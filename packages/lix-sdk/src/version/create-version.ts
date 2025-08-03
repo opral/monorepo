@@ -23,7 +23,7 @@ export async function createVersion(args: {
 	id?: LixVersion["id"];
 	commit_id?: LixVersion["commit_id"];
 	name?: LixVersion["name"];
-	inherits_from_version_id?: LixVersion["inherits_from_version_id"];
+	inherits_from_version_id?: LixVersion["inherits_from_version_id"] | null;
 }): Promise<LixVersion> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
@@ -67,7 +67,10 @@ export async function createVersion(args: {
 				name: args.name,
 				commit_id: commitId,
 				working_commit_id: workingCommitId,
-				inherits_from_version_id: args.inherits_from_version_id ?? "global",
+				inherits_from_version_id:
+					args.inherits_from_version_id === undefined
+						? "global"
+						: args.inherits_from_version_id,
 			})
 			.execute();
 

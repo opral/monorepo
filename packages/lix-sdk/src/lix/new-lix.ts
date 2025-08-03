@@ -18,6 +18,7 @@ import type { LixStoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
+import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 
@@ -111,28 +112,23 @@ export async function newLixFile(args?: {
 	// applying the schema etc.
 	const db = initDb({ sqlite, hooks });
 
-	// Check if deterministic bootstrap is enabled
-	// First check for the new JSON structure
+	// Check if deterministic mode is enabled
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
 
 	let isDeterministicBootstrap = false;
+	let useRandomLixId = false;
+
 	if (
 		deterministicModeConfig?.value &&
 		typeof deterministicModeConfig.value === "object"
 	) {
-		// Check if bootstrap is enabled in the config
-		isDeterministicBootstrap =
-			(deterministicModeConfig.value as any).bootstrap === true;
-	}
-
-	// For backward compatibility, also check legacy key
-	if (!isDeterministicBootstrap) {
-		isDeterministicBootstrap =
-			args?.keyValues?.some(
-				(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
-			) ?? false;
+		const config = deterministicModeConfig.value as any;
+		// If deterministic mode is enabled, bootstrap is automatically deterministic
+		isDeterministicBootstrap = config.enabled === true;
+		// Check randomLixId flag (defaults to false)
+		useRandomLixId = config.randomLixId === true;
 	}
 
 	// Counter for deterministic IDs
@@ -168,7 +164,8 @@ export async function newLixFile(args?: {
 		created_at,
 		generateUuid,
 		generateNanoid,
-		isDeterministicBootstrap: isDeterministicBootstrap || false,
+		isDeterministicBootstrap,
+		useRandomLixId,
 	});
 
 	// Extract the lix_id from bootstrap changes
@@ -214,72 +211,46 @@ export async function newLixFile(args?: {
 		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
 	)?.entity_id;
 
-	// Set active version using internal_state_all_untracked for determinism
-	sqlite.exec({
-		sql: `INSERT INTO internal_state_all_untracked (
-			entity_id,
-			schema_key,
-			file_id,
-			version_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			created_at,
-			updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		bind: [
-			"active",
-			"lix_active_version",
-			"lix",
-			"global",
-			"lix_own_entity",
-			JSON.stringify({ version_id: initialVersionId }),
-			"1.0",
-			created_at,
-			created_at,
-		],
+	// Set active version using updateUntrackedState for proper inheritance handling
+	updateUntrackedState({
+		lix: { sqlite, db },
+		change: {
+			entity_id: "active",
+			schema_key: "lix_active_version",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({ version_id: initialVersionId }),
+			schema_version: "1.0",
+			created_at: created_at,
+		},
+		version_id: "global",
 	});
 
 	// Anonymous account creation has been moved to openLix
 	// No need to set up any accounts here
 
-	// No need to persist lix_deterministic_bootstrap separately anymore
-	// It's handled as part of the deterministic mode config
-
 	// Handle other untracked key values
 	const untrackedKeyValues = args?.keyValues?.filter(
-		(kv) =>
-			kv.lixcol_untracked === true && kv.key !== "lix_deterministic_bootstrap"
+		(kv) => kv.lixcol_untracked === true
 	);
 	if (untrackedKeyValues) {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
-			sqlite.exec({
-				sql: `INSERT INTO internal_state_all_untracked (
-					entity_id,
-					schema_key,
-					file_id,
-					version_id,
-					plugin_key,
-					snapshot_content,
-					schema_version,
-					created_at,
-					updated_at
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				bind: [
-					kv.key,
-					"lix_key_value",
-					"lix",
-					versionId,
-					"lix_own_entity",
-					JSON.stringify({
+			updateUntrackedState({
+				lix: { sqlite, db },
+				change: {
+					entity_id: kv.key,
+					schema_key: "lix_key_value",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
 						key: kv.key,
 						value: kv.value,
 					}),
-					LixKeyValueSchema["x-lix-version"],
-					created_at,
-					created_at,
-				],
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					created_at: created_at,
+				},
+				version_id: versionId,
 			});
 		}
 	}
@@ -316,6 +287,7 @@ function createBootstrapChanges(args: {
 	generateUuid: () => string;
 	generateNanoid: () => string;
 	isDeterministicBootstrap: boolean;
+	useRandomLixId: boolean;
 }): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 
@@ -487,6 +459,21 @@ function createBootstrapChanges(args: {
 	const lixId = args.providedKeyValues?.find(
 		(kv) => kv.key === "lix_id"
 	)?.value;
+
+	// Generate lix_id based on flags
+	let generatedLixId: string;
+	if (lixId) {
+		generatedLixId = lixId;
+	} else if (args.useRandomLixId) {
+		// Use actual random nanoid when randomLixId is true
+		generatedLixId = randomNanoId();
+	} else if (args.isDeterministicBootstrap) {
+		generatedLixId = "deterministic-lix-id";
+	} else {
+		// Regular mode - use the generator (which is random)
+		generatedLixId = args.generateNanoid();
+	}
+
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: "lix_id",
@@ -497,11 +484,7 @@ function createBootstrapChanges(args: {
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			key: "lix_id",
-			value:
-				lixId ??
-				(args.isDeterministicBootstrap
-					? "deterministic-lix-id"
-					: args.generateNanoid()),
+			value: generatedLixId,
 		} satisfies LixKeyValue,
 		created_at: args.created_at,
 	});

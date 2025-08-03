@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { simulationTest, type SimulationTestDef } from "./simulation-test.js";
+import {
+	simulationTest,
+	type SimulationTestDef,
+	normalSimulation,
+} from "./simulation-test.js";
 import { commit } from "../../state/commit.js";
 
 test("simulation test discovery", () => {});
@@ -23,8 +27,7 @@ describe("expectDeterministic validates values across simulations", () => {
 			}).not.toThrow();
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [customSimulation],
+			simulations: [normalSimulation, customSimulation],
 		}
 	);
 });
@@ -40,9 +43,9 @@ describe("expectDeterministic catches simulation differences", () => {
 		async ({ simulation, expectDeterministic }) => {
 			// This will store different values in different simulations
 			const simulationSpecificValue =
-				simulation === "normal" ? "normal-value" : "other-value";
+				simulation.name === "normal" ? "normal-value" : "other-value";
 
-			if (simulation === "normal") {
+			if (simulation.name === "normal") {
 				// This will fail in the second simulation
 				expect(() =>
 					expectDeterministic(simulationSpecificValue).toBe("normal-value")
@@ -54,8 +57,7 @@ describe("expectDeterministic catches simulation differences", () => {
 			}
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [customSimulation],
+			simulations: [normalSimulation, customSimulation],
 		}
 	);
 });
@@ -103,8 +105,7 @@ describe("deterministic state validation", () => {
 			expect(allState).toBeDefined();
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [mockSimulation],
+			simulations: [normalSimulation, mockSimulation],
 		}
 	);
 });
@@ -179,8 +180,7 @@ describe("database operations are deterministic", async () => {
 			}
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [mockSimulation],
+			simulations: [normalSimulation, mockSimulation],
 		}
 	);
 });
@@ -212,5 +212,189 @@ describe("providing key values", async () => {
 				value: ["*"],
 			},
 		]);
+	});
+});
+
+describe("expectDeterministic diff callback receives correct values", () => {
+	// Use a global store that persists across test runs
+	const globalStore = globalThis as any;
+	if (!globalStore.__testCallback1) {
+		globalStore.__testCallback1 = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__testCallback1 = {
+		invoked: false,
+		actual: undefined,
+		expected: undefined,
+	};
+
+	const testSimulation: SimulationTestDef = {
+		name: "test-diff-callback",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ expectDeterministic, simulation }) => {
+			const store = globalStore.__testCallback1;
+
+			if (simulation.name === "normal") {
+				// First simulation - set the expected value
+				const testValue = { foo: "bar", count: 42 };
+				expectDeterministic(testValue).toBeDefined();
+			} else {
+				// Second simulation - use different value to trigger callback and error
+				const differentValue = { foo: "baz", count: 100 };
+				try {
+					expectDeterministic(differentValue, ({ actual, expected }) => {
+						store.invoked = true;
+						store.actual = actual;
+						store.expected = expected;
+					}).toBeDefined();
+				} catch {
+					// Expected to throw after callback
+				}
+			}
+		},
+		{
+			simulations: [normalSimulation, testSimulation],
+		}
+	);
+
+	test("callback was invoked with correct values", () => {
+		const { invoked, actual, expected } = globalStore.__testCallback1;
+
+		// Verify callback was invoked before the error
+		expect(invoked).toBe(true);
+
+		// Verify actual value matches what was passed in second simulation
+		expect(actual).toEqual({ foo: "baz", count: 100 });
+
+		// Verify expected value matches what was passed in first simulation
+		expect(expected).toEqual({ foo: "bar", count: 42 });
+	});
+});
+
+describe("expectDeterministic diff callback is not invoked when values match", () => {
+	// Use a global store that persists across test runs
+	const globalStore = globalThis as any;
+	if (!globalStore.__testCallback2) {
+		globalStore.__testCallback2 = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__testCallback2 = { invoked: false };
+
+	const testSimulation: SimulationTestDef = {
+		name: "test-no-diff",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ expectDeterministic }) => {
+			const store = globalStore.__testCallback2;
+			const sameValue = { consistent: true, data: [1, 2, 3] };
+
+			expectDeterministic(sameValue, () => {
+				store.invoked = true;
+			}).toBeDefined();
+		},
+		{
+			simulations: [normalSimulation, testSimulation],
+		}
+	);
+
+	test("callback should not be invoked", () => {
+		expect(globalStore.__testCallback2.invoked).toBe(false);
+	});
+});
+
+describe("skip option filters out specified simulations", () => {
+	const globalStore = globalThis as any;
+	if (!globalStore.__skipTest) {
+		globalStore.__skipTest = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__skipTest = {
+		normalRan: false,
+		cacheMissRan: false,
+		customRan: false,
+	};
+
+	const customSimulation: SimulationTestDef = {
+		name: "custom-for-skip-test",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ simulation }) => {
+			const store = globalStore.__skipTest;
+
+			// Track which simulations actually ran
+			if (simulation.name === "normal") {
+				store.normalRan = true;
+			} else if (simulation.name === "cache-miss") {
+				store.cacheMissRan = true;
+			} else if (simulation.name === "custom-for-skip-test") {
+				store.customRan = true;
+			}
+		},
+		{
+			simulations: [normalSimulation, customSimulation], // Skip cache-miss by not including it
+		}
+	);
+
+	test("should run normal simulation", () => {
+		expect(globalStore.__skipTest.normalRan).toBe(true);
+	});
+
+	test("should skip cache-miss simulation", () => {
+		expect(globalStore.__skipTest.cacheMissRan).toBe(false);
+	});
+
+	test("should run custom simulation (not affected by skip)", () => {
+		expect(globalStore.__skipTest.customRan).toBe(true);
+	});
+});
+
+describe("skip option combined with onlyRun", () => {
+	const globalStore = globalThis as any;
+	if (!globalStore.__skipOnlyRunTest) {
+		globalStore.__skipOnlyRunTest = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__skipOnlyRunTest = {
+		normalRan: false,
+		cacheMissRan: false,
+	};
+
+	simulationTest(
+		"",
+		async ({ simulation }) => {
+			const store = globalStore.__skipOnlyRunTest;
+
+			// Track which simulations actually ran
+			if (simulation.name === "normal") {
+				store.normalRan = true;
+			} else if (simulation.name === "cache-miss") {
+				store.cacheMissRan = true;
+			}
+		},
+		{
+			simulations: [normalSimulation], // Only run normal (equivalent to including both but skipping cache-miss)
+		}
+	);
+
+	test("should run normal simulation (included and not skipped)", () => {
+		expect(globalStore.__skipOnlyRunTest.normalRan).toBe(true);
+	});
+
+	test("should skip cache-miss simulation (included but then skipped)", () => {
+		expect(globalStore.__skipOnlyRunTest.cacheMissRan).toBe(false);
 	});
 });

@@ -46,7 +46,7 @@ export function applyResolvedStateView(args: {
 				schema_key, 
 				file_id, 
 				plugin_key,
-				snapshot_content, 
+				json(snapshot_content) as snapshot_content, 
 				schema_version, 
 				version_id,
 				created_at, 
@@ -56,6 +56,8 @@ export function applyResolvedStateView(args: {
 				1 as untracked,
 				'untracked' as commit_id
 			FROM internal_state_all_untracked
+			WHERE inheritance_delete_marker = 0  -- Hide tombstones
+			AND snapshot_content IS NOT NULL     -- Hide deleted entries
 			
 			UNION ALL
 			
@@ -77,6 +79,7 @@ export function applyResolvedStateView(args: {
 				commit_id
 			FROM internal_state_cache
 			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
+			AND snapshot_content IS NOT NULL     -- Hide tombstones (deleted entries)
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_all_untracked unt
 				WHERE unt.entity_id = internal_state_cache.entity_id
@@ -105,7 +108,7 @@ export function applyResolvedStateView(args: {
 				isc.commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
-				SELECT 
+				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 				FROM internal_state_cache isc_v
@@ -115,6 +118,7 @@ export function applyResolvedStateView(args: {
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent
 			AND isc.inheritance_delete_marker = 0
+			AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_cache child_isc
@@ -141,7 +145,7 @@ export function applyResolvedStateView(args: {
 				unt.schema_key, 
 				unt.file_id, 
 				unt.plugin_key, 
-				unt.snapshot_content, 
+				json(unt.snapshot_content) as snapshot_content, 
 				unt.schema_version, 
 				vi.version_id, -- Return child version_id
 				unt.created_at, 
@@ -152,7 +156,7 @@ export function applyResolvedStateView(args: {
 				'untracked' as commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
-				SELECT 
+				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 				FROM internal_state_cache isc_v
@@ -160,6 +164,9 @@ export function applyResolvedStateView(args: {
 			) vi
 			JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
+			-- Only inherit entities that exist (not deleted) in parent
+			AND unt.inheritance_delete_marker = 0
+			AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_cache child_isc

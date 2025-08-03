@@ -5,6 +5,7 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
+import { updateUntrackedState } from "./untracked/update-untracked-state.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
@@ -72,83 +73,21 @@ export function insertTransactionState(args: {
 } {
 	const _timestamp = args.timestamp || timestamp({ lix: args.lix as any });
 	if (args.data.untracked == true) {
-		// For untracked entities with null snapshot_content, we need to handle deletion
-		if (args.data.snapshot_content === null) {
-			// Check if this is an inherited untracked entity that needs a tombstone
-			// We need to create a tombstone in the cache to block inheritance
-			executeSync({
-				lix: { sqlite: args.lix.sqlite },
-				query: args.lix.db
-					.insertInto("internal_state_cache")
-					.values({
-						entity_id: args.data.entity_id,
-						schema_key: args.data.schema_key,
-						file_id: args.data.file_id,
-						plugin_key: args.data.plugin_key,
-						snapshot_content: null,
-						schema_version: args.data.schema_version,
-						version_id: args.data.version_id,
-						change_id: "untracked-delete",
-						inheritance_delete_marker: 1,
-						created_at: _timestamp,
-						updated_at: _timestamp,
-						inherited_from_version_id: null,
-						commit_id: "untracked",
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								snapshot_content: null,
-								updated_at: _timestamp,
-								inheritance_delete_marker: 1,
-								change_id: "untracked-delete",
-							})
-					),
-			});
-			return {
-				data: {
-					entity_id: args.data.entity_id,
-					schema_key: args.data.schema_key,
-					file_id: args.data.file_id,
-					plugin_key: args.data.plugin_key,
-					snapshot_content: null,
-					schema_version: args.data.schema_version,
-					version_id: args.data.version_id,
-					created_at: _timestamp,
-					updated_at: _timestamp,
-					untracked: true,
-					inherited_from_version_id: null,
-					change_id: "untracked",
-					commit_id: "pending",
-				},
-			};
-		}
-		// Normal untracked insert/update
-		executeSync({
-			lix: { sqlite: args.lix.sqlite },
-			query: args.lix.db
-				.insertInto("internal_state_all_untracked")
-				.values({
-					entity_id: args.data.entity_id,
-					schema_key: args.data.schema_key,
-					file_id: args.data.file_id,
-					plugin_key: args.data.plugin_key,
-					snapshot_content: args.data.snapshot_content,
-					schema_version: args.data.schema_version,
-					version_id: args.data.version_id,
-					created_at: _timestamp,
-					updated_at: _timestamp,
-				})
-				.onConflict((oc) =>
-					oc
-						.columns(["entity_id", "schema_key", "file_id", "version_id"])
-						.doUpdateSet({
-							snapshot_content: args.data.snapshot_content!,
-							updated_at: _timestamp,
-						})
-				),
+		// Use the new untracked API for all untracked operations
+		updateUntrackedState({
+			lix: args.lix as any,
+			change: {
+				entity_id: args.data.entity_id,
+				schema_key: args.data.schema_key,
+				file_id: args.data.file_id,
+				plugin_key: args.data.plugin_key,
+				snapshot_content: args.data.snapshot_content,
+				schema_version: args.data.schema_version,
+				created_at: _timestamp,
+			},
+			version_id: args.data.version_id,
 		});
+
 		return {
 			data: {
 				entity_id: args.data.entity_id,
@@ -168,6 +107,18 @@ export function insertTransactionState(args: {
 		};
 	} else {
 		const changeId = uuidV7({ lix: args.lix as any });
+
+		// When inserting tracked state, delete any existing untracked state
+		// This ensures tracked state always overrides untracked state
+		executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.deleteFrom("internal_state_all_untracked")
+				.where("entity_id", "=", args.data.entity_id)
+				.where("schema_key", "=", args.data.schema_key)
+				.where("file_id", "=", args.data.file_id)
+				.where("version_id", "=", args.data.version_id),
+		});
 
 		// Insert into internal_change_in_transaction
 		// Use ON CONFLICT to handle updates within the same transaction
@@ -293,9 +244,11 @@ export function insertTransactionState(args: {
 			}
 		}
 
-		// Update the cache - handle all mutations including deletions
-		// For deletions, we still need to update the cache to maintain tombstones
-		// The handleStateMutation function already sets up deletion markers properly
+		// Update the cache using centralized function for tracked entities
+		// Note: We can't fully use updateStateCache here because it doesn't handle
+		// the inheritance_delete_marker field or "pending" commit_id properly
+		// For now, keep the inline cache update but add a TODO to enhance updateStateCache
+		// TODO: Enhance updateStateCache to handle inheritance_delete_marker and pending state
 		executeSync({
 			lix: args.lix,
 			query: args.lix.db
@@ -314,6 +267,7 @@ export function insertTransactionState(args: {
 					created_at: _timestamp,
 					updated_at: _timestamp,
 					inherited_from_version_id: null,
+					commit_id: "pending",
 				})
 				.onConflict((oc) =>
 					oc
@@ -327,6 +281,7 @@ export function insertTransactionState(args: {
 							inheritance_delete_marker:
 								args.data.snapshot_content === null ? 1 : 0,
 							inherited_from_version_id: null,
+							commit_id: "pending",
 						})
 				),
 		});

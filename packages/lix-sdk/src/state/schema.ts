@@ -4,23 +4,21 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
-import { handleStateMutation } from "./handle-state-mutation.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
-import {
-	applyMaterializeStateSchema,
-	materializeState,
-} from "./materialize-state.js";
+import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
+import { applyUntrackedStateSchema } from "./untracked/schema.js";
 import { commit } from "./commit.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
+import { populateStateCache } from "./cache/populate-state-cache.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -48,6 +46,7 @@ export function applyStateDatabaseSchema(
 ): void {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
+	applyUntrackedStateSchema({ sqlite });
 	applyResolvedStateView({ sqlite, db });
 
 	sqlite.createFunction({
@@ -314,13 +313,23 @@ export function applyStateDatabaseSchema(
 						}
 					}
 
-					// If we're updating cache state, we must use materialized state directly to avoid recursion
+					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
-						// console.log(
-						// 	"Updating cache state, using materialized state directly"
-						// );
-						// Directly materialize state without cache
-						const stateResults = materializeState(sqlite, filters, false);
+						// Query directly from resolved state view which handles inheritance correctly
+						let query = db
+							.selectFrom("internal_resolved_state_all")
+							.selectAll();
+
+						// Apply filters
+						for (const [column, value] of Object.entries(filters)) {
+							query = query.where(column as any, "=", value);
+						}
+
+						const stateResults = executeSync({
+							lix: { sqlite },
+							query,
+						});
+
 						cursorState.results = stateResults || [];
 						cursorState.rowIndex = 0;
 						return capi.SQLITE_OK;
@@ -354,112 +363,26 @@ export function applyStateDatabaseSchema(
 					cursorState.rowIndex = 0;
 
 					if (cacheIsStale) {
-						// Run the expensive recursive CTE to materialize state
-						// Include deletions when populating cache so inheritance blocking works
-						const stateResults = materializeState(sqlite, {}, true);
+						// Populate cache directly with materialized state
+						populateStateCache(sqlite);
 
-						// Populate cache with materialized state results
-						if (stateResults && stateResults.length > 0) {
-							let cachePopulated = false;
-							for (const row of stateResults) {
-								// CTE returns rows as arrays, so access by index
-								const entity_id = Array.isArray(row) ? row[0] : row.entity_id;
-								const schema_key = Array.isArray(row) ? row[1] : row.schema_key;
-								const file_id = Array.isArray(row) ? row[2] : row.file_id;
-								const plugin_key = Array.isArray(row) ? row[3] : row.plugin_key;
-								const snapshot_content = Array.isArray(row)
-									? row[4]
-									: row.snapshot_content;
-								const schema_version = Array.isArray(row)
-									? row[5]
-									: row.schema_version;
-								const version_id = Array.isArray(row) ? row[6] : row.version_id;
-								const created_at = Array.isArray(row) ? row[7] : row.created_at;
-								const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
-								const inherited_from_version_id = Array.isArray(row)
-									? row[9]
-									: row.inherited_from_version_id;
-								const change_id = Array.isArray(row) ? row[10] : row.change_id;
-								const commit_id = Array.isArray(row) ? row[11] : row.commit_id;
+						// Log the cache miss
+						insertVTableLog({
+							sqlite,
+							db: db as any,
+							key: "lix_state_cache_miss",
+							level: "debug",
+							message: `Cache miss detected - materialized state`,
+						});
 
-								// Skip rows with null entity_id (no actual state data found)
-								if (!entity_id) {
-									continue;
-								}
-
-								const isDeletion = snapshot_content === null;
-
-								// TODO the CTE should not return inherited entities (optimization for later)
-								// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
-								if (inherited_from_version_id !== null) {
-									continue;
-								}
-
-								executeSync({
-									lix: { sqlite },
-									query: db
-										.insertInto("internal_state_cache")
-										.values({
-											entity_id,
-											schema_key,
-											file_id,
-											version_id,
-											plugin_key,
-											snapshot_content: isDeletion ? null : snapshot_content,
-											schema_version,
-											created_at,
-											updated_at,
-											inherited_from_version_id,
-											inheritance_delete_marker: isDeletion ? 1 : 0,
-											change_id: change_id || "unknown-change-id",
-											commit_id: commit_id || "untracked",
-										})
-										.onConflict((oc) =>
-											oc
-												.columns([
-													"entity_id",
-													"schema_key",
-													"file_id",
-													"version_id",
-												])
-												.doUpdateSet({
-													plugin_key,
-													snapshot_content: isDeletion
-														? null
-														: snapshot_content,
-													schema_version,
-													created_at,
-													updated_at,
-													inherited_from_version_id,
-													inheritance_delete_marker: isDeletion ? 1 : 0,
-													change_id: change_id || "unknown-change-id",
-													commit_id: commit_id || "untracked",
-												})
-										),
-								});
-								cachePopulated = true;
-							}
-
-							if (cachePopulated) {
-								// Log the cache miss immediately (guard flag will prevent recursion)
-								insertVTableLog({
-									sqlite,
-									db: db as any,
-									key: "lix_state_cache_miss",
-									level: "debug",
-									message: `Cache miss detected - materialized state`,
-								});
-								// Mark cache as fresh after population
-								isUpdatingCacheState = true;
-								try {
-									markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
-								} finally {
-									isUpdatingCacheState = false;
-								}
-							}
+						// Mark cache as fresh after population
+						isUpdatingCacheState = true;
+						try {
+							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
+						} finally {
+							isUpdatingCacheState = false;
 						}
 
-						// After populating cache, query from resolved state view
 						let query = db
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();
@@ -572,58 +495,8 @@ export function applyStateDatabaseSchema(
 							throw new Error("Missing primary key for DELETE operation");
 						}
 
-						// Parse primary key to determine tag and extract values
-						const parsed = parseStatePk(oldPk);
-
-						// Route based on tag
-						if (parsed.tag === "U") {
-							// Delete from untracked table - direct untracked entity
-							executeSync({
-								lix: { sqlite },
-								query: db
-									.deleteFrom("internal_state_all_untracked")
-									.where("entity_id", "=", parsed.entityId)
-									.where("file_id", "=", parsed.fileId)
-									.where("version_id", "=", parsed.versionId),
-							});
-						} else if (parsed.tag === "UI") {
-							// For inherited untracked, we need to create a tombstone
-							// Get the row data first
-							const rowToDelete = executeSync({
-								lix: { sqlite },
-								query: db
-									.selectFrom("internal_resolved_state_all")
-									.select([
-										"entity_id",
-										"schema_key",
-										"file_id",
-										"version_id",
-										"plugin_key",
-										"schema_version",
-									])
-									.where("_pk", "=", oldPk),
-							})[0];
-
-							if (rowToDelete) {
-								// Call insertTransactionState with null snapshot to create tombstone
-								insertTransactionState({
-									lix: { sqlite, db },
-									data: {
-										entity_id: rowToDelete.entity_id,
-										schema_key: rowToDelete.schema_key,
-										file_id: rowToDelete.file_id,
-										plugin_key: rowToDelete.plugin_key,
-										snapshot_content: null, // Deletion
-										schema_version: rowToDelete.schema_version,
-										version_id: rowToDelete.version_id,
-										untracked: true,
-									},
-								});
-							}
-						} else if (parsed.tag === "C" || parsed.tag === "CI") {
-							// For tracked state, use handleStateDelete
-							handleStateDelete(sqlite, oldPk, db);
-						}
+						// Use handleStateDelete for all cases - it handles both tracked and untracked
+						handleStateDelete(sqlite, oldPk, db);
 
 						return capi.SQLITE_OK;
 					}
@@ -674,63 +547,20 @@ export function applyStateDatabaseSchema(
 						untracked: Boolean(untracked),
 					});
 
-					// Route based on untracked flag
-					if (untracked) {
-						// Handle untracked mutation - write directly to untracked table
-						executeSync({
-							lix: { sqlite },
-							query: db
-								.insertInto("internal_state_all_untracked")
-								.values({
-									entity_id: String(entity_id),
-									schema_key: String(schema_key),
-									file_id: String(file_id),
-									version_id: String(version_id),
-									plugin_key: String(plugin_key),
-									snapshot_content,
-									schema_version: String(schema_version),
-								})
-								.onConflict((oc) =>
-									oc
-										.columns([
-											"entity_id",
-											"schema_key",
-											"file_id",
-											"version_id",
-										])
-										.doUpdateSet({
-											plugin_key: String(plugin_key),
-											snapshot_content,
-											schema_version: String(schema_version),
-										})
-								),
-						});
-					} else {
-						// Handle tracked mutation - normal change control
-						// If there's existing untracked state, delete it first (tracked overrides untracked)
-						executeSync({
-							lix: { sqlite },
-							query: db
-								.deleteFrom("internal_state_all_untracked")
-								.where("entity_id", "=", String(entity_id))
-								.where("schema_key", "=", String(schema_key))
-								.where("file_id", "=", String(file_id))
-								.where("version_id", "=", String(version_id)),
-						});
-
-						// Call handleStateMutation (same logic as triggers)
-						handleStateMutation(
-							sqlite,
-							db,
-							String(entity_id),
-							String(schema_key),
-							String(file_id),
-							String(plugin_key),
+					// Use insertTransactionState which handles both tracked and untracked entities
+					insertTransactionState({
+						lix: { sqlite, db },
+						data: {
+							entity_id: String(entity_id),
+							schema_key: String(schema_key),
+							file_id: String(file_id),
+							plugin_key: String(plugin_key),
 							snapshot_content,
-							String(version_id),
-							String(schema_version)
-						);
-					}
+							schema_version: String(schema_version),
+							version_id: String(version_id),
+							untracked: Boolean(untracked),
+						},
+					});
 
 					// TODO: This cache copying logic is a temporary workaround for shared commits.
 					// The proper solution requires improving cache miss logic to handle commit sharing
@@ -896,16 +726,8 @@ export function applyStateDatabaseSchema(
 		CREATE TRIGGER IF NOT EXISTS state_delete
 		INSTEAD OF DELETE ON state
 		BEGIN
-			-- Delete from state_all (handles tracked entities)
+			-- Delete from state_all (handles both tracked and untracked entities)
 			DELETE FROM state_all
-			WHERE 
-				entity_id = OLD.entity_id
-				AND schema_key = OLD.schema_key
-				AND file_id = OLD.file_id
-				AND version_id = (SELECT version_id FROM active_version);
-				
-			-- Also delete from untracked table if the entity is untracked
-			DELETE FROM internal_state_all_untracked
 			WHERE 
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -913,35 +735,6 @@ export function applyStateDatabaseSchema(
 				AND version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
-
-	// Create the cache table for performance optimization and the untracked state table
-	sqlite.exec(`
-  -- Table for untracked state that bypasses change control
-  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    version_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-    snapshot_content TEXT NOT NULL, -- JSON content
-    schema_version TEXT NOT NULL,
-    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
-    updated_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (updated_at LIKE '%Z'),
-    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
-  ) STRICT;
-
-  -- Trigger to update updated_at on untracked state changes
-  CREATE TRIGGER IF NOT EXISTS internal_state_all_untracked_update_timestamp
-  AFTER UPDATE ON internal_state_all_untracked
-  BEGIN
-    UPDATE internal_state_all_untracked 
-    SET updated_at = lix_timestamp()
-    WHERE entity_id = NEW.entity_id 
-      AND schema_key = NEW.schema_key 
-      AND file_id = NEW.file_id 
-      AND version_id = NEW.version_id;
-  END;
-`);
 
 	/**
 	 * Insert a log entry directly using insertTransactionState to avoid recursion
@@ -1048,18 +841,38 @@ export function handleStateDelete(
 	const schema_version = rowToDelete.schema_version;
 	const untracked = rowToDelete.untracked;
 
-	// If entity is untracked, just delete it without creating changes
+	// If entity is untracked, handle differently based on whether it's inherited
 	if (untracked) {
-		// Delete from untracked table
-		executeSync({
-			lix: { sqlite },
-			query: db
-				.deleteFrom("internal_state_all_untracked")
-				.where("entity_id", "=", String(entity_id))
-				.where("schema_key", "=", String(schema_key))
-				.where("file_id", "=", String(file_id))
-				.where("version_id", "=", String(version_id)),
-		});
+		// Parse the primary key to check if it's inherited untracked (UI tag)
+		const parsed = parseStatePk(primaryKey);
+
+		if (parsed.tag === "UI") {
+			// For inherited untracked, create a tombstone to block inheritance
+			insertTransactionState({
+				lix: { sqlite, db },
+				data: {
+					entity_id: String(entity_id),
+					schema_key: String(schema_key),
+					file_id: String(file_id),
+					plugin_key: String(plugin_key),
+					snapshot_content: null, // Deletion tombstone
+					schema_version: String(schema_version),
+					version_id: String(version_id),
+					untracked: true,
+				},
+			});
+		} else {
+			// For direct untracked (U tag), just delete from untracked table
+			executeSync({
+				lix: { sqlite },
+				query: db
+					.deleteFrom("internal_state_all_untracked")
+					.where("entity_id", "=", String(entity_id))
+					.where("schema_key", "=", String(schema_key))
+					.where("file_id", "=", String(file_id))
+					.where("version_id", "=", String(version_id)),
+			});
+		}
 		return;
 	}
 
@@ -1074,17 +887,19 @@ export function handleStateDelete(
 		version_id: String(version_id),
 	});
 
-	handleStateMutation(
-		sqlite,
-		db,
-		String(entity_id),
-		String(schema_key),
-		String(file_id),
-		String(plugin_key),
-		null, // No snapshot content for DELETE
-		String(version_id),
-		String(schema_version)
-	);
+	insertTransactionState({
+		lix: { sqlite, db },
+		data: {
+			entity_id: String(entity_id),
+			schema_key: String(schema_key),
+			file_id: String(file_id),
+			plugin_key: String(plugin_key),
+			snapshot_content: null, // No snapshot content for DELETE
+			schema_version: String(schema_version),
+			version_id: String(version_id),
+			untracked: false, // tracked entity
+		},
+	});
 }
 
 // Helper functions for the virtual table
@@ -1148,18 +963,6 @@ export type StateAllView = {
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
 	commit_id: Generated<string>;
-};
-
-export type InternalStateAllUntrackedTable = {
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-	version_id: string;
-	plugin_key: string;
-	snapshot_content: string; // JSON string, not null for untracked
-	schema_version: string;
-	created_at: Generated<string>;
-	updated_at: Generated<string>;
 };
 
 // Kysely operation types

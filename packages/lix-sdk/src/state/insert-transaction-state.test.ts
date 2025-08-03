@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
@@ -257,9 +257,9 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 		},
 	});
 
-	// Verify tombstone exists in cache
+	// Verify tombstone exists in untracked table (not cache)
 	const tombstone = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_all_untracked")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
@@ -269,7 +269,6 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 	expect(tombstone).toHaveLength(1);
 	expect(tombstone[0]?.inheritance_delete_marker).toBe(1);
 	expect(tombstone[0]?.snapshot_content).toBe(null);
-	expect(tombstone[0]?.change_id).toBe("untracked-delete");
 
 	// Verify entity no longer appears in active version
 	const afterDelete = await lix.db
@@ -339,4 +338,591 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		.executeTakeFirstOrThrow();
 
 	expect(stateView.created_at).toBe(stateView.updated_at);
+});
+
+test("insertTransactionState deletes direct untracked entity on null snapshot_content", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// First insert a direct untracked entity
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		data: {
+			entity_id: "direct-untracked-key",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				key: "direct-untracked-key",
+				value: "direct-value",
+			}),
+			schema_version: "1.0",
+			version_id: activeVersion.version_id,
+			untracked: true,
+		},
+	});
+
+	// Verify it exists in untracked table
+	const beforeDelete = await lixInternalDb
+		.selectFrom("internal_state_all_untracked")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.select([
+			"entity_id",
+			"schema_key",
+			"file_id",
+			"version_id",
+			"plugin_key",
+			sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+			"schema_version",
+			"created_at",
+			"updated_at",
+			"inherited_from_version_id",
+			"inheritance_delete_marker",
+		])
+		.execute();
+
+	expect(beforeDelete).toHaveLength(1);
+	const content = beforeDelete[0]!.snapshot_content;
+	const parsedContent =
+		typeof content === "string" ? JSON.parse(content) : content;
+	expect(parsedContent).toEqual({
+		key: "direct-untracked-key",
+		value: "direct-value",
+	});
+
+	// Now delete the direct untracked entity
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		data: {
+			entity_id: "direct-untracked-key",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: null, // Deletion
+			schema_version: "1.0",
+			version_id: activeVersion.version_id,
+			untracked: true,
+		},
+	});
+
+	// Verify it's deleted from untracked table
+	const afterDelete = await lixInternalDb
+		.selectFrom("internal_state_all_untracked")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.execute();
+
+	expect(afterDelete).toHaveLength(0);
+
+	// Verify no tombstone was created in cache (direct untracked deletions don't need tombstones)
+	const cacheEntry = await lixInternalDb
+		.selectFrom("internal_state_cache")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.execute();
+
+	expect(cacheEntry).toHaveLength(0);
+
+	// Verify entity no longer appears in state view
+	const stateView = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "direct-untracked-key")
+		.selectAll()
+		.execute();
+
+	expect(stateView).toHaveLength(0);
+});
+
+// Tests moved from handle-state-mutation.test.ts
+
+test("should throw error when version_id is null", async () => {
+	const lix = await openLix({});
+
+	// Try to insert state with null version_id - should throw
+	await expect(
+		lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "test_entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "test_plugin",
+				snapshot_content: { key: "test", value: "test" },
+				schema_version: "1.0",
+				version_id: null as any, // Explicitly null version_id
+			})
+			.execute()
+	).rejects.toThrow("version_id is required");
+});
+
+test("should throw error when version_id does not exist", async () => {
+	const lix = await openLix({});
+
+	const nonExistentVersionId = "non-existent-version-id";
+
+	// Try to insert state with non-existent version_id - should throw
+	await expect(
+		lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "test_entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "test_plugin",
+				snapshot_content: { key: "test", value: "test" },
+				schema_version: "1.0",
+				version_id: nonExistentVersionId,
+			})
+			.execute()
+	).rejects.toThrow(`Version with id '${nonExistentVersionId}' does not exist`);
+});
+
+test("inserts working change set elements", async () => {
+	const lix = await openLix({});
+
+	// Get initial version and working change set
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Make a mutation
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "test_key",
+			value: "test_value",
+			lixcol_version_id: activeVersion.id,
+		})
+		.execute();
+
+	// Get the working commit to find its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Check that working change set element was created by mutation handler
+	const workingElements = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElements).toHaveLength(1);
+	expect(workingElements[0]).toMatchObject({
+		change_set_id: workingCommit.change_set_id,
+		entity_id: "test_key",
+		schema_key: "lix_key_value",
+		file_id: "lix",
+	});
+
+	// Verify the change_id points to a real change
+	const change = await lix.db
+		.selectFrom("change")
+		.where("id", "=", workingElements[0]!.change_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(change.entity_id).toBe("test_key");
+	expect(change.schema_key).toBe("lix_key_value");
+});
+
+test("updates working change set elements on entity updates (latest change wins)", async () => {
+	const lix = await openLix({});
+
+	// Get initial version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Insert entity
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "test_key",
+			value: "test_value",
+			lixcol_version_id: activeVersion.id,
+		})
+		.execute();
+
+	// Get the working commit to find its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Get initial working element
+	const initialWorkingElements = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(initialWorkingElements).toHaveLength(1);
+	const initialChangeId = initialWorkingElements[0]!.change_id;
+
+	// Update the same entity
+	await lix.db
+		.updateTable("key_value")
+		.where("key", "=", "test_key")
+		.set({ value: "updated_value" })
+		.execute();
+
+	// Check that working change set still has only one element for this entity (latest change)
+	const workingElementsAfterUpdate = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElementsAfterUpdate).toHaveLength(1);
+
+	// Verify the change_id was updated to latest change
+	expect(workingElementsAfterUpdate[0]!.change_id).not.toBe(initialChangeId);
+
+	// Verify the change_id points to the latest change
+	const allChanges = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.orderBy("created_at", "desc")
+		.selectAll()
+		.execute();
+
+	expect(allChanges).toHaveLength(2); // Insert + Update
+	expect(workingElementsAfterUpdate[0]!.change_id).toBe(allChanges[0]!.id); // Latest change
+});
+
+test("mutation handler removes working change set elements on entity deletion", async () => {
+	const lix = await openLix({});
+
+	// Get initial version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Insert entity
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "test_key",
+			value: "test_value",
+			lixcol_version_id: activeVersion.id,
+		})
+		.execute();
+
+	// Get the working commit to find its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Verify element exists in working change set
+	const workingElementsAfterInsert = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElementsAfterInsert).toHaveLength(1);
+
+	// Delete the entity
+	await lix.db.deleteFrom("key_value").where("key", "=", "test_key").execute();
+
+	// Check that working change set no longer includes this entity
+	const workingElementsAfterDelete = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElementsAfterDelete).toHaveLength(0);
+
+	// Verify the delete change was still recorded
+	const allChanges = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.orderBy("created_at", "desc")
+		.selectAll()
+		.execute();
+
+	expect(allChanges).toHaveLength(2); // Insert + Delete
+	expect(allChanges[0]!.snapshot_content).toBe(null); // Latest change is deletion
+});
+
+test("delete reconciliation: entities added after checkpoint then deleted are excluded from working change set", async () => {
+	const lix = await openLix({});
+
+	// Get initial version and working change set
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Create a checkpoint label to mark the current state
+	const checkpointLabel = await lix.db
+		.selectFrom("label")
+		.where("name", "=", "checkpoint")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	// Get the change set from the commit to add checkpoint label
+	const currentCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Add checkpoint label to the current change set (simulating a checkpoint)
+	await lix.db
+		.insertInto("change_set_label_all")
+		.values({
+			change_set_id: currentCommit.change_set_id,
+			label_id: checkpointLabel.id,
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	// AFTER checkpoint: Insert an entity
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "post_checkpoint_key",
+			value: "post_checkpoint_value",
+			lixcol_version_id: activeVersion.id,
+		})
+		.execute();
+
+	// Get the working commit to find its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Verify entity appears in working change set after insert
+	const workingElementsAfterInsert = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "post_checkpoint_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElementsAfterInsert).toHaveLength(1);
+
+	// AFTER checkpoint: Delete the same entity
+	await lix.db
+		.deleteFrom("key_value")
+		.where("key", "=", "post_checkpoint_key")
+		.execute();
+
+	// Verify entity is excluded from working change set (added after checkpoint then deleted)
+	const workingElementsAfterDelete = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("lixcol_version_id", "=", activeVersion.id)
+		.where("entity_id", "=", "post_checkpoint_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(workingElementsAfterDelete).toHaveLength(0);
+
+	// Verify the changes were recorded
+	const allChanges = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "post_checkpoint_key")
+		.where("schema_key", "=", "lix_key_value")
+		.orderBy("created_at", "asc")
+		.selectAll()
+		.execute();
+
+	expect(allChanges).toHaveLength(2); // Insert + Delete
+	expect(allChanges[1]!.snapshot_content).toBe(null); // Delete change
+});
+
+test("working change set elements are separated per version", async () => {
+	const lix = await openLix({});
+
+	// Get the initial main version
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Make changes in the main version context
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "main_version_key",
+			value: "main_version_value",
+			lixcol_version_id: mainVersion.id,
+		})
+		.execute();
+
+	// Create a new change set, commit and version
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "new_cs", lixcol_version_id: "global" },
+			{ id: "new_working_cs", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Create a commit that points to the change set
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: "new_commit",
+			change_set_id: "new_cs",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	// Create a working commit for the new version
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: "new_working_commit",
+			change_set_id: "new_working_cs",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "new_version",
+			name: "new_version",
+			commit_id: "new_commit",
+			working_commit_id: "new_working_commit",
+			inherits_from_version_id: "global",
+		})
+		.execute();
+
+	// Switch to the new version and make changes
+	await lix.db
+		.updateTable("active_version")
+		.set({ version_id: "new_version" })
+		.execute();
+
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "new_version_key",
+			value: "new_version_value",
+			lixcol_version_id: "new_version",
+		})
+		.execute();
+
+	// Get the main version's working commit
+	const mainWorkingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", mainVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Check main version's working change set elements
+	const mainWorkingElements = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", mainWorkingCommit.change_set_id)
+		.where("lixcol_version_id", "=", mainVersion.id)
+		.where("entity_id", "=", "main_version_key")
+		.selectAll()
+		.execute();
+
+	// Check new version's working change set elements
+	const newWorkingElements = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", "new_working_cs")
+		.where("lixcol_version_id", "=", "new_version")
+		.where("entity_id", "=", "new_version_key")
+		.selectAll()
+		.execute();
+
+	// Main version should see its own changes
+	expect(mainWorkingElements).toHaveLength(1);
+	expect(mainWorkingElements[0]).toMatchObject({
+		change_set_id: mainWorkingCommit.change_set_id,
+		entity_id: "main_version_key",
+		schema_key: "lix_key_value",
+		file_id: "lix",
+	});
+
+	// New version should see its own changes
+	expect(newWorkingElements).toHaveLength(1);
+	expect(newWorkingElements[0]).toMatchObject({
+		change_set_id: "new_working_cs",
+		entity_id: "new_version_key",
+		schema_key: "lix_key_value",
+		file_id: "lix",
+	});
+
+	// Verify isolation - main working change set should not contain new version changes
+	const mainCrossCheck = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", mainWorkingCommit.change_set_id)
+		.where("lixcol_version_id", "=", mainVersion.id)
+		.where("entity_id", "=", "new_version_key")
+		.selectAll()
+		.execute();
+
+	// New working change set should not contain main version changes
+	const newCrossCheck = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("change_set_id", "=", "new_working_cs")
+		.where("lixcol_version_id", "=", "new_version")
+		.where("entity_id", "=", "main_version_key")
+		.selectAll()
+		.execute();
+
+	expect(mainCrossCheck).toHaveLength(0);
+	expect(newCrossCheck).toHaveLength(0);
 });

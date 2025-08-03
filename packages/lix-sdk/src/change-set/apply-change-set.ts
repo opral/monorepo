@@ -1,7 +1,6 @@
 import type { Lix } from "../lix/index.js";
 import type { LixChangeSet } from "./schema.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { updateStateCache } from "../state/cache/update-state-cache.js";
 
 /**
  * Applies a change set to the lix.
@@ -73,53 +72,21 @@ export async function applyChangeSet(args: {
 			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.selectAll("change")
-			.select(sql`${version.id}`.as("version_id"))
 			.execute();
 
 		// Write-through cache: populate internal_state_cache for all applied changes
 		for (const change of changesResult) {
-			const cacheKey = {
-				entity_id: change.entity_id,
-				schema_key: change.schema_key,
-				file_id: change.file_id,
+			updateStateCache({
+				lix: args.lix,
+				change: {
+					...change,
+					snapshot_content: change.snapshot_content
+						? JSON.stringify(change.snapshot_content)
+						: null,
+				},
 				version_id: version.id,
-			};
-
-			if (change.snapshot_content === null) {
-				// deletion – remove from cache
-				await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-					.deleteFrom("internal_state_cache")
-					.where("entity_id", "=", cacheKey.entity_id)
-					.where("schema_key", "=", cacheKey.schema_key)
-					.where("file_id", "=", cacheKey.file_id)
-					.where("version_id", "=", version.id)
-					.execute();
-			} else {
-				// insertion/update – upsert into cache
-				await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-					.insertInto("internal_state_cache")
-					.values({
-						...cacheKey,
-						plugin_key: change.plugin_key,
-						inheritance_delete_marker: change.snapshot_content === null ? 1 : 0,
-						snapshot_content: JSON.stringify(change.snapshot_content),
-						schema_version: change.schema_version,
-						created_at: change.created_at,
-						updated_at: change.created_at,
-						change_id: change.id,
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								plugin_key: change.plugin_key,
-								snapshot_content: sql`excluded.snapshot_content`,
-								schema_version: change.schema_version,
-								updated_at: change.created_at,
-							})
-					)
-					.execute();
-			}
+				commit_id: version.commit_id,
+			});
 		}
 
 		// Group changes by file_id for processing

@@ -1,3 +1,4 @@
+import type { Selectable } from "kysely";
 import type { Lix } from "../../lix/open-lix.js";
 
 export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
@@ -14,12 +15,14 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     updated_at TEXT NOT NULL,
     inherited_from_version_id TEXT,
     inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
-    change_id TEXT, -- Allow NULL during migration and for deletion markers 
+    change_id TEXT,
     commit_id TEXT, -- Allow NULL until commit is created
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
-  );
+  ) strict;
 `);
 }
+
+export type InternalStateCacheRow = Selectable<InternalStateCacheTable>;
 
 export type InternalStateCacheTable = {
 	entity_id: string;
