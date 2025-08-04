@@ -30,45 +30,33 @@
 				margin-bottom: 1.5rem;
 			}
 
-			.product-cards {
-				display: flex;
-				flex-direction: row;
-				gap: 1.5rem;
-				margin-bottom: 1.5rem;
-			}
-
-			.product-card {
-				border: 1px solid black;
-				padding: 1.5rem;
+			.product-list {
+				margin-bottom: 0.75rem;
 				text-align: center;
-				flex: 1;
 			}
 
-			.product-card h2 {
-				font-size: 1.5rem;
-				margin: 0 0 0.5rem 0;
+			.product-list ul {
+				list-style-type: disc;
+				padding-left: 1.5rem;
+				display: inline-block;
+				text-align: left;
 			}
 
-			.product-card .subtitle {
-				font-size: 1.1rem;
+			.product-list li {
 				margin-bottom: 0.5rem;
-			}
-
-			.product-card .description {
-				margin-bottom: 1rem;
 				font-size: 1rem;
 			}
 
-			.product-card .cta {
-				display: inline-block;
-				border: 1px solid black;
+			.product-list a {
 				text-decoration: none;
-				padding: 0.5rem 1.5rem;
+			}
+
+			.product-list a:hover {
+				text-decoration: underline;
 			}
 
 			.footer {
 				text-align: center;
-				border-top: 1px solid black;
 				padding-top: 1rem;
 			}
 
@@ -106,9 +94,6 @@
 					font-size: 1.1rem;
 				}
 				
-				.product-cards {
-					flex-direction: column;
-				}
 				
 				.footer-links {
 					flex-direction: column;
@@ -126,24 +111,11 @@
 			We are the company behind two key products:
 		</div>
 
-		<div class="product-cards">
-			<div class="product-card">
-				<h2>Lix</h2>
-				<div class="subtitle">Change Control System</div>
-				<div class="description">
-					See, review, and control every change AI agents and humans make.
-				</div>
-				<a href="https://lix.dev/" target="_blank" class="cta">Visit Site</a>
-			</div>
-
-			<div class="product-card">
-				<h2>Inlang</h2>
-				<div class="subtitle">Globalization Infrastructure</div>
-				<div class="description">
-					An open file format for managing software translations.
-				</div>
-				<a href="https://inlang.com" target="_blank" class="cta">Visit Site</a>
-			</div>
+		<div class="product-list">
+			<ul>
+				<li>Lix - Change Control System (<a href="https://lix.dev/" target="_blank">lix.dev</a>)</li>
+				<li>Inlang - Globalization Infrastructure (<a href="https://inlang.com" target="_blank">inlang.com</a>)</li>
+			</ul>
 		</div>
 
 		<div class="footer">
@@ -154,7 +126,7 @@
 				<a href="mailto:hello@opral.com">Contact</a>
 			</div>
 			<div class="footer-note">
-				PS Nothing is broken about this page. It's simple on purpose to iterate faster :)
+				PS Nothing is broken about this page. It's simple on purpose :)
 			</div>
 		</div>
 	</body>
