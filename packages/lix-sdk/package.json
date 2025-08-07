@@ -1,7 +1,7 @@
 {
 	"name": "@lix-js/sdk",
 	"type": "module",
-	"version": "0.5.0-preview.0",
+	"version": "0.5.0-preview.1",
 	"license": "Apache-2.0",
 	"types": "./dist/index.d.ts",
 	"exports": {
