@@ -21,6 +21,12 @@ import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
+import {
+	LixAccountSchema,
+	LixActiveAccountSchema,
+	type LixAccount,
+	type LixActiveAccount,
+} from "../account/schema.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -226,8 +232,47 @@ export async function newLixFile(args?: {
 		version_id: "global",
 	});
 
-	// Anonymous account creation has been moved to openLix
-	// No need to set up any accounts here
+	// Create anonymous account as untracked for deterministic behavior
+	const activeAccountId = generateNanoid();
+	const humanName = isDeterministicBootstrap
+		? "Deterministic"
+		: humanId({ separator: "", capitalize: true });
+	const anonymousAccountName = `Anonymous ${humanName}`;
+
+	// Create the anonymous account as untracked
+	updateUntrackedState({
+		lix: { sqlite, db },
+		change: {
+			entity_id: activeAccountId,
+			schema_key: LixAccountSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeAccountId,
+				name: anonymousAccountName,
+			} satisfies LixAccount),
+			schema_version: LixAccountSchema["x-lix-version"],
+			created_at: created_at,
+		},
+		version_id: "global",
+	});
+
+	// Set it as the active account
+	updateUntrackedState({
+		lix: { sqlite, db },
+		change: {
+			entity_id: `active_${activeAccountId}`,
+			schema_key: LixActiveAccountSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				account_id: activeAccountId,
+			} satisfies LixActiveAccount),
+			schema_version: LixActiveAccountSchema["x-lix-version"],
+			created_at: created_at,
+		},
+		version_id: "global",
+	});
 
 	// Handle other untracked key values
 	const untrackedKeyValues = args?.keyValues?.filter(
@@ -563,8 +608,7 @@ function createBootstrapChanges(args: {
 		});
 	}
 
-	// Anonymous account creation has been moved to openLix
-	// to only create when no account is provided and no active account exists
+	// Anonymous account is now created during bootstrap for deterministic behavior
 
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes
