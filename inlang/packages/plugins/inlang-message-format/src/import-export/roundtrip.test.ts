@@ -73,7 +73,19 @@ test("it handles variable expressions in patterns", async () => {
 			type: "text",
 			value: " designers and translators",
 		},
-	] satisfies Pattern);
+        ] satisfies Pattern);
+});
+
+test("it handles escaped curly braces", async () => {
+        const imported = await runImportFiles({
+                braces: "Escape \\{ and \\}",
+        });
+        expect(await runExportFilesParsed(imported)).toMatchObject({
+                braces: "Escape \\{ and \\}",
+        });
+        expect(imported.variants[0]?.pattern).toStrictEqual([
+                { type: "text", value: "Escape { and }" },
+        ]);
 });
 
 test("it adds the $schema property", async () => {
