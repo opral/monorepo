@@ -19,6 +19,10 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     commit_id TEXT, -- Allow NULL until commit is created
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   ) strict;
+
+  -- Index for fast version_id filtering
+  CREATE INDEX IF NOT EXISTS idx_internal_state_cache_version_id 
+    ON internal_state_cache (version_id);
 `);
 }
 

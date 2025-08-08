@@ -37,6 +37,10 @@ export function applyUntrackedStateSchema(args: {
 				(inheritance_delete_marker = 0)
 			)
 		) STRICT;
+
+		-- Index for fast version_id filtering
+		CREATE INDEX IF NOT EXISTS idx_internal_state_all_untracked_version_id 
+			ON internal_state_all_untracked (version_id);
 	`);
 }
 
