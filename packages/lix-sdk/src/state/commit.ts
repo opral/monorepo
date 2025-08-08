@@ -39,9 +39,16 @@ import { updateStateCache } from "./cache/update-state-cache.js";
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
+	const commitFuncStartTime = performance.now();
+	console.log(`commit() START`);
+	
 	// Create a single timestamp for the entire transaction
+	const timestampStart = performance.now();
 	const transactionTimestamp = timestamp({ lix: args.lix });
+	const timestampTime = performance.now() - timestampStart;
+	console.log(`  timestamp: ${timestampTime.toFixed(3)}ms`);
 
+	const queryChangesStart = performance.now();
 	const transactionChanges = executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -59,6 +66,8 @@ export function commit(args: {
 			])
 			.orderBy("version_id"),
 	});
+	const queryChangesTime = performance.now() - queryChangesStart;
+	console.log(`  queryTransactionChanges: ${queryChangesTime.toFixed(3)}ms, found: ${transactionChanges.length}`);
 
 	// Group changes by version_id
 	const changesByVersion = new Map<string, typeof transactionChanges>();
@@ -158,29 +167,35 @@ export function commit(args: {
 		...newChangesInTransaction,
 	];
 
-	for (const change of allChangesToRealize) {
+	// Batch insert all changes into the change table (instead of N+1 individual inserts)
+	if (allChangesToRealize.length > 0) {
+		const changeRows = allChangesToRealize.map((change) => ({
+			id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			schema_version: change.schema_version,
+			file_id: change.file_id,
+			plugin_key: change.plugin_key,
+			created_at: change.created_at,
+			snapshot_content: change.snapshot_content,
+		}));
+
 		executeSync({
 			lix: args.lix,
-			query: args.lix.db.insertInto("change").values({
-				id: change.id,
-				entity_id: change.entity_id,
-				schema_key: change.schema_key,
-				schema_version: change.schema_version,
-				file_id: change.file_id,
-				plugin_key: change.plugin_key,
-				created_at: change.created_at,
-				snapshot_content: change.snapshot_content,
-			}),
+			query: args.lix.db.insertInto("change").values(changeRows),
 		});
 	}
 
 	// Clear the transaction table after committing
+	const cleanupStart = performance.now();
 	executeSync({
 		lix: args.lix,
 		query: (
 			args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		).deleteFrom("internal_change_in_transaction"),
 	});
+	const cleanupTime = performance.now() - cleanupStart;
+	console.log(`  cleanup: ${cleanupTime.toFixed(3)}ms`);
 
 	// Update cache entries with the commit id only for entities that were changed
 	for (const [version_id, commitId] of commitIdsByVersion) {
@@ -212,14 +227,24 @@ export function commit(args: {
 		}
 	}
 
+	const sequenceStart = performance.now();
 	commitDeterministicSequenceNumber({
 		lix: args.lix,
 		timestamp: transactionTimestamp,
 	});
+	const sequenceTime = performance.now() - sequenceStart;
+	console.log(`  commitDeterministicSequence: ${sequenceTime.toFixed(3)}ms`);
 
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes
+	const hooksStart = performance.now();
 	args.lix.hooks._emit("state_commit", { changes: allChangesToRealize });
+	const hooksTime = performance.now() - hooksStart;
+	console.log(`  hooks: ${hooksTime.toFixed(3)}ms`);
+	
+	const commitFuncTime = performance.now() - commitFuncStartTime;
+	console.log(`commit() COMPLETE: ${commitFuncTime.toFixed(3)}ms total`);
+	
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }
 
@@ -260,7 +285,11 @@ function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): string {
+	const createChangesetStartTime = performance.now();
+	console.log(`    createChangeset START for version_id: ${version_id}`);
+
 	// Get the version record from resolved state view
+	const versionQueryStart = performance.now();
 	const versionRows = executeSync({
 		lix: { sqlite },
 		query: db
@@ -270,6 +299,8 @@ function createChangesetForTransaction(
 			.select("snapshot_content")
 			.limit(1),
 	});
+	const versionQueryTime = performance.now() - versionQueryStart;
+	console.log(`      versionQuery: ${versionQueryTime.toFixed(3)}ms`);
 
 	if (versionRows.length === 0 || !versionRows[0]?.snapshot_content) {
 		throw new Error(`Version with id '${version_id}' not found.`);
@@ -284,10 +315,15 @@ function createChangesetForTransaction(
 	// Change authors should be associated with commit entities when implemented.
 	// See: https://github.com/opral/lix-sdk/issues/359
 
-	// Create changeset
-	const changeSetChange = insertTransactionState({
-		lix: { sqlite, db },
-		data: {
+	// Create a new commit that points to the new change set
+	const nextCommitId = uuidV7({
+		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+	});
+
+	// Batch create all core entities (changeset, commit, edge, version) in one call
+	const coreEntitiesBatchStart = performance.now();
+	const coreEntitiesData = [
+		{
 			entity_id: nextChangeSetId,
 			schema_key: "lix_change_set",
 			file_id: "lix",
@@ -300,17 +336,7 @@ function createChangesetForTransaction(
 			version_id: "global",
 			untracked: false,
 		},
-		createChangeAuthors: false,
-	}).data;
-
-	// Create a new commit that points to the new change set
-	const nextCommitId = uuidV7({
-		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
-	});
-
-	const commitChange = insertTransactionState({
-		lix: { sqlite, db },
-		data: {
+		{
 			entity_id: nextCommitId,
 			schema_key: "lix_commit",
 			file_id: "lix",
@@ -323,13 +349,7 @@ function createChangesetForTransaction(
 			version_id: "global",
 			untracked: false,
 		},
-		createChangeAuthors: false,
-	}).data;
-
-	// Create commit edge from previous commit to new commit
-	const commitEdgeChange = insertTransactionState({
-		lix: { sqlite, db },
-		data: {
+		{
 			entity_id: `${mutatedVersion.commit_id}~${nextCommitId}`,
 			schema_key: "lix_commit_edge",
 			file_id: "lix",
@@ -342,13 +362,7 @@ function createChangesetForTransaction(
 			version_id: "global",
 			untracked: false,
 		},
-		createChangeAuthors: false,
-	}).data;
-
-	// Update version with new commit
-	const versionChange = insertTransactionState({
-		lix: { sqlite, db },
-		data: {
+		{
 			entity_id: mutatedVersion.id,
 			schema_key: "lix_version",
 			file_id: "lix",
@@ -361,47 +375,75 @@ function createChangesetForTransaction(
 			version_id: "global",
 			untracked: false,
 		},
-		createChangeAuthors: false,
-	}).data;
+	];
 
-	// Create changeset elements for all changes
-	const changesToProcess = [
-		...changes,
+	const [
 		changeSetChange,
 		commitChange,
 		commitEdgeChange,
 		versionChange,
+	] = insertTransactionState({
+		lix: { sqlite, db },
+		data: coreEntitiesData,
+		createChangeAuthors: false,
+	});
+	const coreEntitiesBatchTime = performance.now() - coreEntitiesBatchStart;
+	console.log(`      coreEntitiesBatch: ${coreEntitiesBatchTime.toFixed(3)}ms`);
+
+	// Create changeset elements for all changes
+	const changesToProcess = [
+		...changes,
+		changeSetChange!,
+		commitChange!,
+		commitEdgeChange!,
+		versionChange!,
 	];
 
-	for (const change of changesToProcess) {
+	// Batch create all changeset elements in one call (instead of N+1 individual inserts)
+	const changesetElementsBatchStart = performance.now();
+	console.log(
+		`      changesetElementsBatch START: processing ${changesToProcess.length} changes`
+	);
+	
+	const changesetElementsData = changesToProcess.map((change) => {
 		// Get the change ID - it may be 'id' for original changes or 'change_id' for results from insertTransactionState
 		const changeId = "change_id" in change ? change.change_id : change.id;
+		
+		return {
+			entity_id: `${nextChangeSetId}::${changeId}`,
+			schema_key: "lix_change_set_element",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				change_set_id: nextChangeSetId,
+				change_id: changeId,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+				entity_id: change.entity_id,
+			} satisfies LixChangeSetElement),
+			schema_version: LixChangeSetElementSchema["x-lix-version"],
+			version_id: "global",
+			untracked: false,
+		};
+	});
 
-		// Create changeset element for this change
+	if (changesetElementsData.length > 0) {
 		insertTransactionState({
 			lix: { sqlite, db },
-			data: {
-				entity_id: `${nextChangeSetId}::${changeId}`,
-				schema_key: "lix_change_set_element",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: nextChangeSetId,
-					change_id: changeId,
-					schema_key: change.schema_key,
-					file_id: change.file_id,
-					entity_id: change.entity_id,
-				} satisfies LixChangeSetElement),
-				schema_version: LixChangeSetElementSchema["x-lix-version"],
-				version_id: "global",
-				untracked: false,
-			},
+			data: changesetElementsData,
 			createChangeAuthors: false,
 		});
 	}
+	
+	const changesetElementsBatchTime =
+		performance.now() - changesetElementsBatchStart;
+	console.log(
+		`      changesetElementsBatch COMPLETE: ${changesetElementsBatchTime.toFixed(3)}ms`
+	);
 
 	// Create/update working change set element for user data changes
 	// Get the working commit and its change set
+	const workingCommitQueryStart = performance.now();
 	const workingCommit = executeSync({
 		lix: { sqlite },
 		query: db
@@ -409,6 +451,10 @@ function createChangesetForTransaction(
 			.where("id", "=", mutatedVersion.working_commit_id)
 			.selectAll(),
 	});
+	const workingCommitQueryTime = performance.now() - workingCommitQueryStart;
+	console.log(
+		`      workingCommitQuery: ${workingCommitQueryTime.toFixed(3)}ms`
+	);
 
 	if (workingCommit.length === 0) {
 		throw new Error(
@@ -420,168 +466,223 @@ function createChangesetForTransaction(
 
 	// TODO skipping lix internal entities is likely undesired.
 	// Skip lix internal entities (change sets, edges, etc.)
-	for (const change of changes) {
-		if (
+	const deletionReconciliationStart = performance.now();
+	console.log(
+		`      deletionReconciliation START: processing ${changes.length} user changes`
+	);
+	
+	// Filter out lix internal entities
+	const userChanges = changes.filter(
+		(change) =>
 			change.schema_key !== "lix_change_set" &&
 			change.schema_key !== "lix_change_set_edge" &&
 			change.schema_key !== "lix_change_set_element" &&
 			change.schema_key !== "lix_version"
-		) {
+	);
+
+	if (userChanges.length > 0) {
+		// Separate changes into deletions and non-deletions
+		const deletions: typeof userChanges = [];
+		const nonDeletions: typeof userChanges = [];
+		
+		for (const change of userChanges) {
 			const parsedSnapshot = change.snapshot_content
 				? JSON.parse(change.snapshot_content)
 				: null;
 			const isDeletion =
 				!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
-
+			
 			if (isDeletion) {
-				// Delete reconciliation: check if entity existed at last checkpoint using state_history
-				const entityAtCheckpoint = executeSync({
+				deletions.push(change);
+			} else {
+				nonDeletions.push(change);
+			}
+		}
+
+		// Step 1: Batch check for entities at checkpoint (for deletions)
+		const entitiesAtCheckpoint = new Set<string>();
+		if (deletions.length > 0) {
+			// Get the checkpoint commit ID once
+			const checkpointStart = performance.now();
+			const checkpointCommitResult = executeSync({
+				lix: { sqlite },
+				query: db
+					.selectFrom("commit")
+					.innerJoin("entity_label", (join) =>
+						join
+							.onRef("entity_label.entity_id", "=", "commit.id")
+							.on("entity_label.schema_key", "=", "lix_commit")
+					)
+					.innerJoin("label", "label.id", "entity_label.label_id")
+					.where("label.name", "=", "checkpoint")
+					.where(
+						commitIsAncestorOf(
+							{ id: mutatedVersion.commit_id },
+							{ includeSelf: true, depth: 1 }
+						)
+					)
+					.select("commit.id")
+					.limit(1),
+			});
+			
+			const checkpointCommitId = checkpointCommitResult[0]?.id;
+			
+			if (checkpointCommitId) {
+				// Batch check all deletion entities at checkpoint
+				const checkpointEntities = executeSync({
 					lix: { sqlite },
 					query: db
 						.selectFrom("state_history")
-						.where("entity_id", "=", change.entity_id)
-						.where("schema_key", "=", change.schema_key)
-						.where("file_id", "=", change.file_id)
 						.where("depth", "=", 0)
-						.where(
-							"commit_id",
-							"=",
-							// get the previous checkpoint commit
-							db
-								.selectFrom("commit")
-								.innerJoin("entity_label", (join) =>
-									join
-										.onRef("entity_label.entity_id", "=", "commit.id")
-										.on("entity_label.schema_key", "=", "lix_commit")
+						.where("commit_id", "=", checkpointCommitId)
+						.where((eb) =>
+							eb.or(
+								deletions.map((change) =>
+									eb.and([
+										eb("entity_id", "=", change.entity_id),
+										eb("schema_key", "=", change.schema_key),
+										eb("file_id", "=", change.file_id),
+									])
 								)
-								.innerJoin("label", "label.id", "entity_label.label_id")
-								.where("label.name", "=", "checkpoint")
-								.where(
-									commitIsAncestorOf(
-										{ id: mutatedVersion.commit_id },
-										{ includeSelf: true, depth: 1 }
-									)
-								)
-								.select("commit.id")
+							)
 						)
-						.select("entity_id"),
+						.select(["entity_id", "schema_key", "file_id"]),
 				});
-
-				const entityExistedAtCheckpoint = entityAtCheckpoint.length > 0;
-
-				// Always remove existing working change set element first
-				const toDelete = executeSync({
-					lix: { sqlite },
-					query: db
-						.selectFrom("internal_resolved_state_all")
-						.select("_pk")
-						.where("entity_id", "like", `${workingChangeSetId}::%`)
-						.where("schema_key", "=", "lix_change_set_element")
-						.where("file_id", "=", "lix")
-						.where("version_id", "=", "global")
-						.where(
-							sql`json_extract(snapshot_content, '$.entity_id')`,
-							"=",
-							change.entity_id
-						)
-						.where(
-							sql`json_extract(snapshot_content, '$.schema_key')`,
-							"=",
-							change.schema_key
-						)
-						.where(
-							sql`json_extract(snapshot_content, '$.file_id')`,
-							"=",
-							change.file_id
-						),
-				});
-
-				if (toDelete.length > 0) {
-					handleStateDelete(sqlite, toDelete[0]!._pk, db);
+				
+				// Build a set for quick lookup
+				for (const entity of checkpointEntities) {
+					entitiesAtCheckpoint.add(
+						`${entity.entity_id}|${entity.schema_key}|${entity.file_id}`
+					);
 				}
+			}
+			const checkpointTime = performance.now() - checkpointStart;
+			console.log(
+				`        checkpointCheck: ${checkpointTime.toFixed(3)}ms, deletions: ${deletions.length}, found: ${entitiesAtCheckpoint.size}`
+			);
+		}
 
-				// If entity existed at checkpoint, add deletion to working change set
-				if (entityExistedAtCheckpoint) {
-					insertTransactionState({
-						lix: { sqlite, db },
-						data: {
-							entity_id: `${workingChangeSetId}::${change.id}`,
-							schema_key: "lix_change_set_element",
-							file_id: "lix",
-							plugin_key: "lix_own_entity",
-							snapshot_content: JSON.stringify({
-								change_set_id: workingChangeSetId,
-								change_id: change.id,
-								entity_id: change.entity_id,
-								schema_key: change.schema_key,
-								file_id: change.file_id,
-							} satisfies LixChangeSetElement),
-							schema_version: LixChangeSetElementSchema["x-lix-version"],
-							version_id: "global",
-							untracked: false,
-						},
-						createChangeAuthors: false,
-					});
-				}
-				// If entity didn't exist at checkpoint, just remove from working change set (already done above)
-			} else {
-				// Non-deletion: create/update working change set element (latest change wins)
-				// First, remove any existing working change set element for this entity
-				const toDelete = executeSync({
-					lix: { sqlite },
-					query: db
-						.selectFrom("internal_resolved_state_all")
-						.select("_pk")
-						.where("entity_id", "like", `${workingChangeSetId}::%`)
-						.where("schema_key", "=", "lix_change_set_element")
-						.where("file_id", "=", "lix")
-						.where("version_id", "=", "global")
-						.where(
-							sql`json_extract(snapshot_content, '$.entity_id')`,
-							"=",
-							change.entity_id
+		// Step 2: Batch find all existing working change set elements to delete
+		const findExistingStart = performance.now();
+		const existingEntities = executeSync({
+			lix: { sqlite },
+			query: db
+				.selectFrom("internal_resolved_state_all")
+				.select([
+					"_pk",
+					sql`json_extract(snapshot_content, '$.entity_id')`.as("entity_id"),
+					sql`json_extract(snapshot_content, '$.schema_key')`.as("schema_key"),
+					sql`json_extract(snapshot_content, '$.file_id')`.as("file_id"),
+				])
+				.where("entity_id", "like", `${workingChangeSetId}::%`)
+				.where("schema_key", "=", "lix_change_set_element")
+				.where("file_id", "=", "lix")
+				.where("version_id", "=", "global")
+				.where((eb) =>
+					eb.or(
+						userChanges.map((change) =>
+							eb.and([
+								eb(
+									sql`json_extract(snapshot_content, '$.entity_id')`,
+									"=",
+									change.entity_id
+								),
+								eb(
+									sql`json_extract(snapshot_content, '$.schema_key')`,
+									"=",
+									change.schema_key
+								),
+								eb(
+									sql`json_extract(snapshot_content, '$.file_id')`,
+									"=",
+									change.file_id
+								),
+							])
 						)
-						.where(
-							sql`json_extract(snapshot_content, '$.schema_key')`,
-							"=",
-							change.schema_key
-						)
-						.where(
-							sql`json_extract(snapshot_content, '$.file_id')`,
-							"=",
-							change.file_id
-						),
-				});
+					)
+				),
+		});
+		const findExistingTime = performance.now() - findExistingStart;
+		console.log(
+			`        findExistingElements: ${findExistingTime.toFixed(3)}ms, found: ${existingEntities.length}`
+		);
 
-				if (toDelete.length > 0) {
-					// throw new Error("not implement - us the delete function ");
-					handleStateDelete(sqlite, toDelete[0]!._pk, db);
-				}
+		// Step 3: Delete all existing working change set elements at once
+		console.log(
+			`        deletingElements: ${existingEntities.length} elements`
+		);
+		const deleteStart = performance.now();
+		for (const existing of existingEntities) {
+			handleStateDelete(sqlite, existing._pk, db);
+		}
+		const deleteTime = performance.now() - deleteStart;
+		console.log(`        deleteElements: ${deleteTime.toFixed(3)}ms`);
 
-				// Then create new element with latest change
-				insertTransactionState({
-					lix: { sqlite, db },
-					data: {
-						entity_id: `${workingChangeSetId}::${change.id}`,
-						schema_key: "lix_change_set_element",
-						file_id: "lix",
-						plugin_key: "lix_own_entity",
-						snapshot_content: JSON.stringify({
-							change_set_id: workingChangeSetId,
-							change_id: change.id,
-							entity_id: change.entity_id,
-							schema_key: change.schema_key,
-							file_id: change.file_id,
-						} satisfies LixChangeSetElement),
-						schema_version: LixChangeSetElementSchema["x-lix-version"],
-						version_id: "global",
-						untracked: false,
-					},
-					createChangeAuthors: false,
+		// Step 4: Batch create new working change set elements
+		const newWorkingElements: Parameters<typeof insertTransactionState>[0]["data"] = [];
+		
+		// Add deletions that existed at checkpoint
+		for (const deletion of deletions) {
+			const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
+			if (entitiesAtCheckpoint.has(key)) {
+				newWorkingElements.push({
+					entity_id: `${workingChangeSetId}::${deletion.id}`,
+					schema_key: "lix_change_set_element",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						change_set_id: workingChangeSetId,
+						change_id: deletion.id,
+						entity_id: deletion.entity_id,
+						schema_key: deletion.schema_key,
+						file_id: deletion.file_id,
+					} satisfies LixChangeSetElement),
+					schema_version: LixChangeSetElementSchema["x-lix-version"],
+					version_id: "global",
+					untracked: false,
 				});
 			}
 		}
+		
+		// Add all non-deletions
+		for (const change of nonDeletions) {
+			newWorkingElements.push({
+				entity_id: `${workingChangeSetId}::${change.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: workingChangeSetId,
+					change_id: change.id,
+					entity_id: change.entity_id,
+					schema_key: change.schema_key,
+					file_id: change.file_id,
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
+				version_id: "global",
+				untracked: false,
+			});
+		}
+		
+		// Batch insert all new working elements
+		if (newWorkingElements.length > 0) {
+			insertTransactionState({
+				lix: { sqlite, db },
+				data: newWorkingElements,
+				createChangeAuthors: false,
+			});
+		}
 	}
+	
+	const deletionReconciliationTime =
+		performance.now() - deletionReconciliationStart;
+	console.log(
+		`      deletionReconciliation COMPLETE: ${deletionReconciliationTime.toFixed(3)}ms`
+	);
 
+	const createChangesetTime = performance.now() - createChangesetStartTime;
+	console.log(
+		`    createChangeset COMPLETE: ${createChangesetTime.toFixed(3)}ms, returning commitId: ${nextCommitId}`
+	);
 	return nextCommitId;
 }

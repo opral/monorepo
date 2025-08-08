@@ -159,7 +159,19 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
-				return commit({ lix: { sqlite, db: db as any, hooks } });
+				const xCommitStartTime = performance.now();
+				console.log(`xCommit START`);
+
+				try {
+					const result = commit({ lix: { sqlite, db: db as any, hooks } });
+					const xCommitTime = performance.now() - xCommitStartTime;
+					console.log(`xCommit COMPLETE: ${xCommitTime.toFixed(3)}ms`);
+					return result;
+				} catch (error) {
+					const xCommitTime = performance.now() - xCommitStartTime;
+					console.log(`xCommit ERROR: ${xCommitTime.toFixed(3)}ms`);
+					throw error;
+				}
 			},
 
 			xRollback: () => {
@@ -170,83 +182,99 @@ export function applyStateDatabaseSchema(
 			},
 
 			xBestIndex: (pVTab: any, pIdxInfo: any) => {
-				const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
+				const xBestIndexStartTime = performance.now();
 
-				// Track which columns have equality constraints
-				const usableConstraints: string[] = [];
-				let argIndex = 0;
+				try {
+					const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
 
-				// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
-				const columnMap = [
-					"_pk", // 0 (HIDDEN column)
-					"entity_id", // 1
-					"schema_key", // 2
-					"file_id", // 3
-					"version_id", // 4
-					"plugin_key", // 5
-					"snapshot_content", // 6
-					"schema_version", // 7
-					"created_at", // 8
-					"updated_at", // 9
-					"inherited_from_version_id", // 10
-					"change_id", // 11
-					"untracked", // 12
-					"commit_id", // 13
-				];
+					// Track which columns have equality constraints
+					const usableConstraints: string[] = [];
+					let argIndex = 0;
 
-				// Process constraints
-				// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
-				for (let i = 0; i < idxInfo.$nConstraint; i++) {
-					// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
-					const constraint = idxInfo.nthConstraint(i);
+					// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
+					const columnMap = [
+						"_pk", // 0 (HIDDEN column)
+						"entity_id", // 1
+						"schema_key", // 2
+						"file_id", // 3
+						"version_id", // 4
+						"plugin_key", // 5
+						"snapshot_content", // 6
+						"schema_version", // 7
+						"created_at", // 8
+						"updated_at", // 9
+						"inherited_from_version_id", // 10
+						"change_id", // 11
+						"untracked", // 12
+						"commit_id", // 13
+					];
 
-					// Only handle equality constraints that are usable
-					if (
-						constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
-						constraint.$usable
-					) {
-						const columnName = columnMap[constraint.$iColumn];
-						if (columnName) {
-							usableConstraints.push(columnName);
+					// Process constraints
+					// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
+					for (let i = 0; i < idxInfo.$nConstraint; i++) {
+						// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
+						const constraint = idxInfo.nthConstraint(i);
 
-							// Mark this constraint as used
-							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
-							idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+						// Only handle equality constraints that are usable
+						if (
+							constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
+							constraint.$usable
+						) {
+							const columnName = columnMap[constraint.$iColumn];
+							if (columnName) {
+								usableConstraints.push(columnName);
+
+								// Mark this constraint as used
+								// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
+								idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+							}
 						}
 					}
-				}
 
-				const fullTableCost = 1000000; // Default cost for full table scan
-				const fullTableRows = 10000000;
+					const fullTableCost = 1000000; // Default cost for full table scan
+					const fullTableRows = 10000000;
 
-				// Set the index string to pass column names to xFilter
-				if (usableConstraints.length > 0) {
-					const idxStr = usableConstraints.join(",");
-					// @ts-expect-error - idxInfo.$idxStr is not defined in the type
-					idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
-					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
-					idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
+					// Set the index string to pass column names to xFilter
+					if (usableConstraints.length > 0) {
+						const idxStr = usableConstraints.join(",");
+						// @ts-expect-error - idxInfo.$idxStr is not defined in the type
+						idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
+						// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+						idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
 
-					// Lower cost when we can use filters (more selective)
-					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
-					idxInfo.$estimatedCost =
-						fullTableCost / (usableConstraints.length + 1);
-					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
-					idxInfo.$estimatedRows = Math.ceil(
-						fullTableRows / (usableConstraints.length + 1)
+						// Lower cost when we can use filters (more selective)
+						// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+						idxInfo.$estimatedCost =
+							fullTableCost / (usableConstraints.length + 1);
+						// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+						idxInfo.$estimatedRows = Math.ceil(
+							fullTableRows / (usableConstraints.length + 1)
+						);
+					} else {
+						// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+						idxInfo.$needToFreeIdxStr = 0;
+
+						// Higher cost for full table scan
+						// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+						idxInfo.$estimatedCost = fullTableCost;
+						// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+						idxInfo.$estimatedRows = fullTableRows;
+					}
+
+					const xBestIndexTime = performance.now() - xBestIndexStartTime;
+					console.log(
+						`xBestIndex: ${xBestIndexTime.toFixed(3)}ms, constraints: ${usableConstraints.length}`
 					);
-				} else {
-					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
-					idxInfo.$needToFreeIdxStr = 0;
 
-					// Higher cost for full table scan
-					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
-					idxInfo.$estimatedCost = fullTableCost;
-					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
-					idxInfo.$estimatedRows = fullTableRows;
+					return capi.SQLITE_OK;
+				} finally {
+					// Always log timing even if error occurs
+					const xBestIndexTime = performance.now() - xBestIndexStartTime;
+					if (xBestIndexTime > 1) {
+						// Only log if > 1ms
+						console.log(`xBestIndex (slow): ${xBestIndexTime.toFixed(3)}ms`);
+					}
 				}
-
-				return capi.SQLITE_OK;
 			},
 
 			xDisconnect: () => {
@@ -278,6 +306,8 @@ export function applyStateDatabaseSchema(
 				argc: number,
 				argv: any
 			) => {
+				const xFilterStartTime = performance.now();
+
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
@@ -399,6 +429,11 @@ export function applyStateDatabaseSchema(
 						cursorState.results = newResults || [];
 					}
 
+					const xFilterTime = performance.now() - xFilterStartTime;
+					console.log(
+						`xFilter: ${xFilterTime.toFixed(3)}ms, filters: ${Object.keys(filters).length}, results: ${cursorState.results.length}`
+					);
+
 					return capi.SQLITE_OK;
 				} finally {
 					// Always decrement recursion depth
@@ -484,9 +519,17 @@ export function applyStateDatabaseSchema(
 			},
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
+				const xUpdateStartTime = performance.now();
+				console.log(
+					`xUpdate START: operation type=${nArg === 1 ? "DELETE" : "INSERT/UPDATE"}`
+				);
+
 				try {
 					// Extract arguments using the proper SQLite WASM API
+					const argExtractStart = performance.now();
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
+					const argExtractTime = performance.now() - argExtractStart;
+					console.log(`  argExtract: ${argExtractTime.toFixed(3)}ms`);
 
 					// DELETE operation: nArg = 1, args[0] = old primary key
 					if (nArg === 1) {
@@ -535,6 +578,7 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
+					const validationStart = performance.now();
 					const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 					validateStateMutation({
@@ -546,27 +590,35 @@ export function applyStateDatabaseSchema(
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
 					});
+					const validationTime = performance.now() - validationStart;
+					console.log(`  validation: ${validationTime.toFixed(3)}ms`);
 
 					// Use insertTransactionState which handles both tracked and untracked entities
+					const insertStart = performance.now();
 					insertTransactionState({
 						lix: { sqlite, db },
-						data: {
-							entity_id: String(entity_id),
-							schema_key: String(schema_key),
-							file_id: String(file_id),
-							plugin_key: String(plugin_key),
-							snapshot_content,
-							schema_version: String(schema_version),
-							version_id: String(version_id),
-							untracked: Boolean(untracked),
-						},
+						data: [
+							{
+								entity_id: String(entity_id),
+								schema_key: String(schema_key),
+								file_id: String(file_id),
+								plugin_key: String(plugin_key),
+								snapshot_content,
+								schema_version: String(schema_version),
+								version_id: String(version_id),
+								untracked: Boolean(untracked),
+							},
+						],
 					});
+					const insertTime = performance.now() - insertStart;
+					console.log(`  insertTransactionState: ${insertTime.toFixed(3)}ms`);
 
 					// TODO: This cache copying logic is a temporary workaround for shared commits.
 					// The proper solution requires improving cache miss logic to handle commit sharing
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
 					// Handle cache copying for new versions that share commits
+					const cacheCopyStart = performance.now();
 					if (isInsert && String(schema_key) === "lix_version") {
 						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
@@ -615,6 +667,13 @@ export function applyStateDatabaseSchema(
 							}
 						}
 					}
+					const cacheCopyTime = performance.now() - cacheCopyStart;
+					if (cacheCopyTime > 0.1) {
+						console.log(`  cacheCopy: ${cacheCopyTime.toFixed(3)}ms`);
+					}
+
+					const xUpdateTime = performance.now() - xUpdateStartTime;
+					console.log(`xUpdate COMPLETE: ${xUpdateTime.toFixed(3)}ms total`);
 
 					return capi.SQLITE_OK;
 				} catch (error) {
@@ -787,18 +846,20 @@ export function applyStateDatabaseSchema(
 		// Insert log using insertTransactionState
 		insertTransactionState({
 			lix,
-			data: {
-				entity_id: logData.id,
-				schema_key: LixLogSchema["x-lix-key"],
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify(logData),
-				schema_version: LixLogSchema["x-lix-version"],
-				// Using global and untracked for vtable logs.
-				// if we need to track them, we can change this later
-				version_id: "global",
-				untracked: true,
-			},
+			data: [
+				{
+					entity_id: logData.id,
+					schema_key: LixLogSchema["x-lix-key"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify(logData),
+					schema_version: LixLogSchema["x-lix-version"],
+					// Using global and untracked for vtable logs.
+					// if we need to track them, we can change this later
+					version_id: "global",
+					untracked: true,
+				},
+			],
 		});
 		loggingIsInProgress = false;
 	}
@@ -850,16 +911,18 @@ export function handleStateDelete(
 			// For inherited untracked, create a tombstone to block inheritance
 			insertTransactionState({
 				lix: { sqlite, db },
-				data: {
-					entity_id: String(entity_id),
-					schema_key: String(schema_key),
-					file_id: String(file_id),
-					plugin_key: String(plugin_key),
-					snapshot_content: null, // Deletion tombstone
-					schema_version: String(schema_version),
-					version_id: String(version_id),
-					untracked: true,
-				},
+				data: [
+					{
+						entity_id: String(entity_id),
+						schema_key: String(schema_key),
+						file_id: String(file_id),
+						plugin_key: String(plugin_key),
+						snapshot_content: null, // Deletion tombstone
+						schema_version: String(schema_version),
+						version_id: String(version_id),
+						untracked: true,
+					},
+				],
 			});
 		} else {
 			// For direct untracked (U tag), just delete from untracked table
@@ -889,16 +952,18 @@ export function handleStateDelete(
 
 	insertTransactionState({
 		lix: { sqlite, db },
-		data: {
-			entity_id: String(entity_id),
-			schema_key: String(schema_key),
-			file_id: String(file_id),
-			plugin_key: String(plugin_key),
-			snapshot_content: null, // No snapshot content for DELETE
-			schema_version: String(schema_version),
-			version_id: String(version_id),
-			untracked: false, // tracked entity
-		},
+		data: [
+			{
+				entity_id: String(entity_id),
+				schema_key: String(schema_key),
+				file_id: String(file_id),
+				plugin_key: String(plugin_key),
+				snapshot_content: null, // No snapshot content for DELETE
+				schema_version: String(schema_version),
+				version_id: String(version_id),
+				untracked: false, // tracked entity
+			},
+		],
 	});
 }
 

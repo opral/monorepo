@@ -2,42 +2,157 @@ import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 
-// pre-eliminary testing for queries.
 bench(
-	"query leaf state for entity with 100 changes in one version",
+	"select all entities from single version",
 	async () => {
 		const lix = await openLix({});
 
-		// Create one version
+		// Create a version with test data
 		const version = await createVersion({
 			lix,
-			id: "test_version",
-			name: "Test Version",
+			id: "bench_version_1",
+			name: "Benchmark Version 1",
 		});
 
-		// Create 100 changes for the same entity in the same version
-		for (let i = 0; i < 100; i++) {
+		for (let i = 0; i < 10; i++) {
 			await lix.db
 				.insertInto("state_all")
 				.values({
-					entity_id: "mock_entity_id",
+					entity_id: `entity_${i}`,
 					version_id: version.id,
-					snapshot_content: { value: `data_${i}`, change: i },
-					schema_key: "benchmark_schema",
-					file_id: "benchmark_file",
+					snapshot_content: {
+						id: `entity_${i}`,
+						value: `test_data_${i}`,
+						metadata: { index: i, type: "benchmark" },
+					},
+					schema_key: "benchmark_entity",
+					file_id: `mock_file`,
 					plugin_key: "benchmark_plugin",
 					schema_version: "1.0",
 				})
 				.execute();
 		}
 
-		// Benchmark querying the leaf state for this entity (should return the latest change)
+		// Benchmark: Select all entities from this version
 		await lix.db
 			.selectFrom("state_all")
-			.where("entity_id", "=", "mock_entity_id")
 			.where("version_id", "=", version.id)
 			.selectAll()
 			.execute();
 	},
-	{ iterations: 5, warmupIterations: 1 }
+	{ iterations: 1, warmupIterations: 0 }
 );
+
+bench(
+	"select all entities from single version - bypass vtable",
+	async () => {
+		const lix = await openLix({});
+
+		// Create a version with test data
+		const version = await createVersion({
+			lix,
+			id: "bench_version_2",
+			name: "Benchmark Version 2",
+		});
+
+		for (let i = 0; i < 10; i++) {
+			await lix.db
+				.insertInto("state_all")
+				.values({
+					entity_id: `entity_${i}`,
+					version_id: version.id,
+					snapshot_content: {
+						id: `entity_${i}`,
+						value: `test_data_${i}`,
+						metadata: { index: i, type: "benchmark" },
+					},
+					schema_key: "benchmark_entity",
+					file_id: `mock_file`,
+					plugin_key: "benchmark_plugin",
+					schema_version: "1.0",
+				})
+				.execute();
+		}
+
+		// First run EXPLAIN QUERY PLAN to understand how SQLite executes this query
+		const explainResult = lix.sqlite.exec({
+			sql: `EXPLAIN QUERY PLAN SELECT * FROM internal_resolved_state_all WHERE version_id = ?`,
+			bind: [version.id],
+			returnValue: "resultRows",
+		});
+
+		console.log("EXPLAIN QUERY PLAN for internal_resolved_state_all:");
+		if (explainResult) {
+			explainResult.forEach((row: any) => {
+				console.log(`  ${row[0]} | ${row[1]} | ${row[2]} | ${row[3]}`);
+			});
+		}
+
+		// Benchmark: Select directly from internal_resolved_state_all (bypasses vtable)
+		const start = Date.now();
+		const results = await lix.db
+			.selectFrom("internal_resolved_state_all")
+			.where("version_id", "=", version.id)
+			.selectAll()
+			.execute();
+		const queryTime = Date.now() - start;
+
+		console.log(
+			`Direct query time: ${queryTime}ms, rows returned: ${results.length}`
+		);
+	},
+	{ iterations: 1, warmupIterations: 0 }
+);
+
+bench.todo("select single entity by entity_id");
+
+bench.todo("select entities by schema_key filter");
+
+bench.todo("select entities by file_id filter");
+
+bench.todo("select entities with multiple filters (entity_id + schema_key)");
+
+bench(
+	"insert single state record",
+	async () => {
+		const lix = await openLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: `mutation_entity`,
+				version_id: "global",
+				snapshot_content: {
+					id: `mutation_entity`,
+					value: `test_data`,
+					metadata: { type: "mutation_benchmark" },
+				},
+				schema_key: "mutation_benchmark_entity",
+				file_id: `mutation_file`,
+				plugin_key: "benchmark_plugin",
+				schema_version: "1.0",
+			})
+			.execute();
+	},
+	{ iterations: 1, warmupIterations: 0 }
+);
+
+bench.todo("insert batch of 100 state records");
+
+bench.todo("update existing state record");
+
+bench.todo("delete single state record");
+
+bench.todo("mixed mutations (insert + update + delete)");
+
+bench.todo("cache miss performance - full table scan");
+
+bench.todo("cache hit performance - filtered query");

@@ -166,11 +166,13 @@ test("should allow multiple authors for the same change", async () => {
 	// Create accounts
 	const author1 = await createAccount({
 		lix,
+		id: "author1",
 		name: "Author One",
 	});
 
 	const author2 = await createAccount({
 		lix,
+		id: "author2",
 		name: "Author Two",
 	});
 

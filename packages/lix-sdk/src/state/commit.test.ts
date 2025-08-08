@@ -38,36 +38,40 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// 2. Insert transaction state
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "test-entity-1",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "test-key-1",
-				value: "test-value-1",
-			}),
-			schema_version: "1.0",
-			version_id: versionId,
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "test-entity-1",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "test-key-1",
+					value: "test-value-1",
+				}),
+				schema_version: "1.0",
+				version_id: versionId,
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "test-entity-2",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "test-key-2",
-				value: "test-value-2",
-			}),
-			schema_version: "1.0",
-			version_id: versionId,
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "test-entity-2",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "test-key-2",
+					value: "test-value-2",
+				}),
+				schema_version: "1.0",
+				version_id: versionId,
+				untracked: false,
+			},
+		],
 	});
 
 	// 3. Commit
@@ -226,212 +230,236 @@ test("commit should handle multiple versions correctly", async () => {
 	// Create change sets for versions
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionAChangeSetId,
-			schema_key: "lix_change_set",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionAChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionAChangeSetId,
+				schema_key: "lix_change_set",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionAWorkingChangeSetId,
-			schema_key: "lix_change_set",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionAWorkingChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionAWorkingChangeSetId,
+				schema_key: "lix_change_set",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAWorkingChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionBChangeSetId,
-			schema_key: "lix_change_set",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionBChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionBChangeSetId,
+				schema_key: "lix_change_set",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionBWorkingChangeSetId,
-			schema_key: "lix_change_set",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionBWorkingChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionBWorkingChangeSetId,
+				schema_key: "lix_change_set",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBWorkingChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Create commits for version A
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionACommitId,
-			schema_key: "lix_commit",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionACommitId,
-				change_set_id: versionAChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionACommitId,
+				schema_key: "lix_commit",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionACommitId,
+					change_set_id: versionAChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionAWorkingCommitId,
-			schema_key: "lix_commit",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionAWorkingCommitId,
-				change_set_id: versionAWorkingChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionAWorkingCommitId,
+				schema_key: "lix_commit",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAWorkingCommitId,
+					change_set_id: versionAWorkingChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Create version A
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionAId,
-			schema_key: "lix_version",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionAId,
-				name: "version A",
-				commit_id: versionACommitId,
-				working_commit_id: versionAWorkingCommitId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionAId,
+				schema_key: "lix_version",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAId,
+					name: "version A",
+					commit_id: versionACommitId,
+					working_commit_id: versionAWorkingCommitId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Create commits for version B
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionBCommitId,
-			schema_key: "lix_commit",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionBCommitId,
-				change_set_id: versionBChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionBCommitId,
+				schema_key: "lix_commit",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBCommitId,
+					change_set_id: versionBChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionBWorkingCommitId,
-			schema_key: "lix_commit",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionBWorkingCommitId,
-				change_set_id: versionBWorkingChangeSetId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionBWorkingCommitId,
+				schema_key: "lix_commit",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBWorkingCommitId,
+					change_set_id: versionBWorkingChangeSetId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Create version B
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: versionBId,
-			schema_key: "lix_version",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: versionBId,
-				name: "version B",
-				commit_id: versionBCommitId,
-				working_commit_id: versionBWorkingCommitId,
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: versionBId,
+				schema_key: "lix_version",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBId,
+					name: "version B",
+					commit_id: versionBCommitId,
+					working_commit_id: versionBWorkingCommitId,
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Insert entity for version A
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "version-a-entity",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "version-a-key",
-				value: "version-a-value",
-			}),
-			schema_version: "1.0",
-			version_id: versionAId,
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "version-a-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "version-a-key",
+					value: "version-a-value",
+				}),
+				schema_version: "1.0",
+				version_id: versionAId,
+				untracked: false,
+			},
+		],
 	});
 
 	// Insert entity for version B
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "version-b-entity",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "version-b-key",
-				value: "version-b-value",
-			}),
-			schema_version: "1.0",
-			version_id: versionBId,
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "version-b-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "version-b-key",
+					value: "version-b-value",
+				}),
+				schema_version: "1.0",
+				version_id: versionBId,
+				untracked: false,
+			},
+		],
 	});
 
 	// Commit
@@ -800,19 +828,21 @@ test("global version should move forward when mutations occur", async () => {
 	// Insert data with version_id = "global"
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "test-global-entity",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "test-global-key",
-				value: "test-global-value",
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "test-global-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "test-global-key",
+					value: "test-global-value",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Commit the changes
@@ -888,19 +918,21 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	// Insert data with version_id = "global"
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "test-edge-entity",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "test-edge-key",
-				value: "test-edge-value",
-			}),
-			schema_version: "1.0",
-			version_id: "global",
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "test-edge-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "test-edge-key",
+					value: "test-edge-value",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
 	});
 
 	// Commit the changes
@@ -1031,19 +1063,21 @@ test("active version should move forward when mutations occur", async () => {
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db },
-		data: {
-			entity_id: "test-active-entity",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "test-active-key",
-				value: "test-active-value",
-			}),
-			schema_version: "1.0",
-			version_id: activeVersionId,
-			untracked: false,
-		},
+		data: [
+			{
+				entity_id: "test-active-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "test-active-key",
+					value: "test-active-value",
+				}),
+				schema_version: "1.0",
+				version_id: activeVersionId,
+				untracked: false,
+			},
+		],
 	});
 
 	// Commit the changes
