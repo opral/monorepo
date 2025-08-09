@@ -45,11 +45,14 @@ export function applyChangeDatabaseSchema(
     c.file_id,
     c.plugin_key,
     c.created_at,
-    (SELECT json(s.content)
-     FROM internal_snapshot s
-     WHERE s.id = c.snapshot_id) AS snapshot_content
-  FROM internal_change AS c
+    json(s.content) AS snapshot_content
+  FROM 
+    internal_change AS c
+  LEFT JOIN 
+    internal_snapshot AS s ON s.id = c.snapshot_id
+
   UNION ALL
+
   SELECT 
     t.id,
     t.entity_id,
@@ -58,11 +61,9 @@ export function applyChangeDatabaseSchema(
     t.file_id,
     t.plugin_key,
     t.created_at,
-    CASE 
-      WHEN t.snapshot_content IS NULL THEN NULL
-      ELSE json(t.snapshot_content)
-    END AS snapshot_content
-  FROM internal_change_in_transaction AS t;
+    json(t.snapshot_content) AS snapshot_content
+  FROM 
+    internal_change_in_transaction AS t;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change
