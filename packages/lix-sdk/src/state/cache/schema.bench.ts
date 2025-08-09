@@ -100,7 +100,7 @@ bench("query with json_extract from cache", async () => {
 		.execute();
 
 	// Now perform the query with json_extract
-	const results = await db
+	await db
 		.selectFrom("internal_state_cache")
 		.select([
 			"entity_id",
@@ -160,7 +160,7 @@ bench("query through resolved_state_all view", async () => {
 		.execute();
 
 	// Query through the resolved state view which has json() conversion
-	const results = await db
+	await db
 		.selectFrom("internal_resolved_state_all")
 		.select([
 			"entity_id",
@@ -226,7 +226,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 	}
 
 	// This mimics the query from deletionReconciliation
-	const results = await db
+	await db
 		.selectFrom("internal_resolved_state_all")
 		.select([
 			"_pk",

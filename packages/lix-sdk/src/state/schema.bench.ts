@@ -67,32 +67,12 @@ bench(
 			)
 			.execute();
 
-		// First run EXPLAIN QUERY PLAN to understand how SQLite executes this query
-		const explainResult = lix.sqlite.exec({
-			sql: `EXPLAIN QUERY PLAN SELECT * FROM internal_resolved_state_all WHERE version_id = ?`,
-			bind: [version.id],
-			returnValue: "resultRows",
-		});
-
-		console.log("EXPLAIN QUERY PLAN for internal_resolved_state_all:");
-		if (explainResult) {
-			explainResult.forEach((row: any) => {
-				console.log(`  ${row[0]} | ${row[1]} | ${row[2]} | ${row[3]}`);
-			});
-		}
-
 		// Benchmark: Select directly from internal_resolved_state_all (bypasses vtable)
-		const start = Date.now();
-		const results = await lix.db
+		await lix.db
 			.selectFrom("internal_resolved_state_all" as any)
 			.where("version_id", "=", version.id)
 			.selectAll()
 			.execute();
-		const queryTime = Date.now() - start;
-
-		console.log(
-			`Direct query time: ${queryTime}ms, rows returned: ${results.length}`
-		);
 	},
 	{ iterations: 1, warmupIterations: 0 }
 );

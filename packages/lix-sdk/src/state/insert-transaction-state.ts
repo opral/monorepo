@@ -117,21 +117,15 @@ export function insertTransactionState(args: {
 
 	// Process tracked data with batching optimization
 	if (trackedData.length > 0) {
-		const perfStart = performance.now();
 		// Generate change IDs for all tracked entities upfront
 		const dataWithChangeIds = trackedData.map((data) => ({
 			...data,
 			change_id: uuidV7({ lix: args.lix as any }),
 		}));
-		const genIdsTime = performance.now() - perfStart;
-		if (trackedData.length > 50) {
-			console.log(`        generateChangeIds: ${genIdsTime.toFixed(3)}ms for ${trackedData.length} items`);
-		}
 
 		// Batch delete existing untracked state for all entities
 		// Build a single DELETE with OR conditions for all entities
 		if (dataWithChangeIds.length > 0) {
-			const deleteStart = performance.now();
 			executeSync({
 				lix: args.lix,
 				query: args.lix.db
@@ -149,10 +143,6 @@ export function insertTransactionState(args: {
 						)
 					),
 			});
-			const deleteTime = performance.now() - deleteStart;
-			if (trackedData.length > 50) {
-				console.log(`        deleteUntracked: ${deleteTime.toFixed(3)}ms`);
-			}
 		}
 
 		// Batch insert into internal_change_in_transaction
@@ -170,7 +160,6 @@ export function insertTransactionState(args: {
 			created_at: _timestamp,
 		}));
 
-		const insertTransStart = performance.now();
 		executeSync({
 			lix: args.lix,
 			query: args.lix.db
@@ -188,10 +177,6 @@ export function insertTransactionState(args: {
 						}))
 				),
 		});
-		const insertTransTime = performance.now() - insertTransStart;
-		if (trackedData.length > 50) {
-			console.log(`        insertTransaction: ${insertTransTime.toFixed(3)}ms`);
-		}
 
 		// Batch insert/update cache
 		const cacheRows = dataWithChangeIds.map((data) => ({
@@ -212,7 +197,6 @@ export function insertTransactionState(args: {
 			commit_id: "pending",
 		}));
 
-		const insertCacheStart = performance.now();
 		executeSync({
 			lix: args.lix,
 			query: args.lix.db
@@ -237,10 +221,6 @@ export function insertTransactionState(args: {
 						}))
 				),
 		});
-		const insertCacheTime = performance.now() - insertCacheStart;
-		if (trackedData.length > 50) {
-			console.log(`        insertCache: ${insertCacheTime.toFixed(3)}ms`);
-		}
 
 		// Handle change authors for tracked entities (if enabled)
 		if (args.createChangeAuthors !== false && dataWithChangeIds.length > 0) {
