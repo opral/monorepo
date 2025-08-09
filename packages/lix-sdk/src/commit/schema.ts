@@ -79,7 +79,7 @@ export type LixCommitEdge = FromLixSchemaDefinition<typeof LixCommitEdgeSchema>;
  * Apply commit database schema by creating entity views for commits and commit edges.
  */
 export function applyCommitDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	// Create commit views with UUID v7 as default ID
 	createEntityViewsIfNotExists({

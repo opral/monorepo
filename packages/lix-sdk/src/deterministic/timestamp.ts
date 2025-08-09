@@ -47,7 +47,9 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns ISO 8601 timestamp string
  */
-export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
+export function timestamp(args: {
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+}): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Check if timestamps are disabled in the config

@@ -171,47 +171,6 @@ export async function openLix(args: {
 
 		// Use switchAccount to properly set this as the only active account
 		await switchAccount({ lix: { db }, to: [accountToSet] });
-	} else {
-		// Check if there's already an active account
-		const existingActiveAccount = await db
-			.selectFrom("active_account")
-			.selectAll()
-			.executeTakeFirst();
-
-		if (!existingActiveAccount) {
-			// No account provided and no active account exists - create anonymous account
-			const { nanoId } = await import("../deterministic/index.js");
-			const { generateHumanId } = await import(
-				"../deterministic/generate-human-id.js"
-			);
-
-			const activeAccountId = nanoId({
-				lix: { sqlite: database, db: db as any },
-			});
-			const humanName = generateHumanId({
-				lix: { sqlite: database, db: db as any },
-			});
-			const anonymousAccountName = `Anonymous ${humanName}`;
-
-			// Create the anonymous account as untracked
-			await db
-				.insertInto("account_all")
-				.values({
-					id: activeAccountId,
-					name: anonymousAccountName,
-					lixcol_version_id: "global",
-					lixcol_untracked: true,
-				})
-				.execute();
-
-			// Set it as the active account
-			await db
-				.insertInto("active_account")
-				.values({
-					account_id: activeAccountId,
-				})
-				.execute();
-		}
 	}
 
 	// Only process keyValues if we're opening an existing blob
@@ -295,8 +254,10 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterministicSequenceNumber({ lix: { sqlite: database, db } });
-			commitDeterministicRngState({ lix: { sqlite: database, db } });
+			commitDeterministicSequenceNumber({
+				lix: { sqlite: database, db, hooks },
+			});
+			commitDeterministicRngState({ lix: { sqlite: database, db, hooks } });
 			return storage.export();
 		},
 	};

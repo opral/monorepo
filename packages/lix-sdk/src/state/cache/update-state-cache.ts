@@ -68,7 +68,9 @@ export function updateStateCache(args: {
 								file_id: args.change.file_id,
 								version_id: childVersion.id,
 								plugin_key: currentCacheEntry.plugin_key,
-								snapshot_content: currentCacheEntry.snapshot_content,
+								snapshot_content: currentCacheEntry.snapshot_content
+									? sql`jsonb(${currentCacheEntry.snapshot_content})`
+									: null,
 								schema_version: currentCacheEntry.schema_version,
 								created_at: currentCacheEntry.created_at,
 								updated_at: currentCacheEntry.updated_at,
@@ -82,7 +84,9 @@ export function updateStateCache(args: {
 									.columns(["entity_id", "schema_key", "file_id", "version_id"])
 									.doUpdateSet({
 										plugin_key: currentCacheEntry.plugin_key,
-										snapshot_content: currentCacheEntry.snapshot_content,
+										snapshot_content: currentCacheEntry.snapshot_content
+											? sql`jsonb(${currentCacheEntry.snapshot_content})`
+											: null,
 										schema_version: currentCacheEntry.schema_version,
 										updated_at: currentCacheEntry.updated_at,
 										inherited_from_version_id: null, // Now direct entry in child version
@@ -116,7 +120,7 @@ export function updateStateCache(args: {
 							file_id: args.change.file_id,
 							version_id: args.version_id,
 							plugin_key: args.change.plugin_key,
-							snapshot_content: args.change.snapshot_content,
+							snapshot_content: null, // Always null for deletions
 							schema_version: args.change.schema_version,
 							created_at: args.change.created_at,
 							updated_at: args.change.created_at,
@@ -253,7 +257,7 @@ export function updateStateCache(args: {
 							file_id: args.change.file_id,
 							version_id: args.version_id,
 							plugin_key: args.change.plugin_key,
-							snapshot_content: args.change.snapshot_content,
+							snapshot_content: null, // Always null for deletions
 							schema_version: args.change.schema_version,
 							created_at: args.change.created_at,
 							updated_at: args.change.created_at,
@@ -290,7 +294,9 @@ export function updateStateCache(args: {
 					file_id: args.change.file_id,
 					version_id: args.version_id,
 					plugin_key: args.change.plugin_key,
-					snapshot_content: args.change.snapshot_content,
+					snapshot_content: args.change.snapshot_content
+						? sql`jsonb(${args.change.snapshot_content})`
+						: null,
 					schema_version: args.change.schema_version,
 					created_at: args.change.created_at,
 					updated_at: args.change.created_at,
@@ -304,7 +310,9 @@ export function updateStateCache(args: {
 						.columns(["entity_id", "schema_key", "file_id", "version_id"])
 						.doUpdateSet({
 							plugin_key: args.change.plugin_key,
-							snapshot_content: args.change.snapshot_content,
+							snapshot_content: args.change.snapshot_content
+								? sql`jsonb(${args.change.snapshot_content})`
+								: null,
 							schema_version: args.change.schema_version,
 							updated_at: args.change.created_at,
 							inheritance_delete_marker: 0, // Reset tombstone flag for non-null content

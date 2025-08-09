@@ -1,8 +1,6 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { StateAllView } from "./schema.js";
-import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { encodeStatePkPart } from "./primary-key.js";
+import type { Lix } from "../index.js";
 
 /**
  * Creates a view that provides direct access to resolved state data
@@ -20,12 +18,11 @@ import { encodeStatePkPart } from "./primary-key.js";
  *
  * See https://github.com/opral/lix-sdk/issues/355
  */
-export function applyResolvedStateView(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-}): void {
+export function applyResolvedStateView(
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
+): void {
 	// Register a custom SQLite function for encoding primary key parts
-	args.sqlite.createFunction({
+	lix.sqlite.createFunction({
 		name: "lix_encode_pk_part",
 		deterministic: true,
 		arity: 1,
@@ -36,7 +33,7 @@ export function applyResolvedStateView(args: {
 		},
 	});
 	// Create the view that provides resolved state by combining cache and untracked state
-	args.sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
 		SELECT * FROM (
 			-- 1. Untracked state (highest priority)
@@ -68,7 +65,7 @@ export function applyResolvedStateView(args: {
 				schema_key, 
 				file_id, 
 				plugin_key, 
-				snapshot_content, 
+				json(snapshot_content) as snapshot_content, 
 				schema_version, 
 				version_id,
 				created_at, 
@@ -97,7 +94,7 @@ export function applyResolvedStateView(args: {
 				isc.schema_key, 
 				isc.file_id, 
 				isc.plugin_key, 
-				isc.snapshot_content, 
+				json(isc.snapshot_content) as snapshot_content, 
 				isc.schema_version, 
 				vi.version_id, -- Return child version_id
 				isc.created_at, 

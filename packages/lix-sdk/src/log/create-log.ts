@@ -26,7 +26,7 @@ import type { LixLog } from "./schema.js";
  * @returns A promise that resolves with the created log entry.
  */
 export async function createLog(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	message: string;
 	level: string;
 	key: string;

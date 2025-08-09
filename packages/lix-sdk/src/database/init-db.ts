@@ -127,7 +127,7 @@ export function initDb(args: {
 		],
 	});
 
-	const lix = { sqlite: args.sqlite, db } as unknown as Lix;
+	const lix = { sqlite: args.sqlite, db, hooks: args.hooks } as unknown as Lix;
 
 	initFunctions({
 		sqlite: args.sqlite,
@@ -137,17 +137,13 @@ export function initDb(args: {
 	// Apply all database schemas first (tables, views, triggers)
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
-	applyStateDatabaseSchema(
-		args.sqlite,
-		db as unknown as Kysely<LixInternalDatabaseSchema>,
-		args.hooks
-	);
+	applyStateDatabaseSchema(lix);
 	applyEntityDatabaseSchema(lix);
-	applyChangeSetDatabaseSchema(args.sqlite, db);
+	applyChangeSetDatabaseSchema(lix);
 	applyCommitDatabaseSchema(lix);
-	applyStoredSchemaDatabaseSchema(args.sqlite);
+	applyStoredSchemaDatabaseSchema(lix);
 	applyVersionDatabaseSchema(lix);
-	applyAccountDatabaseSchema(args.sqlite, db);
+	applyAccountDatabaseSchema(lix);
 	applyKeyValueDatabaseSchema(lix);
 	applyChangeAuthorDatabaseSchema(lix);
 	applyLabelDatabaseSchema(lix);

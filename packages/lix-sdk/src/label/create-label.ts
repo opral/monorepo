@@ -15,7 +15,7 @@ import { nanoId } from "../deterministic/index.js";
  */
 
 export async function createLabel(args: {
-	lix: Pick<Lix, "db" | "sqlite">;
+	lix: Pick<Lix, "db" | "sqlite" | "hooks">;
 	id?: LixLabel["id"];
 	name: LixLabel["name"];
 	lixcol_version_id?: string;

@@ -9,7 +9,7 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     file_id TEXT NOT NULL,
     version_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    snapshot_content TEXT, -- Allow NULL for deletions
+    snapshot_content BLOB, -- JSONB content, NULL for deletions
     schema_version TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
@@ -18,7 +18,17 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     change_id TEXT,
     commit_id TEXT, -- Allow NULL until commit is created
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+    -- 8 = strictly JSONB
+    -- https://www.sqlite.org/json1.html#jvalid
+    CHECK (snapshot_content IS NULL OR json_valid(snapshot_content, 8)),
+    -- Ensure content is either NULL or a JSON object (not string, array, etc)
+    -- This prevents double-stringified JSON from being stored
+    CHECK (snapshot_content IS NULL OR json_type(snapshot_content) = 'object')
   ) strict;
+
+  -- Index for fast version_id filtering
+  CREATE INDEX IF NOT EXISTS idx_internal_state_cache_version_id 
+    ON internal_state_cache (version_id);
 `);
 }
 

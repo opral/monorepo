@@ -1,43 +1,106 @@
 import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "../version/create-version.js";
 
-// pre-eliminary testing for queries.
-bench(
-	"query leaf state for entity with 100 changes in one version",
-	async () => {
-		const lix = await openLix({});
+const NUM_ROWS = 100;
 
-		// Create one version
-		const version = await createVersion({
-			lix,
-			id: "test_version",
-			name: "Test Version",
-		});
+bench("select entities from single version", async () => {
+	const lix = await openLix({});
 
-		// Create 100 changes for the same entity in the same version
-		for (let i = 0; i < 100; i++) {
-			await lix.db
-				.insertInto("state_all")
-				.values({
-					entity_id: "mock_entity_id",
-					version_id: version.id,
-					snapshot_content: { value: `data_${i}`, change: i },
-					schema_key: "benchmark_schema",
-					file_id: "benchmark_file",
-					plugin_key: "benchmark_plugin",
-					schema_version: "1.0",
-				})
-				.execute();
-		}
+	await lix.db
+		.insertInto("state_all")
+		.values(
+			Array.from({ length: NUM_ROWS }, (_, i) => ({
+				entity_id: `entity_${i}`,
+				version_id: "global",
+				snapshot_content: {
+					id: `entity_${i}`,
+					value: `test_data_${i}`,
+					metadata: { index: i, type: "benchmark" },
+				},
+				schema_key: "benchmark_entity",
+				file_id: `mock_file`,
+				plugin_key: "benchmark_plugin",
+				schema_version: "1.0",
+			}))
+		)
+		.execute();
 
-		// Benchmark querying the leaf state for this entity (should return the latest change)
-		await lix.db
-			.selectFrom("state_all")
-			.where("entity_id", "=", "mock_entity_id")
-			.where("version_id", "=", version.id)
-			.selectAll()
-			.execute();
-	},
-	{ iterations: 5, warmupIterations: 1 }
-);
+	// Benchmark: Select all entities from this version
+	await lix.db
+		.selectFrom("state_all")
+		.where("version_id", "=", "global")
+		.selectAll()
+		.execute();
+});
+
+// This test ensures that xBestIndex does not have a regression
+bench("select all entities from single version - bypass vtable", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("state_all")
+		.values(
+			Array.from({ length: NUM_ROWS }, (_, i) => ({
+				entity_id: `entity_${i}`,
+				version_id: "global",
+				snapshot_content: {
+					id: `entity_${i}`,
+					value: `test_data_${i}`,
+					metadata: { index: i, type: "benchmark" },
+				},
+				schema_key: "benchmark_entity",
+				file_id: `mock_file`,
+				plugin_key: "benchmark_plugin",
+				schema_version: "1.0",
+			}))
+		)
+		.execute();
+
+	// Benchmark: Select directly from internal_resolved_state_all (bypasses vtable)
+	await lix.db
+		.selectFrom("internal_resolved_state_all" as any)
+		.where("version_id", "=", "global")
+		.selectAll()
+		.execute();
+});
+
+bench.todo("select single entity by entity_id");
+
+bench.todo("select entities by schema_key filter");
+
+bench.todo("select entities by file_id filter");
+
+bench.todo("select entities with multiple filters (entity_id + schema_key)");
+
+bench("insert single state record", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: `mutation_entity`,
+			version_id: "global",
+			snapshot_content: {
+				id: `mutation_entity`,
+				value: `test_data`,
+				metadata: { type: "mutation_benchmark" },
+			},
+			schema_key: "mutation_benchmark_entity",
+			file_id: `mutation_file`,
+			plugin_key: "benchmark_plugin",
+			schema_version: "1.0",
+		})
+		.execute();
+});
+
+bench.todo("insert batch of 100 state records");
+
+bench.todo("update existing state record");
+
+bench.todo("delete single state record");
+
+bench.todo("mixed mutations (insert + update + delete)");
+
+bench.todo("cache miss performance - full table scan");
+
+bench.todo("cache hit performance - filtered query");

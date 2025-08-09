@@ -320,3 +320,46 @@ test("changes in transaction can be accessed via change view", async () => {
 		});
 	});
 });
+
+test("JSON null handling: change view returns SQL NULL not JSON 'null' string for deletions", async () => {
+	const lix = await openLix({});
+
+	// Insert a change with null snapshot_content (deletion/tombstone)
+	await lix.db
+		.insertInto("change")
+		.values({
+			id: "change_null_test",
+			entity_id: "entity_null_test",
+			schema_key: "test_schema",
+			schema_version: "1.0",
+			file_id: "file1",
+			plugin_key: "test_plugin",
+			snapshot_content: null,
+		})
+		.execute();
+
+	// Query the change view directly using raw SQL to verify the actual value
+	const rawResult = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("change")
+		.where("id", "=", "change_null_test")
+		.select("snapshot_content")
+		.executeTakeFirst();
+
+	// The bug: json(NULL) returns the string "null" instead of SQL NULL
+	// This test should verify that snapshot_content is actually SQL NULL, not the string "null"
+	expect(rawResult?.snapshot_content).toBe(null);
+	expect(rawResult?.snapshot_content).not.toBe("null");
+
+	// Also verify through the normal Kysely query
+	const change = await lix.db
+		.selectFrom("change")
+		.where("id", "=", "change_null_test")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(change).toBeDefined();
+	expect(change?.snapshot_content).toBe(null);
+	expect(change?.snapshot_content).not.toBe("null");
+});

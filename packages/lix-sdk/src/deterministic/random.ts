@@ -90,7 +90,9 @@ function randomUnstable(): number {
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns Random float between 0 (inclusive) and 1 (exclusive) with 53-bit precision
  */
-export function random(args: { lix: Pick<Lix, "sqlite" | "db"> }): number {
+export function random(args: {
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+}): number {
 	// Non-deterministic mode: use crypto.getRandomValues()
 	if (!isDeterministicMode({ lix: args.lix })) {
 		return randomUnstable();
@@ -228,7 +230,7 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	const state = rngCache.get(args.lix.sqlite);

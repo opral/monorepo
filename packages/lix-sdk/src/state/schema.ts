@@ -5,7 +5,6 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
@@ -19,6 +18,7 @@ import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
 import { populateStateCache } from "./cache/populate-state-cache.js";
+import type { Lix } from "../lix/open-lix.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -40,14 +40,15 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 ) WITHOUT ROWID;`;
 
 export function applyStateDatabaseSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>,
-	hooks: LixHooks
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
-	applyMaterializeStateSchema(sqlite);
-	applyStateCacheSchema({ sqlite });
-	applyUntrackedStateSchema({ sqlite });
-	applyResolvedStateView({ sqlite, db });
+	const { sqlite, hooks } = lix;
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	applyMaterializeStateSchema(lix);
+	applyStateCacheSchema(lix);
+	applyUntrackedStateSchema(lix);
+	applyResolvedStateView(lix);
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -170,83 +171,87 @@ export function applyStateDatabaseSchema(
 			},
 
 			xBestIndex: (pVTab: any, pIdxInfo: any) => {
-				const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
+				try {
+					const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
 
-				// Track which columns have equality constraints
-				const usableConstraints: string[] = [];
-				let argIndex = 0;
+					// Track which columns have equality constraints
+					const usableConstraints: string[] = [];
+					let argIndex = 0;
 
-				// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
-				const columnMap = [
-					"_pk", // 0 (HIDDEN column)
-					"entity_id", // 1
-					"schema_key", // 2
-					"file_id", // 3
-					"version_id", // 4
-					"plugin_key", // 5
-					"snapshot_content", // 6
-					"schema_version", // 7
-					"created_at", // 8
-					"updated_at", // 9
-					"inherited_from_version_id", // 10
-					"change_id", // 11
-					"untracked", // 12
-					"commit_id", // 13
-				];
+					// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
+					const columnMap = [
+						"_pk", // 0 (HIDDEN column)
+						"entity_id", // 1
+						"schema_key", // 2
+						"file_id", // 3
+						"version_id", // 4
+						"plugin_key", // 5
+						"snapshot_content", // 6
+						"schema_version", // 7
+						"created_at", // 8
+						"updated_at", // 9
+						"inherited_from_version_id", // 10
+						"change_id", // 11
+						"untracked", // 12
+						"commit_id", // 13
+					];
 
-				// Process constraints
-				// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
-				for (let i = 0; i < idxInfo.$nConstraint; i++) {
-					// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
-					const constraint = idxInfo.nthConstraint(i);
+					// Process constraints
+					// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
+					for (let i = 0; i < idxInfo.$nConstraint; i++) {
+						// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
+						const constraint = idxInfo.nthConstraint(i);
 
-					// Only handle equality constraints that are usable
-					if (
-						constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
-						constraint.$usable
-					) {
-						const columnName = columnMap[constraint.$iColumn];
-						if (columnName) {
-							usableConstraints.push(columnName);
+						// Only handle equality constraints that are usable
+						if (
+							constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
+							constraint.$usable
+						) {
+							const columnName = columnMap[constraint.$iColumn];
+							if (columnName) {
+								usableConstraints.push(columnName);
 
-							// Mark this constraint as used
-							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
-							idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+								// Mark this constraint as used
+								// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
+								idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+							}
 						}
 					}
+
+					const fullTableCost = 1000000; // Default cost for full table scan
+					const fullTableRows = 10000000;
+
+					// Set the index string to pass column names to xFilter
+					if (usableConstraints.length > 0) {
+						const idxStr = usableConstraints.join(",");
+						// @ts-expect-error - idxInfo.$idxStr is not defined in the type
+						idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
+						// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+						idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
+
+						// Lower cost when we can use filters (more selective)
+						// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+						idxInfo.$estimatedCost =
+							fullTableCost / (usableConstraints.length + 1);
+						// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+						idxInfo.$estimatedRows = Math.ceil(
+							fullTableRows / (usableConstraints.length + 1)
+						);
+					} else {
+						// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+						idxInfo.$needToFreeIdxStr = 0;
+
+						// Higher cost for full table scan
+						// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+						idxInfo.$estimatedCost = fullTableCost;
+						// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+						idxInfo.$estimatedRows = fullTableRows;
+					}
+
+					return capi.SQLITE_OK;
+				} finally {
+					// Always log timing even if error occurs
 				}
-
-				const fullTableCost = 1000000; // Default cost for full table scan
-				const fullTableRows = 10000000;
-
-				// Set the index string to pass column names to xFilter
-				if (usableConstraints.length > 0) {
-					const idxStr = usableConstraints.join(",");
-					// @ts-expect-error - idxInfo.$idxStr is not defined in the type
-					idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
-					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
-					idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
-
-					// Lower cost when we can use filters (more selective)
-					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
-					idxInfo.$estimatedCost =
-						fullTableCost / (usableConstraints.length + 1);
-					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
-					idxInfo.$estimatedRows = Math.ceil(
-						fullTableRows / (usableConstraints.length + 1)
-					);
-				} else {
-					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
-					idxInfo.$needToFreeIdxStr = 0;
-
-					// Higher cost for full table scan
-					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
-					idxInfo.$estimatedCost = fullTableCost;
-					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
-					idxInfo.$estimatedRows = fullTableRows;
-				}
-
-				return capi.SQLITE_OK;
 			},
 
 			xDisconnect: () => {
@@ -378,7 +383,7 @@ export function applyStateDatabaseSchema(
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;
 						try {
-							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
+							markStateCacheAsFresh({ lix: { sqlite, db: db as any, hooks } });
 						} finally {
 							isUpdatingCacheState = false;
 						}
@@ -496,7 +501,7 @@ export function applyStateDatabaseSchema(
 						}
 
 						// Use handleStateDelete for all cases - it handles both tracked and untracked
-						handleStateDelete(sqlite, oldPk, db);
+						handleStateDelete(lix as any, oldPk);
 
 						return capi.SQLITE_OK;
 					}
@@ -535,10 +540,10 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(sqlite, db, schema_key);
+					const storedSchema = getStoredSchema(lix as any, schema_key);
 
 					validateStateMutation({
-						lix: { sqlite, db: db as any },
+						lix: lix as any,
 						schema: storedSchema ? JSON.parse(storedSchema) : null,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
@@ -549,17 +554,19 @@ export function applyStateDatabaseSchema(
 
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
-						lix: { sqlite, db },
-						data: {
-							entity_id: String(entity_id),
-							schema_key: String(schema_key),
-							file_id: String(file_id),
-							plugin_key: String(plugin_key),
-							snapshot_content,
-							schema_version: String(schema_version),
-							version_id: String(version_id),
-							untracked: Boolean(untracked),
-						},
+						lix: lix as any,
+						data: [
+							{
+								entity_id: String(entity_id),
+								schema_key: String(schema_key),
+								file_id: String(file_id),
+								plugin_key: String(plugin_key),
+								snapshot_content,
+								schema_version: String(schema_version),
+								version_id: String(version_id),
+								untracked: Boolean(untracked),
+							},
+						],
 					});
 
 					// TODO: This cache copying logic is a temporary workaround for shared commits.
@@ -615,7 +622,6 @@ export function applyStateDatabaseSchema(
 							}
 						}
 					}
-
 					return capi.SQLITE_OK;
 				} catch (error) {
 					const errorMessage =
@@ -787,32 +793,33 @@ export function applyStateDatabaseSchema(
 		// Insert log using insertTransactionState
 		insertTransactionState({
 			lix,
-			data: {
-				entity_id: logData.id,
-				schema_key: LixLogSchema["x-lix-key"],
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify(logData),
-				schema_version: LixLogSchema["x-lix-version"],
-				// Using global and untracked for vtable logs.
-				// if we need to track them, we can change this later
-				version_id: "global",
-				untracked: true,
-			},
+			data: [
+				{
+					entity_id: logData.id,
+					schema_key: LixLogSchema["x-lix-key"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify(logData),
+					schema_version: LixLogSchema["x-lix-version"],
+					// Using global and untracked for vtable logs.
+					// if we need to track them, we can change this later
+					version_id: "global",
+					untracked: true,
+				},
+			],
 		});
 		loggingIsInProgress = false;
 	}
 }
 
 export function handleStateDelete(
-	sqlite: SqliteWasmDatabase,
-	primaryKey: string,
-	db: Kysely<LixInternalDatabaseSchema>
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
+	primaryKey: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
-		lix: { sqlite },
-		query: db
+		lix,
+		query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select([
 				"entity_id",
@@ -849,23 +856,25 @@ export function handleStateDelete(
 		if (parsed.tag === "UI") {
 			// For inherited untracked, create a tombstone to block inheritance
 			insertTransactionState({
-				lix: { sqlite, db },
-				data: {
-					entity_id: String(entity_id),
-					schema_key: String(schema_key),
-					file_id: String(file_id),
-					plugin_key: String(plugin_key),
-					snapshot_content: null, // Deletion tombstone
-					schema_version: String(schema_version),
-					version_id: String(version_id),
-					untracked: true,
-				},
+				lix,
+				data: [
+					{
+						entity_id: String(entity_id),
+						schema_key: String(schema_key),
+						file_id: String(file_id),
+						plugin_key: String(plugin_key),
+						snapshot_content: null, // Deletion tombstone
+						schema_version: String(schema_version),
+						version_id: String(version_id),
+						untracked: true,
+					},
+				],
 			});
 		} else {
 			// For direct untracked (U tag), just delete from untracked table
 			executeSync({
-				lix: { sqlite },
-				query: db
+				lix,
+				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 					.deleteFrom("internal_state_all_untracked")
 					.where("entity_id", "=", String(entity_id))
 					.where("schema_key", "=", String(schema_key))
@@ -876,10 +885,10 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(sqlite, db, schema_key);
+	const storedSchema = getStoredSchema(lix, schema_key);
 
 	validateStateMutation({
-		lix: { sqlite, db: db as any },
+		lix,
 		schema: storedSchema ? JSON.parse(storedSchema) : null,
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
@@ -888,31 +897,32 @@ export function handleStateDelete(
 	});
 
 	insertTransactionState({
-		lix: { sqlite, db },
-		data: {
-			entity_id: String(entity_id),
-			schema_key: String(schema_key),
-			file_id: String(file_id),
-			plugin_key: String(plugin_key),
-			snapshot_content: null, // No snapshot content for DELETE
-			schema_version: String(schema_version),
-			version_id: String(version_id),
-			untracked: false, // tracked entity
-		},
+		lix,
+		data: [
+			{
+				entity_id: String(entity_id),
+				schema_key: String(schema_key),
+				file_id: String(file_id),
+				plugin_key: String(plugin_key),
+				snapshot_content: null, // No snapshot content for DELETE
+				schema_version: String(schema_version),
+				version_id: String(version_id),
+				untracked: false, // tracked entity
+			},
+		],
 	});
 }
 
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>,
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
 	schemaKey: any
 ): string | null {
 	// Query directly from internal_resolved_state_all to avoid vtable recursion
 	const result = executeSync({
-		lix: { sqlite },
-		query: db
+		lix,
+		query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")

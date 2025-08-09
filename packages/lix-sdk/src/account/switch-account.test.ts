@@ -4,7 +4,7 @@ import { createAccount } from "./create-account.js";
 import { switchAccount } from "./switch-account.js";
 import { createVersion } from "../version/create-version.js";
 
-test("should switch the current account", async () => {
+test("should switch the active account", async () => {
 	const lix = await openLix({});
 
 	const version = await createVersion({
@@ -15,12 +15,14 @@ test("should switch the current account", async () => {
 	// Create two accounts
 	const account1 = await createAccount({
 		lix,
-		name: "account1",
+		id: "account1",
+		name: "Account One",
 		lixcol_version_id: version.id,
 	});
 	const account2 = await createAccount({
 		lix,
-		name: "account2",
+		id: "account2",
+		name: "Account Two",
 		lixcol_version_id: version.id,
 	});
 

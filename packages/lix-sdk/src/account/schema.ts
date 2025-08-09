@@ -3,29 +3,27 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyAccountDatabaseSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Lix["db"]
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	// Create account view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixAccountSchema,
 		overrideName: "account",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix: { sqlite, db } }),
+			id: () => nanoId({ lix }),
 		},
 	});
 
 	// Create active_account as an entity view (similar to active_version)
 	// Stores references to account IDs, joining with account table for details
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_account AS
 		SELECT
 			json_extract(sa.snapshot_content, '$.account_id') AS account_id,

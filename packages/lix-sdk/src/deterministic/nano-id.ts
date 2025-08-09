@@ -54,7 +54,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  * @returns Nano ID string
  */
 export function nanoId(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	length?: number;
 }): string {
 	// Check if deterministic mode is enabled

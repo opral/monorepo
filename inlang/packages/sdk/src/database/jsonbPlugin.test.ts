@@ -137,7 +137,7 @@ test("storing json as text is supposed to fail to avoid heuristics if the json s
 		plugins: [new JsonbPlugin({ database })],
 	});
 
-	expect(() =>
+	await expect(() =>
 		db
 			.insertInto("foo")
 			.values({

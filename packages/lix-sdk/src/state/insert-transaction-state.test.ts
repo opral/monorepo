@@ -5,7 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 
-test("insertPendingState creates tracked entity with pending change", async () => {
+test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -25,17 +25,19 @@ test("insertPendingState creates tracked entity with pending change", async () =
 
 	// Use insertPendingState function
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "test-insert",
-			schema_key: "lix_key_value",
-			file_id: "mock",
-			plugin_key: "mock",
-			snapshot_content: JSON.stringify({ value: "inserted-value" }),
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: false, // tracked entity
-		},
+		lix,
+		data: [
+			{
+				entity_id: "test-insert",
+				schema_key: "lix_key_value",
+				file_id: "mock",
+				plugin_key: "mock",
+				snapshot_content: JSON.stringify({ value: "inserted-value" }),
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: false, // tracked entity
+			},
+		],
 	});
 
 	const results = await lixInternalDb
@@ -53,6 +55,7 @@ test("insertPendingState creates tracked entity with pending change", async () =
 		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "test-insert")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
 	expect(cacheBeforeCommit).toBeDefined();
@@ -151,17 +154,19 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "inherited-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: null, // Deletion
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: false,
-		},
+		lix,
+		data: [
+			{
+				entity_id: "inherited-key",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: null, // Deletion
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: false,
+			},
+		],
 	});
 
 	// Verify tombstone exists in cache before commit
@@ -171,6 +176,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstoneBeforeCommit).toHaveLength(1);
@@ -196,6 +202,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstoneAfterCommit).toHaveLength(1);
@@ -244,17 +251,19 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "inherited-untracked-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: null, // Deletion
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: true,
-		},
+		lix,
+		data: [
+			{
+				entity_id: "inherited-untracked-key",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: null, // Deletion
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: true,
+			},
+		],
 	});
 
 	// Verify tombstone exists in untracked table (not cache)
@@ -264,6 +273,7 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstone).toHaveLength(1);
@@ -302,30 +312,33 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "test-untracked-timestamp",
-			schema_key: "lix_key_value",
-			file_id: "mock",
-			plugin_key: "mock",
-			snapshot_content: JSON.stringify({
-				key: "test-key",
-				value: "test-value",
-			}),
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: true,
-		},
+		lix,
+		data: [
+			{
+				entity_id: "test-untracked-timestamp",
+				schema_key: "lix_key_value",
+				file_id: "mock",
+				plugin_key: "mock",
+				snapshot_content: JSON.stringify({
+					key: "test-key",
+					value: "test-value",
+				}),
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: true,
+			},
+		],
 	});
 
 	// Check returned data has same timestamps
-	expect(result.data.created_at).toBe(result.data.updated_at);
+	expect(result[0]?.created_at).toBe(result[0]?.updated_at);
 
 	// Verify in the actual table
 	const untrackedEntity = await lixInternalDb
 		.selectFrom("internal_state_all_untracked")
 		.where("entity_id", "=", "test-untracked-timestamp")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
 	expect(untrackedEntity.created_at).toBe(untrackedEntity.updated_at);
@@ -360,20 +373,22 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 
 	// First insert a direct untracked entity
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "direct-untracked-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				key: "direct-untracked-key",
-				value: "direct-value",
-			}),
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: true,
-		},
+		lix,
+		data: [
+			{
+				entity_id: "direct-untracked-key",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "direct-untracked-key",
+					value: "direct-value",
+				}),
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: true,
+			},
+		],
 	});
 
 	// Verify it exists in untracked table
@@ -407,17 +422,19 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 
 	// Now delete the direct untracked entity
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
-		data: {
-			entity_id: "direct-untracked-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: null, // Deletion
-			schema_version: "1.0",
-			version_id: activeVersion.version_id,
-			untracked: true,
-		},
+		lix,
+		data: [
+			{
+				entity_id: "direct-untracked-key",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: null, // Deletion
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: true,
+			},
+		],
 	});
 
 	// Verify it's deleted from untracked table
@@ -426,6 +443,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(afterDelete).toHaveLength(0);
@@ -436,6 +454,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(cacheEntry).toHaveLength(0);

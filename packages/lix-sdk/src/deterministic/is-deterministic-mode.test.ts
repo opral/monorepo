@@ -94,20 +94,6 @@ test("isDeterministicMode returns false for falsy enabled values", async () => {
 	}
 });
 
-test("isDeterministicMode works with only required properties from Lix", async () => {
-	const lix = await openLix({ blob: await newLixFile() });
-
-	// Create a minimal object with only required properties
-	const minimalLix = {
-		sqlite: lix.sqlite,
-		db: lix.db,
-	};
-
-	const result = isDeterministicMode({ lix: minimalLix });
-
-	expect(result).toBe(false);
-});
-
 test("isDeterministicMode can be changed at runtime", async () => {
 	const lix = await openLix({ blob: await newLixFile() });
 

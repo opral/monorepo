@@ -104,7 +104,7 @@ export function populateStateCache(
 			m.file_id,
 			m.version_id,
 			m.plugin_key,
-			m.snapshot_content,
+			CASE WHEN m.snapshot_content IS NULL THEN NULL ELSE jsonb(m.snapshot_content) END as snapshot_content,
 			m.schema_version,
 			m.created_at,
 			m.updated_at,

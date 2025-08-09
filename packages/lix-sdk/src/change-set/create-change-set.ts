@@ -18,7 +18,7 @@ import type { NewState } from "../entity-views/types.js";
  */
 
 export async function createChangeSet(args: {
-	lix: Pick<Lix, "db" | "sqlite">;
+	lix: Pick<Lix, "db" | "sqlite" | "hooks">;
 	id?: string;
 	elements?: Omit<NewState<LixChangeSetElement>, "change_set_id">[];
 	labels?: Pick<LixLabel, "id">[];
