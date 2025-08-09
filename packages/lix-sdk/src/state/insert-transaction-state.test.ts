@@ -55,6 +55,7 @@ test("creates tracked entity with pending change", async () => {
 		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "test-insert")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
 	expect(cacheBeforeCommit).toBeDefined();
@@ -175,6 +176,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstoneBeforeCommit).toHaveLength(1);
@@ -200,6 +202,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstoneAfterCommit).toHaveLength(1);
@@ -270,6 +273,7 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(tombstone).toHaveLength(1);
@@ -334,6 +338,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		.selectFrom("internal_state_all_untracked")
 		.where("entity_id", "=", "test-untracked-timestamp")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
 	expect(untrackedEntity.created_at).toBe(untrackedEntity.updated_at);
@@ -438,6 +443,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(afterDelete).toHaveLength(0);
@@ -448,6 +454,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	expect(cacheEntry).toHaveLength(0);

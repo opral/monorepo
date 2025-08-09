@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import type { InternalStateCacheRow } from "./schema.js";
@@ -49,6 +49,7 @@ test("inserts into cache based on change", async () => {
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testChange.entity_id)
 		.where("schema_key", "=", testChange.schema_key)
 		.where("file_id", "=", testChange.file_id)
@@ -118,6 +119,7 @@ test("upserts cache entry on conflict", async () => {
 	const initialEntries = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", initialChange.entity_id)
 		.where("schema_key", "=", initialChange.schema_key)
 		.where("file_id", "=", initialChange.file_id)
@@ -160,6 +162,7 @@ test("upserts cache entry on conflict", async () => {
 	const finalEntries = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", updatedChange.entity_id)
 		.where("schema_key", "=", updatedChange.schema_key)
 		.where("file_id", "=", updatedChange.file_id)
@@ -241,6 +244,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	const initialCache = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.execute();
 
@@ -271,6 +275,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	const cacheAfterParentDelete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.orderBy("version_id", "asc")
 		.execute();
@@ -312,6 +317,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	const cacheAfterChild1Delete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.execute();
 
@@ -346,6 +352,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	const finalCache = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.execute();
 
@@ -407,6 +414,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const parentCache = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "parent-version")
 		.execute();
@@ -441,6 +449,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const parentCacheAfterDelete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "parent-version")
 		.execute();
@@ -455,6 +464,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const childCacheAfterDelete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "child-version")
 		.execute();
@@ -467,6 +477,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const subchildCacheAfterDelete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "subchild-version")
 		.execute();

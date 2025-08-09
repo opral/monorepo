@@ -39,16 +39,10 @@ import { updateStateCache } from "./cache/update-state-cache.js";
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
-	const commitFuncStartTime = performance.now();
-	console.log(`commit() START`);
 	
 	// Create a single timestamp for the entire transaction
-	const timestampStart = performance.now();
 	const transactionTimestamp = timestamp({ lix: args.lix });
-	const timestampTime = performance.now() - timestampStart;
-	console.log(`  timestamp: ${timestampTime.toFixed(3)}ms`);
 
-	const queryChangesStart = performance.now();
 	const transactionChanges = executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -66,8 +60,6 @@ export function commit(args: {
 			])
 			.orderBy("version_id"),
 	});
-	const queryChangesTime = performance.now() - queryChangesStart;
-	console.log(`  queryTransactionChanges: ${queryChangesTime.toFixed(3)}ms, found: ${transactionChanges.length}`);
 
 	// Group changes by version_id
 	const changesByVersion = new Map<string, typeof transactionChanges>();
@@ -187,15 +179,12 @@ export function commit(args: {
 	}
 
 	// Clear the transaction table after committing
-	const cleanupStart = performance.now();
 	executeSync({
 		lix: args.lix,
 		query: (
 			args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		).deleteFrom("internal_change_in_transaction"),
 	});
-	const cleanupTime = performance.now() - cleanupStart;
-	console.log(`  cleanup: ${cleanupTime.toFixed(3)}ms`);
 
 	// Update cache entries with the commit id only for entities that were changed
 	for (const [version_id, commitId] of commitIdsByVersion) {
@@ -227,23 +216,15 @@ export function commit(args: {
 		}
 	}
 
-	const sequenceStart = performance.now();
 	commitDeterministicSequenceNumber({
 		lix: args.lix,
 		timestamp: transactionTimestamp,
 	});
-	const sequenceTime = performance.now() - sequenceStart;
-	console.log(`  commitDeterministicSequence: ${sequenceTime.toFixed(3)}ms`);
 
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes
-	const hooksStart = performance.now();
 	args.lix.hooks._emit("state_commit", { changes: allChangesToRealize });
-	const hooksTime = performance.now() - hooksStart;
-	console.log(`  hooks: ${hooksTime.toFixed(3)}ms`);
 	
-	const commitFuncTime = performance.now() - commitFuncStartTime;
-	console.log(`commit() COMPLETE: ${commitFuncTime.toFixed(3)}ms total`);
 	
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }
@@ -285,11 +266,8 @@ function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): string {
-	const createChangesetStartTime = performance.now();
-	console.log(`    createChangeset START for version_id: ${version_id}`);
 
 	// Get the version record from resolved state view
-	const versionQueryStart = performance.now();
 	const versionRows = executeSync({
 		lix: { sqlite },
 		query: db
@@ -299,8 +277,6 @@ function createChangesetForTransaction(
 			.select("snapshot_content")
 			.limit(1),
 	});
-	const versionQueryTime = performance.now() - versionQueryStart;
-	console.log(`      versionQuery: ${versionQueryTime.toFixed(3)}ms`);
 
 	if (versionRows.length === 0 || !versionRows[0]?.snapshot_content) {
 		throw new Error(`Version with id '${version_id}' not found.`);
@@ -321,7 +297,6 @@ function createChangesetForTransaction(
 	});
 
 	// Batch create all core entities (changeset, commit, edge, version) in one call
-	const coreEntitiesBatchStart = performance.now();
 	const coreEntitiesData = [
 		{
 			entity_id: nextChangeSetId,
@@ -387,8 +362,6 @@ function createChangesetForTransaction(
 		data: coreEntitiesData,
 		createChangeAuthors: false,
 	});
-	const coreEntitiesBatchTime = performance.now() - coreEntitiesBatchStart;
-	console.log(`      coreEntitiesBatch: ${coreEntitiesBatchTime.toFixed(3)}ms`);
 
 	// Create changeset elements for all changes
 	const changesToProcess = [
@@ -400,10 +373,6 @@ function createChangesetForTransaction(
 	];
 
 	// Batch create all changeset elements in one call (instead of N+1 individual inserts)
-	const changesetElementsBatchStart = performance.now();
-	console.log(
-		`      changesetElementsBatch START: processing ${changesToProcess.length} changes`
-	);
 	
 	const changesetElementsData = changesToProcess.map((change) => {
 		// Get the change ID - it may be 'id' for original changes or 'change_id' for results from insertTransactionState
@@ -435,15 +404,9 @@ function createChangesetForTransaction(
 		});
 	}
 	
-	const changesetElementsBatchTime =
-		performance.now() - changesetElementsBatchStart;
-	console.log(
-		`      changesetElementsBatch COMPLETE: ${changesetElementsBatchTime.toFixed(3)}ms`
-	);
 
 	// Create/update working change set element for user data changes
 	// Get the working commit and its change set
-	const workingCommitQueryStart = performance.now();
 	const workingCommit = executeSync({
 		lix: { sqlite },
 		query: db
@@ -451,10 +414,6 @@ function createChangesetForTransaction(
 			.where("id", "=", mutatedVersion.working_commit_id)
 			.selectAll(),
 	});
-	const workingCommitQueryTime = performance.now() - workingCommitQueryStart;
-	console.log(
-		`      workingCommitQuery: ${workingCommitQueryTime.toFixed(3)}ms`
-	);
 
 	if (workingCommit.length === 0) {
 		throw new Error(
@@ -466,10 +425,6 @@ function createChangesetForTransaction(
 
 	// TODO skipping lix internal entities is likely undesired.
 	// Skip lix internal entities (change sets, edges, etc.)
-	const deletionReconciliationStart = performance.now();
-	console.log(
-		`      deletionReconciliation START: processing ${changes.length} user changes`
-	);
 	
 	// Filter out lix internal entities
 	const userChanges = changes.filter(
@@ -503,7 +458,6 @@ function createChangesetForTransaction(
 		const entitiesAtCheckpoint = new Set<string>();
 		if (deletions.length > 0) {
 			// Get the checkpoint commit ID once
-			const checkpointStart = performance.now();
 			const checkpointCommitResult = executeSync({
 				lix: { sqlite },
 				query: db
@@ -556,14 +510,9 @@ function createChangesetForTransaction(
 					);
 				}
 			}
-			const checkpointTime = performance.now() - checkpointStart;
-			console.log(
-				`        checkpointCheck: ${checkpointTime.toFixed(3)}ms, deletions: ${deletions.length}, found: ${entitiesAtCheckpoint.size}`
-			);
 		}
 
 		// Step 2: Batch find all existing working change set elements to delete
-		const findExistingStart = performance.now();
 		const existingEntities = executeSync({
 			lix: { sqlite },
 			query: db
@@ -602,21 +551,11 @@ function createChangesetForTransaction(
 					)
 				),
 		});
-		const findExistingTime = performance.now() - findExistingStart;
-		console.log(
-			`        findExistingElements: ${findExistingTime.toFixed(3)}ms, found: ${existingEntities.length}`
-		);
 
 		// Step 3: Delete all existing working change set elements at once
-		console.log(
-			`        deletingElements: ${existingEntities.length} elements`
-		);
-		const deleteStart = performance.now();
 		for (const existing of existingEntities) {
 			handleStateDelete(sqlite, existing._pk, db);
 		}
-		const deleteTime = performance.now() - deleteStart;
-		console.log(`        deleteElements: ${deleteTime.toFixed(3)}ms`);
 
 		// Step 4: Batch create new working change set elements
 		const newWorkingElements: Parameters<typeof insertTransactionState>[0]["data"] = [];
@@ -674,15 +613,6 @@ function createChangesetForTransaction(
 		}
 	}
 	
-	const deletionReconciliationTime =
-		performance.now() - deletionReconciliationStart;
-	console.log(
-		`      deletionReconciliation COMPLETE: ${deletionReconciliationTime.toFixed(3)}ms`
-	);
 
-	const createChangesetTime = performance.now() - createChangesetStartTime;
-	console.log(
-		`    createChangeset COMPLETE: ${createChangesetTime.toFixed(3)}ms, returning commitId: ${nextCommitId}`
-	);
 	return nextCommitId;
 }

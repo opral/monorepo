@@ -1259,6 +1259,7 @@ simulationTest(
 			.where("file_id", "=", "write-through-file")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
 			.executeTakeFirst();
 
 		expect(cacheEntry).toBeDefined();
@@ -1340,6 +1341,7 @@ simulationTest(
 			.where("file_id", "=", "update-cache-file")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
 			.executeTakeFirst();
 
 		expect(cacheEntry).toBeDefined();

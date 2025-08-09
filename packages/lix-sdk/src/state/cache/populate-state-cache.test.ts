@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { clearStateCache } from "./clear-state-cache.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { createVersion } from "../../version/create-version.js";
 
@@ -39,6 +39,7 @@ test("should populate cache for a specific version_id", async () => {
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.execute();
@@ -137,6 +138,7 @@ test("should implement copy-on-write semantics by only caching direct entries", 
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.execute();
@@ -154,6 +156,7 @@ test("should implement copy-on-write semantics by only caching direct entries", 
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.execute();
@@ -167,6 +170,7 @@ test("should implement copy-on-write semantics by only caching direct entries", 
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.execute();
 
 	for (const entry of allCacheEntries) {
@@ -217,6 +221,7 @@ test("should cache tombstones (delete markers) when they are direct entries", as
 	)
 		.selectFrom("internal_state_cache")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "to-be-deleted")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", "feature-version")

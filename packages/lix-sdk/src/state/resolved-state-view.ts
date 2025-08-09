@@ -68,7 +68,7 @@ export function applyResolvedStateView(args: {
 				schema_key, 
 				file_id, 
 				plugin_key, 
-				snapshot_content, 
+				json(snapshot_content) as snapshot_content, 
 				schema_version, 
 				version_id,
 				created_at, 
@@ -97,7 +97,7 @@ export function applyResolvedStateView(args: {
 				isc.schema_key, 
 				isc.file_id, 
 				isc.plugin_key, 
-				isc.snapshot_content, 
+				json(isc.snapshot_content) as snapshot_content, 
 				isc.schema_version, 
 				vi.version_id, -- Return child version_id
 				isc.created_at, 

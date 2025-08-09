@@ -199,7 +199,9 @@ export function insertTransactionState(args: {
 			schema_key: data.schema_key,
 			file_id: data.file_id,
 			plugin_key: data.plugin_key,
-			snapshot_content: data.snapshot_content,
+			snapshot_content: data.snapshot_content
+				? sql`jsonb(${data.snapshot_content})`
+				: null,
 			schema_version: data.schema_version,
 			version_id: data.version_id,
 			change_id: data.change_id,
@@ -215,7 +217,7 @@ export function insertTransactionState(args: {
 			lix: args.lix,
 			query: args.lix.db
 				.insertInto("internal_state_cache")
-				.values(cacheRows)
+				.values(cacheRows as any)
 				.onConflict((oc) =>
 					oc
 						.columns(["entity_id", "schema_key", "file_id", "version_id"])

@@ -159,19 +159,7 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
-				const xCommitStartTime = performance.now();
-				console.log(`xCommit START`);
-
-				try {
-					const result = commit({ lix: { sqlite, db: db as any, hooks } });
-					const xCommitTime = performance.now() - xCommitStartTime;
-					console.log(`xCommit COMPLETE: ${xCommitTime.toFixed(3)}ms`);
-					return result;
-				} catch (error) {
-					const xCommitTime = performance.now() - xCommitStartTime;
-					console.log(`xCommit ERROR: ${xCommitTime.toFixed(3)}ms`);
-					throw error;
-				}
+				return commit({ lix: { sqlite, db: db as any, hooks } });
 			},
 
 			xRollback: () => {
@@ -182,8 +170,6 @@ export function applyStateDatabaseSchema(
 			},
 
 			xBestIndex: (pVTab: any, pIdxInfo: any) => {
-				const xBestIndexStartTime = performance.now();
-
 				try {
 					const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
 
@@ -261,19 +247,9 @@ export function applyStateDatabaseSchema(
 						idxInfo.$estimatedRows = fullTableRows;
 					}
 
-					const xBestIndexTime = performance.now() - xBestIndexStartTime;
-					console.log(
-						`xBestIndex: ${xBestIndexTime.toFixed(3)}ms, constraints: ${usableConstraints.length}`
-					);
-
 					return capi.SQLITE_OK;
 				} finally {
 					// Always log timing even if error occurs
-					const xBestIndexTime = performance.now() - xBestIndexStartTime;
-					if (xBestIndexTime > 1) {
-						// Only log if > 1ms
-						console.log(`xBestIndex (slow): ${xBestIndexTime.toFixed(3)}ms`);
-					}
 				}
 			},
 
@@ -306,8 +282,6 @@ export function applyStateDatabaseSchema(
 				argc: number,
 				argv: any
 			) => {
-				const xFilterStartTime = performance.now();
-
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
@@ -429,11 +403,6 @@ export function applyStateDatabaseSchema(
 						cursorState.results = newResults || [];
 					}
 
-					const xFilterTime = performance.now() - xFilterStartTime;
-					console.log(
-						`xFilter: ${xFilterTime.toFixed(3)}ms, filters: ${Object.keys(filters).length}, results: ${cursorState.results.length}`
-					);
-
 					return capi.SQLITE_OK;
 				} finally {
 					// Always decrement recursion depth
@@ -519,17 +488,9 @@ export function applyStateDatabaseSchema(
 			},
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
-				const xUpdateStartTime = performance.now();
-				console.log(
-					`xUpdate START: operation type=${nArg === 1 ? "DELETE" : "INSERT/UPDATE"}`
-				);
-
 				try {
 					// Extract arguments using the proper SQLite WASM API
-					const argExtractStart = performance.now();
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
-					const argExtractTime = performance.now() - argExtractStart;
-					console.log(`  argExtract: ${argExtractTime.toFixed(3)}ms`);
 
 					// DELETE operation: nArg = 1, args[0] = old primary key
 					if (nArg === 1) {
@@ -578,7 +539,6 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const validationStart = performance.now();
 					const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 					validateStateMutation({
@@ -590,11 +550,8 @@ export function applyStateDatabaseSchema(
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
 					});
-					const validationTime = performance.now() - validationStart;
-					console.log(`  validation: ${validationTime.toFixed(3)}ms`);
 
 					// Use insertTransactionState which handles both tracked and untracked entities
-					const insertStart = performance.now();
 					insertTransactionState({
 						lix: { sqlite, db },
 						data: [
@@ -610,15 +567,12 @@ export function applyStateDatabaseSchema(
 							},
 						],
 					});
-					const insertTime = performance.now() - insertStart;
-					console.log(`  insertTransactionState: ${insertTime.toFixed(3)}ms`);
 
 					// TODO: This cache copying logic is a temporary workaround for shared commits.
 					// The proper solution requires improving cache miss logic to handle commit sharing
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
 					// Handle cache copying for new versions that share commits
-					const cacheCopyStart = performance.now();
 					if (isInsert && String(schema_key) === "lix_version") {
 						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
@@ -667,14 +621,6 @@ export function applyStateDatabaseSchema(
 							}
 						}
 					}
-					const cacheCopyTime = performance.now() - cacheCopyStart;
-					if (cacheCopyTime > 0.1) {
-						console.log(`  cacheCopy: ${cacheCopyTime.toFixed(3)}ms`);
-					}
-
-					const xUpdateTime = performance.now() - xUpdateStartTime;
-					console.log(`xUpdate COMPLETE: ${xUpdateTime.toFixed(3)}ms total`);
-
 					return capi.SQLITE_OK;
 				} catch (error) {
 					const errorMessage =

@@ -3,23 +3,16 @@ import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 
 bench(
-	"select all entities from single version",
+	"select entities from single version",
 	async () => {
 		const lix = await openLix({});
 
-		// Create a version with test data
-		const version = await createVersion({
-			lix,
-			id: "bench_version_1",
-			name: "Benchmark Version 1",
-		});
-
-		for (let i = 0; i < 10; i++) {
-			await lix.db
-				.insertInto("state_all")
-				.values({
+		await lix.db
+			.insertInto("state_all")
+			.values(
+				Array.from({ length: 100 }, (_, i) => ({
 					entity_id: `entity_${i}`,
-					version_id: version.id,
+					version_id: "global",
 					snapshot_content: {
 						id: `entity_${i}`,
 						value: `test_data_${i}`,
@@ -29,14 +22,14 @@ bench(
 					file_id: `mock_file`,
 					plugin_key: "benchmark_plugin",
 					schema_version: "1.0",
-				})
-				.execute();
-		}
+				}))
+			)
+			.execute();
 
 		// Benchmark: Select all entities from this version
 		await lix.db
 			.selectFrom("state_all")
-			.where("version_id", "=", version.id)
+			.where("version_id", "=", "global")
 			.selectAll()
 			.execute();
 	},
@@ -55,10 +48,10 @@ bench(
 			name: "Benchmark Version 2",
 		});
 
-		for (let i = 0; i < 10; i++) {
-			await lix.db
-				.insertInto("state_all")
-				.values({
+		await lix.db
+			.insertInto("state_all")
+			.values(
+				Array.from({ length: 10 }, (_, i) => ({
 					entity_id: `entity_${i}`,
 					version_id: version.id,
 					snapshot_content: {
@@ -70,9 +63,9 @@ bench(
 					file_id: `mock_file`,
 					plugin_key: "benchmark_plugin",
 					schema_version: "1.0",
-				})
-				.execute();
-		}
+				}))
+			)
+			.execute();
 
 		// First run EXPLAIN QUERY PLAN to understand how SQLite executes this query
 		const explainResult = lix.sqlite.exec({
@@ -91,7 +84,7 @@ bench(
 		// Benchmark: Select directly from internal_resolved_state_all (bypasses vtable)
 		const start = Date.now();
 		const results = await lix.db
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_resolved_state_all" as any)
 			.where("version_id", "=", version.id)
 			.selectAll()
 			.execute();
