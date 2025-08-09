@@ -37,7 +37,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 
 	// 2. Insert transaction state
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "test-entity-1",
@@ -56,7 +56,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "test-entity-2",
@@ -229,7 +229,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create change sets for versions
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionAChangeSetId,
@@ -247,7 +247,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionAWorkingChangeSetId,
@@ -265,7 +265,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionBChangeSetId,
@@ -283,7 +283,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionBWorkingChangeSetId,
@@ -302,7 +302,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version A
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionACommitId,
@@ -321,7 +321,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionAWorkingCommitId,
@@ -341,7 +341,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version A
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionAId,
@@ -363,7 +363,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version B
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionBCommitId,
@@ -382,7 +382,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionBWorkingCommitId,
@@ -402,7 +402,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version B
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: versionBId,
@@ -424,7 +424,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version A
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "version-a-entity",
@@ -444,7 +444,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version B
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "version-b-entity",
@@ -827,7 +827,7 @@ test("global version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "test-global-entity",
@@ -917,7 +917,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "test-edge-entity",
@@ -1062,7 +1062,7 @@ test("active version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: "test-active-entity",

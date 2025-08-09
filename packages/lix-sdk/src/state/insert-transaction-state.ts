@@ -64,7 +64,7 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
  * });
  */
 export function insertTransactionState(args: {
-	lix: { sqlite: Lix["sqlite"]; db: Kysely<LixInternalDatabaseSchema> };
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	data: NewTransactionStateRow[];
 	timestamp?: string;
 	createChangeAuthors?: boolean;
@@ -128,7 +128,7 @@ export function insertTransactionState(args: {
 		if (dataWithChangeIds.length > 0) {
 			executeSync({
 				lix: args.lix,
-				query: args.lix.db
+				query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 					.deleteFrom("internal_state_all_untracked")
 					.where((eb) =>
 						eb.or(
@@ -162,7 +162,7 @@ export function insertTransactionState(args: {
 
 		executeSync({
 			lix: args.lix,
-			query: args.lix.db
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.insertInto("internal_change_in_transaction")
 				.values(transactionRows)
 				.onConflict((oc) =>
@@ -199,7 +199,7 @@ export function insertTransactionState(args: {
 
 		executeSync({
 			lix: args.lix,
-			query: args.lix.db
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.insertInto("internal_state_cache")
 				.values(cacheRows as any)
 				.onConflict((oc) =>
@@ -227,7 +227,7 @@ export function insertTransactionState(args: {
 			// Step 1: Get all active accounts once
 			const activeAccounts = executeSync({
 				lix: args.lix,
-				query: args.lix.db
+				query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 					.selectFrom("internal_resolved_state_all")
 					.where("schema_key", "=", "lix_active_account")
 					.where("version_id", "=", "global")
@@ -237,21 +237,29 @@ export function insertTransactionState(args: {
 			if (activeAccounts && activeAccounts.length > 0) {
 				// Extract all account IDs
 				const accountIds = activeAccounts.map(
-					(acc) => JSON.parse(acc.snapshot_content as string).account_id as string
+					(acc) =>
+						JSON.parse(acc.snapshot_content as string).account_id as string
 				);
 
 				// Get all unique version IDs we need to check
-				const uniqueVersionIds = [...new Set(dataWithChangeIds.map((d) => d.version_id))];
+				const uniqueVersionIds = [
+					...new Set(dataWithChangeIds.map((d) => d.version_id)),
+				];
 
 				// Step 2: Batch query to check account states across all versions
 				const accountStates = executeSync({
 					lix: args.lix,
-					query: args.lix.db
+					query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 						.selectFrom("internal_resolved_state_all")
 						.where("entity_id", "in", accountIds)
 						.where("schema_key", "=", "lix_account")
 						.where("version_id", "in", uniqueVersionIds)
-						.select(["entity_id", "version_id", "snapshot_content", "untracked"]),
+						.select([
+							"entity_id",
+							"version_id",
+							"snapshot_content",
+							"untracked",
+						]),
 				});
 
 				// Create a Map for quick lookups: "accountId:versionId" -> state
@@ -277,11 +285,13 @@ export function insertTransactionState(args: {
 
 				// Step 4: Batch fetch missing accounts from global version if needed
 				if (accountsToImport.length > 0) {
-					const uniqueAccountIds = [...new Set(accountsToImport.map((a) => a.accountId))];
-					
+					const uniqueAccountIds = [
+						...new Set(accountsToImport.map((a) => a.accountId)),
+					];
+
 					const globalAccounts = executeSync({
 						lix: args.lix,
-						query: args.lix.db
+						query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 							.selectFrom("internal_resolved_state_all")
 							.where("entity_id", "in", uniqueAccountIds)
 							.where("schema_key", "=", "lix_account")
@@ -372,4 +382,3 @@ export function insertTransactionState(args: {
 
 	return results;
 }
-

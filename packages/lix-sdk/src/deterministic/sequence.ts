@@ -56,7 +56,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
 export function nextDeterministicSequenceNumber(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
 	// Check if deterministic mode is enabled
 	if (!isDeterministicMode({ lix: args.lix })) {
@@ -102,7 +102,7 @@ export function nextDeterministicSequenceNumber(args: {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitDeterministicSequenceNumber(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	const state = counterCache.get(args.lix.sqlite);

@@ -1,5 +1,4 @@
 import { type Kysely, sql } from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import {
 	type LixChangeSet,
 	type LixChangeSetElement,
@@ -7,10 +6,7 @@ import {
 	LixChangeSetSchema,
 } from "../change-set/schema.js";
 import { executeSync } from "../database/execute-sync.js";
-import type {
-	LixDatabaseSchema,
-	LixInternalDatabaseSchema,
-} from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { nanoId } from "../deterministic/index.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
@@ -39,7 +35,6 @@ import { updateStateCache } from "./cache/update-state-cache.js";
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
-	
 	// Create a single timestamp for the entire transaction
 	const transactionTimestamp = timestamp({ lix: args.lix });
 
@@ -78,8 +73,7 @@ export function commit(args: {
 		if (version_id !== "global") {
 			// Create changeset, commit and edges for this version's transaction
 			const commitId = createChangesetForTransaction(
-				args.lix.sqlite,
-				args.lix.db as any,
+				args.lix,
 				transactionTimestamp,
 				version_id,
 				versionChanges
@@ -113,8 +107,7 @@ export function commit(args: {
 
 		if (globalChanges.length > 0) {
 			const globalCommitId = createChangesetForTransaction(
-				args.lix.sqlite,
-				args.lix.db as any,
+				args.lix,
 				transactionTimestamp,
 				"global",
 				globalChanges
@@ -224,8 +217,7 @@ export function commit(args: {
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes
 	args.lix.hooks._emit("state_commit", { changes: allChangesToRealize });
-	
-	
+
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }
 
@@ -247,8 +239,7 @@ export function commit(args: {
  * @returns The ID of the newly created commit
  */
 function createChangesetForTransaction(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>,
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
 	_currentTime: string,
 	version_id: string,
 	changes: Pick<
@@ -266,10 +257,11 @@ function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): string {
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Get the version record from resolved state view
 	const versionRows = executeSync({
-		lix: { sqlite },
+		lix: lix,
 		query: db
 			.selectFrom("internal_resolved_state_all")
 			.where("schema_key", "=", "lix_version")
@@ -284,7 +276,7 @@ function createChangesetForTransaction(
 
 	const mutatedVersion = JSON.parse(versionRows[0].snapshot_content) as any;
 	const nextChangeSetId = nanoId({
-		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+		lix,
 	});
 
 	// TODO: Don't create change author for the changeset itself.
@@ -293,7 +285,7 @@ function createChangesetForTransaction(
 
 	// Create a new commit that points to the new change set
 	const nextCommitId = uuidV7({
-		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+		lix,
 	});
 
 	// Batch create all core entities (changeset, commit, edge, version) in one call
@@ -352,16 +344,12 @@ function createChangesetForTransaction(
 		},
 	];
 
-	const [
-		changeSetChange,
-		commitChange,
-		commitEdgeChange,
-		versionChange,
-	] = insertTransactionState({
-		lix: { sqlite, db },
-		data: coreEntitiesData,
-		createChangeAuthors: false,
-	});
+	const [changeSetChange, commitChange, commitEdgeChange, versionChange] =
+		insertTransactionState({
+			lix,
+			data: coreEntitiesData,
+			createChangeAuthors: false,
+		});
 
 	// Create changeset elements for all changes
 	const changesToProcess = [
@@ -373,11 +361,11 @@ function createChangesetForTransaction(
 	];
 
 	// Batch create all changeset elements in one call (instead of N+1 individual inserts)
-	
+
 	const changesetElementsData = changesToProcess.map((change) => {
 		// Get the change ID - it may be 'id' for original changes or 'change_id' for results from insertTransactionState
 		const changeId = "change_id" in change ? change.change_id : change.id;
-		
+
 		return {
 			entity_id: `${nextChangeSetId}::${changeId}`,
 			schema_key: "lix_change_set_element",
@@ -398,17 +386,16 @@ function createChangesetForTransaction(
 
 	if (changesetElementsData.length > 0) {
 		insertTransactionState({
-			lix: { sqlite, db },
+			lix,
 			data: changesetElementsData,
 			createChangeAuthors: false,
 		});
 	}
-	
 
 	// Create/update working change set element for user data changes
 	// Get the working commit and its change set
 	const workingCommit = executeSync({
-		lix: { sqlite },
+		lix,
 		query: db
 			.selectFrom("commit")
 			.where("id", "=", mutatedVersion.working_commit_id)
@@ -425,7 +412,7 @@ function createChangesetForTransaction(
 
 	// TODO skipping lix internal entities is likely undesired.
 	// Skip lix internal entities (change sets, edges, etc.)
-	
+
 	// Filter out lix internal entities
 	const userChanges = changes.filter(
 		(change) =>
@@ -439,14 +426,14 @@ function createChangesetForTransaction(
 		// Separate changes into deletions and non-deletions
 		const deletions: typeof userChanges = [];
 		const nonDeletions: typeof userChanges = [];
-		
+
 		for (const change of userChanges) {
 			const parsedSnapshot = change.snapshot_content
 				? JSON.parse(change.snapshot_content)
 				: null;
 			const isDeletion =
 				!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
-			
+
 			if (isDeletion) {
 				deletions.push(change);
 			} else {
@@ -459,7 +446,7 @@ function createChangesetForTransaction(
 		if (deletions.length > 0) {
 			// Get the checkpoint commit ID once
 			const checkpointCommitResult = executeSync({
-				lix: { sqlite },
+				lix,
 				query: db
 					.selectFrom("commit")
 					.innerJoin("entity_label", (join) =>
@@ -478,13 +465,13 @@ function createChangesetForTransaction(
 					.select("commit.id")
 					.limit(1),
 			});
-			
+
 			const checkpointCommitId = checkpointCommitResult[0]?.id;
-			
+
 			if (checkpointCommitId) {
 				// Batch check all deletion entities at checkpoint
 				const checkpointEntities = executeSync({
-					lix: { sqlite },
+					lix,
 					query: db
 						.selectFrom("state_history")
 						.where("depth", "=", 0)
@@ -502,7 +489,7 @@ function createChangesetForTransaction(
 						)
 						.select(["entity_id", "schema_key", "file_id"]),
 				});
-				
+
 				// Build a set for quick lookup
 				for (const entity of checkpointEntities) {
 					entitiesAtCheckpoint.add(
@@ -514,7 +501,7 @@ function createChangesetForTransaction(
 
 		// Step 2: Batch find all existing working change set elements to delete
 		const existingEntities = executeSync({
-			lix: { sqlite },
+			lix,
 			query: db
 				.selectFrom("internal_resolved_state_all")
 				.select([
@@ -554,12 +541,14 @@ function createChangesetForTransaction(
 
 		// Step 3: Delete all existing working change set elements at once
 		for (const existing of existingEntities) {
-			handleStateDelete(sqlite, existing._pk, db);
+			handleStateDelete(lix, existing._pk);
 		}
 
 		// Step 4: Batch create new working change set elements
-		const newWorkingElements: Parameters<typeof insertTransactionState>[0]["data"] = [];
-		
+		const newWorkingElements: Parameters<
+			typeof insertTransactionState
+		>[0]["data"] = [];
+
 		// Add deletions that existed at checkpoint
 		for (const deletion of deletions) {
 			const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
@@ -582,7 +571,7 @@ function createChangesetForTransaction(
 				});
 			}
 		}
-		
+
 		// Add all non-deletions
 		for (const change of nonDeletions) {
 			newWorkingElements.push({
@@ -602,17 +591,16 @@ function createChangesetForTransaction(
 				untracked: false,
 			});
 		}
-		
+
 		// Batch insert all new working elements
 		if (newWorkingElements.length > 0) {
 			insertTransactionState({
-				lix: { sqlite, db },
+				lix,
 				data: newWorkingElements,
 				createChangeAuthors: false,
 			});
 		}
 	}
-	
 
 	return nextCommitId;
 }

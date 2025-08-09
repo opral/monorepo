@@ -1,17 +1,17 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import type { Lix } from "../index.js";
 
 export function applyStoredSchemaDatabaseSchema(
-	sqlite: SqliteWasmDatabase
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	// Create both primary and _all views for stored_schema with validation
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixStoredSchemaSchema,
 		overrideName: "stored_schema",
 		pluginKey: "lix_own_entity",

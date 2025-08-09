@@ -5,7 +5,6 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
@@ -19,6 +18,7 @@ import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
 import { populateStateCache } from "./cache/populate-state-cache.js";
+import type { Lix } from "../lix/open-lix.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -40,14 +40,15 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 ) WITHOUT ROWID;`;
 
 export function applyStateDatabaseSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>,
-	hooks: LixHooks
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
-	applyMaterializeStateSchema(sqlite);
-	applyStateCacheSchema({ sqlite });
-	applyUntrackedStateSchema({ sqlite });
-	applyResolvedStateView({ sqlite, db });
+	const { sqlite, hooks } = lix;
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	applyMaterializeStateSchema(lix);
+	applyStateCacheSchema(lix);
+	applyUntrackedStateSchema(lix);
+	applyResolvedStateView(lix);
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -382,7 +383,7 @@ export function applyStateDatabaseSchema(
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;
 						try {
-							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
+							markStateCacheAsFresh({ lix: { sqlite, db: db as any, hooks } });
 						} finally {
 							isUpdatingCacheState = false;
 						}
@@ -500,7 +501,7 @@ export function applyStateDatabaseSchema(
 						}
 
 						// Use handleStateDelete for all cases - it handles both tracked and untracked
-						handleStateDelete(sqlite, oldPk, db);
+						handleStateDelete(lix as any, oldPk);
 
 						return capi.SQLITE_OK;
 					}
@@ -539,10 +540,10 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(sqlite, db, schema_key);
+					const storedSchema = getStoredSchema(lix as any, schema_key);
 
 					validateStateMutation({
-						lix: { sqlite, db: db as any },
+						lix: lix as any,
 						schema: storedSchema ? JSON.parse(storedSchema) : null,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
@@ -553,7 +554,7 @@ export function applyStateDatabaseSchema(
 
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
-						lix: { sqlite, db },
+						lix: lix as any,
 						data: [
 							{
 								entity_id: String(entity_id),
@@ -812,14 +813,13 @@ export function applyStateDatabaseSchema(
 }
 
 export function handleStateDelete(
-	sqlite: SqliteWasmDatabase,
-	primaryKey: string,
-	db: Kysely<LixInternalDatabaseSchema>
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
+	primaryKey: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
-		lix: { sqlite },
-		query: db
+		lix,
+		query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select([
 				"entity_id",
@@ -856,7 +856,7 @@ export function handleStateDelete(
 		if (parsed.tag === "UI") {
 			// For inherited untracked, create a tombstone to block inheritance
 			insertTransactionState({
-				lix: { sqlite, db },
+				lix,
 				data: [
 					{
 						entity_id: String(entity_id),
@@ -873,8 +873,8 @@ export function handleStateDelete(
 		} else {
 			// For direct untracked (U tag), just delete from untracked table
 			executeSync({
-				lix: { sqlite },
-				query: db
+				lix,
+				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 					.deleteFrom("internal_state_all_untracked")
 					.where("entity_id", "=", String(entity_id))
 					.where("schema_key", "=", String(schema_key))
@@ -885,10 +885,10 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(sqlite, db, schema_key);
+	const storedSchema = getStoredSchema(lix, schema_key);
 
 	validateStateMutation({
-		lix: { sqlite, db: db as any },
+		lix,
 		schema: storedSchema ? JSON.parse(storedSchema) : null,
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
@@ -897,7 +897,7 @@ export function handleStateDelete(
 	});
 
 	insertTransactionState({
-		lix: { sqlite, db },
+		lix,
 		data: [
 			{
 				entity_id: String(entity_id),
@@ -916,14 +916,13 @@ export function handleStateDelete(
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>,
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
 	schemaKey: any
 ): string | null {
 	// Query directly from internal_resolved_state_all to avoid vtable recursion
 	const result = executeSync({
-		lix: { sqlite },
-		query: db
+		lix,
+		query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")

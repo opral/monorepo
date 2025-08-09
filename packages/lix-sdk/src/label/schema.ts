@@ -7,7 +7,7 @@ import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyLabelDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	createEntityViewsIfNotExists({
 		lix,

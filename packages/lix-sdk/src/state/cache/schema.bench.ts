@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { Kysely, sql } from "kysely";

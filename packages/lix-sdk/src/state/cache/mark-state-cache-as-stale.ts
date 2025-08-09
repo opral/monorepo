@@ -6,7 +6,7 @@ import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
 export function markStateCacheAsStale(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "true" in untracked state
@@ -28,7 +28,7 @@ export function markStateCacheAsStale(args: {
 }
 
 export function markStateCacheAsFresh(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "false" in untracked state

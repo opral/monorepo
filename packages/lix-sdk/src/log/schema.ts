@@ -6,7 +6,9 @@ import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builde
 import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
-export function applyLogDatabaseSchema(lix: Pick<Lix, "sqlite" | "db">): void {
+export function applyLogDatabaseSchema(
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
+): void {
 	// Create both primary and _all views for log
 	createEntityViewsIfNotExists({
 		lix,

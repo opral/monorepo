@@ -254,8 +254,10 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterministicSequenceNumber({ lix: { sqlite: database, db } });
-			commitDeterministicRngState({ lix: { sqlite: database, db } });
+			commitDeterministicSequenceNumber({
+				lix: { sqlite: database, db, hooks },
+			});
+			commitDeterministicRngState({ lix: { sqlite: database, db, hooks } });
 			return storage.export();
 		},
 	};

@@ -14,7 +14,7 @@ const hookListenersRegistered = new WeakSet<any>();
  *
  * Returns true if the enabled property in the JSON object is true.
  * Returns false for any other value or if the key doesn't exist.
- * 
+ *
  * Results are cached per lix instance to avoid repeated database queries.
  * Cache is automatically invalidated when lix_deterministic_mode changes.
  *

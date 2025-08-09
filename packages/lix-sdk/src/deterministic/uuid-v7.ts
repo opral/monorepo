@@ -50,7 +50,9 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns UUID v7 string
  */
-export function uuidV7(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
+export function uuidV7(args: {
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+}): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Check if uuid_v7 is disabled in the config

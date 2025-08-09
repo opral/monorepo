@@ -1,32 +1,29 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoId } from "../deterministic/index.js";
-import type { LixDatabaseSchema } from "../database/schema.js";
-import type { Kysely } from "kysely";
+import type { Lix } from "../lix/open-lix.js";
 
 export function applyChangeSetDatabaseSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixDatabaseSchema>
-): SqliteWasmDatabase {
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
+): void {
 	// Create change_set view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixChangeSetSchema,
 		overrideName: "change_set",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix: { sqlite, db } }),
+			id: () => nanoId({ lix }),
 		},
 	});
 
 	// Create change_set_element views
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixChangeSetElementSchema,
 		overrideName: "change_set_element",
 		pluginKey: "lix_own_entity",
@@ -35,14 +32,12 @@ export function applyChangeSetDatabaseSchema(
 
 	// Create change_set_label views
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixChangeSetLabelSchema,
 		overrideName: "change_set_label",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 	});
-
-	return sqlite;
 }
 
 export const LixChangeSetSchema = {

@@ -25,7 +25,7 @@ test("creates tracked entity with pending change", async () => {
 
 	// Use insertPendingState function
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "test-insert",
@@ -154,7 +154,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "inherited-key",
@@ -251,7 +251,7 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "inherited-untracked-key",
@@ -312,7 +312,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "test-untracked-timestamp",
@@ -373,7 +373,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 
 	// First insert a direct untracked entity
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -422,7 +422,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 
 	// Now delete the direct untracked entity
 	insertTransactionState({
-		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		lix,
 		data: [
 			{
 				entity_id: "direct-untracked-key",

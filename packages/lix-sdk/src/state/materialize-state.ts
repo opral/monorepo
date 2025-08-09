@@ -1,12 +1,14 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { Lix } from "../index.js";
 
-export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
+export function applyMaterializeStateSchema(
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
+): void {
 	// View 1: Version tips - one row per version with its current tip commit
 	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"
 	// A commit C is the tip for version V iff:
 	// • C appears in at least one lix_version change row for V AND
 	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
 		WITH
 		-- 1. every (version, commit) ever recorded
@@ -44,7 +46,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 	`);
 
 	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
 		WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
 			-- Start from version tips at depth 0
@@ -80,7 +82,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 	`);
 
 	// View 3: Latest visible state - first seen wins, with proper timestamps
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
 		WITH commit_changes AS (
 			SELECT 
@@ -149,7 +151,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 	// - And so on up the inheritance chain
 	// Used by the state materializer to implement multi-level inheritance where
 	// child versions can see state from all ancestors unless overridden
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_ancestry AS
 		WITH RECURSIVE version_ancestry(version_id, ancestor_version_id, inheritance_depth, path) AS (
 			-- Each version is its own ancestor at depth 0
@@ -182,7 +184,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 	`);
 
 	// View 5: Final state materializer with multi-level inheritance
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
 		WITH all_possible_states AS (
 			SELECT

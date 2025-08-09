@@ -61,7 +61,7 @@ const DETERMINISTIC_NAMES = [
  * ```
  */
 export function generateHumanId(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	separator?: string;
 	capitalize?: boolean;
 }): string {

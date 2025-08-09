@@ -7,7 +7,7 @@ import { nanoId, generateHumanId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyVersionDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	// Create both primary and _all views for version with global version constraint
 	createEntityViewsIfNotExists({

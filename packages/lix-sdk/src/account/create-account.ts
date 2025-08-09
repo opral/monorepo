@@ -16,7 +16,7 @@ import type { LixAccount } from "./schema.js";
  */
 
 export async function createAccount(args: {
-	lix: Pick<Lix, "db" | "sqlite">;
+	lix: Pick<Lix, "db" | "sqlite" | "hooks">;
 	id?: LixAccount["id"];
 	name: LixAccount["name"];
 	lixcol_version_id?: string;
