@@ -438,7 +438,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(fileInLixAfter.length).toBe(0);
 	});
 
-	test("file created in lix should be avaialable in fs ", async () => {
+	test("file created in lix should be available in fs ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
