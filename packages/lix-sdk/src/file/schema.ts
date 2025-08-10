@@ -6,10 +6,15 @@ import type {
 } from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
+import { selectFileData } from "./select-file-data.js";
+import { applyFileDataCacheSchema } from "./cache/schema.js";
 
 export function applyFileDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
 ): void {
+	// Apply the file data cache schema
+	applyFileDataCacheSchema(lix);
+
 	lix.sqlite.createFunction({
 		name: "handle_file_insert",
 		arity: 7,
@@ -90,6 +95,23 @@ export function applyFileDatabaseSchema(
 	});
 
 	lix.sqlite.createFunction({
+		name: "select_file_data",
+		arity: 4,
+		deterministic: false,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			return selectFileData({
+				lix,
+				file: {
+					id: args[0],
+					path: args[1],
+					metadata: args[3],
+				},
+				versionId: args[2],
+			});
+		},
+	});
+
+	lix.sqlite.createFunction({
 		name: "materialize_file_data_at_commit",
 		arity: 5,
 		deterministic: false,
@@ -132,7 +154,7 @@ export function applyFileDatabaseSchema(
         SELECT
                 json_extract(fd.snapshot_content, '$.id') AS id,
                 json_extract(fd.snapshot_content, '$.path') AS path,
-                materialize_file_data(
+                select_file_data(
                         json_extract(fd.snapshot_content, '$.id'),
                         json_extract(fd.snapshot_content, '$.path'),
                         (SELECT version_id FROM active_version),
@@ -181,7 +203,7 @@ export function applyFileDatabaseSchema(
         SELECT
                 json_extract(fd.snapshot_content, '$.id') AS id,
                 json_extract(fd.snapshot_content, '$.path') AS path,
-                materialize_file_data(
+                select_file_data(
                         json_extract(fd.snapshot_content, '$.id'),
                         json_extract(fd.snapshot_content, '$.path'),
                         fd.version_id,
@@ -236,6 +258,11 @@ export function applyFileDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS file_delete
   INSTEAD OF DELETE ON file
   BEGIN
+      -- Clear the file data cache
+      DELETE FROM internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = (SELECT version_id FROM active_version);
+        
       -- Delete all non-lix_file entities associated with this file first
       DELETE FROM state_all
       WHERE file_id = OLD.id
@@ -280,6 +307,11 @@ export function applyFileDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS file_all_delete
   INSTEAD OF DELETE ON file_all
   BEGIN
+      -- Clear the file data cache
+      DELETE FROM internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = OLD.lixcol_version_id;
+        
       -- Delete all non-lix_file entities associated with this file first
       DELETE FROM state_all
       WHERE file_id = OLD.id

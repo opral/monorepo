@@ -5,6 +5,7 @@ import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
+import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
 
 function globSync(args: {
 	lix: Pick<Lix, "sqlite">;
@@ -184,6 +185,9 @@ export function handleFileInsert(args: {
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
 	}
 
+	// Don't cache here - the data needs to be materialized by plugins first
+	// Caching happens in selectFileData after materialization
+
 	// Emit file change event
 	args.lix.hooks._emit("file_change", {
 		fileId: args.file.id,
@@ -218,7 +222,7 @@ export function handleFileUpdate(args: {
 		return 1; // Indicate no changes were made
 	}
 
-	// Update the file metadata in state table
+	// Update the file metadata in state table FIRST
 	executeSync({
 		lix: args.lix,
 		query: args.lix.db
@@ -393,6 +397,13 @@ export function handleFileUpdate(args: {
 			});
 		}
 	}
+
+	// Clear cache AFTER all updates are complete
+	clearFileDataCache({
+		lix: args.lix,
+		fileId: args.file.id,
+		versionId: args.versionId,
+	});
 
 	// Emit file change event
 	args.lix.hooks._emit("file_change", {
