@@ -602,7 +602,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 		.where("entity_id", "=", entityId)
 		.where("inheritance_delete_marker", "=", 0)
 		.where("snapshot_content", "is not", null)
-		.where("version_id", "in", ["child1-cid", "child2-cid"]) as any
+		.where("version_id", "in", ["child1-cid", "child2-cid"])
 		.execute();
 
 	expect(childEntries).toHaveLength(2);
