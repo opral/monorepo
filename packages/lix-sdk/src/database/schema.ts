@@ -37,6 +37,8 @@ import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
+import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
+import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -50,6 +52,8 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
 	internal_resolved_state_all: InternalResolvedStateAllView;
+	internal_file_data_cache: InternalFileDataCacheTable;
+	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {

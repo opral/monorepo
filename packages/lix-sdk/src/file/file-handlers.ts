@@ -185,8 +185,11 @@ export function handleFileInsert(args: {
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
 	}
 
-	// Don't cache here - the data needs to be materialized by plugins first
-	// Caching happens in selectFileData after materialization
+	// Don't cache data here - the data needs to be materialized by plugins first
+	// Data caching happens in selectFileData after materialization
+
+	// Don't cache lixcol metadata here either - the commit_id will change after auto-commit
+	// The cache will be populated on first read via selectFileLixcol
 
 	// Emit file change event
 	args.lix.hooks._emit("file_change", {
@@ -398,7 +401,7 @@ export function handleFileUpdate(args: {
 		}
 	}
 
-	// Clear cache AFTER all updates are complete
+	// Clear data cache AFTER all updates are complete
 	clearFileDataCache({
 		lix: args.lix,
 		fileId: args.file.id,

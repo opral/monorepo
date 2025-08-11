@@ -7,13 +7,18 @@ import type {
 import type { Lix } from "../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
+import { selectFileLixcol } from "./select-file-lixcol.js";
 import { applyFileDataCacheSchema } from "./cache/schema.js";
+// import { applyFileLixcolCacheSchema } from "./cache/lixcol-schema.js";
 
 export function applyFileDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
 ): void {
-	// Apply the file data cache schema
+	// Apply the cache schemas
 	applyFileDataCacheSchema(lix);
+	// applied in databse itself before state because commit
+	// logic writes into the licol cache
+	// applyFileLixcolCacheSchema({ lix });
 
 	lix.sqlite.createFunction({
 		name: "handle_file_insert",
@@ -111,6 +116,23 @@ export function applyFileDatabaseSchema(
 		},
 	});
 
+	// Register SQL functions for lixcol metadata caching
+	// Returns JSON string with {latest_change_id, latest_commit_id, created_at, updated_at}
+	lix.sqlite.createFunction({
+		name: "select_file_lixcol",
+		arity: 2, // file_id, version_id
+		deterministic: false,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			const lixcol = selectFileLixcol({
+				lix,
+				fileId: args[0],
+				versionId: args[1],
+			});
+			// Return as JSON string so SQL can extract fields
+			return JSON.stringify(lixcol);
+		},
+	});
+
 	lix.sqlite.createFunction({
 		name: "materialize_file_data_at_commit",
 		arity: 5,
@@ -131,100 +153,60 @@ export function applyFileDatabaseSchema(
 
 	lix.sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
-        WITH latest_file_change AS (
-            SELECT 
-                fd.entity_id as file_id,
-                -- Get the latest change across all entities in this file
-                (SELECT s.change_id 
-                 FROM state s 
-                 WHERE s.file_id = fd.entity_id
-                 ORDER BY s.updated_at DESC 
-                 LIMIT 1) as latest_change_id,
-                -- Get the latest change_set that contains any change for this file
-                (SELECT cse.change_set_id
-                 FROM change_set_element cse
-                 INNER JOIN state s ON s.change_id = cse.change_id
-                 WHERE s.file_id = fd.entity_id
-                 ORDER BY s.updated_at DESC
-                 LIMIT 1
-                ) as latest_change_set_id
-            FROM state fd
-            WHERE fd.schema_key = 'lix_file_descriptor'
-        )
-        SELECT
-                json_extract(fd.snapshot_content, '$.id') AS id,
-                json_extract(fd.snapshot_content, '$.path') AS path,
-                select_file_data(
-                        json_extract(fd.snapshot_content, '$.id'),
-                        json_extract(fd.snapshot_content, '$.path'),
-                        (SELECT version_id FROM active_version),
-                        json_extract(fd.snapshot_content, '$.metadata')
-                ) AS data,
-                json_extract(fd.snapshot_content, '$.metadata') AS metadata,
-                json_extract(fd.snapshot_content, '$.hidden') AS hidden,
-                fd.entity_id AS lixcol_entity_id,
-                'lix_file_descriptor' AS lixcol_schema_key,
-                fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
-                fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
-                -- Use the latest change info from any entity in the file
-                lc.latest_change_id AS lixcol_change_id,
-                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
-                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
-                lc.latest_change_set_id AS lixcol_commit_id,
-                fd.untracked AS lixcol_untracked
-        FROM state fd
-        JOIN latest_file_change lc ON lc.file_id = fd.entity_id
-        WHERE fd.schema_key = 'lix_file_descriptor';
+        SELECT 
+                id,
+                path,
+                data,
+                metadata,
+                hidden,
+                lixcol_entity_id,
+                lixcol_schema_key,
+                lixcol_file_id,
+                lixcol_inherited_from_version_id,
+                lixcol_change_id,
+                lixcol_created_at,
+                lixcol_updated_at,
+                lixcol_commit_id,
+                lixcol_untracked
+        FROM file_all
+        WHERE lixcol_version_id IN (SELECT version_id FROM active_version);
 
   CREATE VIEW IF NOT EXISTS file_all AS
-        WITH latest_file_change AS (
-            SELECT 
-                fd.entity_id as file_id,
+        WITH file_lixcol AS (
+            SELECT
+                fd.entity_id,
+                fd.snapshot_content,
                 fd.version_id,
-                -- Get the latest change across all entities in this file for this version
-                (SELECT s.change_id 
-                 FROM state_all s 
-                 WHERE s.file_id = fd.entity_id
-                   AND s.version_id = fd.version_id
-                 ORDER BY s.updated_at DESC 
-                 LIMIT 1) as latest_change_id,
-                -- Get the latest change_set that contains any change for this file
-                (SELECT cse.change_set_id
-                 FROM change_set_element cse
-                 INNER JOIN state_all s ON s.change_id = cse.change_id
-                 WHERE s.file_id = fd.entity_id
-                   AND s.version_id = fd.version_id
-                 ORDER BY s.updated_at DESC
-                 LIMIT 1
-                ) as latest_change_set_id
+                fd.inherited_from_version_id,
+                fd.untracked,
+                -- Call select_file_lixcol once per file/version and store the JSON result
+                select_file_lixcol(fd.entity_id, fd.version_id) AS lixcol_json
             FROM state_all fd
             WHERE fd.schema_key = 'lix_file_descriptor'
         )
         SELECT
-                json_extract(fd.snapshot_content, '$.id') AS id,
-                json_extract(fd.snapshot_content, '$.path') AS path,
+                json_extract(snapshot_content, '$.id') AS id,
+                json_extract(snapshot_content, '$.path') AS path,
                 select_file_data(
-                        json_extract(fd.snapshot_content, '$.id'),
-                        json_extract(fd.snapshot_content, '$.path'),
-                        fd.version_id,
-                        json_extract(fd.snapshot_content, '$.metadata')
+                        json_extract(snapshot_content, '$.id'),
+                        json_extract(snapshot_content, '$.path'),
+                        version_id,
+                        json_extract(snapshot_content, '$.metadata')
                 ) AS data,
-                json_extract(fd.snapshot_content, '$.metadata') AS metadata,
-                json_extract(fd.snapshot_content, '$.hidden') AS hidden,
-                fd.entity_id AS lixcol_entity_id,
+                json_extract(snapshot_content, '$.metadata') AS metadata,
+                json_extract(snapshot_content, '$.hidden') AS hidden,
+                entity_id AS lixcol_entity_id,
                 'lix_file_descriptor' AS lixcol_schema_key,
-                fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
-                fd.version_id AS lixcol_version_id,
-                fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
-                -- Use the latest change info from any entity in the file
-                lc.latest_change_id AS lixcol_change_id,
-                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
-                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
-                lc.latest_change_set_id AS lixcol_commit_id,
-                fd.untracked AS lixcol_untracked
-        FROM state_all fd
-        JOIN latest_file_change lc ON lc.file_id = fd.entity_id AND lc.version_id = fd.version_id
-        WHERE fd.schema_key = 'lix_file_descriptor';
+                entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
+                version_id AS lixcol_version_id,
+                inherited_from_version_id AS lixcol_inherited_from_version_id,
+                -- Extract all lixcol columns from the cached JSON (single function call per row)
+                json_extract(lixcol_json, '$.latest_change_id') AS lixcol_change_id,
+                json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
+                json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
+                json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+                untracked AS lixcol_untracked
+        FROM file_lixcol;
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
@@ -260,6 +242,11 @@ export function applyFileDatabaseSchema(
   BEGIN
       -- Clear the file data cache
       DELETE FROM internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = (SELECT version_id FROM active_version);
+        
+      -- Clear the file lixcol cache
+      DELETE FROM internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
@@ -309,6 +296,11 @@ export function applyFileDatabaseSchema(
   BEGIN
       -- Clear the file data cache
       DELETE FROM internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = OLD.lixcol_version_id;
+        
+      -- Clear the file lixcol cache
+      DELETE FROM internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         

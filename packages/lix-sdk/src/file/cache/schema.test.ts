@@ -1,16 +1,35 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
-import { getFileDataCache } from "./get-file-data-cache.js";
+import type { Lix } from "../../lix/open-lix.js";
+
+// Helper function to query cache directly
+function getFileDataCache(args: {
+	lix: Pick<Lix, "sqlite">;
+	fileId: string;
+	versionId: string;
+}): Uint8Array | undefined {
+	const result = args.lix.sqlite.exec({
+		sql: `
+			SELECT data 
+			FROM internal_file_data_cache 
+			WHERE file_id = ? 
+			AND version_id = ?
+		`,
+		bind: [args.fileId, args.versionId],
+		returnValue: "resultRows",
+	});
+	return result[0]?.[0] as Uint8Array | undefined;
+}
 
 /**
  * File data caching uses READ-THROUGH caching, not write-through.
- * 
+ *
  * Why read-through instead of write-through?
  * 1. File writes receive raw data, but the cache needs materialized data (after plugin processing)
  * 2. Materializing on every write would make writes slow
  * 3. There could be consistency gaps between written raw data and cached materialized data
- * 
+ *
  * Trade-offs:
  * - First read after insert/update has a cache miss (slower)
  * - But writes remain fast and cache consistency is guaranteed

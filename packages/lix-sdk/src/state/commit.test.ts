@@ -8,6 +8,7 @@ import { openLix } from "../lix/open-lix.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
 import { switchAccount } from "../account/switch-account.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
+import { selectActiveVersion } from "../version/select-active-version.js";
 
 test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
 	const lix = await openLix({
@@ -1432,5 +1433,322 @@ test("creates change_author records for insert, update, and delete operations", 
 	expect(deleteAuthors[0]).toMatchObject({
 		change_id: deleteChangeId,
 		account_id: "test-account-2",
+	});
+});
+
+describe("file lixcol cache updates", () => {
+	test("should update cache on file insert", async () => {
+		const lix = await openLix({});
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert a file
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/test.txt",
+				data: new TextEncoder().encode("test content"),
+			})
+			.execute();
+
+		// Check that the cache was populated
+		const cacheEntries = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.execute();
+
+		expect(cacheEntries.length).toBe(1);
+		const entry = cacheEntries[0]!;
+
+		// Should have all required fields
+		expect(entry.file_id).toBeDefined();
+		expect(entry.version_id).toBeDefined();
+		expect(entry.latest_change_id).toBeDefined();
+		expect(entry.latest_commit_id).toBeDefined();
+		expect(entry.created_at).toBeDefined();
+		expect(entry.updated_at).toBeDefined();
+
+		// created_at should equal updated_at for new files
+		expect(entry.created_at).toBe(entry.updated_at);
+	});
+
+	test("should update cache on file update", async () => {
+		const lix = await openLix({
+			keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		});
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert a file
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/test.txt",
+				data: new TextEncoder().encode("initial content"),
+			})
+			.execute();
+
+		// Get initial cache entry
+		const initialCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Update the file
+		await lix.db
+			.updateTable("file")
+			.where("path", "=", "/test.txt")
+			.set({
+				data: new TextEncoder().encode("updated content"),
+			})
+			.execute();
+
+		// Check that cache was updated
+		const updatedCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.where("file_id", "=", initialCache.file_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Should have new change_id and commit_id
+		expect(updatedCache.latest_change_id).not.toBe(
+			initialCache.latest_change_id
+		);
+		expect(updatedCache.latest_commit_id).not.toBe(
+			initialCache.latest_commit_id
+		);
+
+		// created_at should be preserved, updated_at should change
+		expect(updatedCache.created_at).toBe(initialCache.created_at);
+		expect(updatedCache.updated_at).not.toBe(initialCache.updated_at);
+	});
+
+	test("should remove cache entry on file delete", async () => {
+		const lix = await openLix({});
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert a file
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/test.txt",
+				data: new TextEncoder().encode("test content"),
+			})
+			.execute();
+
+		// Verify cache exists
+		const cacheBeforeDelete = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.execute();
+		expect(cacheBeforeDelete.length).toBe(1);
+
+		// Delete the file
+		await lix.db.deleteFrom("file").where("path", "=", "/test.txt").execute();
+
+		// Cache entry should be removed
+		const cacheAfterDelete = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.execute();
+		expect(cacheAfterDelete.length).toBe(0);
+	});
+
+	test("should batch update cache for multiple files", async () => {
+		const lix = await openLix({});
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert multiple files in one transaction
+		await lix.db
+			.insertInto("file")
+			.values([
+				{ path: "/file1.txt", data: new TextEncoder().encode("content1") },
+				{ path: "/file2.txt", data: new TextEncoder().encode("content2") },
+				{ path: "/file3.txt", data: new TextEncoder().encode("content3") },
+			])
+			.execute();
+
+		// All files should have cache entries
+		const cacheEntries = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.execute();
+
+		expect(cacheEntries.length).toBe(3);
+
+		// All should have the same commit_id (batched in one commit)
+		const commitIds = cacheEntries.map((e) => e.latest_commit_id);
+		expect(new Set(commitIds).size).toBe(1);
+	});
+
+	test("should preserve created_at on conflict", async () => {
+		const lix = await openLix({
+			keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		});
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert a file into global version using file_all
+		await lix.db
+			.insertInto("file_all")
+			.values({
+				path: "/test.txt",
+				data: new TextEncoder().encode("initial"),
+				lixcol_version_id: "global",
+			})
+			.execute();
+
+		const initialCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.where("version_id", "=", "global")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		console.log("Initial cache:", initialCache);
+
+		// Update the file multiple times using file_all (in deterministic mode, timestamps auto-increment)
+		await lix.db
+			.updateTable("file_all")
+			.where("path", "=", "/test.txt")
+			.where("lixcol_version_id", "=", "global")
+			.set({ data: new TextEncoder().encode("update1") })
+			.execute();
+
+		await lix.db
+			.updateTable("file_all")
+			.where("path", "=", "/test.txt")
+			.where("lixcol_version_id", "=", "global")
+			.set({ data: new TextEncoder().encode("update2") })
+			.execute();
+
+		const finalCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.where("file_id", "=", initialCache.file_id)
+			.where("version_id", "=", "global")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		console.log("Final cache:", finalCache);
+
+		// created_at should be preserved from the initial insert
+		expect(finalCache.created_at).toBe(initialCache.created_at);
+		// updated_at should be different
+		expect(finalCache.updated_at).not.toBe(initialCache.updated_at);
+	});
+
+	test("should handle mixed insert, update, and delete in one commit", async () => {
+		const lix = await openLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const activeVersion = await selectActiveVersion(lix)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Setup initial files
+		await lix.db
+			.insertInto("file")
+			.values([
+				{
+					id: "keep-file-id",
+					path: "/keep.txt",
+					data: new TextEncoder().encode("keep"),
+				},
+				{
+					id: "update-file-id",
+					path: "/update.txt",
+					data: new TextEncoder().encode("update"),
+				},
+				{
+					id: "delete-file-id",
+					path: "/delete.txt",
+					data: new TextEncoder().encode("delete"),
+				},
+			])
+			.execute();
+
+		// Get initial state
+		const initialCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.execute();
+		expect(initialCache.length).toBe(3);
+
+		// Perform mixed operations
+		insertTransactionState({
+			lix,
+			data: [
+				// New file
+				{
+					entity_id: "new-file-id",
+					schema_key: "lix_file_descriptor",
+					file_id: "new-file-id",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						id: "new-file-id",
+						path: "/new.txt",
+					}),
+					schema_version: "1.0",
+					version_id: activeVersion.id,
+					untracked: false,
+				},
+				// Update existing file
+				{
+					entity_id: "update-file-id",
+					schema_key: "lix_file_descriptor",
+					file_id: "update-file-id",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						id: "update-file-id",
+						path: "/update.txt",
+						metadata: { updated: true },
+					}),
+					schema_version: "1.0",
+					version_id: activeVersion.id,
+					untracked: false,
+				},
+				// Delete file
+				{
+					entity_id: "delete-file-id",
+					schema_key: "lix_file_descriptor",
+					file_id: "delete-file-id",
+					plugin_key: "lix_own_entity",
+					snapshot_content: null, // Deletion
+					schema_version: "1.0",
+					version_id: activeVersion.id,
+					untracked: false,
+				},
+			],
+		});
+
+		// Commit the transaction
+		commit({ lix });
+
+		// Check final cache state
+		const finalCache = await db
+			.selectFrom("internal_file_lixcol_cache")
+			.selectAll()
+			.orderBy("file_id")
+			.execute();
+
+		// Should have: keep, update, new (delete should be gone)
+		expect(finalCache.length).toBe(3);
+
+		const filePaths = await lix.db
+			.selectFrom("file")
+			.select("path")
+			.orderBy("path")
+			.execute();
+
+		expect(filePaths.map((f) => f.path).sort()).toEqual([
+			"/keep.txt",
+			"/new.txt",
+			"/update.txt",
+		]);
 	});
 });
