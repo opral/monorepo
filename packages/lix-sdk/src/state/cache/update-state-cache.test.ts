@@ -538,3 +538,86 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	// Subchild should show NO entity through state_all (inherits deletion from child)
 	expect(subchildStateAll).toHaveLength(0);
 });
+
+test("copied entries retain original commit_id during deletion copy-down", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } },
+		],
+	});
+
+	// Create inheritance chain: parent -> child1, child2
+	await createVersion({ lix, id: "parent-cid", inherits_from_version_id: "global" });
+	await createVersion({ lix, id: "child1-cid", inherits_from_version_id: "parent-cid" });
+	await createVersion({ lix, id: "child2-cid", inherits_from_version_id: "parent-cid" });
+
+	const t1 = timestamp({ lix });
+	const entityId = "entity-commit-propagation";
+
+	// Create in parent with an original commit id
+	const createChange: LixChangeRaw = {
+		id: "change-create-cid",
+		entity_id: entityId,
+		schema_key: "lix_test",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: JSON.stringify({ id: entityId, value: "data" }),
+		created_at: t1,
+	};
+
+	const originalCommitId = "original-commit-id-001";
+	updateStateCache({ lix, changes: [createChange], commit_id: originalCommitId, version_id: "parent-cid" });
+
+	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Sanity: parent entry has original commit id
+	const parentEntry = await intDb
+		.selectFrom("internal_state_cache")
+		.selectAll()
+		.where("entity_id", "=", entityId)
+		.where("version_id", "=", "parent-cid")
+		.executeTakeFirstOrThrow();
+	expect(parentEntry.commit_id).toBe(originalCommitId);
+
+	// Delete in parent with a different commit id; this should copy entries to children
+	const t2 = timestamp({ lix });
+	const deleteChange: LixChangeRaw = {
+		id: "change-delete-cid",
+		entity_id: entityId,
+		schema_key: "lix_test",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: null,
+		created_at: t2,
+	};
+	const deletionCommitId = "deletion-commit-id-002";
+	updateStateCache({ lix, changes: [deleteChange], commit_id: deletionCommitId, version_id: "parent-cid" });
+
+	// Verify copied entries exist in both children with the ORIGINAL commit id
+	const childEntries = await intDb
+		.selectFrom("internal_state_cache")
+		.selectAll()
+		.where("entity_id", "=", entityId)
+		.where("inheritance_delete_marker", "=", 0)
+		.where("snapshot_content", "is not", null)
+		.where("version_id", "in", ["child1-cid", "child2-cid"]) as any
+		.execute();
+
+	expect(childEntries).toHaveLength(2);
+	for (const entry of childEntries) {
+		expect(["child1-cid", "child2-cid"]).toContain(entry.version_id);
+		expect(entry.commit_id).toBe(originalCommitId);
+	}
+
+	// Tombstone in parent should have the deletion commit id
+	const tombstone = await intDb
+		.selectFrom("internal_state_cache")
+		.selectAll()
+		.where("entity_id", "=", entityId)
+		.where("version_id", "=", "parent-cid")
+		.where("inheritance_delete_marker", "=", 1)
+		.executeTakeFirstOrThrow();
+	expect(tombstone.commit_id).toBe(deletionCommitId);
+});

@@ -113,7 +113,8 @@ export function updateStateCache(args: {
 							sql`null`.as("inherited_from_version_id"),
 							sql`0`.as("inheritance_delete_marker"),
 							"src.change_id",
-							sql`${args.commit_id}`.as("commit_id"), // Stamp with current commit
+							// Preserve the original commit_id from the source entry when copying down
+							"src.commit_id",
 						])
 						.where("src.version_id", "=", args.version_id)
 						.where("src.inheritance_delete_marker", "=", 0)
