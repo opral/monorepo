@@ -28,5 +28,5 @@ jobs:
         env:
           CODSPEED_BENCH: true
         with:
-          run: pnpm --filter @lix-js/sdk exec vitest bench
+          run: pnpm --filter @lix-js/sdk exec vitest bench --run
           token: ${{ secrets.CODSPEED_TOKEN }}
