@@ -1,6 +1,7 @@
 import type { Lix } from "../lix/index.js";
 import type { LixChangeSet } from "./schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
+import { clearFileDataCache } from "../file/cache/clear-file-data-cache.js";
 
 /**
  * Applies a change set to the lix.
@@ -125,6 +126,15 @@ export async function applyChangeSet(args: {
 				await trx.deleteFrom("file").where("id", "=", file_id).execute();
 				continue;
 			}
+
+			// Clear file cache before fetching to ensure we get fresh data
+			// This is important because the file may have been updated by previous operations
+			// and we need the current state for plugin processing
+			clearFileDataCache({
+				lix: args.lix,
+				fileId: file_id,
+				versionId: version.id,
+			});
 
 			const file = await trx
 				.selectFrom("file")

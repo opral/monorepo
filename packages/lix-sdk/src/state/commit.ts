@@ -189,6 +189,12 @@ export function commit(args: {
 				: changesByVersion.get(version_id)!;
 
 		// Only update cache entries for entities that were actually changed
+		// Track files that need lixcol cache updates
+		const fileChanges = new Map<
+			string,
+			{ change_id: string; created_at: string }
+		>();
+
 		for (const change of changesForVersion) {
 			// Use the centralized updateStateCache function instead of inline updates
 			updateStateCache({
@@ -206,6 +212,87 @@ export function commit(args: {
 				commit_id: commitId,
 				version_id: version_id,
 			});
+
+			// IDEALLY WE WOULD HAVE A BEFORE_COMMIT HOOK
+			// THAT LIX EXPOSES TO KEEP THE LOGIC IN THE FILE STUFF
+			//
+			//
+			// Track the latest change for each file (excluding "lix" internal file)
+			if (change.file_id && change.file_id !== "lix") {
+				// We want the latest change for each file (by created_at)
+				const existing = fileChanges.get(change.file_id);
+				if (!existing || change.created_at > existing.created_at) {
+					fileChanges.set(change.file_id, {
+						change_id: change.id,
+						created_at: change.created_at,
+					});
+				}
+			}
+		}
+
+		// Update file lixcol cache for all files that had changes
+		// We have all the data we need from the commit, no need to recompute
+		if (fileChanges.size > 0) {
+			// Separate files into deletions and updates
+			const filesToDelete: string[] = [];
+			const filesToUpdate: Array<{
+				file_id: string;
+				version_id: string;
+				latest_change_id: string;
+				latest_commit_id: string;
+				created_at: string;
+				updated_at: string;
+			}> = [];
+
+			for (const [fileId, { change_id, created_at }] of fileChanges) {
+				// Check if this is a deletion (file descriptor with null snapshot content)
+				const changeData = changesForVersion.find((c) => c.id === change_id);
+				const isDeleted =
+					changeData?.schema_key === "lix_file_descriptor" &&
+					!changeData.snapshot_content;
+
+				if (isDeleted) {
+					filesToDelete.push(fileId);
+				} else {
+					filesToUpdate.push({
+						file_id: fileId,
+						version_id: version_id,
+						latest_change_id: change_id,
+						latest_commit_id: commitId,
+						created_at: created_at,
+						updated_at: created_at,
+					});
+				}
+			}
+
+			// Delete cache entries for deleted files
+			if (filesToDelete.length > 0) {
+				executeSync({
+					lix: args.lix,
+					query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.deleteFrom("internal_file_lixcol_cache")
+						.where("version_id", "=", version_id)
+						.where("file_id", "in", filesToDelete),
+				});
+			}
+
+			// Batch insert/update cache entries for existing files
+			if (filesToUpdate.length > 0) {
+				executeSync({
+					lix: args.lix,
+					query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.insertInto("internal_file_lixcol_cache")
+						.values(filesToUpdate)
+						.onConflict((oc) =>
+							oc.columns(["file_id", "version_id"]).doUpdateSet({
+								latest_change_id: sql`excluded.latest_change_id`,
+								latest_commit_id: sql`excluded.latest_commit_id`,
+								// Don't update created_at - preserve the original
+								updated_at: sql`excluded.updated_at`,
+							})
+						),
+				});
+			}
 		}
 	}
 

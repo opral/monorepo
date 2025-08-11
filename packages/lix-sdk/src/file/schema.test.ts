@@ -1440,10 +1440,16 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 
 	// The file's change_set_id should contain the latest content change
 	// Get all changes in the file's current change_set
+	// Join through commit to get the changeset since versions now point to commits
 	const changesInFileChangeSet = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", fileAfterContentUpdate.lixcol_commit_id)
-		.selectAll()
+		.innerJoin(
+			"commit",
+			"commit.change_set_id",
+			"change_set_element.change_set_id"
+		)
+		.where("commit.id", "=", fileAfterContentUpdate.lixcol_commit_id)
+		.select("change_set_element.change_id")
 		.execute();
 
 	const changeIdsInSet = changesInFileChangeSet.map((el) => el.change_id);
@@ -1643,4 +1649,48 @@ test("files should be identical across versions when versions have the same comm
 
 	expect(mainData.items[0].price).toBe(29.99); // Original price
 	expect(updatedVersionData.items[0].price).toBe(34.99); // Updated price
+});
+
+test("file view exposes the correct commit_id", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: {
+					enabled: true,
+				},
+				lixcol_version_id: "global",
+			},
+		],
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert a file
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test_commit_id_file",
+			path: "/test/file.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "initial" })),
+		})
+		.execute();
+
+	// Get the current commit ID from the version
+	const version = await lix.db
+		.selectFrom("version")
+		.innerJoin("active_version", "active_version.version_id", "version.id")
+		.select("version.commit_id")
+		.executeTakeFirstOrThrow();
+
+	// Query the file and check its commit_id
+	const file = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "test_commit_id_file")
+		.select(["id", "path", "lixcol_commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// The file's commit_id should match the version's commit_id
+	expect(file.lixcol_commit_id).toBe(version.commit_id);
+	expect(file.lixcol_commit_id).toBeTruthy();
+	expect(file.lixcol_commit_id).not.toBe("undefined");
 });
