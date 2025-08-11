@@ -1,0 +1,31 @@
+name: Benchmark @lix-js/sdk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/sdk/**"
+  pull_request:
+    paths:
+      - "packages/sdk/**"
+  workflow_dispatch:
+    # allows manual triggering of the workflow
+
+jobs:
+  benchmarks:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v3"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build dependencies
+        run: pnpm --filter @lix-js/sdk... build
+      - name: Run benchmarks
+        uses: CodSpeedHQ/action@v3
+        env:
+          CODSPEED_BENCH: true
+        with:
+          run: pnpm --filter @lix-js/sdk exec vitest bench
+          token: ${{ secrets.CODSPEED_TOKEN }}
