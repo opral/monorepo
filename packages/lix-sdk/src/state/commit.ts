@@ -194,25 +194,28 @@ export function commit(args: {
 			string,
 			{ change_id: string; created_at: string }
 		>();
-
+		
+		// Batch update state cache for all changes at once
+		const changesForCache = changesForVersion.map(change => ({
+			id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			schema_version: change.schema_version,
+			file_id: change.file_id,
+			plugin_key: change.plugin_key,
+			snapshot_content: change.snapshot_content,
+			created_at: change.created_at,
+		}));
+		
+		updateStateCache({
+			lix: args.lix,
+			changes: changesForCache,
+			commit_id: commitId,
+			version_id: version_id,
+		});
+		
+		// Track files that need lixcol cache updates
 		for (const change of changesForVersion) {
-			// Use the centralized updateStateCache function instead of inline updates
-			updateStateCache({
-				lix: args.lix,
-				change: {
-					id: change.id,
-					entity_id: change.entity_id,
-					schema_key: change.schema_key,
-					schema_version: change.schema_version,
-					file_id: change.file_id,
-					plugin_key: change.plugin_key,
-					snapshot_content: change.snapshot_content,
-					created_at: change.created_at,
-				},
-				commit_id: commitId,
-				version_id: version_id,
-			});
-
 			// IDEALLY WE WOULD HAVE A BEFORE_COMMIT HOOK
 			// THAT LIX EXPOSES TO KEEP THE LOGIC IN THE FILE STUFF
 			//

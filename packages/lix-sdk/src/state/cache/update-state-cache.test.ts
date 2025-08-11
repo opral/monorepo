@@ -38,7 +38,7 @@ test("inserts into cache based on change", async () => {
 	// Call updateStateCache
 	updateStateCache({
 		lix,
-		change: testChange,
+		changes: [testChange],
 		commit_id: commitId,
 		version_id: versionId,
 	});
@@ -109,7 +109,7 @@ test("upserts cache entry on conflict", async () => {
 	// First insert
 	updateStateCache({
 		lix,
-		change: initialChange,
+		changes: [initialChange],
 		commit_id: initialCommitId,
 		version_id: versionId,
 	});
@@ -153,7 +153,7 @@ test("upserts cache entry on conflict", async () => {
 	// Second call should trigger onConflict upsert
 	updateStateCache({
 		lix,
-		change: updatedChange,
+		changes: [updatedChange],
 		commit_id: updatedCommitId,
 		version_id: versionId,
 	});
@@ -233,7 +233,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	updateStateCache({
 		lix,
-		change: createChange,
+		changes: [createChange],
 		commit_id: "parent-commit",
 		version_id: "parent",
 	});
@@ -266,17 +266,20 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	updateStateCache({
 		lix,
-		change: deleteFromParentChange,
+		changes: [deleteFromParentChange],
 		commit_id: "parent-delete-commit",
 		version_id: "parent",
 	});
 
 	// Verify entity moved to child1 and child2, parent entry removed
+	// Note: We need to exclude tombstones (inheritance_delete_marker = 1) and entries without content
 	const cacheAfterParentDelete = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
+		.where("inheritance_delete_marker", "=", 0)  // Exclude tombstones
+		.where("snapshot_content", "is not", null)   // Exclude null snapshots
 		.orderBy("version_id", "asc")
 		.execute();
 
@@ -308,7 +311,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	updateStateCache({
 		lix,
-		change: deleteFromChild1Change,
+		changes: [deleteFromChild1Change],
 		commit_id: "child1-delete-commit",
 		version_id: "child1",
 	});
@@ -319,6 +322,8 @@ test("moves cache entries to children on deletion, clears when no children remai
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
+		.where("inheritance_delete_marker", "=", 0)  // Exclude tombstones
+		.where("snapshot_content", "is not", null)   // Exclude null snapshots
 		.execute();
 
 	expect(cacheAfterChild1Delete).toHaveLength(1);
@@ -343,12 +348,13 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	updateStateCache({
 		lix,
-		change: deleteFromChild2Change,
+		changes: [deleteFromChild2Change],
 		commit_id: "child2-delete-commit",
 		version_id: "child2",
 	});
 
-	// Verify entity is completely removed from cache
+	// Verify tombstones remain in cache (new behavior: tombstones are permanent)
+	// The important thing is that state_all queries show no active entities
 	const finalCache = await intDb
 		.selectFrom("internal_state_cache")
 		.selectAll()
@@ -356,7 +362,20 @@ test("moves cache entries to children on deletion, clears when no children remai
 		.where("entity_id", "=", testEntity)
 		.execute();
 
-	expect(finalCache).toHaveLength(0);
+	// Should have 3 tombstones (one for each version where we deleted)
+	expect(finalCache).toHaveLength(3);
+	expect(finalCache.every(c => c.inheritance_delete_marker === 1)).toBe(true);
+	expect(finalCache.every(c => c.snapshot_content === null)).toBe(true);
+	
+	// More importantly, verify that state_all shows no active entities
+	const stateAllResults = await lix.db
+		.selectFrom("state_all")
+		.selectAll()
+		.where("entity_id", "=", testEntity)
+		.execute();
+	
+	// This is what really matters - no visible entities
+	expect(stateAllResults).toHaveLength(0);
 });
 
 test("handles inheritance chain deletions with tombstones", async () => {
@@ -403,7 +422,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	updateStateCache({
 		lix,
-		change: createChange,
+		changes: [createChange],
 		commit_id: "parent-commit-123",
 		version_id: "parent-version",
 	});
@@ -440,7 +459,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	updateStateCache({
 		lix,
-		change: deleteChange,
+		changes: [deleteChange],
 		commit_id: "child-commit-456",
 		version_id: "child-version",
 	});

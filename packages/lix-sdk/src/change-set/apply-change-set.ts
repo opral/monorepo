@@ -76,19 +76,19 @@ export async function applyChangeSet(args: {
 			.execute();
 
 		// Write-through cache: populate internal_state_cache for all applied changes
-		for (const change of changesResult) {
-			updateStateCache({
-				lix: args.lix,
-				change: {
-					...change,
-					snapshot_content: change.snapshot_content
-						? JSON.stringify(change.snapshot_content)
-						: null,
-				},
-				version_id: version.id,
-				commit_id: version.commit_id,
-			});
-		}
+		const changesForCache = changesResult.map(change => ({
+			...change,
+			snapshot_content: change.snapshot_content
+				? JSON.stringify(change.snapshot_content)
+				: null,
+		}));
+		
+		updateStateCache({
+			lix: args.lix,
+			changes: changesForCache,
+			version_id: version.id,
+			commit_id: version.commit_id,
+		});
 
 		// Group changes by file_id for processing
 		const changesGroupedByFile = Object.groupBy(
