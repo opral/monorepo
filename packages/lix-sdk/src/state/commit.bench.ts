@@ -41,14 +41,9 @@ bench("commit transaction with 100 rows", async () => {
 	});
 
 	// Benchmark: Commit all transaction states
-	const commitStartTime = performance.now();
 	commit({
 		lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 	});
-	const commitTime = performance.now() - commitStartTime;
-	console.log(`Batch commit time: ${commitTime.toFixed(3)}ms`);
 });
 
 bench.todo("commit with mixed operations (insert/update/delete)");
-
-bench.todo("commit performance vs direct SQLite INSERT");
