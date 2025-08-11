@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/sdk/**"
+      - "packages/lix-sdk/**"
   pull_request:
     paths:
-      - "packages/sdk/**"
+      - "packages/lix-sdk/**"
   workflow_dispatch:
     # allows manual triggering of the workflow
 
@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: "actions/checkout@v4"
-      - uses: "actions/setup-node@v3"
+      - uses: "actions/setup-node@v4"
+      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install
       - name: Build dependencies
