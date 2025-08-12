@@ -36,149 +36,32 @@ const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	commit_id TEXT
 ) WITHOUT ROWID;`;
 
+// Global cache of physical tables - shared across vtable and direct access
+export const stateCacheV2Tables = new Set<string>();
+
 export function applyStateCacheV2Schema(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	const { sqlite } = lix;
 
-	// Cache of available physical tables - shared across all vtable operations
-	const tableCache = {
-		tables: null as string[] | null,
-		timestamp: 0,
-		TTL: 60000, // 60 seconds
-	};
+	// Initialize cache with existing tables on startup
+	const existingTables = sqlite.exec({
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
+		returnValue: "resultRows",
+	}) as any[];
 
-	/**
-	 * Handles INSERT/UPDATE operations for the cache v2 virtual table.
-	 * Creates physical tables as needed and inserts/updates data.
-	 */
-	function handleInsertUpdate(args: {
-		entity_id: string;
-		schema_key: string;
-		file_id: string;
-		version_id: string;
-		plugin_key: string;
-		snapshot_content: any;
-		schema_version: string;
-		created_at: string;
-		updated_at: string;
-		inherited_from_version_id: string | null;
-		inheritance_delete_marker: number;
-		change_id: string | null;
-		commit_id: string | null;
-	}): void {
-		const { schema_key } = args;
-
-		if (!schema_key) {
-			throw new Error("schema_key is required");
+	if (existingTables) {
+		for (const row of existingTables) {
+			stateCacheV2Tables.add(row[0] as string);
 		}
-
-		// Determine physical table name
-		const tableName = `internal_state_cache_${schema_key}`;
-
-		// Create table if it doesn't exist
-		const createTableSql = `
-			CREATE TABLE IF NOT EXISTS ${tableName} (
-				entity_id TEXT NOT NULL,
-				file_id TEXT NOT NULL,
-				version_id TEXT NOT NULL,
-				plugin_key TEXT NOT NULL,
-				snapshot_content BLOB,
-				schema_version TEXT NOT NULL,
-				created_at TEXT NOT NULL,
-				updated_at TEXT NOT NULL,
-				inherited_from_version_id TEXT,
-				inheritance_delete_marker INTEGER DEFAULT 0,
-				change_id TEXT,
-				commit_id TEXT,
-				PRIMARY KEY (entity_id, file_id, version_id)
-			) STRICT, WITHOUT ROWID;
-		`;
-
-		sqlite.exec({ sql: createTableSql });
-
-		// Create basic indexes for the new table
-		sqlite.exec({
-			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
-		});
-
-		// Run ANALYZE on the new table
-		sqlite.exec({ sql: `ANALYZE ${tableName}` });
-
-		// Clear table cache to force refresh
-		tableCache.tables = null;
-
-		// Perform the INSERT OR REPLACE
-		const upsertSql = `
-			INSERT OR REPLACE INTO ${tableName} (
-				entity_id, file_id, version_id, plugin_key, snapshot_content,
-				schema_version, created_at, updated_at, inherited_from_version_id,
-				inheritance_delete_marker, change_id, commit_id
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`;
-
-		sqlite.exec({
-			sql: upsertSql,
-			bind: [
-				args.entity_id,
-				args.file_id,
-				args.version_id,
-				args.plugin_key,
-				args.snapshot_content,
-				args.schema_version,
-				args.created_at,
-				args.updated_at,
-				args.inherited_from_version_id,
-				args.inheritance_delete_marker,
-				args.change_id,
-				args.commit_id,
-			],
-		});
 	}
 
-	/**
-	 * Handles DELETE operations for the cache v2 virtual table.
-	 */
-	function handleDelete(oldPrimaryKey: string): void {
-		// Parse the composite primary key
-		// Format should be: "entity_id|schema_key|file_id|version_id"
-		const parts = oldPrimaryKey.split("|");
-		if (parts.length < 4) {
-			// Invalid format, silently return
-			return;
-		}
+	// Local reference to the global cache for vtable operations
+	const tableCache = stateCacheV2Tables;
 
-		const [entity_id, schema_key, file_id, version_id] = parts;
-
-		if (!schema_key) {
-			return; // Can't determine which table to delete from
-		}
-
-		const tableName = `internal_state_cache_${schema_key}`;
-
-		// Check if the physical table exists
-		const tableExists = sqlite.exec({
-			sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
-			bind: [tableName],
-			returnValue: "resultRows",
-		});
-
-		if (!tableExists || tableExists.length === 0) {
-			// Table doesn't exist, nothing to delete
-			return;
-		}
-
-		// Delete the row from the physical table
-		const deleteSql = `
-			DELETE FROM ${tableName} 
-			WHERE entity_id = ? AND file_id = ? AND version_id = ?
-		`;
-
-		sqlite.exec({
-			sql: deleteSql,
-			bind: [entity_id, file_id, version_id],
-		});
-	}
+	// Note: INSERT/UPDATE/DELETE operations are now handled by updateStateCacheV2()
+	// which writes directly to physical tables for better performance.
+	// This vtable is now read-only.
 
 	// Create virtual table using the proper SQLite WASM API
 	const capi = sqlite.sqlite3.capi;
@@ -449,11 +332,11 @@ export function applyStateCacheV2Schema(
 				// Map column index to value
 				let value;
 				switch (iCol) {
-					case 0: { // _pk - composite primary key (needs schema_key for DELETE)
-						const schemaKey = cursorState.tables[cursorState.currentTableIndex].replace(
-							"internal_state_cache_",
-							""
-						);
+					case 0: {
+						// _pk - composite primary key (needs schema_key for DELETE)
+						const schemaKey = cursorState.tables[
+							cursorState.currentTableIndex
+						].replace("internal_state_cache_", "");
 						value = `${row.entity_id}|${schemaKey}|${row.file_id}|${row.version_id}`;
 						break;
 					}
@@ -517,53 +400,9 @@ export function applyStateCacheV2Schema(
 				return capi.SQLITE_ERROR;
 			},
 
-			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
-				// Extract arguments using the proper SQLite WASM API
-				const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
-
-				// DELETE operation: nArg = 1, args[0] = old primary key
-				if (nArg === 1) {
-					handleDelete(args[0] as string);
-					return capi.SQLITE_OK;
-				}
-
-				// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new primary key
-				// UPDATE operation: nArg = N+2, args[0] = old primary key, args[1] = new primary key
-				const isInsert = args[0] === null;
-				const isUpdate = args[0] !== null;
-
-				if (!isInsert && !isUpdate) {
-					throw new Error("Invalid xUpdate operation");
-				}
-
-				// Extract column values
-				// For INSERT: args[0]=NULL, args[1]=NULL (new _pk), then column values starting at args[2]
-				// For UPDATE: args[0]=old_pk, args[1]=new_pk, then column values starting at args[2]
-				// Note: The HIDDEN _pk column value is at args[1] but we don't use it for INSERT
-				// Column order (starting at args[2]): entity_id, schema_key, file_id, version_id, plugin_key,
-				//               snapshot_content, schema_version, created_at, updated_at,
-				//               inherited_from_version_id, inheritance_delete_marker, change_id, commit_id
-				const columnValues = {
-					entity_id: args[3] as string,
-					schema_key: args[4] as string,
-					file_id: args[5] as string,
-					version_id: args[6] as string,
-					plugin_key: args[7] as string,
-					snapshot_content: args[8],
-					schema_version: args[9] as string,
-					created_at: args[10] as string,
-					updated_at: args[11] as string,
-					inherited_from_version_id: args[12] as string | null,
-					inheritance_delete_marker: args[13] as number,
-					change_id: args[14] as string | null,
-					commit_id: args[15] as string | null,
-				};
-
-				// Both INSERT and UPDATE use the same function
-				// INSERT OR REPLACE handles both cases
-				handleInsertUpdate(columnValues);
-
-				return capi.SQLITE_OK;
+			xUpdate: () => {
+				// All write operations should use updateStateCacheV2()
+				return capi.SQLITE_READONLY;
 			},
 		},
 		false
@@ -580,24 +419,25 @@ export function applyStateCacheV2Schema(
 // Helper function to get list of physical cache tables
 function getPhysicalTables(
 	sqlite: SqliteWasmDatabase,
-	cache: { tables: string[] | null; timestamp: number; TTL: number }
+	cache: Set<string>
 ): string[] {
-	// Use cache if available and not expired
-	if (cache.tables && Date.now() - cache.timestamp < cache.TTL) {
-		return cache.tables;
+	// Always refresh cache from database since direct function may have created new tables
+	const existingTables = sqlite.exec({
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
+		returnValue: "resultRows",
+	}) as any[];
+
+	if (existingTables) {
+		for (const row of existingTables) {
+			cache.add(row[0] as string);
+		}
 	}
 
-	const result = sqlite.exec({
-		sql: `SELECT name FROM sqlite_schema 
-		      WHERE type='table' AND name LIKE 'internal_state_cache_%'
-		      AND name != 'internal_state_cache'
-		      AND name != 'internal_state_cache_v2'`,
-		returnValue: "resultRows",
-	});
-
-	cache.tables = result ? result.map((row) => row[0] as string) : [];
-	cache.timestamp = Date.now();
-	return cache.tables;
+	// Convert Set to array and filter out base tables
+	return Array.from(cache).filter(
+		(name) =>
+			name !== "internal_state_cache" && name !== "internal_state_cache_v2"
+	);
 }
 
 // Helper function to load rows from next table

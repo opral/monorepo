@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { updateStateCacheV2 } from "./update-state-cache-v2.js";
+import { updateStateCacheV2 } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
 import { sql, type Kysely } from "kysely";
