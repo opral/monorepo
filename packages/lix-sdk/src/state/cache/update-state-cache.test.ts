@@ -541,9 +541,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 test("copied entries retain original commit_id during deletion copy-down", async () => {
 	const lix = await openLix({
-		keyValues: [
-			{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } },
-		],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Create inheritance chain: parent -> child1, child2

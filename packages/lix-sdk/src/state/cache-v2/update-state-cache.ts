@@ -3,7 +3,7 @@ import type { LixChangeRaw } from "../../change/schema.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { executeSync } from "../../database/execute-sync.js";
-import { stateCacheV2Tables } from "./schema.js";
+import { getStateCacheV2Tables } from "./schema.js";
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
@@ -103,8 +103,11 @@ export function updateStateCacheV2(args: {
  * Single source of truth for table creation and cache management.
  */
 function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
+	// Get cache for this Lix instance
+	const tableCache = getStateCacheV2Tables(lix);
+	
 	// Check cache first for performance
-	if (stateCacheV2Tables.has(tableName)) {
+	if (tableCache.has(tableName)) {
 		return;
 	}
 	
@@ -138,7 +141,7 @@ function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	lix.sqlite.exec({ sql: `ANALYZE ${tableName}` });
 	
 	// Update cache
-	stateCacheV2Tables.add(tableName);
+	tableCache.add(tableName);
 }
 
 function batchInsertDirectToTable(args: {

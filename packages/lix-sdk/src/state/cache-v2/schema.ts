@@ -36,14 +36,28 @@ const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	commit_id TEXT
 ) WITHOUT ROWID;`;
 
-// Global cache of physical tables - shared across vtable and direct access
-export const stateCacheV2Tables = new Set<string>();
+// Cache of physical tables scoped to each Lix instance
+// Using WeakMap ensures proper cleanup when Lix instances are garbage collected
+const stateCacheV2TablesMap = new WeakMap<any, Set<string>>();
+
+// Export a getter function to access the cache for a specific Lix instance
+export function getStateCacheV2Tables(lix: Pick<Lix, "sqlite">): Set<string> {
+	let cache = stateCacheV2TablesMap.get(lix);
+	if (!cache) {
+		cache = new Set<string>();
+		stateCacheV2TablesMap.set(lix, cache);
+	}
+	return cache;
+}
 
 export function applyStateCacheV2Schema(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
 	const { sqlite } = lix;
 
+	// Get or create cache for this Lix instance
+	const tableCache = getStateCacheV2Tables(lix);
+	
 	// Initialize cache with existing tables on startup
 	const existingTables = sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
@@ -52,12 +66,9 @@ export function applyStateCacheV2Schema(
 
 	if (existingTables) {
 		for (const row of existingTables) {
-			stateCacheV2Tables.add(row[0] as string);
+			tableCache.add(row[0] as string);
 		}
 	}
-
-	// Local reference to the global cache for vtable operations
-	const tableCache = stateCacheV2Tables;
 
 	// Note: INSERT/UPDATE/DELETE operations are now handled by updateStateCacheV2()
 	// which writes directly to physical tables for better performance.

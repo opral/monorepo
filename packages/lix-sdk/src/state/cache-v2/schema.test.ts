@@ -8,10 +8,6 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	// Clear the global table cache to avoid contamination from other tests
-	const { stateCacheV2Tables } = await import("./schema.js");
-	stateCacheV2Tables.clear();
-
 	// Use the direct function to insert rows into different schemas
 	updateStateCacheV2({
 		lix,
