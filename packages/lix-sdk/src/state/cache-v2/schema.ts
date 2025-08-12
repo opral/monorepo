@@ -41,19 +41,151 @@ export function applyStateCacheV2Schema(
 ): void {
 	const { sqlite } = lix;
 
-	// Create virtual table using the proper SQLite WASM API
-	const capi = sqlite.sqlite3.capi;
-	const module = new capi.sqlite3_module();
-
-	// Store cursor states - maps cursor pointer to state
-	const cursorStates = new Map();
-
 	// Cache of available physical tables - shared across all vtable operations
 	const tableCache = {
 		tables: null as string[] | null,
 		timestamp: 0,
 		TTL: 60000, // 60 seconds
 	};
+
+	/**
+	 * Handles INSERT/UPDATE operations for the cache v2 virtual table.
+	 * Creates physical tables as needed and inserts/updates data.
+	 */
+	function handleInsertUpdate(args: {
+		entity_id: string;
+		schema_key: string;
+		file_id: string;
+		version_id: string;
+		plugin_key: string;
+		snapshot_content: any;
+		schema_version: string;
+		created_at: string;
+		updated_at: string;
+		inherited_from_version_id: string | null;
+		inheritance_delete_marker: number;
+		change_id: string | null;
+		commit_id: string | null;
+	}): void {
+		const { schema_key } = args;
+
+		if (!schema_key) {
+			throw new Error("schema_key is required");
+		}
+
+		// Determine physical table name
+		const tableName = `internal_state_cache_${schema_key}`;
+
+		// Create table if it doesn't exist
+		const createTableSql = `
+			CREATE TABLE IF NOT EXISTS ${tableName} (
+				entity_id TEXT NOT NULL,
+				file_id TEXT NOT NULL,
+				version_id TEXT NOT NULL,
+				plugin_key TEXT NOT NULL,
+				snapshot_content BLOB,
+				schema_version TEXT NOT NULL,
+				created_at TEXT NOT NULL,
+				updated_at TEXT NOT NULL,
+				inherited_from_version_id TEXT,
+				inheritance_delete_marker INTEGER DEFAULT 0,
+				change_id TEXT,
+				commit_id TEXT,
+				PRIMARY KEY (entity_id, file_id, version_id)
+			) STRICT, WITHOUT ROWID;
+		`;
+
+		sqlite.exec({ sql: createTableSql });
+
+		// Create basic indexes for the new table
+		sqlite.exec({
+			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
+		});
+
+		// Run ANALYZE on the new table
+		sqlite.exec({ sql: `ANALYZE ${tableName}` });
+
+		// Clear table cache to force refresh
+		tableCache.tables = null;
+
+		// Perform the INSERT OR REPLACE
+		const upsertSql = `
+			INSERT OR REPLACE INTO ${tableName} (
+				entity_id, file_id, version_id, plugin_key, snapshot_content,
+				schema_version, created_at, updated_at, inherited_from_version_id,
+				inheritance_delete_marker, change_id, commit_id
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`;
+
+		sqlite.exec({
+			sql: upsertSql,
+			bind: [
+				args.entity_id,
+				args.file_id,
+				args.version_id,
+				args.plugin_key,
+				args.snapshot_content,
+				args.schema_version,
+				args.created_at,
+				args.updated_at,
+				args.inherited_from_version_id,
+				args.inheritance_delete_marker,
+				args.change_id,
+				args.commit_id,
+			],
+		});
+	}
+
+	/**
+	 * Handles DELETE operations for the cache v2 virtual table.
+	 */
+	function handleDelete(oldPrimaryKey: string): void {
+		// Parse the composite primary key
+		// Format should be: "entity_id|schema_key|file_id|version_id"
+		const parts = oldPrimaryKey.split("|");
+		if (parts.length < 4) {
+			// Invalid format, silently return
+			return;
+		}
+
+		const [entity_id, schema_key, file_id, version_id] = parts;
+
+		if (!schema_key) {
+			return; // Can't determine which table to delete from
+		}
+
+		const tableName = `internal_state_cache_${schema_key}`;
+
+		// Check if the physical table exists
+		const tableExists = sqlite.exec({
+			sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
+			bind: [tableName],
+			returnValue: "resultRows",
+		});
+
+		if (!tableExists || tableExists.length === 0) {
+			// Table doesn't exist, nothing to delete
+			return;
+		}
+
+		// Delete the row from the physical table
+		const deleteSql = `
+			DELETE FROM ${tableName} 
+			WHERE entity_id = ? AND file_id = ? AND version_id = ?
+		`;
+
+		sqlite.exec({
+			sql: deleteSql,
+			bind: [entity_id, file_id, version_id],
+		});
+	}
+
+	// Create virtual table using the proper SQLite WASM API
+	const capi = sqlite.sqlite3.capi;
+	const module = new capi.sqlite3_module();
+
+	// Store cursor states - maps cursor pointer to state
+	const cursorStates = new Map();
 
 	module.installMethods(
 		{
@@ -317,9 +449,14 @@ export function applyStateCacheV2Schema(
 				// Map column index to value
 				let value;
 				switch (iCol) {
-					case 0: // _pk - composite primary key
-						value = `${row.entity_id}|${row.file_id}|${row.version_id}`;
+					case 0: { // _pk - composite primary key (needs schema_key for DELETE)
+						const schemaKey = cursorState.tables[cursorState.currentTableIndex].replace(
+							"internal_state_cache_",
+							""
+						);
+						value = `${row.entity_id}|${schemaKey}|${row.file_id}|${row.version_id}`;
 						break;
+					}
 					case 1:
 						value = row.entity_id;
 						break;
@@ -386,8 +523,8 @@ export function applyStateCacheV2Schema(
 
 				// DELETE operation: nArg = 1, args[0] = old primary key
 				if (nArg === 1) {
-					// Delete not implemented for cache vtable
-					throw new Error("DELETE not supported on cache vtable");
+					handleDelete(args[0] as string);
+					return capi.SQLITE_OK;
 				}
 
 				// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new primary key
@@ -406,138 +543,25 @@ export function applyStateCacheV2Schema(
 				// Column order (starting at args[2]): entity_id, schema_key, file_id, version_id, plugin_key,
 				//               snapshot_content, schema_version, created_at, updated_at,
 				//               inherited_from_version_id, inheritance_delete_marker, change_id, commit_id
-				const entity_id = args[3];
-				const schema_key = args[4];
-				const file_id = args[5];
-				const version_id = args[6];
-				const plugin_key = args[7];
-				const snapshot_content = args[8];
-				const schema_version = args[9];
-				const created_at = args[10];
-				const updated_at = args[11];
-				const inherited_from_version_id = args[12];
-				const inheritance_delete_marker = args[13];
-				const change_id = args[14];
-				const commit_id = args[15];
+				const columnValues = {
+					entity_id: args[3] as string,
+					schema_key: args[4] as string,
+					file_id: args[5] as string,
+					version_id: args[6] as string,
+					plugin_key: args[7] as string,
+					snapshot_content: args[8],
+					schema_version: args[9] as string,
+					created_at: args[10] as string,
+					updated_at: args[11] as string,
+					inherited_from_version_id: args[12] as string | null,
+					inheritance_delete_marker: args[13] as number,
+					change_id: args[14] as string | null,
+					commit_id: args[15] as string | null,
+				};
 
-				if (!schema_key) {
-					throw new Error("schema_key is required");
-				}
-
-				// Determine physical table name
-				const tableName = `internal_state_cache_${schema_key}`;
-
-				// Create table if it doesn't exist (with retry logic for concurrent creation)
-				const createTableSql = `
-					CREATE TABLE IF NOT EXISTS ${tableName} (
-						entity_id TEXT NOT NULL,
-						file_id TEXT NOT NULL,
-						version_id TEXT NOT NULL,
-						plugin_key TEXT NOT NULL,
-						snapshot_content BLOB,
-						schema_version TEXT NOT NULL,
-						created_at TEXT NOT NULL,
-						updated_at TEXT NOT NULL,
-						inherited_from_version_id TEXT,
-						inheritance_delete_marker INTEGER DEFAULT 0,
-						change_id TEXT,
-						commit_id TEXT,
-						PRIMARY KEY (entity_id, file_id, version_id)
-					) STRICT, WITHOUT ROWID;
-				`;
-
-				sqlite.exec({ sql: createTableSql });
-
-				// Create basic indexes for the new table
-				sqlite.exec({
-					sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
-				});
-				sqlite.exec({
-					sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_entity_id ON ${tableName} (entity_id)`,
-				});
-
-				// Run ANALYZE on the new table
-				sqlite.exec({ sql: `ANALYZE ${tableName}` });
-
-				// Clear table cache to force refresh
-				tableCache.tables = null;
-
-				// Perform the actual INSERT or UPDATE
-				if (isInsert) {
-					const insertSql = `
-						INSERT INTO ${tableName} (
-							entity_id, file_id, version_id, plugin_key, snapshot_content,
-							schema_version, created_at, updated_at, inherited_from_version_id,
-							inheritance_delete_marker, change_id, commit_id
-						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-					`;
-
-					// Retry logic for concurrent table creation race
-					let retries = 3;
-					while (retries > 0) {
-						try {
-							sqlite.exec({
-								sql: insertSql,
-								bind: [
-									entity_id,
-									file_id,
-									version_id,
-									plugin_key,
-									snapshot_content,
-									schema_version,
-									created_at,
-									updated_at,
-									inherited_from_version_id,
-									inheritance_delete_marker,
-									change_id,
-									commit_id,
-								],
-							});
-							break;
-						} catch (error: any) {
-							if (error.message.includes("no such table") && retries > 1) {
-								// Table creation race - retry
-								sqlite.exec({ sql: createTableSql });
-								retries--;
-							} else {
-								throw error;
-							}
-						}
-					}
-				} else {
-					// UPDATE
-					const updateSql = `
-						UPDATE ${tableName} SET
-							plugin_key = ?,
-							snapshot_content = ?,
-							schema_version = ?,
-							created_at = ?,
-							updated_at = ?,
-							inherited_from_version_id = ?,
-							inheritance_delete_marker = ?,
-							change_id = ?,
-							commit_id = ?
-						WHERE entity_id = ? AND file_id = ? AND version_id = ?
-					`;
-
-					sqlite.exec({
-						sql: updateSql,
-						bind: [
-							plugin_key,
-							snapshot_content,
-							schema_version,
-							created_at,
-							updated_at,
-							inherited_from_version_id,
-							inheritance_delete_marker,
-							change_id,
-							commit_id,
-							entity_id,
-							file_id,
-							version_id,
-						],
-					});
-				}
+				// Both INSERT and UPDATE use the same function
+				// INSERT OR REPLACE handles both cases
+				handleInsertUpdate(columnValues);
 
 				return capi.SQLITE_OK;
 			},
