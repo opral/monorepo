@@ -128,9 +128,30 @@ You likely want to use one of the built-in strategies. Visit the [strategy docum
 
 ## Message keys and organization
 
-<doc-callout type="info">
-  Paraglide supports nested keys through bracket notation but recommends flat keys for better performance. Learn more about [message key structures and best practices](/m/gerre34r/library-inlang-paraglideJs/message-keys).
-</doc-callout>
+Paraglide supports nested keys through bracket notation but recommends flat keys due to management complexity. Learn more about [message key structures and best practices](/m/gerre34r/library-inlang-paraglideJs/message-keys).
+
+```json
+// messages/en.json
+{
+  // Recommended: flat keys with snake_case
+  "user_profile_title": "User Profile",
+  
+  // Also supported but not recommended: nested keys
+  "user": {
+    "profile": {
+      "title": "User Profile"
+    }
+  }
+}
+```
+
+```js
+import { m } from "./paraglide/messages.js";
+
+console.log(m.user_profile_title()); // "User Profile" (recommended)
+console.log(m["user.profile.title"]()); // "User Profile" (also works)
+```
+
 
 ## Dynamically calling messages
 
