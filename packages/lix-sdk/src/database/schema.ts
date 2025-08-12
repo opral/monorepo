@@ -35,6 +35,7 @@ import {
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
+import type { InternalStateCacheV2Table } from "../state/cache-v2/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
@@ -50,6 +51,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;
+	internal_state_cache_v2: InternalStateCacheV2Table;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
 	internal_resolved_state_all: InternalResolvedStateAllView;
 	internal_file_data_cache: InternalFileDataCacheTable;

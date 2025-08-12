@@ -19,6 +19,7 @@ import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
 import { populateStateCache } from "./cache/populate-state-cache.js";
 import type { Lix } from "../lix/open-lix.js";
+import { applyStateCacheV2Schema } from "./cache-v2/schema.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -47,6 +48,7 @@ export function applyStateDatabaseSchema(
 
 	applyMaterializeStateSchema(lix);
 	applyStateCacheSchema(lix);
+	applyStateCacheV2Schema(lix);
 	applyUntrackedStateSchema(lix);
 	applyResolvedStateView(lix);
 
