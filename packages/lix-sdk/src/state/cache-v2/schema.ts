@@ -566,7 +566,8 @@ function getPhysicalTables(
 	const result = sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' AND name LIKE 'internal_state_cache_%'
-		      AND name != 'internal_state_cache'`,
+		      AND name != 'internal_state_cache'
+		      AND name != 'internal_state_cache_v2'`,
 		returnValue: "resultRows",
 	});
 
