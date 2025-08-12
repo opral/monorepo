@@ -24,6 +24,10 @@ To add a new locale, add it to the `locales` array in `<project0name>.inlang/set
   This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. 
 </doc-callout>
 
+<doc-callout type="tip">
+  New to message IDs, aliases, and why we recommend flat keys (no nesting)? See [Messages, IDs, aliases, and nesting](./keys-ids-and-aliases.md).
+</doc-callout>
+
 Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.
 
 ```diff
