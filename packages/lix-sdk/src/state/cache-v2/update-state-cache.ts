@@ -149,41 +149,38 @@ function batchInsertDirectToTable(args: {
 	version_id: string;
 }): void {
 	const { lix, tableName, changes, commit_id, version_id } = args;
-	
-	// Use a transaction for better performance
-	lix.sqlite.exec({ sql: "BEGIN IMMEDIATE" });
-	
+
+	// Prepare statement once for all inserts
+	// Use proper UPSERT with ON CONFLICT instead of INSERT OR REPLACE
+	// jsonb() conversion is handled directly in the SQL
+	const stmt = lix.sqlite.prepare(`
+		INSERT INTO ${tableName} (
+			entity_id,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			inheritance_delete_marker,
+			change_id,
+			commit_id
+		) VALUES (?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET
+			plugin_key = excluded.plugin_key,
+			snapshot_content = excluded.snapshot_content,
+			schema_version = excluded.schema_version,
+			created_at = excluded.created_at,
+			updated_at = excluded.updated_at,
+			inherited_from_version_id = excluded.inherited_from_version_id,
+			inheritance_delete_marker = excluded.inheritance_delete_marker,
+			change_id = excluded.change_id,
+			commit_id = excluded.commit_id
+	`);
+
 	try {
-		// Prepare statement once for all inserts
-		// Use proper UPSERT with ON CONFLICT instead of INSERT OR REPLACE
-		// jsonb() conversion is handled directly in the SQL
-		const stmt = lix.sqlite.prepare(`
-			INSERT INTO ${tableName} (
-				entity_id,
-				file_id,
-				version_id,
-				plugin_key,
-				snapshot_content,
-				schema_version,
-				created_at,
-				updated_at,
-				inherited_from_version_id,
-				inheritance_delete_marker,
-				change_id,
-				commit_id
-			) VALUES (?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
-			ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET
-				plugin_key = excluded.plugin_key,
-				snapshot_content = excluded.snapshot_content,
-				schema_version = excluded.schema_version,
-				created_at = excluded.created_at,
-				updated_at = excluded.updated_at,
-				inherited_from_version_id = excluded.inherited_from_version_id,
-				inheritance_delete_marker = excluded.inheritance_delete_marker,
-				change_id = excluded.change_id,
-				commit_id = excluded.commit_id
-		`);
-		
 		for (const change of changes) {
 			stmt.bind([
 				change.entity_id,
@@ -202,12 +199,8 @@ function batchInsertDirectToTable(args: {
 			stmt.step();
 			stmt.reset();
 		}
-		
+	} finally {
 		stmt.finalize();
-		lix.sqlite.exec({ sql: "COMMIT" });
-	} catch (err) {
-		lix.sqlite.exec({ sql: "ROLLBACK" });
-		throw err;
 	}
 }
 
@@ -220,7 +213,7 @@ function batchDeleteDirectFromTable(args: {
 	version_id: string;
 }): void {
 	const { db, lix, tableName, changes, commit_id, version_id } = args;
-	
+
 	// Get child versions for copy-down operations
 	const childVersions = executeSync({
 		lix,
@@ -230,40 +223,38 @@ function batchDeleteDirectFromTable(args: {
 			.where("inherits_from_version_id", "=", version_id),
 	});
 
-	lix.sqlite.exec({ sql: "BEGIN IMMEDIATE" });
-	
-	try {
-		for (const change of changes) {
-			// Get existing entry
-			const result = lix.sqlite.exec({
-				sql: `SELECT * FROM ${tableName} 
-				      WHERE entity_id = ? AND file_id = ? AND version_id = ?
-				      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
-				bind: [change.entity_id, change.file_id, version_id],
-				returnValue: "resultRows",
-			}) as any[];
-			
-			const existingEntry = result?.[0];
-			
-			// Copy down to children if needed
-			if (existingEntry && childVersions.length > 0) {
-				const copyStmt = lix.sqlite.prepare(`
-					INSERT OR IGNORE INTO ${tableName} (
-						entity_id,
-						file_id,
-						version_id,
-						plugin_key,
-						snapshot_content,
-						schema_version,
-						created_at,
-						updated_at,
-						inherited_from_version_id,
-						inheritance_delete_marker,
-						change_id,
-						commit_id
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-				`);
-				
+	for (const change of changes) {
+		// Get existing entry
+		const result = lix.sqlite.exec({
+			sql: `SELECT * FROM ${tableName} 
+			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
+			      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
+			bind: [change.entity_id, change.file_id, version_id],
+			returnValue: "resultRows",
+		}) as any[];
+
+		const existingEntry = result?.[0];
+
+		// Copy down to children if needed
+		if (existingEntry && childVersions.length > 0) {
+			const copyStmt = lix.sqlite.prepare(`
+				INSERT OR IGNORE INTO ${tableName} (
+					entity_id,
+					file_id,
+					version_id,
+					plugin_key,
+					snapshot_content,
+					schema_version,
+					created_at,
+					updated_at,
+					inherited_from_version_id,
+					inheritance_delete_marker,
+					change_id,
+					commit_id
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`);
+
+			try {
 				for (const childVersion of childVersions) {
 					copyStmt.bind([
 						existingEntry[0], // entity_id
@@ -282,52 +273,47 @@ function batchDeleteDirectFromTable(args: {
 					copyStmt.step();
 					copyStmt.reset();
 				}
-				
+			} finally {
 				copyStmt.finalize();
 			}
-			
-			// Delete the entry
-			if (existingEntry) {
-				lix.sqlite.exec({
-					sql: `DELETE FROM ${tableName} 
-					      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
-					bind: [change.entity_id, change.file_id, version_id],
-				});
-			}
-			
-			// Insert tombstone
+		}
+
+		// Delete the entry
+		if (existingEntry) {
 			lix.sqlite.exec({
-				sql: `INSERT INTO ${tableName} (
-					entity_id,
-					file_id,
-					version_id,
-					plugin_key,
-					snapshot_content,
-					schema_version,
-					created_at,
-					updated_at,
-					inherited_from_version_id,
-					inheritance_delete_marker,
-					change_id,
-					commit_id
-				) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)`,
-				bind: [
-					change.entity_id,
-					change.file_id,
-					version_id,
-					change.plugin_key,
-					change.schema_version,
-					change.created_at,
-					change.created_at,
-					change.id,
-					commit_id,
-				],
+				sql: `DELETE FROM ${tableName} 
+				      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
+				bind: [change.entity_id, change.file_id, version_id],
 			});
 		}
-		
-		lix.sqlite.exec({ sql: "COMMIT" });
-	} catch (err) {
-		lix.sqlite.exec({ sql: "ROLLBACK" });
-		throw err;
+
+		// Insert tombstone
+		lix.sqlite.exec({
+			sql: `INSERT INTO ${tableName} (
+				entity_id,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				inheritance_delete_marker,
+				change_id,
+				commit_id
+			) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)`,
+			bind: [
+				change.entity_id,
+				change.file_id,
+				version_id,
+				change.plugin_key,
+				change.schema_version,
+				change.created_at,
+				change.created_at,
+				change.id,
+				commit_id,
+			],
+		});
 	}
 }

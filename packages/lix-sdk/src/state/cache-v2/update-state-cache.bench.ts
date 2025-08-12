@@ -112,7 +112,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		});
 	});
 
-	bench("Warm cache - 1000 records with 10K pre-existing rows", async () => {
+	bench("Warm cache - 1000 records with 100K pre-existing rows", async () => {
 		const lix = await openLix({
 			keyValues: [
 				{
@@ -123,19 +123,22 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		});
 
 		const ts = timestamp({ lix });
-		
-		// Pre-populate with 10K rows across 5 schemas (2K per schema)
-		const warmupChanges = generateChanges(10000, schemas, ts, {
-			prefix: "warmup",
-		});
-		updateStateCacheV2({
-			lix,
-			changes: warmupChanges,
-			commit_id: "warmup",
-			version_id: "v0",
-		});
 
-		// Now benchmark 1000 changes against the warm cache
+		// Pre-populate with 100K rows across 5 schemas (20K per schema)
+		// Process in 10K batches to avoid memory issues
+		for (let i = 0; i < 10; i++) {
+			const warmupChanges = generateChanges(10000, schemas, ts, {
+				prefix: `warmup-${i}`,
+			});
+			updateStateCacheV2({
+				lix,
+				changes: warmupChanges,
+				commit_id: `warmup-${i}`,
+				version_id: "v0",
+			});
+		}
+
+		// Now benchmark 1000 changes against the warm cache with deep B-trees
 		const changes = generateChanges(1000, schemas, ts, {
 			prefix: "bench",
 			deletionRatio: 0.05,
