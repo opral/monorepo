@@ -126,6 +126,12 @@ Important: If you route to a different locale, ensure a reload happens afterward
 
 You likely want to use one of the built-in strategies. Visit the [strategy documentation](./strategy.md) to learn more.
 
+## Message keys and organization
+
+<doc-callout type="info">
+  Paraglide supports nested keys through bracket notation but recommends flat keys for better performance. Learn more about [message key structures and best practices](/m/gerre34r/library-inlang-paraglideJs/message-keys).
+</doc-callout>
+
 ## Dynamically calling messages
 
 You can dynamically call messages by specifying what messages you expect beforehand. Specifying the messages beforehand preserves tree-shaking.

@@ -33,6 +33,7 @@
 		},
 		"Usage": {
 			"/basics": "./docs/basics.md",
+			"/message-keys": "./docs/message-keys.md",
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
 			"/file-formats": "./docs/file-formats.md",
