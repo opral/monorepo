@@ -14,11 +14,7 @@ import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import type {
-	StateView,
-	InternalChangeInTransactionTable,
-	StateAllView,
-} from "../state/schema.js";
+import type { StateView, StateAllView } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
@@ -34,12 +30,12 @@ import {
 } from "../thread/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
-import type { InternalStateCacheTable } from "../state/cache/schema.js";
 import type { InternalStateCacheV2Table } from "../state/cache/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
+import type { InternalChangeInTransactionTable } from "../state/transaction/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -50,7 +46,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_change_in_transaction: InternalChangeInTransactionTable;
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
-	internal_state_cache: InternalStateCacheTable;
 	internal_state_cache_v2: InternalStateCacheV2Table;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
 	internal_resolved_state_all: InternalResolvedStateAllView;

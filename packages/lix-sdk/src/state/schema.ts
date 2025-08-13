@@ -945,20 +945,3 @@ export type StateRowUpdate = Updateable<StateView>;
 export type StateAllRow = Selectable<StateAllView>;
 export type NewStateAllRow = Insertable<StateAllView>;
 export type StateAllRowUpdate = Updateable<StateAllView>;
-
-// Types for the internal_change TABLE
-export type InternalChangeInTransaction =
-	Selectable<InternalChangeInTransactionTable>;
-export type NewInternalChangeInTransaction =
-	Insertable<InternalChangeInTransactionTable>;
-export type InternalChangeInTransactionTable = {
-	id: Generated<string>;
-	entity_id: string;
-	schema_key: string;
-	schema_version: string;
-	file_id: string;
-	plugin_key: string;
-	version_id: string;
-	snapshot_content: Record<string, any> | null;
-	created_at: Generated<string>;
-};
