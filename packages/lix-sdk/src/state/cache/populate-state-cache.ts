@@ -1,7 +1,5 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixChangeRaw } from "../../change/schema.js";
-import { updateStateCacheV2 } from "./update-state-cache.js";
 import { getStateCacheV2Tables } from "./schema.js";
 
 export interface PopulateStateCacheV2Options {
@@ -13,19 +11,19 @@ export interface PopulateStateCacheV2Options {
 
 /**
  * Populates the state cache v2 from the materializer view.
- * 
+ *
  * This function reads from the materialized state and writes to the per-schema
  * physical cache tables using updateStateCacheV2 for optimal performance.
- * 
+ *
  * @param lix - The Lix instance with sqlite and db
  * @param options - Optional filters for selective population
  */
-export function populateStateCacheV2(
+export function populateStateCache(
 	lix: Pick<Lix, "sqlite" | "db">,
 	options: PopulateStateCacheV2Options = {}
 ): void {
 	const { sqlite } = lix;
-	
+
 	// Build WHERE clause based on options
 	const whereConditions: string[] = [];
 	const bindParams: any[] = [];
@@ -56,16 +54,16 @@ export function populateStateCacheV2(
 
 	// Clear existing cache entries for v2 tables that match the criteria
 	const tableCache = getStateCacheV2Tables(lix);
-	
+
 	if (options.schema_key) {
 		// If schema_key is specified, only clear that specific table
 		// Sanitize schema_key for table name - must match update-state-cache.ts
-		const sanitizedSchemaKey = options.schema_key.replace(/[^a-zA-Z0-9]/g, '_');
+		const sanitizedSchemaKey = options.schema_key.replace(/[^a-zA-Z0-9]/g, "_");
 		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 		if (tableCache.has(tableName)) {
 			const deleteConditions: string[] = [];
 			const deleteParams: any[] = [];
-			
+
 			if (options.version_id) {
 				deleteConditions.push("version_id = ?");
 				deleteParams.push(options.version_id);
@@ -78,7 +76,7 @@ export function populateStateCacheV2(
 				deleteConditions.push("file_id = ?");
 				deleteParams.push(options.file_id);
 			}
-			
+
 			if (deleteConditions.length > 0) {
 				sqlite.exec({
 					sql: `DELETE FROM ${tableName} WHERE ${deleteConditions.join(" AND ")}`,
@@ -94,10 +92,10 @@ export function populateStateCacheV2(
 		for (const tableName of tableCache) {
 			// Skip the virtual table itself
 			if (tableName === "internal_state_cache_v2") continue;
-			
+
 			const deleteConditions: string[] = [];
 			const deleteParams: any[] = [];
-			
+
 			if (options.version_id) {
 				deleteConditions.push("version_id = ?");
 				deleteParams.push(options.version_id);
@@ -110,7 +108,7 @@ export function populateStateCacheV2(
 				deleteConditions.push("file_id = ?");
 				deleteParams.push(options.file_id);
 			}
-			
+
 			if (deleteConditions.length > 0) {
 				// Check if table exists before deleting
 				const tableExists = sqlite.exec({
@@ -118,21 +116,25 @@ export function populateStateCacheV2(
 					bind: [tableName],
 					returnValue: "resultRows",
 				});
-				
+
 				if (tableExists && tableExists.length > 0) {
 					sqlite.exec({
 						sql: `DELETE FROM ${tableName} WHERE ${deleteConditions.join(" AND ")}`,
 						bind: deleteParams,
 					});
 				}
-			} else if (!options.version_id && !options.entity_id && !options.file_id) {
+			} else if (
+				!options.version_id &&
+				!options.entity_id &&
+				!options.file_id
+			) {
 				// Only clear entire tables if no filters specified
 				const tableExists = sqlite.exec({
 					sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
 					bind: [tableName],
 					returnValue: "resultRows",
 				});
-				
+
 				if (tableExists && tableExists.length > 0) {
 					sqlite.exec(`DELETE FROM ${tableName}`);
 				}
@@ -170,47 +172,128 @@ export function populateStateCacheV2(
 		return;
 	}
 
-	// Group results by version_id and commit_id for batch processing
-	const changesByVersionAndCommit = new Map<string, { 
-		commit_id: string; 
-		changes: LixChangeRaw[] 
-	}>();
+	// Group results by schema_key for batch processing
+	const rowsBySchema = new Map<string, any[]>();
 
 	for (const row of results) {
-		const key = `${row.version_id}:${row.commit_id}`;
-		
-		if (!changesByVersionAndCommit.has(key)) {
-			changesByVersionAndCommit.set(key, {
-				commit_id: row.commit_id,
-				changes: [],
-			});
+		if (!rowsBySchema.has(row.schema_key)) {
+			rowsBySchema.set(row.schema_key, []);
 		}
-
-		// Convert to LixChangeRaw format
-		// Use updated_at as the change timestamp since it represents when this state was last modified
-		const change: LixChangeRaw = {
-			id: row.change_id,
-			entity_id: row.entity_id,
-			schema_key: row.schema_key,
-			schema_version: row.schema_version,
-			file_id: row.file_id,
-			plugin_key: row.plugin_key,
-			snapshot_content: row.snapshot_content,
-			created_at: row.updated_at, // Use updated_at for the change timestamp
-		};
-
-		changesByVersionAndCommit.get(key)!.changes.push(change);
+		rowsBySchema.get(row.schema_key)!.push(row);
 	}
 
-	// Call updateStateCacheV2 for each version/commit combination
-	for (const [key, data] of changesByVersionAndCommit) {
-		const [version_id] = key.split(":");
-		
-		updateStateCacheV2({
-			lix,
-			changes: data.changes,
-			commit_id: data.commit_id,
-			version_id: version_id,
-		});
+	// Process each schema's rows directly to its physical table
+	for (const [schema_key, schemaRows] of rowsBySchema) {
+		// Sanitize schema_key for use in table name - must match update-state-cache.ts
+		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
+		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+
+		// Ensure table exists (creates if needed, updates cache)
+		ensureTableExists(sqlite, tableName);
+
+		// Batch insert with prepared statement
+		const stmt = sqlite.prepare(`
+			INSERT INTO ${tableName} (
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				inheritance_delete_marker,
+				change_id,
+				commit_id
+			) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET
+				schema_key = excluded.schema_key,
+				plugin_key = excluded.plugin_key,
+				snapshot_content = excluded.snapshot_content,
+				schema_version = excluded.schema_version,
+				-- Preserve both timestamps exactly as they are from the materializer
+				created_at = excluded.created_at,
+				updated_at = excluded.updated_at,
+				inherited_from_version_id = excluded.inherited_from_version_id,
+				inheritance_delete_marker = excluded.inheritance_delete_marker,
+				change_id = excluded.change_id,
+				commit_id = excluded.commit_id
+		`);
+
+		try {
+			for (const row of schemaRows) {
+				stmt.bind([
+					row.entity_id,
+					row.schema_key,
+					row.file_id,
+					row.version_id,
+					row.plugin_key,
+					row.snapshot_content, // jsonb() conversion happens in SQL
+					row.schema_version,
+					row.created_at, // Preserve original created_at
+					row.updated_at, // Preserve original updated_at
+					null, // inherited_from_version_id
+					0, // inheritance_delete_marker
+					row.change_id,
+					row.commit_id,
+				]);
+				stmt.step();
+				stmt.reset();
+			}
+		} finally {
+			stmt.finalize();
+		}
 	}
+}
+
+/**
+ * Ensures a table exists and updates the cache.
+ * Duplicated from update-state-cache.ts to avoid circular dependency.
+ */
+function ensureTableExists(
+	sqlite: SqliteWasmDatabase,
+	tableName: string
+): void {
+	// Get cache for this sqlite instance
+	const tableCache = getStateCacheV2Tables({ sqlite } as any);
+
+	// Check cache first for performance
+	if (tableCache.has(tableName)) {
+		return;
+	}
+
+	// Create table if it doesn't exist
+	const createTableSql = `
+		CREATE TABLE IF NOT EXISTS ${tableName} (
+			entity_id TEXT NOT NULL,
+			schema_key TEXT NOT NULL,
+			file_id TEXT NOT NULL,
+			version_id TEXT NOT NULL,
+			plugin_key TEXT NOT NULL,
+			snapshot_content BLOB,
+			schema_version TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			inherited_from_version_id TEXT,
+			inheritance_delete_marker INTEGER DEFAULT 0,
+			change_id TEXT,
+			commit_id TEXT,
+			PRIMARY KEY (entity_id, file_id, version_id)
+		) STRICT, WITHOUT ROWID;
+	`;
+
+	sqlite.exec({ sql: createTableSql });
+
+	// Create index on version_id for version-based queries
+	sqlite.exec({
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
+	});
+
+	// Initial ANALYZE for new tables
+	sqlite.exec({ sql: `ANALYZE ${tableName}` });
+
+	// Update cache
+	tableCache.add(tableName);
 }

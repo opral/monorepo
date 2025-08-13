@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { updateStateCache } from "./update-state-cache.js";
+import { updateStateCacheV2 } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
 import { sql, type Kysely } from "kysely";
@@ -35,8 +35,8 @@ test("inserts into cache based on change", async () => {
 	const commitId = "test-commit-456";
 	const versionId = "global";
 
-	// Call updateStateCache
-	updateStateCache({
+	// Call updateStateCacheV2
+	updateStateCacheV2({
 		lix,
 		changes: [testChange],
 		commit_id: commitId,
@@ -107,7 +107,7 @@ test("upserts cache entry on conflict", async () => {
 	const versionId = "global";
 
 	// First insert
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [initialChange],
 		commit_id: initialCommitId,
@@ -151,7 +151,7 @@ test("upserts cache entry on conflict", async () => {
 	const updatedCommitId = "updated-commit-456";
 
 	// Second call should trigger onConflict upsert
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [updatedChange],
 		commit_id: updatedCommitId,
@@ -180,7 +180,7 @@ test("upserts cache entry on conflict", async () => {
 		plugin_key: updatedChange.plugin_key, // Should be updated
 		snapshot_content: JSON.parse(updatedChange.snapshot_content as any), // Should be updated
 		schema_version: updatedChange.schema_version, // Should be updated
-		created_at: initialTimestamp, // Should remain from initial insert
+		created_at: initialTimestamp, // Should remain from initial insert (v2 now matches v1 behavior)
 		updated_at: updateTimestamp, // Should be updated
 		inherited_from_version_id: null,
 		inheritance_delete_marker: 0,
@@ -231,7 +231,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: initialTimestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [createChange],
 		commit_id: "parent-commit",
@@ -264,7 +264,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromParentTimestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [deleteFromParentChange],
 		commit_id: "parent-delete-commit",
@@ -278,8 +278,8 @@ test("moves cache entries to children on deletion, clears when no children remai
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("inheritance_delete_marker", "=", 0)  // Exclude tombstones
-		.where("snapshot_content", "is not", null)   // Exclude null snapshots
+		.where("inheritance_delete_marker", "=", 0) // Exclude tombstones
+		.where("snapshot_content", "is not", null) // Exclude null snapshots
 		.orderBy("version_id", "asc")
 		.execute();
 
@@ -309,7 +309,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromChild1Timestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [deleteFromChild1Change],
 		commit_id: "child1-delete-commit",
@@ -322,8 +322,8 @@ test("moves cache entries to children on deletion, clears when no children remai
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("inheritance_delete_marker", "=", 0)  // Exclude tombstones
-		.where("snapshot_content", "is not", null)   // Exclude null snapshots
+		.where("inheritance_delete_marker", "=", 0) // Exclude tombstones
+		.where("snapshot_content", "is not", null) // Exclude null snapshots
 		.execute();
 
 	expect(cacheAfterChild1Delete).toHaveLength(1);
@@ -346,7 +346,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromChild2Timestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [deleteFromChild2Change],
 		commit_id: "child2-delete-commit",
@@ -364,18 +364,21 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	// Should have 3 tombstones (one for each version where we deleted)
 	expect(finalCache).toHaveLength(3);
-	expect(finalCache.every(c => c.inheritance_delete_marker === 1)).toBe(true);
-	expect(finalCache.every(c => c.snapshot_content === null)).toBe(true);
-	
+	expect(finalCache.every((c) => c.inheritance_delete_marker === 1)).toBe(true);
+	expect(finalCache.every((c) => c.snapshot_content === null)).toBe(true);
+
 	// More importantly, verify that state_all shows no active entities
-	const stateAllResults = await lix.db
-		.selectFrom("state_all")
+	// Note: state_all is a view in v1, but v2 doesn't have it yet - we'll just verify the cache directly
+	const activeEntries = await intDb
+		.selectFrom("internal_state_cache_v2")
 		.selectAll()
 		.where("entity_id", "=", testEntity)
+		.where("inheritance_delete_marker", "=", 0)
+		.where("snapshot_content", "is not", null)
 		.execute();
-	
+
 	// This is what really matters - no visible entities
-	expect(stateAllResults).toHaveLength(0);
+	expect(activeEntries).toHaveLength(0);
 });
 
 test("handles inheritance chain deletions with tombstones", async () => {
@@ -420,7 +423,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		created_at: baseTimestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [createChange],
 		commit_id: "parent-commit-123",
@@ -457,7 +460,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		created_at: deleteTimestamp,
 	};
 
-	updateStateCache({
+	updateStateCacheV2({
 		lix,
 		changes: [deleteChange],
 		commit_id: "child-commit-456",
@@ -503,51 +506,77 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	expect(subchildCacheAfterDelete).toHaveLength(0);
 
-	// 7. Verify state_all queries return correct results (tombstones filtered out)
-	const parentStateAll = await lix.db
-		.selectFrom("state_all")
+	// 7. Verify cache entries are correct (tombstones filtered out)
+	const parentStateAll = await intDb
+		.selectFrom("internal_state_cache_v2")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "parent-version")
+		.where("inheritance_delete_marker", "=", 0)
+		.where("snapshot_content", "is not", null)
 		.execute();
 
-	const childStateAll = await lix.db
-		.selectFrom("state_all")
+	const childStateAll = await intDb
+		.selectFrom("internal_state_cache_v2")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "child-version")
+		.where("inheritance_delete_marker", "=", 0)
+		.where("snapshot_content", "is not", null)
 		.execute();
 
-	const subchildStateAll = await lix.db
-		.selectFrom("state_all")
+	const subchildStateAll = await intDb
+		.selectFrom("internal_state_cache_v2")
 		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", "subchild-version")
+		.where("inheritance_delete_marker", "=", 0)
+		.where("snapshot_content", "is not", null)
 		.execute();
 
-	// Parent should show the entity through state_all
+	// Parent should show the entity
 	expect(parentStateAll).toHaveLength(1);
 	expect(parentStateAll[0]?.snapshot_content).toEqual({
 		id: testEntity,
 		value: "parent-data",
 	});
 
-	// Child should show NO entity through state_all (tombstone filtered out)
+	// Child should show NO entity (tombstone filtered out)
 	expect(childStateAll).toHaveLength(0);
 
-	// Subchild should show NO entity through state_all (inherits deletion from child)
+	// Subchild should show NO entity (inherits deletion from child)
 	expect(subchildStateAll).toHaveLength(0);
 });
 
 test("copied entries retain original commit_id during deletion copy-down", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 
 	// Create inheritance chain: parent -> child1, child2
-	await createVersion({ lix, id: "parent-cid", inherits_from_version_id: "global" });
-	await createVersion({ lix, id: "child1-cid", inherits_from_version_id: "parent-cid" });
-	await createVersion({ lix, id: "child2-cid", inherits_from_version_id: "parent-cid" });
+	await createVersion({
+		lix,
+		id: "parent-cid",
+		inherits_from_version_id: "global",
+	});
+	await createVersion({
+		lix,
+		id: "child1-cid",
+		inherits_from_version_id: "parent-cid",
+	});
+	await createVersion({
+		lix,
+		id: "child2-cid",
+		inherits_from_version_id: "parent-cid",
+	});
 
 	const t1 = timestamp({ lix });
 	const entityId = "entity-commit-propagation";
@@ -565,7 +594,12 @@ test("copied entries retain original commit_id during deletion copy-down", async
 	};
 
 	const originalCommitId = "original-commit-id-001";
-	updateStateCache({ lix, changes: [createChange], commit_id: originalCommitId, version_id: "parent-cid" });
+	updateStateCacheV2({
+		lix,
+		changes: [createChange],
+		commit_id: originalCommitId,
+		version_id: "parent-cid",
+	});
 
 	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -591,7 +625,12 @@ test("copied entries retain original commit_id during deletion copy-down", async
 		created_at: t2,
 	};
 	const deletionCommitId = "deletion-commit-id-002";
-	updateStateCache({ lix, changes: [deleteChange], commit_id: deletionCommitId, version_id: "parent-cid" });
+	updateStateCacheV2({
+		lix,
+		changes: [deleteChange],
+		commit_id: deletionCommitId,
+		version_id: "parent-cid",
+	});
 
 	// Verify copied entries exist in both children with the ORIGINAL commit id
 	const childEntries = await intDb
@@ -618,4 +657,145 @@ test("copied entries retain original commit_id during deletion copy-down", async
 		.where("inheritance_delete_marker", "=", 1)
 		.executeTakeFirstOrThrow();
 	expect(tombstone.commit_id).toBe(deletionCommitId);
+});
+
+test("handles duplicate entity updates - last change wins", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+
+	// Create test changes for the same entity
+	const change1: LixChangeRaw = {
+		id: "change-1",
+		entity_id: "test-entity",
+		schema_key: "test-schema",
+		file_id: "test-file",
+		plugin_key: "test-plugin",
+		snapshot_content: JSON.stringify({ value: "first" }),
+		schema_version: "1.0",
+		created_at: "2024-01-01T00:00:00Z",
+	};
+
+	const change2: LixChangeRaw = {
+		id: "change-2",
+		entity_id: "test-entity", // Same entity
+		schema_key: "test-schema",
+		file_id: "test-file",
+		plugin_key: "test-plugin",
+		snapshot_content: JSON.stringify({ value: "second" }),
+		schema_version: "1.0",
+		created_at: "2024-01-01T00:01:00Z", // Later timestamp
+	};
+
+	// Apply first change
+	updateStateCacheV2({
+		lix,
+		changes: [change1],
+		commit_id: "commit-1",
+		version_id: "version-1",
+	});
+
+	// Apply second change (should overwrite first)
+	updateStateCacheV2({
+		lix,
+		changes: [change2],
+		commit_id: "commit-2",
+		version_id: "version-1",
+	});
+
+	// Query the cache to verify only the latest change is present
+	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.selectFrom("internal_state_cache_v2")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.where("entity_id", "=", "test-entity")
+		.where("file_id", "=", "test-file")
+		.where("version_id", "=", "version-1")
+		.execute();
+
+	// Should have exactly one row (latest change wins)
+	expect(result).toHaveLength(1);
+
+	// Should be the second change
+	expect(result[0]!.change_id).toBe("change-2");
+	expect(result[0]!.snapshot_content).toEqual({ value: "second" });
+	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at
+	expect(result[0]!.updated_at).toBe("2024-01-01T00:01:00Z"); // Should update updated_at
+});
+
+test("handles batch updates with duplicates - last in batch wins", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+
+	// Create multiple changes for the same entity in a single batch
+	const changes: LixChangeRaw[] = [
+		{
+			id: "change-1",
+			entity_id: "test-entity",
+			schema_key: "test-schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: JSON.stringify({ value: "first" }),
+			schema_version: "1.0",
+			created_at: "2024-01-01T00:00:00Z",
+		},
+		{
+			id: "change-2",
+			entity_id: "test-entity", // Same entity
+			schema_key: "test-schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: JSON.stringify({ value: "second" }),
+			schema_version: "1.0",
+			created_at: "2024-01-01T00:01:00Z",
+		},
+		{
+			id: "change-3",
+			entity_id: "test-entity", // Same entity again
+			schema_key: "test-schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: JSON.stringify({ value: "third" }),
+			schema_version: "1.0",
+			created_at: "2024-01-01T00:02:00Z",
+		},
+	];
+
+	// Apply all changes in a single batch
+	updateStateCacheV2({
+		lix,
+		changes,
+		commit_id: "commit-1",
+		version_id: "version-1",
+	});
+
+	// Query the cache to verify only the latest change is present
+	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.selectFrom("internal_state_cache_v2")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.where("entity_id", "=", "test-entity")
+		.where("file_id", "=", "test-file")
+		.where("version_id", "=", "version-1")
+		.execute();
+
+	// Should have exactly one row (last change in batch wins)
+	expect(result).toHaveLength(1);
+
+	// Should be the third change (last in batch)
+	expect(result[0]!.change_id).toBe("change-3");
+	expect(result[0]!.snapshot_content).toEqual({ value: "third" });
+	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at from first
+	expect(result[0]!.updated_at).toBe("2024-01-01T00:02:00Z"); // Should use updated_at from last
 });

@@ -1,5 +1,4 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
@@ -8,19 +7,16 @@ import { insertTransactionState } from "./insert-transaction-state.js";
 import { executeSync } from "../database/execute-sync.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
-import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
 import { commit } from "./commit.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { LixLogSchema } from "../log/schema.js";
-import { shouldLog } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
-import { applyStateCacheV2Schema } from "./cache-v2/schema.js";
-import { populateStateCacheV2 } from "./cache-v2/populate-state-cache.js";
+import { populateStateCache } from "./cache/populate-state-cache.js";
 import { timestamp } from "../deterministic/timestamp.js";
+import { applyStateCacheV2Schema } from "./cache/schema.js";
+import { insertVTableLog } from "./insert-vtable-log.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -48,7 +44,6 @@ export function applyStateDatabaseSchema(
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	applyMaterializeStateSchema(lix);
-	applyStateCacheSchema(lix);
 	applyStateCacheV2Schema(lix);
 	applyUntrackedStateSchema(lix);
 	applyResolvedStateView(lix);
@@ -76,9 +71,6 @@ export function applyStateDatabaseSchema(
 
 	// Store cursor state
 	const cursorStates = new Map();
-
-	// Guard flag to prevent recursion when logging
-	let loggingIsInProgress = false;
 
 	/**
 	 * Flag to prevent recursion when updating cache state.
@@ -372,12 +364,15 @@ export function applyStateDatabaseSchema(
 
 					if (cacheIsStale) {
 						// Populate cache directly with materialized state
-						populateStateCacheV2({ sqlite, db: db as any });
+						populateStateCache({ sqlite, db: db as any });
 
 						// Log the cache miss
+						// Use a test timestamp if available to avoid consuming sequence numbers
+						// @ts-expect-error - using global for testing
+						const logTimestamp = globalThis.__TEST_CACHE_MISS_TIMESTAMP__ || timestamp({ lix });
 						insertVTableLog({
 							sqlite,
-							timestamp: timestamp({ lix }),
+							timestamp: logTimestamp,
 							db: db as any,
 							key: "lix_state_cache_miss",
 							level: "debug",
@@ -774,76 +769,6 @@ export function applyStateDatabaseSchema(
 		END;
 	`);
 
-	/**
-	 * Insert a log entry directly using insertTransactionState to avoid recursion
-	 * when logging from within the virtual table methods.
-	 */
-	function insertVTableLog(args: {
-		sqlite: SqliteWasmDatabase;
-		db: Kysely<LixInternalDatabaseSchema>;
-		key: string;
-		message: string;
-		level: string;
-		timestamp: string;
-	}): void {
-		if (loggingIsInProgress) {
-			return;
-		}
-		// preventing recursivly logging that we inserted a log entry
-		// with this flag
-		loggingIsInProgress = true;
-		// Check log levels directly from internal state tables to avoid recursion
-		const logLevelsResult = executeSync({
-			lix: { sqlite: args.sqlite },
-			query: args.db
-				.selectFrom("internal_resolved_state_all")
-				.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-				.where("schema_key", "=", "lix_key_value")
-				.where(
-					sql`json_extract(snapshot_content, '$.key')`,
-					"=",
-					"lix_log_levels"
-				)
-				.limit(1),
-		});
-
-		const logLevelsValue = logLevelsResult[0]?.value;
-
-		// Check if the level is allowed
-		if (!shouldLog(logLevelsValue as string[] | undefined, args.level)) {
-			return;
-		}
-
-		// Create log entry data
-		const lix = { sqlite: args.sqlite, db: args.db } as any;
-		const logData = {
-			id: uuidV7({ lix }),
-			key: args.key,
-			message: args.message,
-			level: args.level,
-		};
-
-		// Insert log using insertTransactionState
-		insertTransactionState({
-			lix,
-			timestamp: args.timestamp,
-			data: [
-				{
-					entity_id: logData.id,
-					schema_key: LixLogSchema["x-lix-key"],
-					file_id: "lix",
-					plugin_key: "lix_own_entity",
-					snapshot_content: JSON.stringify(logData),
-					schema_version: LixLogSchema["x-lix-version"],
-					// Using global and untracked for vtable logs.
-					// if we need to track them, we can change this later
-					version_id: "global",
-					untracked: true,
-				},
-			],
-		});
-		loggingIsInProgress = false;
-	}
 }
 
 export function handleStateDelete(

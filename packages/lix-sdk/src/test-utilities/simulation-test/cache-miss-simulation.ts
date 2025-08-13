@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
+import { clearStateCache } from "../../state/cache/clear-state-cache.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 const CACHE_TIMESTAMP = "2099-12-31T23:59:59.999Z";
@@ -25,6 +26,10 @@ const wrappedMarkFresh = (args: any) => {
 export const cacheMissSimulation: SimulationTestDef = {
 	name: "cache miss",
 	setup: async (lix) => {
+		// Set global timestamp for cache miss logs to avoid consuming sequence numbers
+		// @ts-expect-error - using global for testing
+		globalThis.__TEST_CACHE_MISS_TIMESTAMP__ = CACHE_TIMESTAMP;
+
 		// Mock the cache marking functions to use our wrapped versions
 		vi.spyOn(cacheModule, "markStateCacheAsStale").mockImplementation(
 			wrappedMarkStale
@@ -42,13 +47,8 @@ export const cacheMissSimulation: SimulationTestDef = {
 
 			// Override execute
 			query.execute = async function (...args: any[]) {
-				// Clear cache before executing select
-				lix.sqlite.exec({
-					sql: "DELETE FROM internal_state_cache",
-					returnValue: "resultRows",
-				});
-
-				cacheModule.markStateCacheAsStale({ lix, timestamp: CACHE_TIMESTAMP });
+				// This forces re-materialization from changes
+				clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
 
 				// Call the original execute
 				return originalExecute.apply(this, args);

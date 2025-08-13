@@ -109,4 +109,3 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	expect(filteredRow).toHaveLength(1);
 	expect(filteredRow[0]?.entity_id).toBe("entity3");
 });
-

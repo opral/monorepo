@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { populateStateCacheV2 } from "./populate-state-cache.js";
+import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCacheV2 } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
@@ -88,7 +88,7 @@ test("populates v2 cache from materializer", async () => {
 	// we'll test the populate function with filters instead
 
 	// Test 1: Populate specific schema_key
-	populateStateCacheV2(lix, { schema_key: "lix_test" });
+	populateStateCache(lix, { schema_key: "lix_test" });
 
 	// The function should have cleared and re-populated lix_test table
 	// In real usage, it would read from materializer, but since we don't have
@@ -178,7 +178,7 @@ test("populates v2 cache with version filter", async () => {
 	expect(allData[1].version_id).toBe("version-2");
 
 	// Populate only version-1
-	populateStateCacheV2(lix, { version_id: "version-1" });
+	populateStateCache(lix, { version_id: "version-1" });
 
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
@@ -265,7 +265,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	expect(schemaC).toHaveLength(1);
 
 	// Populate with no filters (should clear all)
-	populateStateCacheV2(lix);
+	populateStateCache(lix);
 
 	// All tables should be empty now (no materializer data)
 	const schemaAAfter = lix.sqlite.exec({

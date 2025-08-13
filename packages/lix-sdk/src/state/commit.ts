@@ -17,7 +17,7 @@ import { handleStateDelete } from "./schema.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import type { LixCommitEdge } from "../commit/schema.js";
-import { updateStateCacheV2 } from "./cache-v2/update-state-cache.js";
+import { updateStateCacheV2 } from "./cache/update-state-cache.js";
 
 /**
  * Commits all pending changes from the transaction stage to permanent storage.

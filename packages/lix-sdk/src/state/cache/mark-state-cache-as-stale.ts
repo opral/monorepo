@@ -11,6 +11,8 @@ export function markStateCacheAsStale(args: {
 }): void {
 	// Set the cache stale flag to "true" in untracked state
 	const snapshotContent = JSON.stringify({ key: CACHE_STALE_KEY, value: true });
+	
+	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
 	updateUntrackedState({
 		lix: args.lix,
@@ -21,7 +23,7 @@ export function markStateCacheAsStale(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_content: snapshotContent,
 			schema_version: LixKeyValueSchema["x-lix-version"],
-			created_at: args.timestamp ?? timestamp({ lix: args.lix }),
+			created_at: ts,
 		},
 		version_id: "global",
 	});
@@ -36,6 +38,8 @@ export function markStateCacheAsFresh(args: {
 		key: CACHE_STALE_KEY,
 		value: false,
 	});
+	
+	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
 	updateUntrackedState({
 		lix: args.lix,
@@ -46,7 +50,7 @@ export function markStateCacheAsFresh(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_content: snapshotContent,
 			schema_version: LixKeyValueSchema["x-lix-version"],
-			created_at: args.timestamp ?? timestamp({ lix: args.lix }),
+			created_at: ts,
 		},
 		version_id: "global",
 	});

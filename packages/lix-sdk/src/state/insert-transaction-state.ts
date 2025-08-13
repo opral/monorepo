@@ -6,7 +6,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { updateUntrackedState } from "./untracked/update-untracked-state.js";
-import { updateStateCacheV2 } from "./cache-v2/update-state-cache.js";
+import { updateStateCacheV2 } from "./cache/update-state-cache.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;

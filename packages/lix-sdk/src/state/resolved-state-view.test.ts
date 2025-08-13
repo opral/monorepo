@@ -254,7 +254,7 @@ test("resolved state view generates correct composite keys", async () => {
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Import updateStateCacheV2 at the top of the test
-	const { updateStateCacheV2 } = await import("./cache-v2/update-state-cache.js");
+	const { updateStateCacheV2 } = await import("./cache/update-state-cache.js");
 
 	// Insert some test data into untracked state
 	const now = timestamp({ lix });
@@ -278,16 +278,18 @@ test("resolved state view generates correct composite keys", async () => {
 	// Insert some test data into state cache using updateStateCacheV2
 	updateStateCacheV2({
 		lix,
-		changes: [{
-			id: "change1",
-			entity_id: "entity2",
-			file_id: "file2",
-			schema_key: "test_schema",
-			plugin_key: "test_plugin",
-			snapshot_content: JSON.stringify({ test: "data2" }),
-			schema_version: "1.0",
-			created_at: timestamp({ lix }),
-		}],
+		changes: [
+			{
+				id: "change1",
+				entity_id: "entity2",
+				file_id: "file2",
+				schema_key: "test_schema",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ test: "data2" }),
+				schema_version: "1.0",
+				created_at: timestamp({ lix }),
+			},
+		],
 		commit_id: "changeset1",
 		version_id: "version2",
 	});
@@ -367,7 +369,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Import updateStateCacheV2 at the top of the test
-	const { updateStateCacheV2 } = await import("./cache-v2/update-state-cache.js");
+	const { updateStateCacheV2 } = await import("./cache/update-state-cache.js");
 
 	// Create parent and child versions
 	const parentVersionId = "parent_version";
@@ -409,16 +411,18 @@ test("resolved state view generates correct composite keys for inherited state",
 	// Insert data in parent version (cached) using updateStateCacheV2
 	updateStateCacheV2({
 		lix,
-		changes: [{
-			id: "change3",
-			entity_id: "inherited_entity",
-			schema_key: "test_schema",
-			file_id: "file3",
-			plugin_key: "test_plugin",
-			snapshot_content: JSON.stringify({ test: "inherited_data" }),
-			schema_version: "1.0",
-			created_at: timestamp({ lix }),
-		}],
+		changes: [
+			{
+				id: "change3",
+				entity_id: "inherited_entity",
+				schema_key: "test_schema",
+				file_id: "file3",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ test: "inherited_data" }),
+				schema_version: "1.0",
+				created_at: timestamp({ lix }),
+			},
+		],
 		commit_id: "changeset3",
 		version_id: parentVersionId,
 	});

@@ -50,15 +50,6 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 export function timestamp(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): string {
-	// TRACE: Log timestamp call with stack trace
-	if (process.env.TRACE_TIMESTAMP === "true") {
-		const stack = new Error().stack;
-		console.log("\n=== TIMESTAMP CALLED ===");
-		console.log("Stack trace:");
-		console.log(stack);
-		console.log("========================\n");
-	}
-	
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Check if timestamps are disabled in the config
