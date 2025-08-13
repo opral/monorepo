@@ -17,9 +17,10 @@ import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
-import { populateStateCache } from "./cache/populate-state-cache.js";
 import type { Lix } from "../lix/open-lix.js";
 import { applyStateCacheV2Schema } from "./cache-v2/schema.js";
+import { populateStateCacheV2 } from "./cache-v2/populate-state-cache.js";
+import { timestamp } from "../deterministic/timestamp.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -371,11 +372,12 @@ export function applyStateDatabaseSchema(
 
 					if (cacheIsStale) {
 						// Populate cache directly with materialized state
-						populateStateCache(sqlite);
+						populateStateCacheV2({ sqlite, db: db as any });
 
 						// Log the cache miss
 						insertVTableLog({
 							sqlite,
+							timestamp: timestamp({ lix }),
 							db: db as any,
 							key: "lix_state_cache_miss",
 							level: "debug",
@@ -492,6 +494,7 @@ export function applyStateDatabaseSchema(
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
+					const _timestamp = timestamp({ lix });
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 
@@ -503,7 +506,7 @@ export function applyStateDatabaseSchema(
 						}
 
 						// Use handleStateDelete for all cases - it handles both tracked and untracked
-						handleStateDelete(lix as any, oldPk);
+						handleStateDelete(lix as any, oldPk, _timestamp);
 
 						return capi.SQLITE_OK;
 					}
@@ -557,6 +560,7 @@ export function applyStateDatabaseSchema(
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
 						lix: lix as any,
+						timestamp: _timestamp,
 						data: [
 							{
 								entity_id: String(entity_id),
@@ -575,7 +579,7 @@ export function applyStateDatabaseSchema(
 					// The proper solution requires improving cache miss logic to handle commit sharing
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
-					// Handle cache copying for new versions that share commits
+					// Handle cache copying for new versions that share commits (v2 cache)
 					if (isInsert && String(schema_key) === "lix_version") {
 						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
@@ -586,7 +590,7 @@ export function applyStateDatabaseSchema(
 							const existingVersionsWithSameCommit = sqlite.exec({
 								sql: `
 									SELECT json_extract(snapshot_content, '$.id') as version_id
-									FROM internal_state_cache 
+									FROM internal_state_cache_v2 
 									WHERE schema_key = 'lix_version' 
 									  AND json_extract(snapshot_content, '$.commit_id') = ?
 									  AND json_extract(snapshot_content, '$.id') != ?
@@ -602,25 +606,50 @@ export function applyStateDatabaseSchema(
 							) {
 								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
 
-								// Copy cache entries from source version to new version
-								// IMPORTANT: When copying cache entries, we need to mark them as inherited
-								// if they don't have an inherited_from_version_id already
-								sqlite.exec({
-									sql: `
-										INSERT OR IGNORE INTO internal_state_cache 
-										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
-										SELECT 
-											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
-											CASE 
-												WHEN inherited_from_version_id IS NULL THEN ?
-												ELSE inherited_from_version_id
-											END as inherited_from_version_id,
-											inheritance_delete_marker, change_id, commit_id
-										FROM internal_state_cache
-										WHERE version_id = ? AND schema_key != 'lix_version'
-									`,
-									bind: [newVersionId, sourceVersionId, sourceVersionId],
-								});
+								// Get all unique schema keys from the source version
+								const schemaKeys = sqlite.exec({
+									sql: `SELECT DISTINCT schema_key FROM internal_state_cache_v2 WHERE version_id = ? AND schema_key != 'lix_version'`,
+									bind: [sourceVersionId],
+									returnValue: "resultRows",
+								}) as string[][];
+
+								// Copy cache entries for each schema key to the appropriate physical table
+								for (const row of schemaKeys || []) {
+									const sourceSchemaKey = row[0];
+									if (!sourceSchemaKey) continue;
+									const sanitizedSchemaKey = sourceSchemaKey.replace(
+										/[^a-zA-Z0-9]/g,
+										"_"
+									);
+									const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+
+									// Check if table exists first
+									const tableExists = sqlite.exec({
+										sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
+										bind: [tableName],
+										returnValue: "resultRows",
+									});
+
+									if (tableExists && tableExists.length > 0) {
+										// Copy entries from source version to new version using v2 cache structure
+										sqlite.exec({
+											sql: `
+												INSERT OR IGNORE INTO ${tableName} 
+												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
+												SELECT 
+													entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+													CASE 
+														WHEN inherited_from_version_id IS NULL THEN ?
+														ELSE inherited_from_version_id
+													END as inherited_from_version_id,
+													inheritance_delete_marker, change_id, commit_id
+												FROM ${tableName}
+												WHERE version_id = ?
+											`,
+											bind: [newVersionId, sourceVersionId, sourceVersionId],
+										});
+									}
+								}
 							}
 						}
 					}
@@ -633,6 +662,7 @@ export function applyStateDatabaseSchema(
 					insertVTableLog({
 						sqlite,
 						db: db as any,
+						timestamp: timestamp({ lix }),
 						key: "lix_state_xupdate_error",
 						level: "error",
 						message: `xUpdate error: ${errorMessage}`,
@@ -754,6 +784,7 @@ export function applyStateDatabaseSchema(
 		key: string;
 		message: string;
 		level: string;
+		timestamp: string;
 	}): void {
 		if (loggingIsInProgress) {
 			return;
@@ -795,6 +826,7 @@ export function applyStateDatabaseSchema(
 		// Insert log using insertTransactionState
 		insertTransactionState({
 			lix,
+			timestamp: args.timestamp,
 			data: [
 				{
 					entity_id: logData.id,
@@ -816,7 +848,8 @@ export function applyStateDatabaseSchema(
 
 export function handleStateDelete(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">,
-	primaryKey: string
+	primaryKey: string,
+	timestamp: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
@@ -859,6 +892,7 @@ export function handleStateDelete(
 			// For inherited untracked, create a tombstone to block inheritance
 			insertTransactionState({
 				lix,
+				timestamp,
 				data: [
 					{
 						entity_id: String(entity_id),
@@ -900,6 +934,7 @@ export function handleStateDelete(
 
 	insertTransactionState({
 		lix,
+		timestamp,
 		data: [
 			{
 				entity_id: String(entity_id),

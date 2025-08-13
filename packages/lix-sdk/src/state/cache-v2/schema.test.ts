@@ -47,10 +47,11 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 		version_id: "v1",
 	});
 
-	// Test 1: Select all rows from vtable
+	// Test 1: Select test rows from vtable (filter by our specific test data)
 	const allRows = await db
 		.selectFrom("internal_state_cache_v2")
 		.select(["entity_id", "schema_key", "file_id"])
+		.where("schema_key", "in", ["schema_a", "schema_b"])
 		.orderBy("entity_id")
 		.execute();
 

@@ -6,7 +6,7 @@ import { createVersion } from "../../version/create-version.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixChangeRaw } from "../../change/schema.js";
-import type { InternalStateCacheV2Table } from "./schema.js";
+import type { InternalStateCacheRow } from "../cache/schema.js";
 
 test("inserts into cache based on change", async () => {
 	const lix = await openLix({
@@ -73,7 +73,7 @@ test("inserts into cache based on change", async () => {
 		inheritance_delete_marker: 0,
 		change_id: testChange.id,
 		commit_id: commitId,
-	} satisfies InternalStateCacheV2Table);
+	} satisfies InternalStateCacheRow);
 });
 
 test("upserts cache entry on conflict", async () => {
@@ -180,13 +180,13 @@ test("upserts cache entry on conflict", async () => {
 		plugin_key: updatedChange.plugin_key, // Should be updated
 		snapshot_content: JSON.parse(updatedChange.snapshot_content as any), // Should be updated
 		schema_version: updatedChange.schema_version, // Should be updated
-		created_at: updateTimestamp, // In v2, INSERT OR REPLACE updates this
+		created_at: initialTimestamp, // Should remain from initial insert (v2 now matches v1 behavior)
 		updated_at: updateTimestamp, // Should be updated
 		inherited_from_version_id: null,
 		inheritance_delete_marker: 0,
 		change_id: updatedChange.id, // Should be updated
 		commit_id: updatedCommitId, // Should be updated
-	} satisfies InternalStateCacheV2Table);
+	} satisfies InternalStateCacheRow);
 });
 
 test("moves cache entries to children on deletion, clears when no children remain", async () => {
@@ -632,4 +632,145 @@ test("copied entries retain original commit_id during deletion copy-down", async
 		.where("inheritance_delete_marker", "=", 1)
 		.executeTakeFirstOrThrow();
 	expect(tombstone.commit_id).toBe(deletionCommitId);
+});
+
+test("handles duplicate entity updates - last change wins", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	
+	// Create test changes for the same entity
+	const change1: LixChangeRaw = {
+		id: "change-1",
+		entity_id: "test-entity",
+		schema_key: "test-schema",
+		file_id: "test-file",
+		plugin_key: "test-plugin",
+		snapshot_content: JSON.stringify({ value: "first" }),
+		schema_version: "1.0",
+		created_at: "2024-01-01T00:00:00Z",
+	};
+
+	const change2: LixChangeRaw = {
+		id: "change-2", 
+		entity_id: "test-entity", // Same entity
+		schema_key: "test-schema",
+		file_id: "test-file",
+		plugin_key: "test-plugin",
+		snapshot_content: JSON.stringify({ value: "second" }),
+		schema_version: "1.0",
+		created_at: "2024-01-01T00:01:00Z", // Later timestamp
+	};
+
+	// Apply first change
+	updateStateCacheV2({
+		lix,
+		changes: [change1],
+		commit_id: "commit-1",
+		version_id: "version-1",
+	});
+
+	// Apply second change (should overwrite first)
+	updateStateCacheV2({
+		lix,
+		changes: [change2],
+		commit_id: "commit-2", 
+		version_id: "version-1",
+	});
+
+	// Query the cache to verify only the latest change is present
+	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.selectFrom("internal_state_cache_v2")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.where("entity_id", "=", "test-entity")
+		.where("file_id", "=", "test-file")
+		.where("version_id", "=", "version-1")
+		.execute();
+
+	// Should have exactly one row (latest change wins)
+	expect(result).toHaveLength(1);
+	
+	// Should be the second change
+	expect(result[0]!.change_id).toBe("change-2");
+	expect(result[0]!.snapshot_content).toEqual({ value: "second" });
+	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at
+	expect(result[0]!.updated_at).toBe("2024-01-01T00:01:00Z"); // Should update updated_at
+});
+
+test("handles batch updates with duplicates - last in batch wins", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	
+	// Create multiple changes for the same entity in a single batch
+	const changes: LixChangeRaw[] = [
+		{
+			id: "change-1",
+			entity_id: "test-entity",
+			schema_key: "test-schema",
+			file_id: "test-file", 
+			plugin_key: "test-plugin",
+			snapshot_content: JSON.stringify({ value: "first" }),
+			schema_version: "1.0",
+			created_at: "2024-01-01T00:00:00Z",
+		},
+		{
+			id: "change-2",
+			entity_id: "test-entity", // Same entity
+			schema_key: "test-schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin", 
+			snapshot_content: JSON.stringify({ value: "second" }),
+			schema_version: "1.0",
+			created_at: "2024-01-01T00:01:00Z",
+		},
+		{
+			id: "change-3",
+			entity_id: "test-entity", // Same entity again
+			schema_key: "test-schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: JSON.stringify({ value: "third" }),
+			schema_version: "1.0", 
+			created_at: "2024-01-01T00:02:00Z",
+		}
+	];
+
+	// Apply all changes in a single batch
+	updateStateCacheV2({
+		lix,
+		changes,
+		commit_id: "commit-1",
+		version_id: "version-1",
+	});
+
+	// Query the cache to verify only the latest change is present
+	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.selectFrom("internal_state_cache_v2")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.where("entity_id", "=", "test-entity")
+		.where("file_id", "=", "test-file")
+		.where("version_id", "=", "version-1")
+		.execute();
+
+	// Should have exactly one row (last change in batch wins)
+	expect(result).toHaveLength(1);
+	
+	// Should be the third change (last in batch)
+	expect(result[0]!.change_id).toBe("change-3");
+	expect(result[0]!.snapshot_content).toEqual({ value: "third" });
+	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at from first
+	expect(result[0]!.updated_at).toBe("2024-01-01T00:02:00Z"); // Should use updated_at from last
 });

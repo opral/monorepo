@@ -17,7 +17,7 @@ import { handleStateDelete } from "./schema.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import type { LixCommitEdge } from "../commit/schema.js";
-import { updateStateCache } from "./cache/update-state-cache.js";
+import { updateStateCacheV2 } from "./cache-v2/update-state-cache.js";
 
 /**
  * Commits all pending changes from the transaction stage to permanent storage.
@@ -194,9 +194,9 @@ export function commit(args: {
 			string,
 			{ change_id: string; created_at: string }
 		>();
-		
+
 		// Batch update state cache for all changes at once
-		const changesForCache = changesForVersion.map(change => ({
+		const changesForCache = changesForVersion.map((change) => ({
 			id: change.id,
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
@@ -206,14 +206,14 @@ export function commit(args: {
 			snapshot_content: change.snapshot_content,
 			created_at: change.created_at,
 		}));
-		
-		updateStateCache({
+
+		updateStateCacheV2({
 			lix: args.lix,
 			changes: changesForCache,
 			commit_id: commitId,
 			version_id: version_id,
 		});
-		
+
 		// Track files that need lixcol cache updates
 		for (const change of changesForVersion) {
 			// IDEALLY WE WOULD HAVE A BEFORE_COMMIT HOOK
@@ -438,6 +438,7 @@ function createChangesetForTransaction(
 		insertTransactionState({
 			lix,
 			data: coreEntitiesData,
+			timestamp: _currentTime,
 			createChangeAuthors: false,
 		});
 
@@ -478,6 +479,7 @@ function createChangesetForTransaction(
 		insertTransactionState({
 			lix,
 			data: changesetElementsData,
+			timestamp: _currentTime,
 			createChangeAuthors: false,
 		});
 	}
@@ -631,7 +633,7 @@ function createChangesetForTransaction(
 
 		// Step 3: Delete all existing working change set elements at once
 		for (const existing of existingEntities) {
-			handleStateDelete(lix, existing._pk);
+			handleStateDelete(lix, existing._pk, _currentTime);
 		}
 
 		// Step 4: Batch create new working change set elements
@@ -687,6 +689,7 @@ function createChangesetForTransaction(
 			insertTransactionState({
 				lix,
 				data: newWorkingElements,
+				timestamp: _currentTime,
 				createChangeAuthors: false,
 			});
 		}

@@ -253,6 +253,9 @@ test("resolved state view generates correct composite keys", async () => {
 	const lix = await openLix({});
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
+	// Import updateStateCacheV2 at the top of the test
+	const { updateStateCacheV2 } = await import("./cache-v2/update-state-cache.js");
+
 	// Insert some test data into untracked state
 	const now = timestamp({ lix });
 	await lixInternalDb
@@ -272,25 +275,22 @@ test("resolved state view generates correct composite keys", async () => {
 		})
 		.execute();
 
-	// Insert some test data into state cache
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values({
+	// Insert some test data into state cache using updateStateCacheV2
+	updateStateCacheV2({
+		lix,
+		changes: [{
+			id: "change1",
 			entity_id: "entity2",
-			schema_key: "test_schema",
 			file_id: "file2",
+			schema_key: "test_schema",
 			plugin_key: "test_plugin",
-			snapshot_content: sql`jsonb(${JSON.stringify({ test: "data2" })})`,
+			snapshot_content: JSON.stringify({ test: "data2" }),
 			schema_version: "1.0",
-			version_id: "version2",
-			change_id: "change1",
-			inheritance_delete_marker: 0,
-			inherited_from_version_id: null,
-			commit_id: "changeset1",
 			created_at: timestamp({ lix }),
-			updated_at: timestamp({ lix }),
-		})
-		.execute();
+		}],
+		commit_id: "changeset1",
+		version_id: "version2",
+	});
 
 	// Query the resolved state view
 	const results = await lixInternalDb
@@ -366,69 +366,62 @@ test("resolved state view generates correct composite keys for inherited state",
 	const lix = await openLix({});
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
+	// Import updateStateCacheV2 at the top of the test
+	const { updateStateCacheV2 } = await import("./cache-v2/update-state-cache.js");
+
 	// Create parent and child versions
 	const parentVersionId = "parent_version";
 	const childVersionId = "child_version";
 
-	// Insert version records
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values([
+	// Insert version records using updateStateCacheV2
+	const versionTimestamp = timestamp({ lix });
+	updateStateCacheV2({
+		lix,
+		changes: [
 			{
+				id: "change1",
 				entity_id: parentVersionId,
 				schema_key: "lix_version",
 				file_id: "lix",
 				plugin_key: "lix",
-				snapshot_content: sql`jsonb(${JSON.stringify({ id: parentVersionId })})`,
+				snapshot_content: JSON.stringify({ id: parentVersionId }),
 				schema_version: "1.0",
-				version_id: "global",
-				change_id: "change1",
-				inheritance_delete_marker: 0,
-				inherited_from_version_id: null,
-				commit_id: "changeset1",
-				created_at: timestamp({ lix }),
-				updated_at: timestamp({ lix }),
+				created_at: versionTimestamp,
 			},
 			{
+				id: "change2",
 				entity_id: childVersionId,
 				schema_key: "lix_version",
 				file_id: "lix",
 				plugin_key: "lix",
-				snapshot_content: sql`jsonb(${JSON.stringify({
+				snapshot_content: JSON.stringify({
 					id: childVersionId,
 					inherits_from_version_id: parentVersionId,
-				})})`,
+				}),
 				schema_version: "1.0",
-				version_id: "global",
-				change_id: "change2",
-				inheritance_delete_marker: 0,
-				inherited_from_version_id: null,
-				commit_id: "changeset2",
-				created_at: timestamp({ lix }),
-				updated_at: timestamp({ lix }),
+				created_at: versionTimestamp,
 			},
-		])
-		.execute();
+		],
+		commit_id: "changeset1",
+		version_id: "global",
+	});
 
-	// Insert data in parent version (cached)
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values({
+	// Insert data in parent version (cached) using updateStateCacheV2
+	updateStateCacheV2({
+		lix,
+		changes: [{
+			id: "change3",
 			entity_id: "inherited_entity",
 			schema_key: "test_schema",
 			file_id: "file3",
 			plugin_key: "test_plugin",
-			snapshot_content: sql`jsonb(${JSON.stringify({ test: "inherited_data" })})`,
+			snapshot_content: JSON.stringify({ test: "inherited_data" }),
 			schema_version: "1.0",
-			version_id: parentVersionId,
-			change_id: "change3",
-			inheritance_delete_marker: 0,
-			inherited_from_version_id: null,
-			commit_id: "changeset3",
 			created_at: timestamp({ lix }),
-			updated_at: timestamp({ lix }),
-		})
-		.execute();
+		}],
+		commit_id: "changeset3",
+		version_id: parentVersionId,
+	});
 
 	// Insert data in parent version (untracked)
 	const untrackedTimestamp = timestamp({ lix });

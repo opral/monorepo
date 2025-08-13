@@ -59,7 +59,9 @@ export function populateStateCacheV2(
 	
 	if (options.schema_key) {
 		// If schema_key is specified, only clear that specific table
-		const tableName = `internal_state_cache_${options.schema_key}`;
+		// Sanitize schema_key for table name - must match update-state-cache.ts
+		const sanitizedSchemaKey = options.schema_key.replace(/[^a-zA-Z0-9]/g, '_');
+		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 		if (tableCache.has(tableName)) {
 			const deleteConditions: string[] = [];
 			const deleteParams: any[] = [];
@@ -185,6 +187,7 @@ export function populateStateCacheV2(
 		}
 
 		// Convert to LixChangeRaw format
+		// Use updated_at as the change timestamp since it represents when this state was last modified
 		const change: LixChangeRaw = {
 			id: row.change_id,
 			entity_id: row.entity_id,
@@ -193,7 +196,7 @@ export function populateStateCacheV2(
 			file_id: row.file_id,
 			plugin_key: row.plugin_key,
 			snapshot_content: row.snapshot_content,
-			created_at: row.created_at,
+			created_at: row.updated_at, // Use updated_at for the change timestamp
 		};
 
 		changesByVersionAndCommit.get(key)!.changes.push(change);

@@ -5,6 +5,8 @@ import type { Lix } from "../lix/open-lix.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import { timestamp } from "./timestamp.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -71,13 +73,13 @@ export function nextDeterministicSequenceNumber(args: {
 	if (!state) {
 		const [row] = executeSync({
 			lix: { sqlite: args.lix.sqlite },
-			// querying from key_value_all is fine here because its a view
-			// that hits the internal_state_all_untracked table
-			query: args.lix.db
-				.selectFrom("key_value_all")
-				.where("key", "=", "lix_deterministic_sequence_number")
-				.where("lixcol_version_id", "=", "global")
-				.select("value"),
+			// Use internal_resolved_state_all to avoid virtual table recursion
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.selectFrom("internal_resolved_state_all")
+				.where("entity_id", "=", "lix_deterministic_sequence_number")
+				.where("schema_key", "=", "lix_key_value")
+				.where("version_id", "=", "global")
+				.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
 		});
 
 		// The persisted value is the next counter to use

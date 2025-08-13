@@ -2,6 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
+import { timestamp } from "../deterministic/timestamp.js";
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns
@@ -38,6 +39,7 @@ bench("commit transaction with 100 rows", async () => {
 	insertTransactionState({
 		lix: lix as any,
 		data: multipleData,
+		timestamp: timestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states

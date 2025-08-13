@@ -1,11 +1,12 @@
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "../database/execute-sync.js";
-import { timestamp, uuidV7 } from "../deterministic/index.js";
+import { uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { updateUntrackedState } from "./untracked/update-untracked-state.js";
+import { updateStateCacheV2 } from "./cache-v2/update-state-cache.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
@@ -66,10 +67,10 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
 export function insertTransactionState(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	data: NewTransactionStateRow[];
-	timestamp?: string;
+	timestamp: string;
 	createChangeAuthors?: boolean;
 }): TransactionStateRow[] {
-	const _timestamp = args.timestamp || timestamp({ lix: args.lix as any });
+	const _timestamp = args.timestamp;
 
 	if (args.data.length === 0) {
 		return [];
@@ -178,49 +179,39 @@ export function insertTransactionState(args: {
 				),
 		});
 
-		// Batch insert/update cache
-		const cacheRows = dataWithChangeIds.map((data) => ({
+		// Batch insert/update cache using v2
+		// Convert to the format expected by updateStateCacheV2
+		const changesForV2 = dataWithChangeIds.map((data) => ({
+			id: data.change_id,
 			entity_id: data.entity_id,
 			schema_key: data.schema_key,
 			file_id: data.file_id,
 			plugin_key: data.plugin_key,
-			snapshot_content: data.snapshot_content
-				? sql`jsonb(${data.snapshot_content})`
-				: null,
+			snapshot_content: data.snapshot_content,
 			schema_version: data.schema_version,
-			version_id: data.version_id,
-			change_id: data.change_id,
-			inheritance_delete_marker: data.snapshot_content === null ? 1 : 0,
 			created_at: _timestamp,
-			updated_at: _timestamp,
-			inherited_from_version_id: null,
-			commit_id: "pending",
 		}));
 
-		executeSync({
-			lix: args.lix,
-			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-				.insertInto("internal_state_cache")
-				.values(cacheRows as any)
-				.onConflict((oc) =>
-					oc
-						.columns(["entity_id", "schema_key", "file_id", "version_id"])
-						.doUpdateSet((eb) => ({
-							plugin_key: eb.ref("excluded.plugin_key"),
-							snapshot_content: eb.ref("excluded.snapshot_content"),
-							schema_version: eb.ref("excluded.schema_version"),
-							updated_at: eb.ref("excluded.updated_at"),
-							change_id: eb.ref("excluded.change_id"),
-							inheritance_delete_marker: eb.ref(
-								"excluded.inheritance_delete_marker"
-							),
-							inherited_from_version_id: eb.ref(
-								"excluded.inherited_from_version_id"
-							),
-							commit_id: eb.ref("excluded.commit_id"),
-						}))
-				),
-		});
+		// Group by version_id for efficient batch processing
+		const changesByVersion = new Map<string, typeof changesForV2>();
+		for (const data of dataWithChangeIds) {
+			if (!changesByVersion.has(data.version_id)) {
+				changesByVersion.set(data.version_id, []);
+			}
+			const versionChanges = changesByVersion.get(data.version_id)!;
+			const changeIndex = dataWithChangeIds.indexOf(data);
+			versionChanges.push(changesForV2[changeIndex]!);
+		}
+
+		// Process each version's changes
+		for (const [version_id, changes] of changesByVersion) {
+			updateStateCacheV2({
+				lix: args.lix,
+				changes,
+				commit_id: "pending",
+				version_id,
+			});
+		}
 
 		// Handle change authors for tracked entities (if enabled)
 		if (args.createChangeAuthors !== false && dataWithChangeIds.length > 0) {

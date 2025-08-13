@@ -19,7 +19,7 @@ test("cache is stale after cache clear", async () => {
 		.execute();
 
 	const cache = await internalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_cache_v2")
 		.selectAll()
 		.execute();
 

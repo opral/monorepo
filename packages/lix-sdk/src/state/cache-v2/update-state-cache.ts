@@ -1,6 +1,7 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import type { Kysely } from "kysely";
+import { sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { getStateCacheV2Tables } from "./schema.js";
@@ -68,7 +69,9 @@ export function updateStateCacheV2(args: {
 
 	// Process each schema's changes directly to its physical table
 	for (const [schema_key, schemaChanges] of changesBySchema) {
-		const tableName = `internal_state_cache_${schema_key}`;
+		// Sanitize schema_key for use in table name - replace non-alphanumeric with underscore
+		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, '_');
+		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 		
 		// Ensure table exists (creates if needed, updates cache)
 		ensureTableExists(lix, tableName);
@@ -115,6 +118,7 @@ function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	const createTableSql = `
 		CREATE TABLE IF NOT EXISTS ${tableName} (
 			entity_id TEXT NOT NULL,
+			schema_key TEXT NOT NULL,
 			file_id TEXT NOT NULL,
 			version_id TEXT NOT NULL,
 			plugin_key TEXT NOT NULL,
@@ -159,6 +163,7 @@ function batchInsertDirectToTable(args: {
 	const stmt = lix.sqlite.prepare(`
 		INSERT INTO ${tableName} (
 			entity_id,
+			schema_key,
 			file_id,
 			version_id,
 			plugin_key,
@@ -170,12 +175,13 @@ function batchInsertDirectToTable(args: {
 			inheritance_delete_marker,
 			change_id,
 			commit_id
-		) VALUES (?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET
+			schema_key = excluded.schema_key,
 			plugin_key = excluded.plugin_key,
 			snapshot_content = excluded.snapshot_content,
 			schema_version = excluded.schema_version,
-			created_at = excluded.created_at,
+			-- Preserve original created_at, don't overwrite it
 			updated_at = excluded.updated_at,
 			inherited_from_version_id = excluded.inherited_from_version_id,
 			inheritance_delete_marker = excluded.inheritance_delete_marker,
@@ -187,6 +193,7 @@ function batchInsertDirectToTable(args: {
 		for (const change of changes) {
 			stmt.bind([
 				change.entity_id,
+				change.schema_key, // Add the original schema_key
 				change.file_id,
 				version_id,
 				change.plugin_key,
@@ -217,13 +224,14 @@ function batchDeleteDirectFromTable(args: {
 }): void {
 	const { db, lix, tableName, changes, commit_id, version_id } = args;
 
-	// Get child versions for copy-down operations
+	// Get child versions for copy-down operations using resolved view to avoid virtual table recursion
 	const childVersions = executeSync({
 		lix,
 		query: db
-			.selectFrom("version")
-			.select("id")
-			.where("inherits_from_version_id", "=", version_id),
+			.selectFrom("internal_resolved_state_all")
+			.select(sql`json_extract(snapshot_content, '$.id')`.as("id"))
+			.where("schema_key", "=", "lix_version")
+			.where(sql`json_extract(snapshot_content, '$.inherits_from_version_id')`, "=", version_id),
 	});
 
 	for (const change of changes) {
@@ -243,6 +251,7 @@ function batchDeleteDirectFromTable(args: {
 			const copyStmt = lix.sqlite.prepare(`
 				INSERT OR IGNORE INTO ${tableName} (
 					entity_id,
+					schema_key,
 					file_id,
 					version_id,
 					plugin_key,
@@ -254,24 +263,25 @@ function batchDeleteDirectFromTable(args: {
 					inheritance_delete_marker,
 					change_id,
 					commit_id
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			`);
 
 			try {
 				for (const childVersion of childVersions) {
 					copyStmt.bind([
 						existingEntry[0], // entity_id
-						existingEntry[1], // file_id
+						existingEntry[1], // schema_key
+						existingEntry[2], // file_id
 						childVersion.id,
-						existingEntry[3], // plugin_key
-						existingEntry[4], // snapshot_content
-						existingEntry[5], // schema_version
-						existingEntry[6], // created_at
-						existingEntry[7], // updated_at
+						existingEntry[4], // plugin_key
+						existingEntry[5], // snapshot_content
+						existingEntry[6], // schema_version
+						existingEntry[7], // created_at
+						existingEntry[8], // updated_at
 						version_id, // inherited_from_version_id
 						0, // inheritance_delete_marker
-						existingEntry[10], // change_id
-						existingEntry[11], // commit_id (preserve original)
+						existingEntry[11], // change_id
+						existingEntry[12], // commit_id (preserve original)
 					]);
 					copyStmt.step();
 					copyStmt.reset();
@@ -290,10 +300,11 @@ function batchDeleteDirectFromTable(args: {
 			});
 		}
 
-		// Insert tombstone
+		// Insert tombstone with UPSERT to handle existing entries
 		lix.sqlite.exec({
 			sql: `INSERT INTO ${tableName} (
 				entity_id,
+				schema_key,
 				file_id,
 				version_id,
 				plugin_key,
@@ -305,9 +316,20 @@ function batchDeleteDirectFromTable(args: {
 				inheritance_delete_marker,
 				change_id,
 				commit_id
-			) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)`,
+			) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)
+			ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET
+				schema_key = excluded.schema_key,
+				plugin_key = excluded.plugin_key,
+				snapshot_content = NULL,
+				schema_version = excluded.schema_version,
+				updated_at = excluded.updated_at,
+				inherited_from_version_id = NULL,
+				inheritance_delete_marker = 1,
+				change_id = excluded.change_id,
+				commit_id = excluded.commit_id`,
 			bind: [
 				change.entity_id,
+				change.schema_key,
 				change.file_id,
 				version_id,
 				change.plugin_key,

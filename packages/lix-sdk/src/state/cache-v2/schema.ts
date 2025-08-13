@@ -220,6 +220,7 @@ export function applyStateCacheV2Schema(
 					currentStmt: null, // Current prepared statement
 					currentRows: [], // Rows from current table
 					currentRowIndex: 0, // Current row in current table
+					filters: {}, // Filters from xFilter to use in xNext
 				});
 				return capi.SQLITE_OK;
 			},
@@ -258,10 +259,15 @@ export function applyStateCacheV2Schema(
 					}
 				}
 
+				// Store filters in cursor state for use in xNext
+				cursorState.filters = filters;
+
 				// Determine which tables to query
 				if (filters.schema_key) {
 					// Single schema_key - query single table
-					const tableName = `internal_state_cache_${filters.schema_key}`;
+					// Sanitize schema_key for table name - must match update-state-cache.ts
+					const sanitizedSchemaKey = String(filters.schema_key).replace(/[^a-zA-Z0-9]/g, '_');
+					const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 					// Check if table exists
 					const tableExists = sqlite.exec({
 						sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
@@ -288,9 +294,16 @@ export function applyStateCacheV2Schema(
 					cursorState.currentStmt = null;
 				}
 
-				// Load first table if available
+				// Load first non-empty table if available
 				if (cursorState.tables.length > 0) {
 					loadNextTable(sqlite, cursorState, filters);
+					// Skip empty tables at the start
+					while (cursorState.currentRows.length === 0 &&
+					       cursorState.currentTableIndex < cursorState.tables.length - 1) {
+						cursorState.currentTableIndex++;
+						cursorState.currentRowIndex = 0;
+						loadNextTable(sqlite, cursorState, filters);
+					}
 				}
 
 				return capi.SQLITE_OK;
@@ -301,7 +314,9 @@ export function applyStateCacheV2Schema(
 				cursorState.currentRowIndex++;
 
 				// Check if we need to move to next table
-				if (cursorState.currentRowIndex >= cursorState.currentRows.length) {
+				while (cursorState.currentRowIndex >= cursorState.currentRows.length &&
+				       cursorState.currentTableIndex < cursorState.tables.length) {
+					// Move to next table
 					cursorState.currentTableIndex++;
 					cursorState.currentRowIndex = 0;
 					cursorState.currentRows = [];
@@ -314,8 +329,9 @@ export function applyStateCacheV2Schema(
 
 					// Load next table if available
 					if (cursorState.currentTableIndex < cursorState.tables.length) {
-						// Pass empty filters since we're iterating through pre-filtered tables
-						loadNextTable(sqlite, cursorState, {});
+						// Use the stored filters from xFilter
+						loadNextTable(sqlite, cursorState, cursorState.filters || {});
+						// If the table we just loaded is also empty, continue loop
 					}
 				}
 
@@ -324,11 +340,22 @@ export function applyStateCacheV2Schema(
 
 			xEof: (pCursor: any) => {
 				const cursorState = cursorStates.get(pCursor);
-				return cursorState.currentTableIndex >= cursorState.tables.length ||
-					(cursorState.currentTableIndex === cursorState.tables.length - 1 &&
-						cursorState.currentRowIndex >= cursorState.currentRows.length)
-					? 1
-					: 0;
+				// Check if we've run out of tables entirely
+				if (cursorState.currentTableIndex >= cursorState.tables.length) {
+					return 1;
+				}
+				// Check if we're past the end of the current table's rows
+				// This handles both empty tables and exhausted tables
+				if (cursorState.currentRowIndex >= cursorState.currentRows.length) {
+					// If this is the last table and we're out of rows, we're at EOF
+					if (cursorState.currentTableIndex === cursorState.tables.length - 1) {
+						return 1;
+					}
+					// Otherwise, there might be more tables, so not EOF yet
+					// xNext will handle moving to the next table
+					return 0;
+				}
+				return 0;
 			},
 
 			xColumn: (pCursor: any, pContext: any, iCol: number) => {
@@ -345,20 +372,14 @@ export function applyStateCacheV2Schema(
 				switch (iCol) {
 					case 0: {
 						// _pk - composite primary key (needs schema_key for DELETE)
-						const schemaKey = cursorState.tables[
-							cursorState.currentTableIndex
-						].replace("internal_state_cache_", "");
-						value = `${row.entity_id}|${schemaKey}|${row.file_id}|${row.version_id}`;
+						value = `${row.entity_id}|${row.schema_key}|${row.file_id}|${row.version_id}`;
 						break;
 					}
 					case 1:
 						value = row.entity_id;
 						break;
-					case 2: // schema_key - derive from table name
-						value = cursorState.tables[cursorState.currentTableIndex].replace(
-							"internal_state_cache_",
-							""
-						);
+					case 2: // schema_key - read from row
+						value = row.schema_key;
 						break;
 					case 3:
 						value = row.file_id;
@@ -467,6 +488,9 @@ function loadNextTable(
 	let sql = `SELECT * FROM ${tableName}`;
 	const whereClauses: string[] = [];
 	const bindParams: any[] = [];
+
+	// Don't filter tombstones here - let the view decide what to filter
+	// This allows the resolved view to check for tombstones when needed
 
 	for (const [column, value] of Object.entries(filters)) {
 		if (column !== "schema_key") {

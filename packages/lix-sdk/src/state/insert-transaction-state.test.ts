@@ -4,6 +4,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
+import { timestamp } from "../deterministic/timestamp.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -26,6 +27,7 @@ test("creates tracked entity with pending change", async () => {
 	// Use insertPendingState function
 	insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-insert",
@@ -52,7 +54,7 @@ test("creates tracked entity with pending change", async () => {
 
 	// Check that the cache has been updated with a change_id
 	const cacheBeforeCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_cache_v2")
 		.where("entity_id", "=", "test-insert")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
@@ -155,6 +157,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-key",
@@ -171,7 +174,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 
 	// Verify tombstone exists in cache before commit
 	const tombstoneBeforeCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_cache_v2")
 		.where("entity_id", "=", "inherited-key")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
@@ -197,7 +200,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 
 	// After commit, verify tombstone still exists
 	const tombstoneAfterCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_cache_v2")
 		.where("entity_id", "=", "inherited-key")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
@@ -252,6 +255,7 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-untracked-key",
@@ -313,6 +317,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-untracked-timestamp",
@@ -374,6 +379,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 	// First insert a direct untracked entity
 	insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -423,6 +429,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 	// Now delete the direct untracked entity
 	insertTransactionState({
 		lix,
+		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -450,7 +457,7 @@ test("insertTransactionState deletes direct untracked entity on null snapshot_co
 
 	// Verify no tombstone was created in cache (direct untracked deletions don't need tombstones)
 	const cacheEntry = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_cache_v2")
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -627,12 +634,7 @@ test("updates working change set elements on entity updates (latest change wins)
 		.selectAll()
 		.execute();
 
-	expect(workingElementsAfterUpdate).toHaveLength(1);
-
-	// Verify the change_id was updated to latest change
-	expect(workingElementsAfterUpdate[0]!.change_id).not.toBe(initialChangeId);
-
-	// Verify the change_id points to the latest change
+	// DEBUG: Get all changes to see what changes exist
 	const allChanges = await lix.db
 		.selectFrom("change")
 		.where("entity_id", "=", "test_key")
@@ -640,6 +642,37 @@ test("updates working change set elements on entity updates (latest change wins)
 		.orderBy("created_at", "desc")
 		.selectAll()
 		.execute();
+
+	// DEBUG: Throw error with detailed info if we have the wrong count
+	if (workingElementsAfterUpdate.length !== 1) {
+		const debugInfo = {
+			workingElementsCount: workingElementsAfterUpdate.length,
+			workingElements: workingElementsAfterUpdate.map((element, i) => ({
+				index: i,
+				entity_id: element.entity_id,
+				change_id: element.change_id,
+				change_set_id: element.change_set_id,
+				schema_key: element.schema_key,
+				file_id: element.file_id
+			})),
+			allChangesCount: allChanges.length,
+			allChanges: allChanges.map((change, i) => ({
+				index: i,
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+				created_at: change.created_at,
+				snapshot_content: change.snapshot_content
+			}))
+		};
+		throw new Error(`DEBUG: Working change set elements not properly replaced. Expected 1 but got ${workingElementsAfterUpdate.length}. Details: ${JSON.stringify(debugInfo, null, 2)}`);
+	}
+
+	expect(workingElementsAfterUpdate).toHaveLength(1);
+
+	// Verify the change_id was updated to latest change
+	expect(workingElementsAfterUpdate[0]!.change_id).not.toBe(initialChangeId);
 
 	expect(allChanges).toHaveLength(2); // Insert + Update
 	expect(workingElementsAfterUpdate[0]!.change_id).toBe(allChanges[0]!.id); // Latest change
