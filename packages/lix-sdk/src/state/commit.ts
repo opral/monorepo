@@ -275,6 +275,31 @@ export function commit(args: {
 			version_id: version_id,
 		});
 
+		// Delete untracked state for any tracked changes that were committed
+		// This handles the transition from untracked to tracked state
+		if (context.originalChanges.length > 0) {
+			// Collect unique entities to delete from untracked
+			const untrackedToDelete = new Set<string>();
+			for (const change of context.originalChanges) {
+				const key = `${change.entity_id}|${change.schema_key}|${change.file_id}|${version_id}`;
+				untrackedToDelete.add(key);
+			}
+
+			// Delete untracked state for these entities
+			for (const key of untrackedToDelete) {
+				const [entity_id, schema_key, file_id, vid] = key.split("|");
+				executeSync({
+					lix: args.lix,
+					query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.deleteFrom("internal_state_all_untracked")
+						.where("entity_id", "=", entity_id!)
+						.where("schema_key", "=", schema_key!)
+						.where("file_id", "=", file_id!)
+						.where("version_id", "=", vid!),
+				});
+			}
+		}
+
 		// Track files that need lixcol cache updates
 		const fileChanges = new Map<
 			string,
