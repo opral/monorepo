@@ -3,7 +3,7 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
-import { insertTransactionState } from "./insert-transaction-state.js";
+import { insertTransactionState } from "./transaction/insert-transaction-state.js";
 import { executeSync } from "../database/execute-sync.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";

@@ -1,10 +1,10 @@
 import { sql, type Kysely } from "kysely";
-import { executeSync } from "../database/execute-sync.js";
-import { uuidV7 } from "../deterministic/index.js";
-import type { Lix } from "../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { NewStateAllRow, StateAllRow } from "./schema.js";
-import { LixChangeAuthorSchema } from "../change-author/schema.js";
+import { executeSync } from "../../database/execute-sync.js";
+import { uuidV7 } from "../../deterministic/index.js";
+import type { Lix } from "../../lix/open-lix.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import type { NewStateAllRow, StateAllRow } from "../schema.js";
+import { LixChangeAuthorSchema } from "../../change-author/schema.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;

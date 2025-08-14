@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { commit } from "./commit.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { commit } from "../commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { timestamp } from "../../deterministic/timestamp.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({

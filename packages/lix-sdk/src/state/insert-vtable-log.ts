@@ -1,4 +1,4 @@
-import { insertTransactionState } from "./insert-transaction-state.js";
+import { insertTransactionState } from "./transaction/insert-transaction-state.js";
 import { LixLogSchema, type LixLog } from "../log/schema.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { timestamp, type Lix } from "../index.js";
