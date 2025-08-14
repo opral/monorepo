@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import {
 	simulationTest,
 	normalSimulation,
@@ -6,11 +6,16 @@ import {
 } from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
+
 test("cache miss simulation test discovery", () => {});
 
 simulationTest(
 	"cache miss simulation clears cache before every select",
 	async ({ openSimulatedLix }) => {
+		// Spy on clearStateCache
+		const clearStateCacheSpy = vi.spyOn(clearCacheModule, "clearStateCache");
+
 		const lix = await openSimulatedLix({
 			keyValues: [
 				{
@@ -19,14 +24,11 @@ simulationTest(
 					lixcol_version_id: "global",
 					lixcol_untracked: true,
 				},
-				{
-					key: "lix_log_levels",
-					value: ["debug"],
-					lixcol_version_id: "global",
-					lixcol_untracked: true,
-				},
 			],
 		});
+
+		// Reset the spy counter after initialization
+		clearStateCacheSpy.mockClear();
 
 		// Insert test data
 		await lix.db
@@ -34,24 +36,17 @@ simulationTest(
 			.values([{ key: "test_1", value: "value_1" }])
 			.execute();
 
-		const timeBefore = timestamp({ lix });
-
+		// First select query
 		await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_1")
 			.selectAll()
 			.execute();
 
-		const cacheMissAfter = await lix.db
-			.selectFrom("log")
-			.where("key", "=", "lix_state_cache_miss")
-			.where("lixcol_created_at", ">", timeBefore)
-			.selectAll()
-			.execute();
+		// Second select query
+		await lix.db.selectFrom("key_value").selectAll().execute();
 
-		// greater than one because the entity view key value
-		// might fire off subqueries that also trigger cache misses
-		expect(cacheMissAfter.length).toBeGreaterThan(1);
+		expect(clearStateCacheSpy).toHaveBeenCalledTimes(2);
 	},
 	{
 		simulations: [cacheMissSimulation],

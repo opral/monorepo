@@ -2190,7 +2190,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],

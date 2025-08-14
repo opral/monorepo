@@ -367,13 +367,8 @@ export function applyStateDatabaseSchema(
 						populateStateCache({ sqlite, db: db as any });
 
 						// Log the cache miss
-						// Use a test timestamp if available to avoid consuming sequence numbers
-						// @ts-expect-error - using global for testing
-						const logTimestamp = globalThis.__TEST_CACHE_MISS_TIMESTAMP__ || timestamp({ lix });
 						insertVTableLog({
-							sqlite,
-							timestamp: logTimestamp,
-							db: db as any,
+							lix,
 							key: "lix_state_cache_miss",
 							level: "debug",
 							message: `Cache miss detected - materialized state`,
@@ -655,8 +650,7 @@ export function applyStateDatabaseSchema(
 
 					// Log error for debugging
 					insertVTableLog({
-						sqlite,
-						db: db as any,
+						lix,
 						timestamp: timestamp({ lix }),
 						key: "lix_state_xupdate_error",
 						level: "error",

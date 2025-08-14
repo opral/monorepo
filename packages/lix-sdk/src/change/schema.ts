@@ -63,7 +63,8 @@ export function applyChangeDatabaseSchema(
     t.created_at,
     json(t.snapshot_content) AS snapshot_content
   FROM 
-    internal_change_in_transaction AS t;
+    internal_change_in_transaction AS t
+  WHERE t.untracked = 0;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change

@@ -13,6 +13,7 @@ export function applyTransactionStateSchema(lix: Pick<Lix, "sqlite">): void {
     version_id TEXT NOT NULL,
     snapshot_content BLOB,
     created_at TEXT NOT NULL,
+    untracked INTEGER NOT NULL DEFAULT 0,
     --- NOTE schema_key must be unique per entity_id and file_id in the transaction
     UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
@@ -33,4 +34,5 @@ export type InternalChangeInTransactionTable = {
 	version_id: string;
 	snapshot_content: Record<string, any> | null;
 	created_at: Generated<string>;
+	untracked: number;
 };

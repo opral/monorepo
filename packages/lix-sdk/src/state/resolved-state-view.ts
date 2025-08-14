@@ -8,8 +8,9 @@ import type { Lix } from "../index.js";
  * issues when operations like lix_timestamp() need to query state.
  *
  * The "resolved state" combines:
- * - Untracked state (highest priority)
- * - Tracked state from cache
+ * - Transaction state (highest priority - pending changes)
+ * - Untracked state (second priority)
+ * - Tracked state from cache (third priority)
  * - Inherited state (resolved from parent versions)
  *
  * IMPORTANT: This view assumes that the cache is fresh. It does not check
@@ -32,11 +33,32 @@ export function applyResolvedStateView(
 			return encodeStatePkPart(String(part));
 		},
 	});
-	// Create the view that provides resolved state by combining cache and untracked state
+	// Create the view that provides resolved state by combining transaction, cache and untracked state
 	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
 		SELECT * FROM (
-			-- 1. Untracked state (highest priority)
+			-- 1. Transaction state (highest priority) - pending changes
+			SELECT 
+				'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
+				entity_id, 
+				schema_key, 
+				file_id, 
+				plugin_key,
+				json(snapshot_content) as snapshot_content, 
+				schema_version, 
+				version_id,
+				created_at, 
+				created_at as updated_at,
+				NULL as inherited_from_version_id, 
+				id as change_id, 
+				untracked,
+				'pending' as commit_id
+			FROM internal_change_in_transaction
+			WHERE snapshot_content IS NOT NULL     -- Hide deleted entries
+			
+			UNION ALL
+			
+			-- 2. Untracked state (second priority) - only if no transaction exists
 			SELECT 
 				'U' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
 				entity_id, 
@@ -55,10 +77,17 @@ export function applyResolvedStateView(
 			FROM internal_state_all_untracked
 			WHERE inheritance_delete_marker = 0  -- Hide tombstones
 			AND snapshot_content IS NOT NULL     -- Hide deleted entries
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_change_in_transaction txn
+				WHERE txn.entity_id = internal_state_all_untracked.entity_id
+				  AND txn.schema_key = internal_state_all_untracked.schema_key
+				  AND txn.file_id = internal_state_all_untracked.file_id
+				  AND txn.version_id = internal_state_all_untracked.version_id
+			)
 			
 			UNION ALL
 			
-			-- 2. Tracked state from cache (second priority) - only if no untracked exists
+			-- 3. Tracked state from cache (third priority) - only if no transaction or untracked exists
 			SELECT 
 				'C' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
 				entity_id, 
@@ -78,6 +107,13 @@ export function applyResolvedStateView(
 			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
 			AND snapshot_content IS NOT NULL     -- Hide tombstones (deleted entries)
 			AND NOT EXISTS (
+				SELECT 1 FROM internal_change_in_transaction txn
+				WHERE txn.entity_id = internal_state_cache_v2.entity_id
+				  AND txn.schema_key = internal_state_cache_v2.schema_key
+				  AND txn.file_id = internal_state_cache_v2.file_id
+				  AND txn.version_id = internal_state_cache_v2.version_id
+			)
+			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_all_untracked unt
 				WHERE unt.entity_id = internal_state_cache_v2.entity_id
 				  AND unt.schema_key = internal_state_cache_v2.schema_key
@@ -87,7 +123,7 @@ export function applyResolvedStateView(
 			
 			UNION ALL
 			
-			-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
+			-- 4. Inherited tracked state (fourth priority) - only if no transaction, untracked or tracked exists
 			SELECT 
 				'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) as _pk,
 				isc.entity_id, 
@@ -116,6 +152,14 @@ export function applyResolvedStateView(
 			-- Only inherit entities that exist (not deleted) in parent
 			AND isc.inheritance_delete_marker = 0
 			AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
+			-- Don't inherit if child has transaction state
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_change_in_transaction txn
+				WHERE txn.version_id = vi.version_id
+				  AND txn.entity_id = isc.entity_id
+				  AND txn.schema_key = isc.schema_key
+				  AND txn.file_id = isc.file_id
+			)
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_cache_v2 child_isc
@@ -135,7 +179,7 @@ export function applyResolvedStateView(
 			
 			UNION ALL
 			
-			-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
+			-- 5. Inherited untracked state (lowest priority) - only if no transaction, untracked or tracked exists
 			SELECT 
 				'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) as _pk,
 				unt.entity_id, 
@@ -164,6 +208,14 @@ export function applyResolvedStateView(
 			-- Only inherit entities that exist (not deleted) in parent
 			AND unt.inheritance_delete_marker = 0
 			AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
+			-- Don't inherit if child has transaction state
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_change_in_transaction txn
+				WHERE txn.version_id = vi.version_id
+				  AND txn.entity_id = unt.entity_id
+				  AND txn.schema_key = unt.schema_key
+				  AND txn.file_id = unt.file_id
+			)
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_cache_v2 child_isc
@@ -180,6 +232,61 @@ export function applyResolvedStateView(
 				  AND child_unt.schema_key = unt.schema_key
 				  AND child_unt.file_id = unt.file_id
 			)
+			
+			UNION ALL
+			
+			-- 6. Inherited transaction state (after inherited untracked) - only if no direct transaction exists
+			SELECT 
+				'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) as _pk,
+				txn.entity_id, 
+				txn.schema_key, 
+				txn.file_id, 
+				txn.plugin_key,
+				json(txn.snapshot_content) as snapshot_content, 
+				txn.schema_version, 
+				vi.version_id, -- Return child version_id 
+				txn.created_at, 
+				txn.created_at as updated_at,
+				vi.parent_version_id as inherited_from_version_id, 
+				txn.id as change_id, 
+				txn.untracked,
+				'pending' as commit_id
+			FROM (
+				-- Get version inheritance relationships from cache
+				SELECT DISTINCT
+					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+				FROM internal_state_cache_v2 isc_v
+				WHERE isc_v.schema_key = 'lix_version'
+			) vi
+			JOIN internal_change_in_transaction txn ON txn.version_id = vi.parent_version_id
+			WHERE vi.parent_version_id IS NOT NULL
+			-- Only inherit entities that exist (not deleted) in parent transaction
+			AND txn.snapshot_content IS NOT NULL
+			-- Don't inherit if child has direct transaction state
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_change_in_transaction child_txn
+				WHERE child_txn.version_id = vi.version_id
+				  AND child_txn.entity_id = txn.entity_id
+				  AND child_txn.schema_key = txn.schema_key
+				  AND child_txn.file_id = txn.file_id
+			)
+			-- Don't inherit if child has tracked state
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_state_cache_v2 child_isc
+				WHERE child_isc.version_id = vi.version_id
+				  AND child_isc.entity_id = txn.entity_id
+				  AND child_isc.schema_key = txn.schema_key
+				  AND child_isc.file_id = txn.file_id
+			)
+			-- Don't inherit if child has untracked state
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_state_all_untracked child_unt
+				WHERE child_unt.version_id = vi.version_id
+				  AND child_unt.entity_id = txn.entity_id
+				  AND child_unt.schema_key = txn.schema_key
+				  AND child_unt.file_id = txn.file_id
+			)
 		);
 	`);
 }
@@ -191,7 +298,7 @@ export type InternalResolvedStateAllView = Omit<
 > & {
 	/**
 	 * Primary key in format: tag~file_id~entity_id~version_id
-	 * where tag is U (untracked), UI (untracked inherited), C (cached), or CI (cached inherited)
+	 * where tag is T (transaction), U (untracked), UI (untracked inherited), C (cached), CI (cached inherited), or TI (transaction inherited)
 	 */
 	_pk: string;
 	// needs to manually stringify snapshot_content

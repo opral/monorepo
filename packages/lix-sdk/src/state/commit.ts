@@ -18,6 +18,7 @@ import { insertTransactionState } from "./insert-transaction-state.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import type { LixCommitEdge } from "../commit/schema.js";
 import { updateStateCacheV2 } from "./cache/update-state-cache.js";
+import { updateUntrackedState } from "./untracked/update-untracked-state.js";
 
 /**
  * Commits all pending changes from the transaction stage to permanent storage.
@@ -52,13 +53,37 @@ export function commit(args: {
 				"version_id",
 				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 				"created_at",
+				"untracked",
 			])
 			.orderBy("version_id"),
 	});
 
-	// Group changes by version_id
-	const changesByVersion = new Map<string, typeof transactionChanges>();
-	for (const change of transactionChanges) {
+	// Separate tracked and untracked changes
+	const trackedChanges = transactionChanges.filter((change) => change.untracked === 0);
+	const untrackedChanges = transactionChanges.filter((change) => change.untracked === 1);
+
+
+	// Process untracked changes by routing them to untracked state
+	for (const change of untrackedChanges) {
+		updateUntrackedState({
+			lix: args.lix,
+			change: {
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				snapshot_content: change.snapshot_content,
+				schema_version: change.schema_version,
+				created_at: change.created_at,
+			},
+			version_id: change.version_id,
+		});
+	}
+
+	// Group tracked changes by version_id
+	const changesByVersion = new Map<string, typeof trackedChanges>();
+	for (const change of trackedChanges) {
 		if (!changesByVersion.has(change.version_id)) {
 			changesByVersion.set(change.version_id, []);
 		}
@@ -101,16 +126,20 @@ export function commit(args: {
 					"version_id",
 					sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 					"created_at",
+					"untracked",
 				])
 				.where("version_id", "=", "global"),
 		});
 
-		if (globalChanges.length > 0) {
+		// Filter only tracked global changes for changesets
+		const trackedGlobalChanges = globalChanges.filter((change) => change.untracked === 0);
+
+		if (trackedGlobalChanges.length > 0) {
 			const globalCommitId = createChangesetForTransaction(
 				args.lix,
 				transactionTimestamp,
 				"global",
-				globalChanges
+				trackedGlobalChanges
 			);
 			commitIdsByVersion.set("global", globalCommitId);
 		}
@@ -137,6 +166,7 @@ export function commit(args: {
 							"version_id",
 							sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 							"created_at",
+							"untracked",
 						])
 						.where(
 							"id",
@@ -152,9 +182,12 @@ export function commit(args: {
 		...newChangesInTransaction,
 	];
 
-	// Batch insert all changes into the change table (instead of N+1 individual inserts)
-	if (allChangesToRealize.length > 0) {
-		const changeRows = allChangesToRealize.map((change) => ({
+	// Only insert tracked changes into the change table (untracked changes are handled separately)
+	const trackedChangesToRealize = allChangesToRealize.filter((change) => change.untracked === 0);
+
+	// Batch insert tracked changes into the change table (instead of N+1 individual inserts)
+	if (trackedChangesToRealize.length > 0) {
+		const changeRows = trackedChangesToRealize.map((change) => ({
 			id: change.id,
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
@@ -181,11 +214,11 @@ export function commit(args: {
 
 	// Update cache entries with the commit id only for entities that were changed
 	for (const [version_id, commitId] of commitIdsByVersion) {
-		// Get the changes for this version
-		// For global version, we need to use all changes in the version (including from second pass)
+		// Get the tracked changes for this version
+		// For global version, we need to use all tracked changes in the version (including from second pass)
 		const changesForVersion =
 			version_id === "global"
-				? allChangesToRealize.filter((c) => c.version_id === "global")
+				? trackedChangesToRealize.filter((c) => c.version_id === "global")
 				: changesByVersion.get(version_id)!;
 
 		// Only update cache entries for entities that were actually changed

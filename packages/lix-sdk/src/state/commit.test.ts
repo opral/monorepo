@@ -191,7 +191,6 @@ test("commit with no changes should not create a change set", async () => {
 		.selectFrom("change_set")
 		.selectAll()
 		.execute();
-
 	// Commit with no changes
 	commit({ lix });
 

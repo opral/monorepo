@@ -2,6 +2,9 @@ import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { type Kysely } from "kysely";
+import { insertTransactionState } from "../state/insert-transaction-state.js";
+import { commit } from "../state/commit.js";
+import { timestamp } from "../deterministic/timestamp.js";
 
 test("insert on the change view", async () => {
 	const lix = await openLix({});
@@ -362,4 +365,48 @@ test("JSON null handling: change view returns SQL NULL not JSON 'null' string fo
 	expect(change).toBeDefined();
 	expect(change?.snapshot_content).toBe(null);
 	expect(change?.snapshot_content).not.toBe("null");
+});
+
+test("untracked changes in transaction don't show up in change view after commit", async () => {
+	const lix = await openLix({});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Get initial change count
+	const initialChanges = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.orderBy("id")
+		.execute();
+
+	// Insert an untracked change into the transaction state
+	insertTransactionState({
+		lix,
+		timestamp: timestamp({ lix }),
+		data: [
+			{
+				entity_id: "test_untracked_entity",
+				schema_key: "lix_log",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: "test_log_id",
+					key: "test_log_key",
+					message: "This is an untracked log entry",
+					level: "debug",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: true, // This is the key - it's untracked
+			},
+		],
+	});
+
+	// Verify the change is in the transaction table
+	const changesAfter = await db
+		.selectFrom("change")
+		.selectAll()
+		.orderBy("id")
+		.execute();
+
+	expect(initialChanges).toEqual(changesAfter);
 });
