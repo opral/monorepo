@@ -1,6 +1,18 @@
 import type { Change } from "../change/index.js";
 
 /**
+ * Change data passed to state commit hooks.
+ * Extends the standard Change type with tracking information.
+ */
+export type StateCommitChange = Change & {
+	/**
+	 * Whether this change is untracked (bypasses change control).
+	 * Untracked changes are stored directly without creating change records.
+	 */
+	untracked?: number; // 0 for tracked, 1 for untracked
+};
+
+/**
  * Lix hooks system for listening to database lifecycle events.
  *
  * Hooks allow you to register callbacks that fire at specific points
@@ -27,7 +39,7 @@ export type LixHooks = {
 	 * unsubscribe();
 	 * ```
 	 */
-	onStateCommit: (handler: (data: { changes: Change[] }) => void) => () => void;
+	onStateCommit: (handler: (data: { changes: StateCommitChange[] }) => void) => () => void;
 
 	/**
 	 * Internal method for emitting events.
@@ -51,7 +63,7 @@ export function createHooks(): LixHooks {
 	const eventTarget = new EventTarget();
 
 	return {
-		onStateCommit(handler: (data: { changes: Change[] }) => void): () => void {
+		onStateCommit(handler: (data: { changes: StateCommitChange[] }) => void): () => void {
 			const wrappedHandler = (event: Event) => {
 				const customEvent = event as CustomEvent;
 				handler(customEvent.detail);

@@ -15,6 +15,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		account: { id: "test-account", name: "Test User" },
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
+
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// 1. Get the active version (should be 'global')
@@ -28,12 +29,13 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	expect(activeVersion).toBeDefined();
 	const versionId = activeVersion!.version_id;
 
-	// Get the previous change set for this version
+	// Get the previous commit for this version
 	const versionBefore = await db
 		.selectFrom("version")
 		.where("id", "=", versionId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
+
 	const previousCommitId = versionBefore.commit_id;
 
 	// 2. Insert transaction state
@@ -107,21 +109,20 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const newChangeSetId = newCommit.change_set_id;
-
 	// 5. Directly expect on the elements in this new set to contain the expected changes
 	const changeSetElements = await db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", newChangeSetId)
+		.innerJoin("change", "change_set_element.change_id", "change.id")
+		.where("change_set_id", "=", newCommit.change_set_id)
 		.selectAll()
 		.execute();
 
 	// We expect exactly these elements:
 	// - 2 user data changes (test-entity-1, test-entity-2)
 	// - 2 change authors (one for each user data change)
-	// - 1 changeset creation
 	// - 1 commit creation
 	// - 1 commit edge creation
+	// - 1 changeset creation
 	// - 1 version update
 	// Total: 8 elements
 	expect(changeSetElements.length).toBe(8);
