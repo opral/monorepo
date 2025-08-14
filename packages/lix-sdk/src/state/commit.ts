@@ -21,6 +21,23 @@ import { updateStateCacheV2 } from "./cache/update-state-cache.js";
 import { updateUntrackedState } from "./untracked/update-untracked-state.js";
 
 /**
+ * Context for tracking all changes and metadata for a specific version during commit.
+ *
+ * This consolidates all version-related data into a single structure to simplify
+ * state management and reduce the number of passes over the data.
+ */
+type VersionCommitContext = {
+	/** Original changes from the transaction table for this version */
+	originalChanges: any[];
+	/** Generated changes (changesets, commits, edges, etc.) for this version */
+	generatedChanges: LixChangeRaw[];
+	/** Entities to delete from the state */
+	deletions: Array<{ pk: string; timestamp: string }>;
+	/** The commit ID created for this version, null until generated */
+	commitId: string | null;
+};
+
+/**
  * Commits all transaction changes to permanent storage.
  *
  * This function handles the COMMIT stage of the state mutation flow. It takes
@@ -58,39 +75,22 @@ export function commit(args: {
 			]),
 	});
 
-	// Process all changes in one pass:
-	// 1. Separate tracked/untracked
-	// 2. Group tracked by version
-	// 3. Build flat list for later use
+	// Separate tracked and untracked changes
 	const trackedChangesByVersion = new Map<string, any[]>();
 	const untrackedChanges: any[] = [];
-	const allTrackedChanges: LixChangeRaw[] = [];
 
 	for (const change of allTransactionChanges) {
 		if (change.untracked === 1) {
 			untrackedChanges.push(change);
 		} else {
-			// Group tracked changes by version
 			if (!trackedChangesByVersion.has(change.version_id)) {
 				trackedChangesByVersion.set(change.version_id, []);
 			}
 			trackedChangesByVersion.get(change.version_id)!.push(change);
-
-			// Also add to flat list (without version_id)
-			allTrackedChanges.push({
-				id: change.id,
-				entity_id: change.entity_id,
-				schema_key: change.schema_key,
-				schema_version: change.schema_version,
-				file_id: change.file_id,
-				plugin_key: change.plugin_key,
-				created_at: change.created_at,
-				snapshot_content: change.snapshot_content,
-			});
 		}
 	}
 
-	// Process untracked changes
+	// Process all untracked changes immediately
 	for (const change of untrackedChanges) {
 		updateUntrackedState({
 			lix: args.lix,
@@ -108,100 +108,128 @@ export function commit(args: {
 		});
 	}
 
-	// Generate change control changes for each version and collect all changes
-	const commitIdsByVersion = new Map<string, string>();
-	// Accumulate generated changes keyed by their REAL version_id ("global", "boot_...", etc.)
-	const aggregatedGeneratedByVersion = new Map<string, LixChangeRaw[]>();
-	const allGeneratedChanges: LixChangeRaw[] = [];
-	const allDeletions: Array<{ pk: string; timestamp: string }> = [];
+	// Create version contexts from tracked changes
+	const versionContexts = new Map<string, VersionCommitContext>();
+	let hasNonGlobalChanges = false;
 
-	const accumulateGeneratedChanges = (
-		versionId: string,
-		changes: LixChangeRaw[]
-	) => {
-		if (!aggregatedGeneratedByVersion.has(versionId)) {
-			aggregatedGeneratedByVersion.set(versionId, []);
+	for (const [version_id, changes] of trackedChangesByVersion) {
+		if (version_id !== "global") {
+			hasNonGlobalChanges = true;
 		}
-		aggregatedGeneratedByVersion.get(versionId)!.push(...changes);
-	};
+		versionContexts.set(version_id, {
+			originalChanges: changes,
+			generatedChanges: [],
+			deletions: [],
+			commitId: null,
+		});
+	}
 
-	// Track version changes from non-global versions to include in global commit
-	const nonGlobalVersionChanges: Array<{
+	// If any non-global version has changes, global needs a commit too
+	if (hasNonGlobalChanges && !versionContexts.has("global")) {
+		versionContexts.set("global", {
+			originalChanges: [],
+			generatedChanges: [],
+			deletions: [],
+			commitId: null,
+		});
+	}
+
+	// Pass 1: Process all non-global versions
+	const versionChangesToInclude: Array<{
 		id: string;
 		entity_id: string;
 		schema_key: string;
 		file_id: string;
 	}> = [];
 
-	// Generate changesets for all versions
-	for (const [version_id, versionChanges] of trackedChangesByVersion) {
-		// Generate changeset, commit and edges for this version's transaction
+	for (const [version_id, context] of versionContexts) {
+		if (version_id === "global") continue;
+		
 		const result = generateChangeControlChanges(
 			args.lix,
 			transactionTimestamp,
 			version_id,
-			versionChanges
+			context.originalChanges,
+			undefined
 		);
-		commitIdsByVersion.set(version_id, result.commitId);
+		context.commitId = result.commitId;
+		context.deletions.push(...result.deletions);
 
-		// Re-key generated changes by their actual target version
+		// Aggregate generated changes into appropriate version contexts
 		for (const [versionKey, changes] of result.changesByVersion.entries()) {
-			accumulateGeneratedChanges(versionKey, changes);
-			allGeneratedChanges.push(...changes);
-
-			// Track version changes from non-global versions
-			if (version_id !== "global") {
-				for (const change of changes) {
-					if (
-						change.schema_key === "lix_version" &&
-						change.entity_id !== "global"
-					) {
-						nonGlobalVersionChanges.push({
-							id: change.id,
-							entity_id: change.entity_id,
-							schema_key: change.schema_key,
-							file_id: change.file_id,
-						});
-					}
-				}
+			if (!versionContexts.has(versionKey)) {
+				versionContexts.set(versionKey, {
+					originalChanges: [],
+					generatedChanges: [],
+					deletions: [],
+					commitId: null,
+				});
+			}
+			versionContexts.get(versionKey)!.generatedChanges.push(...changes);
+		}
+		
+		// Collect version changes for global commit
+		const versionChanges = result.changesByVersion.get("global") || [];
+		for (const change of versionChanges) {
+			if (change.schema_key === "lix_version" && change.entity_id !== "global") {
+				versionChangesToInclude.push({
+					id: change.id,
+					entity_id: change.entity_id,
+					schema_key: change.schema_key,
+					file_id: change.file_id,
+				});
 			}
 		}
-
-		allDeletions.push(...result.deletions);
 	}
-
-	// If any non-global version was updated, create a separate commit for global
-	// that tracks the version changes
-	const hasNonGlobalChanges = Array.from(trackedChangesByVersion.keys()).some(
-		(v) => v !== "global"
-	);
-	if (hasNonGlobalChanges && !trackedChangesByVersion.has("global")) {
-		// Generate a global commit that tracks the version updates from non-global versions
+	
+	// Pass 2: Process global version (if it has original changes or version changes were created)
+	const globalContext = versionContexts.get("global");
+	if (globalContext) {
 		const result = generateChangeControlChanges(
 			args.lix,
 			transactionTimestamp,
 			"global",
-			[], // No direct changes for global
-			nonGlobalVersionChanges // Include the version changes in the changeset
+			globalContext.originalChanges,
+			globalContext.originalChanges.length === 0 ? versionChangesToInclude : undefined
 		);
-		commitIdsByVersion.set("global", result.commitId);
+		globalContext.commitId = result.commitId;
+		globalContext.deletions.push(...result.deletions);
 
-		// Add the generated changes
-		for (const [versionKey, changes] of result.changesByVersion.entries()) {
-			accumulateGeneratedChanges(versionKey, changes);
-			allGeneratedChanges.push(...changes);
+		// Add generated changes back to global context
+		const globalChanges = result.changesByVersion.get("global");
+		if (globalChanges) {
+			globalContext.generatedChanges.push(...globalChanges);
 		}
+	}
 
-		allDeletions.push(...result.deletions);
+	// Collect all changes and deletions from contexts
+	const allChangesToFlush: LixChangeRaw[] = [];
+	const allDeletions: Array<{ pk: string; timestamp: string }> = [];
+
+	for (const context of versionContexts.values()) {
+		// Add original changes (need to transform to LixChangeRaw format)
+		for (const change of context.originalChanges) {
+			allChangesToFlush.push({
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				schema_version: change.schema_version,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				created_at: change.created_at,
+				snapshot_content: change.snapshot_content,
+			});
+		}
+		// Add generated changes
+		allChangesToFlush.push(...context.generatedChanges);
+		// Collect deletions
+		allDeletions.push(...context.deletions);
 	}
 
 	// Apply all deletions
 	for (const deletion of allDeletions) {
 		handleStateDelete(args.lix, deletion.pk, deletion.timestamp);
 	}
-
-	// Combine all tracked changes: original + generated
-	const allChangesToFlush = [...allTrackedChanges, ...allGeneratedChanges];
 
 	// Single batch insert of all tracked changes into the change table
 	if (allChangesToFlush.length > 0) {
@@ -220,27 +248,14 @@ export function commit(args: {
 		).deleteFrom("internal_change_in_transaction"),
 	});
 
-	// Update cache entries with the commit id only for entities that were changed
-	for (const [version_id, commitId] of commitIdsByVersion) {
-		// Get the tracked changes for this version
-		// Get the changes for this version from the original transaction changes
-		const changesForVersion = trackedChangesByVersion.get(version_id) || [];
+	// Update cache entries for each version
+	for (const [version_id, context] of versionContexts) {
+		// Skip if no commit was created for this version
+		if (!context.commitId) continue;
 
-		// Get the generated changes for this version from the aggregated map
-		const generatedChangesForVersion =
-			aggregatedGeneratedByVersion.get(version_id) || [];
-
-		// Only update cache entries for entities that were actually changed
-		// Track files that need lixcol cache updates
-		const fileChanges = new Map<
-			string,
-			{ change_id: string; created_at: string }
-		>();
-
-		// Batch update state cache for all changes at once
-		// Include BOTH the original transaction changes AND the generated changes
+		// Combine original and generated changes for this version
 		const allChangesForVersion = [
-			...changesForVersion.map((change: any) => ({
+			...context.originalChanges.map((change: any) => ({
 				id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
@@ -250,18 +265,24 @@ export function commit(args: {
 				snapshot_content: change.snapshot_content,
 				created_at: change.created_at,
 			})),
-			...generatedChangesForVersion,
+			...context.generatedChanges,
 		];
 
 		updateStateCacheV2({
 			lix: args.lix,
 			changes: allChangesForVersion,
-			commit_id: commitId,
+			commit_id: context.commitId,
 			version_id: version_id,
 		});
 
 		// Track files that need lixcol cache updates
-		for (const change of changesForVersion) {
+		const fileChanges = new Map<
+			string,
+			{ change_id: string; created_at: string }
+		>();
+
+		// Track files that need lixcol cache updates
+		for (const change of context.originalChanges) {
 			// IDEALLY WE WOULD HAVE A BEFORE_COMMIT HOOK
 			// THAT LIX EXPOSES TO KEEP THE LOGIC IN THE FILE STUFF
 			//
@@ -295,7 +316,7 @@ export function commit(args: {
 
 			for (const [fileId, { change_id, created_at }] of fileChanges) {
 				// Check if this is a deletion (file descriptor with null snapshot content)
-				const changeData = changesForVersion.find(
+				const changeData = context.originalChanges.find(
 					(c: any) => c.id === change_id
 				);
 				const isDeleted =
@@ -309,7 +330,7 @@ export function commit(args: {
 						file_id: fileId,
 						version_id: version_id,
 						latest_change_id: change_id,
-						latest_commit_id: commitId,
+						latest_commit_id: context.commitId!,
 						created_at: created_at,
 						updated_at: created_at,
 					});
@@ -357,7 +378,7 @@ export function commit(args: {
 	// Include ALL changes: tracked, untracked, and generated
 	const allChangesForHook: any[] = [
 		...allChangesToFlush, // All tracked changes (original + generated)
-		...untrackedChanges.map((c) => ({ ...c, untracked: 1 })), // Untracked with flag
+		...untrackedChanges, // Untracked changes already have the untracked: 1 flag
 	];
 	args.lix.hooks._emit("state_commit", { changes: allChangesForHook });
 
