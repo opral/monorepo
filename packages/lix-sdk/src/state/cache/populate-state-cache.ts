@@ -91,7 +91,7 @@ export function populateStateCache(
 		// Clear all v2 cache tables based on filters
 		for (const tableName of tableCache) {
 			// Skip the virtual table itself
-			if (tableName === "internal_state_cache_v2") continue;
+			if (tableName === "internal_state_cache") continue;
 
 			const deleteConditions: string[] = [];
 			const deleteParams: any[] = [];

@@ -71,7 +71,7 @@ test("creates tracked entity with pending change", async () => {
 
 	// Verify cache is NOT updated before commit (new behavior)
 	const cacheBeforeCommit = await lixInternalDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "test-insert")
 		.selectAll()
 		.execute();
@@ -94,7 +94,7 @@ test("creates tracked entity with pending change", async () => {
 
 	// After commit, verify cache has been updated
 	const cacheAfterCommit = await lixInternalDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "test-insert")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
@@ -203,7 +203,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 
 	// Verify tombstone exists in cache after commit
 	const tombstoneAfterCommit = await lixInternalDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "inherited-key")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
@@ -505,7 +505,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 
 	// Verify no tombstone was created in cache (direct untracked deletions don't need tombstones)
 	const cacheEntry = await lixInternalDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()

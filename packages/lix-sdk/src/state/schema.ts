@@ -580,7 +580,7 @@ export function applyStateDatabaseSchema(
 							const existingVersionsWithSameCommit = sqlite.exec({
 								sql: `
 									SELECT json_extract(snapshot_content, '$.id') as version_id
-									FROM internal_state_cache_v2 
+									FROM internal_state_cache 
 									WHERE schema_key = 'lix_version' 
 									  AND json_extract(snapshot_content, '$.commit_id') = ?
 									  AND json_extract(snapshot_content, '$.id') != ?
@@ -598,7 +598,7 @@ export function applyStateDatabaseSchema(
 
 								// Get all unique schema keys from the source version
 								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM internal_state_cache_v2 WHERE version_id = ? AND schema_key != 'lix_version'`,
+									sql: `SELECT DISTINCT schema_key FROM internal_state_cache WHERE version_id = ? AND schema_key != 'lix_version'`,
 									bind: [sourceVersionId],
 									returnValue: "resultRows",
 								}) as string[][];

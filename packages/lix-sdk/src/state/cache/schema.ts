@@ -445,11 +445,16 @@ export function applyStateCacheV2Schema(
 		false
 	);
 
-	capi.sqlite3_create_module(sqlite.pointer!, "cache_v2_vtab", module, 0);
+	capi.sqlite3_create_module(
+		sqlite.pointer!,
+		"internal_state_cache_vtable",
+		module,
+		0
+	);
 
 	// Create the virtual table
 	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_cache_v2 USING cache_v2_vtab();`
+		`CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_cache USING internal_state_cache_vtable();`
 	);
 }
 
@@ -472,8 +477,7 @@ function getPhysicalTables(
 
 	// Convert Set to array and filter out base tables
 	return Array.from(cache).filter(
-		(name) =>
-			name !== "internal_state_cache" && name !== "internal_state_cache_v2"
+		(name) => name !== "internal_state_cache" && name !== "internal_state_cache"
 	);
 }
 

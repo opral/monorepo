@@ -47,7 +47,7 @@ test("inserts into cache based on change", async () => {
 	const cacheEntries = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testChange.entity_id)
@@ -117,7 +117,7 @@ test("upserts cache entry on conflict", async () => {
 	// Verify initial entry exists
 	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 	const initialEntries = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", initialChange.entity_id)
@@ -160,7 +160,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// Verify only one entry exists (upserted, not inserted as new)
 	const finalEntries = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", updatedChange.entity_id)
@@ -242,7 +242,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	// Verify entity exists only in parent
 	const initialCache = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -274,7 +274,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	// Verify entity moved to child1 and child2, parent entry removed
 	// Note: We need to exclude tombstones (inheritance_delete_marker = 1) and entries without content
 	const cacheAfterParentDelete = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -318,7 +318,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 
 	// Verify only child2 has the entity now
 	const cacheAfterChild1Delete = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -356,7 +356,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	// Verify tombstones remain in cache (new behavior: tombstones are permanent)
 	// The important thing is that state_all queries show no active entities
 	const finalCache = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -370,7 +370,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 	// More importantly, verify that state_all shows no active entities
 	// Note: state_all is a view in v1, but v2 doesn't have it yet - we'll just verify the cache directly
 	const activeEntries = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.where("entity_id", "=", testEntity)
 		.where("inheritance_delete_marker", "=", 0)
@@ -434,7 +434,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 2. Verify entity exists in parent cache
 	const parentCache = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -469,7 +469,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 4. Verify parent still has the entity in cache
 	const parentCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -484,7 +484,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 5. Verify child version HAS a tombstone cache entry
 	const childCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -497,7 +497,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 6. Verify subchild version has NO direct cache entry (inherits deletion from child)
 	const subchildCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -508,7 +508,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 7. Verify cache entries are correct (tombstones filtered out)
 	const parentStateAll = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -518,7 +518,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.execute();
 
 	const childStateAll = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -528,7 +528,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.execute();
 
 	const subchildStateAll = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -605,7 +605,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 
 	// Sanity: parent entry has original commit id
 	const parentEntry = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.where("entity_id", "=", entityId)
 		.where("version_id", "=", "parent-cid")
@@ -634,7 +634,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 
 	// Verify copied entries exist in both children with the ORIGINAL commit id
 	const childEntries = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.where("entity_id", "=", entityId)
 		.where("inheritance_delete_marker", "=", 0)
@@ -650,7 +650,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 
 	// Tombstone in parent should have the deletion commit id
 	const tombstone = await intDb
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.where("entity_id", "=", entityId)
 		.where("version_id", "=", "parent-cid")
@@ -710,7 +710,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 
 	// Query the cache to verify only the latest change is present
 	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-entity")
@@ -782,7 +782,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 
 	// Query the cache to verify only the latest change is present
 	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache_v2")
+		.selectFrom("internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-entity")

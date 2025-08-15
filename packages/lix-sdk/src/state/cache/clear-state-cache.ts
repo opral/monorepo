@@ -27,7 +27,7 @@ export function clearStateCache(args: {
 		      WHERE type='table' 
 		      AND name LIKE 'internal_state_cache_%' 
 		      AND name != 'internal_state_cache'
-		      AND name != 'internal_state_cache_v2'`,
+		      AND name != 'internal_state_cache'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -36,7 +36,7 @@ export function clearStateCache(args: {
 		for (const row of existingTables) {
 			const tableName = row[0] as string;
 			// Skip virtual tables (shouldn't happen with our query, but be safe)
-			if (tableName === "internal_state_cache_v2") continue;
+			if (tableName === "internal_state_cache") continue;
 
 			args.lix.sqlite.exec({
 				sql: `DELETE FROM ${tableName}`,

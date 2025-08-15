@@ -46,7 +46,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_change_in_transaction: InternalChangeInTransactionTable;
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
-	internal_state_cache_v2: InternalStateCacheTable;
+	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
 	internal_resolved_state_all: InternalResolvedStateAllView;
 	internal_file_data_cache: InternalFileDataCacheTable;

@@ -103,22 +103,22 @@ export function applyResolvedStateView(
 				change_id, 
 				0 as untracked,
 				commit_id
-			FROM internal_state_cache_v2
+			FROM internal_state_cache
 			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
 			AND snapshot_content IS NOT NULL     -- Hide tombstones (deleted entries)
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_change_in_transaction txn
-				WHERE txn.entity_id = internal_state_cache_v2.entity_id
-				  AND txn.schema_key = internal_state_cache_v2.schema_key
-				  AND txn.file_id = internal_state_cache_v2.file_id
-				  AND txn.version_id = internal_state_cache_v2.version_id
+				WHERE txn.entity_id = internal_state_cache.entity_id
+				  AND txn.schema_key = internal_state_cache.schema_key
+				  AND txn.file_id = internal_state_cache.file_id
+				  AND txn.version_id = internal_state_cache.version_id
 			)
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_all_untracked unt
-				WHERE unt.entity_id = internal_state_cache_v2.entity_id
-				  AND unt.schema_key = internal_state_cache_v2.schema_key
-				  AND unt.file_id = internal_state_cache_v2.file_id
-				  AND unt.version_id = internal_state_cache_v2.version_id
+				WHERE unt.entity_id = internal_state_cache.entity_id
+				  AND unt.schema_key = internal_state_cache.schema_key
+				  AND unt.file_id = internal_state_cache.file_id
+				  AND unt.version_id = internal_state_cache.version_id
 			)
 			
 			UNION ALL
@@ -144,10 +144,10 @@ export function applyResolvedStateView(
 				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache_v2 isc_v
+				FROM internal_state_cache isc_v
 				WHERE isc_v.schema_key = 'lix_version'
 			) vi
-			JOIN internal_state_cache_v2 isc ON isc.version_id = vi.parent_version_id
+			JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent
 			AND isc.inheritance_delete_marker = 0
@@ -162,7 +162,7 @@ export function applyResolvedStateView(
 			)
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_cache_v2 child_isc
+				SELECT 1 FROM internal_state_cache child_isc
 				WHERE child_isc.version_id = vi.version_id
 				  AND child_isc.entity_id = isc.entity_id
 				  AND child_isc.schema_key = isc.schema_key
@@ -200,7 +200,7 @@ export function applyResolvedStateView(
 				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache_v2 isc_v
+				FROM internal_state_cache isc_v
 				WHERE isc_v.schema_key = 'lix_version'
 			) vi
 			JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
@@ -218,7 +218,7 @@ export function applyResolvedStateView(
 			)
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_cache_v2 child_isc
+				SELECT 1 FROM internal_state_cache child_isc
 				WHERE child_isc.version_id = vi.version_id
 				  AND child_isc.entity_id = unt.entity_id
 				  AND child_isc.schema_key = unt.schema_key
@@ -256,7 +256,7 @@ export function applyResolvedStateView(
 				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache_v2 isc_v
+				FROM internal_state_cache isc_v
 				WHERE isc_v.schema_key = 'lix_version'
 			) vi
 			JOIN internal_change_in_transaction txn ON txn.version_id = vi.parent_version_id
@@ -273,7 +273,7 @@ export function applyResolvedStateView(
 			)
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_cache_v2 child_isc
+				SELECT 1 FROM internal_state_cache child_isc
 				WHERE child_isc.version_id = vi.version_id
 				  AND child_isc.entity_id = txn.entity_id
 				  AND child_isc.schema_key = txn.schema_key

@@ -924,7 +924,7 @@ simulationTest(
 		const cacheRecord = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("internal_state_cache_v2")
+			.selectFrom("internal_state_cache")
 			.where("entity_id", "=", "timestamp-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.select(["created_at", "updated_at"])
@@ -1253,7 +1253,7 @@ simulationTest(
 		const cacheEntry = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("internal_state_cache_v2")
+			.selectFrom("internal_state_cache")
 			.where("entity_id", "=", "write-through-entity")
 			.where("schema_key", "=", "write-through-schema")
 			.where("file_id", "=", "write-through-file")
@@ -1335,7 +1335,7 @@ simulationTest(
 		const cacheEntry = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("internal_state_cache_v2")
+			.selectFrom("internal_state_cache")
 			.where("entity_id", "=", "update-cache-entity")
 			.where("schema_key", "=", "update-cache-schema")
 			.where("file_id", "=", "update-cache-file")
