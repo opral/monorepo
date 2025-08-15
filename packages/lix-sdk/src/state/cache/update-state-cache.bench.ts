@@ -1,12 +1,12 @@
 import { bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { updateStateCacheV2 } from "./update-state-cache.js";
+import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 
 /**
  * Regression benchmarks for updateStateCacheV2 performance
- * 
+ *
  * Key regression tests:
  * - Standard batch (1000 records) - baseline performance
  * - Multi-schema distribution (5 schemas) - tests per-schema table handling
@@ -83,7 +83,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		const ts = timestamp({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
-		updateStateCacheV2({
+		updateStateCache({
 			lix,
 			changes,
 			commit_id: "commit-standard",
@@ -104,7 +104,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		const ts = timestamp({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
-		updateStateCacheV2({
+		updateStateCache({
 			lix,
 			changes,
 			commit_id: "commit-multi",
@@ -130,7 +130,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			const warmupChanges = generateChanges(10000, schemas, ts, {
 				prefix: `warmup-${i}`,
 			});
-			updateStateCacheV2({
+			updateStateCache({
 				lix,
 				changes: warmupChanges,
 				commit_id: `warmup-${i}`,
@@ -145,7 +145,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			updateRatio: 0.15,
 		});
 
-		updateStateCacheV2({
+		updateStateCache({
 			lix,
 			changes,
 			commit_id: "commit-warm",

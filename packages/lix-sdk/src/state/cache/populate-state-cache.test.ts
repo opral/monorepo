@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
-import { updateStateCacheV2 } from "./update-state-cache.js";
+import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 
@@ -52,7 +52,7 @@ test("populates v2 cache from materializer", async () => {
 	];
 
 	// Insert data into v2 cache
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: testChanges,
 		commit_id: "test-commit-1",
@@ -139,7 +139,7 @@ test("populates v2 cache with version filter", async () => {
 		},
 	];
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes,
 		commit_id: "commit-v1",
@@ -159,7 +159,7 @@ test("populates v2 cache with version filter", async () => {
 		},
 	];
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: changesV2,
 		commit_id: "commit-v2",
@@ -239,7 +239,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 		},
 	];
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes,
 		commit_id: "commit-1",

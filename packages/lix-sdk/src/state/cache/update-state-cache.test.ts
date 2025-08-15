@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { updateStateCacheV2 } from "./update-state-cache.js";
+import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
 import { sql, type Kysely } from "kysely";
@@ -36,7 +36,7 @@ test("inserts into cache based on change", async () => {
 	const versionId = "global";
 
 	// Call updateStateCacheV2
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [testChange],
 		commit_id: commitId,
@@ -107,7 +107,7 @@ test("upserts cache entry on conflict", async () => {
 	const versionId = "global";
 
 	// First insert
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [initialChange],
 		commit_id: initialCommitId,
@@ -151,7 +151,7 @@ test("upserts cache entry on conflict", async () => {
 	const updatedCommitId = "updated-commit-456";
 
 	// Second call should trigger onConflict upsert
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [updatedChange],
 		commit_id: updatedCommitId,
@@ -231,7 +231,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: initialTimestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [createChange],
 		commit_id: "parent-commit",
@@ -264,7 +264,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromParentTimestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [deleteFromParentChange],
 		commit_id: "parent-delete-commit",
@@ -309,7 +309,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromChild1Timestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [deleteFromChild1Change],
 		commit_id: "child1-delete-commit",
@@ -346,7 +346,7 @@ test("moves cache entries to children on deletion, clears when no children remai
 		created_at: deleteFromChild2Timestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [deleteFromChild2Change],
 		commit_id: "child2-delete-commit",
@@ -423,7 +423,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		created_at: baseTimestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [createChange],
 		commit_id: "parent-commit-123",
@@ -460,7 +460,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		created_at: deleteTimestamp,
 	};
 
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [deleteChange],
 		commit_id: "child-commit-456",
@@ -594,7 +594,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 	};
 
 	const originalCommitId = "original-commit-id-001";
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [createChange],
 		commit_id: originalCommitId,
@@ -625,7 +625,7 @@ test("copied entries retain original commit_id during deletion copy-down", async
 		created_at: t2,
 	};
 	const deletionCommitId = "deletion-commit-id-002";
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [deleteChange],
 		commit_id: deletionCommitId,
@@ -693,7 +693,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 	};
 
 	// Apply first change
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [change1],
 		commit_id: "commit-1",
@@ -701,7 +701,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 	});
 
 	// Apply second change (should overwrite first)
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [change2],
 		commit_id: "commit-2",
@@ -773,7 +773,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 	];
 
 	// Apply all changes in a single batch
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes,
 		commit_id: "commit-1",

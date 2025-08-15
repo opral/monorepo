@@ -1,8 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "../../lix/open-lix.js";
-
 // Type definition for the cache v2 virtual table
-export type InternalStateCacheV2Table = {
+export type InternalStateCacheTable = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
@@ -17,7 +16,6 @@ export type InternalStateCacheV2Table = {
 	change_id: string | null;
 	commit_id: string | null;
 };
-
 // Virtual table schema definition - matches existing internal_state_cache structure
 const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	_pk HIDDEN TEXT NOT NULL PRIMARY KEY,
@@ -57,7 +55,7 @@ export function applyStateCacheV2Schema(
 
 	// Get or create cache for this Lix instance
 	const tableCache = getStateCacheV2Tables(lix);
-	
+
 	// Initialize cache with existing tables on startup
 	const existingTables = sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
@@ -266,7 +264,10 @@ export function applyStateCacheV2Schema(
 				if (filters.schema_key) {
 					// Single schema_key - query single table
 					// Sanitize schema_key for table name - must match update-state-cache.ts
-					const sanitizedSchemaKey = String(filters.schema_key).replace(/[^a-zA-Z0-9]/g, '_');
+					const sanitizedSchemaKey = String(filters.schema_key).replace(
+						/[^a-zA-Z0-9]/g,
+						"_"
+					);
 					const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 					// Check if table exists
 					const tableExists = sqlite.exec({
@@ -298,8 +299,10 @@ export function applyStateCacheV2Schema(
 				if (cursorState.tables.length > 0) {
 					loadNextTable(sqlite, cursorState, filters);
 					// Skip empty tables at the start
-					while (cursorState.currentRows.length === 0 &&
-					       cursorState.currentTableIndex < cursorState.tables.length - 1) {
+					while (
+						cursorState.currentRows.length === 0 &&
+						cursorState.currentTableIndex < cursorState.tables.length - 1
+					) {
 						cursorState.currentTableIndex++;
 						cursorState.currentRowIndex = 0;
 						loadNextTable(sqlite, cursorState, filters);
@@ -314,8 +317,10 @@ export function applyStateCacheV2Schema(
 				cursorState.currentRowIndex++;
 
 				// Check if we need to move to next table
-				while (cursorState.currentRowIndex >= cursorState.currentRows.length &&
-				       cursorState.currentTableIndex < cursorState.tables.length) {
+				while (
+					cursorState.currentRowIndex >= cursorState.currentRows.length &&
+					cursorState.currentTableIndex < cursorState.tables.length
+				) {
 					// Move to next table
 					cursorState.currentTableIndex++;
 					cursorState.currentRowIndex = 0;

@@ -254,7 +254,9 @@ test("resolved state view generates correct composite keys", async () => {
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Import updateStateCacheV2 at the top of the test
-	const { updateStateCacheV2 } = await import("./cache/update-state-cache.js");
+	const { updateStateCache: updateStateCacheV2 } = await import(
+		"./cache/update-state-cache.js"
+	);
 
 	// Insert some test data into untracked state
 	const now = timestamp({ lix });
@@ -369,7 +371,9 @@ test("resolved state view generates correct composite keys for inherited state",
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Import updateStateCacheV2 at the top of the test
-	const { updateStateCacheV2 } = await import("./cache/update-state-cache.js");
+	const { updateStateCache: updateStateCacheV2 } = await import(
+		"./cache/update-state-cache.js"
+	);
 
 	// Create parent and child versions
 	const parentVersionId = "parent_version";

@@ -17,7 +17,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { handleStateDelete } from "./schema.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import type { LixCommitEdge } from "../commit/schema.js";
-import { updateStateCacheV2 } from "./cache/update-state-cache.js";
+import { updateStateCache } from "./cache/update-state-cache.js";
 import { updateUntrackedState } from "./untracked/update-untracked-state.js";
 
 /**
@@ -150,17 +150,14 @@ export function commit(args: {
 				snapshot_content: change.snapshot_content,
 			});
 		}
-		
+
 		// Generate change_author records for each user data change
 		// Get active accounts
 		const activeAccounts = executeSync({
 			lix: args.lix,
-			query: db
-				.selectFrom("active_account")
-				.select("account_id"),
+			query: db.selectFrom("active_account").select("account_id"),
 		});
-		
-		
+
 		// Create change_author records for each change and each active account
 		for (const change of changes) {
 			for (const account of activeAccounts) {
@@ -203,13 +200,14 @@ export function commit(args: {
 				created_at: transactionTimestamp,
 			});
 		}
-		
-		// Then, for change_author changes  
+
+		// Then, for change_author changes
 		const changeAuthorChanges = allChangesToFlush.filter(
-			c => c.schema_key === "lix_change_author" && 
-			changes.some(ch => c.snapshot_content?.includes(ch.id))
+			(c) =>
+				c.schema_key === "lix_change_author" &&
+				changes.some((ch) => c.snapshot_content?.includes(ch.id))
 		);
-		
+
 		for (const changeAuthor of changeAuthorChanges) {
 			const elementId = uuidV7({ lix: args.lix });
 			allChangesToFlush.push({
@@ -616,9 +614,7 @@ export function commit(args: {
 			...allChangesToFlush.filter(
 				(c) =>
 					c.schema_key === "lix_change_author" &&
-					versionChanges.some((vc: any) =>
-						c.snapshot_content?.includes(vc.id)
-					)
+					versionChanges.some((vc: any) => c.snapshot_content?.includes(vc.id))
 			),
 			// Also include the graph changes if this is global
 			...(version_id === "global"
@@ -633,8 +629,7 @@ export function commit(args: {
 				: []),
 		];
 
-
-		updateStateCacheV2({
+		updateStateCache({
 			lix: args.lix,
 			changes: allChangesForVersion,
 			commit_id: meta.commitId,

@@ -29,14 +29,14 @@ import { getStateCacheV2Tables } from "./schema.js";
  * - Tombstone management
  * 
  * @example
- * updateStateCacheV2({
+ * updateStateCache({
  *   lix,
  *   changes: [change1, change2],
  *   commit_id: "commit-123",
  *   version_id: "v1"
  * });
  */
-export function updateStateCacheV2(args: {
+export function updateStateCache(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
 	changes: LixChangeRaw[];
 	commit_id: string;
@@ -46,10 +46,13 @@ export function updateStateCacheV2(args: {
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Group changes by schema_key for efficient batch processing
-	const changesBySchema = new Map<string, {
-		inserts: LixChangeRaw[];
-		deletes: LixChangeRaw[];
-	}>();
+	const changesBySchema = new Map<
+		string,
+		{
+			inserts: LixChangeRaw[];
+			deletes: LixChangeRaw[];
+		}
+	>();
 
 	for (const change of changes) {
 		if (!changesBySchema.has(change.schema_key)) {
@@ -58,7 +61,7 @@ export function updateStateCacheV2(args: {
 				deletes: [],
 			});
 		}
-		
+
 		const group = changesBySchema.get(change.schema_key)!;
 		if (change.snapshot_content === null) {
 			group.deletes.push(change);
@@ -70,9 +73,9 @@ export function updateStateCacheV2(args: {
 	// Process each schema's changes directly to its physical table
 	for (const [schema_key, schemaChanges] of changesBySchema) {
 		// Sanitize schema_key for use in table name - replace non-alphanumeric with underscore
-		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, '_');
+		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
 		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
-		
+
 		// Ensure table exists (creates if needed, updates cache)
 		ensureTableExists(lix, tableName);
 

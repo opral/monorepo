@@ -2,14 +2,14 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { updateStateCacheV2 } from "./update-state-cache.js";
+import { updateStateCache } from "./update-state-cache.js";
 
 test("selecting from vtable queries per-schema physical tables", async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Use the direct function to insert rows into different schemas
-	updateStateCacheV2({
+	updateStateCache({
 		lix,
 		changes: [
 			{
