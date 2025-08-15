@@ -1,33 +1,31 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import type { Kysely } from "kysely";
-import { sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { getStateCacheV2Tables } from "./schema.js";
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
- * 
+ *
  * This function writes directly to per-schema SQLite tables instead of going through
  * the vtable for two critical performance reasons:
- * 
+ *
  * 1. **Minimizes JS <-> WASM overhead**: Direct table access avoids the vtable's
  *    row-by-row callback mechanism that crosses the JS/WASM boundary for each row.
- * 
+ *
  * 2. **Enables efficient batching**: Vtables only support per-row logic, preventing
  *    batch optimizations like prepared statements, transactions, and bulk operations.
  *    Direct access allows us to batch hundreds of rows in a single transaction.
- * 
+ *
  * The vtable (schema.ts) remains read-only for SELECT queries, providing a unified
  * query interface while mutations bypass it for ~50% better performance.
- * 
+ *
  * This function handles:
  * - Direct writes to per-schema physical tables for optimal performance
  * - Batch inserting/updating cache entries
  * - Deletion copy-down operations for inheritance
  * - Tombstone management
- * 
+ *
  * @example
  * updateStateCache({
  *   lix,
@@ -64,6 +62,12 @@ export function updateStateCache(args: {
 
 		const group = changesBySchema.get(change.schema_key)!;
 		if (change.snapshot_content === null) {
+			if (change.schema_key === "lix_change_set_element") {
+				console.log(
+					"[DEBUG updateStateCache] Adding deletion for change_set_element:",
+					change.entity_id
+				);
+			}
 			group.deletes.push(change);
 		} else {
 			group.inserts.push(change);
@@ -92,6 +96,21 @@ export function updateStateCache(args: {
 
 		// Process deletions for this schema
 		if (schemaChanges.deletes.length > 0) {
+			if (schema_key === "lix_change_set_element") {
+				console.log(
+					"[DEBUG updateStateCache] Processing",
+					schemaChanges.deletes.length,
+					"deletions for change_set_element"
+				);
+				schemaChanges.deletes.forEach((d) => {
+					console.log(
+						"[DEBUG updateStateCache] Deleting entity_id:",
+						d.entity_id,
+						"version_id:",
+						version_id
+					);
+				});
+			}
 			batchDeleteDirectFromTable({
 				db,
 				lix,
@@ -111,12 +130,12 @@ export function updateStateCache(args: {
 function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	// Get cache for this Lix instance
 	const tableCache = getStateCacheV2Tables(lix);
-	
+
 	// Check cache first for performance
 	if (tableCache.has(tableName)) {
 		return;
 	}
-	
+
 	// Create table if it doesn't exist
 	const createTableSql = `
 		CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -138,15 +157,15 @@ function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	`;
 
 	lix.sqlite.exec({ sql: createTableSql });
-	
+
 	// Create index on version_id for version-based queries
 	lix.sqlite.exec({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
 	});
-	
+
 	// Initial ANALYZE for new tables
 	lix.sqlite.exec({ sql: `ANALYZE ${tableName}` });
-	
+
 	// Update cache
 	tableCache.add(tableName);
 }
@@ -225,20 +244,18 @@ function batchDeleteDirectFromTable(args: {
 	commit_id: string;
 	version_id: string;
 }): void {
-	const { db, lix, tableName, changes, commit_id, version_id } = args;
-
-	// Get child versions for copy-down operations using resolved view to avoid virtual table recursion
-	const childVersions = executeSync({
-		lix,
-		query: db
-			.selectFrom("internal_resolved_state_all")
-			.select(sql`json_extract(snapshot_content, '$.id')`.as("id"))
-			.where("schema_key", "=", "lix_version")
-			.where(sql`json_extract(snapshot_content, '$.inherits_from_version_id')`, "=", version_id),
-	});
+	const { lix, tableName, changes, commit_id, version_id } = args;
 
 	for (const change of changes) {
-		// Get existing entry
+		// Get existing entry to check if it exists before deletion
+		if (change.schema_key === "lix_change_set_element") {
+			console.log("[DEBUG batchDelete] Looking for existing entry:", {
+				tableName,
+				entity_id: change.entity_id,
+				file_id: change.file_id,
+				version_id,
+			});
+		}
 		const result = lix.sqlite.exec({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
@@ -248,62 +265,40 @@ function batchDeleteDirectFromTable(args: {
 		}) as any[];
 
 		const existingEntry = result?.[0];
-
-		// Copy down to children if needed
-		if (existingEntry && childVersions.length > 0) {
-			const copyStmt = lix.sqlite.prepare(`
-				INSERT OR IGNORE INTO ${tableName} (
-					entity_id,
-					schema_key,
-					file_id,
-					version_id,
-					plugin_key,
-					snapshot_content,
-					schema_version,
-					created_at,
-					updated_at,
-					inherited_from_version_id,
-					inheritance_delete_marker,
-					change_id,
-					commit_id
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			`);
-
-			try {
-				for (const childVersion of childVersions) {
-					copyStmt.bind([
-						existingEntry[0], // entity_id
-						existingEntry[1], // schema_key
-						existingEntry[2], // file_id
-						childVersion.id,
-						existingEntry[4], // plugin_key
-						existingEntry[5], // snapshot_content
-						existingEntry[6], // schema_version
-						existingEntry[7], // created_at
-						existingEntry[8], // updated_at
-						version_id, // inherited_from_version_id
-						0, // inheritance_delete_marker
-						existingEntry[11], // change_id
-						existingEntry[12], // commit_id (preserve original)
-					]);
-					copyStmt.step();
-					copyStmt.reset();
-				}
-			} finally {
-				copyStmt.finalize();
-			}
+		if (change.schema_key === "lix_change_set_element") {
+			console.log(
+				"[DEBUG batchDelete] Found existing entry:",
+				existingEntry ? "YES" : "NO"
+			);
 		}
 
 		// Delete the entry
 		if (existingEntry) {
+			if (change.schema_key === "lix_change_set_element") {
+				console.log(
+					"[DEBUG batchDelete] Executing DELETE for:",
+					change.entity_id
+				);
+			}
 			lix.sqlite.exec({
 				sql: `DELETE FROM ${tableName} 
 				      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
 				bind: [change.entity_id, change.file_id, version_id],
 			});
+			if (change.schema_key === "lix_change_set_element") {
+				console.log("[DEBUG batchDelete] DELETE executed");
+			}
 		}
 
 		// Insert tombstone with UPSERT to handle existing entries
+		if (change.schema_key === "lix_change_set_element") {
+			console.log(
+				"[DEBUG batchDelete] Inserting tombstone for:",
+				change.entity_id,
+				"in version:",
+				version_id
+			);
+		}
 		lix.sqlite.exec({
 			sql: `INSERT INTO ${tableName} (
 				entity_id,
@@ -343,5 +338,8 @@ function batchDeleteDirectFromTable(args: {
 				commit_id,
 			],
 		});
+		if (change.schema_key === "lix_change_set_element") {
+			console.log("[DEBUG batchDelete] Tombstone inserted");
+		}
 	}
 }

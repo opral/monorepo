@@ -30,7 +30,7 @@ export function insertVTableLog(args: {
 	loggingInProgressMap.set(args.lix, true);
 	try {
 		const id = args.id ?? uuidV7({ lix: args.lix });
-		// Use direct transactional state insertion to avoid virtual table recursion
+		// Use direct transaction state insertion to avoid virtual table recursion
 		insertTransactionState({
 			lix: {
 				sqlite: args.lix.sqlite,

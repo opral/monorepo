@@ -1,5 +1,8 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "../../lix/open-lix.js";
+
+export type InternalStateCache = InternalStateCacheTable;
+
 // Type definition for the cache v2 virtual table
 export type InternalStateCacheTable = {
 	entity_id: string;
