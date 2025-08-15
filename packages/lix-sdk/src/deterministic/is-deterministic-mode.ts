@@ -2,9 +2,9 @@ import type { Lix } from "../lix/open-lix.js";
 import { executeSync } from "../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
-// Cache for deterministic mode per lix instance
-const deterministicModeCache = new WeakMap<any, boolean>();
+const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
 
 // Track which lix instances have hook listeners registered
 const hookListenersRegistered = new WeakSet<any>();
@@ -36,7 +36,7 @@ export function isDeterministicMode(args: {
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(args.lix);
+					deterministicModeCache.delete(args.lix.sqlite);
 					break;
 				}
 			}
@@ -44,8 +44,8 @@ export function isDeterministicMode(args: {
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(args.lix)) {
-		return deterministicModeCache.get(args.lix)!;
+	if (deterministicModeCache.has(args.lix.sqlite)) {
+		return deterministicModeCache.get(args.lix.sqlite)!;
 	}
 
 	// TODO account for active version
@@ -64,7 +64,7 @@ export function isDeterministicMode(args: {
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(args.lix, result);
+	deterministicModeCache.set(args.lix.sqlite, result);
 
 	return result;
 }
