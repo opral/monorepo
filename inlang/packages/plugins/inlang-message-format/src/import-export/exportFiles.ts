@@ -123,14 +123,14 @@ function serializeVariants(
 function serializePattern(pattern: Variant["pattern"]): string {
 	let result = "";
 
-	for (const part of pattern) {
-		if (part.type === "text") {
-			result += part.value;
-		} else if (part.arg.type === "variable-reference") {
-			result += `{${part.arg.name}}`;
-		} else {
-			throw new Error("Unsupported expression type");
-		}
+        for (const part of pattern) {
+                if (part.type === "text") {
+                        result += part.value.replace(/([\\{}])/g, "\\$1");
+                } else if (part.arg.type === "variable-reference") {
+                        result += `{${part.arg.name}}`;
+                } else {
+                        throw new Error("Unsupported expression type");
+                }
 	}
 	return result;
 }

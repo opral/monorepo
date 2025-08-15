@@ -170,42 +170,75 @@ function parseVariants(
 }
 
 function parsePattern(value: string): {
-	declarations: Declaration[];
-	pattern: Pattern;
+        declarations: Declaration[];
+        pattern: Pattern;
 } {
-	const pattern: Variant["pattern"] = [];
-	const declarations: Declaration[] = [];
+        const pattern: Variant["pattern"] = [];
+        const declarations: Declaration[] = [];
 
-	// splits a pattern like "Hello {name}!" into an array of parts
-	// "hello {name}, how are you?" -> ["hello ", "{name}", ", how are you?"]
-	const parts = value.split(/(\{.*?\})/).filter((part) => part !== "");
+        let buffer = "";
+        let i = 0;
+        while (i < value.length) {
+                const char = value[i]!;
 
-	for (const part of parts) {
-		// it's text
-		if ((part.startsWith("{") && part.endsWith("}")) === false) {
-			pattern.push({ type: "text", value: part });
-		}
-		// it's an expression (only supporting variables for now)
-		else {
-			const variableName = part.slice(1, -1);
-			// this is a heuristic. there is no guarentee that the variable might not be
-			// a local variable. only use the returned declarations in a single variant
-			// context
-			declarations.push({
-				type: "input-variable",
-				name: variableName,
-			});
-			pattern.push({
-				type: "expression",
-				arg: { type: "variable-reference", name: variableName },
-			});
-		}
-	}
+                if (char === "\\") {
+                        const next = value[i + 1];
+                        if (next === "{" || next === "}" || next === "\\") {
+                                buffer += next;
+                                i += 2;
+                                continue;
+                        }
+                        buffer += char;
+                        i++;
+                        continue;
+                }
 
-	return {
-		declarations,
-		pattern,
-	};
+                if (char === "{") {
+                        // flush text buffer
+                        if (buffer !== "") {
+                                pattern.push({ type: "text", value: buffer });
+                                buffer = "";
+                        }
+
+                        let j = i + 1;
+                        let expression = "";
+                        while (j < value.length && value[j] !== "}") {
+                                expression += value[j];
+                                j++;
+                        }
+
+                        if (j < value.length && value[j] === "}") {
+                                const variableName = expression;
+                                declarations.push({
+                                        type: "input-variable",
+                                        name: variableName,
+                                });
+                                pattern.push({
+                                        type: "expression",
+                                        arg: { type: "variable-reference", name: variableName },
+                                });
+                                i = j + 1;
+                                continue;
+                        }
+
+                        // unmatched '{', treat as text
+                        buffer += "{" + expression;
+                        i = j;
+                        continue;
+                }
+
+                buffer += char;
+                i++;
+        }
+
+        if (buffer !== "") {
+                pattern.push({ type: "text", value: buffer });
+        }
+
+        return {
+                declarations,
+                pattern,
+        };
 }
 
 // input: `platform=android,userGender=male`
