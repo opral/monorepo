@@ -92,6 +92,10 @@ export function commit(args: {
 
 	// Prepare to collect all changes
 	const allChangesToFlush: LixChangeRaw[] = [];
+	// Collect change_set_elements separately to avoid filtering later
+	const changeSetElements: LixChangeRaw[] = [];
+	// Collect all change_authors separately (all are global since changes are global)
+	const allChangeAuthors: LixChangeRaw[] = [];
 
 	// Track metadata for each version that gets a commit
 	const versionMetadata = new Map<
@@ -103,7 +107,7 @@ export function commit(args: {
 		}
 	>();
 
-	// Step 1: Process all versions' data changes (including global if it has data)
+	// Step 1: Create commits and changesets for each version with changes
 	for (const [version_id, changes] of trackedChangesByVersion) {
 		if (changes.length === 0) continue;
 
@@ -134,6 +138,60 @@ export function commit(args: {
 			changeSetId,
 			previousCommitId: versionData.commit_id,
 		});
+	}
+
+	// Step 2: If we have any commits but global doesn't have one yet, create global commit
+	if (versionMetadata.size > 0 && !versionMetadata.has("global")) {
+		// Get global version info
+		const globalVersionRows = executeSync({
+			lix: args.lix,
+			query: db
+				.selectFrom("internal_resolved_state_all")
+				.where("schema_key", "=", "lix_version")
+				.where("entity_id", "=", "global")
+				.select("snapshot_content")
+				.limit(1),
+		});
+
+		if (
+			globalVersionRows.length === 0 ||
+			!globalVersionRows[0]?.snapshot_content
+		) {
+			throw new Error(`Global version not found.`);
+		}
+
+		const globalVersion = JSON.parse(
+			globalVersionRows[0].snapshot_content
+		) as LixVersion;
+		const globalChangeSetId = nanoId({ lix: args.lix });
+		const globalCommitId = uuidV7({ lix: args.lix });
+
+		// Store global metadata
+		versionMetadata.set("global", {
+			commitId: globalCommitId,
+			changeSetId: globalChangeSetId,
+			previousCommitId: globalVersion.commit_id,
+		});
+	}
+
+	// Get active accounts for change_author records
+	const activeAccounts = executeSync({
+		lix: args.lix,
+		query: db
+			.selectFrom("internal_resolved_state_all")
+			.where("schema_key", "=", "lix_active_account")
+			.where("version_id", "=", "global")
+			.select(
+				sql`json_extract(snapshot_content, '$.account_id')`.as("account_id")
+			),
+	});
+
+	// Step 3: Process each version's changes completely
+	for (const [version_id, changes] of trackedChangesByVersion) {
+		if (changes.length === 0) continue;
+
+		const meta = versionMetadata.get(version_id)!;
+		const changeSetId = meta.changeSetId;
 
 		// Add user data changes
 		for (const change of changes) {
@@ -149,14 +207,8 @@ export function commit(args: {
 			});
 		}
 
-		// Generate change_author records for each user data change
-		// Get active accounts
-		const activeAccounts = executeSync({
-			lix: args.lix,
-			query: db.selectFrom("active_account").select("account_id"),
-		});
-
 		// Create change_author records for each change and each active account
+		// These are global metadata since changes are global
 		for (const change of changes) {
 			for (const account of activeAccounts) {
 				const changeAuthorId = uuidV7({ lix: args.lix });
@@ -173,15 +225,15 @@ export function commit(args: {
 						account_id: account.account_id,
 					}),
 				};
-				allChangesToFlush.push(authorChange);
+				allChangeAuthors.push(authorChange);
 			}
 		}
 
-		// Create changeset elements for user data and change_authors (these belong to the version's changeset)
-		// First, for user data changes
+		// Create changeset elements for all changes of this version
+		// These are global metadata - collect them separately
 		for (const change of changes) {
 			const elementId = uuidV7({ lix: args.lix });
-			allChangesToFlush.push({
+			const changeSetElement = {
 				id: elementId,
 				entity_id: `${changeSetId}~${change.id}`,
 				schema_key: "lix_change_set_element",
@@ -196,37 +248,32 @@ export function commit(args: {
 				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				created_at: transactionTimestamp,
-			});
+			};
+			// Add to separate collection to avoid filtering later
+			changeSetElements.push(changeSetElement);
 		}
 
-		// Then, for change_author changes
-		const changeAuthorChanges = allChangesToFlush.filter(
-			(c) =>
-				c.schema_key === "lix_change_author" &&
-				changes.some((ch) => c.snapshot_content?.includes(ch.id))
-		);
+	}
 
-		for (const changeAuthor of changeAuthorChanges) {
-			const elementId = uuidV7({ lix: args.lix });
-			allChangesToFlush.push({
-				id: elementId,
-				entity_id: `${changeSetId}~${changeAuthor.id}`,
-				schema_key: "lix_change_set_element",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: changeSetId,
-					change_id: changeAuthor.id,
-					schema_key: changeAuthor.schema_key,
-					file_id: changeAuthor.file_id,
-					entity_id: changeAuthor.entity_id,
-				} satisfies LixChangeSetElement),
-				schema_version: LixChangeSetElementSchema["x-lix-version"],
-				created_at: transactionTimestamp,
-			});
-		}
+	// Step 4: Handle working changeset updates for each version
+	for (const [version_id, changes] of trackedChangesByVersion) {
+		if (changes.length === 0) continue;
 
-		// Handle working changeset updates
+		// Get version data to access working_commit_id
+		const versionRows = executeSync({
+			lix: args.lix,
+			query: db
+				.selectFrom("internal_resolved_state_all")
+				.where("schema_key", "=", "lix_version")
+				.where("entity_id", "=", version_id)
+				.select("snapshot_content")
+				.limit(1),
+		});
+
+		const versionData = JSON.parse(
+			versionRows[0]!.snapshot_content
+		) as LixVersion;
+
 		const [workingCommitRow] = executeSync({
 			lix: args.lix,
 			query: db
@@ -336,7 +383,9 @@ export function commit(args: {
 							sql`json_extract(snapshot_content, '$.schema_key')`.as(
 								"element_schema_key"
 							),
-							sql`json_extract(snapshot_content, '$.file_id')`.as("element_file_id"),
+							sql`json_extract(snapshot_content, '$.file_id')`.as(
+								"element_file_id"
+							),
 						])
 						.where("entity_id", "like", `${workingChangeSetId}~%`)
 						.where("schema_key", "=", "lix_change_set_element")
@@ -373,7 +422,7 @@ export function commit(args: {
 					// We already queried for entity_id LIKE '${workingChangeSetId}~%'
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
-					allChangesToFlush.push({
+					changeSetElements.push({
 						id: uuidV7({ lix: args.lix }),
 						entity_id: entityIdForDeletion,
 						schema_key: "lix_change_set_element",
@@ -389,7 +438,7 @@ export function commit(args: {
 				for (const deletion of deletionChanges) {
 					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
 					if (entitiesAtCheckpoint.has(key)) {
-						allChangesToFlush.push({
+						changeSetElements.push({
 							id: uuidV7({ lix: args.lix }),
 							entity_id: `${workingChangeSetId}~${deletion.id}`,
 							schema_key: "lix_change_set_element",
@@ -410,7 +459,7 @@ export function commit(args: {
 
 				// Add all non-deletions
 				for (const change of nonDeletionChanges) {
-					allChangesToFlush.push({
+					changeSetElements.push({
 						id: uuidV7({ lix: args.lix }),
 						entity_id: `${workingChangeSetId}~${change.id}`,
 						schema_key: "lix_change_set_element",
@@ -431,7 +480,9 @@ export function commit(args: {
 		}
 	}
 
-	// Step 2: Generate global metadata commit (if any versions had changes)
+	const globalChanges: LixChangeRaw[] = [];
+
+	// Step 5: Generate global metadata commit (if any version had changes)
 	if (versionMetadata.size > 0) {
 		// Check if global needs its own commit or can reuse existing
 		const needsNewGlobalCommit = !versionMetadata.has("global");
@@ -471,14 +522,35 @@ export function commit(args: {
 
 		const globalMeta = versionMetadata.get("global")!;
 
-		// Create all the graph metadata changes
-		const graphChanges: LixChangeRaw[] = [];
+		// Add all change_authors to globalChanges (they're global metadata)
+		globalChanges.push(...allChangeAuthors);
+
+		// Create changeset elements for change_author records using global changeset
+		for (const changeAuthor of allChangeAuthors) {
+			const elementId = uuidV7({ lix: args.lix });
+			changeSetElements.push({
+				id: elementId,
+				entity_id: `${globalMeta.changeSetId}~${changeAuthor.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: globalMeta.changeSetId,
+					change_id: changeAuthor.id,
+					schema_key: changeAuthor.schema_key,
+					file_id: changeAuthor.file_id,
+					entity_id: changeAuthor.entity_id,
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
+				created_at: transactionTimestamp,
+			});
+		}
 
 		// Add metadata for all versions (including global)
 		for (const [version_id, meta] of versionMetadata) {
 			// Add the changeset entity
 			const changeSetChangeId = uuidV7({ lix: args.lix });
-			graphChanges.push({
+			globalChanges.push({
 				id: changeSetChangeId,
 				entity_id: meta.changeSetId,
 				schema_key: "lix_change_set",
@@ -494,7 +566,7 @@ export function commit(args: {
 
 			// Add the commit entity
 			const commitChangeId = uuidV7({ lix: args.lix });
-			graphChanges.push({
+			globalChanges.push({
 				id: commitChangeId,
 				entity_id: meta.commitId,
 				schema_key: "lix_commit",
@@ -510,7 +582,7 @@ export function commit(args: {
 
 			// Add commit edge
 			const edgeChangeId = uuidV7({ lix: args.lix });
-			graphChanges.push({
+			globalChanges.push({
 				id: edgeChangeId,
 				entity_id: `${meta.previousCommitId}~${meta.commitId}`,
 				schema_key: "lix_commit_edge",
@@ -541,7 +613,7 @@ export function commit(args: {
 			const currentVersion = JSON.parse(
 				versionRows[0]!.snapshot_content
 			) as LixVersion;
-			graphChanges.push({
+			globalChanges.push({
 				id: versionChangeId,
 				entity_id: version_id,
 				schema_key: "lix_version",
@@ -556,13 +628,10 @@ export function commit(args: {
 			});
 		}
 
-		// Add all graph changes to flush
-		allChangesToFlush.push(...graphChanges);
-
-		// Create changeset elements for all graph entities (these belong to global's changeset)
-		for (const change of graphChanges) {
+		// Create changeset elements for all global metadata (these belong to global's changeset)
+		for (const change of globalChanges) {
 			const elementId = uuidV7({ lix: args.lix });
-			allChangesToFlush.push({
+			changeSetElements.push({
 				id: elementId,
 				entity_id: `${globalMeta.changeSetId}~${change.id}`,
 				schema_key: "lix_change_set_element",
@@ -580,10 +649,15 @@ export function commit(args: {
 			});
 		}
 
-		// Note: We do NOT add changeset elements for user data changes to global's changeset
-		// Global's changeset only contains graph metadata (commits, changesets, edges, version updates)
-	}
+		// Add ALL change_set_element records to globalChanges
+		// since they are all global metadata that should be cached at global level
+		globalChanges.push(...changeSetElements);
 
+		// Add all global changes to flush
+		allChangesToFlush.push(...globalChanges);
+
+		// Note: ALL changeset elements are now in globalChanges since they're all global metadata
+	}
 
 	// Single batch insert of all tracked changes into the change table
 	if (allChangesToFlush.length > 0) {
@@ -615,23 +689,9 @@ export function commit(args: {
 				snapshot_content: change.snapshot_content,
 				created_at: change.created_at,
 			})),
-			// Include change_author records for this version
-			...allChangesToFlush.filter(
-				(c) =>
-					c.schema_key === "lix_change_author" &&
-					versionChanges.some((vc: any) => c.snapshot_content?.includes(vc.id))
-			),
-			// Also include the graph changes if this is global
-			...(version_id === "global"
-				? allChangesToFlush.filter(
-						(c) =>
-							c.schema_key === "lix_change_set" ||
-							c.schema_key === "lix_commit" ||
-							c.schema_key === "lix_commit_edge" ||
-							c.schema_key === "lix_version" ||
-							c.schema_key === "lix_change_set_element"
-					)
-				: []),
+			// Include all global changes only for global version
+			// (change_authors are now in globalChanges)
+			...(version_id === "global" ? globalChanges : []),
 		];
 
 		updateStateCache({

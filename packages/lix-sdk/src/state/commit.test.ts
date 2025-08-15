@@ -33,7 +33,7 @@ import { selectActiveVersion } from "../version/select-active-version.js";
  *
  *  ┌─────────────────┐                 ┌─────────────────────────┐
  *  │  version_active │  user-data      │   COMMIT  (active)      │
- *  └─────────────────┘ ───────────────▶│  data + change_author   │
+ *  └─────────────────┘ ───────────────▶│  entity                 │
  *                                      └─────────────────────────┘
  *                                             ▲
  *                                             │ graph rows that *describe* ↑
@@ -104,6 +104,7 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		],
 	});
 
+
 	/*──────────────────────── 3. COMMIT ───────────────────────────────────*/
 	commit({ lix });
 
@@ -120,6 +121,7 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 
 	const commitActiveId = activeVersionAfter.commit_id; // data commit
 	const commitGlobalId = globalVersionAfter.commit_id; // graph commit
+
 
 	expect(commitActiveId).not.toBe(prevCommitActive);
 	expect(commitGlobalId).not.toBe(prevCommitGlobal);
@@ -149,15 +151,16 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
+
 	const activeSchemas = await countSchemas(commitActive.change_set_id);
 	const globalSchemas = await countSchemas(commitGlobal.change_set_id);
 
 	/*──────────────────────── 4. assertions ───────────────────────────────*/
 	/* COMMIT ON ACTIVE VERSION ────────────────────────────────────────────*/
 	expect(activeSchemas["lix_key_value"]).toBe(2); // user rows
-	expect(activeSchemas["lix_change_author"]).toBe(2); // authors created
 
 	// Must *not* contain any graph-rows which belong to global commit
+	expect(activeSchemas["lix_change_author"]).toBeUndefined();
 	expect(activeSchemas["lix_commit"]).toBeUndefined();
 	expect(activeSchemas["lix_change_set"]).toBeUndefined();
 	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
@@ -165,8 +168,8 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 
 	// COMMIT ON GLOBAL (graph-only)
 	expect(globalSchemas["lix_key_value"]).toBeUndefined();
-	expect(globalSchemas["lix_change_author"]).toBeUndefined();
 
+	expect(globalSchemas["lix_change_author"]).toBe(2); // two entities (para-1, para-2)
 	expect(globalSchemas["lix_commit"]).toBe(2); // copy of active + self
 	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
 	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
@@ -1465,6 +1468,65 @@ test("creates change_author records for insert, update, and delete operations", 
 		change_id: deleteChangeId,
 		account_id: "test-account-2",
 	});
+});
+
+test("global cache entry should be inherited by child versions in resolved view", async () => {
+	const lix = await openLix({});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Get the active version (should be main, not global)
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+	
+	expect(activeVersion.version_id).not.toBe("global");
+
+	// Insert a mock entity into global version via transaction
+	insertTransactionState({
+		lix,
+		timestamp: timestamp({ lix }),
+		data: [
+			{
+				entity_id: "mock-global-entity",
+				schema_key: "mock_schema",
+				file_id: "mock-file",
+				plugin_key: "mock_plugin",
+				snapshot_content: JSON.stringify({ id: "mock-global-entity", data: "test-data" }),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+		],
+	});
+
+	// Commit the changes
+	commit({ lix });
+
+	// Verify cache has exactly one entry for this entity (in global version)
+	const cacheEntries = await db
+		.selectFrom("internal_state_cache")
+		.selectAll()
+		.where("entity_id", "=", "mock-global-entity")
+		.execute();
+
+	expect(cacheEntries).toHaveLength(1);
+	expect(cacheEntries[0]?.version_id).toBe("global");
+
+	// Verify resolved view returns the entity for both global and active version
+	const resolvedEntries = await db
+		.selectFrom("internal_resolved_state_all")
+		.select(["version_id", "entity_id", "schema_key"])
+		.where("entity_id", "=", "mock-global-entity")
+		.orderBy("version_id", "asc")
+		.execute();
+
+	// Should have two entries: one for active version (inherited) and one for global
+	expect(resolvedEntries).toHaveLength(2);
+	
+	const versionIds = resolvedEntries.map(e => e.version_id).sort();
+	expect(versionIds).toContain("global");
+	expect(versionIds).toContain(activeVersion.version_id);
 });
 
 describe("file lixcol cache updates", () => {
