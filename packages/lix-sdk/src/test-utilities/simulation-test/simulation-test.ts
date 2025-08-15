@@ -104,6 +104,8 @@ export function simulationTest(
 	const expectedValues = new Map<string, any>();
 
 	test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
+		vi.restoreAllMocks();
+
 		let callIndex = 0;
 		const isFirstSimulation = simulation === simulationsToRun[0];
 
@@ -171,6 +173,6 @@ Use regular expect() for simulation-specific assertions.
 			openSimulatedLix,
 			expectDeterministic: deterministicExpect as ExpectDeterministic,
 		});
-		vi.resetAllMocks();
+		vi.restoreAllMocks(); // Restore original implementations, not just reset
 	});
 }
