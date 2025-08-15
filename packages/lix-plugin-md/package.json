@@ -30,7 +30,7 @@
 		"remark-stringify": "^11.0.0",
 		"remark-gfm": "^3.0.1",
 		"remark-frontmatter": "^4.0.1",
-		"unified": "11.0.3",
+		"unified": "^11.0.5",
 		"unist-util-visit": "5.0.0"
 	},
 	"devDependencies": {
