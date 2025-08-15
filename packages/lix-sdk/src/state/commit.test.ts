@@ -10,170 +10,184 @@ import { switchAccount } from "../account/switch-account.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../version/select-active-version.js";
 
-test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
+/**
+ * TL;DR
+ *   ──►  *Business* rows (actual user-domain data) are stored in the *active*
+ *        version that the user is editing.
+ *   ──►  *Graph* rows (everything that describes the history DAG: change-sets,
+ *        commits, edges, version objects) are *always* stored in the
+ *        special version called **global**.
+ *
+ *   This split gives us two key properties:
+ *
+ *     1. **Single source of truth for history topology**  
+ *        The entire DAG is materialised exactly once (under `global`), so
+ *        graph traversals and lineage CTEs never need to bounce across version
+ *        tables. Think "`.git/refs`-style catalogue", but in-DB.
+ *
+ *     2. **Version-local changes**  
+ *
+ *
+ *  BUSINESS DATA lives on the *active version*,
+ *  GRAPH META-DATA lives on *global*.
+ *
+ *  ┌─────────────────┐                 ┌─────────────────────────┐
+ *  │  version_active │  user-data      │   COMMIT  (active)      │
+ *  └─────────────────┘ ───────────────▶│  data + change_author   │
+ *                                      └─────────────────────────┘
+ *                                             ▲
+ *                                             │ graph rows that *describe* ↑
+ *  ┌────────────┐                   ┌─────────┴───────────────────────────┐
+ *  │  global    │  graph rows       │  COMMIT  (global) – graph-only      │
+ *  └────────────┘ ─────────────────▶│  change_set, commit, edge, version  │
+ *                                   └─────────────────────────────────────┘
+ */
+test("split-commit: business rows on active version, graph rows on global", async () => {
+	/*──────────────────────── 1. initialise workspace ─────────────────────*/
 	const lix = await openLix({
-		account: { id: "test-account", name: "Test User" },
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
 	});
-
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	// 1. Get the active version (should be 'global')
-	const activeVersions = await db
+	/* Resolve IDs for the two versions involved */
+	const activeRow = await db
 		.selectFrom("active_version")
 		.selectAll()
-		.execute();
+		.executeTakeFirstOrThrow();
+	const activeVersionId = activeRow.version_id; // e.g. "main"
+	expect(activeVersionId).not.toBe("global");
 
-	expect(activeVersions.length).toBe(1);
-	const activeVersion = activeVersions[0];
-	expect(activeVersion).toBeDefined();
-	const versionId = activeVersion!.version_id;
-
-	// Get the previous commit for this version
-	const versionBefore = await db
+	const activeVersionBefore = await db
 		.selectFrom("version")
-		.where("id", "=", versionId)
+		.where("id", "=", activeVersionId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const globalVersionBefore = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const previousCommitId = versionBefore.commit_id;
+	const prevCommitActive = activeVersionBefore.commit_id;
+	const prevCommitGlobal = globalVersionBefore.commit_id;
 
-	// 2. Insert transaction state
+	/*──────────────────────── 2. stage two user changes ───────────────────*/
 	insertTransactionState({
 		lix,
 		timestamp: timestamp({ lix }),
 		data: [
 			{
-				entity_id: "test-entity-1",
+				entity_id: "para-1",
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					key: "test-key-1",
-					value: "test-value-1",
-				}),
+				snapshot_content: JSON.stringify({ key: "k1", value: "v1" }),
 				schema_version: "1.0",
-				version_id: versionId,
+				version_id: activeVersionId,
 				untracked: false,
 			},
-		],
-	});
-
-	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
-		data: [
 			{
-				entity_id: "test-entity-2",
+				entity_id: "para-2",
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					key: "test-key-2",
-					value: "test-value-2",
-				}),
+				snapshot_content: JSON.stringify({ key: "k2", value: "v2" }),
 				schema_version: "1.0",
-				version_id: versionId,
+				version_id: activeVersionId,
 				untracked: false,
 			},
 		],
 	});
 
-	// 3. Commit
+	/*──────────────────────── 3. COMMIT ───────────────────────────────────*/
 	commit({ lix });
 
-	// 4. Expect the commit of the active version to have one edge to the previous one
-	const versionAfter = await db
+	const activeVersionAfter = await db
 		.selectFrom("version")
-		.where("id", "=", versionId)
+		.where("id", "=", activeVersionId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const globalVersionAfter = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const newCommitId = versionAfter.commit_id;
-	expect(newCommitId).not.toBe(previousCommitId);
+	const commitActiveId = activeVersionAfter.commit_id; // data commit
+	const commitGlobalId = globalVersionAfter.commit_id; // graph commit
 
-	// Check edges - should have exactly one edge from previous to new
-	const edges = await db
-		.selectFrom("commit_edge")
-		.where("parent_id", "=", previousCommitId)
-		.where("child_id", "=", newCommitId)
-		.selectAll()
-		.execute();
+	expect(commitActiveId).not.toBe(prevCommitActive);
+	expect(commitGlobalId).not.toBe(prevCommitGlobal);
 
-	expect(edges.length).toBe(1);
+	/* helper: build histogram of schema_key counts for a change_set --------*/
+	const countSchemas = async (changeSetId: string) => {
+		const rows = await db
+			.selectFrom("change_set_element")
+			.innerJoin("change", "change_set_element.change_id", "change.id")
+			.where("change_set_id", "=", changeSetId)
+			.select("change.schema_key")
+			.execute();
+		return rows.reduce<Record<string, number>>((map, r) => {
+			map[r.schema_key] = (map[r.schema_key] ?? 0) + 1;
+			return map;
+		}, {});
+	};
 
-	// Get the change set ID from the commit
-	const newCommit = await db
+	const commitActive = await db
 		.selectFrom("commit")
-		.where("id", "=", newCommitId)
+		.where("id", "=", commitActiveId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const commitGlobal = await db
+		.selectFrom("commit")
+		.where("id", "=", commitGlobalId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// 5. Directly expect on the elements in this new set to contain the expected changes
-	const changeSetElements = await db
-		.selectFrom("change_set_element")
-		.innerJoin("change", "change_set_element.change_id", "change.id")
-		.where("change_set_id", "=", newCommit.change_set_id)
+	const activeSchemas = await countSchemas(commitActive.change_set_id);
+	const globalSchemas = await countSchemas(commitGlobal.change_set_id);
+
+	/*──────────────────────── 4. assertions ───────────────────────────────*/
+	/* COMMIT ON ACTIVE VERSION ────────────────────────────────────────────*/
+	expect(activeSchemas["lix_key_value"]).toBe(2); // user rows
+	expect(activeSchemas["lix_change_author"]).toBe(2); // authors created
+
+	// Must *not* contain any graph-rows which belong to global commit
+	expect(activeSchemas["lix_commit"]).toBeUndefined();
+	expect(activeSchemas["lix_change_set"]).toBeUndefined();
+	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
+	expect(activeSchemas["lix_version"]).toBeUndefined();
+
+	// COMMIT ON GLOBAL (graph-only)
+	expect(globalSchemas["lix_key_value"]).toBeUndefined();
+	expect(globalSchemas["lix_change_author"]).toBeUndefined();
+
+	expect(globalSchemas["lix_commit"]).toBe(2); // copy of active + self
+	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
+	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
+	expect(globalSchemas["lix_version"]).toBe(2); // version_active & global
+
+	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
+	const edgeActive = await db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", prevCommitActive)
+		.where("child_id", "=", commitActiveId)
 		.selectAll()
 		.execute();
+	expect(edgeActive.length).toBe(1); // prevActive ─▶ active
 
-	// We expect exactly these elements:
-	// - 2 user data changes (test-entity-1, test-entity-2)
-	// - 2 change authors (one for each user data change)
-	// - 1 commit creation
-	// - 1 commit edge creation
-	// - 1 changeset creation
-	// - 1 version update
-	// Total: 8 elements
-	expect(changeSetElements.length).toBe(8);
-
-	// Verify the specific changes are in the change set
-	const elementChangeIds = changeSetElements.map((e) => e.change_id);
-
-	// Get the actual changes to verify content
-	const changes = await db
-		.selectFrom("change")
-		.where("id", "in", elementChangeIds)
+	const edgeGlobal = await db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", prevCommitGlobal)
+		.where("child_id", "=", commitGlobalId)
 		.selectAll()
 		.execute();
-
-	// Group by schema_key for easier verification
-	const changesBySchema = changes.reduce(
-		(acc, change) => {
-			if (!acc[change.schema_key]) {
-				acc[change.schema_key] = [];
-			}
-			acc[change.schema_key]!.push(change);
-			return acc;
-		},
-		{} as Record<string, typeof changes>
-	);
-
-	// Verify we have the expected types of changes
-	expect(changesBySchema["lix_key_value"]?.length).toBe(2); // Our test data
-	expect(changesBySchema["lix_change_author"]?.length).toBe(2); // Change authors for test data
-	expect(changesBySchema["lix_change_set"]?.length).toBe(1); // The new changeset
-	expect(changesBySchema["lix_commit"]?.length).toBe(1); // The new commit
-	expect(changesBySchema["lix_commit_edge"]?.length).toBe(1); // The commit edge
-	expect(changesBySchema["lix_version"]?.length).toBe(1); // Version update
-
-	// Verify the test entities are included
-	const keyValueChanges = changesBySchema["lix_key_value"] || [];
-	const keyValueEntities = keyValueChanges.map((c) => c.entity_id);
-	expect(keyValueEntities).toContain("test-entity-1");
-	expect(keyValueEntities).toContain("test-entity-2");
-
-	// Verify change authors were created for user data changes
-	const changeAuthors = changesBySchema["lix_change_author"] || [];
-	expect(changeAuthors.length).toBe(2);
-
-	// Change author entity IDs should reference the user data change IDs
-	const userDataChangeIds = keyValueChanges.map((c) => c.id);
-	for (const author of changeAuthors) {
-		// Entity ID format for change authors is "changeId~accountId"
-		const changeId = author.entity_id.split("~")[0];
-		expect(userDataChangeIds).toContain(changeId);
-	}
+	expect(edgeGlobal.length).toBe(1); // prevGlobal ─▶ global
 });
 
 test("commit with no changes should not create a change set", async () => {
@@ -1618,8 +1632,6 @@ describe("file lixcol cache updates", () => {
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		console.log("Initial cache:", initialCache);
-
 		// Update the file multiple times using file_all (in deterministic mode, timestamps auto-increment)
 		await lix.db
 			.updateTable("file_all")
@@ -1641,8 +1653,6 @@ describe("file lixcol cache updates", () => {
 			.where("version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
-
-		console.log("Final cache:", finalCache);
 
 		// created_at should be preserved from the initial insert
 		expect(finalCache.created_at).toBe(initialCache.created_at);

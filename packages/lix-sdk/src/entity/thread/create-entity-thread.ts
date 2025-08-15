@@ -24,7 +24,7 @@ import type { LixEntity, LixEntityCanonical } from "../schema.js";
  * await createEntityThread({
  *   lix,
  *   entity: {
- *     entity_id: "row_789::column_2",
+ *     entity_id: "row_789~column_2",
  *     schema_key: "csv_cell",
  *     file_id: "data.csv"
  *   },
