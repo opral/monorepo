@@ -62,12 +62,6 @@ export function updateStateCache(args: {
 
 		const group = changesBySchema.get(change.schema_key)!;
 		if (change.snapshot_content === null) {
-			if (change.schema_key === "lix_change_set_element") {
-				console.log(
-					"[DEBUG updateStateCache] Adding deletion for change_set_element:",
-					change.entity_id
-				);
-			}
 			group.deletes.push(change);
 		} else {
 			group.inserts.push(change);
@@ -96,21 +90,6 @@ export function updateStateCache(args: {
 
 		// Process deletions for this schema
 		if (schemaChanges.deletes.length > 0) {
-			if (schema_key === "lix_change_set_element") {
-				console.log(
-					"[DEBUG updateStateCache] Processing",
-					schemaChanges.deletes.length,
-					"deletions for change_set_element"
-				);
-				schemaChanges.deletes.forEach((d) => {
-					console.log(
-						"[DEBUG updateStateCache] Deleting entity_id:",
-						d.entity_id,
-						"version_id:",
-						version_id
-					);
-				});
-			}
 			batchDeleteDirectFromTable({
 				db,
 				lix,
@@ -248,14 +227,6 @@ function batchDeleteDirectFromTable(args: {
 
 	for (const change of changes) {
 		// Get existing entry to check if it exists before deletion
-		if (change.schema_key === "lix_change_set_element") {
-			console.log("[DEBUG batchDelete] Looking for existing entry:", {
-				tableName,
-				entity_id: change.entity_id,
-				file_id: change.file_id,
-				version_id,
-			});
-		}
 		const result = lix.sqlite.exec({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
@@ -265,40 +236,17 @@ function batchDeleteDirectFromTable(args: {
 		}) as any[];
 
 		const existingEntry = result?.[0];
-		if (change.schema_key === "lix_change_set_element") {
-			console.log(
-				"[DEBUG batchDelete] Found existing entry:",
-				existingEntry ? "YES" : "NO"
-			);
-		}
 
 		// Delete the entry
 		if (existingEntry) {
-			if (change.schema_key === "lix_change_set_element") {
-				console.log(
-					"[DEBUG batchDelete] Executing DELETE for:",
-					change.entity_id
-				);
-			}
 			lix.sqlite.exec({
 				sql: `DELETE FROM ${tableName} 
 				      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
 				bind: [change.entity_id, change.file_id, version_id],
 			});
-			if (change.schema_key === "lix_change_set_element") {
-				console.log("[DEBUG batchDelete] DELETE executed");
-			}
 		}
 
 		// Insert tombstone with UPSERT to handle existing entries
-		if (change.schema_key === "lix_change_set_element") {
-			console.log(
-				"[DEBUG batchDelete] Inserting tombstone for:",
-				change.entity_id,
-				"in version:",
-				version_id
-			);
-		}
 		lix.sqlite.exec({
 			sql: `INSERT INTO ${tableName} (
 				entity_id,
@@ -338,8 +286,5 @@ function batchDeleteDirectFromTable(args: {
 				commit_id,
 			],
 		});
-		if (change.schema_key === "lix_change_set_element") {
-			console.log("[DEBUG batchDelete] Tombstone inserted");
-		}
 	}
 }

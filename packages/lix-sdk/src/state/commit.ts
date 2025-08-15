@@ -323,13 +323,6 @@ export function commit(args: {
 				}
 
 				// Find existing working change set elements to delete
-				console.log("[DEBUG] Looking for working change set elements to delete");
-				console.log("[DEBUG] Working change set ID:", workingChangeSetId);
-				console.log("[DEBUG] User changes:", userChanges.map(c => ({
-					entity_id: c.entity_id,
-					schema_key: c.schema_key,
-					file_id: c.file_id
-				})));
 				const existingEntities = executeSync({
 					lix: args.lix,
 					query: db
@@ -373,8 +366,6 @@ export function commit(args: {
 							)
 						),
 				});
-				
-				console.log("[DEBUG] Found existing entities to delete:", existingEntities);
 
 				// Collect working change set element deletions as changes
 				for (const existing of existingEntities) {
@@ -382,10 +373,8 @@ export function commit(args: {
 					// We already queried for entity_id LIKE '${workingChangeSetId}~%'
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
-					const deletionChangeId = uuidV7({ lix: args.lix });
-					console.log("[DEBUG] Creating deletion change with id:", deletionChangeId, "for entity_id:", entityIdForDeletion);
 					allChangesToFlush.push({
-						id: deletionChangeId,
+						id: uuidV7({ lix: args.lix }),
 						entity_id: entityIdForDeletion,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
@@ -394,7 +383,6 @@ export function commit(args: {
 						schema_version: LixChangeSetElementSchema["x-lix-version"],
 						created_at: transactionTimestamp,
 					});
-					console.log("[DEBUG] Total changes in allChangesToFlush after deletion:", allChangesToFlush.length);
 				}
 
 				// Add deletion changes that existed at checkpoint
@@ -635,40 +623,16 @@ export function commit(args: {
 			),
 			// Also include the graph changes if this is global
 			...(version_id === "global"
-				? (() => {
-					const graphChanges = allChangesToFlush.filter(
+				? allChangesToFlush.filter(
 						(c) =>
 							c.schema_key === "lix_change_set" ||
 							c.schema_key === "lix_commit" ||
 							c.schema_key === "lix_commit_edge" ||
 							c.schema_key === "lix_version" ||
 							c.schema_key === "lix_change_set_element"
-					);
-					console.log("[DEBUG] Graph changes filtered for global:", graphChanges.filter(c => c.schema_key === "lix_change_set_element").length, "change_set_elements");
-					return graphChanges;
-				})()
+					)
 				: []),
 		];
-		
-		// Debug: Log changes being sent to updateStateCache
-		console.log("[DEBUG] Sending changes to updateStateCache for version:", version_id);
-		if (version_id === "global") {
-			const allChangeSetElementsInFlush = allChangesToFlush.filter(c => c.schema_key === "lix_change_set_element");
-			console.log("[DEBUG] Total change_set_element changes in allChangesToFlush:", allChangeSetElementsInFlush.length);
-			const deletionChanges = allChangeSetElementsInFlush.filter(c => c.snapshot_content === null);
-			console.log("[DEBUG] Deletion changes (null snapshot_content):", deletionChanges.length);
-			if (deletionChanges.length > 0) {
-				console.log("[DEBUG] Deletion change IDs:", deletionChanges.map(c => c.id));
-			}
-		}
-		const changeSetElementChanges = allChangesForVersion.filter(c => c.schema_key === "lix_change_set_element");
-		if (changeSetElementChanges.length > 0) {
-			const deletionsInChanges = changeSetElementChanges.filter(c => c.snapshot_content === null);
-			console.log("[DEBUG] Change set element changes being sent:", changeSetElementChanges.length, "total,", deletionsInChanges.length, "deletions");
-			if (deletionsInChanges.length > 0) {
-				console.log("[DEBUG] Deletion IDs being sent:", deletionsInChanges.map(c => c.id));
-			}
-		}
 
 		updateStateCache({
 			lix: args.lix,
