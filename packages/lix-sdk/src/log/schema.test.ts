@@ -8,18 +8,22 @@ test("log insert creates entries in the view", async () => {
 	await lix.db
 		.insertInto("log")
 		.values({
-			key: "test.log",
+			key: "test_log",
 			message: "Test log message",
 			level: "info",
 		})
 		.execute();
 
 	// Verify the log appears in the view
-	const logs = await lix.db.selectFrom("log").selectAll().execute();
+	const logs = await lix.db
+		.selectFrom("log")
+		.where("key", "=", "test_log")
+		.selectAll()
+		.execute();
 
 	expect(logs).toHaveLength(1);
 	expect(logs[0]).toMatchObject({
-		key: "test.log",
+		key: "test_log",
 		message: "Test log message",
 		level: "info",
 	});
@@ -61,12 +65,12 @@ test("log delete removes entries from the view", async () => {
 		.insertInto("log")
 		.values([
 			{
-				key: "log.to.keep",
+				key: "test_log_to_keep",
 				message: "Keep this log",
 				level: "info",
 			},
 			{
-				key: "log.to.delete",
+				key: "test_log_to_delete",
 				message: "Delete this log",
 				level: "error",
 			},
@@ -74,20 +78,28 @@ test("log delete removes entries from the view", async () => {
 		.execute();
 
 	// Verify both logs exist
-	const allLogs = await lix.db.selectFrom("log").selectAll().execute();
+	const allLogs = await lix.db
+		.selectFrom("log")
+		.where("key", "in", ["test_log_to_keep", "test_log_to_delete"])
+		.selectAll()
+		.execute();
 	expect(allLogs).toHaveLength(2);
 
 	// Get the ID of the log to delete
-	const logToDelete = allLogs.find((log) => log.key === "log.to.delete");
+	const logToDelete = allLogs.find((log) => log.key === "test_log_to_delete");
 	expect(logToDelete).toBeDefined();
 
 	// Delete one log by ID
 	await lix.db.deleteFrom("log").where("id", "=", logToDelete!.id).execute();
 
 	// Verify only one log remains
-	const remainingLogs = await lix.db.selectFrom("log").selectAll().execute();
+	const remainingLogs = await lix.db
+		.selectFrom("log")
+		.where("key", "in", ["test_log_to_keep", "test_log_to_delete"])
+		.selectAll()
+		.execute();
 	expect(remainingLogs).toHaveLength(1);
-	expect(remainingLogs[0]?.key).toBe("log.to.keep");
+	expect(remainingLogs[0]?.key).toBe("test_log_to_keep");
 	expect(remainingLogs[0]?.message).toBe("Keep this log");
 
 	// Verify the deleted log is gone
@@ -107,24 +119,28 @@ test("multiple log inserts with unique ids", async () => {
 		.insertInto("log")
 		.values([
 			{
-				key: "log1",
+				key: "test_log1",
 				message: "First log",
 				level: "info",
 			},
 			{
-				key: "log2",
+				key: "test_log2",
 				message: "Second log",
 				level: "warn",
 			},
 			{
-				key: "log3",
+				key: "test_log3",
 				message: "Third log",
 				level: "error",
 			},
 		])
 		.execute();
 
-	const logs = await lix.db.selectFrom("log").selectAll().execute();
+	const logs = await lix.db
+		.selectFrom("log")
+		.where("key", "like", "test_log%")
+		.selectAll()
+		.execute();
 
 	expect(logs).toHaveLength(3);
 
@@ -134,7 +150,13 @@ test("multiple log inserts with unique ids", async () => {
 	expect(uniqueIds.size).toBe(3);
 
 	// Verify content
-	expect(logs.find((log) => log.key === "log1")?.message).toBe("First log");
-	expect(logs.find((log) => log.key === "log2")?.message).toBe("Second log");
-	expect(logs.find((log) => log.key === "log3")?.message).toBe("Third log");
+	expect(logs.find((log) => log.key === "test_log1")?.message).toBe(
+		"First log"
+	);
+	expect(logs.find((log) => log.key === "test_log2")?.message).toBe(
+		"Second log"
+	);
+	expect(logs.find((log) => log.key === "test_log3")?.message).toBe(
+		"Third log"
+	);
 });
