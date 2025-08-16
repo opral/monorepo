@@ -78,7 +78,11 @@ test("file data cache - read-through caching", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(file.data).toEqual(testData);
+	// Compare JSON semantically, not byte-for-byte
+	// The mockJsonPlugin may reorder properties when reconstructing JSON
+	const fileDataParsed = JSON.parse(new TextDecoder().decode(file.data));
+	const testDataParsed = JSON.parse(new TextDecoder().decode(testData));
+	expect(fileDataParsed).toEqual(testDataParsed);
 
 	// Now cache should be populated
 	cachedData = getFileDataCache({
@@ -87,7 +91,9 @@ test("file data cache - read-through caching", async () => {
 		versionId: activeVersion.version_id,
 	});
 	expect(cachedData).toBeDefined();
-	expect(cachedData).toEqual(testData);
+	// Cache contains the materialized data (which may have reordered properties)
+	const cachedDataParsed = JSON.parse(new TextDecoder().decode(cachedData!));
+	expect(cachedDataParsed).toEqual(testDataParsed);
 });
 
 test("file data cache - update invalidates and rewrites cache", async () => {
@@ -124,7 +130,10 @@ test("file data cache - update invalidates and rewrites cache", async () => {
 		.where("id", "=", "update_file")
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	expect(file.data).toEqual(initialData);
+	// Compare JSON semantically
+	expect(JSON.parse(new TextDecoder().decode(file.data))).toEqual(
+		JSON.parse(new TextDecoder().decode(initialData))
+	);
 
 	// Verify initial cache
 	let cachedData = getFileDataCache({
@@ -132,7 +141,9 @@ test("file data cache - update invalidates and rewrites cache", async () => {
 		fileId: "update_file",
 		versionId: activeVersion.version_id,
 	});
-	expect(cachedData).toEqual(initialData);
+	expect(JSON.parse(new TextDecoder().decode(cachedData!))).toEqual(
+		JSON.parse(new TextDecoder().decode(initialData))
+	);
 
 	// Update the file
 	const updatedData = new TextEncoder().encode(
@@ -166,7 +177,10 @@ test("file data cache - update invalidates and rewrites cache", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(file.data).toEqual(updatedData);
+	// Compare JSON semantically
+	expect(JSON.parse(new TextDecoder().decode(file.data))).toEqual(
+		JSON.parse(new TextDecoder().decode(updatedData))
+	);
 
 	// Now cache should be populated with updated data
 	cachedData = getFileDataCache({
@@ -174,7 +188,9 @@ test("file data cache - update invalidates and rewrites cache", async () => {
 		fileId: "update_file",
 		versionId: activeVersion.version_id,
 	});
-	expect(cachedData).toEqual(updatedData);
+	expect(JSON.parse(new TextDecoder().decode(cachedData!))).toEqual(
+		JSON.parse(new TextDecoder().decode(updatedData))
+	);
 });
 
 // test("file data cache - performance improvement for repeated reads", async () => {
@@ -278,7 +294,10 @@ test("file data cache - cache is cleared when file is deleted", async () => {
 		.where("id", "=", "delete_test_file")
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	expect(file.data).toEqual(testData);
+	// Compare JSON semantically
+	expect(JSON.parse(new TextDecoder().decode(file.data))).toEqual(
+		JSON.parse(new TextDecoder().decode(testData))
+	);
 
 	// Verify cache was populated
 	let cachedData = getFileDataCache({
@@ -287,7 +306,9 @@ test("file data cache - cache is cleared when file is deleted", async () => {
 		versionId: activeVersion.version_id,
 	});
 	expect(cachedData).toBeDefined();
-	expect(cachedData).toEqual(testData);
+	expect(JSON.parse(new TextDecoder().decode(cachedData!))).toEqual(
+		JSON.parse(new TextDecoder().decode(testData))
+	);
 
 	// Delete the file
 	await lix.db
