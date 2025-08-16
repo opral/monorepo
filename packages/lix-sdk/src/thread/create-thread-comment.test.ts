@@ -111,12 +111,14 @@ test("defaults parent_id to the last comment when not provided", async () => {
 
 	expect(fourthComment.parent_id).toBe(firstComment.id);
 
-	// Create fifth comment without parent_id (should default to third comment, which is still the leaf)
+	// Create fifth comment without parent_id 
+	// Should default to the most recently created leaf (fourth comment)
+	// This follows common UI patterns where replies go to the most recent activity
 	const fifthComment = await createThreadComment({
 		lix,
 		thread_id: thread.id,
 		body: fromPlainText("Fifth comment"),
 	});
 
-	expect(fifthComment.parent_id).toBe(thirdComment.id);
+	expect(fifthComment.parent_id).toBe(fourthComment.id);
 });

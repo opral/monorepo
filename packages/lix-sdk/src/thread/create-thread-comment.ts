@@ -29,9 +29,12 @@ export async function createThreadComment(
 			.select("lixcol_version_id")
 			.executeTakeFirstOrThrow();
 
-		// If parent_id is not provided, find the leaf comment using SQL traversal
+		// If parent_id is not provided, find the most appropriate parent comment
+		// Following common UI patterns (GitHub, Slack), we default to the most recently
+		// created leaf comment, which approximates "most recently active" thread
 		let parentId = args.parent_id;
 		if (parentId === undefined) {
+			// Find all leaf comments (comments with no children)
 			const leafComment = await trx
 				.selectFrom("thread_comment_all as c1")
 				.where("c1.thread_id", "=", args.thread_id)
@@ -52,7 +55,10 @@ export async function createThreadComment(
 						)
 					)
 				)
-				.select("c1.id")
+				.select(["c1.id", "c1.lixcol_created_at"])
+				// Select the most recently created leaf (approximates most recent activity)
+				.orderBy("c1.lixcol_created_at", "desc")
+				.orderBy("c1.id", "desc") // Secondary order by id for absolute determinism
 				.executeTakeFirst();
 			parentId = leafComment?.id ?? null;
 		}
