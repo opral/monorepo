@@ -143,6 +143,8 @@ export function populateStateCache(
 	}
 
 	// Query materialized state to get changes
+	// Include ALL state (direct and inherited) that the version can see
+	// The materializer already handles inheritance correctly
 	const selectSql = `
 		SELECT 
 			m.entity_id,
@@ -155,10 +157,11 @@ export function populateStateCache(
 			m.created_at,
 			m.updated_at,
 			m.change_id,
-			m.commit_id
+			m.commit_id,
+			m.inherited_from_version_id
 		FROM internal_state_materializer m
 		WHERE ${whereConditions.length > 0 ? whereConditions.join(" AND ") : "1=1"}
-		  AND m.inherited_from_version_id IS NULL  -- Only direct entries, no inherited state
+		  -- No inheritance filter - include all state the version can see
 	`;
 
 	const results = sqlite.exec({
@@ -234,7 +237,7 @@ export function populateStateCache(
 					row.schema_version,
 					row.created_at, // Preserve original created_at
 					row.updated_at, // Preserve original updated_at
-					null, // inherited_from_version_id
+					row.inherited_from_version_id || null, // Preserve inheritance info
 					0, // inheritance_delete_marker
 					row.change_id,
 					row.commit_id,
