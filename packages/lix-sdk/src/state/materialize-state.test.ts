@@ -2003,7 +2003,7 @@ describe("internal_state_materializer", () => {
 			await lix.db
 				.insertInto("key_value_all")
 				.values({
-					key: "deep-key",
+					key: "key-from-a",
 					value: "value-from-a",
 					lixcol_version_id: "version-a",
 				})
@@ -2025,7 +2025,7 @@ describe("internal_state_materializer", () => {
 				.selectAll()
 				.where("version_id", "=", "version-c")
 				.where("schema_key", "=", "lix_key_value")
-				.where("entity_id", "in", ["deep-key", "b-only-key"])
+				.where("entity_id", "in", ["key-from-a", "b-only-key"])
 				.orderBy("entity_id")
 				.execute();
 
@@ -2033,15 +2033,17 @@ describe("internal_state_materializer", () => {
 			expect(materializedStates).toHaveLength(2);
 
 			// Check inherited from A (through B)
-			const deepKey = materializedStates.find(
-				(s: any) => s.entity_id === "deep-key"
+			const keyFromA = materializedStates.find(
+				(s: any) => s.entity_id === "key-from-a"
 			);
-			expect(deepKey).toBeDefined();
-			expect(deepKey!.snapshot_content).toEqual({
-				key: "deep-key",
+			expect(keyFromA).toBeDefined();
+			expect(keyFromA!.snapshot_content).toEqual({
+				key: "key-from-a",
 				value: "value-from-a",
 			});
-			expect(deepKey!.inherited_from_version_id).toBe("version-a");
+			expect(keyFromA!.inherited_from_version_id).toBe("version-a");
+			// CRITICAL: version_id should be version-c (the viewing version), not version-a
+			expect(keyFromA!.version_id).toBe("version-c");
 
 			// Check inherited from B
 			const bKey = materializedStates.find(
@@ -2053,6 +2055,8 @@ describe("internal_state_materializer", () => {
 				value: "value-from-b",
 			});
 			expect(bKey!.inherited_from_version_id).toBe("version-b");
+			// CRITICAL: version_id should be version-c (the viewing version), not version-b
+			expect(bKey!.version_id).toBe("version-c");
 		},
 		{
 			simulations: [normalSimulation, outOfOrderSequenceSimulation],
