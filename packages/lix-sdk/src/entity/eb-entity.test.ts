@@ -74,19 +74,29 @@ test("ebEntity.hasLabel filters entities by label id", async () => {
 		.insertInto("file")
 		.values([
 			{
+				id: "file0",
 				path: "/docs/readme.md",
 				data: new Uint8Array(Buffer.from("# README")),
 			},
 			{
+				id: "file1",
 				path: "/src/index.ts",
 				data: new Uint8Array(Buffer.from("console.log('hello')")),
 			},
-			{ path: "/package.json", data: new Uint8Array(Buffer.from("{}")) },
+			{
+				id: "file2",
+				path: "/package.json",
+				data: new Uint8Array(Buffer.from("{}")),
+			},
 		])
 		.execute();
 
 	// Get files from view
-	const files = await lix.db.selectFrom("file").selectAll().execute();
+	const files = await lix.db
+		.selectFrom("file")
+		.orderBy("id")
+		.selectAll()
+		.execute();
 
 	// Label first two files
 	for (let i = 0; i < 2; i++) {
@@ -102,6 +112,7 @@ test("ebEntity.hasLabel filters entities by label id", async () => {
 		.selectFrom("file")
 		.where(ebEntity("file").hasLabel({ id: label.id }))
 		.select(["path"])
+		.orderBy("id")
 		.execute();
 
 	expect(labeledFiles).toHaveLength(2);
