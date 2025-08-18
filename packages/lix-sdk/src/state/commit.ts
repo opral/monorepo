@@ -416,64 +416,79 @@ export function commit(args: {
 						),
 				});
 
-				// Collect working change set element deletions as changes
+				// Delete existing working change set elements as untracked changes
 				for (const existing of existingEntities) {
 					// The entity_id for a change_set_element is "${change_set_id}~${change_id}"
 					// We already queried for entity_id LIKE '${workingChangeSetId}~%'
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
-					changeSetElements.push({
-						id: uuidV7({ lix: args.lix }),
-						entity_id: entityIdForDeletion,
-						schema_key: "lix_change_set_element",
-						file_id: "lix",
-						plugin_key: "lix_own_entity",
-						snapshot_content: null, // null indicates deletion
-						schema_version: LixChangeSetElementSchema["x-lix-version"],
-						created_at: transactionTimestamp,
+					// Handle working changeset elements as untracked
+					updateUntrackedState({
+						lix: args.lix,
+						change: {
+							id: uuidV7({ lix: args.lix }),
+							entity_id: entityIdForDeletion,
+							schema_key: "lix_change_set_element",
+							file_id: "lix",
+							plugin_key: "lix_own_entity",
+							snapshot_content: null, // null indicates deletion
+							schema_version: LixChangeSetElementSchema["x-lix-version"],
+							created_at: transactionTimestamp,
+						},
+						version_id: "global",
 					});
 				}
 
-				// Add deletion changes that existed at checkpoint
+				// Add deletion changes that existed at checkpoint as untracked
 				for (const deletion of deletionChanges) {
 					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
 					if (entitiesAtCheckpoint.has(key)) {
-						changeSetElements.push({
+						// Handle working changeset elements as untracked
+						updateUntrackedState({
+							lix: args.lix,
+							change: {
+								id: uuidV7({ lix: args.lix }),
+								entity_id: `${workingChangeSetId}~${deletion.id}`,
+								schema_key: "lix_change_set_element",
+								file_id: "lix",
+								plugin_key: "lix_own_entity",
+								snapshot_content: JSON.stringify({
+									change_set_id: workingChangeSetId,
+									change_id: deletion.id,
+									entity_id: deletion.entity_id,
+									schema_key: deletion.schema_key,
+									file_id: deletion.file_id,
+								} satisfies LixChangeSetElement),
+								schema_version: LixChangeSetElementSchema["x-lix-version"],
+								created_at: transactionTimestamp,
+							},
+							version_id: "global",
+						});
+					}
+				}
+
+				// Add all non-deletions as untracked
+				for (const change of nonDeletionChanges) {
+					// Handle working changeset elements as untracked
+					updateUntrackedState({
+						lix: args.lix,
+						change: {
 							id: uuidV7({ lix: args.lix }),
-							entity_id: `${workingChangeSetId}~${deletion.id}`,
+							entity_id: `${workingChangeSetId}~${change.id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
 							plugin_key: "lix_own_entity",
 							snapshot_content: JSON.stringify({
 								change_set_id: workingChangeSetId,
-								change_id: deletion.id,
-								entity_id: deletion.entity_id,
-								schema_key: deletion.schema_key,
-								file_id: deletion.file_id,
+								change_id: change.id,
+								entity_id: change.entity_id,
+								schema_key: change.schema_key,
+								file_id: change.file_id,
 							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
 							created_at: transactionTimestamp,
-						});
-					}
-				}
-
-				// Add all non-deletions
-				for (const change of nonDeletionChanges) {
-					changeSetElements.push({
-						id: uuidV7({ lix: args.lix }),
-						entity_id: `${workingChangeSetId}~${change.id}`,
-						schema_key: "lix_change_set_element",
-						file_id: "lix",
-						plugin_key: "lix_own_entity",
-						snapshot_content: JSON.stringify({
-							change_set_id: workingChangeSetId,
-							change_id: change.id,
-							entity_id: change.entity_id,
-							schema_key: change.schema_key,
-							file_id: change.file_id,
-						} satisfies LixChangeSetElement),
-						schema_version: LixChangeSetElementSchema["x-lix-version"],
-						created_at: transactionTimestamp,
+						},
+						version_id: "global",
 					});
 				}
 			}
@@ -524,27 +539,6 @@ export function commit(args: {
 
 		// Add all change_authors to globalChanges (they're global metadata)
 		globalChanges.push(...allChangeAuthors);
-
-		// Create changeset elements for change_author records using global changeset
-		for (const changeAuthor of allChangeAuthors) {
-			const elementId = uuidV7({ lix: args.lix });
-			changeSetElements.push({
-				id: elementId,
-				entity_id: `${globalMeta.changeSetId}~${changeAuthor.id}`,
-				schema_key: "lix_change_set_element",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: globalMeta.changeSetId,
-					change_id: changeAuthor.id,
-					schema_key: changeAuthor.schema_key,
-					file_id: changeAuthor.file_id,
-					entity_id: changeAuthor.entity_id,
-				} satisfies LixChangeSetElement),
-				schema_version: LixChangeSetElementSchema["x-lix-version"],
-				created_at: transactionTimestamp,
-			});
-		}
 
 		// Add metadata for all versions (including global)
 		for (const [version_id, meta] of versionMetadata) {
@@ -652,6 +646,32 @@ export function commit(args: {
 		// Add ALL change_set_element records to globalChanges
 		// since they are all global metadata that should be cached at global level
 		globalChanges.push(...changeSetElements);
+
+		// Create change_set_elements for the change_set_element changes themselves
+		// This ensures the materializer can find them
+		const metaChangeSetElements: LixChangeRaw[] = [];
+		for (const elementChange of changeSetElements) {
+			const metaElementId = uuidV7({ lix: args.lix });
+			metaChangeSetElements.push({
+				id: metaElementId,
+				entity_id: `${globalMeta.changeSetId}~${elementChange.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: globalMeta.changeSetId,
+					change_id: elementChange.id,
+					schema_key: elementChange.schema_key,
+					file_id: elementChange.file_id,
+					entity_id: elementChange.entity_id,
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
+				created_at: transactionTimestamp,
+			});
+		}
+
+		// Add the meta change_set_elements to globalChanges as well
+		globalChanges.push(...metaChangeSetElements);
 
 		// Add all global changes to flush
 		allChangesToFlush.push(...globalChanges);

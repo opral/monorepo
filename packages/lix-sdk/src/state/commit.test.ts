@@ -104,7 +104,6 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		],
 	});
 
-
 	/*──────────────────────── 3. COMMIT ───────────────────────────────────*/
 	commit({ lix });
 
@@ -122,7 +121,6 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 	const commitActiveId = activeVersionAfter.commit_id; // data commit
 	const commitGlobalId = globalVersionAfter.commit_id; // graph commit
 
-
 	expect(commitActiveId).not.toBe(prevCommitActive);
 	expect(commitGlobalId).not.toBe(prevCommitGlobal);
 
@@ -132,8 +130,15 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 			.selectFrom("change_set_element")
 			.innerJoin("change", "change_set_element.change_id", "change.id")
 			.where("change_set_id", "=", changeSetId)
-			.select("change.schema_key")
+			.select([
+				"change.schema_key", 
+				"change.entity_id", 
+				"change_set_element.change_id",
+				"change.snapshot_content"
+			])
 			.execute();
+		
+		
 		return rows.reduce<Record<string, number>>((map, r) => {
 			map[r.schema_key] = (map[r.schema_key] ?? 0) + 1;
 			return map;
@@ -150,7 +155,6 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		.where("id", "=", commitGlobalId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
-
 
 	const activeSchemas = await countSchemas(commitActive.change_set_id);
 	const globalSchemas = await countSchemas(commitGlobal.change_set_id);
@@ -171,9 +175,11 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 
 	expect(globalSchemas["lix_change_author"]).toBe(2); // two entities (para-1, para-2)
 	expect(globalSchemas["lix_commit"]).toBe(2); // copy of active + self
-	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
 	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
 	expect(globalSchemas["lix_version"]).toBe(2); // version_active & global
+	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
+	// Actual count: 2 user + 2 authors + 6 global metadata + 2 meta-elements (no duplicates) = 12
+	expect(globalSchemas["lix_change_set_element"]).toBe(12);
 
 	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
 	const edgeActive = await db
