@@ -4,16 +4,14 @@ import { getStateCacheV2Tables } from "./schema.js";
 
 export interface PopulateStateCacheV2Options {
 	version_id?: string; // Optional - if not provided, all active versions are populated
-	entity_id?: string; // Optional
-	schema_key?: string; // Optional
-	file_id?: string; // Optional
 }
 
 /**
  * Populates the state cache v2 from the materializer view.
  *
  * This function reads from the materialized state and writes to the per-schema
- * physical cache tables using updateStateCacheV2 for optimal performance.
+ * physical cache tables. If a version_id is provided, it also populates the
+ * cache for all ancestor versions.
  *
  * @param lix - The Lix instance with sqlite and db
  * @param options - Optional filters for selective population
@@ -24,125 +22,63 @@ export function populateStateCache(
 ): void {
 	const { sqlite } = lix;
 
-	// Build WHERE clause based on options
-	const whereConditions: string[] = [];
-	const bindParams: any[] = [];
+	let versionsToPopulate: string[];
 
 	if (options.version_id) {
-		whereConditions.push("m.version_id = ?");
-		bindParams.push(options.version_id);
+		// When a specific version is requested, also include all its ancestors
+		// This ensures the resolved view can access inherited state
+		// Use the materializer's version ancestry view to find all ancestors
+		const ancestorRows = sqlite.exec({
+			sql: `
+				SELECT DISTINCT ancestor_version_id as version_id
+				FROM internal_materialization_version_ancestry
+				WHERE version_id = ?
+			`,
+			bind: [options.version_id],
+			returnValue: "resultRows",
+			rowMode: "array",
+		}) as [string][];
+		
+		// The ancestry view includes the version itself and all its ancestors
+		versionsToPopulate = ancestorRows.length > 0 
+			? ancestorRows.map((row) => row[0])
+			: [options.version_id];
 	} else {
-		// If no version_id specified, only populate active versions (with tips)
-		whereConditions.push(`EXISTS (
-			SELECT 1 FROM internal_materialization_version_tips vt
-			WHERE vt.version_id = m.version_id
-		)`);
+		// If no version_id specified, populate all active versions (with tips)
+		const tipRows = sqlite.exec({
+			sql: `SELECT version_id FROM internal_materialization_version_tips`,
+			returnValue: "resultRows",
+			rowMode: "array",
+		}) as [string][];
+		versionsToPopulate = tipRows.map((row) => row[0]);
 	}
 
-	if (options.entity_id) {
-		whereConditions.push("m.entity_id = ?");
-		bindParams.push(options.entity_id);
-	}
-	if (options.schema_key) {
-		whereConditions.push("m.schema_key = ?");
-		bindParams.push(options.schema_key);
-	}
-	if (options.file_id) {
-		whereConditions.push("m.file_id = ?");
-		bindParams.push(options.file_id);
+	if (versionsToPopulate.length === 0) {
+		return;
 	}
 
-	// Clear existing cache entries for v2 tables that match the criteria
+	// Clear existing cache entries for the versions being populated
 	const tableCache = getStateCacheV2Tables(lix);
+	for (const tableName of tableCache) {
+		if (tableName === "internal_state_cache") continue;
 
-	if (options.schema_key) {
-		// If schema_key is specified, only clear that specific table
-		// Sanitize schema_key for table name - must match update-state-cache.ts
-		const sanitizedSchemaKey = options.schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
-		if (tableCache.has(tableName)) {
-			const deleteConditions: string[] = [];
-			const deleteParams: any[] = [];
+		const tableExists = sqlite.exec({
+			sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
+			bind: [tableName],
+			returnValue: "resultRows",
+		});
 
-			if (options.version_id) {
-				deleteConditions.push("version_id = ?");
-				deleteParams.push(options.version_id);
-			}
-			if (options.entity_id) {
-				deleteConditions.push("entity_id = ?");
-				deleteParams.push(options.entity_id);
-			}
-			if (options.file_id) {
-				deleteConditions.push("file_id = ?");
-				deleteParams.push(options.file_id);
-			}
-
-			if (deleteConditions.length > 0) {
-				sqlite.exec({
-					sql: `DELETE FROM ${tableName} WHERE ${deleteConditions.join(" AND ")}`,
-					bind: deleteParams,
-				});
-			} else {
-				// Clear entire table for this schema
-				sqlite.exec(`DELETE FROM ${tableName}`);
-			}
-		}
-	} else {
-		// Clear all v2 cache tables based on filters
-		for (const tableName of tableCache) {
-			// Skip the virtual table itself
-			if (tableName === "internal_state_cache") continue;
-
-			const deleteConditions: string[] = [];
-			const deleteParams: any[] = [];
-
-			if (options.version_id) {
-				deleteConditions.push("version_id = ?");
-				deleteParams.push(options.version_id);
-			}
-			if (options.entity_id) {
-				deleteConditions.push("entity_id = ?");
-				deleteParams.push(options.entity_id);
-			}
-			if (options.file_id) {
-				deleteConditions.push("file_id = ?");
-				deleteParams.push(options.file_id);
-			}
-
-			if (deleteConditions.length > 0) {
-				// Check if table exists before deleting
-				const tableExists = sqlite.exec({
-					sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
-					bind: [tableName],
-					returnValue: "resultRows",
-				});
-
-				if (tableExists && tableExists.length > 0) {
-					sqlite.exec({
-						sql: `DELETE FROM ${tableName} WHERE ${deleteConditions.join(" AND ")}`,
-						bind: deleteParams,
-					});
-				}
-			} else if (
-				!options.version_id &&
-				!options.entity_id &&
-				!options.file_id
-			) {
-				// Only clear entire tables if no filters specified
-				const tableExists = sqlite.exec({
-					sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
-					bind: [tableName],
-					returnValue: "resultRows",
-				});
-
-				if (tableExists && tableExists.length > 0) {
-					sqlite.exec(`DELETE FROM ${tableName}`);
-				}
-			}
+		if (tableExists && tableExists.length > 0) {
+			const placeholders = versionsToPopulate.map(() => "?").join(",");
+			sqlite.exec({
+				sql: `DELETE FROM ${tableName} WHERE version_id IN (${placeholders})`,
+				bind: versionsToPopulate,
+			});
 		}
 	}
 
-	// Query materialized state to get changes
+	// Query materialized state to get changes for all required versions
+	const placeholders = versionsToPopulate.map(() => "?").join(",");
 	const selectSql = `
 		SELECT 
 			m.entity_id,
@@ -155,15 +91,16 @@ export function populateStateCache(
 			m.created_at,
 			m.updated_at,
 			m.change_id,
-			m.commit_id
+			m.commit_id,
+			m.inherited_from_version_id
 		FROM internal_state_materializer m
-		WHERE ${whereConditions.length > 0 ? whereConditions.join(" AND ") : "1=1"}
-		  AND m.inherited_from_version_id IS NULL  -- Only direct entries, no inherited state
+		WHERE m.version_id IN (${placeholders})
+		  AND m.inherited_from_version_id IS NULL
 	`;
 
 	const results = sqlite.exec({
 		sql: selectSql,
-		bind: bindParams,
+		bind: versionsToPopulate,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -234,7 +171,7 @@ export function populateStateCache(
 					row.schema_version,
 					row.created_at, // Preserve original created_at
 					row.updated_at, // Preserve original updated_at
-					null, // inherited_from_version_id
+					row.inherited_from_version_id,
 					0, // inheritance_delete_marker
 					row.change_id,
 					row.commit_id,

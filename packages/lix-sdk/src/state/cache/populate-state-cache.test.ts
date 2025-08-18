@@ -4,6 +4,10 @@ import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
+import { clearStateCache } from "./clear-state-cache.js";
+import { createVersion } from "../../version/create-version.js";
+import { Kysely, sql } from "kysely";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("populates v2 cache from materializer", async () => {
 	const lix = await openLix({
@@ -79,38 +83,6 @@ test("populates v2 cache from materializer", async () => {
 
 	expect(lixOtherTable).toHaveLength(1);
 	expect(lixOtherTable[0].entity_id).toBe("entity-3");
-
-	// Now clear and repopulate from materializer
-	// Note: In a real scenario, the materializer would have this data
-	// For testing, we'll simulate by inserting directly into the materializer view
-
-	// Since we can't directly insert into the materializer (it's a view),
-	// we'll test the populate function with filters instead
-
-	// Test 1: Populate specific schema_key
-	populateStateCache(lix, { schema_key: "lix_test" });
-
-	// The function should have cleared and re-populated lix_test table
-	// In real usage, it would read from materializer, but since we don't have
-	// materializer data in this test, the table should be empty after clear
-	const lixTestAfterPopulate = lix.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
-
-	// Should be empty since materializer has no data
-	expect(lixTestAfterPopulate).toHaveLength(0);
-
-	// lix_other should remain unchanged
-	const lixOtherAfterPopulate = lix.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_other`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
-
-	expect(lixOtherAfterPopulate).toHaveLength(1);
-	expect(lixOtherAfterPopulate[0].entity_id).toBe("entity-3");
 });
 
 test("populates v2 cache with version filter", async () => {
@@ -284,4 +256,156 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	expect(schemaAAfter).toHaveLength(0);
 	expect(schemaBAfter).toHaveLength(0);
 	expect(schemaCAfter).toHaveLength(0);
+});
+
+// This test verifies that when populating cache for a child version,
+// all parent versions in the inheritance chain are also populated.
+// This is necessary because the child version needs access to inherited state.
+test("inheritance is queryable from the resolved view after population", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	const currentTimestamp = timestamp({ lix });
+
+	// Create version hierarchy: C inherits from B, B inherits from A
+	const versionA = await createVersion({
+		lix,
+		name: "Version A",
+		id: "version_a",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		name: "Version B",
+		id: "version_b",
+		inherits_from_version_id: versionA.id,
+	});
+
+	const versionC = await createVersion({
+		lix,
+		name: "Version C",
+		id: "version_c",
+		inherits_from_version_id: versionB.id,
+	});
+
+	// Insert test entities directly into state_all for each version using Kysely
+	// Entity in version A
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "entity_a",
+			schema_key: "test_entity",
+			file_id: "file1",
+			version_id: versionA.id,
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "entity_a",
+				value: "from_version_a",
+			}) as any,
+			schema_version: "1.0",
+			created_at: currentTimestamp,
+			updated_at: currentTimestamp,
+		})
+		.execute();
+
+	// Entity in version B
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "entity_b",
+			schema_key: "test_entity",
+			file_id: "file1",
+			version_id: versionB.id,
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "entity_b",
+				value: "from_version_b",
+			}) as any,
+			schema_version: "1.0",
+			created_at: currentTimestamp,
+			updated_at: currentTimestamp,
+		})
+		.execute();
+
+	// Entity in version C
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "entity_c",
+			schema_key: "test_entity",
+			file_id: "file1",
+			version_id: versionC.id,
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "entity_c",
+				value: "from_version_c",
+			}) as any,
+			schema_version: "1.0",
+			created_at: currentTimestamp,
+			updated_at: currentTimestamp,
+		})
+		.execute();
+
+	// Clear all cache to start fresh
+	clearStateCache({ lix });
+
+	// ACT: Populate ONLY version C
+	populateStateCache(lix, { version_id: versionC.id });
+
+	// ASSERT: Check what got populated in the cache
+	// Read from the virtual table internal_state_cache using Kysely with json function
+	const resolvedContents = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_resolved_state_all")
+		.select([
+			"entity_id",
+			"schema_key",
+			"file_id",
+			"version_id",
+			"inherited_from_version_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
+		.where("schema_key", "=", "test_entity")
+		.where("version_id", "=", versionC.id)
+		.orderBy("entity_id")
+		.execute();
+
+	// EXPECTED BEHAVIOR: When populating version_c, the cache should contain
+	// all entities that version_c can see through inheritance:
+	// 1. entity_a from version_a (inherited through B -> A)
+	// 2. entity_b from version_b (inherited from B)
+	// 3. entity_c from version_c (direct)
+
+	// All three entities should be in the cache
+	expect(resolvedContents).toHaveLength(3);
+
+	// Verify entity_a is cached (inherited from version_a)
+	// All entities are stored with version_id=version_c since that's the version viewing them
+	const entityA = resolvedContents.find((r: any) => r.entity_id === "entity_a");
+	expect(entityA).toBeTruthy();
+	expect(entityA?.version_id).toBe(versionC.id); // Stored under version_c
+	expect(entityA?.inherited_from_version_id).toBe(versionA.id); // But inherited from version_a
+	// snapshot_content is already a parsed object from the sql`json()` function
+	expect((entityA?.snapshot_content as any).value).toBe("from_version_a");
+
+	// Verify entity_b is cached (inherited from version_b)
+	const entityB = resolvedContents.find((r: any) => r.entity_id === "entity_b");
+	expect(entityB).toBeTruthy();
+	expect(entityB?.version_id).toBe(versionC.id); // Stored under version_c
+	expect(entityB?.inherited_from_version_id).toBe(versionB.id); // But inherited from version_b
+	expect((entityB?.snapshot_content as any).value).toBe("from_version_b");
+
+	// Verify entity_c is cached (direct from version_c)
+	const entityC = resolvedContents.find((r: any) => r.entity_id === "entity_c");
+	expect(entityC).toBeTruthy();
+	expect(entityC?.version_id).toBe(versionC.id); // Stored under version_c
+	expect(entityC?.inherited_from_version_id).toBeNull(); // Direct, not inherited
+	expect((entityC?.snapshot_content as any).value).toBe("from_version_c");
 });
