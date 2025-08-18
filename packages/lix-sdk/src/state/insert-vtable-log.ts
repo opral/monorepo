@@ -1,7 +1,7 @@
-import { insertTransactionState } from "./transaction/insert-transaction-state.js";
 import { LixLogSchema, type LixLog } from "../log/schema.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { timestamp, type Lix } from "../index.js";
+import { insertTransactionState } from "./transaction/insert-transaction-state.js";
 
 // Track if logging is in progress per Lix instance to prevent recursion
 const loggingInProgressMap = new WeakMap<
@@ -30,7 +30,8 @@ export function insertVTableLog(args: {
 	loggingInProgressMap.set(args.lix, true);
 	try {
 		const id = args.id ?? uuidV7({ lix: args.lix });
-		// Use direct transaction state insertion to avoid virtual table recursion
+		// Insert into transaction state (untracked) to preserve previous behavior.
+		// Note: If called outside a vtable write, this may require a later commit to flush.
 		insertTransactionState({
 			lix: {
 				sqlite: args.lix.sqlite,

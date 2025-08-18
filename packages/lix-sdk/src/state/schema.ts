@@ -116,19 +116,6 @@ export function applyStateDatabaseSchema(
 					return result;
 				}
 
-				// wiping all rows on connect simulates a temp table for internal_change_in_transaction.
-				// we need to clear any existing changes on connect in case a transaction remained open.
-				// otherwise, the lix can't boot up properly and will throw an error.
-				//
-				// an open transaction can happen if the storage layer crashes or is not properly shut down.
-				//
-				// PS internal_change_in_transaction is not a temp table because sqlite
-				// prohibits access to temp tables from virtual tables
-				executeSync({
-					lix: { sqlite },
-					query: db.deleteFrom("internal_change_in_transaction"),
-				});
-
 				sqlite.sqlite3.vtab.xVtab.create(pVTab);
 				return capi.SQLITE_OK;
 			},
@@ -366,13 +353,8 @@ export function applyStateDatabaseSchema(
 						// Populate cache directly with materialized state
 						populateStateCache({ sqlite, db: db as any });
 
-						// Log the cache miss
-						insertVTableLog({
-							lix,
-							key: "lix_state_cache_miss",
-							level: "debug",
-							message: `Cache miss detected - materialized state`,
-						});
+						// Do not log here: xFilter can be invoked during SELECT-only paths
+						// and should avoid writing to the transaction state/logs.
 
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;

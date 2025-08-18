@@ -252,7 +252,6 @@ export function commit(args: {
 			// Add to separate collection to avoid filtering later
 			changeSetElements.push(changeSetElement);
 		}
-
 	}
 
 	// Step 4: Handle working changeset updates for each version
@@ -827,6 +826,5 @@ export function commit(args: {
 	// Emit state commit hook after transaction is successfully committed
 	const allChangesForHook: any[] = [...allChangesToFlush, ...untrackedChanges];
 	args.lix.hooks._emit("state_commit", { changes: allChangesForHook });
-
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }

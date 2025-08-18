@@ -2119,7 +2119,7 @@ simulationTest(
 );
 
 simulationTest(
-	"untracked state is persisted across lix sessions",
+	"untracked state is persisted across lix openings",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const mockSchema: LixSchemaDefinition = {
 			"x-lix-key": "mock_schema",
@@ -2138,7 +2138,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2301,6 +2301,90 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(changes.length).toBeGreaterThan(0);
+	}
+);
+
+// Verify that normal operations do not leave rows staged in the transaction table.
+simulationTest(
+	"transaction table is empty after select, insert, update, delete",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Prepare a simple schema for state mutations
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_txn",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Helper to assert transaction table is empty
+		const expectTxnEmpty = async () => {
+			const rows = await (lix.db as any)
+				.selectFrom("internal_change_in_transaction")
+				.selectAll()
+				.execute();
+			expectDeterministic(rows.length).toBe(0);
+		};
+
+		// 1) SELECT should not stage anything
+		await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema_txn")
+			.selectAll()
+			.execute();
+		await expectTxnEmpty();
+
+		// 2) INSERT tracked
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e_txn",
+				file_id: "f_txn",
+				schema_key: "mock_schema_txn",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: { value: "v1" },
+				// untracked defaults to false
+			})
+			.execute();
+		await expectTxnEmpty();
+
+		// 3) UPDATE
+		await lix.db
+			.updateTable("state_all")
+			.set({ snapshot_content: { value: "v2" } })
+			.where("entity_id", "=", "e_txn")
+			.where("schema_key", "=", "mock_schema_txn")
+			.where("file_id", "=", "f_txn")
+			.execute();
+		await expectTxnEmpty();
+
+		// 4) DELETE
+		await lix.db
+			.deleteFrom("state_all")
+			.where("entity_id", "=", "e_txn")
+			.where("schema_key", "=", "mock_schema_txn")
+			.where("file_id", "=", "f_txn")
+			.execute();
+		await expectTxnEmpty();
 	}
 );
 
