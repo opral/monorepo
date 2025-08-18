@@ -135,22 +135,37 @@ export function applyResolvedStateView(
 				vi.version_id, -- Return child version_id
 				isc.created_at, 
 				isc.updated_at,
-				vi.parent_version_id as inherited_from_version_id, 
+				isc.version_id as inherited_from_version_id, -- The actual version containing the entity
 				isc.change_id, 
 				0 as untracked,
 				isc.commit_id
 			FROM (
-				-- Get version inheritance relationships from cache
-				SELECT DISTINCT
-					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache isc_v
-				WHERE isc_v.schema_key = 'lix_version'
+				-- Get all ancestor versions using recursive CTE for transitive inheritance
+				WITH RECURSIVE version_inheritance AS (
+					-- Base case: direct inheritance relationships
+					SELECT 
+						json_extract(v.snapshot_content, '$.id') AS version_id,
+						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
+					FROM internal_state_cache v
+					WHERE v.schema_key = 'lix_version'
+					  AND json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+					
+					UNION
+					
+					-- Recursive case: follow the inheritance chain
+					SELECT 
+						vi.version_id,
+						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
+					FROM version_inheritance vi
+					JOIN internal_state_cache v ON v.schema_key = 'lix_version' 
+					  AND json_extract(v.snapshot_content, '$.id') = vi.ancestor_version_id
+					WHERE json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+				)
+				SELECT DISTINCT version_id, ancestor_version_id 
+				FROM version_inheritance
 			) vi
-			JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-			WHERE vi.parent_version_id IS NOT NULL
-			-- Only inherit entities that exist (not deleted) in parent
-			AND isc.inheritance_delete_marker = 0
+			JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
+			WHERE isc.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
 			AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
@@ -191,22 +206,37 @@ export function applyResolvedStateView(
 				vi.version_id, -- Return child version_id
 				unt.created_at, 
 				unt.updated_at,
-				vi.parent_version_id as inherited_from_version_id, 
+				unt.version_id as inherited_from_version_id, -- The actual version containing the entity
 				'untracked' as change_id, 
 				1 as untracked,
 				'untracked' as commit_id
 			FROM (
-				-- Get version inheritance relationships from cache
-				SELECT DISTINCT
-					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache isc_v
-				WHERE isc_v.schema_key = 'lix_version'
+				-- Get all ancestor versions using recursive CTE for transitive inheritance
+				WITH RECURSIVE version_inheritance AS (
+					-- Base case: direct inheritance relationships
+					SELECT 
+						json_extract(v.snapshot_content, '$.id') AS version_id,
+						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
+					FROM internal_state_cache v
+					WHERE v.schema_key = 'lix_version'
+					  AND json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+					
+					UNION
+					
+					-- Recursive case: follow the inheritance chain
+					SELECT 
+						vi.version_id,
+						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
+					FROM version_inheritance vi
+					JOIN internal_state_cache v ON v.schema_key = 'lix_version' 
+					  AND json_extract(v.snapshot_content, '$.id') = vi.ancestor_version_id
+					WHERE json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+				)
+				SELECT DISTINCT version_id, ancestor_version_id 
+				FROM version_inheritance
 			) vi
-			JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
-			WHERE vi.parent_version_id IS NOT NULL
-			-- Only inherit entities that exist (not deleted) in parent
-			AND unt.inheritance_delete_marker = 0
+			JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+			WHERE unt.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
 			AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (

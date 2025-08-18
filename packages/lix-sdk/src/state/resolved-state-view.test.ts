@@ -4,6 +4,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
+import { createVersion } from "../version/create-version.js";
 
 test("resolved state view should return same results as state_all for a tracked entity", async () => {
 	const lix = await openLix({});
@@ -364,6 +365,95 @@ test("resolved state view generates correct composite keys", async () => {
 		entityId: "entity2",
 		versionId: "version2",
 	});
+});
+
+test("resolved state view should handle transitive inheritance (A->B->C)", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const currentTimestamp = timestamp({ lix });
+
+	// Create version hierarchy: C inherits from B, B inherits from A
+	const versionA = await createVersion({
+		lix,
+		name: "Version A",
+		id: "version_a",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		name: "Version B",
+		id: "version_b",
+		inherits_from_version_id: versionA.id,
+	});
+
+	const versionC = await createVersion({
+		lix,
+		name: "Version C",
+		id: "version_c",
+		inherits_from_version_id: versionB.id,
+	});
+
+	// Insert an entity only in version A
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "entity_a",
+			schema_key: "test_schema",
+			file_id: "file1",
+			version_id: versionA.id,
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "entity_a",
+				value: "from_version_a",
+			}) as any,
+			schema_version: "1.0",
+			created_at: currentTimestamp,
+			updated_at: currentTimestamp,
+		})
+		.execute();
+
+	// Query resolved state for version C (should see entity_a through transitive inheritance)
+	const resolvedForC = await lixInternalDb
+		.selectFrom("internal_resolved_state_all")
+		.select([
+			"entity_id",
+			"schema_key",
+			"file_id",
+			"version_id",
+			"inherited_from_version_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
+		.where("schema_key", "=", "test_schema")
+		.where("version_id", "=", versionC.id)
+		.execute();
+
+	// Version C should see entity_a inherited from version_a through version_b
+	expect(resolvedForC).toHaveLength(1);
+
+	const entityA = resolvedForC[0];
+	expect(entityA?.entity_id).toBe("entity_a");
+	expect(entityA?.version_id).toBe(versionC.id);
+	expect(entityA?.inherited_from_version_id).toBe(versionA.id);
+	expect((entityA?.snapshot_content as any).value).toBe("from_version_a");
+
+	// Also verify version B sees entity_a inherited from A
+	const resolvedForB = await lixInternalDb
+		.selectFrom("internal_resolved_state_all")
+		.select(["entity_id", "version_id", "inherited_from_version_id"])
+		.where("schema_key", "=", "test_schema")
+		.where("version_id", "=", versionB.id)
+		.execute();
+
+	expect(resolvedForB).toHaveLength(1);
+	expect(resolvedForB[0]?.entity_id).toBe("entity_a");
+	expect(resolvedForB[0]?.inherited_from_version_id).toBe(versionA.id);
 });
 
 test("resolved state view generates correct composite keys for inherited state", async () => {
