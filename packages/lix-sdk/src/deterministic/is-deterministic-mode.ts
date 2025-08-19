@@ -6,8 +6,9 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
 
-// Track which lix instances have hook listeners registered
-const hookListenersRegistered = new WeakSet<any>();
+// Track which hooks instances have a listener registered
+// Using hooks object identity is stable, unlike ad-hoc { sqlite, db, hooks } wrappers
+const hookListenersRegistered = new WeakSet<object>();
 
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
@@ -24,9 +25,10 @@ const hookListenersRegistered = new WeakSet<any>();
 export function isDeterministicMode(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): boolean {
-	// Register hook listener for cache invalidation (only once per lix instance)
-	if (!hookListenersRegistered.has(args.lix) && args.lix.hooks) {
-		hookListenersRegistered.add(args.lix);
+	// Register hook listener for cache invalidation (only once per hooks instance)
+	const key = args.lix.hooks as unknown as object;
+	if (!hookListenersRegistered.has(key) && args.lix.hooks) {
+		hookListenersRegistered.add(key);
 
 		args.lix.hooks.onStateCommit(({ changes }) => {
 			// Check if any change affects lix_deterministic_mode
