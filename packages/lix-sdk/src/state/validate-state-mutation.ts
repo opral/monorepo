@@ -2,8 +2,9 @@ import { Ajv } from "ajv";
 import type { Lix } from "../lix/open-lix.js";
 import { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { executeSync } from "../database/execute-sync.js";
-import { sql } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixChange } from "../change/schema.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -190,12 +191,20 @@ function validatePrimaryKeyConstraints(args: {
 		primaryKeyValues.push(value);
 	}
 
-	// Query existing state to check for duplicates
-	let query = args.lix.db
-		.selectFrom("state_all")
-		.select("snapshot_content")
-		.where("schema_key", "=", args.schema["x-lix-key"])
-		.where("version_id", "=", args.version_id);
+	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates,
+	// but ignore transaction rows (tag 'T' in _pk) so that multiple inserts within the same
+	// transaction can overwrite without tripping PK validation.
+	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	let query = db
+		.selectFrom("internal_resolved_state_all")
+		.select(["snapshot_content"])
+		.where("schema_key", "=", args.schema["x-lix-key"]);
+
+	// Constrain by version – internal_resolved_state_all exposes child version_id directly
+	query = query.where("version_id", "=", args.version_id);
+
+	// Exclude transaction-state rows: _pk starting with 'T~'
+	query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -262,12 +271,15 @@ function validateUniqueConstraints(args: {
 			continue;
 		}
 
-		// Query existing state to check for duplicates
-		let query = args.lix.db
-			.selectFrom("state_all")
-			.select("snapshot_content")
-			.where("schema_key", "=", args.schema["x-lix-key"])
-			.where("version_id", "=", args.version_id);
+		// Query existing resolved state for duplicates, excluding transaction-state rows (tag 'T')
+		const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		let query = db
+			.selectFrom("internal_resolved_state_all")
+			.select(["snapshot_content"])
+			.where("schema_key", "=", args.schema["x-lix-key"]);
+
+		query = query.where("version_id", "=", args.version_id);
+		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {

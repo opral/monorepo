@@ -218,6 +218,68 @@ test("throws when primary key violates uniqueness constraint", async () => {
 	).toThrowError("Primary key constraint violation");
 });
 
+test("state_all: inserting same PK twice in one transaction overwrites without PK error", async () => {
+	const lix = await openLix({});
+
+	// Define a mock schema with PK on 'key'
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "kv_mock_vtab",
+		"x-lix-primary-key": ["key"],
+		properties: {
+			key: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["key", "value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Register schema
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	// Execute both inserts in a single DB transaction so that xUpdate/xCommit run once
+	await lix.db.transaction().execute(async (trx) => {
+		// First insert
+		await trx
+			.insertInto("state_all")
+			.values({
+				entity_id: "kv_vtab1",
+				file_id: "lix",
+				schema_key: "kv_mock_vtab",
+				plugin_key: "lix_own_entity",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: { key: "test", value: "A" },
+				schema_version: "1.0",
+			})
+			.execute();
+
+		// Second insert with same PK in the same transaction → should overwrite, not error
+		await trx
+			.insertInto("state_all")
+			.values({
+				entity_id: "kv_vtab1",
+				file_id: "lix",
+				schema_key: "kv_mock_vtab",
+				plugin_key: "lix_own_entity",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: { key: "test", value: "B" },
+				schema_version: "1.0",
+			})
+			.execute();
+	});
+
+	// Verify the final materialized state reflects the second insert
+	const row = await lix.db
+		.selectFrom("state_all")
+		.where("schema_key", "=", "kv_mock_vtab")
+		.where("entity_id", "=", "kv_vtab1")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(row?.snapshot_content).toEqual({ key: "test", value: "B" });
+});
+
 test("handles composite primary keys", async () => {
 	const lix = await openLix({});
 
