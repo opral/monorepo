@@ -278,3 +278,39 @@ test("can update individual JSON properties using SQLite JSON functions", async 
 		count: 100,
 	});
 });
+
+test("key_value preserves '1' as string when inserted as string", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "type_test_string", value: "1" })
+		.execute();
+
+	const row = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "type_test_string")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof row.value).toBe("string");
+	expect(row.value).toBe("1");
+});
+
+test("key_value preserves 1 as number when inserted as number", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "type_test_number", value: 1 })
+		.execute();
+
+	const row = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "type_test_number")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof row.value).toBe("number");
+	expect(row.value).toBe(1);
+});
