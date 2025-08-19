@@ -45,9 +45,14 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		if (workingElements.length === 0) {
-			throw new Error(
-				"No changes in working change set to create a checkpoint for."
-			);
+			// Idempotent behavior: if working set is clean, return the current head commit
+			const headCommit = await trx
+				.selectFrom("commit_all")
+				.selectAll()
+				.where("id", "=", activeVersion.commit_id)
+				.where("lixcol_version_id", "=", "global")
+				.executeTakeFirstOrThrow();
+			return headCommit;
 		}
 
 		// 1. The old working commit becomes the checkpoint commit

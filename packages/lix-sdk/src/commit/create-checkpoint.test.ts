@@ -185,11 +185,30 @@ test("creates edge from checkpoint to new working commit", async () => {
 	});
 });
 
-test("creating a checkpoint with no changes throws", async () => {
+test("creating a checkpoint with no changes returns current head (idempotent)", async () => {
 	const lix = await openLix({});
 
-	// Create checkpoint without making explicit changes (should work with lix own changes)
-	await expect(createCheckpoint({ lix })).rejects.toThrow();
+	// Capture version before
+	const before = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create checkpoint without making explicit changes → idempotent no-op
+	const cp = await createCheckpoint({ lix });
+
+	// Returns the current head commit
+	expect(cp.id).toBe(before.commit_id);
+
+	// Verify version state unchanged
+	const after = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	expect(after.commit_id).toBe(before.commit_id);
+	expect(after.working_commit_id).toBe(before.working_commit_id);
 });
 
 // we should have https://github.com/opral/lix-sdk/issues/305 before this test
