@@ -6,13 +6,15 @@
  *
  * Tag meanings:
  *
+ * - T: Transaction direct (from internal_change_in_transaction in child version)
+ * - TI: Transaction inherited (from internal_change_in_transaction in parent version)
  * - U: Untracked direct (from internal_state_all_untracked in child version)
  * - UI: Untracked inherited (from internal_state_all_untracked in parent version)
  * - C: Cache-tracked direct (from internal_state_cache in child version)
  * - CI: Cache-tracked inherited (from internal_state_cache in parent version)
- */
+*/
 
-export type StatePkTag = "U" | "UI" | "C" | "CI";
+export type StatePkTag = "T" | "TI" | "U" | "UI" | "C" | "CI";
 
 const DELIM = "~"; // still our global separator
 const DELIM_ENC = "%7E"; // RFC 3986 percent-encoding for '~'
