@@ -159,26 +159,27 @@ export function populateStateCache(
 				commit_id = excluded.commit_id
 		`);
 
-		try {
-			for (const row of schemaRows) {
-				stmt.bind([
-					row.entity_id,
-					row.schema_key,
-					row.file_id,
-					row.version_id,
-					row.plugin_key,
-					row.snapshot_content, // jsonb() conversion happens in SQL
-					row.schema_version,
-					row.created_at, // Preserve original created_at
-					row.updated_at, // Preserve original updated_at
-					row.inherited_from_version_id,
-					0, // inheritance_delete_marker
-					row.change_id,
-					row.commit_id,
-				]);
-				stmt.step();
-				stmt.reset();
-			}
+        try {
+            for (const row of schemaRows) {
+                const isDeletion = row.snapshot_content === null || row.snapshot_content === undefined;
+                stmt.bind([
+                    row.entity_id,
+                    row.schema_key,
+                    row.file_id,
+                    row.version_id,
+                    row.plugin_key,
+                    row.snapshot_content, // jsonb() conversion happens in SQL
+                    row.schema_version,
+                    row.created_at, // Preserve original created_at
+                    row.updated_at, // Preserve original updated_at
+                    row.inherited_from_version_id,
+                    isDeletion ? 1 : 0, // inheritance_delete_marker
+                    row.change_id,
+                    row.commit_id,
+                ]);
+                stmt.step();
+                stmt.reset();
+            }
 		} finally {
 			stmt.finalize();
 		}

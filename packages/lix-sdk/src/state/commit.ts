@@ -33,10 +33,12 @@ import { updateUntrackedState } from "./untracked/update-untracked-state.js";
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+    lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
-	const transactionTimestamp = timestamp({ lix: args.lix });
-	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+    const transactionTimestamp = timestamp({ lix: args.lix });
+    const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+    
 
 	// Query all transaction changes
 	const allTransactionChanges = executeSync({
@@ -108,8 +110,8 @@ export function commit(args: {
 	>();
 
 	// Step 1: Create commits and changesets for each version with changes
-	for (const [version_id, changes] of trackedChangesByVersion) {
-		if (changes.length === 0) continue;
+    for (const [version_id, changes] of trackedChangesByVersion) {
+        if (changes.length === 0) continue;
 
 		// Get version info
 		const versionRows = executeSync({
@@ -132,16 +134,17 @@ export function commit(args: {
 		const changeSetId = uuidV7({ lix: args.lix });
 		const commitId = uuidV7({ lix: args.lix });
 
-		// Store metadata for later use
-		versionMetadata.set(version_id, {
-			commitId,
-			changeSetId,
-			previousCommitId: versionData.commit_id,
-		});
-	}
+        // Store metadata for later use
+        versionMetadata.set(version_id, {
+            commitId,
+            changeSetId,
+            previousCommitId: versionData.commit_id,
+        });
+        
+    }
 
-	// Step 2: If we have any commits but global doesn't have one yet, create global commit
-	if (versionMetadata.size > 0 && !versionMetadata.has("global")) {
+    // Step 2: If we have any commits but global doesn't have one yet, create global commit
+    if (versionMetadata.size > 0 && !versionMetadata.has("global")) {
 		// Get global version info
 		const globalVersionRows = executeSync({
 			lix: args.lix,
@@ -166,13 +169,14 @@ export function commit(args: {
 		const globalChangeSetId = nanoId({ lix: args.lix });
 		const globalCommitId = uuidV7({ lix: args.lix });
 
-		// Store global metadata
-		versionMetadata.set("global", {
-			commitId: globalCommitId,
-			changeSetId: globalChangeSetId,
-			previousCommitId: globalVersion.commit_id,
-		});
-	}
+        // Store global metadata
+        versionMetadata.set("global", {
+            commitId: globalCommitId,
+            changeSetId: globalChangeSetId,
+            previousCommitId: globalVersion.commit_id,
+        });
+        
+    }
 
 	// Get active accounts for change_author records
 	const activeAccounts = executeSync({
@@ -187,11 +191,11 @@ export function commit(args: {
 	});
 
 	// Step 3: Process each version's changes completely
-	for (const [version_id, changes] of trackedChangesByVersion) {
-		if (changes.length === 0) continue;
+    for (const [version_id, changes] of trackedChangesByVersion) {
+        if (changes.length === 0) continue;
 
 		const meta = versionMetadata.get(version_id)!;
-		const changeSetId = meta.changeSetId;
+        const changeSetId = meta.changeSetId;
 
 		// Add user data changes
 		for (const change of changes) {
@@ -693,8 +697,8 @@ export function commit(args: {
 		query: db.deleteFrom("internal_change_in_transaction"),
 	});
 
-	// Update cache entries for each version
-	for (const [version_id, meta] of versionMetadata) {
+    // Update cache entries for each version
+    for (const [version_id, meta] of versionMetadata) {
 		// Collect all changes for this version
 		const versionChanges = trackedChangesByVersion.get(version_id) || [];
 		const allChangesForVersion = [
@@ -713,12 +717,13 @@ export function commit(args: {
 			...(version_id === "global" ? globalChanges : []),
 		];
 
-		updateStateCache({
-			lix: args.lix,
-			changes: allChangesForVersion,
-			commit_id: meta.commitId,
-			version_id: version_id,
-		});
+        updateStateCache({
+            lix: args.lix,
+            changes: allChangesForVersion,
+            commit_id: meta.commitId,
+            version_id: version_id,
+        });
+        
 
 		// Delete untracked state for any tracked changes that were committed
 		if (versionChanges.length > 0) {
@@ -823,8 +828,8 @@ export function commit(args: {
 		timestamp: transactionTimestamp,
 	});
 
-	// Emit state commit hook after transaction is successfully committed
-	const allChangesForHook: any[] = [...allChangesToFlush, ...untrackedChanges];
-	args.lix.hooks._emit("state_commit", { changes: allChangesForHook });
-	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
+    // Emit state commit hook after transaction is successfully committed
+    const allChangesForHook: any[] = [...allChangesToFlush, ...untrackedChanges];
+    args.lix.hooks._emit("state_commit", { changes: allChangesForHook });
+    return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }

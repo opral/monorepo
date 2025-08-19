@@ -37,8 +37,9 @@ export async function createCommit(args: {
 	changeSet: Pick<LixChangeSet, "id">;
 	parentCommits?: Array<Pick<LixCommit, "id">>;
 }): Promise<LixCommit> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
-		const commitId = uuidV7({ lix: args.lix });
+    const executeInTransaction = async (trx: Lix["db"]) => {
+        const commitId = uuidV7({ lix: args.lix });
+        
 
 		// Create the commit
 		await trx
@@ -62,15 +63,17 @@ export async function createCommit(args: {
 		}
 
 		// Return the created commit
-		const commit = await trx
-			.selectFrom("commit_all")
-			.where("id", "=", commitId)
-			.where("lixcol_version_id", "=", "global")
-			.selectAll()
-			.executeTakeFirstOrThrow();
+        const commit = await trx
+            .selectFrom("commit_all")
+            .where("id", "=", commitId)
+            .where("lixcol_version_id", "=", "global")
+            .selectAll()
+            .executeTakeFirstOrThrow();
 
-		return commit;
-	};
+        
+
+        return commit;
+    };
 
 	if (args.lix.db.isTransaction) {
 		return executeInTransaction(args.lix.db);

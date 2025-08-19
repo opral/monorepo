@@ -8,100 +8,111 @@ import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
 } from "../plugin/mock-json-plugin.js";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 
-test("applyCommit updates the active version's commit_id", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
-	});
+simulationTest(
+	"applyCommit updates the active version's commit_id",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+			providePlugins: [mockJsonPlugin],
+		});
 
-	// Insert the schema
-	await lix.db
-		.insertInto("stored_schema_all")
-		.values({
-			value: MockJsonPropertySchema,
+		// Insert the schema
+		await lix.db
+			.insertInto("stored_schema_all")
+			.values({
+				value: MockJsonPropertySchema,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
+		// Create a file
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "file1",
+				data: new TextEncoder().encode("{}"),
+				path: "/test.json",
+			})
+			.execute();
+
+		// Create some changes
+		const changes = await lix.db
+			.insertInto("change")
+			.values([
+				{
+					id: "c1",
+					file_id: "file1",
+					plugin_key: mockJsonPlugin.key,
+					entity_id: "e1",
+					schema_key: "mock_json_property",
+					snapshot_content: { value: "Value 1" },
+					schema_version: "1.0",
+				},
+			])
+			.returningAll()
+			.execute();
+
+		// Create a change set
+		const changeSet = await createChangeSet({
+			lix,
 			lixcol_version_id: "global",
-		})
-		.execute();
+			elements: changes.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
+		});
 
-	// Create a file
-	await lix.db
-		.insertInto("file")
-		.values({
-			id: "file1",
-			data: new TextEncoder().encode("{}"),
-			path: "/test.json",
-		})
-		.execute();
+		// Create a commit
+		const commit = await createCommit({
+			lix,
+			changeSet,
+		});
 
-	// Create some changes
-	const changes = await lix.db
-		.insertInto("change")
-		.values([
-			{
-				id: "c1",
-				file_id: "file1",
-				plugin_key: mockJsonPlugin.key,
-				entity_id: "e1",
-				schema_key: "mock_json_property",
-				snapshot_content: { value: "Value 1" },
-				schema_version: "1.0",
-			},
-		])
-		.returningAll()
-		.execute();
+		// Get the active version before applying
+		const versionBefore = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Create a change set
-	const changeSet = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: changes.map((change) => ({
-			change_id: change.id,
-			entity_id: change.entity_id,
-			schema_key: change.schema_key,
-			file_id: change.file_id,
-		})),
-	});
+		// Apply the commit
+		await applyCommit({
+			lix,
+			commit,
+		});
 
-	// Create a commit
-	const commit = await createCommit({
-		lix,
-		changeSet,
-	});
+		// Get the active version after applying
+		const versionAfter = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Get the active version before applying
-	const versionBefore = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		// Verify the version's commit_id was updated
+		expect(versionAfter.commit_id).toBe(commit.id);
+		expect(versionAfter.commit_id).not.toBe(versionBefore.commit_id);
 
-	// Apply the commit
-	await applyCommit({
-		lix,
-		commit,
-	});
+		// Verify the changes were applied to the file
+		const file = await lix.db
+			.selectFrom("file")
+			.where("id", "=", "file1")
+			.selectAll()
+			.executeTakeFirstOrThrow();
 
-	// Get the active version after applying
-	const versionAfter = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
-
-	// Verify the version's commit_id was updated
-	expect(versionAfter.commit_id).toBe(commit.id);
-	expect(versionAfter.commit_id).not.toBe(versionBefore.commit_id);
-
-	// Verify the changes were applied to the file
-	const file = await lix.db
-		.selectFrom("file")
-		.where("id", "=", "file1")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	const fileData = JSON.parse(new TextDecoder().decode(file.data));
-	expect(fileData).toEqual({ e1: "Value 1" });
-});
+		const fileData = JSON.parse(new TextDecoder().decode(file.data));
+		expect(fileData).toEqual({ e1: "Value 1" });
+	}
+);
 
 test("applyCommit applies to a specific version when provided", async () => {
 	const lix = await openLix({
