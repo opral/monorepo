@@ -744,7 +744,6 @@ export function applyStateDatabaseSchema(
 				AND version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
-
 }
 
 export function handleStateDelete(
@@ -784,13 +783,13 @@ export function handleStateDelete(
 	const schema_version = rowToDelete.schema_version;
 	const untracked = rowToDelete.untracked;
 
-	// If entity is untracked, handle differently based on whether it's inherited
+	// If entity is untracked, handle differently based on its source (transaction/inherited/direct)
 	if (untracked) {
-		// Parse the primary key to check if it's inherited untracked (UI tag)
+		// Parse the primary key tag to determine where the row is coming from in the resolved view
 		const parsed = parseStatePk(primaryKey);
 
 		if (parsed.tag === "UI") {
-			// For inherited untracked, create a tombstone to block inheritance
+			// Inherited untracked: create a tombstone to block inheritance
 			insertTransactionState({
 				lix,
 				timestamp,
@@ -807,18 +806,42 @@ export function handleStateDelete(
 					},
 				],
 			});
-		} else {
-			// For direct untracked (U tag), just delete from untracked table
-			executeSync({
-				lix,
-				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.deleteFrom("internal_state_all_untracked")
-					.where("entity_id", "=", String(entity_id))
-					.where("schema_key", "=", String(schema_key))
-					.where("file_id", "=", String(file_id))
-					.where("version_id", "=", String(version_id)),
-			});
+			return;
 		}
+
+		if (parsed.tag === "T" || parsed.tag === "TI") {
+			// The row is coming from the transaction stage (pending untracked insert/update).
+			// Overwrite the pending transaction row with a deletion so the commit drops it
+			// and nothing is persisted to the untracked table.
+			insertTransactionState({
+				lix,
+				timestamp,
+				data: [
+					{
+						entity_id: String(entity_id),
+						schema_key: String(schema_key),
+						file_id: String(file_id),
+						plugin_key: String(plugin_key),
+						snapshot_content: null, // mark as delete in txn
+						schema_version: String(schema_version),
+						version_id: String(version_id),
+						untracked: true,
+					},
+				],
+			});
+			return;
+		}
+
+		// Direct untracked in this version (U tag) – delete from the untracked table immediately
+		executeSync({
+			lix,
+			query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.deleteFrom("internal_state_all_untracked")
+				.where("entity_id", "=", String(entity_id))
+				.where("schema_key", "=", String(schema_key))
+				.where("file_id", "=", String(file_id))
+				.where("version_id", "=", String(version_id)),
+		});
 		return;
 	}
 

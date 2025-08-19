@@ -125,6 +125,110 @@ simulationTest(
 	}
 );
 
+test("untracked insert then delete within same transaction leaves no residue", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const active = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.insertInto("key_value_all")
+			.values({
+				key: "tx_skip_flag_untracked",
+				value: true,
+				lixcol_untracked: true,
+				lixcol_version_id: (active as any).version_id ?? (active as any).id,
+			})
+			.execute();
+
+		await trx
+			.deleteFrom("key_value_all")
+			.where("key", "=", "tx_skip_flag_untracked")
+			.where(
+				"lixcol_version_id",
+				"=",
+				(active as any).version_id ?? (active as any).id
+			)
+			.execute();
+	});
+
+	const remaining = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "tx_skip_flag_untracked")
+		.where(
+			"lixcol_version_id",
+			"=",
+			(active as any).version_id ?? (active as any).id
+		)
+		.selectAll()
+		.execute();
+
+	expect(remaining).toHaveLength(0);
+});
+
+test("tracked insert then delete within same transaction leaves no residue", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const active = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db.transaction().execute(async (trx) => {
+		// tracked by default (omit lixcol_untracked)
+		await trx
+			.insertInto("key_value_all")
+			.values({
+				key: "tx_skip_flag_tracked",
+				value: true,
+				lixcol_version_id: (active as any).version_id ?? (active as any).id,
+			})
+			.execute();
+
+		await trx
+			.deleteFrom("key_value_all")
+			.where("key", "=", "tx_skip_flag_tracked")
+			.where(
+				"lixcol_version_id",
+				"=",
+				(active as any).version_id ?? (active as any).id
+			)
+			.execute();
+	});
+
+	const remaining = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "tx_skip_flag_tracked")
+		.where(
+			"lixcol_version_id",
+			"=",
+			(active as any).version_id ?? (active as any).id
+		)
+		.selectAll()
+		.execute();
+
+	expect(remaining).toHaveLength(0);
+});
+
 simulationTest(
 	"validates the schema on insert",
 	async ({ openSimulatedLix }) => {
