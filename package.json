@@ -13,7 +13,7 @@
   },
   "packageManager": "pnpm@10.13.1",
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "pnpm": ">=10 <11"
   },
   "devDependencies": {
