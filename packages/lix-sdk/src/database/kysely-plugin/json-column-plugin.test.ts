@@ -402,3 +402,129 @@ test("SQL expressions in onConflict updates", async () => {
 		},
 	});
 });
+
+test("does not coerce JSON string '1' into number in result rows", async () => {
+	const db = await mockDatabase();
+
+	// Insert a JSON string "1" and a numeric 1 into the any-json column
+	await db.insertInto("mock_table").values({ data: "1", other: "s" }).execute();
+	// @ts-expect-error - dynamic types
+	await db.insertInto("mock_table").values({ data: 1, other: "n" }).execute();
+
+	const stringRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "s")
+		.executeTakeFirstOrThrow();
+	const numberRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "n")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof stringRow.data).toBe("string");
+	// Stored as JSON string text; should not be coerced to number
+	expect(() => JSON.parse(stringRow.data as string)).not.toThrow();
+	expect(JSON.parse(stringRow.data as string)).toBe("1");
+	// And importantly, it's not a number
+	expect(typeof stringRow.data).not.toBe("number");
+
+	// For this mock table, numbers are stored via json() into TEXT; plugin doesn't parse scalars here
+	expect(() => JSON.parse(numberRow.data as string)).not.toThrow();
+	expect(JSON.parse(numberRow.data as string)).toBe(1);
+});
+
+test("preserves scalar strings and JSON-looking strings; parses only JS arrays/objects or direct JSON columns", async () => {
+	const db = await mockDatabase();
+
+	// Insert array and object as strings
+	await db
+		.insertInto("mock_table")
+		.values({ data: "[1,2,3]", other: "arr_s" })
+		.execute();
+	await db
+		.insertInto("mock_table")
+		.values({ data: '{"a":1,"b":"x"}', other: "obj_s" })
+		.execute();
+	// Insert scalar-looking strings
+	await db
+		.insertInto("mock_table")
+		.values({ data: "1", other: "num_s" })
+		.execute();
+	await db
+		.insertInto("mock_table")
+		.values({ data: "true", other: "bool_s" })
+		.execute();
+	await db
+		.insertInto("mock_table")
+		.values({ data: "null", other: "null_s" })
+		.execute();
+
+	const arrRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "arr_s")
+		.executeTakeFirstOrThrow();
+	const objRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "obj_s")
+		.executeTakeFirstOrThrow();
+	const numStrRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "num_s")
+		.executeTakeFirstOrThrow();
+	const boolStrRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "bool_s")
+		.executeTakeFirstOrThrow();
+	const nullStrRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "null_s")
+		.executeTakeFirstOrThrow();
+
+	// JSON-like strings remain strings (no implicit coercion)
+	expect(typeof arrRow.data).toBe("string");
+	expect(JSON.parse(arrRow.data as string)).toEqual("[1,2,3]");
+	expect(typeof objRow.data).toBe("string");
+	expect(JSON.parse(objRow.data as string)).toEqual('{"a":1,"b":"x"}');
+
+	// Plugin preserves scalar strings
+	expect(typeof numStrRow.data).toBe("string");
+	expect(JSON.parse(numStrRow.data as string)).toBe("1");
+	expect(typeof boolStrRow.data).toBe("string");
+	expect(JSON.parse(boolStrRow.data as string)).toBe("true");
+	expect(typeof nullStrRow.data).toBe("string");
+	expect(JSON.parse(nullStrRow.data as string)).toBe("null");
+});
+
+test("arrays and objects inserted as JS values are round-tripped", async () => {
+	const db = await mockDatabase();
+
+	// Insert JS array/object
+	await db
+		.insertInto("mock_table")
+		.values({ data: [1, { k: "v" }], other: "arr" })
+		.execute();
+	await db
+		.insertInto("mock_table")
+		.values({ data: { a: [1, 2], b: { c: 3 } }, other: "obj" })
+		.execute();
+
+	const arrRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "arr")
+		.executeTakeFirstOrThrow();
+	const objRow = await db
+		.selectFrom("mock_table")
+		.selectAll()
+		.where("other", "=", "obj")
+		.executeTakeFirstOrThrow();
+
+	expect(arrRow.data).toEqual([1, { k: "v" }]);
+	expect(objRow.data).toEqual({ a: [1, 2], b: { c: 3 } });
+});
