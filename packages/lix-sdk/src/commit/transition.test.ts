@@ -4,6 +4,7 @@ import { createVersion } from "../version/create-version.js";
 import { switchVersion } from "../version/switch-version.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
 test("simulation test discovery", () => {});
 
@@ -122,6 +123,12 @@ simulationTest(
 			commit_id: checkpoint.id,
 		});
 
+		// Record commit count immediately before transition
+		const commitsBefore = await lix.db
+			.selectFrom("commit")
+			.select(({ fn }) => [fn.countAll<number>().as("c")])
+			.executeTakeFirstOrThrow();
+
 		const returned = await transition({ lix, to: checkpoint, version });
 		expect(returned.id).toBe(checkpoint.id);
 
@@ -131,6 +138,16 @@ simulationTest(
 			.where("id", "=", version.id)
 			.executeTakeFirstOrThrow();
 		expect(v.commit_id).toBe(checkpoint.id);
+
+		// Verify no new commits were created by transition
+		const commitsAfter = await lix.db
+			.selectFrom("commit")
+			.select(({ fn }) => [fn.countAll<number>().as("c")])
+			.executeTakeFirstOrThrow();
+
+		expect(Number((commitsAfter as any).c)).toBe(
+			Number((commitsBefore as any).c)
+		);
 	}
 );
 
@@ -172,5 +189,107 @@ simulationTest(
 
 		expect(activeV.id).toBe(version.id);
 		expect(activeV.commit_id).toBe(resultCommit.id);
+	}
+);
+
+simulationTest(
+	"transition respects boundaries by file_id",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+
+			providePlugins: [mockJsonPlugin],
+		});
+
+		// Create two JSON files where both have a shared property key
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "f1",
+				path: "/a.json",
+				data: new TextEncoder().encode(
+					JSON.stringify({ shared: "A", keep: 1 })
+				),
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "f2",
+				path: "/b.json",
+				data: new TextEncoder().encode(
+					JSON.stringify({ shared: "B", keep: 2 })
+				),
+			})
+			.execute();
+
+		// Baseline where both files have the shared property
+		const checkpointBoth = await createCheckpoint({ lix });
+
+		// Update only f2 to delete the shared property (keep other fields)
+		await lix.db
+			.updateTable("file")
+			.set({ data: new TextEncoder().encode(JSON.stringify({ keep: 2 })) })
+			.where("id", "=", "f2")
+			.execute();
+
+		const checkpointMinusOne = await createCheckpoint({ lix });
+
+		// Create a new version pinned at the baseline (both present) and switch to it
+		const version = await createVersion({
+			lix,
+			name: "multi-key-diff",
+			commit_id: checkpointBoth.id,
+		});
+		await switchVersion({ lix, to: version });
+
+		// Transition this version to the target that removed only f2's shared property
+		await transition({ lix, to: checkpointMinusOne });
+
+		// Verify file contents reflect deletion only in f2
+		const decoder = new TextDecoder();
+		const file1 = await lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("id", "=", "f1")
+			.executeTakeFirstOrThrow();
+		const file2 = await lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("id", "=", "f2")
+			.executeTakeFirstOrThrow();
+
+		const json1 = JSON.parse(decoder.decode(file1.data));
+		const json2 = JSON.parse(decoder.decode(file2.data));
+
+		expect(json1.shared).toBe("A");
+		expect(json1.keep).toBe(1);
+		expect(json2.shared).toBeUndefined();
+		expect(json2.keep).toBe(2);
+
+		// Additionally, check state_all shows only one leaf for entity_id 'shared' at this version
+		const activeV = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
+
+		const sharedLeaves = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_json_property")
+			.where("entity_id", "=", "shared")
+			.where("version_id", "=", activeV.id)
+			.selectAll()
+			.execute();
+
+		expect(sharedLeaves).toHaveLength(1);
+		expect(sharedLeaves[0]!.file_id).toBe("f1");
 	}
 );
