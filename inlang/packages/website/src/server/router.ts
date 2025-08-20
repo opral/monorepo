@@ -96,6 +96,10 @@ router.get("/c/svelte", (request, response) => {
 	);
 });
 
+router.get("/c/lint-rules", (request, response) => {
+	return response.redirect(301, "https://github.com/opral/lix-sdk/issues/239");
+});
+
 router.get("m/osslbuzt*", (request, response) => {
 	return response.redirect(
 		301,
