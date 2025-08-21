@@ -50,7 +50,7 @@ const localeMiddleware: Route.unstable_MiddlewareFunction = async (
 ) => {
   return await paraglideMiddleware(request, () => {
     return next();
-  }, { onRedirect: (response) => throw response });
+  }, { onRedirect: (response) => { throw response } });
 };
 
 export { localeMiddleware };
