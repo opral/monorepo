@@ -6,6 +6,23 @@ import { serializeStatePk, parseStatePk } from "./primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { createVersion } from "../version/create-version.js";
 
+/**
+ * Strips the internal vtable primary key column `_pk` from result rows.
+ *
+ * Why: internal_resolved_state_all exposes an implementation detail `_pk` used
+ * for efficient row identification across merged sources (txn, untracked, cache).
+ * Public views like state_all should be compared against resolved state without
+ * this internal column. Use when asserting equality between state_all and
+ * internal_resolved_state_all results.
+ */
+function filterPkCol<T extends Record<string, any>>(rows: T[]): T[] {
+	return rows.map((r) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { _pk, ...rest } = r || ({} as any);
+		return rest as T;
+	});
+}
+
 test("resolved state view should return same results as state_all for a tracked entity", async () => {
 	const lix = await openLix({});
 
@@ -26,8 +43,6 @@ test("resolved state view should return same results as state_all for a tracked 
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -37,7 +52,7 @@ test("resolved state view should return same results as state_all for a tracked 
 		.selectAll()
 		.execute();
 
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 });
 
 test("resolved state view should return same results as state_all for an untracked entity", async () => {
@@ -61,8 +76,6 @@ test("resolved state view should return same results as state_all for an untrack
 		.where("entity_id", "=", "cache_stale")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -72,7 +85,7 @@ test("resolved state view should return same results as state_all for an untrack
 		.selectAll()
 		.execute();
 
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as untracked
 	expect(stateAllResults[0]?.untracked).toBe(1);
@@ -106,8 +119,6 @@ test("resolved state view should handle version inheritance", async () => {
 		.where("entity_id", "=", "inherited-key")
 		.where("version_id", "=", activeVersion!.version_id)
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -122,7 +133,7 @@ test("resolved state view should handle version inheritance", async () => {
 	expect(resolvedStateResults).toHaveLength(1);
 
 	// Results should match
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as inherited from global
 	expect(stateAllResults[0]?.inherited_from_version_id).toBe("global");
@@ -156,8 +167,6 @@ test("resolved state view should handle inherited untracked entities", async () 
 		.selectFrom("state_all")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("version_id", "=", activeVersion!.version_id)
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.selectAll()
 		.execute();
 
@@ -173,7 +182,7 @@ test("resolved state view should handle inherited untracked entities", async () 
 	expect(resolvedStateResults).toHaveLength(1);
 
 	// Results should match
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as inherited from global and untracked
 	expect(stateAllResults[0]?.inherited_from_version_id).toBe("global");
@@ -386,19 +395,19 @@ test("resolved state view should handle transitive inheritance (A->B->C)", async
 		id: "version_a",
 	});
 
-  const versionB = await createVersion({
-    lix,
-    name: "Version B",
-    id: "version_b",
-    inheritsFrom: versionA,
-  });
+	const versionB = await createVersion({
+		lix,
+		name: "Version B",
+		id: "version_b",
+		inheritsFrom: versionA,
+	});
 
-  const versionC = await createVersion({
-    lix,
-    name: "Version C",
-    id: "version_c",
-    inheritsFrom: versionB,
-  });
+	const versionC = await createVersion({
+		lix,
+		name: "Version C",
+		id: "version_c",
+		inheritsFrom: versionB,
+	});
 
 	// Insert an entity only in version A
 	await lix.db

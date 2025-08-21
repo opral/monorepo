@@ -118,16 +118,20 @@ test("creates tracked entity with pending change", async () => {
 	const resultingState = await lix.db
 		.selectFrom("state_all")
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
-	const resultingUnderlyingState = await lixInternalDb
+	const resultingUnderlyingStateRaw = await lixInternalDb
 		.selectFrom("internal_resolved_state_all")
 		.selectAll()
 		.execute();
 
-	expect(resultingState).toEqual(resultingUnderlyingState);
+	const resolvedStateWithoutPk = resultingUnderlyingStateRaw.map((r: any) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { _pk, ...rest } = r || {};
+		return rest;
+	});
+
+	expect(resultingState).toEqual(resolvedStateWithoutPk);
 });
 
 test("creates tombstone for inherited entity deletion", async () => {

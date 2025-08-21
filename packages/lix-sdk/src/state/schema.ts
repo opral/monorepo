@@ -17,6 +17,9 @@ import { populateStateCache } from "./cache/populate-state-cache.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { applyStateCacheV2Schema } from "./cache/schema.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
+import { applyStateAllView } from "./views/state-all.js";
+import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
+import { applyStateView } from "./views/state.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
@@ -646,104 +649,20 @@ export function applyStateDatabaseSchema(
 		false
 	);
 
-	capi.sqlite3_create_module(sqlite.pointer!, "state_vtab", module, 0);
+    // Register the vtable under a clearer internal name
+    capi.sqlite3_create_module(sqlite.pointer!, "internal_state_vtable", module, 0);
 
-	// Create the virtual table as 'state' directly (no more _impl suffix or view layer)
-	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS state_all USING state_vtab();`
-	);
+    // Create the internal vtable (raw state surface)
+    sqlite.exec(
+        `CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_vtable USING internal_state_vtable();`
+    );
 
-	// Create state view that filters to active version only
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS state AS
-		SELECT 
-			entity_id,
-			schema_key,
-			file_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			created_at,
-			updated_at,
-			inherited_from_version_id,
-			change_id,
-			untracked,
-			commit_id
-		FROM state_all
-		WHERE version_id IN (SELECT version_id FROM active_version);
+    // Public views over the internal vtable
+    applyStateAllView(lix);
+    applyStateWithTombstonesView(lix);
+    applyStateView(lix);
 
-		-- Add INSTEAD OF triggers for state that forward to state virtual table
-		CREATE TRIGGER IF NOT EXISTS state_insert
-		INSTEAD OF INSERT ON state
-		BEGIN
-			INSERT INTO state_all (
-				entity_id,
-				schema_key,
-				file_id,
-				version_id,
-				plugin_key,
-				snapshot_content,
-				schema_version,
-				created_at,
-				updated_at,
-				inherited_from_version_id,
-				change_id,
-				untracked,
-				commit_id
-			) VALUES (
-				NEW.entity_id,
-				NEW.schema_key,
-				NEW.file_id,
-				(SELECT version_id FROM active_version),
-				NEW.plugin_key,
-				NEW.snapshot_content,
-				NEW.schema_version,
-				NEW.created_at,
-				NEW.updated_at,
-				NEW.inherited_from_version_id,
-				NEW.change_id,
-				NEW.untracked,
-				NEW.commit_id
-			);
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS state_update
-		INSTEAD OF UPDATE ON state	
-		BEGIN
-			UPDATE state_all
-			SET
-				entity_id = NEW.entity_id,
-				schema_key = NEW.schema_key,
-				file_id = NEW.file_id,
-				version_id = (SELECT version_id FROM active_version),
-				plugin_key = NEW.plugin_key,
-				snapshot_content = NEW.snapshot_content,
-				schema_version = NEW.schema_version,
-				created_at = NEW.created_at,
-				updated_at = NEW.updated_at,
-				inherited_from_version_id = NEW.inherited_from_version_id,
-				change_id = NEW.change_id,
-				untracked = NEW.untracked,
-				commit_id = NEW.commit_id
-			WHERE
-				entity_id = OLD.entity_id
-				AND schema_key = OLD.schema_key
-				AND file_id = OLD.file_id
-				AND version_id = (SELECT version_id FROM active_version);
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS state_delete
-		INSTEAD OF DELETE ON state
-		BEGIN
-			-- Delete from state_all (handles both tracked and untracked entities)
-			DELETE FROM state_all
-			WHERE 
-				entity_id = OLD.entity_id
-				AND schema_key = OLD.schema_key
-				AND file_id = OLD.file_id
-				AND version_id = (SELECT version_id FROM active_version);
-		END;
-	`);
+    // state (active version) view created via applyStateView
 }
 
 export function handleStateDelete(
