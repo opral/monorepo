@@ -4,9 +4,9 @@ import { createVersion } from "./create-version.js";
 import { selectVersionDiff as selectVersionDiff } from "./select-version-diff.js";
 
 const COUNTS = {
-	created: 1,
-	updated: 1,
-	deleted: 1,
+	created: 10,
+	updated: 10,
+	deleted: 10,
 } as const;
 
 type Ctx = {
@@ -95,7 +95,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 	return { lix, sourceId: source.id, targetId: target.id } satisfies Ctx;
 })();
 
-bench("diffVersionQuery (exclude unchanged)", async () => {
+bench("selectVersionDiff (exclude unchanged)", async () => {
 	try {
 		const { lix, sourceId, targetId } = await readyCtx;
 
@@ -110,11 +110,11 @@ bench("diffVersionQuery (exclude unchanged)", async () => {
 		if (!rows || rows.length === 0)
 			throw new Error("unexpected empty diff in bench");
 	} catch (error) {
-		console.error("Error during diffVersionQuery bench:", error);
+		console.error("Error during selectVersionDiff bench:", error);
 	}
 });
 
-bench("diffVersionQuery (full document diff)", async () => {
+bench("selectVersionDiff (full document diff)", async () => {
 	const { lix, sourceId, targetId } = await readyCtx;
 	const qb = selectVersionDiff({
 		lix,
