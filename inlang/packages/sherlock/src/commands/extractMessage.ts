@@ -20,7 +20,7 @@ import { customAlphabet } from "nanoid"
  */
 const generators = {
 	humanId,
-	nanoid: customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 10),
+	nanoid: customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 8),
 	none: () => "",
 }
 
