@@ -3212,7 +3212,7 @@ test("state foreign key references should handle inherited entities", async () =
 	const childVersion = await createVersion({
 		lix,
 		name: "child_version",
-		inherits_from_version_id: mainVersion.id,
+		inheritsFrom: mainVersion,
 	});
 
 	// The inherited entity should NOT be visible for foreign key validation

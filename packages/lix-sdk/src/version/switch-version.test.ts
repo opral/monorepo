@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "./create-version.js";
 import { switchVersion } from "./switch-version.js";
+import { createVersion } from "./create-version.js";
 
 test("switching versiones should update the active_version", async () => {
 	const lix = await openLix({});
@@ -15,7 +15,7 @@ test("switching versiones should update the active_version", async () => {
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		const newVersion = await createVersion({
 			lix: { ...lix, db: trx },
-			commit_id: activeVersion.commit_id,
+			from: activeVersion,
 		});
 		await switchVersion({ lix: { ...lix, db: trx }, to: newVersion });
 		return newVersion;

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { transition } from "./index.js";
-import { createVersion } from "../version/create-version.js";
+import { createVersionFromCommit } from "../version/create-version-from-commit.js";
 import { switchVersion } from "../version/switch-version.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
@@ -117,10 +117,10 @@ simulationTest(
 			.execute();
 		const checkpoint = await createCheckpoint({ lix });
 
-		const version = await createVersion({
+		const version = await createVersionFromCommit({
 			lix,
 			name: "noop-test",
-			commit_id: checkpoint.id,
+			commit: checkpoint,
 		});
 
 		// Record commit count immediately before transition
@@ -171,10 +171,10 @@ simulationTest(
 
 		const checkpoint1 = await createCheckpoint({ lix });
 
-		const version = await createVersion({
+		const version = await createVersionFromCommit({
 			lix,
 			name: "active-transition",
-			commit_id: checkpoint1.id,
+			commit: checkpoint1,
 		});
 
 		await switchVersion({ lix, to: version });
@@ -243,10 +243,10 @@ simulationTest(
 		const checkpointMinusOne = await createCheckpoint({ lix });
 
 		// Create a new version pinned at the baseline (both present) and switch to it
-		const version = await createVersion({
+		const version = await createVersionFromCommit({
 			lix,
 			name: "multi-key-diff",
-			commit_id: checkpointBoth.id,
+			commit: checkpointBoth,
 		});
 		await switchVersion({ lix, to: version });
 

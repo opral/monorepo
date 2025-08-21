@@ -119,18 +119,12 @@ test("view should show changes across versions", async () => {
 		},
 	]);
 
-	const versionAAfterKvInsert = await lix.db
-		.selectFrom("version")
-		.where("id", "=", versionA.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	// creating a new version from the active version
 	const versionB = await createVersion({
 		lix,
 		id: "versionB",
 		name: "versionB",
-		commit_id: versionAAfterKvInsert.commit_id,
+		from: versionA,
 	});
 
 	const kvAfterInsertInVersionB = await lix.db

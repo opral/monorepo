@@ -386,19 +386,19 @@ test("resolved state view should handle transitive inheritance (A->B->C)", async
 		id: "version_a",
 	});
 
-	const versionB = await createVersion({
-		lix,
-		name: "Version B",
-		id: "version_b",
-		inherits_from_version_id: versionA.id,
-	});
+  const versionB = await createVersion({
+    lix,
+    name: "Version B",
+    id: "version_b",
+    inheritsFrom: versionA,
+  });
 
-	const versionC = await createVersion({
-		lix,
-		name: "Version C",
-		id: "version_c",
-		inherits_from_version_id: versionB.id,
-	});
+  const versionC = await createVersion({
+    lix,
+    name: "Version C",
+    id: "version_c",
+    inheritsFrom: versionB,
+  });
 
 	// Insert an entity only in version A
 	await lix.db

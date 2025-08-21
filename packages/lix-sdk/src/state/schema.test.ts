@@ -753,16 +753,17 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		const sharedCommitId = versionAAfterInsert.commit_id;
-
-		// Create version B from version A
-		const versionB = await createVersion({
+		// Create version B from version A's commit using commit-based API
+		const { createVersionFromCommit } = await import(
+			"../version/create-version-from-commit.js"
+		);
+		const versionB = await createVersionFromCommit({
 			lix,
 			id: "version_b",
-			commit_id: sharedCommitId,
+			commit: { id: versionAAfterInsert.commit_id },
 		});
 
-		expect(versionB.commit_id).toBe(sharedCommitId);
+		expect(versionB.commit_id).toBe(versionAAfterInsert.commit_id);
 
 		const stateInBothVersions = await lix.db
 			.selectFrom("state_all")
@@ -778,14 +779,14 @@ simulationTest(
 				schema_key: "mock_schema",
 				snapshot_content: { value: "shared state" },
 				version_id: "version_a",
-				commit_id: sharedCommitId,
+				commit_id: versionAAfterInsert.commit_id,
 			},
 			{
 				entity_id: "e0",
 				schema_key: "mock_schema",
 				snapshot_content: { value: "shared state" },
 				version_id: "version_b",
-				commit_id: sharedCommitId,
+				commit_id: versionAAfterInsert.commit_id,
 			},
 		]);
 	}
@@ -822,23 +823,17 @@ simulationTest(
 			})
 			.execute();
 
-		const baseVersionAfterInsert = await lix.db
-			.selectFrom("version")
-			.where("id", "=", baseVersion.id)
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
 		// Create two versions from the same base version
 		await createVersion({
 			lix,
 			id: "version_a",
-			commit_id: baseVersionAfterInsert.commit_id,
+			from: baseVersion,
 		});
 
 		await createVersion({
 			lix,
 			id: "version_b",
-			commit_id: baseVersionAfterInsert.commit_id,
+			from: baseVersion,
 		});
 
 		const versions = await lix.db
@@ -1696,7 +1691,7 @@ simulationTest(
 		const childVersion = await createVersion({
 			lix,
 			id: "child-version",
-			inherits_from_version_id: "global",
+			inheritsFrom: { id: "global" },
 		});
 
 		// Verify the child initially sees the inherited entity
@@ -1947,7 +1942,7 @@ simulationTest(
 		const childVersion = await createVersion({
 			lix,
 			name: "child-version",
-			inherits_from_version_id: "global",
+			inheritsFrom: { id: "global" },
 		});
 
 		// Verify inheritance - both global and child should see the entity

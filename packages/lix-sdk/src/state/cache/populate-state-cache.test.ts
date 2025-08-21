@@ -284,14 +284,14 @@ test("inheritance is queryable from the resolved view after population", async (
 		lix,
 		name: "Version B",
 		id: "version_b",
-		inherits_from_version_id: versionA.id,
+		inheritsFrom: versionA,
 	});
 
 	const versionC = await createVersion({
 		lix,
 		name: "Version C",
 		id: "version_c",
-		inherits_from_version_id: versionB.id,
+		inheritsFrom: versionB,
 	});
 
 	// Insert test entities directly into state_all for each version using Kysely

@@ -203,17 +203,17 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	await createVersion({
 		lix,
 		id: "parent-version",
-		inherits_from_version_id: "global",
+		inheritsFrom: { id: "global" },
 	});
 	await createVersion({
 		lix,
 		id: "child-version",
-		inherits_from_version_id: "parent-version",
+		inheritsFrom: { id: "parent-version" },
 	});
 	await createVersion({
 		lix,
 		id: "subchild-version",
-		inherits_from_version_id: "child-version",
+		inheritsFrom: { id: "child-version" },
 	});
 
 	const baseTimestamp = timestamp({ lix });

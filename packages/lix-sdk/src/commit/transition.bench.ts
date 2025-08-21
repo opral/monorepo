@@ -1,7 +1,7 @@
 import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "./create-checkpoint.js";
-import { createVersion } from "../version/create-version.js";
+import { createVersionFromCommit } from "../version/create-version-from-commit.js";
 import { switchVersion } from "../version/switch-version.js";
 import { transition } from "./index.js";
 
@@ -41,10 +41,10 @@ bench("transition with 100 additions", async () => {
 		const addedCp = await createCheckpoint({ lix });
 
 		// Create and switch to a version at the empty baseline
-		const version = await createVersion({
+		const version = await createVersionFromCommit({
 			lix,
 			name: "bench_additions",
-			commit_id: emptyCp.id,
+			commit: emptyCp,
 		});
 		await switchVersion({ lix, to: version });
 
@@ -73,10 +73,10 @@ bench("transition with 100 deletions", async () => {
 	const emptyCp = await createCheckpoint({ lix });
 
 	// Create and switch to a version at the full baseline
-	const version = await createVersion({
+	const version = await createVersionFromCommit({
 		lix,
 		name: "bench_deletions",
-		commit_id: fullCp.id,
+		commit: fullCp,
 	});
 	await switchVersion({ lix, to: version });
 
@@ -107,10 +107,10 @@ bench("transition with 100 updates", async () => {
 	const afterCp = await createCheckpoint({ lix });
 
 	// Version at beforeCp, transition to afterCp
-	const version = await createVersion({
+	const version = await createVersionFromCommit({
 		lix,
 		name: "bench_updates",
-		commit_id: beforeCp.id,
+		commit: beforeCp,
 	});
 	await switchVersion({ lix, to: version });
 	await transition({ lix, to: afterCp });
@@ -142,7 +142,10 @@ bench("transition mixed (40 add, 40 update, 20 delete)", async () => {
 	}
 	// Delete last deleteCount
 	for (let i = updateCount; i < updateCount + deleteCount; i++) {
-		await lix.db.deleteFrom("key_value").where("key", "=", `mix_${i}`).execute();
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", `mix_${i}`)
+			.execute();
 	}
 	// Add addCount new keys
 	for (let i = 0; i < addCount; i++) {
@@ -153,7 +156,11 @@ bench("transition mixed (40 add, 40 update, 20 delete)", async () => {
 	}
 	const targetCp = await createCheckpoint({ lix });
 
-	const version = await createVersion({ lix, name: "bench_mixed", commit_id: baseCp.id });
+	const version = await createVersionFromCommit({
+		lix,
+		name: "bench_mixed",
+		commit: baseCp,
+	});
 	await switchVersion({ lix, to: version });
 	await transition({ lix, to: targetCp });
 });
@@ -173,7 +180,11 @@ bench("transition deep ancestry (depth=50)", async () => {
 
 	const headCp = await createCheckpoint({ lix }); // idempotent, returns current head
 
-	const version = await createVersion({ lix, name: "bench_depth", commit_id: baseCp.id });
+	const version = await createVersionFromCommit({
+		lix,
+		name: "bench_depth",
+		commit: baseCp,
+	});
 	await switchVersion({ lix, to: version });
 	await transition({ lix, to: headCp });
 });
