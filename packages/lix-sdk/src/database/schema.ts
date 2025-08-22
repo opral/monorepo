@@ -14,7 +14,11 @@ import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import type { StateView, StateAllView } from "../state/index.js";
+import type {
+  StateView,
+  StateAllView,
+  StateWithTombstonesView,
+} from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
@@ -81,6 +85,7 @@ export type LixDatabaseSchema = {
 
 	state: StateView;
 	state_all: StateAllView;
+	state_with_tombstones: StateWithTombstonesView;
 	state_history: StateHistoryView;
 
 	change: ChangeView;

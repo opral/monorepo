@@ -12,3 +12,8 @@ export type {
 	NewStateAllRow,
 	StateAllRowUpdate,
 } from "./views/state-all.js";
+
+export type {
+  StateWithTombstonesView,
+  StateWithTombstonesRow,
+} from "./views/state-with-tombstones.js";
