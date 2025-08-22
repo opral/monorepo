@@ -194,11 +194,9 @@ compile({
 });
 ```
 
-<doc-callout type="info">
 **Why the wildcard pattern always resolves**: In this configuration, the pattern `/:path(.*)?` matches **any** path. When a user visits `/about` (without a locale prefix), it matches the English pattern `/:path(.*)?` and resolves to the `en` locale. This is why the URL strategy acts as an "end condition" - it will always find a match when using wildcards.
 
-**This is also the default behavior** if you don't specify `urlPatterns` at all.
-</doc-callout>
+This is also the default behavior if you don't specify `urlPatterns` at all.
 
 #### Translated pathnames
 
