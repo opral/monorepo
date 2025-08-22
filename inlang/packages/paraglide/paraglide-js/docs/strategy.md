@@ -169,7 +169,7 @@ strategy: ["url", "localStorage", "preferredLanguage"]
 
 The `urlPatterns` configuration determines how the `url` strategy matches and resolves locales from URLs. 
 
-##### Locale prefixing
+#### Locale prefixing
 
 ```
 https://example.com/about
@@ -200,7 +200,7 @@ compile({
 **This is also the default behavior** if you don't specify `urlPatterns` at all.
 </doc-callout>
 
-##### Translated pathnames
+#### Translated pathnames
 
 For pathnames where you want to localize the structure and path segments of the URL, you can use different patterns for each locale. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
 
@@ -246,7 +246,7 @@ compile({
 ```
 
 
-##### Domain-based localization
+#### Domain-based localization
 
 ```
 https://example.com/about
@@ -280,7 +280,7 @@ compile({
 });
 ```
 
-##### Adding a base path
+#### Adding a base path
 
 You can add a base path to your URL patterns to support localized URLs with a common base path.
 
@@ -317,7 +317,7 @@ This configuration enables:
 
 The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
 
-##### Making URL patterns unavailable in specific locales
+#### Making URL patterns unavailable in specific locales
 
 You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page.
 
@@ -383,17 +383,17 @@ When a user tries to access `/specific-path` in German, they will be redirected 
 
 Note that other paths will still work normally through the catch-all pattern, so only the specifically configured paths will be unavailable.
 
-##### Troubleshooting URL patterns
+#### Troubleshooting URL patterns
 
 When working with URL patterns, there are a few important considerations to keep in mind:
 
-###### Excluding paths is not supported
+##### Excluding paths is not supported
 
 [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns.
 
 The decision to not support negative lookaheads is likely related to ReDoS (Regular Expression Denial of Service) attacks. Read [this blog post](https://blakeembrey.com/posts/2024-09-web-redos/) or the [CVE on GitHub](https://github.com/pillarjs/path-to-regexp/security/advisories/GHSA-9wv6-86v2-598j).
 
-###### Pattern order matters
+##### Pattern order matters
 
 URL patterns are evaluated in the order they appear in the `urlPatterns` array. The first pattern that matches a URL will be used. This means that more specific patterns should come before more general patterns.
 
@@ -436,7 +436,7 @@ urlPatterns: [
 ]
 ```
 
-###### Localized pattern order matters too
+##### Localized pattern order matters too
 
 Within each pattern's `localized` array, the order of locale patterns also matters. When localizing a URL, the first matching pattern for the target locale will be used. Similarly, when delocalizing a URL, patterns are checked in order.
 
@@ -480,7 +480,7 @@ This is especially important for path-based localization where one locale has a 
 }
 ```
 
-###### Example: Multi-tenant application with specific routes
+##### Example: Multi-tenant application with specific routes
 
 For a multi-tenant application with specific routes, proper pattern ordering is crucial:
 
