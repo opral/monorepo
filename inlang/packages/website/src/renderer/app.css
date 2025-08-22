@@ -82,9 +82,15 @@
 	background: var(--sl-color-neutral-300);
 }
 
-/* Scroll Offset for Anchor Links */
-article :target {
-	scroll-margin-top: -256px;
+/* Scroll Offset for Anchor Links - Using scroll-margin-top which doesn't interfere with text selection */
+/* Only apply to headings with IDs (anchor targets), not the entire article */
+article h1[id],
+article h2[id],
+article h3[id],
+article h4[id],
+article h5[id],
+article h6[id] {
+	scroll-margin-top: 200px; /* Offset for sticky header including app name bar */
 }
 
 /* Scroll Offset for Anchor Links */
@@ -315,9 +321,15 @@ sl-dialog.video-dialog::part(body) {
 	padding-top: 0;
 }
 
-/* ugly quickfix for https://github.com/opral/inlang.com/issues/117. likely breaks other parts of the UI :/ */
-html {
-  scroll-padding-top: 28rem; 
+/* Scroll Offset for Anchor Links - Using scroll-margin-top which doesn't interfere with text selection */
+/* Only apply to headings with IDs (anchor targets), not the entire article */
+article h1[id],
+article h2[id],
+article h3[id],
+article h4[id],
+article h5[id],
+article h6[id] {
+	scroll-margin-top: 200px; /* Offset for sticky header including app name bar */
 }
 
 .DocSearch-Modal {
