@@ -1,4 +1,13 @@
+import type { Insertable, Selectable, Updateable } from "kysely";
 import type { Lix } from "../../lix/open-lix.js";
+import type { StateAllView } from "./state-all.js";
+
+export type StateView = Omit<StateAllView, "version_id">;
+
+// Kysely operation types
+export type StateRow = Selectable<StateView>;
+export type NewStateRow = Insertable<StateView>;
+export type StateRowUpdate = Updateable<StateView>;
 
 /**
  * Creates the public 'state' view filtered to the active version, and

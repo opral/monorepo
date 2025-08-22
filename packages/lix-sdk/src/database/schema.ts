@@ -14,7 +14,7 @@ import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import type { StateView, StateAllView } from "../state/schema.js";
+import type { StateView, StateAllView } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
@@ -36,6 +36,7 @@ import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.j
 import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
 import type { InternalChangeInTransactionTable } from "../state/transaction/schema.js";
+import type { InternalStateVTable } from "../state/vtable.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -49,6 +50,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
 	internal_resolved_state_all: InternalResolvedStateAllView;
+	internal_state_vtable: InternalStateVTable;
 	internal_file_data_cache: InternalFileDataCacheTable;
 	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
 };

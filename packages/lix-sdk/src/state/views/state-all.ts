@@ -1,4 +1,26 @@
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { Lix } from "../../lix/open-lix.js";
+
+export type StateAllView = {
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+	plugin_key: string;
+	snapshot_content: Record<string, any>;
+	schema_version: string;
+	version_id: string;
+	created_at: Generated<string>;
+	updated_at: Generated<string>;
+	inherited_from_version_id: string | null;
+	change_id: Generated<string>;
+	untracked: Generated<boolean>;
+	commit_id: Generated<string>;
+};
+
+// Kysely operation types
+export type StateAllRow = Selectable<StateAllView>;
+export type NewStateAllRow = Insertable<StateAllView>;
+export type StateAllRowUpdate = Updateable<StateAllView>;
 
 /**
  * Creates the public state_all view (no tombstones) over the internal vtable,

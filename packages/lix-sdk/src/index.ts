@@ -17,6 +17,7 @@ export * from "./observe/index.js";
 export * from "./plugin/index.js";
 export * from "./query-filter/index.js";
 export * from "./schema-definition/index.js";
+export * from "./state/index.js";
 export * from "./stored-schema/index.js";
 export * from "./server-protocol-handler/index.js";
 export * from "./thread/index.js";
