@@ -201,13 +201,24 @@ export default function Page(props: PageProps) {
 
 function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 	return (
-		<article
-			class={
-				"w-full rounded-lg col-span-1 " +
-				(props.fullWidth ? "md:col-span-4" : "md:col-span-3")
-			}
-			// eslint-disable-next-line solid/no-innerhtml
-			innerHTML={props.markdown}
-		/>
-	);
+                <article
+                        class={
+                                "w-full rounded-lg col-span-1 " +
+                                (props.fullWidth ? "md:col-span-4" : "md:col-span-3")
+                        }
+                        // eslint-disable-next-line solid/no-innerhtml
+                        innerHTML={props.markdown}
+                        onMouseDown={(e) => {
+                                const anchor = (e.target as HTMLElement).closest("a");
+                                if (
+                                        anchor &&
+                                        anchor.getAttribute("href")?.startsWith("#")
+                                ) {
+                                        // Prevent smooth-scroll when selecting text near hash anchors
+                                        // to avoid the scroll bug during text selection
+                                        e.preventDefault();
+                                }
+                        }}
+                />
+        );
 }
