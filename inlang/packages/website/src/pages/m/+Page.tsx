@@ -109,8 +109,24 @@ export default function Page(props: PageProps) {
 						>
 							<DeprecationBanner manifest={props.manifest} />
 							{/* eslint-disable-next-line solid/no-innerhtml */}
-							<article class="w-full my-12" innerHTML={props.markdown} />
-						</InlangDoclayout>
+                                                        <article
+                                                                class="w-full my-12"
+                                                                innerHTML={props.markdown}
+                                                                onMouseDown={(e) => {
+                                                                        const anchor = (e.target as HTMLElement).closest("a");
+                                                                        if (
+                                                                                anchor &&
+                                                                                anchor
+                                                                                        .getAttribute("href")
+                                                                                        ?.startsWith("#")
+                                                                        ) {
+                                                                                // Prevent smooth-scroll when selecting text near hash anchors
+                                                                                // which triggers the scroll bug during text selection
+                                                                                e.preventDefault();
+                                                                        }
+                                                                }}
+                                                        />
+                                                </InlangDoclayout>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
