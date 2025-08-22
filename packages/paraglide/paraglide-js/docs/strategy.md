@@ -7,9 +7,9 @@ imports:
 
 Paraglide JS comes with various strategies to determine the locale out of the box.
 
-The strategy is defined with the `strategy` option. The priority is determined by the order of the strategies in the array. The first strategy that returns a locale will be used.
+The strategy is defined with the `strategy` option. **Strategies are evaluated in order** - the first strategy that successfully returns a locale will be used, and subsequent strategies won't be checked.
 
-In the example below, the `cookie` strategy first determines the locale. If no cookie is found, the `baseLocale` is used.
+In the example below, the `cookie` strategy first determines the locale. If no cookie is found (returns `undefined`), the `baseLocale` is used as a fallback.
 
 ```diff
 compile({
@@ -18,6 +18,38 @@ compile({
 +	strategy: ["cookie", "baseLocale"]
 })
 ```
+
+<doc-callout type="important">
+**Strategy Order Matters**: The order of strategies in your array determines priority. Strategies that always resolve a locale (like `url` with wildcards or `baseLocale`) should typically be placed last as fallbacks, since they prevent subsequent strategies from being evaluated.
+</doc-callout>
+
+## Common Strategy Patterns
+
+Here are some common strategy patterns and when to use them:
+
+### URL as source of truth (default behavior)
+```js
+strategy: ["url", "baseLocale"]
+```
+Use this when the URL should always determine the locale. The URL pattern (with wildcards) will always resolve, making `baseLocale` a safety fallback only.
+
+### Prioritize user preferences
+```js
+strategy: ["localStorage", "cookie", "url", "baseLocale"]
+```
+Use this when you want returning visitors to see content in their previously selected language, regardless of the URL they land on. The URL only determines locale if no preference is stored.
+
+### Automatic language detection with URL fallback
+```js
+strategy: ["preferredLanguage", "url", "baseLocale"]
+```
+Use this for new visitors to automatically see content in their browser's language, with URL-based routing as a fallback.
+
+### Session-based with persistence
+```js
+strategy: ["cookie", "localStorage", "preferredLanguage", "baseLocale"]
+```
+Use this for applications where the locale should persist across sessions but not be tied to the URL structure.
 
 ## Built-in strategies
 
@@ -113,6 +145,20 @@ The URL-based strategy uses the web standard [URLPattern](https://developer.mozi
 
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
+<doc-callout type="warning">
+**URL Strategy with Wildcards**: When using wildcard patterns like `/:path(.*)?`, the URL strategy will **always** resolve to a locale (typically the base locale for paths without a locale prefix). This makes it act as an "end condition" in your strategy array - any strategies placed after it will never be evaluated.
+
+If you want to prioritize user preferences (from localStorage, cookies, etc.) over the URL, place those strategies **before** the URL strategy in your array:
+
+```js
+// ✅ User preference is checked first
+strategy: ["localStorage", "preferredLanguage", "url"]
+
+// ❌ localStorage will never be checked because URL always resolves
+strategy: ["url", "localStorage", "preferredLanguage"]
+```
+</doc-callout>
+
 #### Locale prefixing
 
 ```
@@ -137,6 +183,10 @@ compile({
 	],
 });
 ```
+
+<doc-callout type="info">
+**Why the wildcard pattern always resolves**: In this configuration, the pattern `/:path(.*)?` matches **any** path. When a user visits `/about` (without a locale prefix), it matches the English pattern `/:path(.*)?` and resolves to the `en` locale. This is why the URL strategy acts as an "end condition" - it will always find a match when using wildcards.
+</doc-callout>
 
 #### Translated pathnames
 
