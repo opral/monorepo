@@ -90,6 +90,7 @@ export async function applyCommit(args: {
             .selectFrom("internal_resolved_state_all")
             .where("schema_key", "=", "lix_version")
             .where("entity_id", "=", targetVersion.id)
+            .where("snapshot_content", "is not", null)
             .select([sql`json(snapshot_content)`.as("snapshot_content")])
             .executeTakeFirstOrThrow();
 

@@ -136,6 +136,7 @@ simulationTest(
 		const viewAfterDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -144,11 +145,97 @@ simulationTest(
 );
 
 simulationTest(
+	"exposes tracked deletions as tombstones (NULL snapshot_content)",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_tombstone",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Insert a tracked row via the vtable into the active version
+		await db
+			.insertInto("internal_state_vtable")
+			.values({
+				entity_id: "e_tomb",
+				file_id: "f_tomb",
+				schema_key: "mock_schema_tombstone",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: JSON.stringify({ value: "live" }),
+				untracked: 0,
+			})
+			.execute();
+
+		// Delete it via the vtable in the active version (creates a tracked tombstone)
+		await db
+			.deleteFrom("internal_state_vtable")
+			.where("entity_id", "=", "e_tomb")
+			.where("schema_key", "=", "mock_schema_tombstone")
+			.where("file_id", "=", "f_tomb")
+			.where(
+				"version_id",
+				"=",
+				db.selectFrom("active_version").select("version_id")
+			)
+			.execute();
+
+		// Default filter (snapshot_content IS NOT NULL) would hide the deletion; ensure tombstone is exposed
+		const rows = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "e_tomb")
+			.where("schema_key", "=", "mock_schema_tombstone")
+			.where("file_id", "=", "f_tomb")
+			.select([
+				"entity_id",
+				"schema_key",
+				"file_id",
+				"version_id",
+				"change_id",
+				"commit_id",
+				"snapshot_content",
+			])
+			.execute();
+
+		expectDeterministic(rows).toHaveLength(1);
+		expectDeterministic(rows[0]?.snapshot_content).toBeNull();
+		expectDeterministic(rows[0]?.change_id).toBeTruthy();
+		expectDeterministic(rows[0]?.commit_id).toBeTruthy();
+	}
+);
+
+simulationTest(
 	"delete ALL via vtable should delete untracked entities in active version",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
-				{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true }, lixcol_version_id: "global" },
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
 			],
 		});
 
@@ -206,8 +293,10 @@ simulationTest(
 		const afterDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
+
 		expectDeterministic(afterDelete).toHaveLength(0);
 	}
 );
@@ -217,7 +306,11 @@ simulationTest(
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
-				{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true }, lixcol_version_id: "global" },
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
 			],
 		});
 
@@ -425,7 +518,10 @@ simulationTest(
 			},
 		};
 
-		await lix.db.insertInto("stored_schema").values({ value: mockSchema }).execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const childVersion = await createVersion({ lix, name: "child" });
@@ -450,10 +546,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
-			.select([
-				sql`json(snapshot_content)`.as("snapshot_content"),
-				"untracked",
-			])
+			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
 		expectDeterministic(inheritedState).toHaveLength(1);
@@ -482,10 +575,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
-			.select([
-				sql`json(snapshot_content)`.as("snapshot_content"),
-				"untracked",
-			])
+			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
 		expectDeterministic(finalState).toHaveLength(1);
@@ -518,7 +608,10 @@ simulationTest(
 			},
 		};
 
-		await lix.db.insertInto("stored_schema").values({ value: mockSchema }).execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const childVersion = await createVersion({ lix, name: "child" });
@@ -555,7 +648,9 @@ simulationTest(
 			value: "global untracked",
 		});
 		expectDeterministic(inheritedState[0]?.untracked).toBe(1);
-		expectDeterministic(inheritedState[0]?.inherited_from_version_id).toBe("global");
+		expectDeterministic(inheritedState[0]?.inherited_from_version_id).toBe(
+			"global"
+		);
 
 		// 3. Insert tracked state in child version for same entity
 		await db
@@ -577,10 +672,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
-			.select([
-				sql`json(snapshot_content)`.as("snapshot_content"),
-				"untracked",
-			])
+			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
 		expectDeterministic(finalState).toHaveLength(1);
@@ -613,7 +705,10 @@ simulationTest(
 			},
 		};
 
-		await lix.db.insertInto("stored_schema").values({ value: mockSchema }).execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const childVersion = await createVersion({ lix, name: "child" });
@@ -783,7 +878,10 @@ simulationTest(
 			},
 		};
 
-		await lix.db.insertInto("stored_schema").values({ value: mockSchema }).execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -944,7 +1042,9 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(afterInit).toHaveLength(1);
-		expectDeterministic(afterInit[0]?.snapshot_content).toEqual({ value: "init" });
+		expectDeterministic(afterInit[0]?.snapshot_content).toEqual({
+			value: "init",
+		});
 
 		// Step 2: Update to untracked state with "update" (should NOT delete tracked state)
 		await db
@@ -966,7 +1066,9 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(afterUntrackedUpdate).toHaveLength(1);
-		expectDeterministic(afterUntrackedUpdate[0]?.snapshot_content).toEqual({ value: "update" });
+		expectDeterministic(afterUntrackedUpdate[0]?.snapshot_content).toEqual({
+			value: "update",
+		});
 
 		// Step 4: Update back to tracked state with "update2" (should delete untracked state)
 		await db
@@ -988,7 +1090,9 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(afterTrackedUpdate).toHaveLength(1);
-		expectDeterministic(afterTrackedUpdate[0]?.snapshot_content).toEqual({ value: "update2" });
+		expectDeterministic(afterTrackedUpdate[0]?.snapshot_content).toEqual({
+			value: "update2",
+		});
 
 		// Verify that a change was created for the final tracked mutation
 		const changes = await db
@@ -1079,6 +1183,7 @@ simulationTest(
 		const afterDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -1129,7 +1234,9 @@ simulationTest(
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
 				version_id: sql`(SELECT version_id FROM active_version)`,
-				snapshot_content: JSON.stringify({ value: "persistent untracked value" }),
+				snapshot_content: JSON.stringify({
+					value: "persistent untracked value",
+				}),
 				untracked: 1,
 			})
 			.execute();
@@ -1789,6 +1896,7 @@ simulationTest(
 		const afterDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 		expect(afterDelete).toHaveLength(0);
@@ -2729,6 +2837,7 @@ simulationTest(
 				"=",
 				(active as any).version_id ?? (active as any).id
 			)
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -2788,6 +2897,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -2826,6 +2936,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -2851,6 +2962,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 
@@ -3256,6 +3368,7 @@ simulationTest(
 				"=",
 				(active as any).version_id ?? (active as any).id
 			)
+			.where("snapshot_content", "is not", null)
 			.selectAll()
 			.execute();
 

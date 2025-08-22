@@ -202,6 +202,8 @@ function validatePrimaryKeyConstraints(args: {
 
 	// Constrain by version – internal_resolved_state_all exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
+	// Exclude tombstones
+	query = query.where("snapshot_content", "is not", null);
 
 	// Exclude transaction-state rows: _pk starting with 'T~'
 	query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
@@ -279,6 +281,8 @@ function validateUniqueConstraints(args: {
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 
 		query = query.where("version_id", "=", args.version_id);
+		// Exclude tombstones
+		query = query.where("snapshot_content", "is not", null);
 		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
 
 		// For updates, exclude the current entity from the check

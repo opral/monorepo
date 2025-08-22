@@ -62,6 +62,7 @@ export function uuidV7(args: {
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
+				.where("snapshot_content", "is not", null)
 				.select(
 					sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")
 				),

@@ -35,91 +35,95 @@ export function applyResolvedStateView(
 	});
 	// Create the view that provides resolved state by combining transaction, cache and untracked state
 	lix.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
-		SELECT * FROM (
-			-- 1. Transaction state (highest priority) - pending changes
-			SELECT 
-				'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
-				entity_id, 
-				schema_key, 
-				file_id, 
-				plugin_key,
-				json(snapshot_content) as snapshot_content, 
-				schema_version, 
-				version_id,
-				created_at, 
-				created_at as updated_at,
-				NULL as inherited_from_version_id, 
-				id as change_id, 
-				untracked,
-				'pending' as commit_id
-			FROM internal_change_in_transaction
-			WHERE snapshot_content IS NOT NULL     -- Hide deleted entries
+    CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
+      SELECT * FROM (
+          -- 1. Transaction state (highest priority) - pending changes
+          SELECT 
+              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
+              entity_id, 
+              schema_key, 
+              file_id, 
+              plugin_key,
+              json(snapshot_content) as snapshot_content, 
+              schema_version, 
+              version_id,
+              created_at, 
+              created_at as updated_at,
+              NULL as inherited_from_version_id, 
+              id as change_id, 
+              untracked,
+              'pending' as commit_id
+          FROM internal_change_in_transaction
+          -- Include both live rows and deletion tombstones (NULL snapshot_content)
 			
 			UNION ALL
 			
-			-- 2. Untracked state (second priority) - only if no transaction exists
-			SELECT 
-				'U' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
-				entity_id, 
-				schema_key, 
-				file_id, 
-				plugin_key,
-				json(snapshot_content) as snapshot_content, 
-				schema_version, 
-				version_id,
-				created_at, 
-				updated_at,
-				NULL as inherited_from_version_id, 
-				'untracked' as change_id, 
-				1 as untracked,
-				'untracked' as commit_id
-			FROM internal_state_all_untracked
-			WHERE inheritance_delete_marker = 0  -- Hide tombstones
-			AND snapshot_content IS NOT NULL     -- Hide deleted entries
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_change_in_transaction txn
-				WHERE txn.entity_id = internal_state_all_untracked.entity_id
-				  AND txn.schema_key = internal_state_all_untracked.schema_key
-				  AND txn.file_id = internal_state_all_untracked.file_id
-				  AND txn.version_id = internal_state_all_untracked.version_id
-			)
+          -- 2. Untracked state (second priority) - only if no transaction exists
+          SELECT 
+              'U' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
+              entity_id, 
+              schema_key, 
+              file_id, 
+              plugin_key,
+              json(snapshot_content) as snapshot_content, 
+              schema_version, 
+              version_id,
+              created_at, 
+              updated_at,
+              NULL as inherited_from_version_id, 
+              'untracked' as change_id, 
+              1 as untracked,
+              'untracked' as commit_id
+          FROM internal_state_all_untracked
+          WHERE (
+            (inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL)  -- live
+            OR (inheritance_delete_marker = 1 AND snapshot_content IS NULL)   -- tombstone
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM internal_change_in_transaction txn
+              WHERE txn.entity_id = internal_state_all_untracked.entity_id
+                AND txn.schema_key = internal_state_all_untracked.schema_key
+                AND txn.file_id = internal_state_all_untracked.file_id
+                AND txn.version_id = internal_state_all_untracked.version_id
+          )
 			
 			UNION ALL
 			
-			-- 3. Tracked state from cache (third priority) - only if no transaction or untracked exists
-			SELECT 
-				'C' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
-				entity_id, 
-				schema_key, 
-				file_id, 
-				plugin_key, 
-				json(snapshot_content) as snapshot_content, 
-				schema_version, 
-				version_id,
-				created_at, 
-				updated_at,
-				inherited_from_version_id, 
-				change_id, 
-				0 as untracked,
-				commit_id
-			FROM internal_state_cache
-			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
-			AND snapshot_content IS NOT NULL     -- Hide tombstones (deleted entries)
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_change_in_transaction txn
-				WHERE txn.entity_id = internal_state_cache.entity_id
-				  AND txn.schema_key = internal_state_cache.schema_key
-				  AND txn.file_id = internal_state_cache.file_id
-				  AND txn.version_id = internal_state_cache.version_id
-			)
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked unt
-				WHERE unt.entity_id = internal_state_cache.entity_id
-				  AND unt.schema_key = internal_state_cache.schema_key
-				  AND unt.file_id = internal_state_cache.file_id
-				  AND unt.version_id = internal_state_cache.version_id
-			)
+          -- 3. Tracked state from cache (third priority) - only if no transaction or untracked exists
+          SELECT 
+              'C' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
+              entity_id, 
+              schema_key, 
+              file_id, 
+              plugin_key, 
+              json(snapshot_content) as snapshot_content, 
+              schema_version, 
+              version_id,
+              created_at, 
+              updated_at,
+              inherited_from_version_id, 
+              change_id, 
+              0 as untracked,
+              commit_id
+          FROM internal_state_cache
+          WHERE (
+            (inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL)  -- live
+            OR (inheritance_delete_marker = 1 AND snapshot_content IS NULL)   -- tombstone
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM internal_change_in_transaction txn
+              WHERE txn.entity_id = internal_state_cache.entity_id
+                AND txn.schema_key = internal_state_cache.schema_key
+                AND txn.file_id = internal_state_cache.file_id
+                AND txn.version_id = internal_state_cache.version_id
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM internal_state_all_untracked unt
+              WHERE unt.entity_id = internal_state_cache.entity_id
+                AND unt.schema_key = internal_state_cache.schema_key
+                AND unt.file_id = internal_state_cache.file_id
+                AND unt.version_id = internal_state_cache.version_id
+          )
 			
 			UNION ALL
 			
@@ -165,8 +169,8 @@ export function applyResolvedStateView(
 				FROM version_inheritance
 			) vi
 			JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
-			WHERE isc.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
-			AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
+          WHERE isc.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
+          AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_change_in_transaction txn
@@ -236,8 +240,8 @@ export function applyResolvedStateView(
 				FROM version_inheritance
 			) vi
 			JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-			WHERE unt.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
-			AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
+          WHERE unt.inheritance_delete_marker = 0  -- Only inherit entities that exist (not deleted)
+          AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_change_in_transaction txn

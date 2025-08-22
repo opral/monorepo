@@ -309,7 +309,7 @@ export function applyStateVTable(
 
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
-						// Query directly from resolved state view which handles inheritance correctly
+						// Query directly from resolved state (now includes tombstones)
 						let query = db
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();
@@ -337,7 +337,7 @@ export function applyStateVTable(
 					// Try cache first - but only if it's not stale
 					let cacheResults: any[] | null = null;
 					if (!cacheIsStale) {
-						// Select directly from resolved state view using Kysely
+						// Select directly from resolved state using Kysely (includes tombstones)
 						let query = db
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();
@@ -813,6 +813,7 @@ function getStoredSchema(
 				"=",
 				String(schemaKey)
 			)
+			.where("snapshot_content", "is not", null)
 			.limit(1),
 	});
 

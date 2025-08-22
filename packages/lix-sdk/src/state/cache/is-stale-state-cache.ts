@@ -16,6 +16,7 @@ export function isStaleStateCache(args: {
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", "lix_key_value")
 			.where("version_id", "=", "global")
+			.where("snapshot_content", "is not", null)
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
 	});
 

@@ -116,6 +116,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version")
 				.where("entity_id", "=", version_id)
+				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
 				.limit(1),
 		});
@@ -147,6 +148,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version")
 				.where("entity_id", "=", "global")
+				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
 				.limit(1),
 		});
@@ -179,6 +181,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 			.selectFrom("internal_resolved_state_all")
 			.where("schema_key", "=", "lix_active_account")
 			.where("version_id", "=", "global")
+			.where("snapshot_content", "is not", null)
 			.select(
 				sql`json_extract(snapshot_content, '$.account_id')`.as("account_id")
 			),
@@ -277,6 +280,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_commit")
 				.where("entity_id", "=", versionData.working_commit_id)
+				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
 				.limit(1),
 		});
@@ -507,6 +511,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 					.selectFrom("internal_resolved_state_all")
 					.where("schema_key", "=", "lix_version")
 					.where("entity_id", "=", "global")
+					.where("snapshot_content", "is not", null)
 					.select("snapshot_content")
 					.limit(1),
 			});
@@ -597,6 +602,7 @@ export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): num
 					.selectFrom("internal_resolved_state_all")
 					.where("schema_key", "=", "lix_version")
 					.where("entity_id", "=", version_id)
+					.where("snapshot_content", "is not", null)
 					.select("snapshot_content")
 					.limit(1),
 			});

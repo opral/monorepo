@@ -1,16 +1,18 @@
 import type { Lix } from "../../lix/open-lix.js";
 
 /**
- * Creates a read-only view that exposes tracked tombstones (snapshot_content = null).
+ * Creates a read-only view that exposes tracked deletions as tombstones.
  *
- * Note: Initially, this selects from state_all. After the vtable is renamed to
- * internal_state_vtable and full-fidelity rows are exposed there, this view
- * should be updated to select from that vtable (and state_all will continue to
- * filter out tombstones).
+ * This view reads from the materialized state which includes both live rows
+ * and deletion tombstones (NULL snapshot_content). It intentionally does NOT
+ * filter out tombstones, unlike the resolved-state or public state_all views.
+ *
+ * We restrict to non-inherited rows (inherited_from_version_id IS NULL) so that
+ * each version only reports its own direct state or tombstones.
  */
 export function applyStateWithTombstonesView(lix: Pick<Lix, "sqlite">): void {
   lix.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_with_tombstones AS
-    SELECT * FROM internal_state_vtable
+    SELECT * FROM internal_state_vtable;
   `);
 }

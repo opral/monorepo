@@ -79,6 +79,7 @@ export function nextDeterministicSequenceNumber(args: {
 				.where("entity_id", "=", "lix_deterministic_sequence_number")
 				.where("schema_key", "=", "lix_key_value")
 				.where("version_id", "=", "global")
+				.where("snapshot_content", "is not", null)
 				.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
 		});
 
