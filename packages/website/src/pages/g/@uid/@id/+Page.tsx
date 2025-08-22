@@ -208,17 +208,6 @@ function Markdown(props: { markdown: string; fullWidth?: boolean }) {
                         }
                         // eslint-disable-next-line solid/no-innerhtml
                         innerHTML={props.markdown}
-                        onMouseDown={(e) => {
-                                const anchor = (e.target as HTMLElement).closest("a");
-                                if (
-                                        anchor &&
-                                        anchor.getAttribute("href")?.startsWith("#")
-                                ) {
-                                        // Prevent smooth-scroll when selecting text near hash anchors
-                                        // to avoid the scroll bug during text selection
-                                        e.preventDefault();
-                                }
-                        }}
                 />
         );
 }

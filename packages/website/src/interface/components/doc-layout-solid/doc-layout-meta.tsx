@@ -1,7 +1,7 @@
 import Link from "#src/renderer/Link.jsx";
 import { currentPageContext } from "#src/renderer/state.js";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
-import { Show, createEffect, createSignal, onMount, For } from "solid-js";
+import { Show, createEffect, createSignal, onMount, onCleanup, For } from "solid-js";
 // import MaterialSymbolsWarningOutlineRounded from "~icons/material-symbols/warning-outline-rounded"
 import { Chip } from "../Chip.jsx";
 import { getGithubLink } from "#src/pages/m/helper/getGithubLink.js";
@@ -43,7 +43,11 @@ const InlangDocMeta = (props: {
 
 	const findHeadlineElements = (elements: HTMLCollection) => {
 		const myHeadlines: Headlines = [];
-		for (const element of elements) {
+		if (!elements || elements.length === 0) {
+			return myHeadlines;
+		}
+		for (let i = 0; i < elements.length; i++) {
+			const element = elements[i];
 			// Check if the element is an h1 or h2
 			if (
 				element &&
@@ -194,7 +198,14 @@ const InlangDocMeta = (props: {
 			</div>
 			<Show when={props.manifest.pricing}>
 				<div
-					onClick={() => {
+					onClick={(e) => {
+						// Prevent scroll if text is selected
+						const selection = window.getSelection();
+						if (selection && selection.toString().length > 0) {
+							e.preventDefault();
+							e.stopPropagation();
+							return;
+						}
 						if (
 							headlines() &&
 							headlines().some((h) => h.anchor === "pricing")
@@ -255,9 +266,22 @@ const InlangDocMeta = (props: {
 			</Show>
 
 			<Show when={headlines() && headlines()![0]}>
-				<div
-					class={`hover:text-primary flex items-center gap-[6px] text-surface-600 cursor-pointer`}
-					onClick={() => {
+				<button
+					type="button"
+					class={`hover:text-primary flex items-center gap-[6px] text-surface-600 cursor-pointer bg-transparent border-none p-0 font-inherit`}
+					onClick={(e) => {
+						// Prevent scroll if text is selected
+						const selection = window.getSelection();
+						if (selection && selection.toString().length > 0) {
+							e.preventDefault();
+							e.stopPropagation();
+							return;
+						}
+						// Double-check we're not in the middle of a drag
+						if (e.detail === 0) {
+							// This is a programmatic click, ignore it
+							return;
+						}
 						scrollToAnchor(headlines()![0]!.anchor, "smooth");
 					}}
 				>
@@ -273,7 +297,7 @@ const InlangDocMeta = (props: {
 							d="M11 16h2v-4.2l1.6 1.6L16 12l-4-4l-4 4l1.4 1.4l1.6-1.6zm1 6q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
 						/>
 					</svg>
-				</div>
+				</button>
 			</Show>
 		</div>
 	);
