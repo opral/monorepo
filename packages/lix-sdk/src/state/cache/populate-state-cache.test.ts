@@ -409,3 +409,109 @@ test("inheritance is queryable from the resolved view after population", async (
 	expect(entityC?.inherited_from_version_id).toBeNull(); // Direct, not inherited
 	expect((entityC?.snapshot_content as any).value).toBe("from_version_c");
 });
+
+test("global version entities are populated when populating child versions", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Create a test version that will inherit from global
+	const testVersion = await createVersion({
+		lix,
+		name: "Test Version",
+		id: "test_version_1",
+	});
+
+	// Insert a test entity into state_all for global version
+	// This simulates entities that exist in global and should be inherited by all versions
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "global_entity_1",
+			schema_key: "test_entity",
+			file_id: "test_file",
+			version_id: "global",
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "global_entity_1",
+				value: "from_global",
+				updated_after_merge: true,
+			}) as any,
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Verify the test version can see this entity through inheritance before cache miss
+	const beforeCacheMiss = await db
+		.selectFrom("state_all")
+		.where("version_id", "=", testVersion.id)
+		.where("schema_key", "=", "test_entity")
+		.where("entity_id", "=", "global_entity_1")
+		.select(["entity_id", "change_id", sql`json(snapshot_content)`.as("snapshot_content")])
+		.execute();
+	
+	expect(beforeCacheMiss).toHaveLength(1);
+	const originalChangeId = beforeCacheMiss[0]?.change_id;
+	expect((beforeCacheMiss[0]?.snapshot_content as any).value).toBe("from_global");
+
+	// Clear all cache to simulate cache miss
+	clearStateCache({ lix });
+
+	// ACT: Populate the test version's cache (simulating cache miss recovery)
+	populateStateCache(lix, { version_id: testVersion.id });
+
+	// ASSERT: After cache population, the test version should still see the global entity
+	const afterCachePopulation = await db
+		.selectFrom("state_all")
+		.where("version_id", "=", testVersion.id)
+		.where("schema_key", "=", "test_entity")
+		.where("entity_id", "=", "global_entity_1")
+		.select(["entity_id", "change_id", sql`json(snapshot_content)`.as("snapshot_content")])
+		.execute();
+
+	// Should still see the entity with the same change_id
+	expect(afterCachePopulation).toHaveLength(1);
+	expect(afterCachePopulation[0]?.change_id).toBe(originalChangeId);
+	expect((afterCachePopulation[0]?.snapshot_content as any).value).toBe("from_global");
+
+		// Check the physical cache directly: the parent/global authored entry
+		// should be materialized in its own version's cache table.
+		const cacheEntries = await db
+			.selectFrom("internal_state_cache_test_entity" as any)
+			.where("entity_id", "=", "global_entity_1")
+			.select(["entity_id", "change_id", "version_id", "inherited_from_version_id"])
+			.execute();
+
+		const globalEntry = cacheEntries.find((e: any) => e.version_id === "global");
+		expect(globalEntry).toBeTruthy();
+		expect(globalEntry?.change_id).toBe(originalChangeId);
+
+		// Inheritance is resolved at read time via the resolved view.
+		// Verify the child version sees the inherited row from global.
+		const resolvedInherited = await db
+			.selectFrom("internal_resolved_state_all")
+			.where("version_id", "=", testVersion.id)
+			.where("schema_key", "=", "test_entity")
+			.where("entity_id", "=", "global_entity_1")
+			.select([
+				"entity_id",
+				"change_id",
+				"version_id",
+				"inherited_from_version_id",
+				sql`json(snapshot_content)`.as("snapshot_content"),
+			])
+			.execute();
+
+		expect(resolvedInherited).toHaveLength(1);
+		expect(resolvedInherited[0]?.version_id).toBe(testVersion.id);
+		expect(resolvedInherited[0]?.inherited_from_version_id).toBe("global");
+		expect(resolvedInherited[0]?.change_id).toBe(originalChangeId);
+		expect((resolvedInherited[0]?.snapshot_content as any).value).toBe("from_global");
+	});
