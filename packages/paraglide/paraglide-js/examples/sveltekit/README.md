@@ -132,6 +132,7 @@ If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare P
 </doc-callout>
 
 ```diff
+// vite.config.js
 export default defineConfig({
 	plugins: [
 		sveltekit(),
