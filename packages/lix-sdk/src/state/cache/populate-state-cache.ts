@@ -1,6 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "../../lix/open-lix.js";
 import { getStateCacheV2Tables } from "./schema.js";
+import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
 export interface PopulateStateCacheV2Options {
 	version_id?: string; // Optional - if not provided, all active versions are populated
@@ -193,47 +194,11 @@ export function populateStateCache(
  * Duplicated from update-state-cache.ts to avoid circular dependency.
  */
 function ensureTableExists(
-	sqlite: SqliteWasmDatabase,
-	tableName: string
+    sqlite: SqliteWasmDatabase,
+    tableName: string
 ): void {
-	// Get cache for this sqlite instance
-	const tableCache = getStateCacheV2Tables({ sqlite } as any);
-
-	// Check cache first for performance
-	if (tableCache.has(tableName)) {
-		return;
-	}
-
-	// Create table if it doesn't exist
-	const createTableSql = `
-		CREATE TABLE IF NOT EXISTS ${tableName} (
-			entity_id TEXT NOT NULL,
-			schema_key TEXT NOT NULL,
-			file_id TEXT NOT NULL,
-			version_id TEXT NOT NULL,
-			plugin_key TEXT NOT NULL,
-			snapshot_content BLOB,
-			schema_version TEXT NOT NULL,
-			created_at TEXT NOT NULL,
-			updated_at TEXT NOT NULL,
-			inherited_from_version_id TEXT,
-			inheritance_delete_marker INTEGER DEFAULT 0,
-			change_id TEXT,
-			commit_id TEXT,
-			PRIMARY KEY (entity_id, file_id, version_id)
-		) STRICT, WITHOUT ROWID;
-	`;
-
-	sqlite.exec({ sql: createTableSql });
-
-	// Create index on version_id for version-based queries
-	sqlite.exec({
-		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
-	});
-
-	// Initial ANALYZE for new tables
-	sqlite.exec({ sql: `ANALYZE ${tableName}` });
-
-	// Update cache
-	tableCache.add(tableName);
+    // Use shared creator (idempotent) and update the cache set
+    createSchemaCacheTable({ lix: { sqlite } as any, tableName });
+    const tableCache = getStateCacheV2Tables({ sqlite } as any);
+    if (!tableCache.has(tableName)) tableCache.add(tableName);
 }

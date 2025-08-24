@@ -3,6 +3,7 @@ import type { LixChangeRaw } from "../../change/schema.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getStateCacheV2Tables } from "./schema.js";
+import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
@@ -110,43 +111,13 @@ function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	// Get cache for this Lix instance
 	const tableCache = getStateCacheV2Tables(lix);
 
-	// Check cache first for performance
-	if (tableCache.has(tableName)) {
-		return;
+	// Always run idempotent creator to ensure indexes exist
+	createSchemaCacheTable({ lix, tableName });
+
+	// Update cache set if newly seen
+	if (!tableCache.has(tableName)) {
+		tableCache.add(tableName);
 	}
-
-	// Create table if it doesn't exist
-	const createTableSql = `
-		CREATE TABLE IF NOT EXISTS ${tableName} (
-			entity_id TEXT NOT NULL,
-			schema_key TEXT NOT NULL,
-			file_id TEXT NOT NULL,
-			version_id TEXT NOT NULL,
-			plugin_key TEXT NOT NULL,
-			snapshot_content BLOB,
-			schema_version TEXT NOT NULL,
-			created_at TEXT NOT NULL,
-			updated_at TEXT NOT NULL,
-			inherited_from_version_id TEXT,
-			inheritance_delete_marker INTEGER DEFAULT 0,
-			change_id TEXT,
-			commit_id TEXT,
-			PRIMARY KEY (entity_id, file_id, version_id)
-		) STRICT, WITHOUT ROWID;
-	`;
-
-	lix.sqlite.exec({ sql: createTableSql });
-
-	// Create index on version_id for version-based queries
-	lix.sqlite.exec({
-		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
-	});
-
-	// Initial ANALYZE for new tables
-	lix.sqlite.exec({ sql: `ANALYZE ${tableName}` });
-
-	// Update cache
-	tableCache.add(tableName);
 }
 
 function batchInsertDirectToTable(args: {
