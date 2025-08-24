@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { serializeStatePk, parseStatePk } from "./primary-key.js";
+import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { createVersion } from "../version/create-version.js";
 

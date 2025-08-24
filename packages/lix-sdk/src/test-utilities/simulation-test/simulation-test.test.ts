@@ -4,7 +4,7 @@ import {
 	type SimulationTestDef,
 	normalSimulation,
 } from "./simulation-test.js";
-import { commit } from "../../state/commit.js";
+import { commit } from "../../state/vtable/commit.js";
 
 test("simulation test discovery", () => {});
 

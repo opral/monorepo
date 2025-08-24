@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { commit } from "../commit.js";
+import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 

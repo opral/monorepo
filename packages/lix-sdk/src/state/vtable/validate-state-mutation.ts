@@ -1,10 +1,10 @@
 import { Ajv } from "ajv";
-import type { Lix } from "../lix/open-lix.js";
-import { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { executeSync } from "../database/execute-sync.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
-import type { LixChange } from "../change/schema.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixChange } from "../../change/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,

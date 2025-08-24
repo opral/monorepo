@@ -1,14 +1,14 @@
 import { test, expect, describe } from "vitest";
 import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { LixCommitEdge } from "../commit/schema.js";
-import { insertTransactionState } from "./transaction/insert-transaction-state.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import type { LixCommitEdge } from "../../commit/schema.js";
+import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { commit } from "./commit.js";
-import { openLix } from "../lix/open-lix.js";
-import { nanoId, timestamp, uuidV7 } from "../deterministic/index.js";
-import { switchAccount } from "../account/switch-account.js";
-import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
-import { selectActiveVersion } from "../version/select-active-version.js";
+import { openLix } from "../../lix/open-lix.js";
+import { nanoId, timestamp, uuidV7 } from "../../deterministic/index.js";
+import { switchAccount } from "../../account/switch-account.js";
+import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
+import { selectActiveVersion } from "../../version/select-active-version.js";
 
 /**
  * TL;DR

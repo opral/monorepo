@@ -6,7 +6,7 @@ import { applyStateCacheV2Schema } from "./cache/schema.js";
 import { applyStateAllView } from "./views/state-all.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
-import { applyStateVTable } from "./vtable.js";
+import { applyStateVTable } from "./vtable/index.js";
 
 export function applyStateDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">

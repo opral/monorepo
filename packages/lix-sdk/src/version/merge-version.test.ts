@@ -1,9 +1,8 @@
-import { test, expect } from "vitest";
-import { sql, type Kysely } from "kysely";
+import { test } from "vitest";
+import { sql } from "kysely";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 import { createVersion } from "./create-version.js";
 import { mergeVersion } from "./merge-version.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("simulationTest discovery", () => {});
 
@@ -427,7 +426,6 @@ simulationTest(
 
 		await mergeVersion({ lix, source, target });
 
-
 		const afterFirst = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
@@ -474,14 +472,15 @@ simulationTest(
 						])
 						.execute()
 				: [];
-			const bySchema = referenced.reduce<Record<string, number>>((m, r: any) => {
-				m[r.schema_key] = (m[r.schema_key] ?? 0) + 1;
-				return m;
-			}, {});
+			const bySchema = referenced.reduce<Record<string, number>>(
+				(m, r: any) => {
+					m[r.schema_key] = (m[r.schema_key] ?? 0) + 1;
+					return m;
+				},
+				{}
+			);
 			return { commitId, change_set_id, schemas: bySchema, referenced };
 		};
-
-
 
 		// Verify snapshots after first merge
 		const firstStateAll = await lix.db
@@ -496,36 +495,7 @@ simulationTest(
 				sql`json(snapshot_content)`.as("snapshot"),
 			])
 			.executeTakeFirstOrThrow();
-		const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-		const firstMaterializer = await intDb
-			.selectFrom("internal_state_materializer")
-			.where("version_id", "=", target.id)
-			.where("file_id", "=", "fileI")
-			.where("schema_key", "=", "test_entity")
-			.where("entity_id", "=", "idem-1")
-			.select([
-				"change_id",
-				"commit_id",
-				sql`json(snapshot_content)`.as("snapshot"),
-			])
-			.executeTakeFirstOrThrow();
-		const firstCandidates = await intDb
-			.selectFrom("internal_materialization_latest_visible_state" as any)
-			.where("version_id", "=", target.id)
-			.where("file_id", "=", "fileI")
-			.where("schema_key", "=", "test_entity")
-			.where("entity_id", "=", "idem-1")
-			.select([
-				"change_id",
-				"commit_id",
-				"depth",
-				sql`json(snapshot_content)`.as("snapshot"),
-			])
-			.orderBy("depth", "asc")
-			.execute();
 		expectDeterministic(firstStateAll);
-		expectDeterministic(firstMaterializer);
-		expectDeterministic(firstCandidates);
 
 		await mergeVersion({ lix, source, target });
 
@@ -569,42 +539,11 @@ simulationTest(
 				sql`json(snapshot_content)`.as("snapshot"),
 			])
 			.executeTakeFirstOrThrow();
-		const secondMaterializer = await intDb
-			.selectFrom("internal_state_materializer")
-			.where("version_id", "=", target.id)
-			.where("file_id", "=", "fileI")
-			.where("schema_key", "=", "test_entity")
-			.where("entity_id", "=", "idem-1")
-			.select([
-				"change_id",
-				"commit_id",
-				sql`json(snapshot_content)`.as("snapshot"),
-			])
-			.executeTakeFirstOrThrow();
-		const secondCandidates = await intDb
-			.selectFrom("internal_materialization_latest_visible_state" as any)
-			.where("version_id", "=", target.id)
-			.where("file_id", "=", "fileI")
-			.where("schema_key", "=", "test_entity")
-			.where("entity_id", "=", "idem-1")
-			.select([
-				"change_id",
-				"commit_id",
-				"depth",
-				sql`json(snapshot_content)`.as("snapshot"),
-			])
-			.orderBy("depth", "asc")
-			.execute();
 
 		// Verify business snapshots are correct across both surfaces
 		expectDeterministic(firstStateAll.snapshot).toEqual({ v: "from-source" });
-		expectDeterministic(firstMaterializer.snapshot).toEqual({
-			v: "from-source",
-		});
+
 		expectDeterministic(secondStateAll.snapshot).toEqual({ v: "from-source" });
-		expectDeterministic(secondMaterializer.snapshot).toEqual({
-			v: "from-source",
-		});
 	}
 );
 

@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { type Kysely } from "kysely";
 import { insertTransactionState } from "../state/transaction/insert-transaction-state.js";
-import { commit } from "../state/commit.js";
+import { commit } from "../state/vtable/commit.js";
 import { timestamp } from "../deterministic/timestamp.js";
 
 test("insert on the change view", async () => {

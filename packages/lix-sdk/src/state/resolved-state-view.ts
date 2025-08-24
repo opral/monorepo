@@ -1,5 +1,5 @@
-import type { StateAllView } from "./schema.js";
-import { encodeStatePkPart } from "./primary-key.js";
+import type { StateAllView } from "./views/state-all.js";
+import { encodeStatePkPart } from "./vtable/primary-key.js";
 import type { Lix } from "../index.js";
 
 /**

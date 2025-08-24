@@ -1,15 +1,15 @@
 import type { Kysely, Generated } from "kysely";
 import { sql } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { Lix } from "../lix/open-lix.js";
-import { executeSync } from "../database/execute-sync.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
-import { insertTransactionState } from "./transaction/insert-transaction-state.js";
-import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
-import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
-import { populateStateCache } from "./cache/populate-state-cache.js";
+import { insertTransactionState } from "../transaction/insert-transaction-state.js";
+import { isStaleStateCache } from "../cache/is-stale-state-cache.js";
+import { markStateCacheAsFresh } from "../cache/mark-state-cache-as-stale.js";
+import { populateStateCache } from "../cache/populate-state-cache.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { timestamp } from "../../deterministic/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 

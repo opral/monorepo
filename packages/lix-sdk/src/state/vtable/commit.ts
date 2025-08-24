@@ -1,23 +1,23 @@
 import { type Kysely, sql } from "kysely";
 import {
-	type LixChangeSet,
-	type LixChangeSetElement,
-	LixChangeSetElementSchema,
-	LixChangeSetSchema,
-} from "../change-set/schema.js";
-import type { LixChangeRaw } from "../change/schema.js";
-import { executeSync } from "../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { LixVersionSchema, type LixVersion } from "../version/schema.js";
-import { nanoId } from "../deterministic/index.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
-import { timestamp } from "../deterministic/timestamp.js";
-import type { Lix } from "../lix/open-lix.js";
-import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
-import type { LixCommitEdge } from "../commit/schema.js";
-import { updateStateCache } from "./cache/update-state-cache.js";
-import { updateUntrackedState } from "./untracked/update-untracked-state.js";
+    type LixChangeSet,
+    type LixChangeSetElement,
+    LixChangeSetElementSchema,
+    LixChangeSetSchema,
+} from "../../change-set/schema.js";
+import type { LixChangeRaw } from "../../change/schema.js";
+import { executeSync } from "../../database/execute-sync.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { LixVersionSchema, type LixVersion } from "../../version/schema.js";
+import { nanoId } from "../../deterministic/index.js";
+import { uuidV7 } from "../../deterministic/uuid-v7.js";
+import { commitDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import { timestamp } from "../../deterministic/timestamp.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
+import type { LixCommitEdge } from "../../commit/schema.js";
+import { updateStateCache } from "../cache/update-state-cache.js";
+import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 
 /**
  * Commits all transaction changes to permanent storage.

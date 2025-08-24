@@ -1,7 +1,7 @@
-import { LixLogSchema, type LixLog } from "../log/schema.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { timestamp, type Lix } from "../index.js";
-import { insertTransactionState } from "./transaction/insert-transaction-state.js";
+import { LixLogSchema, type LixLog } from "../../log/schema.js";
+import { uuidV7 } from "../../deterministic/uuid-v7.js";
+import { timestamp, type Lix } from "../../index.js";
+import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 
 // Track if logging is in progress per Lix instance to prevent recursion
 const loggingInProgressMap = new WeakMap<

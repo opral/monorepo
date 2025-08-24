@@ -1,8 +1,8 @@
 import { bench } from "vitest";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
-import { insertTransactionState } from "./transaction/insert-transaction-state.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { insertTransactionState } from "../transaction/insert-transaction-state.js";
+import { timestamp } from "../../deterministic/timestamp.js";
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns

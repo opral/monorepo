@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
-import { createVersion } from "../version/create-version.js";
-import type { LixChangeSetElement } from "../change-set/schema.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { createVersion } from "../../version/create-version.js";
+import type { LixChangeSetElement } from "../../change-set/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLix({});

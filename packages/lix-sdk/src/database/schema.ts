@@ -40,7 +40,7 @@ import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.j
 import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
 import type { InternalChangeInTransactionTable } from "../state/transaction/schema.js";
-import type { InternalStateVTable } from "../state/vtable.js";
+import type { InternalStateVTable } from "../state/vtable/vtable.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],

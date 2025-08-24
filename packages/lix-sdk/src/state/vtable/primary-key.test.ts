@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import {
-	encodeStatePkPart,
-	parseStatePk,
-	serializeStatePk,
+    encodeStatePkPart,
+    parseStatePk,
+    serializeStatePk,
 } from "./primary-key.js";
 
 describe("primary-key serialize/parse", () => {

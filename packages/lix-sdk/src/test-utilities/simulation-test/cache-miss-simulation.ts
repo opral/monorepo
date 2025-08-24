@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
-import * as insertVTableLogModule from "../../state/insert-vtable-log.js";
+import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 const CACHE_TIMESTAMP = "2099-12-31T23:59:59.999Z";

@@ -1,14 +1,14 @@
 import { expect } from "vitest";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { createVersion } from "../version/create-version.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { createVersion } from "../../version/create-version.js";
 import {
 	simulationTest,
 	normalSimulation,
-} from "../test-utilities/simulation-test/simulation-test.js";
-import { createVersionFromCommit } from "../version/create-version-from-commit.js";
-import { openLix } from "../lix/open-lix.js";
+} from "../../test-utilities/simulation-test/simulation-test.js";
+import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
+import { openLix } from "../../lix/open-lix.js";
 
 simulationTest(
 	"select, insert, update, delete entity via internal_state_vtable",
