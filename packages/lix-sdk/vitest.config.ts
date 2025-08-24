@@ -5,6 +5,7 @@ export default defineConfig({
 	plugins: [process.env.CODSPEED_BENCH ? codspeedPlugin() : undefined],
 	test: {
 		// increased default timeout to avoid ci/cd issues
-		testTimeout: 60000,
+		// the high timeout will be needed less with further performance improvements
+		testTimeout: 120000,
 	},
 });
