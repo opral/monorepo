@@ -43,6 +43,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		} catch (error) {
 			logger.error("Failed to compile project:", (error as Error).message);
 			logger.info("Please check your translation files for syntax errors.");
+			if (isProduction) throw error;
 		} finally {
 			// in any case add the files to watch
 			for (const path of Array.from(readFiles)) {
@@ -135,6 +136,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			} catch (error) {
 				logger.warn("Failed to compile project:", (error as Error).message);
 				logger.warn("Please check your translation files for syntax errors.");
+				if (isProduction) throw error;
 			}
 		});
 	},
