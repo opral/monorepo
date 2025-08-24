@@ -194,11 +194,11 @@ export function populateStateCache(
  * Duplicated from update-state-cache.ts to avoid circular dependency.
  */
 function ensureTableExists(
-    sqlite: SqliteWasmDatabase,
-    tableName: string
+	sqlite: SqliteWasmDatabase,
+	tableName: string
 ): void {
-    // Use shared creator (idempotent) and update the cache set
-    createSchemaCacheTable({ lix: { sqlite } as any, tableName });
-    const tableCache = getStateCacheV2Tables({ sqlite } as any);
-    if (!tableCache.has(tableName)) tableCache.add(tableName);
+	// Use shared creator (idempotent) and update the cache set
+	createSchemaCacheTable({ lix: { sqlite } as any, tableName });
+	const tableCache = getStateCacheV2Tables({ sqlite } as any);
+	if (!tableCache.has(tableName)) tableCache.add(tableName);
 }
