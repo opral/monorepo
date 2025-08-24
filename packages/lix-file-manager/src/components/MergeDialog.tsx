@@ -15,7 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select.js";
 import { useState, useEffect } from "react";
-import { createMergeCommit } from "@lix-js/sdk";
+import { transition } from "@lix-js/sdk";
 
 interface MergeDialogProps {
 	open: boolean;
@@ -62,10 +62,10 @@ export function MergeDialog({
 
 			if (!source || !target) return;
 
-			await createMergeCommit({
+			await transition({
 				lix,
-				source: { id: source.commit_id },
-				target: { id: target.commit_id },
+				to: { id: source.commit_id },
+				version: { id: target.id },
 			});
 
 			onMergeComplete();

@@ -1,7 +1,7 @@
 import { test, expect, expectTypeOf } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
-import { createCheckpoint } from "../commit/create-checkpoint.js";
+import { createCheckpoint } from "../state/create-checkpoint.js";
 import { switchVersion } from "../version/switch-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";

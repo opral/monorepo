@@ -1,9 +1,31 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { createCommit } from "../commit/create-commit.js";
+import type { Lix } from "../lix/open-lix.js";
+import type { LixChangeSet } from "../change-set/schema.js";
+import type { LixCommit } from "../commit/schema.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";
 import { createVersion } from "./create-version.js";
+
+// Local test helper: create a global commit pointing to a given change set
+async function createCommit(args: {
+    lix: Lix;
+    changeSet: Pick<LixChangeSet, "id">;
+}): Promise<Pick<LixCommit, "id" | "change_set_id">> {
+    const commitId = uuidV7({ lix: args.lix });
+    await args.lix.db
+        .insertInto("commit_all")
+        .values({ id: commitId, change_set_id: args.changeSet.id, lixcol_version_id: "global" })
+        .execute();
+    const row = await args.lix.db
+        .selectFrom("commit_all")
+        .where("id", "=", commitId)
+        .where("lixcol_version_id", "=", "global")
+        .selectAll()
+        .executeTakeFirstOrThrow();
+    return { id: row.id, change_set_id: row.change_set_id };
+}
 
 // Planning all test cases for createVersionFromCommit (empty bodies for TDD)
 
@@ -101,6 +123,7 @@ test("allows explicit inheritsFrom: null (no inheritance)", async () => {
 		lixcol_version_id: "global",
 		elements: [],
 	});
+
 	const commit = await createCommit({ lix, changeSet: cs });
 
 	const v = await createVersionFromCommit({

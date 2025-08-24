@@ -1,4 +1,4 @@
-import type { LixCommit } from "./schema.js";
+import type { LixCommit } from "../commit/schema.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";

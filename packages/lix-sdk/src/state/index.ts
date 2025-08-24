@@ -17,3 +17,7 @@ export type {
   StateWithTombstonesView,
   StateWithTombstonesRow,
 } from "./views/state-with-tombstones.js";
+
+// State operations
+export { createCheckpoint } from "./create-checkpoint.js";
+export { transition } from "./transition.js";

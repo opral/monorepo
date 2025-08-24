@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { transition } from "./index.js";
+import { transition } from "./transition.js";
 import { createVersionFromCommit } from "../version/create-version-from-commit.js";
 import { switchVersion } from "../version/switch-version.js";
 import { createCheckpoint } from "./create-checkpoint.js";

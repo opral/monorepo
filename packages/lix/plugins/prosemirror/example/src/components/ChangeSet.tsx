@@ -9,9 +9,8 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import {
-	applyChangeSet,
+	transition,
 	createThread,
-	createUndoCommit,
 	type LixChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useKeyValue } from "../hooks/useKeyValue";
@@ -95,7 +94,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			return selectThreads(lix, { commitId: commit.id });
 		});
 
-// Removed the console.log statement as it is a debugging artifact.
+		// Removed the console.log statement as it is a debugging artifact.
 
 		// Get the first comment if it exists
 		const firstComment = threads?.[0]?.comments?.[0];
@@ -230,20 +229,25 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 													.where("change_set_id", "=", changeSet.id)
 													.selectAll()
 													.executeTakeFirst();
-												
+
 												if (!commit) {
 													console.error("Could not find commit for change set");
 													return;
 												}
 
-												const undoCommit = await createUndoCommit({
-													lix,
-													commit: { id: commit.id },
-												});
-												await applyChangeSet({
-													lix,
-													changeSet: { id: undoCommit.change_set_id },
-												});
+												// Find the parent of this commit and transition to it
+												const parent = await lix.db
+													.selectFrom("commit_edge")
+													.where("child_id", "=", commit.id)
+													.select(["parent_id"])
+													.executeTakeFirst();
+
+												if (!parent) {
+													console.error("Cannot undo: commit has no parent");
+													return;
+												}
+
+												await transition({ lix, to: { id: parent.parent_id } });
 											}}
 											title="Undo this change set"
 										>

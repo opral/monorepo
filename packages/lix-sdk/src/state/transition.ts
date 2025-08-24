@@ -1,18 +1,18 @@
 import type { Lix } from "../lix/index.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 // Using explicit commit-scoped leaf CTEs for performance and clarity
-import type { LixCommit } from "./schema.js";
+import type { LixCommit } from "../commit/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
 } from "../change-set/schema.js";
-import { LixCommitSchema, LixCommitEdgeSchema } from "./schema.js";
+import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../change/schema.js";
-import { updateStateCache } from "../state/cache/update-state-cache.js";
+import { updateStateCache } from "./cache/update-state-cache.js";
 
 /**
  * Transitions a version's state to match the state at `toCommitId`.

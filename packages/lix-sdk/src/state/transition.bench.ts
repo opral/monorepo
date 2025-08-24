@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { createVersionFromCommit } from "../version/create-version-from-commit.js";
 import { switchVersion } from "../version/switch-version.js";
-import { transition } from "./index.js";
+import { transition } from "./transition.js";
 
 const N = 1;
 const DEPTH = 2;
