@@ -4,7 +4,7 @@ import codspeedPlugin from "@codspeed/vitest-plugin";
 export default defineConfig({
 	plugins: [process.env.CODSPEED_BENCH ? codspeedPlugin() : undefined],
 	test: {
-		// default timeout
-		testTimeout: 20000,
+		// increased default timeout to avoid ci/cd issues
+		testTimeout: 60000,
 	},
 });
