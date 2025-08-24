@@ -74,14 +74,9 @@ export function applyChangeDatabaseSchema(
     SELECT 
       lix_uuid_v7(), 
       jsonb(NEW.snapshot_content)
-    WHERE NEW.snapshot_content IS NOT NULL
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_snapshot 
-        WHERE id = 'no-content' 
-        AND NEW.snapshot_content IS NULL
-      );
+    WHERE NEW.snapshot_content IS NOT NULL;
 
-    -- Insert the change, referencing the snapshot
+    -- Insert the change, referencing the last inserted snapshot (or 'no-content')
     INSERT INTO internal_change (
       id,
       entity_id,
@@ -100,7 +95,7 @@ export function applyChangeDatabaseSchema(
       NEW.plugin_key,
       CASE 
         WHEN NEW.snapshot_content IS NULL THEN 'no-content'
-        ELSE (SELECT id FROM internal_snapshot WHERE content = jsonb(NEW.snapshot_content) ORDER BY id DESC LIMIT 1)
+        ELSE (SELECT id FROM internal_snapshot WHERE rowid = last_insert_rowid())
       END,
       COALESCE(NEW.created_at, lix_timestamp())
     );
