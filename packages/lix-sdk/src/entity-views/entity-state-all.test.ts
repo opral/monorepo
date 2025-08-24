@@ -578,11 +578,12 @@ describe("createEntityAllViewIfNotExists", () => {
 
 		// Create parent and child versions
 		const { createVersion } = await import("../version/create-version.js");
-		await createVersion({ lix, id: "parent-version" });
+		const parentVersion = await createVersion({ lix, id: "parent-version" });
+
 		await createVersion({
 			lix,
 			id: "child-version",
-			inherits_from_version_id: "parent-version",
+			inheritsFrom: parentVersion,
 		});
 
 		// Insert entity into parent version

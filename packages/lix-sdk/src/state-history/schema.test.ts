@@ -2,7 +2,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { createCheckpoint } from "../commit/create-checkpoint.js";
+import { createCheckpoint } from "../state/create-checkpoint.js";
 import {
 	commitIsDescendantOf,
 	commitIsAncestorOf,

@@ -27,6 +27,7 @@ import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
+import { applyTransactionStateSchema } from "../state/transaction/schema.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -136,6 +137,7 @@ export function initDb(args: {
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
+	applyTransactionStateSchema(lix);
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
 	applyFileLixcolCacheSchema(lix);

@@ -804,16 +804,16 @@ describe("internal_materialization_commit_graph", () => {
 			});
 
 			// Create three versions
-			await createVersion({ lix, id: "version-cycle-a" });
-			await createVersion({
+			const versionA = await createVersion({ lix, id: "version-cycle-a" });
+			const versionB = await createVersion({
 				lix,
 				id: "version-cycle-b",
-				inherits_from_version_id: "version-cycle-a",
+				inheritsFrom: versionA,
 			});
 			await createVersion({
 				lix,
 				id: "version-cycle-c",
-				inherits_from_version_id: "version-cycle-b",
+				inheritsFrom: versionB,
 			});
 
 			// Manually create a cycle by updating version A to inherit from C
@@ -1438,7 +1438,7 @@ describe("internal_materialization_version_ancestry", () => {
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 
 			// Query ancestry for version B
@@ -1496,19 +1496,19 @@ describe("internal_materialization_version_ancestry", () => {
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 
 			await createVersion({
 				lix,
 				id: "version-c",
-				inherits_from_version_id: "version-b",
+				inheritsFrom: { id: "version-b" },
 			});
 
 			await createVersion({
 				lix,
 				id: "version-d",
-				inherits_from_version_id: "version-c",
+				inheritsFrom: { id: "version-c" },
 			});
 
 			// Query ancestry for version D
@@ -1587,20 +1587,20 @@ describe("internal_materialization_version_ancestry", () => {
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 
 			await createVersion({
 				lix,
 				id: "version-c",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 
 			// D inherits from B (not from both B and C)
 			await createVersion({
 				lix,
 				id: "version-d",
-				inherits_from_version_id: "version-b",
+				inheritsFrom: { id: "version-b" },
 			});
 
 			// Query ancestry for version D
@@ -1671,7 +1671,7 @@ describe("internal_materialization_version_ancestry", () => {
 			await createVersion({
 				lix,
 				id: "standalone-version",
-				inherits_from_version_id: null,
+				inheritsFrom: null,
 			});
 
 			// Query ancestry
@@ -1712,14 +1712,14 @@ describe("internal_materialization_version_ancestry", () => {
 			await createVersion({
 				lix,
 				id: "version-a",
-				inherits_from_version_id: null, // Start with no inheritance
+				inheritsFrom: null, // Start with no inheritance
 			});
 
 			// Create version B that inherits from A
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 
 			// Now update A to inherit from B, creating a cycle
@@ -1859,7 +1859,7 @@ describe("internal_state_materializer", () => {
 			await createVersion({
 				lix,
 				id: "child-version",
-				inherits_from_version_id: "parent-version",
+				inheritsFrom: { id: "parent-version" },
 			});
 
 			// Add entity to parent version
@@ -1921,7 +1921,7 @@ describe("internal_state_materializer", () => {
 			await createVersion({
 				lix,
 				id: "child-version",
-				inherits_from_version_id: "parent-version",
+				inheritsFrom: { id: "parent-version" },
 			});
 
 			// Add entity to parent version
@@ -1991,19 +1991,19 @@ describe("internal_state_materializer", () => {
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 			await createVersion({
 				lix,
 				id: "version-c",
-				inherits_from_version_id: "version-b",
+				inheritsFrom: { id: "version-b" },
 			});
 
 			// Add entity to version A
 			await lix.db
 				.insertInto("key_value_all")
 				.values({
-					key: "deep-key",
+					key: "key-from-a",
 					value: "value-from-a",
 					lixcol_version_id: "version-a",
 				})
@@ -2025,7 +2025,7 @@ describe("internal_state_materializer", () => {
 				.selectAll()
 				.where("version_id", "=", "version-c")
 				.where("schema_key", "=", "lix_key_value")
-				.where("entity_id", "in", ["deep-key", "b-only-key"])
+				.where("entity_id", "in", ["key-from-a", "b-only-key"])
 				.orderBy("entity_id")
 				.execute();
 
@@ -2033,15 +2033,17 @@ describe("internal_state_materializer", () => {
 			expect(materializedStates).toHaveLength(2);
 
 			// Check inherited from A (through B)
-			const deepKey = materializedStates.find(
-				(s: any) => s.entity_id === "deep-key"
+			const keyFromA = materializedStates.find(
+				(s: any) => s.entity_id === "key-from-a"
 			);
-			expect(deepKey).toBeDefined();
-			expect(deepKey!.snapshot_content).toEqual({
-				key: "deep-key",
+			expect(keyFromA).toBeDefined();
+			expect(keyFromA!.snapshot_content).toEqual({
+				key: "key-from-a",
 				value: "value-from-a",
 			});
-			expect(deepKey!.inherited_from_version_id).toBe("version-a");
+			expect(keyFromA!.inherited_from_version_id).toBe("version-a");
+			// CRITICAL: version_id should be version-c (the viewing version), not version-a
+			expect(keyFromA!.version_id).toBe("version-c");
 
 			// Check inherited from B
 			const bKey = materializedStates.find(
@@ -2053,6 +2055,8 @@ describe("internal_state_materializer", () => {
 				value: "value-from-b",
 			});
 			expect(bKey!.inherited_from_version_id).toBe("version-b");
+			// CRITICAL: version_id should be version-c (the viewing version), not version-b
+			expect(bKey!.version_id).toBe("version-c");
 		},
 		{
 			simulations: [normalSimulation, outOfOrderSequenceSimulation],
@@ -2138,7 +2142,7 @@ describe("internal_state_materializer", () => {
 			await createVersion({
 				lix,
 				id: "child-version",
-				inherits_from_version_id: "parent-version",
+				inheritsFrom: { id: "parent-version" },
 			});
 
 			// Add entity to parent version
@@ -2237,17 +2241,17 @@ describe("internal_state_materializer", () => {
 			await createVersion({
 				lix,
 				id: "version-b",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 			await createVersion({
 				lix,
 				id: "version-c",
-				inherits_from_version_id: "version-a",
+				inheritsFrom: { id: "version-a" },
 			});
 			await createVersion({
 				lix,
 				id: "version-d",
-				inherits_from_version_id: "version-b",
+				inheritsFrom: { id: "version-b" },
 			});
 
 			// Add entity to root version A

@@ -183,7 +183,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
-			entity_id: `changeset::entity-${i}`,
+			entity_id: `changeset~entity-${i}`,
 			schema_key: "lix_change_set_element",
 			file_id: "lix",
 			change_id: `change-${i}`,
@@ -194,7 +194,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 		};
 
 		rows.push({
-			entity_id: `changeset::entity-${i}`,
+			entity_id: `changeset~entity-${i}`,
 			schema_key: "lix_change_set_element",
 			file_id: "lix",
 			version_id: "global",
@@ -218,7 +218,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 	const userChanges: any = [];
 	for (let i = 0; i < ROW_NUM / 10; i++) {
 		userChanges.push({
-			entity_id: `changeset::entity-${i}`,
+			entity_id: `changeset~entity-${i}`,
 			schema_key: "lix_change_set_element",
 			file_id: "lix",
 		});
@@ -233,7 +233,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 			sql`json_extract(snapshot_content, '$.schema_key')`.as("schema_key"),
 			sql`json_extract(snapshot_content, '$.file_id')`.as("file_id"),
 		])
-		.where("entity_id", "like", "changeset::%")
+		.where("entity_id", "like", "changeset~%")
 		.where("schema_key", "=", "lix_change_set_element")
 		.where("file_id", "=", "lix")
 		.where("version_id", "=", "global")

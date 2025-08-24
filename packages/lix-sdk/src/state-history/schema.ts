@@ -107,7 +107,8 @@ export function applyStateHistoryDatabaseSchema(
 	lix.sqlite.exec(STATE_HISTORY_VIEW_SQL);
 }
 
-// Optimized to use materialized commit_edge_all and change_set_element_all from global version
+// Optimized to keep the generic history view, but add a fast path for depth=0
+// to avoid whole-graph recursion for common queries like "WHERE depth = 0".
 export const STATE_HISTORY_VIEW_SQL = `
 CREATE VIEW IF NOT EXISTS state_history AS
 WITH
@@ -122,13 +123,34 @@ WITH
 		FROM internal_change ic
 		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
 	),
-	-- For state_history, we work with any commit_id, not just version heads
+
+	-- Fast path for depth = 0 (no recursion, direct commit join)
+	depth0_entity_states AS (
+		SELECT 
+			chg.entity_id,
+			chg.schema_key,
+			chg.file_id,
+			chg.plugin_key,
+			chg.snapshot_content,
+			chg.schema_version,
+			cse.change_id AS target_change_id,
+			c.id AS origin_commit_id,
+			c.id AS root_commit_id,
+			0 AS commit_depth
+		FROM change_set_element_all cse
+		JOIN commit_all c 
+			ON cse.change_set_id = c.change_set_id 
+			AND c.lixcol_version_id = 'global'
+		JOIN all_changes_with_snapshots chg 
+			ON chg.id = cse.change_id
+		WHERE cse.lixcol_version_id = 'global'
+	),
+
+	-- General path for depth > 0 (recursive, ancestors of requested commits)
 	requested_commits AS (
 		SELECT DISTINCT c.id as commit_id
 		FROM commit_all c
-		-- This will be filtered by the WHERE clause in queries
 	),
-	-- Find all commits reachable from requested ones (including ancestors)
 	reachable_commits_from_requested(id, root_commit_id, depth) AS (
 		SELECT commit_id, commit_id as root_commit_id, 0 as depth 
 		FROM requested_commits
@@ -138,7 +160,6 @@ WITH
 		JOIN reachable_commits_from_requested r ON ce.child_id = r.id
 		WHERE ce.lixcol_version_id = 'global'
 	),
-	-- Get change set IDs for each commit
 	commit_changesets AS (
 		SELECT 
 			c.id as commit_id,
@@ -149,7 +170,6 @@ WITH
 		JOIN reachable_commits_from_requested rc ON c.id = rc.id
 		WHERE c.lixcol_version_id = 'global'
 	),
-	-- Find all change set elements in reachable commits
 	cse_in_reachable_commits AS (
 		SELECT cse.entity_id AS target_entity_id,
 			   cse.file_id AS target_file_id,
@@ -164,7 +184,6 @@ WITH
 		JOIN commit_changesets cc ON cse.change_set_id = cc.change_set_id
 		WHERE cse.lixcol_version_id = 'global'
 	),
-	-- For each entity at each depth, find the latest change within that depth's commit
 	latest_change_per_entity_per_depth AS (
 		SELECT 
 			r.target_entity_id,
@@ -178,8 +197,7 @@ WITH
 		INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
 		GROUP BY r.target_entity_id, r.target_file_id, r.target_schema_key, r.root_commit_id, r.commit_depth
 	),
-	-- Get the actual changes for each entity at each depth
-	entity_states_at_depths AS (
+	depthN_entity_states AS (
 		SELECT 
 			target_change.entity_id, 
 			target_change.schema_key, 
@@ -203,19 +221,25 @@ WITH
 			r.target_change_id = target_change.id
 			AND target_change.created_at = latest.latest_created_at
 		)
+		WHERE latest.commit_depth > 0
 	)
+
 SELECT 
-	esad.entity_id,
-	esad.schema_key,
-	esad.file_id,
-	esad.plugin_key,
-	esad.snapshot_content,
-	esad.schema_version,
-	esad.target_change_id as change_id,
-	esad.origin_commit_id as commit_id,
-	esad.root_commit_id as root_commit_id,
-	esad.commit_depth as depth
-FROM entity_states_at_depths esad
-WHERE esad.snapshot_content IS NOT NULL  -- Exclude deletions for now
-ORDER BY esad.entity_id, esad.commit_depth;
+	es.entity_id,
+	es.schema_key,
+	es.file_id,
+	es.plugin_key,
+	es.snapshot_content,
+	es.schema_version,
+	es.target_change_id as change_id,
+	es.origin_commit_id as commit_id,
+	es.root_commit_id as root_commit_id,
+	es.commit_depth as depth
+FROM (
+	SELECT * FROM depth0_entity_states
+	UNION ALL
+	SELECT * FROM depthN_entity_states
+) AS es
+WHERE es.snapshot_content IS NOT NULL  -- Exclude deletions for now
+ORDER BY es.entity_id, es.commit_depth;
 `;

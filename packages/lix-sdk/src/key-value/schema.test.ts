@@ -62,6 +62,18 @@ test("inserts, updates, deletes are handled", async () => {
 	]);
 });
 
+// NOTE ON SQLITE JSON1 AND BOOLEANS
+// ---------------------------------
+// SQLite JSON1 does not have a native boolean type at the SQL level.
+// When projecting a JSON boolean with json_extract(...), SQLite returns
+// SQL-native scalars: true -> 1 and false -> 0. Objects/arrays are
+// returned as JSON text unless wrapped, and strings are TEXT.
+//
+// Historically this test compared directly against JS booleans because
+// values were stored as strings (e.g. "true") and parsed elsewhere.
+// Now that we store proper JSON and project with json_extract, the view
+// returns 1/0 for booleans. This test therefore expects 1 for true and
+// 0 for false to reflect SQLite’s behavior.
 test("arbitrary json is allowed", async () => {
 	const lix = await openLix({});
 
@@ -86,7 +98,89 @@ test("arbitrary json is allowed", async () => {
 		)
 		.execute();
 
-	expect(viewAfterInsert).toEqual(kvs);
+	const expected = kvs.map((kv) => ({
+		key: kv.key,
+		value: typeof kv.value === "boolean" ? (kv.value ? 1 : 0) : kv.value,
+	}));
+
+	expect(viewAfterInsert).toEqual(expected);
+});
+
+test("key_value insert stores proper JSON in state_all (no double encoding)", async () => {
+	const lix = await openLix({});
+
+	const kvs = [
+		{ key: "key0", value: { foo: "bar" } },
+		{ key: "key1", value: ["foo", "bar"] },
+		{ key: "key2", value: "foo" },
+		{ key: "key3", value: 42 },
+		{ key: "key4", value: true },
+		{ key: "key5", value: null },
+	];
+
+	await lix.db.insertInto("key_value").values(kvs).execute();
+
+	const rows = await lix.db
+		.selectFrom("state_all")
+		.where("schema_key", "=", "lix_key_value")
+		.where(
+			"entity_id",
+			"in",
+			kvs.map((kv) => kv.key)
+		)
+		.select(["entity_id", sql`json(snapshot_content)`.as("snapshot_content")])
+		.execute();
+
+	// map by key
+	const byKey = new Map(rows.map((r) => [r.entity_id, r as any]));
+
+	expect(byKey.get("key0")?.snapshot_content.value).toEqual({ foo: "bar" });
+	expect(byKey.get("key1")?.snapshot_content.value).toEqual(["foo", "bar"]);
+	expect(byKey.get("key2")?.snapshot_content.value).toBe("foo");
+	expect(byKey.get("key3")?.snapshot_content.value).toBe(42);
+	// With json(snapshot_content), driver decodes JSON booleans to true/false
+	expect(byKey.get("key4")?.snapshot_content.value).toBe(true);
+	expect(byKey.get("key5")?.snapshot_content.value).toBeNull();
+});
+
+test("boolean representation matches between key_value view and state view", async () => {
+	const lix = await openLix({});
+
+	// Insert booleans via entity view
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "bool_true", value: true },
+			{ key: "bool_false", value: false },
+		])
+		.execute();
+
+	// Read from key_value view
+	const viewRows = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["bool_true", "bool_false"])
+		.select(["key", "value"])
+		.orderBy("key")
+		.execute();
+
+	// Read from state view (active version) and extract JSON value
+	const stateRows = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "in", ["bool_true", "bool_false"])
+		.select([
+			"entity_id",
+			// json_extract returns SQLite-native scalars (1/0), matching the key_value view's behavior
+			sql`json_extract(snapshot_content, '$.value')`.as("value"),
+		])
+		.orderBy("entity_id")
+		.execute();
+
+	const viewMap = new Map(viewRows.map((r) => [r.key, r.value]));
+	const stateMap = new Map(stateRows.map((r: any) => [r.entity_id, r.value]));
+
+	expect(viewMap.get("bool_true")).toBe(stateMap.get("bool_true"));
+	expect(viewMap.get("bool_false")).toBe(stateMap.get("bool_false"));
 });
 
 test("view should show changes across versions", async () => {
@@ -119,18 +213,12 @@ test("view should show changes across versions", async () => {
 		},
 	]);
 
-	const versionAAfterKvInsert = await lix.db
-		.selectFrom("version")
-		.where("id", "=", versionA.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	// creating a new version from the active version
 	const versionB = await createVersion({
 		lix,
 		id: "versionB",
 		name: "versionB",
-		commit_id: versionAAfterKvInsert.commit_id,
+		from: versionA,
 	});
 
 	const kvAfterInsertInVersionB = await lix.db
@@ -277,4 +365,40 @@ test("can update individual JSON properties using SQLite JSON functions", async 
 		theme: "light",
 		count: 100,
 	});
+});
+
+test("key_value preserves '1' as string when inserted as string", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "type_test_string", value: "1" })
+		.execute();
+
+	const row = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "type_test_string")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof row.value).toBe("string");
+	expect(row.value).toBe("1");
+});
+
+test("key_value preserves 1 as number when inserted as number", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "type_test_number", value: 1 })
+		.execute();
+
+	const row = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "type_test_number")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof row.value).toBe("number");
+	expect(row.value).toBe(1);
 });

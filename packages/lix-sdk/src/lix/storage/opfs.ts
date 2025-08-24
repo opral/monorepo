@@ -56,6 +56,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	private pendingSave = false;
 	private activeAccounts?: Pick<LixAccount, "id" | "name">[];
 	private activeAccountSubscription?: { unsubscribe(): void };
+	private unsubscribeFromStateCommit?: () => void;
 
 	/**
 	 * Creates a new OpfsStorage instance.
@@ -143,6 +144,11 @@ export class OpfsStorage implements LixStorageAdapter {
 			this.activeAccountSubscription.unsubscribe();
 			this.activeAccountSubscription = undefined;
 		}
+		// Clean up hooks listener if registered
+		if (this.unsubscribeFromStateCommit) {
+			this.unsubscribeFromStateCommit();
+			this.unsubscribeFromStateCommit = undefined;
+		}
 	}
 
 	/**
@@ -185,7 +191,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 */
 	connect(args: { lix: Lix }): void {
 		// Set up hook for database persistence
-		args.lix.hooks.onStateCommit(() => {
+		this.unsubscribeFromStateCommit = args.lix.hooks.onStateCommit(() => {
 			this.batchedSave();
 		});
 

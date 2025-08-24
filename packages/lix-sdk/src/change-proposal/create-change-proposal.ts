@@ -5,7 +5,6 @@ import type { LixChangeSet } from "../change-set/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeProposal } from "./database-schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { changeSetElementInSymmetricDifference } from "../query-filter/change-set-element-in-symmetric-difference.js";
 
 /**
  * Creates a change proposal that represents the symmetric difference
@@ -20,14 +19,36 @@ export async function createChangeProposal(args: {
 	targetChangeSet: Pick<LixChangeSet, "id">;
 }): Promise<ChangeProposal> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Get the changes that are in the symmetric difference between the two change sets
+		// Compute symmetric difference of change_ids between the two change sets (inline stub)
 		const symmetricDifferenceChanges = await trx
 			.selectFrom("change_set_element")
-			.where(
-				changeSetElementInSymmetricDifference(
-					args.sourceChangeSet,
-					args.targetChangeSet
-				)
+			.where((eb) =>
+				eb.or([
+					eb("change_set_element.change_id", "in", (sub) =>
+						sub
+							.selectFrom("change_set_element as A")
+							.leftJoin("change_set_element as B", (join) =>
+								join
+									.onRef("A.change_id", "=", "B.change_id")
+									.on("B.change_set_id", "=", args.targetChangeSet.id)
+							)
+							.where("A.change_set_id", "=", args.sourceChangeSet.id)
+							.where("B.change_id", "is", null)
+							.select("A.change_id")
+					),
+					eb("change_set_element.change_id", "in", (sub) =>
+						sub
+							.selectFrom("change_set_element as B")
+							.leftJoin("change_set_element as A", (join) =>
+								join
+									.onRef("B.change_id", "=", "A.change_id")
+									.on("A.change_set_id", "=", args.sourceChangeSet.id)
+							)
+							.where("B.change_set_id", "=", args.targetChangeSet.id)
+							.where("A.change_id", "is", null)
+							.select("B.change_id")
+					),
+				])
 			)
 			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
 			.execute();

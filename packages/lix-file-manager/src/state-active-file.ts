@@ -11,13 +11,12 @@ import {
 	threadSearchParamsAtom,
 } from "./state.ts";
 import {
-	changeSetElementIsLeafOf,
-	commitIsAncestorOf,
-	jsonArrayFrom,
-	Lix,
-	sql,
-	UiDiffComponentProps,
-	ebEntity,
+    commitIsAncestorOf,
+    jsonArrayFrom,
+    Lix,
+    sql,
+    UiDiffComponentProps,
+    ebEntity,
 } from "@lix-js/sdk";
 import { redirect } from "react-router-dom";
 
@@ -130,8 +129,7 @@ export const intermediateChangesAtom = atom<
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId }])) // Only get leaf changes
-		.where("change_set_element.change_set_id", "=", workingChangeSetId)
+    .where("change_set_element.change_set_id", "=", workingChangeSetId)
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
 			"change.id",
@@ -296,8 +294,7 @@ export const getChangeDiffs = async (
 			"change.id"
 		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
-		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
-		.where(ebEntity("change").hasLabel({ name: "checkpoint" }))
+    .where(ebEntity("change").hasLabel({ name: "checkpoint" }))
 		.selectAll("change")
 		.select(sql`json(snapshot.content)`.as("snapshot_content_after"));
 
@@ -326,8 +323,7 @@ export const getChangeDiffs = async (
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.where(changeSetElementIsLeafOf([{ id: changeSetBeforeId }]))
-						.where("change.entity_id", "=", change.entity_id)
+                    .where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
 						.where(ebEntity("change").hasLabel({ name: "checkpoint" }))
 						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))

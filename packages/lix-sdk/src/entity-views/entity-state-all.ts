@@ -5,6 +5,7 @@ import type {
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
+import { buildJsonObjectEntries } from "./build-json-object-entries.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
@@ -480,6 +481,10 @@ function createSingleEntityAllView(args: {
 		? generateValidationSQL(args.validation.onDelete)
 		: "";
 
+	// Helper for json_object entries per schema types
+	const buildJsonEntries = (refExpr: (prop: string) => string): string =>
+		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
+
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
 	const sqlQuery = `
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
@@ -514,7 +519,7 @@ function createSingleEntityAllView(args: {
           '${schema_key}',
           ${fileId.replace(/NEW\./g, "with_default_values.")},
           '${args.pluginKey}',
-          json_object(${properties.map((prop) => `'${prop}', with_default_values.${prop}`).join(", ")}),
+          json_object(${buildJsonEntries((prop) => `with_default_values.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
           COALESCE(with_default_values.lixcol_untracked, 0)
@@ -531,7 +536,7 @@ function createSingleEntityAllView(args: {
           '${schema_key}',
           ${fileId},
           '${args.pluginKey}',
-          json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
+          json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference},
           COALESCE(NEW.lixcol_untracked, 0)
@@ -549,7 +554,7 @@ function createSingleEntityAllView(args: {
           schema_key = '${schema_key}',
           file_id = ${fileId},
           plugin_key = '${args.pluginKey}',
-          snapshot_content = json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
+          snapshot_content = json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           version_id = ${versionIdReference},
           untracked = NEW.lixcol_untracked
         WHERE

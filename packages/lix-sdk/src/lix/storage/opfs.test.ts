@@ -296,9 +296,6 @@ describe("OpfsStorage", () => {
 		expect(activeAccount2.name).toBe(account.name);
 	});
 
-	// TODO occasional test failures due to timing issues
-	// faulty state materialization might be the cause.
-	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("only saves active accounts when they change", async () => {
 		const path = "observer-test.lix";
 		const storage = new OpfsStorage({ path });

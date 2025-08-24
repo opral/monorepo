@@ -2,8 +2,26 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { serializeStatePk, parseStatePk } from "./primary-key.js";
+import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
+import { createVersion } from "../version/create-version.js";
+
+/**
+ * Strips the internal vtable primary key column `_pk` from result rows.
+ *
+ * Why: internal_resolved_state_all exposes an implementation detail `_pk` used
+ * for efficient row identification across merged sources (txn, untracked, cache).
+ * Public views like state_all should be compared against resolved state without
+ * this internal column. Use when asserting equality between state_all and
+ * internal_resolved_state_all results.
+ */
+function filterPkCol<T extends Record<string, any>>(rows: T[]): T[] {
+	return rows.map((r) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { _pk, ...rest } = r || ({} as any);
+		return rest as T;
+	});
+}
 
 test("resolved state view should return same results as state_all for a tracked entity", async () => {
 	const lix = await openLix({});
@@ -25,8 +43,6 @@ test("resolved state view should return same results as state_all for a tracked 
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -36,7 +52,7 @@ test("resolved state view should return same results as state_all for a tracked 
 		.selectAll()
 		.execute();
 
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 });
 
 test("resolved state view should return same results as state_all for an untracked entity", async () => {
@@ -60,8 +76,6 @@ test("resolved state view should return same results as state_all for an untrack
 		.where("entity_id", "=", "cache_stale")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -71,7 +85,7 @@ test("resolved state view should return same results as state_all for an untrack
 		.selectAll()
 		.execute();
 
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as untracked
 	expect(stateAllResults[0]?.untracked).toBe(1);
@@ -105,8 +119,6 @@ test("resolved state view should handle version inheritance", async () => {
 		.where("entity_id", "=", "inherited-key")
 		.where("version_id", "=", activeVersion!.version_id)
 		.selectAll()
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.execute();
 
 	const resolvedStateResults = await lixInternalDb
@@ -121,7 +133,7 @@ test("resolved state view should handle version inheritance", async () => {
 	expect(resolvedStateResults).toHaveLength(1);
 
 	// Results should match
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as inherited from global
 	expect(stateAllResults[0]?.inherited_from_version_id).toBe("global");
@@ -155,8 +167,6 @@ test("resolved state view should handle inherited untracked entities", async () 
 		.selectFrom("state_all")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("version_id", "=", activeVersion!.version_id)
-		// @ts-expect-error - internal state_all has a hidden _pk column
-		.select("_pk")
 		.selectAll()
 		.execute();
 
@@ -172,7 +182,7 @@ test("resolved state view should handle inherited untracked entities", async () 
 	expect(resolvedStateResults).toHaveLength(1);
 
 	// Results should match
-	expect(stateAllResults).toEqual(resolvedStateResults);
+	expect(stateAllResults).toEqual(filterPkCol(resolvedStateResults));
 
 	// Verify it's marked as inherited from global and untracked
 	expect(stateAllResults[0]?.inherited_from_version_id).toBe("global");
@@ -253,6 +263,11 @@ test("resolved state view generates correct composite keys", async () => {
 	const lix = await openLix({});
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
+	// Import updateStateCacheV2 at the top of the test
+	const { updateStateCache: updateStateCacheV2 } = await import(
+		"./cache/update-state-cache.js"
+	);
+
 	// Insert some test data into untracked state
 	const now = timestamp({ lix });
 	await lixInternalDb
@@ -272,25 +287,24 @@ test("resolved state view generates correct composite keys", async () => {
 		})
 		.execute();
 
-	// Insert some test data into state cache
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values({
-			entity_id: "entity2",
-			schema_key: "test_schema",
-			file_id: "file2",
-			plugin_key: "test_plugin",
-			snapshot_content: sql`jsonb(${JSON.stringify({ test: "data2" })})`,
-			schema_version: "1.0",
-			version_id: "version2",
-			change_id: "change1",
-			inheritance_delete_marker: 0,
-			inherited_from_version_id: null,
-			commit_id: "changeset1",
-			created_at: timestamp({ lix }),
-			updated_at: timestamp({ lix }),
-		})
-		.execute();
+	// Insert some test data into state cache using updateStateCacheV2
+	updateStateCacheV2({
+		lix,
+		changes: [
+			{
+				id: "change1",
+				entity_id: "entity2",
+				file_id: "file2",
+				schema_key: "test_schema",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ test: "data2" }),
+				schema_version: "1.0",
+				created_at: timestamp({ lix }),
+			},
+		],
+		commit_id: "changeset1",
+		version_id: "version2",
+	});
 
 	// Query the resolved state view
 	const results = await lixInternalDb
@@ -362,73 +376,159 @@ test("resolved state view generates correct composite keys", async () => {
 	});
 });
 
+test("resolved state view should handle transitive inheritance (A->B->C)", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const currentTimestamp = timestamp({ lix });
+
+	// Create version hierarchy: C inherits from B, B inherits from A
+	const versionA = await createVersion({
+		lix,
+		name: "Version A",
+		id: "version_a",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		name: "Version B",
+		id: "version_b",
+		inheritsFrom: versionA,
+	});
+
+	const versionC = await createVersion({
+		lix,
+		name: "Version C",
+		id: "version_c",
+		inheritsFrom: versionB,
+	});
+
+	// Insert an entity only in version A
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "entity_a",
+			schema_key: "test_schema",
+			file_id: "file1",
+			version_id: versionA.id,
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "entity_a",
+				value: "from_version_a",
+			}) as any,
+			schema_version: "1.0",
+			created_at: currentTimestamp,
+			updated_at: currentTimestamp,
+		})
+		.execute();
+
+	// Query resolved state for version C (should see entity_a through transitive inheritance)
+	const resolvedForC = await lixInternalDb
+		.selectFrom("internal_resolved_state_all")
+		.select([
+			"entity_id",
+			"schema_key",
+			"file_id",
+			"version_id",
+			"inherited_from_version_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
+		.where("schema_key", "=", "test_schema")
+		.where("version_id", "=", versionC.id)
+		.execute();
+
+	// Version C should see entity_a inherited from version_a through version_b
+	expect(resolvedForC).toHaveLength(1);
+
+	const entityA = resolvedForC[0];
+	expect(entityA?.entity_id).toBe("entity_a");
+	expect(entityA?.version_id).toBe(versionC.id);
+	expect(entityA?.inherited_from_version_id).toBe(versionA.id);
+	expect((entityA?.snapshot_content as any).value).toBe("from_version_a");
+
+	// Also verify version B sees entity_a inherited from A
+	const resolvedForB = await lixInternalDb
+		.selectFrom("internal_resolved_state_all")
+		.select(["entity_id", "version_id", "inherited_from_version_id"])
+		.where("schema_key", "=", "test_schema")
+		.where("version_id", "=", versionB.id)
+		.execute();
+
+	expect(resolvedForB).toHaveLength(1);
+	expect(resolvedForB[0]?.entity_id).toBe("entity_a");
+	expect(resolvedForB[0]?.inherited_from_version_id).toBe(versionA.id);
+});
+
 test("resolved state view generates correct composite keys for inherited state", async () => {
 	const lix = await openLix({});
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Import updateStateCacheV2 at the top of the test
+	const { updateStateCache: updateStateCacheV2 } = await import(
+		"./cache/update-state-cache.js"
+	);
 
 	// Create parent and child versions
 	const parentVersionId = "parent_version";
 	const childVersionId = "child_version";
 
-	// Insert version records
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values([
+	// Insert version records using updateStateCacheV2
+	const versionTimestamp = timestamp({ lix });
+	updateStateCacheV2({
+		lix,
+		changes: [
 			{
+				id: "change1",
 				entity_id: parentVersionId,
 				schema_key: "lix_version",
 				file_id: "lix",
 				plugin_key: "lix",
-				snapshot_content: sql`jsonb(${JSON.stringify({ id: parentVersionId })})`,
+				snapshot_content: JSON.stringify({ id: parentVersionId }),
 				schema_version: "1.0",
-				version_id: "global",
-				change_id: "change1",
-				inheritance_delete_marker: 0,
-				inherited_from_version_id: null,
-				commit_id: "changeset1",
-				created_at: timestamp({ lix }),
-				updated_at: timestamp({ lix }),
+				created_at: versionTimestamp,
 			},
 			{
+				id: "change2",
 				entity_id: childVersionId,
 				schema_key: "lix_version",
 				file_id: "lix",
 				plugin_key: "lix",
-				snapshot_content: sql`jsonb(${JSON.stringify({
+				snapshot_content: JSON.stringify({
 					id: childVersionId,
 					inherits_from_version_id: parentVersionId,
-				})})`,
+				}),
 				schema_version: "1.0",
-				version_id: "global",
-				change_id: "change2",
-				inheritance_delete_marker: 0,
-				inherited_from_version_id: null,
-				commit_id: "changeset2",
-				created_at: timestamp({ lix }),
-				updated_at: timestamp({ lix }),
+				created_at: versionTimestamp,
 			},
-		])
-		.execute();
+		],
+		commit_id: "changeset1",
+		version_id: "global",
+	});
 
-	// Insert data in parent version (cached)
-	await lixInternalDb
-		.insertInto("internal_state_cache")
-		.values({
-			entity_id: "inherited_entity",
-			schema_key: "test_schema",
-			file_id: "file3",
-			plugin_key: "test_plugin",
-			snapshot_content: sql`jsonb(${JSON.stringify({ test: "inherited_data" })})`,
-			schema_version: "1.0",
-			version_id: parentVersionId,
-			change_id: "change3",
-			inheritance_delete_marker: 0,
-			inherited_from_version_id: null,
-			commit_id: "changeset3",
-			created_at: timestamp({ lix }),
-			updated_at: timestamp({ lix }),
-		})
-		.execute();
+	// Insert data in parent version (cached) using updateStateCacheV2
+	updateStateCacheV2({
+		lix,
+		changes: [
+			{
+				id: "change3",
+				entity_id: "inherited_entity",
+				schema_key: "test_schema",
+				file_id: "file3",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ test: "inherited_data" }),
+				schema_version: "1.0",
+				created_at: timestamp({ lix }),
+			},
+		],
+		commit_id: "changeset3",
+		version_id: parentVersionId,
+	});
 
 	// Insert data in parent version (untracked)
 	const untrackedTimestamp = timestamp({ lix });

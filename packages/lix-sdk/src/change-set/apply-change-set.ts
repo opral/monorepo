@@ -76,13 +76,13 @@ export async function applyChangeSet(args: {
 			.execute();
 
 		// Write-through cache: populate internal_state_cache for all applied changes
-		const changesForCache = changesResult.map(change => ({
+		const changesForCache = changesResult.map((change) => ({
 			...change,
 			snapshot_content: change.snapshot_content
 				? JSON.stringify(change.snapshot_content)
 				: null,
 		}));
-		
+
 		updateStateCache({
 			lix: args.lix,
 			changes: changesForCache,

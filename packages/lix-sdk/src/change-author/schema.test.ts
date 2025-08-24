@@ -292,7 +292,8 @@ test("should allow same author for multiple changes", async () => {
 	]);
 });
 
-test("change authors are accessible during a transaction", async () => {
+// disabled because change author logic was moved into the commit phase
+test.skip("change authors are accessible during a transaction", async () => {
 	// Create a lix instance with an active account
 	const lix = await openLix({
 		account: {

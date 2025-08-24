@@ -4,6 +4,7 @@ import type {
 	LixGenerated,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { buildJsonObjectEntries } from "./build-json-object-entries.js";
 
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
@@ -477,6 +478,9 @@ function createSingleEntityView(args: {
 		? generateValidationSQL(args.validation.onDelete)
 		: "";
 
+	const buildJsonEntries = (refExpr: (prop: string) => string): string =>
+		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
+
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
 	const sqlQuery = `
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
@@ -511,7 +515,7 @@ function createSingleEntityView(args: {
           '${schema_key}',
           ${fileId.replace(/NEW\./g, "with_default_values.")},
           '${args.pluginKey}',
-          json_object(${properties.map((prop) => `'${prop}', with_default_values.${prop}`).join(", ")}),
+          json_object(${buildJsonEntries((prop) => `with_default_values.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
           COALESCE(with_default_values.lixcol_untracked, 0)
@@ -527,7 +531,7 @@ function createSingleEntityView(args: {
           '${schema_key}',
           ${fileId},
           '${args.pluginKey}',
-          json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
+          json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference},
           COALESCE(NEW.lixcol_untracked, 0)
@@ -545,7 +549,7 @@ function createSingleEntityView(args: {
           schema_key = '${schema_key}',
           file_id = ${fileId},
           plugin_key = '${args.pluginKey}',
-          snapshot_content = json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
+          snapshot_content = json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           version_id = ${versionIdReference},
           untracked = NEW.lixcol_untracked
         WHERE

@@ -124,6 +124,7 @@ export default defineConfig({
             },
             { text: "Versions", link: "/guide/concepts/versions" },
             { text: "Discussions", link: "/guide/concepts/discussions" },
+            { text: "Key-Value", link: "/guide/concepts/key-value" },
           ],
         },
         {

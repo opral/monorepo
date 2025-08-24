@@ -152,7 +152,23 @@ test("usedFileExtensions", async () => {
 });
 
 test("it should open a lix in memory from a blob", async () => {
-	const lix1 = await openLix({});
+	const lix1 = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	await lix1.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
 
 	await lix1.db
 		.insertInto("file")
@@ -164,7 +180,19 @@ test("it should open a lix in memory from a blob", async () => {
 		.execute();
 
 	const lix2 = await openLix({ blob: await lix1.toBlob() });
+
 	const files = await lix2.db.selectFrom("file").selectAll().execute();
+
+	const kv = await lix2.db
+		.selectFrom("key_value")
+		.select(["key", "value"])
+		.where("key", "=", "test_key")
+		.executeTakeFirst();
+
+	expect(kv).toEqual({
+		key: "test_key",
+		value: "test_value",
+	});
 
 	expect(files).toEqual([
 		expect.objectContaining({

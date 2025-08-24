@@ -2,12 +2,13 @@ import type { Lix } from "../lix/open-lix.js";
 import { executeSync } from "../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
-// Cache for deterministic mode per lix instance
-const deterministicModeCache = new WeakMap<any, boolean>();
+const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
 
-// Track which lix instances have hook listeners registered
-const hookListenersRegistered = new WeakSet<any>();
+// Track which hooks instances have a listener registered
+// Using hooks object identity is stable, unlike ad-hoc { sqlite, db, hooks } wrappers
+const hookListenersRegistered = new WeakSet<object>();
 
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
@@ -24,9 +25,10 @@ const hookListenersRegistered = new WeakSet<any>();
 export function isDeterministicMode(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): boolean {
-	// Register hook listener for cache invalidation (only once per lix instance)
-	if (!hookListenersRegistered.has(args.lix) && args.lix.hooks) {
-		hookListenersRegistered.add(args.lix);
+	// Register hook listener for cache invalidation (only once per hooks instance)
+	const key = args.lix.hooks as unknown as object;
+	if (!hookListenersRegistered.has(key) && args.lix.hooks) {
+		hookListenersRegistered.add(key);
 
 		args.lix.hooks.onStateCommit(({ changes }) => {
 			// Check if any change affects lix_deterministic_mode
@@ -36,7 +38,7 @@ export function isDeterministicMode(args: {
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(args.lix);
+					deterministicModeCache.delete(args.lix.sqlite);
 					break;
 				}
 			}
@@ -44,8 +46,8 @@ export function isDeterministicMode(args: {
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(args.lix)) {
-		return deterministicModeCache.get(args.lix)!;
+	if (deterministicModeCache.has(args.lix.sqlite)) {
+		return deterministicModeCache.get(args.lix.sqlite)!;
 	}
 
 	// TODO account for active version
@@ -56,6 +58,7 @@ export function isDeterministicMode(args: {
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
+			.where("snapshot_content", "is not", null)
 			.select(
 				sql`json_extract(snapshot_content, '$.value.enabled')`.as("enabled")
 			),
@@ -64,7 +67,7 @@ export function isDeterministicMode(args: {
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(args.lix, result);
+	deterministicModeCache.set(args.lix.sqlite, result);
 
 	return result;
 }

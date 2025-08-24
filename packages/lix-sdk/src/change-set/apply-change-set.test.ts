@@ -8,7 +8,7 @@ import {
 } from "../plugin/mock-json-plugin.js";
 import type { LixChange } from "../change/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
-import { createCheckpoint } from "../commit/create-checkpoint.js";
+import { createCheckpoint } from "../state/create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {
 	const lix = await openLix({});

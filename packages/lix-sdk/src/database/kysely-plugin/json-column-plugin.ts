@@ -29,11 +29,17 @@ export function JSONColumnPlugin(
 		transformResult: async (args) => {
 			for (const row of args.result.rows) {
 				for (const col of jsonColumnNames) {
-					const text = row[col];
-					try {
-						row[col] = JSON.parse(text as string);
-					} catch {
-						continue;
+					const val = row[col];
+					// Only parse when it's a string that looks like an object/array JSON.
+					if (typeof val === "string") {
+						const trimmed = val.trim();
+						if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+							try {
+								row[col] = JSON.parse(val);
+							} catch {
+								// leave as-is if parsing fails
+							}
+						}
 					}
 				}
 			}
