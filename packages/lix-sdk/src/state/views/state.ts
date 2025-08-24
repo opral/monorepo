@@ -14,7 +14,7 @@ export type StateRowUpdate = Updateable<StateView>;
  * INSTEAD OF triggers that forward writes to state_all (which proxies to the vtable).
  */
 export function applyStateView(lix: Pick<Lix, "sqlite">): void {
-  lix.sqlite.exec(`
+	lix.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state AS
     SELECT 
       entity_id,
@@ -89,4 +89,3 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
     END;
   `);
 }
-

@@ -12,7 +12,7 @@
  * - UI: Untracked inherited (from internal_state_all_untracked in parent version)
  * - C: Cache-tracked direct (from internal_state_cache in child version)
  * - CI: Cache-tracked inherited (from internal_state_cache in parent version)
-*/
+ */
 
 export type StatePkTag = "T" | "TI" | "U" | "UI" | "C" | "CI";
 

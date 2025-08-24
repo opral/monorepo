@@ -14,8 +14,8 @@ export type {
 } from "./views/state-all.js";
 
 export type {
-  StateWithTombstonesView,
-  StateWithTombstonesRow,
+	StateWithTombstonesView,
+	StateWithTombstonesRow,
 } from "./views/state-with-tombstones.js";
 
 // State operations

@@ -175,7 +175,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: globalChangeSetId, metadata: null }),
+			snapshot_content: JSON.stringify({
+				id: globalChangeSetId,
+				metadata: null,
+			}),
 			created_at: now,
 		});
 
@@ -187,7 +190,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: targetChangeSetId, metadata: null }),
+			snapshot_content: JSON.stringify({
+				id: targetChangeSetId,
+				metadata: null,
+			}),
 			created_at: now,
 		});
 
@@ -200,7 +206,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: targetCommitId, change_set_id: targetChangeSetId }),
+			snapshot_content: JSON.stringify({
+				id: targetCommitId,
+				change_set_id: targetChangeSetId,
+			}),
 			created_at: now,
 		});
 
@@ -271,7 +280,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: globalCommitId, change_set_id: globalChangeSetId }),
+			snapshot_content: JSON.stringify({
+				id: globalCommitId,
+				change_set_id: globalChangeSetId,
+			}),
 			created_at: now,
 		});
 
@@ -323,8 +335,16 @@ export async function mergeVersion(args: {
 
 		// Reference graph rows under GLOBAL change set
 		for (const meta of [
-			{ change_id: targetCommitChangeId, entity_id: targetCommitId, schema_key: "lix_commit" },
-			{ change_id: globalCommitChangeId, entity_id: globalCommitId, schema_key: "lix_commit" },
+			{
+				change_id: targetCommitChangeId,
+				entity_id: targetCommitId,
+				schema_key: "lix_commit",
+			},
+			{
+				change_id: globalCommitChangeId,
+				entity_id: globalCommitId,
+				schema_key: "lix_commit",
+			},
 			{
 				change_id: edgeTargetFromTargetBeforeId,
 				entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
@@ -370,7 +390,8 @@ export async function mergeVersion(args: {
 			.where("snapshot_content", "is not", null)
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.executeTakeFirstOrThrow();
-		const currentTargetVersion = targetVersionRow.snapshot_content as unknown as LixVersion;
+		const currentTargetVersion =
+			targetVersionRow.snapshot_content as unknown as LixVersion;
 		const updatedTargetVersion: LixChangeRaw = {
 			id: uuidV7({ lix }),
 			entity_id: targetVersion.id,
@@ -378,7 +399,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ ...currentTargetVersion, commit_id: targetCommitId }),
+			snapshot_content: JSON.stringify({
+				...currentTargetVersion,
+				commit_id: targetCommitId,
+			}),
 			created_at: now,
 		};
 		changeRows.push(updatedTargetVersion);
@@ -408,7 +432,8 @@ export async function mergeVersion(args: {
 			.where("snapshot_content", "is not", null)
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.executeTakeFirstOrThrow();
-		const currentGlobalVersion = globalVersionRow.snapshot_content as unknown as LixVersion;
+		const currentGlobalVersion =
+			globalVersionRow.snapshot_content as unknown as LixVersion;
 		const updatedGlobalVersion: LixChangeRaw = {
 			id: uuidV7({ lix }),
 			entity_id: "global",
@@ -416,7 +441,10 @@ export async function mergeVersion(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ ...currentGlobalVersion, commit_id: globalCommitId }),
+			snapshot_content: JSON.stringify({
+				...currentGlobalVersion,
+				commit_id: globalCommitId,
+			}),
 			created_at: now,
 		};
 		changeRows.push(updatedGlobalVersion);
@@ -459,12 +487,13 @@ export async function mergeVersion(args: {
 			});
 		}
 
-
-
 		// Insert all changes (graph + change set defs + target deletions)
 		const allChanges = [...changeRows, ...deletionChanges];
 		if (allChanges.length > 0) {
-			await trx.insertInto("change").values(allChanges as any).execute();
+			await trx
+				.insertInto("change")
+				.values(allChanges as any)
+				.execute();
 		}
 
 		// Populate caches
@@ -501,7 +530,9 @@ export async function mergeVersion(args: {
 				file_id: r.file_id,
 				plugin_key: r.plugin_key,
 				schema_version: r.schema_version,
-				snapshot_content: r.snapshot_content ? JSON.stringify(r.snapshot_content) : null,
+				snapshot_content: r.snapshot_content
+					? JSON.stringify(r.snapshot_content)
+					: null,
 				created_at: r.created_at,
 			}));
 		}

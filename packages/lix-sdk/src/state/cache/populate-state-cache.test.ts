@@ -454,12 +454,18 @@ test("global version entities are populated when populating child versions", asy
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
-		.select(["entity_id", "change_id", sql`json(snapshot_content)`.as("snapshot_content")])
+		.select([
+			"entity_id",
+			"change_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
 		.execute();
-	
+
 	expect(beforeCacheMiss).toHaveLength(1);
 	const originalChangeId = beforeCacheMiss[0]?.change_id;
-	expect((beforeCacheMiss[0]?.snapshot_content as any).value).toBe("from_global");
+	expect((beforeCacheMiss[0]?.snapshot_content as any).value).toBe(
+		"from_global"
+	);
 
 	// Clear all cache to simulate cache miss
 	clearStateCache({ lix });
@@ -473,45 +479,58 @@ test("global version entities are populated when populating child versions", asy
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
-		.select(["entity_id", "change_id", sql`json(snapshot_content)`.as("snapshot_content")])
+		.select([
+			"entity_id",
+			"change_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
 		.execute();
 
 	// Should still see the entity with the same change_id
 	expect(afterCachePopulation).toHaveLength(1);
 	expect(afterCachePopulation[0]?.change_id).toBe(originalChangeId);
-	expect((afterCachePopulation[0]?.snapshot_content as any).value).toBe("from_global");
+	expect((afterCachePopulation[0]?.snapshot_content as any).value).toBe(
+		"from_global"
+	);
 
-		// Check the physical cache directly: the parent/global authored entry
-		// should be materialized in its own version's cache table.
-		const cacheEntries = await db
-			.selectFrom("internal_state_cache_test_entity" as any)
-			.where("entity_id", "=", "global_entity_1")
-			.select(["entity_id", "change_id", "version_id", "inherited_from_version_id"])
-			.execute();
+	// Check the physical cache directly: the parent/global authored entry
+	// should be materialized in its own version's cache table.
+	const cacheEntries = await db
+		.selectFrom("internal_state_cache_test_entity" as any)
+		.where("entity_id", "=", "global_entity_1")
+		.select([
+			"entity_id",
+			"change_id",
+			"version_id",
+			"inherited_from_version_id",
+		])
+		.execute();
 
-		const globalEntry = cacheEntries.find((e: any) => e.version_id === "global");
-		expect(globalEntry).toBeTruthy();
-		expect(globalEntry?.change_id).toBe(originalChangeId);
+	const globalEntry = cacheEntries.find((e: any) => e.version_id === "global");
+	expect(globalEntry).toBeTruthy();
+	expect(globalEntry?.change_id).toBe(originalChangeId);
 
-		// Inheritance is resolved at read time via the resolved view.
-		// Verify the child version sees the inherited row from global.
-		const resolvedInherited = await db
-			.selectFrom("internal_resolved_state_all")
-			.where("version_id", "=", testVersion.id)
-			.where("schema_key", "=", "test_entity")
-			.where("entity_id", "=", "global_entity_1")
-			.select([
-				"entity_id",
-				"change_id",
-				"version_id",
-				"inherited_from_version_id",
-				sql`json(snapshot_content)`.as("snapshot_content"),
-			])
-			.execute();
+	// Inheritance is resolved at read time via the resolved view.
+	// Verify the child version sees the inherited row from global.
+	const resolvedInherited = await db
+		.selectFrom("internal_resolved_state_all")
+		.where("version_id", "=", testVersion.id)
+		.where("schema_key", "=", "test_entity")
+		.where("entity_id", "=", "global_entity_1")
+		.select([
+			"entity_id",
+			"change_id",
+			"version_id",
+			"inherited_from_version_id",
+			sql`json(snapshot_content)`.as("snapshot_content"),
+		])
+		.execute();
 
-		expect(resolvedInherited).toHaveLength(1);
-		expect(resolvedInherited[0]?.version_id).toBe(testVersion.id);
-		expect(resolvedInherited[0]?.inherited_from_version_id).toBe("global");
-		expect(resolvedInherited[0]?.change_id).toBe(originalChangeId);
-		expect((resolvedInherited[0]?.snapshot_content as any).value).toBe("from_global");
-	});
+	expect(resolvedInherited).toHaveLength(1);
+	expect(resolvedInherited[0]?.version_id).toBe(testVersion.id);
+	expect(resolvedInherited[0]?.inherited_from_version_id).toBe("global");
+	expect(resolvedInherited[0]?.change_id).toBe(originalChangeId);
+	expect((resolvedInherited[0]?.snapshot_content as any).value).toBe(
+		"from_global"
+	);
+});

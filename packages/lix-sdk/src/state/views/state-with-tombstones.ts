@@ -2,19 +2,19 @@ import type { Generated, Selectable } from "kysely";
 import type { Lix } from "../../lix/open-lix.js";
 
 export type StateWithTombstonesView = {
-  entity_id: string;
-  schema_key: string;
-  file_id: string;
-  plugin_key: string;
-  snapshot_content: Record<string, any> | null; // null for tombstones
-  schema_version: string;
-  version_id: string;
-  created_at: Generated<string>;
-  updated_at: Generated<string>;
-  inherited_from_version_id: string | null;
-  change_id: Generated<string>;
-  untracked: Generated<boolean>;
-  commit_id: Generated<string>;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+	plugin_key: string;
+	snapshot_content: Record<string, any> | null; // null for tombstones
+	schema_version: string;
+	version_id: string;
+	created_at: Generated<string>;
+	updated_at: Generated<string>;
+	inherited_from_version_id: string | null;
+	change_id: Generated<string>;
+	untracked: Generated<boolean>;
+	commit_id: Generated<string>;
 };
 
 export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
@@ -30,7 +30,7 @@ export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
  * each version only reports its own direct state or tombstones.
  */
 export function applyStateWithTombstonesView(lix: Pick<Lix, "sqlite">): void {
-  lix.sqlite.exec(`
+	lix.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_with_tombstones AS
     SELECT * FROM internal_state_vtable;
   `);

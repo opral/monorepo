@@ -10,21 +10,25 @@ import { createVersion } from "./create-version.js";
 
 // Local test helper: create a global commit pointing to a given change set
 async function createCommit(args: {
-    lix: Lix;
-    changeSet: Pick<LixChangeSet, "id">;
+	lix: Lix;
+	changeSet: Pick<LixChangeSet, "id">;
 }): Promise<Pick<LixCommit, "id" | "change_set_id">> {
-    const commitId = uuidV7({ lix: args.lix });
-    await args.lix.db
-        .insertInto("commit_all")
-        .values({ id: commitId, change_set_id: args.changeSet.id, lixcol_version_id: "global" })
-        .execute();
-    const row = await args.lix.db
-        .selectFrom("commit_all")
-        .where("id", "=", commitId)
-        .where("lixcol_version_id", "=", "global")
-        .selectAll()
-        .executeTakeFirstOrThrow();
-    return { id: row.id, change_set_id: row.change_set_id };
+	const commitId = uuidV7({ lix: args.lix });
+	await args.lix.db
+		.insertInto("commit_all")
+		.values({
+			id: commitId,
+			change_set_id: args.changeSet.id,
+			lixcol_version_id: "global",
+		})
+		.execute();
+	const row = await args.lix.db
+		.selectFrom("commit_all")
+		.where("id", "=", commitId)
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	return { id: row.id, change_set_id: row.change_set_id };
 }
 
 // Planning all test cases for createVersionFromCommit (empty bodies for TDD)

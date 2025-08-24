@@ -17,7 +17,7 @@ export function clearStateCache(args: {
 	timestamp?: string;
 }): void {
 	// Mark the cache as stale first to prevent repopulation during delete
-		markStateCacheAsStale({ lix: args.lix as Lix, timestamp: args.timestamp });
+	markStateCacheAsStale({ lix: args.lix as Lix, timestamp: args.timestamp });
 
 	// Find ALL physical cache tables in the database (not just cached ones)
 	// This ensures we clear tables even if they weren't in our cache

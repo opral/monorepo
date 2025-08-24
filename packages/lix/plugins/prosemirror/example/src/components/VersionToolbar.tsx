@@ -43,7 +43,7 @@ const VersionToolbar: React.FC = () => {
 			const newVersion = await createVersion({
 				lix,
 				name: `${firstName}'s Version`,
-				commit_id: activeVersion.commit_id,
+				from: activeVersion,
 			});
 			await switchVersion({ lix, to: newVersion });
 			// Scroll to the end of the scrollbar after a short delay to ensure DOM update
@@ -71,7 +71,7 @@ const VersionToolbar: React.FC = () => {
 				const newVersion = await createVersion({
 					lix,
 					name: `${firstName}'s Version`,
-					commit_id: activeVersion.commit_id,
+					from: activeVersion,
 				});
 				await switchVersion({ lix, to: { id: newVersion.id } });
 			}

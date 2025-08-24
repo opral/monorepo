@@ -27,7 +27,7 @@ export type StateAllRowUpdate = Updateable<StateAllView>;
  * plus INSTEAD OF triggers to forward writes to the internal vtable.
  */
 export function applyStateAllView(lix: Pick<Lix, "sqlite">): void {
-  lix.sqlite.exec(`
+	lix.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_all AS
     SELECT * FROM internal_state_vtable
     WHERE snapshot_content IS NOT NULL;

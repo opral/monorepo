@@ -1,9 +1,9 @@
 import { type Kysely, sql } from "kysely";
 import {
-    type LixChangeSet,
-    type LixChangeSetElement,
-    LixChangeSetElementSchema,
-    LixChangeSetSchema,
+	type LixChangeSet,
+	type LixChangeSetElement,
+	LixChangeSetElementSchema,
+	LixChangeSetSchema,
 } from "../../change-set/schema.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import { executeSync } from "../../database/execute-sync.js";
@@ -32,7 +32,9 @@ import { updateUntrackedState } from "../untracked/update-untracked-state.js";
  * commit({ lix });
  * // All pending changes are now persisted
  */
-export function commit(args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> }): number {
+export function commit(args: {
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+}): number {
 	const transactionTimestamp = timestamp({ lix: args.lix });
 	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 

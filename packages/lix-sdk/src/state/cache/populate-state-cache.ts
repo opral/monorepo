@@ -38,11 +38,12 @@ export function populateStateCache(
 			returnValue: "resultRows",
 			rowMode: "array",
 		}) as [string][];
-		
+
 		// The ancestry view includes the version itself and all its ancestors
-		versionsToPopulate = ancestorRows.length > 0 
-			? ancestorRows.map((row) => row[0])
-			: [options.version_id];
+		versionsToPopulate =
+			ancestorRows.length > 0
+				? ancestorRows.map((row) => row[0])
+				: [options.version_id];
 	} else {
 		// If no version_id specified, populate all active versions (with tips)
 		const tipRows = sqlite.exec({
@@ -159,27 +160,28 @@ export function populateStateCache(
 				commit_id = excluded.commit_id
 		`);
 
-        try {
-            for (const row of schemaRows) {
-                const isDeletion = row.snapshot_content === null || row.snapshot_content === undefined;
-                stmt.bind([
-                    row.entity_id,
-                    row.schema_key,
-                    row.file_id,
-                    row.version_id,
-                    row.plugin_key,
-                    row.snapshot_content, // jsonb() conversion happens in SQL
-                    row.schema_version,
-                    row.created_at, // Preserve original created_at
-                    row.updated_at, // Preserve original updated_at
-                    row.inherited_from_version_id,
-                    isDeletion ? 1 : 0, // inheritance_delete_marker
-                    row.change_id,
-                    row.commit_id,
-                ]);
-                stmt.step();
-                stmt.reset();
-            }
+		try {
+			for (const row of schemaRows) {
+				const isDeletion =
+					row.snapshot_content === null || row.snapshot_content === undefined;
+				stmt.bind([
+					row.entity_id,
+					row.schema_key,
+					row.file_id,
+					row.version_id,
+					row.plugin_key,
+					row.snapshot_content, // jsonb() conversion happens in SQL
+					row.schema_version,
+					row.created_at, // Preserve original created_at
+					row.updated_at, // Preserve original updated_at
+					row.inherited_from_version_id,
+					isDeletion ? 1 : 0, // inheritance_delete_marker
+					row.change_id,
+					row.commit_id,
+				]);
+				stmt.step();
+				stmt.reset();
+			}
 		} finally {
 			stmt.finalize();
 		}

@@ -20,12 +20,12 @@ import { selectActiveVersion } from "../../version/select-active-version.js";
  *
  *   This split gives us two key properties:
  *
- *     1. **Single source of truth for history topology**  
+ *     1. **Single source of truth for history topology**
  *        The entire DAG is materialised exactly once (under `global`), so
  *        graph traversals and lineage CTEs never need to bounce across version
  *        tables. Think "`.git/refs`-style catalogue", but in-DB.
  *
- *     2. **Version-local changes**  
+ *     2. **Version-local changes**
  *
  *
  *  BUSINESS DATA lives on the *active version*,
@@ -131,14 +131,13 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 			.innerJoin("change", "change_set_element.change_id", "change.id")
 			.where("change_set_id", "=", changeSetId)
 			.select([
-				"change.schema_key", 
-				"change.entity_id", 
+				"change.schema_key",
+				"change.entity_id",
 				"change_set_element.change_id",
-				"change.snapshot_content"
+				"change.snapshot_content",
 			])
 			.execute();
-		
-		
+
 		return rows.reduce<Record<string, number>>((map, r) => {
 			map[r.schema_key] = (map[r.schema_key] ?? 0) + 1;
 			return map;
@@ -1485,7 +1484,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 		.selectFrom("active_version")
 		.select("version_id")
 		.executeTakeFirstOrThrow();
-	
+
 	expect(activeVersion.version_id).not.toBe("global");
 
 	// Insert a mock entity into global version via transaction
@@ -1498,7 +1497,10 @@ test("global cache entry should be inherited by child versions in resolved view"
 				schema_key: "mock_schema",
 				file_id: "mock-file",
 				plugin_key: "mock_plugin",
-				snapshot_content: JSON.stringify({ id: "mock-global-entity", data: "test-data" }),
+				snapshot_content: JSON.stringify({
+					id: "mock-global-entity",
+					data: "test-data",
+				}),
 				schema_version: "1.0",
 				version_id: "global",
 				untracked: false,
@@ -1529,8 +1531,8 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Should have two entries: one for active version (inherited) and one for global
 	expect(resolvedEntries).toHaveLength(2);
-	
-	const versionIds = resolvedEntries.map(e => e.version_id).sort();
+
+	const versionIds = resolvedEntries.map((e) => e.version_id).sort();
 	expect(versionIds).toContain("global");
 	expect(versionIds).toContain(activeVersion.version_id);
 });

@@ -39,7 +39,9 @@ export type LixHooks = {
 	 * unsubscribe();
 	 * ```
 	 */
-	onStateCommit: (handler: (data: { changes: StateCommitChange[] }) => void) => () => void;
+	onStateCommit: (
+		handler: (data: { changes: StateCommitChange[] }) => void
+	) => () => void;
 
 	/**
 	 * Internal method for emitting events.
@@ -63,7 +65,9 @@ export function createHooks(): LixHooks {
 	const eventTarget = new EventTarget();
 
 	return {
-		onStateCommit(handler: (data: { changes: StateCommitChange[] }) => void): () => void {
+		onStateCommit(
+			handler: (data: { changes: StateCommitChange[] }) => void
+		): () => void {
 			const wrappedHandler = (event: Event) => {
 				const customEvent = event as CustomEvent;
 				handler(customEvent.detail);

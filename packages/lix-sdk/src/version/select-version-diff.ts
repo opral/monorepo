@@ -19,12 +19,12 @@ export type DiffRow = {
  * Compares two versions and returns differences between their entities.
  *
  * This function is modeled for merging a source version into a target version,
- * which is why the source always wins in conflict scenarios (when both versions 
- * modified the same entity). It performs a full outer join between source and 
+ * which is why the source always wins in conflict scenarios (when both versions
+ * modified the same entity). It performs a full outer join between source and
  * target versions to identify created, updated, deleted, and unchanged entities.
  *
- * Note: More sophisticated diff strategies and proper conflict handling are 
- * planned for the future. Please upvote https://github.com/opral/lix-sdk/issues/368 
+ * Note: More sophisticated diff strategies and proper conflict handling are
+ * planned for the future. Please upvote https://github.com/opral/lix-sdk/issues/368
  * if you need conflict detection and resolution capabilities.
  *
  * The returned query builder allows for flexible filtering and composition
@@ -103,16 +103,16 @@ export type DiffRow = {
  * 1. What did YOU intentionally delete? (will be removed from target)
  * 2. What did your colleague add that you never knew about? (will be kept)
  *
- * The system tracks deletions using "tombstones" - special markers that say 
+ * The system tracks deletions using "tombstones" - special markers that say
  * "this entity was deleted". When you delete something, a tombstone is created.
  *
  * This means:
- * - If you deleted "entity A" that existed in the common ancestor → 
+ * - If you deleted "entity A" that existed in the common ancestor →
  *   Status: "deleted" (tombstone present, will be removed from target)
- * - If "entity B" only exists in target (added after you created your version) → 
+ * - If "entity B" only exists in target (added after you created your version) →
  *   Status: "unchanged" (no tombstone, you never knew about it, so it stays)
  *
- * Without this logic, the system couldn't tell the difference between 
+ * Without this logic, the system couldn't tell the difference between
  * "I deleted this" and "I never had this".
  */
 export function selectVersionDiff(args: {

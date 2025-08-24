@@ -26,26 +26,26 @@ export function JSONColumnPlugin(
 	);
 
 	return {
-    transformResult: async (args) => {
-            for (const row of args.result.rows) {
-                for (const col of jsonColumnNames) {
-                    const val = row[col];
-                    // Only parse when it's a string that looks like an object/array JSON.
-                    if (typeof val === "string") {
-                        const trimmed = val.trim();
-                        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-                            try {
-                                row[col] = JSON.parse(val);
-                            } catch {
-                                // leave as-is if parsing fails
-                            }
-                        }
-                    }
-                }
-            }
+		transformResult: async (args) => {
+			for (const row of args.result.rows) {
+				for (const col of jsonColumnNames) {
+					const val = row[col];
+					// Only parse when it's a string that looks like an object/array JSON.
+					if (typeof val === "string") {
+						const trimmed = val.trim();
+						if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+							try {
+								row[col] = JSON.parse(val);
+							} catch {
+								// leave as-is if parsing fails
+							}
+						}
+					}
+				}
+			}
 
-            return args.result;
-        },
+			return args.result;
+		},
 		transformQuery(args: PluginTransformQueryArgs) {
 			if (args.node.kind === "InsertQueryNode") {
 				const tableNode = (args.node as InsertQueryNode).into;

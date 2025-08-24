@@ -11,7 +11,7 @@ export function markStateCacheAsStale(args: {
 }): void {
 	// Set the cache stale flag to "true" in untracked state
 	const snapshotContent = JSON.stringify({ key: CACHE_STALE_KEY, value: true });
-	
+
 	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
 	updateUntrackedState({
@@ -38,7 +38,7 @@ export function markStateCacheAsFresh(args: {
 		key: CACHE_STALE_KEY,
 		value: false,
 	});
-	
+
 	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
 	updateUntrackedState({
