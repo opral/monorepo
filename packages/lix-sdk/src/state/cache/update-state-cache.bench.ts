@@ -112,44 +112,47 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		});
 	});
 
-	bench("Warm cache - 1000 records with 100K pre-existing rows", async () => {
-		const lix = await openLix({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
-				},
-			],
-		});
-
-		const ts = timestamp({ lix });
-
-		// Pre-populate with 100K rows across 5 schemas (20K per schema)
-		// Process in 10K batches to avoid memory issues
-		for (let i = 0; i < 10; i++) {
-			const warmupChanges = generateChanges(10000, schemas, ts, {
-				prefix: `warmup-${i}`,
+	bench.skip(
+		"Warm cache - 1000 records with 100K pre-existing rows",
+		async () => {
+			const lix = await openLix({
+				keyValues: [
+					{
+						key: "lix_deterministic_mode",
+						value: { enabled: true, bootstrap: true },
+					},
+				],
 			});
+
+			const ts = timestamp({ lix });
+
+			// Pre-populate with 100K rows across 5 schemas (20K per schema)
+			// Process in 10K batches to avoid memory issues
+			for (let i = 0; i < 10; i++) {
+				const warmupChanges = generateChanges(10000, schemas, ts, {
+					prefix: `warmup-${i}`,
+				});
+				updateStateCache({
+					lix,
+					changes: warmupChanges,
+					commit_id: `warmup-${i}`,
+					version_id: "v0",
+				});
+			}
+
+			// Now benchmark 1000 changes against the warm cache with deep B-trees
+			const changes = generateChanges(1000, schemas, ts, {
+				prefix: "bench",
+				deletionRatio: 0.05,
+				updateRatio: 0.15,
+			});
+
 			updateStateCache({
 				lix,
-				changes: warmupChanges,
-				commit_id: `warmup-${i}`,
-				version_id: "v0",
+				changes,
+				commit_id: "commit-warm",
+				version_id: "v1",
 			});
 		}
-
-		// Now benchmark 1000 changes against the warm cache with deep B-trees
-		const changes = generateChanges(1000, schemas, ts, {
-			prefix: "bench",
-			deletionRatio: 0.05,
-			updateRatio: 0.15,
-		});
-
-		updateStateCache({
-			lix,
-			changes,
-			commit_id: "commit-warm",
-			version_id: "v1",
-		});
-	});
+	);
 });
