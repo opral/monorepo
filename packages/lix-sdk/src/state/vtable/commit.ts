@@ -312,19 +312,21 @@ export function commit(args: {
 
 			if (userChanges.length > 0) {
 				// Handle deletions and updates for working changeset elements
-				const deletionChanges = userChanges.filter((change) => {
-					const parsedSnapshot = change.snapshot_content
-						? JSON.parse(change.snapshot_content)
-						: null;
-					return !parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
-				});
-
-				const nonDeletionChanges = userChanges.filter((change) => {
-					const parsedSnapshot = change.snapshot_content
-						? JSON.parse(change.snapshot_content)
-						: null;
-					return parsedSnapshot && parsedSnapshot.snapshot_id !== "no-content";
-				});
+				// Parse snapshot_content exactly once per change and split in one pass
+				const deletionChanges: typeof userChanges = [];
+				const nonDeletionChanges: typeof userChanges = [];
+				for (const change of userChanges) {
+					let isDeletion = true;
+					if (change.snapshot_content) {
+						const parsed = JSON.parse(change.snapshot_content);
+						isDeletion = parsed?.snapshot_id === "no-content";
+					}
+					if (isDeletion) {
+						deletionChanges.push(change);
+					} else {
+						nonDeletionChanges.push(change);
+					}
+				}
 
 				// Check for entities at checkpoint (for deletions)
 				const entitiesAtCheckpoint = new Set<string>();
