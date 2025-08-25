@@ -259,6 +259,21 @@ export function commit(args: {
 
 	// Step 4: Handle working changeset updates for each version
 	for (const [version_id, changes] of trackedChangesByVersion) {
+		/**
+		 * IMPORTANT: Skip updating working change set elements for the global version.
+		 *
+		 * See https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923
+		 *
+		 * Rationale:
+		 * - We will make working CSE materialization lazy in a future iteration.
+		 * - For now, avoid mutating global working CSE at commit-time to keep the
+		 *   commit path simpler and cheaper.
+		 * - If someone needs working CSE for global and to checkpoint global, this
+		 *   will be supported by the lazy materializer later.
+		 */
+		if (version_id === "global") {
+			continue;
+		}
 		if (changes.length === 0) continue;
 
 		// Get version data to access working_commit_id
