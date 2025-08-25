@@ -38,6 +38,9 @@ export function commit(args: {
 	const transactionTimestamp = timestamp({ lix: args.lix });
 	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
+	// Collect per-version snapshots once to avoid duplicate queries in this commit
+	const versionSnapshots = new Map<string, LixVersion>();
+
 	// Query all transaction changes
 	const allTransactionChanges = executeSync({
 		lix: args.lix,
@@ -111,7 +114,7 @@ export function commit(args: {
 	for (const [version_id, changes] of trackedChangesByVersion) {
 		if (changes.length === 0) continue;
 
-		// Get version info
+		// Load version snapshot once
 		const versionRows = executeSync({
 			lix: args.lix,
 			query: db
@@ -130,6 +133,7 @@ export function commit(args: {
 		const versionData = JSON.parse(
 			versionRows[0].snapshot_content
 		) as LixVersion;
+		versionSnapshots.set(version_id, versionData);
 		const changeSetId = uuidV7({ lix: args.lix });
 		const commitId = uuidV7({ lix: args.lix });
 
@@ -143,7 +147,7 @@ export function commit(args: {
 
 	// Step 2: If we have any commits but global doesn't have one yet, create global commit
 	if (versionMetadata.size > 0 && !versionMetadata.has("global")) {
-		// Get global version info
+		// Load global version snapshot once
 		const globalVersionRows = executeSync({
 			lix: args.lix,
 			query: db
@@ -165,6 +169,7 @@ export function commit(args: {
 		const globalVersion = JSON.parse(
 			globalVersionRows[0].snapshot_content
 		) as LixVersion;
+		versionSnapshots.set("global", globalVersion);
 		const globalChangeSetId = nanoId({ lix: args.lix });
 		const globalCommitId = uuidV7({ lix: args.lix });
 
@@ -276,20 +281,8 @@ export function commit(args: {
 		}
 		if (changes.length === 0) continue;
 
-		// Get version data to access working_commit_id
-		const versionRows = executeSync({
-			lix: args.lix,
-			query: db
-				.selectFrom("internal_resolved_state_all")
-				.where("schema_key", "=", "lix_version")
-				.where("entity_id", "=", version_id)
-				.select("snapshot_content")
-				.limit(1),
-		});
-
-		const versionData = JSON.parse(
-			versionRows[0]!.snapshot_content
-		) as LixVersion;
+		// Get version data to access working_commit_id (from local snapshot map)
+		const versionData = versionSnapshots.get(version_id)!;
 
 		const [workingCommitRow] = executeSync({
 			lix: args.lix,
@@ -612,21 +605,8 @@ export function commit(args: {
 			// Add version update
 			const versionChangeId = uuidV7({ lix: args.lix });
 
-			// Get the current version snapshot to update
-			const versionRows = executeSync({
-				lix: args.lix,
-				query: db
-					.selectFrom("internal_resolved_state_all")
-					.where("schema_key", "=", "lix_version")
-					.where("entity_id", "=", version_id)
-					.where("snapshot_content", "is not", null)
-					.select("snapshot_content")
-					.limit(1),
-			});
-
-			const currentVersion = JSON.parse(
-				versionRows[0]!.snapshot_content
-			) as LixVersion;
+			// Get the current version snapshot to update (use local snapshot)
+			const currentVersion = versionSnapshots.get(version_id)!;
 			globalChanges.push({
 				id: versionChangeId,
 				entity_id: version_id,
@@ -640,6 +620,7 @@ export function commit(args: {
 				schema_version: LixVersionSchema["x-lix-version"],
 				created_at: transactionTimestamp,
 			});
+			// No module-level cache to update; we only reuse within this function
 		}
 
 		// Create changeset elements for all global metadata (these belong to global's changeset)
