@@ -2404,7 +2404,7 @@ simulationTest(
 		// Helper to assert transaction table is empty
 		const expectTxnEmpty = async () => {
 			const rows = await db
-				.selectFrom("internal_change_in_transaction")
+                .selectFrom("internal_transaction_state")
 				.selectAll()
 				.execute();
 			expectDeterministic(rows.length).toBe(0);

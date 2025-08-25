@@ -39,7 +39,7 @@ import type { InternalResolvedStateAllView } from "../state/resolved-state-view.
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
-import type { InternalChangeInTransactionTable } from "../state/transaction/schema.js";
+import type { InternalTransactionStateTable } from "../state/transaction/schema.js";
 import type { InternalStateVTable } from "../state/vtable/vtable.js";
 
 export const LixDatabaseSchemaJsonColumns = {
@@ -48,7 +48,7 @@ export const LixDatabaseSchemaJsonColumns = {
 } as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
-	internal_change_in_transaction: InternalChangeInTransactionTable;
+	internal_transaction_state: InternalTransactionStateTable;
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;

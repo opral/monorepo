@@ -39,21 +39,21 @@ export function applyResolvedStateView(
       SELECT * FROM (
           -- 1. Transaction state (highest priority) - pending changes
           SELECT 
-              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
+              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(lixcol_version_id) as _pk,
               entity_id, 
               schema_key, 
               file_id, 
               plugin_key,
               json(snapshot_content) as snapshot_content, 
               schema_version, 
-              version_id,
+              lixcol_version_id as version_id,
               created_at, 
               created_at as updated_at,
               NULL as inherited_from_version_id, 
               id as change_id, 
-              untracked,
+              lixcol_untracked as untracked,
               'pending' as commit_id
-          FROM internal_change_in_transaction
+          FROM internal_transaction_state
           -- Include both live rows and deletion tombstones (NULL snapshot_content)
 			
 			UNION ALL
@@ -80,11 +80,11 @@ export function applyResolvedStateView(
             OR (inheritance_delete_marker = 1 AND snapshot_content IS NULL)   -- tombstone
           )
           AND NOT EXISTS (
-              SELECT 1 FROM internal_change_in_transaction txn
+              SELECT 1 FROM internal_transaction_state txn
               WHERE txn.entity_id = internal_state_all_untracked.entity_id
                 AND txn.schema_key = internal_state_all_untracked.schema_key
                 AND txn.file_id = internal_state_all_untracked.file_id
-                AND txn.version_id = internal_state_all_untracked.version_id
+                AND txn.lixcol_version_id = internal_state_all_untracked.version_id
           )
 			
 			UNION ALL
@@ -111,11 +111,11 @@ export function applyResolvedStateView(
             OR (inheritance_delete_marker = 1 AND snapshot_content IS NULL)   -- tombstone
           )
           AND NOT EXISTS (
-              SELECT 1 FROM internal_change_in_transaction txn
+              SELECT 1 FROM internal_transaction_state txn
               WHERE txn.entity_id = internal_state_cache.entity_id
                 AND txn.schema_key = internal_state_cache.schema_key
                 AND txn.file_id = internal_state_cache.file_id
-                AND txn.version_id = internal_state_cache.version_id
+                AND txn.lixcol_version_id = internal_state_cache.version_id
           )
           AND NOT EXISTS (
               SELECT 1 FROM internal_state_all_untracked unt
@@ -173,8 +173,8 @@ export function applyResolvedStateView(
           AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_change_in_transaction txn
-				WHERE txn.version_id = vi.version_id
+				SELECT 1 FROM internal_transaction_state txn
+				WHERE txn.lixcol_version_id = vi.version_id
 				  AND txn.entity_id = isc.entity_id
 				  AND txn.schema_key = isc.schema_key
 				  AND txn.file_id = isc.file_id
@@ -244,8 +244,8 @@ export function applyResolvedStateView(
           AND unt.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_change_in_transaction txn
-				WHERE txn.version_id = vi.version_id
+				SELECT 1 FROM internal_transaction_state txn
+				WHERE txn.lixcol_version_id = vi.version_id
 				  AND txn.entity_id = unt.entity_id
 				  AND txn.schema_key = unt.schema_key
 				  AND txn.file_id = unt.file_id
@@ -283,7 +283,7 @@ export function applyResolvedStateView(
 				txn.created_at as updated_at,
 				vi.parent_version_id as inherited_from_version_id, 
 				txn.id as change_id, 
-				txn.untracked,
+				txn.lixcol_untracked as untracked,
 				'pending' as commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
@@ -293,14 +293,14 @@ export function applyResolvedStateView(
 				FROM internal_state_cache isc_v
 				WHERE isc_v.schema_key = 'lix_version'
 			) vi
-			JOIN internal_change_in_transaction txn ON txn.version_id = vi.parent_version_id
+			JOIN internal_transaction_state txn ON txn.lixcol_version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent transaction
 			AND txn.snapshot_content IS NOT NULL
 			-- Don't inherit if child has direct transaction state
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_change_in_transaction child_txn
-				WHERE child_txn.version_id = vi.version_id
+              SELECT 1 FROM internal_transaction_state child_txn
+				WHERE child_txn.lixcol_version_id = vi.version_id
 				  AND child_txn.entity_id = txn.entity_id
 				  AND child_txn.schema_key = txn.schema_key
 				  AND child_txn.file_id = txn.file_id

@@ -9,8 +9,10 @@ import type { Lix } from "../../lix/open-lix.js";
  * Since untracked entities don't participate in change control,
  * the change ID is not required.
  */
-type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
-	id?: string;
+export type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
+    id?: string;
+    /** target version for the untracked update (column maps to version_id) */
+    lixcol_version_id: string;
 };
 
 /**
@@ -33,101 +35,147 @@ type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * @param args.version_id - Version ID to update
  */
 export function updateUntrackedState(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
-	change: UntrackedChangeData;
-	version_id: string;
+    lix: Pick<Lix, "sqlite" | "db">;
+    changes: UntrackedChangeData[];
 }): void {
-	const intDb = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+    const { lix, changes } = args;
+    if (!changes || changes.length === 0) return;
 
-	// Handle deletions (null snapshot_content)
-	if (args.change.snapshot_content === null) {
-		// Check if entity exists directly in this version's untracked table
-		const existingEntity = executeSync({
-			lix: args.lix,
-			query: intDb
-				.selectFrom("internal_state_all_untracked")
-				.selectAll()
-				.where("entity_id", "=", args.change.entity_id)
-				.where("schema_key", "=", args.change.schema_key)
-				.where("file_id", "=", args.change.file_id)
-				.where("version_id", "=", args.version_id)
-				.limit(1),
-		})[0];
+    const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		if (existingEntity) {
-			// Direct entity exists - delete it from the untracked table
-			executeSync({
-				lix: args.lix,
-				query: intDb
-					.deleteFrom("internal_state_all_untracked")
-					.where("entity_id", "=", args.change.entity_id)
-					.where("schema_key", "=", args.change.schema_key)
-					.where("file_id", "=", args.change.file_id)
-					.where("version_id", "=", args.version_id),
-			});
-		} else {
-			// No direct entity - this is an inherited entity deletion
-			// Create a tombstone to block inheritance
-			executeSync({
-				lix: args.lix,
-				query: intDb
-					.insertInto("internal_state_all_untracked")
-					.values({
-						entity_id: args.change.entity_id,
-						schema_key: args.change.schema_key,
-						file_id: args.change.file_id,
-						version_id: args.version_id,
-						plugin_key: args.change.plugin_key,
-						snapshot_content: null, // Proper NULL for BLOB column
-						schema_version: args.change.schema_version,
-						created_at: args.change.created_at,
-						updated_at: args.change.created_at,
-						inherited_from_version_id: null,
-						inheritance_delete_marker: 1, // Mark as tombstone
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								snapshot_content: null,
-								updated_at: args.change.created_at,
-								inheritance_delete_marker: 1,
-								plugin_key: args.change.plugin_key,
-								schema_version: args.change.schema_version,
-							})
-					),
-			});
-		}
-	} else {
-		// Non-null snapshot_content - normal insert/update
-		executeSync({
-			lix: args.lix,
-			query: intDb
-				.insertInto("internal_state_all_untracked")
-				.values({
-					entity_id: args.change.entity_id,
-					schema_key: args.change.schema_key,
-					file_id: args.change.file_id,
-					version_id: args.version_id,
-					plugin_key: args.change.plugin_key,
-					snapshot_content: sql`jsonb(${args.change.snapshot_content})`,
-					schema_version: args.change.schema_version,
-					created_at: args.change.created_at,
-					updated_at: args.change.created_at,
-					inherited_from_version_id: null, // Direct entry, not inherited
-					inheritance_delete_marker: 0, // Normal entry, not a tombstone
-				})
-				.onConflict((oc) =>
-					oc
-						.columns(["entity_id", "schema_key", "file_id", "version_id"])
-						.doUpdateSet({
-							plugin_key: args.change.plugin_key,
-							snapshot_content: sql`jsonb(${args.change.snapshot_content})`,
-							schema_version: args.change.schema_version,
-							updated_at: args.change.created_at,
-							inheritance_delete_marker: 0, // Reset tombstone flag if updating
-						})
-				),
-		});
-	}
+    // Split into deletions and non-deletions
+    const deletions = changes.filter((c) => c.snapshot_content == null);
+    const inserts = changes.filter((c) => c.snapshot_content != null);
+
+    // 1) Handle deletions first (delete direct or create tombstones for inherited)
+    if (deletions.length > 0) {
+        // Group by version for efficient lookups
+        const byVersion = new Map<string, UntrackedChangeData[]>();
+        for (const c of deletions) {
+            const v = c.lixcol_version_id;
+            if (!byVersion.has(v)) byVersion.set(v, []);
+            byVersion.get(v)!.push(c);
+        }
+
+        for (const [versionId, list] of byVersion) {
+            // Build compact IN filters and intersect in JS to find direct entries
+            const desired = new Set<string>();
+            const ent = new Set<string>();
+            const sch = new Set<string>();
+            const fil = new Set<string>();
+            for (const c of list) {
+                desired.add(`${c.entity_id}|${c.schema_key}|${c.file_id}`);
+                ent.add(c.entity_id);
+                sch.add(c.schema_key);
+                fil.add(c.file_id);
+            }
+
+            let sel = intDb
+                .selectFrom("internal_state_all_untracked")
+                .where("version_id", "=", versionId);
+            const entArr = Array.from(ent);
+            const schArr = Array.from(sch);
+            const filArr = Array.from(fil);
+            if (entArr.length > 0) sel = sel.where("entity_id", "in", entArr);
+            if (schArr.length > 0) sel = sel.where("schema_key", "in", schArr);
+            if (filArr.length > 0) sel = sel.where("file_id", "in", filArr);
+
+            const existing = executeSync({
+                lix,
+                query: sel.select(["entity_id", "schema_key", "file_id"]),
+            });
+            const existingSet = new Set<string>(
+                existing.map((r) => `${r.entity_id}|${r.schema_key}|${r.file_id}`)
+            );
+
+            // Direct deletes (per-row to keep selection precise)
+            for (const c of list) {
+                const key = `${c.entity_id}|${c.schema_key}|${c.file_id}`;
+                if (existingSet.has(key)) {
+                    executeSync({
+                        lix,
+                        query: intDb
+                            .deleteFrom("internal_state_all_untracked")
+                            .where("entity_id", "=", c.entity_id)
+                            .where("schema_key", "=", c.schema_key)
+                            .where("file_id", "=", c.file_id)
+                            .where("version_id", "=", versionId),
+                    });
+                }
+            }
+
+            // Tombstones for inherited (non-existing) entries via batched upsert
+            const tombstoneValues = list
+                .filter((c) => !existingSet.has(`${c.entity_id}|${c.schema_key}|${c.file_id}`))
+                .map((c) => ({
+                    entity_id: c.entity_id,
+                    schema_key: c.schema_key,
+                    file_id: c.file_id,
+                    version_id: versionId,
+                    plugin_key: c.plugin_key,
+                    snapshot_content: null as null,
+                    schema_version: c.schema_version,
+                    created_at: c.created_at,
+                    updated_at: c.created_at,
+                    inherited_from_version_id: null as null,
+                    inheritance_delete_marker: 1,
+                }));
+
+            if (tombstoneValues.length > 0) {
+                executeSync({
+                    lix,
+                    query: intDb
+                        .insertInto("internal_state_all_untracked")
+                        .values(tombstoneValues)
+                        .onConflict((oc) =>
+                            oc
+                                .columns(["entity_id", "schema_key", "file_id", "version_id"])
+                                .doUpdateSet((eb) => ({
+                                    snapshot_content: eb.val(null),
+                                    updated_at: eb.ref("excluded.updated_at"),
+                                    inheritance_delete_marker: eb.val(1),
+                                    plugin_key: eb.ref("excluded.plugin_key"),
+                                    schema_version: eb.ref("excluded.schema_version"),
+                                }))
+                        ),
+                });
+            }
+        }
+    }
+
+    // 2) Handle non-deletions: upsert actual content rows in batch using a prepared stmt
+    if (inserts.length > 0) {
+        for (const c of inserts) {
+            const content: any = c.snapshot_content as any;
+            executeSync({
+                lix,
+                query: intDb
+                    .insertInto("internal_state_all_untracked")
+                    .values({
+                        entity_id: c.entity_id,
+                        schema_key: c.schema_key,
+                        file_id: c.file_id,
+                        version_id: c.lixcol_version_id,
+                        plugin_key: c.plugin_key,
+                        snapshot_content: sql`jsonb(${content})`,
+                        schema_version: c.schema_version,
+                        created_at: c.created_at,
+                        updated_at: c.created_at,
+                        inherited_from_version_id: null,
+                        inheritance_delete_marker: 0,
+                    })
+                    .onConflict((oc) =>
+                        oc
+                            .columns(["entity_id", "schema_key", "file_id", "version_id"])
+                            .doUpdateSet({
+                                plugin_key: c.plugin_key,
+                                snapshot_content: sql`jsonb(${content})`,
+                                schema_version: c.schema_version,
+                                updated_at: c.created_at,
+                                inheritance_delete_marker: 0,
+                            })
+                    ),
+            });
+        }
+    }
 }

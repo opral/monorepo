@@ -2738,7 +2738,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	).not.toThrowError();
 });
 
-test("should validate foreign keys that reference changes in internal_change_in_transaction during transaction", async () => {
+test("should validate foreign keys that reference changes in internal_transaction_state during transaction", async () => {
 	const lix = await openLix({});
 
 	// Create a simple mock schema that references a change
@@ -2776,7 +2776,7 @@ test("should validate foreign keys that reference changes in internal_change_in_
 		.executeTakeFirstOrThrow();
 
 	await lix.db.transaction().execute(async (trx) => {
-		// Insert a key-value entity which creates a change in internal_change_in_transaction
+    // Insert a key-value entity which creates a change in internal_transaction_state
 		await trx
 			.insertInto("key_value")
 			.values({
@@ -2785,20 +2785,20 @@ test("should validate foreign keys that reference changes in internal_change_in_
 			})
 			.execute();
 
-		// Get the change ID that was just created in internal_change_in_transaction
-		const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-			.selectFrom("internal_change_in_transaction")
-			.select("id")
-			.where("entity_id", "=", "test_key_for_change_reference")
-			.where("schema_key", "=", "lix_key_value")
-			.execute();
+        // Get the change ID that was just created in internal_transaction_state
+        const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+            .selectFrom("internal_transaction_state")
+            .select("id")
+            .where("entity_id", "=", "test_key_for_change_reference")
+            .where("schema_key", "=", "lix_key_value")
+            .execute();
 
 		expect(changes).toHaveLength(1);
 		const changeId = changes[0]!.id;
 
-		// This should NOT throw an error because the change exists in internal_change_in_transaction
-		// But currently it will throw because validation only checks the "change" table (internal_change)
-		// which doesn't include internal_change_in_transaction
+        // This should NOT throw an error because the change exists in internal_transaction_state
+        // But currently it will throw because validation only checks the "change" table (internal_change)
+        // which doesn't include internal_transaction_state
 		expect(() =>
 			validateStateMutation({
 				lix: { sqlite: lix.sqlite, db: trx as any },

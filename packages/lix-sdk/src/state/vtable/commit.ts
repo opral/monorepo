@@ -23,7 +23,7 @@ import { updateUntrackedState } from "../untracked/update-untracked-state.js";
  * Commits all transaction changes to permanent storage.
  *
  * This function handles the COMMIT stage of the state mutation flow. It takes
- * all changes accumulated in the transaction table (internal_change_in_transaction),
+ * all changes accumulated in the transaction table (internal_transaction_state),
  * creates commits for each version with data changes, and then creates a global
  * commit containing all the graph metadata (commits, changesets, edges, version updates).
  *
@@ -41,24 +41,24 @@ export function commit(args: {
 	// Collect per-version snapshots once to avoid duplicate queries in this commit
 	const versionSnapshots = new Map<string, LixVersion>();
 
-	// Query all transaction changes
-	const allTransactionChanges = executeSync({
-		lix: args.lix,
-		query: db
-			.selectFrom("internal_change_in_transaction")
-			.select([
-				"id",
-				"entity_id",
-				"schema_key",
-				"schema_version",
-				"file_id",
-				"plugin_key",
-				"version_id",
-				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
-				"created_at",
-				"untracked",
-			]),
-	});
+    // Query all transaction changes
+    const allTransactionChanges = executeSync({
+        lix: args.lix,
+        query: db
+            .selectFrom("internal_transaction_state")
+            .select([
+                "id",
+                "entity_id",
+                "schema_key",
+                "schema_version",
+                "file_id",
+                "plugin_key",
+                sql`lixcol_version_id`.as("version_id"),
+                sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+                "created_at",
+                sql`lixcol_untracked`.as("untracked"),
+            ]),
+    });
 
 	// Separate tracked and untracked changes
 	const trackedChangesByVersion = new Map<string, any[]>();
@@ -75,22 +75,20 @@ export function commit(args: {
 		}
 	}
 
-	// Process all untracked changes immediately
-	for (const change of untrackedChanges) {
-		updateUntrackedState({
-			lix: args.lix,
-			change: {
-				id: change.id,
-				entity_id: change.entity_id,
-				schema_key: change.schema_key,
-				file_id: change.file_id,
-				plugin_key: change.plugin_key,
-				snapshot_content: change.snapshot_content,
-				schema_version: change.schema_version,
-				created_at: change.created_at,
-			},
-			version_id: change.version_id,
-		});
+	// Process all untracked changes in a single batched call
+	if (untrackedChanges.length > 0) {
+		const untrackedBatch = untrackedChanges.map((change) => ({
+			id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+			plugin_key: change.plugin_key,
+			snapshot_content: change.snapshot_content,
+			schema_version: change.schema_version,
+			created_at: change.created_at,
+			lixcol_version_id: change.version_id,
+		}));
+		updateUntrackedState({ lix: args.lix, changes: untrackedBatch });
 	}
 
 	// Prepare to collect all changes
@@ -429,26 +427,35 @@ export function commit(args: {
 						),
 				});
 
+				// Collect batched untracked updates for working CSE
+				const workingUntrackedBatch: Array<{
+					id?: string;
+					entity_id: string;
+					schema_key: string;
+					file_id: string;
+					plugin_key: string;
+					snapshot_content: string | null;
+					schema_version: string;
+					created_at: string;
+					lixcol_version_id: string;
+				}> = [];
+
 				// Delete existing working change set elements as untracked changes
 				for (const existing of existingEntities) {
 					// The entity_id for a change_set_element is "${change_set_id}~${change_id}"
 					// We already queried for entity_id LIKE '${workingChangeSetId}~%'
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
-					// Handle working changeset elements as untracked
-					updateUntrackedState({
-						lix: args.lix,
-						change: {
-							id: uuidV7({ lix: args.lix }),
-							entity_id: entityIdForDeletion,
-							schema_key: "lix_change_set_element",
-							file_id: "lix",
-							plugin_key: "lix_own_entity",
-							snapshot_content: null, // null indicates deletion
-							schema_version: LixChangeSetElementSchema["x-lix-version"],
-							created_at: transactionTimestamp,
-						},
-						version_id: "global",
+					workingUntrackedBatch.push({
+						id: uuidV7({ lix: args.lix }),
+						entity_id: entityIdForDeletion,
+						schema_key: "lix_change_set_element",
+						file_id: "lix",
+						plugin_key: "lix_own_entity",
+						snapshot_content: null,
+						schema_version: LixChangeSetElementSchema["x-lix-version"],
+						created_at: transactionTimestamp,
+						lixcol_version_id: "global",
 					});
 				}
 
@@ -456,53 +463,49 @@ export function commit(args: {
 				for (const deletion of deletionChanges) {
 					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
 					if (entitiesAtCheckpoint.has(key)) {
-						// Handle working changeset elements as untracked
-						updateUntrackedState({
-							lix: args.lix,
-							change: {
-								id: uuidV7({ lix: args.lix }),
-								entity_id: `${workingChangeSetId}~${deletion.id}`,
-								schema_key: "lix_change_set_element",
-								file_id: "lix",
-								plugin_key: "lix_own_entity",
-								snapshot_content: JSON.stringify({
-									change_set_id: workingChangeSetId,
-									change_id: deletion.id,
-									entity_id: deletion.entity_id,
-									schema_key: deletion.schema_key,
-									file_id: deletion.file_id,
-								} satisfies LixChangeSetElement),
-								schema_version: LixChangeSetElementSchema["x-lix-version"],
-								created_at: transactionTimestamp,
-							},
-							version_id: "global",
+						workingUntrackedBatch.push({
+							id: uuidV7({ lix: args.lix }),
+							entity_id: `${workingChangeSetId}~${deletion.id}`,
+							schema_key: "lix_change_set_element",
+							file_id: "lix",
+							plugin_key: "lix_own_entity",
+							snapshot_content: JSON.stringify({
+								change_set_id: workingChangeSetId,
+								change_id: deletion.id,
+								entity_id: deletion.entity_id,
+								schema_key: deletion.schema_key,
+								file_id: deletion.file_id,
+							} satisfies LixChangeSetElement),
+							schema_version: LixChangeSetElementSchema["x-lix-version"],
+							created_at: transactionTimestamp,
+							lixcol_version_id: "global",
 						});
 					}
 				}
 
 				// Add all non-deletions as untracked
 				for (const change of nonDeletionChanges) {
-					// Handle working changeset elements as untracked
-					updateUntrackedState({
-						lix: args.lix,
-						change: {
-							id: uuidV7({ lix: args.lix }),
-							entity_id: `${workingChangeSetId}~${change.id}`,
-							schema_key: "lix_change_set_element",
-							file_id: "lix",
-							plugin_key: "lix_own_entity",
-							snapshot_content: JSON.stringify({
-								change_set_id: workingChangeSetId,
-								change_id: change.id,
-								entity_id: change.entity_id,
-								schema_key: change.schema_key,
-								file_id: change.file_id,
-							} satisfies LixChangeSetElement),
-							schema_version: LixChangeSetElementSchema["x-lix-version"],
-							created_at: transactionTimestamp,
-						},
-						version_id: "global",
+					workingUntrackedBatch.push({
+						id: uuidV7({ lix: args.lix }),
+						entity_id: `${workingChangeSetId}~${change.id}`,
+						schema_key: "lix_change_set_element",
+						file_id: "lix",
+						plugin_key: "lix_own_entity",
+						snapshot_content: JSON.stringify({
+							change_set_id: workingChangeSetId,
+							change_id: change.id,
+							entity_id: change.entity_id,
+							schema_key: change.schema_key,
+							file_id: change.file_id,
+						} satisfies LixChangeSetElement),
+						schema_version: LixChangeSetElementSchema["x-lix-version"],
+						created_at: transactionTimestamp,
+						lixcol_version_id: "global",
 					});
+				}
+
+				if (workingUntrackedBatch.length > 0) {
+					updateUntrackedState({ lix: args.lix, changes: workingUntrackedBatch });
 				}
 			}
 		}
@@ -691,11 +694,11 @@ export function commit(args: {
 		});
 	}
 
-	// Clear the transaction table after committing
-	executeSync({
-		lix: args.lix,
-		query: db.deleteFrom("internal_change_in_transaction"),
-	});
+    // Clear the transaction table after committing
+    executeSync({
+        lix: args.lix,
+        query: db.deleteFrom("internal_transaction_state"),
+    });
 
 	// Update cache entries for each version
 	for (const [version_id, meta] of versionMetadata) {
