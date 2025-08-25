@@ -19,23 +19,6 @@ export function applyChangeDatabaseSchema(
     FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
   ) STRICT;
 
-  -- add a table we use within the transaction
-  -- which is used by the state logic
-  -- defined here to avoid circular dependencies
-  CREATE TABLE IF NOT EXISTS internal_change_in_transaction (
-    id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    schema_version TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-    version_id TEXT NOT NULL,
-    snapshot_content BLOB,
-    created_at TEXT NOT NULL CHECK (created_at LIKE '%Z'),
-    --- NOTE schena_key must be unique per entity_id and file_id in the transaction
-    UNIQUE(entity_id, file_id, schema_key, version_id)
-  ) STRICT;
-
   CREATE VIEW IF NOT EXISTS change AS
   SELECT 
     c.id,
@@ -63,8 +46,8 @@ export function applyChangeDatabaseSchema(
     t.created_at,
     json(t.snapshot_content) AS snapshot_content
   FROM 
-    internal_change_in_transaction AS t
-  WHERE t.untracked = 0;
+    internal_transaction_state AS t
+  WHERE t.lixcol_untracked = 0;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change

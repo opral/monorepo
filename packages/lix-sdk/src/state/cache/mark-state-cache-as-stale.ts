@@ -14,19 +14,21 @@ export function markStateCacheAsStale(args: {
 
 	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
-	updateUntrackedState({
-		lix: args.lix,
-		change: {
-			entity_id: CACHE_STALE_KEY,
-			schema_key: LixKeyValueSchema["x-lix-key"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: snapshotContent,
-			schema_version: LixKeyValueSchema["x-lix-version"],
-			created_at: ts,
-		},
-		version_id: "global",
-	});
+    updateUntrackedState({
+        lix: args.lix,
+        changes: [
+            {
+                entity_id: CACHE_STALE_KEY,
+                schema_key: LixKeyValueSchema["x-lix-key"],
+                file_id: "lix",
+                plugin_key: "lix_own_entity",
+                snapshot_content: snapshotContent,
+                schema_version: LixKeyValueSchema["x-lix-version"],
+                created_at: ts,
+                lixcol_version_id: "global",
+            },
+        ],
+    });
 }
 
 export function markStateCacheAsFresh(args: {
@@ -41,17 +43,19 @@ export function markStateCacheAsFresh(args: {
 
 	const ts = args.timestamp ?? timestamp({ lix: args.lix });
 
-	updateUntrackedState({
-		lix: args.lix,
-		change: {
-			entity_id: CACHE_STALE_KEY,
-			schema_key: LixKeyValueSchema["x-lix-key"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: snapshotContent,
-			schema_version: LixKeyValueSchema["x-lix-version"],
-			created_at: ts,
-		},
-		version_id: "global",
-	});
+    updateUntrackedState({
+        lix: args.lix,
+        changes: [
+            {
+                entity_id: CACHE_STALE_KEY,
+                schema_key: LixKeyValueSchema["x-lix-key"],
+                file_id: "lix",
+                plugin_key: "lix_own_entity",
+                snapshot_content: snapshotContent,
+                schema_version: LixKeyValueSchema["x-lix-version"],
+                created_at: ts,
+                lixcol_version_id: "global",
+            },
+        ],
+    });
 }

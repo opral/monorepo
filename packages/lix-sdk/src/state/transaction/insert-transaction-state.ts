@@ -78,40 +78,40 @@ export function insertTransactionState(args: {
 		change_id: uuidV7({ lix: args.lix as any }),
 	}));
 
-	// Batch insert into internal_change_in_transaction
-	const transactionRows = dataWithChangeIds.map((data) => ({
-		id: data.change_id,
-		entity_id: data.entity_id,
-		schema_key: data.schema_key,
-		file_id: data.file_id,
-		plugin_key: data.plugin_key,
-		snapshot_content: data.snapshot_content
-			? sql`jsonb(${data.snapshot_content})`
-			: null,
-		schema_version: data.schema_version,
-		version_id: data.version_id,
-		created_at: _timestamp,
-		untracked: data.untracked === true ? 1 : 0,
-	}));
+    // Batch insert into internal_transaction_state
+    const transactionRows = dataWithChangeIds.map((data) => ({
+        id: data.change_id,
+        entity_id: data.entity_id,
+        schema_key: data.schema_key,
+        file_id: data.file_id,
+        plugin_key: data.plugin_key,
+        snapshot_content: data.snapshot_content
+            ? sql`jsonb(${data.snapshot_content})`
+            : null,
+        schema_version: data.schema_version,
+        lixcol_version_id: data.version_id,
+        created_at: _timestamp,
+        lixcol_untracked: data.untracked === true ? 1 : 0,
+    }));
 
-	executeSync({
-		lix: args.lix,
-		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_change_in_transaction")
-			.values(transactionRows)
-			.onConflict((oc) =>
-				oc
-					.columns(["entity_id", "file_id", "schema_key", "version_id"])
-					.doUpdateSet((eb) => ({
-						id: eb.ref("excluded.id"),
-						plugin_key: eb.ref("excluded.plugin_key"),
-						snapshot_content: eb.ref("excluded.snapshot_content"),
-						schema_version: eb.ref("excluded.schema_version"),
-						created_at: eb.ref("excluded.created_at"),
-						untracked: eb.ref("excluded.untracked"),
-					}))
-			),
-	});
+    executeSync({
+        lix: args.lix,
+        query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+            .insertInto("internal_transaction_state")
+            .values(transactionRows)
+            .onConflict((oc) =>
+                oc
+                    .columns(["entity_id", "file_id", "schema_key", "lixcol_version_id"])
+                    .doUpdateSet((eb) => ({
+                        id: eb.ref("excluded.id"),
+                        plugin_key: eb.ref("excluded.plugin_key"),
+                        snapshot_content: eb.ref("excluded.snapshot_content"),
+                        schema_version: eb.ref("excluded.schema_version"),
+                        created_at: eb.ref("excluded.created_at"),
+                        lixcol_untracked: eb.ref("excluded.lixcol_untracked"),
+                    }))
+            ),
+    });
 
 	// Return results for all data
 	return dataWithChangeIds.map((data) => ({

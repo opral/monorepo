@@ -106,21 +106,21 @@ export async function mergeVersion(args: {
 			const refIds = toReference.map((r) => r.id);
 
 			// Read pending rows from the transaction table
-			const pending = await intDbLocal
-				.selectFrom("internal_change_in_transaction")
-				.select([
-					"id",
-					"entity_id",
-					"schema_key",
-					"schema_version",
-					"file_id",
-					"plugin_key",
-					sql`json(snapshot_content)`.as("snapshot_content"),
-					"created_at",
-				])
-				.where("version_id", "=", sourceVersion.id)
-				.where("id", "in", refIds)
-				.execute();
+            const pending = await intDbLocal
+                .selectFrom("internal_transaction_state")
+                .select([
+                    "id",
+                    "entity_id",
+                    "schema_key",
+                    "schema_version",
+                    "file_id",
+                    "plugin_key",
+                    sql`json(snapshot_content)`.as("snapshot_content"),
+                    "created_at",
+                ])
+                .where("lixcol_version_id", "=", sourceVersion.id)
+                .where("id", "in", refIds)
+                .execute();
 
 			if (pending.length > 0) {
 				// Insert into persistent change table using the view's insert trigger
@@ -143,10 +143,10 @@ export async function mergeVersion(args: {
 					.execute();
 
 				// Remove from transaction queue to prevent automatic commit logic for source
-				await intDbLocal
-					.deleteFrom("internal_change_in_transaction")
-					.where("id", "in", refIds)
-					.execute();
+                await intDbLocal
+                    .deleteFrom("internal_transaction_state")
+                    .where("id", "in", refIds)
+                    .execute();
 			}
 		}
 

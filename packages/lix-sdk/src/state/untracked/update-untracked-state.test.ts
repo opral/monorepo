@@ -25,23 +25,23 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 	const currentTime = timestamp({ lix: lix as any });
 
 	// Create direct untracked entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-change-id",
-			entity_id: "direct-untracked-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-change-id",
+        entity_id: "direct-untracked-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "direct-untracked-key",
 				value: "direct-value",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify entity exists in untracked table
 	const result = await lixInternalDb
@@ -95,42 +95,42 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 	const currentTime = timestamp({ lix: lix as any });
 
 	// Create initial entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-change-id",
-			entity_id: "update-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-change-id",
+        entity_id: "update-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "update-test-key",
 				value: "initial-value",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Update the entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-change-id-2",
-			entity_id: "update-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-change-id-2",
+        entity_id: "update-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "update-test-key",
 				value: "updated-value",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify entity was updated
 	const result = await lixInternalDb
@@ -182,23 +182,23 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 	const currentTime = timestamp({ lix: lix as any });
 
 	// Create direct untracked entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-change-id",
-			entity_id: "delete-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-change-id",
+        entity_id: "delete-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "delete-test-key",
 				value: "to-be-deleted",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify entity exists
 	const beforeDelete = await lixInternalDb
@@ -211,20 +211,20 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 	expect(beforeDelete).toHaveLength(1);
 
 	// Delete the entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-delete-change-id",
-			entity_id: "delete-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-delete-change-id",
+        entity_id: "delete-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: null, // Deletion
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify entity is deleted
 	const afterDelete = await lixInternalDb
@@ -288,20 +288,20 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 	expect(beforeDelete).toHaveLength(0);
 
 	// Delete the inherited entity (should create tombstone)
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-inherited-delete-change-id",
-			entity_id: "inherited-untracked-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-inherited-delete-change-id",
+        entity_id: "inherited-untracked-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: null, // Deletion
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify tombstone was created
 	const afterDelete = await lixInternalDb
@@ -337,23 +337,23 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 	const currentTime = timestamp({ lix: lix as any });
 
 	// Create untracked entity
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-timestamp-change-id",
-			entity_id: "timestamp-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-timestamp-change-id",
+        entity_id: "timestamp-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "timestamp-test-key",
 				value: "timestamp-value",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify timestamps are consistent
 	const result = await lixInternalDb
@@ -388,20 +388,20 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 	const currentTime = timestamp({ lix: lix as any });
 
 	// Create a tombstone first
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-tombstone-change-id",
-			entity_id: "tombstone-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-tombstone-change-id",
+        entity_id: "tombstone-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: null, // Creates tombstone
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify tombstone exists
 	const tombstone = await lixInternalDb
@@ -416,23 +416,23 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 	expect(tombstone[0]!.snapshot_content).toBe(null);
 
 	// Update the tombstone with actual content
-	updateUntrackedState({
-		lix,
-		change: {
-			id: "test-tombstone-update-change-id",
-			entity_id: "tombstone-test-key",
-			schema_key: "lix_key_value",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
+updateUntrackedState({
+    lix,
+    changes: [{
+        id: "test-tombstone-update-change-id",
+        entity_id: "tombstone-test-key",
+        schema_key: "lix_key_value",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				key: "tombstone-test-key",
 				value: "revived-value",
 			}),
 			schema_version: "1.0",
-			created_at: currentTime,
-		},
-		version_id: activeVersion.version_id,
-	});
+        created_at: currentTime,
+        lixcol_version_id: activeVersion.version_id,
+    }],
+});
 
 	// Verify tombstone flag is reset and content is restored
 	const result = await lixInternalDb

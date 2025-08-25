@@ -6,8 +6,8 @@
  *
  * Tag meanings:
  *
- * - T: Transaction direct (from internal_change_in_transaction in child version)
- * - TI: Transaction inherited (from internal_change_in_transaction in parent version)
+ * - T: Transaction direct (from internal_transaction_state in child version)
+ * - TI: Transaction inherited (from internal_transaction_state in parent version)
  * - U: Untracked direct (from internal_state_all_untracked in child version)
  * - UI: Untracked inherited (from internal_state_all_untracked in parent version)
  * - C: Cache-tracked direct (from internal_state_cache in child version)

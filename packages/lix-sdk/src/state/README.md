@@ -46,7 +46,7 @@ The virtual table:
 
 - **Purpose**: Accumulate multiple mutations
 - **Scope**: Multiple entities, single version
-- **Storage**: Temporary (`internal_change_in_transaction`)
+- **Storage**: Temporary (`internal_transaction_state`)
 - **Rollback**: Automatic on error or explicit rollback
 
 #### 3. COMMIT Stage
@@ -80,7 +80,7 @@ The virtual table acts as a facade over the actual storage mechanism:
 ┌─────────────────────────────────────────────────┐
 │         Regular SQLite Tables                   │
 │                                                 │
-│  • internal_change_in_transaction               │
+│  • internal_transaction_state                   │
 │  • internal_state_cache                         │
 │  • internal_change                              │
 │  • internal_snapshot                            │

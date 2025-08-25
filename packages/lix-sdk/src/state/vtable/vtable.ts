@@ -154,7 +154,7 @@ export function applyStateVTable(
 
 			xRollback: () => {
 				sqlite.exec({
-					sql: "DELETE FROM internal_change_in_transaction",
+					sql: "DELETE FROM internal_transaction_state",
 					returnValue: "resultRows",
 				});
 			},
