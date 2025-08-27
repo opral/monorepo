@@ -1,9 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { applyChanges } from "./apply-changes.js";
-import { mockChanges } from "./utilities/mockChanges.js";
-import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
 import { MarkdownRootSchemaV1 } from "./schemas/root.js";
-import { parseMarkdown } from "./utilities/parseMarkdown.js";
+import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 
 const createMockFile = (data: Uint8Array) => ({
 	id: "mock",
@@ -15,6 +13,47 @@ const createMockFile = (data: Uint8Array) => ({
 	lixcol_updated_at: new Date().toISOString(),
 });
 
+function buildChangesFromAst(astMarkdown: string) {
+	const ast = parseMarkdown(astMarkdown) as any;
+	// assign deterministic ids per top-level node
+	const ids: string[] = [];
+	const nodes: any[] = [];
+	ast.children.forEach((n: any, i: number) => {
+		const id = `n${i + 1}`;
+		n.data = { ...(n.data ?? {}), id };
+		ids.push(id);
+		nodes.push(n);
+	});
+	const created_at = new Date().toISOString();
+	const changes = [
+		{
+			id: "root-change",
+			entity_id: "root",
+			schema_key: MarkdownRootSchemaV1["x-lix-key"],
+			schema_version: MarkdownRootSchemaV1["x-lix-version"],
+			snapshot_content: { order: ids },
+			file_id: "mock",
+			plugin_key: "mock",
+			snapshot_id: "mock",
+			created_at,
+		},
+		...nodes.map((node, idx) => ({
+			id: `change-${idx + 1}`,
+			entity_id: node.data.id,
+			schema_key: (AstSchemas.schemasByType as any)[node.type]["x-lix-key"],
+			schema_version: (AstSchemas.schemasByType as any)[node.type][
+				"x-lix-version"
+			],
+			snapshot_content: node,
+			file_id: "mock",
+			plugin_key: "mock",
+			snapshot_id: "mock",
+			created_at,
+		})),
+	];
+	return changes as any;
+}
+
 describe("applyChanges", () => {
 	test("applies node insertion changes", () => {
 		const beforeMarkdown = "# Title\n\nHello world.";
@@ -23,15 +62,7 @@ describe("applyChanges", () => {
 		const beforeData = new TextEncoder().encode(beforeMarkdown);
 		const afterData = new TextEncoder().encode(afterMarkdown);
 
-		// Use mockChanges to get properly formatted changes
-		const changes = mockChanges({
-			file: {
-				id: "mock",
-				path: "/mock.md",
-				metadata: null,
-			},
-			fileUpdates: [beforeData, afterData],
-		});
+		const changes = buildChangesFromAst(new TextDecoder().decode(afterData));
 
 		// Apply changes to reconstruct
 		const result = applyChanges({
@@ -55,14 +86,7 @@ describe("applyChanges", () => {
 		const beforeData = new TextEncoder().encode(beforeMarkdown);
 		const afterData = new TextEncoder().encode(afterMarkdown);
 
-		const changes = mockChanges({
-			file: {
-				id: "mock",
-				path: "/mock.md",
-				metadata: null,
-			},
-			fileUpdates: [beforeData, afterData],
-		});
+		const changes = buildChangesFromAst(new TextDecoder().decode(afterData));
 
 		const result = applyChanges({
 			file: createMockFile(beforeData),
@@ -85,14 +109,7 @@ describe("applyChanges", () => {
 		const beforeData = new TextEncoder().encode(beforeMarkdown);
 		const afterData = new TextEncoder().encode(afterMarkdown);
 
-		const changes = mockChanges({
-			file: {
-				id: "mock",
-				path: "/mock.md",
-				metadata: null,
-			},
-			fileUpdates: [beforeData, afterData],
-		});
+		const changes = buildChangesFromAst(new TextDecoder().decode(afterData));
 
 		const result = applyChanges({
 			file: createMockFile(beforeData),
@@ -115,14 +132,7 @@ describe("applyChanges", () => {
 		const beforeData = new TextEncoder().encode(beforeMarkdown);
 		const afterData = new TextEncoder().encode(afterMarkdown);
 
-		const changes = mockChanges({
-			file: {
-				id: "mock",
-				path: "/mock.md",
-				metadata: null,
-			},
-			fileUpdates: [beforeData, afterData],
-		});
+		const changes = buildChangesFromAst(new TextDecoder().decode(afterData));
 		const result = applyChanges({
 			file: createMockFile(beforeData),
 			changes,
@@ -154,95 +164,5 @@ describe("applyChanges", () => {
 		expect(resultMarkdown.trim()).toBe("");
 	});
 
-	test("applies changes with existing mdast_id comments", () => {
-		const beforeMarkdown = `<!-- mdast_id = heading-1 -->
-# Title
-
-<!-- mdast_id = para-1 -->
-Hello world.`;
-
-		const afterMarkdown = `<!-- mdast_id = heading-1 -->
-# Title
-
-<!-- mdast_id = para-1 -->
-Hello everyone.`;
-
-		const beforeData = new TextEncoder().encode(beforeMarkdown);
-		const afterData = new TextEncoder().encode(afterMarkdown);
-
-		const changes = mockChanges({
-			file: {
-				id: "mock",
-				path: "/mock.md",
-				metadata: null,
-			},
-			fileUpdates: [beforeData, afterData],
-		});
-
-		const result = applyChanges({
-			file: createMockFile(beforeData),
-			changes,
-		});
-
-		const resultMarkdown = new TextDecoder().decode(result.fileData);
-
-		// Should contain modified text
-		expect(resultMarkdown).toContain("Hello everyone");
-		expect(resultMarkdown).not.toContain("Hello world");
-		// Should preserve IDs
-		expect(resultMarkdown).toContain("heading-1");
-		expect(resultMarkdown).toContain("para-1");
-	});
-
-	test("skips ID comments when metadata flag is set", () => {
-		const markdown = "# Title\n\nHello world.";
-		const data = new TextEncoder().encode(markdown);
-
-		// Parse markdown to get AST structure
-		const ast = parseMarkdown(markdown);
-
-		// Create mock changes that would normally add the nodes
-		const changes = [
-			{
-				id: "change-1",
-				entity_id: "root",
-				schema_key: MarkdownRootSchemaV1["x-lix-key"],
-				schema_version: MarkdownRootSchemaV1["x-lix-version"],
-				snapshot_content: {
-					order: ast.children.map((node) => node.mdast_id),
-				},
-				file_id: "mock",
-				plugin_key: "mock",
-				snapshot_id: "mock",
-				created_at: new Date().toISOString(),
-			},
-			...ast.children.map((node) => ({
-				id: `change-${node.mdast_id}`,
-				entity_id: node.mdast_id,
-				schema_key: MarkdownNodeSchemaV1["x-lix-key"],
-				schema_version: MarkdownNodeSchemaV1["x-lix-version"],
-				snapshot_content: node,
-				file_id: "mock",
-				plugin_key: "mock",
-				snapshot_id: "mock",
-				created_at: new Date().toISOString(),
-			})),
-		];
-
-		const result = applyChanges({
-			file: {
-				...createMockFile(data),
-				metadata: { skip_id_comments: true },
-			},
-			changes,
-		});
-
-		const resultMarkdown = new TextDecoder().decode(result.fileData);
-
-		// Should not contain ID comments
-		expect(resultMarkdown).not.toContain("mdast_id");
-		// Should still contain content
-		expect(resultMarkdown).toContain("Title");
-		expect(resultMarkdown).toContain("Hello world");
-	});
+	// The plugin no longer writes HTML id comments; those tests were removed.
 });

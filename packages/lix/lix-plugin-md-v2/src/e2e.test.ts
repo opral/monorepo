@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "@lix-js/sdk";
-import { MarkdownNodeSchemaV1, plugin } from "./index.js";
+import { plugin } from "./index.js";
+import { AstSchemas } from "@opral/markdown-wc";
 
 test("detects changes when inserting markdown file", async () => {
 	// Initialize Lix with the markdown plugin
@@ -103,12 +104,8 @@ test("programatically mutating entities should be reflected in the file", async 
 		providePlugins: [plugin],
 	});
 
-	// 1. Insert a markdown with nodes that have explicit IDs
-	const initialMarkdown = `<!-- mdast_id = abc123 -->
-# Title
-
-<!-- mdast_id = def456 -->
-This is the original paragraph content.`;
+	// 1. Insert a markdown document
+	const initialMarkdown = `# Title\n\nThis is the original paragraph content.`;
 	const initialData = new TextEncoder().encode(initialMarkdown);
 
 	await lix.db
@@ -120,48 +117,60 @@ This is the original paragraph content.`;
 		})
 		.execute();
 
-	// 2. Mutate the paragraph via state using the known entity_id
-	// Create proper MD-AST node structure for paragraph
+	// Discover current entity ids for heading and paragraph
+	const headingRow = await lix.db
+		.selectFrom("state_all")
+		.where("file_id", "=", "file1")
+		.where("schema_key", "=", (AstSchemas.schemasByType as any).heading["x-lix-key"])
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const paraRow = await lix.db
+		.selectFrom("state_all")
+		.where("file_id", "=", "file1")
+		.where("schema_key", "=", (AstSchemas.schemasByType as any).paragraph["x-lix-key"])
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// 2. Mutate the paragraph via state using the discovered entity_id
+	// Create proper Markdown-WC node structure for paragraph
 	await lix.db
 		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				type: "paragraph",
-				mdast_id: "def456",
+				data: { id: "def456" },
 				children: [
 					{
 						type: "text",
 						value: "This is the updated paragraph content.",
-						mdast_id: "def456-text",
 					},
 				],
 			},
 		})
-		.where("entity_id", "=", "def456")
-		.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+		.where("entity_id", "=", paraRow.entity_id)
+		.where("schema_key", "=", (AstSchemas.schemasByType as any).paragraph["x-lix-key"])
 		.where("file_id", "=", "file1")
 		.execute();
 
 	// 3. Mutate the title via state using the known entity_id
-	// Create proper MD-AST node structure for heading
+	// Create proper node structure for heading
 	await lix.db
 		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				type: "heading",
 				depth: 1,
-				mdast_id: "abc123",
+				data: { id: "abc123" },
 				children: [
 					{
 						type: "text",
 						value: "This is the updated title.",
-						mdast_id: "abc123-text",
 					},
 				],
 			},
 		})
-		.where("entity_id", "=", "abc123")
-		.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+		.where("entity_id", "=", headingRow.entity_id)
+		.where("schema_key", "=", (AstSchemas.schemasByType as any).heading["x-lix-key"])
 		.where("file_id", "=", "file1")
 		.execute();
 
@@ -175,9 +184,8 @@ This is the original paragraph content.`;
 	// Decode and verify the updated content
 	const updatedMarkdown = new TextDecoder().decode(updatedFile.data);
 
-	// Should contain the updated content with mdast_id comments
+	// Should contain the updated content (no HTML id comments expected)
 	expect(updatedMarkdown).toContain("This is the updated title.");
 	expect(updatedMarkdown).toContain("This is the updated paragraph content.");
-	expect(updatedMarkdown).toContain("<!-- mdast_id = abc123 -->");
-	expect(updatedMarkdown).toContain("<!-- mdast_id = def456 -->");
+	expect(updatedMarkdown).not.toContain("mdast_id");
 });

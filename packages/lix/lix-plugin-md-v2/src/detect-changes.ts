@@ -1,4 +1,9 @@
-import type { DetectedChange, LixFile, StateRow } from "@lix-js/sdk";
+import type {
+	DetectedChange,
+	LixFile,
+	StateRow,
+	LixSchemaDefinition,
+} from "@lix-js/sdk";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 import { MarkdownRootSchemaV1 } from "./schemas/root.js";
@@ -97,7 +102,9 @@ export const detectChanges = ({
 	// Deletions
 	for (const [id, node] of beforeNodes) {
 		if (!afterNodesById.has(id)) {
-			const schema = AstSchemas.schemasByType[(node as any).type];
+			const schema = AstSchemas.schemasByType[
+				(node as any).type
+			] as unknown as LixSchemaDefinition;
 			if (schema) {
 				detectedChanges.push({
 					schema,
@@ -111,7 +118,9 @@ export const detectChanges = ({
 	// Adds/Mods
 	for (const [id, afterNode] of afterNodesById) {
 		const beforeNode = beforeNodes.get(id);
-		const schema = AstSchemas.schemasByType[(afterNode as any).type];
+		const schema = AstSchemas.schemasByType[
+			(afterNode as any).type
+		] as unknown as LixSchemaDefinition;
 		if (!schema) continue;
 		if (!beforeNode || fingerprint(beforeNode) !== fingerprint(afterNode)) {
 			detectedChanges.push({
