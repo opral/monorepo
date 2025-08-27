@@ -274,6 +274,39 @@ describe("blocks", () => {
 		expect(output).toEqual(input)
 	})
 
+
+	test("table", () => {
+		const input: Root = {
+			type: "root",
+			children: [
+				{
+					type: "table",
+					align: [null, null] as any,
+					children: [
+						{
+							type: "tableRow",
+							children: [
+								{ type: "tableCell", children: [{ type: "text", value: "a" }] } as any,
+								{ type: "tableCell", children: [{ type: "text", value: "b" }] } as any,
+							],
+						},
+						{
+							type: "tableRow",
+							children: [
+								{ type: "tableCell", children: [{ type: "text", value: "1" }] } as any,
+								{ type: "tableCell", children: [{ type: "text", value: "2" }] } as any,
+							],
+						},
+					],
+				} as any,
+			],
+		} as any
+		const output = roundtrip(input)
+		expect(output).toEqual(input)
+		const editorOutput = roundtripThroughEditor(input)
+		expect(editorOutput).toEqual(input)
+	})
+
 	test("thematic break", () => {
 		const input: Root = { type: "root", children: [{ type: "thematicBreak" }] } as any
 		const output = roundtrip(input)

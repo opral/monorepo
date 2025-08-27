@@ -24,18 +24,19 @@ function pmBlockToAst(node: PMNode): any {
 				children: pmInlineToMd(node.content || []),
 			}
 		case "bulletList":
-			return { type: "list", ordered: false, children: (node.content || []).map(pmBlockToAst) }
+			return { type: "list", ordered: false, spread: false, children: (node.content || []).map(pmBlockToAst) } as any
 		case "orderedList": {
 			const out: any = {
 				type: "list",
 				ordered: true,
+				spread: false,
 				children: (node.content || []).map(pmBlockToAst),
 			}
 			if (node.attrs?.start != null && node.attrs.start !== 1) out.start = node.attrs.start
 			return out
 		}
 		case "listItem": {
-			const out: any = { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
+			const out: any = { type: "listItem", spread: false, children: (node.content || []).map(pmBlockToAst) }
 			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false)) out.checked = node.attrs.checked
 			return out
 		}
@@ -51,6 +52,18 @@ function pmBlockToAst(node: PMNode): any {
 		}
 		case "horizontalRule":
 			return { type: "thematicBreak" }
+		case "table": {
+			const align = node.attrs?.align ?? []
+			return {
+				type: "table",
+				align,
+				children: (node.content || []).map(pmBlockToAst),
+			} as any
+		}
+		case "tableRow":
+			return { type: "tableRow", children: (node.content || []).map(pmBlockToAst) }
+		case "tableCell":
+			return { type: "tableCell", children: pmInlineToMd(node.content || []) }
 		default:
 			if (node.content && node.content.length && isInline(node.content[0] as any)) {
 				return { type: "paragraph", children: pmInlineToMd(node.content) }

@@ -57,6 +57,32 @@ export function markdownWcNodes(): Extensions {
 				return ["ol", attrs, 0]
 			},
 		}),
+		// table
+		Node.create({
+			name: "table",
+			group: "block",
+			content: "tableRow+",
+			addAttributes() {
+				return { align: { default: [] } }
+			},
+			renderHTML() {
+				return ["table", ["tbody", 0]]
+			},
+		}),
+		Node.create({
+			name: "tableRow",
+			content: "tableCell+",
+			renderHTML() {
+				return ["tr", 0]
+			},
+		}),
+		Node.create({
+			name: "tableCell",
+			content: "inline*",
+			renderHTML() {
+				return ["td", 0]
+			},
+		}),
 		Node.create({
 			name: "listItem",
 			group: "block",

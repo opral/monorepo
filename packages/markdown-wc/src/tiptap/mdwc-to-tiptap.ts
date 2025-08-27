@@ -64,6 +64,22 @@ function astBlockToPM(node: MdContent): PMNode {
 		}
 		case "thematicBreak":
 			return { type: "horizontalRule" }
+		case "table": {
+			const n = node as any
+			return {
+				type: "table",
+				attrs: { align: Array.isArray(n.align) ? n.align : [] },
+				content: (n.children || []).map(astBlockToPM),
+			}
+		}
+		case "tableRow": {
+			const n = node as any
+			return { type: "tableRow", content: (n.children || []).map(astBlockToPM) }
+		}
+		case "tableCell": {
+			const n = node as any
+			return { type: "tableCell", content: flattenInline((n.children || []) as any, []) }
+		}
 		case "yaml":
 			// Not represented in editor surface; drop
 			return { type: "paragraph", content: textContent("") }

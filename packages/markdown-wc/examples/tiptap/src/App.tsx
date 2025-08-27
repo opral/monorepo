@@ -10,6 +10,12 @@ Hello **world** and _friends_. Visit [OpenAI](https://openai.com "OpenAI").
 - [x] task done
 - [ ] task todo
 
+| Left columns  | Right columns |
+| ------------- |:-------------:|
+| left foo      | right foo     |
+| left bar      | right bar     |
+| left baz      | right baz     |
+
 \`\`\`js
 const a = 1
 \`\`\``

@@ -98,3 +98,19 @@ textarea {
 	border-radius: 6px;
 	overflow: auto;
 }
+
+
+/* Table styling with CSS header (first row) */
+.editor .ProseMirror table {
+  border-collapse: collapse;
+  width: auto;
+  margin: 0 0 8px;
+}
+.editor .ProseMirror td {
+  border: 1px solid #e5e7eb;
+  padding: 4px 8px;
+}
+.editor .ProseMirror tr:first-child td {
+  font-weight: 600;
+  background: #f8fafc;
+}
