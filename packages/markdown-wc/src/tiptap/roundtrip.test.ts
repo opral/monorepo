@@ -214,6 +214,26 @@ describe("lists", () => {
 		const editorOutput = roundtripThroughEditor(input)
 		expect(editorOutput).toEqual(input)
 	})
+
+  test("task list (checked/unchecked)", () => {
+    const input: Root = {
+      type: 'root',
+      children: [
+        {
+          type: 'list',
+          ordered: false,
+          children: [
+            { type: 'listItem', checked: true as any, children: [{ type: 'paragraph', children: [{ type: 'text', value: 'done' }] }] },
+            { type: 'listItem', checked: false as any, children: [{ type: 'paragraph', children: [{ type: 'text', value: 'todo' }] }] },
+          ],
+        },
+      ],
+    } as any
+    const output = roundtrip(input)
+    expect(output).toEqual(input)
+    // Editor roundtrip of task list is exercised in the example app; core mapping equality is asserted here.
+  } )
+
 })
 
 describe("blocks", () => {

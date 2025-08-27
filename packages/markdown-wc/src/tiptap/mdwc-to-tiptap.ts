@@ -33,11 +33,22 @@ function astBlockToPM(node: MdContent): PMNode {
 			const type = n.ordered ? "orderedList" : "bulletList"
 			let attrs: any = undefined
 			if (n.ordered && n.start != null && n.start !== 1) attrs = { start: n.start }
+
+			// Mark bullet lists as task lists if any item has checked set
+			if (!n.ordered) {
+				const hasTask = Array.isArray(n.children)
+					? n.children.some((li: any) => li && (li.checked === true || li.checked === false))
+					: false
+				attrs = { ...(attrs || {}), isTaskList: hasTask }
+			}
+
 			return { type, attrs, content: (n.children || []).map(astBlockToPM) }
 		}
 		case "listItem": {
 			const n = node as any
-			return { type: "listItem", content: (n.children || []).map(astBlockToPM) }
+			const hasChecked = n.checked === true || n.checked === false
+			const attrs = hasChecked ? { checked: n.checked } : undefined
+			return { type: 'listItem', attrs, content: (n.children || []).map(astBlockToPM) }
 		}
 		case "blockquote": {
 			const n = node as any

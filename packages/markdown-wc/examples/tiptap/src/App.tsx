@@ -7,8 +7,8 @@ const initialMarkdown = `# Heading
 
 Hello **world** and _friends_.
 
-- one
-- two
+- [x] task done
+- [ ] task todo
 
 \`\`\`js
 const a = 1
@@ -21,7 +21,7 @@ export default function App() {
 		lastEditorMd: null,
 	})
 
-	const editor = useEditor({
+  const editor = useEditor({
 		extensions: markdownWcExtensions(),
 		content: astToTiptapDoc(parseMarkdown(initialMarkdown)) as any,
 		onUpdate: ({ editor }) => {
@@ -31,7 +31,9 @@ export default function App() {
 			sync.current.lastEditorMd = md
 			setMarkdown(md)
 		},
-	})
+  })
+
+		// Checkbox toggling is now handled by a NodeView in markdownWcExtensions.
 
 	// Markdown (left) → TipTap (right), without losing selection or causing loops
 	useEffect(() => {

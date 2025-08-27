@@ -85,6 +85,8 @@ textarea {
 .editor .ProseMirror ol {
 	margin: 0 0 8px 24px;
 }
+.editor .ProseMirror li[data-task] { list-style: none; }
+.editor .ProseMirror li[data-task] input[type="checkbox"] { margin-right: 6px; }
 .editor .ProseMirror blockquote {
 	border-left: 3px solid #e5e7eb;
 	margin: 0 0 8px;

@@ -34,8 +34,12 @@ function pmBlockToAst(node: PMNode): any {
 			if (node.attrs?.start != null && node.attrs.start !== 1) out.start = node.attrs.start
 			return out
 		}
-		case "listItem":
-			return { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
+		case "listItem": {
+			const out: any = { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
+			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false)) out.checked = node.attrs.checked
+			return out
+		}
+
 		case "blockquote":
 			return { type: "blockquote", children: (node.content || []).map(pmBlockToAst) }
 		case "codeBlock": {
