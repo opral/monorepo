@@ -2738,6 +2738,9 @@ importers:
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../../lix-sdk
+      '@opral/markdown-wc':
+        specifier: workspace:*
+        version: link:../../markdown-wc
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
@@ -3044,6 +3047,9 @@ importers:
       ajv:
         specifier: ^8.12.0
         version: 8.17.1
+      json-schema-to-ts:
+        specifier: ^3.1.0
+        version: 3.1.1
       lit:
         specifier: ^3.2.1
         version: 3.2.1
@@ -3144,7 +3150,7 @@ importers:
         version: link:../lix/inspector
       '@lix-js/plugin-md':
         specifier: workspace:*
-        version: link:../lix/lix-plugin-md-v2
+        version: link:../lix-plugin-md
       '@lix-js/plugin-txt':
         specifier: workspace:*
         version: link:../lix-plugin-txt
@@ -35852,7 +35858,7 @@ snapshots:
 
   json-schema-to-ts@3.1.1:
     dependencies:
-      '@babel/runtime': 7.25.7
+      '@babel/runtime': 7.27.6
       ts-algebra: 2.0.0
 
   json-schema-traverse@0.4.1: {}

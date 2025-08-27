@@ -1,8 +1,7 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
+import { serializeAst, AstSchemas } from "@opral/markdown-wc";
+import type { Ast } from "@opral/markdown-wc";
 import { MarkdownRootSchemaV1 } from "./schemas/root.js";
-import { serializeMarkdown } from "./utilities/serializeMarkdown.js";
-import type { MdAst, MdAstNode } from "./utilities/parseMarkdown.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
@@ -10,69 +9,47 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 }) => {
 	// Extract order from root change (use the most recent one)
 	const rootChanges = changes.filter(
-		(c) => c.schema_key === MarkdownRootSchemaV1["x-lix-key"],
+		(c) => c.schema_key === MarkdownRootSchemaV1["x-lix-key"]
 	);
 	const orderChange = rootChanges.sort((a, b) =>
-		b.created_at.localeCompare(a.created_at),
+		b.created_at.localeCompare(a.created_at)
 	)[0];
-	const order = orderChange?.snapshot_content?.order || [];
+	const order: string[] = orderChange?.snapshot_content?.order || [];
 
-	// Build new AST from changes
-	const ast: MdAst = {
-		type: "root",
-		children: [],
-	};
+	// Build new AST from latest node snapshots
+	const ast: Ast = { type: "root", children: [] } as any;
 
-	// Process each node in the specified order
-	for (const nodeId of order) {
-		// Find the most recent change for this node
-		const nodeChanges = changes.filter(
-			(c) =>
-				c.entity_id === nodeId &&
-				c.schema_key === MarkdownNodeSchemaV1["x-lix-key"],
-		);
-		const change = nodeChanges.sort((a, b) =>
-			b.created_at.localeCompare(a.created_at),
-		)[0];
+	// Group latest snapshot per entity_id across any markdown-wc node schema
+	const latestById = new Map<string, typeof changes[number]>();
+	for (const ch of changes) {
+		if (
+			ch.schema_key &&
+			typeof ch.schema_key === "string" &&
+			ch.schema_key.startsWith("markdown_wc_ast_") &&
+			ch.schema_key !== MarkdownRootSchemaV1["x-lix-key"]
+		) {
+			const prev = latestById.get(ch.entity_id);
+			if (!prev || ch.created_at > prev.created_at) latestById.set(ch.entity_id, ch);
+		}
+	}
 
+	// If no explicit order, fall back to created_at ordering
+	const effectiveOrder = order.length
+		? order
+		: Array.from(latestById.values())
+			.sort((a, b) => a.created_at.localeCompare(b.created_at))
+			.map((c) => c.entity_id);
+
+	for (const id of effectiveOrder) {
+		const change = latestById.get(id);
 		if (change?.snapshot_content) {
-			// Add the node content
-			ast.children.push(change.snapshot_content as MdAstNode);
+			const node = change.snapshot_content as any;
+			node.data = { ...(node.data ?? {}), id };
+			(ast.children as any[]).push(node);
 		}
 	}
 
-	// Handle case where no order change exists - use all node changes in their original order
-	if (order.length === 0) {
-		const nodeChanges = changes.filter(
-			(c) => c.schema_key === MarkdownNodeSchemaV1["x-lix-key"],
-		);
-
-		// Group changes by entity_id and take the most recent for each
-		const nodesByEntity = new Map<string, (typeof nodeChanges)[0]>();
-		for (const change of nodeChanges) {
-			const existing = nodesByEntity.get(change.entity_id);
-			if (!existing || change.created_at > existing.created_at) {
-				nodesByEntity.set(change.entity_id, change);
-			}
-		}
-
-		// Sort by creation time to maintain some order
-		const latestChanges = Array.from(nodesByEntity.values()).sort((a, b) =>
-			a.created_at.localeCompare(b.created_at),
-		);
-
-		for (const change of latestChanges) {
-			if (change.snapshot_content) {
-				ast.children.push(change.snapshot_content as MdAstNode);
-			}
-		}
-	}
-
-	// Serialize to markdown
-	const skipIdComments = file.metadata?.skip_id_comments === true;
-	const markdown = serializeMarkdown(ast, { skip_id_comments: skipIdComments });
-
-	return {
-		fileData: new TextEncoder().encode(markdown),
-	};
+	// Serialize to markdown (markdown-wc ignores unknown node.data fields)
+	const markdown = serializeAst(ast);
+	return { fileData: new TextEncoder().encode(markdown) };
 };

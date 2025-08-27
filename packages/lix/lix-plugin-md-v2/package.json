@@ -18,7 +18,8 @@
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"dependencies": {
-		"@lix-js/sdk": "workspace:*"
+		"@lix-js/sdk": "workspace:*",
+		"@opral/markdown-wc": "workspace:*"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
