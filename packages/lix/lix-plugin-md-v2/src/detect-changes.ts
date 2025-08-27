@@ -30,6 +30,15 @@ export const detectChanges = ({
 	before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 	after: Omit<LixFile, "data"> & { data: Uint8Array };
 }): DetectedChange[] => {
+	const THRESHOLDS = {
+		simStrong: 0.6,
+		headingSim: 0.3,
+		idxSame: 0.3,
+		scoreGood: 0.5,
+		marginWin: 0.1,
+		smallEditLen: 12,
+		tieStrongMargin: 0.15,
+	} as const;
 	const afterMarkdown = new TextDecoder().decode(
 		after?.data ?? new Uint8Array(),
 	);
@@ -140,6 +149,7 @@ export const detectChanges = ({
 	};
 
 	// Overlay: serialize before/after blocks and diff to help remap ids on edits/moves
+	// Reserved for potential anchor-based matching; currently not used.
 	const buildComposite = (
 		nodes: { id: string; node: any }[],
 	): {
@@ -275,13 +285,9 @@ export const detectChanges = ({
 
 	// Build exact canonicalized text pools from remaining before nodes
 	const exactPoolsByType = new Map<string, Map<string, string[]>>();
-	const canonBlockText = (n: any) => {
-		const s = serializeAst({ type: "root", children: [omitMeta(n)] } as any);
-		return stripTrailingNewlines(normEOL(s));
-	};
 	for (const b of beforeInfos) {
 		if (used.has(b.id)) continue;
-		const text = canonBlockText(beforeNodes.get(b.id));
+		const text = stripTrailingNewlines(normEOL(b.text));
 		let pool = exactPoolsByType.get(b.type);
 		if (!pool) {
 			pool = new Map();
@@ -299,7 +305,7 @@ export const detectChanges = ({
 
 		// Stage 1: exact canonicalized text match
 		let idFromExact: string | undefined;
-		const text = canonBlockText(a.node);
+		const text = stripTrailingNewlines(normEOL(a.text));
 		const pool = exactPoolsByType.get(a.type);
 		if (pool) {
 			const list = pool.get(text);
@@ -347,7 +353,7 @@ export const detectChanges = ({
 			const top = metrics[0]!;
 			const second = metrics[1]!;
 			margin = second ? top.s - second.s : Infinity;
-			if (!second || margin >= 0.15) {
+			if (!second || margin >= THRESHOLDS.tieStrongMargin) {
 				chosen = top;
 			} else {
 				metrics.sort((m1, m2) => m2.score - m1.score);
@@ -366,17 +372,17 @@ export const detectChanges = ({
 					bTxt.length > 0 &&
 					(aTxt.includes(bTxt) || bTxt.includes(aTxt));
 				const lenDiff = Math.abs(aTxt.length - bTxt.length);
-				smallEditOK = isSub && lenDiff <= 12;
+				smallEditOK = isSub && lenDiff <= THRESHOLDS.smallEditLen;
 			}
 			// Acceptance: strong textual similarity OR same index with modest similarity OR good combined score
 			// Additionally, if chosen clearly wins by similarity, accept with a slightly lower threshold
 			if (
 				smallEditOK ||
-				chosen.s >= 0.6 ||
-				(a.type === "heading" && chosen.s >= 0.3) ||
-				(chosen.idxDiff === 0 && chosen.s >= 0.3) ||
-				chosen.score >= 0.5 ||
-				(margin >= 0.1 && chosen.s >= 0.4)
+				chosen.s >= THRESHOLDS.simStrong ||
+				(a.type === "heading" && chosen.s >= THRESHOLDS.headingSim) ||
+				(chosen.idxDiff === 0 && chosen.s >= THRESHOLDS.idxSame) ||
+				chosen.score >= THRESHOLDS.scoreGood ||
+				(margin >= THRESHOLDS.marginWin && chosen.s >= 0.4)
 			) {
 				id = chosen.b.id;
 			}

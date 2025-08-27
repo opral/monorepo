@@ -30,6 +30,40 @@ function makeBeforeState(markdown: string, ids?: string[]) {
 	return rows;
 }
 
+// ===== Helpers for large-doc tests (deterministic) =====
+function rng(seed: number) {
+  // xorshift32
+  let x = seed >>> 0;
+  return () => {
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    return (x >>> 0) / 0xffffffff;
+  };
+}
+
+function shuffle<T>(arr: T[], seed = 42): T[] {
+  const r = rng(seed);
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(r() * (i + 1));
+    [a[i] as any, a[j] as any] = [a[j], a[i]];
+  }
+  return a;
+}
+function makeBigDoc(n: number) {
+  const paras = Array.from({ length: n }, (_, i) => `P${i + 1}`);
+  const beforeIds = Array.from({ length: n }, (_, i) => `p${i + 1}`);
+  return { paras, beforeIds, markdown: paras.join("\n\n") };
+}
+function applySmallEdits(paras: string[], count: number, seed = 7): string[] {
+  const r = rng(seed);
+  const n = paras.length;
+  const idxs = new Set<number>();
+  while (idxs.size < Math.min(count, n)) idxs.add(Math.floor(r() * n));
+  const out = paras.slice();
+  for (const i of idxs) out[i] = out[i] + " x"; // tiny additive edit
+  return out;
+}
+
 test("it should not detect changes if the markdown file did not update", async () => {
 	const beforeMarkdown = `# Heading\n\nSome text.`;
 	const beforeState = makeBeforeState(beforeMarkdown, ["h1", "p1"]);
@@ -1110,4 +1144,122 @@ test("large doc (1k paras): delete 1, insert 1, move 10 → 3 changes", () => {
 	const idx600 = order.indexOf("p600");
 	expect(idx600).toBeGreaterThanOrEqual(0);
 	expect(order[idx600 + 1]).toBe(addedId);
+});
+
+test("large doc (5k): pure shuffle → root change only", () => {
+	const { paras, beforeIds, markdown } = makeBigDoc(5000);
+	const beforeState = makeBeforeState(markdown, beforeIds);
+	const after = shuffle(paras, 123).join("\n\n");
+
+	const changes = detectChanges({
+		beforeState,
+		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+	});
+
+	// Expect ONLY a root order change
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter((c) => (c.snapshot_content as any)?.type);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
+
+	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
+	const order = (root!.snapshot_content as any).order as string[];
+	expect(order.length).toBe(5000);
+});
+
+test("large doc (3k): ~1% tiny edits → equal number of mods, no adds/dels", () => {
+	const { paras, beforeIds, markdown } = makeBigDoc(3000);
+	const beforeState = makeBeforeState(markdown, beforeIds);
+
+	const edited = applySmallEdits(paras, Math.floor(paras.length * 0.01), 99);
+	const after = edited.join("\n\n");
+
+	const changes = detectChanges({
+		beforeState,
+		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+	});
+
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter(
+		(c) =>
+			(c.snapshot_content as any)?.type &&
+			c.entity_id &&
+			!beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => (c.snapshot_content as any)?.type && beforeIds.includes(c.entity_id),
+	);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
+	expect(mods.length).toBeGreaterThan(0);
+	// Allow a little slack but expect close to 1% (±2)
+	expect(
+		Math.abs(mods.length - Math.floor(paras.length * 0.01)),
+	).toBeLessThanOrEqual(2);
+});
+
+test("duplicates (1k Same): edit #700 only → 1 mod, no root change", () => {
+	const paras = Array.from({ length: 1000 }, () => "Same");
+	const beforeIds = Array.from({ length: 1000 }, (_, i) => `p${i + 1}`);
+	const before = paras.join("\n\n");
+	const beforeState = makeBeforeState(before, beforeIds);
+
+	const afterParas = paras.slice();
+	afterParas[699] = "Same updated";
+	const after = afterParas.join("\n\n");
+
+	const changes = detectChanges({
+		beforeState,
+		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+	});
+
+	const mods = changes.filter(
+		(c) => (c.snapshot_content as any)?.type === "paragraph",
+	);
+	expect(mods.length).toBe(1);
+	expect(mods[0]!.entity_id).toBe("p700");
+
+	const root = changes.find((c) => c.entity_id === "root");
+	if (root) {
+		expect((root.snapshot_content as any).order).toEqual(beforeIds); // order stable
+	}
+});
+
+test("large mixed: 2k dup 'Same' blocks + move 200 unique → 1 root + targeted mods", () => {
+	// Build 2000 'Same' + 200 unique tail
+	const dups = Array.from({ length: 2000 }, () => "Same");
+	const uniques = Array.from({ length: 200 }, (_, i) => `U${i + 1}`);
+	const paras = [...dups, ...uniques];
+	const beforeIds = Array.from({ length: paras.length }, (_, i) => `p${i + 1}`);
+	const before = paras.join("\n\n");
+	const beforeState = makeBeforeState(before, beforeIds);
+
+	// Move the last 200 uniques to the front; edit U10 slightly
+	const moved = uniques.slice();
+	const remaining = dups.slice();
+	const editedMoved = moved.slice();
+	editedMoved[9] = editedMoved[9] + " x";
+	const after = [...editedMoved, ...remaining].join("\n\n");
+
+	const changes = detectChanges({
+		beforeState,
+		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+	});
+
+	// Expect one root, plus exactly one mod (U10), no adds/dels
+	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
+
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter(
+		(c) =>
+			(c.snapshot_content as any)?.type && !beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => (c.snapshot_content as any)?.type && beforeIds.includes(c.entity_id),
+	);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
+	expect(mods.length).toBe(1);
 });
