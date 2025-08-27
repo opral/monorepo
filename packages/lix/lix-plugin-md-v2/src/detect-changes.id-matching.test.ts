@@ -194,19 +194,19 @@ test("code → paragraph (cross-type) results in deletion+addition", () => {
   expect(addPara).toBeTruthy();
 });
 
-test("heading text edit preserves id (expected to fail with current impl)", () => {
-  const before = `# Hello`;
-  const after = `# Hello World`;
-  const beforeState = makeBeforeState(before, ["h1"]);
+test("heading text edit preserves id", () => {
+	const before = `# Hello`;
+	const after = `# Hello World`;
+	const beforeState = makeBeforeState(before, ["h1"]);
 
-  const changes = detectChanges({
-    beforeState,
-    after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-  });
+	const changes = detectChanges({
+		beforeState,
+		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+	});
 
-  const mod = changes.find((c) => c.entity_id === "h1");
-  expect(mod).toBeTruthy();
-  expect((mod as any).snapshot_content?.type).toBe("heading");
+	const mod = changes.find((c) => c.entity_id === "h1");
+	expect(mod).toBeTruthy();
+	expect((mod as any).snapshot_content?.type).toBe("heading");
 });
 
 test("long document: insert 1, delete 1, reorder 2 (sanity)", () => {
