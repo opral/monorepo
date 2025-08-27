@@ -73,10 +73,70 @@ export const detectChanges = ({
 		return rest;
 	};
 	const fingerprint = (n: any): string => JSON.stringify(omitMeta(n));
+	const toNFC = (s: string) =>
+		typeof (s as any).normalize === "function"
+			? (s as any).normalize("NFC")
+			: s;
+	const norm = (s: string) =>
+		toNFC(String(s)).replace(/\r\n?|\u2028|\u2029/g, "\n");
 	const hash = (s: string): string => {
 		let h = 5381;
 		for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i);
 		return (h >>> 0).toString(36);
+	};
+
+	const extractText = (node: any): string => {
+		if (!node || typeof node !== "object") return "";
+		if (typeof (node as any).value === "string")
+			return String((node as any).value ?? "");
+		let out = "";
+		const children = (node.children ?? []) as any[];
+		for (const ch of children) out += extractText(ch);
+		return out;
+	};
+	const normEOL = (s: string) => norm(s);
+	const stripTrailingNewlines = (s: string) => s.replace(/\n+$/g, "");
+	const blockKey = (node: any): string => {
+		const type = String(node?.type || "");
+		switch (type) {
+			case "paragraph":
+				return stripTrailingNewlines(normEOL(extractText(node))).trim();
+			case "heading":
+				return (
+					`${(node as any).depth ?? ""}|` +
+					stripTrailingNewlines(normEOL(extractText(node)))
+						.trim()
+						.toLowerCase()
+				);
+			case "code":
+				return (
+					`${(node as any).lang ?? ""}|` +
+					stripTrailingNewlines(normEOL(String((node as any).value ?? "")))
+				);
+			case "blockquote":
+				return stripTrailingNewlines(normEOL(extractText(node))).trim();
+			case "list": {
+				const arr = (node.children ?? []) as any[];
+				return arr.map((li: any) => normEOL(extractText(li)).trim()).join("\n");
+			}
+			case "table": {
+				const rows = (node.children ?? []) as any[];
+				return rows
+					.map((row: any) =>
+						((row.children ?? []) as any[])
+							.map((cell: any) => normEOL(extractText(cell)).trim())
+							.join("|"),
+					)
+					.join("\n");
+			}
+			default: {
+				const s = serializeAst({
+					type: "root",
+					children: [omitMeta(node)],
+				} as any);
+				return stripTrailingNewlines(normEOL(s)).trim();
+			}
+		}
 	};
 
 	// Overlay: serialize before/after blocks and diff to help remap ids on edits/moves
@@ -124,25 +184,79 @@ export const detectChanges = ({
 	).map((n: any, i: number) => ({ id: `after_${i}`, node: n }));
 	const afterComposite = buildComposite(afterBlocks);
 
-	// String-similarity assignment (type-scoped) as a robust block matcher
-	const beforeInfos = beforeBlocksOrdered.map(({ id, node }, idx) => ({
-		id,
-		type: node.type,
-		idx,
-		text: serializeAst({ type: "root", children: [omitMeta(node)] } as any),
-	}));
-	const afterInfos = (afterAst.children as any[]).map(
-		(node: any, idx: number) => ({
+	// Build (type,key) maps for a Stage 0 unique mapping
+	type TK = string; // `${type}#${key}`
+	const tk = (type: string, key: string): TK => `${type}#${key}`;
+
+	const beforeByTK = new Map<TK, string[]>();
+	const afterByTK = new Map<TK, number[]>();
+
+	const beforeInfos = beforeBlocksOrdered.map(({ id, node }, idx) => {
+		const key = blockKey(node);
+		const type = node.type;
+		const k = tk(type, key);
+		const list = beforeByTK.get(k) ?? [];
+		list.push(id);
+		beforeByTK.set(k, list);
+		return {
+			id,
+			type,
 			idx,
+			key,
+			text: norm(
+				serializeAst({ type: "root", children: [omitMeta(node)] } as any),
+			),
 			node,
-			type: node.type,
-			text: serializeAst({ type: "root", children: [omitMeta(node)] } as any),
-		}),
+		};
+	});
+	const afterInfos = (afterAst.children as any[]).map(
+		(node: any, idx: number) => {
+			const key = blockKey(node);
+			const type = node.type;
+			const k = tk(type, key);
+			const list = afterByTK.get(k) ?? [];
+			list.push(idx);
+			afterByTK.set(k, list);
+			return {
+				idx,
+				node,
+				type,
+				key,
+				text: norm(
+					serializeAst({ type: "root", children: [omitMeta(node)] } as any),
+				),
+			};
+		},
 	);
 
 	const used = new Set<string>();
-	const afterOrder: string[] = [];
+	const afterOrder: string[] = new Array(afterInfos.length).fill("");
 	const afterNodesById = new Map<string, any>();
+	const seenIds = new Set<string>(Array.from(beforeNodes.keys()));
+	let idCounter = 0;
+	const mintNewId = (): string => {
+		let id: string;
+		do {
+			id = `mdwc_${(++idCounter).toString(36)}`;
+		} while (seenIds.has(id));
+		seenIds.add(id);
+		return id;
+	};
+
+	// Stage 0: unique (type,key) present exactly once in before and after
+	for (const [k, ids] of beforeByTK) {
+		if (ids.length !== 1) continue;
+		const afterIdxs = afterByTK.get(k);
+		if (!afterIdxs || afterIdxs.length !== 1) continue;
+		const id = ids[0]!;
+		const idx = afterIdxs[0]!;
+		const a = afterInfos[idx]!;
+		a.node.data = { ...(a.node.data ?? {}), id };
+		afterNodesById.set(id, a.node);
+		afterOrder[idx] = id;
+		used.add(id);
+		seenIds.add(id);
+	}
 	const sim = (a: string, b: string): number => {
 		if (a === b) return 1;
 		const diffs = cleanupSemantic(makeDiff(a, b));
@@ -159,35 +273,120 @@ export const detectChanges = ({
 		return denom === 0 ? 1 : same / denom;
 	};
 
+	// Build exact canonicalized text pools from remaining before nodes
+	const exactPoolsByType = new Map<string, Map<string, string[]>>();
+	const canonBlockText = (n: any) => {
+		const s = serializeAst({ type: "root", children: [omitMeta(n)] } as any);
+		return stripTrailingNewlines(normEOL(s));
+	};
+	for (const b of beforeInfos) {
+		if (used.has(b.id)) continue;
+		const text = canonBlockText(beforeNodes.get(b.id));
+		let pool = exactPoolsByType.get(b.type);
+		if (!pool) {
+			pool = new Map();
+			exactPoolsByType.set(b.type, pool);
+		}
+		const list = pool.get(text) ?? [];
+		list.push(b.id);
+		pool.set(text, list);
+	}
+
 	for (const a of afterInfos) {
-		let best: { id: string; score: number } | null = null;
+		// Skip already assigned by Stage 0
+		const alreadyId = (a.node.data as any)?.id;
+		if (alreadyId) continue;
+
+		// Stage 1: exact canonicalized text match
+		let idFromExact: string | undefined;
+		const text = canonBlockText(a.node);
+		const pool = exactPoolsByType.get(a.type);
+		if (pool) {
+			const list = pool.get(text);
+			while (list && list.length) {
+				const candidateId = list.shift()!;
+				if (!used.has(candidateId)) {
+					idFromExact = candidateId;
+					break;
+				}
+			}
+			if (list && list.length === 0) pool.delete(text);
+		}
+		if (idFromExact) {
+			const id = idFromExact;
+			a.node.data = { ...(a.node.data ?? {}), id };
+			afterNodesById.set(id, a.node);
+			afterOrder[a.idx] = id;
+			used.add(id);
+			seenIds.add(id);
+			continue;
+		}
+
 		const candidates = beforeInfos.filter(
 			(b) => b.type === a.type && !used.has(b.id),
 		);
-		for (const b of candidates) {
-			if (b.type !== a.type) continue;
-			if (used.has(b.id)) continue;
+		const metrics = candidates.map((b) => {
 			const s = sim(b.text, a.text);
-			const posBoost = 1 - Math.min(1, Math.abs(a.idx - b.idx)); // 1 when same index, 0 when 1+ apart
-			const score = 0.8 * s + 0.2 * posBoost;
-			if (!best || score > best.score) best = { id: b.id, score };
+			const idxDiff = Math.abs(a.idx - b.idx);
+			const posBoost = 1 - Math.min(1, idxDiff);
+			const score = 0.6 * s + 0.4 * posBoost;
+			return { b, s, posBoost, score, idxDiff };
+		});
+		let chosen: (typeof metrics)[number] | undefined;
+		let margin = 0;
+		if (metrics.length === 1) {
+			chosen = metrics[0];
+		} else if (metrics.length > 1) {
+			// Prefer highest similarity; break ties by posBoost then smaller idxDiff
+			metrics.sort((m1, m2) => {
+				if (m2.s !== m1.s) return m2.s - m1.s;
+				if (m2.posBoost !== m1.posBoost) return m2.posBoost - m1.posBoost;
+				return m1.idxDiff - m2.idxDiff;
+			});
+			// If top similarity clearly better, pick it; else fall back to best score
+			const top = metrics[0]!;
+			const second = metrics[1]!;
+			margin = second ? top.s - second.s : Infinity;
+			if (!second || margin >= 0.15) {
+				chosen = top;
+			} else {
+				metrics.sort((m1, m2) => m2.score - m1.score);
+				chosen = metrics[0];
+			}
 		}
 		let id: string | undefined;
-		if (candidates.length === 1) {
-			// Only one viable candidate of same type; accept if similarity is reasonable
-			const b = candidates[0]!;
-			const s = sim(b.text, a.text);
-			const posBoost = 1 - Math.min(1, Math.abs(a.idx - b.idx));
-			const score = 0.8 * s + 0.2 * posBoost;
-			id = score >= 0.4 ? b.id : undefined;
-		} else {
-			id = best && best.score >= 0.6 ? best.id : undefined;
+		if (chosen) {
+			// Type-specific relaxed acceptance: for paragraphs, accept small additive edits (substring relation)
+			let smallEditOK = false;
+			if (a.type === "paragraph") {
+				const aTxt = extractText(omitMeta(a.node)).trim();
+				const bTxt = extractText(omitMeta(chosen.b.node)).trim();
+				const isSub =
+					aTxt.length > 0 &&
+					bTxt.length > 0 &&
+					(aTxt.includes(bTxt) || bTxt.includes(aTxt));
+				const lenDiff = Math.abs(aTxt.length - bTxt.length);
+				smallEditOK = isSub && lenDiff <= 12;
+			}
+			// Acceptance: strong textual similarity OR same index with modest similarity OR good combined score
+			// Additionally, if chosen clearly wins by similarity, accept with a slightly lower threshold
+			if (
+				smallEditOK ||
+				chosen.s >= 0.6 ||
+				(a.type === "heading" && chosen.s >= 0.3) ||
+				(chosen.idxDiff === 0 && chosen.s >= 0.3) ||
+				chosen.score >= 0.5 ||
+				(margin >= 0.1 && chosen.s >= 0.4)
+			) {
+				id = chosen.b.id;
+			}
 		}
-		if (!id) id = `mdwc_${hash(fingerprint(a.node))}`;
+		if (!id) id = mintNewId();
 		a.node.data = { ...(a.node.data ?? {}), id };
 		afterNodesById.set(id, a.node);
-		afterOrder.push(id);
+		afterOrder[a.idx] = id;
 		if (id && beforeNodes.has(id)) used.add(id);
+		seenIds.add(id);
 	}
 
 	// Deletions
