@@ -19,7 +19,8 @@
 	"sideEffects": false,
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
-		"@opral/markdown-wc": "workspace:*"
+		"@opral/markdown-wc": "workspace:*",
+		"@sanity/diff-match-patch": "^3.1.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",

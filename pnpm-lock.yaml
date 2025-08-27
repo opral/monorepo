@@ -2741,6 +2741,9 @@ importers:
       '@opral/markdown-wc':
         specifier: workspace:*
         version: link:../../markdown-wc
+      '@sanity/diff-match-patch':
+        specifier: ^3.1.0
+        version: 3.2.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
