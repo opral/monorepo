@@ -5,7 +5,7 @@ import type {
 	Text as MdText,
 } from "mdast"
 
-export type PMMark = { type: "bold" | "italic" | "strike" | "code" }
+export type PMMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: Record<string, any> }
 export type PMNode = {
 	type: string
 	attrs?: Record<string, any>
@@ -105,6 +105,15 @@ function flattenInline(nodes: MdPhrasing[], active: PMMark[]): PMNode[] {
 					marks: addMark(active, { type: "code" }),
 				})
 				break
+			case "link": {
+				const ln = n as any
+				const href = ln.url || null
+				const title = ln.title ?? null
+				out.push(
+					...flattenInline((ln.children || []) as any, addMark(active, { type: "link", attrs: { href, title } })),
+				)
+				break
+			}
 			case "break":
 				out.push({ type: "hardBreak" })
 				break

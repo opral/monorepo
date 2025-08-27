@@ -1,6 +1,6 @@
 import type { Root as MdRoot, PhrasingContent as MdPhrasing } from "mdast"
 
-export type PMMark = { type: "bold" | "italic" | "strike" | "code" }
+export type PMMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: Record<string, any> }
 export type PMNode = {
 	type: string
 	attrs?: Record<string, any>
@@ -73,13 +73,19 @@ function pmInlineToMd(nodes: PMNode[]): MdPhrasing[] {
 
 function applyMarksToText(value: string, marks: PMMark[]): MdPhrasing {
 	let node: MdPhrasing = { type: "text", value } as any
-	const order: PMMark["type"][] = ["bold", "italic", "strike", "code"]
+	const order: PMMark["type"][] = ["bold", "italic", "strike", "code", "link"]
 	for (const t of order) {
 		if (marks.find((m) => m.type === t)) {
 			if (t === "bold") node = { type: "strong", children: [node] } as any
 			else if (t === "italic") node = { type: "emphasis", children: [node] } as any
 			else if (t === "strike") node = { type: "delete", children: [node] } as any
 			else if (t === "code") node = { type: "inlineCode", value } as any
+			else if (t === "link") {
+				const mark = marks.find((m) => m.type === "link")!
+				const href = mark.attrs?.href ?? null
+				const title = mark.attrs?.title ?? null
+				node = { type: "link", url: href, title, children: [node] } as any
+			}
 		}
 	}
 	return node

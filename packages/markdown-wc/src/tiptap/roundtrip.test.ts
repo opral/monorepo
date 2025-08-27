@@ -133,6 +133,29 @@ describe("paragraph marks", () => {
 		const editorOutput = roundtripThroughEditor(input)
 		expect(editorOutput).toEqual(input)
 	})
+
+	test("link with text and title", () => {
+		const input: Root = {
+			type: "root",
+			children: [
+				{
+					type: "paragraph",
+					children: [
+						{
+							type: "link",
+							url: "https://example.com",
+							title: "title",
+							children: [{ type: "text", value: "text" }],
+						} as any,
+					],
+				},
+			],
+		} as any
+		const output = roundtrip(input)
+		expect(output).toEqual(input)
+		const editorOutput = roundtripThroughEditor(input)
+		expect(editorOutput).toEqual(input)
+	})
 })
 
 describe("lists", () => {

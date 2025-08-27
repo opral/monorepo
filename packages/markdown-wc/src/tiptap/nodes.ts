@@ -75,8 +75,8 @@ export function markdownWcNodes(): Extensions {
 			addNodeView() {
 				return ({ node, editor, getPos }) => {
 					const dom = document.createElement("li")
-					dom.style.display = 'flex'
-					dom.style.alignItems = 'flex-start'
+					dom.style.display = "flex"
+					dom.style.alignItems = "flex-start"
 					const isTask = node.attrs.checked === true || node.attrs.checked === false
 					let input: HTMLInputElement | null = null
 					const content = document.createElement("div")
@@ -190,6 +190,23 @@ export function markdownWcNodes(): Extensions {
 			name: "code",
 			renderHTML() {
 				return ["code", 0]
+			},
+		}),
+		Mark.create({
+			name: "link",
+			addAttributes() {
+				return {
+					href: { default: null },
+					title: { default: null },
+				}
+			},
+			renderHTML({ mark }) {
+				const attrs: any = {}
+				const href = (mark as any).attrs?.href
+				if (href) attrs.href = href
+				const title = (mark as any).attrs?.title
+				if (title) attrs.title = title
+				return ["a", attrs, 0]
 			},
 		}),
 	]

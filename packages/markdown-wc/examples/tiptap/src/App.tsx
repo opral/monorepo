@@ -5,7 +5,7 @@ import { parseMarkdown, serializeAst } from "@opral/markdown-wc"
 
 const initialMarkdown = `# Heading
 
-Hello **world** and _friends_.
+Hello **world** and _friends_. Visit [OpenAI](https://openai.com "OpenAI").
 
 - [x] task done
 - [ ] task todo
@@ -101,6 +101,23 @@ export default function App() {
                   title="Strikethrough"
                 >
                   <span style={{ textDecoration: "line-through" }}>S</span>
+                </button>
+                <button
+                  className={editor.isActive("link") ? "active" : ""}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    if (editor.isActive("link")) {
+                      editor.chain().focus().unsetMark("link").run()
+                      return
+                    }
+                    const href = window.prompt("Link URL", "https://")?.trim()
+                    if (!href) return
+                    const title = window.prompt("Link title (optional)")?.trim() || null
+                    editor.chain().focus().setMark("link", { href, title }).run()
+                  }}
+                  title="Link"
+                >
+                  Link
                 </button>
               </div>
               <EditorContent editor={editor} />
