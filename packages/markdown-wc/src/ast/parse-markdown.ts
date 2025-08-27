@@ -11,7 +11,7 @@ import type { Root as Ast } from "mdast"
  */
 export function parseMarkdown(markdown: string): Ast {
 	const processor = unified()
-		.use(remarkParse)
+		.use(remarkParse as any)
 		.use(remarkGfm as any)
 		.use(remarkFrontmatter as any, ["yaml"])
 

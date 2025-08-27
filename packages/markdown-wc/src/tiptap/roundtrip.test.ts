@@ -1,25 +1,25 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
 import type { Root } from "mdast"
-import { markdownWcAstToTiptap } from "./mdwc-to-tiptap.js"
-import { tiptapDocToMarkdownWcAst } from "./tiptap-to-mdwc.js"
+import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
+import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import { Editor } from "@tiptap/core"
 import { markdownWcExtensions } from "./markdown-wc.js"
 
 function roundtrip(ast: Root): Root {
-	const pmDoc = markdownWcAstToTiptap(ast)
-	const out = tiptapDocToMarkdownWcAst(pmDoc as any)
+	const pmDoc = astToTiptapDoc(ast)
+	const out = tiptapDocToAst(pmDoc as any)
 	return out as any
 }
 
 function roundtripThroughEditor(ast: Root): Root {
-	const pmDoc = markdownWcAstToTiptap(ast)
+	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
 		content: pmDoc as any,
 	})
 	const outJSON = editor.getJSON() as any
-	return tiptapDocToMarkdownWcAst(outJSON as any) as any
+	return tiptapDocToAst(outJSON as any) as any
 }
 
 describe("root & paragraph", () => {

@@ -9,7 +9,7 @@ export type PMNode = {
 	marks?: PMMark[]
 }
 
-export function tiptapDocToMarkdownWcAst(doc: PMNode): MdRoot {
+export function tiptapDocToAst(doc: PMNode): MdRoot {
 	return { type: "root", children: (doc.content || []).map(pmBlockToAst) } as any
 }
 
@@ -48,7 +48,7 @@ function pmBlockToAst(node: PMNode): any {
 		case "horizontalRule":
 			return { type: "thematicBreak" }
 		default:
-			if (node.content && node.content.length && isInline(node.content[0])) {
+			if (node.content && node.content.length && isInline(node.content[0] as any)) {
 				return { type: "paragraph", children: pmInlineToMd(node.content) }
 			}
 			return { type: "paragraph", children: [] }

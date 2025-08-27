@@ -1,0 +1,99 @@
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	font-family: system-ui, sans-serif;
+}
+.app {
+	display: flex;
+	height: 100vh;
+}
+.pane + .pane {
+	border-left: 1px solid #e5e7eb; /* vertical split line */
+}
+
+.pane {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.pane header {
+	padding: 8px 12px;
+	background: #f8fafc;
+	font-weight: 600;
+}
+.pane .content {
+	flex: 1;
+	min-height: 0;
+	padding: 12px; /* space so content borders don't clash with header/split */
+}
+.toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.toolbar button {
+    appearance: none;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.toolbar button.active {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+textarea {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #e5e7eb;
+	outline: 0;
+	resize: none;
+	padding: 12px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 14px;
+	line-height: 1.5;
+	border-radius: 6px;
+	background: #fff;
+}
+.editor {
+	height: 100%;
+	padding: 0; /* padding handled by parent content */
+	overflow: auto;
+}
+.editor .ProseMirror {
+	outline: 0;
+	border: 1px solid #e5e7eb; /* editor border */
+	border-radius: 6px;
+	background: #fff;
+	padding: 8px;
+}
+.editor .ProseMirror p {
+	margin: 0 0 8px;
+}
+.editor .ProseMirror h1,
+.editor .ProseMirror h2,
+.editor .ProseMirror h3 {
+	margin: 0 0 8px;
+}
+.editor .ProseMirror ul,
+.editor .ProseMirror ol {
+	margin: 0 0 8px 24px;
+}
+.editor .ProseMirror blockquote {
+	border-left: 3px solid #e5e7eb;
+	margin: 0 0 8px;
+	padding: 4px 8px;
+}
+.editor .ProseMirror pre {
+	background: #0f172a;
+	color: #e5e7eb;
+	padding: 8px;
+	border-radius: 6px;
+	overflow: auto;
+}

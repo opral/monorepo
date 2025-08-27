@@ -3,17 +3,17 @@ import { describe, expect, test } from "vitest"
 import { Editor } from "@tiptap/core"
 import type { Root } from "mdast"
 import { markdownWcExtensions } from "./markdown-wc.js"
-import { markdownWcAstToTiptap } from "./mdwc-to-tiptap.js"
-import { tiptapDocToMarkdownWcAst } from "./tiptap-to-mdwc.js"
+import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
+import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 
 function roundtripThroughEditor(ast: Root): Root {
-	const pmDoc = markdownWcAstToTiptap(ast)
+	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
 		content: pmDoc as any,
 	})
 	const outJSON = editor.getJSON() as any
-	return tiptapDocToMarkdownWcAst(outJSON as any) as any
+	return tiptapDocToAst(outJSON as any) as any
 }
 
 describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {

@@ -7,6 +7,7 @@ import { schemasByType } from "./schemas.js"
  * Returns true if all nodes validate; false otherwise.
  */
 export function validateAst(ast: Ast): boolean {
+	// @ts-expect-error
 	const ajv = new Ajv({ allErrors: true, strict: false })
 	const validators = new Map<string, any>()
 

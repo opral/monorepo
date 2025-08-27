@@ -4,8 +4,8 @@ import { Editor } from "@tiptap/core"
 import { parseMarkdown } from "../ast/parse-markdown.js"
 import { serializeAst } from "../ast/serialize-ast.js"
 import { markdownWcExtensions } from "./markdown-wc.js"
-import { markdownWcAstToTiptap } from "./mdwc-to-tiptap.js"
-import { tiptapDocToMarkdownWcAst } from "./tiptap-to-mdwc.js"
+import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
+import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 
 test("append paragraph at end", () => {
 	const input = `# Header\n\nHello`
@@ -13,7 +13,7 @@ test("append paragraph at end", () => {
 
 	// 1) markdown doc is loaded
 	const ast = parseMarkdown(input)
-	const content = markdownWcAstToTiptap(ast)
+	const content = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
 		content: content as any,
@@ -26,7 +26,7 @@ test("append paragraph at end", () => {
 	} as any)
 
 	// 3) roundtrip back to Markdown and assert expected
-	const outAst = tiptapDocToMarkdownWcAst(editor.getJSON() as any)
+	const outAst = tiptapDocToAst(editor.getJSON() as any)
 	const output = serializeAst(outAst as any)
 	expect(output).toBe(expectedOutput)
 })
@@ -38,7 +38,7 @@ test("insert text mid-paragraph", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
-		content: markdownWcAstToTiptap(ast) as any,
+		content: astToTiptapDoc(ast) as any,
 	})
 
 	// compute absolute pos after "Hello "
@@ -52,6 +52,7 @@ test("insert text mid-paragraph", () => {
 					return false
 				}
 			}
+			return
 		})
 		if (result == null) throw new Error("target not found")
 		return result
@@ -59,7 +60,7 @@ test("insert text mid-paragraph", () => {
 
 	editor.commands.insertContentAt(posAfter, { type: "text", text: "dear " } as any)
 
-	const outAst = tiptapDocToMarkdownWcAst(editor.getJSON() as any)
+	const outAst = tiptapDocToAst(editor.getJSON() as any)
 	const output = serializeAst(outAst as any)
 	expect(output).toBe(expectedOutput)
 })
@@ -71,7 +72,7 @@ test("insert hard break in paragraph (replace following space)", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
-		content: markdownWcAstToTiptap(ast) as any,
+		content: astToTiptapDoc(ast) as any,
 	})
 
 	// Replace the whole paragraph with a version that includes a hard break between words
@@ -90,7 +91,7 @@ test("insert hard break in paragraph (replace following space)", () => {
 		} as any
 	)
 
-	const outAst = tiptapDocToMarkdownWcAst(editor.getJSON() as any)
+	const outAst = tiptapDocToAst(editor.getJSON() as any)
 	const output = serializeAst(outAst as any)
 	expect(output).toBe(expectedOutput)
 })
@@ -102,7 +103,7 @@ test("split paragraph into two (insert new paragraph in the middle)", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
-		content: markdownWcAstToTiptap(ast) as any,
+		content: astToTiptapDoc(ast) as any,
 	})
 
 	// First paragraph positions
@@ -118,7 +119,7 @@ test("split paragraph into two (insert new paragraph in the middle)", () => {
 		{ type: "paragraph", content: [{ type: "text", text: "world." }] } as any
 	)
 
-	const outAst = tiptapDocToMarkdownWcAst(editor.getJSON() as any)
+	const outAst = tiptapDocToAst(editor.getJSON() as any)
 	const output = serializeAst(outAst as any)
 	expect(output).toBe(expectedOutput)
 })

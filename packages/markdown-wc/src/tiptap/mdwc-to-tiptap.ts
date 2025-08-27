@@ -14,7 +14,7 @@ export type PMNode = {
 	marks?: PMMark[]
 }
 
-export function markdownWcAstToTiptap(ast: MdRoot): PMNode {
+export function astToTiptapDoc(ast: MdRoot): PMNode {
 	return { type: "doc", content: ast.children.map(astBlockToPM) }
 }
 
