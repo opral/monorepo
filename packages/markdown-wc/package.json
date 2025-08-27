@@ -13,6 +13,7 @@
 	],
 	"exports": {
 		".": "./dist/index.js",
+		"./tiptap": "./dist/tiptap/index.js",
 		"./dist/markdown-wc-embed.js": "./dist/markdown-wc-embed.js"
 	},
 	"scripts": {
