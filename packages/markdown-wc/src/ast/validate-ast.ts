@@ -1,5 +1,5 @@
 import Ajv from "ajv"
-import type { Root as Ast } from "mdast"
+import type { Ast } from "./schemas.js"
 import { schemasByType } from "./schemas.js"
 
 /**

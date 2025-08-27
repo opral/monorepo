@@ -25,7 +25,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@types/mdast": "^4.0.4",
 		"mermaid": "^11.4.1",
 		"rehype-accessible-emojis": "0.3.2",
 		"rehype-autolink-headings": "7.0.0",

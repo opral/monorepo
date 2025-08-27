@@ -1,9 +1,4 @@
-import type {
-	Root as MdRoot,
-	Content as MdContent,
-	PhrasingContent as MdPhrasing,
-	Text as MdText,
-} from "mdast"
+// Avoid tight compile-time coupling to mdast types; operate on structural shape
 
 export type PMMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: Record<string, any> }
 export type PMNode = {
@@ -14,11 +9,11 @@ export type PMNode = {
 	marks?: PMMark[]
 }
 
-export function astToTiptapDoc(ast: MdRoot): PMNode {
+export function astToTiptapDoc(ast: any): PMNode {
 	return { type: "doc", content: ast.children.map(astBlockToPM) }
 }
 
-function astBlockToPM(node: MdContent): PMNode {
+function astBlockToPM(node: any): PMNode {
 	switch (node.type) {
 		case "paragraph":
 			return { type: "paragraph", content: flattenInline((node as any).children || [], []) }
@@ -96,12 +91,12 @@ function textContent(str: string): PMNode[] {
 	return str ? [{ type: "text", text: str }] : []
 }
 
-function flattenInline(nodes: MdPhrasing[], active: PMMark[]): PMNode[] {
+function flattenInline(nodes: any[], active: PMMark[]): PMNode[] {
 	const out: PMNode[] = []
 	for (const n of nodes) {
 		switch (n.type) {
 			case "text": {
-				const t = (n as MdText).value
+				const t = (n as any).value
 				if (t) out.push({ type: "text", text: t, marks: active.length ? [...active] : undefined })
 				break
 			}

@@ -2,7 +2,7 @@ import { unified } from "unified";
 import remarkStringify from "remark-stringify";
 import remarkGfm from "remark-gfm";
 import remarkFrontmatter from "remark-frontmatter";
-import type { Root as Ast } from "mdast";
+import type { Ast } from "./schemas.js";
 
 export interface SerializeOptions {
   gfm?: boolean;

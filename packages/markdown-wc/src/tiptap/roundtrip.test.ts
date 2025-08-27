@@ -1,18 +1,18 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
-import type { Root } from "mdast"
+import type { Ast } from "../ast/schemas.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import { Editor } from "@tiptap/core"
 import { markdownWcExtensions } from "./markdown-wc.js"
 
-function roundtrip(ast: Root): Root {
+function roundtrip(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const out = tiptapDocToAst(pmDoc as any)
 	return out as any
 }
 
-function roundtripThroughEditor(ast: Root): Root {
+function roundtripThroughEditor(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
@@ -24,7 +24,7 @@ function roundtripThroughEditor(ast: Root): Root {
 
 describe("root & paragraph", () => {
 	test("simple paragraph", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [{ type: "paragraph", children: [{ type: "text", value: "Hello world." }] }],
 		} as any
@@ -38,7 +38,7 @@ describe("root & paragraph", () => {
 describe("heading", () => {
 	for (let level = 1 as 1 | 2 | 3 | 4 | 5 | 6; level <= 6; level++) {
 		test(`h${level}`, () => {
-			const input: Root = {
+			const input: Ast = {
 				type: "root",
 				children: [
 					{ type: "heading", depth: level, children: [{ type: "text", value: "Heading" }] },
@@ -54,7 +54,7 @@ describe("heading", () => {
 
 describe("paragraph marks", () => {
 	test("bold + italic + text", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -76,7 +76,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("strong only", () => {
-		const input: Root = {
+			const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -92,7 +92,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("italic only", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -108,7 +108,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("inline code", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [{ type: "paragraph", children: [{ type: "inlineCode", value: "code" } as any] }],
 		} as any
@@ -119,7 +119,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("strikethrough", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -135,7 +135,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("link with text and title", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -160,7 +160,7 @@ describe("paragraph marks", () => {
 
 describe("lists", () => {
 	test("unordered", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -186,7 +186,7 @@ describe("lists", () => {
 	})
 
 	test("ordered (start omitted = 1)", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -212,7 +212,7 @@ describe("lists", () => {
 	})
 
 	test("ordered with start=3", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -239,7 +239,7 @@ describe("lists", () => {
 	})
 
   test("task list (checked/unchecked)", () => {
-    const input: Root = {
+    const input: Ast = {
       type: 'root',
       children: [
         {
@@ -261,7 +261,7 @@ describe("lists", () => {
 
 describe("blocks", () => {
 	test("blockquote", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -276,7 +276,7 @@ describe("blocks", () => {
 
 
 	test("table", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -308,13 +308,13 @@ describe("blocks", () => {
 	})
 
 	test("thematic break", () => {
-		const input: Root = { type: "root", children: [{ type: "thematicBreak" }] } as any
+		const input: Ast = { type: "root", children: [{ type: "thematicBreak" }] } as any
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
 
 	test("code block", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [{ type: "code", lang: "js", value: "const a = 1" }],
 		} as any
@@ -323,7 +323,7 @@ describe("blocks", () => {
 	})
 
 	test("code block without lang", () => {
-		const input: Root = { type: "root", children: [{ type: "code", value: "plain" }] } as any
+		const input: Ast = { type: "root", children: [{ type: "code", value: "plain" }] } as any
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
@@ -331,7 +331,7 @@ describe("blocks", () => {
 
 describe("inline", () => {
 	test("hard break", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{

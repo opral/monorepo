@@ -2977,9 +2977,6 @@ importers:
 
   packages/markdown-wc:
     dependencies:
-      '@types/mdast':
-        specifier: ^4.0.4
-        version: 4.0.4
       mermaid:
         specifier: ^11.4.1
         version: 11.8.1

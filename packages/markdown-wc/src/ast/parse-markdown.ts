@@ -2,7 +2,7 @@ import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkFrontmatter from "remark-frontmatter"
-import type { Root as Ast } from "mdast"
+import type { Ast } from "./schemas.js"
 
 /**
  * Parse a Markdown string into an mdast-shaped AST (Root).

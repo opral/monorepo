@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
 import { Editor } from "@tiptap/core"
-import type { Root } from "mdast"
+import type { Ast } from "../ast/schemas.js"
 import { markdownWcExtensions } from "./markdown-wc.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 
-function roundtripThroughEditor(ast: Root): Root {
+function roundtripThroughEditor(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: markdownWcExtensions(),
@@ -18,7 +18,7 @@ function roundtripThroughEditor(ast: Root): Root {
 
 describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	test("heading + paragraph", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{ type: "heading", depth: 1, children: [{ type: "text", value: "Heading" }] },
@@ -30,7 +30,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 
 	test("unordered list", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -54,7 +54,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 
 	test("ordered list with start", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -79,7 +79,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 
 	test("marks (bold + italic + inlineCode + strike)", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -101,7 +101,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 
 	test("blockquote + thematicBreak + code block", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -117,7 +117,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 
 	test("hard break", () => {
-		const input: Root = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{

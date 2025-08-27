@@ -1,4 +1,4 @@
-import type { Root as MdRoot, PhrasingContent as MdPhrasing } from "mdast"
+// Remove mdast dependency; operate on structural shapes
 
 export type PMMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: Record<string, any> }
 export type PMNode = {
@@ -9,7 +9,7 @@ export type PMNode = {
 	marks?: PMMark[]
 }
 
-export function tiptapDocToAst(doc: PMNode): MdRoot {
+export function tiptapDocToAst(doc: PMNode): any {
 	return { type: "root", children: (doc.content || []).map(pmBlockToAst) } as any
 }
 
@@ -71,8 +71,8 @@ function pmBlockToAst(node: PMNode): any {
 	}
 }
 
-function pmInlineToMd(nodes: PMNode[]): MdPhrasing[] {
-	const out: MdPhrasing[] = []
+function pmInlineToMd(nodes: PMNode[]): any[] {
+	const out: any[] = []
 	for (const n of nodes) {
 		if (n.type === "text") {
 			out.push(applyMarksToText(n.text || "", n.marks || []))
@@ -83,8 +83,8 @@ function pmInlineToMd(nodes: PMNode[]): MdPhrasing[] {
 	return out
 }
 
-function applyMarksToText(value: string, marks: PMMark[]): MdPhrasing {
-	let node: MdPhrasing = { type: "text", value } as any
+function applyMarksToText(value: string, marks: PMMark[]): any {
+	let node: any = { type: "text", value } as any
 	const order: PMMark["type"][] = ["bold", "italic", "strike", "code", "link"]
 	for (const t of order) {
 		if (marks.find((m) => m.type === t)) {
