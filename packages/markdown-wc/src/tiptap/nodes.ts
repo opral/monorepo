@@ -74,9 +74,7 @@ export function markdownWcNodes(): Extensions {
 			},
 			addNodeView() {
 				return ({ node, editor, getPos }) => {
-					const dom = document.createElement("li")
-					dom.style.display = "flex"
-					dom.style.alignItems = "flex-start"
+						const dom = document.createElement("li")
 					const isTask = node.attrs.checked === true || node.attrs.checked === false
 					let input: HTMLInputElement | null = null
 					const content = document.createElement("div")
