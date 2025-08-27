@@ -14,7 +14,7 @@ At a glance:
 
 - Load
   - Query MD‑AST root (order) + node entities from Lix state for the active file.
-  - Convert entities → Plate `Descendant[]` while preserving per‑node `mdast_id`.
+  - Convert entities → Plate `Descendant[]` while preserving per‑node `data.id`.
   - Initialize Plate editor with the converted value.
 - Edit
   - On user changes, convert Plate value → MD‑AST entities + root order.
@@ -44,11 +44,11 @@ At a glance:
     - `plateValueToMdastEntities(value)` → `{ entities, order }`.
     - Maps types both ways (`paragraph` ↔ `p`, `heading` ↔ `h1..h6`, lists, code, blockquote, link, image, table, etc.).
     - Preserves node identity:
-      - Uses `mdast_id` as Plate `id` and also stores `mdast_id` on Plate elements.
+      - Uses `node.data.id` as Plate `id` and stores it in entity snapshots.
       - Generates new IDs via `nanoId` from Lix when needed.
     - Serialization helper:
       - `serializeMdastEntities(entities, order)` emits a simplified markdown string.
-      - Can inject `<!-- mdast_id = ... -->` HTML comments for round‑trip ID preservation.
+      - No HTML id comments; identity lives at `node.data.id`.
 - State access and persistence
   - `packages/md-app/src/hooks/useMdAstState.ts`
     - Encapsulates loading and writing MD‑AST.
@@ -72,11 +72,11 @@ At a glance:
 ## Data Model in Lix
 
 - Node schema: `lix_plugin_md_node` (see `packages/lix-plugin-md/src/schemas/nodes.ts`).
-  - Required: `mdast_id`, `type`.
-  - Optional: `children` (inline or ID refs), `value`, `depth`, `ordered`, `url`, `alt`, `title`, `lang`, `meta`, alignment, position.
-  - In practice, `entity_id` == `mdast_id` for top‑level nodes.
+  - Required: `type` and `data.id`.
+  - Snapshot content: full md-ast node with inline children (no nested entities).
+  - In practice, `entity_id === data.id` for top‑level nodes.
 - Root schema: `lix_plugin_md_root` (see `packages/lix-plugin-md/src/schemas/root.ts`).
-  - `order: string[]` of top‑level `mdast_id`s.
+  - `order: string[]` of top‑level `data.id`.
 - All state writes use plugin key `lix_plugin_md`.
 
 ## Initialization and Environment
@@ -92,7 +92,7 @@ At a glance:
   - Insert node snapshots with schema `lix_plugin_md_node`.
   - Upsert root order snapshot with schema `lix_plugin_md_root`.
 - On write error, fallback: serialize Plate → markdown and write to `file.data`.
-- ID management: stable `mdast_id`/`entity_id` per node; new IDs via `nanoId({ lix, length: 10 })`; optional HTML ID comments for round‑trip.
+- ID management: stable `data.id`/`entity_id` per node; new IDs via `nanoId({ lix, length: 10 })`.
 - Order management: top‑level only; reorder is captured as a root snapshot change.
 
 ## Change Control, Diffs, and Checkpoints
@@ -111,7 +111,7 @@ At a glance:
 
 - No file materialization on edits; all transformations are in memory against entities.
 - Debounced writes; simple JSON comparisons to avoid redundant editor value sets.
-- Maps keyed by `mdast_id` for efficient lookups during conversion.
+- Maps keyed by `data.id` for efficient lookups during conversion.
 
 ## Interfaces and Contracts
 
@@ -129,11 +129,11 @@ graph TB
   Lix["Lix (State)"]
 
   %% High-level channels
-  Plate <--> |"Convert editor value ↔ MD-AST entities\n(preserve stable mdast_id)"| MdAst
+  Plate <--> |"Convert editor value ↔ MD-AST entities\n(preserve stable data.id)"| MdAst
   MdAst <--> |"Read/Write entities + order for active file\n(change-controlled snapshots)"| Lix
 ```
 
-Contract summary: Plate ↔ MD‑AST converts editor value ↔ entities with stable mdast_id; MD‑AST ↔ Lix reads/writes entity snapshots and document order for the active file.
+Contract summary: Plate ↔ MD‑AST converts editor value ↔ entities with stable `data.id`; MD‑AST ↔ Lix reads/writes top‑level entity snapshots and document order for the active file.
 
 ## Markdown Core (markdown-wc)
 
@@ -201,9 +201,9 @@ Contract summary: Plate ↔ MD‑AST converts editor value ↔ entities with sta
 ## Optional Editor Swap (If Desired Later)
 
 - TipTap (ProseMirror):
-  - Define a mdast-aligned schema (node names/attrs), use marks for inline formatting, store `mdast_id` in attrs. A thin mdast↔ProseMirror bridge remains.
+  - Define a mdast-aligned schema (node names/attrs), use marks for inline formatting, carry `data.id` in node attrs. A thin mdast↔ProseMirror bridge remains.
 - Lexical:
-  - Use built-ins + small custom nodes for html/frontmatter/table, carry `mdast_id` in node props. A thin mdast↔Lexical bridge remains.
+  - Use built-ins + small custom nodes for html/frontmatter/table, carry `data.id` in node props. A thin mdast↔Lexical bridge remains.
 
 ## Trade-offs and Risks
 

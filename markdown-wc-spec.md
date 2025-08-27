@@ -70,7 +70,8 @@
 
 ## Identity & Order
 
-- Initial cut: no prescribed identity requirements. Order schema exists to allow consumers (e.g., Lix) to track top-level block order by identifier if needed.
+- Node identity: use `node.data.id` on AST nodes as the stable identifier (mdast vendor field). Tools may choose to generate it if missing.
+- Root order: `{ order: string[] }` stores the top‑level ordering of `data.id` values only. Nested nodes are not persisted as separate entities.
 
 ## Sanitization and Security
 
