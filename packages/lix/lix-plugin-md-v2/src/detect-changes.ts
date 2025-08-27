@@ -200,7 +200,7 @@ export const detectChanges = ({
 				detectedChanges.push({
 					schema,
 					entity_id: id,
-					snapshot_content: undefined,
+					snapshot_content: null,
 				});
 			}
 		}

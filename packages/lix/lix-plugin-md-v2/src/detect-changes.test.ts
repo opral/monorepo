@@ -110,7 +110,7 @@ test("it should detect a deleted node", async () => {
 	expect(detectedChanges.length).toBeGreaterThan(0);
 	const deletedNode = detectedChanges.find((c) => c.entity_id === "p2");
 	expect(deletedNode).toBeTruthy();
-	expect(deletedNode?.snapshot_content).toBeUndefined();
+	expect(deletedNode?.snapshot_content).toBeNull();
 });
 
 test("it should detect node reordering", async () => {
