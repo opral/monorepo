@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { FolderOpen, History, Zap } from "lucide-react";
 
