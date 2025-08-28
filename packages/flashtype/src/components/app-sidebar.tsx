@@ -10,7 +10,7 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 } from "@/components/ui/sidebar";
-import { useLeftDock } from "@/components/left-dock";
+import { useLeftSidebar } from "@/components/left-sidebar";
 
 // This is sample data.
 const data = {
@@ -42,7 +42,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const { active, setActive } = useLeftDock();
+	const { active, setActive } = useLeftSidebar();
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

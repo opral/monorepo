@@ -2,10 +2,10 @@ import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { LeftDockProvider, useLeftDock } from "@/components/left-dock";
-import { LeftDockFiles } from "@/components/left-dock-files";
-import { LeftDockHistory } from "@/components/left-dock-history";
-import { LeftDockTab } from "@/components/left-dock-tab";
+import { LeftSidebarProvider, useLeftSidebar } from "@/components/left-sidebar";
+import { LeftSidebarFiles } from "@/components/left-sidebar-files";
+import { LeftSidebarHistory } from "@/components/left-sidebar-history";
+import { LeftSidebarTab } from "@/components/left-sidebar-tab";
 
 export const Route = createRootRoute({
 	component: Root,
@@ -19,20 +19,20 @@ export const Route = createRootRoute({
 	),
 });
 
-function LeftDockArea() {
-	const { active } = useLeftDock();
+function LeftSidebarArea() {
+	const { active } = useLeftSidebar();
 	if (!active) return null;
 	return (
 		<div className="w-72 shrink-0 border-r bg-background">
 			{active === "files" && (
-				<LeftDockTab title="Files">
-					<LeftDockFiles />
-				</LeftDockTab>
+				<LeftSidebarTab title="Files">
+					<LeftSidebarFiles />
+				</LeftSidebarTab>
 			)}
 			{active === "history" && (
-				<LeftDockTab title="Checkpoints">
-					<LeftDockHistory />
-				</LeftDockTab>
+				<LeftSidebarTab title="Checkpoints">
+					<LeftSidebarHistory />
+				</LeftSidebarTab>
 			)}
 		</div>
 	);
@@ -40,7 +40,7 @@ function LeftDockArea() {
 
 function Root() {
 	return (
-		<LeftDockProvider>
+		<LeftSidebarProvider>
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>
 				<AppSidebar />
 				<SidebarInset>
@@ -48,7 +48,7 @@ function Root() {
 						<div className="font-medium">Flashtype</div>
 					</header>
 					<div className="flex min-h-0 flex-1">
-						<LeftDockArea />
+						<LeftSidebarArea />
 						<div className="flex-1 p-4">
 							<Outlet />
 						</div>
@@ -58,6 +58,6 @@ function Root() {
 					) : null}
 				</SidebarInset>
 			</SidebarProvider>
-		</LeftDockProvider>
+		</LeftSidebarProvider>
 	);
 }

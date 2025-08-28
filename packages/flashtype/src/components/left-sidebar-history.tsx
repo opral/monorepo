@@ -37,7 +37,7 @@ const sample: Checkpoint[] = [
 	},
 ];
 
-export function LeftDockHistory() {
+export function LeftSidebarHistory() {
 	return (
 		<div className="flex flex-col gap-3">
 			{sample.map((cp) => (

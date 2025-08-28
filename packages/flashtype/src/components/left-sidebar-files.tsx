@@ -37,7 +37,7 @@ const sampleTree: TreeNode[] = [
 	"README.md",
 ];
 
-export function LeftDockFiles() {
+export function LeftSidebarFiles() {
 	return (
 		<SidebarMenu>
 			{sampleTree.map((item, i) => (
