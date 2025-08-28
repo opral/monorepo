@@ -6,7 +6,7 @@ import { openLix } from "@lix-js/sdk";
 import { useKeyValue, KeyValueProvider } from "./use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./schema";
 
-test("reads a global, untracked key (left dock tab)", async () => {
+test("reads a global, untracked key (left sidebar tab)", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -20,7 +20,7 @@ test("reads a global, untracked key (left dock tab)", async () => {
 	await lix.db
 		.insertInto("key_value_all")
 		.values({
-			key: "flashtype_left_dock_tab",
+			key: "flashtype_left_sidebar_active_tab",
 			value: "files",
 			lixcol_version_id: "global",
 		})
@@ -30,7 +30,7 @@ test("reads a global, untracked key (left dock tab)", async () => {
 
 	await act(async () => {
 		const { result } = renderHook(
-			() => useKeyValue("flashtype_left_dock_tab"),
+			() => useKeyValue("flashtype_left_sidebar_active_tab"),
 			{ wrapper },
 		);
 		hookResult = result as unknown as { current: unknown };
@@ -42,7 +42,7 @@ test("reads a global, untracked key (left dock tab)", async () => {
 	expect(tab).toBe("files");
 });
 
-test("writes and reads a global, untracked key (left dock tab)", async () => {
+test("writes and reads a global, untracked key (left sidebar tab)", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -53,7 +53,7 @@ test("writes and reads a global, untracked key (left dock tab)", async () => {
 	);
 
 	const { result } = renderHook(
-		() => useKeyValue("flashtype_left_dock_tab"),
+		() => useKeyValue("flashtype_left_sidebar_active_tab"),
 		{ wrapper },
 	);
 
@@ -67,11 +67,12 @@ test("writes and reads a global, untracked key (left dock tab)", async () => {
 	await waitFor(() => expect((result.current as any)?.[0]).toBe("history"));
 
 	// Verify DB row persisted to key_value_all with lixcol_version_id = 'global'
-	const rows = await lix.db
+	const rows = (await lix.db
 		.selectFrom("key_value_all")
-		.where("key", "=", "flashtype_left_dock_tab")
+		.where("key", "=", "flashtype_left_sidebar_active_tab")
 		.where("lixcol_version_id", "=", "global")
-		.select(["value"]).execute() as any;
+		.select(["value"])
+		.execute()) as any;
 	expect(rows[0]?.value).toBe("history");
 });
 
@@ -107,9 +108,10 @@ test("writes and reads a tracked key on active version", async () => {
 	});
 
 	// Verify DB row persisted to tracked table
-	const rows = await lix.db
+	const rows = (await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", TEST_KEY)
-		.select(["value"]).execute() as any;
+		.select(["value"])
+		.execute()) as any;
 	expect(rows[0]?.value).toBe("hello");
 });

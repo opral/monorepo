@@ -53,9 +53,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<NavMain
 					items={data.navMain}
 					active={active}
-					onSelect={(key) =>
-						setActive((prev) => (prev === key ? null : (key as any)))
-					}
+					onSelect={(key) => {
+						const next =
+							active === key
+								? null
+								: key === "files" || key === "history"
+									? key
+									: null;
+						setActive(next);
+					}}
 				/>
 			</SidebarContent>
 			<SidebarFooter>

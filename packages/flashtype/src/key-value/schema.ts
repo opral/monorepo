@@ -14,7 +14,7 @@ export const KEY_VALUE_DEFINITIONS = {
 		untracked: true,
 	} as KeyDef<string | null>,
 
-	flashtype_left_dock_tab: {
+	flashtype_left_sidebar_active_tab: {
 		defaultVersionId: "global",
 		untracked: true,
 	} as KeyDef<"files" | "history" | null>,

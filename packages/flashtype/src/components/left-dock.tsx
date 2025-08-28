@@ -1,19 +1,20 @@
 import * as React from "react";
+import { useKeyValue } from "@/key-value/use-key-value";
+import type { ValueOf } from "@/key-value/schema";
 
-export type LeftDockTab = "files" | "history" | null;
+export type LeftDockTab = ValueOf<"flashtype_left_sidebar_active_tab">;
 
 type Ctx = {
 	active: LeftDockTab;
-	setActive: (tab: LeftDockTab) => void;
+	setActive: (tab: LeftDockTab) => Promise<void>;
 };
 
 const LeftDockContext = React.createContext<Ctx | null>(null);
 
 export function LeftDockProvider({ children }: { children: React.ReactNode }) {
-	const [active, setActive] = React.useState<LeftDockTab>(null);
-	const value = React.useMemo(() => ({ active, setActive }), [active]);
+	const [active, setActive] = useKeyValue("flashtype_left_sidebar_active_tab");
 	return (
-		<LeftDockContext.Provider value={value}>
+		<LeftDockContext.Provider value={{ active, setActive }}>
 			{children}
 		</LeftDockContext.Provider>
 	);

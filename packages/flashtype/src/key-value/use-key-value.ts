@@ -155,9 +155,6 @@ async function upsertValue<T>(
 			.where("key", "=", key)
 			.execute();
 	} else {
-		await lix.db
-			.insertInto("key_value")
-			.values({ key, value })
-			.execute();
+		await lix.db.insertInto("key_value").values({ key, value }).execute();
 	}
 }
