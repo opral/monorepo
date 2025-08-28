@@ -1,4 +1,5 @@
 import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { useKeyValue } from "@/key-value/use-key-value";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -39,13 +40,14 @@ function LeftSidebarArea() {
 }
 
 function Root() {
+	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 	return (
 		<LeftSidebarProvider>
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>
 				<AppSidebar />
 				<SidebarInset>
-					<header className="flex h-14 items-center gap-2 border-b px-4">
-						<div className="font-medium">Flashtype</div>
+					<header className="flex h-12 items-center gap-2 border-b px-4">
+						<div className="font-medium">{activeFileId ?? "Flashtype"}</div>
 					</header>
 					<div className="flex min-h-0 flex-1">
 						<LeftSidebarArea />

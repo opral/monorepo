@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ChevronRight, File, Folder } from "lucide-react";
+import { useKeyValue } from "@/key-value/use-key-value";
 
 import {
 	Collapsible,
@@ -38,22 +39,42 @@ const sampleTree: TreeNode[] = [
 ];
 
 export function LeftSidebarFiles() {
+	const [activeFileId, setActiveFileId] = useKeyValue(
+		"flashtype_active_file_id",
+	);
 	return (
 		<SidebarMenu>
 			{sampleTree.map((item, i) => (
-				<Tree key={i} item={item} />
+				<Tree
+					key={i}
+					item={item}
+					activeId={activeFileId}
+					onSelect={setActiveFileId}
+				/>
 			))}
 		</SidebarMenu>
 	);
 }
 
-function Tree({ item }: { item: TreeNode }) {
+function Tree({
+	item,
+	activeId,
+	onSelect,
+}: {
+	item: TreeNode;
+	activeId: string | null;
+	onSelect: (id: string) => Promise<void>;
+}) {
 	const [name, ...items] = Array.isArray(item) ? item : [item];
 
 	if (!items.length) {
 		return (
 			<SidebarMenuItem>
-				<SidebarMenuButton className="data-[active=true]:bg-transparent cursor-pointer">
+				<SidebarMenuButton
+					isActive={activeId === (name as string)}
+					onClick={() => onSelect(name as string)}
+					className="data-[active=true]:bg-secondary cursor-pointer"
+				>
 					<File />
 					{name as string}
 				</SidebarMenuButton>
@@ -74,7 +95,12 @@ function Tree({ item }: { item: TreeNode }) {
 				<CollapsibleContent>
 					<SidebarMenuSub>
 						{items.map((subItem, idx) => (
-							<Tree key={idx} item={subItem} />
+							<Tree
+								key={idx}
+								item={subItem}
+								activeId={activeId}
+								onSelect={onSelect}
+							/>
 						))}
 					</SidebarMenuSub>
 				</CollapsibleContent>

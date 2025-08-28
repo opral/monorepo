@@ -49,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarHeader>
 				<TeamSwitcher teams={data.teams} />
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent className="mt-0">
 				<NavMain
 					items={data.navMain}
 					active={active}
