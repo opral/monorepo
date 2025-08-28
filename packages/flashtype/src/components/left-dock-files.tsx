@@ -53,7 +53,7 @@ function Tree({ item }: { item: TreeNode }) {
 	if (!items.length) {
 		return (
 			<SidebarMenuItem>
-				<SidebarMenuButton className="data-[active=true]:bg-transparent">
+				<SidebarMenuButton className="data-[active=true]:bg-transparent cursor-pointer">
 					<File />
 					{name as string}
 				</SidebarMenuButton>
@@ -65,7 +65,7 @@ function Tree({ item }: { item: TreeNode }) {
 		<SidebarMenuItem>
 			<Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
 				<CollapsibleTrigger asChild>
-					<SidebarMenuButton>
+					<SidebarMenuButton className="cursor-pointer">
 						<ChevronRight className="transition-transform" />
 						<Folder />
 						{name as string}
