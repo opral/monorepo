@@ -1,1 +1,1 @@
-# ⚡ Flashtype 
+# ⚡ Flashtype
