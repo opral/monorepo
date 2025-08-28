@@ -27,7 +27,9 @@ describe("DiffIndicator", () => {
 	 * Actual: [green][red] (ensures both colors visible)
 	 */
 	test("scales bars based on highRange and splits by ratio", () => {
-		const { container } = render(<DiffIndicator added={12} removed={3} highRange={100} />);
+		const { container } = render(
+			<DiffIndicator added={12} removed={3} highRange={100} />,
+		);
 		const bars = getBars(container);
 		expect(bars.length).toBeGreaterThanOrEqual(1);
 		expect(bars.length).toBeLessThanOrEqual(4); // Max is 4 bars now
@@ -47,7 +49,9 @@ describe("DiffIndicator", () => {
 	 * Since deletions dominate (15 vs 1), more red bars
 	 */
 	test("shows more red when deletions dominate", () => {
-		const { container } = render(<DiffIndicator added={1} removed={15} highRange={50} />);
+		const { container } = render(
+			<DiffIndicator added={1} removed={15} highRange={50} />,
+		);
 		const bars = getBars(container);
 		const greens = bars.filter((b) => b.className.includes("bg-green")).length;
 		const reds = bars.filter((b) => b.className.includes("bg-red")).length;
@@ -63,7 +67,9 @@ describe("DiffIndicator", () => {
 	 * Visual bars: [green] (1 bar, all green since no deletions)
 	 */
 	test("no deletions -> all bars green", () => {
-		const { container } = render(<DiffIndicator added={8} removed={0} highRange={100} />);
+		const { container } = render(
+			<DiffIndicator added={8} removed={0} highRange={100} />,
+		);
 		const bars = getBars(container);
 		expect(bars.length).toBe(1); // 8% of 100 = 1 bar
 		expect(bars.every((b) => b.className.includes("bg-green"))).toBe(true);
@@ -74,7 +80,9 @@ describe("DiffIndicator", () => {
 	 * Visual bars: [green][green][green][green] (4 bars max, all green)
 	 */
 	test("max changes shows 4 bars", () => {
-		const { container } = render(<DiffIndicator added={100} removed={0} highRange={100} />);
+		const { container } = render(
+			<DiffIndicator added={100} removed={0} highRange={100} />,
+		);
 		const bars = getBars(container);
 		expect(bars.length).toBe(4); // Max 4 bars at 100% of range
 		expect(bars.every((b) => b.className.includes("bg-green"))).toBe(true);
@@ -85,7 +93,9 @@ describe("DiffIndicator", () => {
 	 * Visual bars: [green][green][red][red] (4 bars: 2 green, 2 red for 50/50 split)
 	 */
 	test("equal additions and deletions at max range", () => {
-		const { container } = render(<DiffIndicator added={50} removed={50} highRange={100} />);
+		const { container } = render(
+			<DiffIndicator added={50} removed={50} highRange={100} />,
+		);
 		const bars = getBars(container);
 		expect(bars.length).toBe(4); // Max bars
 		const greens = bars.filter((b) => b.className.includes("bg-green")).length;
@@ -99,7 +109,9 @@ describe("DiffIndicator", () => {
 	 * Visual bars: (none) - no bars rendered for zero changes
 	 */
 	test("zero changes shows no bars", () => {
-		const { container } = render(<DiffIndicator added={0} removed={0} highRange={100} />);
+		const { container } = render(
+			<DiffIndicator added={0} removed={0} highRange={100} />,
+		);
 		const bars = getBars(container);
 		expect(bars.length).toBe(0);
 	});

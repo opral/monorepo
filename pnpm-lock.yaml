@@ -1992,6 +1992,12 @@ importers:
 
   packages/flashtype:
     dependencies:
+      '@lix-js/react-utils':
+        specifier: workspace:*
+        version: link:../lix/lix-react-utils
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../lix-sdk
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

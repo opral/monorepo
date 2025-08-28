@@ -8,7 +8,7 @@ type Props = {
 	 */
 	removed: number;
 	/**
-	 * The threshold for maximum changes. When total changes reach this value, 
+	 * The threshold for maximum changes. When total changes reach this value,
 	 * 4 bars will be shown. Below this, bars scale proportionally (1 bar per 25% of range).
 	 * @default 100
 	 */
