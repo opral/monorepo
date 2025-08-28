@@ -1,5 +1,8 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import { Separator } from '@/components/ui/separator';
 
 export const Route = createRootRoute({
   component: Root,
@@ -13,14 +16,21 @@ export const Route = createRootRoute({
 
 function Root() {
   return (
-    <div
-      style={{
-        fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
-        lineHeight: 1.4,
-      }}
-    >
-      <Outlet />
-      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-2 border-b px-4">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="mr-2 h-6" />
+          <div className="font-medium">Flashtype</div>
+        </header>
+        <div className="p-4">
+          <Outlet />
+        </div>
+        {import.meta.env.DEV ? (
+          <TanStackRouterDevtools position="bottom-right" />
+        ) : null}
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
