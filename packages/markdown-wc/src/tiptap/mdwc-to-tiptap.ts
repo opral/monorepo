@@ -125,6 +125,14 @@ function flattenInline(nodes: any[], active: PMMark[]): PMNode[] {
 				)
 				break
 			}
+			case "image": {
+				const im = n as any
+				const src = im.url || null
+				const title = im.title ?? null
+				const alt = im.alt ?? null
+				out.push({ type: "image", attrs: { src, title, alt } } as any)
+				break
+			}
 			case "break":
 				out.push({ type: "hardBreak" })
 				break

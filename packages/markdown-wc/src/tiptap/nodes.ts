@@ -37,10 +37,9 @@ export function markdownWcNodes(): Extensions {
 			addAttributes() {
 				return { isTaskList: { default: false } }
 			},
-			renderHTML({ node }) {
-				const isTask = (node as any).attrs?.isTaskList === true
-				const attrs: any = isTask ? { "data-type": "taskList" } : {}
-				return ["ul", attrs, 0]
+			renderHTML() {
+				// Match serializeToHtml default: plain <ul>
+				return ["ul", 0]
 			},
 		}),
 		Node.create({
@@ -91,16 +90,13 @@ export function markdownWcNodes(): Extensions {
 			addAttributes() {
 				return { checked: { default: null } }
 			},
-			renderHTML({ node }) {
-				const checked = (node as any).attrs?.checked
-				// For HTML serialization, mark task items but don't insert inputs (avoid content-hole issues)
-				if (checked === true || checked === false)
-					return ["li", { "data-task": checked ? "x" : " " }, 0]
+			renderHTML() {
+				// Match serializeToHtml default: plain <li>
 				return ["li", 0]
 			},
 			addNodeView() {
 				return ({ node, editor, getPos }) => {
-						const dom = document.createElement("li")
+					const dom = document.createElement("li")
 					const isTask = node.attrs.checked === true || node.attrs.checked === false
 					let input: HTMLInputElement | null = null
 					const content = document.createElement("div")
@@ -169,8 +165,11 @@ export function markdownWcNodes(): Extensions {
 			addAttributes() {
 				return { language: { default: null } }
 			},
-			renderHTML() {
-				return ["pre", ["code", 0]]
+			renderHTML({ node }) {
+				const lang = (node as any).attrs?.language ?? null
+				const codeAttrs: any = {}
+				if (lang) codeAttrs.class = `language-${lang}`
+				return ["pre", ["code", codeAttrs, 0]]
 			},
 		}),
 		// horizontal rule
@@ -231,6 +230,26 @@ export function markdownWcNodes(): Extensions {
 				const title = (mark as any).attrs?.title
 				if (title) attrs.title = title
 				return ["a", attrs, 0]
+			},
+		}),
+		// image (inline)
+		Node.create({
+			name: "image",
+			group: "inline",
+			inline: true,
+			atom: true,
+			addAttributes() {
+				return { src: { default: null }, alt: { default: null }, title: { default: null } }
+			},
+			renderHTML({ node }) {
+				const attrs: any = {}
+				const src = (node as any).attrs?.src
+				if (src) attrs.src = src
+				const alt = (node as any).attrs?.alt
+				if (alt) attrs.alt = alt
+				const title = (node as any).attrs?.title
+				if (title) attrs.title = title
+				return ["img", attrs]
 			},
 		}),
 	]

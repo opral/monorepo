@@ -1,6 +1,9 @@
 // Remove mdast dependency; operate on structural shapes
 
-export type PMMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: Record<string, any> }
+export type PMMark = {
+	type: "bold" | "italic" | "strike" | "code" | "link"
+	attrs?: Record<string, any>
+}
 export type PMNode = {
 	type: string
 	attrs?: Record<string, any>
@@ -24,7 +27,11 @@ function pmBlockToAst(node: PMNode): any {
 				children: pmInlineToMd(node.content || []),
 			}
 		case "bulletList":
-			return { type: "list", ordered: false, children: (node.content || []).map(pmBlockToAst) } as any
+			return {
+				type: "list",
+				ordered: false,
+				children: (node.content || []).map(pmBlockToAst),
+			} as any
 		case "orderedList": {
 			const out: any = {
 				type: "list",
@@ -36,7 +43,8 @@ function pmBlockToAst(node: PMNode): any {
 		}
 		case "listItem": {
 			const out: any = { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
-			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false)) out.checked = node.attrs.checked
+			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false))
+				out.checked = node.attrs.checked
 			return out
 		}
 
@@ -78,6 +86,11 @@ function pmInlineToMd(nodes: PMNode[]): any[] {
 			out.push(applyMarksToText(n.text || "", n.marks || []))
 		} else if (n.type === "hardBreak") {
 			out.push({ type: "break" } as any)
+		} else if (n.type === "image") {
+			const src = n.attrs?.src ?? null
+			const title = n.attrs?.title ?? null
+			const alt = n.attrs?.alt ?? null
+			out.push({ type: "image", url: src, title, alt } as any)
 		}
 	}
 	return out
