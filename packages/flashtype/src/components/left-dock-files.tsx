@@ -7,9 +7,6 @@ import {
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -42,16 +39,11 @@ const sampleTree: TreeNode[] = [
 
 export function LeftDockFiles() {
 	return (
-		<SidebarGroup>
-			<SidebarGroupLabel>Files</SidebarGroupLabel>
-			<SidebarGroupContent>
-				<SidebarMenu>
-					{sampleTree.map((item, i) => (
-						<Tree key={i} item={item} />
-					))}
-				</SidebarMenu>
-			</SidebarGroupContent>
-		</SidebarGroup>
+		<SidebarMenu>
+			{sampleTree.map((item, i) => (
+				<Tree key={i} item={item} />
+			))}
+		</SidebarMenu>
 	);
 }
 

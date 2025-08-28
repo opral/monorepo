@@ -30,10 +30,9 @@ export function NavMain({
 				{items.map((item) => (
 					<SidebarMenuItem key={item.key}>
 						<SidebarMenuButton
-							tooltip={item.title}
 							isActive={active === item.key}
 							onClick={() => onSelect(item.key)}
-							className={`rounded-l-none rounded-r-md data-[active=true]:bg-transparent data-[active=true]:text-sidebar-foreground data-[active=true]:font-normal ${
+							className={`rounded-l-none rounded-r-md data-[active=true]:bg-transparent data-[active=true]:text-sidebar-foreground data-[active=true]:font-normal cursor-pointer ${
 								active === item.key
 									? "relative before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-amber-500"
 									: ""
