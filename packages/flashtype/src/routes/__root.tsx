@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { LeftDockProvider, useLeftDock } from "@/components/left-dock";
 import { LeftDockFiles } from "@/components/left-dock-files";
+import { LeftDockHistory } from "@/components/left-dock-history";
 import { LeftDockTab } from "@/components/left-dock-tab";
 
 export const Route = createRootRoute({
@@ -29,12 +30,8 @@ function LeftDockArea() {
 				</LeftDockTab>
 			)}
 			{active === "history" && (
-				<LeftDockTab title="History">
-					<ul className="space-y-1 text-sm">
-						<li className="rounded-md px-2 py-1">Initial draft</li>
-						<li className="rounded-md px-2 py-1">Added introduction</li>
-						<li className="rounded-md px-2 py-1">Fixed typos</li>
-					</ul>
+				<LeftDockTab title="Checkpoints">
+					<LeftDockHistory />
 				</LeftDockTab>
 			)}
 		</div>
