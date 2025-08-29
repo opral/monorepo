@@ -55,7 +55,7 @@ function Root() {
 				<AppSidebar />
 				<SidebarInset>
 					<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
-						<div className="font-medium">{activeFileId ?? "Flashtype"}</div>
+						<div className="font-medium text-sm">{activeFileId ?? "Flashtype"}</div>
 						<VersionDropdown />
 						<div className="ml-auto">
 							<ChangeIndicator />
