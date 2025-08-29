@@ -11,12 +11,12 @@
 		"./dist",
 		"./README.md"
 	],
-  "exports": {
-    ".": "./dist/index.js",
-    "./tiptap": "./dist/tiptap/index.js",
-    "./html": "./dist/html/index.js",
-    "./dist/markdown-wc-embed.js": "./dist/markdown-wc-embed.js"
-  },
+	"exports": {
+		".": "./dist/index.js",
+		"./tiptap": "./dist/tiptap/index.js",
+		"./html": "./dist/html/index.js",
+		"./dist/markdown-wc-embed.js": "./dist/markdown-wc-embed.js"
+	},
 	"scripts": {
 		"build": "tsc --build && rolldown -c",
 		"dev": "tsc --watch",
@@ -57,6 +57,14 @@
 		"vitest": "^3.0.0",
 		"ajv": "^8.12.0",
 		"json-schema-to-ts": "^3.1.0"
+	},
+	"peerDependencies": {
+		"@tiptap/core": "^3.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@tiptap/core": {
+			"optional": true
+		}
 	},
 	"license": "MIT"
 }
