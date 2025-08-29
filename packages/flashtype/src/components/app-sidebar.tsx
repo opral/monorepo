@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FolderOpen, History, Zap } from "lucide-react";
+import { FolderOpen, GitCommitVertical, Zap } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -35,8 +35,8 @@ const data = {
 		},
 		{
 			key: "history",
-			title: "History",
-			icon: History,
+			title: "Checkpoints",
+			icon: GitCommitVertical,
 		},
 	],
 };
