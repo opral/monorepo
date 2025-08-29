@@ -24,6 +24,9 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { useLix } from "@lix-js/react-utils";
+import { seedMarkdownFiles } from "@/seed";
+import { OpfsStorage } from "@lix-js/sdk";
 
 export function FlashtypeMenu({
 	teams,
@@ -37,6 +40,7 @@ export function FlashtypeMenu({
 	user: { name: string; email: string; avatar: string };
 }) {
 	const { isMobile } = useSidebar();
+	const lix = useLix();
 	const [activeTeam] = React.useState(teams[0]);
 
 	if (!activeTeam) {
@@ -94,12 +98,28 @@ export function FlashtypeMenu({
 									Toggle Lix Inspector
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onSelect={() => console.log("seed markdown files")}
+									onSelect={async () => {
+										try {
+											await seedMarkdownFiles(lix);
+											console.log("Seeded Markdown files");
+										} catch (e) {
+											console.error("Seeding failed", e);
+										}
+									}}
 								>
 									<FilePlus />
 									Seed Markdown files
 								</DropdownMenuItem>
-								<DropdownMenuItem onSelect={() => console.log("reset opfs")}>
+								<DropdownMenuItem
+									onSelect={async () => {
+										try {
+											await OpfsStorage.clean();
+											window.location.reload();
+										} catch (e) {
+											console.error("Failed to reset OPFS", e);
+										}
+									}}
+								>
 									<RotateCcw />
 									Reset OPFS
 								</DropdownMenuItem>

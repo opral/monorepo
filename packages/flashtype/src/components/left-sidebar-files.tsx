@@ -1,6 +1,7 @@
-import * as React from "react";
 import { ChevronRight, File, Folder } from "lucide-react";
 import { useKeyValue } from "@/key-value/use-key-value";
+import { useQuery } from "@lix-js/react-utils";
+import { selectFiles } from "@/queries";
 
 import {
 	Collapsible,
@@ -16,35 +17,42 @@ import {
 
 type TreeNode = string | [string, ...TreeNode[]];
 
-const sampleTree: TreeNode[] = [
-	[
-		"app",
-		[
-			"api",
-			["hello", ["route.ts"]],
-			"page.tsx",
-			"layout.tsx",
-			["blog", ["page.tsx"]],
-		],
-	],
-	["components", ["ui", "button.tsx", "card.tsx"], "header.tsx", "footer.tsx"],
-	["lib", ["util.ts"]],
-	["public", "favicon.ico", "vercel.svg"],
-	".eslintrc.json",
-	".gitignore",
-	"next.config.js",
-	"tailwind.config.js",
-	"package.json",
-	"README.md",
-];
+function buildTree(paths: string[]): TreeNode[] {
+	type Dir = { [name: string]: Dir | true };
+	const root: Dir = {};
+	for (const p of paths) {
+		const segs = p.split("/").filter(Boolean);
+		let dir = root;
+		for (let i = 0; i < segs.length; i++) {
+			const s = segs[i]!;
+			const isFile = i === segs.length - 1;
+			if (!(s in dir)) dir[s] = isFile ? true : {};
+			if (!isFile) dir = dir[s] as Dir;
+		}
+	}
+
+	function toTree(d: Dir): TreeNode[] {
+		return Object.keys(d)
+			.sort()
+			.map((name) => {
+				const v = d[name]!;
+				if (v === true) return name as TreeNode;
+				return [name, ...toTree(v as Dir)] as TreeNode;
+			});
+	}
+
+	return toTree(root);
+}
 
 export function LeftSidebarFiles() {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
 	);
+	const files = useQuery((lix) => selectFiles(lix));
+	const tree = buildTree(files.map((f) => f.path as string));
 	return (
 		<SidebarMenu>
-			{sampleTree.map((item, i) => (
+			{tree.map((item, i) => (
 				<Tree
 					key={i}
 					item={item}
