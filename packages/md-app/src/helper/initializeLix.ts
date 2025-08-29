@@ -44,7 +44,7 @@ export async function initializeLix(
 
 	if (lixFile) {
 		// Import existing file data if found
-		const storage = new OpfsStorage({ path: `${lixId}.lix` });
+        const storage = OpfsStorage.byId(lixId);
 		lix = await openLix({
 			blob: lixFile,
 			providePlugins: [mdPlugin],
@@ -57,7 +57,7 @@ export async function initializeLix(
 		lix = await openLix({
 			blob: _newLixFile,
 			providePlugins: [mdPlugin],
-			storage: new OpfsStorage({ path: `${lixId}.lix` }),
+            storage: OpfsStorage.byId(lixId),
 		});
 	}
 

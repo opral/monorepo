@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import { test, expect, describe, beforeEach, vi } from "vitest";
 import { OpfsStorage } from "./opfs.js";
 import { openLix } from "../open-lix.js";
@@ -8,24 +9,37 @@ class MockOPFS {
 	private files = new Map<string, Uint8Array | string>();
 
 	createMockOpfsRoot() {
+		const self = this;
 		return {
 			getFileHandle: vi
 				.fn()
 				.mockImplementation(
 					(filename: string, options?: { create?: boolean }) => {
-						if (!this.files.has(filename) && !options?.create) {
+						if (!self.files.has(filename) && !options?.create) {
 							throw new Error("File not found");
 						}
-						return this.createMockFileHandle(filename);
+						if (options?.create && !self.files.has(filename)) {
+							self.files.set(filename, new Uint8Array());
+						}
+						return self.createMockFileHandle(filename);
 					}
 				),
+			removeEntry: vi.fn().mockImplementation((name: string) => {
+				self.files.delete(name);
+			}),
+			values: vi.fn().mockImplementation(async function* () {
+				for (const name of self.files.keys()) {
+					yield { kind: "file", name } as const;
+				}
+			}),
 		};
 	}
 
 	private createMockFileHandle(filename: string) {
+		const self = this;
 		return {
 			getFile: vi.fn().mockImplementation(() => {
-				const data = this.files.get(filename);
+				const data = self.files.get(filename);
 				if (typeof data === "string") {
 					return Promise.resolve({
 						text: vi.fn().mockResolvedValue(data),
@@ -42,25 +56,52 @@ class MockOPFS {
 				}
 			}),
 			createWritable: vi.fn().mockImplementation(() => {
-				return Promise.resolve(this.createMockWritable(filename));
+				return Promise.resolve(self.createMockWritable(filename));
 			}),
 		};
 	}
 
 	private createMockWritable(filename: string) {
-		let buffer: Uint8Array | string;
+		const self = this;
+		let chunks: (Uint8Array | string)[] = [];
 
 		return {
-			write: vi.fn().mockImplementation((data: Uint8Array | string) => {
-				if (typeof data === "string") {
-					buffer = data;
+			write: vi.fn().mockImplementation((data: Uint8Array | string | any) => {
+				if (data instanceof Uint8Array) {
+					chunks.push(new Uint8Array(data));
+				} else if (typeof data === "string") {
+					chunks.push(data);
+				} else if (data?.buffer instanceof ArrayBuffer) {
+					chunks.push(new Uint8Array(data.buffer));
 				} else {
-					buffer = new Uint8Array(data);
+					chunks.push(String(data));
 				}
 				return Promise.resolve();
 			}),
 			close: vi.fn().mockImplementation(() => {
-				this.files.set(filename, buffer);
+				if (chunks.length === 1) {
+					self.files.set(filename, chunks[0]!);
+				} else if (chunks.every((c) => c instanceof Uint8Array)) {
+					const total = (chunks as Uint8Array[]).reduce(
+						(n, c) => n + c.byteLength,
+						0
+					);
+					const out = new Uint8Array(total);
+					let off = 0;
+					for (const c of chunks as Uint8Array[]) {
+						out.set(c, off);
+						off += c.byteLength;
+					}
+					self.files.set(filename, out);
+				} else {
+					const text = chunks
+						.map((c) =>
+							typeof c === "string" ? c : new TextDecoder().decode(c)
+						)
+						.join("");
+					self.files.set(filename, text);
+				}
+				chunks = [];
 				return Promise.resolve();
 			}),
 		};
@@ -70,7 +111,7 @@ class MockOPFS {
 describe("OpfsStorage", () => {
 	let mockOpfs: MockOPFS;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		vi.clearAllMocks();
 		// Create a fresh MockOPFS instance for each test to prevent cross-test pollution
 		mockOpfs = new MockOPFS();
@@ -87,10 +128,9 @@ describe("OpfsStorage", () => {
 			writable: true,
 			configurable: true,
 		});
-	});
 
-	test("constructor requires path argument", () => {
-		expect(() => new OpfsStorage({ path: "test.db" })).not.toThrow();
+		// Ensure OPFS is clean for each test after mock is in place
+		await OpfsStorage.clean();
 	});
 
 	test("throws error if OPFS is not supported", () => {
@@ -98,7 +138,7 @@ describe("OpfsStorage", () => {
 		const originalNavigator = globalThis.navigator;
 		delete (globalThis as any).navigator;
 
-		expect(() => new OpfsStorage({ path: "test.db" })).toThrow(
+		expect(() => OpfsStorage.byId("test" as string)).toThrow(
 			"OPFS is not supported in this environment"
 		);
 
@@ -107,15 +147,14 @@ describe("OpfsStorage", () => {
 	});
 
 	test("creates new lix file when OPFS file doesn't exist", async () => {
-		const storage = new OpfsStorage({ path: "new.db" });
-		const lix = await openLix({ storage });
+		const lix = await openLix({ storage: OpfsStorage.byName("new-project") });
 
 		expect(lix.db).toBeDefined();
 		expect(lix.sqlite).toBeDefined();
 	});
 
 	test("returns same database instance on multiple open calls", async () => {
-		const storage = new OpfsStorage({ path: "test.db" });
+		const storage = OpfsStorage.byId("same-db");
 		const db1 = await storage.open({ createBlob: () => newLixFile() });
 		const db2 = await storage.open({ createBlob: () => newLixFile() });
 
@@ -123,7 +162,7 @@ describe("OpfsStorage", () => {
 	});
 
 	test("saves database on close", async () => {
-		const storage = new OpfsStorage({ path: "test.db" });
+		const storage = OpfsStorage.byId("save-close");
 		await openLix({ storage });
 
 		// This should not throw
@@ -131,8 +170,7 @@ describe("OpfsStorage", () => {
 	});
 
 	test("integrates with openLix", async () => {
-		const storage = new OpfsStorage({ path: "integration.db" });
-		const lix = await openLix({ storage });
+		const lix = await openLix({ storage: OpfsStorage.byId("integration") });
 
 		expect(lix.db).toBeDefined();
 		expect(lix.sqlite).toBeDefined();
@@ -144,10 +182,10 @@ describe("OpfsStorage", () => {
 	});
 
 	test("persists data automatically on state mutations", async () => {
-		const path = "e2e-persist-test.db";
+		const path = "e2e-persist-test";
 
-		// Open lix with OPFS storage
-		const lix1 = await openLix({ storage: new OpfsStorage({ path }) });
+		// Open lix with OPFS storage by id
+		const lix1 = await openLix({ storage: OpfsStorage.byId(path) });
 
 		// Insert some data
 		await lix1.db
@@ -164,7 +202,7 @@ describe("OpfsStorage", () => {
 		await lix1.close();
 
 		// Open the persisted blob to verify the data
-		const lix2 = await openLix({ storage: new OpfsStorage({ path }) });
+		const lix2 = await openLix({ storage: OpfsStorage.byId(path) });
 
 		// Verify the data persisted correctly
 		const result = await lix2.db
@@ -181,10 +219,10 @@ describe("OpfsStorage", () => {
 	// faulty state materialization might be the cause.
 	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("can save and load data persistence", async () => {
-		const path = "persistence-test.db";
+		const path = "persistence-test";
 
 		// Create and populate database
-		const storage1 = new OpfsStorage({ path });
+		const storage1 = OpfsStorage.byId(path);
 		const lix1 = await openLix({ storage: storage1 });
 
 		await lix1.db
@@ -202,7 +240,7 @@ describe("OpfsStorage", () => {
 		await lix1.close();
 
 		// Open new storage instance with same path
-		const storage2 = new OpfsStorage({ path });
+		const storage2 = OpfsStorage.byId(path);
 		const lix2 = await openLix({ storage: storage2 });
 
 		// Data should persist
@@ -217,8 +255,8 @@ describe("OpfsStorage", () => {
 	});
 
 	test("persists active account", async () => {
-		const path = "example.lix";
-		const storage = new OpfsStorage({ path });
+		const path = "example";
+		const storage = OpfsStorage.byId(path);
 
 		const account = { id: "test-account", name: "Test User" };
 
@@ -257,8 +295,8 @@ describe("OpfsStorage", () => {
 	});
 
 	test("active account persistence across multiple storage instances", async () => {
-		const path = "example.lix";
-		const storage1 = new OpfsStorage({ path });
+		const path = "example";
+		const storage1 = OpfsStorage.byId(path);
 
 		const account = { id: "test-account", name: "Test User" };
 
@@ -280,7 +318,7 @@ describe("OpfsStorage", () => {
 
 		await lix1.close();
 
-		const storage2 = new OpfsStorage({ path });
+		const storage2 = OpfsStorage.byId(path);
 		// Reopen the lix instance
 		const lix2 = await openLix({ storage: storage2 });
 
@@ -297,8 +335,8 @@ describe("OpfsStorage", () => {
 	});
 
 	test("only saves active accounts when they change", async () => {
-		const path = "observer-test.lix";
-		const storage = new OpfsStorage({ path });
+		const path = "observer-test";
+		const storage = OpfsStorage.byId(path);
 
 		const account = { id: "observer-account", name: "Observer Test" };
 		const lix = await openLix({ storage, account });
@@ -368,8 +406,8 @@ describe("OpfsStorage", () => {
 
 	test("clean() removes all files from OPFS", async () => {
 		// Create some files in OPFS
-		const storage1 = new OpfsStorage({ path: "file1.lix" });
-		const storage2 = new OpfsStorage({ path: "file2.lix" });
+		const storage1 = OpfsStorage.byId("file1");
+		const storage2 = OpfsStorage.byId("file2");
 
 		// Open and create files
 		await openLix({ storage: storage1 });
@@ -377,7 +415,7 @@ describe("OpfsStorage", () => {
 
 		// Also create an active accounts file
 		const lix3 = await openLix({
-			storage: new OpfsStorage({ path: "file3.lix" }),
+			storage: OpfsStorage.byId("file3"),
 			account: { id: "test-clean", name: "Clean Test" },
 		});
 		await lix3.close();
@@ -431,5 +469,248 @@ describe("OpfsStorage", () => {
 
 		// Restore navigator
 		globalThis.navigator = originalNavigator;
+	});
+	// helper utilities inside this block to ensure navigator is available
+	async function fileExistsInOpfs(name: string): Promise<boolean> {
+		try {
+			const root: any = await (navigator as any).storage.getDirectory();
+			await root.getFileHandle(name);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	async function readJsonFromOpfs(name: string): Promise<any | undefined> {
+		try {
+			const root: any = await (navigator as any).storage.getDirectory();
+			const fh = await root.getFileHandle(name);
+			const f = await fh.getFile();
+			const text = await f.text();
+			return JSON.parse(text);
+		} catch {
+			return undefined;
+		}
+	}
+
+	async function writeOpfsFile(
+		name: string,
+		content: Uint8Array | string | Blob
+	) {
+		const root: any = await (navigator as any).storage.getDirectory();
+		const fh = await root.getFileHandle(name, { create: true });
+		const w = await fh.createWritable();
+		if (content instanceof Blob) {
+			const buf = new Uint8Array(await content.arrayBuffer());
+			await w.write(buf);
+		} else {
+			await w.write(content);
+		}
+		await w.close();
+	}
+
+	test("byId opens and persists to <id>.lix", async () => {
+		const id = "abc123";
+		const lix = await openLix({ storage: OpfsStorage.byId(id) });
+
+		expect(await fileExistsInOpfs(`${id}.lix`)).toBe(true);
+
+		const blob = await lix.toBlob();
+		expect(blob).toBeInstanceOf(Blob);
+		await lix.close();
+	});
+
+	test("byName creates when missing and sets mapping + name", async () => {
+		const name = "project-alpha";
+		const lix = await openLix({ storage: OpfsStorage.byName(name) });
+
+		const idRow = await lix.db
+			.selectFrom("key_value")
+			.select("value")
+			.where("key", "=", "lix_id")
+			.executeTakeFirstOrThrow();
+		const nameRow = await lix.db
+			.selectFrom("key_value")
+			.select("value")
+			.where("key", "=", "lix_name")
+			.executeTakeFirstOrThrow();
+
+		const id = idRow.value as string;
+		expect(typeof id).toBe("string");
+		expect(nameRow.value).toBe(name);
+
+		expect(await fileExistsInOpfs(`${id}.lix`)).toBe(true);
+
+		const index = await readJsonFromOpfs("lix_opfs_storage.json");
+		expect(index?.version).toBe(1);
+		expect(index?.names?.[name]).toBe(id);
+
+		await lix.close();
+	});
+
+	test("byName uses existing mapping and opens existing file", async () => {
+		const existingId = "id-preexisting";
+		const existingName = "preexisting";
+		const blob = await newLixFile({
+			keyValues: [
+				{ key: "lix_id", value: existingId, lixcol_version_id: "global" },
+				{ key: "lix_name", value: existingName, lixcol_version_id: "global" },
+			],
+		});
+
+		await writeOpfsFile(
+			`${existingId}.lix`,
+			new Uint8Array(await blob.arrayBuffer())
+		);
+		await writeOpfsFile(
+			"lix_opfs_storage.json",
+			JSON.stringify({ version: 1, names: { [existingName]: existingId } })
+		);
+
+		const lix = await openLix({ storage: OpfsStorage.byName(existingName) });
+		const idRow = await lix.db
+			.selectFrom("key_value")
+			.select("value")
+			.where("key", "=", "lix_id")
+			.executeTakeFirstOrThrow();
+
+		expect(idRow.value).toBe(existingId);
+		expect(await fileExistsInOpfs(`${existingId}.lix`)).toBe(true);
+		await lix.close();
+	});
+
+	test("byName enforces uniqueness: opening same name twice returns same id", async () => {
+		const name = "unique-name";
+		const lix1 = await openLix({ storage: OpfsStorage.byName(name) });
+		const id1 = (
+			await lix1.db
+				.selectFrom("key_value")
+				.select("value")
+				.where("key", "=", "lix_id")
+				.executeTakeFirstOrThrow()
+		).value as string;
+		await lix1.close();
+
+		const lix2 = await openLix({ storage: OpfsStorage.byName(name) });
+		const id2 = (
+			await lix2.db
+				.selectFrom("key_value")
+				.select("value")
+				.where("key", "=", "lix_id")
+				.executeTakeFirstOrThrow()
+		).value as string;
+		await lix2.close();
+
+		expect(id2).toBe(id1);
+		expect(await fileExistsInOpfs(`${id1}.lix`)).toBe(true);
+	});
+
+	test("byName with stale mapping recreates and refreshes index", async () => {
+		const name = "stale-name";
+
+		await writeOpfsFile(
+			"lix_opfs_storage.json",
+			JSON.stringify({ version: 1, names: { [name]: "missing-id" } })
+		);
+
+		const lix = await openLix({ storage: OpfsStorage.byName(name) });
+		const id = (
+			await lix.db
+				.selectFrom("key_value")
+				.select("value")
+				.where("key", "=", "lix_id")
+				.executeTakeFirstOrThrow()
+		).value as string;
+		await lix.close();
+
+		expect(await fileExistsInOpfs(`${id}.lix`)).toBe(true);
+		const index = await readJsonFromOpfs("lix_opfs_storage.json");
+		expect(index?.names?.[name]).toBe(id);
+		expect(index?.names?.[name]).not.toBe("missing-id");
+	});
+
+	test("list returns minimal entries { id, name, path }", async () => {
+		const name = "listed-project";
+		const lix = await openLix({ storage: OpfsStorage.byName(name) });
+		const id = (
+			await lix.db
+				.selectFrom("key_value")
+				.select("value")
+				.where("key", "=", "lix_id")
+				.executeTakeFirstOrThrow()
+		).value as string;
+		await lix.close();
+
+		const entries = await OpfsStorage.list();
+		expect(Array.isArray(entries)).toBe(true);
+		expect(entries.length).toBeGreaterThanOrEqual(1);
+		const found = entries.find((e) => e.name === name);
+		expect(found).toBeDefined();
+		expect(found!.id).toBe(id);
+		expect(found!.path).toBe(`${id}.lix`);
+	});
+
+	test("byId throws when DB lix_id mismatches requested id", async () => {
+		// Prepare a file at expected path but with a different internal lix_id
+		const requestedId = "expected";
+		const dbId = "mismatch";
+		const blob = await newLixFile({
+			keyValues: [
+				{ key: "lix_id", value: dbId, lixcol_version_id: "global" },
+				{ key: "lix_name", value: "keep-db-name", lixcol_version_id: "global" },
+			],
+		});
+		await writeOpfsFile(
+			`${requestedId}.lix`,
+			new Uint8Array(await blob.arrayBuffer())
+		);
+
+		// Opening by requested id should fail fast if the DB contains a different lix_id
+		await expect(
+			openLix({ storage: OpfsStorage.byId(requestedId) })
+		).rejects.toThrow();
+	});
+
+	test("byName updates index to DB id but does not mutate DB lix_name", async () => {
+		// Create a DB with a specific id and name
+		const dbId = "db-id-xyz";
+		const dbName = "db-existing-name";
+		const desiredName = "requested-name";
+
+		const blob = await newLixFile({
+			keyValues: [
+				{ key: "lix_id", value: dbId, lixcol_version_id: "global" },
+				{ key: "lix_name", value: dbName, lixcol_version_id: "global" },
+			],
+		});
+
+		// Write a file under an arbitrary different id to simulate wrong path/id pairing
+		const wrongFileId = "wrong-file-id";
+		await writeOpfsFile(
+			`${wrongFileId}.lix`,
+			new Uint8Array(await blob.arrayBuffer())
+		);
+
+		// Index maps desiredName -> wrongFileId (stale or incorrect mapping)
+		await writeOpfsFile(
+			"lix_opfs_storage.json",
+			JSON.stringify({ version: 1, names: { [desiredName]: wrongFileId } })
+		);
+
+		const lix = await openLix({ storage: OpfsStorage.byName(desiredName) });
+
+		// DB name should remain what the file contained (no mutation)
+		const nameRow = await lix.db
+			.selectFrom("key_value")
+			.select("value")
+			.where("key", "=", "lix_name")
+			.executeTakeFirstOrThrow();
+		expect(nameRow.value).toBe(dbName);
+
+		// Index should be corrected to point name -> dbId (not wrongFileId)
+		const index = await readJsonFromOpfs("lix_opfs_storage.json");
+		expect(index?.names?.[desiredName]).toBe(dbId);
+
+		await lix.close();
 	});
 });

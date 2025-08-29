@@ -55,16 +55,16 @@ test("creates tracked entity with pending change", async () => {
 	expect(results[0]?.commit_id).toBe("pending"); // should be pending before commit
 
 	// Check that the change is in the transaction table before commit (not in cache)
-    const changeInTransaction = await lixInternalDb
-        .selectFrom("internal_transaction_state")
-        .where("entity_id", "=", "test-insert")
-        .selectAll()
-        .select(sql`json(snapshot_content)`.as("snapshot_content"))
-        .executeTakeFirstOrThrow();
+	const changeInTransaction = await lixInternalDb
+		.selectFrom("internal_transaction_state")
+		.where("entity_id", "=", "test-insert")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.executeTakeFirstOrThrow();
 
 	expect(changeInTransaction).toBeDefined();
 	expect(changeInTransaction.id).toBe(results[0]?.change_id);
-expect(changeInTransaction.lixcol_untracked).toBe(0); // tracked entity
+	expect(changeInTransaction.lixcol_untracked).toBe(0); // tracked entity
 	expect(changeInTransaction.snapshot_content).toEqual({
 		value: "inserted-value",
 	});
@@ -107,10 +107,10 @@ expect(changeInTransaction.lixcol_untracked).toBe(0); // tracked entity
 	expect(cacheAfterCommit.change_id).toBe(changeInTransaction.id);
 
 	// Verify the transaction table is cleared
-    const transactionAfterCommit = await lixInternalDb
-        .selectFrom("internal_transaction_state")
-        .selectAll()
-        .execute();
+	const transactionAfterCommit = await lixInternalDb
+		.selectFrom("internal_transaction_state")
+		.selectAll()
+		.execute();
 
 	expect(transactionAfterCommit).toHaveLength(0);
 
@@ -191,16 +191,16 @@ test("creates tombstone for inherited entity deletion", async () => {
 	});
 
 	// Verify the deletion is in transaction table (not cache yet)
-    const transactionDeletion = await lixInternalDb
-        .selectFrom("internal_transaction_state")
-        .where("entity_id", "=", "inherited-key")
-        .where("schema_key", "=", "lix_key_value")
-        .where("lixcol_version_id", "=", activeVersion.version_id)
-        .selectAll()
-        .executeTakeFirstOrThrow();
+	const transactionDeletion = await lixInternalDb
+		.selectFrom("internal_transaction_state")
+		.where("entity_id", "=", "inherited-key")
+		.where("schema_key", "=", "lix_key_value")
+		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-expect(transactionDeletion.lixcol_untracked).toBe(0); // tracked entity
+	expect(transactionDeletion.lixcol_untracked).toBe(0); // tracked entity
 
 	// Commit to create the tombstone
 	commit({ lix });
@@ -287,16 +287,16 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 	});
 
 	// Verify the deletion is in transaction table first
-    const transactionDeletion = await lixInternalDb
-        .selectFrom("internal_transaction_state")
-        .where("entity_id", "=", "inherited-untracked-key")
-        .where("schema_key", "=", "lix_key_value")
-        .where("lixcol_version_id", "=", activeVersion.version_id)
-        .selectAll()
-        .executeTakeFirstOrThrow();
+	const transactionDeletion = await lixInternalDb
+		.selectFrom("internal_transaction_state")
+		.where("entity_id", "=", "inherited-untracked-key")
+		.where("schema_key", "=", "lix_key_value")
+		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-expect(transactionDeletion.lixcol_untracked).toBe(1); // untracked entity
+	expect(transactionDeletion.lixcol_untracked).toBe(1); // untracked entity
 
 	// Commit to create the tombstone in untracked table
 	commit({ lix });
@@ -368,14 +368,14 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 	expect(result[0]?.created_at).toBe(result[0]?.updated_at);
 
 	// Verify the entity is in the transaction table (not untracked table yet)
-    const transactionEntity = await lixInternalDb
-        .selectFrom("internal_transaction_state")
-        .where("entity_id", "=", "test-untracked-timestamp")
-        .selectAll()
-        .select(sql`json(snapshot_content)`.as("snapshot_content"))
-        .executeTakeFirstOrThrow();
+	const transactionEntity = await lixInternalDb
+		.selectFrom("internal_transaction_state")
+		.where("entity_id", "=", "test-untracked-timestamp")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content"))
+		.executeTakeFirstOrThrow();
 
-expect(transactionEntity.lixcol_untracked).toBe(1); // marked as untracked
+	expect(transactionEntity.lixcol_untracked).toBe(1); // marked as untracked
 	expect(transactionEntity.snapshot_content).toEqual({
 		key: "test-key",
 		value: "test-value",

@@ -6,7 +6,7 @@ export async function createNewLixFileInOpfs(): Promise<{ id: string }> {
 	await openLix({
 		blob: lixFile,
 		providePlugins: [mdPlugin],
-		storage: new OpfsStorage({ path: `${lixFile._lix.id}.lix` }),
+    storage: OpfsStorage.byId(lixFile._lix.id),
 	});
 
 	return { id: lixFile._lix.id };

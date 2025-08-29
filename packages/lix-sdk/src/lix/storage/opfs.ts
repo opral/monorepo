@@ -7,6 +7,10 @@ import {
 import type { LixStorageAdapter } from "./lix-storage-adapter.js";
 import type { LixAccount } from "../../account/schema.js";
 import type { Lix } from "../open-lix.js";
+import { newLixFile } from "../new-lix.js";
+import type { NewStateAll } from "../../entity-views/types.js";
+import type { LixKeyValue } from "../../key-value/schema.js";
+import { executeSync } from "../../database/execute-sync.js";
 
 /**
  * OPFS (Origin Private File System) storage adapter for Lix.
@@ -16,7 +20,13 @@ import type { Lix } from "../open-lix.js";
  *
  * Features auto-saving functionality when integrated with the hooks system.
  */
+type OpfsIndex = {
+	version: 1;
+	names: Record<string, string>; // name -> id
+};
+
 export class OpfsStorage implements LixStorageAdapter {
+	private static readonly INDEX_FILE = "lix_opfs_storage.json";
 	/**
 	 * Cleans the entire OPFS by removing all files.
 	 * Useful for debugging and testing.
@@ -50,20 +60,26 @@ export class OpfsStorage implements LixStorageAdapter {
 	}
 
 	private database?: SqliteWasmDatabase;
-	private readonly path: string;
+	private path?: string;
 	private opfsRoot?: FileSystemDirectoryHandle;
 	private savePromise?: Promise<void>;
 	private pendingSave = false;
 	private activeAccounts?: Pick<LixAccount, "id" | "name">[];
 	private activeAccountSubscription?: { unsubscribe(): void };
 	private unsubscribeFromStateCommit?: () => void;
+	private openPromise?: Promise<SqliteWasmDatabase>;
+
+	// Creation/resolution mode
+	private mode?:
+		| { type: "byId"; id: string }
+		| { type: "byName"; name: string };
 
 	/**
 	 * Creates a new OpfsStorage instance.
 	 *
 	 * @param args.path - Path/name of the file to store in OPFS
 	 */
-	constructor(args: { path: string }) {
+	private constructor() {
 		// Check if OPFS is supported
 		if (
 			!("navigator" in globalThis) ||
@@ -72,8 +88,37 @@ export class OpfsStorage implements LixStorageAdapter {
 		) {
 			throw new Error("OPFS is not supported in this environment");
 		}
+	}
 
-		this.path = args.path;
+	/**
+	 * Factory: open by id. Stores at `<id>.lix`.
+	 */
+	static byId(id: string): OpfsStorage {
+		const s = new OpfsStorage();
+		s.mode = { type: "byId", id };
+		return s;
+	}
+
+	/**
+	 * Factory: open by name. Resolves/creates mapping name -> id and stores at `<id>.lix`.
+	 */
+	static byName(name: string): OpfsStorage {
+		const s = new OpfsStorage();
+		s.mode = { type: "byName", name };
+		return s;
+	}
+
+	/**
+	 * Lists known lix entries from the name index.
+	 */
+	static async list(): Promise<{ id: string; name: string; path: string }[]> {
+		const root = await navigator.storage.getDirectory();
+		const index = await OpfsStorage.readIndexFile(root);
+		return Object.entries(index.names).map(([name, id]) => ({
+			id,
+			name,
+			path: `${id}.lix`,
+		}));
 	}
 
 	/**
@@ -86,47 +131,80 @@ export class OpfsStorage implements LixStorageAdapter {
 		blob?: Blob;
 		createBlob: () => Promise<Blob>;
 	}): Promise<SqliteWasmDatabase> {
-		if (!this.database) {
-			this.database = await createInMemoryDatabase({ readOnly: false });
-			this.opfsRoot = await navigator.storage.getDirectory();
+		if (this.openPromise) return this.openPromise;
+		this.openPromise = (async () => {
+			if (!this.database) {
+				this.database = await createInMemoryDatabase({ readOnly: false });
+				this.opfsRoot = await navigator.storage.getDirectory();
 
-			if (args.blob) {
-				// Use provided blob
-				importDatabase({
-					db: this.database,
-					content: new Uint8Array(await args.blob.arrayBuffer()),
-				});
-				// Save the imported state to OPFS
-				await this.save();
-			} else {
-				try {
-					// Try to load existing data from OPFS
-					const fileHandle = await this.opfsRoot.getFileHandle(this.path);
-					const file = await fileHandle.getFile();
-					const content = new Uint8Array(await file.arrayBuffer());
-
-					importDatabase({
-						db: this.database,
-						content,
-					});
-				} catch {
-					// File doesn't exist, create new one
-					const blob = await args.createBlob();
-					importDatabase({
-						db: this.database,
-						content: new Uint8Array(await blob.arrayBuffer()),
-					});
-
-					// Save the initial state to OPFS
-					await this.save();
+				// Resolve path if needed
+				if (!this.path) {
+					if (this.mode?.type === "byId") {
+						this.path = `${this.mode.id}.lix`;
+					} else if (this.mode?.type === "byName") {
+						// Try to resolve via index
+						const index = await OpfsStorage.readIndexFile(this.opfsRoot);
+						const mappedId = index.names[this.mode.name];
+						if (mappedId) {
+							const exists = await OpfsStorage.fileExists(
+								this.opfsRoot,
+								`${mappedId}.lix`
+							);
+							if (exists) {
+								this.path = `${mappedId}.lix`;
+							} else {
+								// Stale mapping - remove and create new below
+								delete index.names[this.mode.name];
+								await OpfsStorage.writeIndexFile(this.opfsRoot, index);
+							}
+						}
+					}
 				}
+
+				if (args.blob) {
+					// Use provided blob
+					importDatabase({
+						db: this.database,
+						content: new Uint8Array(await args.blob.arrayBuffer()),
+					});
+					// Save the imported state to OPFS
+					await this.ensurePathResolvedForCreation(args);
+					await this.enforceModeInvariantsAndIndexUpdateAfterImport();
+					await this.save();
+				} else {
+					if (this.path) {
+						try {
+							// Try to load existing data from OPFS
+							const fileHandle = await this.opfsRoot.getFileHandle(this.path);
+							const file = await fileHandle.getFile();
+							const content = new Uint8Array(await file.arrayBuffer());
+
+							importDatabase({
+								db: this.database,
+								content,
+							});
+							await this.enforceModeInvariantsAndIndexUpdateAfterImport();
+						} catch {
+							// File doesn't exist, create new one
+							await this.createNewFromCallbackAndIndex(args);
+						}
+					} else {
+						// No path yet (e.g., byName without mapping) -> create new and resolve id
+						await this.createNewFromCallbackAndIndex(args);
+					}
+				}
+
+				// Load active accounts if they exist
+				await this.loadActiveAccounts();
 			}
 
-			// Load active accounts if they exist
-			await this.loadActiveAccounts();
+			return this.database;
+		})();
+		try {
+			return await this.openPromise;
+		} finally {
+			this.openPromise = undefined;
 		}
-
-		return this.database;
 	}
 
 	/**
@@ -174,7 +252,9 @@ export class OpfsStorage implements LixStorageAdapter {
 		if (!this.database || !this.opfsRoot) {
 			return;
 		}
-
+		if (!this.path) {
+			throw new Error("Cannot save without a resolved file path");
+		}
 		const content = contentFromDatabase(this.database);
 		const fileHandle = await this.opfsRoot.getFileHandle(this.path, {
 			create: true,
@@ -190,6 +270,38 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Sets up observers for persisting state changes.
 	 */
 	connect(args: { lix: Lix }): void {
+		// Enforce invariants and adjust index synchronously after DB is initialized
+		try {
+			const idRow = executeSync({
+				lix: { sqlite: args.lix.sqlite },
+				query: args.lix.db
+					.selectFrom("key_value_all")
+					.where("key", "=", "lix_id")
+					.where("lixcol_version_id", "=", "global")
+					.select("value"),
+			});
+			const dbId = idRow?.[0]?.value as string | undefined;
+
+			if (this.mode?.type === "byId") {
+				if (dbId && dbId !== this.mode.id) {
+					throw new Error(
+						`OPFS file lix_id mismatch: expected '${this.mode.id}' but found '${dbId}'`
+					);
+				}
+			}
+
+			if (this.mode?.type === "byName" && dbId && this.opfsRoot) {
+				// Update index to point name -> dbId (do not mutate DB name)
+				void (async () => {
+					const index = await OpfsStorage.readIndexFile(this.opfsRoot!);
+					index.names[this.mode!.name] = dbId;
+					await OpfsStorage.writeIndexFile(this.opfsRoot!, index);
+				})();
+			}
+		} catch (e) {
+			if (e instanceof Error) throw e;
+			throw new Error(String(e));
+		}
 		// Set up hook for database persistence
 		this.unsubscribeFromStateCommit = args.lix.hooks.onStateCommit(() => {
 			this.batchedSave();
@@ -315,5 +427,214 @@ export class OpfsStorage implements LixStorageAdapter {
 				this.savePromise = undefined;
 				this.pendingSave = false;
 			});
+	}
+
+	// Helper: ensure path is resolved for creation scenarios when args.blob provided
+	private async ensurePathResolvedForCreation(args: {
+		blob?: Blob;
+		createBlob: () => Promise<Blob>;
+	}): Promise<void> {
+		if (this.path) return;
+		if (!this.opfsRoot) return;
+		if (this.mode?.type === "byId") {
+			this.path = `${this.mode.id}.lix`;
+			return;
+		}
+		if (this.mode?.type === "byName") {
+			// Try to derive id from provided blob if it has _lix metadata
+			let idFromBlob: string | undefined;
+			if (args.blob && (args.blob as any)?._lix?.id) {
+				idFromBlob = (args.blob as any)._lix.id as string;
+			}
+			if (idFromBlob) {
+				this.path = `${idFromBlob}.lix`;
+				// update index
+				const index = await OpfsStorage.readIndexFile(this.opfsRoot);
+				index.names[this.mode.name] = idFromBlob;
+				await OpfsStorage.writeIndexFile(this.opfsRoot, index);
+			}
+		}
+	}
+
+	private static async fileExists(
+		root: FileSystemDirectoryHandle,
+		name: string
+	): Promise<boolean> {
+		try {
+			await root.getFileHandle(name);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	private static async readIndexFile(
+		root: FileSystemDirectoryHandle
+	): Promise<OpfsIndex> {
+		try {
+			const fileHandle = await root.getFileHandle(OpfsStorage.INDEX_FILE);
+			const file = await fileHandle.getFile();
+			const text = await file.text();
+			const parsed = JSON.parse(text) as OpfsIndex;
+			if (!parsed || parsed.version !== 1 || !parsed.names) {
+				return { version: 1, names: {} };
+			}
+			return parsed;
+		} catch {
+			return { version: 1, names: {} };
+		}
+	}
+
+	private static async writeIndexFile(
+		root: FileSystemDirectoryHandle,
+		index: OpfsIndex
+	): Promise<void> {
+		const fh = await root.getFileHandle(OpfsStorage.INDEX_FILE, {
+			create: true,
+		});
+		const w = await fh.createWritable();
+		await w.write(JSON.stringify(index));
+		await w.close();
+	}
+
+	private async createNewFromCallbackAndIndex(args: {
+		blob?: Blob;
+		createBlob: () => Promise<Blob>;
+	}): Promise<void> {
+		if (!this.database || !this.opfsRoot) return;
+		// Create new blob - customize for byId/byName to satisfy mapping immediately
+		let blob: Blob;
+		if (this.mode?.type === "byId" || this.mode?.type === "byName") {
+			const keyValues: NewStateAll<LixKeyValue>[] = [];
+			if (this.mode.type === "byId") {
+				keyValues.push({
+					key: "lix_id",
+					value: this.mode.id,
+					lixcol_version_id: "global",
+				});
+			}
+			if (this.mode.type === "byName") {
+				keyValues.push({
+					key: "lix_name",
+					value: this.mode.name,
+					lixcol_version_id: "global",
+				});
+			}
+			blob = await newLixFile({ keyValues });
+		} else {
+			blob = await args.createBlob();
+		}
+		importDatabase({
+			db: this.database,
+			content: new Uint8Array(await blob.arrayBuffer()),
+		});
+
+		// Determine id
+		let id: string | undefined = (blob as any)?._lix?.id as string | undefined;
+		if (!id) {
+			// Fallback: try to read from imported database using internal tables
+			id = await this.readLixIdFromCurrentDb();
+		}
+		if (!id) {
+			throw new Error("Failed to determine lix_id for new OPFS file");
+		}
+
+		// If we are in byId mode, force the id to match the requested id
+		if (this.mode?.type === "byId") {
+			try {
+				(this.database as any).exec({
+					sql: `UPDATE key_value SET value = ? WHERE key = 'lix_id'`,
+					bind: [this.mode.id],
+				});
+				id = this.mode.id;
+			} catch {
+				// ignore
+			}
+		}
+
+		this.path = `${id}.lix`;
+
+		// If opened by name, ensure the created DB has the requested name
+		if (this.mode?.type === "byName") {
+			try {
+				// Update or insert lix_name to desired
+				(this.database as any).exec({
+					sql: `UPDATE key_value SET value = ? WHERE key = 'lix_name'`,
+					bind: [this.mode.name],
+				});
+				const rows = (this.database as any).exec({
+					sql: `SELECT 1 FROM key_value WHERE key = 'lix_name' LIMIT 1`,
+					returnValue: "resultRows",
+				});
+				if (!rows || rows.length === 0) {
+					(this.database as any).exec({
+						sql: `INSERT INTO key_value (key, value) VALUES ('lix_name', ?)`,
+						bind: [this.mode.name],
+					});
+				}
+			} catch {
+				// ignore
+			}
+		}
+		await this.save();
+
+		// Update index if opened by name
+		if (this.mode?.type === "byName") {
+			const index = await OpfsStorage.readIndexFile(this.opfsRoot);
+			index.names[this.mode.name] = id;
+			await OpfsStorage.writeIndexFile(this.opfsRoot, index);
+		}
+	}
+
+	// After importing any DB content, enforce mode invariants and adjust index mapping accordingly.
+	private async enforceModeInvariantsAndIndexUpdateAfterImport(): Promise<void> {
+		if (!this.database || !this.opfsRoot) return;
+		const id = await this.readLixIdFromCurrentDb();
+		if (!id) return;
+		if (this.mode?.type === "byId") {
+			if (id !== this.mode.id) {
+				throw new Error(
+					`OPFS file lix_id mismatch: expected '${this.mode.id}' but found '${id}'`
+				);
+			}
+		}
+		if (this.mode?.type === "byName") {
+			const index = await OpfsStorage.readIndexFile(this.opfsRoot);
+			index.names[this.mode.name] = id;
+			await OpfsStorage.writeIndexFile(this.opfsRoot, index);
+		}
+	}
+
+	private async readLixIdFromCurrentDb(): Promise<string | undefined> {
+		try {
+			const columnNames: string[] = [];
+			const rows = (this.database as any).exec({
+				sql: `
+					SELECT content
+					FROM internal_snapshot
+					WHERE id IN (
+						SELECT snapshot_id FROM internal_change WHERE schema_key = 'lix_key_value'
+					)
+				`,
+				returnValue: "resultRows",
+				columnNames,
+			});
+			if (Array.isArray(rows) && rows.length > 0) {
+				for (const row of rows) {
+					let c = (row &&
+						(Array.isArray(row) ? row[0] : (row as any)["content"])) as any;
+					if (c instanceof Uint8Array) {
+						c = new TextDecoder().decode(c);
+					}
+					const obj = typeof c === "string" ? JSON.parse(c) : c;
+					if (obj?.key === "lix_id") {
+						return String(obj.value);
+					}
+				}
+			}
+			return undefined;
+		} catch {
+			return undefined;
+		}
 	}
 }
