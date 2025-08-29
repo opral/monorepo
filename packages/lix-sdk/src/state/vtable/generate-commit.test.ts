@@ -12,7 +12,7 @@ function groupBySchema(rows: any[]): Map<string, any[]> {
 	return m;
 }
 
-test("scenario 1: 1 key_value on active (with author)", async () => {
+test("scenario 1: 1 key_value on active (with author) — 30-change model", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -50,10 +50,24 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 					snapshot: {
 						id: "version-main",
 						name: "main",
-						commit_id: "ignore",
+						commit_id: "ignore_active",
 						working_commit_id: "work-main",
 						inherits_from_version_id: "global",
 						hidden: false,
+					},
+				},
+			],
+			[
+				"global",
+				{
+					parent_commit_ids: ["P_global"],
+					snapshot: {
+						id: "global",
+						name: "global",
+						commit_id: "ignore_global",
+						working_commit_id: "work-global",
+						inherits_from_version_id: null,
+						hidden: true,
 					},
 				},
 			],
@@ -62,13 +76,15 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
-	expect(bySchema.get("lix_commit_package")).toBeUndefined();
+	// Domain + Metadata rows
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
+	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(2);
+	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
+	// Change set elements (domain + meta + meta-of-meta)
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(20);
 
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
@@ -83,15 +99,16 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	// Synthesized: domain-only CSE; domain rows are included for the commit's version
 	const bySchemaMat = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat.get("lix_key_value")?.length ?? 0).toBe(1);
-	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(1);
-	// No meta synthesized into materialized state
-	expect(bySchemaMat.get("lix_commit")?.length ?? 0).toBe(0);
-	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(0);
-	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(0);
+	expect(bySchemaMat.get("lix_change_author")?.length ?? 0).toBe(1);
+	expect(bySchemaMat.get("lix_commit")?.length ?? 0).toBe(2);
+	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(2);
+	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(2);
+	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(2);
+	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(20);
 
-	// Totals
-	expect(res.changes).toHaveLength(6); // 1 domain + 1 version + 1 changeset + 1 commit + 1 edge + 1 author
-	expect(res.materializedState).toHaveLength(2); // 1 domain + 1 CSE
+	// Totals per 30-change model
+	expect(res.changes).toHaveLength(30);
+	expect(res.materializedState).toHaveLength(30);
 });
 
 test("scenario 2: 1 key_value on global (with author)", async () => {
@@ -143,12 +160,14 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
+	// Only global participates
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(12);
 
 	const commit = JSON.parse(
 		(bySchema.get("lix_commit")![0] as any).snapshot_content!
@@ -160,18 +179,17 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(commit.author_account_ids).toBeUndefined();
 
 	const bySchemaMat2 = groupBySchema((res.materializedState as any[]) ?? []);
-	// Materialized state (cache)
-	// Synthesized: domain-only CSE; domain rows are included for the commit's version
 	expect(bySchemaMat2.get("lix_key_value")?.length ?? 0).toBe(1);
-	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(1);
-	// No meta synthesized
-	expect(bySchemaMat2.get("lix_commit")?.length ?? 0).toBe(0);
-	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(0);
-	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(0);
+	expect(bySchemaMat2.get("lix_change_author")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_commit")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_commit_edge")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(12);
 
 	// Totals
-	expect(res.changes).toHaveLength(6); // 1 domain + 1 version + 1 changeset + 1 commit + 1 edge + 1 author
-	expect(res.materializedState).toHaveLength(2); // 1 domain + 1 CSE
+	expect(res.changes).toHaveLength(18);
+	expect(res.materializedState).toHaveLength(18);
 });
 
 test("scenario 3: 2 key_values (active + global), each with both authors", async () => {
@@ -254,6 +272,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(28);
 
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
@@ -267,16 +286,15 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	});
 
 	const bySchemaMat3 = groupBySchema((res.materializedState as any[]) ?? []);
-	// Materialized state (cache)
-	// Synthesized: domain-only CSE; domain rows are included per version
 	expect(bySchemaMat3.get("lix_key_value")?.length ?? 0).toBe(2);
-	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(2);
-	// No meta synthesized
-	expect(bySchemaMat3.get("lix_commit")?.length ?? 0).toBe(0);
-	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(0);
-	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(0);
+	expect(bySchemaMat3.get("lix_change_author")?.length ?? 0).toBe(4);
+	expect(bySchemaMat3.get("lix_commit")?.length ?? 0).toBe(2);
+	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(2);
+	expect(bySchemaMat3.get("lix_commit_edge")?.length ?? 0).toBe(2);
+	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(2);
+	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(28);
 
 	// Totals
-	expect(res.changes).toHaveLength(14); // 2 domain + 2 versions + 2 changesets + 2 commits + 2 edges + 4 authors
-	expect(res.materializedState).toHaveLength(4); // 2 domain + 2 CSE
+	expect(res.changes).toHaveLength(42);
+	expect(res.materializedState).toHaveLength(42);
 });
