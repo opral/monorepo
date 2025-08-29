@@ -39,10 +39,115 @@ const jsonCellRenderer = (info: any) => {
   }
 };
 
+// Utilities to detect and format binary/text
+function toUint8Array(value: any): Uint8Array | null {
+  if (!value) return null;
+  if (value instanceof Uint8Array) return value;
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (Array.isArray(value)) return new Uint8Array(value as number[]);
+  if (typeof value === 'object') {
+    // Detect objects with numeric keys: {"0":45, "1":120, ...}
+    const keys = Object.keys(value);
+    if (keys.length === 0) return null;
+    const numeric = keys.every((k) => /^\d+$/.test(k));
+    if (!numeric) return null;
+    const max = keys.reduce((m, k) => Math.max(m, Number(k)), 0);
+    const arr = new Uint8Array(max + 1);
+    for (const k of keys) {
+      const n = Number(k);
+      const v = (value as any)[k];
+      arr[n] = typeof v === 'number' ? v : 0;
+    }
+    return arr;
+  }
+  if (typeof value === 'string') {
+    // Try base64
+    try {
+      const bin = atob(value);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      return arr;
+    } catch {}
+  }
+  return null;
+}
+
+function asciiRatio(bytes: Uint8Array, sample = 1024): number {
+  const len = Math.min(bytes.length, sample);
+  if (len === 0) return 0;
+  let printable = 0;
+  for (let i = 0; i < len; i++) {
+    const c = bytes[i]!;
+    if (
+      (c >= 32 && c <= 126) || // printable
+      c === 9 || c === 10 || c === 13 // tab, lf, cr
+    )
+      printable++;
+  }
+  return printable / len;
+}
+
+function bytesToAscii(bytes: Uint8Array, max = 200): string {
+  let out = '';
+  const n = Math.min(bytes.length, max);
+  for (let i = 0; i < n; i++) {
+    const c = bytes[i]!;
+    if (c === 9) out += '\t';
+    else if (c === 10) out += '\n';
+    else if (c === 13) out += '\r';
+    else if (c >= 32 && c <= 126) out += String.fromCharCode(c);
+    else out += '·';
+  }
+  if (bytes.length > max) out += '…';
+  return out;
+}
+
+function bytesToHexPreview(bytes: Uint8Array, maxBytes = 16): string {
+  const n = Math.min(bytes.length, maxBytes);
+  const parts: string[] = [];
+  for (let i = 0; i < n; i++) {
+    parts.push(bytes[i]!.toString(16).padStart(2, '0'));
+  }
+  const hex = parts.join(' ').toUpperCase();
+  return bytes.length > n ? `${hex} …` : hex;
+}
+
+function Hexdump({ bytes }: { bytes: Uint8Array }) {
+  const rows: string[] = [];
+  const width = 16;
+  for (let off = 0; off < bytes.length; off += width) {
+    const slice = bytes.slice(off, off + width);
+    const hex = Array.from(slice)
+      .map((b) => b.toString(16).padStart(2, '0').toUpperCase())
+      .join(' ');
+    const ascii = Array.from(slice)
+      .map((b) => (b >= 32 && b <= 126 ? String.fromCharCode(b) : '.'))
+      .join('');
+    rows.push(
+      `${off.toString(16).padStart(4, '0')}: ${hex.padEnd(47, ' ')}  |${ascii}|`
+    );
+  }
+  return (
+    <pre className="text-xs whitespace-pre leading-4 overflow-auto max-h-[60vh]">
+      {rows.join('\n')}
+    </pre>
+  );
+}
+
 function DataExplorerContent() {
   const [selectedEntity, setSelectedEntity] = useState<string>("");
   const [selectedViewType, setSelectedViewType] = useState<string>("active");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [viewer, setViewer] = useState<
+    | null
+    | {
+        id: string | number | undefined;
+        path?: string;
+        column: string;
+        bytes: Uint8Array;
+        mode: 'auto' | 'text' | 'hex' | 'base64';
+      }
+  >(null);
 
   const tablesQueryData = useQuery((lix) =>
     lix.db
@@ -163,7 +268,45 @@ function DataExplorerContent() {
       ];
     } else {
       return columnNames.map((columnName: string) => {
-        const cellRenderer = defaultCellRenderer;
+        const firstRowValue = tableDataQueryResult?.[0]?.[columnName];
+        const maybeBytes = toUint8Array(firstRowValue);
+
+        const cellRenderer = maybeBytes
+          ? (info: any) => {
+              const raw = info.getValue();
+              const bytes = toUint8Array(raw);
+              if (!bytes) {
+                return <span className="text-xs opacity-70">(no data)</span>;
+              }
+              const ratio = asciiRatio(bytes);
+              const isText = ratio >= 0.85;
+              const label = isText
+                ? `"${bytesToAscii(bytes, 80)}"`
+                : `hex: ${bytesToHexPreview(bytes, 16)}`;
+              return (
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-xs max-w-[420px] inline-block">
+                    {label}
+                  </span>
+                  <button
+                    className="btn btn-ghost btn-xs"
+                    title="Open viewer"
+                    onClick={() =>
+                      setViewer({
+                        id: info.row?.original?.id as any,
+                        path: (info.row?.original?.path as string) ?? undefined,
+                        column: columnName,
+                        bytes,
+                        mode: 'auto',
+                      })
+                    }
+                  >
+                    ⤢
+                  </button>
+                </div>
+              );
+            }
+          : defaultCellRenderer;
 
         const columnDef: ColumnDef<any> = {
           id: columnName,
@@ -172,11 +315,9 @@ function DataExplorerContent() {
           cell: cellRenderer,
         };
 
-        // Check if the column contains objects by sampling the first row
-        const firstRowValue = tableDataQueryResult?.[0]?.[columnName];
-        if (typeof firstRowValue === 'object' && firstRowValue !== null) {
+        if (maybeBytes || (typeof firstRowValue === 'object' && firstRowValue !== null)) {
           columnDef.size = 800;
-          columnDef.minSize = 400;
+          columnDef.minSize = 300;
           columnDef.maxSize = 1200;
           columnDef.enableResizing = true;
         }
@@ -344,12 +485,116 @@ function DataExplorerContent() {
       )}
 
       {selectedTable && (
-        <DataTable
-          data={computedTableData}
-          columns={computedTableColumns}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-        />
+        <div className="flex gap-2">
+          <div className="flex-1 min-w-0">
+            <DataTable
+              data={computedTableData}
+              columns={computedTableColumns}
+              columnFilters={columnFilters}
+              setColumnFilters={setColumnFilters}
+              tableId={`data-explorer:${selectedTable}`}
+            />
+          </div>
+          {viewer && (
+            <div className="w-[520px] shrink-0 border-l pl-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="font-medium text-sm">
+                  Data • {viewer.column}
+                  {viewer.path ? ` • ${viewer.path}` : ''}
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    className="select select-bordered select-xs"
+                    value={viewer.mode}
+                    onChange={(e) =>
+                      setViewer({ ...viewer, mode: e.target.value as any })
+                    }
+                  >
+                    <option value="auto">Auto</option>
+                    <option value="text">Text</option>
+                    <option value="hex">Hexdump</option>
+                    <option value="base64">Base64</option>
+                  </select>
+                  <button className="btn btn-xs" onClick={() => setViewer(null)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              {(() => {
+                if (!viewer) return null;
+                const bytes = viewer.bytes;
+                const autoText = asciiRatio(bytes) >= 0.85;
+                const mode = viewer.mode === 'auto' ? (autoText ? 'text' : 'hex') : viewer.mode;
+                if (mode === 'text') {
+                  return (
+                    <pre className="text-xs whitespace-pre-wrap break-all max-h-[60vh] overflow-auto">
+                      {bytesToAscii(bytes, 10000)}
+                    </pre>
+                  );
+                }
+                if (mode === 'base64') {
+                  let bin = '';
+                  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
+                  const b64 = btoa(bin);
+                  return (
+                    <textarea readOnly className="textarea textarea-bordered w-full h-[60vh] text-xs">
+                      {b64}
+                    </textarea>
+                  );
+                }
+                return <Hexdump bytes={bytes} />;
+              })()}
+
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  className="btn btn-xs"
+                  onClick={() => {
+                    const bytes = viewer.bytes;
+                    const autoText = asciiRatio(bytes) >= 0.85;
+                    const mode = viewer.mode === 'auto' ? (autoText ? 'text' : 'hex') : viewer.mode;
+                    let content = '';
+                    if (mode === 'text') {
+                      content = bytesToAscii(bytes, 100000);
+                    } else if (mode === 'base64') {
+                      let bin = '';
+                      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
+                      content = btoa(bin);
+                    } else {
+                      const hexParts: string[] = [];
+                      for (let i = 0; i < bytes.length; i++) {
+                        const b = bytes[i]!;
+                        hexParts.push(b.toString(16).padStart(2, '0').toUpperCase());
+                      }
+                      content = hexParts.join(' ');
+                    }
+                    navigator.clipboard.writeText(content).catch(() => {});
+                  }}
+                >
+                  Copy
+                </button>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => {
+                    const blob = new Blob([viewer.bytes]);
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'data.bin';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }, 100);
+                  }}
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

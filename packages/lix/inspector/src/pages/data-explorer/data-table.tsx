@@ -16,6 +16,7 @@ interface DataTableProps<TData> {
   data: TData[];
   columnFilters: ColumnFiltersState;
   setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+  tableId?: string;
 }
 
 export function DataTable<TData>({
@@ -23,14 +24,33 @@ export function DataTable<TData>({
   data,
   columnFilters,
   setColumnFilters,
+  tableId = "default",
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<Record<string, boolean>>({});
+
+  // Load/persist column visibility per table id
+  React.useEffect(() => {
+    const key = `lix-inspector:columns:${tableId}`;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) setColumnVisibility(JSON.parse(raw));
+    } catch {}
+  }, [tableId]);
+
+  React.useEffect(() => {
+    const key = `lix-inspector:columns:${tableId}`;
+    try {
+      localStorage.setItem(key, JSON.stringify(columnVisibility));
+    } catch {}
+  }, [columnVisibility, tableId]);
 
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -40,11 +60,32 @@ export function DataTable<TData>({
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
     },
   });
 
   return (
     <div>
+      <div className="mb-2 flex items-center gap-2">
+        <div className="dropdown">
+          <div tabIndex={0} role="button" className="btn btn-xs btn-outline">Columns ▾</div>
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-56 p-2 shadow">
+            {table.getAllLeafColumns().map((col) => (
+              <li key={col.id}>
+                <label className="label cursor-pointer justify-start gap-2 py-1">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs"
+                    checked={col.getIsVisible()}
+                    onChange={(e) => col.toggleVisibility(e.target.checked)}
+                  />
+                  <span className="label-text text-xs">{String(col.columnDef.header)}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="table table-zebra">
           <thead>
