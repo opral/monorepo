@@ -151,7 +151,7 @@ function AppContent(args: { show: boolean }) {
     {} as Record<Pages, WindowState>
   );
 
-  // Update body padding when the inspector height changes
+  // Update app layout offsets using a CSS variable; host can consume via sticky top
   useEffect(() => {
     const updateBodyPadding = () => {
       if (isHidden) {
@@ -160,7 +160,10 @@ function AppContent(args: { show: boolean }) {
           "lix-inspector-style"
         ) as HTMLStyleElement;
         if (styleEl) {
-          styleEl.textContent = `body { padding-top: 0; }`;
+          styleEl.textContent = `
+            :root { --lix-inspector-offset: 0px; }
+            body { padding-top: var(--lix-inspector-offset) !important; }
+          `;
         }
         return;
       }
@@ -170,13 +173,14 @@ function AppContent(args: { show: boolean }) {
         "lix-inspector-style"
       ) as HTMLStyleElement;
       if (styleEl) {
-        styleEl.textContent = `body { padding-top: ${height}; }`;
+        styleEl.textContent = `
+          :root { --lix-inspector-offset: ${height}; }
+          /* Push normal flow content */
+          body { padding-top: var(--lix-inspector-offset) !important; }
+        `;
 
-        // Extract header height for window positioning
-        const match = styleEl.textContent?.match(/padding-top:\s*(\d+)px/);
-        if (match && match[1]) {
-          setHeaderHeight(parseInt(match[1], 10));
-        }
+        // Update header height directly
+        setHeaderHeight(rootContainer.offsetHeight);
       }
     };
 
