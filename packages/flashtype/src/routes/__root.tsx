@@ -15,6 +15,7 @@ import { VersionDropdown } from "@/components/version-dropdown";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, BotMessageSquare } from "lucide-react";
 import { LixAgentChat } from "@/components/lix-agent-chat";
+import { EditorProvider } from "@/editor/editor-context";
 
 export const Route = createRootRoute({
 	component: Root,
@@ -58,59 +59,61 @@ function Root() {
 	return (
 		<LeftSidebarProvider>
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>
-				<AppSidebar />
-				<SidebarInset>
-					<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
-						<div className="font-medium text-sm">
-							{activeFileId ?? "Flashtype"}
-						</div>
-						<VersionDropdown />
-						<div className="ml-auto flex items-center gap-2">
-							<ChangeIndicator />
-							<Button
-								aria-label="Open Lix Agent chat"
-								variant="ghost"
-								size="sm"
-								className="h-7 w-7 p-0 text-muted-foreground"
-								title="Open Lix Agent chat"
-								onClick={() => setAgentChatOpen(true)}
-							>
-								<BotMessageSquare className="h-4 w-4" />
-							</Button>
-						</div>
-					</header>
-					<div className="flex min-h-0 flex-1">
-						<LeftSidebarArea />
-						<div className="flex min-h-0 flex-1 flex-col text-sm">
-							<FormattingToolbar />
-							<div className="flex-1 overflow-auto p-4">
-								<Outlet />
+				<EditorProvider>
+					<AppSidebar />
+					<SidebarInset>
+						<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
+							<div className="font-medium text-sm">
+								{activeFileId ?? "Flashtype"}
 							</div>
-						</div>
-						{agentChatOpen ? (
-							<div className="w-72 shrink-0 border-l bg-background">
-								<SidebarTab
-									title={
-										<a
-											href="https://github.com/opral/lix-sdk"
-											target="_blank"
-											rel="noreferrer noopener"
-											className="inline-flex items-center gap-1 text-foreground hover:underline"
-										>
-											Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
-										</a>
-									}
-									onClose={() => setAgentChatOpen(false)}
+							<VersionDropdown />
+							<div className="ml-auto flex items-center gap-2">
+								<ChangeIndicator />
+								<Button
+									aria-label="Open Lix Agent chat"
+									variant="ghost"
+									size="sm"
+									className="h-7 w-7 p-0 text-muted-foreground"
+									title="Open Lix Agent chat"
+									onClick={() => setAgentChatOpen(true)}
 								>
-									<LixAgentChat />
-								</SidebarTab>
+									<BotMessageSquare className="h-4 w-4" />
+								</Button>
 							</div>
+						</header>
+						<div className="flex min-h-0 flex-1">
+							<LeftSidebarArea />
+							<div className="flex min-h-0 flex-1 flex-col text-sm">
+								<FormattingToolbar />
+								<div className="flex-1 overflow-auto p-4">
+									<Outlet />
+								</div>
+							</div>
+							{agentChatOpen ? (
+								<div className="w-72 shrink-0 border-l bg-background">
+									<SidebarTab
+										title={
+											<a
+												href="https://github.com/opral/lix-sdk"
+												target="_blank"
+												rel="noreferrer noopener"
+												className="inline-flex items-center gap-1 text-foreground hover:underline"
+											>
+												Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
+											</a>
+										}
+										onClose={() => setAgentChatOpen(false)}
+									>
+										<LixAgentChat />
+									</SidebarTab>
+								</div>
+							) : null}
+						</div>
+						{import.meta.env.DEV ? (
+							<TanStackRouterDevtools position="bottom-right" />
 						) : null}
-					</div>
-					{import.meta.env.DEV ? (
-						<TanStackRouterDevtools position="bottom-right" />
-					) : null}
-				</SidebarInset>
+					</SidebarInset>
+				</EditorProvider>
 			</SidebarProvider>
 		</LeftSidebarProvider>
 	);

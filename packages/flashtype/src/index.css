@@ -215,3 +215,31 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+/* TipTap / ProseMirror editor tweaks */
+.ProseMirror:focus,
+.ProseMirror:focus-visible {
+	outline: none;
+}
+.tiptap:focus,
+.tiptap:focus-visible {
+	outline: none;
+}
+
+/* Allow editor surface to fill available height */
+.ProseMirror {
+	min-height: 100%;
+}
+
+/* Fill available space */
+html,
+body,
+#root {
+	height: 100%;
+}
+
+.tiptap,
+.ProseMirror {
+	height: 100%;
+	width: 100%;
+}

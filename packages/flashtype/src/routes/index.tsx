@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { TipTapEditor } from "@/components/tiptap-editor";
 
 export const Route = createFileRoute("/")({
 	component: Index,
@@ -6,16 +7,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
 	return (
-		<main style={{ maxWidth: 720, margin: "48px auto", padding: "0 16px" }}>
-			<h1 style={{ fontSize: 32, marginBottom: 8 }}>Flashtype</h1>
-			<p style={{ color: "#555", marginBottom: 24 }}>
-				Minimal scaffold — React 19 + Vite + TanStack Router.
-			</p>
-			<nav style={{ display: "flex", gap: 12 }}>
-				<Link to="/" style={{ color: "#2563eb" }}>
-					Home
-				</Link>
-			</nav>
+		<main style={{ height: "100%", padding: "0 16px" }}>
+			<TipTapEditor />
 		</main>
 	);
 }
