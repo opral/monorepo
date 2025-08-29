@@ -13,9 +13,14 @@ type Props = {
 	 * @default 100
 	 */
 	highRange?: number;
+	/**
+	 * Whether to show the numeric counts (+X -Y) or only the visual bars
+	 * @default true
+	 */
+	showCounts?: boolean;
 };
 
-export function DiffIndicator({ added, removed, highRange = 100 }: Props) {
+export function DiffIndicator({ added, removed, highRange = 100, showCounts = true }: Props) {
 	const total = added + removed;
 
 	// Calculate number of bars (1-4) based on percentage of highRange
@@ -68,9 +73,13 @@ export function DiffIndicator({ added, removed, highRange = 100 }: Props) {
 
 	return (
 		<div className="flex items-center gap-2 text-xs font-medium tabular-nums">
-			<span className="text-green-600">+{added}</span>
-			{removed > 0 ? <span className="text-red-600">-{removed}</span> : null}
-			<span aria-hidden className="inline-flex items-center gap-0.5 pl-1 h-3">
+			{showCounts && (
+				<>
+					<span className="text-green-600">+{added}</span>
+					{removed > 0 ? <span className="text-red-600">-{removed}</span> : null}
+				</>
+			)}
+			<span aria-hidden className={`inline-flex items-center gap-0.5 h-3 ${!showCounts ? '' : 'pl-1'}`}>
 				{Array.from({ length: greenBars }).map((_, i) => (
 					<i
 						key={`g${i}`}

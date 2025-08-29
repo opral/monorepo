@@ -115,4 +115,17 @@ describe("DiffIndicator", () => {
 		const bars = getBars(container);
 		expect(bars.length).toBe(0);
 	});
+
+	/**
+	 * Expected output: | (no counts, only bars)
+	 * Visual bars: [green][green][red] (3 bars for 75% of highRange)
+	 */
+	test("hides counts when showCounts is false", () => {
+		render(
+			<DiffIndicator added={50} removed={25} highRange={100} showCounts={false} />,
+		);
+		// Counts should not be in the document
+		expect(screen.queryByText("+50")).not.toBeInTheDocument();
+		expect(screen.queryByText("-25")).not.toBeInTheDocument();
+	});
 });
