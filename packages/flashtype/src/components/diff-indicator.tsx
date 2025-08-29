@@ -20,7 +20,12 @@ type Props = {
 	showCounts?: boolean;
 };
 
-export function DiffIndicator({ added, removed, highRange = 100, showCounts = true }: Props) {
+export function DiffIndicator({
+	added,
+	removed,
+	highRange = 100,
+	showCounts = true,
+}: Props) {
 	const total = added + removed;
 
 	// Calculate number of bars (1-4) based on percentage of highRange
@@ -76,10 +81,15 @@ export function DiffIndicator({ added, removed, highRange = 100, showCounts = tr
 			{showCounts && (
 				<>
 					<span className="text-green-600">+{added}</span>
-					{removed > 0 ? <span className="text-red-600">-{removed}</span> : null}
+					{removed > 0 ? (
+						<span className="text-red-600">-{removed}</span>
+					) : null}
 				</>
 			)}
-			<span aria-hidden className={`inline-flex items-center gap-0.5 h-3 ${!showCounts ? '' : 'pl-1'}`}>
+			<span
+				aria-hidden
+				className={`inline-flex items-center gap-0.5 h-3 ${!showCounts ? "" : "pl-1"}`}
+			>
 				{Array.from({ length: greenBars }).map((_, i) => (
 					<i
 						key={`g${i}`}

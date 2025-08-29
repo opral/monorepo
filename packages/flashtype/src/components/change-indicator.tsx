@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Zap } from "lucide-react";
 import { useRef, useState } from "react";
 import {
 	DropdownMenu,
@@ -7,6 +7,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { DiffIndicator } from "@/components/diff-indicator";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function ChangeIndicator() {
 	const [open, setOpen] = useState(false);
@@ -43,7 +48,12 @@ export function ChangeIndicator() {
 					}}
 				>
 					<span className="font-medium text-sm">3 changes</span>
-					<DiffIndicator added={12} removed={3} highRange={30} showCounts={false} />
+					<DiffIndicator
+						added={12}
+						removed={3}
+						highRange={30}
+						showCounts={false}
+					/>
 					<ChevronDown
 						className={`size-4 transition-transform duration-200 ${
 							open ? "rotate-180" : ""
@@ -53,8 +63,27 @@ export function ChangeIndicator() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-[320px] p-0" sideOffset={8} align="end">
 				<div className="p-2.5">
-					<div className="text-sm font-semibold leading-snug">
-						Added greeting text
+					<div className="flex items-center justify-between gap-2">
+						<div className="text-sm font-semibold leading-snug">
+							Added greeting text
+						</div>
+						<Tooltip delayDuration={1200}>
+							<TooltipTrigger asChild>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="h-7 w-7 p-0"
+									aria-label="Auto-fill title and summary"
+									onClick={() => {}}
+								>
+									<Zap className="size-4 text-amber-500" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								Auto-fill title & summary (⌘G)
+							</TooltipContent>
+						</Tooltip>
 					</div>
 					<div className="mt-1 text-xs text-muted-foreground">
 						Simple greeting text – ready to expand into introduction

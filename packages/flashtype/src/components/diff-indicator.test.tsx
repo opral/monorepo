@@ -122,7 +122,12 @@ describe("DiffIndicator", () => {
 	 */
 	test("hides counts when showCounts is false", () => {
 		render(
-			<DiffIndicator added={50} removed={25} highRange={100} showCounts={false} />,
+			<DiffIndicator
+				added={50}
+				removed={25}
+				highRange={100}
+				showCounts={false}
+			/>,
 		);
 		// Counts should not be in the document
 		expect(screen.queryByText("+50")).not.toBeInTheDocument();
