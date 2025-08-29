@@ -3,7 +3,7 @@ import { FolderOpen, GitCommitVertical, Zap } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
+import { FlashtypeMenu } from "@/components/flashtype-menu";
 import {
 	Sidebar,
 	SidebarContent,
@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader className="h-12.5">
-				<TeamSwitcher teams={data.teams} />
+				<FlashtypeMenu teams={data.teams} user={data.user} />
 			</SidebarHeader>
 			<SidebarContent className="mt-0">
 				<NavMain
