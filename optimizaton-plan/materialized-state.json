@@ -1,0 +1,68 @@
+[
+	{
+		"change_id": "c-cp1",
+		"commit_id": "commit1",
+		"version_id": "version_a",
+		"schema_key": "lix_commit",
+		"snapshot_content": {
+			"id": "commit1",
+			"change_set_id": "cs1"
+		}
+	},
+	{
+		"change_id": "c-kv1",
+		"commit_id": "commit1",
+		"version_id": "version_a",
+		"schema_key": "lix_key_value",
+		"snapshot_content": {
+			"key": "foo",
+			"value": "bar"
+		}
+	},
+	{
+		"change_id": "c-vt1",
+		"commit_id": "commit1",
+		"version_id": "version_a",
+		"schema_key": "lix_version",
+		"snapshot_content": {
+			"id": "version_a",
+			"name": "Version A",
+			"commit_id": "commit1",
+			"working_commit_id": "<working-commit-id>",
+			"inherits_from_version_id": "global",
+			"hidden": false
+		}
+	},
+	{
+		"change_id": "c-cs1",
+		"commit_id": "commit1",
+		"version_id": "version_a",
+		"schema_key": "lix_change_set",
+		"snapshot_content": {
+			"id": "cs1"
+		}
+	},
+	{
+		"change_id": "c-ca1",
+		"commit_id": "commit1",
+		"version_id": "version_a",
+		"schema_key": "lix_change_author",
+		"snapshot_content": {
+			"change_id": "c-kv1",
+			"account_id": "<account-id>"
+		}
+	},
+	{
+		"change_id": "c-kv1",
+		"commit_id": "commit1",
+		"version_id": "global",
+		"schema_key": "lix_change_set_element",
+		"snapshot_content": {
+			"change_set_id": "cs1",
+			"change_id": "c-kv1",
+			"entity_id": "cs1~c-kv1",
+			"schema_key": "lix_key_value",
+			"file_id": "lix"
+		}
+	}
+]
