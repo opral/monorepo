@@ -7,6 +7,7 @@ import { LeftSidebarProvider, useLeftSidebar } from "@/components/left-sidebar";
 import { LeftSidebarFiles } from "@/components/left-sidebar-files";
 import { LeftSidebarHistory } from "@/components/left-sidebar-history";
 import { LeftSidebarTab } from "@/components/left-sidebar-tab";
+import { FormattingToolbar } from "@/components/formatting-toolbar";
 
 export const Route = createRootRoute({
 	component: Root,
@@ -46,13 +47,16 @@ function Root() {
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>
 				<AppSidebar />
 				<SidebarInset>
-					<header className="flex h-12 items-center gap-2 border-b px-4">
+					<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
 						<div className="font-medium">{activeFileId ?? "Flashtype"}</div>
 					</header>
 					<div className="flex min-h-0 flex-1">
 						<LeftSidebarArea />
-						<div className="flex-1 p-4">
-							<Outlet />
+						<div className="flex min-h-0 flex-1 flex-col">
+							<FormattingToolbar />
+							<div className="flex-1 overflow-auto p-4">
+								<Outlet />
+							</div>
 						</div>
 					</div>
 					{import.meta.env.DEV ? (
