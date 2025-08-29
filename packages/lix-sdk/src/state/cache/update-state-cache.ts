@@ -1,5 +1,6 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixChangeRaw } from "../../change/schema.js";
+import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getStateCacheV2Tables } from "./schema.js";
@@ -37,11 +38,14 @@ import { createSchemaCacheTable } from "./create-schema-cache-table.js";
  */
 export function updateStateCache(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
-	changes: LixChangeRaw[];
-	commit_id: string;
-	version_id: string;
+	// Accepts standard changes or materialized changes which include inline
+	// lixcol_version_id and lixcol_commit_id. When inline values are present,
+	// they take precedence over top-level commit/version arguments.
+	changes: Array<LixChangeRaw | MaterializedChange>;
+	commit_id?: string;
+	version_id?: string;
 }): void {
-	const { lix, changes, commit_id, version_id } = args;
+	const { lix, changes } = args;
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Group changes by schema_key for efficient batch processing
@@ -84,8 +88,8 @@ export function updateStateCache(args: {
 				lix,
 				tableName,
 				changes: schemaChanges.inserts,
-				commit_id,
-				version_id,
+				default_commit_id: args.commit_id,
+				default_version_id: args.version_id,
 			});
 		}
 
@@ -96,8 +100,8 @@ export function updateStateCache(args: {
 				lix,
 				tableName,
 				changes: schemaChanges.deletes,
-				commit_id,
-				version_id,
+				default_commit_id: args.commit_id,
+				default_version_id: args.version_id,
 			});
 		}
 	}
@@ -123,11 +127,12 @@ function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 function batchInsertDirectToTable(args: {
 	lix: Pick<Lix, "sqlite">;
 	tableName: string;
-	changes: LixChangeRaw[];
-	commit_id: string;
-	version_id: string;
+	changes: Array<LixChangeRaw | MaterializedChange>;
+	default_commit_id?: string;
+	default_version_id?: string;
 }): void {
-	const { lix, tableName, changes, commit_id, version_id } = args;
+	const { lix, tableName, changes, default_commit_id, default_version_id } =
+		args;
 
 	// Prepare statement once for all inserts
 	// Use proper UPSERT with ON CONFLICT instead of INSERT OR REPLACE
@@ -163,11 +168,30 @@ function batchInsertDirectToTable(args: {
 
 	try {
 		for (const change of changes) {
+			// Resolve version/commit per-change, supporting inline values from materialized rows
+			const change_any = change as any;
+			const resolvedVersionId =
+				change_any.lixcol_version_id ??
+				change_any.version_id ??
+				default_version_id;
+			const resolvedCommitId = change_any.lixcol_commit_id ?? default_commit_id;
+
+			if (!resolvedVersionId) {
+				throw new Error(
+					"updateStateCache: version_id missing; provide inline lixcol_version_id or top-level version_id"
+				);
+			}
+			if (!resolvedCommitId) {
+				throw new Error(
+					"updateStateCache: commit_id missing; provide inline lixcol_commit_id or top-level commit_id"
+				);
+			}
+
 			stmt.bind([
 				change.entity_id,
 				change.schema_key, // Add the original schema_key
 				change.file_id,
-				version_id,
+				resolvedVersionId,
 				change.plugin_key,
 				change.snapshot_content, // jsonb() conversion happens in SQL
 				change.schema_version,
@@ -176,7 +200,7 @@ function batchInsertDirectToTable(args: {
 				null, // inherited_from_version_id
 				0, // inheritance_delete_marker
 				change.id,
-				commit_id,
+				resolvedCommitId,
 			]);
 			stmt.step();
 			stmt.reset();
@@ -190,19 +214,38 @@ function batchDeleteDirectFromTable(args: {
 	db: Kysely<LixInternalDatabaseSchema>;
 	lix: Pick<Lix, "sqlite">;
 	tableName: string;
-	changes: LixChangeRaw[];
-	commit_id: string;
-	version_id: string;
+	changes: Array<LixChangeRaw | MaterializedChange>;
+	default_commit_id?: string;
+	default_version_id?: string;
 }): void {
-	const { lix, tableName, changes, commit_id, version_id } = args;
+	const { lix, tableName, changes, default_commit_id, default_version_id } =
+		args;
 
 	for (const change of changes) {
+		const change_any = change as any;
+		const resolvedVersionId =
+			change_any.lixcol_version_id ??
+			change_any.version_id ??
+			default_version_id;
+		const resolvedCommitId = change_any.lixcol_commit_id ?? default_commit_id;
+
+		if (!resolvedVersionId) {
+			throw new Error(
+				"updateStateCache: version_id missing; provide inline lixcol_version_id or top-level version_id"
+			);
+		}
+		if (!resolvedCommitId) {
+			throw new Error(
+				"updateStateCache: commit_id missing; provide inline lixcol_commit_id or top-level commit_id"
+			);
+		}
+
 		// Get existing entry to check if it exists before deletion
 		const result = lix.sqlite.exec({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
 			      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
-			bind: [change.entity_id, change.file_id, version_id],
+			bind: [change.entity_id, change.file_id, resolvedVersionId],
 			returnValue: "resultRows",
 		}) as any[];
 
@@ -213,7 +256,7 @@ function batchDeleteDirectFromTable(args: {
 			lix.sqlite.exec({
 				sql: `DELETE FROM ${tableName} 
 				      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
-				bind: [change.entity_id, change.file_id, version_id],
+				bind: [change.entity_id, change.file_id, resolvedVersionId],
 			});
 		}
 
@@ -248,13 +291,13 @@ function batchDeleteDirectFromTable(args: {
 				change.entity_id,
 				change.schema_key,
 				change.file_id,
-				version_id,
+				resolvedVersionId,
 				change.plugin_key,
 				change.schema_version,
 				change.created_at,
 				change.created_at,
 				change.id,
-				commit_id,
+				resolvedCommitId,
 			],
 		});
 	}

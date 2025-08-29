@@ -2,10 +2,9 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
 import { timestamp } from "../../deterministic/timestamp.js";
-import { createVersion } from "../../version/create-version.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { MaterializedState } from "../vtable/generate-commit.js";
 import type { InternalStateCache } from "./schema.js";
 
 test("inserts into cache based on change", async () => {
@@ -20,8 +19,10 @@ test("inserts into cache based on change", async () => {
 
 	const currentTimestamp = timestamp({ lix });
 
-	// Create a test change
-	const testChange: LixChangeRaw = {
+	// Create a test change (materialized with inline version/commit)
+	const commitId = "test-commit-456";
+	const versionId = "global";
+	const testChange: MaterializedState = {
 		id: "test-change-123",
 		entity_id: "test-entity",
 		schema_key: "lix_test",
@@ -30,17 +31,14 @@ test("inserts into cache based on change", async () => {
 		plugin_key: "test_plugin",
 		snapshot_content: JSON.stringify({ id: "test-entity", value: "test-data" }),
 		created_at: currentTimestamp,
+		lixcol_version_id: versionId,
+		lixcol_commit_id: commitId,
 	};
-
-	const commitId = "test-commit-456";
-	const versionId = "global";
 
 	// Call updateStateCacheV2
 	updateStateCache({
 		lix,
 		changes: [testChange],
-		commit_id: commitId,
-		version_id: versionId,
 	});
 
 	// Verify cache entry was created/updated
@@ -88,8 +86,10 @@ test("upserts cache entry on conflict", async () => {
 
 	const initialTimestamp = timestamp({ lix });
 
-	// Create initial test change
-	const initialChange: LixChangeRaw = {
+	// Create initial test change (materialized)
+	const versionId = "global";
+	const initialCommitId = "initial-commit-123";
+	const initialChange: MaterializedState = {
 		id: "test-change-initial",
 		entity_id: "test-entity-upsert",
 		schema_key: "lix_test",
@@ -101,17 +101,14 @@ test("upserts cache entry on conflict", async () => {
 			value: "initial-data",
 		}),
 		created_at: initialTimestamp,
+		lixcol_version_id: versionId,
+		lixcol_commit_id: initialCommitId,
 	};
-
-	const initialCommitId = "initial-commit-123";
-	const versionId = "global";
 
 	// First insert
 	updateStateCache({
 		lix,
 		changes: [initialChange],
-		commit_id: initialCommitId,
-		version_id: versionId,
 	});
 
 	// Verify initial entry exists
@@ -134,7 +131,8 @@ test("upserts cache entry on conflict", async () => {
 
 	// Now update with new data (same entity, schema, file, version - should trigger upsert)
 	const updateTimestamp = timestamp({ lix });
-	const updatedChange: LixChangeRaw = {
+	const updatedCommitId = "updated-commit-456";
+	const updatedChange: MaterializedState = {
 		id: "test-change-updated",
 		entity_id: "test-entity-upsert", // Same entity
 		schema_key: "lix_test", // Same schema
@@ -146,16 +144,14 @@ test("upserts cache entry on conflict", async () => {
 			value: "updated-data",
 		}), // Different content
 		created_at: updateTimestamp,
+		lixcol_version_id: versionId,
+		lixcol_commit_id: updatedCommitId,
 	};
-
-	const updatedCommitId = "updated-commit-456";
 
 	// Second call should trigger onConflict upsert
 	updateStateCache({
 		lix,
 		changes: [updatedChange],
-		commit_id: updatedCommitId,
-		version_id: versionId,
 	});
 
 	// Verify only one entry exists (upserted, not inserted as new)
@@ -199,43 +195,34 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		],
 	});
 
-	// Create inheritance chain: parent -> child -> subchild
-	await createVersion({
-		lix,
-		id: "parent-version",
-		inheritsFrom: { id: "global" },
-	});
-	await createVersion({
-		lix,
-		id: "child-version",
-		inheritsFrom: { id: "parent-version" },
-	});
-	await createVersion({
-		lix,
-		id: "subchild-version",
-		inheritsFrom: { id: "child-version" },
-	});
+	// Define test version ids (no actual version rows needed for cache tests)
+	const parentVersion = "parent-version";
+	const childVersion = "child-version";
+	const subchildVersion = "subchild-version";
 
 	const baseTimestamp = timestamp({ lix });
 	const testEntity = "inherited-entity";
 
 	// 1. Create entity in parent version
-	const createChange: LixChangeRaw = {
+	const createChange: MaterializedState = {
 		id: "create-change-123",
 		entity_id: testEntity,
 		schema_key: "lix_test",
 		schema_version: "1.0",
 		file_id: "lix",
 		plugin_key: "test_plugin",
-		snapshot_content: JSON.stringify({ id: testEntity, value: "parent-data" }),
+		snapshot_content: JSON.stringify({
+			id: testEntity,
+			value: "parent-data",
+		}),
 		created_at: baseTimestamp,
+		lixcol_version_id: parentVersion,
+		lixcol_commit_id: "parent-commit-123",
 	};
 
 	updateStateCache({
 		lix,
 		changes: [createChange],
-		commit_id: "parent-commit-123",
-		version_id: "parent-version",
 	});
 
 	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
@@ -246,7 +233,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "parent-version")
+		.where("version_id", "=", parentVersion)
 		.execute();
 
 	expect(parentCache).toHaveLength(1);
@@ -257,7 +244,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 3. Create tombstone in child version (deleting inherited entity)
 	const deleteTimestamp = timestamp({ lix });
-	const deleteChange: LixChangeRaw = {
+	const deleteChange: MaterializedState = {
 		id: "delete-change-456",
 		entity_id: testEntity,
 		schema_key: "lix_test",
@@ -266,13 +253,13 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		plugin_key: "test_plugin",
 		snapshot_content: null, // Tombstone
 		created_at: deleteTimestamp,
+		lixcol_version_id: childVersion,
+		lixcol_commit_id: "child-commit-456",
 	};
 
 	updateStateCache({
 		lix,
 		changes: [deleteChange],
-		commit_id: "child-commit-456",
-		version_id: "child-version",
 	});
 
 	// 4. Verify parent still has the entity in cache
@@ -281,7 +268,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "parent-version")
+		.where("version_id", "=", parentVersion)
 		.execute();
 
 	expect(parentCacheAfterDelete).toHaveLength(1);
@@ -296,7 +283,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "child-version")
+		.where("version_id", "=", childVersion)
 		.execute();
 
 	expect(childCacheAfterDelete).toHaveLength(1);
@@ -309,7 +296,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "subchild-version")
+		.where("version_id", "=", subchildVersion)
 		.execute();
 
 	expect(subchildCacheAfterDelete).toHaveLength(0);
@@ -320,7 +307,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "parent-version")
+		.where("version_id", "=", parentVersion)
 		.where("inheritance_delete_marker", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
@@ -330,7 +317,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "child-version")
+		.where("version_id", "=", childVersion)
 		.where("inheritance_delete_marker", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
@@ -340,7 +327,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", "subchild-version")
+		.where("version_id", "=", subchildVersion)
 		.where("inheritance_delete_marker", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
@@ -370,7 +357,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 	});
 
 	// Create test changes for the same entity
-	const change1: LixChangeRaw = {
+	const change1: MaterializedState = {
 		id: "change-1",
 		entity_id: "test-entity",
 		schema_key: "test-schema",
@@ -379,9 +366,11 @@ test("handles duplicate entity updates - last change wins", async () => {
 		snapshot_content: JSON.stringify({ value: "first" }),
 		schema_version: "1.0",
 		created_at: "2024-01-01T00:00:00Z",
+		lixcol_version_id: "version-1",
+		lixcol_commit_id: "commit-1",
 	};
 
-	const change2: LixChangeRaw = {
+	const change2: MaterializedState = {
 		id: "change-2",
 		entity_id: "test-entity", // Same entity
 		schema_key: "test-schema",
@@ -390,22 +379,20 @@ test("handles duplicate entity updates - last change wins", async () => {
 		snapshot_content: JSON.stringify({ value: "second" }),
 		schema_version: "1.0",
 		created_at: "2024-01-01T00:01:00Z", // Later timestamp
+		lixcol_version_id: "version-1",
+		lixcol_commit_id: "commit-2",
 	};
 
 	// Apply first change
 	updateStateCache({
 		lix,
 		changes: [change1],
-		commit_id: "commit-1",
-		version_id: "version-1",
 	});
 
 	// Apply second change (should overwrite first)
 	updateStateCache({
 		lix,
 		changes: [change2],
-		commit_id: "commit-2",
-		version_id: "version-1",
 	});
 
 	// Query the cache to verify only the latest change is present
@@ -439,7 +426,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 	});
 
 	// Create multiple changes for the same entity in a single batch
-	const changes: LixChangeRaw[] = [
+	const changes: MaterializedState[] = [
 		{
 			id: "change-1",
 			entity_id: "test-entity",
@@ -449,6 +436,8 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 			snapshot_content: JSON.stringify({ value: "first" }),
 			schema_version: "1.0",
 			created_at: "2024-01-01T00:00:00Z",
+			lixcol_version_id: "version-1",
+			lixcol_commit_id: "commit-1",
 		},
 		{
 			id: "change-2",
@@ -459,6 +448,8 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 			snapshot_content: JSON.stringify({ value: "second" }),
 			schema_version: "1.0",
 			created_at: "2024-01-01T00:01:00Z",
+			lixcol_version_id: "version-1",
+			lixcol_commit_id: "commit-1",
 		},
 		{
 			id: "change-3",
@@ -469,6 +460,8 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 			snapshot_content: JSON.stringify({ value: "third" }),
 			schema_version: "1.0",
 			created_at: "2024-01-01T00:02:00Z",
+			lixcol_version_id: "version-1",
+			lixcol_commit_id: "commit-1",
 		},
 	];
 
@@ -476,8 +469,6 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 	updateStateCache({
 		lix,
 		changes,
-		commit_id: "commit-1",
-		version_id: "version-1",
 	});
 
 	// Query the cache to verify only the latest change is present
