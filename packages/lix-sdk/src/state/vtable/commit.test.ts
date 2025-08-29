@@ -177,8 +177,8 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
 	expect(globalSchemas["lix_version"]).toBe(2); // version_active & global
 	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
-	// Actual count: 2 user + 2 authors + 6 global metadata + 2 meta-elements (no duplicates) = 12
-	expect(globalSchemas["lix_change_set_element"]).toBe(12);
+	// CSE-of-CSE rows are not surfaced by the view; only first-order CSEs are materialized
+	expect(globalSchemas["lix_change_set_element"]).toBeUndefined();
 
 	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
 	const edgeActive = await db

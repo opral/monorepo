@@ -104,12 +104,12 @@ test("scenario 1: 1 key_value on active (with author) — 30-change model", asyn
 	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(2);
-    expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(10);
+	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(10);
 
-    // Totals per 30-change model
-    expect(res.changes).toHaveLength(30);
-    // materialized: exclude meta-of-meta CSE (10)
-    expect(res.materializedState).toHaveLength(20);
+	// Totals per 30-change model
+	expect(res.changes).toHaveLength(30);
+	// materialized: exclude meta-of-meta CSE (10)
+	expect(res.materializedState).toHaveLength(20);
 });
 
 test("scenario 2: 1 key_value on global (with author)", async () => {
@@ -186,12 +186,12 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(1);
-    expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(6);
+	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(6);
 
-    // Totals
-    expect(res.changes).toHaveLength(18);
-    // materialized: exclude meta-of-meta CSE (6)
-    expect(res.materializedState).toHaveLength(12);
+	// Totals
+	expect(res.changes).toHaveLength(18);
+	// materialized: exclude meta-of-meta CSE (6)
+	expect(res.materializedState).toHaveLength(12);
 });
 
 test("scenario 3: 2 key_values (active + global), each with both authors", async () => {
@@ -294,10 +294,10 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(2);
-    expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(14);
+	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(14);
 
-    // Totals
-    expect(res.changes).toHaveLength(42);
-    // materialized: exclude meta-of-meta CSE (14)
-    expect(res.materializedState).toHaveLength(28);
+	// Totals
+	expect(res.changes).toHaveLength(42);
+	// materialized: exclude meta-of-meta CSE (14)
+	expect(res.materializedState).toHaveLength(28);
 });
