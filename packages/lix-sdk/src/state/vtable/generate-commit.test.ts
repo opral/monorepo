@@ -12,7 +12,7 @@ function groupBySchema(rows: any[]): Map<string, any[]> {
 	return m;
 }
 
-test("scenario 1: 1 key_value on active (with author) — 30-change model", async () => {
+test("scenario 1: 1 key_value on active (with author) — 10-change model", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -83,8 +83,8 @@ test("scenario 1: 1 key_value on active (with author) — 30-change model", asyn
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
-	// Change set elements (domain + meta + meta-of-meta)
-	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(20);
+	// Change set elements are derived in Step 1 (no change rows)
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
@@ -106,9 +106,9 @@ test("scenario 1: 1 key_value on active (with author) — 30-change model", asyn
 	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(2);
 	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(10);
 
-	// Totals per 30-change model
-	expect(res.changes).toHaveLength(30);
-	// materialized: exclude meta-of-meta CSE (10)
+	// Totals per Step 1 (derived CSEs)
+	expect(res.changes).toHaveLength(10);
+	// materialized remains the same (derived CSEs)
 	expect(res.materializedState).toHaveLength(20);
 });
 
@@ -168,7 +168,8 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(12);
+	// Step 1: no CSE change rows
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
 	const commit = JSON.parse(
 		(bySchema.get("lix_commit")![0] as any).snapshot_content!
@@ -188,9 +189,9 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(6);
 
-	// Totals
-	expect(res.changes).toHaveLength(18);
-	// materialized: exclude meta-of-meta CSE (6)
+	// Totals under Step 1 (no CSE rows)
+	expect(res.changes).toHaveLength(6);
+	// materialized unchanged (derived CSEs present)
 	expect(res.materializedState).toHaveLength(12);
 });
 
@@ -274,7 +275,8 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
-	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(28);
+	// Step 1: no CSE change rows
+	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
@@ -296,8 +298,8 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(14);
 
-	// Totals
-	expect(res.changes).toHaveLength(42);
-	// materialized: exclude meta-of-meta CSE (14)
+	// Totals under Step 1
+	expect(res.changes).toHaveLength(14);
+	// materialized unchanged (derived CSEs present)
 	expect(res.materializedState).toHaveLength(28);
 });
