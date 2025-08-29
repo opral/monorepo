@@ -283,7 +283,7 @@ export function generateCommit(args: {
             ...metaChanges,
             // domainCseChanges already materialized above
             ...metaCseChanges,
-            ...metaOfMetaCse,
+            // intentionally exclude metaOfMetaCse from materialized state
         ];
         for (const ch of toMaterialize) {
             materialized.push({
