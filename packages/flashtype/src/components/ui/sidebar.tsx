@@ -404,7 +404,7 @@ function SidebarMenuButton({
 	tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
 	const Comp = asChild ? Slot : "button";
-	const { isMobile, state } = useSidebar();
+	const { isMobile, state: _state } = useSidebar();
 
 	const button = (
 		<Comp
