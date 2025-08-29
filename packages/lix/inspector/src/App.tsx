@@ -192,21 +192,30 @@ function AppContent(args: { show: boolean }) {
     };
   }, [rootContainer, isHidden]);
 
-  // Add keyboard shortcut listener for showing the inspector when hidden
+  // Listen for programmatic toggle events (keyboard handler is registered globally in index.tsx)
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Command+Shift+O to toggle inspector
-      if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "o") {
-        setIsHidden((prev) => {
-          localStorage.setItem("lix-inspector:show", String(prev));
-          return !prev;
-        });
+    const handleToggleEvent = (e: Event) => {
+      try {
+        const ce = e as CustomEvent<{ show?: boolean }>;
+        if (typeof ce.detail?.show === "boolean") {
+          setIsHidden(!ce.detail.show);
+        } else {
+          setIsHidden((prev) => !prev);
+        }
+      } catch {
+        setIsHidden((prev) => !prev);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "lix-inspector-toggle",
+      handleToggleEvent as EventListener
+    );
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(
+        "lix-inspector-toggle",
+        handleToggleEvent as EventListener
+      );
     };
   }, []);
 
@@ -537,7 +546,7 @@ function AppContent(args: { show: boolean }) {
                       <div className="flex items-center gap-4">
                         <EyeOff className="h-4 w-4" />
                         Hide Inspector
-                        <kbd className="kbd kbd-sm">⌘⇧o</kbd>
+                        <kbd className="kbd kbd-sm">Ctrl+Shift+O</kbd>
                       </div>
                     </a>
                   </li>

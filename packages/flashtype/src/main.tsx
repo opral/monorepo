@@ -5,6 +5,7 @@ import { routeTree } from "./routeTree.gen";
 import "./index.css";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, OpfsStorage } from "@lix-js/sdk";
+import { initLixInspector } from "@lix-js/inspector";
 import { KeyValueProvider } from "./key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
 
@@ -21,6 +22,13 @@ declare module "@tanstack/react-router" {
 const lix = await openLix({
 	storage: new OpfsStorage({ path: "flashtype.lix" }),
 });
+
+// Initialize Lix Inspector on load (hidden by default)
+try {
+	await initLixInspector({ lix, show: false });
+} catch (e) {
+	console.warn("Lix Inspector failed to initialize:", e);
+}
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>

@@ -25,6 +25,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { useLix } from "@lix-js/react-utils";
+import { initLixInspector, toggleLixInspector } from "@lix-js/inspector";
 import { seedMarkdownFiles } from "@/seed";
 import { OpfsStorage } from "@lix-js/sdk";
 
@@ -92,7 +93,18 @@ export function FlashtypeMenu({
 							</DropdownMenuSubTrigger>
 							<DropdownMenuSubContent className="min-w-56">
 								<DropdownMenuItem
-									onSelect={() => console.log("toggle inspector")}
+									onSelect={async () => {
+										try {
+											const existing = document.getElementById("lix-inspector");
+											if (!existing) {
+												await initLixInspector({ lix, show: false, hideWelcomeMessage: true });
+											}
+											// Programmatically toggle visibility
+											toggleLixInspector();
+										} catch (e) {
+											console.error("Failed to toggle Lix Inspector", e);
+										}
+									}}
 								>
 									<Search />
 									Toggle Lix Inspector
