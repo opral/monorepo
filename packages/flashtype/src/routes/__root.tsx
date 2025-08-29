@@ -9,6 +9,7 @@ import { LeftSidebarHistory } from "@/components/left-sidebar-history";
 import { LeftSidebarTab } from "@/components/left-sidebar-tab";
 import { FormattingToolbar } from "@/components/formatting-toolbar";
 import { ChangeIndicator } from "@/components/change-indicator";
+import { VersionDropdown } from "@/components/version-dropdown";
 
 export const Route = createRootRoute({
 	component: Root,
@@ -55,6 +56,7 @@ function Root() {
 				<SidebarInset>
 					<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
 						<div className="font-medium">{activeFileId ?? "Flashtype"}</div>
+						<VersionDropdown />
 						<div className="ml-auto">
 							<ChangeIndicator />
 						</div>
