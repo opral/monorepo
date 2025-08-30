@@ -1,92 +1,113 @@
 import type { Lix } from "../index.js";
 
 export function applyMaterializeStateSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
+    lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
+    // View 0: Unified commit edges (derived from commit.parent_commit_ids ∪ physical rows)
+    lix.sqlite.exec(`
+        CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
+        WITH derived_edges AS (
+            SELECT 
+                je.value AS parent_id,
+                c.entity_id AS child_id
+            FROM change c
+            JOIN json_each(json_extract(c.snapshot_content,'$.parent_commit_ids')) je
+            WHERE c.schema_key = 'lix_commit'
+              AND json_type(json_extract(c.snapshot_content,'$.parent_commit_ids')) = 'array'
+        ),
+        physical_edges AS (
+            SELECT 
+                json_extract(e.snapshot_content,'$.parent_id') AS parent_id,
+                json_extract(e.snapshot_content,'$.child_id')  AS child_id
+            FROM change e
+            WHERE e.schema_key = 'lix_commit_edge'
+        )
+        SELECT DISTINCT parent_id, child_id FROM derived_edges
+        UNION
+        SELECT DISTINCT parent_id, child_id FROM physical_edges;
+    `);
 	// View 1: Version tips - one row per version with its current tip commit
 	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"
 	// A commit C is the tip for version V iff:
 	// • C appears in at least one lix_version change row for V AND
 	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
-	lix.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
-		WITH
-		-- 1. every (version, commit) ever recorded
-		version_commits(version_id, commit_id) AS (
-			SELECT
-				v.entity_id,
-				json_extract(v.snapshot_content,'$.commit_id')
-			FROM change v
-			WHERE v.schema_key = 'lix_version'
-		),
-		-- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
-		non_tips AS (
-			SELECT DISTINCT
-				vc.version_id,
-				vc.commit_id
-			FROM version_commits vc
-			JOIN change e -- commit-edge
-				ON e.schema_key = 'lix_commit_edge'
-				AND json_extract(e.snapshot_content,'$.parent_id') = vc.commit_id
-			JOIN version_commits vc_child
-				ON vc_child.commit_id = json_extract(e.snapshot_content,'$.child_id')
-				AND vc_child.version_id = vc.version_id -- same version!
-		)
-		-- 3. tips = version commits that are NOT in the non_tip set
-		SELECT
-			vc.version_id,
-			vc.commit_id AS tip_commit_id
-		FROM version_commits vc
-		WHERE NOT EXISTS (
-			SELECT 1
-			FROM non_tips nt
-			WHERE nt.version_id = vc.version_id
-			AND nt.commit_id = vc.commit_id
-		);
-	`);
+    lix.sqlite.exec(`
+        CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
+        WITH
+        -- 1. every (version, commit) ever recorded
+        version_commits(version_id, commit_id) AS (
+            SELECT
+                v.entity_id,
+                json_extract(v.snapshot_content,'$.commit_id')
+            FROM change v
+            WHERE v.schema_key = 'lix_version'
+        ),
+        -- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
+        non_tips AS (
+            SELECT DISTINCT
+                vc.version_id,
+                vc.commit_id
+            FROM version_commits vc
+            JOIN internal_materialization_all_commit_edges e
+                ON e.parent_id = vc.commit_id
+            JOIN version_commits vc_child
+                ON vc_child.commit_id = e.child_id
+                AND vc_child.version_id = vc.version_id -- same version!
+        )
+        -- 3. tips = version commits that are NOT in the non_tip set
+        SELECT
+            vc.version_id,
+            vc.commit_id AS tip_commit_id
+        FROM version_commits vc
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM non_tips nt
+            WHERE nt.version_id = vc.version_id
+            AND nt.commit_id = vc.commit_id
+        );
+    `);
 
 	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)
-	lix.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
-		WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
-			-- Start from version tips at depth 0
-			SELECT 
-				tip_commit_id, 
-				version_id, 
-				0,
-				',' || tip_commit_id || ',' -- Path for cycle detection
-			FROM internal_materialization_version_tips
-			
-			UNION ALL
-			
-			-- Walk up parent chain, incrementing depth
-			SELECT 
-				json_extract(edge.snapshot_content,'$.parent_id'),
-				g.version_id,
-				g.depth + 1,
-				g.path || json_extract(edge.snapshot_content,'$.parent_id') || ','
-			FROM change edge
-			JOIN commit_paths g ON json_extract(edge.snapshot_content,'$.child_id') = g.commit_id
-			WHERE edge.schema_key = 'lix_commit_edge'
-			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
-			  -- Cycle detection: stop if parent already in path
-			  AND INSTR(g.path, ',' || json_extract(edge.snapshot_content,'$.parent_id') || ',') = 0
-		)
-		-- Group by commit_id and version_id, taking MIN depth for merge commits
-		SELECT 
-			commit_id,
-			version_id,
-			MIN(depth) as depth
-		FROM commit_paths
-		GROUP BY commit_id, version_id;
-	`);
+    lix.sqlite.exec(`
+        CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
+        WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
+            -- Start from version tips at depth 0
+            SELECT 
+                tip_commit_id, 
+                version_id, 
+                0,
+                ',' || tip_commit_id || ',' -- Path for cycle detection
+            FROM internal_materialization_version_tips
+            
+            UNION ALL
+            
+            -- Walk up parent chain, incrementing depth
+            SELECT 
+                e.parent_id,
+                g.version_id,
+                g.depth + 1,
+                g.path || e.parent_id || ','
+            FROM internal_materialization_all_commit_edges e
+            JOIN commit_paths g ON e.child_id = g.commit_id
+            WHERE e.parent_id IS NOT NULL
+              -- Cycle detection: stop if parent already in path
+              AND INSTR(g.path, ',' || e.parent_id || ',') = 0
+        )
+        -- Group by commit_id and version_id, taking MIN depth for merge commits
+        SELECT 
+            commit_id,
+            version_id,
+            MIN(depth) as depth
+        FROM commit_paths
+        GROUP BY commit_id, version_id;
+    `);
 
 	// View 3: Latest visible state - derive commit membership from commit.change_ids
 	// We explode commit.change_ids for each commit in the graph and join with change table
 	// to obtain the actual change rows for that commit.
-	lix.sqlite.exec(`
-    CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
-    WITH commit_targets AS (
+    lix.sqlite.exec(`
+        CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
+        WITH commit_targets AS (
 			-- Primary path: change_ids embedded in commit snapshot
 			SELECT 
 				cg.version_id,
@@ -181,6 +202,44 @@ export function applyMaterializeStateSchema(
         FROM commit_targets ct
         JOIN change cmt ON cmt.entity_id = ct.commit_id AND cmt.schema_key = 'lix_commit'
         JOIN change c ON c.id = ct.target_change_id
+    ),
+    commit_edges AS (
+        -- Derive commit_edge rows from commit snapshots (global scope)
+        SELECT 
+            'global' AS version_id,
+            cg.commit_id,
+            cg.depth,
+            -- Change id uses the child commit change id for stable origin tracking
+            cmt.id AS change_id,
+            -- entity id key: parent~child
+            (je.value || '~' || cg.commit_id) AS entity_id,
+            'lix_commit_edge' AS schema_key,
+            'lix' AS file_id,
+            'lix_own_entity' AS plugin_key,
+            json_object(
+                'parent_id', je.value,
+                'child_id', cg.commit_id
+            ) AS snapshot_content,
+            '1.0' AS schema_version,
+            cmt.created_at AS created_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                ORDER BY cg.depth ASC
+            ) AS first_seen,
+            FIRST_VALUE(cmt.created_at) OVER (
+                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                ORDER BY cg.depth DESC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_created_at,
+            FIRST_VALUE(cmt.created_at) OVER (
+                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                ORDER BY cg.depth ASC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_updated_at
+        FROM internal_materialization_commit_graph cg
+        JOIN change cmt ON cmt.entity_id = cg.commit_id AND cmt.schema_key = 'lix_commit'
+        JOIN json_each(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) je
+        WHERE json_type(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) = 'array'
     )
     SELECT 
         version_id,
@@ -212,9 +271,25 @@ export function applyMaterializeStateSchema(
         entity_created_at as created_at,
         entity_updated_at as updated_at
     FROM commit_cse
+    WHERE first_seen = 1
+    UNION ALL
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM commit_edges
     WHERE first_seen = 1;
-		-- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
-	`);
+        -- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
+    `);
 
 	// View 4: Version ancestry - computes the complete ancestral lineage for each version
 	// This view recursively follows inherits_from_version_id relationships to build

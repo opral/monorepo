@@ -174,7 +174,8 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 
 	expect(globalSchemas["lix_change_author"]).toBe(2); // two entities (para-1, para-2)
 	expect(globalSchemas["lix_commit"]).toBe(2); // copy of active + self
-	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
+    // Edges are derived now; no commit_edge change rows under global change set
+    expect(globalSchemas["lix_commit_edge"]).toBeUndefined();
 	expect(globalSchemas["lix_version"]).toBe(2); // version_active & global
 	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
 	// CSE-of-CSE rows are not surfaced by the view; only first-order CSEs are materialized
@@ -1027,59 +1028,57 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	const newCommitId = globalVersionAfter.commit_id;
 	expect(newCommitId).not.toBe(previousCommitId);
 
-	// CRITICAL: Verify that an actual edge CHANGE exists (not just an element)
-	const edgeChanges = await db
-		.selectFrom("change")
-		.where("schema_key", "=", "lix_commit_edge")
-		.where("entity_id", "=", `${previousCommitId}~${newCommitId}`)
-		.selectAll()
-		.execute();
+  // CRITICAL: edges are derived in Step 2; there are no edge change rows
+  const edgeChanges = await db
+    .selectFrom("change")
+    .where("schema_key", "=", "lix_commit_edge")
+    .where("entity_id", "=", `${previousCommitId}~${newCommitId}`)
+    .selectAll()
+    .execute();
 
-	expect(edgeChanges.length).toBe(1);
+  expect(edgeChanges.length).toBe(0);
 
-	const edgeChange = edgeChanges[0]!;
-	expect(edgeChange.snapshot_content).toBeTruthy();
+  // Verify the derived edge via the commit_edge view
+  const derivedEdge = await db
+    .selectFrom("commit_edge")
+    .where("parent_id", "=", previousCommitId)
+    .where("child_id", "=", newCommitId)
+    .selectAll()
+    .execute();
+  expect(derivedEdge.length).toBe(1);
 
-	// Verify the edge snapshot content
-	const edgeSnapshot = edgeChange.snapshot_content as any;
-	expect(edgeSnapshot.parent_id).toBe(previousCommitId);
-	expect(edgeSnapshot.child_id).toBe(newCommitId);
+  // Verify the edge is discoverable by the lineage CTE using derived edges
+  const lineageRows = lix.sqlite.exec({
+    sql: `
+      WITH RECURSIVE lineage_commits(id, version_id) AS (
+        /* anchor: use edge-based approach to find the tip */
+        SELECT 
+          json_extract(v.snapshot_content,'$.commit_id') AS id,
+          v.entity_id AS version_id 
+        FROM change v
+        WHERE v.schema_key = 'lix_version'
+          AND v.entity_id = 'global'
+          /* keep only the row whose commit_id has NO outgoing edge */
+          AND NOT EXISTS (
+            SELECT 1
+            FROM internal_materialization_all_commit_edges e
+            WHERE e.parent_id = json_extract(v.snapshot_content,'$.commit_id')
+          )
 
-	// Verify the edge is discoverable by the lineage CTE
-	// This simulates what internal_materialization_lineage does
-	const lineageRows = lix.sqlite.exec({
-		sql: `
-			WITH RECURSIVE lineage_commits(id, version_id) AS (
-				/* anchor: use edge-based approach to find the tip */
-				SELECT 
-					json_extract(v.snapshot_content,'$.commit_id') AS id,
-					v.entity_id AS version_id 
-				FROM change v
-				WHERE v.schema_key = 'lix_version'
-				  AND v.entity_id = 'global'
-				  /* keep only the row whose commit_id has NO outgoing edge */
-				  AND NOT EXISTS (
-					SELECT 1
-					FROM change edge
-					WHERE edge.schema_key = 'lix_commit_edge'
-					  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
-				  )
+        UNION
 
-				UNION
-
-				/* recurse upwards via parent_id */
-				SELECT 
-					json_extract(edge.snapshot_content,'$.parent_id') AS id,
-					l.version_id AS version_id
-				FROM change edge
-				JOIN lineage_commits l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
-				WHERE edge.schema_key = 'lix_commit_edge'
-				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
-			)
-			SELECT id FROM lineage_commits WHERE version_id = 'global' ORDER BY id;
-		`,
-		returnValue: "resultRows",
-	});
+        /* recurse upwards via parent_id */
+        SELECT 
+          e.parent_id AS id,
+          l.version_id AS version_id
+        FROM internal_materialization_all_commit_edges e
+        JOIN lineage_commits l ON e.child_id = l.id
+        WHERE e.parent_id IS NOT NULL
+      )
+      SELECT id FROM lineage_commits WHERE version_id = 'global' ORDER BY id;
+    `,
+    returnValue: "resultRows",
+  });
 
 	// Should have at least 2 entries: the new commit and its parent
 	expect(lineageRows.length).toBeGreaterThanOrEqual(2);

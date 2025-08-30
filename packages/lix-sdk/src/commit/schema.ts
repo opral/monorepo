@@ -29,6 +29,10 @@ export const LixCommitSchema = {
 	properties: {
 		id: { type: "string" },
 		change_set_id: { type: "string" },
+		// Step 1 (already in use): list of change ids that belong to this commit
+		change_ids: { type: ["array", "null"], items: { type: "string" } },
+		// Step 2: list of parent commit ids that this commit directly references
+		parent_commit_ids: { type: ["array", "null"], items: { type: "string" } },
 	},
 	required: ["id", "change_set_id"],
 	additionalProperties: false,

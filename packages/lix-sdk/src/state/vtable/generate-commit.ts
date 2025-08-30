@@ -106,8 +106,8 @@ export function generateCommit(args: {
 		});
 	}
 
-	// Build metadata rows: version updates, change_sets, commits, edges
-	const metaChanges: LixChangeRaw[] = [];
+    // Build metadata rows: version updates, change_sets, commits
+    const metaChanges: LixChangeRaw[] = [];
 	for (const [vid, meta] of metaByVersion) {
 		const vinfo = versions.get(vid)!;
 
@@ -141,38 +141,21 @@ export function generateCommit(args: {
 			created_at: timestamp,
 		});
 
-		// commit (snapshot updated with change_ids later once we have authors/meta)
-		metaChanges.push({
-			id: generateUuid(),
-			entity_id: meta.commitId,
-			schema_key: "lix_commit",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: meta.commitId,
-				change_set_id: meta.changeSetId,
-			}),
-			created_at: timestamp,
-		});
-
-		// edges for each parent
-		for (const parent of meta.parents) {
-			metaChanges.push({
-				id: generateUuid(),
-				entity_id: `${parent}~${meta.commitId}`,
-				schema_key: "lix_commit_edge",
-				schema_version: "1.0",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					parent_id: parent,
-					child_id: meta.commitId,
-				}),
-				created_at: timestamp,
-			});
-		}
-	}
+        // commit (snapshot updated with change_ids & parent_commit_ids later once we have authors/meta)
+        metaChanges.push({
+            id: generateUuid(),
+            entity_id: meta.commitId,
+            schema_key: "lix_commit",
+            schema_version: "1.0",
+            file_id: "lix",
+            plugin_key: "lix_own_entity",
+            snapshot_content: JSON.stringify({
+                id: meta.commitId,
+                change_set_id: meta.changeSetId,
+            }),
+            created_at: timestamp,
+        });
+    }
 
 	// author rows (global metadata)
 	const authorChanges: LixChangeRaw[] = [];
@@ -255,50 +238,79 @@ export function generateCommit(args: {
 		}
 	}
 
-	// Update commit snapshots with change_ids (domain for per-version commits, meta for global)
-	for (const [vid, meta] of metaByVersion) {
-		const commitIdx = metaChanges.findIndex(
-			(m) => m.schema_key === "lix_commit" && m.entity_id === meta.commitId
-		);
-		if (commitIdx >= 0) {
-			const snap = JSON.parse(
-				metaChanges[commitIdx]!.snapshot_content as any
-			) as any;
-			const domainIds = (domainByVersion.get(vid) || []).map((c) => c.id);
-			if (vid === "global") {
-				const metaIds = [...authorChanges, ...metaChanges].map((c) => c.id);
-				snap.change_ids = [...domainIds, ...metaIds];
-			} else {
-				snap.change_ids = domainIds;
-			}
-			metaChanges[commitIdx]!.snapshot_content = JSON.stringify(snap);
-		}
-	}
+    // Update commit snapshots with change_ids (domain for per-version commits, meta for global)
+    for (const [vid, meta] of metaByVersion) {
+        const commitIdx = metaChanges.findIndex(
+            (m) => m.schema_key === "lix_commit" && m.entity_id === meta.commitId
+        );
+        if (commitIdx >= 0) {
+            const snap = JSON.parse(
+                metaChanges[commitIdx]!.snapshot_content as any
+            ) as any;
+            const domainIds = (domainByVersion.get(vid) || []).map((c) => c.id);
+            if (vid === "global") {
+                const metaIds = [...authorChanges, ...metaChanges].map((c) => c.id);
+                snap.change_ids = [...domainIds, ...metaIds];
+            } else {
+                snap.change_ids = domainIds;
+            }
+            // Step 2: add parent_commit_ids from versions input
+            snap.parent_commit_ids = meta.parents;
+            metaChanges[commitIdx]!.snapshot_content = JSON.stringify(snap);
+        }
+    }
 
-	// Materialize meta rows (authors + meta + cse + meta-of-meta) under GLOBAL
-	const globalMeta2 = metaByVersion.get("global");
-	if (globalMeta2) {
-		const toMaterialize = [
-			...authorChanges,
-			...metaChanges,
-			...metaCseChanges,
-			// Note: domain CSE already materialized above; do not materialize meta-of-meta
-		];
-		for (const ch of toMaterialize) {
-			materialized.push({
-				...(sanitize(ch) as any),
-				lixcol_version_id: "global",
-				lixcol_commit_id: globalMeta2.commitId,
-			});
-		}
-	}
+    // Derive commit edges for materialization (global scope)
+    const edgeMaterialized: MaterializedState[] = [];
+    {
+        const globalMeta3 = metaByVersion.get("global");
+        for (const [, meta] of metaByVersion) {
+            for (const parent of meta.parents) {
+                edgeMaterialized.push({
+                    id: generateUuid(),
+                    entity_id: `${parent}~${meta.commitId}`,
+                    schema_key: "lix_commit_edge",
+                    schema_version: "1.0",
+                    file_id: "lix",
+                    plugin_key: "lix_own_entity",
+                    snapshot_content: JSON.stringify({
+                        parent_id: parent,
+                        child_id: meta.commitId,
+                    }),
+                    created_at: timestamp,
+                    lixcol_version_id: "global",
+                    lixcol_commit_id: globalMeta3 ? globalMeta3.commitId : meta.commitId,
+                } as MaterializedState);
+            }
+        }
+    }
+
+    // Materialize meta rows (authors + meta + cse + edges + meta-of-meta) under GLOBAL
+    const globalMeta2 = metaByVersion.get("global");
+    if (globalMeta2) {
+        const toMaterialize = [
+            ...authorChanges,
+            ...metaChanges,
+            ...metaCseChanges,
+            ...edgeMaterialized,
+            // Note: domain CSE already materialized above; do not materialize meta-of-meta
+        ];
+        for (const ch of toMaterialize) {
+            materialized.push({
+                ...(sanitize(ch) as any),
+                lixcol_version_id: "global",
+                lixcol_commit_id: globalMeta2.commitId,
+            });
+        }
+    }
 
 	// Assemble output: domain, authors, meta (no CSE rows in Step 1)
-	outputChanges.push(
-		...authorChanges,
-		...metaChanges
-		// CSEs are derived; do not include as change rows
-	);
+    outputChanges.push(
+        ...authorChanges,
+        ...metaChanges
+        // No commit_edge change rows in Step 2
+        // CSEs are derived; do not include as change rows
+    );
 
 	return { changes: outputChanges, materializedState: materialized };
 }
