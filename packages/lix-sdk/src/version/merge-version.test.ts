@@ -787,16 +787,15 @@ simulationTest(
 			])
 			.execute();
 
-		const schemaCounts = cseRows.reduce<Record<string, number>>(
-			(acc, r: any) => {
-				acc[r.schema_key] = (acc[r.schema_key] ?? 0) + 1;
-				return acc;
-			},
-			{}
-		);
-		expectDeterministic(schemaCounts["lix_commit"]).toBe(2);
-		expectDeterministic(schemaCounts["lix_commit_edge"]).toBe(3);
-		expectDeterministic(schemaCounts["lix_version"]).toBe(2);
+    const schemaCounts = cseRows.reduce<Record<string, number>>(
+        (acc, r: any) => {
+            acc[r.schema_key] = (acc[r.schema_key] ?? 0) + 1;
+            return acc;
+        },
+        {}
+    );
+    expectDeterministic(schemaCounts["lix_commit"]).toBe(2);
+    expectDeterministic(schemaCounts["lix_version"]).toBe(2);
 
 		// Commits: one for afterGlobal and one for afterTarget
 		const commitIds = new Set(
@@ -807,22 +806,22 @@ simulationTest(
 		expectDeterministic(commitIds.has(afterGlobal.commit_id)).toBe(true);
 		expectDeterministic(commitIds.has(afterTarget.commit_id)).toBe(true);
 
-		// Edges: two parents for target, and one edge prevGlobal -> afterGlobal
-		const edgePairs = cseRows
-			.filter((r: any) => r.schema_key === "lix_commit_edge")
-			.map((r: any) => r.entity_id.split("~"));
-		const edgeParents = edgePairs.map((p: any) => p[0]);
-		const edgeChildren = edgePairs.map((p: any) => p[1]);
-		const parentsSet = new Set(edgeParents);
-		const childrenSet = new Set(edgeChildren);
-		// target edges
-		expectDeterministic(parentsSet.has(beforeTarget.commit_id)).toBe(true);
-		expectDeterministic(parentsSet.has(beforeSource.commit_id)).toBe(true);
-		// ensure child target appears
-		expectDeterministic(childrenSet.has(targetCommitId)).toBe(true);
-		// global lineage edge
-		expectDeterministic(parentsSet.has(beforeGlobal.commit_id)).toBe(true);
-		expectDeterministic(childrenSet.has(afterGlobal.commit_id)).toBe(true);
+    // Edges are derived/materialized: verify via commit_edge view (global scope)
+    const allEdges = await lix.db
+        .selectFrom("commit_edge")
+        .select(["parent_id", "child_id"])
+        .execute();
+    const parentsSet = new Set(allEdges.map((e: any) => e.parent_id));
+    const childrenSet = new Set(allEdges.map((e: any) => e.child_id));
+    // target edges
+    expectDeterministic(parentsSet.has(beforeTarget.commit_id)).toBe(true);
+    expectDeterministic(parentsSet.has(beforeSource.commit_id)).toBe(true);
+    expectDeterministic(childrenSet.has(targetCommitId)).toBe(true);
+    // global lineage edge
+    const lineageEdge = allEdges.find(
+        (e: any) => e.parent_id === beforeGlobal.commit_id && e.child_id === afterGlobal.commit_id
+    );
+    expectDeterministic(Boolean(lineageEdge)).toBe(true);
 
 		// Versions referenced in CSE: verify presence, and verify pointers via version view
 		const versionEntityIds = new Set(

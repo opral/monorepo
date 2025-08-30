@@ -209,6 +209,7 @@ export async function mergeVersion(args: {
 			snapshot_content: JSON.stringify({
 				id: targetCommitId,
 				change_set_id: targetChangeSetId,
+				parent_commit_ids: [targetVersion.commit_id, sourceVersion.commit_id],
 			}),
 			created_at: now,
 		});
@@ -287,51 +288,21 @@ export async function mergeVersion(args: {
 			created_at: now,
 		});
 
-		// Commit edges: target has two parents; global has one lineage edge
-		const edgeTargetFromTargetBeforeId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeTargetFromTargetBeforeId,
-			entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: targetVersion.commit_id,
-				child_id: targetCommitId,
-			}),
-			created_at: now,
-		});
-		const edgeTargetFromSourceBeforeId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeTargetFromSourceBeforeId,
-			entity_id: `${sourceVersion.commit_id}~${targetCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: sourceVersion.commit_id,
-				child_id: targetCommitId,
-			}),
-			created_at: now,
-		});
-		// Global lineage edge: always link from beforeGlobal.tip to global.tip_after
+		// Global commit: record lineage parent inline
 		const globalLineageParentId = beforeGlobal.commit_id;
-		const edgeGlobalLineageId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeGlobalLineageId,
-			entity_id: `${globalLineageParentId}~${globalCommitId}`,
-			schema_key: "lix_commit_edge",
+		// augment the previously inserted global commit row with parent_commit_ids
+		// by pushing an updated commit row (overwriting via latest visible state)
+		const updatedGlobalCommit: LixChangeRaw = {
+			id: uuidV7({ lix }),
+			entity_id: globalCommitId,
+			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: globalLineageParentId,
-				child_id: globalCommitId,
-			}),
+			snapshot_content: JSON.stringify({ id: globalCommitId, change_set_id: globalChangeSetId, parent_commit_ids: [globalLineageParentId] }),
 			created_at: now,
-		});
+		};
+		changeRows.push(updatedGlobalCommit);
 
 		// Reference graph rows under GLOBAL change set
 		for (const meta of [
@@ -341,24 +312,9 @@ export async function mergeVersion(args: {
 				schema_key: "lix_commit",
 			},
 			{
-				change_id: globalCommitChangeId,
+				change_id: updatedGlobalCommit.id,
 				entity_id: globalCommitId,
 				schema_key: "lix_commit",
-			},
-			{
-				change_id: edgeTargetFromTargetBeforeId,
-				entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
-				schema_key: "lix_commit_edge",
-			},
-			{
-				change_id: edgeTargetFromSourceBeforeId,
-				entity_id: `${sourceVersion.commit_id}~${targetCommitId}`,
-				schema_key: "lix_commit_edge",
-			},
-			{
-				change_id: edgeGlobalLineageId,
-				entity_id: `${globalLineageParentId}~${globalCommitId}`,
-				schema_key: "lix_commit_edge",
 			},
 		]) {
 			const cseRow: LixChangeRaw = {
@@ -497,10 +453,42 @@ export async function mergeVersion(args: {
 		}
 
 		// Populate caches
-		// Global: graph + change_set (both) + CSEs
+		// Global: graph + change_set (both) + CSEs + derived edges for commit graph
+		const derivedEdges: LixChangeRaw[] = [
+			{
+				id: uuidV7({ lix }),
+				entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
+				schema_key: "lix_commit_edge",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ parent_id: targetVersion.commit_id, child_id: targetCommitId }),
+				created_at: now,
+			},
+			{
+				id: uuidV7({ lix }),
+				entity_id: `${sourceVersion.commit_id}~${targetCommitId}`,
+				schema_key: "lix_commit_edge",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ parent_id: sourceVersion.commit_id, child_id: targetCommitId }),
+				created_at: now,
+			},
+			{
+				id: uuidV7({ lix }),
+				entity_id: `${beforeGlobal.commit_id}~${globalCommitId}`,
+				schema_key: "lix_commit_edge",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ parent_id: beforeGlobal.commit_id, child_id: globalCommitId }),
+				created_at: now,
+			},
+		];
 		updateStateCache({
 			lix,
-			changes: changeRows,
+			changes: [...changeRows, ...derivedEdges],
 			version_id: "global",
 			commit_id: globalCommitId,
 		});
