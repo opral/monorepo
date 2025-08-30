@@ -141,7 +141,7 @@ export function generateCommit(args: {
 			created_at: timestamp,
 		});
 
-		// commit
+		// commit (snapshot updated with change_ids later once we have authors/meta)
 		metaChanges.push({
 			id: generateUuid(),
 			entity_id: meta.commitId,
@@ -176,7 +176,7 @@ export function generateCommit(args: {
 
 	// author rows (global metadata)
 	const authorChanges: LixChangeRaw[] = [];
-	for (const [vid, domainChanges] of domainByVersion) {
+	for (const [, domainChanges] of domainByVersion) {
 		for (const dc of domainChanges) {
 			for (const acct of activeAccounts ?? []) {
 				authorChanges.push({
@@ -252,6 +252,26 @@ export function generateCommit(args: {
 				}),
 				created_at: timestamp,
 			});
+		}
+	}
+
+	// Update commit snapshots with change_ids (domain for per-version commits, meta for global)
+	for (const [vid, meta] of metaByVersion) {
+		const commitIdx = metaChanges.findIndex(
+			(m) => m.schema_key === "lix_commit" && m.entity_id === meta.commitId
+		);
+		if (commitIdx >= 0) {
+			const snap = JSON.parse(
+				metaChanges[commitIdx]!.snapshot_content as any
+			) as any;
+			const domainIds = (domainByVersion.get(vid) || []).map((c) => c.id);
+			if (vid === "global") {
+				const metaIds = [...authorChanges, ...metaChanges].map((c) => c.id);
+				snap.change_ids = [...domainIds, ...metaIds];
+			} else {
+				snap.change_ids = domainIds;
+			}
+			metaChanges[commitIdx]!.snapshot_content = JSON.stringify(snap);
 		}
 	}
 

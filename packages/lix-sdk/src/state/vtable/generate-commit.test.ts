@@ -89,11 +89,11 @@ test("scenario 1: 1 key_value on active (with author) — 10-change model", asyn
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
 	);
-	// current model: commit snapshot only includes id and change_set_id
-	expect(typeof commits[0].change_set_id).toBe("string");
-	expect(commits[0].version_id).toBeUndefined();
-	expect(commits[0].change_ids).toBeUndefined();
-	expect(commits[0].author_account_ids).toBeUndefined();
+    // Step 1: commit snapshot includes change_ids for derivation
+    expect(typeof commits[0].change_set_id).toBe("string");
+    expect(commits[0].version_id).toBeUndefined();
+    expect(Array.isArray(commits[0].change_ids)).toBe(true);
+    expect(commits[0].author_account_ids).toBeUndefined();
 
 	// Materialized state (cache)
 	// Synthesized: domain-only CSE; domain rows are included for the commit's version
@@ -174,11 +174,11 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	const commit = JSON.parse(
 		(bySchema.get("lix_commit")![0] as any).snapshot_content!
 	);
-	// current model: commit snapshot only includes id and change_set_id
-	expect(typeof commit.change_set_id).toBe("string");
-	expect(commit.version_id).toBeUndefined();
-	expect(commit.change_ids).toBeUndefined();
-	expect(commit.author_account_ids).toBeUndefined();
+  // Step 1: commit snapshot includes change_ids for derivation
+  expect(typeof commit.change_set_id).toBe("string");
+  expect(commit.version_id).toBeUndefined();
+  expect(Array.isArray(commit.change_ids)).toBe(true);
+  expect(commit.author_account_ids).toBeUndefined();
 
 	const bySchemaMat2 = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat2.get("lix_key_value")?.length ?? 0).toBe(1);
@@ -281,13 +281,13 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
 	);
-	// current model: commit snapshot only includes id and change_set_id
-	commits.forEach((c: any) => {
-		expect(typeof c.change_set_id).toBe("string");
-		expect(c.version_id).toBeUndefined();
-		expect(c.change_ids).toBeUndefined();
-		expect(c.author_account_ids).toBeUndefined();
-	});
+  // Step 1: commit snapshot includes change_ids for derivation
+  commits.forEach((c: any) => {
+    expect(typeof c.change_set_id).toBe("string");
+    expect(c.version_id).toBeUndefined();
+    expect(Array.isArray(c.change_ids)).toBe(true);
+    expect(c.author_account_ids).toBeUndefined();
+  });
 
 	const bySchemaMat3 = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat3.get("lix_key_value")?.length ?? 0).toBe(2);

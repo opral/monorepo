@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect, test } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
@@ -9,6 +9,8 @@ import {
 } from "../../test-utilities/simulation-test/simulation-test.js";
 import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
 import { openLix } from "../../lix/open-lix.js";
+
+test("simulation test discover", () => {});
 
 simulationTest(
 	"select, insert, update, delete entity via internal_state_vtable",
@@ -2404,7 +2406,7 @@ simulationTest(
 		// Helper to assert transaction table is empty
 		const expectTxnEmpty = async () => {
 			const rows = await db
-                .selectFrom("internal_transaction_state")
+				.selectFrom("internal_transaction_state")
 				.selectAll()
 				.execute();
 			expectDeterministic(rows.length).toBe(0);

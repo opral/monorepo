@@ -81,64 +81,138 @@ export function applyMaterializeStateSchema(
 		GROUP BY commit_id, version_id;
 	`);
 
-	// View 3: Latest visible state - first seen wins, with proper timestamps
+	// View 3: Latest visible state - derive commit membership from commit.change_ids
+	// We explode commit.change_ids for each commit in the graph and join with change table
+	// to obtain the actual change rows for that commit.
 	lix.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
-		WITH commit_changes AS (
+    CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
+    WITH commit_targets AS (
+			-- Primary path: change_ids embedded in commit snapshot
 			SELECT 
 				cg.version_id,
 				cg.commit_id,
 				cg.depth,
-				c.id as change_id,
-				c.entity_id,
-				c.schema_key,
-				c.file_id,
-				c.plugin_key,
-				c.snapshot_content,
-				c.schema_version,
-				c.created_at,
-				ROW_NUMBER() OVER (
-					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
-					ORDER BY cg.depth ASC
-				) as first_seen,
-				-- Get timestamps based on commit graph depth, not wall-clock time
-				-- Deepest ancestor (highest depth) → created_at
-				FIRST_VALUE(c.created_at) OVER (
-					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
-					ORDER BY cg.depth DESC
-					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-				) as entity_created_at,
-				-- Current tip (depth 0) → updated_at  
-				FIRST_VALUE(c.created_at) OVER (
-					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
-					ORDER BY cg.depth ASC
-					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-				) as entity_updated_at
+				j.value AS target_change_id
 			FROM internal_materialization_commit_graph cg
-			-- Get commit's change_set_id
 			JOIN change cmt ON cmt.entity_id = cg.commit_id 
 				AND cmt.schema_key = 'lix_commit'
-			-- Get changes in this change_set  
+			JOIN json_each(json_extract(cmt.snapshot_content,'$.change_ids')) j
+			
+			UNION ALL
+			
+			-- Fallback path for legacy commits (no change_ids): join CSE by change_set_id
+			SELECT 
+				cg.version_id,
+				cg.commit_id,
+				cg.depth,
+				json_extract(cse.snapshot_content,'$.change_id') AS target_change_id
+			FROM internal_materialization_commit_graph cg
+			JOIN change cmt ON cmt.entity_id = cg.commit_id 
+				AND cmt.schema_key = 'lix_commit'
 			JOIN change cse ON cse.schema_key = 'lix_change_set_element'
 				AND json_extract(cse.snapshot_content,'$.change_set_id') = json_extract(cmt.snapshot_content,'$.change_set_id')
-			-- Get the actual change
-			JOIN change c ON c.id = json_extract(cse.snapshot_content,'$.change_id')
-		)
-		SELECT 
-			version_id,
-			commit_id,
-			depth,
-			change_id,
-			entity_id,
-			schema_key,
-			file_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			entity_created_at as created_at,
-			entity_updated_at as updated_at
-		FROM commit_changes 
-		WHERE first_seen = 1;
+			WHERE json_type(json_extract(cmt.snapshot_content,'$.change_ids')) IS NULL
+    ),
+    commit_changes AS (
+        SELECT 
+            ct.version_id,
+            ct.commit_id,
+            ct.depth,
+            c.id as change_id,
+            c.entity_id,
+            c.schema_key,
+            c.file_id,
+            c.plugin_key,
+            c.snapshot_content,
+            c.schema_version,
+            c.created_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY ct.version_id, c.entity_id, c.schema_key, c.file_id
+                ORDER BY ct.depth ASC
+            ) as first_seen,
+            FIRST_VALUE(c.created_at) OVER (
+                PARTITION BY ct.version_id, c.entity_id, c.schema_key, c.file_id
+                ORDER BY ct.depth DESC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) as entity_created_at,
+            FIRST_VALUE(c.created_at) OVER (
+                PARTITION BY ct.version_id, c.entity_id, c.schema_key, c.file_id
+                ORDER BY ct.depth ASC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) as entity_updated_at
+        FROM commit_targets ct
+        JOIN change c ON c.id = ct.target_change_id
+    ),
+    commit_cse AS (
+        -- Derive committed CSE rows from commit membership (one per (commit, change))
+        SELECT 
+            'global' AS version_id,
+            ct.commit_id,
+            ct.depth,
+            c.id as change_id,
+            -- CSE entity_id convention: change_set_id~change_id
+            (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id) AS entity_id,
+            'lix_change_set_element' AS schema_key,
+            'lix' AS file_id,
+            'lix_own_entity' AS plugin_key,
+            json_object(
+                'change_set_id', json_extract(cmt.snapshot_content,'$.change_set_id'),
+                'change_id', c.id,
+                'entity_id', c.entity_id,
+                'schema_key', c.schema_key,
+                'file_id', c.file_id
+            ) AS snapshot_content,
+            '1.0' AS schema_version,
+            c.created_at AS created_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                ORDER BY ct.depth ASC
+            ) AS first_seen,
+            FIRST_VALUE(c.created_at) OVER (
+                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                ORDER BY ct.depth DESC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_created_at,
+            FIRST_VALUE(c.created_at) OVER (
+                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                ORDER BY ct.depth ASC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_updated_at
+        FROM commit_targets ct
+        JOIN change cmt ON cmt.entity_id = ct.commit_id AND cmt.schema_key = 'lix_commit'
+        JOIN change c ON c.id = ct.target_change_id
+    )
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM commit_changes 
+    WHERE first_seen = 1
+    UNION ALL
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM commit_cse
+    WHERE first_seen = 1;
 		-- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
 	`);
 

@@ -1,6 +1,9 @@
 import { createVersion } from "./create-version.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import { test } from "vitest";
+
+test("simulation test discover", () => {});
 
 simulationTest(
 	"created: key only in source -> before=null, after=source (query)",
