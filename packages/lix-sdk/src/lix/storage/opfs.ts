@@ -292,10 +292,12 @@ export class OpfsStorage implements LixStorageAdapter {
 
 			if (this.mode?.type === "byName" && dbId && this.opfsRoot) {
 				// Update index to point name -> dbId (do not mutate DB name)
+				const desiredName = this.mode.name;
+				const root = this.opfsRoot;
 				void (async () => {
-					const index = await OpfsStorage.readIndexFile(this.opfsRoot!);
-					index.names[this.mode!.name] = dbId;
-					await OpfsStorage.writeIndexFile(this.opfsRoot!, index);
+					const index = await OpfsStorage.readIndexFile(root);
+					index.names[desiredName] = dbId;
+					await OpfsStorage.writeIndexFile(root, index);
 				})();
 			}
 		} catch (e) {

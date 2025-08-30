@@ -182,10 +182,10 @@ describe("OpfsStorage", () => {
 	});
 
 	test("persists data automatically on state mutations", async () => {
-		const path = "e2e-persist-test";
+		const id = "e2e-persist-test";
 
 		// Open lix with OPFS storage by id
-		const lix1 = await openLix({ storage: OpfsStorage.byId(path) });
+		const lix1 = await openLix({ storage: OpfsStorage.byId(id) });
 
 		// Insert some data
 		await lix1.db
@@ -202,7 +202,7 @@ describe("OpfsStorage", () => {
 		await lix1.close();
 
 		// Open the persisted blob to verify the data
-		const lix2 = await openLix({ storage: OpfsStorage.byId(path) });
+		const lix2 = await openLix({ storage: OpfsStorage.byId(id) });
 
 		// Verify the data persisted correctly
 		const result = await lix2.db
