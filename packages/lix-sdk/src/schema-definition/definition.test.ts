@@ -270,6 +270,72 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 	expect(valid).toBe(false);
 });
 
+test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
+	const schemaMaterialized = {
+		type: "object",
+		"x-lix-key": "child_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["id"] },
+				mode: "materialized",
+			},
+		],
+		properties: { id: { type: "string" }, parent_id: { type: "string" } },
+		required: ["id", "parent_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const schemaImmediate = {
+		type: "object",
+		"x-lix-key": "comment",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["post_id"],
+				references: { schemaKey: "post", properties: ["id"] },
+				mode: "immediate",
+			},
+		],
+		properties: { id: { type: "string" }, post_id: { type: "string" } },
+		required: ["id", "post_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const v1 = ajv.validate(LixSchemaDefinition, schemaMaterialized);
+	const v2 = ajv.validate(LixSchemaDefinition, schemaImmediate);
+
+	expect(v1).toBe(true);
+	expect(v2).toBe(true);
+});
+
+test("x-lix-foreign-keys fails with invalid mode value", () => {
+	const schema: LixSchemaDefinition = {
+		type: "object",
+		"x-lix-key": "child_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["id"] },
+				// @ts-expect-error - invalid mode value
+				mode: "deferred",
+			},
+		],
+		properties: { id: { type: "string" }, parent_id: { type: "string" } },
+		required: ["id", "parent_id"],
+		additionalProperties: false,
+	};
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(false);
+});
+
 test("x-lix-foreign-keys with composite key", () => {
 	const schema = {
 		type: "object",
