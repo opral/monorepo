@@ -97,7 +97,10 @@ export function FlashtypeMenu({
 										try {
 											const existing = document.getElementById("lix-inspector");
 											if (!existing) {
-												await initLixInspector({ lix, show: false, hideWelcomeMessage: true });
+												await initLixInspector({
+													lix,
+													show: false,
+												});
 											}
 											// Programmatically toggle visibility
 											toggleLixInspector();
