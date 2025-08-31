@@ -1,4 +1,4 @@
-# Opral Monorepo Claude Instructions
+# Agent instructions
 
 - Read the [./contributing.md](./contributing.md) for navigating the monorepo.
   
@@ -18,7 +18,7 @@ The usual structure is:
 /**
  * One liner on what the API does.
  *
- * Multi paragraph longer description of the API,
+ * Multi-paragraph longer description of the API,
  * if needed.
  *
  * @example
