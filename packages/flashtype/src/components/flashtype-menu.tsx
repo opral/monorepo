@@ -95,13 +95,6 @@ export function FlashtypeMenu({
 								<DropdownMenuItem
 									onSelect={async () => {
 										try {
-											const existing = document.getElementById("lix-inspector");
-											if (!existing) {
-												await initLixInspector({
-													lix,
-													show: false,
-												});
-											}
 											// Programmatically toggle visibility
 											toggleLixInspector();
 										} catch (e) {
