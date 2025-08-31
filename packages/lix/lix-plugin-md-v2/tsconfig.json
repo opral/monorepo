@@ -8,6 +8,7 @@
 		"emitDecoratorMetadata": true,
 		"useDefineForClassFields": false,
 		"lib": ["ESNext"],
+		"noUnusedLocals": true,
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"esModuleInterop": true,

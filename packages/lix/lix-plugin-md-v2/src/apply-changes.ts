@@ -1,18 +1,16 @@
 import { type LixPlugin } from "@lix-js/sdk";
 import { serializeAst, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
-import { MarkdownRootSchemaV1 } from "./schemas/root.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
-	file,
 	changes,
 }) => {
 	// Extract order from root change (use the most recent one)
 	const rootChanges = changes.filter(
-		(c) => c.schema_key === MarkdownRootSchemaV1["x-lix-key"]
+		(c) => c.schema_key === (AstSchemas.RootOrderSchema as any)["x-lix-key"],
 	);
 	const orderChange = rootChanges.sort((a, b) =>
-		b.created_at.localeCompare(a.created_at)
+		b.created_at.localeCompare(a.created_at),
 	)[0];
 	const order: string[] = orderChange?.snapshot_content?.order || [];
 
@@ -20,16 +18,17 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	const ast: Ast = { type: "root", children: [] } as any;
 
 	// Group latest snapshot per entity_id across any markdown-wc node schema
-	const latestById = new Map<string, typeof changes[number]>();
+	const latestById = new Map<string, (typeof changes)[number]>();
 	for (const ch of changes) {
 		if (
 			ch.schema_key &&
 			typeof ch.schema_key === "string" &&
 			ch.schema_key.startsWith("markdown_wc_ast_") &&
-			ch.schema_key !== MarkdownRootSchemaV1["x-lix-key"]
+			ch.schema_key !== (AstSchemas.RootOrderSchema as any)["x-lix-key"]
 		) {
 			const prev = latestById.get(ch.entity_id);
-			if (!prev || ch.created_at > prev.created_at) latestById.set(ch.entity_id, ch);
+			if (!prev || ch.created_at > prev.created_at)
+				latestById.set(ch.entity_id, ch);
 		}
 	}
 
@@ -37,8 +36,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	const effectiveOrder = order.length
 		? order
 		: Array.from(latestById.values())
-			.sort((a, b) => a.created_at.localeCompare(b.created_at))
-			.map((c) => c.entity_id);
+				.sort((a, b) => a.created_at.localeCompare(b.created_at))
+				.map((c) => c.entity_id);
 
 	for (const id of effectiveOrder) {
 		const change = latestById.get(id);

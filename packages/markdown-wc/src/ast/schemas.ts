@@ -31,16 +31,16 @@ export const RootSchema = {
 
 // Root order document used for state snapshots in block-based persistence
 export const RootOrderSchema = {
-  "x-lix-key": "markdown_wc_ast_root_order",
-  "x-lix-version": "1.0",
-  description:
-    "Top-level block order for a Markdown document. Stores an array of block ids (node.data.id) to reconstruct the document order without reparsing.",
-  type: "object",
-  properties: {
-    order: { type: "array", items: { type: "string" } },
-  },
-  required: ["order"],
-  additionalProperties: true,
+	"x-lix-key": "markdown_wc_ast_root_order",
+	"x-lix-version": "1.0",
+	description:
+		"Top-level block order for a Markdown document. Stores an array of block ids (node.data.id) to reconstruct the document order without reparsing.",
+	type: "object",
+	properties: {
+		order: { type: "array", items: { type: "string" } },
+	},
+	required: ["order"],
+	additionalProperties: true,
 } as const
 
 export type ParagraphNode = WithBase<FromSchema<typeof ParagraphSchema>>
@@ -361,6 +361,39 @@ export const YamlSchema = {
 	additionalProperties: true,
 } as const
 
+/**
+ * Runtime map from mdast `node.type` → JSON schema.
+ *
+ * Why this exists:
+ *
+ * - Generic code only knows `node.type` at runtime (e.g., during AST walks, diffing, persistence).
+ *   A data-driven map avoids hardcoding switch/case over every node type or importing each schema by name.
+ * - Stable lookup by type string keeps callsites decoupled from export names and enables easy extension.
+ *
+ * @example
+ * // Generic validation/dispatch by node.type
+ * import { schemasByType } from "@opral/markdown-wc";
+ *
+ * function schemaFor(node: { type: string }) {
+ *   return schemasByType[node.type];
+ * }
+ *
+ * @example
+ * // Persisting changes with per-type schemas
+ * import { schemasByType } from "@opral/markdown-wc";
+ *
+ * function toDetectedChange(node: any, id: string) {
+ *   const schema = schemasByType[node.type];
+ *   return { entity_id: id, schema, snapshot_content: node };
+ * }
+ *
+ * @example
+ * // Querying by schema key (known type)
+ * import * as AstSchemas from "@opral/markdown-wc";
+ *
+ * db.select("changes")
+ *   .where("schema_key", "=", AstSchemas.schemasByType.paragraph["x-lix-key"]);
+ */
 export const schemasByType: Record<string, JsonSchema> = {
 	root: RootSchema,
 	paragraph: ParagraphSchema,

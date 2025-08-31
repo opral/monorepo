@@ -1,7 +1,8 @@
 import { describe, test, expect } from "vitest";
 import { applyChanges } from "./apply-changes.js";
-import { MarkdownRootSchemaV1 } from "./schemas/root.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
+import type { Ast, MarkdownNode } from "@opral/markdown-wc";
+import type { Change } from "@lix-js/sdk";
 
 const createMockFile = (data: Uint8Array) => ({
 	id: "mock",
@@ -13,45 +14,41 @@ const createMockFile = (data: Uint8Array) => ({
 	lixcol_updated_at: new Date().toISOString(),
 });
 
-function buildChangesFromAst(astMarkdown: string) {
-	const ast = parseMarkdown(astMarkdown) as any;
+function buildChangesFromAst(astMarkdown: string): Change[] {
+	const ast = parseMarkdown(astMarkdown) as Ast;
 	// assign deterministic ids per top-level node
 	const ids: string[] = [];
-	const nodes: any[] = [];
-	ast.children.forEach((n: any, i: number) => {
+	const nodes: MarkdownNode[] = [];
+	ast.children.forEach((n, i) => {
 		const id = `n${i + 1}`;
 		n.data = { ...(n.data ?? {}), id };
 		ids.push(id);
 		nodes.push(n);
 	});
 	const created_at = new Date().toISOString();
-	const changes = [
+	const changes: Change[] = [
 		{
 			id: "root-change",
 			entity_id: "root",
-			schema_key: MarkdownRootSchemaV1["x-lix-key"],
-			schema_version: MarkdownRootSchemaV1["x-lix-version"],
+			schema_key: AstSchemas.RootOrderSchema["x-lix-key"],
+			schema_version: AstSchemas.RootOrderSchema["x-lix-version"],
 			snapshot_content: { order: ids },
 			file_id: "mock",
 			plugin_key: "mock",
-			snapshot_id: "mock",
 			created_at,
 		},
 		...nodes.map((node, idx) => ({
 			id: `change-${idx + 1}`,
-			entity_id: node.data.id,
-			schema_key: (AstSchemas.schemasByType as any)[node.type]["x-lix-key"],
-			schema_version: (AstSchemas.schemasByType as any)[node.type][
-				"x-lix-version"
-			],
-			snapshot_content: node,
+			entity_id: (node as any).data.id,
+			schema_key: AstSchemas.schemasByType[node.type]?.["x-lix-key"],
+			schema_version: AstSchemas.schemasByType[node.type]?.["x-lix-version"],
+			snapshot_content: node as any,
 			file_id: "mock",
 			plugin_key: "mock",
-			snapshot_id: "mock",
 			created_at,
 		})),
 	];
-	return changes as any;
+	return changes;
 }
 
 describe("applyChanges", () => {

@@ -18,18 +18,13 @@ import type {
 import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
-import { MarkdownRootSchemaV1 } from "./schemas/root.js";
-// Use markdown-wc exported Ast type; avoid mdast dependency
 
-export const detectChanges = ({
-	beforeState = [],
-	before,
-	after,
-}: {
+export const detectChanges = (args: {
 	beforeState?: StateRow[];
 	before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 	after: Omit<LixFile, "data"> & { data: Uint8Array };
 }): DetectedChange[] => {
+	const { beforeState = [], after } = args;
 	const THRESHOLDS = {
 		simStrong: 0.6,
 		headingSim: 0.3,
@@ -52,7 +47,8 @@ export const detectChanges = ({
 		if (
 			typeof row.schema_key === "string" &&
 			row.schema_key.startsWith("markdown_wc_ast_") &&
-			row.schema_key !== AstSchemas.RootSchema["x-lix-key"]
+			row.schema_key !== AstSchemas.RootSchema["x-lix-key"] &&
+			row.schema_key !== AstSchemas.RootOrderSchema["x-lix-key"]
 		) {
 			if (row.snapshot_content) {
 				beforeNodes.set(row.entity_id, row.snapshot_content as any);
@@ -63,7 +59,7 @@ export const detectChanges = ({
 	// Try to derive previous order from a root order state entry (optional)
 	let beforeOrder: string[] = [];
 	const maybeRoot = beforeState
-		.filter((r) => r.schema_key === MarkdownRootSchemaV1["x-lix-key"])
+		.filter((r) => r.schema_key === AstSchemas.RootOrderSchema["x-lix-key"])
 		.sort((a, b) => (a.created_at! < b.created_at! ? 1 : -1))[0];
 	if (
 		maybeRoot?.snapshot_content &&
@@ -72,27 +68,41 @@ export const detectChanges = ({
 		beforeOrder = (maybeRoot as any).snapshot_content.order as string[];
 	}
 
-	// Fingerprint helper (ignore data/position)
+	// Fingerprint helper: drop meta and stable-stringify with normalized strings
 	const omitMeta = (n: any): any => {
 		if (!n || typeof n !== "object") return n;
-		const { data, position, ...rest } = n as any;
-		if (Array.isArray((rest as any).children)) {
-			(rest as any).children = (rest as any).children.map(omitMeta);
+		const obj: any = { ...(n as any) };
+		if ("data" in obj) delete obj.data;
+		if ("position" in obj) delete obj.position;
+		if (Array.isArray(obj.children)) {
+			obj.children = (obj.children as any[]).map(omitMeta);
 		}
-		return rest;
+		return obj;
 	};
-	const fingerprint = (n: any): string => JSON.stringify(omitMeta(n));
+	const stableStringify = (value: any): string => {
+		const seen = new WeakSet();
+		const enc = (v: any): any => {
+			if (v === null || typeof v !== "object") {
+				return typeof v === "string" ? norm(v) : v;
+			}
+			if (seen.has(v)) return null;
+			seen.add(v);
+			if (Array.isArray(v)) return v.map(enc);
+			const obj: Record<string, any> = {};
+			const keys = Object.keys(v).sort();
+			for (const k of keys) obj[k] = enc((v as any)[k]);
+			return obj;
+		};
+		return JSON.stringify(enc(omitMeta(value)));
+	};
+	const fingerprint = (n: any): string => stableStringify(n);
 	const toNFC = (s: string) =>
 		typeof (s as any).normalize === "function"
 			? (s as any).normalize("NFC")
 			: s;
 	const norm = (s: string) =>
 		toNFC(String(s)).replace(/\r\n?|\u2028|\u2029/g, "\n");
-	const hash = (s: string): string => {
-		let h = 5381;
-		for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i);
-		return (h >>> 0).toString(36);
-	};
+	// Note: previously had a string hasher here for experiments; removed as unused.
 
 	const extractText = (node: any): string => {
 		if (!node || typeof node !== "object") return "";
@@ -148,36 +158,6 @@ export const detectChanges = ({
 		}
 	};
 
-	// Overlay: serialize before/after blocks and diff to help remap ids on edits/moves
-	// Reserved for potential anchor-based matching; currently not used.
-	const buildComposite = (
-		nodes: { id: string; node: any }[],
-	): {
-		markdown: string;
-		spans: { id: string; type: string; start: number; end: number }[];
-	} => {
-		let offset = 0;
-		const parts: string[] = [];
-		const spans: { id: string; type: string; start: number; end: number }[] =
-			[];
-		for (let i = 0; i < nodes.length; i++) {
-			const { id, node } = nodes[i]!;
-			const root = { type: "root", children: [omitMeta(node)] } as any;
-			const block = serializeAst(root);
-			const start = offset;
-			const end = start + block.length;
-			parts.push(block);
-			spans.push({ id, type: node.type, start, end });
-			offset = end;
-			// Separate blocks with a blank line to mimic Markdown spacing
-			if (i < nodes.length - 1) {
-				parts.push("\n\n");
-				offset += 2;
-			}
-		}
-		return { markdown: parts.join(""), spans };
-	};
-
 	// Before composite from state (ordered by beforeOrder if available)
 	const beforeBlocksOrdered: { id: string; node: any }[] = [];
 	const fallbackBeforeIds = Array.from(beforeNodes.keys());
@@ -186,13 +166,6 @@ export const detectChanges = ({
 		const n = beforeNodes.get(id);
 		if (n) beforeBlocksOrdered.push({ id, node: n });
 	}
-	const beforeComposite = buildComposite(beforeBlocksOrdered);
-
-	// After composite from parsed AST
-	const afterBlocks: { id: string; node: any }[] = (
-		afterAst.children as any[]
-	).map((n: any, i: number) => ({ id: `after_${i}`, node: n }));
-	const afterComposite = buildComposite(afterBlocks);
 
 	// Build (type,key) maps for a Stage 0 unique mapping
 	type TK = string; // `${type}#${key}`
@@ -430,7 +403,7 @@ export const detectChanges = ({
 	// Order change
 	if (JSON.stringify(beforeOrder) !== JSON.stringify(afterOrder)) {
 		detectedChanges.push({
-			schema: MarkdownRootSchemaV1,
+			schema: AstSchemas.RootOrderSchema as unknown as LixSchemaDefinition,
 			entity_id: "root",
 			snapshot_content: { order: afterOrder },
 		});
