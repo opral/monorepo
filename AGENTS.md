@@ -29,3 +29,4 @@ The usual structure is:
 ### Lix SDK development 
 
 If you develop in the @lix-js/sdk package, ensure that modifications are reflected in the docs. You can find the docs in the @lix-js/docs package. 
+
