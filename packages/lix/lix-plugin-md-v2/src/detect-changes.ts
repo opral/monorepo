@@ -213,7 +213,10 @@ export const detectChanges = (args: {
 	);
 
 	const used = new Set<string>();
-	const afterOrder: string[] = new Array(afterInfos.length).fill("");
+	const afterOrder: string[] = Array.from(
+		{ length: afterInfos.length },
+		() => "",
+	);
 	const afterNodesById = new Map<string, any>();
 	const seenIds = new Set<string>(Array.from(beforeNodes.keys()));
 	let idCounter = 0;
@@ -234,7 +237,7 @@ export const detectChanges = (args: {
 		const id = ids[0]!;
 		const idx = afterIdxs[0]!;
 		const a = afterInfos[idx]!;
-		a.node.data = { ...(a.node.data ?? {}), id };
+		a.node.data = { ...a.node.data, id };
 		afterNodesById.set(id, a.node);
 		afterOrder[idx] = id;
 		used.add(id);
@@ -293,7 +296,7 @@ export const detectChanges = (args: {
 		}
 		if (idFromExact) {
 			const id = idFromExact;
-			a.node.data = { ...(a.node.data ?? {}), id };
+			a.node.data = { ...a.node.data, id };
 			afterNodesById.set(id, a.node);
 			afterOrder[a.idx] = id;
 			used.add(id);
@@ -361,7 +364,7 @@ export const detectChanges = (args: {
 			}
 		}
 		if (!id) id = mintNewId();
-		a.node.data = { ...(a.node.data ?? {}), id };
+		a.node.data = { ...a.node.data, id };
 		afterNodesById.set(id, a.node);
 		afterOrder[a.idx] = id;
 		if (id && beforeNodes.has(id)) used.add(id);

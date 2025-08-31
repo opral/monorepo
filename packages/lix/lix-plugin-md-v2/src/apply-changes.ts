@@ -43,7 +43,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 		const change = latestById.get(id);
 		if (change?.snapshot_content) {
 			const node = change.snapshot_content as any;
-			node.data = { ...(node.data ?? {}), id };
+			node.data = { ...node.data, id };
 			(ast.children as any[]).push(node);
 		}
 	}

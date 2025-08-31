@@ -21,7 +21,7 @@ function buildChangesFromAst(astMarkdown: string): Change[] {
 	const nodes: MarkdownNode[] = [];
 	ast.children.forEach((n, i) => {
 		const id = `n${i + 1}`;
-		n.data = { ...(n.data ?? {}), id };
+		n.data = { ...n.data, id };
 		ids.push(id);
 		nodes.push(n);
 	});

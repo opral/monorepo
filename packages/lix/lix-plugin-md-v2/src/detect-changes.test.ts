@@ -12,7 +12,7 @@ function makeBeforeState(markdown: string, ids?: string[]) {
 	const order: string[] = [];
 	ast.children.forEach((n, i) => {
 		const id = ids?.[i] ?? `n${i + 1}`;
-		n.data = { ...(n.data ?? {}), id };
+		n.data = { ...n.data, id };
 		order.push(id);
 		rows.push({
 			entity_id: id,
@@ -96,11 +96,11 @@ test("it should detect a new node", async () => {
 	});
 
 	expect(detectedChanges.length).toBeGreaterThan(0);
-	const addedNode = detectedChanges.find(
-		(c) =>
-			c.snapshot_content?.type === "paragraph" &&
-			c.snapshot_content?.children?.[0]?.value?.includes("New paragraph"),
-	);
+	const addedNode = detectedChanges.find((c) => {
+		const para =
+			c.snapshot_content?.type === "paragraph" ? c.snapshot_content : undefined;
+		return para?.children?.[0]?.value?.includes("New paragraph") ?? false;
+	});
 	expect(addedNode).toBeTruthy();
 	expect(addedNode?.schema["x-lix-key"]).toBe(
 		AstSchemas.schemasByType.paragraph!["x-lix-key"],
@@ -217,8 +217,9 @@ test("preserves IDs on reorder", () => {
 	expect(changes).toHaveLength(1);
 
 	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
 	expect(root?.schema).toBe(AstSchemas.RootOrderSchema);
-	expect((root?.snapshot_content as { order: string[] }).order).toEqual([
+	expect((root!.snapshot_content as { order: string[] }).order).toEqual([
 		"p2",
 		"p1",
 	]);
@@ -312,8 +313,9 @@ test("move section (heading + paragraph) preserves ids and updates root order", 
 	});
 
 	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
 	expect(root?.schema).toBe(AstSchemas.RootOrderSchema);
-	expect((root?.snapshot_content as { order: string[] }).order).toEqual([
+	expect((root!.snapshot_content as { order: string[] }).order).toEqual([
 		"hB",
 		"pB",
 		"hA",
