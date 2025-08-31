@@ -314,6 +314,26 @@ describe("html", () => {
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
 	})
+
+	test("custom element with explicit open/close is allowed (inline html)", () => {
+		const input = `<doc-figure src="/img.png"></doc-figure>`
+		const ast = parseMarkdown(input) as any
+		const out = serializeAst(ast)
+
+		// Unknown/custom tags are treated as inline HTML inside a paragraph by remark-parse
+		const para = ast.children[0]
+		expect(para?.type).toBe("paragraph")
+		const first = para?.children?.[0]
+		expect(first?.type).toBe("html")
+		expect(first?.value).toContain("doc-figure")
+
+		expect(out).toBe(input)
+	})
+
+	test("self-closing custom element is forbidden", () => {
+		const input = `<doc-figure src="/img.png" />`
+		expect(() => parseMarkdown(input)).toThrow(/self-closing HTML tags/i)
+	})
 })
 
 describe("image & link", () => {
