@@ -49,27 +49,22 @@ Notes:
 - Estimated delta: −2 rows (10 → 8).
 - Materializer complexity: ancestry traversal stays O(P) parents per commit (unchanged), but eliminates O(P) storage writes and reduces join cost to JSON array scan (lower constants).
 
-## Step 3 — De‑duplicate `lix_version` and `lix_change_set`
+## Step 3 — Drop Dual Commit (de‑duplicate commit, version, and change_set)
 
-- Change: Persist only one `lix_version` row per tip move (no duplicate under `global`). Persist only one `lix_change_set` row per commit (commit‑independent, global).
-- Rationale: Avoid meta duplication across scopes; use views for cross‑scope reads.
+- Change: Stop emitting the “global” duplicate for graph metadata. For each mutation, persist exactly one set of graph rows tied to the mutated version:
+  - `lix_commit`: only the version’s commit (no global duplicate)
+  - `lix_version`: only the mutated version’s tip move (no global duplicate)
+  - `lix_change_set`: only one row per commit (no second/global duplicate)
+- Rationale: The dual‑commit model duplicates meta across scopes. The graph topology is global, but does not require duplicate change rows; views/materializer can project what’s needed.
 - Compatibility:
-  - `create-checkpoint`: Still moves `version.commit_id` and `version.working_commit_id` and labels the checkpoint.
-  - `state-history`: Reads commit ancestry and CSEs; unaffected by version/change_set de‑dupe.
-- Estimated delta: −2 rows (8 → 6).
-- Materializer complexity: primarily reduces constants (fewer meta rows scanned). Asymptotic O(D + P) per commit remains unchanged.
+  - `create-checkpoint`: Unchanged. It updates `version.commit_id` and `version.working_commit_id` and labels the checkpoint.
+  - `state-history`: Unchanged. Edges are derived from `parent_commit_ids` and CSEs are derived/materialized; both remain global in views/cache.
+- Estimated delta: −3 rows (8 → 5) from Step 2’s baseline.
+- Notes:
+  - Make edge materialization unconditional: always materialize `lix_commit_edge` in the global scope from `parent_commit_ids` so cache/queries do not depend on a “global” commit change row.
+- Materializer complexity: no change in O(D + P); reduces constants by removing duplicate scans.
 
-## Step 4 — De‑duplicate `lix_commit` (version‑local only)
-
-- Change: Persist exactly one `lix_commit` row per commit (the version’s commit). Do not also write a duplicate row under `global`.
-- Rationale: A commit is version‑scoped; “global” can project commit metadata via views when needed.
-- Compatibility:
-  - `create-checkpoint`: Unchanged. It reads `version.working_commit_id` and `commit.change_set_id`.
--  `state-history`: Unchanged. The commit still exists in `commit_all`.
-- Estimated delta: −1 row (6 → 5).
-- Materializer complexity: no change in O(); reduces constants by removing duplicate scans.
-
-## Result After Steps 1–4 (1 domain mutation)
+## Result After Steps 1–3 (1 domain mutation)
 
 - `lix_key_value`: 1
 - `lix_change_author`: 1
@@ -81,7 +76,7 @@ Notes:
   - `lix_commit_edge` from `parent_commit_ids`
 - Total inserted rows: ~5 (down from 30)
 
-## Step 5 (Optional) — Author normalization for multi‑change commits
+## Step 4 (Optional) — Author normalization for multi‑change commits
 
 - Change: Keep commit‑level authors and expand to per‑change via a view joined through CSEs. Only implement if you want to shrink rows when a commit touches many domain changes with the same authors.
 - Rationale: For N changes and M authors, physical rows go from N×M → M.
@@ -90,7 +85,7 @@ Notes:
 - Estimated delta: 0 for single‑change commits; potentially large savings for multi‑change commits.
 - Materializer complexity: per‑commit author aggregation can be computed in O(D + M) (domain changes + authors) via CSE join, instead of reading O(D×M) physical rows.
 
-## Step 6 (Later) — Introduce an internal “commit package”
+## Step 5 (Later) — Introduce an internal “commit package”
 
 - Change: Add an internal `lix_commit_package` (or similar) that carries `commit_id`, `parent_commit_ids`, `change_set_id`, and split membership: `domain_change_ids` vs `meta_change_ids`.
 - Public `lix_commit` stays minimal (id, change_set_id). Parents and membership migrate to the package.
@@ -109,8 +104,6 @@ Notes:
 
 ## Rollout Guidance
 
-- Ship Steps 1 and 2 first (pure `lix_commit` changes). Add compatibility views and tests.
-- Ship Step 3 behind a flag: derive CSEs, verify equivalence, then disable hot‑path CSE writes.
-- Ship Step 4 to remove meta duplication.
-- Consider Step 6 (commit package) when you want to slim public commit snapshots and decouple lineage/membership fully.
-
+- Ship Steps 1 and 2 first. Add compatibility views and tests; ensure commit edges are materialized globally from `parent_commit_ids`.
+- Ship Step 3 “Drop Dual Commit”: remove the global duplicates for commit/version/change_set and keep edge/CSE derivation intact.
+- Consider Step 5 (commit package) when you want to slim public commit snapshots and decouple lineage/membership fully.

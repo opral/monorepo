@@ -10,7 +10,7 @@ test("storage footprint for 100 state commits", async () => {
 	const baseline = getChangeStatsRaw(lix);
 
 	// Perform 100 tracked inserts into the active version via entity view
-	for (let i = 0; i < 1; i++) {
+	for (let i = 0; i < 100; i++) {
 		// Use key_value as a simple tracked entity
 		await lix.db
 			.insertInto("key_value")
