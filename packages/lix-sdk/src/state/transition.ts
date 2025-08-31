@@ -246,40 +246,12 @@ WHERE rn = 1;
 			snapshot_content: JSON.stringify({
 				id: commitId,
 				change_set_id: changeSetId,
+				parent_commit_ids: [sourceCommitId, args.to.id],
 			}),
 			created_at: now,
 		});
 
-		// commit_edge entities: source->commit, target->commit (track ids for change_set_element)
-		const sourceEdgeChangeId = uuidV7({ lix: args.lix });
-		metadataChanges.push({
-			id: sourceEdgeChangeId,
-			entity_id: `${sourceCommitId}~${commitId}`,
-			schema_key: LixCommitEdgeSchema["x-lix-key"],
-			schema_version: LixCommitEdgeSchema["x-lix-version"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: sourceCommitId,
-				child_id: commitId,
-			}),
-			created_at: now,
-		});
-
-		const targetEdgeChangeId = uuidV7({ lix: args.lix });
-		metadataChanges.push({
-			id: targetEdgeChangeId,
-			entity_id: `${args.to.id}~${commitId}`,
-			schema_key: LixCommitEdgeSchema["x-lix-key"],
-			schema_version: LixCommitEdgeSchema["x-lix-version"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: args.to.id,
-				child_id: commitId,
-			}),
-			created_at: now,
-		});
+		// Do not emit commit_edge as change rows. Edges are derived from commit.parent_commit_ids.
 
 		// Add change_set_element entries for commit and edges so materializer can reach metadata
 		for (const meta of [
@@ -287,18 +259,6 @@ WHERE rn = 1;
 				change_id: commitChangeId,
 				entity_id: commitId,
 				schema_key: LixCommitSchema["x-lix-key"],
-				file_id: "lix" as const,
-			},
-			{
-				change_id: sourceEdgeChangeId,
-				entity_id: `${sourceCommitId}~${commitId}`,
-				schema_key: LixCommitEdgeSchema["x-lix-key"],
-				file_id: "lix" as const,
-			},
-			{
-				change_id: targetEdgeChangeId,
-				entity_id: `${args.to.id}~${commitId}`,
-				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				file_id: "lix" as const,
 			},
 		]) {
@@ -374,10 +334,34 @@ WHERE rn = 1;
 				.execute();
 		}
 
-		// Ensure FK validations for version update see commit/edge/change_set in global cache
+		// Ensure FK validations and readers see commit/graph/change_set in global cache
+		// Add derived edge cache rows (parent -> new commit) without inserting commit_edge changes
+		const derivedEdgesForCache: LixChangeRaw[] = [
+			{
+				id: uuidV7({ lix: args.lix }),
+				entity_id: `${sourceCommitId}~${commitId}`,
+				schema_key: LixCommitEdgeSchema["x-lix-key"],
+				schema_version: LixCommitEdgeSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ parent_id: sourceCommitId, child_id: commitId }),
+				created_at: now,
+			},
+			{
+				id: uuidV7({ lix: args.lix }),
+				entity_id: `${args.to.id}~${commitId}`,
+				schema_key: LixCommitEdgeSchema["x-lix-key"],
+				schema_version: LixCommitEdgeSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ parent_id: args.to.id, child_id: commitId }),
+				created_at: now,
+			},
+		];
+
 		updateStateCache({
 			lix: args.lix,
-			changes: metadataChanges,
+			changes: [...metadataChanges, ...derivedEdgesForCache],
 			version_id: "global",
 			commit_id: commitId,
 		});

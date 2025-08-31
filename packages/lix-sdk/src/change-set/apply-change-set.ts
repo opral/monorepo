@@ -39,29 +39,6 @@ export async function applyChangeSet(args: {
 			.where("id", "=", version.id)
 			.execute();
 
-		// Add a parent relationship (create the edge in the commit graph)
-		if (version.commit_id !== version.commit_id) {
-			// Check if edge already exists to avoid conflict
-			const existingEdge = await trx
-				.selectFrom("commit_edge_all")
-				.where("parent_id", "=", version.commit_id)
-				.where("child_id", "=", version.commit_id)
-				.where("lixcol_version_id", "=", "global")
-				.selectAll()
-				.executeTakeFirst();
-
-			if (!existingEdge) {
-				await trx
-					.insertInto("commit_edge_all")
-					.values({
-						parent_id: version.commit_id,
-						child_id: version.commit_id,
-						lixcol_version_id: "global",
-					})
-					.execute();
-			}
-		}
-
 		// Query for changes in the provided change set (direct mode only)
 		const changesResult = await trx
 			.selectFrom("change")

@@ -12,7 +12,7 @@ test("inserts into cache based on change", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -79,7 +79,7 @@ test("upserts cache entry on conflict", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -190,7 +190,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -351,7 +351,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -420,7 +420,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -489,4 +489,248 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 	expect(result[0]!.snapshot_content).toEqual({ value: "third" });
 	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at from first
 	expect(result[0]!.updated_at).toBe("2024-01-01T00:02:00Z"); // Should use updated_at from last
+});
+
+test("derived edge cache rows reference the commit change id", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
+
+	const now = timestamp({ lix });
+	const parentId = "edge-parent";
+	const childId = "edge-child";
+	const changeSetId = "edge-cs";
+	const commitChangeId = "edge-commit-change";
+
+  // Insert real commit change
+  await lix.db
+    .insertInto("change")
+    .values({
+      id: commitChangeId,
+      entity_id: childId,
+      schema_key: "lix_commit",
+      schema_version: "1.0",
+      file_id: "lix",
+      plugin_key: "lix_own_entity",
+      snapshot_content: { id: childId, change_set_id: changeSetId, parent_commit_ids: [parentId] },
+      created_at: now,
+    })
+    .execute();
+
+  // Push to cache so edges are derived
+  updateStateCache({
+    lix,
+    version_id: "global",
+    commit_id: childId,
+    changes: [
+      {
+        id: commitChangeId,
+        entity_id: childId,
+        schema_key: "lix_commit",
+        schema_version: "1.0",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
+        snapshot_content: JSON.stringify({ id: childId, change_set_id: changeSetId, parent_commit_ids: [parentId] }),
+        created_at: now,
+      },
+    ],
+  });
+
+  const joined = await lix.db
+    .selectFrom("commit_edge_all")
+    .innerJoin("change", "change.id", "commit_edge_all.lixcol_change_id")
+    .where("commit_edge_all.lixcol_version_id", "=", "global")
+    .select([
+      "commit_edge_all.parent_id as parent_id",
+      "commit_edge_all.child_id as child_id",
+      "commit_edge_all.lixcol_change_id as change_id",
+      "change.entity_id as change_entity_id",
+      "change.snapshot_content as snap",
+    ])
+    .executeTakeFirstOrThrow();
+
+  expect(joined.parent_id).toBe(parentId);
+  expect(joined.child_id).toBe(childId);
+  expect(joined.change_id).toBe(commitChangeId);
+  expect(joined.change_entity_id).toBe(childId);
+  expect(joined.snap).toMatchObject({ id: childId, change_set_id: changeSetId, parent_commit_ids: [parentId] });
+});
+
+test("commit caching materializes its change set in cache", async () => {
+  const lix = await openLix({
+    keyValues: [
+      { key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } },
+    ],
+  });
+
+  const now = timestamp({ lix });
+  const parentId = "cs-parent";
+  const childId = "cs-child";
+  const changeSetId = "cs-materialized";
+  const commitChangeId = "cs-commit-change";
+
+  // Insert real commit change
+  await lix.db
+    .insertInto("change")
+    .values({
+      id: commitChangeId,
+      entity_id: childId,
+      schema_key: "lix_commit",
+      schema_version: "1.0",
+      file_id: "lix",
+      plugin_key: "lix_own_entity",
+      snapshot_content: { id: childId, change_set_id: changeSetId, parent_commit_ids: [parentId] },
+      created_at: now,
+    })
+    .execute();
+
+  // Push to cache so commit edges + change set are materialized
+  updateStateCache({
+    lix,
+    version_id: "global",
+    commit_id: childId,
+    changes: [
+      {
+        id: commitChangeId,
+        entity_id: childId,
+        schema_key: "lix_commit",
+        schema_version: "1.0",
+        file_id: "lix",
+        plugin_key: "lix_own_entity",
+        snapshot_content: JSON.stringify({ id: childId, change_set_id: changeSetId, parent_commit_ids: [parentId] }),
+        created_at: now,
+      },
+    ],
+  });
+
+  // Verify the change set appears via the cache in change_set_all
+  const cs = await lix.db
+    .selectFrom("change_set_all")
+    .where("id", "=", changeSetId)
+    .where("lixcol_version_id", "=", "global")
+    .selectAll()
+    .executeTakeFirstOrThrow();
+
+  expect(cs).toMatchObject({ id: changeSetId, lixcol_version_id: "global" });
+});
+
+// Edges caching from commit.parent_commit_ids
+test("caches commit edges from commit.parent_commit_ids", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
+
+	const now = timestamp({ lix });
+	const parentId = "commit-parent";
+	const childId = "commit-child";
+	const changeSetId = "cs-merge";
+
+	updateStateCache({
+		lix,
+		version_id: "global",
+		commit_id: "global-commit-edges-1",
+		changes: [
+			{
+				id: "chg-commit-with-parents",
+				entity_id: childId,
+				schema_key: "lix_commit",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: childId,
+					change_set_id: changeSetId,
+					parent_commit_ids: [parentId],
+				}),
+				created_at: now,
+			},
+		],
+	});
+
+	const edges = await lix.db
+		.selectFrom("commit_edge_all")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	expect(edges).toMatchObject([
+		{ parent_id: parentId, child_id: childId, lixcol_version_id: "global" },
+	]);
+});
+
+test("clears cached edges when parent_commit_ids becomes empty", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	const now = timestamp({ lix });
+	const parentId = "commit-parent-2";
+	const childId = "commit-child-2";
+	const changeSetId = "cs-merge-2";
+
+	// Seed with a commit which has a parent
+	updateStateCache({
+		lix,
+		version_id: "global",
+		commit_id: "global-commit-edges-2",
+		changes: [
+			{
+				id: "chg-commit-with-parents-2",
+				entity_id: childId,
+				schema_key: "lix_commit",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: childId,
+					change_set_id: changeSetId,
+					parent_commit_ids: [parentId],
+				}),
+				created_at: now,
+			},
+		],
+	});
+
+	// Sanity check exists
+	const before = await lix.db
+		.selectFrom("commit_edge_all")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+	expect(before.length).toBeGreaterThan(0);
+
+	// Update commit with empty parents
+	updateStateCache({
+		lix,
+		version_id: "global",
+		commit_id: "global-commit-edges-3",
+		changes: [
+			{
+				id: "chg-commit-without-parents-2",
+				entity_id: childId,
+				schema_key: "lix_commit",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: childId,
+					change_set_id: changeSetId,
+					parent_commit_ids: [],
+				}),
+				created_at: now,
+			},
+		],
+	});
+
+	const after = await lix.db
+		.selectFrom("commit_edge_all")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+	expect(after).toEqual([]);
 });

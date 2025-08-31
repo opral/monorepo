@@ -106,21 +106,21 @@ export async function mergeVersion(args: {
 			const refIds = toReference.map((r) => r.id);
 
 			// Read pending rows from the transaction table
-            const pending = await intDbLocal
-                .selectFrom("internal_transaction_state")
-                .select([
-                    "id",
-                    "entity_id",
-                    "schema_key",
-                    "schema_version",
-                    "file_id",
-                    "plugin_key",
-                    sql`json(snapshot_content)`.as("snapshot_content"),
-                    "created_at",
-                ])
-                .where("lixcol_version_id", "=", sourceVersion.id)
-                .where("id", "in", refIds)
-                .execute();
+			const pending = await intDbLocal
+				.selectFrom("internal_transaction_state")
+				.select([
+					"id",
+					"entity_id",
+					"schema_key",
+					"schema_version",
+					"file_id",
+					"plugin_key",
+					sql`json(snapshot_content)`.as("snapshot_content"),
+					"created_at",
+				])
+				.where("lixcol_version_id", "=", sourceVersion.id)
+				.where("id", "in", refIds)
+				.execute();
 
 			if (pending.length > 0) {
 				// Insert into persistent change table using the view's insert trigger
@@ -143,10 +143,10 @@ export async function mergeVersion(args: {
 					.execute();
 
 				// Remove from transaction queue to prevent automatic commit logic for source
-                await intDbLocal
-                    .deleteFrom("internal_transaction_state")
-                    .where("id", "in", refIds)
-                    .execute();
+				await intDbLocal
+					.deleteFrom("internal_transaction_state")
+					.where("id", "in", refIds)
+					.execute();
 			}
 		}
 
@@ -274,6 +274,7 @@ export async function mergeVersion(args: {
 
 		// 3) Global commit (publishes graph metadata for both commits)
 		const globalCommitChangeId = uuidV7({ lix });
+		const globalLineageParentId = beforeGlobal.commit_id;
 		changeRows.push({
 			id: globalCommitChangeId,
 			entity_id: globalCommitId,
@@ -284,25 +285,10 @@ export async function mergeVersion(args: {
 			snapshot_content: JSON.stringify({
 				id: globalCommitId,
 				change_set_id: globalChangeSetId,
+				parent_commit_ids: [globalLineageParentId],
 			}),
 			created_at: now,
 		});
-
-		// Global commit: record lineage parent inline
-		const globalLineageParentId = beforeGlobal.commit_id;
-		// augment the previously inserted global commit row with parent_commit_ids
-		// by pushing an updated commit row (overwriting via latest visible state)
-		const updatedGlobalCommit: LixChangeRaw = {
-			id: uuidV7({ lix }),
-			entity_id: globalCommitId,
-			schema_key: "lix_commit",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: globalCommitId, change_set_id: globalChangeSetId, parent_commit_ids: [globalLineageParentId] }),
-			created_at: now,
-		};
-		changeRows.push(updatedGlobalCommit);
 
 		// Reference graph rows under GLOBAL change set
 		for (const meta of [
@@ -312,7 +298,7 @@ export async function mergeVersion(args: {
 				schema_key: "lix_commit",
 			},
 			{
-				change_id: updatedGlobalCommit.id,
+				change_id: globalCommitChangeId,
 				entity_id: globalCommitId,
 				schema_key: "lix_commit",
 			},
@@ -462,7 +448,10 @@ export async function mergeVersion(args: {
 				schema_version: "1.0",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ parent_id: targetVersion.commit_id, child_id: targetCommitId }),
+				snapshot_content: JSON.stringify({
+					parent_id: targetVersion.commit_id,
+					child_id: targetCommitId,
+				}),
 				created_at: now,
 			},
 			{
@@ -472,7 +461,10 @@ export async function mergeVersion(args: {
 				schema_version: "1.0",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ parent_id: sourceVersion.commit_id, child_id: targetCommitId }),
+				snapshot_content: JSON.stringify({
+					parent_id: sourceVersion.commit_id,
+					child_id: targetCommitId,
+				}),
 				created_at: now,
 			},
 			{
@@ -482,7 +474,10 @@ export async function mergeVersion(args: {
 				schema_version: "1.0",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ parent_id: beforeGlobal.commit_id, child_id: globalCommitId }),
+				snapshot_content: JSON.stringify({
+					parent_id: beforeGlobal.commit_id,
+					child_id: globalCommitId,
+				}),
 				created_at: now,
 			},
 		];

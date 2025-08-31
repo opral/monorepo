@@ -1,4 +1,5 @@
 import { describe, expect } from "vitest";
+import { sql } from "kysely";
 import { selectActiveVersion } from "../version/select-active-version.js";
 import { createVersion } from "../version/create-version.js";
 import { timestamp } from "../deterministic/timestamp.js";
@@ -686,54 +687,47 @@ describe("internal_materialization_commit_graph", () => {
 				})
 				.execute();
 
-			// Create the merge commit in commit_all (global version)
+			// Insert a commit change with parent_commit_ids (changes-only materializer)
+			const mergeCommitChangeId = `chg-${mergeCommitId}`;
 			await lix.db
-				.insertInto("commit_all")
+				.insertInto("change")
 				.values({
-					id: mergeCommitId,
-					change_set_id: mergeChangeSetId,
-					lixcol_version_id: "global",
+					id: mergeCommitChangeId,
+					entity_id: mergeCommitId,
+					schema_key: "lix_commit",
+					schema_version: "1.0",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: {
+						id: mergeCommitId,
+						change_set_id: mergeChangeSetId,
+						parent_commit_ids: [versionATip.commit_id, versionBTip.commit_id],
+					},
+					created_at: ts,
 				})
 				.execute();
 
-			// Create edges to both parents
+			// Update version A tip via a version change (changes-only materializer)
+			const vRow = await (lix.db as any)
+				.selectFrom("internal_resolved_state_all")
+				.where("schema_key", "=", "lix_version")
+				.where("entity_id", "=", "merge-version-a")
+				.where("snapshot_content", "is not", null)
+				.select([sql`json(snapshot_content)`.as("snapshot_content")])
+				.executeTakeFirstOrThrow();
+			const currentVersion = vRow.snapshot_content as any;
 			await lix.db
 				.insertInto("change")
-				.values([
-					{
-						id: `edge-1-${mergeCommitId}`,
-						entity_id: `edge-${mergeCommitId}-${versionATip.commit_id}`,
-						schema_key: "lix_commit_edge",
-						schema_version: "1.0",
-						file_id: "lix-file",
-						plugin_key: "lix",
-						snapshot_content: {
-							parent_id: versionATip.commit_id,
-							child_id: mergeCommitId,
-						},
-						created_at: ts,
-					},
-					{
-						id: `edge-2-${mergeCommitId}`,
-						entity_id: `edge-${mergeCommitId}-${versionBTip.commit_id}`,
-						schema_key: "lix_commit_edge",
-						schema_version: "1.0",
-						file_id: "lix-file",
-						plugin_key: "lix",
-						snapshot_content: {
-							parent_id: versionBTip.commit_id,
-							child_id: mergeCommitId,
-						},
-						created_at: ts,
-					},
-				])
-				.execute();
-
-			// Update version A to point to the merge commit
-			await lix.db
-				.updateTable("version")
-				.set({ commit_id: mergeCommitId })
-				.where("id", "=", "merge-version-a")
+				.values({
+					id: `vchg-${mergeCommitId}`,
+					entity_id: "merge-version-a",
+					schema_key: "lix_version",
+					schema_version: "1.0",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: { ...currentVersion, commit_id: mergeCommitId },
+					created_at: ts,
+				})
 				.execute();
 
 			// Query the commit graph for the merged version

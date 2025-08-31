@@ -58,14 +58,12 @@ export async function createCheckpoint(args: {
 		// 1. The old working commit becomes the checkpoint commit
 		const checkpointCommitId = activeVersion.working_commit_id;
 
-		// Add commit edge from parent commit to checkpoint commit (which is the old working commit)
+		// Link checkpoint to previous head by setting its parent_commit_ids
 		await trx
-			.insertInto("commit_edge_all")
-			.values({
-				parent_id: activeVersion.commit_id,
-				child_id: checkpointCommitId,
-				lixcol_version_id: "global",
-			})
+			.updateTable("commit_all")
+			.set({ parent_commit_ids: [activeVersion.commit_id] as any })
+			.where("id", "=", checkpointCommitId)
+			.where("lixcol_version_id", "=", "global")
 			.execute();
 
 		// 2. Create new empty working change set for continued work
@@ -103,6 +101,8 @@ export async function createCheckpoint(args: {
 			.values({
 				id: newWorkingCommitId,
 				change_set_id: newWorkingChangeSetId,
+				// new working commit is a child of the checkpoint
+				parent_commit_ids: [checkpointCommitId] as any,
 				lixcol_version_id: "global",
 			})
 			.execute();
@@ -114,15 +114,7 @@ export async function createCheckpoint(args: {
 			.where("lixcol_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
-		// Add commit edge from checkpoint commit to new working commit
-		await trx
-			.insertInto("commit_edge_all")
-			.values({
-				parent_id: checkpointCommitId,
-				child_id: newWorkingCommitId,
-				lixcol_version_id: "global",
-			})
-			.execute();
+		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
 
 		// Update version to point to new working commit
 		await trx

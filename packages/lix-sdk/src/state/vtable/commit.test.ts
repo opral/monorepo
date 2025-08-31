@@ -182,20 +182,20 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 	expect(globalSchemas["lix_change_set_element"]).toBeUndefined();
 
 	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
-	const edgeActive = await db
-		.selectFrom("commit_edge")
-		.where("parent_id", "=", prevCommitActive)
-		.where("child_id", "=", commitActiveId)
-		.selectAll()
-		.execute();
+    const edgeActive = await db
+        .selectFrom("commit_edge")
+        .where("parent_id", "=", prevCommitActive)
+        .where("child_id", "=", commitActiveId)
+        .selectAll()
+        .execute();
 	expect(edgeActive.length).toBe(1); // prevActive ─▶ active
 
-	const edgeGlobal = await db
-		.selectFrom("commit_edge")
-		.where("parent_id", "=", prevCommitGlobal)
-		.where("child_id", "=", commitGlobalId)
-		.selectAll()
-		.execute();
+    const edgeGlobal = await db
+        .selectFrom("commit_edge")
+        .where("parent_id", "=", prevCommitGlobal)
+        .where("child_id", "=", commitGlobalId)
+        .selectAll()
+        .execute();
 	expect(edgeGlobal.length).toBe(1); // prevGlobal ─▶ global
 });
 

@@ -6,25 +6,27 @@ export function applyMaterializeStateSchema(
     // View 0: Unified commit edges (derived from commit.parent_commit_ids ∪ physical rows)
     lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
-        WITH derived_edges AS (
+        WITH latest_commits AS (
+            SELECT 
+                c.entity_id,
+                c.snapshot_content,
+                ROW_NUMBER() OVER (
+                    PARTITION BY c.entity_id 
+                    ORDER BY c.created_at DESC, c.id DESC
+                ) AS rn
+            FROM change c
+            WHERE c.schema_key = 'lix_commit'
+        ),
+        derived_edges AS (
             SELECT 
                 je.value AS parent_id,
-                c.entity_id AS child_id
-            FROM change c
-            JOIN json_each(json_extract(c.snapshot_content,'$.parent_commit_ids')) je
-            WHERE c.schema_key = 'lix_commit'
-              AND json_type(json_extract(c.snapshot_content,'$.parent_commit_ids')) = 'array'
-        ),
-        physical_edges AS (
-            SELECT 
-                json_extract(e.snapshot_content,'$.parent_id') AS parent_id,
-                json_extract(e.snapshot_content,'$.child_id')  AS child_id
-            FROM change e
-            WHERE e.schema_key = 'lix_commit_edge'
+                lc.entity_id AS child_id
+            FROM latest_commits lc
+            JOIN json_each(json_extract(lc.snapshot_content,'$.parent_commit_ids')) je
+            WHERE lc.rn = 1
+              AND json_type(json_extract(lc.snapshot_content,'$.parent_commit_ids')) = 'array'
         )
-        SELECT DISTINCT parent_id, child_id FROM derived_edges
-        UNION
-        SELECT DISTINCT parent_id, child_id FROM physical_edges;
+        SELECT DISTINCT parent_id, child_id FROM derived_edges;
     `);
 	// View 1: Version tips - one row per version with its current tip commit
 	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"

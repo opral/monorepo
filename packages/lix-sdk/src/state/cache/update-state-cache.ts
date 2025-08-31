@@ -91,6 +91,94 @@ export function updateStateCache(args: {
 				default_commit_id: args.commit_id,
 				default_version_id: args.version_id,
 			});
+
+			// Derive commit edges from commit.parent_commit_ids and write to global cache
+			if (schema_key === "lix_commit") {
+				// Build edge rows from each commit change
+				const edgeRows: Array<LixChangeRaw> = [];
+				const changeSetRows: Array<LixChangeRaw> = [];
+				for (const change of schemaChanges.inserts) {
+					const snap = change.snapshot_content
+						? JSON.parse(change.snapshot_content as any)
+						: undefined;
+					if (!snap || !snap.id) continue;
+					const childId = String(snap.id);
+					const parents: string[] = Array.isArray(snap.parent_commit_ids)
+						? snap.parent_commit_ids.map((p: any) => String(p))
+						: [];
+					const changeSetId: string | undefined = snap.change_set_id
+						? String(snap.change_set_id)
+						: undefined;
+
+					// Clear existing cached edges for this child in global scope
+					const edgeTable = "internal_state_cache_lix_commit_edge";
+					ensureTableExists(lix, edgeTable);
+					lix.sqlite.exec(
+						`DELETE FROM ${edgeTable} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = '${childId.replace(/'/g, "''")}'`
+					);
+
+					// Insert derived edges for parents
+					for (const parentId of parents) {
+						edgeRows.push({
+							id: change.id,
+							entity_id: `${parentId}~${childId}`,
+							schema_key: "lix_commit_edge",
+							schema_version: "1.0",
+							file_id: "lix",
+							plugin_key: "lix_own_entity",
+							snapshot_content: JSON.stringify({
+								parent_id: parentId,
+								child_id: childId,
+							}),
+							created_at: change.created_at,
+							// Inline resolved columns for cache write
+							// @ts-expect-error - materialized inline fields used by cache writer
+							lixcol_version_id: "global",
+							lixcol_commit_id: (args.commit_id as any) ?? childId,
+						});
+					}
+
+					// Ensure the commit's change set exists in cache (global)
+					if (changeSetId) {
+						changeSetRows.push({
+							id: change.id, // tie to the real commit change id
+							entity_id: changeSetId,
+							schema_key: "lix_change_set",
+							schema_version: "1.0",
+							file_id: "lix",
+							plugin_key: "lix_own_entity",
+							snapshot_content: JSON.stringify({
+								id: changeSetId,
+								metadata: null,
+							}),
+							created_at: change.created_at,
+							// @ts-expect-error - inline cache hints
+							lixcol_version_id: "global",
+							lixcol_commit_id: (args.commit_id as any) ?? childId,
+						});
+					}
+				}
+
+				if (edgeRows.length > 0) {
+					batchInsertDirectToTable({
+						lix,
+						tableName: "internal_state_cache_lix_commit_edge",
+						changes: edgeRows,
+						default_commit_id: args.commit_id,
+						default_version_id: "global",
+					});
+				}
+
+				if (changeSetRows.length > 0) {
+					batchInsertDirectToTable({
+						lix,
+						tableName: "internal_state_cache_lix_change_set",
+						changes: changeSetRows,
+						default_commit_id: args.commit_id,
+						default_version_id: "global",
+					});
+				}
+			}
 		}
 
 		// Process deletions for this schema
