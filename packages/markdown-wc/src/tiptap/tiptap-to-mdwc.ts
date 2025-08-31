@@ -19,23 +19,30 @@ export function tiptapDocToAst(doc: PMNode): any {
 function pmBlockToAst(node: PMNode): any {
 	switch (node.type) {
 		case "paragraph":
-			return { type: "paragraph", children: pmInlineToMd(node.content || []) }
+			return {
+				type: "paragraph",
+				data: node.attrs?.data ?? undefined,
+				children: pmInlineToMd(node.content || []),
+			}
 		case "heading":
 			return {
 				type: "heading",
 				depth: node.attrs?.level || 1,
+				data: node.attrs?.data ?? undefined,
 				children: pmInlineToMd(node.content || []),
 			}
 		case "bulletList":
 			return {
 				type: "list",
 				ordered: false,
+				data: node.attrs?.data ?? undefined,
 				children: (node.content || []).map(pmBlockToAst),
 			} as any
 		case "orderedList": {
 			const out: any = {
 				type: "list",
 				ordered: true,
+				data: node.attrs?.data ?? undefined,
 				children: (node.content || []).map(pmBlockToAst),
 			}
 			if (node.attrs?.start != null && node.attrs.start !== 1) out.start = node.attrs.start
@@ -43,39 +50,58 @@ function pmBlockToAst(node: PMNode): any {
 		}
 		case "listItem": {
 			const out: any = { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
+			if (node.attrs?.data != null) out.data = node.attrs.data
 			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false))
 				out.checked = node.attrs.checked
 			return out
 		}
 
 		case "blockquote":
-			return { type: "blockquote", children: (node.content || []).map(pmBlockToAst) }
+			return {
+				type: "blockquote",
+				data: node.attrs?.data ?? undefined,
+				children: (node.content || []).map(pmBlockToAst),
+			}
 		case "codeBlock": {
 			const text = collectText(node.content || [])
 			const lang = node.attrs?.language
 			const out: any = { type: "code", value: text }
+			if (node.attrs?.data != null) out.data = node.attrs.data
 			if (lang != null) out.lang = lang
 			return out
 		}
 		case "horizontalRule":
-			return { type: "thematicBreak" }
+			return { type: "thematicBreak", data: node.attrs?.data ?? undefined }
 		case "table": {
 			const align = node.attrs?.align ?? []
 			return {
 				type: "table",
 				align,
+				data: node.attrs?.data ?? undefined,
 				children: (node.content || []).map(pmBlockToAst),
 			} as any
 		}
 		case "tableRow":
-			return { type: "tableRow", children: (node.content || []).map(pmBlockToAst) }
+			return {
+				type: "tableRow",
+				data: node.attrs?.data ?? undefined,
+				children: (node.content || []).map(pmBlockToAst),
+			}
 		case "tableCell":
-			return { type: "tableCell", children: pmInlineToMd(node.content || []) }
+			return {
+				type: "tableCell",
+				data: node.attrs?.data ?? undefined,
+				children: pmInlineToMd(node.content || []),
+			}
 		default:
 			if (node.content && node.content.length && isInline(node.content[0] as any)) {
-				return { type: "paragraph", children: pmInlineToMd(node.content) }
+				return {
+					type: "paragraph",
+					data: node.attrs?.data ?? undefined,
+					children: pmInlineToMd(node.content),
+				}
 			}
-			return { type: "paragraph", children: [] }
+			return { type: "paragraph", data: node.attrs?.data ?? undefined, children: [] }
 	}
 }
 
@@ -85,12 +111,16 @@ function pmInlineToMd(nodes: PMNode[]): any[] {
 		if (n.type === "text") {
 			out.push(applyMarksToText(n.text || "", n.marks || []))
 		} else if (n.type === "hardBreak") {
-			out.push({ type: "break" } as any)
+			const br: any = { type: "break" }
+			if (n.attrs?.data != null) br.data = n.attrs.data
+			out.push(br as any)
 		} else if (n.type === "image") {
 			const src = n.attrs?.src ?? null
 			const title = n.attrs?.title ?? null
 			const alt = n.attrs?.alt ?? null
-			out.push({ type: "image", url: src, title, alt } as any)
+			const im: any = { type: "image", url: src, title, alt }
+			if (n.attrs?.data != null) im.data = n.attrs.data
+			out.push(im as any)
 		}
 	}
 	return out
@@ -109,7 +139,9 @@ function applyMarksToText(value: string, marks: PMMark[]): any {
 				const mark = marks.find((m) => m.type === "link")!
 				const href = mark.attrs?.href ?? null
 				const title = mark.attrs?.title ?? null
-				node = { type: "link", url: href, title, children: [node] } as any
+				const ln: any = { type: "link", url: href, title, children: [node] }
+				if (mark.attrs?.data != null) ln.data = mark.attrs.data
+				node = ln as any
 			}
 		}
 	}

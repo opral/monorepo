@@ -9,20 +9,20 @@ import type { Ast } from "./schemas.js"
  * - GFM is enabled by default for table/task-list/strikethrough serialization.
  */
 export function serializeAst(ast: Ast): string {
-    const processor = unified()
-        .use(remarkStringify as any, {
-            bullet: "-",
-            listItemIndent: "one",
-            rule: "-",
-            ruleRepetition: 3,
-            ruleSpaces: false,
-            emphasis: "_",
-            strong: "*",
-            // Keep raw HTML in output for html nodes
-            allowDangerousHtml: true,
-        })
-        .use(remarkGfm as any)
-        .use(remarkFrontmatter as any, ["yaml"])
+	const processor = unified()
+		.use(remarkStringify as any, {
+			bullet: "-",
+			listItemIndent: "one",
+			rule: "-",
+			ruleRepetition: 3,
+			ruleSpaces: false,
+			emphasis: "_",
+			strong: "*",
+			// Keep raw HTML in output for html nodes
+			allowDangerousHtml: true,
+		})
+		.use(remarkGfm as any)
+		.use(remarkFrontmatter as any, ["yaml"])
 
 	// unified.stringify expects a compatible mdast Root
 	const result = processor.stringify(ast as any) as string

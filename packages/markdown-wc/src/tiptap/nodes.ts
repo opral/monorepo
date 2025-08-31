@@ -12,6 +12,9 @@ export function markdownWcNodes(): Extensions {
 			name: "paragraph",
 			group: "block",
 			content: "inline*",
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["p", 0]
 			},
@@ -22,7 +25,7 @@ export function markdownWcNodes(): Extensions {
 			group: "block",
 			content: "inline*",
 			addAttributes() {
-				return { level: { default: 1 } }
+				return { level: { default: 1 }, data: { default: null } }
 			},
 			renderHTML({ node }) {
 				const level = (node as any).attrs?.level || 1
@@ -35,7 +38,7 @@ export function markdownWcNodes(): Extensions {
 			group: "block",
 			content: "listItem+",
 			addAttributes() {
-				return { isTaskList: { default: false } }
+				return { isTaskList: { default: false }, data: { default: null } }
 			},
 			renderHTML() {
 				// Match serializeToHtml default: plain <ul>
@@ -47,7 +50,7 @@ export function markdownWcNodes(): Extensions {
 			group: "block",
 			content: "listItem+",
 			addAttributes() {
-				return { start: { default: 1 } }
+				return { start: { default: 1 }, data: { default: null } }
 			},
 			renderHTML({ node }) {
 				const attrs: any = {}
@@ -62,7 +65,7 @@ export function markdownWcNodes(): Extensions {
 			group: "block",
 			content: "tableRow+",
 			addAttributes() {
-				return { align: { default: [] } }
+				return { align: { default: [] }, data: { default: null } }
 			},
 			renderHTML() {
 				return ["table", ["tbody", 0]]
@@ -71,6 +74,9 @@ export function markdownWcNodes(): Extensions {
 		Node.create({
 			name: "tableRow",
 			content: "tableCell+",
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["tr", 0]
 			},
@@ -78,6 +84,9 @@ export function markdownWcNodes(): Extensions {
 		Node.create({
 			name: "tableCell",
 			content: "inline*",
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["td", 0]
 			},
@@ -88,7 +97,7 @@ export function markdownWcNodes(): Extensions {
 			content: "paragraph block*",
 			defining: true,
 			addAttributes() {
-				return { checked: { default: null } }
+				return { checked: { default: null }, data: { default: null } }
 			},
 			renderHTML() {
 				// Match serializeToHtml default: plain <li>
@@ -150,6 +159,9 @@ export function markdownWcNodes(): Extensions {
 			group: "block",
 			content: "block+",
 			defining: true,
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["blockquote", 0]
 			},
@@ -163,7 +175,7 @@ export function markdownWcNodes(): Extensions {
 			defining: true,
 			code: true,
 			addAttributes() {
-				return { language: { default: null } }
+				return { language: { default: null }, data: { default: null } }
 			},
 			renderHTML({ node }) {
 				const lang = (node as any).attrs?.language ?? null
@@ -176,6 +188,9 @@ export function markdownWcNodes(): Extensions {
 		Node.create({
 			name: "horizontalRule",
 			group: "block",
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["hr"]
 			},
@@ -186,6 +201,9 @@ export function markdownWcNodes(): Extensions {
 			group: "inline",
 			inline: true,
 			selectable: false,
+			addAttributes() {
+				return { data: { default: null } }
+			},
 			renderHTML() {
 				return ["br"]
 			},
@@ -221,6 +239,7 @@ export function markdownWcNodes(): Extensions {
 				return {
 					href: { default: null },
 					title: { default: null },
+					data: { default: null },
 				}
 			},
 			renderHTML({ mark }) {
@@ -239,7 +258,12 @@ export function markdownWcNodes(): Extensions {
 			inline: true,
 			atom: true,
 			addAttributes() {
-				return { src: { default: null }, alt: { default: null }, title: { default: null } }
+				return {
+					src: { default: null },
+					alt: { default: null },
+					title: { default: null },
+					data: { default: null },
+				}
 			},
 			renderHTML({ node }) {
 				const attrs: any = {}

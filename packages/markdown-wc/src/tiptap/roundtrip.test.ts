@@ -35,6 +35,33 @@ describe("root & paragraph", () => {
 	})
 })
 
+describe("vendor data roundtrip", () => {
+	test("data.id and arbitrary keys survive ast → pm → ast", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "heading",
+					depth: 2,
+					data: { id: "H1", foo: "bar", nested: { a: 1 } },
+					children: [{ type: "text", value: "Title" }],
+				} as any,
+				{
+					type: "paragraph",
+					data: { id: "P1", custom: { x: 42 } },
+					children: [{ type: "text", value: "Content" }],
+				} as any,
+			],
+		} as any
+
+		const pm = astToTiptapDoc(input)
+		const output = tiptapDocToAst(pm as any) as any
+
+		// Expect full structural equality including data.* preservation
+		expect(output).toEqual(input)
+	})
+})
+
 describe("heading", () => {
 	for (let level = 1 as 1 | 2 | 3 | 4 | 5 | 6; level <= 6; level++) {
 		test(`h${level}`, () => {
@@ -76,7 +103,7 @@ describe("paragraph marks", () => {
 	})
 
 	test("strong only", () => {
-			const input: Ast = {
+		const input: Ast = {
 			type: "root",
 			children: [
 				{
@@ -238,25 +265,32 @@ describe("lists", () => {
 		expect(editorOutput).toEqual(input)
 	})
 
-  test("task list (checked/unchecked)", () => {
-    const input: Ast = {
-      type: 'root',
-      children: [
-        {
-          type: 'list',
-          ordered: false,
-          children: [
-            { type: 'listItem', checked: true as any, children: [{ type: 'paragraph', children: [{ type: 'text', value: 'done' }] }] },
-            { type: 'listItem', checked: false as any, children: [{ type: 'paragraph', children: [{ type: 'text', value: 'todo' }] }] },
-          ],
-        },
-      ],
-    } as any
-    const output = roundtrip(input)
-    expect(output).toEqual(input)
-    // Editor roundtrip of task list is exercised in the example app; core mapping equality is asserted here.
-  } )
-
+	test("task list (checked/unchecked)", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "list",
+					ordered: false,
+					children: [
+						{
+							type: "listItem",
+							checked: true as any,
+							children: [{ type: "paragraph", children: [{ type: "text", value: "done" }] }],
+						},
+						{
+							type: "listItem",
+							checked: false as any,
+							children: [{ type: "paragraph", children: [{ type: "text", value: "todo" }] }],
+						},
+					],
+				},
+			],
+		} as any
+		const output = roundtrip(input)
+		expect(output).toEqual(input)
+		// Editor roundtrip of task list is exercised in the example app; core mapping equality is asserted here.
+	})
 })
 
 describe("blocks", () => {
@@ -273,7 +307,6 @@ describe("blocks", () => {
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
-
 
 	test("table", () => {
 		const input: Ast = {

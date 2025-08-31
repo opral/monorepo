@@ -161,6 +161,107 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 	})
 })
 
+describe("IDs: preserve existing and create for new blocks", () => {
+	test("no-op editor roundtrip preserves existing data.id on blocks", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "heading",
+					depth: 1,
+					data: { id: "H1" },
+					children: [{ type: "text", value: "Heading" }],
+				} as any,
+				{
+					type: "paragraph",
+					data: { id: "P1" },
+					children: [{ type: "text", value: "Hello world." }],
+				} as any,
+			],
+		} as any
+
+		const editor = new Editor({
+			extensions: markdownWcExtensions(),
+			content: astToTiptapDoc(input) as any,
+		})
+
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+
+		expect(ids).toEqual(["H1", "P1"]) // should preserve exactly
+	})
+
+	test("splitting a paragraph creates a new data.id for the new block", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "paragraph",
+					data: { id: "PX" },
+					children: [{ type: "text", value: "Hello world." }],
+				} as any,
+			],
+		} as any
+
+		const editor = new Editor({
+			extensions: markdownWcExtensions(),
+			content: astToTiptapDoc(input) as any,
+		})
+
+		// Compute split position after "Hello"
+		const para = editor.state.doc.child(0)
+		const paraFrom = 1
+		const idxHello = (para as any).textContent.indexOf("Hello")
+		const posSplit = paraFrom + 1 + idxHello + "Hello".length
+
+		// Replace trailing text with a new paragraph to simulate a split
+		const paraTo = paraFrom + (para as any).content.size
+		editor.commands.insertContentAt(
+			{ from: posSplit, to: paraTo } as any,
+			{ type: "paragraph", content: [{ type: "text", text: " world." }] } as any
+		)
+
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+
+		expect(ids[0]).toBe("PX") // original keeps id
+		expect(typeof ids[1]).toBe("string")
+		expect(ids[1]).toBeTruthy()
+		expect(ids[1]).not.toBe(ids[0]) // new block gets a fresh id
+	})
+
+	test("appending a new paragraph assigns a fresh data.id", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "paragraph",
+					data: { id: "P1" },
+					children: [{ type: "text", value: "Hello" }],
+				} as any,
+			],
+		} as any
+
+		const editor = new Editor({
+			extensions: markdownWcExtensions(),
+			content: astToTiptapDoc(input) as any,
+		})
+
+		editor.commands.insertContentAt(editor.state.doc.content.size, {
+			type: "paragraph",
+			content: [{ type: "text", text: "New" }],
+		} as any)
+
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+
+		expect(ids[0]).toBe("P1")
+		expect(typeof ids[1]).toBe("string")
+		expect(ids[1]).toBeTruthy()
+		expect(ids[1]).not.toBe("P1")
+	})
+})
+
 test("insert text mid-paragraph", () => {
 	const input = `Hello world.`
 	const expectedOutput = `Hello dear world.`

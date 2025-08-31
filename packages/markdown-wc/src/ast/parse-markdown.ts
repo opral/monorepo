@@ -14,14 +14,18 @@ export function parseMarkdown(markdown: string): Ast {
 	// This keeps block handling deterministic for plugins that persist
 	// top-level HTML nodes. Ask authors to use explicit open/close tags.
 	// Note: we skip code fences to avoid false positives.
-	const scrubbed = markdown.replace(/```[\s\S]*?```/g, "");
-	const m = scrubbed.match(/<([A-Za-z][\w-]*)(?:\s[^<>]*?)?\/>/);
+	const scrubbed = markdown.replace(/```[\s\S]*?```/g, "")
+	const m = scrubbed.match(/<([A-Za-z][\w-]*)(?:\s[^<>]*?)?\/>/)
 	if (m) {
-		const tag = m[1];
+		const tag = m[1]
 		throw new Error(
 			`markdown-wc: self-closing HTML tags are not supported in AST mode: <${tag} />. ` +
-			"Use <" + tag + "></" + tag + "> instead."
-		);
+				"Use <" +
+				tag +
+				"></" +
+				tag +
+				"> instead."
+		)
 	}
 	const processor = unified()
 		.use(remarkParse as any)
