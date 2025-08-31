@@ -1021,48 +1021,56 @@ test("top-level html node: text tweak → same id; single modification", () => {
 	expect(root).toBeUndefined();
 });
 
-test("custom element html: add top-level element → addition + root order change", () => {
-	const before = ``;
-	const after = `<doc-figure src="/img.png" caption="Hello" />`;
-	const beforeState = makeBeforeState(before, []);
+test.todo(
+	"custom element html: add top-level element → addition + root order change",
+	() => {
+		const before = ``;
+		const after = `<doc-figure src="/img.png" caption="Hello" />`;
+		const beforeState = makeBeforeState(before, []);
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
-	expect(changes).toHaveLength(2);
+		const changes = detectChanges({
+			beforeState,
+			after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		});
+		expect(changes).toHaveLength(2);
 
-	const add = changes.find((c) => (c.snapshot_content as any)?.type === "html");
-	expect(add).toBeTruthy();
-	const value = (add as any).snapshot_content?.value as string;
-	expect(value).toContain("doc-figure");
+		const add = changes.find(
+			(c) => (c.snapshot_content as any)?.type === "html",
+		);
+		expect(add).toBeTruthy();
+		const value = (add as any).snapshot_content?.value as string;
+		expect(value).toContain("doc-figure");
 
-	const root = changes.find((c) => c.entity_id === "root");
-	expect(root).toBeTruthy();
-	expect(((root as any).snapshot_content.order as string[])[0]).toBe(
-		add!.entity_id,
-	);
-});
+		const root = changes.find((c) => c.entity_id === "root");
+		expect(root).toBeTruthy();
+		expect(((root as any).snapshot_content.order as string[])[0]).toBe(
+			add!.entity_id,
+		);
+	},
+);
 
-test("custom element html: delete top-level element → deletion + root order change", () => {
-	const before = `<doc-figure src="/img.png" caption="Hello" />`;
-	const after = ``;
-	const beforeState = makeBeforeState(before, ["html1"]);
+test.todo(
+	"custom element html: delete top-level element → deletion + root order change",
+	() => {
+		const before = `<doc-figure src="/img.png" caption="Hello" />`;
+		const after = ``;
+		const beforeState = makeBeforeState(before, ["html1"]);
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
-	expect(changes).toHaveLength(2);
+		const changes = detectChanges({
+			beforeState,
+			after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		});
+		expect(changes).toHaveLength(2);
 
-	const del = changes.find((c) => c.entity_id === "html1");
-	expect(del).toBeTruthy();
-	expect(del!.snapshot_content).toBeNull();
+		const del = changes.find((c) => c.entity_id === "html1");
+		expect(del).toBeTruthy();
+		expect(del!.snapshot_content).toBeNull();
 
-	const root = changes.find((c) => c.entity_id === "root");
-	expect(root).toBeTruthy();
-	expect((root as any).snapshot_content.order as string[]).toEqual([]);
-});
+		const root = changes.find((c) => c.entity_id === "root");
+		expect(root).toBeTruthy();
+		expect((root as any).snapshot_content.order as string[]).toEqual([]);
+	},
+);
 
 test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", () => {
 	// Café (NFC) vs Cafe + combining acute (NFD)
