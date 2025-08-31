@@ -45,12 +45,12 @@ function rng(seed: number) {
 function shuffle<T>(arr: T[], seed = 42): T[] {
 	const r = rng(seed);
 	const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(r() * (i + 1));
-    const tmp = a[i]!;
-    a[i] = a[j]!;
-    a[j] = tmp;
-  }
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(r() * (i + 1));
+		const tmp = a[i]!;
+		a[i] = a[j]!;
+		a[j] = tmp;
+	}
 	return a;
 }
 function makeBigDoc(n: number) {
@@ -102,9 +102,9 @@ test("it should detect a new node", async () => {
 			c.snapshot_content?.children?.[0]?.value?.includes("New paragraph"),
 	);
 	expect(addedNode).toBeTruthy();
-    expect(addedNode?.schema["x-lix-key"]).toBe(
-        AstSchemas.schemasByType.paragraph!["x-lix-key"],
-    );
+	expect(addedNode?.schema["x-lix-key"]).toBe(
+		AstSchemas.schemasByType.paragraph!["x-lix-key"],
+	);
 });
 
 test("it should detect an updated node", async () => {
@@ -124,9 +124,9 @@ test("it should detect an updated node", async () => {
 	expect(detectedChanges.length).toBeGreaterThan(0);
 	const updatedNode = detectedChanges.find((c) => c.entity_id === "p1");
 	expect(updatedNode).toBeTruthy();
-    expect(updatedNode?.schema["x-lix-key"]).toBe(
-        AstSchemas.schemasByType.paragraph!["x-lix-key"],
-    );
+	expect(updatedNode?.schema["x-lix-key"]).toBe(
+		AstSchemas.schemasByType.paragraph!["x-lix-key"],
+	);
 });
 
 test("it should detect a deleted node", async () => {
@@ -1202,15 +1202,15 @@ test("large doc (3k): ~1% tiny edits → equal number of mods, no adds/dels", ()
 	});
 
 	const dels = changes.filter((c) => c.snapshot_content === null);
-    const adds = changes.filter(
-			(c) =>
-				c.snapshot_content?.type &&
-				c.entity_id &&
-				!beforeIds.includes(c.entity_id),
-		);
-		const mods = changes.filter(
-			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-		);
+	const adds = changes.filter(
+		(c) =>
+			c.snapshot_content?.type &&
+			c.entity_id &&
+			!beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+	);
 	expect(dels.length).toBe(0);
 	expect(adds.length).toBe(0);
 	expect(mods.length).toBeGreaterThan(0);
@@ -1235,18 +1235,16 @@ test("duplicates (1k Same): edit #700 only → 1 mod, no root change", () => {
 		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
 	});
 
-    const mods = changes.filter(
-			(c) => c.snapshot_content?.type === "paragraph",
-		);
+	const mods = changes.filter((c) => c.snapshot_content?.type === "paragraph");
 	expect(mods.length).toBe(1);
 	expect(mods[0]!.entity_id).toBe("p700");
 
 	const root = changes.find((c) => c.entity_id === "root");
-    if (root) {
-			expect((root.snapshot_content as { order: string[] }).order).toEqual(
-				beforeIds,
-			); // order stable
-		}
+	if (root) {
+		expect((root.snapshot_content as { order: string[] }).order).toEqual(
+			beforeIds,
+		); // order stable
+	}
 });
 
 test("large mixed: 2k dup 'Same' blocks + move 200 unique → 1 root + targeted mods", () => {
@@ -1275,12 +1273,12 @@ test("large mixed: 2k dup 'Same' blocks + move 200 unique → 1 root + targeted 
 	expect(root).toBeTruthy();
 
 	const dels = changes.filter((c) => c.snapshot_content === null);
-    const adds = changes.filter(
-			(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
-		);
-		const mods = changes.filter(
-			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-		);
+	const adds = changes.filter(
+		(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+	);
 	expect(dels.length).toBe(0);
 	expect(adds.length).toBe(0);
 	expect(mods.length).toBe(1);

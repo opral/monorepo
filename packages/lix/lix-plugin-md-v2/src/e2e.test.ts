@@ -124,12 +124,12 @@ test("programatically mutating entities should be reflected in the file", async 
 		.where("schema_key", "=", AstSchemas["HeadingSchema"]["x-lix-key"])
 		.selectAll()
 		.executeTakeFirstOrThrow();
-    const paraRow = await lix.db
-        .selectFrom("state_all")
-        .where("file_id", "=", "file1")
-        .where("schema_key", "=", AstSchemas.schemasByType.paragraph!["x-lix-key"]) 
-        .selectAll()
-        .executeTakeFirstOrThrow();
+	const paraRow = await lix.db
+		.selectFrom("state_all")
+		.where("file_id", "=", "file1")
+		.where("schema_key", "=", AstSchemas.schemasByType.paragraph!["x-lix-key"])
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	// 2. Mutate the paragraph via state using the discovered entity_id
 	// Create proper Markdown-WC node structure for paragraph
@@ -148,11 +148,7 @@ test("programatically mutating entities should be reflected in the file", async 
 			},
 		})
 		.where("entity_id", "=", paraRow.entity_id)
-        .where(
-            "schema_key",
-            "=",
-            AstSchemas.schemasByType.paragraph!["x-lix-key"],
-        )
+		.where("schema_key", "=", AstSchemas.schemasByType.paragraph!["x-lix-key"])
 		.where("file_id", "=", "file1")
 		.execute();
 
@@ -174,11 +170,7 @@ test("programatically mutating entities should be reflected in the file", async 
 			},
 		})
 		.where("entity_id", "=", headingRow.entity_id)
-        .where(
-            "schema_key",
-            "=",
-            AstSchemas.schemasByType.heading!["x-lix-key"],
-        )
+		.where("schema_key", "=", AstSchemas.schemasByType.heading!["x-lix-key"])
 		.where("file_id", "=", "file1")
 		.execute();
 
