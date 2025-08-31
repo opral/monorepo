@@ -2863,15 +2863,9 @@ importers:
         specifier: ^3.1.0
         version: 3.2.0
     devDependencies:
-      '@eslint/js':
-        specifier: ^9.12.0
-        version: 9.29.0
       '@opral/tsconfig':
         specifier: workspace:*
         version: link:../../tsconfig
-      eslint:
-        specifier: ^9.12.0
-        version: 9.29.0(jiti@2.4.2)
       oxlint:
         specifier: ^1.13.0
         version: 1.13.0
@@ -2881,9 +2875,6 @@ importers:
       typescript:
         specifier: ^5.5.4
         version: 5.8.3
-      typescript-eslint:
-        specifier: ^8.9.0
-        version: 8.35.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       vitest:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.3.0)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.3.0)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1)
@@ -2901,7 +2892,7 @@ importers:
         version: link:../../tsconfig
       '@testing-library/react':
         specifier: ^16.3.0
-        version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.1.9(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.1(react@19.1.0))(react@19.1.0)
+        version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.1.9(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@types/react':
         specifier: ^19.1.8
         version: 19.1.8
@@ -2924,8 +2915,11 @@ importers:
         specifier: ^3.3.3
         version: 3.6.1
       react:
-        specifier: ^19.1.0
-        version: 19.1.0
+        specifier: 19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: 19.1.1
+        version: 19.1.1(react@19.1.1)
       typescript:
         specifier: ^5.5.4
         version: 5.8.3
@@ -25363,11 +25357,11 @@ snapshots:
       '@types/react': 19.1.8
       react: 18.3.1
 
-  '@mdx-js/react@3.1.0(@types/react@19.1.12)(react@18.3.1)':
+  '@mdx-js/react@3.1.0(@types/react@19.1.12)(react@19.1.1)':
     dependencies:
       '@types/mdx': 2.0.13
       '@types/react': 19.1.12
-      react: 18.3.1
+      react: 19.1.1
 
   '@mermaid-js/parser@0.6.1':
     dependencies:
@@ -25646,21 +25640,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@18.3.5)(typescript@5.8.3)':
-    dependencies:
-      '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@18.3.5)(typescript@5.8.3)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-
   '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@21.4.1)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@21.4.1)(typescript@5.4.5)
@@ -25906,7 +25885,7 @@ snapshots:
       '@babel/preset-env': 7.26.0(@babel/core@7.28.3)
       '@babel/preset-typescript': 7.26.0(@babel/core@7.28.3)
       '@babel/runtime': 7.27.6
-      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@18.3.5)(typescript@5.8.3)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@18.3.5)(typescript@5.4.5)
       '@nx/devkit': 18.3.5(nx@18.3.5)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.8.3)
@@ -29118,12 +29097,12 @@ snapshots:
 
   '@storybook/addon-docs@8.6.14(@types/react@19.1.12)(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
-      '@mdx-js/react': 3.1.0(@types/react@19.1.12)(react@18.3.1)
-      '@storybook/blocks': 8.6.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.14(prettier@3.6.1))
+      '@mdx-js/react': 3.1.0(@types/react@19.1.12)(react@19.1.1)
+      '@storybook/blocks': 8.6.14(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@8.6.14(prettier@3.6.1))
       '@storybook/csf-plugin': 8.6.14(storybook@8.6.14(prettier@3.6.1))
-      '@storybook/react-dom-shim': 8.6.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.14(prettier@3.6.1))
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      '@storybook/react-dom-shim': 8.6.14(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@8.6.14(prettier@3.6.1))
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
       storybook: 8.6.14(prettier@3.6.1)
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -29188,6 +29167,15 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
+  '@storybook/blocks@8.6.14(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@8.6.14(prettier@3.6.1))':
+    dependencies:
+      '@storybook/icons': 1.4.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      storybook: 8.6.14(prettier@3.6.1)
+      ts-dedent: 2.2.0
+    optionalDependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+
   '@storybook/builder-vite@8.6.14(storybook@8.6.14(prettier@3.6.1))(vite@7.1.3(@types/node@24.3.0)(jiti@2.4.2)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1))':
     dependencies:
       '@storybook/csf-plugin': 8.6.14(storybook@8.6.14(prettier@3.6.1))
@@ -29233,6 +29221,11 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
+  '@storybook/icons@1.4.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+
   '@storybook/manager-api@8.6.14(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
       storybook: 8.6.14(prettier@3.6.1)
@@ -29241,10 +29234,10 @@ snapshots:
     dependencies:
       storybook: 8.6.14(prettier@3.6.1)
 
-  '@storybook/react-dom-shim@8.6.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.14(prettier@3.6.1))':
+  '@storybook/react-dom-shim@8.6.14(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
       storybook: 8.6.14(prettier@3.6.1)
 
   '@storybook/theming@8.6.14(storybook@8.6.14(prettier@3.6.1))':
@@ -29799,12 +29792,12 @@ snapshots:
       '@types/react': 19.1.12
       '@types/react-dom': 19.1.9(@types/react@19.1.12)
 
-  '@testing-library/react@16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.1.9(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.1(react@19.1.0))(react@19.1.0)':
+  '@testing-library/react@16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.1.9(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@babel/runtime': 7.28.3
       '@testing-library/dom': 10.4.1
-      react: 19.1.0
-      react-dom: 19.1.1(react@19.1.0)
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
     optionalDependencies:
       '@types/react': 19.1.8
       '@types/react-dom': 19.1.9(@types/react@19.1.8)
@@ -41866,11 +41859,6 @@ snapshots:
       scheduler: 0.25.0-rc-941e1b4a-20240729
 
   react-dom@19.1.0(react@19.1.0):
-    dependencies:
-      react: 19.1.0
-      scheduler: 0.26.0
-
-  react-dom@19.1.1(react@19.1.0):
     dependencies:
       react: 19.1.0
       scheduler: 0.26.0
