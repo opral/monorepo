@@ -43,6 +43,7 @@ export function applyMaterializeStateSchema(
                 json_extract(v.snapshot_content,'$.commit_id')
             FROM change v
             WHERE v.schema_key = 'lix_version'
+              AND json_extract(v.snapshot_content,'$.commit_id') IS NOT NULL
         ),
         -- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
         non_tips AS (
@@ -110,7 +111,7 @@ export function applyMaterializeStateSchema(
     lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
         WITH commit_targets AS (
-			-- Primary path: change_ids embedded in commit snapshot
+			-- Only path: change_ids embedded in commit snapshot
 			SELECT 
 				cg.version_id,
 				cg.commit_id,
@@ -120,21 +121,6 @@ export function applyMaterializeStateSchema(
 			JOIN change cmt ON cmt.entity_id = cg.commit_id 
 				AND cmt.schema_key = 'lix_commit'
 			JOIN json_each(json_extract(cmt.snapshot_content,'$.change_ids')) j
-			
-			UNION ALL
-			
-			-- Fallback path for legacy commits (no change_ids): join CSE by change_set_id
-			SELECT 
-				cg.version_id,
-				cg.commit_id,
-				cg.depth,
-				json_extract(cse.snapshot_content,'$.change_id') AS target_change_id
-			FROM internal_materialization_commit_graph cg
-			JOIN change cmt ON cmt.entity_id = cg.commit_id 
-				AND cmt.schema_key = 'lix_commit'
-			JOIN change cse ON cse.schema_key = 'lix_change_set_element'
-				AND json_extract(cse.snapshot_content,'$.change_set_id') = json_extract(cmt.snapshot_content,'$.change_set_id')
-			WHERE json_type(json_extract(cmt.snapshot_content,'$.change_ids')) IS NULL
     ),
     commit_changes AS (
         SELECT 

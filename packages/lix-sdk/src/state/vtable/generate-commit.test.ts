@@ -12,7 +12,7 @@ function groupBySchema(rows: any[]): Map<string, any[]> {
 	return m;
 }
 
-test("scenario 1: 1 key_value on active (with author) — 10-change model", async () => {
+test("scenario 1: 1 key_value on active (with author) — drop dual commit", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -76,44 +76,43 @@ test("scenario 1: 1 key_value on active (with author) — 10-change model", asyn
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
-  // Domain + Metadata rows (no commit_edge change rows in Step 2)
-  expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
-  expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
-  expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
-  expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
+	// Domain + Metadata rows (no commit_edge change rows)
+	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
+	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
 	// Change set elements are derived in Step 1 (no change rows)
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
 	);
-    // Step 1: commit snapshot includes change_ids for derivation
-    expect(typeof commits[0].change_set_id).toBe("string");
-    expect(commits[0].version_id).toBeUndefined();
-    expect(Array.isArray(commits[0].change_ids)).toBe(true);
-    expect(commits[0].author_account_ids).toBeUndefined();
+	// Step 1: commit snapshot includes change_ids for derivation
+	expect(typeof commits[0].change_set_id).toBe("string");
+	expect(commits[0].version_id).toBeUndefined();
+	expect(Array.isArray(commits[0].change_ids)).toBe(true);
+	expect(commits[0].author_account_ids).toBeUndefined();
 
 	// Materialized state (cache)
 	// Synthesized: domain-only CSE; domain rows are included for the commit's version
 	const bySchemaMat = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchemaMat.get("lix_change_author")?.length ?? 0).toBe(1);
-	expect(bySchemaMat.get("lix_commit")?.length ?? 0).toBe(2);
-	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(2);
-	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(2);
-	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(2);
-  // Edges no longer contribute to meta CSE; expect 8
-  expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(8);
+	expect(bySchemaMat.get("lix_commit")?.length ?? 0).toBe(1);
+	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(0);
+	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(1);
+	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(1);
+	// Only domain CSE is materialized
+	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(5);
 
-  // Totals per Step 2 (edges derived): -2 change rows
-  expect(res.changes).toHaveLength(8);
-  // materialized decreases by removed CSE-of-edge meta (−2)
-  expect(res.materializedState).toHaveLength(18);
+	// Totals under drop dual commit
+	expect(res.changes).toHaveLength(5);
+	expect(res.materializedState).toHaveLength(10);
 });
 
-test("scenario 2: 1 key_value on global (with author)", async () => {
+test("scenario 2: 1 key_value on global (with author) — drop dual commit", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -162,42 +161,41 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
-  // Only global participates (no commit_edge change rows in Step 2)
-  expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
-  expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
-  expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
+	// Only global participates
+	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
+	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
 	// Step 1: no CSE change rows
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
 	const commit = JSON.parse(
 		(bySchema.get("lix_commit")![0] as any).snapshot_content!
 	);
-  // Step 1: commit snapshot includes change_ids for derivation
-  expect(typeof commit.change_set_id).toBe("string");
-  expect(commit.version_id).toBeUndefined();
-  expect(Array.isArray(commit.change_ids)).toBe(true);
-  expect(commit.author_account_ids).toBeUndefined();
+	// Step 1: commit snapshot includes change_ids for derivation
+	expect(typeof commit.change_set_id).toBe("string");
+	expect(commit.version_id).toBeUndefined();
+	expect(Array.isArray(commit.change_ids)).toBe(true);
+	expect(commit.author_account_ids).toBeUndefined();
 
 	const bySchemaMat2 = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat2.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_change_author")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_commit")?.length ?? 0).toBe(1);
-	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat2.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(1);
-  // Edges no longer contribute to meta CSE; expect 5
-  expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(5);
+	// Only domain CSE is materialized
+	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(5);
 
-  // Totals under Step 2 (edges derived)
-  expect(res.changes).toHaveLength(5);
-  // materialized decreases by removed CSE-of-edge meta (−1)
-  expect(res.materializedState).toHaveLength(11);
+	// Totals under drop dual commit
+	expect(res.changes).toHaveLength(5);
+	expect(res.materializedState).toHaveLength(10);
 });
 
-test("scenario 3: 2 key_values (active + global), each with both authors", async () => {
+test("scenario 3: 2 key_values (active + global), each with both authors — drop dual commit", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -275,7 +273,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(4);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
-  expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
+	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
 	// Step 1: no CSE change rows
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
@@ -283,26 +281,25 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	const commits = (bySchema.get("lix_commit") || []).map((c: any) =>
 		JSON.parse(c.snapshot_content!)
 	);
-  // Step 1: commit snapshot includes change_ids for derivation
-  commits.forEach((c: any) => {
-    expect(typeof c.change_set_id).toBe("string");
-    expect(c.version_id).toBeUndefined();
-    expect(Array.isArray(c.change_ids)).toBe(true);
-    expect(c.author_account_ids).toBeUndefined();
-  });
+	// Step 1: commit snapshot includes change_ids for derivation
+	commits.forEach((c: any) => {
+		expect(typeof c.change_set_id).toBe("string");
+		expect(c.version_id).toBeUndefined();
+		expect(Array.isArray(c.change_ids)).toBe(true);
+		expect(c.author_account_ids).toBeUndefined();
+	});
 
 	const bySchemaMat3 = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat3.get("lix_key_value")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_change_author")?.length ?? 0).toBe(4);
 	expect(bySchemaMat3.get("lix_commit")?.length ?? 0).toBe(2);
-	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(2);
+	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat3.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(2);
-  // Edges no longer contribute to meta CSE; expect 12
-  expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(12);
+	// Only domain CSEs are materialized
+	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(12);
 
-  // Totals under Step 2 (edges derived)
-  expect(res.changes).toHaveLength(12);
-  // materialized decreases by removed CSE-of-edge meta (−2)
-  expect(res.materializedState).toHaveLength(26);
+	// Totals under drop dual commit
+	expect(res.changes).toHaveLength(12);
+	expect(res.materializedState).toHaveLength(24);
 });

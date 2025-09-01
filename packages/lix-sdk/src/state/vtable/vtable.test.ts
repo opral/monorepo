@@ -386,6 +386,7 @@ simulationTest(
 		expectDeterministic(stateAfterDelete).toHaveLength(0);
 	}
 );
+
 // see https://github.com/opral/lix-sdk/issues/359
 simulationTest(
 	"commit_id in state should be from the real auto-commit, not the working commit",
@@ -440,9 +441,8 @@ simulationTest(
 			.select("id")
 			.execute();
 
-		// two commits for the global and active version
 		expectDeterministic(commitsAfterInsert.length).toBe(
-			commitsBeforeInsert.length + 2
+			commitsBeforeInsert.length + 1
 		);
 
 		const activeVersionAfterInsert = await lix.db
@@ -2848,7 +2848,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state is separated by version via internal_state_vtable",
+	"state is separated by version",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [

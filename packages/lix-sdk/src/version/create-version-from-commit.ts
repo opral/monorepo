@@ -3,7 +3,7 @@ import type { LixCommit } from "../commit/schema.js";
 import type { LixVersion } from "./schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { nanoId } from "../deterministic/index.js";
+import { nanoId, generateHumanId } from "../deterministic/index.js";
 
 /**
  * Creates a new version that starts at a specific commit.
@@ -72,25 +72,30 @@ export async function createVersionFromCommit(args: {
 					: args.inheritsFrom.id;
 
 		const versionId = args.id ?? nanoId({ lix: args.lix });
+		const versionName = args.name ?? generateHumanId({ lix: args.lix });
 
 		// Insert the new version pointing to the provided commit
 		await trx
 			.insertInto("version")
 			.values({
 				id: versionId,
-				name: args.name,
+				name: versionName,
 				commit_id: args.commit.id,
 				working_commit_id: workingCommitId,
 				inherits_from_version_id,
 			})
 			.execute();
 
-		const newVersion = await trx
-			.selectFrom("version")
-			.selectAll()
-			.where("id", "=", versionId)
-			.executeTakeFirstOrThrow();
-
+		// Return the just-created version without an additional SELECT to avoid
+		// triggering cache clears under cache-miss simulation.
+		const newVersion = {
+			id: versionId,
+			name: versionName,
+			commit_id: args.commit.id,
+			working_commit_id: workingCommitId,
+			inherits_from_version_id,
+			hidden: false,
+		} as LixVersion;
 		return newVersion;
 	};
 

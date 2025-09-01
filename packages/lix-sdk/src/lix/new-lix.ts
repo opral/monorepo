@@ -390,7 +390,7 @@ function createBootstrapChanges(args: {
 	const mainCommitId = args.generateUuid();
 
 	// Create commit for global version
-	changes.push({
+	const globalCommitChange = {
 		id: args.generateUuid(),
 		entity_id: globalCommitId,
 		schema_key: "lix_commit",
@@ -403,10 +403,11 @@ function createBootstrapChanges(args: {
 			change_set_id: initialGlobalVersionChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(globalCommitChange);
 
 	// Create commit for main version
-	changes.push({
+	const mainCommitChange = {
 		id: args.generateUuid(),
 		entity_id: mainCommitId,
 		schema_key: "lix_commit",
@@ -419,10 +420,11 @@ function createBootstrapChanges(args: {
 			change_set_id: initialChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(mainCommitChange);
 
 	// Create working commits for both versions
-	changes.push({
+	const globalWorkingCommitChange = {
 		id: args.generateUuid(),
 		entity_id: globalWorkingCommitId,
 		schema_key: "lix_commit",
@@ -435,9 +437,10 @@ function createBootstrapChanges(args: {
 			change_set_id: initialGlobalVersionWorkingChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(globalWorkingCommitChange);
 
-	changes.push({
+	const mainWorkingCommitChange = {
 		id: args.generateUuid(),
 		entity_id: mainWorkingCommitId,
 		schema_key: "lix_commit",
@@ -450,7 +453,8 @@ function createBootstrapChanges(args: {
 			change_set_id: initialWorkingChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(mainWorkingCommitChange);
 
 	// Create global version
 	changes.push({
@@ -658,6 +662,31 @@ function createBootstrapChanges(args: {
 		changes.push(changeSetElementChange);
 		changeSetElementChanges.push(changeSetElementChange);
 	}
+
+	// Map change_set_id -> list of change_ids so commits reference their members
+	const changeIdsByChangeSet = new Map<string, string[]>();
+	for (const cse of changeSetElementChanges) {
+		const snap = cse.snapshot_content as any;
+		const cs = snap.change_set_id as string;
+		const cid = snap.change_id as string;
+		if (!cs || !cid) continue;
+		const list = changeIdsByChangeSet.get(cs) ?? [];
+		list.push(cid);
+		changeIdsByChangeSet.set(cs, list);
+	}
+
+	// Assign change_ids (and empty parent_commit_ids) to initial commits
+	const setCommitMembers = (commitChange: BootstrapChange) => {
+		const csId = (commitChange.snapshot_content as any).change_set_id as string;
+		const ids = changeIdsByChangeSet.get(csId) ?? [];
+		(commitChange.snapshot_content as any).change_ids = ids;
+		(commitChange.snapshot_content as any).parent_commit_ids = [];
+	};
+
+	setCommitMembers(globalCommitChange);
+	setCommitMembers(mainCommitChange);
+	setCommitMembers(globalWorkingCommitChange);
+	setCommitMembers(mainWorkingCommitChange);
 
 	// TODO evaluate if we can come up with a better concept to avoid meta changes (if even desired)
 	//

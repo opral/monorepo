@@ -502,9 +502,10 @@ export function commit(args: {
 			JSON.parse(rows[0].snapshot_content) as LixVersion
 		);
 	}
+	// Use resolved version snapshots to derive parent_commit_ids
 	for (const [vid, snap] of versionSnapshots) {
 		versionsInput.set(vid, {
-			parent_commit_ids: [snap.commit_id],
+			parent_commit_ids: snap.commit_id ? [snap.commit_id] : [],
 			snapshot: snap,
 		});
 	}
