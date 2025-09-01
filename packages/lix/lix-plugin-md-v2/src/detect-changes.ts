@@ -46,7 +46,7 @@ export const detectChanges = (args: {
 	for (const row of beforeState) {
 		if (
 			typeof row.schema_key === "string" &&
-			row.schema_key.startsWith("markdown_wc_ast_") &&
+			row.schema_key.startsWith("markdown_wc_") &&
 			row.schema_key !== AstSchemas.RootSchema["x-lix-key"] &&
 			row.schema_key !== AstSchemas.RootOrderSchema["x-lix-key"]
 		) {

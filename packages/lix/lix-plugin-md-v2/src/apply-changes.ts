@@ -23,7 +23,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 		if (
 			ch.schema_key &&
 			typeof ch.schema_key === "string" &&
-			ch.schema_key.startsWith("markdown_wc_ast_") &&
+			ch.schema_key.startsWith("markdown_wc_") &&
 			ch.schema_key !== (AstSchemas.RootOrderSchema as any)["x-lix-key"]
 		) {
 			const prev = latestById.get(ch.entity_id);

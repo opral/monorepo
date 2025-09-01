@@ -15,7 +15,7 @@ export type BaseNode = {
 type WithBase<T> = Omit<T, "children" | "position" | "data"> & BaseNode
 
 export const RootSchema = {
-	"x-lix-key": "markdown_wc_ast_root",
+	"x-lix-key": "markdown_wc_root",
 	"x-lix-version": "1.0",
 	description: "Markdown AST root node (mdast-shaped). Holds all top-level children.",
 	type: "object",
@@ -31,7 +31,7 @@ export const RootSchema = {
 
 // Root order document used for state snapshots in block-based persistence
 export const RootOrderSchema = {
-	"x-lix-key": "markdown_wc_ast_root_order",
+	"x-lix-key": "markdown_wc_root_order",
 	"x-lix-version": "1.0",
 	description:
 		"Top-level block order for a Markdown document. Stores an array of block ids (node.data.id) to reconstruct the document order without reparsing.",
@@ -45,7 +45,7 @@ export const RootOrderSchema = {
 
 export type ParagraphNode = WithBase<FromSchema<typeof ParagraphSchema>>
 export const ParagraphSchema = {
-	"x-lix-key": "markdown_wc_ast_paragraph",
+	"x-lix-key": "markdown_wc_paragraph",
 	"x-lix-version": "1.0",
 	description: "Markdown paragraph block.",
 	type: "object",
@@ -60,7 +60,7 @@ export const ParagraphSchema = {
 
 export type HeadingNode = WithBase<FromSchema<typeof HeadingSchema>>
 export const HeadingSchema = {
-	"x-lix-key": "markdown_wc_ast_heading",
+	"x-lix-key": "markdown_wc_heading",
 	"x-lix-version": "1.0",
 	description: "Markdown heading block (depth 1–6).",
 	type: "object",
@@ -76,7 +76,7 @@ export const HeadingSchema = {
 
 export type ListNode = WithBase<FromSchema<typeof ListSchema>>
 export const ListSchema = {
-	"x-lix-key": "markdown_wc_ast_list",
+	"x-lix-key": "markdown_wc_list",
 	"x-lix-version": "1.0",
 	description: "Markdown list block (ordered or unordered).",
 	type: "object",
@@ -94,7 +94,7 @@ export const ListSchema = {
 
 export type ListItemNode = WithBase<FromSchema<typeof ListItemSchema>>
 export const ListItemSchema = {
-	"x-lix-key": "markdown_wc_ast_list_item",
+	"x-lix-key": "markdown_wc_list_item",
 	"x-lix-version": "1.0",
 	description: "Markdown list item.",
 	type: "object",
@@ -111,7 +111,7 @@ export const ListItemSchema = {
 
 export type BlockquoteNode = WithBase<FromSchema<typeof BlockquoteSchema>>
 export const BlockquoteSchema = {
-	"x-lix-key": "markdown_wc_ast_blockquote",
+	"x-lix-key": "markdown_wc_blockquote",
 	"x-lix-version": "1.0",
 	description: "Markdown blockquote block.",
 	type: "object",
@@ -126,7 +126,7 @@ export const BlockquoteSchema = {
 
 export type CodeNode = WithBase<FromSchema<typeof CodeSchema>>
 export const CodeSchema = {
-	"x-lix-key": "markdown_wc_ast_code",
+	"x-lix-key": "markdown_wc_code",
 	"x-lix-version": "1.0",
 	description: "Markdown fenced code block.",
 	type: "object",
@@ -144,7 +144,7 @@ export const CodeSchema = {
 
 export type InlineCodeNode = WithBase<FromSchema<typeof InlineCodeSchema>>
 export const InlineCodeSchema = {
-	"x-lix-key": "markdown_wc_ast_inline_code",
+	"x-lix-key": "markdown_wc_inline_code",
 	"x-lix-version": "1.0",
 	description: "Inline code span.",
 	type: "object",
@@ -160,7 +160,7 @@ export const InlineCodeSchema = {
 
 export type ThematicBreakNode = WithBase<FromSchema<typeof ThematicBreakSchema>>
 export const ThematicBreakSchema = {
-	"x-lix-key": "markdown_wc_ast_thematic_break",
+	"x-lix-key": "markdown_wc_thematic_break",
 	"x-lix-version": "1.0",
 	description: "Horizontal rule (thematic break).",
 	type: "object",
@@ -175,7 +175,7 @@ export const ThematicBreakSchema = {
 
 export type BreakNode = WithBase<FromSchema<typeof BreakSchema>>
 export const BreakSchema = {
-	"x-lix-key": "markdown_wc_ast_break",
+	"x-lix-key": "markdown_wc_break",
 	"x-lix-version": "1.0",
 	description: "Hard line break.",
 	type: "object",
@@ -190,7 +190,7 @@ export const BreakSchema = {
 
 export type HtmlNode = WithBase<FromSchema<typeof HtmlSchema>>
 export const HtmlSchema = {
-	"x-lix-key": "markdown_wc_ast_html",
+	"x-lix-key": "markdown_wc_html",
 	"x-lix-version": "1.0",
 	description: "Raw HTML block.",
 	type: "object",
@@ -206,7 +206,7 @@ export const HtmlSchema = {
 
 export type ImageNode = WithBase<FromSchema<typeof ImageSchema>>
 export const ImageSchema = {
-	"x-lix-key": "markdown_wc_ast_image",
+	"x-lix-key": "markdown_wc_image",
 	"x-lix-version": "1.0",
 	description: "Image node.",
 	type: "object",
@@ -224,7 +224,7 @@ export const ImageSchema = {
 
 export type LinkNode = WithBase<FromSchema<typeof LinkSchema>>
 export const LinkSchema = {
-	"x-lix-key": "markdown_wc_ast_link",
+	"x-lix-key": "markdown_wc_link",
 	"x-lix-version": "1.0",
 	description: "Link node containing inline children.",
 	type: "object",
@@ -241,7 +241,7 @@ export const LinkSchema = {
 
 export type EmphasisNode = WithBase<FromSchema<typeof EmphasisSchema>>
 export const EmphasisSchema = {
-	"x-lix-key": "markdown_wc_ast_emphasis",
+	"x-lix-key": "markdown_wc_emphasis",
 	"x-lix-version": "1.0",
 	description: "Emphasis (italic) inline node.",
 	type: "object",
@@ -255,7 +255,7 @@ export const EmphasisSchema = {
 } as const
 export type StrongNode = WithBase<FromSchema<typeof StrongSchema>>
 export const StrongSchema = {
-	"x-lix-key": "markdown_wc_ast_strong",
+	"x-lix-key": "markdown_wc_strong",
 	"x-lix-version": "1.0",
 	description: "Strong (bold) inline node.",
 	type: "object",
@@ -269,7 +269,7 @@ export const StrongSchema = {
 } as const
 export type DeleteNode = WithBase<FromSchema<typeof DeleteSchema>>
 export const DeleteSchema = {
-	"x-lix-key": "markdown_wc_ast_delete",
+	"x-lix-key": "markdown_wc_delete",
 	"x-lix-version": "1.0",
 	description: "Delete/Strikethrough inline node.",
 	type: "object",
@@ -284,7 +284,7 @@ export const DeleteSchema = {
 
 export type TableNode = WithBase<FromSchema<typeof TableSchema>>
 export const TableSchema = {
-	"x-lix-key": "markdown_wc_ast_table",
+	"x-lix-key": "markdown_wc_table",
 	"x-lix-version": "1.0",
 	description: "Markdown table block (GFM).",
 	type: "object",
@@ -302,7 +302,7 @@ export const TableSchema = {
 } as const
 export type TableRowNode = WithBase<FromSchema<typeof TableRowSchema>>
 export const TableRowSchema = {
-	"x-lix-key": "markdown_wc_ast_table_row",
+	"x-lix-key": "markdown_wc_table_row",
 	"x-lix-version": "1.0",
 	description: "Table row (GFM).",
 	type: "object",
@@ -316,7 +316,7 @@ export const TableRowSchema = {
 } as const
 export type TableCellNode = WithBase<FromSchema<typeof TableCellSchema>>
 export const TableCellSchema = {
-	"x-lix-key": "markdown_wc_ast_table_cell",
+	"x-lix-key": "markdown_wc_table_cell",
 	"x-lix-version": "1.0",
 	description: "Table cell (GFM).",
 	type: "object",
@@ -331,7 +331,7 @@ export const TableCellSchema = {
 
 export type TextNode = WithBase<FromSchema<typeof TextSchema>>
 export const TextSchema = {
-	"x-lix-key": "markdown_wc_ast_text",
+	"x-lix-key": "markdown_wc_text",
 	"x-lix-version": "1.0",
 	description: "Plain text leaf node.",
 	type: "object",
@@ -347,7 +347,7 @@ export const TextSchema = {
 
 export type YamlNode = WithBase<FromSchema<typeof YamlSchema>>
 export const YamlSchema = {
-	"x-lix-key": "markdown_wc_ast_yaml",
+	"x-lix-key": "markdown_wc_yaml",
 	"x-lix-version": "1.0",
 	description: "YAML frontmatter block.",
 	type: "object",

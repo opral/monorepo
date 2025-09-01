@@ -6,7 +6,7 @@ import { AstSchemas } from "@opral/markdown-wc";
  *
  * This function reconstructs the current document AST using the markdown plugin’s
  * persisted snapshots in the `state` table. It reads the root order entity
- * (`markdown_wc_ast_root_order`) to determine the top‑level block ordering and then
+ * (`markdown_wc_root_order`) to determine the top‑level block ordering and then
  * fetches each block’s latest snapshot. The returned AST preserves each block’s
  * `data.id`, ensuring stable identities across editor (re)mounts and renders.
  *
