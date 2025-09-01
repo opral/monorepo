@@ -1,11 +1,15 @@
 import type { LixChange } from "../change/schema.js";
 import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { SelectQueryBuilder } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 // Query builder + executor are provided to plugins.
+
+export type LixReadonly = {
+	db: { selectFrom: Lix["db"]["selectFrom"] };
+	sqlite: Lix["sqlite"];
+};
 
 export type LixPlugin = {
 	key: string;
@@ -30,62 +34,39 @@ export type LixPlugin = {
 	detectChanges?: ({
 		before,
 		after,
-		query,
-		executeSync,
+		lix,
 	}: {
 		before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 		after: Omit<LixFile, "data"> & { data: Uint8Array };
 		/**
-		 * Returns a typed Kysely query builder for inspecting Lix state during change detection.
+		 * Readonly Lix context exposing only `db.selectFrom` for typed queries.
 		 *
-		 * Why this exists
-		 * - Detecting changes often requires reading current state to maintain stable entity ids,
-		 *   compare snapshots, or infer ordering without re‑parsing files.
-		 * - Exposes the real Kysely builder so you can compose select/where/order like usual.
-		 * - Execution is separate on purpose — call `executeSync` to run synchronously inside detect.
+		 * Detecting changes can require reading current state to preserve stable entity ids,
+		 * compare snapshots, or infer ordering without reparsing files.
 		 *
-		 * What it returns
-		 * - A builder for the `state` view (scoped to the current run's version context by the host).
-		 * - You decide the projection via `.select(...)`.
+		 * How to use (with synchronous execution)
+		 * - Pair the typed builder with the SDK helper `executeSync` to run queries synchronously
+		 *   inside detectChanges and receive JSON‑parsed rows (matching the async driver behavior).
 		 *
-		 * Example (stable id reuse)
+		 * Example (reuse stable ids)
 		 * ```ts
-		 * detectChanges: ({ after, query, executeSync }) => {
-		 *   const q = query!; // host provides in real runs
-		 *   const exec = executeSync!;
-		 *   const qb = q('state')
+		 * import { executeSync } from '@lix-js/sdk'
+		 *
+		 * detectChanges: ({ after, lix }) => {
+		 *   const qb = lix!.db
+		 *     .selectFrom('state')
 		 *     .where('file_id', '=', after.id)
 		 *     .where('plugin_key', '=', 'plugin_md')
-		 *     .select(['entity_id', 'schema_key', 'snapshot_content']);
-		 *   const rows = exec(qb);
-		 *   const latestById = new Map(rows.map(r => [r.entity_id, r]));
-		 *   // ...reuse entity ids when emitting changes...
-		 *   return detected;
+		 *     .select(['entity_id', 'schema_key', 'snapshot_content'])
+		 *
+		 *   const rows = executeSync({ lix: (lix as any), query: qb })
+		 *   const latestById = new Map(rows.map(r => [r.entity_id, r]))
+		 *   // ...use latestById to assign/reuse ids in emitted changes...
+		 *   return detected
 		 * }
 		 * ```
 		 */
-		query?: (
-			table: "state"
-		) => SelectQueryBuilder<LixDatabaseSchema, "state", any>;
-		/**
-		 * Executes a Kysely builder synchronously with JSON parsing identical to Kysely's async path.
-		 *
-		 * Why separate from the builder
-		 * - Keeps the builder type identical to `lix.db.selectFrom(...)`, so your editor types stay
-		 *   accurate and future `await qb.execute()` adoption is seamless.
-		 *
-		 * Behavior
-		 * - Compiles the builder and runs it synchronously.
-		 * - Parses JSON-like columns (e.g., `snapshot_content`, `value`) so results match what you
-		 *   would get from the async driver.
-		 *
-		 * Example
-		 * ```ts
-		 * const qb = query!('state').where('file_id', '=', after.id).select(['entity_id', 'snapshot_content'])
-		 * const rows = executeSync!(qb)
-		 * ```
-		 */
-		executeSync?: (qb: any) => any[];
+		lix?: LixReadonly;
 	}) => DetectedChange[];
 	applyChanges?: ({
 		file,

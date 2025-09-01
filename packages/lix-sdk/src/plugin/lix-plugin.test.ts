@@ -2,15 +2,17 @@ import { describe, test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixPlugin } from "./lix-plugin.js";
 import { handleFileInsert } from "../file/file-handlers.js";
+import { executeSync } from "../database/execute-sync.js";
 
 describe("detectChanges()", () => {
 	test("exposes query and executeSync", async () => {
 		const plugin: LixPlugin = {
 			key: "plugin_query_test",
 			detectChangesGlob: "*",
-			detectChanges: ({ after, query, executeSync }) => {
-				// Build a typed Kysely query builder from the sync query API
-				const qb = query!("state")
+			detectChanges: ({ after, lix }) => {
+				// Build a typed Kysely query builder via lix
+				const qb = lix!.db
+					.selectFrom("state")
 					.where("file_id", "=", after.id)
 					.select([
 						"entity_id",
@@ -21,7 +23,7 @@ describe("detectChanges()", () => {
 					]);
 
 				// Execute synchronously with JSON parsing compatibility
-				const rows = executeSync!(qb);
+				const rows = executeSync({ lix: lix!, query: qb });
 
 				expect(Array.isArray(rows)).toBe(true);
 				expect(rows.length).toBeGreaterThan(0);

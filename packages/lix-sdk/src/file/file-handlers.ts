@@ -1,5 +1,4 @@
 import { executeSync } from "../database/execute-sync.js";
-import { createQuery, executeQuerySync } from "../plugin/query.js";
 import type { LixFile } from "./schema.js";
 import { LixFileDescriptorSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
@@ -101,8 +100,7 @@ export function handleFileInsert(args: {
 		// Detect changes with the plugin
 		const detectedChanges = plugin.detectChanges({
 			after: args.file,
-			query: createQuery({ lix: args.lix }),
-			executeSync: (qb: any) => executeQuerySync({ lix: args.lix, query: qb }),
+			lix: args.lix,
 		});
 
 		if (detectedChanges.length > 0) {
@@ -291,9 +289,7 @@ export function handleFileUpdate(args: {
 			const detectedChanges = plugin.detectChanges({
 				before: currentFile,
 				after: args.file,
-				query: createQuery({ lix: args.lix }),
-				executeSync: (qb: any) =>
-					executeQuerySync({ lix: args.lix, query: qb }),
+				lix: args.lix,
 			});
 
 			if (detectedChanges.length > 0) {
@@ -354,9 +350,7 @@ export function handleFileUpdate(args: {
 				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 					before: currentFile,
 					after: args.file,
-					query: createQuery({ lix: args.lix }),
-					executeSync: (qb: any) =>
-						executeQuerySync({ lix: args.lix, query: qb }),
+					lix: args.lix,
 				});
 
 				if (detectedChanges.length > 0) {
