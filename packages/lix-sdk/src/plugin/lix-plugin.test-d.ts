@@ -62,7 +62,7 @@ test("queryStateSync resembles kysely query builder", async () => {
 	const plugin: LixPlugin = {
 		key: "plugin1",
 		detectChanges: ({ query }) => {
-			const stateQb = query("state").where("file_id", "=", "123");
+			const stateQb = query!("state").where("file_id", "=", "123");
 			const realQb = lix.db.selectFrom("state").where("file_id", "=", "123");
 
 			assertType<typeof stateQb>(realQb);

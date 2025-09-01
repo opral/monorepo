@@ -10,7 +10,7 @@ describe("detectChanges()", () => {
 			detectChangesGlob: "*",
 			detectChanges: ({ after, query, executeSync }) => {
 				// Build a typed Kysely query builder from the sync query API
-				const qb = query("state")
+				const qb = query!("state")
 					.where("file_id", "=", after.id)
 					.select([
 						"entity_id",
@@ -21,7 +21,7 @@ describe("detectChanges()", () => {
 					]);
 
 				// Execute synchronously with JSON parsing compatibility
-				const rows = executeSync(qb);
+				const rows = executeSync!(qb);
 
 				expect(Array.isArray(rows)).toBe(true);
 				expect(rows.length).toBeGreaterThan(0);
