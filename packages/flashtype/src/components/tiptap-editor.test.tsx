@@ -125,6 +125,7 @@ test("persists state changes on edit (paragraph append)", async () => {
 
 	// 6) Wait for debounce and state write (poll until a paragraph row appears)
 	const paraKey = AstSchemas.schemasByType.paragraph["x-lix-key"];
+
 	await waitFor(async () => {
 		const rows = await lix.db
 			.selectFrom("state")
@@ -132,6 +133,7 @@ test("persists state changes on edit (paragraph append)", async () => {
 			.where("schema_key", "=", paraKey)
 			.select(["entity_id", "snapshot_content"])
 			.execute();
+
 		const hasNewParagraph = rows.some(
 			(r: any) =>
 				Array.isArray(r.snapshot_content?.children) &&
@@ -263,22 +265,21 @@ test("debounces rapid updates and persists once", async () => {
 	});
 
 	// Perform multiple rapid edits (simulate typing bursts)
+	// Replace existing text each time rather than appending new paragraphs
 	// Subscribe to next update from the burst of edits
 	const nextBurstUpdate = awaitNextEditorUpdate(editorRef);
 	await act(async () => {
-		const end = editorRef.state.doc.content.size;
-		editorRef.commands.insertContentAt(end, {
-			type: "paragraph",
-			content: [{ type: "text", text: "One" }],
-		});
-		editorRef.commands.insertContentAt(editorRef.state.doc.content.size, {
-			type: "paragraph",
-			content: [{ type: "text", text: "Two" }],
-		});
-		editorRef.commands.insertContentAt(editorRef.state.doc.content.size, {
-			type: "paragraph",
-			content: [{ type: "text", text: "Three" }],
-		});
+		const textFrom = 1;
+		const textTo = editorRef.state.doc.content.size - 1;
+		editorRef.commands.insertContentAt({ from: textFrom, to: textTo }, "One");
+		editorRef.commands.insertContentAt(
+			{ from: textFrom, to: editorRef.state.doc.content.size - 1 },
+			"Two",
+		);
+		editorRef.commands.insertContentAt(
+			{ from: textFrom, to: editorRef.state.doc.content.size - 1 },
+			"Three",
+		);
 	});
 	// Await an update emitted by the burst (at least one will fire)
 	await nextBurstUpdate;
@@ -302,9 +303,7 @@ test("debounces rapid updates and persists once", async () => {
 		if (!hasThree) throw new Error("final debounced change not persisted yet");
 	});
 
-	// Ensure debounced persist produced final state; count verification is inferred via history below
-
-	// Verify final state reflects only the last change content
+	// Ensure debounced persist produced final state; expect only one paragraph row
 	const paraKey = AstSchemas.schemasByType.paragraph["x-lix-key"];
 	const rows = await lix.db
 		.selectFrom("state")
@@ -344,9 +343,11 @@ test("debounces rapid updates and persists once", async () => {
 				.limit(1),
 		)
 		.where("schema_key", "=", paraKey)
+		.where("entity_id", "=", rows[0].entity_id as any)
 		.orderBy("depth", "asc")
 		.execute();
 
+	// We expect the debounced persist to save only "Three" on top of the original "Hello"
 	expect(history).toEqual([
 		expect.objectContaining({
 			file_id: fileId,

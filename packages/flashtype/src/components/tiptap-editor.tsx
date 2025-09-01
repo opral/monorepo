@@ -46,48 +46,17 @@ export function TipTapEditor({
 	const inFlightRef = React.useRef(false);
 	const pendingRef = React.useRef(false);
 
-	const PERSIST_DEBOUNCE_MS = Math.max(
-		0,
-		typeof persistDebounceMs === "number" ? persistDebounceMs : 200,
-	);
+	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
 	// Helpers kept local for minimal surface and fresh closures per render
-	function partitionTopLevel(children: any[]) {
-		const nonParagraphs: any[] = [];
-		let lastParagraph: any | undefined = undefined;
-		for (const node of children) {
-			if (node?.type === "paragraph") lastParagraph = node;
-			else nonParagraphs.push(node);
-		}
-		return { nonParagraphs, lastParagraph };
-	}
-
-	function ensureNodeIds(nodes: any[]): string[] {
+	function ensureTopLevelIds(children: any[]): string[] {
 		const order: string[] = [];
-		for (const node of nodes) {
+		for (const node of children) {
 			node.data = node.data || {};
 			if (!node.data.id) node.data.id = nanoId({ lix, length: 10 });
 			order.push(node.data.id as string);
 		}
 		return order;
-	}
-
-	async function resolveParagraphEntityId(
-		fileId: string,
-		lastParagraph: any | undefined,
-	) {
-		const paraKey = (AstSchemas.schemasByType as any).paragraph["x-lix-key"] as string;
-		const existingPara = await lix.db
-			.selectFrom("state")
-			.where("file_id", "=", fileId as any)
-			.where("schema_key", "=", paraKey)
-			.select(["entity_id"]) // small row
-			.executeTakeFirst();
-
-		let id = existingPara?.entity_id as string | undefined;
-		if (!id) id = (lastParagraph as any)?.data?.id as string | undefined;
-		if (!id) id = nanoId({ lix, length: 10 });
-		return id;
 	}
 
 	async function upsertNodes(trx: any, fileId: string, nodes: any[]) {
@@ -130,51 +99,13 @@ export function TipTapEditor({
 		}
 	}
 
-	async function upsertParagraph(
-		trx: any,
-		fileId: string,
-		lastParagraph: any | undefined,
-		entityId: string,
-	) {
-		if (!lastParagraph) return;
-		const schema = (AstSchemas.schemasByType as any)[lastParagraph.type];
-		const schemaKey = schema["x-lix-key"] as string;
-		const schemaVersion = schema["x-lix-version"] as string;
-
-		const existing = await trx
-			.selectFrom("state")
-			.where("file_id", "=", fileId as any)
-			.where("schema_key", "=", schemaKey)
-			.where("entity_id", "=", entityId)
-			.select(["entity_id"]) // small row
-			.executeTakeFirst();
-
-		if (existing) {
-			await trx
-				.updateTable("state")
-				.set({ snapshot_content: lastParagraph as any })
-				.where("file_id", "=", fileId as any)
-				.where("schema_key", "=", schemaKey)
-				.where("entity_id", "=", entityId)
-				.execute();
-		} else {
-			await trx
-				.insertInto("state")
-				.values({
-					entity_id: entityId,
-					file_id: fileId as any,
-					schema_key: schemaKey,
-					schema_version: schemaVersion,
-					plugin_key: mdPlugin.key,
-					snapshot_content: lastParagraph as any,
-				})
-				.execute();
-		}
-	}
+	// Removed paragraph-specific upsert; all top-level nodes are treated uniformly
 
 	async function upsertRootOrder(trx: any, fileId: string, order: string[]) {
 		const rootKey = (AstSchemas.RootOrderSchema as any)["x-lix-key"] as string;
-		const rootVersion = (AstSchemas.RootOrderSchema as any)["x-lix-version"] as string;
+		const rootVersion = (AstSchemas.RootOrderSchema as any)[
+			"x-lix-version"
+		] as string;
 		const existingRoot = await trx
 			.selectFrom("state")
 			.where("file_id", "=", fileId as any)
@@ -218,20 +149,32 @@ export function TipTapEditor({
 			const children: any[] = Array.isArray(latestAst?.children)
 				? (latestAst.children as any[])
 				: [];
-			const { nonParagraphs, lastParagraph } = partitionTopLevel(children);
-			const order = ensureNodeIds(nonParagraphs);
 			const fileId = activeFile!.id as any as string;
-			const paraId = await resolveParagraphEntityId(fileId, lastParagraph);
-			if (lastParagraph) {
-				lastParagraph.data = lastParagraph.data || {};
-				lastParagraph.data.id = paraId;
-			}
-			order.push(paraId);
+			const order = ensureTopLevelIds(children);
 
 			await lix.db.transaction().execute(async (trx) => {
-				await upsertNodes(trx, fileId, nonParagraphs);
-				await upsertParagraph(trx, fileId, lastParagraph, paraId);
+				await upsertNodes(trx, fileId, children);
 				await upsertRootOrder(trx, fileId, order);
+
+				// Remove stale entities that are no longer present in the current root order
+				const keepIds = [...order, "root"];
+				if (keepIds.length > 0) {
+					await trx
+						.deleteFrom("state")
+						.where("file_id", "=", fileId as any)
+						.where("plugin_key", "=", mdPlugin.key)
+						.where("entity_id", "not in", keepIds as any)
+						.execute();
+				} else {
+					// Order is empty: remove all rows for this plugin/file except the 'root' row.
+					// This preserves the RootOrder entity while clearing stale block entities.
+					await trx
+						.deleteFrom("state")
+						.where("file_id", "=", fileId as any)
+						.where("plugin_key", "=", mdPlugin.key)
+						.where("entity_id", "<>", "root")
+						.execute();
+				}
 			});
 		} finally {
 			inFlightRef.current = false;
