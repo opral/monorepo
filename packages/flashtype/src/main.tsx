@@ -8,6 +8,7 @@ import { openLix, OpfsStorage } from "@lix-js/sdk";
 import { initLixInspector } from "@lix-js/inspector";
 import { KeyValueProvider } from "./key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
+import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
 
 const router = createRouter({
 	routeTree,
@@ -20,6 +21,7 @@ declare module "@tanstack/react-router" {
 }
 
 const lix = await openLix({
+	providePlugins: [mdPlugin],
 	storage: new OpfsStorage({ path: "flashtype.lix" }),
 });
 

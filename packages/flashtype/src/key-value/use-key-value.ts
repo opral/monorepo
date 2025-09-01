@@ -63,7 +63,6 @@ export function useKeyValue<K extends string>(
 	const untracked = opts?.untracked ?? d.untracked;
 
 	type T = ValueOf<K>;
-
 	const rows = useQuery((lix) =>
 		selectValue(lix, key, { defaultVersionId, untracked }),
 	);
@@ -129,14 +128,19 @@ async function upsertValue<T>(
 		if (exists) {
 			await lix.db
 				.updateTable("key_value_all")
-				.set({ value })
+				.set({ value, lixcol_untracked: true })
 				.where("key", "=", key)
 				.where("lixcol_version_id", "=", versionId)
 				.execute();
 		} else {
 			await lix.db
 				.insertInto("key_value_all")
-				.values({ key, value, lixcol_version_id: versionId })
+				.values({
+					key,
+					value,
+					lixcol_version_id: versionId,
+					lixcol_untracked: true,
+				})
 				.execute();
 		}
 		return;

@@ -25,7 +25,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { useLix } from "@lix-js/react-utils";
-import { initLixInspector, toggleLixInspector } from "@lix-js/inspector";
+import { toggleLixInspector } from "@lix-js/inspector";
 import { seedMarkdownFiles } from "@/seed";
 import { OpfsStorage } from "@lix-js/sdk";
 

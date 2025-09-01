@@ -50,6 +50,9 @@ export function LeftSidebarFiles() {
 	);
 	const files = useQuery((lix) => selectFiles(lix));
 	const tree = buildTree(files.map((f) => f.path as string));
+	const pathToId = Object.fromEntries(
+		files.map((f) => [f.path as string, f.id as string]),
+	);
 	return (
 		<SidebarMenu>
 			{tree.map((item, i) => (
@@ -58,6 +61,8 @@ export function LeftSidebarFiles() {
 					item={item}
 					activeId={activeFileId}
 					onSelect={setActiveFileId}
+					pathPrefix=""
+					pathToId={pathToId}
 				/>
 			))}
 		</SidebarMenu>
@@ -68,19 +73,27 @@ function Tree({
 	item,
 	activeId,
 	onSelect,
+	pathPrefix,
+	pathToId,
 }: {
 	item: TreeNode;
 	activeId: string | null;
 	onSelect: (id: string) => Promise<void>;
+	pathPrefix: string;
+	pathToId: Record<string, string>;
 }) {
 	const [name, ...items] = Array.isArray(item) ? item : [item];
+	const fullPath = `${pathPrefix}/${name as string}`;
 
 	if (!items.length) {
 		return (
 			<SidebarMenuItem>
 				<SidebarMenuButton
-					isActive={activeId === (name as string)}
-					onClick={() => onSelect(name as string)}
+					isActive={activeId === pathToId[fullPath]}
+					onClick={() => {
+						const id = pathToId[fullPath];
+						if (id) onSelect(id);
+					}}
 					className="data-[active=true]:bg-secondary cursor-pointer"
 				>
 					<File />
@@ -108,6 +121,8 @@ function Tree({
 								item={subItem}
 								activeId={activeId}
 								onSelect={onSelect}
+								pathPrefix={fullPath}
+								pathToId={pathToId}
 							/>
 						))}
 					</SidebarMenuSub>

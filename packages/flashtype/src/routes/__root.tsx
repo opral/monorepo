@@ -1,6 +1,7 @@
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
+import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -55,6 +56,12 @@ function LeftSidebarArea() {
 
 function Root() {
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+	const activeFile = useQueryTakeFirst((lix) =>
+		lix.db
+			.selectFrom("file")
+			.select(["id", "path"]) // resolve display name from id
+			.where("id", "=", activeFileId),
+	);
 	const [agentChatOpen, setAgentChatOpen] = useState(false);
 	return (
 		<LeftSidebarProvider>
@@ -64,7 +71,7 @@ function Root() {
 					<SidebarInset>
 						<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
 							<div className="font-medium text-sm">
-								{activeFileId ?? "Flashtype"}
+								{activeFile?.path ?? ""}
 							</div>
 							<VersionDropdown />
 							<div className="ml-auto flex items-center gap-2">
