@@ -5,6 +5,7 @@ import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { openLix } from "../lix/index.js";
 
 test("json schema type of a detected change", () => {
 	const MockChangeSchema = {
@@ -51,6 +52,21 @@ test("file.data is potentially undefined", () => {
 		applyChanges: ({ file }) => {
 			assertType<Uint8Array | undefined>(file.data);
 			return { fileData: new Uint8Array() };
+		},
+	};
+});
+
+test("queryStateSync resembles kysely query builder", async () => {
+	const lix = await openLix({});
+
+	const plugin: LixPlugin = {
+		key: "plugin1",
+		detectChanges: ({ query }) => {
+			const stateQb = query("state").where("file_id", "=", "123");
+			const realQb = lix.db.selectFrom("state").where("file_id", "=", "123");
+
+			assertType<typeof stateQb>(realQb);
+			return [];
 		},
 	};
 });

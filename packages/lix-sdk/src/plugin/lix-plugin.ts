@@ -3,6 +3,8 @@ import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
+// Query builder + executor are provided to plugins.
+
 export type LixPlugin = {
 	key: string;
 	/**
@@ -26,9 +28,17 @@ export type LixPlugin = {
 	detectChanges?: ({
 		before,
 		after,
+		query,
+		executeSync,
 	}: {
 		before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 		after: Omit<LixFile, "data"> & { data: Uint8Array };
+		/** Returns a Kysely query builder for the given table (scoped to this run where applicable). */
+		query: (
+			table: "state"
+		) => ReturnType<ReturnType<typeof import("./query.js").createQuery>>;
+		/** Executes a builder synchronously with JSON parsing identical to Kysely's async path. */
+		executeSync: (qb: any) => any[];
 	}) => DetectedChange[];
 	applyChanges?: ({
 		file,

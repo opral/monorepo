@@ -1,4 +1,5 @@
 import { executeSync } from "../database/execute-sync.js";
+import { createQuery, executeQuerySync } from "../plugin/query.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
