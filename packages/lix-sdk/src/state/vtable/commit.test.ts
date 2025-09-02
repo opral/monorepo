@@ -12,36 +12,13 @@ import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js"
 import { selectActiveVersion } from "../../version/select-active-version.js";
 
 /**
- * TL;DR
- *   ──►  *Business* rows (actual user-domain data) are stored in the *active*
- *        version that the user is editing.
- *   ──►  *Graph* rows (everything that describes the history DAG: change-sets,
- *        commits, edges, version objects) are *always* stored in the
- *        special version called **global**.
- *
- *   This split gives us two key properties:
- *
- *     1. **Single source of truth for history topology**
- *        The entire DAG is materialised exactly once (under `global`), so
- *        graph traversals and lineage CTEs never need to bounce across version
- *        tables. Think "`.git/refs`-style catalogue", but in-DB.
- *
- *     2. **Version-local changes**
- *
- *
- *  BUSINESS DATA lives on the *active version*,
- *  GRAPH META-DATA lives on *global*.
- *
- *  ┌─────────────────┐                 ┌─────────────────────────┐
- *  │  version_active │  user-data      │   COMMIT  (active)      │
- *  └─────────────────┘ ───────────────▶│  entity                 │
- *                                      └─────────────────────────┘
- *                                             ▲
- *                                             │ graph rows that *describe* ↑
- *  ┌────────────┐                   ┌─────────┴───────────────────────────┐
- *  │  global    │  graph rows       │  COMMIT  (global) – graph-only      │
- *  └────────────┘ ─────────────────▶│  change_set, commit, edge, version  │
- *                                   └─────────────────────────────────────┘
+ * One-Commit Model
+ * - Business rows (user-domain) live on the active version.
+ * - Each mutation creates exactly one commit for the mutated version.
+ * - No global duplicate commit row; graph edges are derived globally from
+ *   commit.parent_commit_ids; global version pointer remains unchanged.
+ * - CSEs are domain-only (entity + author). We do not create CSEs for meta
+ *   like commit/change_set/version.
  */
 test("commit writes business rows to active version; graph edges update globally", async () => {
 	/*──────────────────────── 1. initialise workspace ─────────────────────*/
@@ -157,15 +134,15 @@ test("commit writes business rows to active version; graph edges update globally
 	/* COMMIT ON ACTIVE VERSION ────────────────────────────────────────────*/
 	expect(activeSchemas["lix_key_value"]).toBe(2); // user rows
 
-	// Meta now lives in the same (active) commit
+	// Domain-only CSE membership: include authors, exclude meta CSEs
 	expect(activeSchemas["lix_change_author"]).toBe(2);
-	expect(activeSchemas["lix_commit"]).toBe(1);
-	expect(activeSchemas["lix_change_set"]).toBe(1);
-	expect(activeSchemas["lix_version"]).toBe(1);
+	expect(activeSchemas["lix_commit"]).toBeUndefined();
+	expect(activeSchemas["lix_change_set"]).toBeUndefined();
+	expect(activeSchemas["lix_version"]).toBeUndefined();
 	// Edges are derived; no commit_edge change rows
 	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
 
-	// No global commit row is created anymore; graph is represented via edges + meta changes
+	// No global commit row is created; global pointer unchanged
 
 	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
 	const edgeActive = await db

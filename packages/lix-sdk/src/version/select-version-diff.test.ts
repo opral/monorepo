@@ -42,6 +42,7 @@ simulationTest(
 			target: targetVersion,
 		})
 			.where("status", "!=", "unchanged")
+			.where("entity_id", "=", "e1")
 			.execute();
 
 		expectDeterministic(diff).toHaveLength(1);

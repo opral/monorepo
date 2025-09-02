@@ -436,20 +436,14 @@ simulationTest(
 			})
 			.execute();
 
-		const commitsAfterInsert = await lix.db
-			.selectFrom("commit")
-			.select("id")
-			.execute();
-
-		expectDeterministic(commitsAfterInsert.length).toBe(
-			commitsBeforeInsert.length + 1
-		);
-
 		const activeVersionAfterInsert = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
+
+		// expect the version to be identical
+		expectDeterministic(activeVersionAfterInsert).toBeDefined();
 
 		// Query to check the commit_id via vtable
 		const stateAfterInsert = await db
@@ -457,6 +451,8 @@ simulationTest(
 			.where("entity_id", "=", "test-entity-1")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
+
+		expectDeterministic(stateAfterInsert).toBeDefined();
 
 		// The commit_id should NOT be the working_commit_id
 		expectDeterministic(stateAfterInsert.commit_id).not.toBe(
@@ -466,6 +462,17 @@ simulationTest(
 		// The commit_id should be the auto-commit ID (not the working commit)
 		expectDeterministic(stateAfterInsert.commit_id).toBe(
 			activeVersionAfterInsert.commit_id
+		);
+
+		const commitsAfterInsert = await lix.db
+			.selectFrom("commit")
+			.select("id")
+			.execute();
+
+		console.log(commitsAfterInsert);
+
+		expectDeterministic(commitsAfterInsert.length).toBe(
+			commitsBeforeInsert.length + 1
 		);
 
 		// Update the state via vtable to trigger another auto-commit

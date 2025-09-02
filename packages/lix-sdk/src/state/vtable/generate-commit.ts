@@ -153,34 +153,7 @@ export function generateCommit(args: {
 			created_at: timestamp,
 		});
 
-		// Materialize CSEs for meta changes (version, change_set, commit) into global cache
-		const metaRowsForVid = metaChanges.filter(
-			(ch) =>
-				(ch.schema_key === "lix_version" && ch.entity_id === vid) ||
-				(ch.schema_key === "lix_commit" && ch.entity_id === meta.commitId) ||
-				(ch.schema_key === "lix_change_set" &&
-					ch.entity_id === meta.changeSetId)
-		);
-		for (const ch of metaRowsForVid) {
-			materialized.push({
-				id: generateUuid(),
-				entity_id: `${meta.changeSetId}~${ch.id}`,
-				schema_key: "lix_change_set_element",
-				schema_version: "1.0",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: meta.changeSetId,
-					change_id: ch.id,
-					entity_id: ch.entity_id,
-					schema_key: ch.schema_key,
-					file_id: ch.file_id,
-				}),
-				created_at: timestamp,
-				lixcol_version_id: "global",
-				lixcol_commit_id: meta.commitId,
-			} as MaterializedState);
-		}
+		// Skip materializing CSEs for meta (version/commit/change_set) to keep CSE domain-only
 	}
 
 	// author rows (global metadata)
@@ -291,7 +264,7 @@ export function generateCommit(args: {
 		}
 	}
 
-	// Update commit snapshots with change_ids (include domain + local meta changes)
+	// Update commit snapshots with change_ids (domain + author only; exclude meta)
 	for (const [vid, meta] of metaByVersion) {
 		const commitIdx = metaChanges.findIndex(
 			(m) => m.schema_key === "lix_commit" && m.entity_id === meta.commitId
@@ -310,18 +283,8 @@ export function generateCommit(args: {
 						: (ac.snapshot_content as any);
 				if (sc && domainIds.includes(sc.change_id)) localAuthorIds.push(ac.id);
 			}
-			// Include meta changes local to this version (its own version/commit/change_set entries)
-			const localMetaIds = metaChanges
-				.filter(
-					(ch) =>
-						(ch.schema_key === "lix_version" && ch.entity_id === vid) ||
-						(ch.schema_key === "lix_commit" &&
-							ch.entity_id === meta.commitId) ||
-						(ch.schema_key === "lix_change_set" &&
-							ch.entity_id === meta.changeSetId)
-				)
-				.map((c) => c.id);
-			snap.change_ids = [...domainIds, ...localMetaIds, ...localAuthorIds];
+			// Exclude meta (version/commit/change_set) from membership
+			snap.change_ids = [...domainIds, ...localAuthorIds];
 			// Step 2: add parent_commit_ids from versions input
 			snap.parent_commit_ids = meta.parents;
 			metaChanges[commitIdx]!.snapshot_content = JSON.stringify(snap);

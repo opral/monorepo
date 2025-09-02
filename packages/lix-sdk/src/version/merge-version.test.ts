@@ -647,50 +647,16 @@ test.todo("handles empty target (fresh branch) gracefully");
 test.todo("handles mixed created/updated/deleted keys across multiple files");
 
 /**
- * TL;DR — Global/Source/Target merge model
+ * TL;DR — One-Commit Merge Model
  *
- * - Target (the version we merge into) holds user-domain entities. It receives
- *   a new tip commit (target.tip_after) that ANCHORS the winning entity changes.
- * - Global holds the DAG (graph) for all versions. It publishes commits, edges
- *   and version pointers so the full history can be re-materialized from the
- *   global tip alone.
- * - Source remains untouched by the merge: its `commit_id` is unchanged.
- *
- * Properties guaranteed by the two-commit model:
- * 1) Target commit (target.tip_after) has TWO PARENTS:
- *      - parent_1 = target.tip_before
- *      - parent_2 = source.tip_before
- * 2) Global commit (global.tip_after) publishes graph-only rows for BOTH commits
- *    (global.tip_after and target.tip_after) and the necessary edges/version updates:
- *      - Commits (2):   ['lix_commit' for global.tip_after, 'lix_commit' for target.tip_after]
- *      - Edges (3):     [target.tip_before → target.tip_after,
- *                        source.tip_before → target.tip_after,
- *                        global.tip_before → global.tip_after]
- *      - Versions (2):  ['lix_version' for target.id   → target.tip_after,
- *                        'lix_version' for 'global'    → global.tip_after]
- * 3) No user-domain entities are referenced under global — only graph metadata and version updates.
- *
- * Visual overview (simplified):
- *
- *  ┌─────────────────┐                 ┌─────────────────────────┐
- *  │  version_target │  target data    │   COMMIT (target)       │
- *  └─────────────────┘ ───────────────▶│  references user entities  │
- *                                      └──────────┬──────────────┘
- *                                                 │ parent edges (2)
- *                                                 │ from: target.tip_before, source.tip_before
- *                                                 ▼
- *  ┌────────────┐                   ┌─────────────────────────┐
- *  │  global    │  graph rows       │  COMMIT (global)        │
- *  └────────────┘ ─────────────────▶│  change_set with:       │
- *                                   │    commits (2),         │
- *                                   │    edges   (3),         │
- *                                   │    versions (2)         │
- *                                   └──────────┬──────────────┘
- *                                              │ edge (1)
- *                                              │ from: global.tip_before to global.tip_after
- *                                              ▼
- *                                   versions: target → target.tip_after,
- *                                             global → global.tip_after
+ * - Target (merge destination) receives a single new commit that ANCHORS the
+ *   winning domain changes. Parents are [target.tip_before, source.tip_before].
+ * - Global holds the DAG topology via derived edges from parent_commit_ids.
+ *   No global duplicate commit is written; the global version pointer remains
+ *   unchanged by a merge.
+ * - CSEs are domain-only (entity + change_author). We do not emit meta CSEs
+ *   for commit/version/change_set.
+ * - Source remains untouched (its commit_id does not change).
  */
 simulationTest(
 	"merge meta: one-commit model writes global graph edges and local data",
@@ -824,16 +790,9 @@ simulationTest(
 			{}
 		);
 
-		expectDeterministic(schemaCounts["lix_commit"]).toBe(1);
-		expectDeterministic(schemaCounts["lix_version"]).toBe(1);
-
-		// Commits: only the target commit is referenced
-		const commitIds = new Set(
-			cseRows
-				.filter((r: any) => r.schema_key === "lix_commit")
-				.map((r: any) => r.entity_id)
-		);
-		expectDeterministic(commitIds.has(afterTarget.commit_id)).toBe(true);
+		// No meta CSEs (commit/version) in one-commit, domain-only CSEs
+		expectDeterministic(schemaCounts["lix_commit"] ?? 0).toBe(0);
+		expectDeterministic(schemaCounts["lix_version"] ?? 0).toBe(0);
 
 		// Edges are derived/materialized: verify via commit_edge view (global scope)
 		const allEdges = await lix.db
@@ -848,14 +807,7 @@ simulationTest(
 		expectDeterministic(childrenSet.has(targetCommitId)).toBe(true);
 		// No separate global lineage edge in one-commit model
 
-		// Versions referenced in CSE: verify presence, and verify pointers via version view
-		const versionEntityIds = new Set(
-			cseRows
-				.filter((r: any) => r.schema_key === "lix_version")
-				.map((r: any) => r.entity_id)
-		);
-		expectDeterministic(versionEntityIds.has(target.id)).toBe(true);
-		expectDeterministic(versionEntityIds.has("global")).toBe(false);
+		// Version CSEs are not emitted; verify pointers via version view only
 		const versionTargetNow = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
@@ -919,9 +871,9 @@ simulationTest(
 			{}
 		);
 		expectDeterministic(targetSchemaCounts["test_entity"]).toBe(1);
-		expectDeterministic(targetSchemaCounts["lix_commit"] ?? 0).toBe(1);
+		expectDeterministic(targetSchemaCounts["lix_commit"] ?? 0).toBe(0);
 		expectDeterministic(targetSchemaCounts["lix_commit_edge"] ?? 0).toBe(0);
-		expectDeterministic(targetSchemaCounts["lix_version"] ?? 0).toBe(1);
+		expectDeterministic(targetSchemaCounts["lix_version"] ?? 0).toBe(0);
 		const anchoredEntity = targetCseRows.find(
 			(r: any) => r.schema_key === "test_entity"
 		);

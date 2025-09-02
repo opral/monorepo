@@ -165,41 +165,69 @@ export function applyMaterializeStateSchema(
         JOIN change c ON c.id = ct.target_change_id
         WHERE c.schema_key != 'lix_version'
     ),
-    -- Select the lix_version row that references the computed tip for each version (no timestamps)
-    version_rows_for_tip AS (
+    -- All lix_version rows that reference the computed tip for each version (timestamp-free selection)
+    version_tip_rows AS (
         SELECT 
-            v.entity_id AS version_id,
-            v.id        AS change_id,
+            v.entity_id                                   AS version_id,
+            v.id                                          AS change_id,
+            json_extract(v.snapshot_content,'$.commit_id') AS commit_id,
             v.snapshot_content,
             v.schema_version,
-            json_extract(v.snapshot_content,'$.commit_id') AS commit_id,
-            v.created_at AS created_at,
-            ROW_NUMBER() OVER (
-                PARTITION BY v.entity_id
-                ORDER BY v.id DESC
-            ) AS rn
+            v.created_at                                   AS created_at
         FROM change v
         JOIN internal_materialization_version_tips t
-          ON t.version_id = v.entity_id
+          ON v.schema_key = 'lix_version'
+         AND v.entity_id = t.version_id
          AND json_extract(v.snapshot_content,'$.commit_id') = t.tip_commit_id
-        WHERE v.schema_key = 'lix_version'
+    ),
+    -- Canonical choice: lexicographically smallest change_id per version
+    canonical_version_tip AS (
+        SELECT version_id, MIN(change_id) AS winning_change_id
+        FROM version_tip_rows
+        GROUP BY version_id
     ),
     lvs_version_global AS (
         SELECT 
-            'global'         AS version_id,
-            vr.commit_id     AS commit_id,
-            0                AS depth,
-            vr.change_id     AS change_id,
-            vr.version_id    AS entity_id,
-            'lix_version'    AS schema_key,
-            'lix'            AS file_id,
+            'global'              AS version_id,
+            t.tip_commit_id       AS commit_id,
+            0                     AS depth,
+            r.change_id           AS change_id,
+            r.version_id          AS entity_id,
+            'lix_version'         AS schema_key,
+            'lix'                 AS file_id,
+            'lix_own_entity'      AS plugin_key,
+            r.snapshot_content    AS snapshot_content,
+            r.schema_version      AS schema_version,
+            r.created_at          AS entity_created_at,
+            r.created_at          AS entity_updated_at
+        FROM canonical_version_tip w
+        JOIN version_tip_rows r
+          ON r.version_id = w.version_id
+         AND r.change_id  = w.winning_change_id
+        JOIN internal_materialization_version_tips t
+          ON t.version_id = w.version_id
+    ),
+    commit_rows_global AS (
+        -- Materialize commit change rows for all commits in the graph (global scope)
+        SELECT 
+            'global' AS version_id,
+            cg.commit_id,
+            cg.depth,
+            c.id as change_id,
+            c.entity_id,
+            'lix_commit' AS schema_key,
+            'lix' AS file_id,
             'lix_own_entity' AS plugin_key,
-            vr.snapshot_content AS snapshot_content,
-            vr.schema_version   AS schema_version,
-            vr.created_at       AS entity_created_at,
-            vr.created_at       AS entity_updated_at
-        FROM version_rows_for_tip vr
-        WHERE vr.rn = 1
+            c.snapshot_content,
+            c.schema_version,
+            c.created_at AS entity_created_at,
+            c.created_at AS entity_updated_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY 'global', c.entity_id, 'lix_commit', 'lix'
+                ORDER BY cg.depth ASC
+            ) AS first_seen
+        FROM internal_materialization_commit_graph cg
+        JOIN change c ON c.entity_id = cg.commit_id AND c.schema_key = 'lix_commit'
     ),
     commit_cse AS (
         -- Derive committed CSE rows from commit membership (one per (commit, change))
@@ -308,6 +336,22 @@ export function applyMaterializeStateSchema(
         entity_created_at as created_at,
         entity_updated_at as updated_at
     FROM lvs_version_global
+    UNION ALL
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM commit_rows_global
+    WHERE first_seen = 1
     UNION ALL
     SELECT 
         version_id,
