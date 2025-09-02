@@ -1,5 +1,4 @@
-import * as React from "react";
-import { use as usePromise } from "react";
+import { use as usePromise, useEffect, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
@@ -30,7 +29,7 @@ export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
 	// Editor loads initial content and persists via createEditor using only fileId
 
 	const editor = usePromise(
-		React.useMemo(
+		useMemo(
 			() =>
 				createEditor({
 					lix,
@@ -41,18 +40,11 @@ export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
 		),
 	);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!editor) return;
 		setEditor(editor as any);
-		try {
-			onReady?.(editor as any);
-		} catch {}
-		return () => {
-			try {
-				(editor as any)?.destroy?.();
-			} catch {}
-			setEditor(null);
-		};
+		onReady?.(editor as any);
+		// No cleanup/destroy to test strict-mode stability
 	}, [editor, setEditor]);
 
 	return (
@@ -62,6 +54,7 @@ export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
 					editor={editor as any}
 					className="w-full h-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
+					key={activeFileId ?? "no-file"}
 				/>
 			</div>
 		</div>

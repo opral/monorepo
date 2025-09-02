@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, StrictMode } from "react";
 import { expect, test } from "vitest";
 import {
 	render,
@@ -153,4 +153,52 @@ test("persists state changes on edit (paragraph append)", async () => {
 	);
 
 	expect(hasNewParagraph).toBe(true); // original + new paragraph
+});
+
+test("renders content under React.StrictMode", async () => {
+	const lix = await openLix({
+		providePlugins: [mdPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const fileId = "file_strict";
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/strict.md",
+			data: new TextEncoder().encode("Hello Strict"),
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "flashtype_active_file_id",
+			value: fileId,
+			lixcol_version_id: "global",
+			lixcol_untracked: true,
+		})
+		.execute();
+
+	await act(async () => {
+		render(
+			<StrictMode>
+				<Suspense>
+					<Providers lix={lix}>
+						<TipTapEditor />
+					</Providers>
+				</Suspense>
+			</StrictMode>,
+		);
+	});
+
+	const editor = await screen.findByTestId("tiptap-editor");
+	expect(editor).toHaveTextContent("Hello Strict");
 });

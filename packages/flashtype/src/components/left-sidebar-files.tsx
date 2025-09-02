@@ -60,7 +60,9 @@ export function LeftSidebarFiles() {
 					key={i}
 					item={item}
 					activeId={activeFileId}
-					onSelect={setActiveFileId}
+					onSelect={async (id) => {
+						await setActiveFileId(id);
+					}}
 					pathPrefix=""
 					pathToId={pathToId}
 				/>

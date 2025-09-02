@@ -62,6 +62,7 @@ function Root() {
 			.select(["id", "path"]) // resolve display name from id
 			.where("id", "=", activeFileId),
 	);
+
 	const [agentChatOpen, setAgentChatOpen] = useState(false);
 	return (
 		<LeftSidebarProvider>
