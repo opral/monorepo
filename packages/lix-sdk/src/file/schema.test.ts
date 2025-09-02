@@ -6,6 +6,7 @@ import { switchVersion } from "../version/switch-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLix({
@@ -846,6 +847,115 @@ test("file metadata updates create new change_id", async () => {
 	expect(finalFileChangeRecord?.entity_id).toBe("metadata-change-test");
 	expect(finalFileChangeRecord?.schema_key).toBe("lix_file_descriptor");
 });
+
+simulationTest(
+	"direct state updates invalidate file data cache",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			providePlugins: [mockJsonPlugin],
+		});
+
+		// Seed a JSON file that the mock plugin materializes from state
+		const fileId = "state-cache-file";
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/state-cache.json",
+				data: new TextEncoder().encode(JSON.stringify({ content: "Start" })),
+			})
+			.execute();
+
+		// First read: populates internal_file_data_cache via select_file_data
+		const initial = await lix.db
+			.selectFrom("file")
+			.where("id", "=", fileId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(JSON.parse(new TextDecoder().decode(initial.data))).toEqual({
+			content: "Start",
+		});
+
+		// Simulate a direct state write (bypassing file handlers/applyChangeSet)
+		// Update the plugin-managed entity directly in the `state` view
+		await lix.db
+			.updateTable("state")
+			.set({ snapshot_content: { value: "New" } })
+			.where("file_id", "=", fileId)
+			.where("plugin_key", "=", "mock_json_plugin")
+			.where("schema_key", "=", "mock_json_property")
+			.where("entity_id", "=", "content")
+			.execute();
+
+		// Second read must reflect updated state, not stale cache
+		const updated = await lix.db
+			.selectFrom("file")
+			.where("id", "=", fileId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(JSON.parse(new TextDecoder().decode(updated.data))).toEqual({
+			content: "New",
+		});
+	}
+);
+
+simulationTest(
+	"direct state_all updates invalidate file data cache",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			providePlugins: [mockJsonPlugin],
+		});
+
+		const fileId = "state-all-cache-file";
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/state-all-cache.json",
+				data: new TextEncoder().encode(JSON.stringify({ content: "Start" })),
+			})
+			.execute();
+
+		// Initial read to populate cache
+		const initial = await lix.db
+			.selectFrom("file")
+			.where("id", "=", fileId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expect(JSON.parse(new TextDecoder().decode(initial.data))).toEqual({
+			content: "Start",
+		});
+
+		// Active version id for state_all write
+		const active = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+
+		// Update plugin entity directly in state_all for that version
+		await lix.db
+			.updateTable("state_all")
+			.set({ snapshot_content: { value: "New" } })
+			.where("file_id", "=", fileId)
+			.where("version_id", "=", active.version_id)
+			.where("plugin_key", "=", "mock_json_plugin")
+			.where("schema_key", "=", "mock_json_property")
+			.where("entity_id", "=", "content")
+			.execute();
+
+		// Next read must reflect updated state (cache invalidated by state_all trigger)
+		const updated = await lix.db
+			.selectFrom("file")
+			.where("id", "=", fileId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expect(JSON.parse(new TextDecoder().decode(updated.data))).toEqual({
+			content: "New",
+		});
+	}
+);
 
 test("file descriptor updates with untracked state", async () => {
 	const lix = await openLix({

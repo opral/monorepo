@@ -6,8 +6,6 @@ import {
 	tiptapDocToAst,
 } from "@opral/markdown-wc/tiptap";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
-import { buildMarkdownFromEditor } from "./build-markdown-from-editor";
-import { upsertMarkdownFile } from "./upsert-markdown-file";
 import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
 import { handlePaste as defaultHandlePaste } from "./handle-paste";
 
@@ -48,15 +46,11 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 
 	const ast = contentAst ?? (parseMarkdown(initialMd ?? "") as any);
 
-	let persistTimer: any = null;
+	let persistStateTimer: any = null;
 	let currentEditor: Editor | null = null;
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 0;
 
-	async function persist(editor: Editor) {
-		if (!fileId) return;
-		const markdown = buildMarkdownFromEditor(editor as any);
-		await upsertMarkdownFile({ lix, fileId, markdown });
-	}
+	// Removed markdown file writes; state is the source of truth.
 
 	async function upsertNodes(trx: any, fileId: string, nodes: any[]) {
 		for (const node of nodes) {
@@ -153,42 +147,41 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		},
 		onUpdate: ({ editor }) => {
 			onUpdate?.({ editor });
-			const ast = tiptapDocToAst(editor.getJSON() as any);
-			if (fileId) {
-				if (PERSIST_DEBOUNCE_MS <= 0) {
-					void persist(editor);
-				} else {
-					if (persistTimer) clearTimeout(persistTimer);
-					persistTimer = setTimeout(() => {
-						void persist(editor);
-					}, PERSIST_DEBOUNCE_MS);
-				}
-				if (persistState) {
-					const children: any[] = Array.isArray((ast as any)?.children)
-						? ((ast as any).children as any[])
-						: [];
-					const order = ensureTopLevelIds(children);
-					void lix.db.transaction().execute(async (trx) => {
-						await upsertNodes(trx, fileId, children);
-						await upsertRootOrder(trx, fileId, order);
-						const keepIds = [...order, "root"];
-						if (keepIds.length > 0) {
-							await trx
-								.deleteFrom("state")
-								.where("file_id", "=", fileId as any)
-								.where("plugin_key", "=", mdPlugin.key)
-								.where("entity_id", "not in", keepIds as any)
-								.execute();
-						} else {
-							await trx
-								.deleteFrom("state")
-								.where("file_id", "=", fileId as any)
-								.where("plugin_key", "=", mdPlugin.key)
-								.where("entity_id", "<>", "root")
-								.execute();
-						}
-					});
-				}
+			if (!fileId || !persistState) return;
+			// Debounce state writes using the provided debounce ms
+			const ms = PERSIST_DEBOUNCE_MS;
+			const run = async () => {
+				const ast = tiptapDocToAst(editor.getJSON() as any);
+				const children: any[] = Array.isArray((ast as any)?.children)
+					? ((ast as any).children as any[])
+					: [];
+				const order = ensureTopLevelIds(children);
+				await lix.db.transaction().execute(async (trx) => {
+					await upsertNodes(trx, fileId, children);
+					await upsertRootOrder(trx, fileId, order);
+					const keepIds = [...order, "root"];
+					if (keepIds.length > 0) {
+						await trx
+							.deleteFrom("state")
+							.where("file_id", "=", fileId as any)
+							.where("plugin_key", "=", mdPlugin.key)
+							.where("entity_id", "not in", keepIds as any)
+							.execute();
+					} else {
+						await trx
+							.deleteFrom("state")
+							.where("file_id", "=", fileId as any)
+							.where("plugin_key", "=", mdPlugin.key)
+							.where("entity_id", "<>", "root")
+							.execute();
+					}
+				});
+			};
+			if (ms <= 0) {
+				void run();
+			} else {
+				if (persistStateTimer) clearTimeout(persistStateTimer);
+				persistStateTimer = setTimeout(() => void run(), ms);
 			}
 		},
 		editorProps: {

@@ -3,10 +3,20 @@ import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
 import { createEditor } from "./create-editor";
 import { handlePaste } from "./handle-paste";
+import { AstSchemas } from "@opral/markdown-wc";
 
 // TipTap + Lix persistence paste tests (no React)
 test("paste at start inserts before existing content (TipTap + Lix)", async () => {
-	const lix = await openLix({ providePlugins: [mdPlugin] });
+	const lix = await openLix({
+		providePlugins: [mdPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 	const fileId = "paste_start_before";
 
 	// Seed initial file content
@@ -34,8 +44,41 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 		} as any,
 	});
 
-	// allow onUpdate persistence to complete
-	await new Promise((r) => setTimeout(r, 0));
+	const rootOrderAfter = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.select(["snapshot_content"])
+		.execute();
+
+	expect(rootOrderAfter).toHaveLength(1);
+	expect(rootOrderAfter[0]?.snapshot_content.order.length).toBe(2);
+
+	const paragraphsAfter = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+		.orderBy("entity_id", "asc")
+		.select(["snapshot_content"])
+		.execute();
+
+	expect(paragraphsAfter).toHaveLength(2);
+	expect(paragraphsAfter).toEqual([
+		{
+			snapshot_content: {
+				type: "paragraph",
+				children: [{ type: "text", value: "New" }],
+				data: expect.any(Object),
+			},
+		},
+		{
+			snapshot_content: {
+				type: "paragraph",
+				children: [{ type: "text", value: "Start" }],
+				data: expect.any(Object),
+			},
+		},
+	]);
 
 	const fileAfter = await lix.db
 		.selectFrom("file")
@@ -44,6 +87,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 		.executeTakeFirst();
 
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
+
 	expect(mdAfter).toBe("New\n\nStart");
 
 	editor.destroy();

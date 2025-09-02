@@ -27,6 +27,7 @@ import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
+import { applyFileDataCacheSchema } from "../file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
 
 /**
@@ -141,6 +142,8 @@ export function initDb(args: {
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
 	applyFileLixcolCacheSchema(lix);
+	// Ensure file data cache table exists before any triggers may reference it
+	applyFileDataCacheSchema(lix);
 	applyStateDatabaseSchema(lix);
 	applyEntityDatabaseSchema(lix);
 	applyChangeSetDatabaseSchema(lix);

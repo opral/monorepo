@@ -55,6 +55,11 @@ export function applyStateAllView(lix: Pick<Lix, "sqlite">): void {
         NEW.schema_version,
         COALESCE(NEW.untracked, 0)
       );
+
+      -- Invalidate file data cache for this file/version
+      DELETE FROM internal_file_data_cache
+      WHERE file_id = NEW.file_id
+        AND version_id = NEW.version_id;
     END;
 
     CREATE TRIGGER IF NOT EXISTS state_all_update
@@ -75,6 +80,11 @@ export function applyStateAllView(lix: Pick<Lix, "sqlite">): void {
         schema_key = OLD.schema_key AND
         file_id = OLD.file_id AND
         version_id = OLD.version_id;
+
+      -- Invalidate file data cache for this file/version
+      DELETE FROM internal_file_data_cache
+      WHERE file_id = NEW.file_id
+        AND version_id = NEW.version_id;
     END;
 
     CREATE TRIGGER IF NOT EXISTS state_all_delete
@@ -86,6 +96,11 @@ export function applyStateAllView(lix: Pick<Lix, "sqlite">): void {
         schema_key = OLD.schema_key AND
         file_id = OLD.file_id AND
         version_id = OLD.version_id;
+
+      -- Invalidate file data cache for this file/version
+      DELETE FROM internal_file_data_cache
+      WHERE file_id = OLD.file_id
+        AND version_id = OLD.version_id;
     END;
   `);
 }
