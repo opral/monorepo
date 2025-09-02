@@ -20,7 +20,6 @@ type CreateEditorArgs = {
 	editorProps?: any;
 	fileId?: string;
 	persistDebounceMs?: number;
-	onAstChange?: (ast: any) => void;
 	persistState?: boolean;
 };
 
@@ -35,7 +34,6 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		editorProps,
 		fileId,
 		persistDebounceMs,
-		onAstChange,
 		persistState = true,
 	} = args;
 	let initialMd = initialMarkdown;
@@ -156,7 +154,6 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		onUpdate: ({ editor }) => {
 			onUpdate?.({ editor });
 			const ast = tiptapDocToAst(editor.getJSON() as any);
-			onAstChange?.(ast);
 			if (fileId) {
 				if (PERSIST_DEBOUNCE_MS <= 0) {
 					void persist(editor);

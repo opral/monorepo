@@ -1,107 +1,65 @@
 import * as React from "react";
 import { use as usePromise } from "react";
 import { EditorContent } from "@tiptap/react";
-import { parseMarkdown } from "@opral/markdown-wc";
+import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
-import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
+import { useLix } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
-import { assembleMdAst } from "./assemble-md-ast";
 import { createEditor } from "./create-editor";
 
 type TipTapEditorProps = {
-	onAstChange?: (ast: any) => void;
 	className?: string;
-	onReady?: (editor: any) => void;
-	persistDebounceMs?: number;
+	onReady?: (editor: Editor) => void;
 };
 
-export function TipTapEditor({
-	onAstChange,
-	className,
-	onReady,
-	persistDebounceMs,
-}: TipTapEditorProps) {
+export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
 	const lix = useLix();
 
 	const { setEditor } = useEditorCtx();
-
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 
-	const activeFile = useQueryTakeFirst((lix) =>
-		lix.db
-			.selectFrom("file")
-			.select(["id", "path", "data"])
-			.orderBy("path", "asc")
-			.where("id", "=", activeFileId),
-	);
+	const PERSIST_DEBOUNCE_MS = 200;
 
-	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
+	// Require an active file id to operate
+	if (!activeFileId) {
+		throw new Error(
+			"TipTapEditor: 'flashtype_active_file_id' is undefined. Set the active file id before rendering the editor.",
+		);
+	}
 
-	const initialAst = usePromise(
+	// Editor loads initial content and persists via createEditor using only fileId
+
+	const editor = usePromise(
 		React.useMemo(
-			() => assembleMdAst({ lix, fileId: activeFile?.id }),
-			[lix, activeFile?.id],
+			() =>
+				createEditor({
+					lix,
+					fileId: activeFileId,
+					persistDebounceMs: PERSIST_DEBOUNCE_MS,
+				}),
+			[lix, activeFileId, PERSIST_DEBOUNCE_MS],
 		),
 	);
 
-	// Fallback: if no state yet, parse the file's markdown directly
-	const fallbackAst = React.useMemo(() => {
+	React.useEffect(() => {
+		if (!editor) return;
+		setEditor(editor as any);
 		try {
-			const bytes = (activeFile as any)?.data as Uint8Array | undefined;
-			if (!bytes || bytes.byteLength === 0) return null;
-			const md = new TextDecoder().decode(bytes);
-			if (!md) return null;
-			return parseMarkdown(md) as any;
-		} catch {
-			return null;
-		}
-	}, [activeFile?.data]);
-
-	const contentAst = React.useMemo(() => {
-		const hasState = Array.isArray((initialAst as any)?.children) &&
-			(initialAst as any).children.length > 0;
-		if (hasState) return initialAst as any;
-		const hasFile = Array.isArray((fallbackAst as any)?.children) &&
-			(fallbackAst as any).children.length > 0;
-		if (hasFile) return fallbackAst as any;
-		return { type: "root", children: [] } as any;
-	}, [initialAst, fallbackAst]);
-
-    const [editor, setLocalEditor] = React.useState<any>(null);
-
-    React.useEffect(() => {
-        let disposed = false;
-        let created: any = null;
-        (async () => {
-            created = await createEditor({
-                lix,
-                contentAst,
-                fileId: activeFile?.id,
-                persistDebounceMs: PERSIST_DEBOUNCE_MS,
-                onCreate: ({ editor }) => {
-                    setEditor(editor as any);
-                    onReady?.(editor as any);
-                },
-                onAstChange: (ast: any) => onAstChange?.(ast),
-            });
-            if (!disposed) setLocalEditor(created);
-        })();
-        return () => {
-            disposed = true;
-            try {
-                (created as any)?.destroy?.();
-            } catch {}
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeFile?.id, JSON.stringify(contentAst)]);
-
-	// no-op: editor lifecycle handled in the createEditor effect above
+			onReady?.(editor as any);
+		} catch {}
+		return () => {
+			try {
+				(editor as any)?.destroy?.();
+			} catch {}
+			setEditor(null);
+		};
+	}, [editor, setEditor]);
 
 	return (
 		<div className={className} style={{ height: "100%" }}>
 			<div className="w-full h-full bg-background p-3">
-			<EditorContent
-				editor={editor as any}
+				<EditorContent
+					editor={editor as any}
 					className="w-full h-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 				/>
