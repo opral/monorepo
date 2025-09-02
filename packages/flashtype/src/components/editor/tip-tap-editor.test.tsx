@@ -84,6 +84,9 @@ test("renders initial document content", async () => {
 });
 
 test("persists state changes on edit (paragraph append)", async () => {
+	const fileId = "file_1";
+	const markdown = "# Title\n\nHello";
+
 	const lix = await openLix({
 		providePlugins: [mdPlugin],
 		keyValues: [
@@ -92,26 +95,21 @@ test("persists state changes on edit (paragraph append)", async () => {
 				value: "enabled",
 				lixcol_version_id: "global",
 			},
+			{
+				key: "flashtype_active_file_id",
+				value: fileId,
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
 		],
 	});
 
-	const fileId = "file_1";
-	const markdown = "# Title\n\nHello";
 	await lix.db
 		.insertInto("file")
 		.values({
 			id: fileId,
 			path: "/test.md",
 			data: new TextEncoder().encode(markdown),
-		})
-		.execute();
-	await lix.db
-		.insertInto("key_value_all")
-		.values({
-			key: "flashtype_active_file_id",
-			value: fileId,
-			lixcol_version_id: "global",
-			lixcol_untracked: true,
 		})
 		.execute();
 
@@ -121,7 +119,10 @@ test("persists state changes on edit (paragraph append)", async () => {
 		render(
 			<Suspense>
 				<Providers lix={lix}>
-					<TipTapEditor onReady={(editor) => (editorRef = editor)} />
+					<TipTapEditor
+						onReady={(editor) => (editorRef = editor)}
+						persistDebounceMs={0}
+					/>
 				</Providers>
 			</Suspense>,
 		);

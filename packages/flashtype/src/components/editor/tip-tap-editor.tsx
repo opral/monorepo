@@ -9,15 +9,20 @@ import { createEditor } from "./create-editor";
 type TipTapEditorProps = {
 	className?: string;
 	onReady?: (editor: Editor) => void;
+	persistDebounceMs?: number;
 };
 
-export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
+export function TipTapEditor({
+	className,
+	onReady,
+	persistDebounceMs,
+}: TipTapEditorProps) {
 	const lix = useLix();
 
 	const { setEditor } = useEditorCtx();
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 
-	const PERSIST_DEBOUNCE_MS = 200;
+	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
 	// Require an active file id to operate
 	if (!activeFileId) {
@@ -45,7 +50,7 @@ export function TipTapEditor({ className, onReady }: TipTapEditorProps) {
 		setEditor(editor as any);
 		onReady?.(editor as any);
 		// No cleanup/destroy to test strict-mode stability
-	}, [editor, setEditor]);
+	}, [editor, setEditor, onReady]);
 
 	return (
 		<div className={className} style={{ height: "100%" }}>
