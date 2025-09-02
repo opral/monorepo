@@ -324,6 +324,55 @@ describe("internal_materialization_version_tips", () => {
 	);
 });
 
+// Ensures version tip equals the lix_version snapshot commit_id in the materializer
+simulationTest(
+	"version tip matches lix_version snapshot commit_id",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Create a new version from the current global tip
+		const { id: versionId } = await createVersion({
+			lix,
+			name: "tip-vs-snapshot",
+		});
+
+		// 1) Tip from materializer
+		const tips =
+			(lix.sqlite.exec({
+				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
+				bind: [versionId],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+
+		expectDeterministic(tips.length).toBe(1);
+
+		// 2) Global lix_version snapshot for this version entity from the materializer
+		const matRows =
+			(lix.sqlite.exec({
+				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
+                      FROM internal_state_materializer
+                      WHERE schema_key = 'lix_version' AND version_id = 'global' AND entity_id = ?`,
+				bind: [versionId],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ commit_id: string | null }>) ?? [];
+
+		expectDeterministic(matRows.length).toBe(1);
+
+		// Tip and version snapshot.commit_id must match
+		expectDeterministic(matRows[0]!.commit_id).toBe(tips[0]!.tip_commit_id);
+	}
+);
+
 describe("internal_materialization_commit_graph", () => {
 	simulationTest(
 		"builds linear commit history with correct depths",

@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
-import { generateHumanId, deterministicHumanIdVocabularySize } from "./generate-human-id.js";
+import {
+	generateHumanId,
+	deterministicHumanIdVocabularySize,
+} from "./generate-human-id.js";
 import { openLix } from "../lix/open-lix.js";
 
 test("returns deterministic names in deterministic mode", async () => {
@@ -28,33 +31,33 @@ test("returns deterministic names in deterministic mode", async () => {
 });
 
 test("cycles through names when exceeding array length", async () => {
-    const lix = await openLix({
-        keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
-    });
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
 
-    // Generate many IDs to test cycling
-    const names: string[] = [];
-    const vocabSize = deterministicHumanIdVocabularySize();
-    for (let i = 0; i < vocabSize + 5; i++) {
-        names.push(generateHumanId({ lix }));
-    }
+	// Generate many IDs to test cycling
+	const names: string[] = [];
+	const vocabSize = deterministicHumanIdVocabularySize();
+	for (let i = 0; i < vocabSize + 5; i++) {
+		names.push(generateHumanId({ lix }));
+	}
 
-    // Find where the cycle starts repeating
-    let firstRepeatIndex = -1;
-    for (let i = 1; i < names.length; i++) {
-        if (names[i] === names[0]) {
-            firstRepeatIndex = i;
-            break;
-        }
-    }
+	// Find where the cycle starts repeating
+	let firstRepeatIndex = -1;
+	for (let i = 1; i < names.length; i++) {
+		if (names[i] === names[0]) {
+			firstRepeatIndex = i;
+			break;
+		}
+	}
 
-    // Should cycle after the vocabulary size
-    expect(firstRepeatIndex).toBe(vocabSize);
+	// Should cycle after the vocabulary size
+	expect(firstRepeatIndex).toBe(vocabSize);
 
-    // Verify cycling pattern
-    expect(names[vocabSize]).toBe(names[0]);
-    expect(names[vocabSize + 1]).toBe(names[1]);
-    expect(names[vocabSize + 2]).toBe(names[2]);
+	// Verify cycling pattern
+	expect(names[vocabSize]).toBe(names[0]);
+	expect(names[vocabSize + 1]).toBe(names[1]);
+	expect(names[vocabSize + 2]).toBe(names[2]);
 });
 
 test("returns non-deterministic names in normal mode", async () => {

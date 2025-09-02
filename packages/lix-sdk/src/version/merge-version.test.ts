@@ -185,6 +185,7 @@ simulationTest(
 		expectDeterministic(tgtRow.change_id).toBe(srcRow.change_id);
 	}
 );
+
 simulationTest(
 	"applies explicit deletions: source tombstones delete target content",
 	async ({ openSimulatedLix, expectDeterministic }) => {
@@ -250,18 +251,40 @@ simulationTest(
 		expectDeterministic(tgtRows.length).toBe(0);
 
 		// Verify a deletion change was created and referenced in the merge change_set
-		const afterTarget = await lix.db
+		// Also log the version pointer from the view and the materializer for debugging
+		const afterTargetView = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
 			.selectAll()
 			.executeTakeFirstOrThrow();
+		const tipRowsDbg =
+			(lix.sqlite.exec({
+				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
+				bind: [target.id],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+		const matVersionRowsDbg =
+			(lix.sqlite.exec({
+				sql: `SELECT version_id, entity_id, json_extract(snapshot_content,'$.commit_id') AS commit_id
+            FROM internal_state_materializer
+            WHERE schema_key = 'lix_version' AND entity_id = ?
+            ORDER BY version_id`,
+				bind: [target.id],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{
+				version_id: string;
+				entity_id: string;
+				commit_id: string | null;
+			}>) ?? [];
 		const commitChangeRow = await lix.db
 			.selectFrom("change")
 			.where("schema_key", "=", "lix_commit")
 			.where(
 				sql`json_extract(snapshot_content, '$.id')`,
 				"=",
-				afterTarget.commit_id as any
+				afterTargetView.commit_id as any
 			)
 			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
@@ -670,7 +693,7 @@ test.todo("handles mixed created/updated/deleted keys across multiple files");
  *                                             global → global.tip_after
  */
 simulationTest(
-	"merge meta: two-commit model writes global graph rows and local data",
+	"merge meta: one-commit model writes global graph edges and local data",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -760,20 +783,22 @@ simulationTest(
 		expectDeterministic(targetParents.has(beforeSource.commit_id)).toBe(true);
 
 		// ── Expect block 1: GLOBAL ────────────────────────────────────────────────
-		// Global expectations:
-		// - Global tip changed
-		// - Global change_set references: commits (2), edges (3), versions (2)
+		// One-commit model: global tip does NOT change
+		expectDeterministic(afterGlobal.commit_id).toBe(beforeGlobal.commit_id);
 
-		expectDeterministic(afterGlobal.commit_id).not.toBe(beforeGlobal.commit_id);
-
+		// Fetch the target commit change row directly to read its change_set
 		const globalCommit = await lix.db
-			.selectFrom("commit_all")
-			.where("lixcol_version_id", "=", "global")
-			.where("id", "=", afterGlobal.commit_id)
-			.selectAll()
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where(
+				sql`json_extract(snapshot_content, '$.id')`,
+				"=",
+				afterTarget.commit_id as any
+			)
+			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
 
-		const changeSetId = globalCommit.change_set_id;
+		const changeSetId = (globalCommit as any).snapshot.change_set_id as string;
 		const cseRows = await lix.db
 			.selectFrom("change_set_element_all")
 			.where("lixcol_version_id", "=", "global")
@@ -794,16 +819,20 @@ simulationTest(
 			},
 			{}
 		);
-		expectDeterministic(schemaCounts["lix_commit"]).toBe(2);
-		expectDeterministic(schemaCounts["lix_version"]).toBe(2);
 
-		// Commits: one for afterGlobal and one for afterTarget
+		// the schema counts should be identical between simulations in any case
+		// in addition to expecting certain counts
+		expectDeterministic(schemaCounts).toBeDefined();
+
+		expectDeterministic(schemaCounts["lix_commit"]).toBe(1);
+		expectDeterministic(schemaCounts["lix_version"]).toBe(1);
+
+		// Commits: only the target commit is referenced
 		const commitIds = new Set(
 			cseRows
 				.filter((r: any) => r.schema_key === "lix_commit")
 				.map((r: any) => r.entity_id)
 		);
-		expectDeterministic(commitIds.has(afterGlobal.commit_id)).toBe(true);
 		expectDeterministic(commitIds.has(afterTarget.commit_id)).toBe(true);
 
 		// Edges are derived/materialized: verify via commit_edge view (global scope)
@@ -817,13 +846,7 @@ simulationTest(
 		expectDeterministic(parentsSet.has(beforeTarget.commit_id)).toBe(true);
 		expectDeterministic(parentsSet.has(beforeSource.commit_id)).toBe(true);
 		expectDeterministic(childrenSet.has(targetCommitId)).toBe(true);
-		// global lineage edge
-		const lineageEdge = allEdges.find(
-			(e: any) =>
-				e.parent_id === beforeGlobal.commit_id &&
-				e.child_id === afterGlobal.commit_id
-		);
-		expectDeterministic(Boolean(lineageEdge)).toBe(true);
+		// No separate global lineage edge in one-commit model
 
 		// Versions referenced in CSE: verify presence, and verify pointers via version view
 		const versionEntityIds = new Set(
@@ -832,7 +855,7 @@ simulationTest(
 				.map((r: any) => r.entity_id)
 		);
 		expectDeterministic(versionEntityIds.has(target.id)).toBe(true);
-		expectDeterministic(versionEntityIds.has("global")).toBe(true);
+		expectDeterministic(versionEntityIds.has("global")).toBe(false);
 		const versionTargetNow = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
@@ -844,7 +867,9 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		expectDeterministic(versionTargetNow.commit_id).toBe(afterTarget.commit_id);
-		expectDeterministic(versionGlobalNow.commit_id).toBe(afterGlobal.commit_id);
+		expectDeterministic(versionGlobalNow.commit_id).toBe(
+			beforeGlobal.commit_id
+		);
 
 		// ── Expect block 2: LOCAL ────────────────────────────────────────────────
 		// Local expectations:
@@ -862,13 +887,18 @@ simulationTest(
 		expectDeterministic(targetState.length).toBe(1);
 
 		// Target commit change_set should reference exactly the merged entity once
-		const targetCommit = await lix.db
-			.selectFrom("commit_all")
-			.where("lixcol_version_id", "=", "global")
-			.where("id", "=", afterTarget.commit_id)
-			.selectAll()
+		const targetCommitChange = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where(
+				sql`json_extract(snapshot_content, '$.id')`,
+				"=",
+				afterTarget.commit_id as any
+			)
+			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
-		const targetChangeSetId = targetCommit.change_set_id;
+		const targetChangeSetId = (targetCommitChange as any).snapshot
+			.change_set_id as string;
 		const targetCseRows = await lix.db
 			.selectFrom("change_set_element_all")
 			.where("lixcol_version_id", "=", "global")
@@ -889,9 +919,9 @@ simulationTest(
 			{}
 		);
 		expectDeterministic(targetSchemaCounts["test_entity"]).toBe(1);
-		expectDeterministic(targetSchemaCounts["lix_commit"] ?? 0).toBe(0);
+		expectDeterministic(targetSchemaCounts["lix_commit"] ?? 0).toBe(1);
 		expectDeterministic(targetSchemaCounts["lix_commit_edge"] ?? 0).toBe(0);
-		expectDeterministic(targetSchemaCounts["lix_version"] ?? 0).toBe(0);
+		expectDeterministic(targetSchemaCounts["lix_version"] ?? 0).toBe(1);
 		const anchoredEntity = targetCseRows.find(
 			(r: any) => r.schema_key === "test_entity"
 		);

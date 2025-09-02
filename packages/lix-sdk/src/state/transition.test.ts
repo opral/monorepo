@@ -70,11 +70,11 @@ simulationTest(
 		expect(activeV.commit_id).toBe(newCommit.id);
 
 		// New commit should have two parents: source (checkpoint1) and target (checkpoint0)
-        const parents = await lix.db
-            .selectFrom("commit_edge")
-            .where("child_id", "=", newCommit.id)
-            .select(["parent_id"])
-            .execute();
+		const parents = await lix.db
+			.selectFrom("commit_edge")
+			.where("child_id", "=", newCommit.id)
+			.select(["parent_id"])
+			.execute();
 
 		const parentIds = parents.map((p: any) => p.parent_id).sort();
 

@@ -27,15 +27,15 @@ export const LixCommitSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	"x-lix-foreign-keys": [
-    {
-      properties: ["change_set_id"],
-      references: {
-        schemaKey: "lix_change_set",
-        properties: ["id"],
-      },
-      mode: "materialized",
-    },
-  ],
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
+			mode: "materialized",
+		},
+	],
 	// No SQL-level foreign key for change_set_id; see rationale above.
 	type: "object",
 	properties: {

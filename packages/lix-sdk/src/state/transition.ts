@@ -344,7 +344,10 @@ WHERE rn = 1;
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ parent_id: sourceCommitId, child_id: commitId }),
+				snapshot_content: JSON.stringify({
+					parent_id: sourceCommitId,
+					child_id: commitId,
+				}),
 				created_at: now,
 			},
 			{
@@ -354,7 +357,10 @@ WHERE rn = 1;
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ parent_id: args.to.id, child_id: commitId }),
+				snapshot_content: JSON.stringify({
+					parent_id: args.to.id,
+					child_id: commitId,
+				}),
 				created_at: now,
 			},
 		];

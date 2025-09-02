@@ -1,10 +1,10 @@
 import type { Lix } from "../index.js";
 
 export function applyMaterializeStateSchema(
-    lix: Pick<Lix, "sqlite" | "db" | "hooks">
+	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
-    // View 0: Unified commit edges (derived from commit.parent_commit_ids ∪ physical rows)
-    lix.sqlite.exec(`
+	// View 0: Unified commit edges (derived from commit.parent_commit_ids ∪ physical rows)
+	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
         WITH latest_commits AS (
             SELECT 
@@ -33,7 +33,7 @@ export function applyMaterializeStateSchema(
 	// A commit C is the tip for version V iff:
 	// • C appears in at least one lix_version change row for V AND
 	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
-    lix.sqlite.exec(`
+	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
         WITH
         -- 1. every (version, commit) ever recorded
@@ -71,7 +71,7 @@ export function applyMaterializeStateSchema(
     `);
 
 	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)
-    lix.sqlite.exec(`
+	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
         WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
             -- Start from version tips at depth 0
@@ -108,7 +108,7 @@ export function applyMaterializeStateSchema(
 	// View 3: Latest visible state - derive commit membership from commit.change_ids
 	// We explode commit.change_ids for each commit in the graph and join with change table
 	// to obtain the actual change rows for that commit.
-    lix.sqlite.exec(`
+	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
         WITH commit_targets AS (
 			-- Only path: change_ids embedded in commit snapshot
@@ -124,7 +124,7 @@ export function applyMaterializeStateSchema(
     ),
     commit_changes AS (
         SELECT 
-            ct.version_id,
+            ct.version_id AS version_id,
             ct.commit_id,
             ct.depth,
             c.id as change_id,
@@ -151,6 +151,43 @@ export function applyMaterializeStateSchema(
             ) as entity_updated_at
         FROM commit_targets ct
         JOIN change c ON c.id = ct.target_change_id
+        WHERE c.schema_key != 'lix_version'
+    ),
+    -- Select the lix_version row that references the computed tip for each version (no timestamps)
+    version_rows_for_tip AS (
+        SELECT 
+            v.entity_id AS version_id,
+            v.id        AS change_id,
+            v.snapshot_content,
+            v.schema_version,
+            json_extract(v.snapshot_content,'$.commit_id') AS commit_id,
+            v.created_at AS created_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY v.entity_id
+                ORDER BY v.id DESC
+            ) AS rn
+        FROM change v
+        JOIN internal_materialization_version_tips t
+          ON t.version_id = v.entity_id
+         AND json_extract(v.snapshot_content,'$.commit_id') = t.tip_commit_id
+        WHERE v.schema_key = 'lix_version'
+    ),
+    lvs_version_global AS (
+        SELECT 
+            'global'         AS version_id,
+            vr.commit_id     AS commit_id,
+            0                AS depth,
+            vr.change_id     AS change_id,
+            vr.version_id    AS entity_id,
+            'lix_version'    AS schema_key,
+            'lix'            AS file_id,
+            'lix_own_entity' AS plugin_key,
+            vr.snapshot_content AS snapshot_content,
+            vr.schema_version   AS schema_version,
+            vr.created_at       AS entity_created_at,
+            vr.created_at       AS entity_updated_at
+        FROM version_rows_for_tip vr
+        WHERE vr.rn = 1
     ),
     commit_cse AS (
         -- Derive committed CSE rows from commit membership (one per (commit, change))
@@ -174,16 +211,16 @@ export function applyMaterializeStateSchema(
             '1.0' AS schema_version,
             c.created_at AS created_at,
             ROW_NUMBER() OVER (
-                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                PARTITION BY 'global', (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
                 ORDER BY ct.depth ASC
             ) AS first_seen,
             FIRST_VALUE(c.created_at) OVER (
-                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                PARTITION BY 'global', (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
                 ORDER BY ct.depth DESC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_created_at,
             FIRST_VALUE(c.created_at) OVER (
-                PARTITION BY ct.version_id, (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
+                PARTITION BY 'global', (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
                 ORDER BY ct.depth ASC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_updated_at
@@ -211,16 +248,16 @@ export function applyMaterializeStateSchema(
             '1.0' AS schema_version,
             cmt.created_at AS created_at,
             ROW_NUMBER() OVER (
-                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                PARTITION BY 'global', (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
                 ORDER BY cg.depth ASC
             ) AS first_seen,
             FIRST_VALUE(cmt.created_at) OVER (
-                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                PARTITION BY 'global', (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
                 ORDER BY cg.depth DESC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_created_at,
             FIRST_VALUE(cmt.created_at) OVER (
-                PARTITION BY cg.version_id, (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
+                PARTITION BY 'global', (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
                 ORDER BY cg.depth ASC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_updated_at
@@ -244,6 +281,21 @@ export function applyMaterializeStateSchema(
         entity_updated_at as updated_at
     FROM commit_changes 
     WHERE first_seen = 1
+    UNION ALL
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM lvs_version_global
     UNION ALL
     SELECT 
         version_id,

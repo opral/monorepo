@@ -278,25 +278,25 @@ export type EntityStateAllColumns = {
  * ```
  */
 export function createEntityStateAllView(args: {
-    lix: Pick<Lix, "sqlite">;
-    schema: LixSchemaDefinition;
-    /** Overrides the view name which defaults to schema["x-lix-key"] + "_all" */
-    overrideName?: string;
-    /** Plugin identifier for the entity */
-    pluginKey: string;
-    /** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
-    hardcodedFileId?: string;
-    /** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
-    hardcodedVersionId?: string;
-    /** Object mapping property names to functions that generate default values */
-    defaultValues?: Record<
-        string,
-        (() => string) | ((row: Record<string, any>) => string)
-    >;
-    /** Custom validation logic for entity operations */
-    validation?: ValidationCallbacks;
-    /** If true, creates read-only view (no DML triggers) */
-    readOnly?: boolean;
+	lix: Pick<Lix, "sqlite">;
+	schema: LixSchemaDefinition;
+	/** Overrides the view name which defaults to schema["x-lix-key"] + "_all" */
+	overrideName?: string;
+	/** Plugin identifier for the entity */
+	pluginKey: string;
+	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
+	hardcodedFileId?: string;
+	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	hardcodedVersionId?: string;
+	/** Object mapping property names to functions that generate default values */
+	defaultValues?: Record<
+		string,
+		(() => string) | ((row: Record<string, any>) => string)
+	>;
+	/** Custom validation logic for entity operations */
+	validation?: ValidationCallbacks;
+	/** If true, creates read-only view (no DML triggers) */
+	readOnly?: boolean;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"] + "_all";
 	// Quote the view name to handle SQL reserved keywords
@@ -311,25 +311,25 @@ export function createEntityStateAllView(args: {
 }
 
 function createSingleEntityAllView(args: {
-    lix: Pick<Lix, "sqlite">;
-    schema: LixSchemaDefinition;
-    viewName: string;
-    quotedViewName?: string;
-    stateTable: "state_all";
-    /** Plugin identifier for the entity */
-    pluginKey: string;
-    /** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
-    hardcodedFileId?: string;
-    /** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
-    hardcodedVersionId?: string;
-    /** Object mapping property names to functions that generate default values */
-    defaultValues?: Record<
-        string,
-        (() => string) | ((row: Record<string, any>) => string)
-    >;
-    /** Custom validation logic for entity operations */
-    validation?: ValidationCallbacks;
-    readOnly?: boolean;
+	lix: Pick<Lix, "sqlite">;
+	schema: LixSchemaDefinition;
+	viewName: string;
+	quotedViewName?: string;
+	stateTable: "state_all";
+	/** Plugin identifier for the entity */
+	pluginKey: string;
+	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
+	hardcodedFileId?: string;
+	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	hardcodedVersionId?: string;
+	/** Object mapping property names to functions that generate default values */
+	defaultValues?: Record<
+		string,
+		(() => string) | ((row: Record<string, any>) => string)
+	>;
+	/** Custom validation logic for entity operations */
+	validation?: ValidationCallbacks;
+	readOnly?: boolean;
 }): void {
 	if (!args.schema["x-lix-primary-key"]) {
 		throw new Error(
@@ -489,20 +489,22 @@ function createSingleEntityAllView(args: {
 		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
 
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
-    const sqlQuery = `
+	const sqlQuery =
+		`
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
       SELECT
         ${Object.keys((args.schema as any).properties)
-                    .map(
-                        (prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
-                    )
-                    .join(",\n        ")},
+					.map(
+						(prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
+					)
+					.join(",\n        ")},
         ${operationalColumns.join(",\n        ")}
       FROM ${args.stateTable}
       WHERE schema_key = '${schema_key}';
-    ` + (args.readOnly
-            ? ""
-            : `
+    ` +
+		(args.readOnly
+			? ""
+			: `
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_insert
       INSTEAD OF INSERT ON ${quoted_view_name}
@@ -518,8 +520,8 @@ function createSingleEntityAllView(args: {
           version_id,
           untracked
         ) ${
-                        hasDefaults
-                            ? `
+					hasDefaults
+						? `
         SELECT 
           ${entityIdNew.replace(/NEW\./g, "with_default_values.")},
           '${schema_key}',
@@ -536,7 +538,7 @@ function createSingleEntityAllView(args: {
             NEW.lixcol_file_id AS lixcol_file_id,
             COALESCE(NEW.lixcol_untracked, 0) AS lixcol_untracked
         ) AS with_default_values`
-                            : `
+						: `
         VALUES (
           ${entityIdNew},
           '${schema_key}',
@@ -547,7 +549,7 @@ function createSingleEntityAllView(args: {
           ${versionIdReference},
           COALESCE(NEW.lixcol_untracked, 0)
         )`
-                };
+				};
       END;
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_update

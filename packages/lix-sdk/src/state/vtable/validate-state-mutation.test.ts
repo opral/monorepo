@@ -1552,130 +1552,132 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 });
 
 test("materialized FK: insert allowed without referenced; delete restricts", async () => {
-  const lix = await openLix({});
+	const lix = await openLix({});
 
-  // Define a simple parent/child with materialized FK on child.parent_id -> parent.id
-  const parentSchema = {
-    type: "object",
-    "x-lix-version": "1.0",
-    "x-lix-key": "mfk_parent",
-    "x-lix-primary-key": ["id"],
-    properties: {
-      id: { type: "string" },
-      name: { type: "string" },
-    },
-    required: ["id", "name"],
-    additionalProperties: false,
-  } as const satisfies LixSchemaDefinition;
+	// Define a simple parent/child with materialized FK on child.parent_id -> parent.id
+	const parentSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mfk_parent",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
 
-  const childSchema = {
-    type: "object",
-    "x-lix-version": "1.0",
-    "x-lix-key": "mfk_child",
-    "x-lix-primary-key": ["id"],
-    "x-lix-foreign-keys": [
-      {
-        properties: ["parent_id"],
-        references: {
-          schemaKey: "mfk_parent",
-          properties: ["id"],
-        },
-        mode: "materialized",
-      },
-    ],
-    properties: {
-      id: { type: "string" },
-      parent_id: { type: "string" },
-      title: { type: "string" },
-    },
-    required: ["id", "parent_id", "title"],
-    additionalProperties: false,
-  } as const satisfies LixSchemaDefinition;
+	const childSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mfk_child",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["parent_id"],
+				references: {
+					schemaKey: "mfk_parent",
+					properties: ["id"],
+				},
+				mode: "materialized",
+			},
+		],
+		properties: {
+			id: { type: "string" },
+			parent_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "parent_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
 
-  // Store schemas
-  await lix.db
-    .insertInto("stored_schema")
-    .values([{ value: parentSchema }, { value: childSchema }])
-    .execute();
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: parentSchema }, { value: childSchema }])
+		.execute();
 
-  const activeVersion = await lix.db
-    .selectFrom("active_version")
-    .select("version_id")
-    .executeTakeFirstOrThrow();
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
 
-  // Insert child referencing a not-yet-existing parent: should NOT throw (materialized mode skips insert-time check)
-  expect(() =>
-    validateStateMutation({
-      lix,
-      schema: childSchema,
-      snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
-      operation: "insert",
-      version_id: activeVersion.version_id,
-    })
-  ).not.toThrowError();
+	// Insert child referencing a not-yet-existing parent: should NOT throw (materialized mode skips insert-time check)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: childSchema,
+			snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
 
-  // Materialize the child row so delete-time reverse FK check sees it
-  await lix.db
-    .insertInto("state_all")
-    .values({
-      entity_id: "c1",
-      file_id: "file1",
-      schema_key: "mfk_child",
-      plugin_key: "test_plugin",
-      version_id: activeVersion.version_id,
-      snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
-      schema_version: "1.0",
-    })
-    .execute();
+	// Materialize the child row so delete-time reverse FK check sees it
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "c1",
+			file_id: "file1",
+			schema_key: "mfk_child",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
+			schema_version: "1.0",
+		})
+		.execute();
 
-  // Insert the parent rows
-  await lix.db
-    .insertInto("state_all")
-    .values([
-      {
-        entity_id: "p1",
-        file_id: "file1",
-        schema_key: "mfk_parent",
-        plugin_key: "test_plugin",
-        version_id: activeVersion.version_id,
-        snapshot_content: { id: "p1", name: "parent one" },
-        schema_version: "1.0",
-      },
-      {
-        entity_id: "p2",
-        file_id: "file1",
-        schema_key: "mfk_parent",
-        plugin_key: "test_plugin",
-        version_id: activeVersion.version_id,
-        snapshot_content: { id: "p2", name: "parent two" },
-        schema_version: "1.0",
-      },
-    ])
-    .execute();
+	// Insert the parent rows
+	await lix.db
+		.insertInto("state_all")
+		.values([
+			{
+				entity_id: "p1",
+				file_id: "file1",
+				schema_key: "mfk_parent",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: { id: "p1", name: "parent one" },
+				schema_version: "1.0",
+			},
+			{
+				entity_id: "p2",
+				file_id: "file1",
+				schema_key: "mfk_parent",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: { id: "p2", name: "parent two" },
+				schema_version: "1.0",
+			},
+		])
+		.execute();
 
-  // Delete-time: p1 is referenced by child → should throw
-  expect(() =>
-    validateStateMutation({
-      lix,
-      schema: parentSchema,
-      snapshot_content: {},
-      operation: "delete",
-      entity_id: "p1",
-      version_id: activeVersion.version_id,
-    })
-  ).toThrowError(/Foreign key constraint violation.*referenced by.*mfk_child.*parent_id/i);
+	// Delete-time: p1 is referenced by child → should throw
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: parentSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "p1",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(
+		/Foreign key constraint violation.*referenced by.*mfk_child.*parent_id/i
+	);
 
-  // Delete-time: p2 has no references → should not throw
-  expect(() =>
-    validateStateMutation({
-      lix,
-      schema: parentSchema,
-      snapshot_content: {},
-      operation: "delete",
-      entity_id: "p2",
-      version_id: activeVersion.version_id,
-    })
-  ).not.toThrowError();
+	// Delete-time: p2 has no references → should not throw
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: parentSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "p2",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
 });
 
 test("should throw when deleting non-existent entity", async () => {
