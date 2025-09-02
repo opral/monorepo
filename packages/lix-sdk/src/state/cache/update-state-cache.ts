@@ -170,6 +170,8 @@ export function updateStateCache(args: {
 				}
 
 				if (changeSetRows.length > 0) {
+					// Ensure the change_set cache table exists before inserting
+					ensureTableExists(lix, "internal_state_cache_lix_change_set");
 					batchInsertDirectToTable({
 						lix,
 						tableName: "internal_state_cache_lix_change_set",
