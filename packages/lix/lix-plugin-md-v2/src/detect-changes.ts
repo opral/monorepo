@@ -11,20 +11,18 @@
  */
 import type {
 	DetectedChange,
-	LixFile,
-	StateRow,
+	LixPlugin,
 	LixSchemaDefinition,
 } from "@lix-js/sdk";
+import { executeSync } from "@lix-js/sdk";
 import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
 
-export const detectChanges = (args: {
-	beforeState?: StateRow[];
-	before?: Omit<LixFile, "data"> & { data?: Uint8Array };
-	after: Omit<LixFile, "data"> & { data: Uint8Array };
-}): DetectedChange[] => {
-	const { beforeState = [], after } = args;
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
+	lix,
+	after,
+}) => {
 	const THRESHOLDS = {
 		simStrong: 0.6,
 		headingSim: 0.3,
@@ -41,31 +39,30 @@ export const detectChanges = (args: {
 	const afterAst = parseMarkdown(afterMarkdown) as Ast;
 	const detectedChanges: DetectedChange[] = [];
 
-	// Build before index from state: entity_id -> node snapshot (top-level blocks)
+	// Build before index from state via lix: entity_id -> node snapshot
 	const beforeNodes = new Map<string, any>();
-	for (const row of beforeState) {
-		if (
-			typeof row.schema_key === "string" &&
-			row.schema_key.startsWith("markdown_wc_") &&
-			row.schema_key !== AstSchemas.RootSchema["x-lix-key"] &&
-			row.schema_key !== AstSchemas.RootOrderSchema["x-lix-key"]
-		) {
-			if (row.snapshot_content) {
-				beforeNodes.set(row.entity_id, row.snapshot_content as any);
-			}
-		}
-	}
-
-	// Try to derive previous order from a root order state entry (optional)
 	let beforeOrder: string[] = [];
-	const maybeRoot = beforeState
-		.filter((r) => r.schema_key === AstSchemas.RootOrderSchema["x-lix-key"])
-		.sort((a, b) => (a.created_at! < b.created_at! ? 1 : -1))[0];
-	if (
-		maybeRoot?.snapshot_content &&
-		Array.isArray((maybeRoot as any).snapshot_content.order)
-	) {
-		beforeOrder = (maybeRoot as any).snapshot_content.order as string[];
+	if (!lix) return [];
+	const qb = lix.db
+		.selectFrom("state")
+		.where("file_id", "=", after.id)
+		.select(["entity_id", "schema_key", "snapshot_content"]);
+	const rows = executeSync({ lix, query: qb });
+	for (const row of rows) {
+		const sk = row.schema_key as string;
+		// JSON columns returned from executeSync are strings; parse if needed
+		const content =
+			typeof (row as any).snapshot_content === "string"
+				? JSON.parse((row as any).snapshot_content)
+				: (row as any).snapshot_content;
+		if (sk === (AstSchemas.RootOrderSchema as any)["x-lix-key"]) {
+			const order = (content as any)?.order;
+			if (Array.isArray(order)) beforeOrder = order as string[];
+			continue;
+		}
+		if (typeof sk === "string" && sk.startsWith("markdown_wc_")) {
+			if (content) beforeNodes.set(row.entity_id, content);
+		}
 	}
 
 	// Fingerprint helper: drop meta and stable-stringify with normalized strings

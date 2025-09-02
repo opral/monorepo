@@ -8,6 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
 
 export type LixReadonly = {
 	db: { selectFrom: Lix["db"]["selectFrom"] };
+	/** Raw SQLite handle for sync execution (use executeSync({ lix, query })). */
 	sqlite: Lix["sqlite"];
 };
 
@@ -45,13 +46,11 @@ export type LixPlugin = {
 		 * compare snapshots, or infer ordering without reparsing files.
 		 *
 		 * How to use (with synchronous execution)
-		 * - Pair the typed builder with the SDK helper `executeSync` to run queries synchronously
-		 *   inside detectChanges and receive JSON‑parsed rows (matching the async driver behavior).
+		 * - Import `executeSync` from `@lix-js/sdk` and run `executeSync({ lix, query: qb })` to execute
+		 *   synchronously and receive JSON‑parsed rows (matching the async driver behavior).
 		 *
 		 * Example (reuse stable ids)
 		 * ```ts
-		 * import { executeSync } from '@lix-js/sdk'
-		 *
 		 * detectChanges: ({ after, lix }) => {
 		 *   const qb = lix!.db
 		 *     .selectFrom('state')
@@ -59,7 +58,8 @@ export type LixPlugin = {
 		 *     .where('plugin_key', '=', 'plugin_md')
 		 *     .select(['entity_id', 'schema_key', 'snapshot_content'])
 		 *
-		 *   const rows = executeSync({ lix: (lix as any), query: qb })
+		 *   import { executeSync } from '@lix-js/sdk'
+		 *   const rows = executeSync({ lix: lix as any, query: qb })
 		 *   const latestById = new Map(rows.map(r => [r.entity_id, r]))
 		 *   // ...use latestById to assign/reuse ids in emitted changes...
 		 *   return detected

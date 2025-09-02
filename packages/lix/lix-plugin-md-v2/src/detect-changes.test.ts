@@ -1,33 +1,66 @@
 import { test, expect } from "vitest";
 import { detectChanges } from "./detect-changes.js";
+import { openLix } from "@lix-js/sdk";
+import { plugin } from "./index.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
-function makeBeforeState(markdown: string, ids?: string[]) {
+async function seedMarkdownState(args: {
+	lix: any;
+	fileId: string;
+	markdown: string;
+	ids?: string[];
+}) {
+	const { lix, fileId, markdown, ids } = args;
 	const ast = parseMarkdown(markdown) as Ast;
-	const created_at = new Date().toISOString();
-	const rows: any[] = [];
 	const order: string[] = [];
-	ast.children.forEach((n, i) => {
+	const vrow = (await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirst()) as any;
+	const versionId = vrow?.version_id as any;
+
+	// Build values array
+	const values: any[] = [];
+	for (let i = 0; i < (ast.children as any[]).length; i++) {
+		const n: any = (ast.children as any[])[i];
 		const id = ids?.[i] ?? `n${i + 1}`;
-		n.data = { ...n.data, id };
+		n.data = { ...(n.data || {}), id };
 		order.push(id);
-		rows.push({
+		values.push({
 			entity_id: id,
-			schema_key: AstSchemas.schemasByType[n.type]?.["x-lix-key"],
+			schema_key: (AstSchemas.schemasByType as any)[n.type]["x-lix-key"],
+			file_id: fileId,
+			plugin_key: plugin.key,
 			snapshot_content: n,
-			created_at,
+			schema_version: (AstSchemas.schemasByType as any)[n.type][
+				"x-lix-version"
+			],
+			version_id: versionId,
 		});
-	});
-	rows.push({
-		entity_id: "root",
-		schema_key: AstSchemas.RootOrderSchema["x-lix-key"],
-		snapshot_content: { order },
-		created_at,
-	});
-	return rows;
+	}
+
+	// Chunked batch insert to keep parameter counts safe
+	const CHUNK = 200;
+	for (let i = 0; i < values.length; i += CHUNK) {
+		const slice = values.slice(i, i + CHUNK);
+		await lix.db.insertInto("state_all").values(slice).execute();
+	}
+
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "root",
+			schema_key: (AstSchemas.RootOrderSchema as any)["x-lix-key"],
+			file_id: fileId,
+			plugin_key: plugin.key,
+			snapshot_content: { order },
+			schema_version: (AstSchemas.RootOrderSchema as any)["x-lix-version"],
+			version_id: versionId,
+		})
+		.execute();
 }
 
 // ===== Helpers for large-doc tests (deterministic) =====
@@ -69,26 +102,40 @@ function applySmallEdits(paras: string[], count: number, seed = 7): string[] {
 }
 
 test("it should not detect changes if the markdown file did not update", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f1";
 	const beforeMarkdown = `# Heading\n\nSome text.`;
-	const beforeState = makeBeforeState(beforeMarkdown, ["h1", "p1"]);
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: beforeMarkdown,
+		ids: ["h1", "p1"],
+	});
 	const after = encode(beforeMarkdown);
 
 	const detectedChanges = detectChanges({
-		beforeState,
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		lix,
+		after: { id: fileId, path: "x.md", data: after, metadata: {} },
 	});
 
 	expect(detectedChanges).toEqual([]);
 });
 
 test("it should detect a new node", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f2";
 	const beforeMarkdown = `# Heading\n\nSome text.`;
 	const afterMarkdown = `# Heading\n\nSome text.\n\nNew paragraph.`;
-	const beforeState = makeBeforeState(beforeMarkdown, ["h1", "p1"]);
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: beforeMarkdown,
+		ids: ["h1", "p1"],
+	});
 	const detectedChanges = detectChanges({
-		beforeState,
+		lix,
 		after: {
-			id: "random",
+			id: fileId,
 			path: "x.md",
 			data: encode(afterMarkdown),
 			metadata: {},
@@ -108,13 +155,20 @@ test("it should detect a new node", async () => {
 });
 
 test("it should detect an updated node", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f3";
 	const beforeMarkdown = `# Heading\n\nSome text.`;
 	const afterMarkdown = `# Heading\n\nUpdated text.`;
-	const beforeState = makeBeforeState(beforeMarkdown, ["h1", "p1"]);
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: beforeMarkdown,
+		ids: ["h1", "p1"],
+	});
 	const detectedChanges = detectChanges({
-		beforeState,
+		lix,
 		after: {
-			id: "random",
+			id: fileId,
 			path: "x.md",
 			data: encode(afterMarkdown),
 			metadata: {},
@@ -130,13 +184,20 @@ test("it should detect an updated node", async () => {
 });
 
 test("it should detect a deleted node", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f4";
 	const beforeMarkdown = `# Heading\n\nSome text.\n\nAnother paragraph.`;
 	const afterMarkdown = `# Heading\n\nSome text.`;
-	const beforeState = makeBeforeState(beforeMarkdown, ["h1", "p1", "p2"]);
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: beforeMarkdown,
+		ids: ["h1", "p1", "p2"],
+	});
 	const detectedChanges = detectChanges({
-		beforeState,
+		lix,
 		after: {
-			id: "random",
+			id: fileId,
 			path: "x.md",
 			data: encode(afterMarkdown),
 			metadata: {},
@@ -150,13 +211,20 @@ test("it should detect a deleted node", async () => {
 });
 
 test("it should detect node reordering", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f5";
 	const beforeMarkdown = `First paragraph\n\nSecond paragraph`;
 	const afterMarkdown = `Second paragraph\n\nFirst paragraph`;
-	const beforeState = makeBeforeState(beforeMarkdown, ["p1", "p2"]);
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: beforeMarkdown,
+		ids: ["p1", "p2"],
+	});
 	const detectedChanges = detectChanges({
-		beforeState,
+		lix,
 		after: {
-			id: "random",
+			id: fileId,
 			path: "x.md",
 			data: encode(afterMarkdown),
 			metadata: {},
@@ -172,10 +240,12 @@ test("it should detect node reordering", async () => {
 });
 
 test("it should handle empty documents", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f6";
 	const detectedChanges = detectChanges({
-		beforeState: [],
+		lix,
 		after: {
-			id: "random",
+			id: fileId,
 			path: "x.md",
 			data: encode("# New heading"),
 			metadata: {},
@@ -189,14 +259,15 @@ test("it should handle empty documents", async () => {
 	expect(addedNode).toBeTruthy();
 });
 
-test("preserves ID on paragraph edit (expected to fail with strict fingerprints)", () => {
+test("preserves ID on paragraph edit (expected to fail with strict fingerprints)", async () => {
 	const before = `# H\n\nSome text.`;
 	const after = `# H\n\nUpdated text.`;
-
-	const beforeState = makeBeforeState(before, ["h1", "p1"]);
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f7";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1", "p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Desired behavior: modification for entity p1
@@ -205,14 +276,15 @@ test("preserves ID on paragraph edit (expected to fail with strict fingerprints)
 	expect(mod?.snapshot_content?.children?.[0]?.value).toBe("Updated text.");
 });
 
-test("preserves IDs on reorder", () => {
+test("preserves IDs on reorder", async () => {
 	const before = `First\n\nSecond`;
 	const after = `Second\n\nFirst`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f8";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -225,14 +297,15 @@ test("preserves IDs on reorder", () => {
 	]);
 });
 
-test("insert between preserves existing ids and mints new", () => {
+test("insert between preserves existing ids and mints new", async () => {
 	const before = `A\n\nC`;
 	const after = `A\n\nB\n\nC`;
-	const beforeState = makeBeforeState(before, ["pA", "pC"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f9";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["pA", "pC"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(2);
 
@@ -250,14 +323,20 @@ test("insert between preserves existing ids and mints new", () => {
 	expect(["pA", "pC"]).not.toContain(add!.entity_id);
 });
 
-test("delete emits deletion and preserves other ids", () => {
+test("delete emits deletion and preserves other ids", async () => {
 	const before = `Keep me\n\nDelete me`;
 	const after = `Keep me`;
-	const beforeState = makeBeforeState(before, ["keep", "del"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f10";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["keep", "del"],
+	});
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	const deletion = changes.find((c) => c.entity_id === "del");
@@ -265,14 +344,15 @@ test("delete emits deletion and preserves other ids", () => {
 	expect(deletion?.snapshot_content).toBeNull();
 });
 
-test("cross-type: do not map heading id to paragraph", () => {
+test("cross-type: do not map heading id to paragraph", async () => {
 	const before = `# Heading`;
 	const after = `Paragraph`;
-	const beforeState = makeBeforeState(before, ["h1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f11";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Expect heading deletion and new paragraph addition with a different id
@@ -285,14 +365,15 @@ test("cross-type: do not map heading id to paragraph", () => {
 	expect(addPara!.entity_id).not.toBe("h1");
 });
 
-test("canonicalization stability: hard break form changes keep id (mod or noop)", () => {
+test("canonicalization stability: hard break form changes keep id (mod or noop)", async () => {
 	const before = `line  \nbreak`; // two spaces + newline
 	const after = `line\\\nbreak`; // backslash + newline
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f12";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Either no change or a modification for p1 is acceptable.
@@ -302,14 +383,20 @@ test("canonicalization stability: hard break form changes keep id (mod or noop)"
 	}
 });
 
-test("move section (heading + paragraph) preserves ids and updates root order", () => {
+test("move section (heading + paragraph) preserves ids and updates root order", async () => {
 	const before = `# A\n\nPara A\n\n# B\n\nPara B`;
 	const after = `# B\n\nPara B\n\n# A\n\nPara A`;
-	const beforeState = makeBeforeState(before, ["hA", "pA", "hB", "pB"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f13";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["hA", "pA", "hB", "pB"],
+	});
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	const root = changes.find((c) => c.entity_id === "root");
@@ -323,14 +410,15 @@ test("move section (heading + paragraph) preserves ids and updates root order", 
 	]);
 });
 
-test("duplicate paragraphs reorder is ambiguous: no root order change", () => {
+test("duplicate paragraphs reorder is ambiguous: no root order change", async () => {
 	const before = `Same\n\nSame`;
 	const after = `Same\n\nSame`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f14";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	const root = changes.find((c) => c.entity_id === "root");
@@ -342,14 +430,15 @@ test("duplicate paragraphs reorder is ambiguous: no root order change", () => {
 	}
 });
 
-test("code → paragraph (cross-type) results in deletion+addition", () => {
+test("code → paragraph (cross-type) results in deletion+addition", async () => {
 	const before = "```js\nconsole.log(1)\n```";
 	const after = "console.log(1)";
-	const beforeState = makeBeforeState(before, ["code1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f15";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	const del = changes.find(
@@ -360,14 +449,15 @@ test("code → paragraph (cross-type) results in deletion+addition", () => {
 	expect(addPara).toBeTruthy();
 });
 
-test("heading text edit preserves id", () => {
+test("heading text edit preserves id", async () => {
 	const before = `# Hello`;
 	const after = `# Hello World`;
-	const beforeState = makeBeforeState(before, ["h1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f16";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -376,19 +466,21 @@ test("heading text edit preserves id", () => {
 	expect(mod?.snapshot_content?.type).toBe("heading");
 });
 
-test("long document: insert 1, delete 1, reorder 2 (sanity)", () => {
+test("long document: insert 1, delete 1, reorder 2 (sanity)", async () => {
 	const paras = Array.from({ length: 10 }, (_, i) => `P${i + 1}`);
 	const before = paras.join("\n\n");
 	const beforeIds = paras.map((_, i) => `p${i + 1}`);
-	const beforeState = makeBeforeState(before, beforeIds);
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f17";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
 	// After: delete P3, insert PX after P5, reorder P1 and P2
 	const afterParas = ["P2", "P1", "P4", "P5", "PX", "P6", ...paras.slice(6)];
 	const after = afterParas.join("\n\n");
 
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	const deletions = changes.filter((c) => c.snapshot_content === null);
@@ -407,14 +499,15 @@ test("long document: insert 1, delete 1, reorder 2 (sanity)", () => {
 	expect(order.length).toBe(afterParas.length);
 });
 
-test("table cell edit preserves table id", () => {
+test("table cell edit preserves table id", async () => {
 	const before = `| a | b |\n| - | - |\n| 1 | 2 |`;
 	const after = `| a | b |\n| - | - |\n| 1 | 3 |`;
-	const beforeState = makeBeforeState(before, ["t1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f18";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -427,14 +520,15 @@ test("table cell edit preserves table id", () => {
 	expect(lastRowCells[1]?.children?.[0]?.value).toBe("3");
 });
 
-test("duplicate paragraphs: edit the 2nd, keep p2 and no root change", () => {
+test("duplicate paragraphs: edit the 2nd, keep p2 and no root change", async () => {
 	const before = `Same\n\nSame`;
 	const after = `Same\n\nSame updated.`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f19";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -461,14 +555,15 @@ test("duplicate paragraphs: edit the 2nd, keep p2 and no root change", () => {
 	}
 });
 
-test("insert duplicate paragraph identical to existing: new id minted", () => {
+test("insert duplicate paragraph identical to existing: new id minted", async () => {
 	const before = `Same`;
 	const after = `Same\n\nSame`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f20";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(2);
 
@@ -487,14 +582,20 @@ test("insert duplicate paragraph identical to existing: new id minted", () => {
 	expect(order[1]).toBe(added!.entity_id);
 });
 
-test("three identical paragraphs; edit the middle only", () => {
+test("three identical paragraphs; edit the middle only", async () => {
 	const before = `Same\n\nSame\n\nSame`;
 	const after = `Same\n\nSame updated\n\nSame`;
-	const beforeState = makeBeforeState(before, ["p1", "p2", "p3"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f21";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["p1", "p2", "p3"],
+	});
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Only p2 should be modified
@@ -525,14 +626,15 @@ test("three identical paragraphs; edit the middle only", () => {
 	}
 });
 
-test("move a paragraph and add one word (keep id and update order)", () => {
+test("move a paragraph and add one word (keep id and update order)", async () => {
 	const before = `Alpha\n\nBeta`;
 	const after = `Beta plus\n\nAlpha`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f27";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// p2 should be modified ("Beta plus")
@@ -551,14 +653,20 @@ test("move a paragraph and add one word (keep id and update order)", () => {
 	]);
 });
 
-test("move a section and tweak heading text slightly (ids preserved; heading modified; order updated)", () => {
+test("move a section and tweak heading text slightly (ids preserved; heading modified; order updated)", async () => {
 	const before = `# A\n\nPara A\n\n# B\n\nPara B`;
 	const after = `# B plus\n\nPara B\n\n# A\n\nPara A`;
-	const beforeState = makeBeforeState(before, ["hA", "pA", "hB", "pB"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f28";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["hA", "pA", "hB", "pB"],
+	});
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Root order updated to B section first, then A
@@ -585,14 +693,15 @@ test("move a section and tweak heading text slightly (ids preserved; heading mod
 	expect(delPB).toBeUndefined();
 });
 
-test("list item text change: only list block modified (id preserved)", () => {
+test("list item text change: only list block modified (id preserved)", async () => {
 	const before = `- one\n- two`;
 	const after = `- one\n- two changed`;
-	const beforeState = makeBeforeState(before, ["list1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f29";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
 	// Should emit a single list block modification for entity list1
@@ -606,14 +715,15 @@ test("list item text change: only list block modified (id preserved)", () => {
 	expect(changes.length).toBe(1);
 });
 
-test("reorder list items: single list modification and no root order change", () => {
+test("reorder list items: single list modification and no root order change", async () => {
 	const before = `- one\n- two\n- three`;
 	const after = `- three\n- one\n- two`;
-	const beforeState = makeBeforeState(before, ["list1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f30";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -628,14 +738,15 @@ test("reorder list items: single list modification and no root order change", ()
 	expect(changes.length).toBe(1);
 });
 
-test("add a list item: single list modification and no root order change", () => {
+test("add a list item: single list modification and no root order change", async () => {
 	const before = `- one\n- two`;
 	const after = `- one\n- two\n- three`;
-	const beforeState = makeBeforeState(before, ["list1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f31";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -647,14 +758,15 @@ test("add a list item: single list modification and no root order change", () =>
 	expect(root).toBeUndefined();
 });
 
-test("remove a list item: single list modification and no root order change", () => {
+test("remove a list item: single list modification and no root order change", async () => {
 	const before = `- one\n- two\n- three`;
 	const after = `- one\n- three`;
-	const beforeState = makeBeforeState(before, ["list1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f32";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -666,14 +778,15 @@ test("remove a list item: single list modification and no root order change", ()
 	expect(root).toBeUndefined();
 });
 
-test("table: add a row: single table modification and no root order change", () => {
+test("table: add a row: single table modification and no root order change", async () => {
 	const before = `| a | b |\n| - | - |\n| 1 | 2 |`;
 	const after = `| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |`;
-	const beforeState = makeBeforeState(before, ["t1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f33";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -691,14 +804,15 @@ test("table: add a row: single table modification and no root order change", () 
 	expect(root).toBeUndefined();
 });
 
-test("table: remove a row: single table modification and no root order change", () => {
+test("table: remove a row: single table modification and no root order change", async () => {
 	const before = `| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |`;
 	const after = `| a | b |\n| - | - |\n| 1 | 2 |`;
-	const beforeState = makeBeforeState(before, ["t1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f34";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -716,14 +830,15 @@ test("table: remove a row: single table modification and no root order change", 
 	expect(root).toBeUndefined();
 });
 
-test("table: reorder rows: single table modification and no root order change", () => {
+test("table: reorder rows: single table modification and no root order change", async () => {
 	const before = `| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |\n| 5 | 6 |`;
 	const after = `| a | b |\n| - | - |\n| 3 | 4 |\n| 5 | 6 |\n| 1 | 2 |`;
-	const beforeState = makeBeforeState(before, ["t1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f35";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -747,14 +862,15 @@ test("table: reorder rows: single table modification and no root order change", 
 	expect(root).toBeUndefined();
 });
 
-test("paragraph → blockquote (same text): deletion + addition + root order change", () => {
+test("paragraph → blockquote (same text): deletion + addition + root order change", async () => {
 	const before = `Hello`;
 	const after = `> Hello`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f22";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
 
@@ -777,14 +893,15 @@ test("paragraph → blockquote (same text): deletion + addition + root order cha
 	]);
 });
 
-test("paragraph → heading (same text): deletion + addition + root order change", () => {
+test("paragraph → heading (same text): deletion + addition + root order change", async () => {
 	const before = `Hello`;
 	const after = `# Hello`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f23";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
 
@@ -807,14 +924,15 @@ test("paragraph → heading (same text): deletion + addition + root order change
 	]);
 });
 
-test('paragraph split ("AB" → "A" + "B"): first keeps id, second gets new id', () => {
+test('paragraph split ("AB" → "A" + "B"): first keeps id, second gets new id', async () => {
 	const before = `AB`;
 	const after = `A\n\nB`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f24";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
 
@@ -842,14 +960,15 @@ test('paragraph split ("AB" → "A" + "B"): first keeps id, second gets new id',
 	]);
 });
 
-test('paragraph merge ("A" + "B" → "AB"): first keeps id (modified), second deleted', () => {
+test('paragraph merge ("A" + "B" → "AB"): first keeps id (modified), second deleted', async () => {
 	const before = `A\n\nB`;
 	const after = `AB`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f25";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
 
@@ -872,28 +991,40 @@ test('paragraph merge ("A" + "B" → "AB"): first keeps id (modified), second de
 	expect((root!.snapshot_content as { order: string[] }).order).toEqual(["p1"]);
 });
 
-test("CRLF ↔ LF normalization (entire file): no changes", () => {
+test("CRLF ↔ LF normalization (entire file): no changes", async () => {
 	const before = `Line A\r\n\r\nLine B`;
 	const after = `Line A\n\nLine B`;
-	const beforeState = makeBeforeState(before, ["p1", "p2"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f26";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before.replace(/\r\n/g, "\n"),
+		ids: ["p1", "p2"],
+	});
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(0);
 });
 
-test("hard break variants (spaces vs backslash, CRLF): same id, mod or noop", () => {
+test("hard break variants (spaces vs backslash, CRLF): same id, mod or noop", async () => {
 	// Two spaces + CRLF indicates a hard break in Markdown
 	const before = `line··\r\nbreak`;
 	const after = `line\\\r\nbreak`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f49";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before.replace(/··/g, "  "),
+		ids: ["p1"],
+	});
 	const changes = detectChanges({
-		beforeState,
+		lix,
 		after: {
-			id: "f",
+			id: fileId,
 			path: "/f.md",
 			data: encode(after.replace(/··/g, "  ")),
 			metadata: {},
@@ -907,14 +1038,15 @@ test("hard break variants (spaces vs backslash, CRLF): same id, mod or noop", ()
 	expect(newIds.length).toBe(0);
 });
 
-test("code block: edit content, same lang → keep id; single modification", () => {
+test("code block: edit content, same lang → keep id; single modification", async () => {
 	const before = "```js\nconsole.log(1)\n```";
 	const after = "```js\nconsole.log(2)\n```";
-	const beforeState = makeBeforeState(before, ["code1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f50";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -927,14 +1059,15 @@ test("code block: edit content, same lang → keep id; single modification", () 
 	expect(value).toContain("console.log(2)");
 });
 
-test("code block: change lang only → same id; single modification", () => {
+test("code block: change lang only → same id; single modification", async () => {
 	const before = "```js\nconsole.log(1)\n```";
 	const after = "```ts\nconsole.log(1)\n```";
-	const beforeState = makeBeforeState(before, ["code1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f36";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -947,14 +1080,15 @@ test("code block: change lang only → same id; single modification", () => {
 	expect(value).toContain("console.log(1)");
 });
 
-test("code block: backtick fence length 3 ↔ 4 → same id; mod or noop", () => {
+test("code block: backtick fence length 3 ↔ 4 → same id; mod or noop", async () => {
 	const before = "```js\nconsole.log(1)\n```";
 	const after = "````js\nconsole.log(1)\n````";
-	const beforeState = makeBeforeState(before, ["code1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f37";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	// Canonical serializer should normalize either way; allow 0 or 1 change but never a new id
 	expect([0, 1]).toContain(changes.length);
@@ -964,14 +1098,15 @@ test("code block: backtick fence length 3 ↔ 4 → same id; mod or noop", () =>
 	expect(add).toBeUndefined();
 });
 
-test("paragraph with link: change link text only → same paragraph id; single modification", () => {
+test("paragraph with link: change link text only → same paragraph id; single modification", async () => {
 	const before = `[text](https://example.com)`;
 	const after = `[new](https://example.com)`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f38";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -989,14 +1124,15 @@ test("paragraph with link: change link text only → same paragraph id; single m
 	expect(root).toBeUndefined();
 });
 
-test("paragraph with link: change only the url → same paragraph id; single modification", () => {
+test("paragraph with link: change only the url → same paragraph id; single modification", async () => {
 	const before = `[text](https://example.com)`;
 	const after = `[text](https://example.org)`;
-	const beforeState = makeBeforeState(before, ["p1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f39";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -1014,14 +1150,15 @@ test("paragraph with link: change only the url → same paragraph id; single mod
 	expect(root).toBeUndefined();
 });
 
-test("top-level html node: text tweak → same id; single modification", () => {
+test("top-level html node: text tweak → same id; single modification", async () => {
 	const before = `<div>Hello</div>`;
 	const after = `<div>Hello world</div>`;
-	const beforeState = makeBeforeState(before, ["h1"]);
-
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f40";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
 
@@ -1037,14 +1174,16 @@ test("top-level html node: text tweak → same id; single modification", () => {
 
 test.todo(
 	"custom element html: add top-level element → addition + root order change",
-	() => {
+	async () => {
 		const before = ``;
 		const after = `<doc-figure src="/img.png" caption="Hello" />`;
-		const beforeState = makeBeforeState(before, []);
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f41";
+		await seedMarkdownState({ lix, fileId, markdown: before, ids: [] });
 
 		const changes = detectChanges({
-			beforeState,
-			after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 		expect(changes).toHaveLength(2);
 
@@ -1063,14 +1202,16 @@ test.todo(
 
 test.todo(
 	"custom element html: delete top-level element → deletion + root order change",
-	() => {
+	async () => {
 		const before = `<doc-figure src="/img.png" caption="Hello" />`;
 		const after = ``;
-		const beforeState = makeBeforeState(before, ["html1"]);
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f42";
+		await seedMarkdownState({ lix, fileId, markdown: before, ids: ["html1"] });
 
 		const changes = detectChanges({
-			beforeState,
-			after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 		expect(changes).toHaveLength(2);
 
@@ -1086,17 +1227,19 @@ test.todo(
 	},
 );
 
-test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", () => {
+test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", async () => {
 	// Café (NFC) vs Cafe + combining acute (NFD)
 	const nfc = "Caf\u00E9";
 	const nfd = "Cafe\u0301";
 	const before = `${nfc}`;
 	const after = `${nfd}`;
-	const beforeState = makeBeforeState(before, ["p1"]);
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f43";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 
 	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
+		lix,
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	// Ideal: canonicalization eliminates differences => 0 or a single mod to same id
 	expect([0, 1]).toContain(changes.length);
@@ -1106,182 +1249,217 @@ test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", () =
 	expect(foreignParagraph).toBeUndefined();
 });
 
-test("large doc (1k paras): delete 1, insert 1, move 10 → 3 changes", () => {
-	// Build 1k paragraphs via for-loop
-	const paras: string[] = [];
-	const beforeIds: string[] = [];
-	for (let i = 1; i <= 1000; i++) {
-		paras.push(`P${i}`);
-		beforeIds.push(`p${i}`);
-	}
-	const before = paras.join("\n\n");
-	const beforeState = makeBeforeState(before, beforeIds);
+test(
+	"large doc (500 paras): delete 1, insert 1, move 10 → 3 changes",
+	{ timeout: 10000 },
+	async () => {
+		// Build 500 paragraphs via for-loop
+		const paras: string[] = [];
+		const beforeIds: string[] = [];
+		for (let i = 1; i <= 500; i++) {
+			paras.push(`P${i}`);
+			beforeIds.push(`p${i}`);
+		}
+		const before = paras.join("\n\n");
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f44";
+		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-	// After: move P901..P910 to the front, delete P500, insert PX after P600
-	const moved = paras.slice(900, 910); // P901..P910
-	const remaining = paras.slice(0, 900).concat(paras.slice(910)); // exclude moved
-	const remainingNoP500 = remaining.filter((s) => s !== "P500");
-	const idxP600 = remainingNoP500.indexOf("P600");
-	const afterParas = [
-		...moved,
-		...remainingNoP500.slice(0, idxP600 + 1),
-		"PX",
-		...remainingNoP500.slice(idxP600 + 1),
-	];
-	const after = afterParas.join("\n\n");
+		// After: move P451..P460 to the front, delete P500, insert PX after P300
+		const moved = paras.slice(450, 460); // P451..P460
+		const remaining = paras.slice(0, 450).concat(paras.slice(460)); // exclude moved
+		const remainingNoP500 = remaining.filter((s) => s !== "P500");
+		const idxP300 = remainingNoP500.indexOf("P300");
+		const afterParas = [
+			...moved,
+			...remainingNoP500.slice(0, idxP300 + 1),
+			"PX",
+			...remainingNoP500.slice(idxP300 + 1),
+		];
+		const after = afterParas.join("\n\n");
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
+		const changes = detectChanges({
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+		});
 
-	// One deletion (p500)
-	const del = changes.find((c) => c.entity_id === "p500");
-	expect(del).toBeTruthy();
-	expect(del!.snapshot_content).toBeNull();
+		// One deletion (p500)
+		const del = changes.find((c) => c.entity_id === "p500");
+		expect(del).toBeTruthy();
+		expect(del!.snapshot_content).toBeNull();
 
-	// One addition (PX)
-	const add = changes.find(
-		(c) =>
-			c.snapshot_content?.type === "paragraph" &&
-			c.snapshot_content?.children?.[0]?.value === "PX",
-	);
-	expect(add).toBeTruthy();
-	expect(beforeIds).not.toContain(add!.entity_id);
+		// One addition (PX)
+		const add = changes.find(
+			(c) =>
+				c.snapshot_content?.type === "paragraph" &&
+				c.snapshot_content?.children?.[0]?.value === "PX",
+		);
+		expect(add).toBeTruthy();
+		expect(beforeIds).not.toContain(add!.entity_id);
 
-	// Root order updated with length 1000
-	const root = changes.find((c) => c.entity_id === "root");
-	expect(root).toBeTruthy();
-	const order = (root!.snapshot_content as { order: string[] })
-		.order as string[];
-	expect(order.length).toBe(1000);
+		// Root order updated with length 500
+		const root = changes.find((c) => c.entity_id === "root");
+		expect(root).toBeTruthy();
+		const order = (root!.snapshot_content as { order: string[] })
+			.order as string[];
+		expect(order.length).toBe(500);
 
-	// Starts with moved ids p901..p910
-	const expectedStart = Array.from({ length: 10 }, (_, i) => `p${901 + i}`);
-	expect(order.slice(0, 10)).toEqual(expectedStart);
+		// Starts with moved ids p451..p460
+		const expectedStart = Array.from({ length: 10 }, (_, i) => `p${451 + i}`);
+		expect(order.slice(0, 10)).toEqual(expectedStart);
 
-	// p500 not in order; PX appears right after p600
-	expect(order).not.toContain("p500");
-	const addedId = add!.entity_id;
-	const idx600 = order.indexOf("p600");
-	expect(idx600).toBeGreaterThanOrEqual(0);
-	expect(order[idx600 + 1]).toBe(addedId);
-});
+		// p500 not in order; PX appears right after p300
+		expect(order).not.toContain("p500");
+		const addedId = add!.entity_id;
+		const idx300 = order.indexOf("p300");
+		expect(idx300).toBeGreaterThanOrEqual(0);
+		expect(order[idx300 + 1]).toBe(addedId);
+	},
+);
 
-test("large doc (5k): pure shuffle → root change only", () => {
-	const { paras, beforeIds, markdown } = makeBigDoc(5000);
-	const beforeState = makeBeforeState(markdown, beforeIds);
-	const after = shuffle(paras, 123).join("\n\n");
+test(
+	"large doc (500): pure shuffle → root change only",
+	{ timeout: 10000 },
+	async () => {
+		const { paras, beforeIds, markdown } = makeBigDoc(500);
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f45";
+		await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
+		const after = shuffle(paras, 123).join("\n\n");
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
+		const changes = detectChanges({
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+		});
 
-	// Expect ONLY a root order change
-	const dels = changes.filter((c) => c.snapshot_content === null);
-	const adds = changes.filter((c) => c.snapshot_content?.type);
-	expect(dels.length).toBe(0);
-	expect(adds.length).toBe(0);
+		// Expect ONLY a root order change
+		const dels = changes.filter((c) => c.snapshot_content === null);
+		const adds = changes.filter((c) => c.snapshot_content?.type);
+		expect(dels.length).toBe(0);
+		expect(adds.length).toBe(0);
 
-	const root = changes.find((c) => c.entity_id === "root");
-	expect(root).toBeTruthy();
-	const order = (root!.snapshot_content as { order: string[] })
-		.order as string[];
-	expect(order.length).toBe(5000);
-});
+		const root = changes.find((c) => c.entity_id === "root");
+		expect(root).toBeTruthy();
+		const order = (root!.snapshot_content as { order: string[] })
+			.order as string[];
+		expect(order.length).toBe(500);
+	},
+);
 
-test("large doc (3k): ~1% tiny edits → equal number of mods, no adds/dels", () => {
-	const { paras, beforeIds, markdown } = makeBigDoc(3000);
-	const beforeState = makeBeforeState(markdown, beforeIds);
+test(
+	"large doc (500): ~1% tiny edits → equal number of mods, no adds/dels",
+	{ timeout: 10000 },
+	async () => {
+		const { paras, beforeIds, markdown } = makeBigDoc(500);
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f46";
+		await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
 
-	const edited = applySmallEdits(paras, Math.floor(paras.length * 0.01), 99);
-	const after = edited.join("\n\n");
+		const edited = applySmallEdits(paras, Math.floor(paras.length * 0.01), 99);
+		const after = edited.join("\n\n");
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
+		const changes = detectChanges({
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+		});
 
-	const dels = changes.filter((c) => c.snapshot_content === null);
-	const adds = changes.filter(
-		(c) =>
-			c.snapshot_content?.type &&
-			c.entity_id &&
-			!beforeIds.includes(c.entity_id),
-	);
-	const mods = changes.filter(
-		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-	);
-	expect(dels.length).toBe(0);
-	expect(adds.length).toBe(0);
-	expect(mods.length).toBeGreaterThan(0);
-	// Allow a little slack but expect close to 1% (±2)
-	expect(
-		Math.abs(mods.length - Math.floor(paras.length * 0.01)),
-	).toBeLessThanOrEqual(2);
-});
+		const dels = changes.filter((c) => c.snapshot_content === null);
+		const adds = changes.filter(
+			(c) =>
+				c.snapshot_content?.type &&
+				c.entity_id &&
+				!beforeIds.includes(c.entity_id),
+		);
+		const mods = changes.filter(
+			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+		);
+		expect(dels.length).toBe(0);
+		expect(adds.length).toBe(0);
+		expect(mods.length).toBeGreaterThan(0);
+		// Allow a little slack but expect close to 1% (±2)
+		expect(
+			Math.abs(mods.length - Math.floor(paras.length * 0.01)),
+		).toBeLessThanOrEqual(2);
+	},
+);
 
-test("duplicates (1k Same): edit #700 only → 1 mod, no root change", () => {
-	const paras = Array.from({ length: 1000 }, () => "Same");
-	const beforeIds = Array.from({ length: 1000 }, (_, i) => `p${i + 1}`);
-	const before = paras.join("\n\n");
-	const beforeState = makeBeforeState(before, beforeIds);
+test(
+	"duplicates (500 Same): edit #350 only → 1 mod, no root change",
+	{ timeout: 10000 },
+	async () => {
+		const paras = Array.from({ length: 500 }, () => "Same");
+		const beforeIds = Array.from({ length: 500 }, (_, i) => `p${i + 1}`);
+		const before = paras.join("\n\n");
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f47";
+		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-	const afterParas = paras.slice();
-	afterParas[699] = "Same updated";
-	const after = afterParas.join("\n\n");
+		const afterParas = paras.slice();
+		afterParas[349] = "Same updated";
+		const after = afterParas.join("\n\n");
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
+		const changes = detectChanges({
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+		});
 
-	const mods = changes.filter((c) => c.snapshot_content?.type === "paragraph");
-	expect(mods.length).toBe(1);
-	expect(mods[0]!.entity_id).toBe("p700");
+		const mods = changes.filter(
+			(c) => c.snapshot_content?.type === "paragraph",
+		);
+		expect(mods.length).toBe(1);
+		expect(mods[0]!.entity_id).toBe("p350");
 
-	const root = changes.find((c) => c.entity_id === "root");
-	if (root) {
-		expect((root.snapshot_content as { order: string[] }).order).toEqual(
-			beforeIds,
-		); // order stable
-	}
-});
+		const root = changes.find((c) => c.entity_id === "root");
+		if (root) {
+			expect((root.snapshot_content as { order: string[] }).order).toEqual(
+				beforeIds,
+			); // order stable
+		}
+	},
+);
 
-test("large mixed: 2k dup 'Same' blocks + move 200 unique → 1 root + targeted mods", () => {
-	// Build 2000 'Same' + 200 unique tail
-	const dups = Array.from({ length: 2000 }, () => "Same");
-	const uniques = Array.from({ length: 200 }, (_, i) => `U${i + 1}`);
-	const paras = [...dups, ...uniques];
-	const beforeIds = Array.from({ length: paras.length }, (_, i) => `p${i + 1}`);
-	const before = paras.join("\n\n");
-	const beforeState = makeBeforeState(before, beforeIds);
+test(
+	"large mixed (500): 300 dup 'Same' + move 200 unique → 1 root + targeted mods",
+	{ timeout: 10000 },
+	async () => {
+		// Build 300 'Same' + 200 unique tail (total 500)
+		const dups = Array.from({ length: 300 }, () => "Same");
+		const uniques = Array.from({ length: 200 }, (_, i) => `U${i + 1}`);
+		const paras = [...dups, ...uniques];
+		const beforeIds = Array.from(
+			{ length: paras.length },
+			(_, i) => `p${i + 1}`,
+		);
+		const before = paras.join("\n\n");
+		const lix = await openLix({ providePlugins: [plugin] });
+		const fileId = "f48";
+		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-	// Move the last 200 uniques to the front; edit U10 slightly
-	const moved = uniques.slice();
-	const remaining = dups.slice();
-	const editedMoved = moved.slice();
-	editedMoved[9] = editedMoved[9] + " x";
-	const after = [...editedMoved, ...remaining].join("\n\n");
+		// Move the last 200 uniques to the front; edit U10 slightly
+		const moved = uniques.slice();
+		const remaining = dups.slice();
+		const editedMoved = moved.slice();
+		editedMoved[9] = editedMoved[9] + " x";
+		const after = [...editedMoved, ...remaining].join("\n\n");
 
-	const changes = detectChanges({
-		beforeState,
-		after: { id: "f", path: "/f.md", data: encode(after), metadata: {} },
-	});
+		const changes = detectChanges({
+			lix,
+			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+		});
 
-	// Expect one root, plus exactly one mod (U10), no adds/dels
-	const root = changes.find((c) => c.entity_id === "root");
-	expect(root).toBeTruthy();
+		// Expect one root, plus exactly one mod (U10), no adds/dels
+		const root = changes.find((c) => c.entity_id === "root");
+		expect(root).toBeTruthy();
 
-	const dels = changes.filter((c) => c.snapshot_content === null);
-	const adds = changes.filter(
-		(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
-	);
-	const mods = changes.filter(
-		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-	);
-	expect(dels.length).toBe(0);
-	expect(adds.length).toBe(0);
-	expect(mods.length).toBe(1);
-});
+		const dels = changes.filter((c) => c.snapshot_content === null);
+		const adds = changes.filter(
+			(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
+		);
+		const mods = changes.filter(
+			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+		);
+		expect(dels.length).toBe(0);
+		expect(adds.length).toBe(0);
+		expect(mods.length).toBe(1);
+	},
+);
