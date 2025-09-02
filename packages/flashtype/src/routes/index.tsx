@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TipTapEditor } from "@/components/tiptap-editor";
+import { TipTapEditor } from "@/components/editor/tip-tap-editor";
 
 export const Route = createFileRoute("/")({
 	component: Index,

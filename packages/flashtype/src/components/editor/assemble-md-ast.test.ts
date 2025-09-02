@@ -23,12 +23,10 @@ test("assembleMdAst returns ordered children from state (seeded by plugin)", asy
 		})
 		.execute();
 
-	// The md plugin populates state on file insert; assemble AST from state
 	const ast = await assembleMdAst({ lix, fileId });
 	expect(ast?.type).toBe("root");
 	const children = (ast as any)?.children || [];
 	expect(Array.isArray(children)).toBe(true);
-	// Look for a paragraph with text "Hello"
 	const hasHello = children.some(
 		(n: any) =>
 			n?.type === "paragraph" &&
