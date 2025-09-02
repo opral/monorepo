@@ -68,23 +68,47 @@ export async function mergeVersion(args: {
 			schema_version: string;
 		}> = [];
 
-		for (const d of diffs) {
-			if (d.status === "created" || d.status === "updated") {
-				if (d.after_change_id) {
-					toReference.push({
-						id: d.after_change_id,
-						entity_id: d.entity_id,
-						schema_key: d.schema_key,
-						file_id: d.file_id,
-					});
-				}
-			} else if (d.status === "deleted") {
-				// Lookup plugin_key and schema_version from target's before_change_id
-				const before = await trx
-					.selectFrom("change")
-					.where("id", "=", d.before_change_id!)
-					.select(["plugin_key", "schema_version"])
-					.executeTakeFirstOrThrow();
+			for (const d of diffs) {
+				/*
+				TODO [TEMP FILTER — CLEAN UP AFTER STEP 5]:
+				This block purposely filters control meta out of winners/deletions during merge.
+				Reason: keep commit membership deterministic and avoid duplicating meta under cache-miss
+				while we still conflate domain/meta in `change_ids`.
+
+				Important:
+				- Do NOT blanket-filter all `lix_*` schemas. Some `lix_*` are valid domain rows
+				  (e.g., `lix_key_value`, `lix_file_descriptor`). This filter is narrowly scoped to
+				  control/meta only.
+
+				Cleanup plan:
+				- Remove this temporary filter once meta vs domain membership is formally split
+				  (introduce `meta_change_ids`; see Optimization Plan Step 5).
+				- Tracked in `optimizaton-plan/plan.md` under Cleanup TODOs.
+				*/
+				// Treat only domain schemas as winners/deletions. Exclude control meta that should not be merged as domain.
+				const isControlMeta =
+					d.schema_key === "lix_commit" ||
+					d.schema_key === "lix_change_set" ||
+					d.schema_key === "lix_version" ||
+					d.schema_key === "lix_commit_edge" ||
+					d.schema_key === "lix_change_author";
+
+				if ((d.status === "created" || d.status === "updated") && !isControlMeta) {
+					if (d.after_change_id) {
+						toReference.push({
+							id: d.after_change_id,
+							entity_id: d.entity_id,
+							schema_key: d.schema_key,
+							file_id: d.file_id,
+						});
+					}
+				} else if (d.status === "deleted" && !isControlMeta) {
+					// Lookup plugin_key and schema_version from target's before_change_id
+					const before = await trx
+						.selectFrom("change")
+						.where("id", "=", d.before_change_id!)
+						.select(["plugin_key", "schema_version"])
+						.executeTakeFirstOrThrow();
 
 				toDelete.push({
 					entity_id: d.entity_id,
@@ -94,6 +118,8 @@ export async function mergeVersion(args: {
 					schema_version: before.schema_version,
 				});
 			}
+
+			//
 		}
 
 		// Flush pending source tracked changes for referenced items into the change table
@@ -212,24 +238,7 @@ export async function mergeVersion(args: {
 		};
 		changeRows.push(versionRow);
 
-		// TEMPORARY: Also write version change for global scope until materializer is fixed
-		// This ensures the materializer can find the new version tip even in cache miss mode
-		// TODO: Remove this once materializer can handle single-write model (optimization plan step 3)
-		const globalVersionChangeId = uuidV7({ lix });
-		const globalVersionRow: LixChangeRaw = {
-			id: globalVersionChangeId,
-			entity_id: target.id,
-			schema_key: "lix_version",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				...targetVersion,
-				commit_id: targetCommitId,
-			}),
-			created_at: now,
-		};
-		changeRows.push(globalVersionRow);
+			//
 		//
 
 		// Create deletion change rows (domain tombstones) for target
@@ -248,8 +257,8 @@ export async function mergeVersion(args: {
 			});
 		}
 
-		// Create explicit CSE change rows for winners + deletions anchored under target change_set
-		const cseChangeRows: LixChangeRaw[] = [];
+			// Create explicit CSE change rows for winners + deletions anchored under target change_set
+			const cseChangeRows: LixChangeRaw[] = [];
 		for (const ref of toReference) {
 			cseChangeRows.push({
 				id: uuidV7({ lix }),
@@ -285,7 +294,40 @@ export async function mergeVersion(args: {
 				}),
 				created_at: now,
 			});
-		}
+			}
+
+			// Copy change authors from source for referenced winners
+			const authorEntries: Array<{ id: string; entity_id: string; created_at: string }> = [];
+			if (toReference.length > 0) {
+				const refIds = toReference.map((r) => r.id);
+				const sourceAuthorRows = await trx
+					.selectFrom('change')
+					.where('schema_key', '=', 'lix_change_author')
+					.where(sql`json_extract(snapshot_content, '$.change_id')`, 'in', refIds as any)
+					.select(['id', 'entity_id', sql`json(snapshot_content)`.as('snapshot'), 'created_at'])
+					.execute();
+
+				for (const row of sourceAuthorRows as any[]) {
+					authorEntries.push({ id: String(row.id), entity_id: String(row.entity_id), created_at: String(row.created_at) });
+					// Also anchor an explicit CSE change row for the author under target change_set
+					cseChangeRows.push({
+						id: uuidV7({ lix }),
+						entity_id: `${targetChangeSetId}~${row.id}`,
+						schema_key: 'lix_change_set_element',
+						schema_version: '1.0',
+						file_id: 'lix',
+						plugin_key: 'lix_own_entity',
+						snapshot_content: JSON.stringify({
+							change_set_id: targetChangeSetId,
+							change_id: row.id,
+							entity_id: row.entity_id,
+							schema_key: 'lix_change_author',
+							file_id: 'lix',
+						}),
+						created_at: row.created_at,
+					});
+				}
+			}
 
 		// Update commit snapshot to include change_ids for materializer determinism
 		{
@@ -293,21 +335,60 @@ export async function mergeVersion(args: {
 				(c) => c.schema_key === "lix_commit" && c.entity_id === targetCommitId
 			);
 			if (commitIdx >= 0) {
-				const snap = JSON.parse(
-					changeRows[commitIdx]!.snapshot_content as any
-				) as any;
+				const baseSnap = {
+					id: targetCommitId,
+					change_set_id: targetChangeSetId,
+					parent_commit_ids: [targetVersion.commit_id, sourceVersion.commit_id],
+				} as any;
+				// Build intended membership explicitly
 				const winnerIds = toReference.map((r) => r.id);
 				const deletionIds = deletionChanges.map((d) => d.id);
-				// Include local meta so materializer can derive CSEs for commit + change_set
-				snap.change_ids = [
+				const authorIds = authorEntries.map((a) => a.id);
+				//
+				let membership = [
 					...winnerIds,
 					...deletionIds,
+					...authorIds,
 					targetVersionChangeId,
-					globalVersionChangeId,
 					targetChangeSetChangeId,
 					targetCommitChangeId,
 				];
-				changeRows[commitIdx]!.snapshot_content = JSON.stringify(snap);
+
+				// Filter out any prior target commit/change_set meta ids if present
+				try {
+					// Previous target commit change id
+					const prevCommitChange = await (trx
+						.selectFrom("change")
+						.where("schema_key", "=", "lix_commit")
+						.where("entity_id", "=", targetVersion.commit_id)
+						.select(["id", sql`json(snapshot_content)`.as("snapshot")])
+						.executeTakeFirst());
+					const prevCommitChangeId = prevCommitChange?.id as string | undefined;
+					const prevChangeSetId = prevCommitChange?.snapshot?.change_set_id as
+						| string
+						| undefined;
+					let prevChangeSetChangeId: string | undefined = undefined;
+					if (prevChangeSetId) {
+						const prevCsChange = await trx
+							.selectFrom("change")
+							.where("schema_key", "=", "lix_change_set")
+							.where("entity_id", "=", prevChangeSetId)
+							.select(["id"]) 
+							.executeTakeFirst();
+						prevChangeSetChangeId = prevCsChange?.id as string | undefined;
+					}
+					const exclude = new Set(
+						[prevCommitChangeId, prevChangeSetChangeId].filter(Boolean) as string[]
+					);
+					membership = membership.filter((id) => !exclude.has(id));
+				} catch {}
+
+				// Deduplicate any accidental duplicates (e.g., author)
+				membership = Array.from(new Set(membership));
+
+				// Assign final membership, hard overriding snapshot to avoid residue
+				const finalSnap = { ...baseSnap, change_ids: membership };
+				changeRows[commitIdx]!.snapshot_content = JSON.stringify(finalSnap);
 			}
 		}
 
@@ -322,8 +403,8 @@ export async function mergeVersion(args: {
 				.insertInto("change")
 				.values(allChangesToInsert as any)
 				.execute();
-			//
-		}
+				//
+			}
 
 		// Prepare incremental cache updates in a single batch (MaterializedChange)
 		type Mat = Parameters<typeof updateStateCache>[0]["changes"][number] & {
@@ -448,13 +529,20 @@ export async function mergeVersion(args: {
 				mkCse(del.id, del.entity_id, del.schema_key, del.file_id)
 			);
 		}
-		// Meta CSEs
-		cacheBatch.push(
-			mkCse(targetCommitChangeId, targetCommitId, "lix_commit", "lix")
-		);
-		cacheBatch.push(
-			mkCse(targetVersionChangeId, target.id, "lix_version", "lix")
-		);
+			// Meta CSEs
+			cacheBatch.push(
+				mkCse(targetCommitChangeId, targetCommitId, "lix_commit", "lix")
+			);
+			cacheBatch.push(
+				mkCse(targetVersionChangeId, target.id, "lix_version", "lix")
+			);
+			cacheBatch.push(
+				mkCse(targetChangeSetChangeId, targetChangeSetId, "lix_change_set", "lix")
+			);
+			// Author CSEs (copied from source)
+			for (const au of authorEntries) {
+				cacheBatch.push(mkCse(au.id, au.entity_id, 'lix_change_author', 'lix'));
+			}
 
 		// Write incremental cache in a single batched call
 		if (cacheBatch.length > 0) {

@@ -85,10 +85,9 @@ Notes:
 - Estimated delta: 0 for single‑change commits; potentially large savings for multi‑change commits.
 - Materializer complexity: per‑commit author aggregation can be computed in O(D + M) (domain changes + authors) via CSE join, instead of reading O(D×M) physical rows.
 
-## Step 5 (Later) — Introduce an internal “commit package”
+## Step 5 (Later) — Introduce `meta_change_ids`
 
-- Change: Add an internal `lix_commit_package` (or similar) that carries `commit_id`, `parent_commit_ids`, `change_set_id`, and split membership: `domain_change_ids` vs `meta_change_ids`.
-- Public `lix_commit` stays minimal (id, change_set_id). Parents and membership migrate to the package.
+- Add `meta_change_ids` to `lix_commit` that carries `commit_id`, `parent_commit_ids`, `change_set_id`, and split membership: `domain_change_ids` vs `meta_change_ids`.
 - Benefits:
   - Clear separation of “how we materialize” vs “what we expose”.
   - Enables further internal flexibility (e.g., deterministic working heads, background backfills) without API churn.
@@ -106,4 +105,8 @@ Notes:
 
 - Ship Steps 1 and 2 first. Add compatibility views and tests; ensure commit edges are materialized globally from `parent_commit_ids`.
 - Ship Step 3 “Drop Dual Commit”: remove the global duplicates for commit/version/change_set and keep edge/CSE derivation intact.
-- Consider Step 5 (commit package) when you want to slim public commit snapshots and decouple lineage/membership fully.
+- Consider Step 5 when you want to slim public commit snapshots and decouple lineage/membership fully.
+
+## Cleanup TODOs
+
+- Merge filter cleanup: In `packages/lix-sdk/src/version/merge-version.ts`, we temporarily filter control/meta schemas out of winners/deletions to keep commit membership deterministic under cache-miss. Do not blanket-filter `lix_*`; some are valid domain (e.g., `lix_key_value`, `lix_file_descriptor`). Remove this filter after Step 5 introduces `meta_change_ids` and formally splits domain vs meta membership.

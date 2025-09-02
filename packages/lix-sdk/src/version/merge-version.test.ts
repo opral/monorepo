@@ -812,6 +812,10 @@ simulationTest(
 			])
 			.execute();
 
+		// the schema counts should be identical between simulations in any case
+		// in addition to expecting certain counts
+		expectDeterministic(cseRows).toBeDefined();
+
 		const schemaCounts = cseRows.reduce<Record<string, number>>(
 			(acc, r: any) => {
 				acc[r.schema_key] = (acc[r.schema_key] ?? 0) + 1;
@@ -819,10 +823,6 @@ simulationTest(
 			},
 			{}
 		);
-
-		// the schema counts should be identical between simulations in any case
-		// in addition to expecting certain counts
-		expectDeterministic(schemaCounts).toBeDefined();
 
 		expectDeterministic(schemaCounts["lix_commit"]).toBe(1);
 		expectDeterministic(schemaCounts["lix_version"]).toBe(1);

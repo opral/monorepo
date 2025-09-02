@@ -110,17 +110,29 @@ export function applyMaterializeStateSchema(
 	// to obtain the actual change rows for that commit.
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
-        WITH commit_targets AS (
+        WITH cg_distinct AS (
+            SELECT commit_id, version_id, MIN(depth) AS depth
+            FROM internal_materialization_commit_graph
+            GROUP BY commit_id, version_id
+        ),
+        commit_targets AS (
 			-- Only path: change_ids embedded in commit snapshot
 			SELECT 
 				cg.version_id,
 				cg.commit_id,
 				cg.depth,
 				j.value AS target_change_id
-			FROM internal_materialization_commit_graph cg
+			FROM cg_distinct cg
 			JOIN change cmt ON cmt.entity_id = cg.commit_id 
 				AND cmt.schema_key = 'lix_commit'
-			JOIN json_each(json_extract(cmt.snapshot_content,'$.change_ids')) j
+            JOIN json_each(json_extract(cmt.snapshot_content,'$.change_ids')) j
+    ),
+    commit_targets_distinct AS (
+        -- De-duplicate commit-target pairs across version graph contexts for global projections,
+        -- keeping the smallest depth (closest to tip)
+        SELECT commit_id, MIN(depth) AS depth, target_change_id
+        FROM commit_targets
+        GROUP BY commit_id, target_change_id
     ),
     commit_changes AS (
         SELECT 
@@ -224,7 +236,7 @@ export function applyMaterializeStateSchema(
                 ORDER BY ct.depth ASC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_updated_at
-        FROM commit_targets ct
+        FROM commit_targets_distinct ct
         JOIN change cmt ON cmt.entity_id = ct.commit_id AND cmt.schema_key = 'lix_commit'
         JOIN change c ON c.id = ct.target_change_id
     ),
