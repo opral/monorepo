@@ -23,7 +23,7 @@ export function TipTapEditor({
 }: TipTapEditorProps) {
 	const lix = useLix();
 
-	const { setEditor, editor: ctxEditor } = useEditorCtx();
+	const { setEditor } = useEditorCtx();
 
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 
@@ -35,8 +35,7 @@ export function TipTapEditor({
 			.where("id", "=", activeFileId),
 	);
 
-
-    const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
+	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
 	const initialAst = usePromise(
 		React.useMemo(
@@ -45,7 +44,7 @@ export function TipTapEditor({
 		),
 	);
 
-    // Fallback: if no state yet, parse the file's markdown directly
+	// Fallback: if no state yet, parse the file's markdown directly
 	const fallbackAst = React.useMemo(() => {
 		try {
 			const bytes = (activeFile as any)?.data as Uint8Array | undefined;
@@ -56,7 +55,7 @@ export function TipTapEditor({
 		} catch {
 			return null;
 		}
-	}, [activeFile?.id, (activeFile as any)?.data]);
+	}, [activeFile?.data]);
 
 	const contentAst = React.useMemo(() => {
 		const hasState = Array.isArray((initialAst as any)?.children) &&

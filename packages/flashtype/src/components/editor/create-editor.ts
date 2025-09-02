@@ -202,7 +202,7 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 					event,
 				});
 			},
-			...(editorProps || {}),
+			...editorProps,
 		},
 	});
 }
