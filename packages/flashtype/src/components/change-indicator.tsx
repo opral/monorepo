@@ -12,8 +12,17 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
+import { createCheckpoint } from "@lix-js/sdk";
+import { selectWorkingDiff } from "@/queries";
 
 export function ChangeIndicator() {
+	const lix = useLix();
+	const diff = useQueryTakeFirst(selectWorkingDiff);
+	const total = diff?.total ?? 0;
+	const added = diff?.added ?? 0;
+	const removed = diff?.removed ?? 0;
+
 	const [open, setOpen] = useState(false);
 	const triggerRef = useRef<HTMLButtonElement | null>(null);
 	const createBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -47,10 +56,12 @@ export function ChangeIndicator() {
 						openedViaPointer.current = false;
 					}}
 				>
-					<span className="font-medium text-sm">3 changes</span>
+					<span className="font-medium text-sm">
+						<span data-testid="change-count">{total}</span> changes
+					</span>
 					<DiffIndicator
-						added={12}
-						removed={3}
+						added={added}
+						removed={removed}
 						highRange={30}
 						showCounts={false}
 					/>
@@ -75,7 +86,10 @@ export function ChangeIndicator() {
 									size="sm"
 									className="h-7 w-7 p-0"
 									aria-label="Auto-fill title and summary"
-									onClick={() => {}}
+									onClick={async () => {
+										await createCheckpoint({ lix: lix as any });
+										setOpen(false);
+									}}
 								>
 									<Zap className="size-4 text-amber-500" />
 								</Button>
@@ -105,6 +119,8 @@ export function ChangeIndicator() {
 						className="mt-3 w-full"
 						size="sm"
 						variant="default"
+						disabled={total === 0}
+						data-testid="create-checkpoint"
 					>
 						Create checkpoint
 					</Button>
