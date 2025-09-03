@@ -243,3 +243,40 @@ body,
 	height: 100%;
 	width: 100%;
 }
+
+/* TipTap content typography */
+@layer components {
+	.ProseMirror h1 {
+		@apply text-2xl font-bold leading-tight mt-6 mb-3;
+	}
+	.ProseMirror h2 {
+		@apply text-xl font-semibold leading-tight mt-5 mb-2.5;
+	}
+	.ProseMirror h3 {
+		@apply text-lg font-semibold leading-snug mt-4 mb-2;
+	}
+	.ProseMirror p {
+		@apply my-3;
+	}
+
+	/* Blockquote */
+	.ProseMirror blockquote {
+		@apply border-l-2 pl-3 italic text-muted-foreground my-3;
+	}
+	.ProseMirror blockquote p {
+		@apply my-0;
+	}
+
+	/* Inline code (not inside code blocks) */
+	.ProseMirror :not(pre) > code {
+		@apply bg-muted text-foreground font-mono text-[0.9em] rounded px-1.5 py-0.5;
+	}
+
+	/* Code block */
+	.ProseMirror pre {
+		@apply bg-muted border border-border rounded-md p-3 overflow-x-auto my-3;
+	}
+	.ProseMirror pre code {
+		@apply bg-transparent p-0 font-mono text-sm leading-relaxed;
+	}
+}
