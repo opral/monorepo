@@ -246,6 +246,15 @@ body,
 
 /* TipTap content typography */
 @layer components {
+	/* Lists */
+	.ProseMirror ul,
+	.ProseMirror ol {
+		@apply pl-6 my-3;
+	}
+	.ProseMirror li {
+		@apply my-1;
+	}
+
 	.ProseMirror h1 {
 		@apply text-2xl font-bold leading-tight mt-6 mb-3;
 	}
@@ -278,5 +287,20 @@ body,
 	}
 	.ProseMirror pre code {
 		@apply bg-transparent p-0 font-mono text-sm leading-relaxed;
+	}
+
+	/* Task list (checklist) */
+	.ProseMirror li[data-task] {
+		display: flex;
+		align-items: flex-start;
+	}
+	.ProseMirror li[data-task] > input[type="checkbox"] {
+		margin-top: 0.2em;
+	}
+	.ProseMirror li[data-task] > div {
+		flex: 1 1 auto;
+	}
+	.ProseMirror li[data-task] p {
+		@apply my-0;
 	}
 }
