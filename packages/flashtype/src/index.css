@@ -250,6 +250,13 @@ body,
 	.ProseMirror ul,
 	.ProseMirror ol {
 		@apply pl-6 my-3;
+		list-style-position: outside;
+	}
+	.ProseMirror ul {
+		list-style-type: disc;
+	}
+	.ProseMirror ol {
+		list-style-type: decimal;
 	}
 	.ProseMirror li {
 		@apply my-1;

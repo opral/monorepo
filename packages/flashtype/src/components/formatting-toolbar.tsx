@@ -14,6 +14,8 @@ import {
 	Image as ImageIcon,
 	MoreHorizontal,
 	ChevronDown,
+	Copy,
+	Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +31,9 @@ import {
 	DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { useEditorCtx } from "@/editor/editor-context";
+import { Separator } from "@/components/ui/separator";
+import { tiptapDocToAst } from "@opral/markdown-wc/tiptap";
+import { serializeAst } from "@opral/markdown-wc";
 
 function Tb({
 	label,
@@ -60,11 +65,77 @@ function Tb({
 
 export function FormattingToolbar() {
 	const { editor } = useEditorCtx();
+	const [copied, setCopied] = React.useState(false);
+	const copiedTimerRef = React.useRef<number | null>(null);
+	const [copyTooltipOpen, setCopyTooltipOpen] = React.useState(false);
+	const [copiedLabelPinned, setCopiedLabelPinned] = React.useState(false);
+	const copiedLabelTimerRef = React.useRef<number | null>(null);
+
+	async function handleCopyMarkdown() {
+		try {
+			if (!editor) return;
+			const ast = tiptapDocToAst((editor as any).getJSON());
+			const markdown = serializeAst(ast as any);
+			await navigator.clipboard.writeText(markdown);
+			// success animation
+			setCopied(true);
+			if (copiedTimerRef.current) window.clearTimeout(copiedTimerRef.current);
+			// Open tooltip immediately with success label, then close and revert
+			setCopyTooltipOpen(true);
+			setCopiedLabelPinned(true);
+			copiedTimerRef.current = window.setTimeout(() => {
+				setCopied(false);
+				setCopyTooltipOpen(false);
+				// Keep the "Copied" label visible during tooltip exit animation
+				if (copiedLabelTimerRef.current)
+					window.clearTimeout(copiedLabelTimerRef.current);
+				copiedLabelTimerRef.current = window.setTimeout(() => {
+					setCopiedLabelPinned(false);
+				}, 200);
+			}, 1200);
+		} catch (err) {
+			// Fallback for environments without clipboard API permissions
+			try {
+				const el = document.createElement("textarea");
+				el.value = (editor as any)?.getText?.() ?? "";
+				el.setAttribute("readonly", "");
+				el.style.position = "absolute";
+				el.style.left = "-9999px";
+				document.body.appendChild(el);
+				el.select();
+				document.execCommand("copy");
+				document.body.removeChild(el);
+				setCopied(true);
+				if (copiedTimerRef.current) window.clearTimeout(copiedTimerRef.current);
+				setCopyTooltipOpen(true);
+				setCopiedLabelPinned(true);
+				copiedTimerRef.current = window.setTimeout(() => {
+					setCopied(false);
+					setCopyTooltipOpen(false);
+					if (copiedLabelTimerRef.current)
+						window.clearTimeout(copiedLabelTimerRef.current);
+					copiedLabelTimerRef.current = window.setTimeout(() => {
+						setCopiedLabelPinned(false);
+					}, 200);
+				}, 1200);
+			} catch {}
+		}
+	}
+
+	React.useEffect(() => {
+		return () => {
+			if (copiedTimerRef.current) window.clearTimeout(copiedTimerRef.current);
+			if (copiedLabelTimerRef.current)
+				window.clearTimeout(copiedLabelTimerRef.current);
+		};
+	}, []);
 	return (
 		<div className="w-full border-b bg-background">
 			<div className="mx-auto flex h-10 items-center justify-center gap-1 px-4">
-				{/* Turn into dropdown */}
+				{/* Turn into dropdown (style) */}
 				<DropdownTurnInto />
+				{/* Divider: style | formatting */}
+				<Separator orientation="vertical" className="mx-2 h-5" />
 				<Tb
 					label="Bold"
 					onClick={() => editor?.chain().focus().toggleMark("bold").run()}
@@ -161,6 +232,43 @@ export function FormattingToolbar() {
 				<Tb label="Insert image">
 					<ImageIcon />
 				</Tb>
+				<Separator orientation="vertical" className="mx-2 h-5" />
+				<Tooltip
+					open={copied || copyTooltipOpen}
+					onOpenChange={(v) => {
+						// While copied animation is active, pin tooltip open
+						if (copied) {
+							setCopyTooltipOpen(true);
+							return;
+						}
+						setCopyTooltipOpen(v);
+					}}
+					delayDuration={1200}
+				>
+					<TooltipTrigger asChild>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							aria-label={copied ? "Copied Markdown" : "Copy Markdown"}
+							onMouseDown={(e) => e.preventDefault()}
+							onClick={handleCopyMarkdown}
+						>
+							<span className="relative inline-flex">
+								<Copy
+									className={`transition-all duration-150 ${copied ? "opacity-0 scale-75" : "opacity-100 scale-100"}`}
+								/>
+								<Check
+									className={`absolute text-emerald-600 transition-all duration-150 ${copied ? "opacity-100 scale-100 animate-in fade-in-0 zoom-in-95" : "opacity-0 scale-75"}`}
+									aria-hidden
+								/>
+							</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="top">
+						{copied || copiedLabelPinned ? "Copied Markdown" : "Copy Markdown"}
+					</TooltipContent>
+				</Tooltip>
 				<Tb label="More">
 					<MoreHorizontal />
 				</Tb>
@@ -208,6 +316,13 @@ function DropdownTurnInto() {
 		return () => clearTimeout(t);
 	}, [open]);
 
+	const isText = !!editor?.isActive("paragraph");
+	const isH1 = !!editor?.isActive("heading", { level: 1 });
+	const isH2 = !!editor?.isActive("heading", { level: 2 });
+	const isH3 = !!editor?.isActive("heading", { level: 3 });
+	const isCode = !!editor?.isActive("codeBlock");
+	const isQuote = !!editor?.isActive("blockquote");
+
 	return (
 		<DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
 			<Tooltip
@@ -227,7 +342,7 @@ function DropdownTurnInto() {
 							type="button"
 							variant="ghost"
 							size="sm"
-							className="inline-flex items-center gap-1 px-2 w-28 justify-between"
+							className="inline-flex items-center gap-1 px-2 w-32 justify-between"
 							aria-label="Turn into"
 						>
 							<span className="text-sm font-medium">{label}</span>
@@ -243,6 +358,7 @@ function DropdownTurnInto() {
 			<DropdownMenuContent
 				sideOffset={8}
 				align="start"
+				className="min-w-[15rem]"
 				onCloseAutoFocus={(e) => {
 					// Prevent returning focus to the trigger to avoid tooltip-on-close
 					e.preventDefault();
@@ -263,6 +379,9 @@ function DropdownTurnInto() {
 						¶
 					</span>
 					<span>Text</span>
+					<span className={`ml-auto ${isText ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex items-center gap-3 text-sm"
@@ -276,6 +395,9 @@ function DropdownTurnInto() {
 						H1
 					</span>
 					<span>Heading 1</span>
+					<span className={`ml-auto ${isH1 ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex items-center gap-3 text-sm"
@@ -289,6 +411,9 @@ function DropdownTurnInto() {
 						H2
 					</span>
 					<span>Heading 2</span>
+					<span className={`ml-auto ${isH2 ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex items-center gap-3 text-sm"
@@ -302,6 +427,9 @@ function DropdownTurnInto() {
 						H3
 					</span>
 					<span>Heading 3</span>
+					<span className={`ml-auto ${isH3 ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex items-center gap-3 text-sm"
@@ -315,6 +443,9 @@ function DropdownTurnInto() {
 				>
 					<Code2 className="w-5 size-4 text-muted-foreground" />
 					<span>Code</span>
+					<span className={`ml-auto ${isCode ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex items-center gap-3 text-sm"
@@ -328,6 +459,9 @@ function DropdownTurnInto() {
 				>
 					<Quote className="w-5 size-4 text-muted-foreground" />
 					<span>Quote</span>
+					<span className={`ml-auto ${isQuote ? "opacity-100" : "opacity-0"}`}>
+						<Check className="size-4" />
+					</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
