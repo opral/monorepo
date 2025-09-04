@@ -4,7 +4,7 @@ import type { Ast } from "../ast/schemas.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import { Editor } from "@tiptap/core"
-import { markdownWcExtensions } from "./markdown-wc.js"
+import { MarkdownWc } from "./markdown-wc.js"
 
 function roundtrip(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
@@ -15,7 +15,7 @@ function roundtrip(ast: Ast): Ast {
 function roundtripThroughEditor(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: pmDoc as any,
 	})
 	const outJSON = editor.getJSON() as any

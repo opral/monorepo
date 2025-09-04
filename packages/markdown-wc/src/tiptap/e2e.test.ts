@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest"
 import { Editor } from "@tiptap/core"
 import { parseMarkdown } from "../ast/parse-markdown.js"
 import { serializeAst } from "../ast/serialize-ast.js"
-import { markdownWcExtensions } from "./markdown-wc.js"
+import { MarkdownWc } from "./markdown-wc.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import type { Ast } from "../ast/schemas.js"
@@ -11,7 +11,7 @@ import type { Ast } from "../ast/schemas.js"
 function roundtripThroughEditor(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: pmDoc as any,
 	})
 	const outJSON = editor.getJSON() as any
@@ -26,7 +26,7 @@ test("append paragraph at end", () => {
 	const ast = parseMarkdown(input)
 	const content = astToTiptapDoc(ast)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: content as any,
 	})
 
@@ -181,7 +181,7 @@ describe("IDs: preserve existing and create for new blocks", () => {
 		} as any
 
 		const editor = new Editor({
-			extensions: markdownWcExtensions(),
+			extensions: MarkdownWc(),
 			content: astToTiptapDoc(input) as any,
 		})
 
@@ -204,7 +204,7 @@ describe("IDs: preserve existing and create for new blocks", () => {
 		} as any
 
 		const editor = new Editor({
-			extensions: markdownWcExtensions(),
+			extensions: MarkdownWc(),
 			content: astToTiptapDoc(input) as any,
 		})
 
@@ -243,7 +243,7 @@ describe("IDs: preserve existing and create for new blocks", () => {
 		} as any
 
 		const editor = new Editor({
-			extensions: markdownWcExtensions(),
+			extensions: MarkdownWc(),
 			content: astToTiptapDoc(input) as any,
 		})
 
@@ -268,7 +268,7 @@ test("insert text mid-paragraph", () => {
 
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: astToTiptapDoc(ast) as any,
 	})
 
@@ -302,7 +302,7 @@ test("insert hard break in paragraph (replace following space)", () => {
 
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: astToTiptapDoc(ast) as any,
 	})
 
@@ -333,7 +333,7 @@ test("split paragraph into two (insert new paragraph in the middle)", () => {
 
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
-		extensions: markdownWcExtensions(),
+		extensions: MarkdownWc(),
 		content: astToTiptapDoc(ast) as any,
 	})
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
 import { Editor } from "@tiptap/core"
-import { markdownWcExtensions } from "./markdown-wc.js"
+import { MarkdownWc } from "./markdown-wc.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { parseMarkdown } from "../ast/parse-markdown.js"
 import { serializeToHtml } from "../html/serialize-to-html.js"
@@ -9,7 +9,7 @@ import { serializeToHtml } from "../html/serialize-to-html.js"
 async function htmlFromEditor(markdown: string): Promise<string> {
 	const ast = parseMarkdown(markdown) as any
 	const pmDoc = astToTiptapDoc(ast)
-	const editor = new Editor({ extensions: markdownWcExtensions(), content: pmDoc as any })
+	const editor = new Editor({ extensions: MarkdownWc(), content: pmDoc as any })
 	return editor.getHTML()
 }
 

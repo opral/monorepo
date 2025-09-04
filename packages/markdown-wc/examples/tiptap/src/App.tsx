@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
-import { markdownWcExtensions, astToTiptapDoc, tiptapDocToAst } from "@opral/markdown-wc/tiptap"
+import { MarkdownWc, astToTiptapDoc, tiptapDocToAst } from "@opral/markdown-wc/tiptap"
 import { parseMarkdown, serializeAst } from "@opral/markdown-wc"
 
 const initialMarkdown = `# Heading
@@ -28,7 +28,7 @@ export default function App() {
 	})
 
   const editor = useEditor({
-		extensions: markdownWcExtensions(),
+    extensions: MarkdownWc(),
 		content: astToTiptapDoc(parseMarkdown(initialMarkdown)) as any,
 		onUpdate: ({ editor }) => {
 			if (sync.current.fromMarkdown) return
@@ -39,7 +39,7 @@ export default function App() {
 		},
   })
 
-		// Checkbox toggling is now handled by a NodeView in markdownWcExtensions.
+		// Checkbox toggling is now handled by a NodeView in MarkdownWc.
 
 	// Markdown (left) → TipTap (right), without losing selection or causing loops
 	useEffect(() => {

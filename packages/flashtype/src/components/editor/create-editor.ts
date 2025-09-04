@@ -1,7 +1,7 @@
 import { Editor } from "@tiptap/core";
 import { nanoId, type Lix } from "@lix-js/sdk";
 import {
-	markdownWcExtensions,
+	MarkdownWc,
 	astToTiptapDoc,
 	tiptapDocToAst,
 } from "@opral/markdown-wc/tiptap";
@@ -137,7 +137,7 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 	}
 
 	return new Editor({
-		extensions: markdownWcExtensions({
+		extensions: MarkdownWc({
 			idProvider: () => nanoId({ lix, length: 10 }),
 		}),
 		content: astToTiptapDoc(ast) as any,

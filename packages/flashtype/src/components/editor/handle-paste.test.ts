@@ -1,7 +1,7 @@
 import { test, expect, describe } from "vitest";
 import { handlePaste } from "./handle-paste";
 import { Editor } from "@tiptap/core";
-import { markdownWcExtensions } from "@opral/markdown-wc/tiptap";
+import { MarkdownWc } from "@opral/markdown-wc/tiptap";
 
 function makeClipboardEvent(md: string): any {
 	return {
@@ -14,7 +14,7 @@ function makeClipboardEvent(md: string): any {
 
 function createEditor(initialContent?: any): Editor {
 	return new Editor({
-		extensions: markdownWcExtensions(),
+    extensions: MarkdownWc(),
 		content: initialContent || { type: "doc", content: [] },
 	});
 }
