@@ -60,7 +60,16 @@ function applyGranularTextDiff(
 function renderHtmlDiffElement(args: {
   beforeHtml: string;
   afterHtml: string;
+  /**
+   * Attribute used to identify corresponding elements between before/after.
+   * Defaults to `data-diff-key`. You can set this to `data-id` (or any data-* attribute)
+   * if your HTML already contains stable identifiers.
+   *
+   * @default "data-diff-key"
+   */
+  diffAttribute?: string;
 }): HTMLElement {
+  const diffAttr = args.diffAttribute ?? "data-diff-key";
   const parser = new DOMParser();
   const beforeDoc = parser.parseFromString(args.beforeHtml, "text/html");
   const afterDoc = parser.parseFromString(args.afterHtml, "text/html");
@@ -73,8 +82,8 @@ function renderHtmlDiffElement(args: {
   // --- Step 1: Map elements and identify changes ---
   const beforeElementsMap = new Map<string, Element>();
   const beforeElementOrder: { id: string; element: Element }[] = [];
-  beforeDoc.body.querySelectorAll("[data-diff-key]").forEach((el) => {
-    const id = el.getAttribute("data-diff-key");
+  beforeDoc.body.querySelectorAll(`[${diffAttr}]`).forEach((el) => {
+    const id = el.getAttribute(diffAttr);
     if (id) {
       beforeElementsMap.set(id, el);
       beforeElementOrder.push({ id, element: el });
@@ -83,10 +92,11 @@ function renderHtmlDiffElement(args: {
 
   const afterElementsInResultMap = new Map<string, Element>();
   // Query within the result container which holds the 'after' structure clone
-  const afterElementsInResult =
-    resultContainer.querySelectorAll("[data-diff-key]");
+  const afterElementsInResult = resultContainer.querySelectorAll(
+    `[${diffAttr}]`,
+  );
   afterElementsInResult.forEach((el) => {
-    const id = el.getAttribute("data-diff-key");
+    const id = el.getAttribute(diffAttr);
     if (id) {
       afterElementsInResultMap.set(id, el);
     }
@@ -127,13 +137,13 @@ function renderHtmlDiffElement(args: {
 
       // Check if direct child structure changed
       const beforeChildIds = new Set(
-        Array.from(beforeEl.querySelectorAll(":scope > [data-diff-key]")).map(
-          (el) => el.getAttribute("data-diff-key"),
+        Array.from(beforeEl.querySelectorAll(`:scope > [${diffAttr}]`)).map(
+          (el) => el.getAttribute(diffAttr),
         ),
       );
       const afterChildIds = new Set(
-        Array.from(afterEl.querySelectorAll(":scope > [data-diff-key]")).map(
-          (el) => el.getAttribute("data-diff-key"),
+        Array.from(afterEl.querySelectorAll(`:scope > [${diffAttr}]`)).map(
+          (el) => el.getAttribute(diffAttr),
         ),
       );
       const areChildSetsEqual =
@@ -214,7 +224,7 @@ function renderHtmlDiffElement(args: {
       }
 
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
-      const parentId = beforeEl.parentElement?.getAttribute("data-diff-key");
+      const parentId = beforeEl.parentElement?.getAttribute(diffAttr);
       if (parentId && removedIds.has(parentId)) {
         continue;
       }
@@ -223,7 +233,7 @@ function renderHtmlDiffElement(args: {
       let parentInResult: Element | null = null;
       if (parentId) {
         parentInResult = resultContainer.querySelector(
-          `[data-diff-key="${parentId}"]`,
+          `[${diffAttr}="${parentId}"]`,
         );
       } else if (beforeEl.parentElement === beforeDoc.body) {
         parentInResult = resultContainer; // Element was direct child of body
@@ -313,9 +323,19 @@ function renderHtmlDiffElement(args: {
  *   });
  *
  */
+/**
+ * Compare two HTML strings and return an HTML string with inline diff markup.
+ *
+ * @param args.beforeHtml - The "before" version of the HTML
+ * @param args.afterHtml - The "after" version of the HTML
+ * @param args.diffAttribute - The attribute used to match elements between versions.
+ *   Defaults to `data-diff-key`. Set to `data-id` (or any data-* attribute) if you
+ *   already output stable identifiers in your HTML.
+ */
 export function renderHtmlDiff(args: {
   beforeHtml: string;
   afterHtml: string;
+  diffAttribute?: string;
 }): string {
   return renderHtmlDiffElement(args).outerHTML;
 }
