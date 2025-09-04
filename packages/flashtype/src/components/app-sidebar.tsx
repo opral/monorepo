@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Folders, GitCommitVertical, Zap } from "lucide-react";
+import { Bug, Folders, GitCommitVertical, Github, Zap } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -9,6 +9,9 @@ import {
 	SidebarContent,
 	SidebarFooter,
 	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useLeftSidebar } from "@/components/left-sidebar";
 
@@ -66,6 +69,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				/>
 			</SidebarContent>
 			<SidebarFooter>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton asChild tooltip="Report a bug">
+							<a
+								href="https://github.com/opral/flashtype.ai/issues"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="cursor-pointer"
+							>
+								<Bug />
+								<span>Report a bug</span>
+							</a>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+					<SidebarMenuItem>
+						<SidebarMenuButton asChild tooltip="Open on GitHub">
+							<a
+								href="https://github.com/opral/flashtype.ai"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="cursor-pointer"
+							>
+								<Github />
+								<span>GitHub</span>
+							</a>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				</SidebarMenu>
 				<NavUser user={data.user} />
 			</SidebarFooter>
 		</Sidebar>
