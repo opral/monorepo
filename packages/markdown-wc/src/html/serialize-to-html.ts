@@ -1,19 +1,36 @@
-import { unified } from "unified"
+import { unified, type Plugin } from "unified"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
+import { visit } from "unist-util-visit"
 
 // Public API: serialize Ast (mdast-shaped) to HTML string
 export async function serializeToHtml(ast: any): Promise<string> {
-	// Make lists "loose" so list items render paragraphs inside <li> to match editor HTML
-	function loosen(node: any) {
-		if (!node || typeof node !== "object") return
-		if (node.type === "list") (node as any).spread = true
-		if (node.type === "listItem") (node as any).spread = true
-		if (Array.isArray((node as any).children)) (node as any).children.forEach(loosen)
+	// Single-pass remark plugin to serialize mdast data.* to HTML data-* and loosen lists
+	// - Make lists "loose" so list items render paragraphs inside <li>
+	// - Promote node.data.* to hProperties data-* attributes
+	const remarkSerializeDataAttributes: Plugin<[], any> = () => (tree: any) => {
+		visit(tree, (node: any) => {
+			if (!node || typeof node !== "object") return
+			// loose lists
+			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
+			// data -> data-*
+			const d = (node as any).data
+			if (d && typeof d === "object") {
+				const h = (((node as any).data as any).hProperties ||= {}) as Record<string, any>
+				for (const [k, v] of Object.entries(d)) {
+					if (k === "hProperties") continue
+					if (v == null) continue
+					const t = typeof v
+					if (t === "string" || t === "number" || t === "boolean") {
+						h[`data-${k}`] = String(v)
+					}
+				}
+			}
+		})
 	}
-	loosen(ast)
 	// mdast -> hast
 	const hast = await unified()
+		.use(remarkSerializeDataAttributes as any)
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		.run(ast)
 	// hast -> html

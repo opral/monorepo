@@ -46,13 +46,13 @@ function sendModKey(editor: Editor, key: string, opts?: { shift?: boolean }) {
 }
 
 function sendKey(editor: Editor, key: string, opts?: { shift?: boolean }) {
-  const event = new KeyboardEvent("keydown", {
-    key,
-    shiftKey: !!opts?.shift,
-    bubbles: true,
-    cancelable: true,
-  })
-  editor.view.someProp("handleKeyDown", (f: any) => f(editor.view, event))
+	const event = new KeyboardEvent("keydown", {
+		key,
+		shiftKey: !!opts?.shift,
+		bubbles: true,
+		cancelable: true,
+	})
+	editor.view.someProp("handleKeyDown", (f: any) => f(editor.view, event))
 }
 
 describe("Markdown typing shortcuts (input rules)", () => {
@@ -131,93 +131,93 @@ describe("Keyboard shortcuts (keymap)", () => {
 		expect(editor.isActive("italic")).toBe(true)
 	})
 
-  test("Shift-Mod-s toggles strike on selection", () => {
+	test("Shift-Mod-s toggles strike on selection", () => {
 		const editor = createEditor()
 		editor.commands.insertContent("abc")
 		editor.commands.setTextSelection({ from: 1, to: 4 })
 		sendModKey(editor, "s", { shift: true })
 		expect(editor.isActive("strike")).toBe(true)
-  })
+	})
 
-  test("Enter in bullet list creates another bullet item", () => {
-    const editor = createEditor()
-    typeText(editor, "- ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter")
-    const list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("bulletList")
-    expect(list.childCount).toBe(2)
-    const li2: any = list.child(1)
-    expect(li2.type.name).toBe("listItem")
-    const para2: any = li2.child(0)
-    expect((para2.textContent || "").trim()).toBe("")
-  })
+	test("Enter in bullet list creates another bullet item", () => {
+		const editor = createEditor()
+		typeText(editor, "- ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter")
+		const list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("bulletList")
+		expect(list.childCount).toBe(2)
+		const li2: any = list.child(1)
+		expect(li2.type.name).toBe("listItem")
+		const para2: any = li2.child(0)
+		expect((para2.textContent || "").trim()).toBe("")
+	})
 
-  test("Enter in ordered list creates another numbered item", () => {
-    const editor = createEditor()
-    typeText(editor, "1. ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter")
-    const list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("orderedList")
-    expect(list.childCount).toBe(2)
-  })
+	test("Enter in ordered list creates another numbered item", () => {
+		const editor = createEditor()
+		typeText(editor, "1. ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter")
+		const list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("orderedList")
+		expect(list.childCount).toBe(2)
+	})
 
-  test("Enter in todo list creates another unchecked todo", () => {
-    const editor = createEditor()
-    typeText(editor, "[] ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter")
-    const list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("bulletList")
-    expect(list.childCount).toBe(2)
-    const li2: any = list.child(1)
-    expect(li2.type.name).toBe("listItem")
-    expect(li2.attrs?.checked).toBe(false)
-  })
+	test("Enter in todo list creates another unchecked todo", () => {
+		const editor = createEditor()
+		typeText(editor, "[] ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter")
+		const list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("bulletList")
+		expect(list.childCount).toBe(2)
+		const li2: any = list.child(1)
+		expect(li2.type.name).toBe("listItem")
+		expect(li2.attrs?.checked).toBe(false)
+	})
 
-  test("Enter on empty bullet list item exits the list", () => {
-    const editor = createEditor()
-    typeText(editor, "- ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter") // create empty next item
-    let list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("bulletList")
-    expect(list.childCount).toBe(2)
-    // Now press Enter on empty item to exit
-    sendKey(editor, "Enter")
-    // Expect bullet list + following paragraph
-    const root: any = editor.state.doc
-    expect(root.childCount).toBe(2)
-    expect(root.child(0).type.name).toBe("bulletList")
-    expect(root.child(1).type.name).toBe("paragraph")
-  })
+	test("Enter on empty bullet list item exits the list", () => {
+		const editor = createEditor()
+		typeText(editor, "- ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter") // create empty next item
+		let list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("bulletList")
+		expect(list.childCount).toBe(2)
+		// Now press Enter on empty item to exit
+		sendKey(editor, "Enter")
+		// Expect bullet list + following paragraph
+		const root: any = editor.state.doc
+		expect(root.childCount).toBe(2)
+		expect(root.child(0).type.name).toBe("bulletList")
+		expect(root.child(1).type.name).toBe("paragraph")
+	})
 
-  test("Enter on empty ordered list item exits the list", () => {
-    const editor = createEditor()
-    typeText(editor, "1. ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter") // create empty next item
-    let list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("orderedList")
-    // Now press Enter on empty item to exit
-    sendKey(editor, "Enter")
-    const root: any = editor.state.doc
-    expect(root.child(0).type.name).toBe("orderedList")
-    expect(root.child(1).type.name).toBe("paragraph")
-  })
+	test("Enter on empty ordered list item exits the list", () => {
+		const editor = createEditor()
+		typeText(editor, "1. ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter") // create empty next item
+		let list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("orderedList")
+		// Now press Enter on empty item to exit
+		sendKey(editor, "Enter")
+		const root: any = editor.state.doc
+		expect(root.child(0).type.name).toBe("orderedList")
+		expect(root.child(1).type.name).toBe("paragraph")
+	})
 
-  test("Enter on empty todo item exits the list", () => {
-    const editor = createEditor()
-    typeText(editor, "[] ")
-    typeText(editor, "abc")
-    sendKey(editor, "Enter") // create empty next todo
-    let list: any = editor.state.doc.child(0)
-    expect(list.type.name).toBe("bulletList")
-    // Now press Enter on empty todo to exit
-    sendKey(editor, "Enter")
-    const root: any = editor.state.doc
-    expect(root.child(0).type.name).toBe("bulletList")
-    expect(root.child(1).type.name).toBe("paragraph")
-  })
+	test("Enter on empty todo item exits the list", () => {
+		const editor = createEditor()
+		typeText(editor, "[] ")
+		typeText(editor, "abc")
+		sendKey(editor, "Enter") // create empty next todo
+		let list: any = editor.state.doc.child(0)
+		expect(list.type.name).toBe("bulletList")
+		// Now press Enter on empty todo to exit
+		sendKey(editor, "Enter")
+		const root: any = editor.state.doc
+		expect(root.child(0).type.name).toBe("bulletList")
+		expect(root.child(1).type.name).toBe("paragraph")
+	})
 })

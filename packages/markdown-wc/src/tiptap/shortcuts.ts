@@ -148,7 +148,8 @@ export const MarkdownWcShortcuts = Extension.create({
 				if (!inListItem) return false
 				// If current paragraph is empty, exit the list (lift)
 				const para: any = $from.parent
-				const isEmptyPara = para?.type?.name === "paragraph" && (para.textContent || "").length === 0
+				const isEmptyPara =
+					para?.type?.name === "paragraph" && (para.textContent || "").length === 0
 				if (isEmptyPara) {
 					return this.editor.chain().focus().liftListItem("listItem").run()
 				}
