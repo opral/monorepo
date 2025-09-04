@@ -43,7 +43,7 @@ function LeftSidebarArea() {
 			data-open={open}
 			className="group w-0 data-[open=true]:w-72 transition-[width] duration-200 ease-out shrink-0 border-r data-[open=false]:border-transparent bg-background overflow-hidden"
 		>
-			<div className="h-full min-h-0 opacity-0 group-data-[open=true]:opacity-100 transition-opacity duration-150 delay-75">
+			<div className="h-full min-h-0 opacity-0 group-data-[open=true]:opacity-100 transition-opacity duration-100">
 				{active === "files" && (
 					<LeftSidebarTab title="Files" onClose={handleClose}>
 						<LeftSidebarFiles />

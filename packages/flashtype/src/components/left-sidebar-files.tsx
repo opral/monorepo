@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useMemo, useState } from "react";
 import { ChevronRight, File, Folder, FolderOpen } from "lucide-react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQuery } from "@lix-js/react-utils";
@@ -50,9 +50,14 @@ export function LeftSidebarFiles() {
 		"flashtype_active_file_id",
 	);
 	const files = useQuery((lix) => selectFiles(lix));
-	const tree = buildTree(files.map((f) => f.path as string));
-	const pathToId = Object.fromEntries(
-		files.map((f) => [f.path as string, f.id as string]),
+
+	// Memoize expensive derivations from the files query
+	const paths = useMemo(() => files.map((f) => f.path as string), [files]);
+	const tree = useMemo(() => buildTree(paths), [paths]);
+	const pathToId = useMemo(
+		() =>
+			Object.fromEntries(files.map((f) => [f.path as string, f.id as string])),
+		[files],
 	);
 	return (
 		<SidebarMenu>
@@ -87,7 +92,7 @@ function Tree({
 }) {
 	const [name, ...items] = Array.isArray(item) ? item : [item];
 	const fullPath = `${pathPrefix}/${name as string}`;
-	const [open, setOpen] = React.useState(false);
+	const [open, setOpen] = useState(false);
 
 	if (!items.length) {
 		return (
