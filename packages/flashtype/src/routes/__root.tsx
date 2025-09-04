@@ -32,24 +32,29 @@ export const Route = createRootRoute({
 
 function LeftSidebarArea() {
 	const { active, setActive } = useLeftSidebar();
-	if (!active) return null;
+	const open = !!active;
 
 	const handleClose = () => {
 		setActive(null);
 	};
 
 	return (
-		<div className="w-72 shrink-0 border-r bg-background">
-			{active === "files" && (
-				<LeftSidebarTab title="Files" onClose={handleClose}>
-					<LeftSidebarFiles />
-				</LeftSidebarTab>
-			)}
-			{active === "history" && (
-				<LeftSidebarTab title="Checkpoints" onClose={handleClose}>
-					<LeftSidebarHistory />
-				</LeftSidebarTab>
-			)}
+		<div
+			data-open={open}
+			className="group w-0 data-[open=true]:w-72 transition-[width] duration-200 ease-out shrink-0 border-r data-[open=false]:border-transparent bg-background overflow-hidden"
+		>
+			<div className="h-full min-h-0 opacity-0 group-data-[open=true]:opacity-100 transition-opacity duration-150 delay-75">
+				{active === "files" && (
+					<LeftSidebarTab title="Files" onClose={handleClose}>
+						<LeftSidebarFiles />
+					</LeftSidebarTab>
+				)}
+				{active === "history" && (
+					<LeftSidebarTab title="Checkpoints" onClose={handleClose}>
+						<LeftSidebarHistory />
+					</LeftSidebarTab>
+				)}
+			</div>
 		</div>
 	);
 }
