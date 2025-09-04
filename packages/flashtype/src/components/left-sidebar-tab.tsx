@@ -12,7 +12,7 @@ type Props = {
 export function LeftSidebarTab({ title, actions, children, onClose }: Props) {
 	return (
 		<div className="flex h-full min-h-0 flex-col">
-			<div className="sticky top-0 z-10 h-10 flex items-center justify-between border-b bg-background px-3 text-sm font-medium">
+			<div className="sticky top-0 z-10 h-12 pt-1 flex items-center justify-between border-b bg-background px-3 text-sm font-medium">
 				<div>{title}</div>
 				<div className="flex items-center gap-1">
 					{actions ? (

@@ -75,52 +75,56 @@ function Root() {
 				<EditorProvider>
 					<AppSidebar />
 					<SidebarInset>
-						<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
-							<div className="font-medium text-sm">
-								{activeFile?.path ?? ""}
-							</div>
-							<VersionDropdown />
-							<div className="ml-auto flex items-center gap-2">
-								<ChangeIndicator />
-								<Button
-									aria-label="Open Lix Agent chat"
-									variant="ghost"
-									size="sm"
-									className="h-7 w-7 p-0 text-muted-foreground"
-									title="Open Lix Agent chat"
-									onClick={() => setAgentChatOpen(true)}
-								>
-									<BotMessageSquare className="h-4 w-4" />
-								</Button>
-							</div>
-						</header>
 						<div className="flex min-h-0 flex-1">
 							<LeftSidebarArea />
-							<div className="flex min-h-0 flex-1 flex-col text-sm">
-								<FormattingToolbar />
-								<div className="flex-1 overflow-auto p-4">
-									<Outlet />
+							<div className="flex min-h-0 flex-1 flex-col">
+								<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
+									<div className="font-medium text-sm">
+										{activeFile?.path ?? ""}
+									</div>
+									<VersionDropdown />
+									<div className="ml-auto flex items-center gap-2">
+										<ChangeIndicator />
+										<Button
+											aria-label="Open Lix Agent chat"
+											variant="ghost"
+											size="sm"
+											className="h-7 w-7 p-0 text-muted-foreground"
+											title="Open Lix Agent chat"
+											onClick={() => setAgentChatOpen(true)}
+										>
+											<BotMessageSquare className="h-4 w-4" />
+										</Button>
+									</div>
+								</header>
+								<div className="flex min-h-0 flex-1">
+									<div className="flex min-h-0 flex-1 flex-col text-sm">
+										<FormattingToolbar />
+										<div className="flex-1 overflow-auto p-4">
+											<Outlet />
+										</div>
+									</div>
+									{agentChatOpen ? (
+										<div className="w-72 shrink-0 border-l bg-background">
+											<SidebarTab
+												title={
+													<a
+														href="https://github.com/opral/lix-sdk"
+														target="_blank"
+														rel="noreferrer noopener"
+														className="inline-flex items-center gap-1 text-foreground hover:underline"
+													>
+														Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
+													</a>
+												}
+												onClose={() => setAgentChatOpen(false)}
+											>
+												<LixAgentChat />
+											</SidebarTab>
+										</div>
+									) : null}
 								</div>
 							</div>
-							{agentChatOpen ? (
-								<div className="w-72 shrink-0 border-l bg-background">
-									<SidebarTab
-										title={
-											<a
-												href="https://github.com/opral/lix-sdk"
-												target="_blank"
-												rel="noreferrer noopener"
-												className="inline-flex items-center gap-1 text-foreground hover:underline"
-											>
-												Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
-											</a>
-										}
-										onClose={() => setAgentChatOpen(false)}
-									>
-										<LixAgentChat />
-									</SidebarTab>
-								</div>
-							) : null}
 						</div>
 						{import.meta.env.DEV ? (
 							<TanStackRouterDevtools position="bottom-right" />
