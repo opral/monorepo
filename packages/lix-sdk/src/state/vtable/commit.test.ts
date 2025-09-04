@@ -926,43 +926,47 @@ test("global version should move forward when mutations occur", async () => {
 });
 
 // https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923
-// 
+//
 // Verifies that working change set elements are NOT updated for the global version.
 // We intentionally assert no working elements are written for global's working commit.
 // This documents current behavior and makes it explicit until a future lazy design.
 test("does not update working change set elements for global version", async () => {
-  const lix = await openLix({});
+	const lix = await openLix({});
 
-  // Stage a tracked change in the global version
-  await lix.db
-    .insertInto("key_value_all")
-    .values({ key: "global_key", value: "global_value", lixcol_version_id: "global" })
-    .execute();
+	// Stage a tracked change in the global version
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "global_key",
+			value: "global_value",
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-  // Resolve global version and its working commit
-  const globalVersion = await lix.db
-    .selectFrom("version")
-    .where("id", "=", "global")
-    .selectAll()
-    .executeTakeFirstOrThrow();
+	// Resolve global version and its working commit
+	const globalVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-  const workingCommit = await lix.db
-    .selectFrom("commit")
-    .where("id", "=", globalVersion.working_commit_id)
-    .selectAll()
-    .executeTakeFirstOrThrow();
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", globalVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-  // There should be no working change set element for the global working change set
-  const workingElements = await lix.db
-    .selectFrom("change_set_element_all")
-    .where("lixcol_version_id", "=", "global")
-    .where("change_set_id", "=", workingCommit.change_set_id)
-    .where("entity_id", "=", "global_key")
-    .where("schema_key", "=", "lix_key_value")
-    .selectAll()
-    .execute();
+	// There should be no working change set element for the global working change set
+	const workingElements = await lix.db
+		.selectFrom("change_set_element_all")
+		.where("lixcol_version_id", "=", "global")
+		.where("change_set_id", "=", workingCommit.change_set_id)
+		.where("entity_id", "=", "global_key")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
 
-  expect(workingElements).toHaveLength(0);
+	expect(workingElements).toHaveLength(0);
 });
 
 /**

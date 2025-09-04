@@ -122,79 +122,90 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 });
 
 bench("commit with mixed operations (insert/update/delete)", async () => {
-  const lix = await openLix({});
+	const lix = await openLix({});
 
-  // Preload a baseline of entities to update/delete
-  const BASE_COUNT = 30; // baseline rows to enable realistic updates/deletes
-  const baseRows = [] as any[];
-  for (let i = 0; i < BASE_COUNT; i++) {
-    baseRows.push({
-      entity_id: `mixed_entity_${i}`,
-      version_id: "global",
-      schema_key: "commit_benchmark_entity",
-      file_id: "commit_file",
-      plugin_key: "benchmark_plugin",
-      snapshot_content: JSON.stringify({ id: `mixed_entity_${i}`, value: `base_${i}` }),
-      schema_version: "1.0",
-      untracked: false,
-    });
-  }
-  insertTransactionState({ lix: lix as any, data: baseRows, timestamp: timestamp({ lix }) });
-  commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
+	// Preload a baseline of entities to update/delete
+	const BASE_COUNT = 30; // baseline rows to enable realistic updates/deletes
+	const baseRows = [] as any[];
+	for (let i = 0; i < BASE_COUNT; i++) {
+		baseRows.push({
+			entity_id: `mixed_entity_${i}`,
+			version_id: "global",
+			schema_key: "commit_benchmark_entity",
+			file_id: "commit_file",
+			plugin_key: "benchmark_plugin",
+			snapshot_content: JSON.stringify({
+				id: `mixed_entity_${i}`,
+				value: `base_${i}`,
+			}),
+			schema_version: "1.0",
+			untracked: false,
+		});
+	}
+	insertTransactionState({
+		lix: lix as any,
+		data: baseRows,
+		timestamp: timestamp({ lix }),
+	});
+	commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
 
-  // Prepare a mixed batch: 10 inserts, 10 updates, 10 deletes
-  const INSERTS = 10;
-  const UPDATES = 10;
-  const DELETES = 10;
-  const ops: any[] = [];
+	// Prepare a mixed batch: 10 inserts, 10 updates, 10 deletes
+	const INSERTS = 10;
+	const UPDATES = 10;
+	const DELETES = 10;
+	const ops: any[] = [];
 
-  // Inserts: new entities
-  for (let i = 0; i < INSERTS; i++) {
-    const id = `mixed_new_${i}`;
-    ops.push({
-      entity_id: id,
-      version_id: "global",
-      schema_key: "commit_benchmark_entity",
-      file_id: "commit_file",
-      plugin_key: "benchmark_plugin",
-      snapshot_content: JSON.stringify({ id, value: `insert_${i}` }),
-      schema_version: "1.0",
-      untracked: false,
-    });
-  }
+	// Inserts: new entities
+	for (let i = 0; i < INSERTS; i++) {
+		const id = `mixed_new_${i}`;
+		ops.push({
+			entity_id: id,
+			version_id: "global",
+			schema_key: "commit_benchmark_entity",
+			file_id: "commit_file",
+			plugin_key: "benchmark_plugin",
+			snapshot_content: JSON.stringify({ id, value: `insert_${i}` }),
+			schema_version: "1.0",
+			untracked: false,
+		});
+	}
 
-  // Updates: modify existing baseline entities
-  for (let i = 0; i < UPDATES; i++) {
-    const id = `mixed_entity_${i}`;
-    ops.push({
-      entity_id: id,
-      version_id: "global",
-      schema_key: "commit_benchmark_entity",
-      file_id: "commit_file",
-      plugin_key: "benchmark_plugin",
-      snapshot_content: JSON.stringify({ id, value: `updated_${i}` }),
-      schema_version: "1.0",
-      untracked: false,
-    });
-  }
+	// Updates: modify existing baseline entities
+	for (let i = 0; i < UPDATES; i++) {
+		const id = `mixed_entity_${i}`;
+		ops.push({
+			entity_id: id,
+			version_id: "global",
+			schema_key: "commit_benchmark_entity",
+			file_id: "commit_file",
+			plugin_key: "benchmark_plugin",
+			snapshot_content: JSON.stringify({ id, value: `updated_${i}` }),
+			schema_version: "1.0",
+			untracked: false,
+		});
+	}
 
-  // Deletes: remove other baseline entities
-  for (let i = 0; i < DELETES; i++) {
-    const id = `mixed_entity_${BASE_COUNT - 1 - i}`;
-    ops.push({
-      entity_id: id,
-      version_id: "global",
-      schema_key: "commit_benchmark_entity",
-      file_id: "commit_file",
-      plugin_key: "benchmark_plugin",
-      snapshot_content: null,
-      schema_version: "1.0",
-      untracked: false,
-    });
-  }
+	// Deletes: remove other baseline entities
+	for (let i = 0; i < DELETES; i++) {
+		const id = `mixed_entity_${BASE_COUNT - 1 - i}`;
+		ops.push({
+			entity_id: id,
+			version_id: "global",
+			schema_key: "commit_benchmark_entity",
+			file_id: "commit_file",
+			plugin_key: "benchmark_plugin",
+			snapshot_content: null,
+			schema_version: "1.0",
+			untracked: false,
+		});
+	}
 
-  insertTransactionState({ lix: lix as any, data: ops, timestamp: timestamp({ lix }) });
+	insertTransactionState({
+		lix: lix as any,
+		data: ops,
+		timestamp: timestamp({ lix }),
+	});
 
-  // Benchmark: single commit with mixed operations
-  commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
+	// Benchmark: single commit with mixed operations
+	commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
 });

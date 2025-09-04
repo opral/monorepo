@@ -41,24 +41,24 @@ export function commit(args: {
 	// Collect per-version snapshots once to avoid duplicate queries in this commit
 	const versionSnapshots = new Map<string, LixVersion>();
 
-    // Query all transaction changes
-    const allTransactionChanges = executeSync({
-        lix: args.lix,
-        query: db
-            .selectFrom("internal_transaction_state")
-            .select([
-                "id",
-                "entity_id",
-                "schema_key",
-                "schema_version",
-                "file_id",
-                "plugin_key",
-                sql`lixcol_version_id`.as("version_id"),
-                sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
-                "created_at",
-                sql`lixcol_untracked`.as("untracked"),
-            ]),
-    });
+	// Query all transaction changes
+	const allTransactionChanges = executeSync({
+		lix: args.lix,
+		query: db
+			.selectFrom("internal_transaction_state")
+			.select([
+				"id",
+				"entity_id",
+				"schema_key",
+				"schema_version",
+				"file_id",
+				"plugin_key",
+				sql`lixcol_version_id`.as("version_id"),
+				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+				"created_at",
+				sql`lixcol_untracked`.as("untracked"),
+			]),
+	});
 
 	// Separate tracked and untracked changes
 	const trackedChangesByVersion = new Map<string, any[]>();
@@ -505,7 +505,10 @@ export function commit(args: {
 				}
 
 				if (workingUntrackedBatch.length > 0) {
-					updateUntrackedState({ lix: args.lix, changes: workingUntrackedBatch });
+					updateUntrackedState({
+						lix: args.lix,
+						changes: workingUntrackedBatch,
+					});
 				}
 			}
 		}
@@ -694,11 +697,11 @@ export function commit(args: {
 		});
 	}
 
-    // Clear the transaction table after committing
-    executeSync({
-        lix: args.lix,
-        query: db.deleteFrom("internal_transaction_state"),
-    });
+	// Clear the transaction table after committing
+	executeSync({
+		lix: args.lix,
+		query: db.deleteFrom("internal_transaction_state"),
+	});
 
 	// Update cache entries for each version
 	for (const [version_id, meta] of versionMetadata) {

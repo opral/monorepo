@@ -15,7 +15,7 @@ let lix;
 try {
 	lix = await openLix({
 		providePlugins: [prosemirrorPlugin],
-		storage: new OpfsStorage({ path: "example.lix" }),
+    storage: OpfsStorage.byName("example"),
 	});
 } catch (error) {
 	console.error("Failed to open Lix, cleaning OPFS and reloading:", error);
