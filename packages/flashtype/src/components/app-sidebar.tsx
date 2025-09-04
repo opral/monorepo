@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FolderOpen, GitCommitVertical, Zap } from "lucide-react";
+import { Folders, GitCommitVertical, Zap } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -30,7 +30,8 @@ const data = {
 		{
 			key: "files",
 			title: "Files",
-			icon: FolderOpen,
+			// Use a consistent collection icon in the left rail
+			icon: Folders,
 			isActive: true,
 		},
 		{

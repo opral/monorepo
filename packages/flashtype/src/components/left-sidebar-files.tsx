@@ -1,4 +1,5 @@
-import { ChevronRight, File, Folder } from "lucide-react";
+import * as React from "react";
+import { ChevronRight, File, Folder, FolderOpen } from "lucide-react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQuery } from "@lix-js/react-utils";
 import { selectFiles } from "@/queries";
@@ -86,6 +87,7 @@ function Tree({
 }) {
 	const [name, ...items] = Array.isArray(item) ? item : [item];
 	const fullPath = `${pathPrefix}/${name as string}`;
+	const [open, setOpen] = React.useState(false);
 
 	if (!items.length) {
 		return (
@@ -107,11 +109,15 @@ function Tree({
 
 	return (
 		<SidebarMenuItem>
-			<Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
+			<Collapsible
+				open={open}
+				onOpenChange={setOpen}
+				className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+			>
 				<CollapsibleTrigger asChild>
 					<SidebarMenuButton className="cursor-pointer">
 						<ChevronRight className="transition-transform" />
-						<Folder />
+						{open ? <FolderOpen /> : <Folder />}
 						{name as string}
 					</SidebarMenuButton>
 				</CollapsibleTrigger>

@@ -16,7 +16,10 @@ export function NavMain({
 	items: {
 		key: string;
 		title: string;
+		// Prefer static icon; optionally provide a renderer that
+		// can switch based on active state.
 		icon?: LucideIcon;
+		renderIcon?: (isActive: boolean) => React.ReactNode;
 		isActive?: boolean;
 	}[];
 	active: string | null;
@@ -38,7 +41,11 @@ export function NavMain({
 									: ""
 							}`}
 						>
-							{item.icon && <item.icon />}
+							{item.renderIcon ? (
+								item.renderIcon(active === item.key)
+							) : item.icon ? (
+								<item.icon />
+							) : null}
 							<span>{item.title}</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
