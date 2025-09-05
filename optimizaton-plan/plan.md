@@ -94,6 +94,13 @@ Notes:
 - Estimated delta: No immediate row reduction versus Step 1 (CSEs already derived), but simplifies long‑term evolution.
 - Materializer complexity: keeps per‑commit apply at O(D + P); decoupling enables smaller, more targeted scans (lower constants) and easier checkpointing.
 
+Potential follow‑up: Unify version pointers under control (tip)
+
+- Today, `commit_id` (version tip) lives in the control ledger (`lix_version_tip`), while `working_commit_id` lives in the descriptor (`lix_version_descriptor`).
+- This split forces write‑paths (e.g., commit.ts) to read descriptor just to obtain `working_commit_id` while also reading tip for `commit_id`.
+- Proposal: Move `working_commit_id` into the control plane (extend `lix_version_tip` or add a sibling control entity to carry the working pointer). Keep descriptor purely domain (id, name, inherits, hidden).
+- Benefits: Single source for pointers, simpler commit logic (no descriptor fetch for pointer logic), and a clearer domain/control separation consistent with commit‑anchored tips.
+
 ## Compatibility Summary
 
 - `create-checkpoint`: Remains valid throughout. It needs a real `commit` with a `change_set_id`, and will continue to link the previous head as a checkpoint and create a new empty working commit.

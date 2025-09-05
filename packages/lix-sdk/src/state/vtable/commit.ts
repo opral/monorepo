@@ -10,6 +10,7 @@ import { type LixVersion } from "../../version/schema.js";
 import { nanoId } from "../../deterministic/index.js";
 import { uuidV7 } from "../../deterministic/uuid-v7.js";
 import { commitDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import type { StateCommitChange } from "../../hooks/create-hooks.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import type { Lix } from "../../lix/open-lix.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
@@ -99,29 +100,50 @@ export function commit(args: {
 		}
 	>();
 
-	// Step 1: Create commits and changesets for each version with changes
-	for (const [version_id, changes] of trackedChangesByVersion) {
-		if (changes.length === 0) continue;
-
-		// Load version snapshot once
-		const versionRows = executeSync({
+	// Helper to load merged version (descriptor + tip) from resolved state
+	const loadMergedVersion = (version_id: string): LixVersion => {
+		const [desc] = executeSync({
 			lix: args.lix,
 			query: db
 				.selectFrom("internal_resolved_state_all")
-				.where("schema_key", "=", "lix_version")
+				.where("schema_key", "=", "lix_version_descriptor")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
 				.limit(1),
 		});
-
-		if (versionRows.length === 0 || !versionRows[0]?.snapshot_content) {
+		if (!desc?.snapshot_content)
 			throw new Error(`Version with id '${version_id}' not found.`);
-		}
+		const d = JSON.parse(desc.snapshot_content) as any;
+		const [tip] = executeSync({
+			lix: args.lix,
+			query: db
+				.selectFrom("internal_resolved_state_all")
+				.where("schema_key", "=", "lix_version_tip")
+				.where("entity_id", "=", version_id)
+				.where("snapshot_content", "is not", null)
+				.select("snapshot_content")
+				.limit(1),
+		});
+		if (!tip?.snapshot_content)
+			throw new Error(`Version with id '${version_id}' not found.`);
+		const t = JSON.parse(tip.snapshot_content) as any;
+		return {
+			id: d.id,
+			name: d.name,
+			working_commit_id: d.working_commit_id,
+			inherits_from_version_id: d.inherits_from_version_id,
+			hidden: d.hidden,
+			commit_id: t.commit_id,
+		} as LixVersion;
+	};
 
-		const versionData = JSON.parse(
-			versionRows[0].snapshot_content
-		) as LixVersion;
+	// Step 1: Create commits and changesets for each version with changes
+	for (const [version_id, changes] of trackedChangesByVersion) {
+		if (changes.length === 0) continue;
+
+		// Load version snapshot once (descriptor + tip)
+		const versionData = loadMergedVersion(version_id);
 		versionSnapshots.set(version_id, versionData);
 		const changeSetId = uuidV7({ lix: args.lix });
 		const commitId = uuidV7({ lix: args.lix });
@@ -136,28 +158,8 @@ export function commit(args: {
 
 	// Step 2: If we have any commits but global doesn't have one yet, create global commit
 	if (versionMetadata.size > 0 && !versionMetadata.has("global")) {
-		// Load global version snapshot once
-		const globalVersionRows = executeSync({
-			lix: args.lix,
-			query: db
-				.selectFrom("internal_resolved_state_all")
-				.where("schema_key", "=", "lix_version")
-				.where("entity_id", "=", "global")
-				.where("snapshot_content", "is not", null)
-				.select("snapshot_content")
-				.limit(1),
-		});
-
-		if (
-			globalVersionRows.length === 0 ||
-			!globalVersionRows[0]?.snapshot_content
-		) {
-			throw new Error(`Global version not found.`);
-		}
-
-		const globalVersion = JSON.parse(
-			globalVersionRows[0].snapshot_content
-		) as LixVersion;
+		// Load global version snapshot once (descriptor + tip)
+		const globalVersion = loadMergedVersion("global");
 		versionSnapshots.set("global", globalVersion);
 		const globalChangeSetId = nanoId({ lix: args.lix });
 		const globalCommitId = uuidV7({ lix: args.lix });
@@ -464,43 +466,11 @@ export function commit(args: {
 		if (changes.length === 0) continue;
 		// Ensure snapshot loaded
 		if (!versionSnapshots.has(version_id)) {
-			const rows = executeSync({
-				lix: args.lix,
-				query: db
-					.selectFrom("internal_resolved_state_all")
-					.where("schema_key", "=", "lix_version")
-					.where("entity_id", "=", version_id)
-					.where("snapshot_content", "is not", null)
-					.select("snapshot_content")
-					.limit(1),
-			});
-			if (rows.length === 0 || !rows[0]?.snapshot_content) {
-				throw new Error(`Version with id '${version_id}' not found.`);
-			}
-			versionSnapshots.set(
-				version_id,
-				JSON.parse(rows[0].snapshot_content) as LixVersion
-			);
+			versionSnapshots.set(version_id, loadMergedVersion(version_id));
 		}
 	}
 	if (versionSnapshots.size > 0 && !versionSnapshots.has("global")) {
-		const rows = executeSync({
-			lix: args.lix,
-			query: db
-				.selectFrom("internal_resolved_state_all")
-				.where("schema_key", "=", "lix_version")
-				.where("entity_id", "=", "global")
-				.where("snapshot_content", "is not", null)
-				.select("snapshot_content")
-				.limit(1),
-		});
-		if (rows.length === 0 || !rows[0]?.snapshot_content) {
-			throw new Error(`Global version not found.`);
-		}
-		versionSnapshots.set(
-			"global",
-			JSON.parse(rows[0].snapshot_content) as LixVersion
-		);
+		versionSnapshots.set("global", loadMergedVersion("global"));
 	}
 	// Use resolved version snapshots to derive parent_commit_ids
 	for (const [vid, snap] of versionSnapshots) {
@@ -585,14 +555,13 @@ export function commit(args: {
 	const commitIdByVersion = new Map<string, string>();
 	for (const ch of genRes.changes) {
 		if (
-			ch.schema_key === "lix_version" &&
+			ch.schema_key === "lix_version_tip" &&
 			ch.snapshot_content &&
 			ch.entity_id
 		) {
-			try {
-				const snap = JSON.parse(ch.snapshot_content as any) as LixVersion;
-				if (snap.commit_id) commitIdByVersion.set(ch.entity_id, snap.commit_id);
-			} catch {}
+			const snap = JSON.parse(ch.snapshot_content);
+			const cid = snap?.commit_id;
+			if (cid) commitIdByVersion.set(ch.entity_id, cid);
 		}
 	}
 
@@ -675,7 +644,24 @@ export function commit(args: {
 	});
 
 	// Emit state commit hook after transaction is successfully committed
-	const allChangesForHook: any[] = [...genRes.changes, ...untrackedChanges];
-	args.lix.hooks._emit("state_commit", { changes: allChangesForHook });
+	// Emit only materialized state so observers can read inline lixcol_version_id/lixcol_commit_id
+	const hookChanges: StateCommitChange[] = genRes.materializedState.map(
+		(ms) => ({
+			id: ms.id,
+			entity_id: ms.entity_id,
+			schema_key: ms.schema_key,
+			schema_version: ms.schema_version,
+			file_id: ms.file_id,
+			plugin_key: ms.plugin_key,
+			created_at: ms.created_at,
+			snapshot_content: ms.snapshot_content
+				? JSON.parse(ms.snapshot_content)
+				: null,
+			version_id: ms.lixcol_version_id,
+			commit_id: ms.lixcol_commit_id,
+			untracked: 0,
+		})
+	);
+	args.lix.hooks._emit("state_commit", { changes: hookChanges });
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }

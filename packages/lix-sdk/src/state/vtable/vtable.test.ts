@@ -469,8 +469,6 @@ simulationTest(
 			.select("id")
 			.execute();
 
-		console.log(commitsAfterInsert);
-
 		expectDeterministic(commitsAfterInsert.length).toBe(
 			commitsBeforeInsert.length + 1
 		);

@@ -3,36 +3,38 @@ import type { Lix } from "../index.js";
 export function applyMaterializeStateSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
-	// View 0: Unified commit edges (derived from commit.parent_commit_ids ∪ physical rows)
+	// View 0: Unified commit edges (derived from all commit rows ∪ physical rows)
+	// Ensure latest definition is applied
+	lix.sqlite.exec(
+		`DROP VIEW IF EXISTS internal_materialization_all_commit_edges;`
+	);
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
-        WITH latest_commits AS (
-            SELECT 
-                c.entity_id,
-                c.snapshot_content,
-                ROW_NUMBER() OVER (
-                    PARTITION BY c.entity_id 
-                    ORDER BY c.created_at DESC, c.id DESC
-                ) AS rn
-            FROM change c
-            WHERE c.schema_key = 'lix_commit'
-        ),
-        derived_edges AS (
-            SELECT 
+        WITH derived AS (
+            SELECT
                 je.value AS parent_id,
-                lc.entity_id AS child_id
-            FROM latest_commits lc
-            JOIN json_each(json_extract(lc.snapshot_content,'$.parent_commit_ids')) je
-            WHERE lc.rn = 1
-              AND json_type(json_extract(lc.snapshot_content,'$.parent_commit_ids')) = 'array'
+                c.entity_id AS child_id
+            FROM change c
+            JOIN json_each(json_extract(c.snapshot_content,'$.parent_commit_ids')) je
+            WHERE c.schema_key = 'lix_commit'
+              AND json_type(json_extract(c.snapshot_content,'$.parent_commit_ids')) = 'array'
+        ),
+        physical AS (
+            SELECT
+                json_extract(e.snapshot_content,'$.parent_id') AS parent_id,
+                json_extract(e.snapshot_content,'$.child_id')  AS child_id
+            FROM change e
+            WHERE e.schema_key = 'lix_commit_edge'
         )
-        SELECT DISTINCT parent_id, child_id FROM derived_edges;
+        SELECT DISTINCT parent_id, child_id FROM derived
+        UNION
+        SELECT DISTINCT parent_id, child_id FROM physical;
     `);
 	// View 1: Version tips - one row per version with its current tip commit
 	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"
 	// A commit C is the tip for version V iff:
-	// • C appears in at least one lix_version change row for V AND
-	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
+	// • C appears in at least one lix_version_tip change row for V AND
+	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version_tip row of the same version V
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
         WITH
@@ -42,7 +44,7 @@ export function applyMaterializeStateSchema(
                 v.entity_id,
                 json_extract(v.snapshot_content,'$.commit_id')
             FROM change v
-            WHERE v.schema_key = 'lix_version'
+            WHERE v.schema_key = 'lix_version_tip'
               AND json_extract(v.snapshot_content,'$.commit_id') IS NOT NULL
         ),
         -- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
@@ -108,6 +110,10 @@ export function applyMaterializeStateSchema(
 	// View 3: Latest visible state - derive commit membership from commit.change_ids
 	// We explode commit.change_ids for each commit in the graph and join with change table
 	// to obtain the actual change rows for that commit.
+	// Ensure latest definition is applied
+	lix.sqlite.exec(
+		`DROP VIEW IF EXISTS internal_materialization_latest_visible_state;`
+	);
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
         WITH cg_distinct AS (
@@ -164,48 +170,35 @@ export function applyMaterializeStateSchema(
         FROM commit_targets ct
         JOIN change c ON c.id = ct.target_change_id
         WHERE c.schema_key != 'lix_version'
+          AND c.schema_key != 'lix_version_tip'
     ),
-    -- All lix_version rows that reference the computed tip for each version (timestamp-free selection)
-    version_tip_rows AS (
-        SELECT 
-            v.entity_id                                   AS version_id,
-            v.id                                          AS change_id,
-            json_extract(v.snapshot_content,'$.commit_id') AS commit_id,
-            v.snapshot_content,
-            v.schema_version,
-            v.created_at                                   AS created_at
-        FROM change v
-        JOIN internal_materialization_version_tips t
-          ON v.schema_key = 'lix_version'
-         AND v.entity_id = t.version_id
-         AND json_extract(v.snapshot_content,'$.commit_id') = t.tip_commit_id
-    ),
-    -- Canonical choice: lexicographically smallest change_id per version
-    canonical_version_tip AS (
-        SELECT version_id, MIN(change_id) AS winning_change_id
-        FROM version_tip_rows
-        GROUP BY version_id
-    ),
+    -- Tip rows are FOLLOWING the authoritative tips view (graph is source of truth)
     lvs_version_global AS (
-        SELECT 
+        SELECT
             'global'              AS version_id,
             t.tip_commit_id       AS commit_id,
             0                     AS depth,
-            r.change_id           AS change_id,
-            r.version_id          AS entity_id,
-            'lix_version'         AS schema_key,
-            'lix'                 AS file_id,
-            'lix_own_entity'      AS plugin_key,
-            r.snapshot_content    AS snapshot_content,
-            r.schema_version      AS schema_version,
-            r.created_at          AS entity_created_at,
-            r.created_at          AS entity_updated_at
-        FROM canonical_version_tip w
-        JOIN version_tip_rows r
-          ON r.version_id = w.version_id
-         AND r.change_id  = w.winning_change_id
-        JOIN internal_materialization_version_tips t
-          ON t.version_id = w.version_id
+            COALESCE(
+                MIN(v.id),
+                'syn~' || t.version_id || '~' || t.tip_commit_id
+            )                      AS change_id,
+            t.version_id           AS entity_id,
+            'lix_version_tip'      AS schema_key,
+            'lix'                  AS file_id,
+            'lix_own_entity'       AS plugin_key,
+            json_object(
+                'id',        t.version_id,
+                'commit_id', t.tip_commit_id
+            )                      AS snapshot_content,
+            COALESCE(MIN(v.schema_version), '1.0') AS schema_version,
+            MIN(v.created_at)       AS entity_created_at,
+            MIN(v.created_at)       AS entity_updated_at
+        FROM internal_materialization_version_tips t
+        LEFT JOIN change v
+          ON v.schema_key = 'lix_version_tip'
+         AND v.entity_id  = t.version_id
+         AND json_extract(v.snapshot_content,'$.commit_id') = t.tip_commit_id
+        GROUP BY t.version_id, t.tip_commit_id
     ),
     commit_rows_global AS (
         -- Materialize commit change rows for all commits in the graph (global scope)
@@ -406,7 +399,7 @@ export function applyMaterializeStateSchema(
 				0 as inheritance_depth,
 				',' || entity_id || ',' -- Path for cycle detection
 			FROM change 
-			WHERE schema_key = 'lix_version'
+			WHERE schema_key = 'lix_version_descriptor'
 			
 			UNION ALL
 			
@@ -419,7 +412,7 @@ export function applyMaterializeStateSchema(
 			FROM version_ancestry va
 			JOIN change parent_v 
 				ON parent_v.entity_id = va.ancestor_version_id 
-				AND parent_v.schema_key = 'lix_version'
+				AND parent_v.schema_key = 'lix_version_descriptor'
 			WHERE json_extract(parent_v.snapshot_content,'$.inherits_from_version_id') IS NOT NULL
 			  -- Cycle detection: stop if ancestor already in path
 			  AND INSTR(va.path, ',' || json_extract(parent_v.snapshot_content,'$.inherits_from_version_id') || ',') = 0
@@ -429,6 +422,8 @@ export function applyMaterializeStateSchema(
 	`);
 
 	// View 5: Final state materializer with multi-level inheritance
+	// Ensure latest definition is applied
+	lix.sqlite.exec(`DROP VIEW IF EXISTS internal_state_materializer;`);
 	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
 		WITH all_possible_states AS (

@@ -138,7 +138,9 @@ test("commit writes business rows to active version; graph edges update globally
 	expect(activeSchemas["lix_change_author"]).toBe(2);
 	expect(activeSchemas["lix_commit"]).toBeUndefined();
 	expect(activeSchemas["lix_change_set"]).toBeUndefined();
+	// No version meta in CSEs (descriptor/tip excluded)
 	expect(activeSchemas["lix_version"]).toBeUndefined();
+	expect(activeSchemas["lix_version_tip"]).toBeUndefined();
 	// Edges are derived; no commit_edge change rows
 	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
 
@@ -326,21 +328,34 @@ test("commit should handle multiple versions correctly", async () => {
 		],
 	});
 
-	// Create version A
+	// Create version A (descriptor + tip)
 	insertTransactionState({
 		lix,
 		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: versionAId,
 					name: "version A",
-					commit_id: versionACommitId,
 					working_commit_id: versionAWorkingCommitId,
+					inherits_from_version_id: "global",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+			{
+				entity_id: versionAId,
+				schema_key: "lix_version_tip",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAId,
+					commit_id: versionACommitId,
 				}),
 				schema_version: "1.0",
 				version_id: "global",
@@ -390,21 +405,34 @@ test("commit should handle multiple versions correctly", async () => {
 		],
 	});
 
-	// Create version B
+	// Create version B (descriptor + tip)
 	insertTransactionState({
 		lix,
 		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: versionBId,
 					name: "version B",
-					commit_id: versionBCommitId,
 					working_commit_id: versionBWorkingCommitId,
+					inherits_from_version_id: "global",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+			{
+				entity_id: versionBId,
+				schema_key: "lix_version_tip",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBId,
+					commit_id: versionBCommitId,
 				}),
 				schema_version: "1.0",
 				version_id: "global",
@@ -508,7 +536,7 @@ test("commit should handle multiple versions correctly", async () => {
 	const versionChanges = await db
 		.selectFrom("change")
 		.selectAll()
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_version_tip")
 		.orderBy("created_at", "desc")
 		.execute();
 
@@ -1004,55 +1032,20 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.execute();
 	expect(derivedEdges.length).toBe(1);
-
-	// Verify the edge is discoverable by the lineage CTE using derived edges
-	const lineageRows = lix.sqlite.exec({
-		sql: `
-      WITH RECURSIVE lineage_commits(id, version_id) AS (
-        /* anchor: use edge-based approach to find the tip */
-        SELECT 
-          json_extract(v.snapshot_content,'$.commit_id') AS id,
-          v.entity_id AS version_id 
-        FROM change v
-        WHERE v.schema_key = 'lix_version'
-          AND v.entity_id = 'global'
-          /* keep only the row whose commit_id has NO outgoing edge */
-          AND NOT EXISTS (
-            SELECT 1
-            FROM internal_materialization_all_commit_edges e
-            WHERE e.parent_id = json_extract(v.snapshot_content,'$.commit_id')
-          )
-
-        UNION
-
-        /* recurse upwards via parent_id */
-        SELECT 
-          e.parent_id AS id,
-          l.version_id AS version_id
-        FROM internal_materialization_all_commit_edges e
-        JOIN lineage_commits l ON e.child_id = l.id
-        WHERE e.parent_id IS NOT NULL
-      )
-      SELECT id FROM lineage_commits WHERE version_id = 'global' ORDER BY id;
-    `,
-		returnValue: "resultRows",
-	});
-
-	// Skip lineage assertion here; covered by materializer tests.
 });
 
 /**
- * Tests that when changes are made to a non-global version (like the active/main version),
- * both the version itself AND the global version are updated.
+ * Commit‑anchored version tips
  *
- * This is critical because:
- * 1. The non-global version's commit_id moves forward to include its data changes
- * 2. The global version's commit_id ALSO moves forward to track the version update itself
- * 3. All version changes (updates to any version entity) are stored in the global version's history
+ * When mutations occur on a non‑global version (e.g., active/main):
+ * - Exactly one new commit is created for that version and its tip (lix_version_tip.commit_id) advances.
+ * - The global version's commit_id does NOT move for these data mutations (drop‑dual‑commit).
+ * - The pointer ledger (lix_version_tip) is written under the global scope, and consumers join
+ *   descriptor + tip to form the merged version view.
+ * - Commit graph edges are derived from commit.parent_commit_ids (no edge change rows).
  *
- * Without this behavior, each version would need to maintain its own history of all other versions,
- * which would be redundant and complex. Instead, the global version serves as the central registry
- * of all version state changes.
+ * This test asserts the active version moves forward, verifies the derived edge, and cross‑checks
+ * the tip change rows against the version view.
  */
 test("active version should move forward when mutations occur", async () => {
 	const lix = await openLix({
@@ -1064,13 +1057,6 @@ test("active version should move forward when mutations occur", async () => {
 		],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
-	// Get the global version before for comparison
-	const globalVersionBefore = await db
-		.selectFrom("version")
-		.where("id", "=", "global")
-		.selectAll()
-		.executeTakeFirstOrThrow();
 
 	// Get the active version (should be the main version, not global)
 	const activeVersion = await db
@@ -1166,7 +1152,7 @@ test("active version should move forward when mutations occur", async () => {
 	const latestActiveVersionChange = await db
 		.selectFrom("change")
 		.select(["id"])
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", activeVersionId)
 		.orderBy("created_at desc")
 		.executeTakeFirstOrThrow();
@@ -1174,7 +1160,7 @@ test("active version should move forward when mutations occur", async () => {
 	const latestGlobalVersionChange = await db
 		.selectFrom("change")
 		.select(["id"])
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", "global")
 		.orderBy("created_at desc")
 		.executeTakeFirstOrThrow();
@@ -1182,21 +1168,21 @@ test("active version should move forward when mutations occur", async () => {
 	// Cross-check commit_id via JSON extraction
 	const activeCommitIdCheck = await db
 		.selectFrom("change")
-		.select((eb) =>
+		.select(() =>
 			sql<string>`json_extract(snapshot_content,'$.commit_id')`.as("cid")
 		)
 		.where("id", "=", latestActiveVersionChange.id)
 		.executeTakeFirstOrThrow();
-	expect((activeCommitIdCheck as any).cid).toBe(versionAfter.commit_id);
+	expect(activeCommitIdCheck.cid).toBe(versionAfter.commit_id);
 
 	const globalCommitIdCheck = await db
 		.selectFrom("change")
-		.select((eb) =>
+		.select(() =>
 			sql<string>`json_extract(snapshot_content,'$.commit_id')`.as("cid")
 		)
 		.where("id", "=", latestGlobalVersionChange.id)
 		.executeTakeFirstOrThrow();
-	expect((globalCommitIdCheck as any).cid).toBe(globalVersionAfter.commit_id);
+	expect(globalCommitIdCheck.cid).toBe(globalVersionAfter.commit_id);
 });
 
 // Tests moved from handle-state-mutation.test.ts since they test commit behavior

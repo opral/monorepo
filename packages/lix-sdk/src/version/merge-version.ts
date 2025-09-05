@@ -69,34 +69,7 @@ export async function mergeVersion(args: {
 		}> = [];
 
 		for (const d of diffs) {
-			/*
-				TODO [TEMP FILTER — CLEAN UP AFTER STEP 5]:
-				This block purposely filters control meta out of winners/deletions during merge.
-				Reason: keep commit membership deterministic and avoid duplicating meta under cache-miss
-				while we still conflate domain/meta in `change_ids`.
-
-				Important:
-				- Do NOT blanket-filter all `lix_*` schemas. Some `lix_*` are valid domain rows
-				  (e.g., `lix_key_value`, `lix_file_descriptor`). This filter is narrowly scoped to
-				  control/meta only.
-
-				Cleanup plan:
-				- Remove this temporary filter once meta vs domain membership is formally split
-				  (introduce `meta_change_ids`; see Optimization Plan Step 5).
-				- Tracked in `optimizaton-plan/plan.md` under Cleanup TODOs.
-				*/
-			// Treat only domain schemas as winners/deletions. Exclude control meta that should not be merged as domain.
-			const isControlMeta =
-				d.schema_key === "lix_commit" ||
-				d.schema_key === "lix_change_set" ||
-				d.schema_key === "lix_version" ||
-				d.schema_key === "lix_commit_edge" ||
-				d.schema_key === "lix_change_author";
-
-			if (
-				(d.status === "created" || d.status === "updated") &&
-				!isControlMeta
-			) {
+			if (d.status === "created" || d.status === "updated") {
 				if (d.after_change_id) {
 					toReference.push({
 						id: d.after_change_id,
@@ -105,7 +78,7 @@ export async function mergeVersion(args: {
 						file_id: d.file_id,
 					});
 				}
-			} else if (d.status === "deleted" && !isControlMeta) {
+			} else if (d.status === "deleted") {
 				// Lookup plugin_key and schema_version from target's before_change_id
 				const before = await trx
 					.selectFrom("change")
@@ -121,8 +94,6 @@ export async function mergeVersion(args: {
 					schema_version: before.schema_version,
 				});
 			}
-
-			//
 		}
 
 		// Flush pending source tracked changes for referenced items into the change table
@@ -224,22 +195,23 @@ export async function mergeVersion(args: {
 		};
 		changeRows.push(commitRow);
 
-		// version (target -> new tip)
-		const targetVersionChangeId = uuidV7({ lix });
-		const versionRow: LixChangeRaw = {
-			id: targetVersionChangeId,
+		// No 'lix_version' rows; version view is derived from descriptor + tip
+
+		// tip (target -> commit-anchored pointer)
+		const versionTipRow: LixChangeRaw = {
+			id: uuidV7({ lix }),
 			entity_id: target.id,
-			schema_key: "lix_version",
+			schema_key: "lix_version_tip",
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				...targetVersion,
+				id: target.id,
 				commit_id: targetCommitId,
 			}),
 			created_at: now,
 		};
-		changeRows.push(versionRow);
+		changeRows.push(versionTipRow);
 
 		//
 		//
@@ -439,7 +411,7 @@ export async function mergeVersion(args: {
 
 		const cacheBatch: Mat[] = [];
 
-		// Global scope: commit row (derives edges + ensures change_set entry) and version row
+		// Global scope: commit row (derives edges + ensures change_set entry)
 		cacheBatch.push({
 			...(changeRows.find(
 				(c) => c.schema_key === "lix_commit"
@@ -447,27 +419,15 @@ export async function mergeVersion(args: {
 			lixcol_version_id: "global",
 			lixcol_commit_id: targetCommitId,
 		} as Mat);
+
+		// Also cache the tip pointer for materializer seeding and views
 		cacheBatch.push({
-			...(changeRows.find(
-				(c) => c.schema_key === "lix_version" && c.entity_id === target.id
-			) as LixChangeRaw),
+			...(versionTipRow as LixChangeRaw),
 			lixcol_version_id: "global",
 			lixcol_commit_id: targetCommitId,
 		} as Mat);
 
-		// Ensure source version pointer is present in cache under GLOBAL (unchanged)
-		cacheBatch.push({
-			id: uuidV7({ lix }),
-			entity_id: sourceVersion.id,
-			schema_key: "lix_version",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify(sourceVersion),
-			created_at: now,
-			lixcol_version_id: "global",
-			lixcol_commit_id: targetCommitId,
-		} as Mat);
+		// No caching of deprecated 'lix_version' rows
 		// Also include the change_set entity in global scope for completeness
 		cacheBatch.push({
 			...(changeRows.find(

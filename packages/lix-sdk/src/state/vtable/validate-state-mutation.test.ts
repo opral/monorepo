@@ -39,15 +39,27 @@ test("throws if the schema is not a valid lix schema", async () => {
 });
 
 test("inserts the version and active version schemas to enable validation", async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	const result = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "in", ["lix_version", "lix_active_version"])
+		.where("key", "in", [
+			"lix_version_tip",
+			"lix_active_version",
+			"lix_version_descriptor",
+		])
 		.selectAll()
 		.execute();
 
-	expect(result.length).toBeGreaterThan(0);
+	expect(result.length).toBe(3);
 });
 
 test("valid lix schema with a valid snapshot passes", async () => {

@@ -45,6 +45,8 @@ export const LixCommitSchema = {
 		change_ids: { type: ["array", "null"], items: { type: "string" } },
 		// Step 2: list of parent commit ids that this commit directly references
 		parent_commit_ids: { type: ["array", "null"], items: { type: "string" } },
+		// Step 5: meta membership (e.g., version tip rows) kept separate from domain membership
+		meta_change_ids: { type: ["array", "null"], items: { type: "string" } },
 	},
 	required: ["id", "change_set_id"],
 	additionalProperties: false,
@@ -109,7 +111,7 @@ export function applyCommitDatabaseSchema(
 		},
 	});
 
-	// Create commit_edge views (read-only); we'll override SELECTs with derived definitions.
+	// Create commit_edge views (read-only)
 	createEntityViewsIfNotExists({
 		lix,
 		schema: LixCommitEdgeSchema,

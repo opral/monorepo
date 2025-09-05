@@ -559,19 +559,21 @@ export function applyStateVTable(
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
 					// Handle cache copying for new versions that share commits (v2 cache)
-					if (isInsert && String(schema_key) === "lix_version") {
-						const versionData = JSON.parse(snapshot_content);
-						const newVersionId = versionData.id;
-						const commitId = versionData.commit_id;
+					// Updated for commit-anchored tips: trigger on lix_version_tip writes
+					if (isInsert && String(schema_key) === "lix_version_tip") {
+						const tipData = JSON.parse(snapshot_content);
+						const newVersionId = tipData.id;
+						const commitId = tipData.commit_id;
 
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit
 							const existingVersionsWithSameCommit = sqlite.exec({
 								sql: `
 									SELECT json_extract(snapshot_content, '$.id') as version_id
-									FROM internal_state_cache 
-									WHERE schema_key = 'lix_version' 
-									  AND json_extract(snapshot_content, '$.commit_id') = ?
+									FROM internal_resolved_state_all 
+									WHERE schema_key = 'lix_version_tip' 
+									  AND version_id = 'global'
+									  AND commit_id = ?
 									  AND json_extract(snapshot_content, '$.id') != ?
 								`,
 								bind: [commitId, newVersionId],
@@ -587,7 +589,7 @@ export function applyStateVTable(
 
 								// Get all unique schema keys from the source version
 								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM internal_state_cache WHERE version_id = ? AND schema_key != 'lix_version'`,
+									sql: `SELECT DISTINCT schema_key FROM internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
 									bind: [sourceVersionId],
 									returnValue: "resultRows",
 								}) as string[][];

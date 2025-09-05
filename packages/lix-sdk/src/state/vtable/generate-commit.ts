@@ -1,5 +1,9 @@
 import type { LixChangeRaw } from "../../change/schema.js";
-import type { LixVersion } from "../../version/schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersion,
+	type LixVersionTip,
+} from "../../version/schema.js";
 
 export type MaterializedState = LixChangeRaw & {
 	lixcol_version_id: string;
@@ -103,23 +107,21 @@ export function generateCommit(args: {
 		});
 	}
 
-	// Build metadata rows: version updates, change_sets, commits
+	// Build metadata rows: version_tip updates, change_sets, commits
 	const metaChanges: LixChangeRaw[] = [];
 	for (const [vid, meta] of metaByVersion) {
-		const vinfo = versions.get(vid)!;
-
-		// version update (write for the mutated version, including 'global' if it has changes)
+		// version_tip update
 		metaChanges.push({
 			id: generateUuid(),
 			entity_id: vid,
-			schema_key: "lix_version",
-			schema_version: "1.0",
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				...vinfo.snapshot,
+				id: vid,
 				commit_id: meta.commitId,
-			}),
+			} satisfies LixVersionTip),
 			created_at: timestamp,
 		});
 
@@ -265,6 +267,14 @@ export function generateCommit(args: {
 	}
 
 	// Update commit snapshots with change_ids (domain + author only; exclude meta)
+	// Also set meta_change_ids to the associated version_tip change id
+	// (control/meta membership kept separate from domain membership per Step 5)
+	const tipChangeIdByVersion = new Map<string, string>();
+	for (const ch of metaChanges) {
+		if (ch.schema_key === LixVersionTipSchema["x-lix-key"]) {
+			tipChangeIdByVersion.set(ch.entity_id, ch.id);
+		}
+	}
 	for (const [vid, meta] of metaByVersion) {
 		const commitIdx = metaChanges.findIndex(
 			(m) => m.schema_key === "lix_commit" && m.entity_id === meta.commitId
@@ -285,32 +295,17 @@ export function generateCommit(args: {
 			}
 			// Exclude meta (version/commit/change_set) from membership
 			snap.change_ids = [...domainIds, ...localAuthorIds];
+			// Add meta_change_ids (currently only version_tip change id)
+			const tipId = tipChangeIdByVersion.get(vid);
+			snap.meta_change_ids = tipId ? [tipId] : [];
 			// Step 2: add parent_commit_ids from versions input
 			snap.parent_commit_ids = meta.parents;
 			metaChanges[commitIdx]!.snapshot_content = JSON.stringify(snap);
 		}
 	}
 
-	// Materialize version rows into cache under GLOBAL only (version is a global entity)
-	for (const [vid, meta] of metaByVersion) {
-		const vinfo = versions.get(vid)!;
-		materialized.push({
-			id: generateUuid(),
-			entity_id: vid,
-			schema_key: "lix_version",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				...vinfo.snapshot,
-				commit_id: meta.commitId,
-			}),
-			created_at: timestamp,
-			lixcol_version_id: "global",
-			lixcol_commit_id: meta.commitId,
-		} as MaterializedState);
-
-		// Also materialize the commit row so the commit view can resolve immediately
+	// Materialize the commit rows so the commit view can resolve immediately
+	for (const [, meta] of metaByVersion) {
 		materialized.push({
 			id: generateUuid(),
 			entity_id: meta.commitId,
@@ -322,6 +317,26 @@ export function generateCommit(args: {
 				id: meta.commitId,
 				change_set_id: meta.changeSetId,
 			}),
+			created_at: timestamp,
+			lixcol_version_id: "global",
+			lixcol_commit_id: meta.commitId,
+		} as MaterializedState);
+	}
+
+	// Materialize version tip rows to reflect pointers without SELECTs
+	for (const [vid, meta] of metaByVersion) {
+		const tipChangeId = tipChangeIdByVersion.get(vid) ?? generateUuid();
+		materialized.push({
+			id: tipChangeId,
+			entity_id: vid,
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: vid,
+				commit_id: meta.commitId,
+			} satisfies LixVersionTip),
 			created_at: timestamp,
 			lixcol_version_id: "global",
 			lixcol_commit_id: meta.commitId,

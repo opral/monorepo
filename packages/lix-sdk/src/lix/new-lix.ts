@@ -3,7 +3,12 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { LixVersionSchema, type LixVersion } from "../version/schema.js";
+import {
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+} from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
@@ -19,6 +24,7 @@ import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { updateStateCache } from "../state/cache/update-state-cache.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import {
@@ -214,7 +220,9 @@ export async function newLixFile(args?: {
 
 	// The initial version ID will be set by createBootstrapChanges
 	const initialVersionId = bootstrapChanges.find(
-		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
+		(c) =>
+			c.schema_key === "lix_version_descriptor" &&
+			c.snapshot_content?.name === "main"
 	)?.entity_id;
 
 	// Set active version using updateUntrackedState for proper inheritance handling
@@ -456,42 +464,71 @@ function createBootstrapChanges(args: {
 	} as BootstrapChange;
 	changes.push(mainWorkingCommitChange);
 
-	// Create global version
+	// Create global version (split only: descriptor + tip)
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: "global",
-		schema_key: "lix_version",
-		schema_version: LixVersionSchema["x-lix-version"],
+		schema_key: LixVersionDescriptorSchema["x-lix-key"],
+		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			commit_id: globalCommitId,
 			working_commit_id: globalWorkingCommitId,
+			inherits_from_version_id: null,
 			hidden: true,
-		} satisfies LixVersion,
+		} satisfies LixVersionDescriptor,
 		created_at: args.created_at,
 	});
 
-	// Create main version
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: "global",
+		schema_key: LixVersionTipSchema["x-lix-key"],
+		schema_version: LixVersionTipSchema["x-lix-version"],
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: "global",
+			commit_id: globalCommitId,
+		} satisfies LixVersionTip,
+		created_at: args.created_at,
+	});
+
+	// Create main version (split only: descriptor + tip)
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: initialVersionId,
-		schema_key: "lix_version",
-		schema_version: LixVersionSchema["x-lix-version"],
+		schema_key: LixVersionDescriptorSchema["x-lix-key"],
+		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
-			commit_id: mainCommitId,
 			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
-		} satisfies LixVersion,
+		} satisfies LixVersionDescriptor,
+		created_at: args.created_at,
+	});
+
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: initialVersionId,
+		schema_key: LixVersionTipSchema["x-lix-key"],
+		schema_version: LixVersionTipSchema["x-lix-version"],
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: initialVersionId,
+			commit_id: mainCommitId,
+		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});
 

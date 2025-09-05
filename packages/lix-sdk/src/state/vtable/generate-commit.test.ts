@@ -12,7 +12,7 @@ function groupBySchema(rows: any[]): Map<string, any[]> {
 	return m;
 }
 
-test("scenario 1: 1 key_value on active (with author) — drop dual commit", async () => {
+test("scenario 1: 1 key_value on active (with author)", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -82,7 +82,10 @@ test("scenario 1: 1 key_value on active (with author) — drop dual commit", asy
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
-	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
+	// Version pointers are now committed via lix_version_tip (meta ledger)
+	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(1);
+	// No descriptor writes during commit; descriptor is domain-only bootstrap/update
+	expect(bySchema.get("lix_version_descriptor")?.length ?? 0).toBe(0);
 	// Change set elements are derived in Step 1 (no change rows)
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
@@ -91,8 +94,10 @@ test("scenario 1: 1 key_value on active (with author) — drop dual commit", asy
 	);
 	// Step 1: commit snapshot includes change_ids for derivation
 	expect(typeof commits[0].change_set_id).toBe("string");
+	// version_id/author_account_ids are no longer on commit snapshots
 	expect(commits[0].version_id).toBeUndefined();
-	expect(Array.isArray(commits[0].change_ids)).toBe(true);
+	expect(commits[0].meta_change_ids?.length ?? 0).toBe(1);
+	expect(commits[0].parent_commit_ids).toEqual(["P_active"]);
 	expect(commits[0].author_account_ids).toBeUndefined();
 
 	// Materialized state (cache)
@@ -103,7 +108,7 @@ test("scenario 1: 1 key_value on active (with author) — drop dual commit", asy
 	expect(bySchemaMat.get("lix_commit")?.length ?? 0).toBe(1);
 	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(1);
-	expect(bySchemaMat.get("lix_version")?.length ?? 0).toBe(1);
+	expect(bySchemaMat.get("lix_version_tip")?.length ?? 0).toBe(1);
 	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
 	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(2);
 
@@ -112,7 +117,7 @@ test("scenario 1: 1 key_value on active (with author) — drop dual commit", asy
 	expect(res.materializedState).toHaveLength(7);
 });
 
-test("scenario 2: 1 key_value on global (with author) — drop dual commit", async () => {
+test("scenario 2: 1 key_value on global (with author)", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -167,7 +172,10 @@ test("scenario 2: 1 key_value on global (with author) — drop dual commit", asy
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
-	expect(bySchema.get("lix_version")?.length ?? 0).toBe(1);
+	// Version pointer updates are recorded as lix_version_tip
+	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(1);
+	// No descriptor writes during commit; descriptor is domain-only bootstrap/update
+	expect(bySchema.get("lix_version_descriptor")?.length ?? 0).toBe(0);
 	// Step 1: no CSE change rows
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
@@ -176,8 +184,10 @@ test("scenario 2: 1 key_value on global (with author) — drop dual commit", asy
 	);
 	// Step 1: commit snapshot includes change_ids for derivation
 	expect(typeof commit.change_set_id).toBe("string");
+	// version_id/author_account_ids are no longer on commit snapshots
 	expect(commit.version_id).toBeUndefined();
-	expect(Array.isArray(commit.change_ids)).toBe(true);
+	expect(commit.meta_change_ids?.length ?? 0).toBe(1);
+	expect(commit.parent_commit_ids).toEqual(["P_global"]);
 	expect(commit.author_account_ids).toBeUndefined();
 
 	const bySchemaMat2 = groupBySchema((res.materializedState as any[]) ?? []);
@@ -186,7 +196,7 @@ test("scenario 2: 1 key_value on global (with author) — drop dual commit", asy
 	expect(bySchemaMat2.get("lix_commit")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat2.get("lix_commit_edge")?.length ?? 0).toBe(1);
-	expect(bySchemaMat2.get("lix_version")?.length ?? 0).toBe(1);
+	expect(bySchemaMat2.get("lix_version_tip")?.length ?? 0).toBe(1);
 	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
 	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(2);
 
@@ -195,7 +205,7 @@ test("scenario 2: 1 key_value on global (with author) — drop dual commit", asy
 	expect(res.materializedState).toHaveLength(7);
 });
 
-test("scenario 3: 2 key_values (active + global), each with both authors — drop dual commit", async () => {
+test("scenario 3: 2 key_values (active + global), each with both authors", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -274,7 +284,10 @@ test("scenario 3: 2 key_values (active + global), each with both authors — dro
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
-	expect(bySchema.get("lix_version")?.length ?? 0).toBe(2);
+	// Version pointer updates are recorded as lix_version_tip
+	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(2);
+	// No descriptor writes during commit; descriptor is domain-only bootstrap/update
+	expect(bySchema.get("lix_version_descriptor")?.length ?? 0).toBe(0);
 	// Step 1: no CSE change rows
 	expect(bySchema.get("lix_change_set_element")?.length ?? 0).toBe(0);
 
@@ -284,8 +297,9 @@ test("scenario 3: 2 key_values (active + global), each with both authors — dro
 	// Step 1: commit snapshot includes change_ids for derivation
 	commits.forEach((c: any) => {
 		expect(typeof c.change_set_id).toBe("string");
+		// version_id/author_account_ids are no longer on commit snapshots
 		expect(c.version_id).toBeUndefined();
-		expect(Array.isArray(c.change_ids)).toBe(true);
+		expect(c.meta_change_ids?.length ?? 0).toBe(1);
 		expect(c.author_account_ids).toBeUndefined();
 	});
 
@@ -295,11 +309,11 @@ test("scenario 3: 2 key_values (active + global), each with both authors — dro
 	expect(bySchemaMat3.get("lix_commit")?.length ?? 0).toBe(2);
 	expect(bySchemaMat3.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat3.get("lix_commit_edge")?.length ?? 0).toBe(2);
-	expect(bySchemaMat3.get("lix_version")?.length ?? 0).toBe(2);
+	// Version tips are materialized in hot write-through
+	expect(bySchemaMat3.get("lix_version_tip")?.length ?? 0).toBe(2);
 	// Only domain CSEs are materialized: 2 entities + 4 authors = 6
 	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(6);
 
-	// Totals under drop dual commit
 	expect(res.changes).toHaveLength(12);
 	expect(res.materializedState).toHaveLength(18);
 });

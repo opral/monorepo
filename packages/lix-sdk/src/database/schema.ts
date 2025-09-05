@@ -6,9 +6,8 @@ import {
 } from "../change-set/schema.js";
 import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
 import {
-	LixVersionSchema,
+	LixVersionDescriptorSchema,
 	type LixActiveVersion,
-	// type ActiveVersionTable,
 } from "../version/schema.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
@@ -60,7 +59,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
-	version: LixVersionSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_label: LixChangeSetLabelSchema,
@@ -111,6 +109,10 @@ export type LixDatabaseSchema = {
 		"thread_comment",
 		{ body: LixThreadComment["body"] }
 	> &
-	EntityViews<typeof LixVersionSchema, "version"> &
+	EntityViews<
+		typeof LixVersionDescriptorSchema,
+		"version",
+		{ commit_id: string }
+	> &
 	EntityViews<typeof LixCommitSchema, "commit"> &
 	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

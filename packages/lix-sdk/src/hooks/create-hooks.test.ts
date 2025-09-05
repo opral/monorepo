@@ -1,5 +1,8 @@
 import { expect, test, vi } from "vitest";
 import { createHooks } from "./create-hooks.js";
+import { openLix } from "../lix/open-lix.js";
+import { createVersion } from "../version/create-version.js";
+import type { StateCommitChange } from "./create-hooks.js";
 
 test("should create hooks with onStateCommit method", () => {
 	const hooks = createHooks();
@@ -122,4 +125,52 @@ test("should create independent hook instances", () => {
 	hooks2._emit("state_commit");
 	expect(handler1).toHaveBeenCalledTimes(1);
 	expect(handler2).toHaveBeenCalledTimes(1);
+});
+
+test("onStateCommit emits state-shaped changes with version_id and commit_id", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const v = await createVersion({ lix, name: "hook-test" });
+
+	const events: StateCommitChange[][] = [];
+	const unsubscribe = lix.hooks.onStateCommit(({ changes }) => {
+		events.push(changes);
+	});
+
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "hook-entity",
+			schema_key: "mock_entity",
+			schema_version: "1.0",
+			file_id: "hook-file",
+			version_id: v.id,
+			plugin_key: "mock-plugin",
+			snapshot_content: { id: "hook-entity", name: "Hello" },
+		})
+		.execute();
+
+	await new Promise((r) => setTimeout(r, 0));
+
+	expect(events.length).toBeGreaterThan(0);
+	const flat = events.flat();
+	const domain = flat.find(
+		(c) => c.schema_key === "mock_entity" && c.entity_id === "hook-entity"
+	);
+	expect(domain).toBeDefined();
+	expect(domain!.version_id).toBe(v.id);
+	expect(typeof domain!.commit_id).toBe("string");
+	expect((domain!.commit_id ?? "").length).toBeGreaterThan(0);
+	expect(domain!.untracked ?? 0).toBe(0);
+
+	unsubscribe();
+	await lix.close();
 });
