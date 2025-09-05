@@ -28,7 +28,7 @@ export function selectWorkingDiffCount(lix: Lix) {
 		.innerJoin("change", "change_set_element.change_id", "change.id")
 		.where("change_set_element.change_set_id", "=", workingChangeSetIdQ)
 		.where("change.file_id", "=", activeFileIdQ)
-		.where("schema_key", "=", mdPlugin.key)
+		.where("change.plugin_key", "=", mdPlugin.key)
 		.select((eb) => [
 			eb.fn.count<number>("change.id").as("total"),
 			eb.fn
