@@ -7,6 +7,20 @@ import { LixKeyValueSchema } from "../key-value/schema.js";
 const FILE_ID = "lix"; // key_value is stored under hardcoded file_id 'lix'
 const KV_SCHEMA = LixKeyValueSchema["x-lix-key"];
 
+// Manually select base diff columns from the aliased subquery "diff"
+const selectBaseDiffCols = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"before_version_id",
+	"before_change_id",
+	"before_commit_id",
+	"after_version_id",
+	"after_change_id",
+	"after_commit_id",
+	"status",
+];
+
 async function setKeyValue(lix: any, key: string, value: any) {
 	// Safe upsert for vtable-backed entity: check existence first
 	const existing = await lix.db
@@ -47,8 +61,9 @@ test("created: new key after checkpoint", async () => {
 	const wcid = await workingCommitId(lix);
 
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.select(selectBaseDiffCols as any)
 		.execute();
 
 	expect(rows.length).toBeGreaterThan(0);
@@ -78,8 +93,9 @@ test("updated: key changed since last checkpoint", async () => {
 	await setKeyValue(lix, "kv2", "B");
 
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.select(selectBaseDiffCols as any)
 		.execute();
 
 	const updated = rows.find(
@@ -118,8 +134,9 @@ test("deleted: key removed since last checkpoint", async () => {
 	await delKeyValue(lix, "kv3");
 
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.select(selectBaseDiffCols)
 		.execute();
 
 	const deleted = rows.find(
@@ -151,8 +168,9 @@ test("unchanged: no working changes returns no created/updated/deleted", async (
 	await createCheckpoint({ lix });
 
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.select(selectBaseDiffCols)
 		.execute();
 
 	expect(rows.length).toBe(0);
@@ -174,9 +192,10 @@ test("latest checkpoint chosen as before", async () => {
 	await setKeyValue(lix, "t", "B2");
 
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
-		.where("diff.entity_id", "=", "t")
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.where("entity_id", "=", "t")
+		.select(selectBaseDiffCols)
 		.execute();
 
 	const row = rows[0];
@@ -187,46 +206,49 @@ test("latest checkpoint chosen as before", async () => {
 });
 
 test("after_commit_id equals active working commit id", async () => {
-    const lix = await openLix({});
-    await createCheckpoint({ lix });
-    await setKeyValue(lix, "wk1", "Z");
-    const wcid = await workingCommitId(lix);
+	const lix = await openLix({});
+	await createCheckpoint({ lix });
+	await setKeyValue(lix, "wk1", "Z");
+	const wcid = await workingCommitId(lix);
 
-    const rows = await selectWorkingDiff({ lix })
-        .where("diff.entity_id", "=", "wk1")
-        .execute();
-    expect(rows.length).toBe(1);
-    expect(rows[0]!.after_commit_id).toBe(wcid);
+	const rows = await selectWorkingDiff({ lix })
+		.where("entity_id", "=", "wk1")
+		.select(selectBaseDiffCols)
+		.execute();
+	expect(rows.length).toBe(1);
+	expect(rows[0]!.after_commit_id).toBe(wcid);
 });
 
 test("before_* columns are null when no prior checkpoint", async () => {
-    const lix = await openLix({});
-    // NOTE: no checkpoint before first change
-    await setKeyValue(lix, "ncp", "A");
+	const lix = await openLix({});
+	// NOTE: no checkpoint before first change
+	await setKeyValue(lix, "ncp", "A");
 
-    const rows = await selectWorkingDiff({ lix })
-        .where("diff.entity_id", "=", "ncp")
-        .execute();
-    expect(rows.length).toBe(1);
-    const r = rows[0]!;
-    expect(r.status).toBe("created");
-    expect(r.before_commit_id).toBeNull();
-    expect(r.before_change_id).toBeNull();
-    expect(r.before_version_id).toBeNull();
+	const rows = await selectWorkingDiff({ lix })
+		.where("entity_id", "=", "ncp")
+		.select(selectBaseDiffCols)
+		.execute();
+	expect(rows.length).toBe(1);
+	const r = rows[0]!;
+	expect(r.status).toBe("created");
+	expect(r.before_commit_id).toBeNull();
+	expect(r.before_change_id).toBeNull();
+	expect(r.before_version_id).toBeNull();
 });
 
 test("stable sorting by entity_id", async () => {
-    const lix = await openLix({});
-    await createCheckpoint({ lix });
-    await setKeyValue(lix, "b", 1);
-    await setKeyValue(lix, "a", 1);
-    await setKeyValue(lix, "c", 1);
+	const lix = await openLix({});
+	await createCheckpoint({ lix });
+	await setKeyValue(lix, "b", 1);
+	await setKeyValue(lix, "a", 1);
+	await setKeyValue(lix, "c", 1);
 
-    const rows = await selectWorkingDiff({ lix })
-        .orderBy("diff.entity_id", "asc")
-        .execute();
-    const ids = rows.map(r => r.entity_id);
-  expect(ids).toEqual([...ids].sort());
+	const rows = await selectWorkingDiff({ lix })
+		.orderBy("entity_id", "asc")
+		.select(selectBaseDiffCols)
+		.execute();
+	const ids = rows.map((r) => r.entity_id);
+	expect(ids).toEqual([...ids].sort());
 });
 
 test("returns unchanged rows for non-inherited state when no working edits", async () => {
@@ -237,9 +259,10 @@ test("returns unchanged rows for non-inherited state when no working edits", asy
 
 	// No further edits; working diff should include 'unchanged' for kvU
 	const rows = await selectWorkingDiff({ lix })
-		.where("diff.file_id", "=", FILE_ID)
-		.where("diff.schema_key", "=", KV_SCHEMA)
-		.where("diff.entity_id", "=", "kvU")
+		.where("file_id", "=", FILE_ID)
+		.where("schema_key", "=", KV_SCHEMA)
+		.where("entity_id", "=", "kvU")
+		.select(selectBaseDiffCols)
 		.execute();
 
 	expect(rows.length).toBe(1);

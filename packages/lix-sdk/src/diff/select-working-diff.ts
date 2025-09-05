@@ -3,6 +3,8 @@ import type { Lix } from "../lix/open-lix.js";
 import type { DiffRow } from "../version/select-version-diff.js";
 import { sql } from "kysely";
 
+// Note: snapshots are not projected here; join `change` by id if needed.
+
 /**
  * Returns the diff between the working state and the last checkpoint.
  *
@@ -31,7 +33,7 @@ import { sql } from "kysely";
  * @example
  * // Get all changes since the last checkpoint
  * const changes = await selectWorkingDiff({ lix })
- *   .where('diff.status', '!=', 'unchanged')
+ *   .where('status', '!=', 'unchanged')
  *   .execute();
  *
  * console.log(`${changes.length} changes since checkpoint`);
@@ -39,23 +41,23 @@ import { sql } from "kysely";
  * @example
  * // Monitor changes to a specific file
  * const fileChanges = await selectWorkingDiff({ lix })
- *   .where('diff.file_id', '=', 'config.json')
- *   .where('diff.status', '!=', 'unchanged')
- *   .orderBy('diff.entity_id')
+ *   .where('file_id', '=', 'config.json')
+ *   .where('status', '!=', 'unchanged')
+ *   .orderBy('entity_id')
  *   .execute();
  *
  * @example
  * // Check if specific entities have changed since checkpoint
  * const entityIds = ['user-1', 'user-2', 'user-3'];
  * const entityChanges = await selectWorkingDiff({ lix })
- *   .where('diff.entity_id', 'in', entityIds)
- *   .where('diff.status', '!=', 'unchanged')
+ *   .where('entity_id', 'in', entityIds)
+ *   .where('status', '!=', 'unchanged')
  *   .execute();
  *
  * @example
  * // Count changes by status
  * const allChanges = await selectWorkingDiff({ lix })
- *   .where('diff.status', '!=', 'unchanged')
+ *   .where('status', '!=', 'unchanged')
  *   .execute();
  *
  * const stats = allChanges.reduce((acc, change) => {
@@ -74,111 +76,96 @@ import { sql } from "kysely";
  *
  * @see createCheckpoint - Convert working state into a checkpoint
  * @see selectVersionDiff - Compare two complete version states
+ *
+ * @example
+ * // Fetch before/after snapshots by joining the `change` table
+ * // Tip: apply filters (file_id, schema_key, status) before joining to keep it fast.
+ * const rows = await selectWorkingDiff({ lix })
+ *   .where('file_id', '=', 'lix')
+ *   .where('schema_key', '=', 'lix_key_value')
+ *   .where('status', '!=', 'unchanged')
+ *   .leftJoin('change as before', 'before.id', 'before_change_id')
+ *   .leftJoin('change as after', 'after.id', 'after_change_id')
+ *   .select([
+ *     'entity_id',
+ *     'schema_key',
+ *     'file_id',
+ *     'status',
+ *     'before.snapshot_content',
+ *     'after.snapshot_content',
+ *   ])
+ *   .execute();
+ *
+ * // rows[i].before_snapshot_content / after_snapshot_content are JSON objects (or null)
  */
-export function selectWorkingDiff(args: { lix: Lix }): SelectQueryBuilder<any, "diff", DiffRow> {
+type DiffDB = { diff: DiffRow };
+
+export function selectWorkingDiff(args: {
+	lix: Lix;
+}): SelectQueryBuilder<DiffDB, "diff", DiffRow> {
 	const db = args.lix.db;
 
 	// Active version details
 	const workingCommitIdQ = db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.working_commit_id");
+		.select((eb) => eb.ref("version.working_commit_id").as("id"));
 
-	const workingChangeSetIdQ = db
-		.selectFrom("commit")
-		.where("id", "=", workingCommitIdQ)
-		.select("change_set_id");
-
-	const latestCheckpointChangeSetIdQ = db
-		.selectFrom("commit")
-		.innerJoin("entity_label", (join) =>
-			join
-				.onRef("entity_label.entity_id", "=", "commit.id")
-				.on("entity_label.schema_key", "=", "lix_commit")
-		)
-		.innerJoin("label", "label.id", "entity_label.label_id")
-		.where("label.name", "=", "checkpoint")
-		.select("commit.change_set_id")
-		.orderBy("commit.lixcol_updated_at", "desc")
-		.limit(1);
-
+	// Optimize: previous checkpoint is the parent of the current working commit
 	const latestCheckpointCommitIdQ = db
-		.selectFrom("commit")
-		.innerJoin("entity_label", (join) =>
+		.selectFrom("commit_edge as ce")
+		.innerJoin("commit as p", "p.id", "ce.parent_id")
+		.innerJoin("entity_label as el", (join) =>
 			join
-				.onRef("entity_label.entity_id", "=", "commit.id")
-				.on("entity_label.schema_key", "=", "lix_commit")
+				.onRef("el.entity_id", "=", "p.id")
+				.on("el.schema_key", "=", "lix_commit")
 		)
-		.innerJoin("label", "label.id", "entity_label.label_id")
-		.where("label.name", "=", "checkpoint")
-		.select("commit.id")
-		.orderBy("commit.lixcol_updated_at", "desc")
+		.innerJoin("label as l", "l.id", "el.label_id")
+		.whereRef("ce.child_id", "=", workingCommitIdQ)
+		.where("l.name", "=", "checkpoint")
+		.select("p.id")
 		.limit(1);
 
 	// Base SELECT: rows from the working change set
 	const base = db
 		.selectFrom("change as ch")
 		.innerJoin("change_set_element as cse", "cse.change_id", "ch.id")
-		.where("cse.change_set_id", "=", workingChangeSetIdQ)
+		.where(
+			"cse.change_set_id",
+			"=",
+			sql`(select change_set_id from wcs)` as any
+		)
 		.where("ch.file_id", "!=", "lix_own_change_control")
+		.leftJoin("change_set_element as bcse", (join) =>
+			join
+				.onRef("bcse.entity_id", "=", "ch.entity_id")
+				.onRef("bcse.schema_key", "=", "ch.schema_key")
+				.onRef("bcse.file_id", "=", "ch.file_id")
+				.on("bcse.change_set_id", "=", sql`(select change_set_id from ccs)`)
+		)
+		// no join to `change bc` here — project ids only
 		.select((eb) => [
 			eb.ref("ch.entity_id").as("entity_id"),
 			eb.ref("ch.schema_key").as("schema_key"),
 			eb.ref("ch.file_id").as("file_id"),
 
 			sql`NULL`.as("before_version_id"),
-			// Latest matching change in the latest checkpoint
-			eb
-				.selectFrom("change as bc")
-				.innerJoin("change_set_element as bcse", "bcse.change_id", "bc.id")
-				.where("bcse.change_set_id", "=", latestCheckpointChangeSetIdQ)
-				.whereRef("bc.entity_id", "=", "ch.entity_id")
-				.whereRef("bc.schema_key", "=", "ch.schema_key")
-				.whereRef("bc.file_id", "=", "ch.file_id")
-				.select("bc.id")
-				.orderBy("bc.created_at", "desc")
-				.limit(1)
-				.as("before_change_id"),
-			latestCheckpointCommitIdQ.as("before_commit_id"),
+			eb.ref("bcse.change_id").as("before_change_id"),
+			sql`(select id from cc)`.as("before_commit_id"),
 
 			sql`NULL`.as("after_version_id"),
 			eb.ref("ch.id").as("after_change_id"),
-			workingCommitIdQ.as("after_commit_id"),
+			sql`(select id from wc)`.as("after_commit_id"),
 
 			sql<"created" | "updated" | "deleted" | "unchanged">`CASE
-        WHEN json(ch.snapshot_content) IS NULL AND EXISTS (
-          SELECT 1 FROM change_set_element bcse
-          JOIN "change" bc ON bc.id = bcse.change_id
-          WHERE bcse.change_set_id = (${latestCheckpointChangeSetIdQ})
-            AND bc.entity_id = ch.entity_id
-            AND bc.schema_key = ch.schema_key
-            AND bc.file_id = ch.file_id
-          LIMIT 1
-        ) THEN 'deleted'
-        WHEN NOT EXISTS (
-          SELECT 1 FROM change_set_element bcse
-          JOIN "change" bc ON bc.id = bcse.change_id
-          WHERE bcse.change_set_id = (${latestCheckpointChangeSetIdQ})
-            AND bc.entity_id = ch.entity_id
-            AND bc.schema_key = ch.schema_key
-            AND bc.file_id = ch.file_id
-          LIMIT 1
-        ) THEN 'created'
-        WHEN EXISTS (
-          SELECT 1 FROM change_set_element bcse
-          JOIN "change" bc ON bc.id = bcse.change_id
-          WHERE bcse.change_set_id = (${latestCheckpointChangeSetIdQ})
-            AND bc.entity_id = ch.entity_id
-            AND bc.schema_key = ch.schema_key
-            AND bc.file_id = ch.file_id
-            AND bc.id != ch.id
-          LIMIT 1
-        ) THEN 'updated'
+        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NULL THEN 'deleted'
+        WHEN bcse.change_id IS NULL AND json(ch.snapshot_content) IS NOT NULL THEN 'created'
+        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NOT NULL AND bcse.change_id != ch.id THEN 'updated'
         ELSE 'unchanged'
       END`.as("status"),
 		]);
 
-	// Unchanged rows = non-inherited, tracked state rows not present in working CSE
+	// Unchanged rows = non-inherited, tracked state rows without a working CSE entry
 	const unchanged = db
 		.selectFrom("state_all as sa")
 		.whereRef(
@@ -188,50 +175,57 @@ export function selectWorkingDiff(args: { lix: Lix }): SelectQueryBuilder<any, "
 		)
 		.where("sa.inherited_from_version_id", "is", null)
 		.where("sa.untracked", "=", false)
-		.where((eb) =>
-			eb.not(
-				eb.exists(
-					eb
-						.selectFrom("change_set_element")
-						.whereRef("change_set_element.entity_id", "=", "sa.entity_id")
-						.whereRef("change_set_element.schema_key", "=", "sa.schema_key")
-						.whereRef("change_set_element.file_id", "=", "sa.file_id")
-						.where("change_set_element.change_set_id", "=", workingChangeSetIdQ)
-          .select((eb2) => eb2.val(1).as('one'))
-				)
-			)
+		// Anti-join to ensure no working edit exists for this triple
+		.leftJoin("change_set_element as wcse", (join) =>
+			join
+				.onRef("wcse.entity_id", "=", "sa.entity_id")
+				.onRef("wcse.schema_key", "=", "sa.schema_key")
+				.onRef("wcse.file_id", "=", "sa.file_id")
+				.on("wcse.change_set_id", "=", sql`(select change_set_id from wcs)`)
 		)
+		.where("wcse.change_id", "is", null)
+		// For unchanged rows, before == after; reuse sa.* and avoid checkpoint joins
 		.select((eb) => [
 			eb.ref("sa.entity_id").as("entity_id"),
 			eb.ref("sa.schema_key").as("schema_key"),
 			eb.ref("sa.file_id").as("file_id"),
 			sql`NULL`.as("before_version_id"),
-			// before_change_id (latest matching in latest checkpoint)
-			eb
-				.selectFrom("change as bc")
-				.innerJoin("change_set_element as bcse", "bcse.change_id", "bc.id")
-				.where("bcse.change_set_id", "=", latestCheckpointChangeSetIdQ)
-				.whereRef("bc.entity_id", "=", "sa.entity_id")
-				.whereRef("bc.schema_key", "=", "sa.schema_key")
-				.whereRef("bc.file_id", "=", "sa.file_id")
-				.select("bc.id")
-				.orderBy("bc.created_at", "desc")
-				.limit(1)
-				.as("before_change_id"),
-			latestCheckpointCommitIdQ.as("before_commit_id"),
+			eb.ref("sa.change_id").as("before_change_id"),
+			sql`(select id from cc)`.as("before_commit_id"),
 			sql`NULL`.as("after_version_id"),
 			eb.ref("sa.change_id").as("after_change_id"),
-			workingCommitIdQ.as("after_commit_id"),
+			sql`(select id from wc)`.as("after_commit_id"),
 			sql<"unchanged">`'unchanged'`.as("status"),
 		]);
 
-	const union =
-		sql`(select * from (${base}) as w union all select * from (${unchanged}) as u)`.as(
-			"diff"
-		);
+	// CTEs for constants used across both UNION arms
+	const union = sql<DiffRow>`(
+        select * from (${base}) as w
+        union all
+        select * from (${unchanged}) as u
+    )`.as("diff");
 
-	return db.selectFrom(union).selectAll() as unknown as SelectQueryBuilder<
-		any,
+	return db
+		.with("wc", () => workingCommitIdQ as any)
+		.with("cc", () => latestCheckpointCommitIdQ as any)
+		.with(
+			"wcs",
+			() =>
+				db
+					.selectFrom("commit")
+					.where("id", "=", sql`(select id from wc)` as any)
+					.select(["change_set_id"]) as any
+		)
+		.with(
+			"ccs",
+			() =>
+				db
+					.selectFrom("commit")
+					.where("id", "=", sql`(select id from cc)` as any)
+					.select(["change_set_id"]) as any
+		)
+		.selectFrom(union) as unknown as SelectQueryBuilder<
+		DiffDB,
 		"diff",
 		DiffRow
 	>;
