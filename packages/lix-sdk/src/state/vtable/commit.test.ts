@@ -135,7 +135,7 @@ test("commit writes business rows to active version; graph edges update globally
 	expect(activeSchemas["lix_key_value"]).toBe(2); // user rows
 
 	// Domain-only CSE membership: include authors, exclude meta CSEs
-	expect(activeSchemas["lix_change_author"]).toBe(2);
+	expect(activeSchemas["lix_change_author"]).toBeUndefined();
 	expect(activeSchemas["lix_commit"]).toBeUndefined();
 	expect(activeSchemas["lix_change_set"]).toBeUndefined();
 	// No version meta in CSEs (descriptor/tip excluded)

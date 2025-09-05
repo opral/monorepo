@@ -109,6 +109,7 @@ export function generateCommit(args: {
 
 	// Build metadata rows: version_tip updates and commits (change_set is synthesized)
 	const metaChanges: LixChangeRaw[] = [];
+	const commitChangeIdByVersion = new Map<string, string>();
 	for (const [vid, meta] of metaByVersion) {
 		// version_tip update
 		metaChanges.push({
@@ -126,8 +127,10 @@ export function generateCommit(args: {
 		});
 
 		// commit (write for the mutated version, including 'global' if it has changes)
+		const commitChangeRowId = generateUuid();
+		commitChangeIdByVersion.set(vid, commitChangeRowId);
 		metaChanges.push({
-			id: generateUuid(),
+			id: commitChangeRowId,
 			entity_id: meta.commitId,
 			schema_key: "lix_commit",
 			schema_version: "1.0",
@@ -143,79 +146,7 @@ export function generateCommit(args: {
 		// Skip materializing CSEs for meta (version/commit/change_set) to keep CSE domain-only
 	}
 
-	// author rows (global metadata)
-	// Important: author row IDs must be stable across change rows and cache materialization
-	// so that change_set_element.change_id can join to change.id.
-	const authorChanges: LixChangeRaw[] = [];
-	const authorIdByEntity = new Map<string, string>();
-	for (const [, domainChanges] of domainByVersion) {
-		for (const dc of domainChanges) {
-			for (const acct of activeAccounts ?? []) {
-				const entity = `${dc.id}~${acct}`;
-				const id = generateUuid();
-				authorIdByEntity.set(entity, id);
-				authorChanges.push({
-					id,
-					entity_id: entity,
-					schema_key: "lix_change_author",
-					schema_version: "1.0",
-					file_id: "lix",
-					plugin_key: "lix_own_entity",
-					snapshot_content: JSON.stringify({
-						change_id: dc.id,
-						account_id: acct,
-					}),
-					created_at: timestamp,
-				});
-			}
-		}
-	}
-
-	// Materialize author rows into global cache (so views inherit them into active versions)
-	for (const [vid, domainChanges] of domainByVersion) {
-		const meta = metaByVersion.get(vid)!;
-		for (const dc of domainChanges) {
-			for (const acct of activeAccounts ?? []) {
-				const entity = `${dc.id}~${acct}`;
-				const authorId = authorIdByEntity.get(entity)!;
-				// Domain author row in cache uses the SAME id as the change row
-				materialized.push({
-					id: authorId,
-					entity_id: entity,
-					schema_key: "lix_change_author",
-					schema_version: "1.0",
-					file_id: "lix",
-					plugin_key: "lix_own_entity",
-					snapshot_content: JSON.stringify({
-						change_id: dc.id,
-						account_id: acct,
-					}),
-					created_at: timestamp,
-					lixcol_version_id: "global",
-					lixcol_commit_id: meta.commitId,
-				} as MaterializedState);
-				// Materialize CSE for the author row under the commit's change set
-				materialized.push({
-					id: generateUuid(),
-					entity_id: `${meta.changeSetId}~${authorId}`,
-					schema_key: "lix_change_set_element",
-					schema_version: "1.0",
-					file_id: "lix",
-					plugin_key: "lix_own_entity",
-					snapshot_content: JSON.stringify({
-						change_set_id: meta.changeSetId,
-						change_id: authorId,
-						entity_id: entity,
-						schema_key: "lix_change_author",
-						file_id: "lix",
-					}),
-					created_at: timestamp,
-					lixcol_version_id: "global",
-					lixcol_commit_id: meta.commitId,
-				} as MaterializedState);
-			}
-		}
-	}
+	// (no commit-level author rows; authors are per-change in the cache)
 
 	// Derived CSEs in materialized state only (no change rows in Step 1)
 	for (const [vid, domainChanges] of domainByVersion) {
@@ -251,6 +182,32 @@ export function generateCommit(args: {
 		}
 	}
 
+	// Materialize per-change author rows in cache (derived; change_id = domain change id),
+	// and tie their lixcol_change_id to the commit change row id
+	for (const [vid, domainChanges] of domainByVersion) {
+		const meta = metaByVersion.get(vid)!;
+		const commitChangeRowId = commitChangeIdByVersion.get(vid)!;
+		for (const dc of domainChanges) {
+			for (const acct of activeAccounts ?? []) {
+				materialized.push({
+					id: commitChangeRowId,
+					entity_id: `${dc.id}~${acct}`,
+					schema_key: "lix_change_author",
+					schema_version: "1.0",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						change_id: dc.id,
+						account_id: acct,
+					}),
+					created_at: timestamp,
+					lixcol_version_id: "global",
+					lixcol_commit_id: meta.commitId,
+				} as MaterializedState);
+			}
+		}
+	}
+
 	// Update commit snapshots with change_ids (domain + author only; exclude meta)
 	// Also set meta_change_ids to the associated version_tip change id
 	// (control/meta membership kept separate from domain membership per Step 5)
@@ -269,17 +226,10 @@ export function generateCommit(args: {
 				metaChanges[commitIdx]!.snapshot_content as any
 			) as any;
 			const domainIds = (domainByVersion.get(vid) || []).map((c) => c.id);
-			// Include author change ids for domain changes of this version
-			const localAuthorIds: string[] = [];
-			for (const ac of authorChanges) {
-				const sc =
-					typeof ac.snapshot_content === "string"
-						? JSON.parse(ac.snapshot_content as any)
-						: (ac.snapshot_content as any);
-				if (sc && domainIds.includes(sc.change_id)) localAuthorIds.push(ac.id);
-			}
-			// Exclude meta (version/commit/change_set) from membership
-			snap.change_ids = [...domainIds, ...localAuthorIds];
+			// Exclude meta (version/commit/change_set) and author rows from membership
+			snap.change_ids = [...domainIds];
+			// Commit-level authors
+			snap.author_account_ids = Array.from(new Set(activeAccounts ?? []));
 			// Add meta_change_ids (currently only version_tip change id)
 			const tipId = tipChangeIdByVersion.get(vid);
 			snap.meta_change_ids = tipId ? [tipId] : [];
@@ -365,7 +315,7 @@ export function generateCommit(args: {
 		}
 	}
 
-	outputChanges.push(...authorChanges, ...metaChanges);
+	outputChanges.push(...metaChanges);
 
 	return { changes: outputChanges, materializedState: materialized };
 }

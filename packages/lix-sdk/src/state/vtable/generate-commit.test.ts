@@ -78,7 +78,8 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	const bySchema = groupBySchema(res.changes as any[]);
 	// Domain + Metadata rows (no commit_edge change rows)
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
+	// No author change rows (authors live on commit)
+	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
 	// change_set is synthesized in cache from commit.snapshot.change_set_id (no change row)
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
@@ -98,8 +99,9 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	// version_id/author_account_ids are no longer on commit snapshots
 	expect(commits[0].version_id).toBeUndefined();
 	expect(commits[0].meta_change_ids?.length ?? 0).toBe(1);
+	// Commit-level authors
+	expect(commits[0].author_account_ids).toEqual(["acct-1"]);
 	expect(commits[0].parent_commit_ids).toEqual(["P_active"]);
-	expect(commits[0].author_account_ids).toBeUndefined();
 
 	// Materialized state (cache)
 	// Synthesized: domain-only CSE; domain rows are included for the commit's version
@@ -110,12 +112,12 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	expect(bySchemaMat.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchemaMat.get("lix_version_tip")?.length ?? 0).toBe(1);
-	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
-	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(2);
+	// Only domain CSEs: 1 entity
+	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(1);
 
-	// Totals under drop dual commit (domain + author + meta, no change_set row, no meta CSEs)
-	expect(res.changes).toHaveLength(4);
-	expect(res.materializedState).toHaveLength(7);
+	// Totals under drop dual commit (domain + authors(materialized) + meta, no change_set row, no meta CSEs)
+	expect(res.changes).toHaveLength(3);
+	expect(res.materializedState).toHaveLength(6);
 });
 
 test("scenario 2: 1 key_value on global (with author)", async () => {
@@ -169,7 +171,7 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	const bySchema = groupBySchema(res.changes as any[]);
 	// Only global participates
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
+	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
 	// change_set is synthesized in cache (no change row)
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
@@ -189,8 +191,9 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	// version_id/author_account_ids are no longer on commit snapshots
 	expect(commit.version_id).toBeUndefined();
 	expect(commit.meta_change_ids?.length ?? 0).toBe(1);
+	// Commit-level authors
+	expect(commit.author_account_ids).toEqual(["acct-1"]);
 	expect(commit.parent_commit_ids).toEqual(["P_global"]);
-	expect(commit.author_account_ids).toBeUndefined();
 
 	const bySchemaMat2 = groupBySchema((res.materializedState as any[]) ?? []);
 	expect(bySchemaMat2.get("lix_key_value")?.length ?? 0).toBe(1);
@@ -199,12 +202,12 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(bySchemaMat2.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchemaMat2.get("lix_commit_edge")?.length ?? 0).toBe(1);
 	expect(bySchemaMat2.get("lix_version_tip")?.length ?? 0).toBe(1);
-	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
-	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(2);
+	// Only domain CSEs: 1 entity
+	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(1);
 
-	// Totals under drop dual commit (domain + author + meta, no change_set row, no meta CSEs)
-	expect(res.changes).toHaveLength(4);
-	expect(res.materializedState).toHaveLength(7);
+	// Totals under drop dual commit (domain + authors(materialized) + meta, no change_set row, no meta CSEs)
+	expect(res.changes).toHaveLength(3);
+	expect(res.materializedState).toHaveLength(6);
 });
 
 test("scenario 3: 2 key_values (active + global), each with both authors", async () => {
@@ -282,7 +285,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 
 	const bySchema = groupBySchema(res.changes as any[]);
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(2);
-	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(4);
+	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
 	// change_set is synthesized in cache (no change rows)
 	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
@@ -303,7 +306,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 		// version_id/author_account_ids are no longer on commit snapshots
 		expect(c.version_id).toBeUndefined();
 		expect(c.meta_change_ids?.length ?? 0).toBe(1);
-		expect(c.author_account_ids).toBeUndefined();
+		expect(c.author_account_ids).toEqual(["acct-1", "acct-2"]);
 	});
 
 	const bySchemaMat3 = groupBySchema((res.materializedState as any[]) ?? []);
@@ -314,9 +317,9 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchemaMat3.get("lix_commit_edge")?.length ?? 0).toBe(2);
 	// Version tips are materialized in hot write-through
 	expect(bySchemaMat3.get("lix_version_tip")?.length ?? 0).toBe(2);
-	// Only domain CSEs are materialized: 2 entities + 4 authors = 6
-	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(6);
+	// Only domain CSEs are materialized: 2 entities
+	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(2);
 
-	expect(res.changes).toHaveLength(10);
-	expect(res.materializedState).toHaveLength(18);
+	expect(res.changes).toHaveLength(6);
+	expect(res.materializedState).toHaveLength(14);
 });

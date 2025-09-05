@@ -254,11 +254,11 @@ export function applyMaterializeStateSchema(
         JOIN change cmt ON cmt.entity_id = ct.commit_id AND cmt.schema_key = 'lix_commit'
         JOIN change c ON c.id = ct.target_change_id
     ),
-    commit_edges AS (
-        -- Derive commit_edge rows from commit snapshots (global scope)
-        SELECT 
-            'global' AS version_id,
-            cg.commit_id,
+        commit_edges AS (
+            -- Derive commit_edge rows from commit snapshots (global scope)
+            SELECT 
+                'global' AS version_id,
+                cg.commit_id,
             cg.depth,
             -- Change id uses the child commit change id for stable origin tracking
             cmt.id AS change_id,
@@ -291,6 +291,45 @@ export function applyMaterializeStateSchema(
         JOIN change cmt ON cmt.entity_id = cg.commit_id AND cmt.schema_key = 'lix_commit'
         JOIN json_each(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) je
         WHERE json_type(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) = 'array'
+    ),
+    commit_authors AS (
+        -- Derive change_author rows per domain change from commit.author_account_ids (global scope)
+        SELECT
+            'global' AS version_id,
+            ct.commit_id,
+            ct.depth,
+            -- Use the commit change row id for lineage (lixcol_change_id)
+            cmt.id AS change_id,
+            -- entity key: change_id~account_id (domain change id)
+            (c.id || '~' || ja.value) AS entity_id,
+            'lix_change_author' AS schema_key,
+            'lix' AS file_id,
+            'lix_own_entity' AS plugin_key,
+            json_object(
+                'change_id', c.id,
+                'account_id', ja.value
+            ) AS snapshot_content,
+            '1.0' AS schema_version,
+            cmt.created_at AS created_at,
+            ROW_NUMBER() OVER (
+                PARTITION BY 'global', (c.id || '~' || ja.value), 'lix_change_author', 'lix'
+                ORDER BY ct.depth ASC
+            ) AS first_seen,
+            FIRST_VALUE(cmt.created_at) OVER (
+                PARTITION BY 'global', (c.id || '~' || ja.value), 'lix_change_author', 'lix'
+                ORDER BY ct.depth DESC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_created_at,
+            FIRST_VALUE(cmt.created_at) OVER (
+                PARTITION BY 'global', (c.id || '~' || ja.value), 'lix_change_author', 'lix'
+                ORDER BY ct.depth ASC
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS entity_updated_at
+        FROM commit_targets_distinct ct
+        JOIN change cmt ON cmt.entity_id = ct.commit_id AND cmt.schema_key = 'lix_commit'
+        JOIN change c ON c.id = ct.target_change_id
+        JOIN json_each(json_extract(cmt.snapshot_content,'$.author_account_ids')) ja
+        WHERE json_type(json_extract(cmt.snapshot_content,'$.author_account_ids')) = 'array'
     )
     SELECT 
         version_id,
@@ -369,6 +408,22 @@ export function applyMaterializeStateSchema(
         entity_created_at as created_at,
         entity_updated_at as updated_at
     FROM commit_edges
+    WHERE first_seen = 1
+    UNION ALL
+    SELECT 
+        version_id,
+        commit_id,
+        depth,
+        change_id,
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        entity_created_at as created_at,
+        entity_updated_at as updated_at
+    FROM commit_authors
     WHERE first_seen = 1;
         -- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
     `);

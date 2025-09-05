@@ -39,14 +39,36 @@ export const LixCommitSchema = {
 	// No SQL-level foreign key for change_set_id; see rationale above.
 	type: "object",
 	properties: {
-		id: { type: "string" },
-		change_set_id: { type: "string" },
-		// Step 1 (already in use): list of change ids that belong to this commit
-		change_ids: { type: ["array", "null"], items: { type: "string" } },
-		// Step 2: list of parent commit ids that this commit directly references
-		parent_commit_ids: { type: ["array", "null"], items: { type: "string" } },
-		// Step 5: meta membership (e.g., version tip rows) kept separate from domain membership
-		meta_change_ids: { type: ["array", "null"], items: { type: "string" } },
+		id: { type: "string", description: "Commit identifier" },
+		change_set_id: {
+			type: "string",
+			description:
+				"Identifier of the change set associated with this commit (materialized in cache)",
+		},
+		change_ids: {
+			type: ["array", "null"],
+			items: { type: "string" },
+			description:
+				"Domain change identifiers contained in this commit. Excludes meta changes; used to derive change_set_elements.",
+		},
+		author_account_ids: {
+			type: ["array", "null"],
+			items: { type: "string" },
+			description:
+				"Commit-level author account identifiers. Explicit per-change overrides live in lix_change_author.",
+		},
+		parent_commit_ids: {
+			type: ["array", "null"],
+			items: { type: "string" },
+			description:
+				"Direct parent commit identifiers; used to derive commit edges and ancestry.",
+		},
+		meta_change_ids: {
+			type: ["array", "null"],
+			items: { type: "string" },
+			description:
+				"Meta change identifiers (e.g., version tip) associated with this commit and kept separate from domain membership.",
+		},
 	},
 	required: ["id", "change_set_id"],
 	additionalProperties: false,

@@ -325,6 +325,72 @@ describe("internal_materialization_version_tips", () => {
 	);
 });
 
+simulationTest(
+	"materializes change_author from commit.author_account_ids",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Insert a tracked key_value on active version to trigger a commit
+		const kvKey = "kv_for_author_mat";
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: kvKey, value: "v1" })
+			.execute();
+
+		// Domain change id for that key_value
+		const kvChange = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "=", kvKey)
+			.orderBy("created_at", "desc")
+			.select(["id"]) // domain change id
+			.executeTakeFirstOrThrow();
+
+		// Authors should appear in internal_materialization_latest_visible_state
+		const authorRows = await lix.db
+			.selectFrom("internal_materialization_latest_visible_state" as any)
+			.selectAll()
+			.where("schema_key", "=", "lix_change_author")
+			.where(
+				sql`json_extract(snapshot_content, '$.change_id')`,
+				"=",
+				kvChange.id
+			)
+			.execute();
+
+		expectDeterministic(authorRows.length).toBe(1);
+
+		// Verify account and lineage
+		const active = await lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
+		const activeAccountId = active[0]!.account_id;
+		expectDeterministic(
+			(authorRows[0] as any)?.snapshot_content?.account_id
+		).toBe(activeAccountId);
+
+		// The materializer uses the commit change row id as 'change_id' column for provenance
+		const commitChangeId = (authorRows[0] as any)?.change_id;
+		const commitRow = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where("id", "=", commitChangeId)
+			.selectAll()
+			.executeTakeFirst();
+
+		expectDeterministic(!!commitRow).toBe(true);
+	}
+);
+
 // Ensures version tip equals the lix_version_tip snapshot commit_id in the materializer
 simulationTest(
 	"version tip matches lix_version_tip snapshot commit_id",
