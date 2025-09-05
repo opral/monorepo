@@ -69,40 +69,37 @@ export function applyMaterializeStateSchema(
         );
     `);
 
-	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)
+	// View 2: Commit graph - lineage with depth (cache-free, DAG traversal)
+	// Assumes commit graph is a DAG; enforce cycle checks at write time if needed.
 	lix.sqlite.exec(`
-        CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
-        WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
-            -- Start from version tips at depth 0
-            SELECT 
-                tip_commit_id, 
-                version_id, 
-                0,
-                ',' || tip_commit_id || ',' -- Path for cycle detection
-            FROM internal_materialization_version_tips
-            
-            UNION ALL
-            
-            -- Walk up parent chain, incrementing depth
-            SELECT 
-                e.parent_id,
-                g.version_id,
-                g.depth + 1,
-                g.path || e.parent_id || ','
-            FROM internal_materialization_all_commit_edges e
-            JOIN commit_paths g ON e.child_id = g.commit_id
-            WHERE e.parent_id IS NOT NULL
-              -- Cycle detection: stop if parent already in path
-              AND INSTR(g.path, ',' || e.parent_id || ',') = 0
-        )
-        -- Group by commit_id and version_id, taking MIN depth for merge commits
-        SELECT 
-            commit_id,
-            version_id,
-            MIN(depth) as depth
-        FROM commit_paths
-        GROUP BY commit_id, version_id;
-    `);
+		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
+		WITH RECURSIVE commit_paths(commit_id, version_id, depth) AS (
+			-- Start from version tips at depth 0
+			SELECT 
+				tip_commit_id, 
+				version_id, 
+				0
+			FROM internal_materialization_version_tips
+			
+			UNION ALL
+			
+			-- Walk up parent chain, incrementing depth
+			SELECT 
+				e.parent_id,
+				g.version_id,
+				g.depth + 1
+			FROM internal_materialization_all_commit_edges e
+			JOIN commit_paths g ON e.child_id = g.commit_id
+			WHERE e.parent_id IS NOT NULL
+		)
+		-- Group by commit_id and version_id, taking MIN depth for merge commits
+		SELECT 
+			commit_id,
+			version_id,
+			MIN(depth) as depth
+		FROM commit_paths
+		GROUP BY commit_id, version_id;
+	`);
 
 	// View 3: Latest visible state - derive commit membership from commit.change_ids
 	// We explode commit.change_ids for each commit in the graph and join with change table
@@ -124,19 +121,20 @@ export function applyMaterializeStateSchema(
 				cg.depth,
 				j.value AS target_change_id
 			FROM cg_distinct cg
-			JOIN change cmt ON cmt.entity_id = cg.commit_id 
-				AND cmt.schema_key = 'lix_commit'
+            JOIN change cmt ON cmt.entity_id = cg.commit_id 
+                AND cmt.schema_key = 'lix_commit'
             JOIN json_each(json_extract(cmt.snapshot_content,'$.change_ids')) j
     ),
-    commit_targets_distinct AS (
-        -- De-duplicate commit-target pairs across version graph contexts for global projections,
-        -- keeping the smallest depth (closest to tip)
-        SELECT commit_id, MIN(depth) AS depth, target_change_id
-        FROM commit_targets
-        GROUP BY commit_id, target_change_id
-    ),
-    commit_changes AS (
-        SELECT 
+        -- Global dedupe for commit-target pairs (used by global projections like CSE)
+        commit_targets_distinct AS (
+            -- De-duplicate commit-target pairs across version graph contexts for global projections,
+            -- keeping the smallest depth (closest to tip)
+            SELECT commit_id, MIN(depth) AS depth, target_change_id
+            FROM commit_targets
+            GROUP BY commit_id, target_change_id
+        ),
+        commit_changes AS (
+            SELECT 
             ct.version_id AS version_id,
             ct.commit_id,
             ct.depth,
