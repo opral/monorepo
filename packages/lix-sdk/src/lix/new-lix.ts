@@ -4,6 +4,7 @@ import {
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import {
+	LixActiveVersionSchema,
 	LixVersionDescriptorSchema,
 	LixVersionTipSchema,
 	type LixVersionDescriptor,
@@ -24,7 +25,6 @@ import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
-import { updateStateCache } from "../state/cache/update-state-cache.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import {
@@ -640,6 +640,29 @@ function createBootstrapChanges(args: {
 
 	// Create all schema definitions
 	for (const schema of Object.values(LixSchemaViewMap)) {
+		changes.push({
+			id: args.generateUuid(),
+			entity_id: schema["x-lix-key"],
+			schema_key: "lix_stored_schema",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
+			snapshot_content: {
+				key: schema["x-lix-key"],
+				version: schema["x-lix-version"],
+				value: JSON.stringify(schema),
+			} satisfies LixStoredSchema,
+			created_at: args.created_at,
+		});
+	}
+
+	// Also store version schemas (descriptor, tip, active_version) for validation
+	for (const schema of [
+		LixVersionDescriptorSchema,
+		LixVersionTipSchema,
+		LixActiveVersionSchema,
+	]) {
 		changes.push({
 			id: args.generateUuid(),
 			entity_id: schema["x-lix-key"],

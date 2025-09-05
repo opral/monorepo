@@ -11,7 +11,10 @@ import {
 } from "../version/schema.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixGenerated,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type {
 	StateView,
@@ -112,7 +115,7 @@ export type LixDatabaseSchema = {
 	EntityViews<
 		typeof LixVersionDescriptorSchema,
 		"version",
-		{ commit_id: string }
+		{ commit_id: LixGenerated<string> }
 	> &
 	EntityViews<typeof LixCommitSchema, "commit"> &
 	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

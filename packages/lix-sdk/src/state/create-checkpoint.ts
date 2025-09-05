@@ -2,6 +2,9 @@ import type { LixCommit } from "../commit/schema.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
+import type { LixChangeRaw } from "../change/schema.js";
+import { timestamp } from "../deterministic/timestamp.js";
+import { updateStateCache } from "../state/cache/update-state-cache.js";
 
 /**
  * Converts the current working change set into a checkpoint.
@@ -116,15 +119,78 @@ export async function createCheckpoint(args: {
 
 		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
 
-		// Update version to point to new working commit
-		await trx
-			.updateTable("version")
-			.where("id", "=", activeVersion.id)
-			.set({
-				commit_id: checkpointCommitId,
+		// Update version tip + descriptor via change + cache (avoid version view writes)
+		const now = timestamp({ lix: args.lix });
+		const descriptorChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: activeVersion.id,
+			schema_key: "lix_version_descriptor",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				name: activeVersion.name,
 				working_commit_id: newWorkingCommitId,
-			})
+				inherits_from_version_id: activeVersion.inherits_from_version_id,
+				hidden: activeVersion.hidden,
+			}),
+			created_at: now,
+		};
+		const tipChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: activeVersion.id,
+			schema_key: "lix_version_tip",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				commit_id: checkpointCommitId,
+			}),
+			created_at: now,
+		};
+
+		// Also materialize the commit edge parent=checkpoint, child=new working
+		const edgeChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
+			schema_key: "lix_commit_edge",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				parent_id: checkpointCommitId,
+				child_id: newWorkingCommitId,
+			}),
+			created_at: now,
+		};
+
+		// Persist changes and update cache without creating a meta-commit
+		await trx
+			.insertInto("change")
+			.values([descriptorChange as any, tipChange as any, edgeChange as any])
 			.execute();
+		updateStateCache({
+			lix: { sqlite: args.lix.sqlite, db: trx },
+			changes: [
+				{
+					...descriptorChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+				{
+					...tipChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+				{
+					...edgeChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+			],
+		});
 
 		return createdCommit;
 	};

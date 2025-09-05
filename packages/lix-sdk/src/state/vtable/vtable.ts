@@ -561,9 +561,17 @@ export function applyStateVTable(
 					// Handle cache copying for new versions that share commits (v2 cache)
 					// Updated for commit-anchored tips: trigger on lix_version_tip writes
 					if (isInsert && String(schema_key) === "lix_version_tip") {
-						const tipData = JSON.parse(snapshot_content);
-						const newVersionId = tipData.id;
-						const commitId = tipData.commit_id;
+						// Skip tombstone inserts where snapshot_content is null
+						let tipData: any = null;
+						try {
+							tipData = snapshot_content ? JSON.parse(snapshot_content) : null;
+						} catch {
+							// ignore parse errors; treat as tombstone/malformed and skip
+							tipData = null;
+						}
+
+						const newVersionId = tipData?.id;
+						const commitId = tipData?.commit_id;
 
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit

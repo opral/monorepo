@@ -193,127 +193,90 @@ export function applyVersionDatabaseSchema(
         FROM state_history
         WHERE schema_key = 'lix_version';
 
-        -- Triggers to route writes on version view into descriptor + tip only (no extra public views)
+        -- Triggers to route writes on version view through version_all (global scope)
         CREATE TRIGGER IF NOT EXISTS version_insert
         INSTEAD OF INSERT ON version
         BEGIN
-            -- Always write descriptor row
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                COALESCE(NEW.id, lix_nano_id()),
-                'lix_version_descriptor',
-                'lix',
-                'lix_own_entity',
-                json_object(
-                    'id', COALESCE(NEW.id, (SELECT COALESCE(NEW.id, '') )),
-                    'name', COALESCE(NEW.name, human_id()),
-                    'working_commit_id', COALESCE(NEW.working_commit_id, lix_uuid_v7()),
-                    'inherits_from_version_id', NEW.inherits_from_version_id,
-                    'hidden', COALESCE(NEW.hidden, 0)
-                ),
-                '1.0',
-                'global'
-            );
 
-            -- Tip row: only when commit_id is explicitly provided
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            )
-            SELECT
-                COALESCE(NEW.id, (SELECT id FROM version WHERE id IS NOT NULL ORDER BY lixcol_created_at DESC LIMIT 1)),
-                'lix_version_tip',
-                'lix',
-                'lix_own_entity',
-                json_object('id', COALESCE(NEW.id, (SELECT id FROM version WHERE id IS NOT NULL ORDER BY lixcol_created_at DESC LIMIT 1)), 'commit_id', NEW.commit_id),
-                '1.0',
-                'global'
-            WHERE NEW.commit_id IS NOT NULL;
+            -- Route creation via version_all (global scope). The version_all_insert trigger
+            -- will take care of writing descriptor + tip rows.
+            INSERT INTO version_all (
+                id,
+                name,
+                working_commit_id,
+                inherits_from_version_id,
+                hidden,
+                lixcol_version_id,
+                commit_id
+            ) VALUES (
+                NEW.id,
+                NEW.name,
+                NEW.working_commit_id,
+                NEW.inherits_from_version_id,
+                NEW.hidden,
+                'global',
+                NEW.commit_id
+            );
 
         END;
 
         CREATE TRIGGER IF NOT EXISTS version_update
         INSTEAD OF UPDATE ON version
         BEGIN
-            -- Route descriptor updates unconditionally (fields are coalesced from current values)
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                NEW.id,
-                'lix_version_descriptor',
-                'lix',
-                'lix_own_entity',
-                json_object(
-                    'id', NEW.id,
-                    'name', COALESCE(NEW.name, (SELECT name FROM version WHERE id = NEW.id)),
-                    'working_commit_id', COALESCE(NEW.working_commit_id, (SELECT working_commit_id FROM version WHERE id = NEW.id)),
-                    'inherits_from_version_id', NEW.inherits_from_version_id,
-                    'hidden', COALESCE(NEW.hidden, (SELECT hidden FROM version WHERE id = NEW.id))
-                ),
-                '1.0',
-                'global'
-            );
-
-            -- Route tip update only when commit_id is explicitly provided
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            )
-            SELECT
-                NEW.id,
-                'lix_version_tip',
-                'lix',
-                'lix_own_entity',
-                json_object('id', NEW.id, 'commit_id', NEW.commit_id),
-                '1.0',
-                'global'
-            WHERE NEW.commit_id IS NOT NULL;
+            -- Route updates via version_all (global scope). The version_all_update trigger
+            -- will update descriptor fields and move the tip when commit_id is provided.
+            UPDATE version_all
+            SET
+                name = NEW.name,
+                working_commit_id = NEW.working_commit_id,
+                inherits_from_version_id = NEW.inherits_from_version_id,
+                hidden = NEW.hidden,
+                commit_id = NEW.commit_id
+            WHERE id = NEW.id
+              AND lixcol_version_id = 'global';
 
         END;
 
         CREATE TRIGGER IF NOT EXISTS version_delete
         INSTEAD OF DELETE ON version
         BEGIN
-            -- Descriptor tombstone
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                OLD.id,
-                'lix_version_descriptor',
-                'lix',
-                'lix_own_entity',
-                NULL,
-                '1.0',
-                'global'
-            );
-
-            -- Tip tombstone
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                OLD.id,
-                'lix_version_tip',
-                'lix',
-                'lix_own_entity',
-                NULL,
-                '1.0',
-                'global'
-            );
+            -- Route deletes via version_all (global scope); version_all_delete handles state
+            DELETE FROM version_all
+            WHERE id = OLD.id
+              AND lixcol_version_id = 'global';
         END;
 
         -- Write-capable version_all triggers mirroring 'version' but honoring explicit lixcol_version_id
         CREATE TRIGGER IF NOT EXISTS version_all_insert
         INSTEAD OF INSERT ON version_all
         BEGIN
+
+            -- Enforce uniqueness of working_commit_id at descriptor level (latest descriptor in change table)
+            SELECT RAISE(FAIL, 'Unique constraint violation: working_commit_id ' || NEW.working_commit_id || ' must be unique among versions')
+            WHERE NEW.working_commit_id IS NOT NULL AND EXISTS (
+              SELECT 1 FROM change c1
+              WHERE c1.schema_key = 'lix_version_descriptor'
+                AND c1.snapshot_content IS NOT NULL
+                AND json_extract(c1.snapshot_content, '$.working_commit_id') = NEW.working_commit_id
+                AND NOT EXISTS (
+                  SELECT 1 FROM change c2
+                  WHERE c2.entity_id = c1.entity_id
+                    AND c2.schema_key = 'lix_version_descriptor'
+                    AND c2.created_at > c1.created_at
+                )
+            );
+
             -- Always write descriptor row
             INSERT INTO state_all (
                 entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                COALESCE(NEW.id, lix_nano_id()),
+            ) 
+            SELECT 
+                gen_id,
                 'lix_version_descriptor',
                 'lix',
                 'lix_own_entity',
                 json_object(
-                    'id', COALESCE(NEW.id, (SELECT COALESCE(NEW.id, '') )),
+                    'id', gen_id,
                     'name', COALESCE(NEW.name, human_id()),
                     'working_commit_id', COALESCE(NEW.working_commit_id, lix_uuid_v7()),
                     'inherits_from_version_id', NEW.inherits_from_version_id,
@@ -321,90 +284,90 @@ export function applyVersionDatabaseSchema(
                 ),
                 '1.0',
                 COALESCE(NEW.lixcol_version_id, 'global')
-            );
+            FROM (SELECT COALESCE(NEW.id, lix_nano_id()) AS gen_id);
 
-            -- Tip row: only when commit_id is explicitly provided
+            -- Also write tip row: use NEW.commit_id if provided, otherwise default to parent's current tip
             INSERT INTO state_all (
                 entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
             )
             SELECT
-                COALESCE(NEW.id, (SELECT id FROM version WHERE id IS NOT NULL ORDER BY lixcol_created_at DESC LIMIT 1)),
+                gen_id,
                 'lix_version_tip',
                 'lix',
                 'lix_own_entity',
-                json_object('id', COALESCE(NEW.id, (SELECT id FROM version WHERE id IS NOT NULL ORDER BY lixcol_created_at DESC LIMIT 1)), 'commit_id', NEW.commit_id),
+                json_object('id', gen_id, 'commit_id', tip_cid),
                 '1.0',
                 COALESCE(NEW.lixcol_version_id, 'global')
-            WHERE NEW.commit_id IS NOT NULL;
+            FROM (
+                SELECT 
+                  COALESCE(NEW.id, lix_nano_id()) AS gen_id,
+                  COALESCE(
+                    NEW.commit_id,
+                    (
+                      SELECT commit_id FROM version 
+                      WHERE id = COALESCE(NEW.inherits_from_version_id, 'global')
+                      LIMIT 1
+                    )
+                  ) AS tip_cid
+            )
+            WHERE tip_cid IS NOT NULL;
 
         END;
 
         CREATE TRIGGER IF NOT EXISTS version_all_update
         INSTEAD OF UPDATE ON version_all
         BEGIN
-            -- Route descriptor updates unconditionally (fields are coalesced from current values)
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                NEW.id,
-                'lix_version_descriptor',
-                'lix',
-                'lix_own_entity',
-                json_object(
+            -- Route descriptor updates via UPDATE (fields are coalesced from current values)
+            UPDATE state_all
+            SET 
+                file_id = 'lix',
+                plugin_key = 'lix_own_entity',
+                snapshot_content = json_object(
                     'id', NEW.id,
                     'name', COALESCE(NEW.name, (SELECT name FROM version WHERE id = NEW.id)),
                     'working_commit_id', COALESCE(NEW.working_commit_id, (SELECT working_commit_id FROM version WHERE id = NEW.id)),
                     'inherits_from_version_id', NEW.inherits_from_version_id,
                     'hidden', COALESCE(NEW.hidden, (SELECT hidden FROM version WHERE id = NEW.id))
                 ),
-                '1.0',
-                COALESCE(NEW.lixcol_version_id, 'global')
-            );
+                schema_version = '1.0',
+                version_id = COALESCE(NEW.lixcol_version_id, 'global')
+            WHERE entity_id = NEW.id
+              AND schema_key = 'lix_version_descriptor'
+              AND file_id = 'lix'
+              AND version_id = COALESCE(NEW.lixcol_version_id, 'global');
 
-            -- Route tip update only when commit_id is explicitly provided
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            )
-            SELECT
-                NEW.id,
-                'lix_version_tip',
-                'lix',
-                'lix_own_entity',
-                json_object('id', NEW.id, 'commit_id', NEW.commit_id),
-                '1.0',
-                COALESCE(NEW.lixcol_version_id, 'global')
-            WHERE NEW.commit_id IS NOT NULL;
+            -- If a new commit_id is provided, update the tip pointer for the scoped version id
+            UPDATE state_all
+            SET 
+                file_id = 'lix',
+                plugin_key = 'lix_own_entity',
+                snapshot_content = json_object('id', NEW.id, 'commit_id', NEW.commit_id),
+                schema_version = '1.0',
+                version_id = COALESCE(NEW.lixcol_version_id, 'global')
+            WHERE NEW.commit_id IS NOT NULL
+              AND NEW.commit_id <> (SELECT commit_id FROM version WHERE id = NEW.id)
+              AND entity_id = NEW.id
+              AND schema_key = 'lix_version_tip'
+              AND file_id = 'lix'
+              AND version_id = COALESCE(NEW.lixcol_version_id, 'global');
 
         END;
 
         CREATE TRIGGER IF NOT EXISTS version_all_delete
         INSTEAD OF DELETE ON version_all
         BEGIN
-            -- Descriptor tombstone
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                OLD.id,
-                'lix_version_descriptor',
-                'lix',
-                'lix_own_entity',
-                NULL,
-                '1.0',
-                COALESCE(OLD.lixcol_version_id, 'global')
-            );
+            -- Route deletes via state_all (vtable handles tombstones)
+            DELETE FROM state_all
+            WHERE entity_id = OLD.id
+              AND schema_key = 'lix_version_descriptor'
+              AND file_id = 'lix'
+              AND version_id = COALESCE(OLD.lixcol_version_id, 'global');
 
-            -- Tip tombstone
-            INSERT INTO state_all (
-                entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
-            ) VALUES (
-                OLD.id,
-                'lix_version_tip',
-                'lix',
-                'lix_own_entity',
-                NULL,
-                '1.0',
-                COALESCE(OLD.lixcol_version_id, 'global')
-            );
+            DELETE FROM state_all
+            WHERE entity_id = OLD.id
+              AND schema_key = 'lix_version_tip'
+              AND file_id = 'lix'
+              AND version_id = COALESCE(OLD.lixcol_version_id, 'global');
         END;
     `);
 
@@ -478,6 +441,12 @@ export const LixVersionDescriptorSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	"x-lix-unique": [["working_commit_id"]],
+	"x-lix-foreign-keys": [
+		{
+			properties: ["working_commit_id"],
+			references: { schemaKey: "lix_commit", properties: ["id"] },
+		},
+	],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
@@ -500,6 +469,7 @@ export const LixVersionTipSchema = {
 		{
 			properties: ["commit_id"],
 			references: { schemaKey: "lix_commit", properties: ["id"] },
+			mode: "materialized",
 		},
 	],
 	type: "object",
@@ -520,7 +490,7 @@ export const LixActiveVersionSchema = {
 		{
 			properties: ["version_id"],
 			references: {
-				schemaKey: "lix_version",
+				schemaKey: "lix_version_descriptor",
 				properties: ["id"],
 			},
 		},

@@ -4,6 +4,7 @@ import type { LixVersion } from "./schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { nanoId, generateHumanId } from "../deterministic/index.js";
+// Use state_all to write descriptor + tip; vtable commit handles persistence + cache
 
 /**
  * Creates a new version that starts at a specific commit.
@@ -46,6 +47,17 @@ export async function createVersionFromCommit(args: {
 	inheritsFrom?: LixVersion | Pick<LixVersion, "id"> | null;
 }): Promise<LixVersion> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		// Ensure the referenced commit exists (global scope)
+		const commitRow = await trx
+			.selectFrom("commit_all")
+			.where("id", "=", args.commit.id)
+			.where("lixcol_version_id", "=", "global")
+			.select(["id"])
+			.executeTakeFirst();
+		if (!commitRow) {
+			throw new Error(`Commit with id '${args.commit.id}' does not exist`);
+		}
+
 		// Create a working (empty) change set for the new version
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
@@ -74,29 +86,46 @@ export async function createVersionFromCommit(args: {
 		const versionId = args.id ?? nanoId({ lix: args.lix });
 		const versionName = args.name ?? generateHumanId({ lix: args.lix });
 
-		// Insert the new version pointing to the provided commit
+		// Insert descriptor and tip via state_all; vtable commit will persist+materialize
 		await trx
-			.insertInto("version")
-			.values({
-				id: versionId,
-				name: versionName,
-				commit_id: args.commit.id,
-				working_commit_id: workingCommitId,
-				inherits_from_version_id,
-			})
+			.insertInto("state_all")
+			.values([
+				{
+					entity_id: versionId,
+					schema_key: "lix_version_descriptor",
+					file_id: "lix",
+					version_id: "global",
+					plugin_key: "lix_own_entity",
+					snapshot_content: {
+						id: versionId,
+						name: versionName,
+						working_commit_id: workingCommitId,
+						inherits_from_version_id,
+						hidden: false,
+					},
+					schema_version: "1.0",
+				},
+				{
+					entity_id: versionId,
+					schema_key: "lix_version_tip",
+					file_id: "lix",
+					version_id: "global",
+					plugin_key: "lix_own_entity",
+					snapshot_content: { id: versionId, commit_id: args.commit.id },
+					schema_version: "1.0",
+				},
+			])
 			.execute();
 
-		// Return the just-created version without an additional SELECT to avoid
-		// triggering cache clears under cache-miss simulation.
-		const newVersion = {
+		// Return the new merged version (descriptor + tip)
+		return {
 			id: versionId,
 			name: versionName,
 			commit_id: args.commit.id,
 			working_commit_id: workingCommitId,
 			inherits_from_version_id,
 			hidden: false,
-		} as LixVersion;
-		return newVersion;
+		} satisfies LixVersion;
 	};
 
 	return args.lix.db.isTransaction
