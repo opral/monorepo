@@ -3,7 +3,6 @@ import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "../state/create-checkpoint.js";
 import { selectWorkingDiff } from "./select-working-diff.js";
 import { LixKeyValueSchema } from "../key-value/schema.js";
-import { sql } from "kysely";
 
 const FILE_ID = "lix"; // key_value is stored under hardcoded file_id 'lix'
 const KV_SCHEMA = LixKeyValueSchema["x-lix-key"];
@@ -47,7 +46,7 @@ bench("working diff: include unchanged", async () => {
 		.where("file_id", "=", FILE_ID)
 		.where("schema_key", "=", KV_SCHEMA)
 		.orderBy("entity_id")
-		.select(["status"] as any)
+		.select(["status"])
 		.execute();
 });
 
@@ -70,8 +69,8 @@ bench("working diff: exclude unchanged", async () => {
 	await selectWorkingDiff({ lix })
 		.where("file_id", "=", FILE_ID)
 		.where("schema_key", "=", KV_SCHEMA)
-		.where("status", "!=", sql.lit("unchanged"))
+		.where("status", "!=", "unchanged")
 		.orderBy("entity_id")
-		.select(["status"] as any)
+		.select(["status"])
 		.execute();
 });

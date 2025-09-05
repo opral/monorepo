@@ -19,7 +19,7 @@ const selectBaseDiffCols = [
 	"after_change_id",
 	"after_commit_id",
 	"status",
-];
+] as const;
 
 async function setKeyValue(lix: any, key: string, value: any) {
 	// Safe upsert for vtable-backed entity: check existence first

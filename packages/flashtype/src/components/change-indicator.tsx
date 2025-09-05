@@ -13,10 +13,9 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
-import { createCheckpoint, selectWorkingDiff, sql } from "@lix-js/sdk";
+import { createCheckpoint, selectWorkingDiff } from "@lix-js/sdk";
 import { selectWorkingDiffCount } from "@/queries";
 import { Diff } from "@/components/diff";
-import type { UiDiffComponentProps } from "@lix-js/sdk";
 import { plugin } from "@lix-js/plugin-md-v2";
 
 export function ChangeIndicator() {
@@ -136,66 +135,29 @@ export function ChangeIndicator() {
 
 function PanelDiff() {
 	// Fetch joined working diffs with before/after snapshots using a single query
-	const joinedRows = useQuery((lix) => {
-		const activeFileIdQ = lix.db
+	const diff = useQuery((lix) => {
+		const activeFileId = lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "flashtype_active_file_id")
 			.select("value");
 
-		return (
-			selectWorkingDiff({ lix })
-				.where("diff.status", "!=", sql.lit("unchanged"))
-				.where("diff.file_id", "=", activeFileIdQ)
-				.orderBy("diff.entity_id")
-				// Join to fetch snapshots and plugin keys
-				.innerJoin("change as after", "after.id", "diff.after_change_id")
-				.leftJoin("change as before", "before.id", "diff.before_change_id")
-				// Limit to Markdown plugin so Diff UI loads
-				.where("after.plugin_key", "=", plugin.key)
-				.select((eb) => [
-					eb.ref("diff.entity_id").as("entity_id"),
-					eb.ref("diff.schema_key").as("schema_key"),
-					eb.ref("after.plugin_key").as("plugin_key"),
-					sql`json(${eb.ref("before.snapshot_content")})`.as(
-						"snapshot_content_before",
-					),
-					sql`json(${eb.ref("after.snapshot_content")})`.as(
-						"snapshot_content_after",
-					),
-				])
-		);
+		return selectWorkingDiff({ lix })
+			.where("diff.status", "!=", "unchanged")
+			.where("diff.file_id", "=", activeFileId)
+			.orderBy("diff.entity_id")
+			.innerJoin("change as after", "after.id", "after_change_id")
+			.leftJoin("change as before", "before.id", "before_change_id")
+			.where("after.plugin_key", "=", plugin.key)
+			.select([
+				"diff.entity_id",
+				"diff.schema_key",
+				"after.plugin_key as plugin_key",
+				"before.snapshot_content as snapshot_content_before",
+				"after.snapshot_content as snapshot_content_after",
+			]);
 	});
 
-	if (!joinedRows || joinedRows.length === 0) return null;
+	if (!diff || diff.length === 0) return null;
 
-	// Normalize JSON fields if the driver returns them as strings
-	const uiDiffs: UiDiffComponentProps["diffs"] = joinedRows.map((r: any) => {
-		const before =
-			typeof r.snapshot_content_before === "string"
-				? safeParseJson(r.snapshot_content_before)
-				: (r.snapshot_content_before ?? null);
-		const after =
-			typeof r.snapshot_content_after === "string"
-				? safeParseJson(r.snapshot_content_after)
-				: (r.snapshot_content_after ?? null);
-		return {
-			entity_id: r.entity_id,
-			plugin_key: r.plugin_key ?? "unknown_plugin",
-			schema_key: r.schema_key,
-			snapshot_content_before: before,
-			snapshot_content_after: after,
-		};
-	});
-
-	if (uiDiffs.length === 0) return null;
-
-	return <Diff diffs={uiDiffs} contentClassName="text-xs" />;
-}
-
-function safeParseJson(v: string) {
-	try {
-		return JSON.parse(v);
-	} catch {
-		return null;
-	}
+	return <Diff diffs={diff} contentClassName="text-xs" />;
 }

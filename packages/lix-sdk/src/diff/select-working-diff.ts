@@ -2,6 +2,7 @@ import type { SelectQueryBuilder } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import type { DiffRow } from "../version/select-version-diff.js";
 import { sql } from "kysely";
+import type { LixDatabaseSchema } from "../database/schema.js";
 
 // Note: snapshots are not projected here; join `change` by id if needed.
 
@@ -102,7 +103,7 @@ type DiffDB = { diff: DiffRow };
 
 export function selectWorkingDiff(args: {
 	lix: Lix;
-}): SelectQueryBuilder<DiffDB, "diff", DiffRow> {
+}): SelectQueryBuilder<LixDatabaseSchema & DiffDB, "diff", DiffRow> {
 	const db = args.lix.db;
 
 	// Active version details
@@ -225,7 +226,7 @@ export function selectWorkingDiff(args: {
 					.select(["change_set_id"]) as any
 		)
 		.selectFrom(union) as unknown as SelectQueryBuilder<
-		DiffDB,
+		LixDatabaseSchema & DiffDB,
 		"diff",
 		DiffRow
 	>;
