@@ -9,20 +9,20 @@ if (!customElements.get(TAG)) customElements.define(TAG, DiffComponent);
 
 // Basic rendering
 test("renders stacked Before/After HTML for a simple paragraph change", async () => {
-  const el = new DiffComponent();
-  document.body.appendChild(el);
+	const el = new DiffComponent();
+	document.body.appendChild(el);
 
-    const beforeNode: AstSchemas.ParagraphNode = {
-      type: "paragraph",
-      data: { id: 'p1' },
-      children: [{ type: "text", value: "Hello world." } ],
-    };
+	const beforeNode: AstSchemas.ParagraphNode = {
+		type: "paragraph",
+		data: { id: "p1" },
+		children: [{ type: "text", value: "Hello world." }],
+	};
 
-    const afterNode: AstSchemas.ParagraphNode = {
-      type: "paragraph",
-      data: { id: 'p1' },
-      children: [{ type: "text", value: "Hello brave new world." } ],
-    };
+	const afterNode: AstSchemas.ParagraphNode = {
+		type: "paragraph",
+		data: { id: "p1" },
+		children: [{ type: "text", value: "Hello brave new world." }],
+	};
 
 	const diffs: UiDiffComponentProps["diffs"] = [
 		{
@@ -33,11 +33,11 @@ test("renders stacked Before/After HTML for a simple paragraph change", async ()
 			snapshot_content_after: afterNode,
 		},
 	];
-  el.diffs = diffs;
+	el.diffs = diffs;
 
 	// Wait for async serialization and Lit updates to flush
 	for (let i = 0; i < 10; i++) {
-    await el.updateComplete;
+		await el.updateComplete;
 		if ((el as any)._afterHtml || (el as any)._beforeHtml) break;
 		await new Promise((r) => setTimeout(r, 10));
 	}
@@ -46,10 +46,10 @@ test("renders stacked Before/After HTML for a simple paragraph change", async ()
 	const content = shadow.querySelector(".content") as HTMLElement;
 	expect(content).toBeTruthy();
 	const html = content.innerHTML;
-  // Should include inline diff markup for the inserted words
-  expect(html).toContain('<span class="diff-created">brave');
-  // Still contains the rest of the sentence
-  expect(html).toContain('world');
+	// Should include inline diff markup for the inserted words
+	expect(html).toContain('<span class="diff-created">brave');
+	// Still contains the rest of the sentence
+	expect(html).toContain("world");
 });
 
 test.todo("renders plain text when entity.type === 'text' with value");

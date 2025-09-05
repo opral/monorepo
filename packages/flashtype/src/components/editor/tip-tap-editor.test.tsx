@@ -1,12 +1,6 @@
 import React, { Suspense, StrictMode } from "react";
 import { expect, test } from "vitest";
-import {
-	render,
-	waitFor,
-	screen,
-	waitForElementToBeRemoved,
-	act,
-} from "@testing-library/react";
+import { render, waitFor, screen, act } from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, type Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";

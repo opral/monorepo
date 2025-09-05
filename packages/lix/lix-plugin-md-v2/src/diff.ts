@@ -170,5 +170,4 @@ export class DiffComponent extends LitElement {
 			diffAttribute: "data-id",
 		});
 	}
-
 }

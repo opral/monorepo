@@ -93,7 +93,7 @@ export function FormattingToolbar() {
 					setCopiedLabelPinned(false);
 				}, 200);
 			}, 1200);
-		} catch (err) {
+		} catch {
 			// Fallback for environments without clipboard API permissions
 			try {
 				const el = document.createElement("textarea");
