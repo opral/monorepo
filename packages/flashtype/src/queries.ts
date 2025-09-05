@@ -1,3 +1,4 @@
+import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
 import type { Lix } from "@lix-js/sdk";
 import { sql } from "@lix-js/sdk";
 
@@ -10,7 +11,7 @@ export function selectFiles(lix: Lix) {
 }
 
 // Working diff for the active file: total/added/removed in current working change set
-export function selectWorkingDiff(lix: Lix) {
+export function selectWorkingDiffCount(lix: Lix) {
 	const workingChangeSetIdQ = lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
@@ -27,6 +28,7 @@ export function selectWorkingDiff(lix: Lix) {
 		.innerJoin("change", "change_set_element.change_id", "change.id")
 		.where("change_set_element.change_set_id", "=", workingChangeSetIdQ)
 		.where("change.file_id", "=", activeFileIdQ)
+		.where("schema_key", "=", mdPlugin.key)
 		.select((eb) => [
 			eb.fn.count<number>("change.id").as("total"),
 			eb.fn

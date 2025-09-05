@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { openLix, createCheckpoint } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
-import { selectFiles, selectWorkingDiff } from "@/queries";
+import { selectFiles, selectWorkingDiffCount } from "@/queries";
 
 describe("selectFiles", () => {
 	test("returns minimal rows sorted by path", async () => {
@@ -57,7 +57,7 @@ describe("selectWorkingDiff", () => {
 			.execute();
 
 		// selectWorkingDiff should return >0 for active file A
-		const diffA1 = await selectWorkingDiff(lix).executeTakeFirst();
+		const diffA1 = await selectWorkingDiffCount(lix).executeTakeFirst();
 		expect(diffA1?.total ?? 0).toBeGreaterThan(0);
 
 		// Make an additional change in B but keep active file = A
@@ -68,7 +68,7 @@ describe("selectWorkingDiff", () => {
 			.execute();
 
 		// Still scoped to A → count should remain the same as only A's changes are counted
-		const diffA2 = await selectWorkingDiff(lix).executeTakeFirst();
+		const diffA2 = await selectWorkingDiffCount(lix).executeTakeFirst();
 		expect(diffA2?.total ?? 0).toBe(diffA1?.total ?? 0);
 
 		// Switch active file to B
@@ -78,12 +78,12 @@ describe("selectWorkingDiff", () => {
 			.where("key", "=", "flashtype_active_file_id")
 			.execute();
 
-		const diffB = await selectWorkingDiff(lix).executeTakeFirst();
+		const diffB = await selectWorkingDiffCount(lix).executeTakeFirst();
 		expect(diffB?.total ?? 0).toBeGreaterThan(0);
 
 		// Checkpoint and expect zero for B
 		await createCheckpoint({ lix });
-		const diffBAfter = await selectWorkingDiff(lix).executeTakeFirst();
+		const diffBAfter = await selectWorkingDiffCount(lix).executeTakeFirst();
 		expect(diffBAfter?.total ?? 0).toBe(0);
 	});
 });

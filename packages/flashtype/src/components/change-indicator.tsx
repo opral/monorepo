@@ -14,16 +14,16 @@ import {
 } from "@/components/ui/tooltip";
 import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
-import { selectWorkingDiff } from "@/queries";
+import { selectWorkingDiffCount } from "@/queries";
 import { Diff } from "@/components/diff";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
 
 export function ChangeIndicator() {
 	const lix = useLix();
-	const diff = useQueryTakeFirst(selectWorkingDiff);
-	const total = diff?.total ?? 0;
-	const added = diff?.added ?? 0;
-	const removed = diff?.removed ?? 0;
+	const diffCount = useQueryTakeFirst(selectWorkingDiffCount);
+	const total = diffCount?.total ?? 0;
+	const added = diffCount?.added ?? 0;
+	const removed = diffCount?.removed ?? 0;
 
 	const [open, setOpen] = useState(false);
 	const triggerRef = useRef<HTMLButtonElement | null>(null);
