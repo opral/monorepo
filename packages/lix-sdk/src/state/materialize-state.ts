@@ -5,9 +5,6 @@ export function applyMaterializeStateSchema(
 ): void {
 	// View 0: Unified commit edges (derived from all commit rows ∪ physical rows)
 	// Ensure latest definition is applied
-	lix.sqlite.exec(
-		`DROP VIEW IF EXISTS internal_materialization_all_commit_edges;`
-	);
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
         WITH derived AS (
@@ -111,9 +108,7 @@ export function applyMaterializeStateSchema(
 	// We explode commit.change_ids for each commit in the graph and join with change table
 	// to obtain the actual change rows for that commit.
 	// Ensure latest definition is applied
-	lix.sqlite.exec(
-		`DROP VIEW IF EXISTS internal_materialization_latest_visible_state;`
-	);
+
 	lix.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
         WITH cg_distinct AS (
@@ -423,7 +418,6 @@ export function applyMaterializeStateSchema(
 
 	// View 5: Final state materializer with multi-level inheritance
 	// Ensure latest definition is applied
-	lix.sqlite.exec(`DROP VIEW IF EXISTS internal_state_materializer;`);
 	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
 		WITH all_possible_states AS (
