@@ -80,7 +80,8 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
+	// change_set is synthesized in cache from commit.snapshot.change_set_id (no change row)
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
 	// Version pointers are now committed via lix_version_tip (meta ledger)
 	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(1);
@@ -112,8 +113,8 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
 	expect(bySchemaMat.get("lix_change_set_element")?.length ?? 0).toBe(2);
 
-	// Totals under drop dual commit (domain + author + meta, no meta CSEs)
-	expect(res.changes).toHaveLength(5);
+	// Totals under drop dual commit (domain + author + meta, no change_set row, no meta CSEs)
+	expect(res.changes).toHaveLength(4);
 	expect(res.materializedState).toHaveLength(7);
 });
 
@@ -170,7 +171,8 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(1);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(1);
-	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(1);
+	// change_set is synthesized in cache (no change row)
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
 	// Version pointer updates are recorded as lix_version_tip
 	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(1);
@@ -200,8 +202,8 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 	// Only domain CSEs (entity + author) are materialized: 1 entity + 1 author = 2
 	expect(bySchemaMat2.get("lix_change_set_element")?.length ?? 0).toBe(2);
 
-	// Totals under drop dual commit (domain + author + meta, no meta CSEs)
-	expect(res.changes).toHaveLength(5);
+	// Totals under drop dual commit (domain + author + meta, no change_set row, no meta CSEs)
+	expect(res.changes).toHaveLength(4);
 	expect(res.materializedState).toHaveLength(7);
 });
 
@@ -282,7 +284,8 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	expect(bySchema.get("lix_key_value")?.length ?? 0).toBe(2);
 	expect(bySchema.get("lix_change_author")?.length ?? 0).toBe(4);
 	expect(bySchema.get("lix_commit")?.length ?? 0).toBe(2);
-	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(2);
+	// change_set is synthesized in cache (no change rows)
+	expect(bySchema.get("lix_change_set")?.length ?? 0).toBe(0);
 	expect(bySchema.get("lix_commit_edge")?.length ?? 0).toBe(0);
 	// Version pointer updates are recorded as lix_version_tip
 	expect(bySchema.get("lix_version_tip")?.length ?? 0).toBe(2);
@@ -314,6 +317,6 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 	// Only domain CSEs are materialized: 2 entities + 4 authors = 6
 	expect(bySchemaMat3.get("lix_change_set_element")?.length ?? 0).toBe(6);
 
-	expect(res.changes).toHaveLength(12);
+	expect(res.changes).toHaveLength(10);
 	expect(res.materializedState).toHaveLength(18);
 });

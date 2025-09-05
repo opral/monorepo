@@ -107,7 +107,7 @@ export function generateCommit(args: {
 		});
 	}
 
-	// Build metadata rows: version_tip updates, change_sets, commits
+	// Build metadata rows: version_tip updates and commits (change_set is synthesized)
 	const metaChanges: LixChangeRaw[] = [];
 	for (const [vid, meta] of metaByVersion) {
 		// version_tip update
@@ -122,21 +122,6 @@ export function generateCommit(args: {
 				id: vid,
 				commit_id: meta.commitId,
 			} satisfies LixVersionTip),
-			created_at: timestamp,
-		});
-
-		// change_set (write for the mutated version, including 'global' if it has changes)
-		metaChanges.push({
-			id: generateUuid(),
-			entity_id: meta.changeSetId,
-			schema_key: "lix_change_set",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: meta.changeSetId,
-				metadata: null,
-			}),
 			created_at: timestamp,
 		});
 
@@ -380,18 +365,7 @@ export function generateCommit(args: {
 		}
 	}
 
-	// Optionally materialize other meta rows (authors/meta/CSE) under GLOBAL if a global meta exists.
-	// Not required for correctness; queries read these from change/materializer.
-	const globalMeta2 = metaByVersion.get("global");
-	// No need to materialize meta CSEs under global here; commit membership covers it
-
-	// Assemble output: domain, authors, meta (no CSE rows in Step 1)
-	outputChanges.push(
-		...authorChanges,
-		...metaChanges
-		// No commit_edge change rows in Step 2
-		// CSEs are derived; do not include as change rows
-	);
+	outputChanges.push(...authorChanges, ...metaChanges);
 
 	return { changes: outputChanges, materializedState: materialized };
 }

@@ -257,27 +257,7 @@ simulationTest(
 			.where("id", "=", target.id)
 			.selectAll()
 			.executeTakeFirstOrThrow();
-		const tipRowsDbg =
-			(lix.sqlite.exec({
-				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
-				bind: [target.id],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
-		const matVersionRowsDbg =
-			(lix.sqlite.exec({
-				sql: `SELECT version_id, entity_id, json_extract(snapshot_content,'$.commit_id') AS commit_id
-            FROM internal_state_materializer
-            WHERE schema_key = 'lix_version' AND entity_id = ?
-            ORDER BY version_id`,
-				bind: [target.id],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{
-				version_id: string;
-				entity_id: string;
-				commit_id: string | null;
-			}>) ?? [];
+
 		const commitChangeRow = await lix.db
 			.selectFrom("change")
 			.where("schema_key", "=", "lix_commit")

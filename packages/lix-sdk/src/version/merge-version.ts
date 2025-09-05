@@ -161,22 +161,6 @@ export async function mergeVersion(args: {
 		// Build change rows (manual meta for one-commit model)
 		const changeRows: LixChangeRaw[] = [];
 
-		// change_set (target)
-		const targetChangeSetChangeId = uuidV7({ lix });
-		changeRows.push({
-			id: targetChangeSetChangeId,
-			entity_id: targetChangeSetId,
-			schema_key: "lix_change_set",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: targetChangeSetId,
-				metadata: null,
-			}),
-			created_at: now,
-		});
-
 		// commit (target) with parent ordering [target.tip, source.tip]
 		const targetCommitChangeId = uuidV7({ lix });
 		const commitRow: LixChangeRaw = {
@@ -340,45 +324,41 @@ export async function mergeVersion(args: {
 				let membership = [...winnerIds, ...deletionIds, ...authorIds];
 
 				// Filter out any prior target commit/change_set meta ids if present
-				try {
-					// Previous target commit change id
-					const prevCommitChange = await trx
+				// Previous target commit change id
+				const prevCommitChange = await trx
+					.selectFrom("change")
+					.where("schema_key", "=", "lix_commit")
+					.where("entity_id", "=", targetVersion.commit_id)
+					.select(["id"])
+					.executeTakeFirst();
+				const prevCommitChangeId = prevCommitChange?.id as string | undefined;
+				let prevChangeSetId: string | undefined = undefined;
+				if (prevCommitChangeId) {
+					const row = await trx
 						.selectFrom("change")
-						.where("schema_key", "=", "lix_commit")
-						.where("entity_id", "=", targetVersion.commit_id)
+						.where("id", "=", prevCommitChangeId)
+						.select([
+							sql`json_extract(snapshot_content, '$.change_set_id')`.as("csid"),
+						])
+						.executeTakeFirst();
+					prevChangeSetId = (row as any)?.csid as string | undefined;
+				}
+				let prevChangeSetChangeId: string | undefined = undefined;
+				if (prevChangeSetId) {
+					const prevCsChange = await trx
+						.selectFrom("change")
+						.where("schema_key", "=", "lix_change_set")
+						.where("entity_id", "=", prevChangeSetId)
 						.select(["id"])
 						.executeTakeFirst();
-					const prevCommitChangeId = prevCommitChange?.id as string | undefined;
-					let prevChangeSetId: string | undefined = undefined;
-					if (prevCommitChangeId) {
-						const row = await trx
-							.selectFrom("change")
-							.where("id", "=", prevCommitChangeId)
-							.select([
-								sql`json_extract(snapshot_content, '$.change_set_id')`.as(
-									"csid"
-								),
-							])
-							.executeTakeFirst();
-						prevChangeSetId = (row as any)?.csid as string | undefined;
-					}
-					let prevChangeSetChangeId: string | undefined = undefined;
-					if (prevChangeSetId) {
-						const prevCsChange = await trx
-							.selectFrom("change")
-							.where("schema_key", "=", "lix_change_set")
-							.where("entity_id", "=", prevChangeSetId)
-							.select(["id"])
-							.executeTakeFirst();
-						prevChangeSetChangeId = prevCsChange?.id as string | undefined;
-					}
-					const exclude = new Set(
-						[prevCommitChangeId, prevChangeSetChangeId].filter(
-							Boolean
-						) as string[]
-					);
-					membership = membership.filter((id) => !exclude.has(id));
-				} catch {}
+					prevChangeSetChangeId = prevCsChange?.id as string | undefined;
+				}
+				const exclude = new Set(
+					[prevCommitChangeId, prevChangeSetChangeId].filter(
+						Boolean
+					) as string[]
+				);
+				membership = membership.filter((id) => !exclude.has(id));
 
 				// Deduplicate any accidental duplicates (e.g., author)
 				membership = Array.from(new Set(membership));
@@ -428,15 +408,6 @@ export async function mergeVersion(args: {
 		} as Mat);
 
 		// No caching of deprecated 'lix_version' rows
-		// Also include the change_set entity in global scope for completeness
-		cacheBatch.push({
-			...(changeRows.find(
-				(c) => c.schema_key === "lix_change_set"
-			) as LixChangeRaw),
-			lixcol_version_id: "global",
-			lixcol_commit_id: targetCommitId,
-		} as Mat);
-
 		// Target scope: referenced winners (domain rows) and deletions
 		if (toReference.length > 0) {
 			const ids = toReference.map((a) => a.id);

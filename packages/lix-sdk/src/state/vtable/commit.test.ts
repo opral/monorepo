@@ -870,16 +870,6 @@ test("global version should move forward when mutations occur", async () => {
 	// Commit the changes
 	commit({ lix });
 
-	// Get the global version after changes
-	const globalVersionAfter = await db
-		.selectFrom("version")
-		.where("id", "=", "global")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// We no longer update the global version's commit_id on each mutation.
-	// The global graph is represented via derived edges and change rows.
-
 	// Verify at least one global edge originates from the previous global commit
 	const edges = await db
 		.selectFrom("commit_edge")
