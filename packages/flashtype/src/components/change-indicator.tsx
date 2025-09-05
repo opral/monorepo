@@ -1,5 +1,5 @@
 import { ChevronDown, Zap } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, Suspense } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -15,6 +15,8 @@ import {
 import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
 import { selectWorkingDiff } from "@/queries";
+import { Diff } from "@/components/diff";
+import type { UiDiffComponentProps } from "@lix-js/sdk";
 
 export function ChangeIndicator() {
 	const lix = useLix();
@@ -103,15 +105,11 @@ export function ChangeIndicator() {
 						Simple greeting text – ready to expand into introduction
 					</div>
 
+					{/* Temporary sample diff using plugin_md v2 UI component */}
 					<div className="mt-3 rounded-md border bg-secondary/40 p-2 text-xs">
-						Hello{" "}
-						<span className="rounded bg-red-100 px-1 text-red-700 line-through">
-							world
-						</span>{" "}
-						<span className="rounded bg-green-100 px-1 text-green-700">
-							world
-						</span>{" "}
-						how are you?
+						<Suspense fallback={null}>
+							<PanelDiff />
+						</Suspense>
 					</div>
 
 					<Button
@@ -135,4 +133,26 @@ export function ChangeIndicator() {
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
+}
+
+function PanelDiff() {
+	// Minimal example diff until we wire actual working changes
+	const diffs: UiDiffComponentProps["diffs"] = [
+		{
+			plugin_key: "plugin_md",
+			schema_key: "markdown_wc_paragraph",
+			entity_id: "demo_para",
+			snapshot_content_before: {
+				type: "paragraph",
+				data: { id: "demo_para" },
+				children: [{ type: "text", value: "Hello BEFORE, how are you?" }],
+			},
+			snapshot_content_after: {
+				type: "paragraph",
+				data: { id: "demo_para" },
+				children: [{ type: "text", value: "Hello AFTER, how are you?" }],
+			},
+		},
+	];
+	return <Diff diffs={diffs} contentClassName="text-xs" />;
 }
