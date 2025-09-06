@@ -25,7 +25,7 @@ test.skip("pull rows of multiple tables from server successfully and applies the
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	await lixOnServer.db
 		.insertInto("account")
@@ -91,7 +91,7 @@ test.skip("it handles snapshot.content being json binary", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	const mockSnapshot = mockJsonSnapshot({
 		location: "Berlin",
@@ -156,7 +156,7 @@ test.skip("rows changed on the client more recently should not be updated", asyn
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	// initialize the lix on the server with the mock data
 	await lspHandler(
@@ -201,7 +201,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	// create a lix and clone it for the client - so they share the same lix id
 	const remoteLix = await openLix({});
@@ -308,7 +308,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 	const environment = createLspInMemoryEnvironment();
 // 	const lspHandler = await createServerProtocolHandler({ environment });
 
-// 	global.fetch = vi.fn((request) => lspHandler(request));
+// 	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 // 	// initialize the lix on the server
 // 	await lspHandler(
@@ -362,7 +362,7 @@ test.skip("non-conflicting changes from the server should for the same version s
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	const lixOnServer = await openLix({ blob: await lix.toBlob() });
 

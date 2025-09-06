@@ -15,7 +15,7 @@ test.skip("versions should be synced", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	const lix0 = await openLix({
 		keyValues: [{ key: "lix_server_url", value: "http://mock.com" }],
@@ -132,9 +132,9 @@ test.skip("switching synced versions should work", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 	// @ts-expect-error - eases debugging
-	global.executeSync = executeSync;
+	(globalThis as any).executeSync = executeSync;
 
 	const lix0 = await openLix({
 		keyValues: [{ key: "lix_sync", value: "true" }],
@@ -248,7 +248,7 @@ test.skip("switching synced versions should work", async () => {
 test.skip("doesnt sync if lix_sync is not true", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	const lix = await openLix({});
 

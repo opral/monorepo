@@ -12,6 +12,7 @@
 		"emitDeclarationOnly": false,
 		"module": "Node16",
 		"lib": ["ESNext", "DOM"],
+		"types": ["vitest/globals"],
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}
