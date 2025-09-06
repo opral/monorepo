@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import type { Lix } from "@lix-js/sdk";
+import type { JSX } from "react";
 
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
