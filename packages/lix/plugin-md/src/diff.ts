@@ -23,45 +23,45 @@ export class DiffComponent extends LitElement {
 		}
 
 		/* HTML diff styles (inline to work inside Shadow DOM) */
-		.diff-created {
-			color: var(--lix-diff-created-color, #1f883d);
+		.diff-added {
+			color: var(--lix-diff-added-color, #1f883d);
 		}
-		.diff-updated {
-			color: var(--lix-diff-updated-color, #f59e0b);
+		.diff-modified {
+			color: var(--lix-diff-modified-color, #f59e0b);
 		}
-		.diff-deleted {
-			color: var(--lix-diff-deleted-color, #d1242f);
+		.diff-removed {
+			color: var(--lix-diff-removed-color, #d1242f);
 		}
 
 		/* Word-level highlights: soft background and subtle rounding */
-		[data-diff-mode="words"] .diff-created,
-		[data-diff-mode="words"] .diff-deleted,
-		[data-diff-mode="words"] .diff-updated {
+		[data-diff-mode="words"] .diff-added,
+		[data-diff-mode="words"] .diff-removed,
+		[data-diff-mode="words"] .diff-modified {
 			padding: 0 0.18em;
 			border-radius: 4px;
 		}
-		[data-diff-mode="words"] .diff-created {
+		[data-diff-mode="words"] .diff-added {
 			background: #ebf7ef;
 			background: color-mix(
 				in srgb,
-				var(--lix-diff-created-color, #1f883d) 12%,
+				var(--lix-diff-added-color, #1f883d) 12%,
 				transparent
 			);
 		}
-		[data-diff-mode="words"] .diff-deleted {
+		[data-diff-mode="words"] .diff-removed {
 			background: #fdecec;
 			background: color-mix(
 				in srgb,
-				var(--lix-diff-deleted-color, #d1242f) 12%,
+				var(--lix-diff-removed-color, #d1242f) 12%,
 				transparent
 			);
 			text-decoration: line-through;
 		}
-		[data-diff-mode="words"] .diff-updated {
+		[data-diff-mode="words"] .diff-modified {
 			background: #fff3dc;
 			background: color-mix(
 				in srgb,
-				var(--lix-diff-updated-color, #f59e0b) 14%,
+				var(--lix-diff-modified-color, #f59e0b) 14%,
 				transparent
 			);
 		}

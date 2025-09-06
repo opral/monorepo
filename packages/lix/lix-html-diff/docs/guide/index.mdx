@@ -83,17 +83,17 @@ padding: 8px;
 font-weight: bold;
 }
 
-.diff-created {
+.diff-added {
 background-color: #d4edda;
 color: #155724;
 }
 
-.diff-updated {
+.diff-modified {
 background-color: #fff3cd;
 color: #856404;
 }
 
-.diff-deleted {
+.diff-removed {
 background-color: #f8d7da;
 color: #721c24;
 }`}
@@ -169,8 +169,8 @@ const afterHtml = `
 const diff = renderHtmlDiff({ beforeHtml, afterHtml });
 
 // The diff now contains:
-// - "The fast red fox" with class="diff-updated"
-// - "The lazy dog sleeps" with class="diff-created"
+// - "The fast red fox" with class="diff-modified"
+// - "The lazy dog sleeps" with class="diff-added"
 ```
 
 ### Step 3: Render the diff
@@ -198,13 +198,13 @@ function DiffViewer({ diff }: { diff: string }) {
 }
 
 /* Only these 3 classes needed for diff highlighting */
-.diff-created {
+.diff-added {
   color: #22c55e;
 }
-.diff-updated {
+.diff-modified {
   color: #f59e0b;
 }
-.diff-deleted {
+.diff-removed {
   color: #ef4444;
 }
 ```
@@ -226,9 +226,9 @@ function DiffViewer({ diff }: { diff: string }) {
 
 /* Only these 3 classes needed for diff highlighting */
 
-.diff-created { color: #22c55e }
-.diff-updated { color: #f59e0b }
-.diff-deleted { color: #ef4444 }`}
+.diff-added { color: #22c55e }
+.diff-modified { color: #f59e0b }
+.diff-removed { color: #ef4444 }`}
 />
 
 Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS diff classes.
@@ -252,9 +252,9 @@ For word-level highlighting within text elements, add the `data-diff-mode="words
   line-height: 1.4;
 }
 
-.diff-created { color: #22c55e; }
-.diff-updated { color: #f59e0b; }
-.diff-deleted { color: #ef4444; text-decoration: line-through; }`}
+.diff-added { color: #22c55e; }
+.diff-modified { color: #f59e0b; }
+.diff-removed { color: #ef4444; text-decoration: line-through; }`}
 />
 
 Notice how `data-diff-mode="words"` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).

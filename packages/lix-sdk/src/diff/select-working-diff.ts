@@ -158,10 +158,10 @@ export function selectWorkingDiff(args: {
 			eb.ref("ch.id").as("after_change_id"),
 			sql`(select id from wc)`.as("after_commit_id"),
 
-			sql<"created" | "updated" | "deleted" | "unchanged">`CASE
-        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NULL THEN 'deleted'
-        WHEN bcse.change_id IS NULL AND json(ch.snapshot_content) IS NOT NULL THEN 'created'
-        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NOT NULL AND bcse.change_id != ch.id THEN 'updated'
+			sql<"added" | "modified" | "removed" | "unchanged">`CASE
+        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NULL THEN 'removed'
+        WHEN bcse.change_id IS NULL AND json(ch.snapshot_content) IS NOT NULL THEN 'added'
+        WHEN bcse.change_id IS NOT NULL AND json(ch.snapshot_content) IS NOT NULL AND bcse.change_id != ch.id THEN 'modified'
         ELSE 'unchanged'
       END`.as("status"),
 		]);

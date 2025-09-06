@@ -15,17 +15,17 @@
 }
 
 /* Diff styling */
-.diff-created {
+.diff-added {
   background-color: #d4edda;
   color: #155724;
 }
 
-.diff-updated {
+.diff-modified {
   background-color: #fff3cd;
   color: #856404;
 }
 
-.diff-deleted {
+.diff-removed {
   background-color: #f8d7da;
   color: #721c24;
 }

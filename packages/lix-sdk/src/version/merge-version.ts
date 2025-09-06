@@ -35,7 +35,7 @@ export async function mergeVersion(args: {
 			source: args.source,
 			target,
 		})
-			.where("diff.status", "in", ["created", "updated", "deleted"]) // ignore unchanged
+			.where("diff.status", "in", ["added", "modified", "removed"]) // ignore unchanged
 			.selectAll()
 			.execute();
 
@@ -69,7 +69,7 @@ export async function mergeVersion(args: {
 		}> = [];
 
 		for (const d of diffs) {
-			if (d.status === "created" || d.status === "updated") {
+			if (d.status === "added" || d.status === "modified") {
 				if (d.after_change_id) {
 					toReference.push({
 						id: d.after_change_id,
@@ -78,7 +78,7 @@ export async function mergeVersion(args: {
 						file_id: d.file_id,
 					});
 				}
-			} else if (d.status === "deleted") {
+			} else if (d.status === "removed") {
 				// Lookup plugin_key and schema_version from target's before_change_id
 				const before = await trx
 					.selectFrom("change")

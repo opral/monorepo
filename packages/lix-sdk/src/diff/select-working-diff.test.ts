@@ -52,7 +52,7 @@ async function workingCommitId(lix: any): Promise<string> {
 	return row.working_commit_id;
 }
 
-test("created: new key after checkpoint", async () => {
+test("added: new key after checkpoint", async () => {
 	const lix = await openLix({});
 	await createCheckpoint({ lix });
 
@@ -68,7 +68,7 @@ test("created: new key after checkpoint", async () => {
 
 	expect(rows.length).toBeGreaterThan(0);
 	const created = rows.find(
-		(r) => r.status === "created" && r.entity_id === "kv1"
+		(r) => r.status === "added" && r.entity_id === "kv1"
 	);
 	expect(created).toBeTruthy();
 	expect(created?.before_commit_id).toBeNull();
@@ -83,7 +83,7 @@ test("created: new key after checkpoint", async () => {
 	expect(afterCreated.snapshot_content?.value).toBe("A");
 });
 
-test("updated: key changed since last checkpoint", async () => {
+test("modified: key changed since last checkpoint", async () => {
 	const lix = await openLix({});
 	await createCheckpoint({ lix });
 
@@ -99,7 +99,7 @@ test("updated: key changed since last checkpoint", async () => {
 		.execute();
 
 	const updated = rows.find(
-		(r) => r.status === "updated" && r.entity_id === "kv2"
+		(r) => r.status === "modified" && r.entity_id === "kv2"
 	);
 	expect(updated).toBeTruthy();
 	expect(updated?.before_commit_id).toBeTruthy();
@@ -123,7 +123,7 @@ test("updated: key changed since last checkpoint", async () => {
 	expect(afterUpdated.snapshot_content?.value).toBe("B");
 });
 
-test("deleted: key removed since last checkpoint", async () => {
+test("removed: key removed since last checkpoint", async () => {
 	const lix = await openLix({});
 	await createCheckpoint({ lix });
 
@@ -140,7 +140,7 @@ test("deleted: key removed since last checkpoint", async () => {
 		.execute();
 
 	const deleted = rows.find(
-		(r) => r.status === "deleted" && r.entity_id === "kv3"
+		(r) => r.status === "removed" && r.entity_id === "kv3"
 	);
 
 	expect(deleted).toBeTruthy();
@@ -163,7 +163,7 @@ test("deleted: key removed since last checkpoint", async () => {
 	expect(afterDeleted.snapshot_content).toBeNull();
 });
 
-test("unchanged: no working changes returns no created/updated/deleted", async () => {
+test("unchanged: no working changes returns no added/modified/removed", async () => {
 	const lix = await openLix({});
 	await createCheckpoint({ lix });
 
@@ -200,7 +200,7 @@ test("latest checkpoint chosen as before", async () => {
 
 	const row = rows[0];
 	expect(row).toBeTruthy();
-	expect(row?.status).toBe("updated");
+	expect(row?.status).toBe("modified");
 	expect(row?.before_commit_id).toBeTruthy();
 	expect(row?.before_commit_id).not.toBe(A.id);
 });
@@ -230,7 +230,7 @@ test("before_* columns are null when no prior checkpoint", async () => {
 		.execute();
 	expect(rows.length).toBe(1);
 	const r = rows[0]!;
-	expect(r.status).toBe("created");
+	expect(r.status).toBe("added");
 	expect(r.before_commit_id).toBeNull();
 	expect(r.before_change_id).toBeNull();
 	expect(r.before_version_id).toBeNull();

@@ -49,12 +49,12 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <div>
           <p data-diff-key="p1">Para 1</p>
-          <p data-diff-key="p2" class="diff-created">New Para</p>
+          <p data-diff-key="p2" class="diff-added">New Para</p>
         </div>
       `,
     },
     {
-      name: "should mark changed element as updated without data-diff-mode",
+      name: "should mark changed element as modified without data-diff-mode",
       beforeHtml: dedent`
         <div class="tool-container" data-diff-key="complex-component">Old complex component</div>
       `,
@@ -62,7 +62,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="tool-container" data-diff-key="complex-component">New complex component</div>
       `,
       expectedHtml: dedent`
-        <div class="diff-updated tool-container" data-diff-key="complex-component">New complex component</div>
+        <div class="diff-modified tool-container" data-diff-key="complex-component">New complex component</div>
       `,
     },
   ],
@@ -76,7 +76,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="card" data-diff-key="complex" data-diff-mode="element">New content here</div>
       `,
       expectedHtml: dedent`
-        <div><div class="diff-deleted card" data-diff-key="complex" data-diff-mode="element" contenteditable="false">Old content here</div><div class="diff-created card" data-diff-key="complex" data-diff-mode="element">New content here</div></div>
+        <div><div class="diff-removed card" data-diff-key="complex" data-diff-mode="element" contenteditable="false">Old content here</div><div class="diff-added card" data-diff-key="complex" data-diff-mode="element">New content here</div></div>
       `,
     },
     {
@@ -88,7 +88,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p class="highlight important" data-diff-key="text" data-diff-mode="element">After text</p>
       `,
       expectedHtml: dedent`
-        <div><p class="diff-deleted highlight important" data-diff-key="text" data-diff-mode="element" contenteditable="false">Before text</p><p class="diff-created highlight important" data-diff-key="text" data-diff-mode="element">After text</p></div>
+        <div><p class="diff-removed highlight important" data-diff-key="text" data-diff-mode="element" contenteditable="false">Before text</p><p class="diff-added highlight important" data-diff-key="text" data-diff-mode="element">After text</p></div>
       `,
     },
   ],
@@ -102,7 +102,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="ksu4" data-diff-mode="words">Hello World</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="ksu4" data-diff-mode="words">Hello <span class="diff-created">World</span></p>
+        <p data-diff-key="ksu4" data-diff-mode="words">Hello <span class="diff-added">World</span></p>
       `,
     },
     {
@@ -114,7 +114,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="rem" data-diff-mode="words">Remove </p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="rem" data-diff-mode="words">Remove <span class="diff-deleted">This</span></p>
+        <p data-diff-key="rem" data-diff-mode="words">Remove <span class="diff-removed">This</span></p>
       `,
     },
     {
@@ -126,7 +126,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <span data-diff-key="complex" data-diff-mode="words">New text there</span>
       `,
       expectedHtml: dedent`
-        <span data-diff-key="complex" data-diff-mode="words"><span class="diff-deleted">Old</span><span class="diff-created">New</span> text <span class="diff-deleted">here</span><span class="diff-created">there</span></span>
+        <span data-diff-key="complex" data-diff-mode="words"><span class="diff-removed">Old</span><span class="diff-added">New</span> text <span class="diff-removed">here</span><span class="diff-added">there</span></span>
       `,
     },
     {
@@ -138,17 +138,17 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="merge" class="foo bar" data-diff-mode="words">New</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="merge" class="foo bar" data-diff-mode="words"><span class="diff-deleted">Old</span><span class="diff-created">New</span></p>
+        <p data-diff-key="merge" class="foo bar" data-diff-mode="words"><span class="diff-removed">Old</span><span class="diff-added">New</span></p>
       `,
     },
   ],
-  "data-diff-show-when-deleted": [
+  "data-diff-show-when-removed": [
     {
-      name: "should insert deleted element when it has data-diff-show-when-deleted",
+      name: "should insert removed element when it has data-diff-show-when-removed",
       beforeHtml: dedent`
         <ul data-diff-key="list">
           <li data-diff-key="item1">First item</li>
-          <li data-diff-key="item2" data-diff-show-when-deleted>Second item</li>
+          <li data-diff-key="item2" data-diff-show-when-removed>Second item</li>
           <li data-diff-key="item3">Third item</li>
         </ul>
       `,
@@ -161,13 +161,13 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <ul data-diff-key="list">
           <li data-diff-key="item1">First item</li>
-          <li data-diff-key="item2" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">Second item</li>
+          <li data-diff-key="item2" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">Second item</li>
           <li data-diff-key="item3">Third item</li>
         </ul>
       `,
     },
     {
-      name: "should NOT insert deleted element when it lacks data-diff-show-when-deleted",
+      name: "should NOT insert removed element when it lacks data-diff-show-when-removed",
       beforeHtml: dedent`
         <ul data-diff-key="list">
           <li data-diff-key="item1">First item</li>
@@ -189,17 +189,17 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       `,
     },
     {
-      name: "should handle mixed scenarios - some elements show when deleted, others don't",
+      name: "should handle mixed scenarios - some elements show when removed, others don't",
       beforeHtml: dedent`
         <table>
           <tbody data-diff-key="table-body">
-            <tr data-diff-key="row1" data-diff-show-when-deleted>
+            <tr data-diff-key="row1" data-diff-show-when-removed>
               <td>Safe row</td>
             </tr>
             <tr data-diff-key="row2">
               <td>Unsafe row</td>
             </tr>
-            <tr data-diff-key="row3" data-diff-show-when-deleted>
+            <tr data-diff-key="row3" data-diff-show-when-removed>
               <td>Another safe row</td>
             </tr>
           </tbody>
@@ -214,10 +214,10 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <table>
           <tbody data-diff-key="table-body">
-            <tr data-diff-key="row1" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">
+            <tr data-diff-key="row1" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">
               <td>Safe row</td>
             </tr>
-            <tr data-diff-key="row3" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">
+            <tr data-diff-key="row3" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">
               <td>Another safe row</td>
             </tr>
           </tbody>
@@ -232,5 +232,5 @@ export const testCases: TestCase[] = [
   ...testCasesBySection["data-diff-key"]!,
   ...testCasesBySection["data-diff-mode='element'"]!,
   ...testCasesBySection["data-diff-mode='words'"]!,
-  ...testCasesBySection["data-diff-show-when-deleted"]!,
+  ...testCasesBySection["data-diff-show-when-removed"]!,
 ];

@@ -4,7 +4,7 @@ type Props = {
 	 */
 	added: number;
 	/**
-	 * Number of lines/items removed/deleted
+	 * Number of lines/items removed
 	 */
 	removed: number;
 	/**

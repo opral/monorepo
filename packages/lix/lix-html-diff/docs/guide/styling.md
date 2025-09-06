@@ -8,9 +8,9 @@ When you render a diff using Lix HTML Diff, it only adds CSS classes to highligh
 
 The diff renderer uses semantic CSS classes to highlight changes:
 
-- `.diff-created` — applied to newly added elements
-- `.diff-updated` — applied to modified elements  
-- `.diff-deleted` — applied to removed elements
+- `.diff-added` — applied to newly added elements
+- `.diff-modified` — applied to modified elements  
+- `.diff-removed` — applied to removed elements
 
 ### Example: Your Styling is Preserved
 
@@ -21,7 +21,7 @@ The diff renderer uses semantic CSS classes to highlight changes:
 </button>
 
 <!-- After diff processing (text changed) -->
-<button class="diff-updated primary-btn large-size" id="submit-btn" data-diff-key="btn1">
+<button class="diff-modified primary-btn large-size" id="submit-btn" data-diff-key="btn1">
   Complete Purchase
 </button>
 ```
@@ -30,7 +30,7 @@ Notice how:
 
 - Your `primary-btn` and `large-size` classes remain untouched
 - Your `id` and `data-diff-key` attributes are preserved  
-- Only `diff-updated` was added to highlight the change
+- Only `diff-modified` was added to highlight the change
 - All your existing CSS for `.primary-btn` and `.large-size` continues to work
 
 ## Default Styles
@@ -52,15 +52,15 @@ Or, add it to your HTML:
 You can override these styles in your own CSS for custom themes or branding:
 
 ```css
-.diff-created {
+.diff-added {
   color: #080;
   background: #efe;
 }
-.diff-updated {
+.diff-modified {
   color: #f60;
   background: #ffc;
 }
-.diff-deleted {
+.diff-removed {
   color: #b00;
   background: #fee;
 }
@@ -74,11 +74,11 @@ HTML diff uses a **prepend strategy** for CSS classes to ensure diff highlightin
 <!-- Original -->
 <div class="card featured">Content</div>
 
-<!-- After diff (created) -->
-<div class="diff-created card featured">Content</div>
+<!-- After diff (added) -->
+<div class="diff-added card featured">Content</div>
 
-<!-- After diff (updated) -->  
-<div class="diff-updated card featured">Content</div>
+<!-- After diff (modified) -->  
+<div class="diff-modified card featured">Content</div>
 ```
 
 **Why prepend?** Diff classes are added first so they can override conflicting styles (like color) while your layout classes (like `card`, `featured`) continue to work.
@@ -93,9 +93,9 @@ Since diff classes are prepended, you can rely on CSS cascade:
 .featured { border-color: gold; }
 
 /* Diff styles override conflicting properties */
-.diff-updated { color: orange; }  /* This color wins */
-.diff-created { color: green; }   /* This color wins */
-.diff-deleted { color: red; }     /* This color wins */
+.diff-modified { color: orange; }  /* This color wins */
+.diff-added { color: green; }   /* This color wins */
+.diff-removed { color: red; }     /* This color wins */
 ```
 
 This ensures your app's layout and design remain intact while only the diff highlighting is added on top.

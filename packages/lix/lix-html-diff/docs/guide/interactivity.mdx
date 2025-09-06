@@ -4,7 +4,7 @@ The HTML diff engine provides the foundation for building interactive diff exper
 
 ## Live Example
 
-Try hovering over the updated cells (highlighted in orange) in this pricing table to see interactive hover cards:
+Try hovering over the modified cells (highlighted in orange) in this pricing table to see interactive hover cards:
 
 import InteractiveShowcase from "../components/interactive-showcase";
 
@@ -16,10 +16,10 @@ When the diff engine processes your HTML, it adds CSS classes to elements and pr
 
 ```html
 <!-- After diff processing -->
-<p data-diff-key="intro" data-diff-mode="words" class="diff-updated">
-  Welcome to our <span class="diff-deleted">comprehensive</span> 
-  <span class="diff-created">updated</span> guide for new 
-  <span class="diff-deleted">users</span><span class="diff-created">developers</span>.
+<p data-diff-key="intro" data-diff-mode="words" class="diff-modified">
+  Welcome to our <span class="diff-removed">comprehensive</span> 
+  <span class="diff-added">updated</span> guide for new 
+  <span class="diff-removed">users</span><span class="diff-added">developers</span>.
 </p>
 ```
 
@@ -37,12 +37,12 @@ const diffResult = renderHtmlDiff({ beforeHtml, afterHtml });
 container.innerHTML = diffResult;
 
 // 3. Query for interactive elements
-const updatedElements = container.querySelectorAll('.diff-updated[data-diff-key]');
-const createdElements = container.querySelectorAll('.diff-created[data-diff-key]');
-const deletedElements = container.querySelectorAll('.diff-deleted[data-diff-key]');
+const modifiedElements = container.querySelectorAll('.diff-modified[data-diff-key]');
+const addedElements = container.querySelectorAll('.diff-added[data-diff-key]');
+const removedElements = container.querySelectorAll('.diff-removed[data-diff-key]');
 
 // 4. Add any interactivity you want
-updatedElements.forEach(element => {
+modifiedElements.forEach(element => {
   const diffKey = element.getAttribute('data-diff-key');
   
   // Add hover cards
@@ -131,8 +131,8 @@ export function InteractiveHtmlDiff() {
     const diffResult = renderHtmlDiff({ beforeHtml, afterHtml });
     ref.current.innerHTML = diffResult;
 
-    // Add event listeners to updated elements
-    const updatedElements = ref.current.querySelectorAll('.diff-updated[data-diff-key]');
+    // Add event listeners to modified elements
+    const modifiedElements = ref.current.querySelectorAll('.diff-modified[data-diff-key]');
     
     const handleMouseEnter = (e) => {
       const element = e.target;
@@ -156,13 +156,13 @@ export function InteractiveHtmlDiff() {
       setHoverCard(null);
     };
 
-    updatedElements.forEach(element => {
+    modifiedElements.forEach(element => {
       element.addEventListener('mouseenter', handleMouseEnter);
       element.addEventListener('mouseleave', handleMouseLeave);
     });
 
     return () => {
-      updatedElements.forEach(element => {
+      modifiedElements.forEach(element => {
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
       });
@@ -182,12 +182,12 @@ export function InteractiveHtmlDiff() {
           border: 1px solid #e5e7eb;
           padding: 12px 16px;
         }
-        .diff-updated {
+        .diff-modified {
           color: #f59e0b;
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .diff-updated:hover {
+        .diff-modified:hover {
           background-color: rgba(245, 158, 11, 0.1);
           transform: scale(1.02);
         }
@@ -231,7 +231,7 @@ export function InteractiveHtmlDiff() {
               fontWeight: 600,
               textTransform: 'uppercase'
             }}>
-              UPDATED
+              MODIFIED
             </span>
             <span style={{
               fontFamily: 'monospace',

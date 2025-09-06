@@ -25,13 +25,13 @@ function applyGranularTextDiff(
     if (change.added) {
       // Text was added
       const span = document.createElement("span");
-      span.className = "diff-created";
+      span.className = "diff-added";
       span.textContent = change.value;
       element.appendChild(span);
     } else if (change.removed) {
-      // Text was removed - we'll show this as deleted text
+      // Text was removed - show as removed text
       const span = document.createElement("span");
-      span.className = "diff-deleted";
+      span.className = "diff-removed";
       span.textContent = change.value;
       element.appendChild(span);
     } else {
@@ -126,9 +126,9 @@ function renderHtmlDiffElement(args: {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
         if (afterEl.hasAttribute("class")) {
-          afterEl.className = "diff-created " + afterEl.className;
+          afterEl.className = "diff-added " + afterEl.className;
         } else {
-          afterEl.className = "diff-created";
+          afterEl.className = "diff-added";
         }
       }
     } else if (modifiedIds.has(id)) {
@@ -168,20 +168,20 @@ function renderHtmlDiffElement(args: {
             afterEl.textContent || "",
           );
         } else if (diffMode === "element") {
-          // Explicit atomic element diffing - show old as deleted, new as created
-          // Mark the after element as created
+          // Explicit atomic element diffing - show old as removed, new as added
+          // Mark the after element as added
           if (afterEl.hasAttribute("class")) {
-            afterEl.className = "diff-created " + afterEl.className;
+            afterEl.className = "diff-added " + afterEl.className;
           } else {
-            afterEl.className = "diff-created";
+            afterEl.className = "diff-added";
           }
 
-          // Insert the old element as deleted before the new one
+          // Insert the old element as removed before the new one
           const deletedEl = beforeEl.cloneNode(true) as HTMLElement;
           if (deletedEl.hasAttribute("class")) {
-            deletedEl.className = "diff-deleted " + deletedEl.className;
+            deletedEl.className = "diff-removed " + deletedEl.className;
           } else {
-            deletedEl.className = "diff-deleted";
+            deletedEl.className = "diff-removed";
           }
 
           // Make the deleted element non-interactive
@@ -198,14 +198,14 @@ function renderHtmlDiffElement(args: {
               }
             });
 
-          // Insert the deleted element before the new one
+          // Insert the removed element before the new one
           afterEl.parentNode?.insertBefore(deletedEl, afterEl);
         } else {
-          // Default behavior: mark the after element as updated
+          // Default behavior: mark the after element as modified
           if (afterEl.hasAttribute("class")) {
-            afterEl.className = "diff-updated " + afterEl.className;
+            afterEl.className = "diff-modified " + afterEl.className;
           } else {
-            afterEl.className = "diff-updated";
+            afterEl.className = "diff-modified";
           }
         }
       } else {
@@ -218,9 +218,9 @@ function renderHtmlDiffElement(args: {
   // Iterate in the original order to insert removed items correctly
   for (const { id, element: beforeEl } of beforeElementOrder) {
     if (removedIds.has(id)) {
-      // Only insert deleted elements if they have data-diff-show-when-deleted
-      if (!beforeEl.hasAttribute("data-diff-show-when-deleted")) {
-        continue; // Skip insertion - element doesn't want to be shown when deleted
+      // Only insert removed elements if they opt in via data-diff-show-when-removed
+      if (!beforeEl.hasAttribute("data-diff-show-when-removed")) {
+        continue; // Skip insertion - element doesn't want to be shown when removed
       }
 
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
@@ -261,9 +261,9 @@ function renderHtmlDiffElement(args: {
         const clone = beforeEl.cloneNode(true) as HTMLElement;
         // Style with class
         if (clone.hasAttribute("class")) {
-          clone.className = "diff-deleted " + clone.className;
+          clone.className = "diff-removed " + clone.className;
         } else {
-          clone.className = "diff-deleted";
+          clone.className = "diff-removed";
         }
 
         // Ensure contenteditable is false on the clone to prevent interaction

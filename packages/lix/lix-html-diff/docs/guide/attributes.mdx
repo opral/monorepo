@@ -32,7 +32,7 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase 
   before="<div><p data-diff-key='ixn4'>First paragraph</p></div>" 
   after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
 ### Example: Removing an element
@@ -53,18 +53,18 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase 
   before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>" 
   after="<div><p data-diff-key='bw5c'>Keep this</p></div>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
 ## data-diff-mode
 
 **Optional attribute to control diffing behavior.**
 
-By default, when text content changes, elements with `data-diff-key` are marked as `diff-updated`. The `data-diff-mode` attribute allows you to specify different diffing behaviors for more control.
+By default, when text content changes, elements with `data-diff-key` are marked as `diff-modified`. The `data-diff-mode` attribute allows you to specify different diffing behaviors for more control.
 
 ### element
 
-Use `data-diff-mode="element"` to explicitly mark the element for atomic element diffing. When content changes, the old element is shown as `diff-deleted` and the new element is shown as `diff-created`.
+Use `data-diff-mode="element"` to explicitly mark the element for atomic element diffing. When content changes, the old element is shown as `diff-removed` and the new element is shown as `diff-added`.
 
 ```html
 <!-- Before -->
@@ -83,7 +83,7 @@ Use `data-diff-mode="element"` to explicitly mark the element for atomic element
 <Showcase 
   before="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>Old Title</h3><p>Old content</p></div>" 
   after="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>New Title</h3><p>New content</p></div>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
 />
 
 #### When to use element mode
@@ -116,7 +116,7 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 <Showcase 
   before="<p data-diff-key='qr8n'>Hello there</p>" 
   after="<p data-diff-key='qr8n'>Hello world</p>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
 #### With data-diff-mode="words" (granular word diffing)
@@ -132,7 +132,7 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 <Showcase 
   before="<p data-diff-key='kv3m' data-diff-mode='words'>Hello there</p>" 
   after="<p data-diff-key='kv3m' data-diff-mode='words'>Hello world</p>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
 #### When to use data-diff-mode="words"
@@ -168,18 +168,18 @@ This example shows how using `data-diff-mode="words"` on complex components brea
 <Showcase 
   before="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>Old Title</h3><p>Some content here</p></div>" 
   after="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>New Title</h3><p>Different content here</p></div>" 
-  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
+  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
 />
 
 Notice how the word-level diffing breaks the HTML structure by inserting `<span>` elements, making the result invalid HTML. The correct approach is to use `data-diff-mode="element"` or no mode at all for complex components.
 
-## data-diff-show-when-deleted
+## data-diff-show-when-removed
 
-**Optional attribute to show deleted elements in the diff result.**
+**Optional attribute to show removed elements in the diff result.**
 
-By default, when elements are deleted, they are not inserted into the diff result - only existing elements get CSS classes. The `data-diff-show-when-deleted` attribute tells the diff engine that this element should be displayed with strikethrough styling when deleted.
+By default, when elements are removed, they are not inserted into the diff result - only existing elements get CSS classes. The `data-diff-show-when-removed` attribute tells the diff engine that this element should be displayed with strikethrough styling when removed.
 
-### When to use data-diff-show-when-deleted
+### When to use data-diff-show-when-removed
 
 ✅ **Use for elements safe to re-insert:**
 - Table rows (`<tr>`) that won't break table layout
@@ -198,15 +198,15 @@ By default, when elements are deleted, they are not inserted into the diff resul
 ```html
 <!-- Before -->
 <tbody data-diff-key="table-body">
-  <tr data-diff-key="row1" data-diff-show-when-deleted>
+  <tr data-diff-key="row1" data-diff-show-when-removed>
     <td>Product A</td>
     <td>$10</td>
   </tr>
-  <tr data-diff-key="row2" data-diff-show-when-deleted>
+  <tr data-diff-key="row2" data-diff-show-when-removed>
     <td>Product B</td>
     <td>$20</td>
   </tr>
-  <tr data-diff-key="row3" data-diff-show-when-deleted>
+  <tr data-diff-key="row3" data-diff-show-when-removed>
     <td>Product C</td>
     <td>$30</td>
   </tr>
@@ -214,11 +214,11 @@ By default, when elements are deleted, they are not inserted into the diff resul
 
 <!-- After -->
 <tbody data-diff-key="table-body">
-  <tr data-diff-key="row1" data-diff-show-when-deleted>
+  <tr data-diff-key="row1" data-diff-show-when-removed>
     <td>Product A</td>
     <td>$10</td>
   </tr>
-  <tr data-diff-key="row3" data-diff-show-when-deleted>
+  <tr data-diff-key="row3" data-diff-show-when-removed>
     <td>Product C</td>
     <td>$30</td>
   </tr>
@@ -226,36 +226,36 @@ By default, when elements are deleted, they are not inserted into the diff resul
 ```
 
 <Showcase 
-  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-deleted><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-deleted><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-deleted><td>Product C</td><td>$30</td></tr></tbody></table>" 
-  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-deleted><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-deleted><td>Product C</td><td>$30</td></tr></tbody></table>" 
-  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; text-decoration: line-through; }"
+  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-removed><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; text-decoration: line-through; }"
 />
 
-Notice how the deleted row (Product B) is inserted and shown with strikethrough styling.
+Notice how the removed row (Product B) is inserted and shown with strikethrough styling.
 
 ### Mixed scenarios
 
-You can be selective about which elements show when deleted:
+You can be selective about which elements show when removed:
 
 ```html
 <tbody data-diff-key="table-body">
-  <tr data-diff-key="safe-row" data-diff-show-when-deleted>
-    <td>This row shows when deleted</td>
+  <tr data-diff-key="safe-row" data-diff-show-when-removed>
+    <td>This row shows when removed</td>
   </tr>
   <tr data-diff-key="unsafe-row">
-    <td>This row doesn't show when deleted</td>
+    <td>This row doesn't show when removed</td>
   </tr>
 </tbody>
 ```
 
-### Without data-diff-show-when-deleted
+### Without data-diff-show-when-removed
 
-Without the `data-diff-show-when-deleted` attribute, deleted elements are not inserted:
+Without the `data-diff-show-when-removed` attribute, removed elements are not inserted:
 
 <Showcase 
   before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2'><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
   after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
-  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
-Only the existing rows are shown - the deleted row is not inserted.
+Only the existing rows are shown - the removed row is not inserted.
