@@ -1,13 +1,25 @@
 // @vitest-environment jsdom
-import { describe, expect, test } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 import { Editor } from "@tiptap/core"
 import { MarkdownWc } from "./markdown-wc.js"
 
+const __editors: Editor[] = []
 function createEditor() {
-	return new Editor({
+	const ed = new Editor({
 		extensions: MarkdownWc(),
 	})
+	__editors.push(ed)
+	return ed
 }
+
+afterEach(() => {
+	// Ensure all editors are destroyed to stop ProseMirror DOM observers
+	for (const ed of __editors.splice(0)) {
+		try {
+			ed.destroy()
+		} catch {}
+	}
+})
 
 // Simulate real text input so input rules trigger
 function typeText(editor: Editor, text: string) {

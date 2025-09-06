@@ -7,10 +7,12 @@ import { parseMarkdown } from "../ast/parse-markdown.js"
 import { serializeToHtml } from "../html/serialize-to-html.js"
 
 async function htmlFromEditor(markdown: string): Promise<string> {
-	const ast = parseMarkdown(markdown) as any
-	const pmDoc = astToTiptapDoc(ast)
-	const editor = new Editor({ extensions: MarkdownWc(), content: pmDoc as any })
-	return editor.getHTML()
+    const ast = parseMarkdown(markdown) as any
+    const pmDoc = astToTiptapDoc(ast)
+    const editor = new Editor({ extensions: MarkdownWc(), content: pmDoc as any })
+    const html = editor.getHTML()
+    editor.destroy()
+    return html
 }
 
 async function htmlFromSerializer(markdown: string): Promise<string> {

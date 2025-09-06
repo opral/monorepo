@@ -148,10 +148,10 @@ const LixDebugPanel = () => {
 				<div>
 					<h4 className="text-lg font-medium mb-2">
 						All Changes{" "}
-						{(changes?.length ?? 0 > 0) ? `(${changes.length})` : ""}
+						{((changes?.length ?? 0) > 0) ? `(${changes.length})` : ""}
 					</h4>
 					<div className="border border-base-300 rounded overflow-auto">
-						{(changes?.length ?? 0 > 0) ? (
+						{((changes?.length ?? 0) > 0) ? (
 							changes.map((change) => (
 								<div
 									key={`change-${change?.id}`}

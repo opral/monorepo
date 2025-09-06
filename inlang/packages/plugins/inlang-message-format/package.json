@@ -29,7 +29,7 @@
 		"memfs": "4.6.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.2",
-		"vitest": "^2.0.5"
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"flat": "^6.0.1"

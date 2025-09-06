@@ -13,13 +13,15 @@ function roundtrip(ast: Ast): Ast {
 }
 
 function roundtripThroughEditor(ast: Ast): Ast {
-	const pmDoc = astToTiptapDoc(ast)
-	const editor = new Editor({
-		extensions: MarkdownWc(),
-		content: pmDoc as any,
-	})
-	const outJSON = editor.getJSON() as any
-	return tiptapDocToAst(outJSON as any) as any
+    const pmDoc = astToTiptapDoc(ast)
+    const editor = new Editor({
+        extensions: MarkdownWc(),
+        content: pmDoc as any,
+    })
+    const outJSON = editor.getJSON() as any
+    const result = tiptapDocToAst(outJSON as any) as any
+    editor.destroy()
+    return result
 }
 
 describe("root & paragraph", () => {
