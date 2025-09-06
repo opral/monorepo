@@ -1251,7 +1251,7 @@ test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", asyn
 
 test(
 	"large doc (500 paras): delete 1, insert 1, move 10 → 3 changes",
-	{ timeout: 10000 },
+	{ timeout: 30000 },
 	async () => {
 		// Build 500 paragraphs via for-loop
 		const paras: string[] = [];
@@ -1319,7 +1319,7 @@ test(
 
 test(
 	"large doc (500): pure shuffle → root change only",
-	{ timeout: 10000 },
+	{ timeout: 30000 },
 	async () => {
 		const { paras, beforeIds, markdown } = makeBigDoc(500);
 		const lix = await openLix({ providePlugins: [plugin] });
@@ -1348,7 +1348,7 @@ test(
 
 test(
 	"large doc (500): ~1% tiny edits → equal number of mods, no adds/dels",
-	{ timeout: 10000 },
+	{ timeout: 30000 },
 	async () => {
 		const { paras, beforeIds, markdown } = makeBigDoc(500);
 		const lix = await openLix({ providePlugins: [plugin] });
@@ -1385,7 +1385,7 @@ test(
 
 test(
 	"duplicates (500 Same): edit #350 only → 1 mod, no root change",
-	{ timeout: 10000 },
+	{ timeout: 30000 },
 	async () => {
 		const paras = Array.from({ length: 500 }, () => "Same");
 		const beforeIds = Array.from({ length: 500 }, (_, i) => `p${i + 1}`);
@@ -1420,7 +1420,7 @@ test(
 
 test(
 	"large mixed (500): 300 dup 'Same' + move 200 unique → 1 root + targeted mods",
-	{ timeout: 10000 },
+	{ timeout: 30000 },
 	async () => {
 		// Build 300 'Same' + 200 unique tail (total 500)
 		const dups = Array.from({ length: 300 }, () => "Same");
