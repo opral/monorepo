@@ -13,6 +13,16 @@ import {
 } from "@inlang/sdk"
 import { v4 as uuidv4 } from "uuid"
 import { saveProject } from "../main.js"
+import { customAlphabet } from "nanoid"
+
+/**
+ * Generators used to populate the message key field.
+ */
+const generators = {
+	humanId,
+	nanoid: customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 8),
+	none: () => "",
+}
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -63,13 +73,29 @@ export const extractMessageCommand = {
 			)
 		}
 
-		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
+		// Favor the modern option
+		let generator = await getSetting("extract.generator").catch(() => undefined)
+
+		// If undefined or empty, use the deprecated option
+		if (!generator) {
+			generator = (await getSetting("extract.autoHumanId.enabled").catch(() => true))
+				? "humanId"
+				: "none"
+		}
+
+		const isKnownGenerator = Object.hasOwn(generators, generator)
+		const generatedValue = isKnownGenerator
+			? generators[generator as keyof typeof generators]()
+			: ""
+		const showRandomNamesTip = generator !== "none"
+
 		const bundleId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? humanId() : "",
-			prompt:
-				autoHumanId &&
-				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
+			value: generatedValue,
+			// Show the random-names tip only when a random generator is active
+			prompt: showRandomNamesTip
+				? "Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information."
+				: undefined,
 		})
 
 		if (bundleId === undefined) {
