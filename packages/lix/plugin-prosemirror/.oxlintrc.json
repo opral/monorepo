@@ -1,0 +1,16 @@
+{
+	"plugins": ["typescript", "oxc"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"ignorePatterns": ["dist"],
+	"env": {
+		"es2022": true,
+		"node": true
+	},
+	"rules": {
+		"typescript/no-explicit-any": "off"
+	}
+}
+

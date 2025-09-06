@@ -40,7 +40,8 @@
     "tailwindcss": "^4.1.11",
     "typescript": "^5.5.3",
     "vite": "^6.2.6",
-    "vitest": "^2.1.8"
+    "vitest": "^3.2.4",
+    "jsdom": "^24.1.0"
   },
   "dependencies": {
     "@types/diff": "^8.0.0",

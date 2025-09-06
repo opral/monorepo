@@ -180,3 +180,37 @@ You can define custom marks or blocks.
 ```
 
 _Generic editors will skip unknown blocks, but text remains readable and round-trappable._
+
+## 🔁 Blocks vs. Styles for Diffing
+
+Zettel models textual blocks with a single type (`zettel_text_block`) and separates their presentation using a `style` field. This separation makes diffs cleaner and identities stable.
+
+- Stable identity: the block keeps the same `zettel_key` even when the style changes (e.g., normal → quote → heading).
+- Smaller change sets: style flips are a single modification, not a delete+add+reorder at the document level.
+- Simpler merging: downstream tools can treat style changes as non-structural updates to the same block.
+
+Example: paragraph → blockquote
+
+Before
+
+```json
+{
+	"type": "zettel_text_block",
+	"zettel_key": "b1",
+	"style": "zettel_normal",
+	"children": [{ "type": "zettel_span", "zettel_key": "s1", "text": "Hello" }]
+}
+```
+
+After (style change only)
+
+```json
+{
+	"type": "zettel_text_block",
+	"zettel_key": "b1",
+	"style": "zettel_quote",
+	"children": [{ "type": "zettel_span", "zettel_key": "s1", "text": "Hello" }]
+}
+```
+
+Contrast: ASTs that use different node types for paragraph vs. blockquote typically require a deletion (paragraph), an insertion (blockquote), and a document order update — creating noisier diffs and losing block identity. Zettel keeps the block identity intact by expressing presentation as `style`.

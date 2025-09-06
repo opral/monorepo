@@ -8,14 +8,10 @@ import type { Lix } from "../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
 import { selectFileLixcol } from "./select-file-lixcol.js";
-import { applyFileDataCacheSchema } from "./cache/schema.js";
-// import { applyFileLixcolCacheSchema } from "./cache/lixcol-schema.js";
 
 export function applyFileDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
 ): void {
-	// Apply the cache schemas
-	applyFileDataCacheSchema(lix);
 	// applied in databse itself before state because commit
 	// logic writes into the licol cache
 	// applyFileLixcolCacheSchema({ lix });

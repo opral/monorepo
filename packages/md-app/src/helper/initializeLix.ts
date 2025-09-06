@@ -1,5 +1,5 @@
 import { Lix, newLixFile, openLix, OpfsStorage } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../../lix/plugin-md/dist";
 import { initLixInspector } from "@lix-js/inspector";
 import { findLixFileInOpfs, findLixFilesInOpfs } from "./findLixInOpfs";
 

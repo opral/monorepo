@@ -1,21 +1,46 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import type { Lix } from "@lix-js/sdk";
-// @ts-ignore - styles.css is not a module
-import styles from "./styles.css?inline";
-// @ts-ignore - reactflowStyles is not a module
-import reactflowStyles from "@xyflow/react/dist/style.css?inline";
-import { Provider } from "./context";
-import App from "./App.tsx";
+import type { JSX } from "react";
 
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
+let inspectorInitialized = false;
+let inspectorMounted = false;
+let storedLix: Lix | null = null;
+let globalShortcutRegistered = false;
+let pendingToggle: boolean | undefined = undefined;
 
-export async function initLixInspector(args: {
-  lix: Lix;
-  hideWelcomeMessage?: boolean;
-  show?: boolean;
-}): Promise<void> {
+// Lazily loaded modules (cached after first load)
+let loadPromise: Promise<{
+  App: (props: { show: boolean }) => JSX.Element;
+  Provider: (props: any) => JSX.Element;
+  styles: string;
+  reactflowStyles: string;
+}> | null = null;
+
+async function loadModules() {
+  if (!loadPromise) {
+    loadPromise = Promise.all([
+      import("./App.tsx").then((m) => ({ App: m.default })),
+      import("./context").then((m) => ({ Provider: m.Provider })),
+      // @ts-ignore - inline CSS modules
+      import("./styles.css?inline").then((m) => ({ styles: (m as any).default as string })),
+      // @ts-ignore - inline CSS modules
+      import("@xyflow/react/dist/style.css?inline").then((m) => ({ reactflowStyles: (m as any).default as string })),
+    ]).then((arr) => ({
+      App: arr[0]!.App,
+      Provider: arr[1]!.Provider as any,
+      styles: arr[2]!.styles,
+      reactflowStyles: arr[3]!.reactflowStyles,
+    }));
+  }
+  return loadPromise;
+}
+
+async function mountInspector({ lix, show }: { lix: Lix; show: boolean }) {
+  const { App, Provider, styles, reactflowStyles } = await loadModules();
+
   // Create a fixed position overlay container for the inspector
   const container = document.createElement("div");
   container.id = "lix-inspector";
@@ -64,15 +89,84 @@ export async function initLixInspector(args: {
 
   reactRoot.render(
     <React.StrictMode>
-      <Provider lix={args.lix} rootContainer={container!}>
-        <App show={args.show ?? true} />
+      <Provider lix={lix} rootContainer={container!}>
+        <App show={show} />
       </Provider>
     </React.StrictMode>
   );
 
-  if (!args.hideWelcomeMessage) {
-    logWelcomeMessage();
+  inspectorMounted = true;
+}
+
+export async function initLixInspector(args: {
+  lix: Lix;
+  hideWelcomeMessage?: boolean;
+  show?: boolean;
+}): Promise<void> {
+  // Store Lix for later mount; do not load heavy code unless showing immediately
+  storedLix = args.lix;
+  inspectorInitialized = true;
+  registerGlobalShortcut();
+
+  if (args.show) {
+    await mountInspector({ lix: storedLix, show: true });
+  } else {
+    // Keep lazy; mount will occur on first toggle
+    if (!args.hideWelcomeMessage) {
+      logWelcomeMessage();
+    }
+    // If a toggle happened before init completed, honor it now
+    if (pendingToggle !== undefined) {
+      await mountInspector({ lix: storedLix, show: typeof pendingToggle === 'boolean' ? pendingToggle : true });
+      pendingToggle = undefined;
+    }
   }
+}
+
+/**
+ * Programmatically toggle the Inspector visibility.
+ * If `show` is provided, sets visibility accordingly; otherwise toggles.
+ */
+export async function toggleLixInspector(show?: boolean): Promise<void> {
+  if (!inspectorInitialized) {
+    // Defer until init is called
+    pendingToggle = show;
+    return;
+  }
+  if (!inspectorMounted) {
+    if (!storedLix) {
+      // Defer until init stores the Lix instance
+      pendingToggle = show;
+      return;
+    }
+    await mountInspector({ lix: storedLix, show: typeof show === "boolean" ? show : true });
+    return;
+  }
+  const event = new CustomEvent("lix-inspector-toggle", {
+    detail: { show },
+  } as CustomEventInit);
+  window.dispatchEvent(event);
+}
+
+function registerGlobalShortcut() {
+  if (globalShortcutRegistered) return;
+  const handler = (event: KeyboardEvent) => {
+    // Ctrl|Cmd + Shift + O to toggle (use code for layout-agnostic detection)
+    const isModifier = event.ctrlKey || event.metaKey;
+    const isShift = event.shiftKey;
+    const isO = (event.code && event.code === "KeyO") ||
+      (typeof event.key === "string" && event.key.toLowerCase() === "o");
+    if (isModifier && isShift && isO) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleLixInspector().catch((e) => {
+        console.warn("Failed to toggle Lix Inspector via shortcut:", e);
+      });
+    }
+  };
+  // Capture phase to get event even if app-level handlers stop propagation
+  window.addEventListener("keydown", handler, true);
+  globalShortcutRegistered = true;
 }
 
 function logWelcomeMessage() {

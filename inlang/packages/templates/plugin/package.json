@@ -15,6 +15,6 @@
 		"@inlang/sdk": "workspace:*",
 		"@inlang/cli": "workspace:*",
 		"typescript": "^5.5.2",
-		"vitest": "^2.1.8"
+		"vitest": "^3.2.4"
 	}
 }

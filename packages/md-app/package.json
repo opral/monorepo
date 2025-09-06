@@ -4,12 +4,12 @@
 	"version": "0.2.5",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"test": "tsc --noEmit",
-		"test:md": "vitest",
-		"build": "vite build",
-		"lint": "eslint ./src/**/* --fix",
-		"preview": "vite preview"
+		"_dev": "vite",
+		"_test": "tsc --noEmit",
+		"_test:md": "vitest",
+		"_build": "vite build",
+		"-lint": "eslint ./src/**/* --fix",
+		"_preview": "vite preview"
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "^1.3.21",

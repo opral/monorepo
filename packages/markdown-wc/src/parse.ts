@@ -13,7 +13,7 @@ import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
-import { visit } from "unist-util-visit";
+import { visit } from "unist-util-visit"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
@@ -85,17 +85,19 @@ export async function parse(
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 
-	
 	let html = String(content)
 
-	let frontmatter = content.data.frontmatter as Record<string, any> & { imports?: string[] } ?? {}
+	let frontmatter = (content.data.frontmatter as Record<string, any> & { imports?: string[] }) ?? {}
 
-	const hasMermaidDiagram = html.includes("<markdown-wc-mermaid>");
+	const hasMermaidDiagram = html.includes("<markdown-wc-mermaid>")
 
-	if (hasMermaidDiagram){
+	if (hasMermaidDiagram) {
 		// import markdown-wc-mermaid component
-		frontmatter.imports = [...(frontmatter.imports ?? []), 'https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js'];
-	} 
+		frontmatter.imports = [
+			...(frontmatter.imports ?? []),
+			"https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js",
+		]
+	}
 
 	if (content.data.containsCodeBlock) {
 		html = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
@@ -155,12 +157,12 @@ const customElementDetector: Plugin = () => (tree, file) => {
 }
 
 function mermaidTransformer() {
-  return (tree: any) => {
-    visit(tree, "code", (node: any) => {
-      if (node.lang === "mermaid") {
-        node.type = "html";
-        node.value = `<markdown-wc-mermaid>${node.value}</markdown-wc-mermaid>`;
-      }
-    });
-  };
+	return (tree: any) => {
+		visit(tree, "code", (node: any) => {
+			if (node.lang === "mermaid") {
+				node.type = "html"
+				node.value = `<markdown-wc-mermaid>${node.value}</markdown-wc-mermaid>`
+			}
+		})
+	}
 }

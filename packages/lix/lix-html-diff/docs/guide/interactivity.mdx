@@ -30,6 +30,8 @@ The key insight is that after calling `renderHtmlDiff()`, you can query the resu
 ```javascript
 // 1. Generate the diff
 const diffResult = renderHtmlDiff({ beforeHtml, afterHtml });
+// Or, if your HTML already includes stable IDs:
+// const diffResult = renderHtmlDiff({ beforeHtml, afterHtml, diffAttribute: 'data-id' });
 
 // 2. Render to DOM
 container.innerHTML = diffResult;

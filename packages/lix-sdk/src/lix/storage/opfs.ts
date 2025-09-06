@@ -24,7 +24,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * TODO refactor to only delete opfs adapter related files
 	 *      after https://github.com/opral/lix-sdk/issues/332 is implemented.
 	 *
-	 * @warning This will delete ALL files in OPFS, not just Lix files!
+	 * WARNING! This will delete ALL files in OPFS, not just Lix files!
 	 */
 	static async clean(): Promise<void> {
 		// Check if OPFS is supported

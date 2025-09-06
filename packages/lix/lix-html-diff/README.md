@@ -17,7 +17,9 @@ const tableAfter = renderTable(afterData);
 
 const diff = renderHtmlDiff({ 
   beforeHtml: tableBefore, 
-  afterHtml: tableAfter 
+  afterHtml: tableAfter,
+  // Optional: use a custom attribute to match elements
+  // diffAttribute: 'data-id',
 });
 
 render(diff, document.getElementById("diff-container"));

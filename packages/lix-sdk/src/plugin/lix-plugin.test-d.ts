@@ -5,6 +5,7 @@ import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { openLix } from "../lix/index.js";
 
 test("json schema type of a detected change", () => {
 	const MockChangeSchema = {

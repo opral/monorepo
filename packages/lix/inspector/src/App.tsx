@@ -151,7 +151,7 @@ function AppContent(args: { show: boolean }) {
     {} as Record<Pages, WindowState>
   );
 
-  // Update body padding when the inspector height changes
+  // Update app layout offsets using a CSS variable; host can consume via sticky top
   useEffect(() => {
     const updateBodyPadding = () => {
       if (isHidden) {
@@ -160,7 +160,10 @@ function AppContent(args: { show: boolean }) {
           "lix-inspector-style"
         ) as HTMLStyleElement;
         if (styleEl) {
-          styleEl.textContent = `body { padding-top: 0; }`;
+          styleEl.textContent = `
+            :root { --lix-inspector-offset: 0px; }
+            body { padding-top: var(--lix-inspector-offset) !important; }
+          `;
         }
         return;
       }
@@ -170,13 +173,14 @@ function AppContent(args: { show: boolean }) {
         "lix-inspector-style"
       ) as HTMLStyleElement;
       if (styleEl) {
-        styleEl.textContent = `body { padding-top: ${height}; }`;
+        styleEl.textContent = `
+          :root { --lix-inspector-offset: ${height}; }
+          /* Push normal flow content */
+          body { padding-top: var(--lix-inspector-offset) !important; }
+        `;
 
-        // Extract header height for window positioning
-        const match = styleEl.textContent?.match(/padding-top:\s*(\d+)px/);
-        if (match && match[1]) {
-          setHeaderHeight(parseInt(match[1], 10));
-        }
+        // Update header height directly
+        setHeaderHeight(rootContainer.offsetHeight);
       }
     };
 
@@ -192,21 +196,30 @@ function AppContent(args: { show: boolean }) {
     };
   }, [rootContainer, isHidden]);
 
-  // Add keyboard shortcut listener for showing the inspector when hidden
+  // Listen for programmatic toggle events (keyboard handler is registered globally in index.tsx)
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Command+Shift+O to toggle inspector
-      if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "o") {
-        setIsHidden((prev) => {
-          localStorage.setItem("lix-inspector:show", String(prev));
-          return !prev;
-        });
+    const handleToggleEvent = (e: Event) => {
+      try {
+        const ce = e as CustomEvent<{ show?: boolean }>;
+        if (typeof ce.detail?.show === "boolean") {
+          setIsHidden(!ce.detail.show);
+        } else {
+          setIsHidden((prev) => !prev);
+        }
+      } catch {
+        setIsHidden((prev) => !prev);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "lix-inspector-toggle",
+      handleToggleEvent as EventListener
+    );
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(
+        "lix-inspector-toggle",
+        handleToggleEvent as EventListener
+      );
     };
   }, []);
 
@@ -537,7 +550,7 @@ function AppContent(args: { show: boolean }) {
                       <div className="flex items-center gap-4">
                         <EyeOff className="h-4 w-4" />
                         Hide Inspector
-                        <kbd className="kbd kbd-sm">⌘⇧o</kbd>
+                        <kbd className="kbd kbd-sm">Ctrl+Shift+O</kbd>
                       </div>
                     </a>
                   </li>

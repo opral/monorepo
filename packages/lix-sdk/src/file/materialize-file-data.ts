@@ -58,6 +58,7 @@ export function materializeFileData(args: {
 					"plugin_key",
 					"snapshot_content",
 					"version_id",
+					"created_at",
 				]),
 		});
 
@@ -93,6 +94,7 @@ export function materializeFileData(args: {
 				"plugin_key",
 				"snapshot_content",
 				"version_id",
+				"created_at",
 			]),
 	});
 

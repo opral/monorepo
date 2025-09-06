@@ -100,6 +100,7 @@ export function handleFileInsert(args: {
 		// Detect changes with the plugin
 		const detectedChanges = plugin.detectChanges({
 			after: args.file,
+			lix: args.lix,
 		});
 
 		if (detectedChanges.length > 0) {
@@ -288,6 +289,7 @@ export function handleFileUpdate(args: {
 			const detectedChanges = plugin.detectChanges({
 				before: currentFile,
 				after: args.file,
+				lix: args.lix,
 			});
 
 			if (detectedChanges.length > 0) {
@@ -348,6 +350,7 @@ export function handleFileUpdate(args: {
 				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 					before: currentFile,
 					after: args.file,
+					lix: args.lix,
 				});
 
 				if (detectedChanges.length > 0) {

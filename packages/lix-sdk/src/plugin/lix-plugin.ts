@@ -1,8 +1,17 @@
 import type { LixChange } from "../change/schema.js";
 import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
+// Query builder + executor are provided to plugins.
+
+export type LixReadonly = {
+	db: { selectFrom: Lix["db"]["selectFrom"] };
+	/** Raw SQLite handle for sync execution (use executeSync({ lix, query })). */
+	sqlite: Lix["sqlite"];
+};
+
 export type LixPlugin = {
 	key: string;
 	/**
@@ -26,9 +35,38 @@ export type LixPlugin = {
 	detectChanges?: ({
 		before,
 		after,
+		lix,
 	}: {
 		before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 		after: Omit<LixFile, "data"> & { data: Uint8Array };
+		/**
+		 * Readonly Lix context exposing only `db.selectFrom` for typed queries.
+		 *
+		 * Detecting changes can require reading current state to preserve stable entity ids,
+		 * compare snapshots, or infer ordering without reparsing files.
+		 *
+		 * How to use (with synchronous execution)
+		 * - Import `executeSync` from `@lix-js/sdk` and run `executeSync({ lix, query: qb })` to execute
+		 *   synchronously and receive JSON‑parsed rows (matching the async driver behavior).
+		 *
+		 * Example (reuse stable ids)
+		 * ```ts
+		 * detectChanges: ({ after, lix }) => {
+		 *   const qb = lix!.db
+		 *     .selectFrom('state')
+		 *     .where('file_id', '=', after.id)
+		 *     .where('plugin_key', '=', 'plugin_md')
+		 *     .select(['entity_id', 'schema_key', 'snapshot_content'])
+		 *
+		 *   import { executeSync } from '@lix-js/sdk'
+		 *   const rows = executeSync({ lix: lix as any, query: qb })
+		 *   const latestById = new Map(rows.map(r => [r.entity_id, r]))
+		 *   // ...use latestById to assign/reuse ids in emitted changes...
+		 *   return detected
+		 * }
+		 * ```
+		 */
+		lix?: LixReadonly;
 	}) => DetectedChange[];
 	applyChanges?: ({
 		file,

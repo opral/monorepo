@@ -9,7 +9,8 @@
     "build": "rspress build",
     "test": "vitest run",
     "format": "prettier --write .",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "clean": "rm -rf ./dist ./node_modules"
   },
   "devDependencies": {
     "@braintree/sanitize-url": "^7.0.2",
@@ -29,8 +30,9 @@
     "rspress-plugin-mermaid": "^0.3.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
-    "typedoc": "^0.28.5",
-    "typedoc-plugin-markdown": "^4.7.0",
+    "typedoc": "0.28.12",
+    "typedoc-plugin-markdown": "4.7.0",
+    "typescript": "5.8.3",
     "vitest": "^3.2.4"
   },
   "keywords": [

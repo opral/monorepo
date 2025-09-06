@@ -900,6 +900,7 @@ test("global version should move forward when mutations occur", async () => {
 
 // https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923
 //
+//
 // Verifies that working change set elements are NOT updated for the global version.
 // We intentionally assert no working elements are written for global's working commit.
 // This documents current behavior and makes it explicit until a future lazy design.
