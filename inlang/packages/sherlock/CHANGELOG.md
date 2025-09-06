@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 2.1.0
+
+### Minor Changes
+
+- 170472c: https://github.com/opral/monorepo/pull/3674
+
+  adds a new sherlock.extract.generator config key, and deprecates sherlock.extract.autoHumanId.enabled
+
 ## 2.0.17
 
 ### Patch Changes
