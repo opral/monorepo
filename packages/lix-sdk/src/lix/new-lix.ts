@@ -3,7 +3,13 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { LixVersionSchema, type LixVersion } from "../version/schema.js";
+import {
+	LixActiveVersionSchema,
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+} from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
@@ -214,25 +220,27 @@ export async function newLixFile(args?: {
 
 	// The initial version ID will be set by createBootstrapChanges
 	const initialVersionId = bootstrapChanges.find(
-		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
+		(c) =>
+			c.schema_key === "lix_version_descriptor" &&
+			c.snapshot_content?.name === "main"
 	)?.entity_id;
 
 	// Set active version using updateUntrackedState for proper inheritance handling
-    updateUntrackedState({
-        lix: { sqlite, db },
-        changes: [
-            {
-                entity_id: "active",
-                schema_key: "lix_active_version",
-                file_id: "lix",
-                plugin_key: "lix_own_entity",
-                snapshot_content: JSON.stringify({ version_id: initialVersionId }),
-                schema_version: "1.0",
-                created_at: created_at,
-                lixcol_version_id: "global",
-            },
-        ],
-    });
+	updateUntrackedState({
+		lix: { sqlite, db },
+		changes: [
+			{
+				entity_id: "active",
+				schema_key: "lix_active_version",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({ version_id: initialVersionId }),
+				schema_version: "1.0",
+				created_at: created_at,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	// Create anonymous account as untracked for deterministic behavior
 	const activeAccountId = generateNanoid();
@@ -242,70 +250,70 @@ export async function newLixFile(args?: {
 	const anonymousAccountName = `Anonymous ${humanName}`;
 
 	// Create the anonymous account as untracked
-    updateUntrackedState({
-        lix: { sqlite, db },
-        changes: [
-            {
-                entity_id: activeAccountId,
-                schema_key: LixAccountSchema["x-lix-key"],
-                file_id: "lix",
-                plugin_key: "lix_own_entity",
-                snapshot_content: JSON.stringify({
-                    id: activeAccountId,
-                    name: anonymousAccountName,
-                } satisfies LixAccount),
-                schema_version: LixAccountSchema["x-lix-version"],
-                created_at: created_at,
-                lixcol_version_id: "global",
-            },
-        ],
-    });
+	updateUntrackedState({
+		lix: { sqlite, db },
+		changes: [
+			{
+				entity_id: activeAccountId,
+				schema_key: LixAccountSchema["x-lix-key"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: activeAccountId,
+					name: anonymousAccountName,
+				} satisfies LixAccount),
+				schema_version: LixAccountSchema["x-lix-version"],
+				created_at: created_at,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	// Set it as the active account
-    updateUntrackedState({
-        lix: { sqlite, db },
-        changes: [
-            {
-                entity_id: `active_${activeAccountId}`,
-                schema_key: LixActiveAccountSchema["x-lix-key"],
-                file_id: "lix",
-                plugin_key: "lix_own_entity",
-                snapshot_content: JSON.stringify({
-                    account_id: activeAccountId,
-                } satisfies LixActiveAccount),
-                schema_version: LixActiveAccountSchema["x-lix-version"],
-                created_at: created_at,
-                lixcol_version_id: "global",
-            },
-        ],
-    });
+	updateUntrackedState({
+		lix: { sqlite, db },
+		changes: [
+			{
+				entity_id: `active_${activeAccountId}`,
+				schema_key: LixActiveAccountSchema["x-lix-key"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					account_id: activeAccountId,
+				} satisfies LixActiveAccount),
+				schema_version: LixActiveAccountSchema["x-lix-version"],
+				created_at: created_at,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	// Handle other untracked key values
 	const untrackedKeyValues = args?.keyValues?.filter(
 		(kv) => kv.lixcol_untracked === true
 	);
 	if (untrackedKeyValues) {
-        for (const kv of untrackedKeyValues) {
-            const versionId = kv.lixcol_version_id ?? "global";
-            updateUntrackedState({
-                lix: { sqlite, db },
-                changes: [
-                    {
-                        entity_id: kv.key,
-                        schema_key: "lix_key_value",
-                        file_id: "lix",
-                        plugin_key: "lix_own_entity",
-                        snapshot_content: JSON.stringify({
-                            key: kv.key,
-                            value: kv.value,
-                        }),
-                        schema_version: LixKeyValueSchema["x-lix-version"],
-                        created_at: created_at,
-                        lixcol_version_id: versionId,
-                    },
-                ],
-            });
-        }
+		for (const kv of untrackedKeyValues) {
+			const versionId = kv.lixcol_version_id ?? "global";
+			updateUntrackedState({
+				lix: { sqlite, db },
+				changes: [
+					{
+						entity_id: kv.key,
+						schema_key: "lix_key_value",
+						file_id: "lix",
+						plugin_key: "lix_own_entity",
+						snapshot_content: JSON.stringify({
+							key: kv.key,
+							value: kv.value,
+						}),
+						schema_version: LixKeyValueSchema["x-lix-version"],
+						created_at: created_at,
+						lixcol_version_id: versionId,
+					},
+				],
+			});
+		}
 	}
 
 	try {
@@ -390,7 +398,7 @@ function createBootstrapChanges(args: {
 	const mainCommitId = args.generateUuid();
 
 	// Create commit for global version
-	changes.push({
+	const globalCommitChange = {
 		id: args.generateUuid(),
 		entity_id: globalCommitId,
 		schema_key: "lix_commit",
@@ -403,10 +411,11 @@ function createBootstrapChanges(args: {
 			change_set_id: initialGlobalVersionChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(globalCommitChange);
 
 	// Create commit for main version
-	changes.push({
+	const mainCommitChange = {
 		id: args.generateUuid(),
 		entity_id: mainCommitId,
 		schema_key: "lix_commit",
@@ -419,10 +428,11 @@ function createBootstrapChanges(args: {
 			change_set_id: initialChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(mainCommitChange);
 
 	// Create working commits for both versions
-	changes.push({
+	const globalWorkingCommitChange = {
 		id: args.generateUuid(),
 		entity_id: globalWorkingCommitId,
 		schema_key: "lix_commit",
@@ -435,9 +445,10 @@ function createBootstrapChanges(args: {
 			change_set_id: initialGlobalVersionWorkingChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(globalWorkingCommitChange);
 
-	changes.push({
+	const mainWorkingCommitChange = {
 		id: args.generateUuid(),
 		entity_id: mainWorkingCommitId,
 		schema_key: "lix_commit",
@@ -450,44 +461,74 @@ function createBootstrapChanges(args: {
 			change_set_id: initialWorkingChangeSetId,
 		},
 		created_at: args.created_at,
-	});
+	} as BootstrapChange;
+	changes.push(mainWorkingCommitChange);
 
-	// Create global version
+	// Create global version (split only: descriptor + tip)
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: "global",
-		schema_key: "lix_version",
-		schema_version: LixVersionSchema["x-lix-version"],
+		schema_key: LixVersionDescriptorSchema["x-lix-key"],
+		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			commit_id: globalCommitId,
 			working_commit_id: globalWorkingCommitId,
+			inherits_from_version_id: null,
 			hidden: true,
-		} satisfies LixVersion,
+		} satisfies LixVersionDescriptor,
 		created_at: args.created_at,
 	});
 
-	// Create main version
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: "global",
+		schema_key: LixVersionTipSchema["x-lix-key"],
+		schema_version: LixVersionTipSchema["x-lix-version"],
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: "global",
+			commit_id: globalCommitId,
+		} satisfies LixVersionTip,
+		created_at: args.created_at,
+	});
+
+	// Create main version (split only: descriptor + tip)
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: initialVersionId,
-		schema_key: "lix_version",
-		schema_version: LixVersionSchema["x-lix-version"],
+		schema_key: LixVersionDescriptorSchema["x-lix-key"],
+		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
-			commit_id: mainCommitId,
 			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
-		} satisfies LixVersion,
+		} satisfies LixVersionDescriptor,
+		created_at: args.created_at,
+	});
+
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: initialVersionId,
+		schema_key: LixVersionTipSchema["x-lix-key"],
+		schema_version: LixVersionTipSchema["x-lix-version"],
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: initialVersionId,
+			commit_id: mainCommitId,
+		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});
 
@@ -616,6 +657,29 @@ function createBootstrapChanges(args: {
 		});
 	}
 
+	// Also store version schemas (descriptor, tip, active_version) for validation
+	for (const schema of [
+		LixVersionDescriptorSchema,
+		LixVersionTipSchema,
+		LixActiveVersionSchema,
+	]) {
+		changes.push({
+			id: args.generateUuid(),
+			entity_id: schema["x-lix-key"],
+			schema_key: "lix_stored_schema",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
+			snapshot_content: {
+				key: schema["x-lix-key"],
+				version: schema["x-lix-version"],
+				value: JSON.stringify(schema),
+			} satisfies LixStoredSchema,
+			created_at: args.created_at,
+		});
+	}
+
 	// Anonymous account is now created during bootstrap for deterministic behavior
 
 	// Create change set elements linking all changes to the global change set
@@ -658,6 +722,31 @@ function createBootstrapChanges(args: {
 		changes.push(changeSetElementChange);
 		changeSetElementChanges.push(changeSetElementChange);
 	}
+
+	// Map change_set_id -> list of change_ids so commits reference their members
+	const changeIdsByChangeSet = new Map<string, string[]>();
+	for (const cse of changeSetElementChanges) {
+		const snap = cse.snapshot_content as any;
+		const cs = snap.change_set_id as string;
+		const cid = snap.change_id as string;
+		if (!cs || !cid) continue;
+		const list = changeIdsByChangeSet.get(cs) ?? [];
+		list.push(cid);
+		changeIdsByChangeSet.set(cs, list);
+	}
+
+	// Assign change_ids (and empty parent_commit_ids) to initial commits
+	const setCommitMembers = (commitChange: BootstrapChange) => {
+		const csId = (commitChange.snapshot_content as any).change_set_id as string;
+		const ids = changeIdsByChangeSet.get(csId) ?? [];
+		(commitChange.snapshot_content as any).change_ids = ids;
+		(commitChange.snapshot_content as any).parent_commit_ids = [];
+	};
+
+	setCommitMembers(globalCommitChange);
+	setCommitMembers(mainCommitChange);
+	setCommitMembers(globalWorkingCommitChange);
+	setCommitMembers(mainWorkingCommitChange);
 
 	// TODO evaluate if we can come up with a better concept to avoid meta changes (if even desired)
 	//

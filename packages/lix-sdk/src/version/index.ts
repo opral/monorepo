@@ -1,8 +1,13 @@
 export {
-	LixVersionSchema,
-	type LixVersion as Version,
-	type LixActiveVersion as ActiveVersion,
+	type LixVersion,
+	type LixActiveVersion,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+	LixVersionTipSchema,
+	LixVersionDescriptorSchema,
+	LixActiveVersionSchema,
 } from "./schema.js";
+
 export { createVersion } from "./create-version.js";
 export { switchVersion } from "./switch-version.js";
 export { createVersionFromCommit } from "./create-version-from-commit.js";

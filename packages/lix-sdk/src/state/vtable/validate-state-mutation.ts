@@ -341,6 +341,8 @@ function validateForeignKeyConstraints(args: {
 
 	// Validate each foreign key constraint
 	for (const foreignKey of foreignKeys) {
+		// Validation mode: default to immediate
+		const mode = foreignKey.mode ?? "immediate";
 		// Validate that properties arrays have same length
 		if (
 			foreignKey.properties.length !== foreignKey.references.properties.length
@@ -349,6 +351,12 @@ function validateForeignKeyConstraints(args: {
 				`Foreign key constraint error: Local properties (${foreignKey.properties.join(", ")}) and ` +
 					`referenced properties (${foreignKey.references.properties.join(", ")}) must have the same length`
 			);
+		}
+
+		// In materialized mode we skip insert/update existence checks entirely.
+		// Delete-time checks are handled in validateDeletionConstraints by reverse lookup.
+		if (mode === "materialized") {
+			continue;
 		}
 
 		// Extract values for all local properties

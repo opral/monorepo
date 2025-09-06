@@ -5,6 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { createVersion } from "../version/create-version.js";
+import type { LixVersionDescriptor } from "../version/schema.js";
 
 /**
  * Strips the internal vtable primary key column `_pk` from result rows.
@@ -478,7 +479,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	const parentVersionId = "parent_version";
 	const childVersionId = "child_version";
 
-	// Insert version records using updateStateCacheV2
+	// Insert version descriptor records using updateStateCacheV2
 	const versionTimestamp = timestamp({ lix });
 	updateStateCacheV2({
 		lix,
@@ -486,23 +487,32 @@ test("resolved state view generates correct composite keys for inherited state",
 			{
 				id: "change1",
 				entity_id: parentVersionId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
-				plugin_key: "lix",
-				snapshot_content: JSON.stringify({ id: parentVersionId }),
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: parentVersionId,
+					name: "parent_version",
+					working_commit_id: "wc-parent",
+					inherits_from_version_id: null,
+					hidden: false,
+				} satisfies LixVersionDescriptor),
 				schema_version: "1.0",
 				created_at: versionTimestamp,
 			},
 			{
 				id: "change2",
 				entity_id: childVersionId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
-				plugin_key: "lix",
+				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: childVersionId,
+					name: "child_version",
+					working_commit_id: "wc-child",
 					inherits_from_version_id: parentVersionId,
-				}),
+					hidden: false,
+				} satisfies LixVersionDescriptor),
 				schema_version: "1.0",
 				created_at: versionTimestamp,
 			},

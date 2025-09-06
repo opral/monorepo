@@ -298,8 +298,8 @@ test("changes in transaction can be accessed via change view", async () => {
 			})
 			.execute();
 
-    // This should create a change in internal_transaction_state
-    // The change view should include changes from both internal_change and internal_transaction_state
+		// This should create a change in internal_transaction_state
+		// The change view should include changes from both internal_change and internal_transaction_state
 
 		// Try to find the change within the transaction via the change view
 		const changesInTransaction = await trx
@@ -309,7 +309,7 @@ test("changes in transaction can be accessed via change view", async () => {
 			.selectAll()
 			.execute();
 
-    // This should find the change that was created in internal_transaction_state
+		// This should find the change that was created in internal_transaction_state
 		expect(changesInTransaction).toHaveLength(1);
 		expect(changesInTransaction[0]).toMatchObject({
 			entity_id: "test_key_in_transaction",

@@ -22,11 +22,7 @@ import { useCallback, useMemo, useState } from "react";
 import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
-import {
-	Version,
-	createVersion,
-	switchVersion,
-} from "@lix-js/sdk";
+import { LixVersion, createVersion, switchVersion } from "@lix-js/sdk";
 import CustomLink from "../components/CustomLink.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
@@ -221,7 +217,7 @@ const VersionDropdown = () => {
 	const [lix] = useAtom(lixAtom);
 
 	const switchToversion = useCallback(
-		async (version: Version) => {
+		async (version: LixVersion) => {
 			await switchVersion({ lix, to: version });
 			await saveLixToOpfs({ lix });
 		},

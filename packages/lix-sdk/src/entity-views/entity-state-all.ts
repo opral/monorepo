@@ -295,6 +295,8 @@ export function createEntityStateAllView(args: {
 	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
+	/** If true, creates read-only view (no DML triggers) */
+	readOnly?: boolean;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"] + "_all";
 	// Quote the view name to handle SQL reserved keywords
@@ -327,6 +329,7 @@ function createSingleEntityAllView(args: {
 	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
+	readOnly?: boolean;
 }): void {
 	if (!args.schema["x-lix-primary-key"]) {
 		throw new Error(
@@ -486,7 +489,8 @@ function createSingleEntityAllView(args: {
 		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
 
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
-	const sqlQuery = `
+	const sqlQuery =
+		`
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
       SELECT
         ${Object.keys((args.schema as any).properties)
@@ -497,6 +501,10 @@ function createSingleEntityAllView(args: {
         ${operationalColumns.join(",\n        ")}
       FROM ${args.stateTable}
       WHERE schema_key = '${schema_key}';
+    ` +
+		(args.readOnly
+			? ""
+			: `
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_insert
       INSTEAD OF INSERT ON ${quoted_view_name}
@@ -574,7 +582,7 @@ function createSingleEntityAllView(args: {
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
         AND version_id = ${args.hardcodedVersionId ? `'${args.hardcodedVersionId}'` : "OLD.lixcol_version_id"};
       END;
-    `;
+    `);
 
 	args.lix.sqlite.exec(sqlQuery);
 }

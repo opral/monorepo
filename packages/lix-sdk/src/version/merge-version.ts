@@ -7,6 +7,7 @@ import { timestamp } from "../deterministic/timestamp.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
+import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 export async function mergeVersion(args: {
 	lix: Lix;
 	source: Pick<LixVersion, "id">;
@@ -50,11 +51,7 @@ export async function mergeVersion(args: {
 			.where("id", "=", target.id)
 			.executeTakeFirstOrThrow();
 
-		const beforeGlobal = await trx
-			.selectFrom("version")
-			.selectAll()
-			.where("id", "=", "global")
-			.executeTakeFirstOrThrow();
+		//
 
 		// Prepare elements to reference and deletion changes to create
 		const toReference: Array<{
@@ -106,21 +103,21 @@ export async function mergeVersion(args: {
 			const refIds = toReference.map((r) => r.id);
 
 			// Read pending rows from the transaction table
-            const pending = await intDbLocal
-                .selectFrom("internal_transaction_state")
-                .select([
-                    "id",
-                    "entity_id",
-                    "schema_key",
-                    "schema_version",
-                    "file_id",
-                    "plugin_key",
-                    sql`json(snapshot_content)`.as("snapshot_content"),
-                    "created_at",
-                ])
-                .where("lixcol_version_id", "=", sourceVersion.id)
-                .where("id", "in", refIds)
-                .execute();
+			const pending = await intDbLocal
+				.selectFrom("internal_transaction_state")
+				.select([
+					"id",
+					"entity_id",
+					"schema_key",
+					"schema_version",
+					"file_id",
+					"plugin_key",
+					sql`json(snapshot_content)`.as("snapshot_content"),
+					"created_at",
+				])
+				.where("lixcol_version_id", "=", sourceVersion.id)
+				.where("id", "in", refIds)
+				.execute();
 
 			if (pending.length > 0) {
 				// Insert into persistent change table using the view's insert trigger
@@ -143,10 +140,10 @@ export async function mergeVersion(args: {
 					.execute();
 
 				// Remove from transaction queue to prevent automatic commit logic for source
-                await intDbLocal
-                    .deleteFrom("internal_transaction_state")
-                    .where("id", "in", refIds)
-                    .execute();
+				await intDbLocal
+					.deleteFrom("internal_transaction_state")
+					.where("id", "in", refIds)
+					.execute();
 			}
 		}
 
@@ -155,51 +152,18 @@ export async function mergeVersion(args: {
 			// nothing to merge
 			return;
 		}
-
-		// Two-commit model IDs
+		// One-commit model IDs
 		const targetChangeSetId = uuidV7({ lix });
 		const targetCommitId = uuidV7({ lix });
-		const globalChangeSetId = uuidV7({ lix });
-		const globalCommitId = uuidV7({ lix });
 		const now = timestamp({ lix });
+		//
 
-		// Build change rows for two-commit model
+		// Build change rows (manual meta for one-commit model)
 		const changeRows: LixChangeRaw[] = [];
 
-		// 1) Define both change_set entities (global + target)
-		const globalChangeSetChangeId = uuidV7({ lix });
-		changeRows.push({
-			id: globalChangeSetChangeId,
-			entity_id: globalChangeSetId,
-			schema_key: "lix_change_set",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: globalChangeSetId,
-				metadata: null,
-			}),
-			created_at: now,
-		});
-
-		const targetChangeSetChangeId = uuidV7({ lix });
-		changeRows.push({
-			id: targetChangeSetChangeId,
-			entity_id: targetChangeSetId,
-			schema_key: "lix_change_set",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: targetChangeSetId,
-				metadata: null,
-			}),
-			created_at: now,
-		});
-
-		// 2) Target commit (references user-domain changes)
+		// commit (target) with parent ordering [target.tip, source.tip]
 		const targetCommitChangeId = uuidV7({ lix });
-		changeRows.push({
+		const commitRow: LixChangeRaw = {
 			id: targetCommitChangeId,
 			entity_id: targetCommitId,
 			schema_key: "lix_commit",
@@ -209,35 +173,34 @@ export async function mergeVersion(args: {
 			snapshot_content: JSON.stringify({
 				id: targetCommitId,
 				change_set_id: targetChangeSetId,
+				parent_commit_ids: [targetVersion.commit_id, sourceVersion.commit_id],
 			}),
 			created_at: now,
-		});
+		};
+		changeRows.push(commitRow);
 
-		// Track all CSE changes so we can publish meta CSEs (CSE-of-CSE) under global
-		const cseChangeRows: LixChangeRaw[] = [];
-		// Reference user changes under TARGET change set (in GLOBAL view)
-		for (const el of toReference) {
-			const cseRow: LixChangeRaw = {
-				id: uuidV7({ lix }),
-				entity_id: `${targetChangeSetId}~${el.id}`,
-				schema_key: "lix_change_set_element",
-				schema_version: "1.0",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: targetChangeSetId,
-					change_id: el.id,
-					entity_id: el.entity_id,
-					schema_key: el.schema_key,
-					file_id: el.file_id,
-				}),
-				created_at: now,
-			};
-			changeRows.push(cseRow);
-			cseChangeRows.push(cseRow);
-		}
+		// No 'lix_version' rows; version view is derived from descriptor + tip
 
-		// Create deletion change rows + reference them under TARGET change set
+		// tip (target -> commit-anchored pointer)
+		const versionTipRow: LixChangeRaw = {
+			id: uuidV7({ lix }),
+			entity_id: target.id,
+			schema_key: "lix_version_tip",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: target.id,
+				commit_id: targetCommitId,
+			}),
+			created_at: now,
+		};
+		changeRows.push(versionTipRow);
+
+		//
+		//
+
+		// Create deletion change rows (domain tombstones) for target
 		const deletionChanges: LixChangeRaw[] = [];
 		for (const del of toDelete) {
 			const delChangeId = uuidV7({ lix });
@@ -251,262 +214,201 @@ export async function mergeVersion(args: {
 				snapshot_content: null,
 				created_at: now,
 			});
-			const cseRow: LixChangeRaw = {
+		}
+
+		// Create explicit CSE change rows for winners + deletions anchored under target change_set
+		const cseChangeRows: LixChangeRaw[] = [];
+		for (const ref of toReference) {
+			cseChangeRows.push({
 				id: uuidV7({ lix }),
-				entity_id: `${targetChangeSetId}~${delChangeId}`,
+				entity_id: `${targetChangeSetId}~${ref.id}`,
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					change_set_id: targetChangeSetId,
-					change_id: delChangeId,
+					change_id: ref.id,
+					entity_id: ref.entity_id,
+					schema_key: ref.schema_key,
+					file_id: ref.file_id,
+				}),
+				created_at: now,
+			});
+		}
+		for (const del of deletionChanges) {
+			cseChangeRows.push({
+				id: uuidV7({ lix }),
+				entity_id: `${targetChangeSetId}~${del.id}`,
+				schema_key: "lix_change_set_element",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: targetChangeSetId,
+					change_id: del.id,
 					entity_id: del.entity_id,
 					schema_key: del.schema_key,
 					file_id: del.file_id,
 				}),
 				created_at: now,
-			};
-			changeRows.push(cseRow);
-			cseChangeRows.push(cseRow);
-		}
-
-		// 3) Global commit (publishes graph metadata for both commits)
-		const globalCommitChangeId = uuidV7({ lix });
-		changeRows.push({
-			id: globalCommitChangeId,
-			entity_id: globalCommitId,
-			schema_key: "lix_commit",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: globalCommitId,
-				change_set_id: globalChangeSetId,
-			}),
-			created_at: now,
-		});
-
-		// Commit edges: target has two parents; global has one lineage edge
-		const edgeTargetFromTargetBeforeId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeTargetFromTargetBeforeId,
-			entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: targetVersion.commit_id,
-				child_id: targetCommitId,
-			}),
-			created_at: now,
-		});
-		const edgeTargetFromSourceBeforeId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeTargetFromSourceBeforeId,
-			entity_id: `${sourceVersion.commit_id}~${targetCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: sourceVersion.commit_id,
-				child_id: targetCommitId,
-			}),
-			created_at: now,
-		});
-		// Global lineage edge: always link from beforeGlobal.tip to global.tip_after
-		const globalLineageParentId = beforeGlobal.commit_id;
-		const edgeGlobalLineageId = uuidV7({ lix });
-		changeRows.push({
-			id: edgeGlobalLineageId,
-			entity_id: `${globalLineageParentId}~${globalCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: globalLineageParentId,
-				child_id: globalCommitId,
-			}),
-			created_at: now,
-		});
-
-		// Reference graph rows under GLOBAL change set
-		for (const meta of [
-			{
-				change_id: targetCommitChangeId,
-				entity_id: targetCommitId,
-				schema_key: "lix_commit",
-			},
-			{
-				change_id: globalCommitChangeId,
-				entity_id: globalCommitId,
-				schema_key: "lix_commit",
-			},
-			{
-				change_id: edgeTargetFromTargetBeforeId,
-				entity_id: `${targetVersion.commit_id}~${targetCommitId}`,
-				schema_key: "lix_commit_edge",
-			},
-			{
-				change_id: edgeTargetFromSourceBeforeId,
-				entity_id: `${sourceVersion.commit_id}~${targetCommitId}`,
-				schema_key: "lix_commit_edge",
-			},
-			{
-				change_id: edgeGlobalLineageId,
-				entity_id: `${globalLineageParentId}~${globalCommitId}`,
-				schema_key: "lix_commit_edge",
-			},
-		]) {
-			const cseRow: LixChangeRaw = {
-				id: uuidV7({ lix }),
-				entity_id: `${globalChangeSetId}~${meta.change_id}`,
-				schema_key: "lix_change_set_element",
-				schema_version: "1.0",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: globalChangeSetId,
-					change_id: meta.change_id,
-					entity_id: meta.entity_id,
-					schema_key: meta.schema_key,
-					file_id: "lix",
-				}),
-				created_at: now,
-			};
-			changeRows.push(cseRow);
-			cseChangeRows.push(cseRow);
-		}
-
-		// Version updates (target -> targetCommitId, global -> globalCommitId)
-		const intDb = trx as unknown as Kysely<LixInternalDatabaseSchema>;
-		const targetVersionRow = await intDb
-			.selectFrom("internal_resolved_state_all")
-			.where("schema_key", "=", "lix_version")
-			.where("entity_id", "=", targetVersion.id)
-			.where("snapshot_content", "is not", null)
-			.select([sql`json(snapshot_content)`.as("snapshot_content")])
-			.executeTakeFirstOrThrow();
-		const currentTargetVersion =
-			targetVersionRow.snapshot_content as unknown as LixVersion;
-		const updatedTargetVersion: LixChangeRaw = {
-			id: uuidV7({ lix }),
-			entity_id: targetVersion.id,
-			schema_key: "lix_version",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				...currentTargetVersion,
-				commit_id: targetCommitId,
-			}),
-			created_at: now,
-		};
-		changeRows.push(updatedTargetVersion);
-		const cseRowTargetVersion: LixChangeRaw = {
-			id: uuidV7({ lix }),
-			entity_id: `${globalChangeSetId}~${updatedTargetVersion.id}`,
-			schema_key: "lix_change_set_element",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				change_set_id: globalChangeSetId,
-				change_id: updatedTargetVersion.id,
-				entity_id: targetVersion.id,
-				schema_key: "lix_version",
-				file_id: "lix",
-			}),
-			created_at: now,
-		};
-		changeRows.push(cseRowTargetVersion);
-		cseChangeRows.push(cseRowTargetVersion);
-
-		const globalVersionRow = await intDb
-			.selectFrom("internal_resolved_state_all")
-			.where("schema_key", "=", "lix_version")
-			.where("entity_id", "=", "global")
-			.where("snapshot_content", "is not", null)
-			.select([sql`json(snapshot_content)`.as("snapshot_content")])
-			.executeTakeFirstOrThrow();
-		const currentGlobalVersion =
-			globalVersionRow.snapshot_content as unknown as LixVersion;
-		const updatedGlobalVersion: LixChangeRaw = {
-			id: uuidV7({ lix }),
-			entity_id: "global",
-			schema_key: "lix_version",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				...currentGlobalVersion,
-				commit_id: globalCommitId,
-			}),
-			created_at: now,
-		};
-		changeRows.push(updatedGlobalVersion);
-		const cseRowGlobalVersion: LixChangeRaw = {
-			id: uuidV7({ lix }),
-			entity_id: `${globalChangeSetId}~${updatedGlobalVersion.id}`,
-			schema_key: "lix_change_set_element",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				change_set_id: globalChangeSetId,
-				change_id: updatedGlobalVersion.id,
-				entity_id: "global",
-				schema_key: "lix_version",
-				file_id: "lix",
-			}),
-			created_at: now,
-		};
-		changeRows.push(cseRowGlobalVersion);
-		cseChangeRows.push(cseRowGlobalVersion);
-
-		// 4) Create meta change_set_elements for the change_set_element changes themselves (CSE-of-CSE)
-		for (const elementChange of cseChangeRows) {
-			changeRows.push({
-				id: uuidV7({ lix }),
-				entity_id: `${globalChangeSetId}~${elementChange.id}`,
-				schema_key: "lix_change_set_element",
-				schema_version: "1.0",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: globalChangeSetId,
-					change_id: elementChange.id,
-					entity_id: elementChange.entity_id,
-					schema_key: elementChange.schema_key,
-					file_id: elementChange.file_id,
-				}),
-				created_at: now,
 			});
 		}
 
-		// Insert all changes (graph + change set defs + target deletions)
-		const allChanges = [...changeRows, ...deletionChanges];
-		if (allChanges.length > 0) {
-			await trx
-				.insertInto("change")
-				.values(allChanges as any)
+		// Copy change authors from source for referenced winners
+		const authorEntries: Array<{
+			id: string;
+			entity_id: string;
+			created_at: string;
+		}> = [];
+		if (toReference.length > 0) {
+			const refIds = toReference.map((r) => r.id);
+			const sourceAuthorRows = await trx
+				.selectFrom("change")
+				.where("schema_key", "=", "lix_change_author")
+				.where(
+					sql`json_extract(snapshot_content, '$.change_id')`,
+					"in",
+					refIds as any
+				)
+				.select([
+					"id",
+					"entity_id",
+					sql`json(snapshot_content)`.as("snapshot"),
+					"created_at",
+				])
 				.execute();
+
+			for (const row of sourceAuthorRows as any[]) {
+				authorEntries.push({
+					id: String(row.id),
+					entity_id: String(row.entity_id),
+					created_at: String(row.created_at),
+				});
+				// Also anchor an explicit CSE change row for the author under target change_set
+				cseChangeRows.push({
+					id: uuidV7({ lix }),
+					entity_id: `${targetChangeSetId}~${row.id}`,
+					schema_key: "lix_change_set_element",
+					schema_version: "1.0",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						change_set_id: targetChangeSetId,
+						change_id: row.id,
+						entity_id: row.entity_id,
+						schema_key: "lix_change_author",
+						file_id: "lix",
+					}),
+					created_at: row.created_at,
+				});
+			}
 		}
 
-		// Populate caches
-		// Global: graph + change_set (both) + CSEs
-		updateStateCache({
-			lix,
-			changes: changeRows,
-			version_id: "global",
-			commit_id: globalCommitId,
-		});
+		// Update commit snapshot to include change_ids for materializer determinism
+		{
+			const commitIdx = changeRows.findIndex(
+				(c) => c.schema_key === "lix_commit" && c.entity_id === targetCommitId
+			);
+			if (commitIdx >= 0) {
+				const baseSnap = {
+					id: targetCommitId,
+					change_set_id: targetChangeSetId,
+					parent_commit_ids: [targetVersion.commit_id, sourceVersion.commit_id],
+				} as any;
+				// Build intended membership explicitly
+				const winnerIds = toReference.map((r) => r.id);
+				const deletionIds = deletionChanges.map((d) => d.id);
+				const authorIds = authorEntries.map((a) => a.id);
+				//
+				let membership = [...winnerIds, ...deletionIds, ...authorIds];
 
-		// Target: only business/user-domain changes (winning refs + deletions)
-		let referencedChangeRows: LixChangeRaw[] = [];
+				// Filter out any prior target commit/change_set meta ids if present
+				// Previous target commit change id
+				const prevCommitChange = await trx
+					.selectFrom("change")
+					.where("schema_key", "=", "lix_commit")
+					.where("entity_id", "=", targetVersion.commit_id)
+					.select(["id"])
+					.executeTakeFirst();
+				const prevCommitChangeId = prevCommitChange?.id as string | undefined;
+				let prevChangeSetId: string | undefined = undefined;
+				if (prevCommitChangeId) {
+					const row = await trx
+						.selectFrom("change")
+						.where("id", "=", prevCommitChangeId)
+						.select([
+							sql`json_extract(snapshot_content, '$.change_set_id')`.as("csid"),
+						])
+						.executeTakeFirst();
+					prevChangeSetId = (row as any)?.csid as string | undefined;
+				}
+				let prevChangeSetChangeId: string | undefined = undefined;
+				if (prevChangeSetId) {
+					const prevCsChange = await trx
+						.selectFrom("change")
+						.where("schema_key", "=", "lix_change_set")
+						.where("entity_id", "=", prevChangeSetId)
+						.select(["id"])
+						.executeTakeFirst();
+					prevChangeSetChangeId = prevCsChange?.id as string | undefined;
+				}
+				const exclude = new Set(
+					[prevCommitChangeId, prevChangeSetChangeId].filter(
+						Boolean
+					) as string[]
+				);
+				membership = membership.filter((id) => !exclude.has(id));
+
+				// Deduplicate any accidental duplicates (e.g., author)
+				membership = Array.from(new Set(membership));
+
+				// Assign final membership, hard overriding snapshot to avoid residue
+				const finalSnap = { ...baseSnap, change_ids: membership };
+				changeRows[commitIdx]!.snapshot_content = JSON.stringify(finalSnap);
+			}
+		}
+
+		// Insert change rows (meta + deletions) in one batch
+		const allChangesToInsert: LixChangeRaw[] = [
+			...changeRows,
+			...deletionChanges,
+			...cseChangeRows,
+		];
+		if (allChangesToInsert.length > 0) {
+			await trx
+				.insertInto("change")
+				.values(allChangesToInsert as any)
+				.execute();
+			//
+		}
+
+		// Prepare incremental cache updates in a single batch (MaterializedChange)
+		type Mat = Parameters<typeof updateStateCache>[0]["changes"][number] & {
+			lixcol_version_id?: string;
+			lixcol_commit_id?: string;
+		};
+
+		const cacheBatch: Mat[] = [];
+
+		// Global scope: commit row (derives edges + ensures change_set entry)
+		cacheBatch.push({
+			...(changeRows.find(
+				(c) => c.schema_key === "lix_commit"
+			) as LixChangeRaw),
+			lixcol_version_id: "global",
+			lixcol_commit_id: targetCommitId,
+		} as Mat);
+
+		// Also cache the tip pointer for materializer seeding and views
+		cacheBatch.push({
+			...(versionTipRow as LixChangeRaw),
+			lixcol_version_id: "global",
+			lixcol_commit_id: targetCommitId,
+		} as Mat);
+
+		// No caching of deprecated 'lix_version' rows
+		// Target scope: referenced winners (domain rows) and deletions
 		if (toReference.length > 0) {
 			const ids = toReference.map((a) => a.id);
 			const rows = await trx
@@ -523,24 +425,78 @@ export async function mergeVersion(args: {
 					"created_at",
 				])
 				.execute();
-			referencedChangeRows = rows.map((r: any) => ({
-				id: r.id,
-				entity_id: r.entity_id,
-				schema_key: r.schema_key,
-				file_id: r.file_id,
-				plugin_key: r.plugin_key,
-				schema_version: r.schema_version,
-				snapshot_content: r.snapshot_content
-					? JSON.stringify(r.snapshot_content)
-					: null,
-				created_at: r.created_at,
-			}));
+			for (const r of rows as any[]) {
+				cacheBatch.push({
+					id: r.id,
+					entity_id: r.entity_id,
+					schema_key: r.schema_key,
+					file_id: r.file_id,
+					plugin_key: r.plugin_key,
+					schema_version: r.schema_version,
+					snapshot_content: r.snapshot_content
+						? JSON.stringify(r.snapshot_content)
+						: null,
+					created_at: r.created_at,
+					lixcol_version_id: target.id,
+					lixcol_commit_id: targetCommitId,
+				} as Mat);
+			}
 		}
-		updateStateCache({
-			lix,
-			changes: [...referencedChangeRows, ...deletionChanges],
-			version_id: target.id,
-			commit_id: targetCommitId,
+		for (const del of deletionChanges) {
+			cacheBatch.push({
+				...(del as LixChangeRaw),
+				lixcol_version_id: target.id,
+				lixcol_commit_id: targetCommitId,
+			} as Mat);
+		}
+
+		// Global CSEs for winners, deletions, and meta (commit + version)
+		const mkCse = (
+			change_id: string,
+			entity_id: string,
+			schema_key: string,
+			file_id: string
+		): Mat => ({
+			id: uuidV7({ lix }),
+			entity_id: `${targetChangeSetId}~${change_id}`,
+			schema_key: "lix_change_set_element",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				change_set_id: targetChangeSetId,
+				change_id,
+				entity_id,
+				schema_key,
+				file_id,
+			}),
+			created_at: now,
+			lixcol_version_id: "global",
+			lixcol_commit_id: targetCommitId,
 		});
+
+		for (const ref of toReference) {
+			cacheBatch.push(
+				mkCse(ref.id, ref.entity_id, ref.schema_key, ref.file_id)
+			);
+		}
+		for (const del of deletionChanges) {
+			cacheBatch.push(
+				mkCse(del.id, del.entity_id, del.schema_key, del.file_id)
+			);
+		}
+		// No meta CSEs (commit/version/change_set) to keep CSE domain-only
+		// Author CSEs (copied from source)
+		for (const au of authorEntries) {
+			cacheBatch.push(mkCse(au.id, au.entity_id, "lix_change_author", "lix"));
+		}
+
+		// Write incremental cache in a single batched call
+		if (cacheBatch.length > 0) {
+			updateStateCache({ lix, changes: cacheBatch });
+			// Mark cache fresh to prevent vtable from repopulating and discarding just-written rows
+			markStateCacheAsFresh({ lix });
+			//
+		}
 	});
 }

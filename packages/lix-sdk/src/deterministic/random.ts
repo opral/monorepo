@@ -248,19 +248,19 @@ export function commitDeterministicRngState(args: {
 	} satisfies LixKeyValue);
 
 	const now = args.timestamp ?? timestamp({ lix: args.lix });
-    updateUntrackedState({
-        lix: args.lix,
-        changes: [
-            {
-                entity_id: "lix_deterministic_rng_state",
-                schema_key: LixKeyValueSchema["x-lix-key"],
-                file_id: "lix",
-                plugin_key: "lix_own_entity",
-                snapshot_content: newValue,
-                schema_version: LixKeyValueSchema["x-lix-version"],
-                created_at: now,
-                lixcol_version_id: "global",
-            },
-        ],
-    });
+	updateUntrackedState({
+		lix: args.lix,
+		changes: [
+			{
+				entity_id: "lix_deterministic_rng_state",
+				schema_key: LixKeyValueSchema["x-lix-key"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: newValue,
+				schema_version: LixKeyValueSchema["x-lix-version"],
+				created_at: now,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 }
