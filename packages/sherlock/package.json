@@ -259,7 +259,7 @@
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/settings-component": "workspace:*",
-		"@vitest/coverage-v8": "2.1.8",
+		"@vitest/coverage-v8": "^3.2.4",
 		"comlink": "^4.4.1",
 		"fast-glob": "^3.2.12",
 		"https-proxy-agent": "7.0.2",
@@ -270,7 +270,7 @@
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"uuid": "^11.0.5",
-		"vitest": "^2.1.8"
+		"vitest": "^3.2.4"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
