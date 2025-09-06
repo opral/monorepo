@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import { capture } from "./capture.js";
 
 test("it should not capture if telemetry is off", async () => {
-	global.fetch = vi.fn(() => Promise.resolve(new Response()));
+	vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response())) as any);
 
 	vi.mock("../env-variables/index.js", async () => {
 		return {
@@ -19,11 +19,11 @@ test("it should not capture if telemetry is off", async () => {
 		properties: {},
 	});
 
-	expect(global.fetch).not.toHaveBeenCalled();
+	expect((globalThis as any).fetch).not.toHaveBeenCalled();
 });
 
 test("it should not capture if telemetry is NOT off", async () => {
-	global.fetch = vi.fn(() => Promise.resolve(new Response()));
+	vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response())) as any);
 
 	vi.mock("../env-variables/index.js", async () => {
 		return {
@@ -40,5 +40,5 @@ test("it should not capture if telemetry is NOT off", async () => {
 		properties: {},
 	});
 
-	expect(global.fetch).toHaveBeenCalled();
+	expect((globalThis as any).fetch).toHaveBeenCalled();
 });
