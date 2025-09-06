@@ -6,7 +6,7 @@ Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main
 
 ### Type Parameters
 
-### Type declaration
+### Type Declaration
 
 #### getLocale()
 
@@ -40,7 +40,7 @@ Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main
 
 ### Type Parameters
 
-### Type declaration
+### Type Declaration
 
 #### getLocale()
 
@@ -74,7 +74,7 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 ### Type Parameters
 
-### Type declaration
+### Type Declaration
 
 #### run()
 
@@ -219,7 +219,7 @@ Defined in: [runtime/variables.js:43](https://github.com/opral/monorepo/tree/mai
 
 The used URL patterns.
 
-### Type declaration
+### Type Declaration
 
 #### localized
 
