@@ -1,16 +1,26 @@
-import type { Change } from "../change/index.js";
+// State commit emits state-shaped rows (not raw changes).
+// These include version_id/commit_id and may carry untracked flag.
+
+export type StateCommitChange = {
+	id: string;
+	entity_id: string;
+	schema_key: string;
+	schema_version: string;
+	file_id: string;
+	plugin_key: string;
+	created_at: string;
+	snapshot_content: Record<string, any> | null;
+	version_id: string;
+	commit_id: string;
+	/** 0 for tracked, 1 for untracked */
+	untracked?: number;
+};
 
 /**
  * Change data passed to state commit hooks.
  * Extends the standard Change type with tracking information.
  */
-export type StateCommitChange = Change & {
-	/**
-	 * Whether this change is untracked (bypasses change control).
-	 * Untracked changes are stored directly without creating change records.
-	 */
-	untracked?: number; // 0 for tracked, 1 for untracked
-};
+// (No longer extends Change; state commits carry state-level operational columns.)
 
 /**
  * Lix hooks system for listening to database lifecycle events.

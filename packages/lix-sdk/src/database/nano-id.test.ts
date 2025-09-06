@@ -22,7 +22,7 @@ test("the alphabet does not contain dashes `-` because they break selecting the 
  */
 test("polyfill works when crypto is not available", () => {
 	// Store original crypto
-	const originalCrypto = global.crypto;
+	const originalCrypto = globalThis.crypto as any;
 
 	// Mock crypto as undefined to test the polyfill
 	vi.stubGlobal("crypto", undefined);

@@ -28,6 +28,14 @@ export type LixForeignKey = {
 		schemaVersion?: string;
 	};
 
+	/**
+	 * Validation mode for this foreign key.
+	 * - "immediate" (default): validate referenced existence on insert/update; restrict deletion when referenced.
+	 * - "materialized": skip insert/update existence checks (reference is derived/materialized later);
+	 *   still restrict deletion when referenced.
+	 */
+	mode?: "immediate" | "materialized";
+
 	// Future features - not implemented yet
 	// onDelete?: "cascade" | "restrict" | "set null";
 	// onUpdate?: "cascade" | "restrict";
@@ -94,6 +102,12 @@ export const LixSchemaDefinition = {
 										description: "Optional version of the referenced schema",
 									},
 								},
+							},
+							mode: {
+								type: "string",
+								enum: ["immediate", "materialized"],
+								description:
+									"Validation mode: immediate (default) or materialized (defer insert/update existence checks)",
 							},
 							// onDelete: {
 							//   type: "string",

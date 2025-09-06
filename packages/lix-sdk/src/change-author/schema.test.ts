@@ -1,198 +1,275 @@
 import { expect, test } from "vitest";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "../account/create-account.js";
 
-test("insert, update, delete on the change_author view", async () => {
-	const lix = await openLix({});
+test("simulation test discovery", () => {});
 
-	// Create account
-	const account = await createAccount({
-		lix,
-		name: "Test Author",
-	});
+simulationTest(
+	"insert, delete on the change_author view (simulated)",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	// Create change
-	await lix.db
-		.insertInto("change")
-		.values({
-			id: "c0",
-			entity_id: "e0",
-			schema_key: "mock_schema",
-			schema_version: "1",
-			file_id: "f0",
-			plugin_key: "test_plugin",
-			snapshot_content: { id: "e0" },
-		})
-		.execute();
+		// Create account
+		const account = await createAccount({
+			lix,
+			name: "Test Author",
+		});
 
-	await lix.db
-		.insertInto("change_author")
-		.values([
+		// Create change
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "c0",
+				entity_id: "e0",
+				schema_key: "mock_schema",
+				schema_version: "1",
+				file_id: "f0",
+				plugin_key: "test_plugin",
+				snapshot_content: { id: "e0" },
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("change_author")
+			.values([
+				{
+					change_id: "c0",
+					account_id: account.id,
+				},
+			])
+			.execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("change_author")
+			.orderBy("change_id", "asc")
+			.where("change_id", "=", "c0")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(viewAfterInsert).toMatchObject([
 			{
 				change_id: "c0",
 				account_id: account.id,
 			},
-		])
-		.execute();
+		]);
 
-	const viewAfterInsert = await lix.db
-		.selectFrom("change_author")
-		.orderBy("change_id", "asc")
-		.where("change_id", "=", "c0")
-		.selectAll()
-		.execute();
+		await lix.db
+			.deleteFrom("change_author")
+			.where("change_id", "=", "c0")
+			.execute();
 
-	expect(viewAfterInsert).toMatchObject([
-		{
-			change_id: "c0",
-			account_id: account.id,
-		},
-	]);
+		const viewAfterDelete = await lix.db
+			.selectFrom("change_author")
+			.orderBy("change_id", "asc")
+			.where("change_id", "=", "c0")
+			.selectAll()
+			.execute();
 
-	await lix.db
-		.deleteFrom("change_author")
-		.where("change_id", "=", "c0")
-		.execute();
+		expectDeterministic(viewAfterDelete).toEqual([]);
+	}
+);
 
-	const viewAfterDelete = await lix.db
-		.selectFrom("change_author")
-		.orderBy("change_id", "asc")
-		.where("change_id", "=", "c0")
-		.selectAll()
-		.execute();
+simulationTest(
+	"should enforce primary key constraint (change_id, account_id)",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	expect(viewAfterDelete).toEqual([]);
-});
+		// Create account
+		const account = await createAccount({
+			lix,
+			name: "Test Author",
+		});
 
-test("should enforce primary key constraint (change_id, account_id)", async () => {
-	const lix = await openLix({});
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				schema_version: "1",
+				file_id: "f1",
+				plugin_key: "test_plugin",
+				snapshot_content: { id: "e1" },
+			})
+			.execute();
 
-	// Create account
-	const account = await createAccount({
-		lix,
-		name: "Test Author",
-	});
-
-	await lix.db
-		.insertInto("change")
-		.values({
-			id: "c1",
-			entity_id: "e1",
-			schema_key: "mock_schema",
-			schema_version: "1",
-			file_id: "f1",
-			plugin_key: "test_plugin",
-			snapshot_content: { id: "e1" },
-		})
-		.execute();
-
-	// Insert first change_author
-	await lix.db
-		.insertInto("change_author")
-		.values({
-			change_id: "c1",
-			account_id: account.id,
-		})
-		.execute();
-
-	// Attempt duplicate insert with same primary key
-	await expect(
-		lix.db
+		// Insert first change_author
+		await lix.db
 			.insertInto("change_author")
 			.values({
 				change_id: "c1",
 				account_id: account.id,
 			})
-			.execute()
-	).rejects.toThrow(/Primary key constraint violation/i);
-});
+			.execute();
 
-test("should enforce foreign key constraint on change_id", async () => {
-	const lix = await openLix({});
+		// Attempt duplicate insert with same primary key
+		await expect(
+			lix.db
+				.insertInto("change_author")
+				.values({
+					change_id: "c1",
+					account_id: account.id,
+				})
+				.execute()
+		).rejects.toThrow(/Primary key constraint violation/i);
+	}
+);
 
-	// Create account (but NOT change)
-	const account = await createAccount({
-		lix,
-		name: "Test Author",
-	});
+simulationTest(
+	"should enforce foreign key constraint on change_id",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	// Attempt to insert with non-existent change_id
-	await expect(
-		lix.db
-			.insertInto("change_author")
+		// Create account (but NOT change)
+		const account = await createAccount({
+			lix,
+			name: "Test Author",
+		});
+
+		// Attempt to insert with non-existent change_id
+		await expect(
+			lix.db
+				.insertInto("change_author")
+				.values({
+					change_id: "c_nonexistent",
+					account_id: account.id,
+				})
+				.execute()
+		).rejects.toThrow(
+			/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
+		);
+	}
+);
+
+simulationTest(
+	"should enforce foreign key constraint on account_id",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("change")
 			.values({
-				change_id: "c_nonexistent",
-				account_id: account.id,
+				id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				schema_version: "1",
+				file_id: "f1",
+				plugin_key: "test_plugin",
+				snapshot_content: { id: "e1" },
 			})
-			.execute()
-	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
-	);
-});
+			.execute();
 
-test("should enforce foreign key constraint on account_id", async () => {
-	const lix = await openLix({});
+		// Attempt to insert with non-existent account_id
+		await expect(
+			lix.db
+				.insertInto("change_author")
+				.values({
+					change_id: "c1",
+					account_id: "account_nonexistent",
+				})
+				.execute()
+		).rejects.toThrow(
+			/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
+		);
+	}
+);
 
-	await lix.db
-		.insertInto("change")
-		.values({
-			id: "c1",
-			entity_id: "e1",
-			schema_key: "mock_schema",
-			schema_version: "1",
-			file_id: "f1",
-			plugin_key: "test_plugin",
-			snapshot_content: { id: "e1" },
-		})
-		.execute();
+simulationTest(
+	"should allow multiple authors for the same change",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	// Attempt to insert with non-existent account_id
-	await expect(
-		lix.db
-			.insertInto("change_author")
+		// Create accounts
+		const author1 = await createAccount({
+			lix,
+			id: "author1",
+			name: "Author One",
+		});
+
+		const author2 = await createAccount({
+			lix,
+			id: "author2",
+			name: "Author Two",
+		});
+
+		await lix.db
+			.insertInto("change")
 			.values({
-				change_id: "c1",
-				account_id: "account_nonexistent",
+				id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				schema_version: "1",
+				file_id: "f1",
+				plugin_key: "test_plugin",
+				snapshot_content: { id: "e1" },
 			})
-			.execute()
-	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
-	);
-});
+			.execute();
 
-test("should allow multiple authors for the same change", async () => {
-	const lix = await openLix({});
+		// Insert multiple authors for same change
+		await lix.db
+			.insertInto("change_author")
+			.values([
+				{
+					change_id: "c1",
+					account_id: author1.id,
+				},
+				{
+					change_id: "c1",
+					account_id: author2.id,
+				},
+			])
+			.execute();
 
-	// Create accounts
-	const author1 = await createAccount({
-		lix,
-		id: "author1",
-		name: "Author One",
-	});
+		const authors = await lix.db
+			.selectFrom("change_author")
+			.where("change_id", "=", "c1")
+			.orderBy("account_id", "asc")
+			.selectAll()
+			.execute();
 
-	const author2 = await createAccount({
-		lix,
-		id: "author2",
-		name: "Author Two",
-	});
-
-	await lix.db
-		.insertInto("change")
-		.values({
-			id: "c1",
-			entity_id: "e1",
-			schema_key: "mock_schema",
-			schema_version: "1",
-			file_id: "f1",
-			plugin_key: "test_plugin",
-			snapshot_content: { id: "e1" },
-		})
-		.execute();
-
-	// Insert multiple authors for same change
-	await lix.db
-		.insertInto("change_author")
-		.values([
+		expect(authors).toHaveLength(2);
+		expect(authors).toMatchObject([
 			{
 				change_id: "c1",
 				account_id: author1.id,
@@ -201,66 +278,77 @@ test("should allow multiple authors for the same change", async () => {
 				change_id: "c1",
 				account_id: author2.id,
 			},
-		])
-		.execute();
+		]);
+	}
+);
 
-	const authors = await lix.db
-		.selectFrom("change_author")
-		.where("change_id", "=", "c1")
-		.orderBy("account_id", "asc")
-		.selectAll()
-		.execute();
+simulationTest(
+	"should allow same author for multiple changes",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	expect(authors).toHaveLength(2);
-	expect(authors).toMatchObject([
-		{
-			change_id: "c1",
-			account_id: author1.id,
-		},
-		{
-			change_id: "c1",
-			account_id: author2.id,
-		},
-	]);
-});
+		// Create account
+		const author = await createAccount({
+			lix,
+			name: "Prolific Author",
+		});
 
-test("should allow same author for multiple changes", async () => {
-	const lix = await openLix({});
+		await lix.db
+			.insertInto("change")
+			.values([
+				{
+					id: "c1",
+					entity_id: "e1",
+					schema_key: "mock_schema",
+					schema_version: "1",
+					file_id: "f1",
+					plugin_key: "test_plugin",
+					snapshot_content: { id: "e1" },
+				},
+				{
+					id: "c2",
+					entity_id: "e2",
+					schema_key: "mock_schema",
+					schema_version: "1",
+					file_id: "f2",
+					plugin_key: "test_plugin",
+					snapshot_content: { id: "e2" },
+				},
+			])
+			.execute();
 
-	// Create account
-	const author = await createAccount({
-		lix,
-		name: "Prolific Author",
-	});
+		// Insert same author for multiple changes
+		await lix.db
+			.insertInto("change_author")
+			.values([
+				{
+					change_id: "c1",
+					account_id: author.id,
+				},
+				{
+					change_id: "c2",
+					account_id: author.id,
+				},
+			])
+			.execute();
 
-	await lix.db
-		.insertInto("change")
-		.values([
-			{
-				id: "c1",
-				entity_id: "e1",
-				schema_key: "mock_schema",
-				schema_version: "1",
-				file_id: "f1",
-				plugin_key: "test_plugin",
-				snapshot_content: { id: "e1" },
-			},
-			{
-				id: "c2",
-				entity_id: "e2",
-				schema_key: "mock_schema",
-				schema_version: "1",
-				file_id: "f2",
-				plugin_key: "test_plugin",
-				snapshot_content: { id: "e2" },
-			},
-		])
-		.execute();
+		const authorChanges = await lix.db
+			.selectFrom("change_author")
+			.where("account_id", "=", author.id)
+			.orderBy("change_id", "asc")
+			.selectAll()
+			.execute();
 
-	// Insert same author for multiple changes
-	await lix.db
-		.insertInto("change_author")
-		.values([
+		expect(authorChanges).toHaveLength(2);
+		expect(authorChanges).toMatchObject([
 			{
 				change_id: "c1",
 				account_id: author.id,
@@ -269,28 +357,9 @@ test("should allow same author for multiple changes", async () => {
 				change_id: "c2",
 				account_id: author.id,
 			},
-		])
-		.execute();
-
-	const authorChanges = await lix.db
-		.selectFrom("change_author")
-		.where("account_id", "=", author.id)
-		.orderBy("change_id", "asc")
-		.selectAll()
-		.execute();
-
-	expect(authorChanges).toHaveLength(2);
-	expect(authorChanges).toMatchObject([
-		{
-			change_id: "c1",
-			account_id: author.id,
-		},
-		{
-			change_id: "c2",
-			account_id: author.id,
-		},
-	]);
-});
+		]);
+	}
+);
 
 // disabled because change author logic was moved into the commit phase
 test.skip("change authors are accessible during a transaction", async () => {
@@ -365,3 +434,73 @@ test.skip("change authors are accessible during a transaction", async () => {
 		account_id: "test-account",
 	});
 });
+
+simulationTest(
+	"materializes author for committed key_value and ties lixcol_change_id to commit",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Insert a tracked key_value change
+		const kvKey = "kv_mat_auth";
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: kvKey, value: "v1" })
+			.execute();
+
+		// Domain change id for the inserted key
+		const kvChange = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", kvKey)
+			.where("schema_key", "=", "lix_key_value")
+			.orderBy("created_at", "desc")
+			.select(["id"]) // domain change id
+			.executeTakeFirstOrThrow();
+
+		// Synthesized change_author rows must exist for that domain change
+		const authors = await lix.db
+			.selectFrom("change_author")
+			.where("change_id", "=", kvChange.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(authors.length).toBe(1);
+
+		// Active account (anonymous by default)
+		const active = await lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
+		const activeAccountId = active[0]!.account_id;
+		expectDeterministic(authors[0]!.account_id).toBe(activeAccountId);
+
+		// Resolve active version commit entity id
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"]) // single row
+			.executeTakeFirstOrThrow();
+		const versionRow = await lix.db
+			.selectFrom("version")
+			.where("id", "=", activeVersion.version_id)
+			.select(["commit_id"]) // commit entity id
+			.executeTakeFirstOrThrow();
+
+		// Find the commit change row id for that commit entity
+		const commitRow = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where("entity_id", "=", versionRow.commit_id)
+			.select(["id"]) // commit change row id
+			.executeTakeFirstOrThrow();
+
+		// Assert author.lixcol_change_id points to the commit change row id
+		expectDeterministic(authors[0]?.lixcol_change_id).toBe(commitRow.id);
+	}
+);

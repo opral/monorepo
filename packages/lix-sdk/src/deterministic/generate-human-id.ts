@@ -2,7 +2,6 @@ import type { Lix } from "../lix/open-lix.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { humanId } from "human-id";
-
 // Deterministic names for anonymous accounts
 const DETERMINISTIC_NAMES = [
 	"Plum",
@@ -45,7 +44,22 @@ const DETERMINISTIC_NAMES = [
 	"Iron",
 	"Clay",
 	"Sand",
+	"Maple",
+	"Cedar",
+	"Birch",
+	"Willow",
+	"Aspen",
+	"Beech",
+	"Ash",
+	"Alder",
+	"Bamboo",
+	"Coral",
 ];
+
+// Expose vocabulary size for tests that assert cycling behavior
+export function deterministicHumanIdVocabularySize(): number {
+	return DETERMINISTIC_NAMES.length;
+}
 
 /**
  * Generates a human-readable ID that is deterministic in deterministic mode.

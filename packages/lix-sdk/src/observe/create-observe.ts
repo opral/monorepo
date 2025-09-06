@@ -1,7 +1,10 @@
 import type { SelectQueryBuilder } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import { LixObservable } from "./lix-observable.js";
-import { determineSchemaKeys } from "./determine-schema-keys.js";
+import {
+	determineSchemaKeys,
+	extractLiteralFilters,
+} from "./determine-schema-keys.js";
 import type { Change } from "../change/index.js";
 
 /**
@@ -126,7 +129,11 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 				}
 
 				// Get schema keys that this query depends on
-				const schemaKeys = determineSchemaKeys(query.compile());
+				const compiled = query.compile();
+				const schemaKeys = determineSchemaKeys(compiled);
+				const filters = extractLiteralFilters(compiled);
+				const watchedVersions = new Set(filters.versionIds);
+
 				// If no schema keys extracted, always re-execute for safety
 				if (!schemaKeys.length) {
 					return true;
@@ -136,17 +143,24 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 				return changes.some((change: any) => {
 					// changesToRealize is an array of arrays: [change_id, entity_id, schema_key, ...]
 					const schemaKey = change[2] || change.schema_key;
+					const changeVid =
+						(change.lixcol_version_id as string | undefined) ||
+						(change.version_id as string | undefined);
 
-					// Special case: queries with 'change' or 'state_all' schema should always re-execute
-					if (
-						schemaKeys.includes("change") ||
-						schemaKeys.includes("state_all")
-					) {
+					// Special case: queries with 'change' schema should always re-execute
+					if (schemaKeys.includes("change")) {
 						return true;
 					}
 
 					// Check if this specific schema key affects our query
-					return schemaKeys.includes(schemaKey);
+					if (!schemaKeys.includes(schemaKey)) return false;
+
+					// If the query watches a specific version_id and the change carries a version id,
+					// re-exec only when they match. If the change has no version id info, be conservative.
+					if (watchedVersions.size > 0) {
+						if (changeVid && !watchedVersions.has(changeVid)) return false;
+					}
+					return true;
 				});
 			};
 

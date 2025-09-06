@@ -1,4 +1,5 @@
 import { describe, expect } from "vitest";
+import { sql } from "kysely";
 import { selectActiveVersion } from "../version/select-active-version.js";
 import { createVersion } from "../version/create-version.js";
 import { timestamp } from "../deterministic/timestamp.js";
@@ -7,6 +8,7 @@ import {
 	normalSimulation,
 	outOfOrderSequenceSimulation,
 } from "../test-utilities/simulation-test/simulation-test.js";
+import { LixVersionTipSchema, type LixVersionTip } from "../version/schema.js";
 
 describe("internal_materialization_version_tips", () => {
 	simulationTest(
@@ -18,7 +20,7 @@ describe("internal_materialization_version_tips", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -140,7 +142,7 @@ describe("internal_materialization_version_tips", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -172,7 +174,7 @@ describe("internal_materialization_version_tips", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -228,7 +230,7 @@ describe("internal_materialization_version_tips", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -323,6 +325,176 @@ describe("internal_materialization_version_tips", () => {
 	);
 });
 
+simulationTest(
+	"materializes change_author from commit.author_account_ids",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Insert a tracked key_value on active version to trigger a commit
+		const kvKey = "kv_for_author_mat";
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: kvKey, value: "v1" })
+			.execute();
+
+		// Domain change id for that key_value
+		const kvChange = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "=", kvKey)
+			.orderBy("created_at", "desc")
+			.select(["id"]) // domain change id
+			.executeTakeFirstOrThrow();
+
+		// Authors should appear in internal_materialization_latest_visible_state
+		const authorRows = await lix.db
+			.selectFrom("internal_materialization_latest_visible_state" as any)
+			.selectAll()
+			.where("schema_key", "=", "lix_change_author")
+			.where(
+				sql`json_extract(snapshot_content, '$.change_id')`,
+				"=",
+				kvChange.id
+			)
+			.execute();
+
+		expectDeterministic(authorRows.length).toBe(1);
+
+		// Verify account and lineage
+		const active = await lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
+		const activeAccountId = active[0]!.account_id;
+		expectDeterministic(
+			(authorRows[0] as any)?.snapshot_content?.account_id
+		).toBe(activeAccountId);
+
+		// The materializer uses the commit change row id as 'change_id' column for provenance
+		const commitChangeId = (authorRows[0] as any)?.change_id;
+		const commitRow = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where("id", "=", commitChangeId)
+			.selectAll()
+			.executeTakeFirst();
+
+		expectDeterministic(!!commitRow).toBe(true);
+	}
+);
+
+// Ensures version tip equals the lix_version_tip snapshot commit_id in the materializer
+simulationTest(
+	"version tip matches lix_version_tip snapshot commit_id",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Create a new version from the current global tip
+		const { id: versionId } = await createVersion({
+			lix,
+			name: "tip-vs-snapshot",
+		});
+
+		const tips =
+			(lix.sqlite.exec({
+				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
+				bind: [versionId],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+
+		expectDeterministic(tips.length).toBe(1);
+
+		const matRows =
+			(lix.sqlite.exec({
+				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
+                      FROM internal_state_materializer
+                      WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,
+				bind: [versionId],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ commit_id: string | null }>) ?? [];
+
+		expectDeterministic(matRows.length).toBe(1);
+		expectDeterministic(matRows[0]!.commit_id).toBe(tips[0]!.tip_commit_id);
+	}
+);
+
+// Regression: materializer tip for a version must match tips view after a commit on that version
+simulationTest(
+	"materializer tip equals tips view after committing on a version",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// Create version A
+		const versionA = await createVersion({ lix, id: "mat-tip-version-a" });
+
+		// Insert tracked state into version A to trigger a real commit
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "mat-entity-1",
+				schema_key: "mock_schema",
+				schema_version: "1.0",
+				file_id: "mat-file",
+				version_id: versionA.id,
+				plugin_key: "mock-plugin",
+				snapshot_content: { id: "mat-entity-1", name: "Mat Entity" },
+			})
+			.execute();
+
+		// Read tip from materializer tips view
+		const tips =
+			(lix.sqlite.exec({
+				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
+				bind: [versionA.id],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+
+		expectDeterministic(tips.length).toBe(1);
+		expectDeterministic(tips[0]!.tip_commit_id).not.toEqual(versionA.commit_id);
+
+		// Read tip from internal_state_materializer for lix_version_tip (global scope)
+		const matRows =
+			(lix.sqlite.exec({
+				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
+                  FROM internal_state_materializer
+                  WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,
+				bind: [versionA.id],
+				rowMode: "object",
+				returnValue: "resultRows",
+			}) as Array<{ commit_id: string | null }>) ?? [];
+
+		expectDeterministic(matRows.length).toBe(1);
+		expectDeterministic(matRows[0]!.commit_id).toBe(tips[0]!.tip_commit_id);
+	}
+);
+
 describe("internal_materialization_commit_graph", () => {
 	simulationTest(
 		"builds linear commit history with correct depths",
@@ -333,7 +505,7 @@ describe("internal_materialization_commit_graph", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -480,7 +652,7 @@ describe("internal_materialization_commit_graph", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -620,7 +792,7 @@ describe("internal_materialization_commit_graph", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -686,54 +858,42 @@ describe("internal_materialization_commit_graph", () => {
 				})
 				.execute();
 
-			// Create the merge commit in commit_all (global version)
+			// Insert a commit change with parent_commit_ids (changes-only materializer)
+			const mergeCommitChangeId = `chg-${mergeCommitId}`;
 			await lix.db
-				.insertInto("commit_all")
+				.insertInto("change")
 				.values({
-					id: mergeCommitId,
-					change_set_id: mergeChangeSetId,
-					lixcol_version_id: "global",
+					id: mergeCommitChangeId,
+					entity_id: mergeCommitId,
+					schema_key: "lix_commit",
+					schema_version: "1.0",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: {
+						id: mergeCommitId,
+						change_set_id: mergeChangeSetId,
+						parent_commit_ids: [versionATip.commit_id, versionBTip.commit_id],
+					},
+					created_at: ts,
 				})
 				.execute();
 
-			// Create edges to both parents
+			// Update version A tip via version_tip (commit-anchored pointer)
 			await lix.db
 				.insertInto("change")
-				.values([
-					{
-						id: `edge-1-${mergeCommitId}`,
-						entity_id: `edge-${mergeCommitId}-${versionATip.commit_id}`,
-						schema_key: "lix_commit_edge",
-						schema_version: "1.0",
-						file_id: "lix-file",
-						plugin_key: "lix",
-						snapshot_content: {
-							parent_id: versionATip.commit_id,
-							child_id: mergeCommitId,
-						},
-						created_at: ts,
-					},
-					{
-						id: `edge-2-${mergeCommitId}`,
-						entity_id: `edge-${mergeCommitId}-${versionBTip.commit_id}`,
-						schema_key: "lix_commit_edge",
-						schema_version: "1.0",
-						file_id: "lix-file",
-						plugin_key: "lix",
-						snapshot_content: {
-							parent_id: versionBTip.commit_id,
-							child_id: mergeCommitId,
-						},
-						created_at: ts,
-					},
-				])
-				.execute();
-
-			// Update version A to point to the merge commit
-			await lix.db
-				.updateTable("version")
-				.set({ commit_id: mergeCommitId })
-				.where("id", "=", "merge-version-a")
+				.values({
+					id: `vt-${mergeCommitId}`,
+					entity_id: "merge-version-a",
+					schema_key: LixVersionTipSchema["x-lix-key"],
+					schema_version: LixVersionTipSchema["x-lix-version"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: {
+						id: "merge-version-a",
+						commit_id: mergeCommitId,
+					} satisfies LixVersionTip,
+					created_at: ts,
+				})
 				.execute();
 
 			// Query the commit graph for the merged version
@@ -798,7 +958,7 @@ describe("internal_materialization_commit_graph", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -865,7 +1025,7 @@ describe("internal_materialization_commit_graph", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -960,6 +1120,219 @@ describe("internal_materialization_commit_graph", () => {
 	);
 });
 
+// Ensure commit edges are projected by the materializer from commit.parent_commit_ids
+simulationTest(
+	"materializer emits commit_edge rows from commit parent ids",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+				},
+			],
+		});
+
+		// Create two versions and commit one change in each to produce parent commits
+		const vA = await createVersion({ lix, id: "edge-test-a" });
+		const vB = await createVersion({ lix, id: "edge-test-b" });
+
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "edge-entity-a",
+				schema_key: "mock_entity",
+				schema_version: "1.0",
+				file_id: "edge-file",
+				version_id: vA.id,
+				plugin_key: "mock-plugin",
+				snapshot_content: { id: "edge-entity-a", name: "A" },
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "edge-entity-b",
+				schema_key: "mock_entity",
+				schema_version: "1.0",
+				file_id: "edge-file",
+				version_id: vB.id,
+				plugin_key: "mock-plugin",
+				snapshot_content: { id: "edge-entity-b", name: "B" },
+			})
+			.execute();
+
+		const tipA = await lix.db
+			.selectFrom("version")
+			.select("commit_id")
+			.where("id", "=", vA.id)
+			.executeTakeFirstOrThrow();
+		const tipB = await lix.db
+			.selectFrom("version")
+			.select("commit_id")
+			.where("id", "=", vB.id)
+			.executeTakeFirstOrThrow();
+
+		// Create a new commit that has both tips as parents
+		const ts = timestamp({ lix });
+		const mergeCommitId = `edge-merge-${ts}`;
+		const mergeChangeSetId = `cs-${mergeCommitId}`;
+
+		// Ensure a changeset entity exists (not strictly required for edges but keeps commit snapshot coherent)
+		await lix.db
+			.insertInto("change_set_all")
+			.values({ id: mergeChangeSetId, lixcol_version_id: "global" })
+			.execute();
+
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: `chg-${mergeCommitId}`,
+				entity_id: mergeCommitId,
+				schema_key: "lix_commit",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					id: mergeCommitId,
+					change_set_id: mergeChangeSetId,
+					parent_commit_ids: [tipA.commit_id, tipB.commit_id],
+				},
+				created_at: ts,
+			})
+			.execute();
+
+		// Point version A to the merge commit so the graph seeds include it
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: `vt-${mergeCommitId}`,
+				entity_id: vA.id,
+				schema_key: LixVersionTipSchema["x-lix-key"],
+				schema_version: LixVersionTipSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: { id: vA.id, commit_id: mergeCommitId },
+				created_at: ts,
+			})
+			.execute();
+
+		// Read edges from the materializer for this merge commit (global scope)
+		const edges = await lix.db
+			.selectFrom("internal_state_materializer" as any)
+			.select([
+				sql`json_extract(snapshot_content, '$.parent_id')`.as("parent_id"),
+				sql`json_extract(snapshot_content, '$.child_id')`.as("child_id"),
+			])
+			.where("schema_key", "=", "lix_commit_edge")
+			.where("version_id", "=", "global")
+			.where(
+				sql`json_extract(snapshot_content, '$.child_id')`,
+				"=",
+				mergeCommitId as any
+			)
+			.execute();
+
+		// Exactly two parent edges (counts should be deterministic across simulations)
+		expectDeterministic(edges.length).toBe(2);
+
+		// Parents themselves can vary between simulations; assert membership within each run
+		const parents = new Set(edges.map((e: any) => e.parent_id));
+		expect(parents.has(tipA.commit_id)).toBe(true);
+		expect(parents.has(tipB.commit_id)).toBe(true);
+	}
+);
+
+// Ensure change set elements are materialized for domain changes
+simulationTest(
+	"materializer emits change_set_elements for commit.change_ids",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		});
+
+		// Create a version and make two domain changes in a single statement
+		const v = await createVersion({ lix, id: "cse-dom-version" });
+
+		await lix.db
+			.insertInto("state_all")
+			.values([
+				{
+					entity_id: "dom-1",
+					schema_key: "mock_entity",
+					schema_version: "1.0",
+					file_id: "cse-file",
+					version_id: v.id,
+					plugin_key: "mock-plugin",
+					snapshot_content: { id: "dom-1", name: "one" },
+				},
+				{
+					entity_id: "dom-2",
+					schema_key: "mock_entity",
+					schema_version: "1.0",
+					file_id: "cse-file",
+					version_id: v.id,
+					plugin_key: "mock-plugin",
+					snapshot_content: { id: "dom-2", name: "two" },
+				},
+			])
+			.execute();
+
+		// Read the commit and its change_set_id
+		const ver = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("id", "=", v.id)
+			.executeTakeFirstOrThrow();
+
+		const commitRow = await lix.db
+			.selectFrom("change")
+			.select([sql`json(snapshot_content)`.as("snapshot")])
+			.where("schema_key", "=", "lix_commit")
+			.where(
+				sql`json_extract(snapshot_content, '$.id')`,
+				"=",
+				ver.commit_id as any
+			)
+			.executeTakeFirstOrThrow();
+
+		const changeSetId = (commitRow as any).snapshot.change_set_id as string;
+
+		// Query materializer for CSE rows for this change set (domain-only)
+		const cseRows = await lix.db
+			.selectFrom("internal_state_materializer" as any)
+			.select([
+				sql`json_extract(snapshot_content, '$.change_set_id')`.as(
+					"change_set_id"
+				),
+				sql`json_extract(snapshot_content, '$.change_id')`.as("change_id"),
+				sql`json_extract(snapshot_content, '$.entity_id')`.as("entity_id"),
+				sql`json_extract(snapshot_content, '$.schema_key')`.as("schema_key"),
+			])
+			.where("schema_key", "=", "lix_change_set_element")
+			.where("version_id", "=", "global")
+			.where(
+				sql`json_extract(snapshot_content, '$.change_set_id')`,
+				"=",
+				changeSetId as any
+			)
+			.where(
+				sql`json_extract(snapshot_content, '$.schema_key')`,
+				"=",
+				"mock_entity" as any
+			)
+			.execute();
+
+		// Expect exactly two domain CSEs (for dom-1 and dom-2)
+		expectDeterministic(cseRows.length).toBe(2);
+
+		const ids = new Set(cseRows.map((r: any) => r.entity_id));
+		expect(ids.has("dom-1")).toBe(true);
+		expect(ids.has("dom-2")).toBe(true);
+	}
+);
+
 describe("internal_materialization_latest_visible_state", () => {
 	simulationTest(
 		"finds latest change for each entity in a single version",
@@ -970,7 +1343,7 @@ describe("internal_materialization_latest_visible_state", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1067,7 +1440,7 @@ describe("internal_materialization_latest_visible_state", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1236,7 +1609,7 @@ describe("internal_materialization_latest_visible_state", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1377,7 +1750,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1426,7 +1799,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1485,7 +1858,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1564,7 +1937,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1662,7 +2035,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1703,7 +2076,7 @@ describe("internal_materialization_version_ancestry", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1795,7 +2168,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1849,7 +2222,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1911,7 +2284,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -1981,7 +2354,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -2070,7 +2443,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -2132,7 +2505,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});
@@ -2222,7 +2595,7 @@ describe("internal_state_materializer", () => {
 				keyValues: [
 					{
 						key: "lix_deterministic_mode",
-						value: { enabled: true, bootstrap: true },
+						value: { enabled: true },
 					},
 				],
 			});

@@ -39,15 +39,27 @@ test("throws if the schema is not a valid lix schema", async () => {
 });
 
 test("inserts the version and active version schemas to enable validation", async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	const result = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "in", ["lix_version", "lix_active_version"])
+		.where("key", "in", [
+			"lix_version_tip",
+			"lix_active_version",
+			"lix_version_descriptor",
+		])
 		.selectAll()
 		.execute();
 
-	expect(result.length).toBeGreaterThan(0);
+	expect(result.length).toBe(3);
 });
 
 test("valid lix schema with a valid snapshot passes", async () => {
@@ -1551,6 +1563,135 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 	).not.toThrowError();
 });
 
+test("materialized FK: insert allowed without referenced; delete restricts", async () => {
+	const lix = await openLix({});
+
+	// Define a simple parent/child with materialized FK on child.parent_id -> parent.id
+	const parentSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mfk_parent",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const childSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mfk_child",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["parent_id"],
+				references: {
+					schemaKey: "mfk_parent",
+					properties: ["id"],
+				},
+				mode: "materialized",
+			},
+		],
+		properties: {
+			id: { type: "string" },
+			parent_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "parent_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: parentSchema }, { value: childSchema }])
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert child referencing a not-yet-existing parent: should NOT throw (materialized mode skips insert-time check)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: childSchema,
+			snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// Materialize the child row so delete-time reverse FK check sees it
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "c1",
+			file_id: "file1",
+			schema_key: "mfk_child",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Insert the parent rows
+	await lix.db
+		.insertInto("state_all")
+		.values([
+			{
+				entity_id: "p1",
+				file_id: "file1",
+				schema_key: "mfk_parent",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: { id: "p1", name: "parent one" },
+				schema_version: "1.0",
+			},
+			{
+				entity_id: "p2",
+				file_id: "file1",
+				schema_key: "mfk_parent",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: { id: "p2", name: "parent two" },
+				schema_version: "1.0",
+			},
+		])
+		.execute();
+
+	// Delete-time: p1 is referenced by child → should throw
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: parentSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "p1",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(
+		/Foreign key constraint violation.*referenced by.*mfk_child.*parent_id/i
+	);
+
+	// Delete-time: p2 has no references → should not throw
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: parentSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "p2",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+});
+
 test("should throw when deleting non-existent entity", async () => {
 	const lix = await openLix({});
 
@@ -2626,21 +2767,19 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 		])
 		.execute();
 
-	// Create edges: commit1 -> commit2 -> commit3
+	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.insertInto("commit_edge_all")
-		.values([
-			{
-				parent_id: "commit1",
-				child_id: "commit2",
-				lixcol_version_id: "global",
-			},
-			{
-				parent_id: "commit2",
-				child_id: "commit3",
-				lixcol_version_id: "global",
-			},
-		])
+		.updateTable("commit_all")
+		.set({ parent_commit_ids: ["commit1"] as any })
+		.where("id", "=", "commit2")
+		.where("lixcol_version_id", "=", "global")
+		.execute();
+
+	await lix.db
+		.updateTable("commit_all")
+		.set({ parent_commit_ids: ["commit2"] as any })
+		.where("id", "=", "commit3")
+		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	// This should fail - creating commit3 -> commit1 would create a cycle
@@ -2705,21 +2844,19 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 		])
 		.execute();
 
-	// Create edges: commit1 -> commit2 -> commit3
+	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.insertInto("commit_edge_all")
-		.values([
-			{
-				parent_id: "commit1",
-				child_id: "commit2",
-				lixcol_version_id: "global",
-			},
-			{
-				parent_id: "commit2",
-				child_id: "commit3",
-				lixcol_version_id: "global",
-			},
-		])
+		.updateTable("commit_all")
+		.set({ parent_commit_ids: ["commit1"] as any })
+		.where("id", "=", "commit2")
+		.where("lixcol_version_id", "=", "global")
+		.execute();
+
+	await lix.db
+		.updateTable("commit_all")
+		.set({ parent_commit_ids: ["commit2"] as any })
+		.where("id", "=", "commit3")
+		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	// This would create a cycle, but with lix_debug=false it won't be detected
@@ -2776,7 +2913,7 @@ test("should validate foreign keys that reference changes in internal_transactio
 		.executeTakeFirstOrThrow();
 
 	await lix.db.transaction().execute(async (trx) => {
-    // Insert a key-value entity which creates a change in internal_transaction_state
+		// Insert a key-value entity which creates a change in internal_transaction_state
 		await trx
 			.insertInto("key_value")
 			.values({
@@ -2785,20 +2922,20 @@ test("should validate foreign keys that reference changes in internal_transactio
 			})
 			.execute();
 
-        // Get the change ID that was just created in internal_transaction_state
-        const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-            .selectFrom("internal_transaction_state")
-            .select("id")
-            .where("entity_id", "=", "test_key_for_change_reference")
-            .where("schema_key", "=", "lix_key_value")
-            .execute();
+		// Get the change ID that was just created in internal_transaction_state
+		const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+			.selectFrom("internal_transaction_state")
+			.select("id")
+			.where("entity_id", "=", "test_key_for_change_reference")
+			.where("schema_key", "=", "lix_key_value")
+			.execute();
 
 		expect(changes).toHaveLength(1);
 		const changeId = changes[0]!.id;
 
-        // This should NOT throw an error because the change exists in internal_transaction_state
-        // But currently it will throw because validation only checks the "change" table (internal_change)
-        // which doesn't include internal_transaction_state
+		// This should NOT throw an error because the change exists in internal_transaction_state
+		// But currently it will throw because validation only checks the "change" table (internal_change)
+		// which doesn't include internal_transaction_state
 		expect(() =>
 			validateStateMutation({
 				lix: { sqlite: lix.sqlite, db: trx as any },

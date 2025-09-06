@@ -155,3 +155,46 @@ simulationTest(
 		simulations: [normalSimulation, cacheMissSimulation],
 	}
 );
+
+// We must not clear the cache for internal_* tables.
+// Internal views/tables (e.g., internal_resolved_state_all, internal_materialization_*)
+// are used by the commit/materializer paths. Clearing the cache before those
+// reads can cause stale/missing reads or recursion. This test verifies that
+// cache-miss simulation does NOT intercept internal_* queries.
+simulationTest(
+	"cache miss simulation does not clear cache for internal_* tables",
+	async ({ openSimulatedLix }) => {
+		// Spy on the actual module export so we observe real calls
+		const clearCacheModule = await import(
+			"../../state/cache/clear-state-cache.js"
+		);
+		const spy = vi.spyOn(clearCacheModule, "clearStateCache");
+
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+			],
+		});
+
+		spy.mockClear();
+
+		// Internal query should NOT trigger cache clear
+		await (lix.db as any)
+			.selectFrom("internal_resolved_state_all")
+			.selectAll()
+			.limit(1)
+			.execute();
+
+		expect(spy).toHaveBeenCalledTimes(0);
+
+		// Non-internal query SHOULD trigger cache clear at least once
+		await lix.db.selectFrom("key_value").selectAll().execute();
+		expect(spy).toHaveBeenCalledTimes(1);
+	},
+	{ simulations: [cacheMissSimulation] }
+);

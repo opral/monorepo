@@ -1,78 +1,46 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
 import { commitIsDescendantOf } from "./commit-is-descendant-of.js";
 import { commitIsAncestorOf } from "./commit-is-ancestor-of.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
-import type { Lix } from "../lix/open-lix.js";
 
-// Utility function to create a commit with optional parent
-async function createCommitWithParent(args: {
-	lix: Lix;
-	changeSetId: string;
-	parentCommitId?: string;
-	versionId?: string;
-}): Promise<string> {
-	const commitId = uuidV7({ lix: args.lix });
-	const versionId = args.versionId || "global";
-
-	// Create the commit
-	await args.lix.db
-		.insertInto("commit_all")
-		.values({
-			id: commitId,
-			change_set_id: args.changeSetId,
-			lixcol_version_id: versionId,
-		})
-		.execute();
-
-	// Create edge if parent is provided
-	if (args.parentCommitId) {
-		await args.lix.db
-			.insertInto("commit_edge_all")
-			.values({
-				parent_id: args.parentCommitId,
-				child_id: commitId,
-				lixcol_version_id: versionId,
-			})
-			.execute();
-	}
-
-	return commitId;
-}
+// commits are authoritative: insert directly into commit_all (no pre-created change sets).
 
 test("selects all descendants excluding the current commit", async () => {
 	const lix = await openLix({});
 
 	// Create a linear chain of commits: c0 <- c1 <- c2
-	const cs0 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c0Id = await createCommitWithParent({ lix, changeSetId: cs0.id });
+	const c0Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c0Id,
+			change_set_id: "cs-" + c0Id,
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const cs1 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c1Id = await createCommitWithParent({
-		lix,
-		changeSetId: cs1.id,
-		parentCommitId: c0Id,
-	});
+	const c1Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c1Id,
+			change_set_id: "cs-" + c1Id,
+			parent_commit_ids: [c0Id],
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const cs2 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c2Id = await createCommitWithParent({
-		lix,
-		changeSetId: cs2.id,
-		parentCommitId: c1Id,
-	});
+	const c2Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c2Id,
+			change_set_id: "cs-" + c2Id,
+			parent_commit_ids: [c1Id],
+			lixcol_version_id: "global",
+		})
+		.execute();
 
 	// Should select c1, c2 as descendants of c0
 	const results = await lix.db
@@ -88,63 +56,34 @@ test("respects the optional depth limit", async () => {
 	const lix = await openLix({});
 
 	// c0 <- c1 <- c2
-	const cs0 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c0Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c0Id,
-			change_set_id: cs0.id,
+			change_set_id: "cs-" + c0Id,
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs1 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c1Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c1Id,
-			change_set_id: cs1.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c0Id,
-			child_id: c1Id,
+			change_set_id: "cs-" + c1Id,
+			parent_commit_ids: [c0Id],
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs2 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c2Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c2Id,
-			change_set_id: cs2.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c1Id,
-			child_id: c2Id,
+			change_set_id: "cs-" + c2Id,
+			parent_commit_ids: [c1Id],
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -163,45 +102,48 @@ test("can be combined with ancestor filter to select commits between two points"
 	const lix = await openLix({});
 
 	// Create a linear chain: c0 <- c1 <- c2 <- c3
-	const cs0 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c0Id = await createCommitWithParent({ lix, changeSetId: cs0.id });
+	const c0Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c0Id,
+			change_set_id: "cs-" + c0Id,
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const cs1 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c1Id = await createCommitWithParent({
-		lix,
-		changeSetId: cs1.id,
-		parentCommitId: c0Id,
-	});
+	const c1Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c1Id,
+			change_set_id: "cs-" + c1Id,
+			parent_commit_ids: [c0Id],
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const cs2 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c2Id = await createCommitWithParent({
-		lix,
-		changeSetId: cs2.id,
-		parentCommitId: c1Id,
-	});
+	const c2Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c2Id,
+			change_set_id: "cs-" + c2Id,
+			parent_commit_ids: [c1Id],
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const cs3 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
-	const c3Id = await createCommitWithParent({
-		lix,
-		changeSetId: cs3.id,
-		parentCommitId: c2Id,
-	});
+	const c3Id = uuidV7({ lix });
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: c3Id,
+			change_set_id: "cs-" + c3Id,
+			parent_commit_ids: [c2Id],
+			lixcol_version_id: "global",
+		})
+		.execute();
 
 	// Select commits that are descendants of c1 AND ancestors of c3
 	const results = await lix.db
@@ -218,63 +160,34 @@ test("selects descendants including the current commit when includeSelf is true"
 	const lix = await openLix({});
 
 	// Setup: c0 <- c1 <- c2
-	const cs0 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c0Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c0Id,
-			change_set_id: cs0.id,
+			change_set_id: "cs-" + c0Id,
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs1 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c1Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c1Id,
-			change_set_id: cs1.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c0Id,
-			child_id: c1Id,
+			change_set_id: "cs-" + c1Id,
+			parent_commit_ids: [c0Id],
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs2 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c2Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c2Id,
-			change_set_id: cs2.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c1Id,
-			child_id: c2Id,
+			change_set_id: "cs-" + c2Id,
+			parent_commit_ids: [c1Id],
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -293,63 +206,34 @@ test("respects depth limit when includeSelf is true", async () => {
 	const lix = await openLix({});
 
 	// Setup: c0 <- c1 <- c2
-	const cs0 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c0Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c0Id,
-			change_set_id: cs0.id,
+			change_set_id: "cs-" + c0Id,
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs1 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c1Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c1Id,
-			change_set_id: cs1.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c0Id,
-			child_id: c1Id,
+			change_set_id: "cs-" + c1Id,
+			parent_commit_ids: [c0Id],
 			lixcol_version_id: "global",
 		})
 		.execute();
 
-	const cs2 = await createChangeSet({
-		lix,
-		lixcol_version_id: "global",
-		elements: [],
-	});
 	const c2Id = uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
 			id: c2Id,
-			change_set_id: cs2.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
-	await lix.db
-		.insertInto("commit_edge_all")
-		.values({
-			parent_id: c1Id,
-			child_id: c2Id,
+			change_set_id: "cs-" + c2Id,
+			parent_commit_ids: [c1Id],
 			lixcol_version_id: "global",
 		})
 		.execute();

@@ -124,7 +124,6 @@ export function applyResolvedStateView(
                 AND unt.file_id = internal_state_cache.file_id
                 AND unt.version_id = internal_state_cache.version_id
           )
-			
 			UNION ALL
 			
 			-- 4. Inherited tracked state (fourth priority) - only if no transaction, untracked or tracked exists
@@ -150,9 +149,9 @@ export function applyResolvedStateView(
 					SELECT 
 						json_extract(v.snapshot_content, '$.id') AS version_id,
 						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
-					FROM internal_state_cache v
-					WHERE v.schema_key = 'lix_version'
-					  AND json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+            FROM internal_state_cache v
+            WHERE v.schema_key = 'lix_version_descriptor'
+              AND json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
 					
 					UNION
 					
@@ -161,8 +160,8 @@ export function applyResolvedStateView(
 						vi.version_id,
 						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
 					FROM version_inheritance vi
-					JOIN internal_state_cache v ON v.schema_key = 'lix_version' 
-					  AND json_extract(v.snapshot_content, '$.id') = vi.ancestor_version_id
+            JOIN internal_state_cache v ON v.schema_key = 'lix_version_descriptor' 
+              AND json_extract(v.snapshot_content, '$.id') = vi.ancestor_version_id
 					WHERE json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
 				)
 				SELECT DISTINCT version_id, ancestor_version_id 
@@ -222,7 +221,7 @@ export function applyResolvedStateView(
 						json_extract(v.snapshot_content, '$.id') AS version_id,
 						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
 					FROM internal_state_cache v
-					WHERE v.schema_key = 'lix_version'
+					WHERE v.schema_key = 'lix_version_descriptor'
 					  AND json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
 					
 					UNION
@@ -232,7 +231,7 @@ export function applyResolvedStateView(
 						vi.version_id,
 						json_extract(v.snapshot_content, '$.inherits_from_version_id') AS ancestor_version_id
 					FROM version_inheritance vi
-					JOIN internal_state_cache v ON v.schema_key = 'lix_version' 
+					JOIN internal_state_cache v ON v.schema_key = 'lix_version_descriptor' 
 					  AND json_extract(v.snapshot_content, '$.id') = vi.ancestor_version_id
 					WHERE json_extract(v.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
 				)
@@ -290,8 +289,8 @@ export function applyResolvedStateView(
 				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-				FROM internal_state_cache isc_v
-				WHERE isc_v.schema_key = 'lix_version'
+            FROM internal_state_cache isc_v
+            WHERE isc_v.schema_key = 'lix_version_descriptor'
 			) vi
 			JOIN internal_transaction_state txn ON txn.lixcol_version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL

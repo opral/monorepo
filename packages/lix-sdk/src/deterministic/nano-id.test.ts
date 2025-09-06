@@ -180,7 +180,7 @@ test("polyfill works when crypto is not available", async () => {
 	const lix = await openLix({});
 
 	// Store original crypto
-	const originalCrypto = global.crypto;
+	const originalCrypto = globalThis.crypto as any;
 
 	// Mock crypto as undefined to test the polyfill
 	vi.stubGlobal("crypto", undefined);

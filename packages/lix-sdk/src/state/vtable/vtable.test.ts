@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect, test } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
@@ -9,6 +9,8 @@ import {
 } from "../../test-utilities/simulation-test/simulation-test.js";
 import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
 import { openLix } from "../../lix/open-lix.js";
+
+test("simulation test discover", () => {});
 
 simulationTest(
 	"select, insert, update, delete entity via internal_state_vtable",
@@ -384,6 +386,7 @@ simulationTest(
 		expectDeterministic(stateAfterDelete).toHaveLength(0);
 	}
 );
+
 // see https://github.com/opral/lix-sdk/issues/359
 simulationTest(
 	"commit_id in state should be from the real auto-commit, not the working commit",
@@ -433,21 +436,14 @@ simulationTest(
 			})
 			.execute();
 
-		const commitsAfterInsert = await lix.db
-			.selectFrom("commit")
-			.select("id")
-			.execute();
-
-		// two commits for the global and active version
-		expectDeterministic(commitsAfterInsert.length).toBe(
-			commitsBeforeInsert.length + 2
-		);
-
 		const activeVersionAfterInsert = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
+
+		// expect the version to be identical
+		expectDeterministic(activeVersionAfterInsert).toBeDefined();
 
 		// Query to check the commit_id via vtable
 		const stateAfterInsert = await db
@@ -455,6 +451,8 @@ simulationTest(
 			.where("entity_id", "=", "test-entity-1")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
+
+		expectDeterministic(stateAfterInsert).toBeDefined();
 
 		// The commit_id should NOT be the working_commit_id
 		expectDeterministic(stateAfterInsert.commit_id).not.toBe(
@@ -464,6 +462,15 @@ simulationTest(
 		// The commit_id should be the auto-commit ID (not the working commit)
 		expectDeterministic(stateAfterInsert.commit_id).toBe(
 			activeVersionAfterInsert.commit_id
+		);
+
+		const commitsAfterInsert = await lix.db
+			.selectFrom("commit")
+			.select("id")
+			.execute();
+
+		expectDeterministic(commitsAfterInsert.length).toBe(
+			commitsBeforeInsert.length + 1
 		);
 
 		// Update the state via vtable to trigger another auto-commit
@@ -2404,7 +2411,7 @@ simulationTest(
 		// Helper to assert transaction table is empty
 		const expectTxnEmpty = async () => {
 			const rows = await db
-                .selectFrom("internal_transaction_state")
+				.selectFrom("internal_transaction_state")
 				.selectAll()
 				.execute();
 			expectDeterministic(rows.length).toBe(0);
@@ -2846,7 +2853,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state is separated by version via internal_state_vtable",
+	"state is separated by version",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [

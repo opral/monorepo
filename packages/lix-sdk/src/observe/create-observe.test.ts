@@ -550,41 +550,109 @@ test("query with change table join should always re-execute", async () => {
 	await lix.close();
 });
 
-test("query with state_all table should always re-execute", async () => {
+test("state_all observer re-executes when observed schema changes", async () => {
 	const lix = await openLix({});
-	const stateAllEmissions: any[] = [];
+	const emissions: any[] = [];
 
-	// Observe a query that uses the state_all table
-	// This should always re-execute because state_all includes all versions
-	const stateAllSub = lix
+	const sub = lix
+		.observe(
+			lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "lix_key_value")
+		)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	const before = emissions.length;
+
+	// Insert into key_value (matching observed schema_key)
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "state_all_test_key", value: "state_all_test_value" })
+		.execute();
+
+	await new Promise((r) => setTimeout(r, 10));
+	expect(emissions.length).toBe(before + 1);
+
+	sub.unsubscribe();
+	await lix.close();
+});
+
+test("state_all observer does not re-execute for unrelated schema changes", async () => {
+	const lix = await openLix({});
+	const emissions: any[] = [];
+
+	const sub = lix
 		.observe(
 			lix.db
 				.selectFrom("state_all")
 				.selectAll()
 				.where("schema_key", "=", "lix_version")
 		)
-		.subscribe({ next: (rows) => stateAllEmissions.push(rows) });
+		.subscribe({ next: (rows) => emissions.push(rows) });
 
-	// Wait for initial emission
-	await new Promise((resolve) => setTimeout(resolve, 10));
-	expect(stateAllEmissions).toHaveLength(1);
+	await new Promise((r) => setTimeout(r, 10));
+	const before = emissions.length;
 
-	const countBefore = stateAllEmissions.length;
-
-	// Insert into key_value - should trigger state_all observer
-	// because state_all queries should always re-execute (special case)
+	// Insert into key_value (different schema)
 	await lix.db
 		.insertInto("key_value")
-		.values({ key: "state_all_test_key", value: "state_all_test_value" })
+		.values({ key: "state_all_test_key2", value: "state_all_test_value2" })
 		.execute();
 
-	// Wait for emission
-	await new Promise((resolve) => setTimeout(resolve, 10));
+	await new Promise((r) => setTimeout(r, 10));
+	// Should not emit again since observed schema_key does not match the change
+	expect(emissions.length).toBe(before);
 
-	// state_all observer should have received an update
-	expect(stateAllEmissions).toHaveLength(countBefore + 1);
+	sub.unsubscribe();
+	await lix.close();
+});
 
-	stateAllSub.unsubscribe();
+test("state_all observer with version_id filter re-executes only for that version", async () => {
+	const lix = await openLix({});
+	const emissions: any[] = [];
+
+	// Create two versions
+	const vA = await (
+		await import("../version/create-version.js")
+	).createVersion({ lix, name: "obs-A" });
+	const vB = await (
+		await import("../version/create-version.js")
+	).createVersion({ lix, name: "obs-B" });
+
+	const sub = lix
+		.observe(
+			lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "lix_key_value")
+				.where("version_id", "=", vA.id)
+		)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	const before = emissions.length;
+
+	// Insert into different version (vB) - should NOT trigger
+	await lix.db
+		.insertInto("key_value_all")
+		.values({ key: "vk_b", value: "b", lixcol_version_id: vB.id })
+		.execute();
+
+	await new Promise((r) => setTimeout(r, 10));
+	expect(emissions.length).toBe(before);
+
+	// Insert into observed version (vA) - should trigger
+	await lix.db
+		.insertInto("key_value_all")
+		.values({ key: "vk_a", value: "a", lixcol_version_id: vA.id })
+		.execute();
+
+	await new Promise((r) => setTimeout(r, 10));
+	expect(emissions.length).toBe(before + 1);
+
+	sub.unsubscribe();
 	await lix.close();
 });
 
