@@ -13,7 +13,8 @@ const settingsProperty = [
 	"editorColors.error.foreground",
 	"editorColors.error.background",
 	"editorColors.error.border",
-	"extract.autoHumanId.enabled",
+	"extract.generator",
+	"extract.autoHumanId.enabled", // DEPRECATED, TODO: remove in the next major
 	"inlineAnnotations.enabled",
 	"appRecommendations.ninja.enabled",
 ] as const

@@ -210,8 +210,27 @@
 				"sherlock.extract": {
 					"type": "object",
 					"properties": {
+						"generator": {
+							"type": "string",
+							"description": "The generator to use for the extracted message IDs. Default is `humanId`.",
+							"anyOf": [
+								{
+									"const": "humanId",
+									"description": "A human-readable id, like `direct_legal_giraffe_empower`."
+								},
+								{
+									"const": "nanoid",
+									"description": "A short, high-entropy id, like `vOpwTYdaKl`."
+								},
+								{
+									"const": "none",
+									"description": "The field is left empty, for you to fill in."
+								}
+							]
+						},
 						"autoHumanId": {
 							"type": "object",
+							"deprecated": true,
 							"properties": {
 								"enabled": {
 									"type": "boolean",
@@ -266,6 +285,7 @@
 		"kysely": "^0.27.4",
 		"lit-html": "^3.1.2",
 		"lodash-es": "^4.17.21",
+		"nanoid": "^5.1.5",
 		"prettier": "^3.3.3",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
