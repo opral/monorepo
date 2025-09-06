@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../../../lix/plugin-md/dist/index.js";
 import { assembleMdAst } from "./assemble-md-ast";
 
 test("assembleMdAst returns empty root when no state root exists", async () => {

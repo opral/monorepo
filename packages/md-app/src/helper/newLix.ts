@@ -1,5 +1,5 @@
 import { newLixFile, openLix, OpfsStorage } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../../lix/plugin-md/dist";
 
 export async function createNewLixFileInOpfs(): Promise<{ id: string }> {
 	const lixFile = await newLixFile();

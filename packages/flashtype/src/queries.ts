@@ -1,4 +1,4 @@
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
 import type { Lix } from "@lix-js/sdk";
 import { sql } from "@lix-js/sdk";
 

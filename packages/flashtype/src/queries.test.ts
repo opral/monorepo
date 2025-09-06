@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { openLix, createCheckpoint } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
 import { selectFiles, selectWorkingDiffCount } from "@/queries";
 
 describe("selectFiles", () => {

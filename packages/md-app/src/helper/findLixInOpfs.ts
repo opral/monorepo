@@ -1,6 +1,6 @@
 import { openLix } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as mdPlugin } from "../../../lix/plugin-md/dist";
 
 export interface LixFileInfo {
 	handle: FileSystemFileHandle;
