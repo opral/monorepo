@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 import { render, waitFor, screen, act } from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, type Lix } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { TipTapEditor } from "./tip-tap-editor";
 import { KeyValueProvider } from "../../key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "../../key-value/schema";

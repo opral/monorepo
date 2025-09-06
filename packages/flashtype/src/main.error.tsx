@@ -42,8 +42,8 @@ export function ErrorFallback(props: { error: unknown }) {
 					Flashtype failed to start
 				</h1>
 				<p className="text-sm text-muted-foreground mb-4">
-					Lix could not be loaded. This can happen if the lix schema was changed in development. If this is unexpected, please contact the
-					developer.
+					Lix could not be loaded. This can happen if the lix schema was changed
+					in development. If this is unexpected, please contact the developer.
 				</p>
 				<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 mb-4">
 					<p className="text-sm font-medium text-destructive">

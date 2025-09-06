@@ -6,7 +6,7 @@ import {
 	tiptapDocToAst,
 } from "@opral/markdown-wc/tiptap";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
-import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { handlePaste as defaultHandlePaste } from "./handle-paste";
 
 type CreateEditorArgs = {

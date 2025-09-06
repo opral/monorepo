@@ -3,7 +3,7 @@ import { render, screen, waitFor, act } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, createCheckpoint } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { ChangeIndicator } from "./change-indicator";
 
 function Providers({ lix, children }: { lix: any; children: React.ReactNode }) {

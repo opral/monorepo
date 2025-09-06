@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
 	switchAccount,
 	Lix,
@@ -6,11 +7,6 @@ import {
 	jsonArrayFrom,
 	LixFileDescriptor,
 } from "@lix-js/sdk";
-import {
-	MarkdownNodeSchemaV1,
-	MarkdownRootSchemaV1,
-	plugin as mdPlugin,
-} from "@lix-js/plugin-md";
 
 /**
  * Selects the current version
@@ -444,10 +440,7 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 /**
  * Get threads for a specific commit
  */
-export function selectThreads(
-	lix: Lix,
-	args: { commitId: string }
-) {
+export function selectThreads(lix: Lix, args: { commitId: string }) {
 	return lix.db
 		.selectFrom("thread")
 		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
@@ -568,7 +561,7 @@ export interface MdAstDocumentOrder {
 export function selectMdAstRoot(lix: Lix) {
 	return lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+		.where("schema_key", "=", ["x-lix-key"])
 		.where(
 			"file_id",
 			"=",
@@ -583,7 +576,7 @@ export function selectMdAstRoot(lix: Lix) {
 export function selectMdAstNodes(lix: Lix) {
 	return lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+		.where("schema_key", "=", "unimplemented")
 		.where(
 			"file_id",
 			"=",
@@ -613,73 +606,70 @@ export function selectActiveFileData(lix: Lix) {
  * Updates MD-AST entities in lix state using proper lix entity operations
  */
 export async function updateMdAstEntities(
-	lix: Lix,
+	_lix: Lix,
 	activeFile: LixFileDescriptor | null,
-	entities: MdAstEntity[],
-	order: string[]
+	_entities: MdAstEntity[],
+	_order: string[]
 ): Promise<void> {
 	if (!activeFile) return;
-	try {
-		await lix.db.transaction().execute(async (trx) => {
-			// console.log("opening transaction to write md ast");
-			// deleting all nodes avoids diffing delete changes
-			// if this leads to bugs, this is a bug in the lix state
-			// handler and should be reported
-			// await trx
-			// 	.deleteFrom("state")
-			// 	.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
-			// 	.where(
-			// 		// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-			// 		"version_id",
-			// 		"=",
-			// 		trx.selectFrom("active_version").select("version_id")
-			// 	)
-			// 	.where("file_id", "=", activeFile.id)
-			// 	.execute();
-			for (const entity of entities) {
-				await trx
-					.insertInto("state")
-					.values({
-						entity_id: entity.entity_id,
-						file_id: activeFile.id,
-						schema_key: MarkdownNodeSchemaV1["x-lix-key"],
-						schema_version: MarkdownNodeSchemaV1["x-lix-version"],
-						plugin_key: mdPlugin.key,
-						snapshot_content: entity,
-					})
-					.execute();
-			}
-			const existingRoot = await trx
-				.selectFrom("state")
-				.where("file_id", "=", activeFile.id)
-				.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
-				.selectAll()
-				.executeTakeFirst();
+	return;
+	// try {
+	// 	await lix.db.transaction().execute(async (trx) => {
+	// 		// console.log("opening transaction to write md ast");
+	// 		// deleting all nodes avoids diffing delete changes
+	// 		// if this leads to bugs, this is a bug in the lix state
+	// 		// handler and should be reported
+	// 		// await trx
+	// 		// 	.deleteFrom("state")
+	// 		// 	.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+	// 		// 	.where(
+	// 		// 		// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+	// 		// 		"version_id",
+	// 		// 		"=",
+	// 		// 		trx.selectFrom("active_version").select("version_id")
+	// 		// 	)
+	// 		// 	.where("file_id", "=", activeFile.id)
+	// 		// 	.execute();
+	// 		for (const entity of entities) {
+	// 			await trx
+	// 				.insertInto("state")
+	// 				.values({
+	// 					entity_id: entity.entity_id,
+	// 					file_id: activeFile.id,
+	// 					schema_key: MarkdownNodeSchemaV1["x-lix-key"],
+	// 					schema_version: MarkdownNodeSchemaV1["x-lix-version"],
+	// 					plugin_key: mdPlugin.key,
+	// 					snapshot_content: entity,
+	// 				})
+	// 				.execute();
+	// 		}
+	// 		const existingRoot = await trx
+	// 			.selectFrom("state")
+	// 			.where("file_id", "=", activeFile.id)
+	// 			.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+	// 			.selectAll()
+	// 			.executeTakeFirst();
 
-			if (existingRoot) {
-				await trx
-					.updateTable("state")
-					.where("file_id", "=", activeFile.id)
-					.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
-					.set({ snapshot_content: { order } })
-					.execute();
-			} else {
-				await trx
-					.insertInto("state")
-					.values({
-						entity_id: "root",
-						file_id: activeFile.id,
-						schema_key: MarkdownRootSchemaV1["x-lix-key"],
-						schema_version: MarkdownRootSchemaV1["x-lix-version"],
-						plugin_key: mdPlugin.key,
-						snapshot_content: { order },
-					})
-					.execute();
-			}
-			// console.log("closing transaction to write mdast");
-		});
-	} catch (error) {
-		console.error("Failed to update MD-AST entities:", error);
-		throw error;
-	}
+	// 		if (existingRoot) {
+	// 			await trx
+	// 				.updateTable("state")
+	// 				.where("file_id", "=", activeFile.id)
+	// 				.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+	// 				.set({ snapshot_content: { order } })
+	// 				.execute();
+	// 		} else {
+	// 			await trx
+	// 				.insertInto("state")
+	// 				.values({
+	// 					entity_id: "root",
+	// 					file_id: activeFile.id,
+	// 					schema_key: MarkdownRootSchemaV1["x-lix-key"],
+	// 					schema_version: MarkdownRootSchemaV1["x-lix-version"],
+	// 					plugin_key: mdPlugin.key,
+	// 					snapshot_content: { order },
+	// 				})
+	// 				.execute();
+	// 		}
+	// 		// console.log("closing transaction to write mdast");
+	// 	});
 }

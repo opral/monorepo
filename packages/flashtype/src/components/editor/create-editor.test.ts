@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md-v2";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { createEditor } from "./create-editor";
 import { handlePaste } from "./handle-paste";
 import { AstSchemas } from "@opral/markdown-wc";

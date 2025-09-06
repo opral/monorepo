@@ -18,7 +18,7 @@
 		"@lix-js/react-utils": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@lix-js/inspector": "workspace:*",
-		"@lix-js/plugin-md-v2": "workspace:*",
+		"@lix-js/plugin-md": "workspace:*",
 		"@opral/markdown-wc": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.10",
 		"@radix-ui/react-collapsible": "^1.1.12",

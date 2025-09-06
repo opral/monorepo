@@ -1,5 +1,5 @@
 {
-	"name": "@lix-js/plugin-md-v2",
+    "name": "@lix-js/plugin-md",
 	"type": "module",
 	"private": true,
 	"version": "0.1.2",
