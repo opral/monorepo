@@ -42,7 +42,7 @@
 		"test:watch": "vitest --typecheck",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"bench": "vitest bench",
-		"lint": "eslint \"src/**/*.{js,ts}\" --fix",
+		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
@@ -62,14 +62,12 @@
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
 		"@vitest/coverage-v8": "4.0.0-beta.10",
-		"eslint": "^9.12.0",
+		"oxlint": "^1.14.0",
 		"json-schema-to-ts": "^3.1.1",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.9.0",
 		"vitest": "4.0.0-beta.10"
 	}
 }

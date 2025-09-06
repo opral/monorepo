@@ -2543,30 +2543,24 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
     devDependencies:
-      '@eslint/js':
-        specifier: ^9.12.0
-        version: 9.29.0
       '@opral/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@vitest/coverage-v8':
         specifier: 4.0.0-beta.10
         version: 4.0.0-beta.10(vitest@4.0.0-beta.10(@types/debug@4.1.12)(@types/node@24.0.4)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.3)(yaml@2.8.0))
-      eslint:
-        specifier: ^9.12.0
-        version: 9.29.0(jiti@2.4.2)
       json-schema-to-ts:
         specifier: ^3.1.1
         version: 3.1.1
+      oxlint:
+        specifier: ^1.14.0
+        version: 1.14.0
       prettier:
         specifier: ^3.3.3
         version: 3.6.1
       typescript:
         specifier: ^5.5.4
         version: 5.8.3
-      typescript-eslint:
-        specifier: ^8.9.0
-        version: 8.35.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       vitest:
         specifier: 4.0.0-beta.10
         version: 4.0.0-beta.10(@types/debug@4.1.12)(@types/node@24.0.4)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.3)(yaml@2.8.0)
@@ -6714,6 +6708,46 @@ packages:
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
+
+  '@oxlint/darwin-arm64@1.14.0':
+    resolution: {integrity: sha512-rcTw0QWeOc6IeVp+Up7WtcwdS9l4j7TOq4tihF0Ud/fl+VUVdvDCPuZ9QTnLXJhwMXiyQRWdxRyI6XBwf80ncQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxlint/darwin-x64@1.14.0':
+    resolution: {integrity: sha512-TWFSEmyl2/DN4HoXNwQl0y/y3EXFJDctfv5MiDtVOV1GJKX80cGSIxMxXb08Q3CCWqteqEijmfSMo5TG8X1H/A==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxlint/linux-arm64-gnu@1.14.0':
+    resolution: {integrity: sha512-N1FqdKfwhVWPpMElv8qlGqdEefTbDYaRVhdGWOjs/2f7FESa5vX0cvA7ToqzkoXyXZI5DqByWiPML33njK30Kg==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxlint/linux-arm64-musl@1.14.0':
+    resolution: {integrity: sha512-v/BPuiateLBb7Gz1STb69EWjkgKdlPQ1NM56z+QQur21ly2hiMkBX2n0zEhqfu9PQVRUizu6AlsYuzcPY/zsIQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxlint/linux-x64-gnu@1.14.0':
+    resolution: {integrity: sha512-gUTp8KIrSYt97dn+tRRC3LKnH4xlHKCwrPwiDcGmLbCxojuN9/H5mnIhPKEfwNuZNdoKGS/ABuq3neVyvRCRtQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxlint/linux-x64-musl@1.14.0':
+    resolution: {integrity: sha512-DpN6cW2HPjYXeENG0JBbmubO8LtfKt6qJqEMBw9gUevbyBaX+k+Jn7sYgh6S23wGOkzmTNphBsf/7ulj4nIVYA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxlint/win32-arm64@1.14.0':
+    resolution: {integrity: sha512-oXxJksnUTUMgJ0NvjKS1mrCXAy1ttPgIVacRSlxQ+1XHy+aJDMM7I8fsCtoKoEcTIpPaD98eqUqlLYs0H2MGjA==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxlint/win32-x64@1.14.0':
+    resolution: {integrity: sha512-iRYy2rhTQKFztyx0jtNMRBnFpzsRwFdjWQ7sKKzJpmbijA3Tw3DCqlGT7QRgoVRF0+X/ccNGvvsrgMohPVfLeQ==}
+    cpu: [x64]
+    os: [win32]
 
   '@pdf-lib/standard-fonts@1.0.0':
     resolution: {integrity: sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA==}
@@ -16553,6 +16587,16 @@ packages:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
 
+  oxlint@1.14.0:
+    resolution: {integrity: sha512-oo0nq3zF9hmgATGc9esoMahLuEESOodUxEDeHDA2K7tbYcSfcmReE9G2QNppnq9rOSQHLTwlMtzGAjjttYaufQ==}
+    engines: {node: '>=8.*'}
+    hasBin: true
+    peerDependencies:
+      oxlint-tsgolint: '>=0.1.5'
+    peerDependenciesMeta:
+      oxlint-tsgolint:
+        optional: true
+
   p-cancelable@3.0.0:
     resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}
     engines: {node: '>=12.20'}
@@ -24872,6 +24916,30 @@ snapshots:
 
   '@oslojs/encoding@1.1.0': {}
 
+  '@oxlint/darwin-arm64@1.14.0':
+    optional: true
+
+  '@oxlint/darwin-x64@1.14.0':
+    optional: true
+
+  '@oxlint/linux-arm64-gnu@1.14.0':
+    optional: true
+
+  '@oxlint/linux-arm64-musl@1.14.0':
+    optional: true
+
+  '@oxlint/linux-x64-gnu@1.14.0':
+    optional: true
+
+  '@oxlint/linux-x64-musl@1.14.0':
+    optional: true
+
+  '@oxlint/win32-arm64@1.14.0':
+    optional: true
+
+  '@oxlint/win32-x64@1.14.0':
+    optional: true
+
   '@pdf-lib/standard-fonts@1.0.0':
     dependencies:
       pako: 1.0.11
@@ -29258,7 +29326,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@20.19.1)(typescript@5.3.2))(vite@5.4.19(@types/node@20.19.1)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@20.19.1)(typescript@5.3.2)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29281,7 +29349,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@20.5.9)(typescript@5.2.2))(vite@5.4.19(@types/node@20.5.9)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@20.5.9)(typescript@5.2.2)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29304,7 +29372,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@20.5.9)(typescript@5.8.3))(vite@4.5.14(@types/node@20.5.9)(lightningcss@1.30.1)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@20.5.9)(typescript@5.8.3)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29327,7 +29395,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@22.15.33)(typescript@5.8.3))(vite@5.4.19(@types/node@22.15.33)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@22.15.33)(typescript@5.8.3)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29350,7 +29418,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@24.0.4)(typescript@5.8.3)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29374,7 +29442,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@24.0.4)(typescript@5.3.2))(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@24.0.4)(typescript@5.3.2)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29397,7 +29465,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@24.0.4)(typescript@5.4.5))(vite@6.3.5(@types/node@24.0.4)(jiti@2.4.2)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.3)(yaml@2.8.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@24.0.4)(typescript@5.4.5)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -29420,7 +29488,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 2.1.8(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(sass-embedded@1.89.2)(terser@5.36.0))
       '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       msw: 2.10.2(@types/node@24.0.4)(typescript@5.8.3)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
@@ -30032,7 +30100,7 @@ snapshots:
       '@vue/compiler-ssr': 3.5.17
       '@vue/shared': 3.5.17
       estree-walker: 2.0.2
-      magic-string: 0.30.17
+      magic-string: 0.30.18
       postcss: 8.5.6
       source-map-js: 1.2.1
     optional: true
@@ -38306,6 +38374,17 @@ snapshots:
       get-intrinsic: 1.3.0
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
+
+  oxlint@1.14.0:
+    optionalDependencies:
+      '@oxlint/darwin-arm64': 1.14.0
+      '@oxlint/darwin-x64': 1.14.0
+      '@oxlint/linux-arm64-gnu': 1.14.0
+      '@oxlint/linux-arm64-musl': 1.14.0
+      '@oxlint/linux-x64-gnu': 1.14.0
+      '@oxlint/linux-x64-musl': 1.14.0
+      '@oxlint/win32-arm64': 1.14.0
+      '@oxlint/win32-x64': 1.14.0
 
   p-cancelable@3.0.0: {}
 

@@ -1,0 +1,34 @@
+{
+	"ignore": [
+		"dist/**",
+		"build/**",
+		"coverage/**",
+		"**/*.d.ts",
+		"eslint.config.js"
+	],
+	"rules": {
+		/**
+		 * CRITICAL: Prevents unhandled promises which can cause:
+		 * 1. Database operations executing out of order → race conditions & data corruption
+		 * 2. Unhandled rejections → crashes or inconsistent state
+		 * 3. Transaction integrity violations
+		 *
+		 * How to fix:
+		 * - await someAsyncOperation() - Preferred for DB operations
+		 * - void someAsyncOperation() - Intentional fire-and-forget (see below)
+		 * - someAsyncOperation().catch() - When you need error handling
+		 *
+		 * Using void:
+		 * void is appropriate for async operations where:
+		 * - No database operations are performed
+		 * - Order doesn't matter (e.g., analytics, telemetry)
+		 * - Blocking would hurt UX (e.g., server fetch for non-critical data)
+		 *
+		 * Example: void captureAnalytics(...) // Won't block user actions
+		 *
+		 * ⚠️ ALWAYS await database operations to guarantee execution order!
+		 */
+		"@typescript-eslint/no-floating-promises": "error",
+		"typescript/no-floating-promises": "error"
+	}
+}
