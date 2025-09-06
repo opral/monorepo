@@ -6,7 +6,7 @@ import { test } from "vitest";
 test("simulation test discover", () => {});
 
 simulationTest(
-	"created: key only in source -> before=null, after=source (query)",
+	"added: key only in source -> before=null, after=source (query)",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -54,7 +54,7 @@ simulationTest(
 		expectDeterministic(d.before_change_id).toBeNull();
 		expectDeterministic(d.after_version_id).toBe(sourceVersion.id);
 		expectDeterministic(d.after_change_id).not.toBeNull();
-		expectDeterministic(d.status).toBe("created");
+		expectDeterministic(d.status).toBe("added");
 
 		// Verify the 'after' change id refers to a stored change row
 		const stored = await lix.db
@@ -87,7 +87,7 @@ simulationTest(
 );
 
 simulationTest(
-	"updated: both changed without common ancestor -> source wins (query)",
+	"modified: both changed without common ancestor -> source wins (query)",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -143,7 +143,7 @@ simulationTest(
 
 		expectDeterministic(diffs).toHaveLength(1);
 		const r = diffs[0]!;
-		expectDeterministic(r.status).toBe("updated");
+		expectDeterministic(r.status).toBe("modified");
 		expectDeterministic(r.before_version_id).toBe(targetVersion.id);
 		expectDeterministic(r.after_version_id).toBe(sourceVersion.id);
 
@@ -172,7 +172,7 @@ simulationTest(
 );
 
 simulationTest(
-	"updated: both changed after common ancestor -> source wins (query)",
+	"modified: both changed after common ancestor -> source wins (query)",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -249,7 +249,7 @@ simulationTest(
 
 		expectDeterministic(diffs).toHaveLength(1);
 		const r = diffs[0]!;
-		expectDeterministic(r.status).toBe("updated");
+		expectDeterministic(r.status).toBe("modified");
 		expectDeterministic(r.before_version_id).toBe(targetVersion.id);
 		expectDeterministic(r.after_version_id).toBe(sourceVersion.id);
 
@@ -277,7 +277,7 @@ simulationTest(
 );
 
 simulationTest(
-	"deleted: source explicit deletion beats target content -> after=source (tombstone), before=target (query)",
+	"removed: source explicit deletion beats target content -> after=source (tombstone), before=target (query)",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -353,7 +353,7 @@ simulationTest(
 
 		expectDeterministic(diffs).toHaveLength(1);
 		const r = diffs[0]!;
-		expectDeterministic(r.status).toBe("deleted");
+		expectDeterministic(r.status).toBe("removed");
 		expectDeterministic(r.before_version_id).toBe(targetVersion.id);
 		// With explicit deletes, source contributes a tombstone row
 		expectDeterministic(r.after_version_id).toBe(sourceVersion.id);
@@ -621,28 +621,28 @@ simulationTest(
 		const key = (r: any) => `${r.file_id}|${r.schema_key}|${r.entity_id}`;
 		const map = new Map(diffs.map((r: any) => [key(r), r]));
 
-		// created (file1/schemaA/e_add)
+		// added (file1/schemaA/e_add)
 		const created = map.get("file1|schemaA|e_add");
 		expectDeterministic(created).toBeDefined();
-		expectDeterministic(created!.status).toBe("created");
+		expectDeterministic(created!.status).toBe("added");
 		expectDeterministic(created!.before_version_id).toBeNull();
 		expectDeterministic(created!.after_version_id).toBe(sourceVersion.id);
 		expectDeterministic(created!.before_change_id).toBeNull();
 		expectDeterministic(created!.after_change_id).toBeTruthy();
 
-		// deleted (file1/schemaA/e_del): source tombstone vs target content
+		// removed (file1/schemaA/e_del): source tombstone vs target content
 		const deleted = map.get("file1|schemaA|e_del");
 		expectDeterministic(deleted).toBeDefined();
-		expectDeterministic(deleted!.status).toBe("deleted");
+		expectDeterministic(deleted!.status).toBe("removed");
 		expectDeterministic(deleted!.before_version_id).toBe(targetVersion.id);
 		expectDeterministic(deleted!.after_version_id).toBe(sourceVersion.id);
 		expectDeterministic(deleted!.after_change_id).toBeTruthy();
 		expectDeterministic(deleted!.before_change_id).toBeTruthy();
 
-		// updated (file1/schemaB/e_upd)
+		// modified (file1/schemaB/e_upd)
 		const updated = map.get("file1|schemaB|e_upd");
 		expectDeterministic(updated).toBeDefined();
-		expectDeterministic(updated!.status).toBe("updated");
+		expectDeterministic(updated!.status).toBe("modified");
 		expectDeterministic(updated!.before_version_id).toBe(targetVersion.id);
 		expectDeterministic(updated!.after_version_id).toBe(sourceVersion.id);
 		expectDeterministic(updated!.after_change_id).toBeTruthy();

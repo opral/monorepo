@@ -47,7 +47,7 @@ test("renders stacked Before/After HTML for a simple paragraph change", async ()
 	expect(content).toBeTruthy();
 	const html = content.innerHTML;
 	// Should include inline diff markup for the inserted words
-	expect(html).toContain('<span class="diff-created">brave');
+	expect(html).toContain('<span class="diff-added">brave');
 	// Still contains the rest of the sentence
 	expect(html).toContain("world");
 });

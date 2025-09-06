@@ -12,7 +12,7 @@ export type DiffRow = {
 	after_version_id: string | null;
 	after_change_id: string | null;
 	after_commit_id: string | null;
-	status: "created" | "updated" | "deleted" | "unchanged" | null;
+	status: "added" | "modified" | "removed" | "unchanged";
 };
 
 /**
@@ -21,7 +21,7 @@ export type DiffRow = {
  * This function is modeled for merging a source version into a target version,
  * which is why the source always wins in conflict scenarios (when both versions
  * modified the same entity). It performs a full outer join between source and
- * target versions to identify created, updated, deleted, and unchanged entities.
+ * target versions to identify added, modified, removed, and unchanged entities.
  *
  * Note: More sophisticated diff strategies and proper conflict handling are
  * planned for the future. Please upvote https://github.com/opral/lix-sdk/issues/368
@@ -32,18 +32,18 @@ export type DiffRow = {
  * the active version.
  *
  * Diff status meanings:
- * - `created`: Entity exists only in source version (new addition)
- * - `deleted`: Entity explicitly deleted in source (tombstone present)
- * - `updated`: Entity exists in both but with different change_ids (source wins)
+ * - `added`: Entity exists only in source version (new addition)
+ * - `removed`: Entity explicitly deleted in source (tombstone present)
+ * - `modified`: Entity exists in both but with different change_ids (source wins)
  * - `unchanged`: Entity has same change_id in both OR exists only in target without explicit deletion
  *
  * Visual representation (source → target):
  * ```
  * Status      | Source | Target | before_version_id | after_version_id | before_* | after_*
  * ------------|--------|--------|-------------------|------------------|----------|----------
- * created     |   ✓    |   ✗    |       null        |    source.id     |   null   | source
- * deleted     |   ✓*   |   ✓    |     target.id     |    source.id     |  target  | tombstone
- * updated     |   ✓    |   ✓    |     target.id     |    source.id     |  target  | source
+ * added       |   ✓    |   ✗    |       null        |    source.id     |   null   | source
+ * removed     |   ✓*   |   ✓    |     target.id     |    source.id     |  target  | tombstone
+ * modified    |   ✓    |   ✓    |     target.id     |    source.id     |  target  | source
  * unchanged   |   ✓    |   ✓    |     target.id     |    source.id     |   same   | same
  * unchanged   |   ✗    |   ✓    |     target.id     |     target.id    |  target  | target
  * ```
@@ -72,7 +72,7 @@ export type DiffRow = {
  * // Get only entities of a specific schema that were modified
  * const schemaDiff = await selectVersionDiff({ lix, source, target })
  *   .where('diff.schema_key', '=', 'message')
- *   .where('diff.status', 'in', ['created', 'updated', 'deleted'])
+ *   .where('diff.status', 'in', ['added', 'modified', 'removed'])
  *   .execute();
  *
  * @example
@@ -154,14 +154,13 @@ WITH
       s.commit_id AS after_commit_id,
       CASE
         -- Explicit delete in source (tombstone takes precedence)
-        WHEN s.change_id IS NOT NULL AND s.snapshot_content IS NULL THEN 'deleted'
-        -- Created in source only (live row)
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NULL AND s.snapshot_content IS NOT NULL THEN 'created'
+        WHEN s.snapshot_content IS NULL THEN 'removed'
+        -- Added in source only (live row)
+        WHEN t.change_id IS NULL AND s.snapshot_content IS NOT NULL THEN 'added'
         -- Both present and different (live row in source)
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NOT NULL AND s.snapshot_content IS NOT NULL AND s.change_id != t.change_id THEN 'updated'
+        WHEN t.change_id IS NOT NULL AND s.snapshot_content IS NOT NULL AND s.change_id != t.change_id THEN 'modified'
         -- Both present and same (live row in source)
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NOT NULL AND s.snapshot_content IS NOT NULL AND s.change_id = t.change_id THEN 'unchanged'
-        ELSE NULL
+        ELSE 'unchanged'
       END AS status
     FROM s
     LEFT JOIN t ON t.entity_id = s.entity_id AND t.schema_key = s.schema_key AND t.file_id = s.file_id
@@ -182,11 +181,7 @@ WITH
         -- Target-only: entity exists in target but never existed in source (no explicit delete)
         -- Treated as unchanged since source doesn't modify it
         WHEN s.change_id IS NULL AND t.change_id IS NOT NULL THEN 'unchanged'
-        -- These branches shouldn't occur in this half because s.change_id IS NULL filter is applied
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NULL THEN 'created'
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NOT NULL AND s.change_id != t.change_id THEN 'updated'
-        WHEN s.change_id IS NOT NULL AND t.change_id IS NOT NULL AND s.change_id = t.change_id THEN 'unchanged'
-        ELSE NULL
+        ELSE 'unchanged'
       END AS status
     FROM t
     LEFT JOIN s ON s.entity_id = t.entity_id AND s.schema_key = t.schema_key AND s.file_id = t.file_id

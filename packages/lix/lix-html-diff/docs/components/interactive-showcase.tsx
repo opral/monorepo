@@ -94,9 +94,9 @@ export default function InteractiveShowcase() {
     const diffResult = renderHtmlDiff({ beforeHtml, afterHtml });
     ref.current.innerHTML = diffResult;
 
-    // Add event listeners to updated elements
+    // Add event listeners to modified elements
     const updatedElements = ref.current.querySelectorAll(
-      ".diff-updated[data-diff-key]",
+      ".diff-modified[data-diff-key]",
     );
 
     const handleMouseEnter = (e: Event) => {
@@ -160,13 +160,13 @@ export default function InteractiveShowcase() {
           font-weight: 500;
           color: #1f2937;
         }
-        .diff-updated {
+        .diff-modified {
           color: #f59e0b;
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
         }
-        .diff-updated:hover {
+        .diff-modified:hover {
           background-color: rgba(245, 158, 11, 0.1);
           transform: scale(1.02);
         }
@@ -222,7 +222,7 @@ export default function InteractiveShowcase() {
                 color: "#92400e",
               }}
             >
-              UPDATED
+              MODIFIED
             </span>
             <span
               style={{
