@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { detectChanges } from "./detect-changes.js";
-import { openLix } from "@lix-js/sdk";
+import { openLix } from "../../sdk/dist/index.js";
 import { plugin } from "./index.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";

@@ -22,7 +22,6 @@
 		"@hookform/resolvers": "^5.0.1",
 		"@lix-js/inspector": "workspace:*",
 		"@lix-js/plugin-md": "workspace:*",
-		"@lix-js/plugin-txt": "workspace:*",
 		"@lix-js/react-utils": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@radix-ui/react-alert-dialog": "^1.1.11",

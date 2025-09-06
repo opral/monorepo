@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import type { UiDiffComponentProps } from "@lix-js/sdk";
+import type { UiDiffComponentProps } from "../../sdk/dist/index.js";
 import { serializeToHtml } from "@opral/markdown-wc/html";
 import { renderHtmlDiff } from "@lix-js/html-diff";
 import { AstSchemas, type MarkdownNode, type Ast } from "@opral/markdown-wc";
