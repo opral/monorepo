@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
+import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
   generateApiDocs,
   generateApiSidebar,
@@ -61,7 +62,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mermaid()],
+  plugins: [mermaid(), syncReactUtilsReadmePlugin()],
   themeConfig: {
     darkMode: false,
     nav: [
@@ -132,6 +133,7 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
+            { text: "React Utils", link: "/guide/react-utils" },
           ],
         },
         {
