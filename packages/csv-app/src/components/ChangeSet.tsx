@@ -4,7 +4,7 @@ import {
 	createThread,
 	createCheckpoint,
 	Thread,
-	Version,
+	LixVersion,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -252,7 +252,7 @@ const getChanges = async (
 	changeSetId: string,
 	fileId: string,
 	// @ts-expect-error - not used yet
-	currentVersion: Version,
+	currentVersion: LixVersion,
 	previousChangeSetId?: string | undefined | null
 ): Promise<
 	Record<

@@ -76,17 +76,17 @@ test("ebEntity.hasLabel filters entities by label id", async () => {
 			{
 				id: "file0",
 				path: "/docs/readme.md",
-				data: new Uint8Array(Buffer.from("# README")),
+				data: new TextEncoder().encode("# README"),
 			},
 			{
 				id: "file1",
 				path: "/src/index.ts",
-				data: new Uint8Array(Buffer.from("console.log('hello')")),
+				data: new TextEncoder().encode("console.log('hello')"),
 			},
 			{
 				id: "file2",
 				path: "/package.json",
-				data: new Uint8Array(Buffer.from("{}")),
+				data: new TextEncoder().encode("{}"),
 			},
 		])
 		.execute();

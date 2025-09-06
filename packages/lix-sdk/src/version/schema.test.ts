@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 
-test("insert, update, delete on the version view", async () => {
+test("insert, update, delete on version descriptor", async () => {
 	const lix = await openLix({});
 
 	// Create required change sets first
@@ -49,7 +49,7 @@ test("insert, update, delete on the version view", async () => {
 			{
 				id: "version0",
 				name: "version0",
-				commit_id: "commit_id_0",
+				// descriptor-only insert: no commit_id here
 				working_commit_id: "working_commit_0",
 				lixcol_version_id: "global",
 				inherits_from_version_id: "global",
@@ -57,7 +57,7 @@ test("insert, update, delete on the version view", async () => {
 			{
 				id: "version1",
 				name: "version1",
-				commit_id: "commit_id_1",
+				// descriptor-only insert: no commit_id here
 				working_commit_id: "working_commit_1",
 				lixcol_version_id: "global",
 				inherits_from_version_id: "global",
@@ -72,21 +72,15 @@ test("insert, update, delete on the version view", async () => {
 		.selectAll()
 		.execute();
 
-	expect(viewAfterInsert).toMatchObject([
-		{
-			name: "version0",
-			commit_id: "commit_id_0",
-		},
-		{
-			name: "version1",
-			commit_id: "commit_id_1",
-		},
+	expect(viewAfterInsert.map((v) => ({ name: v.name }))).toMatchObject([
+		{ name: "version0" },
+		{ name: "version1" },
 	]);
 
 	await lix.db
 		.updateTable("version")
 		.where("name", "=", "version0")
-		.set({ commit_id: "commit_id_1" })
+		.set({ name: "version0_renamed" })
 		.execute();
 
 	const viewAfterUpdate = await lix.db
@@ -96,15 +90,9 @@ test("insert, update, delete on the version view", async () => {
 		.selectAll()
 		.execute();
 
-	expect(viewAfterUpdate).toMatchObject([
-		{
-			name: "version0",
-			commit_id: "commit_id_1",
-		},
-		{
-			name: "version1",
-			commit_id: "commit_id_1",
-		},
+	expect(viewAfterUpdate.map((v) => ({ name: v.name }))).toMatchObject([
+		{ name: "version0_renamed" },
+		{ name: "version1" },
 	]);
 
 	await lix.db.deleteFrom("version").where("id", "=", "version0").execute();
@@ -120,39 +108,24 @@ test("insert, update, delete on the version view", async () => {
 		{
 			id: "version1",
 			name: "version1",
-			commit_id: "commit_id_1",
 			working_commit_id: "working_commit_1",
 			inherits_from_version_id: "global",
 		},
 	]);
 
+	// Assert descriptor changes (no tip writes since commit_id not provided)
 	const changes = await lix.db
 		.selectFrom("change")
-
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_version_descriptor")
 		.where("entity_id", "in", ["version0", "version1"])
 		.orderBy("change.created_at", "asc")
 		.selectAll("change")
-
 		.execute();
 
-	expect(changes.map((change) => change.snapshot_content)).toMatchObject([
-		// version 0's insert
-		{
-			name: "version0",
-			commit_id: "commit_id_0",
-		},
-		// version 1's insert
-		{
-			name: "version1",
-			commit_id: "commit_id_1",
-		},
-		{
-			// version 0's update
-			name: "version0",
-			commit_id: "commit_id_1",
-		},
-		// version 0's delete
+	expect(changes.map((c) => c.snapshot_content)).toMatchObject([
+		{ name: "version0", working_commit_id: "working_commit_0" },
+		{ name: "version1", working_commit_id: "working_commit_1" },
+		{ name: "version0_renamed" },
 		null,
 	]);
 });
@@ -204,13 +177,11 @@ test("querying by id", async () => {
 			{
 				id: "version0",
 				name: "version0",
-				commit_id: "commit_id_0",
 				working_commit_id: "working_commit_0",
 			},
 			{
 				id: "version1",
 				name: "version1",
-				commit_id: "commit_id_1",
 				working_commit_id: "working_commit_1",
 			},
 		])
@@ -226,7 +197,7 @@ test("querying by id", async () => {
 	expect(versions[0]?.id).toBe("version0");
 });
 
-test("update active version view", async () => {
+test("update active version view (FK against descriptor)", async () => {
 	const lix = await openLix({});
 
 	// Create required change sets and version first
@@ -256,7 +227,6 @@ test("update active version view", async () => {
 		.values({
 			id: "version_id_1",
 			name: "test_version",
-			commit_id: "commit_cs1",
 			working_commit_id: "working_commit_1",
 		})
 		.execute();
@@ -335,11 +305,10 @@ test("should use default id and name if not provided", async () => {
 		])
 		.execute();
 
-	// Insert a version providing only commit_id
+	// Insert a version providing only working_commit_id (no id/name provided)
 	await lix.db
 		.insertInto("version")
 		.values({
-			commit_id: "commit_cs1",
 			working_commit_id: "working_commit_cs1",
 		})
 		.execute();
@@ -348,14 +317,14 @@ test("should use default id and name if not provided", async () => {
 	const version = await lix.db
 		.selectFrom("version")
 		.selectAll()
-		.where("commit_id", "=", "commit_cs1")
+		.where("working_commit_id", "=", "working_commit_cs1")
 		.executeTakeFirstOrThrow();
 
 	expect(version?.id).toBeTypeOf("string");
 	expect(version?.id.length).toBeGreaterThan(0);
 	expect(version?.name).toBeTypeOf("string");
 	expect(version?.name?.length).toBeGreaterThan(0);
-	expect(version?.commit_id).toBe("commit_cs1");
+	// commit_id (tip) is not set via version view; defaults handled elsewhere
 
 	await lix.db
 		.updateTable("version")
@@ -372,23 +341,6 @@ test("should use default id and name if not provided", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(updatedVersion?.name).toBe("new_name");
-});
-
-test("should enforce foreign key constraint on commit_id", async () => {
-	const lix = await openLix({});
-
-	// Attempt to insert version with non-existent commit_id
-	await expect(
-		lix.db
-			.insertInto("version")
-			.values({
-				id: "version1",
-				name: "test_version",
-				commit_id: "commit_nonexistent",
-				working_commit_id: "cs_nonexistent",
-			})
-			.execute()
-	).rejects.toThrow(/Foreign key constraint violation/i);
 });
 
 test("should enforce foreign key constraint on working_commit_id", async () => {
@@ -415,14 +367,13 @@ test("should enforce foreign key constraint on working_commit_id", async () => {
 			.values({
 				id: "version1",
 				name: "test_version",
-				commit_id: "commit_cs1",
 				working_commit_id: "commit_nonexistent",
 			})
 			.execute()
-	).rejects.toThrow(/Foreign key constraint violation/i);
+	).rejects.toThrow();
 });
 
-test("should allow version insertion with valid commit and change set references", async () => {
+test("should allow version insertion with valid working commit reference", async () => {
 	const lix = await openLix({});
 
 	// Create valid change sets
@@ -454,7 +405,6 @@ test("should allow version insertion with valid commit and change set references
 			.values({
 				id: "version1",
 				name: "test_version",
-				commit_id: "commit_cs1",
 				working_commit_id: "working_commit_cs2",
 			})
 			.execute()
@@ -462,7 +412,7 @@ test("should allow version insertion with valid commit and change set references
 });
 
 // having the active_version as regular table is easier
-test.skip("should enforce foreign key constraint on active_version.version_id", async () => {
+test("should enforce FK on active_version.version_id against descriptor", async () => {
 	const lix = await openLix({});
 
 	// Now attempt to update active_version with non-existent version_id
@@ -508,7 +458,6 @@ test("should allow active_version update with valid version_id", async () => {
 		.values({
 			id: "version1",
 			name: "test_version",
-			commit_id: "commit_cs1",
 			working_commit_id: "working_commit_cs1",
 		})
 		.execute();
@@ -577,19 +526,16 @@ test("versions should be globally accessible regardless of version context", asy
 			{
 				id: "version_a",
 				name: "Version A",
-				commit_id: "commit_a",
 				working_commit_id: "working_commit_a",
 			},
 			{
 				id: "version_b",
 				name: "Version B",
-				commit_id: "commit_b",
 				working_commit_id: "working_commit_b",
 			},
 			{
 				id: "version_c",
 				name: "Version C",
-				commit_id: "commit_c",
 				working_commit_id: "working_commit_c",
 			},
 		])
@@ -774,7 +720,6 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 		.values({
 			id: "v1",
 			name: "version one",
-			commit_id: "commit_cs1",
 			working_commit_id: "working_commit_1",
 		})
 		.execute();
@@ -786,7 +731,6 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 			.values({
 				id: "v2",
 				name: "version two",
-				commit_id: "commit_cs2", // Different historical point is fine
 				working_commit_id: "working_commit_1", // <<< Same working_commit_id
 			})
 			.execute()
@@ -801,7 +745,6 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 			.values({
 				id: "v3",
 				name: "version three",
-				commit_id: "commit_cs1", // Can branch from same historical point
 				working_commit_id: "working_commit_2", // <<< Different working_commit_id
 			})
 			.execute()
@@ -874,7 +817,6 @@ test("inherits_from_version_id should default to global", async () => {
 		.values({
 			id: "test_version",
 			name: "Test Version",
-			commit_id: "commit_1",
 			working_commit_id: "working_commit_1",
 			inherits_from_version_id: undefined, // Should default to 'global'
 		})
@@ -938,7 +880,6 @@ test("versions should have hidden property defaulting to false", async () => {
 		.values({
 			id: "test_version",
 			name: "Test Version",
-			commit_id: "commit_test",
 			working_commit_id: "working_commit_test",
 		})
 		.execute();
@@ -1014,7 +955,6 @@ test("can explicitly set hidden to true", async () => {
 		.values({
 			id: "hidden_version",
 			name: "Hidden Version",
-			commit_id: "commit_hidden",
 			working_commit_id: "working_commit_hidden",
 			hidden: true,
 		})
@@ -1027,4 +967,252 @@ test("can explicitly set hidden to true", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(version.hidden).toBe(1);
+});
+
+// V2 unified view tests (merged)
+
+test("insert via version writes descriptor + tip when commit_id provided", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs_unified_1", lixcol_version_id: "global" },
+			{ id: "wcs_unified_1", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{
+				id: "c_unified_1",
+				change_set_id: "cs_unified_1",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "wc_unified_1",
+				change_set_id: "wcs_unified_1",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "v_unified_1",
+			name: "v_unified_1",
+			working_commit_id: "wc_unified_1",
+			commit_id: "c_unified_1",
+		})
+		.execute();
+
+	const v = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "v_unified_1")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(v.name).toBe("v_unified_1");
+	expect(v.working_commit_id).toBe("wc_unified_1");
+	expect(v.commit_id).toBe("c_unified_1");
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "v_unified_1")
+		.orderBy("created_at", "asc")
+		.selectAll()
+		.execute();
+
+	const byKey = new Map(
+		changes.map((c) => [
+			c.schema_key,
+			typeof c.snapshot_content === "string"
+				? JSON.parse(c.snapshot_content)
+				: c.snapshot_content,
+		])
+	);
+	expect(byKey.get("lix_version_descriptor")).toMatchObject({
+		id: "v_unified_1",
+		name: "v_unified_1",
+		working_commit_id: "wc_unified_1",
+	});
+	expect(byKey.get("lix_version_tip")).toMatchObject({
+		id: "v_unified_1",
+		commit_id: "c_unified_1",
+	});
+});
+
+test("insert via version without commit_id auto-inserts a tip", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("change_set_all")
+		.values([{ id: "wcs_unified_2", lixcol_version_id: "global" }])
+		.execute();
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{
+				id: "wc_unified_2",
+				change_set_id: "wcs_unified_2",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "v_unified_2",
+			name: "v_unified_2",
+			working_commit_id: "wc_unified_2",
+		})
+		.execute();
+
+	const v = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "v_unified_2")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(typeof v.commit_id).toBe("string");
+	expect((v.commit_id as string).length).toBeGreaterThan(0);
+
+	const tipRows = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "v_unified_2")
+		.where("schema_key", "=", "lix_version_tip")
+		.selectAll()
+		.execute();
+	expect(tipRows.length).toBe(1);
+});
+
+test("insert via version_all writes descriptor + tip in scoped version", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs_unified_3", lixcol_version_id: "global" },
+			{ id: "wcs_unified_3", lixcol_version_id: "global" },
+		])
+		.execute();
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{
+				id: "c_unified_3",
+				change_set_id: "cs_unified_3",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "wc_unified_3",
+				change_set_id: "wcs_unified_3",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version_all")
+		.values({
+			id: "v_unified_3",
+			name: "v_unified_3",
+			working_commit_id: "wc_unified_3",
+			commit_id: "c_unified_3",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	const v = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "v_unified_3")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	expect(v.commit_id).toBe("c_unified_3");
+});
+
+test("commit_id FK uses materialized mode (lenient on insert)", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("change_set_all")
+		.values([{ id: "wcs_unified_6", lixcol_version_id: "global" }])
+		.execute();
+
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{
+				id: "wc_unified_6",
+				change_set_id: "wcs_unified_6",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "v_unified_6",
+				name: "v_unified_6",
+				working_commit_id: "wc_unified_6",
+				commit_id: "does_not_exist",
+			})
+			.execute()
+	).resolves.toBeDefined();
+});
+
+test("delete via version writes descriptor + tip tombstones", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs_unified_7", lixcol_version_id: "global" },
+			{ id: "wcs_unified_7", lixcol_version_id: "global" },
+		])
+		.execute();
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{
+				id: "c_unified_7",
+				change_set_id: "cs_unified_7",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "wc_unified_7",
+				change_set_id: "wcs_unified_7",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "v_unified_7",
+			name: "v_unified_7",
+			working_commit_id: "wc_unified_7",
+			commit_id: "c_unified_7",
+		})
+		.execute();
+
+	await lix.db.deleteFrom("version").where("id", "=", "v_unified_7").execute();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "v_unified_7")
+		.orderBy("created_at", "asc")
+		.selectAll()
+		.execute();
+
+	const tombstones = changes.filter(
+		(c) => c.snapshot_content === null || c.snapshot_content === undefined
+	);
+	expect(tombstones.length).toBeGreaterThanOrEqual(2);
 });

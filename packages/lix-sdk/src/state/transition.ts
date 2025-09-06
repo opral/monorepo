@@ -7,9 +7,8 @@ import {
 	LixChangeSetElementSchema,
 } from "../change-set/schema.js";
 import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
-import { LixVersionSchema, type LixVersion } from "../version/schema.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { LixVersionTipSchema, type LixVersion } from "../version/schema.js";
+import { sql } from "kysely";
 import { timestamp } from "../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
@@ -194,13 +193,15 @@ WHERE rn = 1;
 			return commit;
 		}
 
-		// 3) Create change set + commit + edges + version as tracked change rows
+		// 3) Create change set + commit + edges + tip as tracked change rows
 		const changeSetId = uuidV7({ lix: args.lix });
 		const commitId = uuidV7({ lix: args.lix });
 		const now = timestamp({ lix: args.lix });
 
 		// Collect all raw changes to insert (with explicit ids + created_at)
 		const metadataChanges: LixChangeRaw[] = [];
+		// Pre-generate tip change id so we can reference it in commit.meta_change_ids
+		const versionChangeId = uuidV7({ lix: args.lix });
 
 		// change_set entity
 		metadataChanges.push({
@@ -246,40 +247,14 @@ WHERE rn = 1;
 			snapshot_content: JSON.stringify({
 				id: commitId,
 				change_set_id: changeSetId,
+				parent_commit_ids: [sourceCommitId, args.to.id],
+				change_ids: combinedElements.map((e) => e.id),
+				meta_change_ids: [versionChangeId],
 			}),
 			created_at: now,
 		});
 
-		// commit_edge entities: source->commit, target->commit (track ids for change_set_element)
-		const sourceEdgeChangeId = uuidV7({ lix: args.lix });
-		metadataChanges.push({
-			id: sourceEdgeChangeId,
-			entity_id: `${sourceCommitId}~${commitId}`,
-			schema_key: LixCommitEdgeSchema["x-lix-key"],
-			schema_version: LixCommitEdgeSchema["x-lix-version"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: sourceCommitId,
-				child_id: commitId,
-			}),
-			created_at: now,
-		});
-
-		const targetEdgeChangeId = uuidV7({ lix: args.lix });
-		metadataChanges.push({
-			id: targetEdgeChangeId,
-			entity_id: `${args.to.id}~${commitId}`,
-			schema_key: LixCommitEdgeSchema["x-lix-key"],
-			schema_version: LixCommitEdgeSchema["x-lix-version"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: args.to.id,
-				child_id: commitId,
-			}),
-			created_at: now,
-		});
+		// Do not emit commit_edge as change rows. Edges are derived from commit.parent_commit_ids.
 
 		// Add change_set_element entries for commit and edges so materializer can reach metadata
 		for (const meta of [
@@ -287,18 +262,6 @@ WHERE rn = 1;
 				change_id: commitChangeId,
 				entity_id: commitId,
 				schema_key: LixCommitSchema["x-lix-key"],
-				file_id: "lix" as const,
-			},
-			{
-				change_id: sourceEdgeChangeId,
-				entity_id: `${sourceCommitId}~${commitId}`,
-				schema_key: LixCommitEdgeSchema["x-lix-key"],
-				file_id: "lix" as const,
-			},
-			{
-				change_id: targetEdgeChangeId,
-				entity_id: `${args.to.id}~${commitId}`,
-				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				file_id: "lix" as const,
 			},
 		]) {
@@ -320,49 +283,16 @@ WHERE rn = 1;
 			});
 		}
 
-		// Fetch current version snapshot to preserve fields
-		const intDb = trx as unknown as Kysely<LixInternalDatabaseSchema>;
-		const versionRow = await intDb
-			.selectFrom("internal_resolved_state_all")
-			.where("schema_key", "=", "lix_version")
-			.where("entity_id", "=", version.id)
-			.where("snapshot_content", "is not", null)
-			.select([sql`json(snapshot_content)`.as("snapshot_content")])
-			.executeTakeFirstOrThrow();
-		const currentVersion = versionRow.snapshot_content as unknown as LixVersion;
-		const updatedVersion = {
-			...currentVersion,
-			commit_id: commitId,
-		} satisfies LixVersion;
-
-		// version entity update as tracked change (track id for change_set_element)
-		const versionChangeId = uuidV7({ lix: args.lix });
+		// version pointer move (tip) as tracked change (track id for CSE if needed)
+		// Write the pointer ledger as a tip change
 		metadataChanges.push({
 			id: versionChangeId,
 			entity_id: version.id,
-			schema_key: LixVersionSchema["x-lix-key"],
-			schema_version: LixVersionSchema["x-lix-version"],
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify(updatedVersion),
-			created_at: now,
-		});
-
-		// Also anchor the version change as a change_set_element for materialization
-		metadataChanges.push({
-			id: uuidV7({ lix: args.lix }),
-			entity_id: `${changeSetId}~${versionChangeId}`,
-			schema_key: LixChangeSetElementSchema["x-lix-key"],
-			schema_version: LixChangeSetElementSchema["x-lix-version"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				change_set_id: changeSetId,
-				change_id: versionChangeId,
-				entity_id: version.id,
-				schema_key: LixVersionSchema["x-lix-key"],
-				file_id: "lix",
-			}),
+			snapshot_content: JSON.stringify({ id: version.id, commit_id: commitId }),
 			created_at: now,
 		});
 
@@ -374,20 +304,45 @@ WHERE rn = 1;
 				.execute();
 		}
 
-		// Ensure FK validations for version update see commit/edge/change_set in global cache
+		// Ensure FK validations and readers see commit/graph/change_set in global cache
+		// Add derived edge cache rows (parent -> new commit) without inserting commit_edge changes
+		const derivedEdgesForCache: LixChangeRaw[] = [
+			{
+				id: uuidV7({ lix: args.lix }),
+				entity_id: `${sourceCommitId}~${commitId}`,
+				schema_key: LixCommitEdgeSchema["x-lix-key"],
+				schema_version: LixCommitEdgeSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					parent_id: sourceCommitId,
+					child_id: commitId,
+				}),
+				created_at: now,
+			},
+			{
+				id: uuidV7({ lix: args.lix }),
+				entity_id: `${args.to.id}~${commitId}`,
+				schema_key: LixCommitEdgeSchema["x-lix-key"],
+				schema_version: LixCommitEdgeSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					parent_id: args.to.id,
+					child_id: commitId,
+				}),
+				created_at: now,
+			},
+		];
+
 		updateStateCache({
 			lix: args.lix,
-			changes: metadataChanges,
+			changes: [...metadataChanges, ...derivedEdgesForCache],
 			version_id: "global",
 			commit_id: commitId,
 		});
 
-		// Ensure the version view reflects the new commit immediately (bypass materializer latency)
-		await trx
-			.updateTable("version")
-			.set({ commit_id: commitId })
-			.where("id", "=", version.id)
-			.execute();
+		// Version view reflects the new commit via tip and cache; no direct version update
 
 		// Prepare user entity cache updates (target content + deletions)
 		const userChangesForCache: LixChangeRaw[] = [

@@ -53,13 +53,21 @@ export const cacheMissSimulation: SimulationTestDef = {
 		// The cache will be cleared before each query anyway
 
 		// Helper to wrap a query builder to clear cache before execute
-		const wrapQueryBuilder = (query: any): any => {
+		const wrapQueryBuilder = (
+			query: any,
+			opts?: { skipClear?: boolean; tableName?: string }
+		): any => {
+			const skipClear = opts?.skipClear === true;
+			const tableName = opts?.tableName;
 			const originalExecute = query.execute;
 
 			// Override execute
 			query.execute = async function (...args: any[]) {
-				// This forces re-materialization from changes
-				clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
+				// Skip cache clear for internal_* views/tables
+				if (!skipClear) {
+					// This forces re-materialization from changes
+					clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
+				}
 
 				// Call the original execute
 				return originalExecute.apply(this, args);
@@ -86,7 +94,7 @@ export const cacheMissSimulation: SimulationTestDef = {
 						const result = originalMethod.apply(this, args);
 						// If it returns a query builder, wrap it too
 						if (result && typeof result === "object" && "execute" in result) {
-							return wrapQueryBuilder(result);
+							return wrapQueryBuilder(result, { skipClear, tableName });
 						}
 						return result;
 					};
@@ -101,7 +109,10 @@ export const cacheMissSimulation: SimulationTestDef = {
 
 		lix.db.selectFrom = (table: any) => {
 			const query = originalSelectFrom(table);
-			return wrapQueryBuilder(query);
+			// Detect internal_* tables and skip cache clearing for them
+			const tableName = String(table ?? "");
+			const isInternal = tableName.startsWith("internal_");
+			return wrapQueryBuilder(query, { skipClear: isInternal, tableName });
 		};
 
 		// Return the modified lix object

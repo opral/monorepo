@@ -182,7 +182,7 @@ test.skip("it should detect conflicts", async () => {
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lsaHandler(request)) as any);
 
 	// server has/creates value0 for mock_key
 	await lixOnServer.db

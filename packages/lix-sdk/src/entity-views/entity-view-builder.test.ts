@@ -104,6 +104,68 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		expect(historyResult[0]).toHaveProperty("lixcol_depth", 0); // Current state is at depth 0
 	});
 
+	test("creates read-only views when readOnly is true", async () => {
+		const lix = await openLix({});
+
+		// Register stored schema for our test entity
+		const roSchema: LixSchemaDefinition = {
+			"x-lix-key": "ro_entity",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["id"],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id", "name"],
+		} as const;
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: roSchema })
+			.execute();
+
+		// Create read-only views
+		createEntityViewsIfNotExists({
+			lix,
+			schema: roSchema,
+			overrideName: "ro_test",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+			readOnly: true,
+		});
+
+		// Select should work and return empty results initially
+		const initial = await lix.db
+			.selectFrom("ro_test" as any)
+			.selectAll()
+			.execute();
+		expect(initial).toEqual([]);
+
+		// Inserts/updates/deletes should fail because view is read-only (no triggers)
+		await expect(
+			lix.db
+				.insertInto("ro_test" as any)
+				.values({ id: "a", name: "A" })
+				.execute()
+		).rejects.toThrow(/view/i);
+
+		await expect(
+			lix.db
+				.updateTable("ro_test" as any)
+				.set({ name: "B" })
+				.where("id" as any, "=", "a")
+				.execute()
+		).rejects.toThrow(/view/i);
+
+		await expect(
+			lix.db
+				.deleteFrom("ro_test" as any)
+				.where("id" as any, "=", "a")
+				.execute()
+		).rejects.toThrow(/view/i);
+	});
+
 	test("should handle cross-view operations", async () => {
 		const lix = await openLix({});
 

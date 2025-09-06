@@ -1,10 +1,4 @@
-import {
-	openLix,
-	Account,
-	switchAccount,
-	Lix,
-	Version,
-} from "@lix-js/sdk";
+import { openLix, Account, switchAccount, Lix, LixVersion } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
@@ -211,19 +205,21 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	if (!lix) return null;
+export const activeVersionAtom = atom<Promise<LixVersion | null>>(
+	async (get) => {
+		get(withPollingAtom);
+		const lix = await get(lixAtom);
+		if (!lix) return null;
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	return activeVersion;
-});
+		return activeVersion;
+	}
+);
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);

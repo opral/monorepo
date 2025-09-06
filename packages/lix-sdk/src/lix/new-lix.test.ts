@@ -71,7 +71,7 @@ test("newLixFile creates all schema definitions", async () => {
 		.execute();
 
 	const expectedSchemaCount = Object.keys(LixSchemaViewMap).length;
-	expect(storedSchemas).toHaveLength(expectedSchemaCount);
+	expect(storedSchemas).toHaveLength(expectedSchemaCount + 3); // +3 for lix_active_account, lix_active_version, lix_change
 
 	// Check that each schema from LixSchemaViewMap exists
 	for (const schema of Object.values(LixSchemaViewMap)) {

@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "tui": {
+    "autoExit": true
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "publicEnv": [

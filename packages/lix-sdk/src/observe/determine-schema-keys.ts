@@ -53,12 +53,14 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 		}
 	}
 
-	// Add special tables that don't have direct schema mappings but are important
+	// Add special tables/views that don't come from LixSchemaViewMap
 	const specialMappings = {
-		change: "change", // Special case for change table
-		state: "state", // Virtual state table - could include multiple schema keys
-		state_all: "state_all", // Virtual state_all table - includes all versions
-	};
+		change: "change",
+		state: "state",
+		state_all: "state_all",
+		version: "lix_version",
+		active_version: "lix_active_version",
+	} as const;
 
 	Object.assign(tableToSchemaMap, specialMappings);
 
@@ -70,7 +72,71 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 		}
 	}
 
+	// Try to detect literal schema_key filters from the compiled SQL and parameters.
+	// This allows more precise dependency tracking for state_all queries.
+	const sqlText: string | undefined = (compiledQuery?.sql ??
+		compiledQuery?.query?.sql) as any;
+	const params: any[] = (compiledQuery?.parameters ??
+		compiledQuery?.query?.parameters) as any[];
+	if (typeof sqlText === "string" && Array.isArray(params)) {
+		const lower = sqlText.toLowerCase();
+		const idx = lower.indexOf("schema_key");
+		if (idx >= 0) {
+			// Count placeholders up to and including first occurrence of schema_key equality
+			// This assumes placeholders are '?'.
+			const before = lower.slice(0, idx);
+			const qCount = (before.match(/\?/g) || []).length;
+			// Look ahead for the first '?' after schema_key reference
+			const after = lower.slice(idx);
+			const aheadQIndex = after.indexOf("?");
+			if (aheadQIndex >= 0) {
+				const paramIndex = qCount; // parameter index of that placeholder
+				const val = params[paramIndex];
+				if (typeof val === "string" && !schemaKeys.includes(val)) {
+					schemaKeys.push(val);
+				}
+			}
+		}
+	}
+
 	return schemaKeys;
+}
+
+/**
+ * Extracts literal filters from a compiled Kysely query.
+ * Currently detects:
+ * - schema_key equality against a single placeholder
+ * - version_id equality against a single placeholder
+ */
+export function extractLiteralFilters(compiledQuery: any): {
+	schemaKeys: string[];
+	versionIds: string[];
+} {
+	const result = { schemaKeys: [] as string[], versionIds: [] as string[] };
+	const sqlText: string | undefined = (compiledQuery?.sql ??
+		compiledQuery?.query?.sql) as any;
+	const params: any[] = (compiledQuery?.parameters ??
+		compiledQuery?.query?.parameters) as any[];
+	if (typeof sqlText !== "string" || !Array.isArray(params)) return result;
+	const lower = sqlText.toLowerCase();
+
+	const pushParamAfterKey = (key: string, sink: string[]) => {
+		const idx = lower.indexOf(key);
+		if (idx < 0) return;
+		const before = lower.slice(0, idx);
+		const qCount = (before.match(/\?/g) || []).length;
+		const after = lower.slice(idx);
+		const aheadQIndex = after.indexOf("?");
+		if (aheadQIndex >= 0) {
+			const paramIndex = qCount; // first '?' after key occurrence
+			const val = params[paramIndex];
+			if (typeof val === "string" && !sink.includes(val)) sink.push(val);
+		}
+	};
+
+	pushParamAfterKey("schema_key", result.schemaKeys);
+	pushParamAfterKey("version_id", result.versionIds);
+	return result;
 }
 
 /**

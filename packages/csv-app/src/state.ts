@@ -1,10 +1,4 @@
-import {
-	Account,
-	Lix,
-	Version,
-	openLix,
-	switchAccount,
-} from "@lix-js/sdk";
+import { Account, Lix, LixVersion, openLix, switchAccount } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -155,7 +149,7 @@ export const lixAtom = atom(async (get) => {
 });
 
 export const currentVersionAtom = atom<
-	Promise<Version & { targets: Version[] }>
+	Promise<LixVersion & { targets: LixVersion[] }>
 >(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);

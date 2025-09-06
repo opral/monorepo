@@ -185,6 +185,7 @@ simulationTest(
 		expectDeterministic(tgtRow.change_id).toBe(srcRow.change_id);
 	}
 );
+
 simulationTest(
 	"applies explicit deletions: source tombstones delete target content",
 	async ({ openSimulatedLix, expectDeterministic }) => {
@@ -250,18 +251,20 @@ simulationTest(
 		expectDeterministic(tgtRows.length).toBe(0);
 
 		// Verify a deletion change was created and referenced in the merge change_set
-		const afterTarget = await lix.db
+		// Also log the version pointer from the view and the materializer for debugging
+		const afterTargetView = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
 			.selectAll()
 			.executeTakeFirstOrThrow();
+
 		const commitChangeRow = await lix.db
 			.selectFrom("change")
 			.where("schema_key", "=", "lix_commit")
 			.where(
 				sql`json_extract(snapshot_content, '$.id')`,
 				"=",
-				afterTarget.commit_id as any
+				afterTargetView.commit_id as any
 			)
 			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
@@ -624,53 +627,19 @@ test.todo("handles empty target (fresh branch) gracefully");
 test.todo("handles mixed created/updated/deleted keys across multiple files");
 
 /**
- * TL;DR — Global/Source/Target merge model
+ * TL;DR — One-Commit Merge Model
  *
- * - Target (the version we merge into) holds user-domain entities. It receives
- *   a new tip commit (target.tip_after) that ANCHORS the winning entity changes.
- * - Global holds the DAG (graph) for all versions. It publishes commits, edges
- *   and version pointers so the full history can be re-materialized from the
- *   global tip alone.
- * - Source remains untouched by the merge: its `commit_id` is unchanged.
- *
- * Properties guaranteed by the two-commit model:
- * 1) Target commit (target.tip_after) has TWO PARENTS:
- *      - parent_1 = target.tip_before
- *      - parent_2 = source.tip_before
- * 2) Global commit (global.tip_after) publishes graph-only rows for BOTH commits
- *    (global.tip_after and target.tip_after) and the necessary edges/version updates:
- *      - Commits (2):   ['lix_commit' for global.tip_after, 'lix_commit' for target.tip_after]
- *      - Edges (3):     [target.tip_before → target.tip_after,
- *                        source.tip_before → target.tip_after,
- *                        global.tip_before → global.tip_after]
- *      - Versions (2):  ['lix_version' for target.id   → target.tip_after,
- *                        'lix_version' for 'global'    → global.tip_after]
- * 3) No user-domain entities are referenced under global — only graph metadata and version updates.
- *
- * Visual overview (simplified):
- *
- *  ┌─────────────────┐                 ┌─────────────────────────┐
- *  │  version_target │  target data    │   COMMIT (target)       │
- *  └─────────────────┘ ───────────────▶│  references user entities  │
- *                                      └──────────┬──────────────┘
- *                                                 │ parent edges (2)
- *                                                 │ from: target.tip_before, source.tip_before
- *                                                 ▼
- *  ┌────────────┐                   ┌─────────────────────────┐
- *  │  global    │  graph rows       │  COMMIT (global)        │
- *  └────────────┘ ─────────────────▶│  change_set with:       │
- *                                   │    commits (2),         │
- *                                   │    edges   (3),         │
- *                                   │    versions (2)         │
- *                                   └──────────┬──────────────┘
- *                                              │ edge (1)
- *                                              │ from: global.tip_before to global.tip_after
- *                                              ▼
- *                                   versions: target → target.tip_after,
- *                                             global → global.tip_after
+ * - Target (merge destination) receives a single new commit that ANCHORS the
+ *   winning domain changes. Parents are [target.tip_before, source.tip_before].
+ * - Global holds the DAG topology via derived edges from parent_commit_ids.
+ *   No global duplicate commit is written; the global version pointer remains
+ *   unchanged by a merge.
+ * - CSEs are domain-only (entity + change_author). We do not emit meta CSEs
+ *   for commit/version/change_set.
+ * - Source remains untouched (its commit_id does not change).
  */
 simulationTest(
-	"merge meta: two-commit model writes global graph rows and local data",
+	"merge meta: one-commit model writes global graph edges and local data",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -760,20 +729,22 @@ simulationTest(
 		expectDeterministic(targetParents.has(beforeSource.commit_id)).toBe(true);
 
 		// ── Expect block 1: GLOBAL ────────────────────────────────────────────────
-		// Global expectations:
-		// - Global tip changed
-		// - Global change_set references: commits (2), edges (3), versions (2)
+		// One-commit model: global tip does NOT change
+		expectDeterministic(afterGlobal.commit_id).toBe(beforeGlobal.commit_id);
 
-		expectDeterministic(afterGlobal.commit_id).not.toBe(beforeGlobal.commit_id);
-
+		// Fetch the target commit change row directly to read its change_set
 		const globalCommit = await lix.db
-			.selectFrom("commit_all")
-			.where("lixcol_version_id", "=", "global")
-			.where("id", "=", afterGlobal.commit_id)
-			.selectAll()
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where(
+				sql`json_extract(snapshot_content, '$.id')`,
+				"=",
+				afterTarget.commit_id as any
+			)
+			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
 
-		const changeSetId = globalCommit.change_set_id;
+		const changeSetId = (globalCommit as any).snapshot.change_set_id as string;
 		const cseRows = await lix.db
 			.selectFrom("change_set_element_all")
 			.where("lixcol_version_id", "=", "global")
@@ -787,6 +758,10 @@ simulationTest(
 			])
 			.execute();
 
+		// the schema counts should be identical between simulations in any case
+		// in addition to expecting certain counts
+		expectDeterministic(cseRows).toBeDefined();
+
 		const schemaCounts = cseRows.reduce<Record<string, number>>(
 			(acc, r: any) => {
 				acc[r.schema_key] = (acc[r.schema_key] ?? 0) + 1;
@@ -794,44 +769,25 @@ simulationTest(
 			},
 			{}
 		);
-		expectDeterministic(schemaCounts["lix_commit"]).toBe(2);
-		expectDeterministic(schemaCounts["lix_commit_edge"]).toBe(3);
-		expectDeterministic(schemaCounts["lix_version"]).toBe(2);
 
-		// Commits: one for afterGlobal and one for afterTarget
-		const commitIds = new Set(
-			cseRows
-				.filter((r: any) => r.schema_key === "lix_commit")
-				.map((r: any) => r.entity_id)
-		);
-		expectDeterministic(commitIds.has(afterGlobal.commit_id)).toBe(true);
-		expectDeterministic(commitIds.has(afterTarget.commit_id)).toBe(true);
+		// No meta CSEs (commit/version) in one-commit, domain-only CSEs
+		expectDeterministic(schemaCounts["lix_commit"] ?? 0).toBe(0);
+		expectDeterministic(schemaCounts["lix_version"] ?? 0).toBe(0);
 
-		// Edges: two parents for target, and one edge prevGlobal -> afterGlobal
-		const edgePairs = cseRows
-			.filter((r: any) => r.schema_key === "lix_commit_edge")
-			.map((r: any) => r.entity_id.split("~"));
-		const edgeParents = edgePairs.map((p: any) => p[0]);
-		const edgeChildren = edgePairs.map((p: any) => p[1]);
-		const parentsSet = new Set(edgeParents);
-		const childrenSet = new Set(edgeChildren);
+		// Edges are derived/materialized: verify via commit_edge view (global scope)
+		const allEdges = await lix.db
+			.selectFrom("commit_edge")
+			.select(["parent_id", "child_id"])
+			.execute();
+		const parentsSet = new Set(allEdges.map((e: any) => e.parent_id));
+		const childrenSet = new Set(allEdges.map((e: any) => e.child_id));
 		// target edges
 		expectDeterministic(parentsSet.has(beforeTarget.commit_id)).toBe(true);
 		expectDeterministic(parentsSet.has(beforeSource.commit_id)).toBe(true);
-		// ensure child target appears
 		expectDeterministic(childrenSet.has(targetCommitId)).toBe(true);
-		// global lineage edge
-		expectDeterministic(parentsSet.has(beforeGlobal.commit_id)).toBe(true);
-		expectDeterministic(childrenSet.has(afterGlobal.commit_id)).toBe(true);
+		// No separate global lineage edge in one-commit model
 
-		// Versions referenced in CSE: verify presence, and verify pointers via version view
-		const versionEntityIds = new Set(
-			cseRows
-				.filter((r: any) => r.schema_key === "lix_version")
-				.map((r: any) => r.entity_id)
-		);
-		expectDeterministic(versionEntityIds.has(target.id)).toBe(true);
-		expectDeterministic(versionEntityIds.has("global")).toBe(true);
+		// Version CSEs are not emitted; verify pointers via version view only
 		const versionTargetNow = await lix.db
 			.selectFrom("version")
 			.where("id", "=", target.id)
@@ -843,7 +799,9 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		expectDeterministic(versionTargetNow.commit_id).toBe(afterTarget.commit_id);
-		expectDeterministic(versionGlobalNow.commit_id).toBe(afterGlobal.commit_id);
+		expectDeterministic(versionGlobalNow.commit_id).toBe(
+			beforeGlobal.commit_id
+		);
 
 		// ── Expect block 2: LOCAL ────────────────────────────────────────────────
 		// Local expectations:
@@ -861,13 +819,18 @@ simulationTest(
 		expectDeterministic(targetState.length).toBe(1);
 
 		// Target commit change_set should reference exactly the merged entity once
-		const targetCommit = await lix.db
-			.selectFrom("commit_all")
-			.where("lixcol_version_id", "=", "global")
-			.where("id", "=", afterTarget.commit_id)
-			.selectAll()
+		const targetCommitChange = await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_commit")
+			.where(
+				sql`json_extract(snapshot_content, '$.id')`,
+				"=",
+				afterTarget.commit_id as any
+			)
+			.select([sql`json(snapshot_content)`.as("snapshot")])
 			.executeTakeFirstOrThrow();
-		const targetChangeSetId = targetCommit.change_set_id;
+		const targetChangeSetId = (targetCommitChange as any).snapshot
+			.change_set_id as string;
 		const targetCseRows = await lix.db
 			.selectFrom("change_set_element_all")
 			.where("lixcol_version_id", "=", "global")

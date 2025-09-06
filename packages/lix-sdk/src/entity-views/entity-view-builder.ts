@@ -124,6 +124,8 @@ export function createEntityViewsIfNotExists(args: {
 	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
+	/** If true, creates read-only views (no INSERT/UPDATE/DELETE triggers) */
+	readOnly?: boolean;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"];
 
@@ -131,12 +133,14 @@ export function createEntityViewsIfNotExists(args: {
 	createEntityStateView({
 		...args,
 		overrideName: view_name,
+		readOnly: args.readOnly,
 	});
 
 	// Create the _all view (all versions)
 	createEntityStateAllView({
 		...args,
 		overrideName: view_name + "_all",
+		readOnly: args.readOnly,
 	});
 
 	// Create the _history view (historical states)

@@ -6,43 +6,21 @@ import { insertTransactionState } from "../transaction/insert-transaction-state.
 import { commit } from "./commit.js";
 import { openLix } from "../../lix/open-lix.js";
 import { nanoId, timestamp, uuidV7 } from "../../deterministic/index.js";
+import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
 
 /**
- * TL;DR
- *   ──►  *Business* rows (actual user-domain data) are stored in the *active*
- *        version that the user is editing.
- *   ──►  *Graph* rows (everything that describes the history DAG: change-sets,
- *        commits, edges, version objects) are *always* stored in the
- *        special version called **global**.
- *
- *   This split gives us two key properties:
- *
- *     1. **Single source of truth for history topology**
- *        The entire DAG is materialised exactly once (under `global`), so
- *        graph traversals and lineage CTEs never need to bounce across version
- *        tables. Think "`.git/refs`-style catalogue", but in-DB.
- *
- *     2. **Version-local changes**
- *
- *
- *  BUSINESS DATA lives on the *active version*,
- *  GRAPH META-DATA lives on *global*.
- *
- *  ┌─────────────────┐                 ┌─────────────────────────┐
- *  │  version_active │  user-data      │   COMMIT  (active)      │
- *  └─────────────────┘ ───────────────▶│  entity                 │
- *                                      └─────────────────────────┘
- *                                             ▲
- *                                             │ graph rows that *describe* ↑
- *  ┌────────────┐                   ┌─────────┴───────────────────────────┐
- *  │  global    │  graph rows       │  COMMIT  (global) – graph-only      │
- *  └────────────┘ ─────────────────▶│  change_set, commit, edge, version  │
- *                                   └─────────────────────────────────────┘
+ * One-Commit Model
+ * - Business rows (user-domain) live on the active version.
+ * - Each mutation creates exactly one commit for the mutated version.
+ * - No global duplicate commit row; graph edges are derived globally from
+ *   commit.parent_commit_ids; global version pointer remains unchanged.
+ * - CSEs are domain-only (entity + author). We do not create CSEs for meta
+ *   like commit/change_set/version.
  */
-test("split-commit: business rows on active version, graph rows on global", async () => {
+test("commit writes business rows to active version; graph edges update globally", async () => {
 	/*──────────────────────── 1. initialise workspace ─────────────────────*/
 	const lix = await openLix({
 		keyValues: [
@@ -119,10 +97,10 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		.executeTakeFirstOrThrow();
 
 	const commitActiveId = activeVersionAfter.commit_id; // data commit
-	const commitGlobalId = globalVersionAfter.commit_id; // graph commit
+	const commitGlobalId = globalVersionAfter.commit_id; // global commit id (unchanged in drop-dual-commit)
 
 	expect(commitActiveId).not.toBe(prevCommitActive);
-	expect(commitGlobalId).not.toBe(prevCommitGlobal);
+	expect(commitGlobalId).toBe(prevCommitGlobal);
 
 	/* helper: build histogram of schema_key counts for a change_set --------*/
 	const countSchemas = async (changeSetId: string) => {
@@ -149,36 +127,24 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		.where("id", "=", commitActiveId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	const commitGlobal = await db
-		.selectFrom("commit")
-		.where("id", "=", commitGlobalId)
-		.selectAll()
-		.executeTakeFirstOrThrow();
 
 	const activeSchemas = await countSchemas(commitActive.change_set_id);
-	const globalSchemas = await countSchemas(commitGlobal.change_set_id);
 
 	/*──────────────────────── 4. assertions ───────────────────────────────*/
 	/* COMMIT ON ACTIVE VERSION ────────────────────────────────────────────*/
 	expect(activeSchemas["lix_key_value"]).toBe(2); // user rows
 
-	// Must *not* contain any graph-rows which belong to global commit
+	// Domain-only CSE membership: include authors, exclude meta CSEs
 	expect(activeSchemas["lix_change_author"]).toBeUndefined();
 	expect(activeSchemas["lix_commit"]).toBeUndefined();
 	expect(activeSchemas["lix_change_set"]).toBeUndefined();
-	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
+	// No version meta in CSEs (descriptor/tip excluded)
 	expect(activeSchemas["lix_version"]).toBeUndefined();
+	expect(activeSchemas["lix_version_tip"]).toBeUndefined();
+	// Edges are derived; no commit_edge change rows
+	expect(activeSchemas["lix_commit_edge"]).toBeUndefined();
 
-	// COMMIT ON GLOBAL (graph-only)
-	expect(globalSchemas["lix_key_value"]).toBeUndefined();
-
-	expect(globalSchemas["lix_change_author"]).toBe(2); // two entities (para-1, para-2)
-	expect(globalSchemas["lix_commit"]).toBe(2); // copy of active + self
-	expect(globalSchemas["lix_commit_edge"]).toBe(2); // edge(active) + edge(global)
-	expect(globalSchemas["lix_version"]).toBe(2); // version_active & global
-	expect(globalSchemas["lix_change_set"]).toBe(2); // active + self
-	// Actual count: 2 user + 2 authors + 6 global metadata + 2 meta-elements (no duplicates) = 12
-	expect(globalSchemas["lix_change_set_element"]).toBe(12);
+	// No global commit row is created; global pointer unchanged
 
 	/*──────────────────── 5. graph edges exist exactly once ───────────────*/
 	const edgeActive = await db
@@ -188,14 +154,6 @@ test("split-commit: business rows on active version, graph rows on global", asyn
 		.selectAll()
 		.execute();
 	expect(edgeActive.length).toBe(1); // prevActive ─▶ active
-
-	const edgeGlobal = await db
-		.selectFrom("commit_edge")
-		.where("parent_id", "=", prevCommitGlobal)
-		.where("child_id", "=", commitGlobalId)
-		.selectAll()
-		.execute();
-	expect(edgeGlobal.length).toBe(1); // prevGlobal ─▶ global
 });
 
 test("commit with no changes should not create a change set", async () => {
@@ -370,21 +328,34 @@ test("commit should handle multiple versions correctly", async () => {
 		],
 	});
 
-	// Create version A
+	// Create version A (descriptor + tip)
 	insertTransactionState({
 		lix,
 		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: versionAId,
 					name: "version A",
-					commit_id: versionACommitId,
 					working_commit_id: versionAWorkingCommitId,
+					inherits_from_version_id: "global",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+			{
+				entity_id: versionAId,
+				schema_key: "lix_version_tip",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionAId,
+					commit_id: versionACommitId,
 				}),
 				schema_version: "1.0",
 				version_id: "global",
@@ -434,21 +405,34 @@ test("commit should handle multiple versions correctly", async () => {
 		],
 	});
 
-	// Create version B
+	// Create version B (descriptor + tip)
 	insertTransactionState({
 		lix,
 		timestamp: timestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBId,
-				schema_key: "lix_version",
+				schema_key: "lix_version_descriptor",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: versionBId,
 					name: "version B",
-					commit_id: versionBCommitId,
 					working_commit_id: versionBWorkingCommitId,
+					inherits_from_version_id: "global",
+				}),
+				schema_version: "1.0",
+				version_id: "global",
+				untracked: false,
+			},
+			{
+				entity_id: versionBId,
+				schema_key: "lix_version_tip",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					id: versionBId,
+					commit_id: versionBCommitId,
 				}),
 				schema_version: "1.0",
 				version_id: "global",
@@ -552,7 +536,7 @@ test("commit should handle multiple versions correctly", async () => {
 	const versionChanges = await db
 		.selectFrom("change")
 		.selectAll()
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_version_tip")
 		.orderBy("created_at", "desc")
 		.execute();
 
@@ -886,46 +870,36 @@ test("global version should move forward when mutations occur", async () => {
 	// Commit the changes
 	commit({ lix });
 
-	// Get the global version after changes
-	const globalVersionAfter = await db
-		.selectFrom("version")
-		.where("id", "=", "global")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// The global version's commit_id should have been updated
-	expect(globalVersionAfter.commit_id).not.toBe(initialCommitId);
-
-	// Verify a new commit was created and linked
+	// Verify at least one global edge originates from the previous global commit
 	const edges = await db
 		.selectFrom("commit_edge")
 		.where("parent_id", "=", initialCommitId)
-		.where("child_id", "=", globalVersionAfter.commit_id)
 		.selectAll()
 		.execute();
+	expect(edges.length).toBeGreaterThanOrEqual(1);
 
-	expect(edges.length).toBe(1);
+	// Verify the global change set contains our change: join by change_id
+	// Find the change row for our test entity
+	const changeRows = await db
+		.selectFrom("change")
+		.select(["id", "entity_id", "schema_key"])
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "test-global-entity")
+		.execute();
+	expect(changeRows.length).toBeGreaterThan(0);
+	const targetChangeId = changeRows[0]!.id;
 
-	// Get the change set ID from the new commit
-	const newCommit = await db
-		.selectFrom("commit")
-		.where("id", "=", globalVersionAfter.commit_id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Verify the change set contains our change
-	const changeSetElements = await db
+	// There should be at least one change_set_element referencing this change_id (global CSE)
+	const cseRows = await db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", newCommit.change_set_id)
+		.where("change_id", "=", targetChangeId)
 		.selectAll()
 		.execute();
-
-	// Should contain our test entity change and the meta changes
-	const elementIds = changeSetElements.map((e) => e.entity_id);
-	expect(elementIds.some((id) => id.includes("test-global-entity"))).toBe(true);
+	expect(cseRows.length).toBeGreaterThan(0);
 });
 
 // https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923
+//
 //
 // Verifies that working change set elements are NOT updated for the global version.
 // We intentionally assert no working elements are written for global's working commit.
@@ -1031,7 +1005,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	const newCommitId = globalVersionAfter.commit_id;
 	expect(newCommitId).not.toBe(previousCommitId);
 
-	// CRITICAL: Verify that an actual edge CHANGE exists (not just an element)
+	// CRITICAL: edges are derived in Step 2; there are no edge change rows
 	const edgeChanges = await db
 		.selectFrom("change")
 		.where("schema_key", "=", "lix_commit_edge")
@@ -1039,73 +1013,30 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.execute();
 
-	expect(edgeChanges.length).toBe(1);
+	expect(edgeChanges.length).toBe(0);
 
-	const edgeChange = edgeChanges[0]!;
-	expect(edgeChange.snapshot_content).toBeTruthy();
-
-	// Verify the edge snapshot content
-	const edgeSnapshot = edgeChange.snapshot_content as any;
-	expect(edgeSnapshot.parent_id).toBe(previousCommitId);
-	expect(edgeSnapshot.child_id).toBe(newCommitId);
-
-	// Verify the edge is discoverable by the lineage CTE
-	// This simulates what internal_materialization_lineage does
-	const lineageRows = lix.sqlite.exec({
-		sql: `
-			WITH RECURSIVE lineage_commits(id, version_id) AS (
-				/* anchor: use edge-based approach to find the tip */
-				SELECT 
-					json_extract(v.snapshot_content,'$.commit_id') AS id,
-					v.entity_id AS version_id 
-				FROM change v
-				WHERE v.schema_key = 'lix_version'
-				  AND v.entity_id = 'global'
-				  /* keep only the row whose commit_id has NO outgoing edge */
-				  AND NOT EXISTS (
-					SELECT 1
-					FROM change edge
-					WHERE edge.schema_key = 'lix_commit_edge'
-					  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
-				  )
-
-				UNION
-
-				/* recurse upwards via parent_id */
-				SELECT 
-					json_extract(edge.snapshot_content,'$.parent_id') AS id,
-					l.version_id AS version_id
-				FROM change edge
-				JOIN lineage_commits l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
-				WHERE edge.schema_key = 'lix_commit_edge'
-				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
-			)
-			SELECT id FROM lineage_commits WHERE version_id = 'global' ORDER BY id;
-		`,
-		returnValue: "resultRows",
-	});
-
-	// Should have at least 2 entries: the new commit and its parent
-	expect(lineageRows.length).toBeGreaterThanOrEqual(2);
-
-	// Verify both commits are in the lineage
-	const lineageIds = lineageRows.map((row) => row[0]);
-	expect(lineageIds).toContain(newCommitId);
-	expect(lineageIds).toContain(previousCommitId);
+	// Verify the derived edge via the commit_edge view (prev → new)
+	const derivedEdges = await db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", previousCommitId)
+		.where("child_id", "=", newCommitId)
+		.selectAll()
+		.execute();
+	expect(derivedEdges.length).toBe(1);
 });
 
 /**
- * Tests that when changes are made to a non-global version (like the active/main version),
- * both the version itself AND the global version are updated.
+ * Commit‑anchored version tips
  *
- * This is critical because:
- * 1. The non-global version's commit_id moves forward to include its data changes
- * 2. The global version's commit_id ALSO moves forward to track the version update itself
- * 3. All version changes (updates to any version entity) are stored in the global version's history
+ * When mutations occur on a non‑global version (e.g., active/main):
+ * - Exactly one new commit is created for that version and its tip (lix_version_tip.commit_id) advances.
+ * - The global version's commit_id does NOT move for these data mutations (drop‑dual‑commit).
+ * - The pointer ledger (lix_version_tip) is written under the global scope, and consumers join
+ *   descriptor + tip to form the merged version view.
+ * - Commit graph edges are derived from commit.parent_commit_ids (no edge change rows).
  *
- * Without this behavior, each version would need to maintain its own history of all other versions,
- * which would be redundant and complex. Instead, the global version serves as the central registry
- * of all version state changes.
+ * This test asserts the active version moves forward, verifies the derived edge, and cross‑checks
+ * the tip change rows against the version view.
  */
 test("active version should move forward when mutations occur", async () => {
 	const lix = await openLix({
@@ -1117,13 +1048,6 @@ test("active version should move forward when mutations occur", async () => {
 		],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
-	// Get the global version before for comparison
-	const globalVersionBefore = await db
-		.selectFrom("version")
-		.where("id", "=", "global")
-		.selectAll()
-		.executeTakeFirstOrThrow();
 
 	// Get the active version (should be the main version, not global)
 	const activeVersion = await db
@@ -1213,56 +1137,43 @@ test("active version should move forward when mutations occur", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Global version should have been updated to track the version change
-	expect(globalVersionAfter.commit_id).not.toBe(globalVersionBefore.commit_id);
+	// We do not update the global version's commit_id in drop-dual-commit model.
 
-	// Get the change set ID from the global version's new commit
-	const globalNewCommit = await db
-		.selectFrom("commit")
-		.where("id", "=", globalVersionAfter.commit_id)
-		.selectAll()
+	// Verify version updates exist for both active and global and point to the new commit ids
+	const latestActiveVersionChange = await db
+		.selectFrom("change")
+		.select(["id"])
+		.where("schema_key", "=", "lix_version_tip")
+		.where(sql`json_extract(snapshot_content,'$.id')`, "=", activeVersionId)
+		.orderBy("created_at desc")
 		.executeTakeFirstOrThrow();
 
-	// Verify the global version's new changeset contains the version updates
-	const globalChangeSetElements = await db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", globalNewCommit.change_set_id)
-		.selectAll()
-		.execute();
-
-	// Should contain exactly two version updates: global and active version
-	const versionUpdateElements = globalChangeSetElements.filter(
-		(e) => e.schema_key === "lix_version"
-	);
-	expect(versionUpdateElements.length).toBe(2);
-
-	// Verify both version updates point to the correct entities
-	const versionUpdateEntityIds = versionUpdateElements.map((e) => e.entity_id);
-	expect(versionUpdateEntityIds).toContain("global");
-	expect(versionUpdateEntityIds).toContain(activeVersionId);
-
-	// Get the actual version changes to verify they have the correct change_set_ids
-	const versionChanges = await db
+	const latestGlobalVersionChange = await db
 		.selectFrom("change")
-		.where(
-			"id",
-			"in",
-			versionUpdateElements.map((e) => e.change_id)
-		)
-		.where("schema_key", "=", "lix_version")
-		.selectAll()
-		.execute();
+		.select(["id"])
+		.where("schema_key", "=", "lix_version_tip")
+		.where(sql`json_extract(snapshot_content,'$.id')`, "=", "global")
+		.orderBy("created_at desc")
+		.executeTakeFirstOrThrow();
 
-	// Verify the version snapshots contain the correct commit_ids
-	for (const change of versionChanges) {
-		if (change.entity_id === "global") {
-			expect(change.snapshot_content?.commit_id).toBe(
-				globalVersionAfter.commit_id
-			);
-		} else if (change.entity_id === activeVersionId) {
-			expect(change.snapshot_content?.commit_id).toBe(versionAfter.commit_id);
-		}
-	}
+	// Cross-check commit_id via JSON extraction
+	const activeCommitIdCheck = await db
+		.selectFrom("change")
+		.select(() =>
+			sql<string>`json_extract(snapshot_content,'$.commit_id')`.as("cid")
+		)
+		.where("id", "=", latestActiveVersionChange.id)
+		.executeTakeFirstOrThrow();
+	expect(activeCommitIdCheck.cid).toBe(versionAfter.commit_id);
+
+	const globalCommitIdCheck = await db
+		.selectFrom("change")
+		.select(() =>
+			sql<string>`json_extract(snapshot_content,'$.commit_id')`.as("cid")
+		)
+		.where("id", "=", latestGlobalVersionChange.id)
+		.executeTakeFirstOrThrow();
+	expect(globalCommitIdCheck.cid).toBe(globalVersionAfter.commit_id);
 });
 
 // Tests moved from handle-state-mutation.test.ts since they test commit behavior

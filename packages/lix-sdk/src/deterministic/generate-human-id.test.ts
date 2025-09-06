@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
-import { generateHumanId } from "./generate-human-id.js";
+import {
+	generateHumanId,
+	deterministicHumanIdVocabularySize,
+} from "./generate-human-id.js";
 import { openLix } from "../lix/open-lix.js";
 
 test("returns deterministic names in deterministic mode", async () => {
@@ -34,7 +37,8 @@ test("cycles through names when exceeding array length", async () => {
 
 	// Generate many IDs to test cycling
 	const names: string[] = [];
-	for (let i = 0; i < 45; i++) {
+	const vocabSize = deterministicHumanIdVocabularySize();
+	for (let i = 0; i < vocabSize + 5; i++) {
 		names.push(generateHumanId({ lix }));
 	}
 
@@ -47,13 +51,13 @@ test("cycles through names when exceeding array length", async () => {
 		}
 	}
 
-	// Should cycle after 40 names
-	expect(firstRepeatIndex).toBe(40);
+	// Should cycle after the vocabulary size
+	expect(firstRepeatIndex).toBe(vocabSize);
 
 	// Verify cycling pattern
-	expect(names[40]).toBe(names[0]);
-	expect(names[41]).toBe(names[1]);
-	expect(names[42]).toBe(names[2]);
+	expect(names[vocabSize]).toBe(names[0]);
+	expect(names[vocabSize + 1]).toBe(names[1]);
+	expect(names[vocabSize + 2]).toBe(names[2]);
 });
 
 test("returns non-deterministic names in normal mode", async () => {

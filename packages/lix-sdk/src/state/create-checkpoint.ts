@@ -2,6 +2,9 @@ import type { LixCommit } from "../commit/schema.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
+import type { LixChangeRaw } from "../change/schema.js";
+import { timestamp } from "../deterministic/timestamp.js";
+import { updateStateCache } from "../state/cache/update-state-cache.js";
 
 /**
  * Converts the current working change set into a checkpoint.
@@ -58,14 +61,12 @@ export async function createCheckpoint(args: {
 		// 1. The old working commit becomes the checkpoint commit
 		const checkpointCommitId = activeVersion.working_commit_id;
 
-		// Add commit edge from parent commit to checkpoint commit (which is the old working commit)
+		// Link checkpoint to previous head by setting its parent_commit_ids
 		await trx
-			.insertInto("commit_edge_all")
-			.values({
-				parent_id: activeVersion.commit_id,
-				child_id: checkpointCommitId,
-				lixcol_version_id: "global",
-			})
+			.updateTable("commit_all")
+			.set({ parent_commit_ids: [activeVersion.commit_id] as any })
+			.where("id", "=", checkpointCommitId)
+			.where("lixcol_version_id", "=", "global")
 			.execute();
 
 		// 2. Create new empty working change set for continued work
@@ -103,6 +104,8 @@ export async function createCheckpoint(args: {
 			.values({
 				id: newWorkingCommitId,
 				change_set_id: newWorkingChangeSetId,
+				// new working commit is a child of the checkpoint
+				parent_commit_ids: [checkpointCommitId] as any,
 				lixcol_version_id: "global",
 			})
 			.execute();
@@ -114,25 +117,80 @@ export async function createCheckpoint(args: {
 			.where("lixcol_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
-		// Add commit edge from checkpoint commit to new working commit
-		await trx
-			.insertInto("commit_edge_all")
-			.values({
+		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
+
+		// Update version tip + descriptor via change + cache (avoid version view writes)
+		const now = timestamp({ lix: args.lix });
+		const descriptorChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: activeVersion.id,
+			schema_key: "lix_version_descriptor",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				name: activeVersion.name,
+				working_commit_id: newWorkingCommitId,
+				inherits_from_version_id: activeVersion.inherits_from_version_id,
+				hidden: activeVersion.hidden,
+			}),
+			created_at: now,
+		};
+		const tipChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: activeVersion.id,
+			schema_key: "lix_version_tip",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				commit_id: checkpointCommitId,
+			}),
+			created_at: now,
+		};
+
+		// Also materialize the commit edge parent=checkpoint, child=new working
+		const edgeChange: LixChangeRaw = {
+			id: uuidV7({ lix: args.lix }),
+			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
+			schema_key: "lix_commit_edge",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
 				parent_id: checkpointCommitId,
 				child_id: newWorkingCommitId,
-				lixcol_version_id: "global",
-			})
-			.execute();
+			}),
+			created_at: now,
+		};
 
-		// Update version to point to new working commit
+		// Persist changes and update cache without creating a meta-commit
 		await trx
-			.updateTable("version")
-			.where("id", "=", activeVersion.id)
-			.set({
-				commit_id: checkpointCommitId,
-				working_commit_id: newWorkingCommitId,
-			})
+			.insertInto("change")
+			.values([descriptorChange as any, tipChange as any, edgeChange as any])
 			.execute();
+		updateStateCache({
+			lix: { sqlite: args.lix.sqlite, db: trx },
+			changes: [
+				{
+					...descriptorChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+				{
+					...tipChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+				{
+					...edgeChange,
+					lixcol_version_id: "global",
+					lixcol_commit_id: checkpointCommitId,
+				} as any,
+			],
+		});
 
 		return createdCommit;
 	};

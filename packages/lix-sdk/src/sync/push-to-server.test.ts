@@ -22,7 +22,7 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	// initialize the lix on the server
 	await lspHandler(
@@ -103,7 +103,7 @@ test.skip("push-pull-push with two clients", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	// Initialize the lix on the server
 	await lspHandler(
@@ -282,7 +282,7 @@ test.skip("push-pull-push with two clients", async () => {
 // 	const environment = createLspInMemoryEnvironment();
 // 	const lspHandler = await createServerProtocolHandler({ environment });
 
-// 	global.fetch = vi.fn((request) => lspHandler(request));
+// 	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 // 	// initialize the lix on the server
 // 	await lspHandler(
@@ -339,7 +339,7 @@ test.todo("it should handle binary values", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
 
 	// initialize the lix on the server
 	await lspHandler(
