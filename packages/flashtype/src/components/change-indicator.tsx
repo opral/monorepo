@@ -16,7 +16,7 @@ import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 import { createCheckpoint, selectWorkingDiff } from "@lix-js/sdk";
 import { selectWorkingDiffCount } from "@/queries";
 import { Diff } from "@/components/diff";
-import { plugin } from "../../../lix/plugin-md/dist";
+import { plugin } from "@lix-js/plugin-md";
 
 export function ChangeIndicator() {
 	const lix = useLix();
