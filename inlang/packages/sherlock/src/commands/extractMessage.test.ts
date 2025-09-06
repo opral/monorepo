@@ -6,7 +6,6 @@ import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 import { state } from "../utilities/state.js"
 import { upsertBundleNested } from "@inlang/sdk"
-import { capture } from "../services/telemetry/index.js"
 
 // Mocking the necessary modules
 vi.mock("../utilities/state", () => ({
@@ -60,10 +59,16 @@ vi.mock("../utilities/settings/index.js", () => ({
 }))
 
 vi.mock("@inlang/sdk", () => ({
-	humanId: vi.fn().mockReturnValue("generatedId123"),
-	createBundle: vi.fn().mockReturnValue({ id: "generatedId123", alias: "alias123" }),
-	createMessage: vi.fn().mockReturnValue({ id: "messageId123", bundleId: "generatedId123" }),
+	humanId: vi.fn().mockReturnValue("generated_human_id"),
+	createBundle: vi.fn().mockReturnValue({ id: "bundleId123", alias: "alias123" }),
+	createMessage: vi
+		.fn()
+		.mockReturnValue({ id: "messageId123", bundleId: "bundleId123bundleId123" }),
 	upsertBundleNested: vi.fn(),
+}))
+
+vi.mock("nanoid", () => ({
+	customAlphabet: vi.fn().mockReturnValue(() => "nanoidnano"),
 }))
 
 vi.mock("../utilities/messages/isQuoted", () => ({
@@ -502,5 +507,88 @@ describe("extractMessageCommand", () => {
 		expect(mockTextEditor.edit).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith("Message extracted.")
+	})
+
+	it("should use the right generator if configured", async () => {
+		vi.mocked(state).mockReturnValue({
+			project: {
+				plugins: {
+					get: async () => [
+						{
+							key: "plugin1",
+							meta: {
+								"app.inlang.ideExtension": {
+									extractMessageOptions: [
+										{
+											callback: vi.fn(() => ({
+												bundleId: "generatedId123",
+												messageReplacement: "Replacement Text",
+											})),
+										},
+									],
+								},
+							},
+						},
+					],
+				},
+				// @ts-expect-error
+				settings: {
+					get: async () => ({ baseLocale: "en", locales: ["en"] }),
+				},
+				db: {
+					// @ts-expect-error
+					transaction: () => ({
+						execute: vi.fn().mockResolvedValueOnce(true),
+					}),
+				},
+			},
+		})
+
+		const mockTextEditor = {
+			selection: {
+				isEmpty: false,
+				start: {
+					line: 1,
+					character: 1,
+				},
+				end: {
+					line: 1,
+					character: 20,
+				},
+			},
+			document: {
+				getText: () => "Some text",
+			},
+			edit: vi.fn(),
+		}
+
+		for (const [generator, expected] of [
+			["humanId", "generated_human_id"],
+			["nanoid", "nanoidnano"],
+			["none", ""],
+		]) {
+			vi.mocked(getSetting).mockResolvedValue(generator)
+			vi.mocked(window.showInputBox).mockResolvedValueOnce("generatedId123")
+			// @ts-expect-error
+			vi.mocked(window.showQuickPick).mockResolvedValueOnce("Replacement Text")
+
+			// @ts-expect-error
+			await extractMessageCommand.callback(mockTextEditor)
+
+			expect(window.showInputBox).toHaveBeenCalledWith(
+				expect.objectContaining({
+					value: expected,
+				})
+			)
+
+			expect(mockTextEditor.edit).toHaveBeenCalled()
+			expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).toHaveBeenCalled()
+			expect(msg).toHaveBeenCalledWith("Message extracted.")
+
+			vi.mocked(window.showInputBox).mockReset()
+			vi.mocked(mockTextEditor.edit).mockReset()
+			vi.mocked(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).mockReset()
+			vi.mocked(msg).mockReset()
+		}
 	})
 })
