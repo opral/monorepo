@@ -83,13 +83,19 @@ export const extractMessageCommand = {
 				: "none"
 		}
 
+		const isKnownGenerator = Object.hasOwn(generators, generator)
+		const generatedValue = isKnownGenerator
+			? generators[generator as keyof typeof generators]()
+			: ""
+		const showRandomNamesTip = generator !== "none"
+
 		const bundleId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: Object.hasOwn(generators, generator)
-				? generators[generator as keyof typeof generators]()
-				: "", // Fallback to an empty string if the generator does not exist
-			prompt:
-				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
+			value: generatedValue,
+			// Show the random-names tip only when a random generator is active
+			prompt: showRandomNamesTip
+				? "Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information."
+				: undefined,
 		})
 
 		if (bundleId === undefined) {
