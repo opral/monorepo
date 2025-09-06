@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.3.0
+
+### Minor Changes
+
+- bfe8518: Crash the build process (for example during `vite build`) if paraglide can't compile the project.
+
 ## 2.2.0
 
 ### Minor Changes
