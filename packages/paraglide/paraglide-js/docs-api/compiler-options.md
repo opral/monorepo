@@ -387,7 +387,7 @@ https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 
 Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
-### Type declaration
+### Type Declaration
 
 #### cleanOutdir
 
