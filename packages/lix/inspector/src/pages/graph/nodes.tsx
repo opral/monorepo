@@ -27,7 +27,7 @@ const CommitNode = ({
   const [showDetails, setShowDetails] = useState(false);
 
   // Fetch change count for this commit
-  const changeSetElements = useQueryTakeFirst((lix) =>
+  const changeSetElements = useQueryTakeFirst(({ lix }) =>
     lix.db
       .selectFrom("change_set_element")
       .where("change_set_element.change_set_id", "=", entity.change_set_id)

@@ -87,7 +87,7 @@ function LogCountsProvider({
   children: (logCounts: any) => React.ReactNode;
 }) {
   // Get error counts
-  const errorLogs = useSuspenseQuery((lix) =>
+  const errorLogs = useSuspenseQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -95,7 +95,7 @@ function LogCountsProvider({
   );
 
   // Get warning counts
-  const warningLogs = useSuspenseQuery((lix) =>
+  const warningLogs = useSuspenseQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -103,7 +103,7 @@ function LogCountsProvider({
   );
 
   // Get info counts
-  const infoLogs = useSuspenseQuery((lix) =>
+  const infoLogs = useSuspenseQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -111,7 +111,7 @@ function LogCountsProvider({
   );
 
   // Get debug counts
-  const debugLogs = useSuspenseQuery((lix) =>
+  const debugLogs = useSuspenseQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -119,7 +119,7 @@ function LogCountsProvider({
   );
 
   // Get unknown level counts
-  const unknownLogs = useSuspenseQuery((lix) =>
+  const unknownLogs = useSuspenseQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))

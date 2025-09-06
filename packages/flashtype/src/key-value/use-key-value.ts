@@ -63,7 +63,7 @@ export function useKeyValue<K extends string>(
 	const untracked = opts?.untracked ?? d.untracked;
 
 	type T = ValueOf<K>;
-	const rows = useQuery((lix) =>
+	const rows = useQuery(({ lix }) =>
 		selectValue(lix, key, { defaultVersionId, untracked }),
 	);
 	const value = (rows[0]?.value ??

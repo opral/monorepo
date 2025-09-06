@@ -105,7 +105,7 @@ export const getAvailableLixes = async (): Promise<
 export function LixSidebar() {
 	const lix = useLix();
 	const [searchParams, setSearchParams] = useSearchParams();
-	const files = useQuery(selectFiles);
+	const files = useQuery(({ lix }) => selectFiles(lix));
 	const activeFile = useQueryTakeFirst(selectActiveFile);
 	const currentLixName = useQueryTakeFirst(selectCurrentLixName)?.value;
 	const lixIdSearchParams = searchParams.get("lix");

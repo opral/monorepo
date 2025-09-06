@@ -38,7 +38,7 @@ test("useQuery throws error when used outside LixProvider", () => {
 	// We need to catch the error since it's thrown during render
 	expect(() => {
 		renderHook(() =>
-			useQuery((lix) => lix.db.selectFrom("key_value").selectAll()),
+			useQuery(({ lix }) => lix.db.selectFrom("key_value").selectAll()),
 		);
 	}).toThrow("useQuery must be used inside <LixProvider>.");
 });
@@ -59,7 +59,7 @@ test("useSuspenseQuery returns array with data using new API", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQuery((lix) =>
+				const data = useQuery(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -96,7 +96,7 @@ test("useSuspenseQuery updates when data changes", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQuery((lix) =>
+				const data = useQuery(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -159,7 +159,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQueryTakeFirst((lix) =>
+				const data = useQueryTakeFirst(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -198,7 +198,7 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQueryTakeFirst((lix) =>
+				const data = useQueryTakeFirst(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -233,7 +233,7 @@ test("useSuspenseQuery return type is properly typed", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQuery((lix) =>
+				const data = useQuery(({ lix }) =>
 					lix.db.selectFrom("key_value").selectAll(),
 				);
 				return data;
@@ -277,7 +277,7 @@ test("useSuspenseQuery error handling with ErrorBoundary", async () => {
 	await act(async () => {
 		renderHook(
 			() =>
-				useQuery((lix) =>
+				useQuery(({ lix }) =>
 					// invalid table: will reject then throw
 					lix.db.selectFrom("non_existent_table" as never).selectAll(),
 				),
@@ -318,7 +318,7 @@ test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async (
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const data = useQueryTakeFirstOrThrow((lix) =>
+				const data = useQueryTakeFirstOrThrow(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -362,7 +362,7 @@ test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () =>
 	await act(async () => {
 		renderHook(
 			() => {
-				const data = useQueryTakeFirstOrThrow((lix) =>
+				const data = useQueryTakeFirstOrThrow(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -414,7 +414,7 @@ test("useSuspenseQuery re-executes when query function changes (dependency array
 		const { result, rerender: rerenderFn } = renderHook(
 			({ prefix = "prefix_a" }: { prefix?: string } = {}) => {
 				// Create a new query function each time prefix changes
-				const data = useQuery((lix) =>
+				const data = useQuery(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -489,7 +489,7 @@ test("useQuery with subscribe: false executes once without live updates", async 
 		const { result } = renderHook(
 			() => {
 				const data = useQuery(
-					(lix) =>
+					({ lix }) =>
 						lix.db
 							.selectFrom("key_value")
 							.selectAll()
@@ -560,7 +560,7 @@ test("useQuery subscription updates when query dependencies change", async () =>
 	await act(async () => {
 		const { result, rerender: rerenderFn } = renderHook(
 			({ filter = "sub_test_a" }: { filter?: string } = {}) => {
-				const data = useQuery((lix) =>
+				const data = useQuery(({ lix }) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -638,7 +638,7 @@ test("useQuery refreshes when lix instance is switched", async () => {
 
 	// Wrapper function that uses the current lix
 	const TestComponent = () => {
-		const data = useQuery((lix) =>
+		const data = useQuery(({ lix }) =>
 			lix.db.selectFrom("key_value").selectAll().where("key", "=", "lix_id"),
 		);
 		return data;

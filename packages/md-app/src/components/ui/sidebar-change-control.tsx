@@ -6,8 +6,8 @@ import { History } from "lucide-react";
 import { useQuery } from "@lix-js/react-utils";
 
 const ChangeControlSidebar = () => {
-  const checkpoints = useQuery(selectCheckpoints);
-  const workingChanges = useQuery(selectWorkingChanges);
+  const checkpoints = useQuery(({ lix }) => selectCheckpoints(lix));
+  const workingChanges = useQuery(({ lix }) => selectWorkingChanges(lix));
 
   return (
     <div className="h-full flex flex-col relative">

@@ -13,7 +13,7 @@ export function DiffView() {
 		afterCsId?: string;
 	}>("diffView", { versionId: "global", untracked: true });
 	const lix = useLix();
-	const fileId = useQueryTakeFirstOrThrow(selectFileId);
+	const fileId = useQueryTakeFirstOrThrow(({ lix }) => selectFileId(lix));
 	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);

@@ -17,8 +17,8 @@ import { useKeyValue } from "../hooks/useKeyValue";
  */
 export default function NewProposal() {
 	// Load necessary data
-	const [proposedChangeSet] = useQuery(selectProposedChangeSet);
-	const [mainVersion] = useQuery(selectMainVersion);
+	const [proposedChangeSet] = useQuery(({ lix }) => selectProposedChangeSet(lix));
+	const [mainVersion] = useQuery(({ lix }) => selectMainVersion(lix));
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 		{ versionId: "global", untracked: true },

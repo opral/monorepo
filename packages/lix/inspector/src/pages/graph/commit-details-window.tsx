@@ -25,7 +25,7 @@ export function CommitDetailsWindow({
   const pageSize = 10;
 
   // Fetch change set elements for the commit's change set
-  const changeSetElements = useQuery((lix) =>
+  const changeSetElements = useQuery(({ lix }) =>
     lix.db
       .selectFrom("change_set_element")
       .innerJoin("change", "change.id", "change_set_element.change_id")
@@ -44,7 +44,7 @@ export function CommitDetailsWindow({
   );
 
   // Fetch parent commit info
-  const parentCommit = useQuery((lix) =>
+  const parentCommit = useQuery(({ lix }) =>
     lix.db
       .selectFrom("commit_edge")
       .where("child_id", "=", commit.id)
@@ -53,7 +53,7 @@ export function CommitDetailsWindow({
   )?.at(0);
 
   // Fetch commit creation time from the underlying change
-  const commitChange = useQuery((lix) =>
+  const commitChange = useQuery(({ lix }) =>
     lix.db
       .selectFrom("change")
       .where("change.id", "=", commit.lixcol_change_id)

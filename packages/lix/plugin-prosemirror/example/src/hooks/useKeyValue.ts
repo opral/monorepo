@@ -17,7 +17,7 @@ export function useKeyValue<T>(
 	options: { versionId?: string; untracked?: boolean } = {},
 ) {
 	const lix = useLix();
-	const result = useQueryTakeFirst((lix) => selectKeyValue(lix, key));
+	const result = useQueryTakeFirst(({ lix }) => selectKeyValue(lix, key));
 
 	const setValue = async (newValue: T) => {
 		await upsertKeyValue(lix, key, newValue, options);

@@ -49,7 +49,7 @@ export function LeftSidebarFiles() {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
 	);
-	const files = useQuery((lix) => selectFiles(lix));
+	const files = useQuery(({ lix }) => selectFiles(lix));
 
 	// Memoize expensive derivations from the files query
 	const paths = useMemo(() => files.map((f) => f.path as string), [files]);

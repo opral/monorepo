@@ -30,15 +30,15 @@ export default function Graph() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
-  const versions = useQuery(selectVersions);
-  const availableLabels = useQuery(selectAvailableLabels);
+  const versions = useQuery(({ lix }) => selectVersions(lix));
+  const availableLabels = useQuery(({ lix }) => selectAvailableLabels(lix));
 
   // Direct approach preserves type inference
-  const commits = useQuery((lix) =>
+  const commits = useQuery(({ lix }) =>
     selectCommits(lix, selectedLabels, availableLabels || [])
   );
 
-  const commitEdges = useQuery((lix) =>
+  const commitEdges = useQuery(({ lix }) =>
     selectCommitEdges(lix, commits?.map((commit) => commit.id) ?? [])
   );
 

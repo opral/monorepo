@@ -15,10 +15,10 @@ import {
 
 const VersionToolbar: React.FC = () => {
 	const lix = useLix();
-	const activeVersion = useQueryTakeFirstOrThrow(selectActiveVersion);
-	const mainVersion = useQueryTakeFirstOrThrow(selectMainVersion);
-	const activeAccount = useQueryTakeFirst(selectActiveAccount);
-	const versions = useQuery(selectVersions);
+	const activeVersion = useQueryTakeFirstOrThrow(({ lix }) => selectActiveVersion(lix));
+	const mainVersion = useQueryTakeFirstOrThrow(({ lix }) => selectMainVersion(lix));
+	const activeAccount = useQueryTakeFirst(({ lix }) => selectActiveAccount(lix));
+	const versions = useQuery(({ lix }) => selectVersions(lix));
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 	// Determine if current version is the main version

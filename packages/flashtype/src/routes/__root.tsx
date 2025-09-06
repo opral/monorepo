@@ -61,7 +61,7 @@ function LeftSidebarArea() {
 
 function Root() {
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
-	const activeFile = useQueryTakeFirst((lix) =>
+	const activeFile = useQueryTakeFirst(({ lix }) =>
 		lix.db
 			.selectFrom("file")
 			.select(["id", "path"]) // resolve display name from id

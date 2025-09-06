@@ -27,7 +27,7 @@ export const CheckpointComponent = (props: {
 	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
 	
 	// Get threads by finding the commit for this change set and querying threads for that commit
-	const threads = useQuery((lix) =>
+	const threads = useQuery(({ lix }) =>
 		lix.db
 			.selectFrom("thread")
 			.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
@@ -64,7 +64,7 @@ export const CheckpointComponent = (props: {
 			.selectAll("thread")
 	);
 	
-	const diffs = useQuery((lix) =>
+	const diffs = useQuery(({ lix }) =>
 		selectChangeDiffs(lix, props.checkpointChangeSet.id, props.previousChangeSetId),
 	);
 

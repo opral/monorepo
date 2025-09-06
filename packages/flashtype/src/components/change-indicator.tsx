@@ -20,7 +20,7 @@ import { plugin } from "@lix-js/plugin-md";
 
 export function ChangeIndicator() {
 	const lix = useLix();
-	const diffCount = useQueryTakeFirst(selectWorkingDiffCount);
+	const diffCount = useQueryTakeFirst(({ lix }) => selectWorkingDiffCount(lix));
 	const total = diffCount?.total ?? 0;
 	const added = diffCount?.added ?? 0;
 	const removed = diffCount?.removed ?? 0;
@@ -135,7 +135,7 @@ export function ChangeIndicator() {
 
 function PanelDiff() {
 	// Fetch joined working diffs with before/after snapshots using a single query
-	const diff = useQuery((lix) => {
+	const diff = useQuery(({ lix }) => {
 		const activeFileId = lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "flashtype_active_file_id")

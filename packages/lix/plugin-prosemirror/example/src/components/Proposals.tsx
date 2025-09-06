@@ -13,7 +13,7 @@ import { useKeyValue } from "../hooks/useKeyValue";
  */
 export default function Proposals() {
 	// Get all open proposals
-	const [proposals] = useQuery(selectOpenChangeProposals);
+	const [proposals] = useQuery(({ lix }) => selectOpenChangeProposals(lix));
 	const [_, setActiveTab] = useKeyValue("activeTab", {
 		versionId: "global",
 		untracked: true,

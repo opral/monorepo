@@ -8,8 +8,8 @@ import { useKeyValue } from "../hooks/useKeyValue";
 import { useEffect } from "react";
 
 export default function Sidebar() {
-	// const [currentVersion] = useQuery(selectActiveVersion);
-	// const [mainVersion] = useQuery(selectMainVersion);
+// const [currentVersion] = useQuery(({ lix }) => selectActiveVersion(lix));
+// const [mainVersion] = useQuery(({ lix }) => selectMainVersion(lix));
 
 	// const isMainVersion = currentVersion?.id === mainVersion?.id;
 

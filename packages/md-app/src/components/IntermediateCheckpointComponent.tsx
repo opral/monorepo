@@ -17,7 +17,7 @@ interface IntermediateCheckpointComponentProps {
 
 export const IntermediateCheckpointComponent = ({ workingChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
-  const checkpointChangeSets = useQuery(selectCheckpoints);
+  const checkpointChangeSets = useQuery(({ lix }) => selectCheckpoints(lix));
 
   // Don't render anything if there's no change data
   if (workingChanges!.length === 0) {
@@ -88,7 +88,7 @@ const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const lix = useLix();
   const currentChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
-  const workingChanges = useQuery(selectWorkingChanges);
+  const workingChanges = useQuery(({ lix }) => selectWorkingChanges(lix));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 

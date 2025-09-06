@@ -39,7 +39,7 @@ const editorStyles = `
 
 const Editor: React.FC = () => {
 	const lix = useLix();
-	const prosemirrorFile = useQueryTakeFirst(selectFileId);
+	const prosemirrorFile = useQueryTakeFirst(({ lix }) => selectFileId(lix));
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
 	const [diffView] = useKeyValue<{

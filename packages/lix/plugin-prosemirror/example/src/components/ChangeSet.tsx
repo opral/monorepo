@@ -59,7 +59,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			afterCsId?: string;
 		} | null>("diffView", { versionId: "global", untracked: true });
 
-		const activeAccount = useQueryTakeFirst(selectActiveAccount);
+		const activeAccount = useQueryTakeFirst(({ lix }) => selectActiveAccount(lix));
 
 		// Determine if this change set is the expanded one
 		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
@@ -78,7 +78,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		]);
 
 		// Get the commit ID for this change set
-		const commits = useQuery((lix) =>
+		const commits = useQuery(({ lix }) =>
 			lix.db
 				.selectFrom("commit")
 				.where("change_set_id", "=", changeSet.id)
@@ -87,7 +87,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		const commit = commits?.[0];
 
-		const threads: any = useQuery((lix) => {
+		const threads: any = useQuery(({ lix }) => {
 			if (!commit?.id) {
 				return [] as any;
 			}

@@ -149,7 +149,7 @@ function DataExplorerContent() {
       }
   >(null);
 
-  const tablesQueryData = useQuery((lix) =>
+  const tablesQueryData = useQuery(({ lix }) =>
     lix.db
       .selectFrom("sqlite_master" as any)
       .select(["name", "type"])
@@ -212,7 +212,7 @@ function DataExplorerContent() {
   }, [selectedEntity, selectedViewType]);
 
   // Fetch table data when a table is selected
-  const tableDataQueryResult = useQuery((lix) => {
+  const tableDataQueryResult = useQuery(({ lix }) => {
     if (!selectedTable) {
       return lix.db
         .selectFrom("sqlite_master" as any)

@@ -7,8 +7,8 @@ import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const LixDebugPanel = () => {
 	const lix = useLix();
-	const changes = useQuery(selectChanges);
-	const currentDoc = useQueryTakeFirst(selectProsemirrorDoc);
+	const changes = useQuery(({ lix }) => selectChanges(lix));
+	const currentDoc = useQueryTakeFirst(({ lix }) => selectProsemirrorDoc(lix));
 	const jsonDoc = JSON.parse(
 		new TextDecoder().decode(
 			currentDoc?.data ?? new TextEncoder().encode("{}"),
@@ -262,7 +262,7 @@ const ProsemirrorDocImport = () => {
 
 // Component for exporting ProseMirror document
 const ProsemirrorDocExport = () => {
-	const currentDoc = useQuery(selectProsemirrorDoc);
+	const currentDoc = useQuery(({ lix }) => selectProsemirrorDoc(lix));
 
 	const handleExportDocument = () => {
 		try {

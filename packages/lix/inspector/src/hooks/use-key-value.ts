@@ -34,7 +34,7 @@ export function useKeyValue<K extends string>(key: K) {
 
   // The new useQuery API doesn't return a refetch function or use polling
   // We'll need to use the database directly for setValue
-  const keyValueData = useQuery((lix) => 
+  const keyValueData = useQuery(({ lix }) => 
     lix.db
       .selectFrom("key_value")
       .where("key", "=", key)

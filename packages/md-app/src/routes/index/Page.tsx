@@ -19,7 +19,7 @@ import posthog from 'posthog-js';
 function PageContent() {
 	const activeFile = useQueryTakeFirst(selectActiveFile);
 	const activeAccount = useQueryTakeFirst(selectActiveAccount);
-	const workingChanges = useQuery(selectWorkingChanges);
+	const workingChanges = useQuery(({ lix }) => selectWorkingChanges(lix));
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
