@@ -9,15 +9,15 @@ import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import type { Ast } from "../ast/schemas.js"
 
 function roundtripThroughEditor(ast: Ast): Ast {
-    const pmDoc = astToTiptapDoc(ast)
-    const editor = new Editor({
-        extensions: MarkdownWc(),
-        content: pmDoc as any,
-    })
-    const outJSON = editor.getJSON() as any
-    const result = tiptapDocToAst(outJSON as any) as any
-    editor.destroy()
-    return result
+	const pmDoc = astToTiptapDoc(ast)
+	const editor = new Editor({
+		extensions: MarkdownWc(),
+		content: pmDoc as any,
+	})
+	const outJSON = editor.getJSON() as any
+	const result = tiptapDocToAst(outJSON as any) as any
+	editor.destroy()
+	return result
 }
 
 test("append paragraph at end", () => {
@@ -41,8 +41,8 @@ test("append paragraph at end", () => {
 	// 3) roundtrip back to Markdown and assert expected
 	const outAst = tiptapDocToAst(editor.getJSON() as any)
 	const output = serializeAst(outAst as any)
-    expect(output).toBe(expectedOutput)
-    editor.destroy()
+	expect(output).toBe(expectedOutput)
+	editor.destroy()
 })
 
 describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
@@ -54,8 +54,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				{ type: "paragraph", children: [{ type: "text", value: "Hello world." }] },
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 
 	test("unordered list", () => {
@@ -78,8 +78,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				},
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 
 	test("ordered list with start", () => {
@@ -103,8 +103,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				},
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 
 	test("marks (bold + italic + inlineCode + strike)", () => {
@@ -125,8 +125,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				},
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 
 	test("blockquote + thematicBreak + code block", () => {
@@ -141,8 +141,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				{ type: "code", lang: "js", value: "const a = 1" },
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 
 	test("hard break", () => {
@@ -159,8 +159,8 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				},
 			],
 		} as any
-    const output = roundtripThroughEditor(input)
-    expect(output).toEqual(input)
+		const output = roundtripThroughEditor(input)
+		expect(output).toEqual(input)
 	})
 })
 
@@ -188,11 +188,11 @@ describe("IDs: preserve existing and create for new blocks", () => {
 			content: astToTiptapDoc(input) as any,
 		})
 
-    const outAst = tiptapDocToAst(editor.getJSON() as any) as any
-    const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
 
-    expect(ids).toEqual(["H1", "P1"]) // should preserve exactly
-    editor.destroy()
+		expect(ids).toEqual(["H1", "P1"]) // should preserve exactly
+		editor.destroy()
 	})
 
 	test("splitting a paragraph creates a new data.id for the new block", () => {
@@ -225,14 +225,14 @@ describe("IDs: preserve existing and create for new blocks", () => {
 			{ type: "paragraph", content: [{ type: "text", text: " world." }] } as any
 		)
 
-    const outAst = tiptapDocToAst(editor.getJSON() as any) as any
-    const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
 
 		expect(ids[0]).toBe("PX") // original keeps id
 		expect(typeof ids[1]).toBe("string")
 		expect(ids[1]).toBeTruthy()
-    expect(ids[1]).not.toBe(ids[0]) // new block gets a fresh id
-    editor.destroy()
+		expect(ids[1]).not.toBe(ids[0]) // new block gets a fresh id
+		editor.destroy()
 	})
 
 	test("appending a new paragraph assigns a fresh data.id", () => {
@@ -257,14 +257,14 @@ describe("IDs: preserve existing and create for new blocks", () => {
 			content: [{ type: "text", text: "New" }],
 		} as any)
 
-    const outAst = tiptapDocToAst(editor.getJSON() as any) as any
-    const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+		const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+		const ids = (outAst.children || []).map((n: any) => n?.data?.id)
 
 		expect(ids[0]).toBe("P1")
 		expect(typeof ids[1]).toBe("string")
 		expect(ids[1]).toBeTruthy()
-    expect(ids[1]).not.toBe("P1")
-    editor.destroy()
+		expect(ids[1]).not.toBe("P1")
+		editor.destroy()
 	})
 })
 
@@ -298,9 +298,9 @@ test("insert text mid-paragraph", () => {
 	editor.commands.insertContentAt(posAfter, { type: "text", text: "dear " } as any)
 
 	const outAst = tiptapDocToAst(editor.getJSON() as any)
-    const output = serializeAst(outAst as any)
-    expect(output).toBe(expectedOutput)
-    editor.destroy()
+	const output = serializeAst(outAst as any)
+	expect(output).toBe(expectedOutput)
+	editor.destroy()
 })
 
 test("insert hard break in paragraph (replace following space)", () => {
@@ -330,9 +330,9 @@ test("insert hard break in paragraph (replace following space)", () => {
 	)
 
 	const outAst = tiptapDocToAst(editor.getJSON() as any)
-    const output = serializeAst(outAst as any)
-    expect(output).toBe(expectedOutput)
-    editor.destroy()
+	const output = serializeAst(outAst as any)
+	expect(output).toBe(expectedOutput)
+	editor.destroy()
 })
 
 test("split paragraph into two (insert new paragraph in the middle)", () => {
@@ -359,7 +359,60 @@ test("split paragraph into two (insert new paragraph in the middle)", () => {
 	)
 
 	const outAst = tiptapDocToAst(editor.getJSON() as any)
-    const output = serializeAst(outAst as any)
-    expect(output).toBe(expectedOutput)
-    editor.destroy()
+	// Assert unique ids across the two paragraphs (no duplicate data.id)
+	const ids = ((outAst as any).children || []).map((n: any) => n?.data?.id)
+	expect(typeof ids[0]).toBe("string")
+	expect(typeof ids[1]).toBe("string")
+	expect(ids[0]).toBeTruthy()
+	expect(ids[1]).toBeTruthy()
+	expect(ids[0]).not.toBe(ids[1])
+
+	const output = serializeAst(outAst as any)
+	expect(output).toBe(expectedOutput)
+	editor.destroy()
+})
+
+test("Enter splits paragraph and assigns unique ids (root order unique)", () => {
+	const input = `Hello world.`
+	const expectedOutput = `Hello\n\nworld.`
+
+	const ast = parseMarkdown(input)
+	const editor = new Editor({
+		extensions: MarkdownWc(),
+		content: astToTiptapDoc(ast) as any,
+	})
+
+	// Compute caret position after "Hello"
+	const para = editor.state.doc.child(0)
+	const paraFrom = 1
+	const idxHello = (para as any).textContent.indexOf("Hello")
+	const posSplit = paraFrom + 1 + idxHello + "Hello".length
+	editor.commands.setTextSelection(posSplit)
+
+	// Simulate pressing Enter
+	const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+	editor.view.someProp("handleKeyDown", (f: any) => f(editor.view, event))
+
+	// Convert back to AST
+	const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+	const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+	// Both paragraphs have ids and they are unique
+	expect(ids.length).toBe(2)
+	expect(typeof ids[0]).toBe("string")
+	expect(typeof ids[1]).toBe("string")
+	expect(ids[0]).toBeTruthy()
+	expect(ids[1]).toBeTruthy()
+	expect(ids[0]).not.toBe(ids[1])
+	// Root order (implicit order of children) has no duplicates
+	expect(new Set(ids).size).toBe(ids.length)
+
+	// Verify text contents of both paragraphs (ignore incidental trailing space)
+	const paraTexts = (outAst.children || []).map((n: any) =>
+		(n.children || [])
+			.map((c: any) => (typeof c.value === "string" ? c.value : ""))
+			.join("")
+			.trim()
+	)
+	expect(paraTexts).toEqual(["Hello", "world."])
+	editor.destroy()
 })
