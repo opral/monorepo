@@ -2,6 +2,8 @@ import { test, expect } from "vitest";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "../../../../lix/plugin-md/dist";
 import { createEditor } from "./create-editor";
+import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
+import { parseMarkdown } from "@opral/markdown-wc";
 import { handlePaste } from "./handle-paste";
 import { AstSchemas } from "@opral/markdown-wc";
 import { Editor } from "@tiptap/core";
@@ -516,5 +518,200 @@ test("paste inline formatting markdown (TipTap + Lix)", async () => {
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
 	expect(mdAfter).toBe(input);
+	editor.destroy();
+});
+
+/**
+ * Why this matters
+ *
+ * - Rapid user input can trigger multiple editor updates in quick succession.
+ * - Without serialized persistence, overlapping transactions can drop rows,
+ *   produce duplicate ids, or create a root order that doesn't match state.
+ * - This test simulates Enter + typing without awaits to assert our debounce/queue
+ *   logic persists a consistent 3‑paragraph snapshot with unique ids.
+ */
+test("rapid Enter/type coalescing persists 3 paragraphs with unique ids", async () => {
+	const lix = await openLix({ providePlugins: [mdPlugin] });
+	const fileId = "rapid_enter_coalesce";
+
+	// Seed with a single paragraph
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/rapid-enter.md",
+			data: new TextEncoder().encode("Start"),
+		})
+		.execute();
+
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
+
+	// Simulate rapid user actions with no awaits between Enter and typing
+	const end = editor.state.doc.content.size;
+	editor.commands.setTextSelection(end);
+	// Enter (new paragraph), then type quickly
+	{
+		const ev = new KeyboardEvent("keydown", {
+			key: "Enter",
+			bubbles: true,
+			cancelable: true,
+		});
+		editor.view.someProp("handleKeyDown", (f) => f(editor.view, ev));
+	}
+	editor.commands.insertContent("Second ");
+
+	// Enter again and type another paragraph
+	editor.commands.setTextSelection(editor.state.doc.content.size);
+	{
+		const ev = new KeyboardEvent("keydown", {
+			key: "Enter",
+			bubbles: true,
+			cancelable: true,
+		});
+		editor.view.someProp("handleKeyDown", (f) => f(editor.view, ev));
+	}
+	editor.commands.insertContent("Third ");
+
+	// Poll DB until 3 paragraphs and 3 root order ids appear
+	let order: string[] = [];
+	let paras: { entity_id: string; snapshot_content: unknown }[] = [];
+	for (let i = 0; i < 40; i++) {
+		const root = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.select(["snapshot_content"]) // small row
+			.executeTakeFirst();
+		order = ((root?.snapshot_content as { order?: string[] } | undefined)
+			?.order ?? []) as string[];
+
+		paras = (await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+			.select(["entity_id", "snapshot_content"]) // small rows
+			.execute()) as { entity_id: string; snapshot_content: unknown }[];
+
+		if (order.length === 3 && paras.length === 3) break;
+		await new Promise((r) => setTimeout(r, 20));
+	}
+
+	expect(order.length).toBe(3);
+	expect(new Set(order).size).toBe(3);
+	expect(paras.length).toBe(3);
+	const paraIds = paras.map((p) => p.entity_id as string);
+	expect(new Set(paraIds).size).toBe(3);
+	const texts = paras.map((p) => {
+		const sc = p.snapshot_content as
+			| { children?: Array<{ value?: string }> }
+			| undefined;
+		const children = sc?.children ?? [];
+		return children
+			.map((c) => (typeof c.value === "string" ? c.value : ""))
+			.join("")
+			.trim();
+	});
+	expect(new Set(texts)).toEqual(new Set(["Start", "Second", "Third"]));
+	const paraIdSet = new Set(paraIds);
+	expect(order.every((id: string) => paraIdSet.has(id))).toBe(true);
+
+	editor.destroy();
+});
+
+test("state cleanup on delete removes row and prunes root order", async () => {
+	const lix = await openLix({ providePlugins: [mdPlugin] });
+	const fileId = "delete_middle_cleanup";
+
+	// Seed with three paragraphs
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/delete-cleanup.md",
+			data: new TextEncoder().encode("Start\n\nSecond\n\nThird"),
+		})
+		.execute();
+
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
+
+	// Force a persistence round on initial content
+	editor.commands.setContent(
+		astToTiptapDoc(parseMarkdown("Start\n\nSecond\n\nThird")) as any,
+	);
+
+	// Poll until state reflects 3 paragraphs and capture the id for "Second"
+	let secondId: string | null = null;
+	for (let i = 0; i < 40; i++) {
+		const paras = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+			.select(["entity_id", "snapshot_content"]) // small rows
+			.execute();
+		if (paras.length === 3) {
+			const texts = paras.map((p) => {
+				const sc = p.snapshot_content as
+					| { children?: Array<{ value?: string }> }
+					| undefined;
+				const children = sc?.children ?? [];
+				return children
+					.map((c) => (typeof c.value === "string" ? c.value : ""))
+					.join("")
+					.trim();
+			});
+			const idx = texts.findIndex((t) => t === "Second");
+			if (idx >= 0) {
+				secondId = paras[idx]!.entity_id as string;
+				break;
+			}
+		}
+		await new Promise((r) => setTimeout(r, 20));
+	}
+	expect(secondId).not.toBeNull();
+
+	// Replace document with only first and third paragraphs (simulate deletion)
+	editor.commands.setContent(
+		astToTiptapDoc(parseMarkdown("Start\n\nThird")) as any,
+	);
+
+	// Poll until state reflects 2 paragraphs and root order pruned
+	let order: string[] = [];
+	for (let i = 0; i < 40; i++) {
+		const root = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.select(["snapshot_content"]) // small row
+			.executeTakeFirst();
+		order = ((root?.snapshot_content as { order?: string[] } | undefined)
+			?.order ?? []) as string[];
+
+		const paras = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+			.select(["entity_id"]) // small rows
+			.execute();
+		if (paras.length === 2 && order.length === 2) {
+			// Ensure "Second" id is gone
+			const ids = paras.map((p) => p.entity_id as string);
+			expect(ids).not.toContain(secondId as string);
+			expect(order).not.toContain(secondId as string);
+			break;
+		}
+		await new Promise((r) => setTimeout(r, 20));
+	}
+	// Final safety assertions
+	expect(order.length).toBe(2);
+	expect(order).not.toContain(secondId as string);
+
 	editor.destroy();
 });

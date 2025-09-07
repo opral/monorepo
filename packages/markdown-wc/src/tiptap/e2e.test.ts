@@ -483,7 +483,7 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
 		let i = 0
 		return new Editor({
 			extensions: MarkdownWc(ids ? { idProvider: () => ids[i++] ?? `T${i}` } : undefined),
-			content: astToTiptapDoc(parseMarkdown(markdown)) as unknown as JSONContent,
+			content: astToTiptapDoc(parseMarkdown(markdown)) as JSONContent,
 		})
 	}
 
@@ -499,15 +499,12 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
 		// Place selection at the very start of the paragraph
 		editor.commands.setTextSelection(paraFrom)
 		pressEnter(editor)
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getParagraphTexts(ast)
-		expect(texts.length).toBe(2)
-		// First is empty, then original content
-		expect(texts[0]).toBe("")
-		expect(texts[1]).toBe("Hello world")
-		// Unique ids
+		// Empty left paragraph is dropped at top-level; only the original remains
+		expect(texts).toEqual(["Hello world"])
 		const ids = (((ast as any).children || []) as any[]).map((n: any) => n?.data?.id)
-		expect(new Set(ids).size).toBe(2)
+		expect(new Set(ids).size).toBe(1)
 		editor.destroy()
 	})
 
@@ -519,7 +516,7 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
 		const posSplit = paraFrom + 1 + idx + "Hello".length
 		editor.commands.setTextSelection(posSplit)
 		pressEnter(editor)
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getParagraphTexts(ast)
 		expect(texts).toEqual(["Hello", "world"])
 		const ids = (((ast as any).children || []) as any[]).map((n: any) => n?.data?.id)
@@ -531,13 +528,12 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
 		const editor = newEditor("Hello")
 		editor.commands.setTextSelection(editor.state.doc.content.size)
 		pressEnter(editor)
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getParagraphTexts(ast)
-		expect(texts.length).toBe(2)
-		expect(texts[0]).toBe("Hello")
-		expect(texts[1]).toBe("")
+		// Empty right paragraph is dropped at top-level; only left remains
+		expect(texts).toEqual(["Hello"])
 		const ids = (((ast as any).children || []) as any[]).map((n: any) => n?.data?.id)
-		expect(new Set(ids).size).toBe(2)
+		expect(new Set(ids).size).toBe(1)
 		editor.destroy()
 	})
 
@@ -551,7 +547,7 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
 		pressEnter(editor)
 		editor.commands.insertContent("Third ")
 
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getParagraphTexts(ast)
 		expect(texts.length).toBe(3)
 		expect(new Set(texts.map((t) => t.trim())).size).toBe(3)
@@ -573,7 +569,7 @@ describe("Enter split positions (start/middle/end) + repeated", () => {
  */
 describe("Paste multi-paragraph at caret", () => {
 	function blocksFromMarkdown(markdown: string): JSONContent[] {
-		const doc = astToTiptapDoc(parseMarkdown(markdown)) as unknown as JSONContent
+		const doc = astToTiptapDoc(parseMarkdown(markdown)) as JSONContent
 		return (doc.content ?? []) as JSONContent[]
 	}
 
@@ -590,14 +586,14 @@ describe("Paste multi-paragraph at caret", () => {
 	test("paste at end appends paragraphs", () => {
 		const editor = new Editor({
 			extensions: MarkdownWc(),
-			content: astToTiptapDoc(parseMarkdown("Hello")) as unknown as JSONContent,
+			content: astToTiptapDoc(parseMarkdown("Hello")) as JSONContent,
 		})
 
 		const end = editor.state.doc.content.size
 		const blocks = blocksFromMarkdown("A\n\nB")
 		editor.commands.insertContentAt(end, blocks)
 
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getTexts(ast)
 		expect(texts).toEqual(["Hello", "A", "B"])
 		const ids = (((ast as any).children || []) as any[]).map((n: any) => n?.data?.id)
@@ -608,7 +604,7 @@ describe("Paste multi-paragraph at caret", () => {
 	test("paste in middle splits and inserts paragraphs", () => {
 		const editor = new Editor({
 			extensions: MarkdownWc(),
-			content: astToTiptapDoc(parseMarkdown("Hello world")) as unknown as JSONContent,
+			content: astToTiptapDoc(parseMarkdown("Hello world")) as JSONContent,
 		})
 
 		// Compute position after "Hello"
@@ -620,7 +616,7 @@ describe("Paste multi-paragraph at caret", () => {
 		const blocks = blocksFromMarkdown("A\n\nB")
 		editor.commands.insertContentAt(pos, blocks)
 
-		const ast = tiptapDocToAst(editor.getJSON() as unknown as PMNode) as Ast
+		const ast = tiptapDocToAst(editor.getJSON()) as Ast
 		const texts = getTexts(ast)
 		// Expect left side, then pasted, then right side
 		expect(texts).toEqual(["Hello", "A", "B", "world"])
@@ -717,4 +713,22 @@ describe("Split with marks and trailing spaces", () => {
 		expect(new Set(ids).size).toBe(2)
 		editor.destroy()
 	})
+})
+
+/**
+ * Empty document behavior
+ * - An empty editor should not persist a top-level empty paragraph — the AST
+ *   should have zero top-level blocks (children.length === 0).
+ */
+test("select-all delete yields no top-level blocks in AST", () => {
+	const editor = new Editor({
+		extensions: MarkdownWc(),
+		content: astToTiptapDoc(parseMarkdown("Hello")),
+	})
+	// Replace content with empty
+	editor.commands.setContent(astToTiptapDoc(parseMarkdown("")))
+	const ast = tiptapDocToAst(editor.getJSON())
+	const children = ((ast as any).children ?? []) as any[]
+	expect(children.length).toBe(0)
+	editor.destroy()
 })
