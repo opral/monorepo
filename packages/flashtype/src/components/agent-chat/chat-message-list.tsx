@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { ChatMessage as Msg } from "./types";
 import { ChatMessage } from "./chat-message";
+import { LixAgentWelcome } from "./lix-agent-welcome";
 
 /**
  * Virtual-less, simple scroll container for a mock chat transcript.
@@ -30,10 +31,16 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 			data-testid="chat-scroller"
 			className={`flex-1 min-h-0 overflow-y-auto px-3 py-3 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
 		>
-			<div className="w-full flex min-h-full max-w-none flex-col justify-end">
-				{messages.map((m) => (
-					<ChatMessage key={m.id} message={m} />
-				))}
+			<div className="w-full flex min-h-full max-w-none flex-col">
+				{/* Top‑aligned welcome message persists as the first item */}
+				<LixAgentWelcome />
+
+				{/* Bottom‑anchored transcript */}
+				<div className="mt-auto flex flex-col justify-end">
+					{messages.map((m) => (
+						<ChatMessage key={m.id} message={m} />
+					))}
+				</div>
 			</div>
 		</div>
 	);

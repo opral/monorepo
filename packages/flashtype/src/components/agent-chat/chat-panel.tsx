@@ -43,7 +43,7 @@ export function ChatPanel() {
 	return (
 		<div
 			ref={panelRef}
-			className="flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
+			className="relative flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
 		>
 			<ChatMessageList messages={messages} />
 			<ChatInput onSend={send} />
