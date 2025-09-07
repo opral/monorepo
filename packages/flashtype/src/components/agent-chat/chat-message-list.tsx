@@ -11,15 +11,25 @@ import { ChatMessage } from "./chat-message";
  */
 export function ChatMessageList({ messages }: { messages: Msg[] }) {
 	const ref = React.useRef<HTMLDivElement>(null);
+	const [hideScrollbar, setHideScrollbar] = React.useState(false);
 
-	React.useEffect(() => {
+	// Always keep the view anchored to the bottom whenever messages update
+	// (new message or streaming content updates).
+	React.useLayoutEffect(() => {
 		const el = ref.current;
 		if (!el) return;
+		setHideScrollbar(true);
 		el.scrollTop = el.scrollHeight;
-	}, [messages.length]);
+		const t = window.setTimeout(() => setHideScrollbar(false), 150);
+		return () => window.clearTimeout(t);
+	}, [messages]);
 
 	return (
-		<div ref={ref} className="min-h-0 overflow-y-auto px-3 py-3">
+		<div
+			ref={ref}
+			data-testid="chat-scroller"
+			className={`min-h-0 overflow-y-auto px-3 py-3 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
+		>
 			<div className="w-full flex min-h-full max-w-none flex-col justify-end">
 				{messages.map((m) => (
 					<ChatMessage key={m.id} message={m} />

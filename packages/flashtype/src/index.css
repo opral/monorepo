@@ -216,6 +216,16 @@
 	}
 }
 
+/* Utility to temporarily hide scrollbars (e.g., during programmatic scroll) */
+.scrollbar-hidden {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
 /* TipTap / ProseMirror editor tweaks */
 .ProseMirror:focus,
 .ProseMirror:focus-visible {
