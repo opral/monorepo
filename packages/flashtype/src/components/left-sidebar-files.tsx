@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { ChevronRight, File, Folder, FolderOpen } from "lucide-react";
+import {
+	ChevronRight,
+	File,
+	Folder,
+	FolderOpen,
+	MoreHorizontal,
+	Trash2,
+} from "lucide-react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useLix, useQuery } from "@lix-js/react-utils";
 import { selectFiles } from "@/queries";
@@ -17,6 +24,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { nanoId } from "@lix-js/sdk";
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type TreeNode = string | [string, ...TreeNode[]];
 
@@ -82,6 +96,17 @@ export function LeftSidebarFiles({
 			Object.fromEntries(files.map((f) => [f.path as string, f.id as string])),
 		[files],
 	);
+	async function handleDeleteFile(targetId: string, targetPath: string) {
+		await lix.db.transaction().execute(async (trx) => {
+			await trx.deleteFrom("state").where("file_id", "=", targetId).execute();
+			await trx.deleteFrom("file").where("id", "=", targetId).execute();
+		});
+
+		if (activeFileId === targetId) {
+			await setActiveFileId(null as any);
+		}
+	}
+
 	return (
 		<SidebarMenu>
 			{creating ? (
@@ -113,6 +138,13 @@ export function LeftSidebarFiles({
 					}}
 					pathPrefix=""
 					pathToId={pathToId}
+					onRequestDelete={async (fullPath) => {
+						const id = pathToId[fullPath];
+						if (!id) return;
+						const ok = window.confirm(`Delete "${fullPath}"?`);
+						if (!ok) return;
+						await handleDeleteFile(id, fullPath);
+					}}
 				/>
 			))}
 		</SidebarMenu>
@@ -206,31 +238,64 @@ function Tree({
 	onSelect,
 	pathPrefix,
 	pathToId,
+	onRequestDelete,
 }: {
 	item: TreeNode;
 	activeId: string | null;
 	onSelect: (id: string) => Promise<void>;
 	pathPrefix: string;
 	pathToId: Record<string, string>;
+	onRequestDelete: (fullPath: string) => Promise<void>;
 }) {
 	const [name, ...items] = Array.isArray(item) ? item : [item];
 	const fullPath = `${pathPrefix}/${name as string}`;
 	const [open, setOpen] = useState(false);
 
 	if (!items.length) {
+		const isActive = activeId === pathToId[fullPath];
 		return (
 			<SidebarMenuItem>
-				<SidebarMenuButton
-					isActive={activeId === pathToId[fullPath]}
-					onClick={() => {
-						const id = pathToId[fullPath];
-						if (id) onSelect(id);
-					}}
-					className="data-[active=true]:bg-secondary cursor-pointer"
+				<div
+					data-active={isActive ? "true" : undefined}
+					className="flex w-full items-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-secondary"
 				>
-					<File />
-					{name as string}
-				</SidebarMenuButton>
+					<SidebarMenuButton
+						isActive={false}
+						onClick={() => {
+							const id = pathToId[fullPath];
+							if (id) onSelect(id);
+						}}
+						className="cursor-pointer flex-1 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent"
+					>
+						<File />
+						{name as string}
+					</SidebarMenuButton>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="ml-1 h-6 w-6 p-0 text-muted-foreground opacity-0 transition-opacity group-hover/menu-item:opacity-100"
+								aria-label={`More actions for ${fullPath}`}
+								title="More actions"
+								onClick={(e) => e.stopPropagation()}
+							>
+								<MoreHorizontal className="h-3.5 w-3.5" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-40 p-1">
+							<DropdownMenuItem
+								className="cursor-pointer text-red-600 hover:text-red-600 focus:text-red-600"
+								onClick={async (e) => {
+									e.stopPropagation();
+									await onRequestDelete(fullPath);
+								}}
+							>
+								<Trash2 className="mr-2 h-3.5 w-3.5 text-red-600" /> Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 			</SidebarMenuItem>
 		);
 	}
