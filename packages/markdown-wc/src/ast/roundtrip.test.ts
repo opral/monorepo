@@ -177,7 +177,7 @@ describe("lists", () => {
 		const list = ast.children[0]
 		expect(list?.type).toBe("list")
 		expect(list?.ordered).toBe(false)
-			const items = list?.children ?? []
+		const items = list?.children ?? []
 		expect(items[0]?.type).toBe("listItem")
 		expect(items[0]?.checked).toBe(true)
 		expect(items[0]?.children?.[0]?.children?.[0]?.value).toBe("done")
@@ -256,7 +256,7 @@ describe("thematic break & break", () => {
 		const out = serializeAst(ast)
 
 		const para = ast.children[0]
-			const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
+		const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
@@ -270,7 +270,7 @@ describe("thematic break & break", () => {
 		const out = serializeAst(ast)
 
 		const para = ast.children[0]
-			const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
+		const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
@@ -286,8 +286,8 @@ describe("html", () => {
 
 		const para = ast.children[0]
 		expect(para?.type).toBe("paragraph")
-			const children = para?.children ?? []
-			const [t1, htmlOpen, tWorld, htmlClose, t2] = children
+		const children = para?.children ?? []
+		const [t1, htmlOpen, tWorld, htmlClose, t2] = children
 		expect(t1?.type).toBe("text")
 		expect(t1?.value).toBe("Hello ")
 		expect(htmlOpen?.type).toBe("html")
@@ -384,11 +384,11 @@ describe("table", () => {
 		const table = ast.children[0]
 		expect(table?.type).toBe("table")
 		expect(Array.isArray(table?.align)).toBe(true)
-			const align = table?.align
-			expect(Array.isArray(align) ? align.length : 0).toBe(2)
+		const align = table?.align
+		expect(Array.isArray(align) ? align.length : 0).toBe(2)
 
-			const rows = table?.children ?? []
-			const [row1, row2] = rows
+		const rows = table?.children ?? []
+		const [row1, row2] = rows
 		expect(row1?.type).toBe("tableRow")
 		expect(row1?.children?.[0]?.type).toBe("tableCell")
 		expect(row1?.children?.[0]?.children?.[0]?.value).toBe("a")

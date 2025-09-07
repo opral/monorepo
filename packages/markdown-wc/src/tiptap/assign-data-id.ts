@@ -20,6 +20,7 @@ export function createAssignDataIdExtension(opts?: AssignDataIdOptions) {
 
 						const tr = newState.tr
 						let modified = false
+						const seen = new Set<string>()
 
 						// Iterate top-level children and ensure data.id
 						const doc = newState.doc
@@ -28,13 +29,18 @@ export function createAssignDataIdExtension(opts?: AssignDataIdOptions) {
 							const node = doc.child(i) as any
 							const attrs = node.attrs || {}
 							const data = attrs.data || null
-							const hasId = data && typeof data.id === "string" && data.id.length > 0
-							if (!hasId) {
-								const nextData = { ...(data || {}), id: idProvider() }
+							let id: string | null =
+								data && typeof data.id === "string" && data.id.length > 0
+									? (data.id as string)
+									: null
+							if (!id || seen.has(id)) {
+								id = idProvider()
+								const nextData = { ...(data || {}), id }
 								const nextAttrs = { ...attrs, data: nextData }
 								tr.setNodeMarkup(pos, undefined, nextAttrs)
 								modified = true
 							}
+							seen.add(id!)
 							pos += node.nodeSize
 						}
 
