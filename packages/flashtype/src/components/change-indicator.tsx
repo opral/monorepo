@@ -117,6 +117,10 @@ export function ChangeIndicator() {
 						variant="default"
 						disabled={total === 0}
 						data-testid="create-checkpoint"
+						onClick={async () => {
+							await createCheckpoint({ lix });
+							setOpen(false);
+						}}
 					>
 						Create checkpoint
 					</Button>
