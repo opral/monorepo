@@ -1,6 +1,7 @@
 import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
 import type { Lix } from "@lix-js/sdk";
 import { sql } from "@lix-js/sdk";
+import { AstSchemas } from "@opral/markdown-wc";
 
 // Files
 export function selectFiles(lix: Lix) {
@@ -11,6 +12,7 @@ export function selectFiles(lix: Lix) {
 }
 
 // Working diff for the active file: total/added/removed in current working change set
+// Note: Excludes the Markdown root order schema so pure reorders don't count as content changes.
 export function selectWorkingDiffCount(lix: Lix) {
 	const workingChangeSetIdQ = lix.db
 		.selectFrom("active_version")
@@ -29,6 +31,7 @@ export function selectWorkingDiffCount(lix: Lix) {
 		.where("change_set_element.change_set_id", "=", workingChangeSetIdQ)
 		.where("change.file_id", "=", activeFileIdQ)
 		.where("change.plugin_key", "=", mdPlugin.key)
+		.where("change.schema_key", "!=", AstSchemas.RootOrderSchema["x-lix-key"])
 		.select((eb) => [
 			eb.fn.count<number>("change.id").as("total"),
 			eb.fn

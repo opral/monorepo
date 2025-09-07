@@ -25,7 +25,7 @@ describe("selectFiles", () => {
 	});
 });
 
-describe("selectWorkingDiff", () => {
+describe("selectWorkingDiffCount", () => {
 	test("scopes change count to active file and responds to edits/checkpoints", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
 
@@ -85,5 +85,46 @@ describe("selectWorkingDiff", () => {
 		await createCheckpoint({ lix });
 		const diffBAfter = await selectWorkingDiffCount(lix).executeTakeFirst();
 		expect(diffBAfter?.total ?? 0).toBe(0);
+	});
+
+	test("order-only change yields zero working diff count (excludes root schema)", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+
+		const fileId = "file_order_only";
+		const before = `# Title\n\nParagraph 1.\n\nParagraph 2.`;
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/order-only.md",
+				data: new TextEncoder().encode(before),
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "flashtype_active_file_id", value: fileId })
+			.execute();
+
+		await createCheckpoint({ lix });
+
+		// Reorder paragraphs without editing content
+		const after = `# Title\n\nParagraph 2.\n\nParagraph 1.`;
+		await lix.db
+			.updateTable("file")
+			.set({ data: new TextEncoder().encode(after) })
+			.where("id", "=", fileId)
+			.execute();
+
+		// Poll a few times to allow detection to run
+		for (let i = 0; i < 10; i++) {
+			const diff = await selectWorkingDiffCount(lix).executeTakeFirst();
+			if ((diff?.total ?? 0) === 0) break;
+			await new Promise((r) => setTimeout(r, 10));
+		}
+
+		const diffFinal = await selectWorkingDiffCount(lix).executeTakeFirst();
+		expect(diffFinal?.total ?? 0).toBe(0);
 	});
 });
