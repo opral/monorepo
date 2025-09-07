@@ -24,13 +24,11 @@ export function TipTapEditor({
 
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
-	// Require an active file id to operate
 	if (!activeFileId) {
 		throw new Error(
 			"TipTapEditor: 'flashtype_active_file_id' is undefined. Set the active file id before rendering the editor.",
 		);
 	}
-
 	// Editor loads initial content and persists via createEditor using only fileId
 
 	const editor = usePromise(
