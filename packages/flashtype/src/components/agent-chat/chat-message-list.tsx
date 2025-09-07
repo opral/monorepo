@@ -28,7 +28,7 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 		<div
 			ref={ref}
 			data-testid="chat-scroller"
-			className={`min-h-0 overflow-y-auto px-3 py-3 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
+			className={`flex-1 min-h-0 overflow-y-auto px-3 py-3 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
 		>
 			<div className="w-full flex min-h-full max-w-none flex-col justify-end">
 				{messages.map((m) => (
