@@ -1,0 +1,17 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"isolatedDeclarations": true,
+		"allowJs": false,
+		"checkJs": false,
+		"allowImportingTsExtensions": false,
+		"emitDeclarationOnly": false,
+		"verbatimModuleSyntax": true,
+		"types": ["vitest/globals"],
+		"module": "Node16",
+		"lib": ["ESNext", "DOM"],
+		"outDir": "./dist",
+		"rootDir": "./src"
+	}
+}
