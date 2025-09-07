@@ -1,0 +1,40 @@
+{
+	"name": "@lix-js/agent",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"description": "Minimal Lix agent built on the Vercel AI SDK.",
+	"license": "Apache-2.0",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"dist",
+		"src"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "vitest run --typecheck",
+		"test:watch": "vitest --typecheck",
+		"format": "prettier ./src --write",
+		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"dependencies": {
+		"ai": "^5.0.34",
+		"@ai-sdk/provider": "^2.0.0"
+	},
+	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"oxlint": "^1.14.0",
+		"prettier": "^3.4.1",
+		"typescript": "^5.5.4",
+		"vitest": "4.0.0-beta.10"
+	}
+}
