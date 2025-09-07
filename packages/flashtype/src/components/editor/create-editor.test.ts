@@ -31,18 +31,22 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 		.execute();
 
 	// Create editor from fileId (auto-loads initial content)
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 
 	// Set cursor at start and simulate paste of plain text
 	editor.commands.setTextSelection(1);
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) => (t === "text/plain" ? "New" : ""),
 			},
-		} as any,
+		},
 	});
 
 	const rootOrderAfter = await lix.db
@@ -107,17 +111,21 @@ test("paste at end inserts after existing content (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
-	const end = (editor as any).state.doc.content.size;
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
+	const end = editor.state.doc.content.size;
 	editor.commands.setTextSelection(end);
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) => (t === "text/plain" ? "New" : ""),
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 
@@ -144,17 +152,21 @@ test("replace word selection with paste (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	// Select the substring "THIS TEXT" (roughly positions 9..18 in PM coords)
 	editor.commands.setTextSelection({ from: 9, to: 18 });
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) => (t === "text/plain" ? "new content" : ""),
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 
@@ -181,17 +193,21 @@ test("replace entire document with paste (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	editor.commands.selectAll();
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) =>
 					t === "text/plain" ? "# New Document\n\nCompletely new content" : "",
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 
@@ -217,16 +233,20 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 		})
 		.execute();
 
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) =>
 					t === "text/plain" ? "First line\n\nSecond line" : "",
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 	const fileAfter = await lix.db
@@ -252,16 +272,16 @@ test("Enter splits paragraph → assigns unique ids and root order has no duplic
 		})
 		.execute();
 
-	const editor = (await createEditor({
+	const editor: Editor = await createEditor({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
-	})) as Editor;
+	});
 
 	// Place caret after "Hello"
-	const para = (editor as any).state.doc.child(0);
+	const para = editor.state.doc.child(0);
 	const paraFrom = 1;
-	const idxHello = (para as any).textContent.indexOf("Hello");
+	const idxHello = para.textContent.indexOf("Hello");
 	const posSplit = paraFrom + 1 + idxHello + "Hello".length;
 	editor.commands.setTextSelection(posSplit);
 
@@ -271,9 +291,7 @@ test("Enter splits paragraph → assigns unique ids and root order has no duplic
 		bubbles: true,
 		cancelable: true,
 	});
-	(editor as any).view.someProp("handleKeyDown", (f: any) =>
-		f((editor as any).view, event),
-	);
+	editor.view.someProp("handleKeyDown", (f) => f(editor.view, event));
 
 	// Give onUpdate/persist a tick (persistDebounceMs=0 still runs async)
 	await new Promise((r) => setTimeout(r, 0));
@@ -285,7 +303,8 @@ test("Enter splits paragraph → assigns unique ids and root order has no duplic
 		.select(["snapshot_content"]) // small row
 		.executeTakeFirst();
 
-	const order = (root?.snapshot_content as any)?.order ?? [];
+	const order =
+		(root?.snapshot_content as { order?: string[] } | undefined)?.order ?? [];
 	expect(order.length).toBe(2);
 	expect(new Set(order).size).toBe(order.length); // no duplicates
 
@@ -314,14 +333,14 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 		})
 		.execute();
 
-	const editor = (await createEditor({
+	const editor: Editor = await createEditor({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
-	})) as Editor;
+	});
 
 	// Move caret to end and split → new empty paragraph (#2)
-	const end = (editor as any).state.doc.content.size;
+	const end = editor.state.doc.content.size;
 	editor.commands.setTextSelection(end);
 	editor.commands.splitBlock();
 	// Type content for paragraph #2
@@ -333,7 +352,7 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 
 	// Poll until we see 3 paragraphs in state and 3 ids in root order
 	let order: string[] = [];
-	let paras: { entity_id: string; snapshot_content: any }[] = [] as any;
+	let paras: { entity_id: string; snapshot_content: unknown }[] = [];
 	for (let i = 0; i < 40; i++) {
 		const root = await lix.db
 			.selectFrom("state")
@@ -341,14 +360,15 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
 			.select(["snapshot_content"]) // small row
 			.executeTakeFirst();
-		order = ((root?.snapshot_content as any)?.order ?? []) as string[];
+		order = ((root?.snapshot_content as { order?: string[] } | undefined)
+			?.order ?? []) as string[];
 
 		paras = (await lix.db
 			.selectFrom("state")
 			.where("file_id", "=", fileId)
 			.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
 			.select(["entity_id", "snapshot_content"]) // small rows
-			.execute()) as any;
+			.execute()) as { entity_id: string; snapshot_content: unknown }[];
 
 		if (order.length === 3 && paras.length === 3) break;
 		await new Promise((r) => setTimeout(r, 20));
@@ -362,12 +382,16 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 	expect(paras.length).toBe(3);
 	const paraIds = paras.map((p) => p.entity_id as string);
 	expect(new Set(paraIds).size).toBe(3);
-	const texts = paras.map((p) =>
-		((p.snapshot_content as any)?.children || [])
-			.map((c: any) => (typeof c.value === "string" ? c.value : ""))
+	const texts = paras.map((p) => {
+		const sc = p.snapshot_content as
+			| { children?: Array<{ value?: string }> }
+			| undefined;
+		const children = sc?.children ?? [];
+		return children
+			.map((c) => (typeof c.value === "string" ? c.value : ""))
 			.join("")
-			.trim(),
-	);
+			.trim();
+	});
 	// Order in DB may not be textual order; ensure all expected texts are present
 	expect(new Set(texts)).toEqual(
 		new Set(["Hello world", "How are you?", "Good and you?"]),
@@ -391,16 +415,20 @@ test("normalize CRLF line endings on paste (TipTap + Lix)", async () => {
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) =>
 					t === "text/plain" ? "Line one\r\n\r\nLine two" : "",
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 	const fileAfter = await lix.db
@@ -424,16 +452,20 @@ test("paste complex markdown with lists and code blocks (TipTap + Lix)", async (
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	const complex = `# Title\n\n- Item 1\n- Item 2\n\n\`\`\`javascript\nconst x = 1;\n\`\`\``;
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) => (t === "text/plain" ? complex : ""),
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 	const fileAfter = await lix.db
@@ -461,16 +493,20 @@ test("paste inline formatting markdown (TipTap + Lix)", async () => {
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor = await createEditor({ lix, fileId, persistDebounceMs: 0 });
+	const editor: Editor = await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	});
 	const input = "This has **bold**, _italic_, and `code`.";
 	await handlePaste({
-		editor: editor as any,
+		editor,
 		event: {
 			preventDefault: () => {},
 			clipboardData: {
 				getData: (t: string) => (t === "text/plain" ? input : ""),
 			},
-		} as any,
+		},
 	});
 	await new Promise((r) => setTimeout(r, 0));
 	const fileAfter = await lix.db

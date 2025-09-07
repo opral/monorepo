@@ -8,20 +8,20 @@ import { MarkdownWc } from "./markdown-wc.js"
 
 function roundtrip(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
-	const out = tiptapDocToAst(pmDoc as any)
-	return out as any
+	const out = tiptapDocToAst(pmDoc)
+	return out
 }
 
 function roundtripThroughEditor(ast: Ast): Ast {
-    const pmDoc = astToTiptapDoc(ast)
-    const editor = new Editor({
-        extensions: MarkdownWc(),
-        content: pmDoc as any,
-    })
-    const outJSON = editor.getJSON() as any
-    const result = tiptapDocToAst(outJSON as any) as any
-    editor.destroy()
-    return result
+	const pmDoc = astToTiptapDoc(ast)
+	const editor = new Editor({
+		extensions: MarkdownWc(),
+		content: pmDoc,
+	})
+	const outJSON = editor.getJSON()
+	const result = tiptapDocToAst(outJSON)
+	editor.destroy()
+	return result
 }
 
 describe("root & paragraph", () => {
@@ -29,7 +29,7 @@ describe("root & paragraph", () => {
 		const input: Ast = {
 			type: "root",
 			children: [{ type: "paragraph", children: [{ type: "text", value: "Hello world." }] }],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -47,17 +47,17 @@ describe("vendor data roundtrip", () => {
 					depth: 2,
 					data: { id: "H1", foo: "bar", nested: { a: 1 } },
 					children: [{ type: "text", value: "Title" }],
-				} as any,
+				},
 				{
 					type: "paragraph",
 					data: { id: "P1", custom: { x: 42 } },
 					children: [{ type: "text", value: "Content" }],
-				} as any,
+				},
 			],
-		} as any
+		}
 
 		const pm = astToTiptapDoc(input)
-		const output = tiptapDocToAst(pm as any) as any
+		const output = tiptapDocToAst(pm)
 
 		// Expect full structural equality including data.* preservation
 		expect(output).toEqual(input)
@@ -72,7 +72,7 @@ describe("heading", () => {
 				children: [
 					{ type: "heading", depth: level, children: [{ type: "text", value: "Heading" }] },
 				],
-			} as any
+			}
 			const output = roundtrip(input)
 			expect(output).toEqual(input)
 			const editorOutput = roundtripThroughEditor(input)
@@ -97,7 +97,7 @@ describe("paragraph marks", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -113,7 +113,7 @@ describe("paragraph marks", () => {
 					children: [{ type: "strong", children: [{ type: "text", value: "bold" }] }],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -139,8 +139,8 @@ describe("paragraph marks", () => {
 	test("inline code", () => {
 		const input: Ast = {
 			type: "root",
-			children: [{ type: "paragraph", children: [{ type: "inlineCode", value: "code" } as any] }],
-		} as any
+			children: [{ type: "paragraph", children: [{ type: "inlineCode", value: "code" }] }],
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -156,7 +156,7 @@ describe("paragraph marks", () => {
 					children: [{ type: "delete", children: [{ type: "text", value: "strike" }] }],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -175,11 +175,11 @@ describe("paragraph marks", () => {
 							url: "https://example.com",
 							title: "title",
 							children: [{ type: "text", value: "text" }],
-						} as any,
+						},
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -207,7 +207,7 @@ describe("lists", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -233,7 +233,7 @@ describe("lists", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -260,7 +260,7 @@ describe("lists", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -277,18 +277,18 @@ describe("lists", () => {
 					children: [
 						{
 							type: "listItem",
-							checked: true as any,
+							checked: true,
 							children: [{ type: "paragraph", children: [{ type: "text", value: "done" }] }],
 						},
 						{
 							type: "listItem",
-							checked: false as any,
+							checked: false,
 							children: [{ type: "paragraph", children: [{ type: "text", value: "todo" }] }],
 						},
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		// Editor roundtrip of task list is exercised in the example app; core mapping equality is asserted here.
@@ -305,7 +305,7 @@ describe("blocks", () => {
 					children: [{ type: "paragraph", children: [{ type: "text", value: "quote" }] }],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
@@ -316,26 +316,26 @@ describe("blocks", () => {
 			children: [
 				{
 					type: "table",
-					align: [null, null] as any,
+					align: [null, null],
 					children: [
 						{
 							type: "tableRow",
 							children: [
-								{ type: "tableCell", children: [{ type: "text", value: "a" }] } as any,
-								{ type: "tableCell", children: [{ type: "text", value: "b" }] } as any,
+								{ type: "tableCell", children: [{ type: "text", value: "a" }] },
+								{ type: "tableCell", children: [{ type: "text", value: "b" }] },
 							],
 						},
 						{
 							type: "tableRow",
 							children: [
-								{ type: "tableCell", children: [{ type: "text", value: "1" }] } as any,
-								{ type: "tableCell", children: [{ type: "text", value: "2" }] } as any,
+								{ type: "tableCell", children: [{ type: "text", value: "1" }] },
+								{ type: "tableCell", children: [{ type: "text", value: "2" }] },
 							],
 						},
 					],
-				} as any,
+				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
@@ -343,7 +343,7 @@ describe("blocks", () => {
 	})
 
 	test("thematic break", () => {
-		const input: Ast = { type: "root", children: [{ type: "thematicBreak" }] } as any
+		const input: Ast = { type: "root", children: [{ type: "thematicBreak" }] }
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
@@ -352,13 +352,13 @@ describe("blocks", () => {
 		const input: Ast = {
 			type: "root",
 			children: [{ type: "code", lang: "js", value: "const a = 1" }],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
 
 	test("code block without lang", () => {
-		const input: Ast = { type: "root", children: [{ type: "code", value: "plain" }] } as any
+		const input: Ast = { type: "root", children: [{ type: "code", value: "plain" }] }
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})
@@ -373,12 +373,12 @@ describe("inline", () => {
 					type: "paragraph",
 					children: [
 						{ type: "text", value: "line" },
-						{ type: "break" } as any,
+						{ type: "break" },
 						{ type: "text", value: "break" },
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtrip(input)
 		expect(output).toEqual(input)
 	})

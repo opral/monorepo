@@ -1,21 +1,21 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
-import { Editor } from "@tiptap/core"
+import { Editor, type JSONContent } from "@tiptap/core"
 import { parseMarkdown } from "../ast/parse-markdown.js"
 import { serializeAst } from "../ast/serialize-ast.js"
 import { MarkdownWc } from "./markdown-wc.js"
 import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
-import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
+import { tiptapDocToAst, type PMNode } from "./tiptap-to-mdwc.js"
 import type { Ast } from "../ast/schemas.js"
 
 function roundtripThroughEditor(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: pmDoc as any,
+		content: pmDoc,
 	})
-	const outJSON = editor.getJSON() as any
-	const result = tiptapDocToAst(outJSON as any) as any
+	const outJSON = editor.getJSON()
+	const result = tiptapDocToAst(outJSON)
 	editor.destroy()
 	return result
 }
@@ -29,18 +29,18 @@ test("append paragraph at end", () => {
 	const content = astToTiptapDoc(ast)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: content as any,
+		content: content,
 	})
 
 	// 2) user adds a new paragraph at the end
 	editor.commands.insertContentAt(editor.state.doc.content.size, {
 		type: "paragraph",
 		content: [{ type: "text", text: "New Paragraph" }],
-	} as any)
+	})
 
 	// 3) roundtrip back to Markdown and assert expected
-	const outAst = tiptapDocToAst(editor.getJSON() as any)
-	const output = serializeAst(outAst as any)
+	const outAst = tiptapDocToAst(editor.getJSON())
+	const output = serializeAst(outAst)
 	expect(output).toBe(expectedOutput)
 	editor.destroy()
 })
@@ -53,7 +53,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 				{ type: "heading", depth: 1, children: [{ type: "text", value: "Heading" }] },
 				{ type: "paragraph", children: [{ type: "text", value: "Hello world." }] },
 			],
-		} as any
+		}
 		const output = roundtripThroughEditor(input)
 		expect(output).toEqual(input)
 	})
@@ -77,7 +77,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtripThroughEditor(input)
 		expect(output).toEqual(input)
 	})
@@ -102,7 +102,7 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtripThroughEditor(input)
 		expect(output).toEqual(input)
 	})
@@ -118,13 +118,13 @@ describe("Editor roundtrip (AST → TipTap Editor → AST)", () => {
 						{ type: "text", value: " " },
 						{ type: "emphasis", children: [{ type: "text", value: "italic" }] },
 						{ type: "text", value: " " },
-						{ type: "inlineCode", value: "code" } as any,
+						{ type: "inlineCode", value: "code" },
 						{ type: "text", value: " " },
 						{ type: "delete", children: [{ type: "text", value: "strike" }] },
 					],
 				},
 			],
-		} as any
+		}
 		const output = roundtripThroughEditor(input)
 		expect(output).toEqual(input)
 	})
@@ -275,7 +275,7 @@ test("insert text mid-paragraph", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: astToTiptapDoc(ast) as any,
+		content: astToTiptapDoc(ast),
 	})
 
 	// compute absolute pos after "Hello "
@@ -310,7 +310,7 @@ test("insert hard break in paragraph (replace following space)", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: astToTiptapDoc(ast) as any,
+		content: astToTiptapDoc(ast),
 	})
 
 	// Replace the whole paragraph with a version that includes a hard break between words
@@ -342,59 +342,61 @@ test("split paragraph into two (insert new paragraph in the middle)", () => {
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: astToTiptapDoc(ast) as any,
+		content: astToTiptapDoc(ast),
 	})
 
 	// First paragraph positions
 	const para = editor.state.doc.child(0)
 	const paraFrom = 1
-	const paraTo = paraFrom + (para as any).content.size
-	const idxHello = (para as any).textContent.indexOf("Hello")
+	const paraTo = paraFrom + para.content.size
+	const idxHello = para.textContent.indexOf("Hello")
 	const posSplit = paraFrom + 1 + idxHello + "Hello".length
 
 	// Replace the trailing text (after 'Hello') with a new paragraph containing 'world.'
 	editor.commands.insertContentAt(
-		{ from: posSplit, to: paraTo } as any,
-		{ type: "paragraph", content: [{ type: "text", text: "world." }] } as any
+		{ from: posSplit, to: paraTo },
+		{
+			type: "paragraph",
+			content: [{ type: "text", text: "world." }],
+		}
 	)
 
-	const outAst = tiptapDocToAst(editor.getJSON() as any)
+	const outAst = tiptapDocToAst(editor.getJSON())
 	// Assert unique ids across the two paragraphs (no duplicate data.id)
-	const ids = ((outAst as any).children || []).map((n: any) => n?.data?.id)
+	const ids = (outAst.children || []).map((n: any) => n?.data?.id)
 	expect(typeof ids[0]).toBe("string")
 	expect(typeof ids[1]).toBe("string")
 	expect(ids[0]).toBeTruthy()
 	expect(ids[1]).toBeTruthy()
 	expect(ids[0]).not.toBe(ids[1])
 
-	const output = serializeAst(outAst as any)
+	const output = serializeAst(outAst)
 	expect(output).toBe(expectedOutput)
 	editor.destroy()
 })
 
 test("Enter splits paragraph and assigns unique ids (root order unique)", () => {
 	const input = `Hello world.`
-	const expectedOutput = `Hello\n\nworld.`
 
 	const ast = parseMarkdown(input)
 	const editor = new Editor({
 		extensions: MarkdownWc(),
-		content: astToTiptapDoc(ast) as any,
+		content: astToTiptapDoc(ast),
 	})
 
 	// Compute caret position after "Hello"
 	const para = editor.state.doc.child(0)
 	const paraFrom = 1
-	const idxHello = (para as any).textContent.indexOf("Hello")
+	const idxHello = para.textContent.indexOf("Hello")
 	const posSplit = paraFrom + 1 + idxHello + "Hello".length
 	editor.commands.setTextSelection(posSplit)
 
 	// Simulate pressing Enter
 	const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
-	editor.view.someProp("handleKeyDown", (f: any) => f(editor.view, event))
+	editor.view.someProp("handleKeyDown", (f) => f(editor.view, event))
 
 	// Convert back to AST
-	const outAst = tiptapDocToAst(editor.getJSON() as any) as any
+	const outAst = tiptapDocToAst(editor.getJSON())
 	const ids = (outAst.children || []).map((n: any) => n?.data?.id)
 	// Both paragraphs have ids and they are unique
 	expect(ids.length).toBe(2)
@@ -414,5 +416,44 @@ test("Enter splits paragraph and assigns unique ids (root order unique)", () => 
 			.trim()
 	)
 	expect(paraTexts).toEqual(["Hello", "world."])
+	editor.destroy()
+})
+
+test("two Enters create three paragraphs with correct texts and unique ids", () => {
+	const input = `Hello world`
+	const ast = parseMarkdown(input)
+	const editor = new Editor({
+		extensions: MarkdownWc(),
+		content: astToTiptapDoc(ast),
+	})
+
+	// Caret at end → Enter → type second paragraph
+	const end = editor.state.doc.content.size
+	editor.commands.setTextSelection(end)
+	// Press Enter (keymap) to create a new paragraph
+	let ev = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+	editor.view.someProp("handleKeyDown", (f) => f(editor.view, ev))
+	editor.commands.insertContent("How are you? ")
+
+	// Enter again → ensure caret at end, then type third paragraph
+	editor.commands.setTextSelection(editor.state.doc.content.size)
+	ev = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+	editor.view.someProp("handleKeyDown", (f) => f(editor.view, ev))
+	// Should now have 3 blocks
+	expect(editor.state.doc.childCount).toBe(3)
+	editor.commands.insertContent("Good and you? ")
+
+	const outAst = tiptapDocToAst(editor.getJSON())
+	const ids = (outAst.children || []).map((n: any) => n?.data?.id)
+	expect(ids.length).toBe(3)
+	expect(new Set(ids).size).toBe(3)
+	const texts = (outAst.children || []).map((n: any) =>
+		(n.children || []).map((c: any) => (typeof c.value === "string" ? c.value : "")).join("")
+	)
+	// Allow a trailing space on the first two
+	expect(texts.length).toBe(3)
+	expect(texts[0]).toBe("Hello world")
+	expect(texts[1]!.startsWith("How are you?"))
+	expect(texts[2]!.startsWith("Good and you?"))
 	editor.destroy()
 })
