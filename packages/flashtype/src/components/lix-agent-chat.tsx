@@ -1,6 +1,14 @@
 import React from "react";
+import { ChatPanel } from "@/components/agent-chat/chat-panel";
 
-// Simple container to be embedded inside a right sidebar panel.
+/**
+ * Lix Agent Chat surface embedded in the right sidebar.
+ * Mock only — no backend calls yet. Keyboard-first, terminal-style UX.
+ *
+ * @example
+ * // Renders the chat panel
+ * <LixAgentChat />
+ */
 export function LixAgentChat() {
-	return <div className="h-full w-full" />;
+	return <ChatPanel />;
 }

@@ -1,5 +1,6 @@
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
@@ -94,6 +95,50 @@ function Root() {
 	);
 
 	const [agentChatOpen, setAgentChatOpen] = useState(false);
+	// Right agent panel width (resizable)
+	const [agentChatWidth, setAgentChatWidth] = useState<number>(() => {
+		const saved = Number(localStorage.getItem("flashtype_agent_chat_width"));
+		return Number.isFinite(saved) && saved >= 280 ? saved : 360;
+	});
+	useEffect(() => {
+		localStorage.setItem("flashtype_agent_chat_width", String(agentChatWidth));
+	}, [agentChatWidth]);
+	const mainRef = useRef<HTMLDivElement | null>(null);
+
+	/**
+	 * Start drag-resizing the agent panel via a vertical separator.
+	 * Calculates width from the container's right edge.
+	 */
+	function startAgentResize(ev: React.MouseEvent<HTMLDivElement>) {
+		ev.preventDefault();
+		const container = mainRef.current;
+		if (!container) return;
+		const rect = container.getBoundingClientRect();
+		const min = 280;
+		const max = Math.max(480, Math.min(800, Math.floor(rect.width * 0.8)));
+
+		function onMove(e: MouseEvent) {
+			const x = e.clientX;
+			const next = clamp(rect.right - x, min, max);
+			setAgentChatWidth(next);
+		}
+
+		function onUp() {
+			document.removeEventListener("mousemove", onMove);
+			document.removeEventListener("mouseup", onUp);
+			document.body.style.cursor = "";
+			document.body.style.userSelect = "";
+		}
+
+		document.addEventListener("mousemove", onMove);
+		document.addEventListener("mouseup", onUp);
+		document.body.style.cursor = "col-resize";
+		document.body.style.userSelect = "none";
+	}
+
+	function clamp(n: number, a: number, b: number) {
+		return Math.max(a, Math.min(b, n));
+	}
 	return (
 		<LeftSidebarProvider>
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>
@@ -103,11 +148,13 @@ function Root() {
 						<div className="flex min-h-0 flex-1">
 							<LeftSidebarArea />
 							<div className="flex min-h-0 flex-1 flex-col">
-								<header className="flex h-12 items-center gap-2 border-b px-4 pt-1">
-									<div className="font-medium text-sm">
+								<header className="flex h-12 min-w-0 items-center gap-2 border-b px-4 pt-1">
+									<div className="font-medium text-sm truncate min-w-0">
 										{activeFile?.path ?? ""}
 									</div>
-									<VersionDropdown />
+									<div className="shrink-0">
+										<VersionDropdown />
+									</div>
 									<div className="ml-auto flex items-center gap-2">
 										<ChangeIndicator />
 										<Button
@@ -122,31 +169,51 @@ function Root() {
 										</Button>
 									</div>
 								</header>
-								<div className="flex min-h-0 flex-1">
-									<div className="flex min-h-0 flex-1 flex-col text-sm">
+								<div
+									ref={mainRef}
+									className="grid min-h-0 min-w-0 flex-1 overflow-hidden"
+									style={{
+										gridTemplateColumns: agentChatOpen
+											? `minmax(0,1fr) 3px ${agentChatWidth}px`
+											: "1fr",
+									}}
+								>
+									<div className="flex min-h-0 min-w-0 flex-1 flex-col text-sm">
 										<FormattingToolbar />
 										<div className="flex-1 overflow-auto p-4">
 											<Outlet />
 										</div>
 									</div>
 									{agentChatOpen ? (
-										<div className="w-72 shrink-0 border-l bg-background">
-											<SidebarTab
-												title={
-													<a
-														href="https://github.com/opral/lix-sdk"
-														target="_blank"
-														rel="noreferrer noopener"
-														className="inline-flex items-center gap-1 text-foreground hover:underline"
-													>
-														Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
-													</a>
-												}
-												onClose={() => setAgentChatOpen(false)}
+										<>
+											<div
+												onMouseDown={startAgentResize}
+												role="separator"
+												aria-orientation="vertical"
+												aria-label="Resize agent panel"
+												className="w-[3px] cursor-col-resize bg-transparent hover:bg-amber-500/30 active:bg-amber-500/40"
+											/>
+											<div
+												className="shrink-0 border-l bg-background"
+												style={{ width: agentChatWidth }}
 											>
-												<LixAgentChat />
-											</SidebarTab>
-										</div>
+												<SidebarTab
+													title={
+														<a
+															href="https://github.com/opral/lix-sdk"
+															target="_blank"
+															rel="noreferrer noopener"
+															className="inline-flex items-center gap-1 text-foreground hover:underline"
+														>
+															Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
+														</a>
+													}
+													onClose={() => setAgentChatOpen(false)}
+												>
+													<LixAgentChat />
+												</SidebarTab>
+											</div>
+										</>
 									) : null}
 								</div>
 							</div>

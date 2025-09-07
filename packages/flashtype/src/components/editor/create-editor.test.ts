@@ -4,6 +4,7 @@ import { plugin as mdPlugin } from "../../../../lix/plugin-md/dist";
 import { createEditor } from "./create-editor";
 import { handlePaste } from "./handle-paste";
 import { AstSchemas } from "@opral/markdown-wc";
+import { Editor } from "@tiptap/core";
 
 // TipTap + Lix persistence paste tests (no React)
 test("paste at start inserts before existing content (TipTap + Lix)", async () => {
@@ -235,6 +236,147 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
 	expect(mdAfter).toBe("First line\n\nSecond line");
+	editor.destroy();
+});
+
+test("Enter splits paragraph → assigns unique ids and root order has no duplicates", async () => {
+	const lix = await openLix({ providePlugins: [mdPlugin] });
+	const fileId = "enter_split_ids_unique";
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/enter-split.md",
+			data: new TextEncoder().encode("Hello world."),
+		})
+		.execute();
+
+	const editor = (await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	})) as Editor;
+
+	// Place caret after "Hello"
+	const para = (editor as any).state.doc.child(0);
+	const paraFrom = 1;
+	const idxHello = (para as any).textContent.indexOf("Hello");
+	const posSplit = paraFrom + 1 + idxHello + "Hello".length;
+	editor.commands.setTextSelection(posSplit);
+
+	// Simulate an Enter key press
+	const event = new KeyboardEvent("keydown", {
+		key: "Enter",
+		bubbles: true,
+		cancelable: true,
+	});
+	(editor as any).view.someProp("handleKeyDown", (f: any) =>
+		f((editor as any).view, event),
+	);
+
+	// Give onUpdate/persist a tick (persistDebounceMs=0 still runs async)
+	await new Promise((r) => setTimeout(r, 0));
+
+	const root = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.select(["snapshot_content"]) // small row
+		.executeTakeFirst();
+
+	const order = (root?.snapshot_content as any)?.order ?? [];
+	expect(order.length).toBe(2);
+	expect(new Set(order).size).toBe(order.length); // no duplicates
+
+	const paras = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+		.select(["entity_id", "snapshot_content"]) // small rows
+		.execute();
+	expect(paras.length).toBe(2);
+
+	editor.destroy();
+});
+
+test("two Enters create three paragraphs with unique ids and correct order", async () => {
+	const lix = await openLix({ providePlugins: [mdPlugin] });
+	const fileId = "enter_split_three";
+
+	// Seed with a single paragraph
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/enter-split-three.md",
+			data: new TextEncoder().encode("Hello world"),
+		})
+		.execute();
+
+	const editor = (await createEditor({
+		lix,
+		fileId,
+		persistDebounceMs: 0,
+	})) as Editor;
+
+	// Move caret to end and split → new empty paragraph (#2)
+	const end = (editor as any).state.doc.content.size;
+	editor.commands.setTextSelection(end);
+	editor.commands.splitBlock();
+	// Type content for paragraph #2
+	editor.commands.insertContent("How are you? ");
+
+	// Split again → new paragraph (#3)
+	editor.commands.splitBlock();
+	editor.commands.insertContent("Good and you? ");
+
+	// Poll until we see 3 paragraphs in state and 3 ids in root order
+	let order: string[] = [];
+	let paras: { entity_id: string; snapshot_content: any }[] = [] as any;
+	for (let i = 0; i < 40; i++) {
+		const root = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.select(["snapshot_content"]) // small row
+			.executeTakeFirst();
+		order = ((root?.snapshot_content as any)?.order ?? []) as string[];
+
+		paras = (await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
+			.select(["entity_id", "snapshot_content"]) // small rows
+			.execute()) as any;
+
+		if (order.length === 3 && paras.length === 3) break;
+		await new Promise((r) => setTimeout(r, 20));
+	}
+
+	// Verify root order: 3 unique ids
+	expect(order.length).toBe(3);
+	expect(new Set(order).size).toBe(3);
+
+	// Verify there are 3 paragraph state rows, unique entity_ids and correct texts
+	expect(paras.length).toBe(3);
+	const paraIds = paras.map((p) => p.entity_id as string);
+	expect(new Set(paraIds).size).toBe(3);
+	const texts = paras.map((p) =>
+		((p.snapshot_content as any)?.children || [])
+			.map((c: any) => (typeof c.value === "string" ? c.value : ""))
+			.join("")
+			.trim(),
+	);
+	// Order in DB may not be textual order; ensure all expected texts are present
+	expect(new Set(texts)).toEqual(
+		new Set(["Hello world", "How are you?", "Good and you?"]),
+	);
+
+	// Root order refers only to existing paragraph ids
+	const paraIdSet = new Set(paraIds);
+	expect(order.every((id: string) => paraIdSet.has(id))).toBe(true);
+
 	editor.destroy();
 });
 
