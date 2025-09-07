@@ -8,6 +8,7 @@
 		"allowImportingTsExtensions": false,
 		"emitDeclarationOnly": false,
 		"verbatimModuleSyntax": true,
+		"types": ["vitest/globals"],
 		"module": "Node16",
 		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",

@@ -1,2 +1,2 @@
 export { createLixAgent } from "./create-lix-agent.js";
-export type { LanguageModelV2 } from "@ai-sdk/provider";
+export { createSqlSelectTool } from "./tools/sql-select.js";

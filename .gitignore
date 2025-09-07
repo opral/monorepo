@@ -388,3 +388,5 @@ lix/packages/gitea
 # VitePress cache
 packages/lix-docs/docs/.vitepress/cache
 packages/lix-docs/docs/.vitepress/dist
+
+artifact/*
