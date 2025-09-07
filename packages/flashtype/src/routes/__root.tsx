@@ -14,7 +14,7 @@ import { FormattingToolbar } from "@/components/formatting-toolbar";
 import { ChangeIndicator } from "@/components/change-indicator";
 import { VersionDropdown } from "@/components/version-dropdown";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, BotMessageSquare } from "lucide-react";
+import { ArrowUpRight, BotMessageSquare, FilePlus } from "lucide-react";
 import { LixAgentChat } from "@/components/lix-agent-chat";
 import { EditorProvider } from "@/editor/editor-context";
 
@@ -34,6 +34,9 @@ function LeftSidebarArea() {
 	const { active, setActive } = useLeftSidebar();
 	const open = !!active;
 
+	// Local UI state for the Files tab: inline "new file" creator
+	const [creatingNewFile, setCreatingNewFile] = useState(false);
+
 	const handleClose = () => {
 		setActive(null);
 	};
@@ -45,8 +48,30 @@ function LeftSidebarArea() {
 		>
 			<div className="h-full min-h-0 opacity-0 group-data-[open=true]:opacity-100 transition-opacity duration-100">
 				{active === "files" && (
-					<LeftSidebarTab title="Files" onClose={handleClose}>
-						<LeftSidebarFiles />
+					<LeftSidebarTab
+						title="Files"
+						onClose={() => {
+							setCreatingNewFile(false);
+							handleClose();
+						}}
+						actions={
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-7 px-2 cursor-pointer"
+								onClick={() => setCreatingNewFile(true)}
+								aria-label="Create new file"
+								title="New file"
+							>
+								<FilePlus className="h-4 w-4" />
+								<span className="sr-only">New</span>
+							</Button>
+						}
+					>
+						<LeftSidebarFiles
+							creating={creatingNewFile}
+							onRequestCloseCreate={() => setCreatingNewFile(false)}
+						/>
 					</LeftSidebarTab>
 				)}
 				{active === "history" && (
