@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { ChatMessage as Msg } from "./types";
+import { ToolRunList } from "./tool-run-list";
 
 /**
  * Renders a single chat message in a terminal‑like block. User messages have a
@@ -17,7 +18,7 @@ export function ChatMessage({ message }: { message: Msg }) {
 		? "text-xs text-muted-foreground"
 		: isUser
 			? "bg-secondary/60 border border-border text-foreground"
-			: "bg-background border border-border";
+			: ""; // assistant: no box/border for a terminal-like feel
 
 	return (
 		<div className="w-full py-1">
@@ -30,6 +31,11 @@ export function ChatMessage({ message }: { message: Msg }) {
 			>
 				{isSystem ? (
 					<span>{message.content}</span>
+				) : message.toolRuns && message.toolRuns.length ? (
+					<>
+						<ToolRunList runs={message.toolRuns} />
+						{message.content ? <MessageBody content={message.content} /> : null}
+					</>
 				) : (
 					<MessageBody content={message.content} />
 				)}

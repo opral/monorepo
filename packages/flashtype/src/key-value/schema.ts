@@ -18,6 +18,16 @@ export const KEY_VALUE_DEFINITIONS = {
 		defaultVersionId: "global",
 		untracked: true,
 	} as KeyDef<"files" | "history" | null>,
+
+	/**
+	 * Persist whether the agent chat is open.
+	 * Untracked, global UI preference (not change-controlled).
+	 */
+	flashtype_agent_chat_open: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: false,
+	} as KeyDef<boolean>,
 } as const;
 
 export type KnownKey = keyof typeof KEY_VALUE_DEFINITIONS;

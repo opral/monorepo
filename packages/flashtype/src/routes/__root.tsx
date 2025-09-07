@@ -94,7 +94,12 @@ function Root() {
 			.where("id", "=", activeFileId),
 	);
 
-	const [agentChatOpen, setAgentChatOpen] = useState(false);
+	// Persisted agent chat open state (untracked/global)
+	const [agentChatOpenKV, setAgentChatOpenKV] = useKeyValue(
+		"flashtype_agent_chat_open",
+		{ defaultVersionId: "global", untracked: true },
+	);
+	const agentChatOpen = !!agentChatOpenKV;
 	// Right agent panel width (resizable)
 	const [agentChatWidth, setAgentChatWidth] = useState<number>(() => {
 		const saved = Number(localStorage.getItem("flashtype_agent_chat_width"));
@@ -163,7 +168,9 @@ function Root() {
 											size="sm"
 											className="h-7 w-7 p-0 text-muted-foreground"
 											title="Open Lix Agent chat"
-											onClick={() => setAgentChatOpen(true)}
+											onClick={() => {
+												void setAgentChatOpenKV(true);
+											}}
 										>
 											<BotMessageSquare className="h-4 w-4" />
 										</Button>
@@ -208,7 +215,9 @@ function Root() {
 															Lix Agent <ArrowUpRight className="h-3.5 w-3.5" />
 														</a>
 													}
-													onClose={() => setAgentChatOpen(false)}
+													onClose={() => {
+														void setAgentChatOpenKV(false);
+													}}
 												>
 													<LixAgentChat />
 												</SidebarTab>

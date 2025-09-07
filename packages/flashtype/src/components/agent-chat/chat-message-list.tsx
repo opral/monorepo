@@ -19,8 +19,8 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 	}, [messages.length]);
 
 	return (
-		<div ref={ref} className="flex-1 overflow-auto px-3 py-3">
-			<div className="mx-auto max-w-[720px]">
+		<div ref={ref} className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
+			<div className="mx-auto flex min-h-full max-w-[720px] flex-col justify-end">
 				{messages.map((m) => (
 					<ChatMessage key={m.id} message={m} />
 				))}
