@@ -2132,12 +2132,12 @@ importers:
         specifier: ^4.0.0
         version: 4.1.5
     devDependencies:
+      '@lix-js/plugin-md':
+        specifier: workspace:*
+        version: link:../plugin-md
       '@opral/tsconfig':
         specifier: workspace:*
         version: link:../../tsconfig
-      dotenv:
-        specifier: 17.2.2
-        version: 17.2.2
       oxlint:
         specifier: ^1.14.0
         version: 1.14.0
@@ -12891,10 +12891,6 @@ packages:
 
   dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
-    engines: {node: '>=12'}
-
-  dotenv@17.2.2:
-    resolution: {integrity: sha512-Sf2LSQP+bOlhKWWyhFsn0UsfdK/kCWRv1iuA2gXAwt3dyNabr6QSj00I2V10pidqz69soatm9ZwZvpQMTIOd5Q==}
     engines: {node: '>=12'}
 
   dotenv@8.6.0:
@@ -33624,8 +33620,6 @@ snapshots:
   dotenv@16.4.7: {}
 
   dotenv@16.5.0: {}
-
-  dotenv@17.2.2: {}
 
   dotenv@8.6.0: {}
 

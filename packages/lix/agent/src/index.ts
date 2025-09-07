@@ -1,2 +1,2 @@
 export { createLixAgent } from "./create-lix-agent.js";
-export { createSqlSelectTool } from "./tools/sql-select.js";
+export { summarizeWorkingChanges } from "./summarize-working-changes.js";
