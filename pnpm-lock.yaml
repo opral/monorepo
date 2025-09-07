@@ -1995,6 +1995,12 @@ importers:
 
   packages/flashtype:
     dependencies:
+      '@ai-sdk/google':
+        specifier: ^2.0.12
+        version: 2.0.12(zod@4.1.5)
+      '@lix-js/agent':
+        specifier: workspace:*
+        version: link:../lix/agent
       '@lix-js/inspector':
         specifier: workspace:*
         version: link:../lix/inspector
@@ -2043,6 +2049,9 @@ importers:
       '@tiptap/react':
         specifier: ^3.0.0
         version: 3.3.0(@floating-ui/dom@1.7.1)(@tiptap/core@3.3.0(@tiptap/pm@3.3.0))(@tiptap/pm@3.3.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      ai:
+        specifier: ^5.0.34
+        version: 5.0.34(zod@4.1.5)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
