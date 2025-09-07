@@ -24,7 +24,7 @@ export function ChatMessage({ message }: { message: Msg }) {
 		<div className="w-full py-1">
 			<div
 				className={[
-					"max-w-none rounded-md px-3 py-2 font-mono leading-relaxed whitespace-pre-wrap",
+					"max-w-full rounded-md px-3 py-2 font-mono leading-relaxed whitespace-pre-wrap break-words",
 					chrome,
 					isUser ? "ml-auto" : "mr-auto",
 				].join(" ")}

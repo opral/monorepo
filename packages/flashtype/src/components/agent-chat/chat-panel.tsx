@@ -41,13 +41,11 @@ export function ChatPanel() {
 	}, []);
 
 	return (
-		<div ref={panelRef} className="flex h-full min-h-0 flex-col text-xs">
+		<div
+			ref={panelRef}
+			className="flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
+		>
 			<ChatMessageList messages={messages} />
-			{isStreaming ? (
-				<div className="px-3 pb-1 text-center text-[11px] text-muted-foreground">
-					Streaming…
-				</div>
-			) : null}
 			<ChatInput onSend={send} />
 		</div>
 	);

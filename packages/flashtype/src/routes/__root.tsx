@@ -201,8 +201,12 @@ function Root() {
 												className="w-[3px] cursor-col-resize bg-transparent hover:bg-amber-500/30 active:bg-amber-500/40"
 											/>
 											<div
-												className="shrink-0 border-l bg-background"
-												style={{ width: agentChatWidth }}
+												className="shrink-0 border-l bg-background flex h-full w-full max-h-full min-h-0 overflow-hidden"
+												style={{
+													width: agentChatWidth,
+													height:
+														"calc(100dvh - var(--lix-inspector-offset, 0px) - 3rem)",
+												}}
 											>
 												<SidebarTab
 													title={

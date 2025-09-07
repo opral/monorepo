@@ -34,7 +34,7 @@ export function ToolRunList({ runs }: { runs: ToolRun[] }) {
 							</div>
 						) : null}
 						{r.output && open[r.id] ? (
-							<pre className="mt-1 rounded border bg-muted/40 p-2 text-[11px] leading-snug whitespace-pre-wrap">
+							<pre className="mt-1 max-w-full break-words overflow-x-hidden rounded border bg-muted/40 p-2 text-[11px] leading-snug whitespace-pre-wrap">
 								{r.output}
 							</pre>
 						) : null}

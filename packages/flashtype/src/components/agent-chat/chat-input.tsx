@@ -64,7 +64,7 @@ export function ChatInput({ onSend }: { onSend: (value: string) => void }) {
 	};
 
 	return (
-		<div className="px-3 py-2">
+		<div className="px-3 py-2 shrink-0">
 			<div className="mx-auto max-w-[720px]">
 				<textarea
 					ref={ref}

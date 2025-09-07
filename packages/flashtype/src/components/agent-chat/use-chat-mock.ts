@@ -49,6 +49,11 @@ export function useChatMock() {
 		setMessages((prev) => [...prev, base]);
 		setStreaming(true);
 
+		// Random durations (1–3s) for each tool
+		const dur1 = 1000 + Math.floor(Math.random() * 2000);
+		const dur2 = 1000 + Math.floor(Math.random() * 2000);
+		const dur3 = 1000 + Math.floor(Math.random() * 2000);
+
 		// Tool 1 running
 		window.setTimeout(() => {
 			setMessages((prev) =>
@@ -93,7 +98,7 @@ export function useChatMock() {
 						: m,
 				),
 			);
-		}, 850);
+		}, dur1);
 
 		// Tool 2 running
 		window.setTimeout(() => {
@@ -109,85 +114,94 @@ export function useChatMock() {
 						: m,
 				),
 			);
-		}, 1000);
+		}, dur1 + 150);
 
 		// Tool 2 success + output (and append Tool 3 queued)
-		window.setTimeout(() => {
-			setMessages((prev) =>
-				prev.map((m) =>
-					m.id === assistantId
-						? {
-								...m,
-								toolRuns: [
-									...(m.toolRuns ?? []).map((r) =>
-										r.id === readId
-											? {
-													...r,
-													status: "success" as const,
-													output: "README.md: 32 lines loaded",
-												}
-											: r,
-									),
-									{
-										id: sumId,
-										title: "Summarize()",
-										detail: "Drafting summary",
-										status: "queued" as const,
-									},
-								],
-							}
-						: m,
-				),
-			);
-		}, 1500);
-
-		// Tool 3 running
-		window.setTimeout(() => {
-			setMessages((prev) =>
-				prev.map((m) =>
-					m.id === assistantId
-						? {
-								...m,
-								toolRuns: (m.toolRuns ?? []).map((r) =>
-									r.id === sumId ? { ...r, status: "running" as const } : r,
-								),
-							}
-						: m,
-				),
-			);
-		}, 1700);
-
-		// Tool 3 success + final content streaming
-		window.setTimeout(() => {
-			setMessages((prev) =>
-				prev.map((m) =>
-					m.id === assistantId
-						? {
-								...m,
-								toolRuns: (m.toolRuns ?? []).map((r) =>
-									r.id === sumId ? { ...r, status: "success" as const } : r,
-								),
-							}
-						: m,
-				),
-			);
-
-			const demo = loremIpsum();
-			let i = 0;
-			const interval = window.setInterval(() => {
-				i += 3 + Math.floor(Math.random() * 5);
-				const slice = demo.slice(0, i);
+		window.setTimeout(
+			() => {
 				setMessages((prev) =>
 					prev.map((m) =>
-						m.id === assistantId ? { ...m, content: slice } : m,
+						m.id === assistantId
+							? {
+									...m,
+									toolRuns: [
+										...(m.toolRuns ?? []).map((r) =>
+											r.id === readId
+												? {
+														...r,
+														status: "success" as const,
+														output: "README.md: 32 lines loaded",
+													}
+												: r,
+										),
+										{
+											id: sumId,
+											title: "Summarize()",
+											detail: "Drafting summary",
+											status: "queued" as const,
+										},
+									],
+								}
+							: m,
 					),
 				);
-				if (i >= demo.length) {
-					window.clearInterval(interval);
-					setStreaming(false);
-				}
-			}, 14);
-		}, 2100);
+			},
+			dur1 + 150 + dur2,
+		);
+
+		// Tool 3 running
+		window.setTimeout(
+			() => {
+				setMessages((prev) =>
+					prev.map((m) =>
+						m.id === assistantId
+							? {
+									...m,
+									toolRuns: (m.toolRuns ?? []).map((r) =>
+										r.id === sumId ? { ...r, status: "running" as const } : r,
+									),
+								}
+							: m,
+					),
+				);
+			},
+			dur1 + 150 + dur2 + 150,
+		);
+
+		// Tool 3 success + final content streaming
+		window.setTimeout(
+			() => {
+				setMessages((prev) =>
+					prev.map((m) =>
+						m.id === assistantId
+							? {
+									...m,
+									toolRuns: (m.toolRuns ?? []).map((r) =>
+										r.id === sumId ? { ...r, status: "success" as const } : r,
+									),
+								}
+							: m,
+					),
+				);
+
+				const demo = loremIpsum();
+				let i = 0;
+				const interval = window.setInterval(() => {
+					i += 3 + Math.floor(Math.random() * 5);
+					const slice = demo.slice(0, i);
+					setMessages((prev) =>
+						prev.map((m) =>
+							m.id === assistantId ? { ...m, content: slice } : m,
+						),
+					);
+					if (i >= demo.length) {
+						window.clearInterval(interval);
+						setStreaming(false);
+					}
+				}, 14);
+			},
+			dur1 + 150 + dur2 + 150 + dur3,
+		);
 	}, []);
 
 	return { messages, isStreaming, send } as const;
