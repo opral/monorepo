@@ -32,7 +32,7 @@ import { createEntityThread } from "../entity/thread/create-entity-thread.js";
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<NewState<LixThreadComment>, "body">[];
+	comments?: Pick<NewState<LixThreadComment>, "body" | "metadata">[];
 	/** defaults to global */
 	versionId?: string;
 	/** Optional entity to attach the thread to */
@@ -72,6 +72,7 @@ export async function createThread(args: {
 					id: commentId,
 					thread_id: thread.id,
 					body: comment.body,
+					metadata: (comment as any).metadata ?? null,
 					parent_id: index > 0 ? insertedComments[index - 1]!.id : null,
 					lixcol_version_id: versionId,
 				})

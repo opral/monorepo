@@ -3,6 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { LixEntityThreadSchema } from "./schema.js";
 import { createEntityThread } from "./create-entity-thread.js";
 import { createThread } from "../../thread/create-thread.js";
+import { createThreadComment } from "../../thread/create-thread-comment.js";
 import { fromPlainText } from "@opral/zettel-ast";
 
 test("entity_thread schema should be properly defined", () => {
@@ -48,6 +49,20 @@ test("entity_thread schema should be properly defined", () => {
 		"file_id",
 		"thread_id",
 	]);
+});
+
+test("thread_comment supports metadata via createThreadComment", async () => {
+	const lix = await openLix({});
+
+	const thread = await createThread({ lix });
+	const c = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("world"),
+		metadata: { lix_agent_role: "assistant" },
+	} as any);
+
+	expect((c as any).metadata).toEqual({ lix_agent_role: "assistant" });
 });
 
 test("entity_thread foreign key to state table should be enforced", async () => {

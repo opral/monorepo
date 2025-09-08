@@ -210,3 +210,19 @@ test("works with lixcol_ prefixed entity fields", async () => {
 	expect(mapping).toBeDefined();
 	expect(mapping?.thread_id).toBe(threadWithComments.id);
 });
+
+test("thread_comment supports metadata via createThread", async () => {
+	const lix = await openLix({});
+
+	const thread = await createThread({
+		lix,
+		comments: [
+			{ body: fromPlainText("hello"), metadata: { lix_agent_role: "user" } },
+		],
+	});
+
+	expect(thread.comments).toHaveLength(1);
+	expect((thread.comments[0] as any).metadata).toEqual({
+		lix_agent_role: "user",
+	});
+});

@@ -69,6 +69,7 @@ export async function createThreadComment(
 				id: commentId,
 				thread_id: args.thread_id,
 				body: args.body,
+				metadata: (args as any).metadata ?? null,
 				parent_id: parentId,
 				lixcol_version_id: existingThread.lixcol_version_id,
 			})

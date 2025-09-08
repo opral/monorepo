@@ -75,6 +75,7 @@ export const LixThreadCommentSchema = {
 		thread_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,
+		metadata: { type: "object", nullable: true },
 	},
 	required: ["id", "thread_id", "body"],
 	additionalProperties: false,
