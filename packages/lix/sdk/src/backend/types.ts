@@ -1,7 +1,7 @@
 /**
- * Public engine types for running the Lix SQLite database in different runtimes.
+ * Public backend types for running the Lix SQLite database in different runtimes.
  *
- * The engine exposes an async surface even when backed by a synchronous
+ * The backend exposes an async surface even when backed by a synchronous
  * in‑process WASM SQLite implementation to unify usage across implementations.
  */
 
@@ -14,7 +14,7 @@ export type ExecResult = {
   lastInsertRowid?: number;
 };
 
-export type EngineError = {
+export type BackendError = {
   /** Error name, e.g. 'SqliteError'. */
   name: string;
   /** Optional database error code. */
@@ -24,23 +24,23 @@ export type EngineError = {
 };
 
 /**
- * Minimal engine interface used by drivers and openLix.
+ * Minimal backend interface used by drivers and openLix.
  *
- * Engines own persistence and plugin execution. The main thread always
- * interacts with the engine via these async methods.
+ * Backends own persistence and plugin execution. The main thread always
+ * interacts with the backend via these async methods.
  */
-export interface LixEngine {
+export interface LixBackend {
   /**
-   * Initialize the engine.
+   * Initialize the backend.
    *
-   * @param opts.path - Optional persistence path (ignored by in‑memory engine)
+   * @param opts.path - Optional persistence path (ignored by in‑memory backend)
    * @param opts.blob - Optional snapshot to seed the database (transferable)
    * @param opts.expProvideStringifiedPlugins - (Experimental) plugin modules as stringified ESM to be imported by the engine
    * @returns void when initialization completes
    *
    * @example
-   * const engine = createMainMemoryEngine()
-   * await engine.init({})
+ * const backend = InMemory()
+ * await backend.init({})
    */
   init(opts: {
     path?: string;
@@ -52,7 +52,7 @@ export interface LixEngine {
    * Execute a single SQL statement.
    *
    * @example
-   * await engine.exec("CREATE TABLE t(a)")
+   * await backend.exec("CREATE TABLE t(a)")
    */
   exec(sql: string, params?: unknown[]): Promise<ExecResult>;
 

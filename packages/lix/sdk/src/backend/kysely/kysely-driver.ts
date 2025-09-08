@@ -1,20 +1,20 @@
 import { CompiledQuery, SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from "kysely";
 import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
-import type { LixEngine } from "../types.js";
+import type { LixBackend } from "../types.js";
 
-type EngineDriverConfig = {
-  engine: LixEngine;
+type BackendDriverConfig = {
+  backend: LixBackend;
 };
 
-class EngineConnection implements DatabaseConnection {
-  #engine: LixEngine;
-  constructor(engine: LixEngine) {
-    this.#engine = engine;
+class BackendConnection implements DatabaseConnection {
+  #backend: LixBackend;
+  constructor(backend: LixBackend) {
+    this.#backend = backend;
   }
 
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     const { sql, parameters } = compiledQuery;
-    const res = await this.#engine.exec(sql, parameters as any[]);
+    const res = await this.#backend.exec(sql, parameters as any[]);
     // Map to Kysely QueryResult shape
     const numAffectedRows =
       res.changes !== undefined ? BigInt(res.changes) : undefined;
@@ -33,16 +33,16 @@ class EngineConnection implements DatabaseConnection {
   }
 }
 
-export class EngineDriver implements Driver {
-  readonly #config: EngineDriverConfig;
-  #connection?: EngineConnection;
+export class BackendDriver implements Driver {
+  readonly #config: BackendDriverConfig;
+  #connection?: BackendConnection;
 
-  constructor(config: EngineDriverConfig) {
+  constructor(config: BackendDriverConfig) {
     this.#config = config;
   }
 
   async init(): Promise<void> {
-    this.#connection = new EngineConnection(this.#config.engine);
+    this.#connection = new BackendConnection(this.#config.backend);
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
@@ -66,14 +66,14 @@ export class EngineDriver implements Driver {
   }
 
   async destroy(): Promise<void> {
-    await this.#config.engine.close();
+    await this.#config.backend.close();
   }
 }
 
-export function createDialect(args: { engine: LixEngine }): Dialect {
+export function createDialect(args: { backend: LixBackend }): Dialect {
   return {
     createAdapter: () => new SqliteAdapter(),
-    createDriver: () => new EngineDriver({ engine: args.engine }),
+    createDriver: () => new BackendDriver({ backend: args.backend }),
     createIntrospector: (db: any) => new SqliteIntrospector(db),
     createQueryCompiler: () => new SqliteQueryCompiler(),
   };

@@ -1,4 +1,4 @@
-% Engine Prototype Plan (Worker-first)
+% Backend Prototype Plan (Worker-first)
 
 This plan outlines a minimal-but-meaningful prototype to run the Lix engine off the UI thread in a Dedicated Web Worker, including the state vtable pipeline and plugin-driven change detection. It keeps the public `openLix` experience largely intact by providing a worker-backed storage adapter and a worker-backed Kysely driver.
 
@@ -38,12 +38,12 @@ Before (Main-thread Engine)
       └─ OPFS I/O (navigator.storage.*) on main thread
 ```
 
-After (Engine + Worker – OPFS)
+After (Backend + Worker – OPFS)
 ```text
 [Browser Main Thread]
   ├─ React UI / App
-  ├─ openLix({ engine })
-  │   └─ Kysely (EngineKyselyDriver)   ← uses engine.exec(...)
+  ├─ openLix({ backend })
+  │   └─ Kysely (BackendDriver)   ← uses backend.exec(...)
   └─ Dedicated Worker (opfs-sah.worker.ts)
       ├─ sqlite-wasm (in-memory)
       │   ├─ initDb() schemas, views, vtable, hooks
@@ -70,12 +70,12 @@ Transport notes:
      - Same schema/vtable/plugins inside Worker.
      - Handles OPFS persistence internally (import/export + batched saves on commit).
 
-- Engine-backed Kysely driver: `packages/lix/sdk/src/engine/driver/engine-kysely-driver.ts`
-  - Depends only on `engine.exec(...)` and emits BEGIN/COMMIT as SQL.
+- Backend Kysely driver: `packages/lix/sdk/src/backend/kysely/backend-driver.ts`
+  - Depends only on `backend.exec(...)` and emits BEGIN/COMMIT as SQL.
 
   
 
-## Engine API (Minimal)
+## Backend API (Minimal)
 
 Single host-side interface used by both implementations.
 
@@ -83,7 +83,7 @@ Single host-side interface used by both implementations.
 type ExecResult = { rows?: any[]; changes?: number; lastInsertRowid?: number }
 type EngineError = { name: string; code?: string | number; message: string }
 
-export interface LixEngine {
+export interface LixBackend {
   init(opts: {
     // Worker+OPFS: used; MainMemory: ignored
     path?: string
@@ -109,9 +109,9 @@ export interface LixEngine {
 
 Transactions are plain SQL (`BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK TO`) via `exec`.
 
-### Engines
+### Backends
 
-1) `createMainMemoryEngine()` (in‑process, no persistence)
+1) `InMemory()` (in‑process, no persistence)
 
 - Uses `sqlite-wasm` directly in the main thread (or Node/Electron).
 - `init()` → create in‑memory DB → `initDb()` → load plugins → ready.
@@ -119,7 +119,7 @@ Transactions are plain SQL (`BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK TO`) via `e
 - `export()` → `contentFromDatabase(db)`.
 - Note: heavy plugin work will block the UI. Use for tests/CLI or very light work.
 
-2) `createOpfsSahWorker({ name })` (Dedicated Worker + OPFS SAHPool)
+2) `OpfsSahWorker({ name })` (Dedicated Worker + OPFS SAHPool)
 
 - Dedicated Worker hosts sqlite-wasm, schema, vtables, plugins.
 - Owns OPFS. On outermost commit: debounced autosave (atomic write). Calls from host are serialized to prevent interleaving.
@@ -148,17 +148,17 @@ Use transferables for any `ArrayBuffer`.
  
 ## openLix (storage removed)
 
-Change `openLix` to accept an `engine` instead of `storage`. Kysely driver depends only on `LixEngine`.
+Change `openLix` to accept a `backend` instead of `storage`. Kysely driver depends only on `LixBackend`.
 
 ```ts
-// Worker engine (plugins provided as ESM code strings)
-openLix({ engine: createOpfsSahWorker({ name: 'lix.db', expProvideStringifiedPlugins: [mdCode] }) })
+// Worker backend (plugins provided as ESM code strings)
+openLix({ backend: createOpfsSahWorker({ name: 'lix.db', expProvideStringifiedPlugins: [mdCode] }) })
 
-// In‑process engine (supports existing providePlugins with function objects)
-openLix({ engine: createMainMemoryEngine(), providePlugins: [jsonPlugin] })
+// In‑process backend (supports existing providePlugins with function objects)
+openLix({ backend: createMainMemoryBackend(), providePlugins: [jsonPlugin] })
 ```
 
-No separate storage concept. Engines own persistence.
+No separate storage concept. Backends own persistence.
 
 ## Worker-side shape (functional)
 
@@ -200,7 +200,7 @@ function createWorkerTransport(w: Worker) {
 }
 ```
 
-`createWorkerOpfsEngine()` then closes over `call()` and returns an object with `init/exec/...` methods that call `call('exec', ...)` etc.
+`OpfsSahWorker()` closes over `call()` and returns an object with `init/exec/...` methods that call `call('exec', ...)` etc.
 
 ## Plugin Execution in Worker
 
@@ -239,12 +239,12 @@ Ensure plugins are bundled as single-file ESM without external imports.
 - Use module workers in ESM bundlers:
   - Vite/Rollup: `new Worker(new URL('./opfs-sah.worker.ts', import.meta.url), { type: 'module' })`.
   - Webpack: same `new URL` pattern.
-- Keep prototype self-contained in `@lix-js/sdk` under `src/engine`.
+- Keep prototype self-contained in `@lix-js/sdk` under `src/backend`.
 
 ## Testing Strategy (Prototype)
 
-- Unit-test the EngineKyselyDriver with a mock engine (and with a worker transport stub).
-- Implement in Flashtype `createWorkerOpfsEngine` and exercise:
+- Unit-test the backend Kysely driver with a mock backend (and with a worker transport stub).
+- Implement in Flashtype `OpfsSahWorker` and exercise:
   - Large writes without UI jank.
   - Plugin `detectChanges` flow.
   - Auto-save + reload roundtrip via OPFS.
@@ -253,18 +253,17 @@ Ensure plugins are bundled as single-file ESM without external imports.
 
 ## Milestones (Minimal)
 
-1) M1 – Engine API + Main-thread engine
-- Define the `LixEngine` interface.
-- Implement `implementations/main-thread.ts` (in-memory, same-thread binding).
+1) M1 – Backend API + Main-thread backend
+- Define the `LixBackend` interface.
+- Implement `backend/main-thread.ts` (in-memory, same-thread binding).
 - Run initDb/vtable/plugins locally; support `exec`, transactions via SQL, `export`.
 
-2) M2 – Worker engine (OPFS) + Driver
+2) M2 – Worker backend (OPFS) + Driver
 - Implement `opfs-sah.worker.ts` with OPFS persistence and batched auto-save.
-- Implement `engine-kysely-driver.ts` (uses engine.exec) and wire into `openLix({ engine })`.
+- Implement backend Kysely driver (uses backend.exec) and wire into `openLixBackend({ backend })`.
 
-3) M3 – Transitional adapter + Demo
-- Optional `WorkerOpfsStorage` shim for `openLix({ storage })` compatibility.
-- Demo app uses Worker engine; validate responsiveness and persistence.
+3) M3 – Demo
+- Demo app uses Worker backend; validate responsiveness and persistence.
 
 ## Risks & Mitigations
 
@@ -275,7 +274,7 @@ Ensure plugins are bundled as single-file ESM without external imports.
 
 ## Acceptance Criteria (Prototype)
 
-- A sample app (e.g., md-app or flashtype) can open Lix with `createWorkerOpfsEngine` and remain responsive during heavy writes.
+- A sample app (e.g., md-app or flashtype) can open Lix with `OpfsSahWorker` and remain responsive during heavy writes.
 - Plugin `detectChanges` executes in Worker and updates state accordingly.
 - Changes auto-save to OPFS in Worker; reload restores state.
 - No COOP/COEP headers required for the prototype path.
@@ -307,7 +306,7 @@ Ensure plugins are bundled as single-file ESM without external imports.
 
 - [ ] Phase 3 — Driver + Integration
   - [x] Implement `engine-kysely-driver.ts`
-  - [x] Add experimental `openLixEngine({ engine })`
+  - [x] Add experimental `openLixBackend({ backend })`
   - [ ] Adapt examples (e.g., Flashtype) to worker engine
 
 - [ ] Phase 4 — Docs, Tests, Perf

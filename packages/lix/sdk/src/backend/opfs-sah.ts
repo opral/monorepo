@@ -1,18 +1,17 @@
-import type { LixEngine } from "./types.js";
+import type { LixBackend } from "./types.js";
 
 /**
  * Host-side wrapper for the OPFS Worker engine.
  *
  * Spawns a Dedicated Worker and forwards calls via a minimal RPC.
- * Keeps the async LixEngine surface.
+ * Keeps the async LixBackend surface.
  *
  * @example
- * const engine = createOpfsSahWorker({ name: 'my.lix' })
+ * const backend = OpfsSahWorker({ name: 'my.lix' })
  * await engine.init({ expProvideStringifiedPlugins: [code] })
  */
-export function createOpfsSahWorker(opts?: { name?: string; pragmasMode?: "safe" | "turbo" }): LixEngine {
+export function OpfsSahWorker(opts?: { name?: string }): LixBackend {
   const name = opts?.name ?? "lix.db";
-  const pragmasMode = opts?.pragmasMode ?? "safe";
   const worker = new Worker(new URL("./opfs-sah.worker.js", import.meta.url), {
     type: "module",
   });
@@ -41,7 +40,7 @@ export function createOpfsSahWorker(opts?: { name?: string; pragmasMode?: "safe"
 
   return {
     async init(initOpts) {
-      const payload: any = { name, pragmas: { mode: pragmasMode } };
+      const payload: any = { name, pragmas: { mode: "safe" } };
       if (initOpts?.expProvideStringifiedPlugins) {
         payload.expProvideStringifiedPlugins = initOpts.expProvideStringifiedPlugins;
       }

@@ -1,10 +1,10 @@
 import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { LixEngine } from "../engine/types.js";
-import { createDialect } from "../engine/driver/engine-driver.js";
+import type { LixBackend } from "../backend/types.js";
+import { createDialect } from "../backend/kysely/kysely-driver.js";
 
 /**
- * Experimental: Open a Lix-like instance backed by a LixEngine.
+ * Experimental: Open a Lix-like instance backed by a LixBackend.
  *
  * This variant does not initialize the Lix database schema. It assumes the
  * engine was initialized with an existing database blob (or takes
@@ -14,31 +14,34 @@ import { createDialect } from "../engine/driver/engine-driver.js";
  * For full Lix behavior (schema, vtable, hooks), use the classic openLix()
  * until the schema initialization is available inside the engine.
  */
-export async function openLixEngine(args: {
-  engine: LixEngine;
-  blob?: ArrayBuffer;
-  expProvideStringifiedPlugins?: string[];
+export async function openLixBackend(args: {
+	backend: LixBackend;
+	blob?: ArrayBuffer;
+	expProvideStringifiedPlugins?: string[];
 }): Promise<{
-  db: Kysely<LixDatabaseSchema>;
-  close: () => Promise<void>;
-  toBlob: () => Promise<Blob>;
+	db: Kysely<LixDatabaseSchema>;
+	close: () => Promise<void>;
+	toBlob: () => Promise<Blob>;
 }> {
-  await args.engine.init({
-    blob: args.blob,
-    expProvideStringifiedPlugins: args.expProvideStringifiedPlugins,
-  });
+	await args.backend.init({
+		blob: args.blob,
+		expProvideStringifiedPlugins: args.expProvideStringifiedPlugins,
+	});
 
-  const db = new Kysely<LixDatabaseSchema>({
-    dialect: createDialect({ engine: args.engine }),
-  });
+	const db = new Kysely<LixDatabaseSchema>({
+		dialect: createDialect({ backend: args.backend }),
+	});
 
-  return {
-    db,
-    close: async () => {
-      await args.engine.close();
-    },
-    toBlob: async () => {
-      return new Blob([await args.engine.export()]);
-    },
-  };
+	return {
+		db,
+		close: async () => {
+			await args.backend.close();
+		},
+		toBlob: async () => {
+			return new Blob([await args.backend.export()]);
+		},
+	};
 }
+
+// Temporary alias for backwards compatibility while migrating terminology.
+// (no alias)

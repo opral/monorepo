@@ -1,5 +1,5 @@
 import { createInMemoryDatabase, importDatabase, contentFromDatabase, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixEngine, ExecResult } from "./types.js";
+import type { LixBackend, ExecResult } from "./types.js";
 
 /**
  * Create an in‑process, in‑memory engine backed by WASM SQLite.
@@ -15,7 +15,7 @@ import type { LixEngine, ExecResult } from "./types.js";
  * await engine.exec("INSERT INTO t(a) VALUES (?)", [1])
  * const out = await engine.exec("SELECT a FROM t")
  */
-export function createMainMemoryEngine(): LixEngine {
+export function InMemory(): LixBackend {
   let db: SqliteWasmDatabase | undefined;
 
   return {

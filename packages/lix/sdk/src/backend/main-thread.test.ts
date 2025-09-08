@@ -1,13 +1,13 @@
 import { describe, test, expect, beforeEach } from "vitest";
-import { createMainMemoryEngine } from "./main-thread.js";
+import { InMemory } from "./main-thread.js";
 
-describe("createMainMemoryEngine", () => {
+describe("InMemory backend", () => {
 	beforeEach(() => {
 		// nothing
 	});
 
   test("initializes and executes basic SQL", async () => {
-		const engine = createMainMemoryEngine();
+		const engine = InMemory();
 		await engine.init({});
 
 		await engine.exec("CREATE TABLE t(a)");
@@ -25,7 +25,7 @@ describe("createMainMemoryEngine", () => {
 	});
 
   test("execBatch runs sequentially", async () => {
-		const engine = createMainMemoryEngine();
+		const engine = InMemory();
 		await engine.init({});
 		await engine.exec("CREATE TABLE t(a)");
 		const batch = [

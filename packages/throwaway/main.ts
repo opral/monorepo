@@ -1,4 +1,4 @@
-import { openLixEngine, createOpfsSahWorker, createMainMemoryEngine } from "@lix-js/sdk";
+import { openLixBackend, OpfsSahWorker, InMemory } from "@lix-js/sdk";
 
 async function bootstrap() {
   const modeEl = document.getElementById("mode") as HTMLSelectElement;
@@ -13,13 +13,13 @@ async function bootstrap() {
   const wrapEl = document.getElementById("wrap") as HTMLInputElement;
   const seedBtn = document.getElementById("seed1g") as HTMLButtonElement;
 
-  let lix: Awaited<ReturnType<typeof openLixEngine>> | null = null;
+  let lix: Awaited<ReturnType<typeof openLixBackend>> | null = null;
 
   async function initEngine() {
     if (lix) await lix.close();
     const mode = modeEl.value as "worker" | "main";
-    const engine = mode === "worker" ? createOpfsSahWorker({ name: "throwaway.lix" }) : createMainMemoryEngine();
-    lix = await openLixEngine({ engine });
+    const backend = mode === "worker" ? OpfsSahWorker({ name: "throwaway.lix" }) : InMemory();
+    lix = await openLixBackend({ backend });
     // Ensure tables
     await lix.db.executeQuery({ sql: "CREATE TABLE IF NOT EXISTS kv(key TEXT PRIMARY KEY, value INTEGER)", parameters: [] } as any);
     await lix.db.executeQuery({ sql: "CREATE TABLE IF NOT EXISTS spam(x INTEGER)", parameters: [] } as any);
