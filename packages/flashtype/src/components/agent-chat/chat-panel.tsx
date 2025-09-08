@@ -16,16 +16,16 @@ export function ChatPanel() {
 	const lix = useLix();
 	const system =
 		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
-    const { messages: agentMsgs, send } = useAgentChat({ lix, system });
+	const { messages: agentMsgs, send, clear } = useAgentChat({ lix, system });
 
-    const messages = React.useMemo<UiMessage[]>(() => {
-        return agentMsgs.map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            at: undefined,
-        }));
-    }, [agentMsgs]);
+	const messages = React.useMemo<UiMessage[]>(() => {
+		return agentMsgs.map((m) => ({
+			id: m.id,
+			role: m.role,
+			content: m.content,
+			at: undefined,
+		}));
+	}, [agentMsgs]);
 
 	// Focus management: pressing "/" anywhere inside the panel focuses the input.
 	const panelRef = React.useRef<HTMLDivElement>(null);
@@ -60,7 +60,15 @@ export function ChatPanel() {
 			className="relative flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
 		>
 			<ChatMessageList messages={messages} />
-			<ChatInput onSend={send} />
+			<ChatInput
+				onSend={send}
+				onCommand={async (cmd) => {
+					if (cmd === "clear" || cmd === "reset" || cmd === "new") {
+						await clear();
+						return;
+					}
+				}}
+			/>
 		</div>
 	);
 }

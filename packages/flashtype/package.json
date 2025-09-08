@@ -14,13 +14,13 @@
 		"lint:fix": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --fix .",
 		"test": "vitest run"
 	},
-  "dependencies": {
-    "ai": "^5.0.34",
-    "@ai-sdk/google": "^2.0.12",
-    "@lix-js/agent": "workspace:*",
-    "@lix-js/react-utils": "workspace:*",
-    "@lix-js/sdk": "workspace:*",
-    "@lix-js/inspector": "workspace:*",
+	"dependencies": {
+		"ai": "^5.0.34",
+		"@ai-sdk/google": "^2.0.12",
+		"@lix-js/agent": "workspace:*",
+		"@lix-js/react-utils": "workspace:*",
+		"@lix-js/sdk": "workspace:*",
+		"@lix-js/inspector": "workspace:*",
 		"@lix-js/plugin-md": "workspace:*",
 		"@opral/markdown-wc": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.10",

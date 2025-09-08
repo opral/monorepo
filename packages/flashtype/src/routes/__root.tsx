@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { LeftSidebarProvider, useLeftSidebar } from "@/components/left-sidebar";
@@ -231,9 +230,6 @@ function Root() {
 								</div>
 							</div>
 						</div>
-						{import.meta.env.DEV ? (
-							<TanStackRouterDevtools position="bottom-right" />
-						) : null}
 					</SidebarInset>
 				</EditorProvider>
 			</SidebarProvider>
