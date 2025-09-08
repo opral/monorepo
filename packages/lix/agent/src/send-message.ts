@@ -18,10 +18,8 @@ export async function sendMessageCore(args: {
 	setSystem?: (system?: string) => void;
 	signal?: AbortSignal;
 	tools: Record<string, any>;
-	persist: (data: {
-		system?: string;
-		messages: ChatMessage[];
-	}) => Promise<void>;
+	persistUser: (text: string) => Promise<void>;
+	persistAssistant: (text: string) => Promise<void>;
 }): Promise<{
 	text: string;
 	usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number };
@@ -35,14 +33,15 @@ export async function sendMessageCore(args: {
 		setSystem,
 		signal,
 		tools,
-		persist,
+		persistUser,
+		persistAssistant,
 	} = args;
 
 	let systemInstruction = system;
 	if (system && setSystem) setSystem(system);
 
 	history.push({ id: uuidV7({ lix }), role: "user", content: text });
-	await persist({ system: systemInstruction, messages: history });
+	await persistUser(text);
 
 	const mentionPaths = extractMentionPaths(text);
 	const mentionGuidance =
@@ -93,7 +92,7 @@ export async function sendMessageCore(args: {
 	});
 
 	history.push({ id: uuidV7({ lix }), role: "assistant", content: reply });
-	await persist({ system: systemInstruction, messages: history });
+	await persistAssistant(reply);
 	return { text: reply, usage };
 }
 

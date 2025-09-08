@@ -1,11 +1,17 @@
 import type { Lix } from "@lix-js/sdk";
-import { uuidV7 } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { createReadFileTool } from "./tools/read-file.js";
 import { createListFilesTool } from "./tools/list-files.js";
 import { createSqlSelectStateTool } from "./tools/sql-select-state.js";
 import dedent from "dedent";
 import { sendMessageCore } from "./send-message.js";
+import {
+	getOrCreateDefaultAgentThreadId,
+	loadThreadHistory,
+	appendUserComment,
+	appendAssistantComment,
+	upsertThreadPointer,
+} from "./thread-storage.js";
 
 export type ChatMessage = {
 	id: string;
@@ -112,10 +118,10 @@ export async function createLixAgent(args: {
 		? `${LIX_BASE_SYSTEM}\n\n${args.system}`
 		: LIX_BASE_SYSTEM;
 
-	// Attempt to hydrate from Lix KV (global, untracked)
-	await hydrateFromKv(lix, history, (sys) => {
-		if (!systemInstruction) systemInstruction = sys;
-	});
+	// Bootstrap default thread pointer and hydrate from thread comments
+	const threadId = await getOrCreateDefaultAgentThreadId(lix);
+	const initial = await loadThreadHistory(lix, threadId);
+	for (const m of initial) history.push(m);
 
 	async function sendMessage({
 		text,
@@ -142,8 +148,8 @@ export async function createLixAgent(args: {
 			},
 			signal,
 			tools: { read_file, list_files, sql_select_state },
-			persist: (data: { system?: string; messages: ChatMessage[] }) =>
-				persistToKv(lix, data),
+			persistUser: (t: string) => appendUserComment(lix, threadId, t),
+			persistAssistant: (t: string) => appendAssistantComment(lix, threadId, t),
 		});
 
 		return { text: reply, usage };
@@ -153,9 +159,11 @@ export async function createLixAgent(args: {
 		return history.slice();
 	}
 
-	function clearHistory() {
+	async function clearHistory() {
 		history.length = 0;
-		void clearKv(lix);
+		const { createThread } = await import("@lix-js/sdk");
+		const t = await createThread({ lix, versionId: "global" });
+		await upsertThreadPointer(lix, t.id);
 	}
 
 	const read_file = createReadFileTool({ lix });
@@ -170,74 +178,4 @@ export async function createLixAgent(args: {
 	};
 }
 
-const CONVO_KEY = "lix_agent_conversation_default";
-
-async function hydrateFromKv(
-	lix: Lix,
-	history: ChatMessage[],
-	setSystem: (system?: string) => void
-) {
-	const row = await lix.db
-		.selectFrom("key_value_all")
-		.where("lixcol_version_id", "=", "global")
-		.where("key", "=", CONVO_KEY)
-		.select(["value"])
-		.executeTakeFirst();
-
-	const payload = row?.value as any;
-
-	if (payload && typeof payload === "object") {
-		if (payload.system && typeof payload.system === "string")
-			setSystem(payload.system);
-		if (Array.isArray(payload.messages)) {
-			for (const m of payload.messages) {
-				if (
-					m &&
-					(m.role === "user" || m.role === "assistant" || m.role === "system")
-				) {
-					const id = (m as any).id ?? uuidV7({ lix });
-					history.push({ id, role: m.role, content: String(m.content ?? "") });
-				}
-			}
-		}
-	}
-}
-
-async function persistToKv(
-	lix: Lix,
-	data: { system?: string; messages: ChatMessage[] }
-) {
-	const exists = await lix.db
-		.selectFrom("key_value_all")
-		.where("key", "=", CONVO_KEY)
-		.where("lixcol_version_id", "=", "global")
-		.select(["key"])
-		.executeTakeFirst();
-	if (exists) {
-		await lix.db
-			.updateTable("key_value_all")
-			.set({ value: data, lixcol_untracked: true })
-			.where("key", "=", CONVO_KEY)
-			.where("lixcol_version_id", "=", "global")
-			.execute();
-	} else {
-		await lix.db
-			.insertInto("key_value_all")
-			.values({
-				key: CONVO_KEY,
-				value: data,
-				lixcol_version_id: "global",
-				lixcol_untracked: true,
-			})
-			.execute();
-	}
-}
-
-async function clearKv(lix: Lix) {
-	await lix.db
-		.updateTable("key_value_all")
-		.set({ value: { system: undefined, messages: [] }, lixcol_untracked: true })
-		.where("key", "=", CONVO_KEY)
-		.where("lixcol_version_id", "=", "global")
-		.execute();
-}
+// KV-based hydration removed; using threads instead

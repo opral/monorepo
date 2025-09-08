@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { Lix } from "@lix-js/sdk";
+import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import {
 	createLixAgent,
 	type LixAgent,
@@ -29,7 +30,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 		[provider, modelName],
 	);
 
-	// Boot agent and subscribe to KV changes (single source of truth)
+	// Boot agent and subscribe to thread_comment changes for transcript
 	useEffect(() => {
 		let cancelled = false;
 		let sub: { unsubscribe(): void } | null = null;
@@ -41,21 +42,28 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			const a = await createLixAgent({ lix, model, system });
 			if (cancelled) return;
 			setAgent(a);
-			const query = lix.db
+			// Fetch pointer to default thread
+			const ptr = await lix.db
 				.selectFrom("key_value_all")
 				.where("lixcol_version_id", "=", "global")
-				.where("key", "=", "lix_agent_conversation_default")
-				.select(["value"]);
+				.where("key", "=", "lix_agent_thread_id")
+				.select(["value"])
+				.executeTakeFirst();
+			const threadId = (ptr?.value as any) ?? null;
+			if (!threadId) return;
+
+			const query = lix.db
+				.selectFrom("thread_comment")
+				.where("thread_id", "=", String(threadId))
+				.select(["id", "body", "metadata", "lixcol_created_at"])
+				.orderBy("lixcol_created_at", "asc")
+				.orderBy("id", "asc");
 			sub = lix.observe(query).subscribe({
 				next: (rows) => {
-					const payload = rows?.[0]?.value as any;
-					const histRaw = Array.isArray(payload?.messages)
-						? (payload.messages as AgentMessage[])
-						: [];
-					const hist = histRaw.map((m, i) => ({
-						id: (m as any).id ?? `m_${i}`,
-						role: m.role,
-						content: m.content,
+					const hist: AgentMessage[] = rows.map((r: any) => ({
+						id: String(r.id),
+						role: (r.metadata?.lix_agent_role as any) ?? "assistant",
+						content: toPlainText(r.body),
 					}));
 					setMessages(hist);
 				},
@@ -86,8 +94,19 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const clear = useCallback(async () => {
 		if (!agent) return;
 		await agent.clearHistory();
-		setMessages([]);
-	}, [agent]);
+		// After clearing, refetch pointer and let subscription update
+		try {
+			const ptr = await lix.db
+				.selectFrom("key_value_all")
+				.where("lixcol_version_id", "=", "global")
+				.where("key", "=", "lix_agent_thread_id")
+				.select(["value"])
+				.executeTakeFirst();
+			void ptr;
+		} catch {
+			// ignore
+		}
+	}, [agent, lix]);
 
 	return {
 		messages,
