@@ -1,8 +1,10 @@
 import type { Lix } from "@lix-js/sdk";
+import { uuidV7 } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { generateText } from "ai";
 
 export type ChatMessage = {
+	id: string;
 	role: "system" | "user" | "assistant";
 	content: string;
 };
@@ -81,7 +83,7 @@ export async function createLixAgent(args: {
 		signal?: AbortSignal;
 	}) {
 		if (system) systemInstruction = system;
-		history.push({ role: "user", content: text });
+		history.push({ id: uuidV7({ lix }), role: "user", content: text });
 		// Persist immediately so observers (UI) see the user message before model response
 		await persistToKv(lix, { system: systemInstruction, messages: history });
 
@@ -92,7 +94,7 @@ export async function createLixAgent(args: {
 			abortSignal: signal,
 		});
 
-		history.push({ role: "assistant", content: reply });
+		history.push({ id: uuidV7({ lix }), role: "assistant", content: reply });
 
 		// Persist new state
 		await persistToKv(lix, { system: systemInstruction, messages: history });
@@ -124,7 +126,9 @@ async function hydrateFromKv(
 		.where("key", "=", CONVO_KEY)
 		.select(["value"])
 		.executeTakeFirst();
+
 	const payload = row?.value as any;
+
 	if (payload && typeof payload === "object") {
 		if (payload.system && typeof payload.system === "string")
 			setSystem(payload.system);
@@ -134,7 +138,8 @@ async function hydrateFromKv(
 					m &&
 					(m.role === "user" || m.role === "assistant" || m.role === "system")
 				) {
-					history.push({ role: m.role, content: String(m.content ?? "") });
+					const id = (m as any).id ?? uuidV7({ lix });
+					history.push({ id, role: m.role, content: String(m.content ?? "") });
 				}
 			}
 		}

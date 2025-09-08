@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { Lix } from "@lix-js/sdk";
-import { createLixAgent, type LixAgent } from "@lix-js/agent";
-
-export type ChatMessage = {
-	role: "system" | "user" | "assistant";
-	content: string;
-};
+import {
+	createLixAgent,
+	type LixAgent,
+	type ChatMessage as AgentMessage,
+} from "@lix-js/agent";
 
 export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const { lix, system } = args;
 
-	const [messages, setMessages] = useState<ChatMessage[]>(() =>
-		system ? [{ role: "system", content: system }] : [],
+	const [messages, setMessages] = useState<AgentMessage[]>(() =>
+		system ? [{ id: "system", role: "system", content: system }] : [],
 	);
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -32,42 +31,53 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 		[provider, modelName],
 	);
 
-    // Boot agent and subscribe to KV changes (single source of truth)
-    useEffect(() => {
-        let cancelled = false;
-        let sub: { unsubscribe(): void } | null = null;
-        (async () => {
-            if (!hasKey || !model) {
-                setAgent(null);
-                return;
-            }
-            const a = await createLixAgent({ lix, model, system });
-            if (cancelled) return;
-            setAgent(a);
-            const query = lix.db
-                .selectFrom("key_value_all")
-                .where("lixcol_version_id", "=", "global")
-                .where("key", "=", "lix_agent_conversation_default")
-                .select(["value"]);
-            sub = lix.observe(query).subscribe({
-                next: (rows) => {
-                    const payload = rows?.[0]?.value as any;
-                    const hist = Array.isArray(payload?.messages)
-                        ? (payload.messages as ChatMessage[])
-                        : [];
-                    const base = system
-                        ? [{ role: "system", content: system } as ChatMessage]
-                        : [];
-                    setMessages([...base, ...hist]);
-                },
-                error: (e) => setError(e?.message || String(e)),
-            });
-        })();
-        return () => {
-            cancelled = true;
-            sub?.unsubscribe();
-        };
-    }, [lix, model, hasKey, system]);
+	// Boot agent and subscribe to KV changes (single source of truth)
+	useEffect(() => {
+		let cancelled = false;
+		let sub: { unsubscribe(): void } | null = null;
+		(async () => {
+			if (!hasKey || !model) {
+				setAgent(null);
+				return;
+			}
+			const a = await createLixAgent({ lix, model, system });
+			if (cancelled) return;
+			setAgent(a);
+			const query = lix.db
+				.selectFrom("key_value_all")
+				.where("lixcol_version_id", "=", "global")
+				.where("key", "=", "lix_agent_conversation_default")
+				.select(["value"]);
+			sub = lix.observe(query).subscribe({
+				next: (rows) => {
+					const payload = rows?.[0]?.value as any;
+					const histRaw = Array.isArray(payload?.messages)
+						? (payload.messages as AgentMessage[])
+						: [];
+					const hist = histRaw.map((m, i) => ({
+						id: (m as any).id ?? `m_${i}`,
+						role: m.role,
+						content: m.content,
+					}));
+					const base = system
+						? [
+								{
+									id: "system",
+									role: "system",
+									content: system,
+								} as AgentMessage,
+							]
+						: [];
+					setMessages([...base, ...hist]);
+				},
+				error: (e) => setError(e?.message || String(e)),
+			});
+		})();
+		return () => {
+			cancelled = true;
+			sub?.unsubscribe();
+		};
+	}, [lix, model, hasKey, system]);
 
 	const send = useCallback(
 		async (text: string) => {
@@ -75,14 +85,14 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			if (!text.trim()) return;
 			setError(null);
 			setPending(true);
-            try {
-                await agent.sendMessage({ text });
-            } finally {
-                setPending(false);
-            }
-        },
-        [agent, system],
-    );
+			try {
+				await agent.sendMessage({ text });
+			} finally {
+				setPending(false);
+			}
+		},
+		[agent, system],
+	);
 
 	const clear = useCallback(async () => {
 		if (!agent) return;

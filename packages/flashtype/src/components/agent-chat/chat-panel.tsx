@@ -1,7 +1,9 @@
 import * as React from "react";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
-import { useChatMock } from "./use-chat-mock";
+import { useAgentChat } from "@/hooks/use-agent-chat";
+import { useLix } from "@lix-js/react-utils";
+import type { ChatMessage as UiMessage } from "./types";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).
@@ -11,7 +13,19 @@ import { useChatMock } from "./use-chat-mock";
  * <ChatPanel />
  */
 export function ChatPanel() {
-	const { messages, isStreaming, send } = useChatMock();
+	const lix = useLix();
+	const system =
+		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
+    const { messages: agentMsgs, send } = useAgentChat({ lix, system });
+
+    const messages = React.useMemo<UiMessage[]>(() => {
+        return agentMsgs.map((m) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            at: undefined,
+        }));
+    }, [agentMsgs]);
 
 	// Focus management: pressing "/" anywhere inside the panel focuses the input.
 	const panelRef = React.useRef<HTMLDivElement>(null);
