@@ -1,7 +1,8 @@
 import type { Lix } from "@lix-js/sdk";
 import { uuidV7 } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
-import { generateText } from "ai";
+import { createReadFileTool } from "./tools/read-file.js";
+import { generateText, stepCountIs } from "ai";
 
 export type ChatMessage = {
 	id: string;
@@ -87,10 +88,57 @@ export async function createLixAgent(args: {
 		// Persist immediately so observers (UI) see the user message before model response
 		await persistToKv(lix, { system: systemInstruction, messages: history });
 
+		// Detect @mentions of file paths and guide the model to use the tool.
+		const mentionPaths = extractMentionPaths(text);
+		const mentionGuidance =
+			mentionPaths.length > 0
+				? `File mentions like @<path> may refer to workspace files. If helpful, you can call the read_file tool with { path: "<path>" } to inspect content before answering. Only read files when needed.`
+				: undefined;
+
+		let stepNo = 0;
 		const { text: reply, usage } = await generateText({
 			model,
-			system: systemInstruction,
+			system:
+				mentionGuidance && systemInstruction
+					? `${systemInstruction}\n\n${mentionGuidance}`
+					: (mentionGuidance ?? systemInstruction),
 			messages: toAiMessages(),
+			// Expose tools so the model can call them (e.g., read_file).
+			tools: { read_file },
+			// Enable multi-step tool calling; allow up to 5 steps when tools are used.
+			stopWhen: stepCountIs(5),
+			// Do not force tool usage; the model decides when to call read_file.
+			// Optional: compress messages for longer loops.
+			prepareStep: async ({ messages }) => {
+				if (messages.length > 20) {
+					return { messages: messages.slice(-10) };
+				}
+				return {};
+			},
+			onStepFinish: ({
+				toolCalls,
+				toolResults,
+				usage: stepUsage,
+				finishReason,
+				text,
+			}) => {
+				stepNo += 1;
+				if (toolCalls.length > 0) {
+					const names = toolCalls.map((c) => c.toolName).join(", ");
+					console.log(`[LixAgent] Step ${stepNo}: tool call → ${names}`);
+				}
+				if (toolResults.length > 0) {
+					const names = toolResults.map((r) => r.toolName).join(", ");
+					console.log(`[LixAgent] Step ${stepNo}: tool result ← ${names}`);
+				}
+				if (text) {
+					// Log short preview of generated text for debugging multi-step flow.
+					const preview = text.length > 120 ? text.slice(0, 117) + "..." : text;
+					console.log(
+						`[LixAgent] Step ${stepNo}: finish=${finishReason}, tokens in=${stepUsage.inputTokens ?? 0} out=${stepUsage.outputTokens ?? 0}. Text: ${preview}`
+					);
+				}
+			},
 			abortSignal: signal,
 		});
 
@@ -110,7 +158,14 @@ export async function createLixAgent(args: {
 		void clearKv(lix);
 	}
 
-	return { lix, model, sendMessage, getHistory, clearHistory };
+	const read_file = createReadFileTool({ lix });
+	return {
+		lix,
+		model,
+		sendMessage,
+		getHistory,
+		clearHistory,
+	};
 }
 
 const CONVO_KEY = "lix_agent_conversation_default";
@@ -183,4 +238,15 @@ async function clearKv(lix: Lix) {
 		.where("key", "=", CONVO_KEY)
 		.where("lixcol_version_id", "=", "global")
 		.execute();
+}
+
+function extractMentionPaths(text: string): string[] {
+	const out = new Set<string>();
+	const re = /@([A-Za-z0-9_./-]+)/g;
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(text))) {
+		const p = m[1];
+		if (p) out.add(p);
+	}
+	return [...out];
 }

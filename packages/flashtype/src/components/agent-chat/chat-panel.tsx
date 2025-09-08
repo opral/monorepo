@@ -68,6 +68,16 @@ export function ChatPanel() {
 						return;
 					}
 				}}
+				onQueryMentions={async (q) => {
+					if (!q) return [];
+					const rows = await lix.db
+						.selectFrom("file")
+						.where("path", "like", `%${q}%`)
+						.select(["path"])
+						.limit(50)
+						.execute();
+					return rows.map((r) => String((r as any).path));
+				}}
 			/>
 		</div>
 	);

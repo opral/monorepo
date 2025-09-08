@@ -3,7 +3,7 @@
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist", "test", "**/*.test.ts", "**/*.spec.ts"],
 	"compilerOptions": {
-		"isolatedDeclarations": true,
+		"isolatedDeclarations": false,
 		"allowJs": false,
 		"checkJs": false,
 		"allowImportingTsExtensions": false,

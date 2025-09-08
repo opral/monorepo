@@ -1,0 +1,148 @@
+import type { Lix } from "@lix-js/sdk";
+import { tool } from "ai";
+import { z } from "zod";
+
+export const ReadFileInputSchema = z
+	.object({
+		path: z.string().min(1).optional(),
+		fileId: z.string().min(1).optional(),
+		byteOffset: z.number().int().min(0).default(0).optional(),
+		byteLength: z.number().int().min(1).optional(),
+		lineOffset: z.number().int().min(0).optional(),
+		lineLimit: z.number().int().min(0).optional(),
+		maxBytes: z
+			.number()
+			.int()
+			.min(1)
+			.max(5_000_000)
+			.default(200_000)
+			.optional(),
+		maxChars: z
+			.number()
+			.int()
+			.min(100)
+			.max(1_000_000)
+			.default(15_000)
+			.optional(),
+	})
+	.refine((v) => v.path || v.fileId, {
+		message: "Provide either 'path' or 'fileId'",
+	})
+	.refine((v) => !(v.path && v.fileId), {
+		message: "Provide only one of 'path' or 'fileId'",
+	});
+
+export type ReadFileInput = z.infer<typeof ReadFileInputSchema>;
+
+export const ReadFileOutputSchema = z.object({
+	text: z.string(),
+	path: z.string(),
+	fileId: z.string().optional(),
+	size: z.number().int().nonnegative(),
+	byteOffset: z.number().int().nonnegative(),
+	byteLength: z.number().int().nonnegative(),
+	encoding: z.literal("utf-8"),
+	truncated: z.boolean(),
+});
+
+export type ReadFileOutput = z.infer<typeof ReadFileOutputSchema>;
+
+/**
+ * Minimal, generic file reader for Lix files (stored as binary).
+ * - Always decodes the selected byte window as UTF-8 (replacement-safe).
+ * - Supports simple byte-windowing and optional line-based slicing after decode.
+ * - Returns a flat result (no nested meta), always including the resolved file path.
+ */
+export async function readFile(
+	args: ReadFileInput & { lix: Lix }
+): Promise<ReadFileOutput> {
+	const {
+		lix,
+		path,
+		fileId,
+		byteOffset = 0,
+		byteLength,
+		lineOffset,
+		lineLimit,
+		maxBytes = 200_000,
+		maxChars = 15_000,
+	} = args;
+
+	if (!path && !fileId)
+		throw new Error("read_file: provide 'path' or 'fileId'.");
+	if (path && fileId)
+		throw new Error("read_file: provide only one of 'path' or 'fileId'.");
+
+	const row = path
+		? await lix.db
+				.selectFrom("file")
+				.where("path", "=", path)
+				.select(["id", "path", "data"])
+				.executeTakeFirst()
+		: await lix.db
+				.selectFrom("file")
+				.where("id", "=", fileId as string)
+				.select(["id", "path", "data"])
+				.executeTakeFirst();
+
+	if (!row) throw new Error("read_file: file not found");
+
+	const bytes = row.data as unknown as Uint8Array;
+	const size = bytes?.byteLength ?? 0;
+
+	const start = clamp(byteOffset, 0, size);
+	const maxLen = clamp(maxBytes, 0, size - start);
+	const reqLen =
+		byteLength == null ? maxLen : clamp(byteLength, 0, size - start);
+	const len = Math.min(reqLen, maxLen);
+
+	const window = bytes.subarray(start, start + len);
+	const decoder = new TextDecoder("utf-8", { fatal: false });
+	let text = decoder.decode(window);
+
+	// Optional line slicing after decode
+	if (lineOffset != null || lineLimit != null) {
+		const lines = text.split("\n");
+		const lo = Math.max(0, lineOffset ?? 0);
+		const ll = Math.max(0, lineLimit ?? lines.length - lo);
+		text = lines.slice(lo, lo + ll).join("\n");
+	}
+
+	// Clamp characters
+	let truncated = false;
+	if (text.length > maxChars) {
+		text = text.slice(0, maxChars);
+		truncated = true;
+	}
+
+	// If our byte window didn't cover the rest of file or was capped by maxBytes, mark truncated
+	if (start + len < size || (byteLength != null && len < byteLength)) {
+		truncated = true;
+	}
+
+	const output = {
+		text,
+		path: row.path as string,
+		fileId: row.id as string,
+		size,
+		byteOffset: start,
+		byteLength: len,
+		encoding: "utf-8",
+		truncated,
+	};
+  return ReadFileOutputSchema.parse(output);
+}
+
+function clamp(n: number, min: number, max: number): number {
+	return Math.max(min, Math.min(max, n));
+}
+
+export function createReadFileTool(args: { lix: Lix }) {
+  return tool({
+		description:
+			"Read a file from the Lix workspace (UTF-8). Supports byte offset/length and optional line slicing.",
+		inputSchema: ReadFileInputSchema,
+    execute: async (input) =>
+      readFile({ lix: args.lix, ...(input as ReadFileInput) }),
+  });
+}
