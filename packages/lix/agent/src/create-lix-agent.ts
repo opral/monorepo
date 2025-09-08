@@ -91,9 +91,16 @@ export async function createLixAgent(args: {
     - Dynamic schemas: entity shapes are stored by schema_key in
 		  snapshot_content; stored schemas live under lix_stored_schema.
 		
-    - Files: the file table stores file descriptors and binary content.
-		  Never query binary content; use the read_file tool when you truly need
-		  to inspect a file.
+	  - Files: the file table stores file descriptors and binary content.
+			  Never query binary content; use the read_file tool when you truly need
+			  to inspect a file.
+
+		Checkpoints (user-facing commits)
+    
+		- Lix auto-commits changes; raw commits are an internal detail.
+		- A checkpoint is a commit labeled with the lix_label named "checkpoint".
+		- When users ask about checkpoints, list recent commits that carry the
+		  "checkpoint" label.
 
 		Language and style
 
