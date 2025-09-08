@@ -1,6 +1,12 @@
 import React from "react";
 import { test, expect } from "vitest";
-import { renderHook, waitFor, act } from "@testing-library/react";
+import {
+	render,
+	renderHook,
+	screen,
+	waitFor,
+	act,
+} from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix } from "@lix-js/sdk";
 import { useKeyValue, KeyValueProvider } from "./use-key-value";
@@ -52,19 +58,23 @@ test("writes and reads a global, untracked key (left sidebar tab)", async () => 
 		</LixProvider>
 	);
 
-	const { result } = renderHook(
-		() => useKeyValue("flashtype_left_sidebar_active_tab"),
-		{ wrapper },
-	);
-
-	// Wait for hook to initialize
-	await waitFor(() => Array.isArray(result.current as any));
-
+	let resultRef: { current: unknown } = { current: null };
 	await act(async () => {
-		await (result.current as any)?.[1]("history");
+		const { result } = renderHook(
+			() => useKeyValue("flashtype_left_sidebar_active_tab"),
+			{ wrapper },
+		);
+		resultRef = result as unknown as { current: unknown };
 	});
 
-	await waitFor(() => expect((result.current as any)?.[0]).toBe("history"));
+	// Wait for hook to initialize
+	await waitFor(() => Array.isArray(resultRef.current as any));
+
+	await act(async () => {
+		await (resultRef.current as any)?.[1]("history");
+	});
+
+	await waitFor(() => expect((resultRef.current as any)?.[0]).toBe("history"));
 
 	// Verify DB row persisted to key_value_all with lixcol_version_id = 'global'
 	const rows = (await lix.db
@@ -114,4 +124,73 @@ test("writes and reads a tracked key on active version", async () => {
 		.select(["value"])
 		.execute()) as any;
 	expect(rows[0]?.value).toBe("hello");
+});
+
+test("shows Suspense fallback first, then renders value on initial read", async () => {
+  const lix = await openLix({});
+  // Ensure the key exists so the initial load resolves deterministically
+  await lix.db
+    .insertInto("key_value_all")
+    .values({ key: "flashtype_left_sidebar_active_tab", value: "files", lixcol_version_id: "global" })
+    .execute();
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+				<React.Suspense fallback={<div data-testid="fb">loading</div>}>
+					{children}
+				</React.Suspense>
+			</KeyValueProvider>
+		</LixProvider>
+	);
+
+	function ReadKV() {
+		const [val] = useKeyValue("flashtype_left_sidebar_active_tab");
+		return <div data-testid="val">{String(val)}</div>;
+	}
+
+	await act(async () => {
+		render(<ReadKV />, { wrapper });
+	});
+    // Eventually value appears once Suspense resolves
+    const el = await screen.findByTestId("val");
+    expect(el.textContent).toBe("files");
+});
+
+test("re-renders when key value changes externally", async () => {
+	const lix = await openLix({});
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+				<React.Suspense fallback={null}>{children}</React.Suspense>
+			</KeyValueProvider>
+		</LixProvider>
+	);
+
+	const TEST_KEY = "flashtype_test_tracked_external";
+
+	let resultRef: { current: unknown } = { current: null };
+	await act(async () => {
+		const { result } = renderHook(() => useKeyValue(TEST_KEY), { wrapper });
+		resultRef = result as unknown as { current: unknown };
+	});
+	// wait for initial suspense resolution
+	await waitFor(() => Array.isArray(resultRef.current as any));
+
+	// set initial value via hook
+	await act(async () => {
+		await (resultRef.current as any)[1]("initial");
+	});
+	await waitFor(() => expect((resultRef.current as any)[0]).toBe("initial"));
+
+	// mutate externally (simulate another part of app)
+	await act(async () => {
+		await lix.db
+			.updateTable("key_value")
+			.set({ value: "external" })
+			.where("key", "=", TEST_KEY)
+			.execute();
+	});
+
+	// observe re-render with new value
+	await waitFor(() => expect((resultRef.current as any)[0]).toBe("external"));
 });
