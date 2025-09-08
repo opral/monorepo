@@ -14,9 +14,15 @@ import type { ChatMessage as UiMessage } from "./types";
  */
 export function ChatPanel() {
 	const lix = useLix();
-	const system =
-		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
-	const { messages: agentMsgs, send, clear } = useAgentChat({ lix, system });
+	const {
+		messages: agentMsgs,
+		send,
+		clear,
+	} = useAgentChat({
+		lix,
+		system:
+			"You are running embedded in an app called 'Flashtype'. Flashtype is a WISIWYG markdown editor that runs in the browser with lix change control.",
+	});
 
 	const messages = React.useMemo<UiMessage[]>(() => {
 		return agentMsgs.map((m) => ({
@@ -29,7 +35,6 @@ export function ChatPanel() {
 
 	// Focus management: pressing "/" anywhere inside the panel focuses the input.
 	const panelRef = React.useRef<HTMLDivElement>(null);
-	const inputRef = React.useRef<{ focus: () => void } | null>(null);
 
 	React.useEffect(() => {
 		const el = panelRef.current;

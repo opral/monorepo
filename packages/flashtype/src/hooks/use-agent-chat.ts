@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { Lix } from "@lix-js/sdk";
 import {
@@ -10,9 +10,7 @@ import {
 export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const { lix, system } = args;
 
-	const [messages, setMessages] = useState<AgentMessage[]>(() =>
-		system ? [{ id: "system", role: "system", content: system }] : [],
-	);
+	const [messages, setMessages] = useState<AgentMessage[]>([]);
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
@@ -59,16 +57,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 						role: m.role,
 						content: m.content,
 					}));
-					const base = system
-						? [
-								{
-									id: "system",
-									role: "system",
-									content: system,
-								} as AgentMessage,
-							]
-						: [];
-					setMessages([...base, ...hist]);
+					setMessages(hist);
 				},
 				error: (e) => setError(e?.message || String(e)),
 			});
@@ -97,8 +86,8 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const clear = useCallback(async () => {
 		if (!agent) return;
 		await agent.clearHistory();
-		setMessages(system ? [{ role: "system", content: system }] : []);
-	}, [agent, system]);
+		setMessages([]);
+	}, [agent]);
 
 	return {
 		messages,

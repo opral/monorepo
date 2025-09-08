@@ -4,7 +4,8 @@ import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { createReadFileTool } from "./tools/read-file.js";
 import { createListFilesTool } from "./tools/list-files.js";
 import { createSqlSelectStateTool } from "./tools/sql-select-state.js";
-import { generateText, stepCountIs } from "ai";
+import dedent from "dedent";
+import { sendMessageCore } from "./send-message.js";
 
 export type ChatMessage = {
 	id: string;
@@ -59,22 +60,55 @@ export async function createLixAgent(args: {
 
 	// Default conversation state (in-memory)
 	const history: ChatMessage[] = [];
-	let systemInstruction: string | undefined = args.system;
+	const LIX_BASE_SYSTEM = dedent`
+		You are the Lix Agent.
+
+		Your job is to assist users in managing their lix, modifying files, etc. 
+
+		Lix is a change control system. A change control system is like a version 
+    control system but tracks individual changes, runs in the browser, 
+    can store and track any file format, and is designed to be used by apps.
+
+    Oftentimes you are embedded into apps that use Lix to expose change control 
+    functionality to end users. You may be asked questions about the lix, its 
+    changes, or to help the user make changes. 
+
+
+		Key concepts
+
+    - Changes: Everything in Lix is a change. State is materialized from changes. 
+
+    - Versions: A version is like a git branch but called version to align more with
+      non-developer users. Versions can be created, switched, and merged.
+
+    - A repository is called just "lix" e.g. a user might say "what is in my lix?". 
+
+		- State views: state (active version) and state_all (all versions).
+		  Columns: entity_id, schema_key, file_id, plugin_key, snapshot_content
+		  (JSON), schema_version, created_at, updated_at, inherited_from_version_id,
+		  change_id, untracked, commit_id; plus version_id on state_all.
+		
+    - Dynamic schemas: entity shapes are stored by schema_key in
+		  snapshot_content; stored schemas live under lix_stored_schema.
+		
+    - Files: the file table stores file descriptors and binary content.
+		  Never query binary content; use the read_file tool when you truly need
+		  to inspect a file.
+
+		Language and style
+
+		- Say “change control” (never “version control”).
+    - Use “the lix” to refer to the repository/workspace.
+	`;
+
+	let systemInstruction: string | undefined = args.system
+		? `${LIX_BASE_SYSTEM}\n\n${args.system}`
+		: LIX_BASE_SYSTEM;
 
 	// Attempt to hydrate from Lix KV (global, untracked)
 	await hydrateFromKv(lix, history, (sys) => {
 		if (!systemInstruction) systemInstruction = sys;
 	});
-
-	function toAiMessages(): { role: "user" | "assistant"; content: string }[] {
-		const out: { role: "user" | "assistant"; content: string }[] = [];
-		for (const m of history) {
-			if (m.role === "user" || m.role === "assistant") {
-				out.push({ role: m.role, content: m.content });
-			}
-		}
-		return out;
-	}
 
 	async function sendMessage({
 		text,
@@ -85,69 +119,26 @@ export async function createLixAgent(args: {
 		system?: string;
 		signal?: AbortSignal;
 	}) {
-		if (system) systemInstruction = system;
-		history.push({ id: uuidV7({ lix }), role: "user", content: text });
-		// Persist immediately so observers (UI) see the user message before model response
-		await persistToKv(lix, { system: systemInstruction, messages: history });
+		if (system) {
+			// Prepend base system to any provided system override.
+			systemInstruction = `${LIX_BASE_SYSTEM}\n\n${system}`;
+		}
 
-		// Detect @mentions of file paths and guide the model to use the tool.
-		const mentionPaths = extractMentionPaths(text);
-		const mentionGuidance =
-			mentionPaths.length > 0
-				? `File mentions like @<path> may refer to workspace files. If helpful, you can call the read_file tool with { path: "<path>" } to inspect content before answering. Only read files when needed.`
-				: undefined;
-
-		let stepNo = 0;
-		const { text: reply, usage } = await generateText({
+		const { text: reply, usage } = await sendMessageCore({
+			lix,
 			model,
-			system:
-				mentionGuidance && systemInstruction
-					? `${systemInstruction}\n\n${mentionGuidance}`
-					: (mentionGuidance ?? systemInstruction),
-			messages: toAiMessages(),
-			// Expose tools so the model can call them (e.g., read_file, sql_select_state).
+			history,
+			text,
+			system: systemInstruction,
+			setSystem: (s?: string) => {
+				systemInstruction = s;
+			},
+			signal,
 			tools: { read_file, list_files, sql_select_state },
-			// Enable multi-step tool calling; allow up to 5 steps when tools are used.
-			stopWhen: stepCountIs(5),
-			// Do not force tool usage; the model decides when to call read_file.
-			// Optional: compress messages for longer loops.
-			prepareStep: async ({ messages }) => {
-				if (messages.length > 20) {
-					return { messages: messages.slice(-10) };
-				}
-				return {};
-			},
-			onStepFinish: ({
-				toolCalls,
-				toolResults,
-				usage: stepUsage,
-				finishReason,
-				text,
-			}) => {
-				stepNo += 1;
-				if (toolCalls.length > 0) {
-					const names = toolCalls.map((c) => c.toolName).join(", ");
-					console.log(`[LixAgent] Step ${stepNo}: tool call → ${names}`);
-				}
-				if (toolResults.length > 0) {
-					const names = toolResults.map((r) => r.toolName).join(", ");
-					console.log(`[LixAgent] Step ${stepNo}: tool result ← ${names}`);
-				}
-				if (text) {
-					// Log short preview of generated text for debugging multi-step flow.
-					const preview = text.length > 120 ? text.slice(0, 117) + "..." : text;
-					console.log(
-						`[LixAgent] Step ${stepNo}: finish=${finishReason}, tokens in=${stepUsage.inputTokens ?? 0} out=${stepUsage.outputTokens ?? 0}. Text: ${preview}`
-					);
-				}
-			},
-			abortSignal: signal,
+			persist: (data: { system?: string; messages: ChatMessage[] }) =>
+				persistToKv(lix, data),
 		});
 
-		history.push({ id: uuidV7({ lix }), role: "assistant", content: reply });
-
-		// Persist new state
-		await persistToKv(lix, { system: systemInstruction, messages: history });
 		return { text: reply, usage };
 	}
 
@@ -242,15 +233,4 @@ async function clearKv(lix: Lix) {
 		.where("key", "=", CONVO_KEY)
 		.where("lixcol_version_id", "=", "global")
 		.execute();
-}
-
-function extractMentionPaths(text: string): string[] {
-	const out = new Set<string>();
-	const re = /@([A-Za-z0-9_./-]+)/g;
-	let m: RegExpExecArray | null;
-	while ((m = re.exec(text))) {
-		const p = m[1];
-		if (p) out.add(p);
-	}
-	return [...out];
 }

@@ -1,5 +1,6 @@
 import type { Lix } from "@lix-js/sdk";
 import { tool } from "ai";
+import dedent from "dedent";
 import { z } from "zod";
 
 export const ReadFileInputSchema = z
@@ -138,10 +139,31 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 export function createReadFileTool(args: { lix: Lix }) {
+  const description = dedent`
+    Read a file from the Lix workspace (UTF-8).
+
+    Paths
+    - Paths are absolute and must start with '/'.
+      Good: "/z.md" • Bad: "z.md"
+    - Alternatively, you can provide fileId instead of path.
+
+    Verification
+    - If in doubt whether a file exists or the exact path is correct, first
+      list files and confirm the absolute path (e.g., via the list_files tool).
+      Alternatively, if you know the file id, read by fileId to avoid path
+      ambiguity.
+
+    Windowing
+    - Use byteOffset/byteLength for byte windows, or lineOffset/lineLimit after decode.
+    - Prefer small windows for previews; the tool clamps very large outputs.
+
+    Output
+    - Returns { text, path, fileId?, size, byteOffset, byteLength, encoding: 'utf-8', truncated }.
+  `;
+
   return tool({
-		description:
-			"Read a file from the Lix workspace (UTF-8). Supports byte offset/length and optional line slicing.",
-		inputSchema: ReadFileInputSchema,
+    description,
+    inputSchema: ReadFileInputSchema,
     execute: async (input) =>
       readFile({ lix: args.lix, ...(input as ReadFileInput) }),
   });
