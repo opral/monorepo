@@ -2,6 +2,8 @@ import type { Lix } from "@lix-js/sdk";
 import { uuidV7 } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { createReadFileTool } from "./tools/read-file.js";
+import { createListFilesTool } from "./tools/list-files.js";
+import { createSqlSelectStateTool } from "./tools/sql-select-state.js";
 import { generateText, stepCountIs } from "ai";
 
 export type ChatMessage = {
@@ -103,8 +105,8 @@ export async function createLixAgent(args: {
 					? `${systemInstruction}\n\n${mentionGuidance}`
 					: (mentionGuidance ?? systemInstruction),
 			messages: toAiMessages(),
-			// Expose tools so the model can call them (e.g., read_file).
-			tools: { read_file },
+			// Expose tools so the model can call them (e.g., read_file, sql_select_state).
+			tools: { read_file, list_files, sql_select_state },
 			// Enable multi-step tool calling; allow up to 5 steps when tools are used.
 			stopWhen: stepCountIs(5),
 			// Do not force tool usage; the model decides when to call read_file.
@@ -159,6 +161,8 @@ export async function createLixAgent(args: {
 	}
 
 	const read_file = createReadFileTool({ lix });
+	const list_files = createListFilesTool({ lix });
+	const sql_select_state = createSqlSelectStateTool({ lix });
 	return {
 		lix,
 		model,
