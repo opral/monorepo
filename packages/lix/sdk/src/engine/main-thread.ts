@@ -41,7 +41,9 @@ export function createMainMemoryEngine(): LixEngine {
         columnNames,
       }) as any[];
 
-      const lastInsertRowid = db.sqlite3.capi.sqlite3_last_insert_rowid(db);
+      const lastInsertRowid = Number(
+        db.sqlite3.capi.sqlite3_last_insert_rowid(db)
+      );
       // Detect changes by comparing total changes
       // Note: we cannot know changes for pure SELECT – return undefined in that case.
       // Using db.changes() after exec returns the number of changes if a write occurred.
@@ -66,7 +68,8 @@ export function createMainMemoryEngine(): LixEngine {
     async export(): Promise<ArrayBuffer> {
       if (!db) throw new Error("Engine not initialized");
       const bytes = contentFromDatabase(db);
-      return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+      const copy = bytes.slice();
+      return copy.buffer;
     },
 
     async close(): Promise<void> {

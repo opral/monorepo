@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lix OPFS Worker Demo</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 680px; margin: 2rem auto; padding: 0 1rem; }
+      button { padding: 0.5rem 0.75rem; margin-right: 0.5rem; }
+      .row { margin: 1rem 0; }
+      code { background: #f4f4f5; padding: 0.2rem 0.3rem; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>Lix OPFS Worker Demo</h1>
+    <p>This demo opens a SQLite DB in a Dedicated Worker and persists to OPFS. Click Increment and reload the page to verify persistence.</p>
+
+    <div class="row">
+      <label>
+        Engine:
+        <select id="mode">
+          <option value="worker" selected>Worker SAHPool (fast OPFS)</option>
+          <option value="main">Main-thread (in-memory)</option>
+        </select>
+      </label>
+      <span style="margin-left:1rem"><strong>Name:</strong> <code>throwaway.lix</code></span>
+    </div>
+
+    <div class="row">
+      <button id="inc">Increment</button>
+      <button id="reset">Reset</button>
+      <button id="reload" onclick="location.reload()">Reload</button>
+    </div>
+
+    <div class="row">
+      <strong>Current value:</strong> <span id="value">…</span>
+    </div>
+
+    <div class="row">
+      <strong>Spam row count:</strong> <span id="rows">…</span>
+      <button id="refresh-rows" style="margin-left:0.5rem">Refresh Count</button>
+    </div>
+
+    <div class="row">
+      <div><strong>Metrics</strong></div>
+      <div>Last increment: <span id="t-inc">–</span> ms</div>
+      <div>Last select: <span id="t-select">–</span> ms</div>
+    </div>
+
+    <div class="row">
+      <div><strong>Simulate load</strong></div>
+      <input id="count" type="number" min="1" step="100" value="2000" />
+      <button id="spam">Insert N rows</button>
+      <span id="t-spam"></span>
+      <div style="margin-top:0.5rem">
+        <label>
+          <input id="wrap" type="checkbox" checked /> Wrap in single transaction
+        </label>
+      </div>
+      <div style="margin-top:0.5rem; color:#6b7280">Tip: switch to Main-thread to observe UI jank under heavy inserts.</div>
+    </div>
+
+    <div class="row">
+      <div><strong>Seed large DB (~1 GiB)</strong></div>
+      <button id="seed1g">Seed 1 GiB (1024 × 1 MiB)</button>
+      <span id="t-seed"></span>
+      <div style="margin-top:0.5rem; color:#6b7280">
+        Warning: This may be slow and hit storage/memory limits depending on your browser.
+      </div>
+    </div>
+
+    <script type="module" src="/main.ts"></script>
+  </body>
+  </html>

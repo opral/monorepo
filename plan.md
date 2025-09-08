@@ -44,7 +44,7 @@ After (Engine + Worker – OPFS)
   ├─ React UI / App
   ├─ openLix({ engine })
   │   └─ Kysely (EngineKyselyDriver)   ← uses engine.exec(...)
-  └─ Dedicated Worker (opfs.worker.ts)
+  └─ Dedicated Worker (opfs-sah.worker.ts)
       ├─ sqlite-wasm (in-memory)
       │   ├─ initDb() schemas, views, vtable, hooks
       │   └─ plugin.detectChanges() (executeSync)
@@ -66,8 +66,7 @@ Transport notes:
      - Initializes sqlite-wasm + schema + vtable in the same thread.
      - No persistence (or optional explicit `toBlob`/`init blob`).
   2) OPFS Worker engine:
-     - `packages/lix/sdk/src/engine-protocol/implementations/opfs-worker.ts` (server)
-     - Dedicated OPFS worker at `packages/lix/sdk/src/engine/opfs.worker.ts` (always persists).
+     - Dedicated OPFS SAHPool worker at `packages/lix/sdk/src/engine/opfs-sah.worker.ts` (always persists).
      - Same schema/vtable/plugins inside Worker.
      - Handles OPFS persistence internally (import/export + batched saves on commit).
 
@@ -120,7 +119,7 @@ Transactions are plain SQL (`BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK TO`) via `e
 - `export()` → `contentFromDatabase(db)`.
 - Note: heavy plugin work will block the UI. Use for tests/CLI or very light work.
 
-2) `createWorkerOpfsEngine({ path })` (Dedicated Worker + OPFS)
+2) `createOpfsSahWorker({ name })` (Dedicated Worker + OPFS SAHPool)
 
 - Dedicated Worker hosts sqlite-wasm, schema, vtables, plugins.
 - Owns OPFS. On outermost commit: debounced autosave (atomic write). Calls from host are serialized to prevent interleaving.
@@ -153,7 +152,7 @@ Change `openLix` to accept an `engine` instead of `storage`. Kysely driver depen
 
 ```ts
 // Worker engine (plugins provided as ESM code strings)
-openLix({ engine: createWorkerOpfsEngine({ path, expProvideStringifiedPlugins: [mdCode] }) })
+openLix({ engine: createOpfsSahWorker({ name: 'lix.db', expProvideStringifiedPlugins: [mdCode] }) })
 
 // In‑process engine (supports existing providePlugins with function objects)
 openLix({ engine: createMainMemoryEngine(), providePlugins: [jsonPlugin] })
@@ -166,7 +165,7 @@ No separate storage concept. Engines own persistence.
 Keep the worker a simple module + factory, not a class.
 
 ```ts
-// opfs.worker.ts
+// opfs-sah.worker.ts
 export function createWorkerHost() {
   // capture state in closures: sqlite instance, plugin registry, debounce timers, etc.
   return {
@@ -238,7 +237,7 @@ Ensure plugins are bundled as single-file ESM without external imports.
 ## Developer Experience & Bundling (Minimal)
 
 - Use module workers in ESM bundlers:
-  - Vite/Rollup: `new Worker(new URL('./opfs.worker.ts', import.meta.url), { type: 'module' })`.
+  - Vite/Rollup: `new Worker(new URL('./opfs-sah.worker.ts', import.meta.url), { type: 'module' })`.
   - Webpack: same `new URL` pattern.
 - Keep prototype self-contained in `@lix-js/sdk` under `src/engine`.
 
@@ -260,7 +259,7 @@ Ensure plugins are bundled as single-file ESM without external imports.
 - Run initDb/vtable/plugins locally; support `exec`, transactions via SQL, `export`.
 
 2) M2 – Worker engine (OPFS) + Driver
-- Implement `opfs.worker.ts` with OPFS persistence and batched auto-save.
+- Implement `opfs-sah.worker.ts` with OPFS persistence and batched auto-save.
 - Implement `engine-kysely-driver.ts` (uses engine.exec) and wire into `openLix({ engine })`.
 
 3) M3 – Transitional adapter + Demo
@@ -298,17 +297,17 @@ Ensure plugins are bundled as single-file ESM without external imports.
   - [x] Unit tests: main engine basics
 
 - [ ] Phase 2 — Worker engine
-  - [x] Scaffold `opfs.worker.ts` + minimal router
+  - [x] Scaffold `opfs-sah.worker.ts` + minimal router
   - [x] Host transport helper (request/response correlation)
   - [ ] Add optional `PromiseQueue` util and wire where needed (worker)
-  - [x] Implement `createWorkerOpfsEngine` (init/exec/execBatch)
+  - [x] Implement `createOpfsSahWorker` (init/exec/execBatch)
   - [x] Autosave: outermost COMMIT + debounce
   - [x] OPFS atomic write (createWritable → write → close)
   - [x] Worker plugin loading via Blob URL
 
 - [ ] Phase 3 — Driver + Integration
-  - [ ] Implement `engine-kysely-driver.ts`
-  - [ ] Update `openLix` to accept `{ engine }`
+  - [x] Implement `engine-kysely-driver.ts`
+  - [x] Add experimental `openLixEngine({ engine })`
   - [ ] Adapt examples (e.g., Flashtype) to worker engine
 
 - [ ] Phase 4 — Docs, Tests, Perf
