@@ -3,7 +3,7 @@ import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { generateText } from "ai";
 
 export type ChatMessage = {
-	role: "system" | "user" | "assistant" | "tool";
+	role: "system" | "user" | "assistant";
 	content: string;
 };
 
@@ -82,6 +82,8 @@ export async function createLixAgent(args: {
 	}) {
 		if (system) systemInstruction = system;
 		history.push({ role: "user", content: text });
+		// Persist immediately so observers (UI) see the user message before model response
+		await persistToKv(lix, { system: systemInstruction, messages: history });
 
 		const { text: reply, usage } = await generateText({
 			model,

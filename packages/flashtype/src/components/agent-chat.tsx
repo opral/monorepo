@@ -1,113 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import React, { useCallback, useRef, useState } from "react";
+import { useAgentChat } from "@/hooks/use-agent-chat";
 import { useLix } from "@lix-js/react-utils";
-import { createLixAgent, type LixAgent } from "@lix-js/agent";
-
-export type ChatMessage = {
-	role: "system" | "user" | "assistant";
-	content: string;
-};
-
-function getGoogleModel() {
-  const apiKey = import.meta?.env?.VITE_GOOGLE_API_KEY as string | undefined;
-  const modelName = (import.meta?.env?.VITE_GOOGLE_MODEL as string | undefined) ?? "gemini-2.5-flash";
-  if (!apiKey) {
-    return { model: null as any, modelName, hasKey: false };
-  }
-  const provider = createGoogleGenerativeAI({ apiKey });
-  const model = provider(modelName);
-  return { model, modelName, hasKey: true };
-}
 
 export default function AgentChat() {
-    const lix = useLix();
-    const [agent, setAgent] = useState<LixAgent | null>(null);
-	const [messages, setMessages] = useState<ChatMessage[]>([
-		{
-			role: "system",
-			content:
-				"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.",
-		},
-	]);
+	const system =
+		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
+	const lix = useLix();
+
+	const { messages, send, pending, error, ready, modelName, hasKey } =
+		useAgentChat({ lix, system });
 	const [input, setInput] = useState("");
-	const [pending, setPending] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 	const listRef = useRef<HTMLDivElement>(null);
 
-    const { model, modelName, hasKey } = useMemo(
-        () => getGoogleModel(),
-        [import.meta.env],
-    );
-
-    // Capture initial system instruction once
-    const initialSystemRef = useRef<string | undefined>(
-      ((): string | undefined => {
-        const sys = messages.find((m) => m.role === "system")?.content;
-        return sys;
-      })(),
-    );
-
-    // Create the agent at mount or when model/lix changes
-    useEffect(() => {
-      let cancelled = false;
-      async function boot() {
-        try {
-          if (!hasKey || !model) {
-            setAgent(null);
-            return;
-          }
-          const a = await createLixAgent({ lix, model, system: initialSystemRef.current });
-          if (!cancelled) setAgent(a);
-          // Hydrate UI messages from store/agent
-          try {
-            const systemMsg = initialSystemRef.current;
-            const prior = a.getHistory();
-            const base: ChatMessage[] = systemMsg ? [{ role: "system", content: systemMsg }] : [];
-            setMessages([...base, ...prior]);
-          } catch {
-            // ignore
-          }
-        } catch (e) {
-          if (!cancelled) {
-            console.error("Failed to create agent:", e);
-            setAgent(null);
-          }
-        }
-      }
-      void boot();
-      return () => {
-        cancelled = true;
-      };
-    }, [lix, model, hasKey]);
-
-    const onSend = useCallback(async () => {
-        if (!input.trim()) return;
-        if (!hasKey) {
-            setError("Missing Google API key. Set VITE_GOOGLE_API_KEY and reload.");
-            return;
-        }
-        setError(null);
-        const next = [...messages, { role: "user" as const, content: input }];
-        setMessages(next);
-        setInput("");
-        setPending(true);
-        try {
-            if (!agent) throw new Error("Agent not ready");
-            const { text } = await agent.sendMessage({ text: input });
-            setMessages([...next, { role: "assistant", content: text }]);
-            // scroll to bottom
-            queueMicrotask(() =>
-                listRef.current?.scrollTo({
-                    top: listRef.current.scrollHeight,
-                    behavior: "smooth",
-                }),
-            );
-        } catch (e: any) {
-            setError(e?.message || String(e));
-        } finally {
-            setPending(false);
-        }
-    }, [input, messages, hasKey, model, lix, agent]);
+	const onSend = useCallback(async () => {
+		if (!input.trim()) return;
+		await send(input);
+		setInput("");
+		queueMicrotask(() =>
+			listRef.current?.scrollTo({
+				top: listRef.current.scrollHeight,
+				behavior: "smooth",
+			}),
+		);
+	}, [input, send]);
 
 	const onKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -159,9 +74,9 @@ export default function AgentChat() {
 					<button
 						className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
 						onClick={onSend}
-                    disabled={pending || !input.trim() || !agent}
-                    title={hasKey ? "Send" : "Missing API key"}
-                >
+						disabled={pending || !input.trim() || !ready}
+						title={hasKey ? "Send" : "Missing API key"}
+					>
 						Send
 					</button>
 				</div>
