@@ -44,8 +44,7 @@ export async function sqlSelectState(
 }
 
 export function createSqlSelectStateTool(args: { lix: Lix }) {
-	
-		const description = dedent`
+	const description = dedent`
 			Execute a read-only SQL SELECT over Lix state.
 
 			State views:

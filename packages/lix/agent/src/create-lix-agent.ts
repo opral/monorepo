@@ -3,6 +3,8 @@ import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { createReadFileTool } from "./tools/read-file.js";
 import { createListFilesTool } from "./tools/list-files.js";
 import { createSqlSelectStateTool } from "./tools/sql-select-state.js";
+import { createWriteFileTool } from "./tools/write-file.js";
+import { createDeleteFileTool } from "./tools/delete-file.js";
 import dedent from "dedent";
 import { sendMessageCore } from "./send-message.js";
 import {
@@ -147,7 +149,13 @@ export async function createLixAgent(args: {
 				systemInstruction = s;
 			},
 			signal,
-			tools: { read_file, list_files, sql_select_state },
+			tools: {
+				read_file,
+				list_files,
+				sql_select_state,
+				write_file,
+				delete_file,
+			},
 			persistUser: (t: string) => appendUserComment(lix, threadId, t),
 			persistAssistant: (t: string) => appendAssistantComment(lix, threadId, t),
 		});
@@ -169,6 +177,8 @@ export async function createLixAgent(args: {
 	const read_file = createReadFileTool({ lix });
 	const list_files = createListFilesTool({ lix });
 	const sql_select_state = createSqlSelectStateTool({ lix });
+	const write_file = createWriteFileTool({ lix });
+	const delete_file = createDeleteFileTool({ lix });
 	return {
 		lix,
 		model,

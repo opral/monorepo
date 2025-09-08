@@ -3,7 +3,7 @@ import { openLix } from "@lix-js/sdk";
 import { sqlSelectState } from "./sql-select-state.js";
 
 function enc(s: string): Uint8Array {
-  return new TextEncoder().encode(s);
+	return new TextEncoder().encode(s);
 }
 
 describe("sql_select_state tool", () => {

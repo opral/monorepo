@@ -131,7 +131,7 @@ export async function readFile(
 		encoding: "utf-8",
 		truncated,
 	};
-  return ReadFileOutputSchema.parse(output);
+	return ReadFileOutputSchema.parse(output);
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -139,7 +139,7 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 export function createReadFileTool(args: { lix: Lix }) {
-  const description = dedent`
+	const description = dedent`
     Read a file from the Lix workspace (UTF-8).
 
     Paths
@@ -161,10 +161,10 @@ export function createReadFileTool(args: { lix: Lix }) {
     - Returns { text, path, fileId?, size, byteOffset, byteLength, encoding: 'utf-8', truncated }.
   `;
 
-  return tool({
-    description,
-    inputSchema: ReadFileInputSchema,
-    execute: async (input) =>
-      readFile({ lix: args.lix, ...(input as ReadFileInput) }),
-  });
+	return tool({
+		description,
+		inputSchema: ReadFileInputSchema,
+		execute: async (input) =>
+			readFile({ lix: args.lix, ...(input as ReadFileInput) }),
+	});
 }
