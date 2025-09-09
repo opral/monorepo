@@ -13,16 +13,16 @@ export function ChatInput({
 	onSend,
 	onCommand,
 	commands = DEFAULT_COMMANDS,
-    onQueryMentions,
+	onQueryMentions,
 }: {
 	onSend: (value: string) => void;
 	onCommand?: (command: string) => void;
 	commands?: SlashCommand[];
-    onQueryMentions?: (query: string) => Promise<string[]> | string[];
+	onQueryMentions?: (query: string) => Promise<string[]> | string[];
 }) {
 	const [value, setValue] = React.useState("");
 	const [history, setHistory] = React.useState<string[]>([]);
-	const [idx, setIdx] = React.useState<number>(-1); // -1 means live input
+	const [, setIdx] = React.useState<number>(-1); // -1 means live input
 	const ref = React.useRef<HTMLTextAreaElement>(null);
 	const [openMenu, setOpenMenu] = React.useState(false); // slash commands
 	const [selected, setSelected] = React.useState(0);
@@ -31,7 +31,11 @@ export function ChatInput({
 	const [mentionOpen, setMentionOpen] = React.useState(false);
 	const [mentionItems, setMentionItems] = React.useState<string[]>([]);
 	const [mentionSelected, setMentionSelected] = React.useState(0);
-	const mentionCtx = React.useRef<{ start: number; end: number; query: string } | null>(null);
+	const mentionCtx = React.useRef<{
+		start: number;
+		end: number;
+		query: string;
+	} | null>(null);
 
 	React.useEffect(() => {
 		ref.current?.focus();
@@ -69,7 +73,7 @@ export function ChatInput({
 			return;
 		}
 		const el = ref.current;
-		const caret = el ? el.selectionStart ?? value.length : value.length;
+		const caret = el ? (el.selectionStart ?? value.length) : value.length;
 		const before = value.slice(0, caret);
 		const m = /(^|[\s])@([A-Za-z0-9_./-]*)$/.exec(before);
 		if (!m) {
@@ -285,7 +289,9 @@ export function ChatInput({
 				{mentionOpen && (
 					<div className="mt-2 max-h-64 overflow-auto font-mono text-[12px] leading-[1.5]">
 						{mentionItems.length === 0 ? (
-							<div className="px-2 py-1 text-muted-foreground">Type to search files…</div>
+							<div className="px-2 py-1 text-muted-foreground">
+								Type to search files…
+							</div>
 						) : (
 							mentionItems.map((p, i) => {
 								const isSel = i === mentionSelected;

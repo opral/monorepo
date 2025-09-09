@@ -96,7 +96,7 @@ export function LeftSidebarFiles({
 			Object.fromEntries(files.map((f) => [f.path as string, f.id as string])),
 		[files],
 	);
-	async function handleDeleteFile(targetId: string, targetPath: string) {
+	async function handleDeleteFile(targetId: string) {
 		await lix.db.transaction().execute(async (trx) => {
 			await trx.deleteFrom("state").where("file_id", "=", targetId).execute();
 			await trx.deleteFrom("file").where("id", "=", targetId).execute();
@@ -111,7 +111,6 @@ export function LeftSidebarFiles({
 		<SidebarMenu>
 			{creating ? (
 				<InlineNewFileRow
-					existingPaths={paths}
 					onCancel={() => onRequestCloseCreate?.()}
 					onCreate={async (stem) => {
 						try {
@@ -143,7 +142,7 @@ export function LeftSidebarFiles({
 						if (!id) return;
 						const ok = window.confirm(`Delete "${fullPath}"?`);
 						if (!ok) return;
-						await handleDeleteFile(id, fullPath);
+						await handleDeleteFile(id);
 					}}
 				/>
 			))}
@@ -178,11 +177,9 @@ function ensureUniqueMarkdownPath(
  * VSCode-like inline new file row. Edits only the stem and shows a fixed .md suffix.
  */
 function InlineNewFileRow({
-	existingPaths,
 	onCancel,
 	onCreate,
 }: {
-	existingPaths: string[];
 	onCancel: () => void;
 	onCreate: (stem: string) => Promise<void>;
 }) {
@@ -209,7 +206,6 @@ function InlineNewFileRow({
 				<File className="h-4 w-4" />
 				<div className="flex min-w-0 items-center gap-1">
 					<Input
-						autoFocus
 						value={stem}
 						onChange={(e) => setStem(e.target.value.replaceAll("/", ""))}
 						placeholder="new-file"
@@ -317,6 +313,7 @@ function Tree({
 				<CollapsibleContent>
 					<SidebarMenuSub>
 						{items.map((subItem, idx) => (
+							// @ts-expect-error
 							<Tree
 								key={idx}
 								item={subItem}

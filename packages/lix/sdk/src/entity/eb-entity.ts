@@ -10,8 +10,8 @@ const CANONICAL_TABLES = [
 	"state",
 	"state_all",
 	"entity_label",
-	"entity_thread",
-	"entity_thread_all",
+	"entity_conversation",
+	"entity_conversation_all",
 ] as const;
 
 /**
@@ -22,7 +22,7 @@ const CANONICAL_TABLES = [
  * .where(ebEntity("state").equals(userAccount))
  * .where(ebEntity().in(entities)) // When context is unambiguous (no joins)
  *
- * @param entityType - The type of entity table being queried (e.g., "file", "account", "thread").
+ * @param entityType - The type of entity table being queried (e.g., "file", "account", "conversation").
  *                     Optional when the context is unambiguous (e.g., single table queries with no joins).
  */
 export function ebEntity<
@@ -162,8 +162,8 @@ export function ebEntity<
 		 *
 		 * @example
 		 *   ```ts
-		 *   await lix.db.selectFrom("thread")
-		 *      .where(ebEntity("thread").in([thread1, thread2, thread3]))
+		 *   await lix.db.selectFrom("conversation")
+		 *      .where(ebEntity("conversation").in([c1, c2, c3]))
 		 *      .selectAll()
 		 *      .execute();
 		 *   ```

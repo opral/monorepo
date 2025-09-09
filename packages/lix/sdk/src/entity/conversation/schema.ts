@@ -5,22 +5,27 @@ import type {
 import { createEntityViewsIfNotExists } from "../../entity-views/entity-view-builder.js";
 import type { Lix } from "../../lix/open-lix.js";
 
-export function applyEntityThreadDatabaseSchema(
+export function applyEntityConversationDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db">
 ): void {
 	createEntityViewsIfNotExists({
 		lix,
-		schema: LixEntityThreadSchema,
-		overrideName: "entity_thread",
+		schema: LixEntityConversationSchema,
+		overrideName: "entity_conversation",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 	});
 }
 
-export const LixEntityThreadSchema = {
-	"x-lix-key": "lix_entity_thread",
+export const LixEntityConversationSchema = {
+	"x-lix-key": "lix_entity_conversation",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "thread_id"],
+	"x-lix-primary-key": [
+		"entity_id",
+		"schema_key",
+		"file_id",
+		"conversation_id",
+	],
 	"x-lix-foreign-keys": [
 		{
 			properties: ["entity_id", "schema_key", "file_id"],
@@ -30,9 +35,9 @@ export const LixEntityThreadSchema = {
 			},
 		},
 		{
-			properties: ["thread_id"],
+			properties: ["conversation_id"],
 			references: {
-				schemaKey: "lix_thread",
+				schemaKey: "lix_conversation",
 				properties: ["id"],
 			},
 		},
@@ -42,14 +47,13 @@ export const LixEntityThreadSchema = {
 		entity_id: { type: "string" },
 		schema_key: { type: "string" },
 		file_id: { type: "string" },
-		thread_id: { type: "string" },
+		conversation_id: { type: "string" },
 	},
-	required: ["entity_id", "schema_key", "file_id", "thread_id"],
+	required: ["entity_id", "schema_key", "file_id", "conversation_id"],
 	additionalProperties: false,
 } as const;
-LixEntityThreadSchema satisfies LixSchemaDefinition;
+LixEntityConversationSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (inferred from schema)
-export type LixEntityThread = FromLixSchemaDefinition<
-	typeof LixEntityThreadSchema
+export type LixEntityConversation = FromLixSchemaDefinition<
+	typeof LixEntityConversationSchema
 >;

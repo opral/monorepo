@@ -30,7 +30,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 		[provider, modelName],
 	);
 
-	// Boot agent and subscribe to thread_comment changes for transcript
+	// Boot agent and subscribe to message changes for transcript
 	useEffect(() => {
 		let cancelled = false;
 		let sub: { unsubscribe(): void } | null = null;
@@ -42,19 +42,19 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			const a = await createLixAgent({ lix, model, system });
 			if (cancelled) return;
 			setAgent(a);
-			// Fetch pointer to default thread
+			// Fetch pointer to default conversation
 			const ptr = await lix.db
 				.selectFrom("key_value_all")
 				.where("lixcol_version_id", "=", "global")
-				.where("key", "=", "lix_agent_thread_id")
+				.where("key", "=", "lix_agent_conversation_id")
 				.select(["value"])
 				.executeTakeFirst();
-			const threadId = (ptr?.value as any) ?? null;
-			if (!threadId) return;
+			const conversationId = (ptr?.value as any) ?? null;
+			if (!conversationId) return;
 
 			const query = lix.db
-				.selectFrom("thread_comment")
-				.where("thread_id", "=", String(threadId))
+				.selectFrom("conversation_message")
+				.where("conversation_id", "=", String(conversationId))
 				.select(["id", "body", "metadata", "lixcol_created_at"])
 				.orderBy("lixcol_created_at", "asc")
 				.orderBy("id", "asc");
@@ -99,7 +99,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			const ptr = await lix.db
 				.selectFrom("key_value_all")
 				.where("lixcol_version_id", "=", "global")
-				.where("key", "=", "lix_agent_thread_id")
+				.where("key", "=", "lix_agent_conversation_id")
 				.select(["value"])
 				.executeTakeFirst();
 			void ptr;

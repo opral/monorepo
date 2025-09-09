@@ -441,36 +441,44 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
  * Get threads for a specific commit
  */
 export function selectThreads(lix: Lix, args: { commitId: string }) {
-	return lix.db
-		.selectFrom("thread")
-		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
-		.where("entity_thread.entity_id", "=", args.commitId)
-		.where("entity_thread.schema_key", "=", "lix_commit")
-		.where("entity_thread.file_id", "=", "lix")
-		.select((eb) => [
-			jsonArrayFrom(
-				eb
-					.selectFrom("thread_comment")
-					.innerJoin(
-						"change_author",
-						"thread_comment.lixcol_change_id",
-						"change_author.change_id"
-					)
-					.innerJoin("account", "account.id", "change_author.account_id")
-					.select([
-						"thread_comment.id",
-						"thread_comment.body",
-						"thread_comment.thread_id",
-						"thread_comment.parent_id",
-						"thread_comment.lixcol_created_at",
-						"thread_comment.lixcol_updated_at",
-					])
-					.select("account.name as author_name")
-					.orderBy("thread_comment.lixcol_created_at", "asc")
-					.whereRef("thread_comment.thread_id", "=", "thread.id")
-			).as("comments"),
-		])
-		.selectAll("thread");
+    return lix.db
+        .selectFrom("conversation")
+        .innerJoin(
+            "entity_conversation",
+            "conversation.id",
+            "entity_conversation.conversation_id",
+        )
+        .where("entity_conversation.entity_id", "=", args.commitId)
+        .where("entity_conversation.schema_key", "=", "lix_commit")
+        .where("entity_conversation.file_id", "=", "lix")
+        .select((eb) => [
+            jsonArrayFrom(
+                eb
+                    .selectFrom("conversation_message")
+                    .innerJoin(
+                        "change_author",
+                        "conversation_message.lixcol_change_id",
+                        "change_author.change_id",
+                    )
+                    .innerJoin("account", "account.id", "change_author.account_id")
+                    .select([
+                        "conversation_message.id",
+                        "conversation_message.body",
+                        "conversation_message.conversation_id",
+                        "conversation_message.parent_id",
+                        "conversation_message.lixcol_created_at",
+                        "conversation_message.lixcol_updated_at",
+                    ])
+                    .select("account.name as author_name")
+                    .orderBy("conversation_message.lixcol_created_at", "asc")
+                    .whereRef(
+                        "conversation_message.conversation_id",
+                        "=",
+                        "conversation.id",
+                    )
+            ).as("comments"),
+        ])
+        .selectAll("conversation");
 }
 
 /**

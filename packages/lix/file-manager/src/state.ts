@@ -28,7 +28,7 @@ export const lixIdSearchParamsAtom = atom((get) => {
 	return searchParams.get("lix") || undefined;
 });
 
-export const threadSearchParamsAtom = atom(async (get) => {
+export const conversationSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
 	return searchParams.get("t");

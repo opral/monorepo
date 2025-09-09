@@ -28,12 +28,12 @@ import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import { LixEntityLabelSchema } from "../entity/label/schema.js";
-import { LixEntityThreadSchema } from "../entity/thread/schema.js";
+import { LixEntityConversationSchema } from "../entity/conversation/schema.js";
 import {
-	LixThreadSchema,
-	LixThreadCommentSchema,
-	type LixThreadComment,
-} from "../thread/schema.js";
+	LixConversationSchema,
+	LixConversationMessageSchema,
+	type LixConversationMessage,
+} from "../conversation/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -75,9 +75,9 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,
-	entity_thread: LixEntityThreadSchema,
-	thread: LixThreadSchema,
-	thread_comment: LixThreadCommentSchema,
+	entity_conversation: LixEntityConversationSchema,
+	conversation: LixConversationSchema,
+	conversation_message: LixConversationMessageSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -103,14 +103,14 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
-	EntityViews<typeof LixEntityThreadSchema, "entity_thread"> &
+	EntityViews<typeof LixEntityConversationSchema, "entity_conversation"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
-	EntityViews<typeof LixThreadSchema, "thread"> &
+	EntityViews<typeof LixConversationSchema, "conversation"> &
 	EntityViews<
-		typeof LixThreadCommentSchema,
-		"thread_comment",
-		{ body: LixThreadComment["body"] }
+		typeof LixConversationMessageSchema,
+		"conversation_message",
+		{ body: LixConversationMessage["body"] }
 	> &
 	EntityViews<
 		typeof LixVersionDescriptorSchema,

@@ -4,13 +4,13 @@ import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
-import { State, ThreadComment } from "@lix-js/sdk";
+import { State, LixConversationMessage } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
 	const lix = useLix();
 	const [firstComment, setFirstComment] = useState<
-		State<ThreadComment & { author_name: string }> | undefined
+    State<LixConversationMessage & { author_name: string }> | undefined
 	>(undefined);
 	const [fileId] = useQuery(() => {
 		const searchParams = new URL(window.location.href).searchParams;
@@ -25,17 +25,17 @@ const DiscussionPreview = ({ threadId }: { threadId: string }) => {
 		if (!lix) return; // Don't try to query if lix is not ready
 		
 		const comment = await lix.db
-			.selectFrom("thread_comment")
+			.selectFrom("conversation_message")
 			.innerJoin("change", (join) =>
 				join
-					.onRef("change.entity_id", "=", "thread_comment.id")
+					.onRef("change.entity_id", "=", "conversation_message.id")
 					.on("change.schema_key", "=", "lix_comment_table")
 			)
 			.innerJoin("change_author", "change_author.change_id", "change.id")
 			.innerJoin("account", "account.id", "change_author.account_id")
-			.selectAll("thread_comment")
+			.selectAll("conversation_message")
 			.select(["account.name as author_name"])
-			.where("thread_comment.thread_id", "=", threadId)
+			.where("conversation_message.conversation_id", "=", threadId)
 			.orderBy("change.created_at", "asc")
 			.limit(1)
 			.executeTakeFirstOrThrow();

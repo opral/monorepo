@@ -127,12 +127,16 @@ test("writes and reads a tracked key on active version", async () => {
 });
 
 test("shows Suspense fallback first, then renders value on initial read", async () => {
-  const lix = await openLix({});
-  // Ensure the key exists so the initial load resolves deterministically
-  await lix.db
-    .insertInto("key_value_all")
-    .values({ key: "flashtype_left_sidebar_active_tab", value: "files", lixcol_version_id: "global" })
-    .execute();
+	const lix = await openLix({});
+	// Ensure the key exists so the initial load resolves deterministically
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "flashtype_left_sidebar_active_tab",
+			value: "files",
+			lixcol_version_id: "global",
+		})
+		.execute();
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
 			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
@@ -151,9 +155,9 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	await act(async () => {
 		render(<ReadKV />, { wrapper });
 	});
-    // Eventually value appears once Suspense resolves
-    const el = await screen.findByTestId("val");
-    expect(el.textContent).toBe("files");
+	// Eventually value appears once Suspense resolves
+	const el = await screen.findByTestId("val");
+	expect(el.textContent).toBe("files");
 });
 
 test("re-renders when key value changes externally", async () => {

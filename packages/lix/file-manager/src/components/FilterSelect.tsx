@@ -5,7 +5,7 @@ import { Button } from "./ui/button.tsx";
 import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import { Checkbox } from "./ui/checkbox.tsx";
 import { lixAtom } from "@/state.ts";
-import { createThread } from "@lix-js/sdk";
+import { createConversation } from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
 import { FormField, FormControl, FormItem, Form } from "./ui/form.tsx";
@@ -41,7 +41,7 @@ const FilterSelect = () => {
   const handleAddDiscussion = async () => {
     const resolve = await lix.db.transaction().execute(
       async (trx) => {
-        return await createThread({
+        return await createConversation({
 					lix: { ...lix, db: trx },
           comments: [{ body: fromPlainText(discussionValue) }],
 				});
