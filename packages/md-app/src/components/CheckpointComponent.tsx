@@ -26,42 +26,50 @@ export const CheckpointComponent = (props: {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
 	
-	// Get threads by finding the commit for this change set and querying threads for that commit
+	// Get conversations by finding the commit for this change set and querying conversations for that commit
 	const threads = useQuery(({ lix }) =>
 		lix.db
-			.selectFrom("thread")
-			.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+			.selectFrom("conversation")
+			.innerJoin(
+				"entity_conversation",
+				"conversation.id",
+				"entity_conversation.conversation_id",
+			)
 			.innerJoin("commit", (join) =>
 				join
-					.onRef("commit.id", "=", "entity_thread.entity_id")
-					.on("entity_thread.schema_key", "=", "lix_commit")
-					.on("entity_thread.file_id", "=", "lix")
+					.onRef("commit.id", "=", "entity_conversation.entity_id")
+					.on("entity_conversation.schema_key", "=", "lix_commit")
+					.on("entity_conversation.file_id", "=", "lix")
 			)
 			.where("commit.change_set_id", "=", props.checkpointChangeSet.id)
 			.select((eb) => [
 				jsonArrayFrom(
 					eb
-						.selectFrom("thread_comment")
+						.selectFrom("conversation_message")
 						.innerJoin(
 							"change_author",
-							"thread_comment.lixcol_change_id",
-							"change_author.change_id"
+							"conversation_message.lixcol_change_id",
+							"change_author.change_id",
 						)
 						.innerJoin("account", "account.id", "change_author.account_id")
 						.select([
-							"thread_comment.id",
-							"thread_comment.body",
-							"thread_comment.thread_id",
-							"thread_comment.parent_id",
-							"thread_comment.lixcol_created_at",
-							"thread_comment.lixcol_updated_at",
+							"conversation_message.id",
+							"conversation_message.body",
+							"conversation_message.conversation_id",
+							"conversation_message.parent_id",
+							"conversation_message.lixcol_created_at",
+							"conversation_message.lixcol_updated_at",
 						])
 						.select("account.name as author_name")
-						.orderBy("thread_comment.lixcol_created_at", "asc")
-						.whereRef("thread_comment.thread_id", "=", "thread.id")
+						.orderBy("conversation_message.lixcol_created_at", "asc")
+						.whereRef(
+							"conversation_message.conversation_id",
+							"=",
+							"conversation.id",
+						)
 				).as("comments"),
 			])
-			.selectAll("thread")
+			.selectAll("conversation")
 	);
 	
 	const diffs = useQuery(({ lix }) =>

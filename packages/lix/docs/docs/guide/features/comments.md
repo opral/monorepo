@@ -1,19 +1,19 @@
 # Comments
 
-Lix has a universal commenting system. You can attach threaded conversations to any entity, whether it's a paragraph in a document, a cell in a spreadsheet, or a proposed change set.
+Lix has a universal commenting system. You can attach conversations to any entity, whether it's a paragraph in a document, a cell in a spreadsheet, or a proposed change set.
 
 ![Comments](/comments.svg)
 
 ## Examples
 
 ```ts
-import { openLix, createThread, createComment } from "@lix-js/sdk";
+import { openLix, createConversation, createConversationMessage } from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 const lix = await openLix({});
 
-// Create a thread on any entity (change set, CSV cell, markdown paragraph, etc.)
-const thread = await createThread({
+// Create a conversation on any entity (change set, CSV cell, markdown paragraph, etc.)
+const conversation = await createConversation({
   lix,
   entity: {
     id: "para_456",
@@ -22,46 +22,55 @@ const thread = await createThread({
   },
 });
 
-// Add a comment to the thread
-const comment = await createComment({
+// Add a message to the conversation
+const message = await createConversationMessage({
   lix,
-  thread: thread.id,
-  content: fromPlainText("This paragraph needs clarification."),
+  conversation_id: conversation.id,
+  body: fromPlainText("This paragraph needs clarification."),
 });
 ```
 
 ```ts
-// Thread on a CSV cell
-const csvThread = await createThread({
+// Conversation on a CSV cell
+const csvConversation = await createConversation({
   lix,
   entity: {
     id: "row_789::column_2",
     schema_key: "csv_cell",
-    file_id: "data.csv"
-  }
+    file_id: "data.csv",
+  },
 });
 
-// Thread on a change set (change sets are entities too!)
-const changeSetThread = await createThread({
+// Conversation on a change set (change sets are entities too!)
+const changeSetConversation = await createConversation({
   lix,
   entity: {
     id: changeSet.id,
-    schema_key: "lix_change_set"
-    file_id: "lix"
-  }
+    schema_key: "lix_change_set",
+    file_id: "lix",
+  },
 });
 ```
 
 ```ts
-// Get all threads for a specific entity
+// Get all conversations for a specific entity
 const selectedEntity = {
   entity_id: "0-jsa9j3",
   schema_key: "csv_cell",
   file_id: "doc_456",
 };
 
-const threads = await selectThreads({ lix })
-  .where(entityIs(selectedEntity))
+const conversations = await lix.db
+  .selectFrom("conversation")
+  .innerJoin(
+    "entity_conversation",
+    "entity_conversation.conversation_id",
+    "conversation.id",
+  )
+  .where("entity_conversation.entity_id", "=", selectedEntity.entity_id)
+  .where("entity_conversation.schema_key", "=", selectedEntity.schema_key)
+  .where("entity_conversation.file_id", "=", selectedEntity.file_id)
+  .selectAll("conversation")
   .execute();
 ```
 
@@ -69,8 +78,8 @@ const threads = await selectThreads({ lix })
 
 Comments are composed of two main parts:
 
-1. **Threads:** A thread is a conversation that can be attached to one or more entities. This makes it possible to have shared conversations across entities.
-2. **Comments:** Each comment belongs to a specific thread.
+1. **Conversations:** A conversation is a discussion that can be attached to one or more entities. This makes it possible to have shared conversations across entities.
+2. **Messages:** Each message belongs to a specific conversation.
 
 ![Comments data model](/comments-data-model.svg)
 

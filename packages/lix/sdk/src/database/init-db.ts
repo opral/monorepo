@@ -17,7 +17,7 @@ import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
-import { applyThreadDatabaseSchema } from "../thread/schema.js";
+import { applyConversationDatabaseSchema } from "../conversation/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
@@ -25,7 +25,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { timestamp, uuidV7, generateHumanId } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
-import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
+import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
@@ -154,8 +154,8 @@ export function initDb(args: {
 	applyKeyValueDatabaseSchema(lix);
 	applyChangeAuthorDatabaseSchema(lix);
 	applyLabelDatabaseSchema(lix);
-	applyThreadDatabaseSchema(lix);
-	applyEntityThreadDatabaseSchema(lix);
+	applyConversationDatabaseSchema(lix);
+	applyEntityConversationDatabaseSchema(lix);
 	applyStateHistoryDatabaseSchema(lix);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(lix);

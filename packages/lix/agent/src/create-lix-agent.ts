@@ -8,12 +8,12 @@ import { createDeleteFileTool } from "./tools/delete-file.js";
 import dedent from "dedent";
 import { sendMessageCore } from "./send-message.js";
 import {
-	getOrCreateDefaultAgentThreadId,
-	loadThreadHistory,
-	appendUserComment,
-	appendAssistantComment,
-	upsertThreadPointer,
-} from "./thread-storage.js";
+	getOrCreateDefaultAgentConversationId,
+	loadConversationHistory,
+	appendUserMessage,
+	appendAssistantMessage,
+	upsertConversationPointer,
+} from "./conversation-storage.js";
 
 export type ChatMessage = {
 	id: string;
@@ -120,9 +120,9 @@ export async function createLixAgent(args: {
 		? `${LIX_BASE_SYSTEM}\n\n${args.system}`
 		: LIX_BASE_SYSTEM;
 
-	// Bootstrap default thread pointer and hydrate from thread comments
-	const threadId = await getOrCreateDefaultAgentThreadId(lix);
-	const initial = await loadThreadHistory(lix, threadId);
+	// Bootstrap default conversation pointer and hydrate from messages
+	const conversationId = await getOrCreateDefaultAgentConversationId(lix);
+	const initial = await loadConversationHistory(lix, conversationId);
 	for (const m of initial) history.push(m);
 
 	async function sendMessage({
@@ -156,8 +156,9 @@ export async function createLixAgent(args: {
 				write_file,
 				delete_file,
 			},
-			persistUser: (t: string) => appendUserComment(lix, threadId, t),
-			persistAssistant: (t: string) => appendAssistantComment(lix, threadId, t),
+			persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
+			persistAssistant: (t: string) =>
+				appendAssistantMessage(lix, conversationId, t),
 		});
 
 		return { text: reply, usage };
@@ -169,9 +170,9 @@ export async function createLixAgent(args: {
 
 	async function clearHistory() {
 		history.length = 0;
-		const { createThread } = await import("@lix-js/sdk");
-		const t = await createThread({ lix, versionId: "global" });
-		await upsertThreadPointer(lix, t.id);
+		const { createConversation } = await import("@lix-js/sdk");
+		const t = await createConversation({ lix, versionId: "global" });
+		await upsertConversationPointer(lix, t.id);
 	}
 
 	const read_file = createReadFileTool({ lix });

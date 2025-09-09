@@ -217,30 +217,38 @@ test("should handle complex working changes query", async () => {
 	await lix.close();
 });
 
-test("should handle thread queries with json aggregation", async () => {
+test("should handle conversation queries with json aggregation", async () => {
 	const lix = await openLix({});
 
-	// Test selectThreads query updated to use entity_thread for universal commenting
+	// Test selectConversations query using entity_conversation for universal commenting
 	const threadsQuery = lix.db
-		.selectFrom("thread")
-		.leftJoin("entity_thread", "thread.id", "entity_thread.thread_id")
-		.leftJoin("thread_comment", "thread_comment.thread_id", "thread.id")
+		.selectFrom("conversation")
+		.leftJoin(
+			"entity_conversation",
+			"conversation.id",
+			"entity_conversation.conversation_id"
+		)
+		.leftJoin(
+			"conversation_message",
+			"conversation_message.conversation_id",
+			"conversation.id"
+		)
 		.leftJoin(
 			"change_author",
-			"thread_comment.lixcol_change_id",
+			"conversation_message.lixcol_change_id",
 			"change_author.change_id"
 		)
 		.leftJoin("account", "account.id", "change_author.account_id")
-		.where("entity_thread.entity_id", "=", "test_changeset")
-		.where("entity_thread.schema_key", "=", "lix_change_set")
-		.selectAll("thread");
+		.where("entity_conversation.entity_id", "=", "test_changeset")
+		.where("entity_conversation.schema_key", "=", "lix_change_set")
+		.selectAll("conversation");
 
 	const schemaKeys = determineSchemaKeys(threadsQuery.compile());
 
 	// Should include all joined tables
-	expect(schemaKeys).toContain("lix_thread");
-	expect(schemaKeys).toContain("lix_entity_thread");
-	expect(schemaKeys).toContain("lix_thread_comment");
+	expect(schemaKeys).toContain("lix_conversation");
+	expect(schemaKeys).toContain("lix_entity_conversation");
+	expect(schemaKeys).toContain("lix_conversation_message");
 	expect(schemaKeys).toContain("lix_change_author");
 	expect(schemaKeys).toContain("lix_account");
 

@@ -400,7 +400,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.execute();
 });
 
-export const getThreads = async (lix: Lix, changeSetId: string) => {
+export const getConversations = async (lix: Lix, changeSetId: string) => {
 	if (!changeSetId || !lix) return null;
 
 	// Get the commit associated with the change set
@@ -412,31 +412,31 @@ export const getThreads = async (lix: Lix, changeSetId: string) => {
 
 	if (!commit) return [];
 
-	// Query threads attached to the commit using the entity_thread system
+    // Query conversations attached to the commit using the entity_conversation system
 	return await lix.db
-		.selectFrom("thread")
-		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
-		.where("entity_thread.entity_id", "=", commit.id)
-		.where("entity_thread.schema_key", "=", "lix_commit")
-		.where("entity_thread.file_id", "=", "lix")
+        .selectFrom("conversation")
+        .innerJoin("entity_conversation", "conversation.id", "entity_conversation.conversation_id")
+        .where("entity_conversation.entity_id", "=", commit.id)
+        .where("entity_conversation.schema_key", "=", "lix_commit")
+        .where("entity_conversation.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb
-					.selectFrom("thread_comment")
-					.innerJoin("change", "change.entity_id", "thread_comment.id")
+                        .selectFrom("conversation_message")
+                        .innerJoin("change", "change.entity_id", "conversation_message.id")
 					.innerJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
-						"thread_comment.id",
-						"thread_comment.body",
-						"thread_comment.thread_id",
-						"thread_comment.parent_id",
+                            "conversation_message.id",
+                            "conversation_message.body",
+                            "conversation_message.conversation_id",
+                            "conversation_message.parent_id",
 					])
 					.select(["change.created_at", "account.name as author_name"])
-					.whereRef("thread_comment.thread_id", "=", "thread.id")
+                    .whereRef("conversation_message.conversation_id", "=", "conversation.id")
 			).as("comments"),
 		])
-		.selectAll("thread")
+        .selectAll("conversation")
 		.execute();
 };
 

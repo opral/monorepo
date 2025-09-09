@@ -2,7 +2,7 @@ import IconUpload from "@/components/icons/IconUpload.tsx";
 import SectionHeader from "@/components/SectionHeader.tsx";
 import ListItems from "@/components/ListItems.tsx";
 import {
-	threadSearchParamsAtom,
+	conversationSearchParamsAtom,
 	fileIdSearchParamsAtom,
 	filesAtom,
 	lixAtom,
@@ -76,7 +76,7 @@ export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
-	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
+	const [threadSearchParams] = useAtom(conversationSearchParamsAtom);
 	const [searchParams] = useSearchParams();
 
 	//hooks

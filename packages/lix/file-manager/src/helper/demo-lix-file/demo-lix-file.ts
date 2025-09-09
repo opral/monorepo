@@ -1,16 +1,17 @@
 import {
 	createAccount,
 	createCheckpoint,
-	createThread,
+	createConversation,
 	Lix,
 	newLixFile,
 	openLix,
 	switchAccount,
-	Thread,
+	LixConversation,
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
-import { getThreads, getWorkingChangeSet } from "@/state-active-file.ts";
+import { getConversations, getWorkingChangeSet } from "@/state-active-file.ts";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { createConversationMessage } from "@lix-js/sdk";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLix({
@@ -108,7 +109,7 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 	// Peter hires a new employee
 	rows.push("Klaus Kleber,Intern,HR,40000");
 
-	const { threads } = await createChangesWithCheckpoint({
+	const { conversations } = await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
@@ -119,28 +120,28 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 	// Anna thinks the salary is too low of Klaus Kleber
 	await switchAccount({ lix, to: [anna] });
 
-	await createComment({
+	await createConversationMessage({
 		lix,
-		threadId: threads![0].id,
-		content: "I think the salary is too low. Adjust to 45000?",
+		conversation_id: conversations![0].id,
+		body: fromPlainText("I think the salary is too low. Adjust to 45000?"),
 	});
 
 	// Otto agrees with Anna
 	await switchAccount({ lix, to: [otto] });
 
-	await createComment({
+	await createConversationMessage({
 		lix,
-		threadId: threads![0].id,
-		content: "I agree. Adjust to 45000.",
+		conversation_id: conversations![0].id,
+		body: fromPlainText("I agree. Adjust to 45000."),
 	});
 
 	// Peter agrees with Anna and Otto
 	await switchAccount({ lix, to: [peter] });
 
-	await createComment({
+	await createConversationMessage({
 		lix,
-		threadId: threads![0].id,
-		content: "Aye from me as well",
+		conversation_id: conversations![0].id,
+		body: fromPlainText("Aye from me as well"),
 	});
 
 	// Anna adjusts the salary
@@ -213,8 +214,8 @@ async function createChangesWithCheckpoint(args: {
 			// Create the checkpoint first to get the commit ID
 			const checkpoint = await createCheckpoint({ lix: { ...args.lix, db: trx } });
 			
-			// Now create the thread and attach it to the commit
-			await createThread({
+			// Now create the conversation and attach it to the commit
+			await createConversation({
 				lix: { ...args.lix, db: trx },
 				comments: [{ body: fromPlainText(args.comment) }],
 				entity: {
@@ -225,30 +226,16 @@ async function createChangesWithCheckpoint(args: {
 			});
 		});
 
-		// Get threads for the newly created commit
+		// Get conversations for the newly created commit
 		const checkpointCommit = await args.lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		const threads = await getThreads(args.lix, checkpointCommit.commit_id);
-		return { threads };
+		const conversations = await getConversations(args.lix, checkpointCommit.commit_id);
+		return { conversations };
 	}
 
-	return { threads: [] };
+	return { conversations: [] };
 }
-
-export const createComment = async (args: {
-	lix: Lix;
-	threadId: Thread["id"];
-	content: string;
-}) => {
-	await args.lix.db
-		.insertInto("thread_comment")
-		.values({
-			body: fromPlainText(args.content),
-			thread_id: args.threadId,
-		})
-		.execute();
-};

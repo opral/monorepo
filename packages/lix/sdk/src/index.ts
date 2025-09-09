@@ -20,6 +20,6 @@ export * from "./schema-definition/index.js";
 export * from "./state/index.js";
 export * from "./stored-schema/index.js";
 export * from "./server-protocol-handler/index.js";
-export * from "./thread/index.js";
+export * from "./conversation/index.js";
 export * from "./version/index.js";
 export * from "./diff/index.js";

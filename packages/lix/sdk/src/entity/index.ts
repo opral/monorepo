@@ -1,12 +1,12 @@
 export type { LixEntity, LixEntityCanonical } from "./schema.js";
 export type { LixEntityLabel } from "./label/schema.js";
-export type { LixEntityThread } from "./thread/schema.js";
+export type { LixEntityConversation } from "./conversation/schema.js";
 export {
 	createEntityLabel,
 	deleteEntityLabel,
 } from "./label/create-entity-label.js";
 export {
-	createEntityThread,
-	deleteEntityThread,
-} from "./thread/create-entity-thread.js";
+	attachConversation,
+	removeConversation,
+} from "./conversation/attach-conversation.js";
 export { ebEntity } from "./eb-entity.js";

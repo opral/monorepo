@@ -127,14 +127,14 @@ test("ebEntity.hasLabel with negation", async () => {
 
 	const draftLabel = await createLabel({ lix, name: "draft" });
 
-	// Create threads
+	// Create conversations
 	await lix.db
-		.insertInto("thread")
-		.values([{ id: "thread1" }, { id: "thread2" }, { id: "thread3" }])
+		.insertInto("conversation")
+		.values([{ id: "c1" }, { id: "c2" }, { id: "c3" }])
 		.execute();
 
-	// Get threads from view
-	const threads = await lix.db.selectFrom("thread").selectAll().execute();
+	// Get conversations from view
+	const threads = await lix.db.selectFrom("conversation").selectAll().execute();
 
 	// Label first thread as draft
 	await createEntityLabel({
@@ -143,18 +143,15 @@ test("ebEntity.hasLabel with negation", async () => {
 		label: draftLabel,
 	});
 
-	// Query threads that are NOT drafts using new API
+	// Query conversations that are NOT drafts using new API
 	const nonDraftThreads = await lix.db
-		.selectFrom("thread")
-		.where((eb) => eb.not(ebEntity("thread").hasLabel({ name: "draft" })))
+		.selectFrom("conversation")
+		.where((eb) => eb.not(ebEntity("conversation").hasLabel({ name: "draft" })))
 		.select(["id"])
 		.execute();
 
 	expect(nonDraftThreads).toHaveLength(2);
-	expect(nonDraftThreads.map((t) => t.id).sort()).toEqual([
-		"thread2",
-		"thread3",
-	]);
+	expect(nonDraftThreads.map((t) => t.id).sort()).toEqual(["c2", "c3"]);
 });
 
 test("ebEntity.equals matches entities by composite key", async () => {
@@ -265,7 +262,7 @@ test("ebEntity works with different entity types", async () => {
 		.values({ id: "acc1", name: "Test Account" })
 		.execute();
 
-	await lix.db.insertInto("thread").values({ id: "thread1" }).execute();
+	await lix.db.insertInto("conversation").values({ id: "thread1" }).execute();
 
 	// Get entity info from views
 	const account = await lix.db
@@ -275,7 +272,7 @@ test("ebEntity works with different entity types", async () => {
 		.executeTakeFirstOrThrow();
 
 	const thread = await lix.db
-		.selectFrom("thread")
+		.selectFrom("conversation")
 		.selectAll()
 		.where("id", "=", "thread1")
 		.executeTakeFirstOrThrow();
@@ -297,8 +294,8 @@ test("ebEntity works with different entity types", async () => {
 		.execute();
 
 	const reviewedThreads = await lix.db
-		.selectFrom("thread")
-		.where(ebEntity("thread").hasLabel({ name: "reviewed" }))
+		.selectFrom("conversation")
+		.where(ebEntity("conversation").hasLabel({ name: "reviewed" }))
 		.selectAll()
 		.execute();
 
@@ -627,7 +624,7 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 		.execute();
 
 	await lix.db
-		.insertInto("thread")
+		.insertInto("conversation")
 		.values([{ id: "thread1" }, { id: "thread2" }])
 		.execute();
 
@@ -661,7 +658,7 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 	await expect(
 		lix.db
 			.selectFrom("key_value")
-			.innerJoin("thread", "thread.id", "key_value.key") // Contrived join
+			.innerJoin("conversation", "conversation.id", "key_value.key") // Contrived join
 			.where(ebEntity().equals(keyValue))
 			.selectAll()
 			.execute()
@@ -673,7 +670,7 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 	await expect(
 		lix.db
 			.selectFrom("key_value")
-			.innerJoin("thread", "thread.id", "key_value.key")
+			.innerJoin("conversation", "conversation.id", "key_value.key")
 			.where(ebEntity().hasLabel({ name: "ambiguous-test" }))
 			.selectAll()
 			.execute()
@@ -682,13 +679,13 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 	// Correct usage: specify the table when using joins
 	// Create a thread with ID matching a key_value key for the join to work
 	await lix.db
-		.insertInto("thread")
+		.insertInto("conversation")
 		.values({ id: "user1" }) // Same as key_value key
 		.execute();
 
 	const correctQuery = await lix.db
 		.selectFrom("key_value")
-		.innerJoin("thread", "thread.id", "key_value.key")
+		.innerJoin("conversation", "conversation.id", "key_value.key")
 		.where(ebEntity("key_value").equals(keyValue))
 		.select(["key_value.key", "key_value.value"])
 		.execute();
