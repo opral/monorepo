@@ -22,7 +22,41 @@ class BackendConnection implements DatabaseConnection {
 
 	async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
 		const { sql, parameters } = compiledQuery;
-		const res = await this.#backend.exec(sql, parameters as any[]);
+		let res;
+		try {
+			res = await this.#backend.exec(sql, parameters as any[]);
+		} catch (err: any) {
+			const previewParam = (v: unknown) => {
+				try {
+					if (v instanceof Uint8Array) return `Uint8Array(len=${v.byteLength})`;
+					if (typeof v === "string") return JSON.stringify(v);
+					if (v && typeof v === "object") return JSON.stringify(v);
+					return String(v);
+				} catch {
+					return String(v);
+				}
+			};
+			// Example formatted error for quick reference:
+			//
+			// executeQuery Error
+			//
+			//   - cause: "version_id is required for state mutation"
+			//   - sql:   insert into "file" ("id","path","data") values (?, ?, ?)
+			//   - params:
+			//       1: "WghuxhzbSR0XM7wdw5Pdd"
+			//       2: "/x.md"
+			//       3: Uint8Array(len=0)
+			const lines: string[] = [];
+			lines.push("executeQuery Error\n");
+			lines.push(`  - cause: "${String(err?.message ?? err)}"`);
+			lines.push(`  - sql:   ${sql}`);
+			lines.push("  - params:");
+			(parameters ?? []).forEach((p, i) => {
+				lines.push(`      ${i + 1}: ${previewParam(p)}`);
+			});
+			const wrapped = new Error(lines.join("\n"), { cause: err });
+			throw wrapped;
+		}
 		// Map to Kysely QueryResult shape
 		const numAffectedRows =
 			res.changes !== undefined ? BigInt(res.changes) : undefined;
