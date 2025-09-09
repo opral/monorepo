@@ -22,8 +22,6 @@ import { isJsonType } from "../schema-definition/json-type.js";
  */
 export async function openLixBackend(args: {
 	backend: LixBackend;
-	/** Optional persistence path used by some backends (e.g., OPFS). */
-	path?: string;
 	blob?: ArrayBuffer;
 	pluginsRaw: string[];
 	account?: { id: string; name: string };
@@ -43,7 +41,6 @@ export async function openLixBackend(args: {
 	}
 
 	await args.backend.init({
-		path: args.path,
 		blob,
 		boot: {
 			args: {

@@ -7,10 +7,10 @@ import type { LixBackend } from "./types.js";
  * Keeps the async LixBackend surface.
  *
  * @example
- * const backend = OpfsSahWorker({ name: 'my.lix' })
- * await backend.init({ blob, boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
+ * const backend = OpfsSahWorker({ path: '/my.lix' })
+ * await backend.init({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
  */
-export function OpfsSahWorker(): LixBackend {
+export function OpfsSahWorker(opts: { path: string }): LixBackend {
 	const worker = new Worker(new URL("./opfs-sah.worker.js", import.meta.url), {
 		type: "module",
 	});
@@ -55,7 +55,15 @@ export function OpfsSahWorker(): LixBackend {
 	return {
 		async init(initOpts) {
 			eventHandler = initOpts.onEvent;
-			const payload: any = { name: initOpts.path ?? "lix.db" };
+			// Require a path when constructing the backend. Normalize to absolute.
+			let name = opts?.path;
+			if (typeof name !== "string" || name.length === 0) {
+				throw Object.assign(new Error("OpfsSahWorker: 'path' is required"), {
+					code: "LIX_OPFS_PATH_REQUIRED",
+				});
+			}
+			if (!name.startsWith("/")) name = "/" + name;
+			const payload: any = { name };
 			if (initOpts.blob) {
 				payload.blob = initOpts.blob;
 			}

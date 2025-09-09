@@ -33,13 +33,11 @@ export interface LixBackend {
 	/**
 	 * Initialize the backend and run Lix runtime boot next to SQLite.
 	 *
-	 * @param opts.path - Optional persistence path (ignored by in‑memory backend)
 	 * @param opts.blob - Optional database snapshot to seed (transferable)
 	 * @param opts.boot - Runtime boot arguments (plugins, account, keyValues)
 	 * @param opts.onEvent - Event bridge (currently only 'state_commit')
 	 */
 	init(opts: {
-		path?: string;
 		blob?: ArrayBuffer;
 		boot: { args: import("../runtime/boot.js").BootArgs };
 		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;

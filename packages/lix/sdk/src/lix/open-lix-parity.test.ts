@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { openLix } from "./open-lix.js";
-import { openLixBackend } from "./open-lix-engine.js";
+import { openLixBackend } from "./open-lix-backend.js";
 import { InMemory } from "../backend/main-thread.js";
 
 async function runKeyValueSequence(db: any) {

@@ -1,10 +1,10 @@
-import { openLixBackend } from "../lix/open-lix-engine.js";
+import { openLixBackend } from "../lix/open-lix-backend.js";
 import { test, expect } from "vitest";
 import { OpfsSahWorker } from "./opfs-sah.js";
 
 test("inserting a file", async () => {
 	const lix = await openLixBackend({
-		backend: OpfsSahWorker(),
+		backend: OpfsSahWorker({ path: "/vitest-opfs.lix" }),
 		pluginsRaw: [],
 	});
 
@@ -24,4 +24,28 @@ test("inserting a file", async () => {
 	expect(new TextDecoder().decode(row?.data)).toBe("Hello, world!");
 
 	await lix.close();
+});
+
+test("creates OPFS file at given absolute path", async () => {
+	// Randomize filename to avoid AccessHandle contention and stale files
+	// across retries/parallel runs (OPFS allows only one open handle per file).
+	const name = `/vitest-opfs-create-${Math.random().toString(36).slice(2, 8)}.lix`;
+	const lix = await openLixBackend({
+		backend: OpfsSahWorker({ path: name }),
+		pluginsRaw: [],
+	});
+	try {
+		const root: any = await (navigator as any).storage.getDirectory();
+		const handle = await root.getFileHandle(name.slice(1));
+		const file = await handle.getFile();
+		expect(file).toBeInstanceOf(File);
+		expect(typeof file.size).toBe("number");
+	} finally {
+		await lix.close();
+		// Cleanup best-effort
+		try {
+			const root: any = await (navigator as any).storage.getDirectory();
+			await root.removeEntry(name.slice(1));
+		} catch {}
+	}
 });
