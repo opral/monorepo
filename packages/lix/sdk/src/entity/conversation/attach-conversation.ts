@@ -2,7 +2,24 @@ import type { Lix } from "../../lix/open-lix.js";
 import type { LixEntity, LixEntityCanonical } from "../schema.js";
 
 /**
- * Creates a mapping between an entity and a conversation.
+ * Attaches a conversation to an entity (creates mapping).
+ *
+ * @example
+ * // Attach an existing conversation to an entity
+ * await attachConversation({
+ *   lix,
+ *   entity: { entity_id: "para_123", schema_key: "markdown_paragraph", file_id: "README.md" },
+ *   conversation: { id: "conv_123" }
+ * });
+ *
+ * @example
+ * // Scope the mapping to a specific version
+ * await attachConversation({
+ *   lix,
+ *   entity: { entity_id: "para_123", schema_key: "markdown_paragraph", file_id: "README.md" },
+ *   conversation: { id: "conv_123" },
+ *   versionId: "v1"
+ * });
  */
 export async function attachConversation(args: {
 	lix: Pick<Lix, "db">;
@@ -45,9 +62,16 @@ export async function attachConversation(args: {
 }
 
 /**
- * Deletes a mapping between an entity and a conversation.
+ * Detaches a conversation from an entity (removes mapping).
+ *
+ * @example
+ * await detachConversation({
+ *   lix,
+ *   entity: { entity_id: "para_123", schema_key: "markdown_paragraph", file_id: "README.md" },
+ *   conversation: { id: "conv_123" }
+ * });
  */
-export async function removeConversation(args: {
+export async function detachConversation(args: {
 	lix: Pick<Lix, "db">;
 	entity: LixEntity | LixEntityCanonical;
 	conversation: { id: string };

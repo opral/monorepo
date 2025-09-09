@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import {
 	attachConversation,
-	removeConversation,
+	detachConversation,
 } from "./attach-conversation.js";
 import { createConversation } from "../../conversation/create-conversation.js";
 import { fromPlainText } from "@opral/zettel-ast";
@@ -133,7 +133,7 @@ test("attachConversation should be idempotent for same entity-conversation pair"
 	expect(mappings).toHaveLength(1);
 });
 
-test("removeConversation should remove the mapping", async () => {
+test("detachConversation should remove the mapping", async () => {
 	const lix = await openLix({});
 	await lix.db
 		.insertInto("key_value_all")
@@ -169,7 +169,7 @@ test("removeConversation should remove the mapping", async () => {
 		.executeTakeFirst();
 	expect(before).toBeDefined();
 
-	await removeConversation({
+	await detachConversation({
 		lix,
 		entity: keyValue,
 		conversation: { id: conv.id },

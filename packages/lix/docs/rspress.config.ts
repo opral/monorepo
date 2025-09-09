@@ -111,7 +111,7 @@ export default defineConfig({
               text: "Attribution (Blame)",
               link: "/guide/features/attribution",
             },
-            { text: "Comments", link: "/guide/features/comments" },
+            { text: "Conversations", link: "/guide/features/conversations" },
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },
             { text: "Snapshots", link: "/guide/concepts/snapshots" },

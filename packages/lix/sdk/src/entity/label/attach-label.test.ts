@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { createLabel } from "../../label/create-label.js";
-import { createEntityLabel, deleteEntityLabel } from "./create-entity-label.js";
+import { attachLabel, detachLabel } from "./attach-label.js";
 import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
 
-test("createEntityLabel creates a mapping between entity and label", async () => {
+test("attachLabel creates a mapping between entity and label", async () => {
 	const lix = await openLix({});
 
 	// Create a label
@@ -24,7 +24,7 @@ test("createEntityLabel creates a mapping between entity and label", async () =>
 		.execute();
 
 	// Create entity-label mapping
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: {
 			entity_id: "doc123",
@@ -50,7 +50,7 @@ test("createEntityLabel creates a mapping between entity and label", async () =>
 	});
 });
 
-test("createEntityLabel throws error if entity doesn't exist", async () => {
+test("attachLabel throws error if entity doesn't exist", async () => {
 	const lix = await openLix({});
 
 	const label = await createLabel({ lix, name: "test-label" });
@@ -58,7 +58,7 @@ test("createEntityLabel throws error if entity doesn't exist", async () => {
 	// Try to create mapping for non-existent entity
 	// Should throw foreign key constraint error
 	await expect(
-		createEntityLabel({
+		attachLabel({
 			lix,
 			entity: {
 				entity_id: "non-existent",
@@ -72,7 +72,7 @@ test("createEntityLabel throws error if entity doesn't exist", async () => {
 	);
 });
 
-test("createEntityLabel throws error if label doesn't exist", async () => {
+test("attachLabel throws error if label doesn't exist", async () => {
 	const lix = await openLix({});
 
 	// Create an entity in state
@@ -91,7 +91,7 @@ test("createEntityLabel throws error if label doesn't exist", async () => {
 	// Try to create mapping with non-existent label
 	// Should throw foreign key constraint error
 	await expect(
-		createEntityLabel({
+		attachLabel({
 			lix,
 			entity: {
 				entity_id: "doc123",
@@ -105,7 +105,7 @@ test("createEntityLabel throws error if label doesn't exist", async () => {
 	);
 });
 
-test("createEntityLabel is idempotent - doesn't fail if mapping already exists", async () => {
+test("attachLabel is idempotent - doesn't fail if mapping already exists", async () => {
 	const lix = await openLix({});
 
 	const label = await createLabel({ lix, name: "idempotent-test" });
@@ -124,7 +124,7 @@ test("createEntityLabel is idempotent - doesn't fail if mapping already exists",
 		.execute();
 
 	// Create mapping first time
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: {
 			entity_id: "doc456",
@@ -136,7 +136,7 @@ test("createEntityLabel is idempotent - doesn't fail if mapping already exists",
 
 	// Create same mapping again - should not throw
 	await expect(
-		createEntityLabel({
+		attachLabel({
 			lix,
 			entity: {
 				entity_id: "doc456",
@@ -158,7 +158,7 @@ test("createEntityLabel is idempotent - doesn't fail if mapping already exists",
 	expect(mappings).toHaveLength(1);
 });
 
-test("deleteEntityLabel removes the mapping", async () => {
+test("detachLabel removes the mapping", async () => {
 	const lix = await openLix({});
 
 	const label = await createLabel({ lix, name: "removable" });
@@ -177,7 +177,7 @@ test("deleteEntityLabel removes the mapping", async () => {
 		.execute();
 
 	// Create mapping
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: {
 			entity_id: "doc789",
@@ -197,7 +197,7 @@ test("deleteEntityLabel removes the mapping", async () => {
 	expect(beforeRemove).toHaveLength(1);
 
 	// Remove mapping
-	await deleteEntityLabel({
+	await detachLabel({
 		lix,
 		entity: {
 			entity_id: "doc789",
@@ -217,7 +217,7 @@ test("deleteEntityLabel removes the mapping", async () => {
 	expect(afterRemove).toHaveLength(0);
 });
 
-test("createEntityLabel works with change_set entities", async () => {
+test("attachLabel works with change_set entities", async () => {
 	const lix = await openLix({});
 
 	const reviewedLabel = await createLabel({ lix, name: "reviewed" });
@@ -231,7 +231,7 @@ test("createEntityLabel works with change_set entities", async () => {
 		.execute();
 
 	// Label the change set
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: {
 			entity_id: "cs789",
@@ -254,7 +254,7 @@ test("createEntityLabel works with change_set entities", async () => {
 	expect(mapping?.label_id).toBe(reviewedLabel.id);
 });
 
-test("createEntityLabel works with files", async () => {
+test("attachLabel works with files", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -284,7 +284,7 @@ test("createEntityLabel works with files", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Label the file using its lixcol_* columns
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: file,
 		label: importantLabel,

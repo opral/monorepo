@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createLabel } from "../label/create-label.js";
-import { createEntityLabel } from "./label/create-entity-label.js";
+import { attachLabel } from "./label/attach-label.js";
 import { ebEntity } from "./eb-entity.js";
 
 test("ebEntity.hasLabel filters entities by label name", async () => {
@@ -25,19 +25,19 @@ test("ebEntity.hasLabel filters entities by label name", async () => {
 	const entries = await lix.db.selectFrom("key_value").selectAll().execute();
 
 	// Label some entries
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: entries[0]!,
 		label: importantLabel,
 	});
 
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: entries[1]!,
 		label: importantLabel,
 	});
 
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: entries[2]!,
 		label: archivedLabel,
@@ -100,7 +100,7 @@ test("ebEntity.hasLabel filters entities by label id", async () => {
 
 	// Label first two files
 	for (let i = 0; i < 2; i++) {
-		await createEntityLabel({
+		await attachLabel({
 			lix,
 			entity: files[i]!,
 			label: label,
@@ -137,7 +137,7 @@ test("ebEntity.hasLabel with negation", async () => {
 	const threads = await lix.db.selectFrom("conversation").selectAll().execute();
 
 	// Label first thread as draft
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: threads[0]!,
 		label: draftLabel,
@@ -279,7 +279,7 @@ test("ebEntity works with different entity types", async () => {
 
 	// Label all entities as reviewed
 	for (const entity of [account, thread]) {
-		await createEntityLabel({
+		await attachLabel({
 			lix,
 			entity: entity,
 			label: reviewedLabel,
@@ -325,26 +325,26 @@ test("ebEntity with multiple labels and complex conditions", async () => {
 
 	// Label issues
 	// issue1: urgent + bug
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: issues[0]!,
 		label: urgentLabel,
 	});
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: issues[0]!,
 		label: bugLabel,
 	});
 
 	// issue2: urgent only
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: issues[1]!,
 		label: urgentLabel,
 	});
 
 	// issue3: bug only
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: issues[2]!,
 		label: bugLabel,
@@ -594,7 +594,7 @@ test("ebEntity works without table parameter when context is unambiguous", async
 
 	// Test with labels too
 	const testLabel = await createLabel({ lix, name: "test-optional" });
-	await createEntityLabel({
+	await attachLabel({
 		lix,
 		entity: entries[1]!,
 		label: testLabel,

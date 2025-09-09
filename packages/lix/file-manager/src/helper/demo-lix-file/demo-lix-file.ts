@@ -6,7 +6,6 @@ import {
 	newLixFile,
 	openLix,
 	switchAccount,
-	LixConversation,
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
 import { getConversations, getWorkingChangeSet } from "@/state-active-file.ts";
