@@ -63,9 +63,11 @@
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
+		"@vitest/browser": "^4.0.0-beta.10",
 		"@vitest/coverage-v8": "4.0.0-beta.10",
-		"oxlint": "^1.14.0",
 		"json-schema-to-ts": "^3.1.1",
+		"oxlint": "^1.14.0",
+		"playwright": "^1.55.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
 		"vitest": "4.0.0-beta.10"
