@@ -902,3 +902,53 @@ test("optimization prevents unnecessary query re-executions", async () => {
 	accountSub.unsubscribe();
 	await lix.close();
 });
+
+test("observing 'version' emits when versions change (createVersion)", async () => {
+	const lix = await openLix({});
+
+	// Observe merged version view
+	const emissions: any[] = [];
+	let subscription: any;
+	const done = new Promise<void>((resolve, reject) => {
+		const to = setTimeout(
+			() => reject(new Error("timeout waiting for version emission")),
+			2000
+		);
+		subscription = lix
+			.observe(lix.db.selectFrom("version").selectAll())
+			.subscribe({
+				next: (rows) => {
+					emissions.push(rows);
+					// After we create a new version, we expect an additional emission with increased count
+					if (
+						emissions.length >= 2 &&
+						emissions[emissions.length - 1].length > emissions[0].length
+					) {
+						clearTimeout(to);
+						resolve();
+					}
+				},
+				error: (err) => {
+					clearTimeout(to);
+					reject(err);
+				},
+			});
+	});
+
+	// Small delay to ensure initial emission captured
+	await new Promise((r) => setTimeout(r, 10));
+	const initialCount = emissions[0]?.length ?? 0;
+
+	// Create a new version which should update the 'version' view
+	const { createVersion } = await import("../version/create-version.js");
+	await createVersion({ lix, name: "obs-version" });
+
+	await done;
+
+	// Verify last emission reflects the new version row
+	const last = emissions[emissions.length - 1];
+	expect(last.length).toBeGreaterThan(initialCount);
+
+	subscription.unsubscribe();
+	await lix.close();
+});

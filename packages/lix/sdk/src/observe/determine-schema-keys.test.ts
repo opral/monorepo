@@ -20,9 +20,11 @@ test("should extract schema keys from simple table queries", async () => {
 
 	const schemaKeys = determineSchemaKeys(activeVersionQuery.compile());
 
-	// Should include schema keys for both active_version and version tables
-	expect(schemaKeys).toContain("lix_version");
-	// Note: active_version might not have a direct schema key mapping
+	// Should include underlying version descriptor/tip because the merged 'version' view depends on them
+	expect(schemaKeys).toContain("lix_version_descriptor");
+	expect(schemaKeys).toContain("lix_version_tip");
+	// Optionally include active version view dependency
+	expect(schemaKeys).toContain("lix_active_version");
 
 	await lix.close();
 });
@@ -67,7 +69,7 @@ test("should extract schema keys from state_all table queries", async () => {
 	// Test query using "state_all" table (includes all versions)
 	const stateAllQuery = lix.db
 		.selectFrom("state_all")
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", "test_version_id")
 		.selectAll();
 
@@ -211,7 +213,8 @@ test("should handle complex working changes query", async () => {
 	// Should include schema keys for all tables involved
 	expect(schemaKeys).toContain("change"); // change table
 	expect(schemaKeys).toContain("lix_change_set_element");
-	expect(schemaKeys).toContain("lix_version");
+	expect(schemaKeys).toContain("lix_version_descriptor");
+	expect(schemaKeys).toContain("lix_version_tip");
 	expect(schemaKeys).toContain("lix_key_value");
 
 	await lix.close();
@@ -266,7 +269,7 @@ test("should correctly extract schema keys from real md-app queries", async () =
 				.selectFrom("active_version")
 				.innerJoin("version", "active_version.version_id", "version.id")
 				.selectAll("version"),
-			expectedKeys: ["lix_version"],
+			expectedKeys: ["lix_version_descriptor", "lix_version_tip"],
 		},
 		{
 			name: "selectCurrentLixName",
@@ -375,5 +378,25 @@ test("should observe key value and handle untracked insertions", async () => {
 	});
 
 	subscription.unsubscribe();
+	await lix.close();
+});
+
+test("determineSchemaKeys: query on version yields descriptor and tip keys", async () => {
+	const lix = await openLix({});
+	const q = lix.db.selectFrom("version").selectAll();
+	const compiled = q.compile();
+	const keys = determineSchemaKeys(compiled);
+	expect(keys).toContain("lix_version_descriptor");
+	expect(keys).toContain("lix_version_tip");
+	await lix.close();
+});
+
+test("determineSchemaKeys: query on version_all yields descriptor and tip keys", async () => {
+	const lix = await openLix({});
+	const q = lix.db.selectFrom("version_all").selectAll();
+	const compiled = q.compile();
+	const keys = determineSchemaKeys(compiled);
+	expect(keys).toContain("lix_version_descriptor");
+	expect(keys).toContain("lix_version_tip");
 	await lix.close();
 });
