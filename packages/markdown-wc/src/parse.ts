@@ -8,7 +8,6 @@ import { defaultSchema } from "rehype-sanitize"
 import rehypeSlug from "rehype-slug"
 import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
-import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
@@ -81,7 +80,6 @@ export async function parse(
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 		})
-		.use(rehypeAccessibleEmojis)
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 

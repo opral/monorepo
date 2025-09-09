@@ -5,10 +5,11 @@
 	"version": "0.1.2",
 	"license": "Apache-2.0",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./dist/plugin.bundle.js": "./dist/plugin.bundle.js"
 	},
 	"scripts": {
-		"build": "tsc --build",
+		"build": "tsc --build && rolldown -c",
 		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",
@@ -29,6 +30,7 @@
 		"@opral/tsconfig": "workspace:*",
 		"oxlint": "^1.13.0",
 		"prettier": "^3.3.3",
+		"rolldown": "1.0.0-beta.36",
 		"typescript": "^5.5.4",
 		"vitest": "^3.0.5"
 	}
