@@ -51,11 +51,11 @@ export function TipTapEditor({
 	}, [editor, setEditor, onReady]);
 
 	return (
-		<div className={className} style={{ height: "100%" }}>
-			<div className="w-full h-full bg-background p-3">
+		<div className={className ?? undefined}>
+			<div className="w-full bg-background px-3 py-0">
 				<EditorContent
 					editor={editor as any}
-					className="w-full h-full max-w-5xl mx-auto"
+					className="w-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}
 				/>

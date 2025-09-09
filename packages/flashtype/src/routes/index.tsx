@@ -11,7 +11,7 @@ function Index() {
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 
 	return (
-		<main style={{ height: "100%", padding: "0 16px" }}>
+		<main style={{ padding: "0 16px" }}>
 			{activeFileId ? (
 				<Suspense
 					fallback={
