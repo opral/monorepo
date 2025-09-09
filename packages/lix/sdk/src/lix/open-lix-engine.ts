@@ -1,7 +1,13 @@
-import { Kysely } from "kysely";
+import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixBackend } from "../backend/types.js";
 import { createDialect } from "../backend/kysely/kysely-driver.js";
+import { createHooks } from "../hooks/create-hooks.js";
+import { newLixFile } from "./new-lix.js";
+import { createObserve } from "../observe/create-observe.js";
+import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
+import { LixSchemaViewMap } from "../database/schema.js";
+import { isJsonType } from "../schema-definition/json-type.js";
 
 /**
  * Experimental: Open a Lix-like instance backed by a LixBackend.
@@ -17,23 +23,80 @@ import { createDialect } from "../backend/kysely/kysely-driver.js";
 export async function openLixBackend(args: {
 	backend: LixBackend;
 	blob?: ArrayBuffer;
-	expProvideStringifiedPlugins?: string[];
+	pluginsRaw: string[];
+	account?: { id: string; name: string };
+	keyValues?: Array<{ key: string; value: any; lixcol_version_id?: string }>;
 }): Promise<{
 	db: Kysely<LixDatabaseSchema>;
+	hooks: ReturnType<typeof createHooks>;
+	observe: ReturnType<typeof createObserve>;
 	close: () => Promise<void>;
 	toBlob: () => Promise<Blob>;
 }> {
+	const hooks = createHooks();
+	let blob = args.blob;
+	if (!blob) {
+		const seed = await newLixFile({ keyValues: args.keyValues as any });
+		blob = await seed.arrayBuffer();
+	}
+
 	await args.backend.init({
-		blob: args.blob,
-		expProvideStringifiedPlugins: args.expProvideStringifiedPlugins,
+		blob,
+		boot: {
+			args: {
+				pluginsRaw: args.pluginsRaw,
+				account: args.account,
+				keyValues: args.keyValues,
+			},
+		},
+		onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 	});
+
+	// Build JSON column mapping to match openLix() parsing behavior
+	const ViewsWithJsonColumns = (() => {
+		const result: Record<string, Record<string, { type: any }>> = {};
+
+		// Hardcoded object-only columns
+		const hardcodedViews: Record<string, Record<string, { type: any }>> = {
+			state: { snapshot_content: { type: "object" } },
+			state_all: { snapshot_content: { type: "object" } },
+			state_history: { snapshot_content: { type: "object" } },
+			change: { snapshot_content: { type: "object" } },
+		};
+		Object.assign(result, hardcodedViews);
+
+		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
+			if (typeof schema === "boolean" || !schema.properties) continue;
+			const jsonColumns: Record<string, { type: any }> = {};
+			for (const [key, def] of Object.entries(schema.properties)) {
+				if (isJsonType(def)) {
+					jsonColumns[key] = {
+						type: ["string", "number", "boolean", "object", "array", "null"],
+					};
+				}
+			}
+			if (Object.keys(jsonColumns).length > 0) {
+				result[viewName] = jsonColumns;
+				result[viewName + "_all"] = jsonColumns;
+			}
+		}
+		return result;
+	})();
 
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({ backend: args.backend }),
+		plugins: [
+			new ParseJSONResultsPlugin(),
+			JSONColumnPlugin(ViewsWithJsonColumns),
+		],
 	});
+
+	const observe = createObserve({ hooks });
 
 	return {
 		db,
+		hooks,
+		observe,
 		close: async () => {
 			await args.backend.close();
 		},

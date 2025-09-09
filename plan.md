@@ -1,14 +1,17 @@
 % Backend Prototype Plan (Worker-first)
 
-This plan outlines a minimal-but-meaningful prototype to run the Lix engine off the UI thread in a Dedicated Web Worker, including the state vtable pipeline and plugin-driven change detection. It keeps the public `openLix` experience largely intact by providing a worker-backed storage adapter and a worker-backed Kysely driver.
+This plan outlines a worker‑first backend for Lix using OPFS SAHPool. We will immediately use SAHPool for persistence and move the full database logic (schema init, vtable, hooks, plugin change detection) into a Dedicated Web Worker. The long‑term goal is that apps keep using `openLix({})` as before, with the backend chosen automatically under the hood.
 
 ## Goals (Prototype)
 
-- Run SQLite + schema init + vtable + commit flow inside a Dedicated Worker.
-- Move plugin-driven `detectChanges()` into the Worker so it can use synchronous reads (executeSync) locally.
-- Keep the main thread responsive; all DB work happens in the Worker.
+- Keep backends generic (exec + persistence). Move all Lix runtime logic (schema, vtable, UDFs, file handlers, plugin registry) into a single runtime boot module owned by Lix.
+- Run the same runtime boot next to SQLite in both environments:
+  - Main thread (InMemory backend)
+  - Dedicated Worker (OPFS SAHPool backend)
+- Standardize plugin loading to stringified ESM modules in `openLixBackend()`.
+- Keep the main thread responsive when using the Worker backend; all DB work in the Worker.
 - Persist to OPFS from the Worker (no main-thread OPFS I/O).
-- Preserve the `Lix` surface (async DB via Kysely) with minimal consumer changes.
+- Preserve the Lix surface (async DB via Kysely + hooks/observe) with minimal consumer changes.
 
 ## Non-Goals (Prototype)
 
@@ -44,13 +47,12 @@ After (Backend + Worker – OPFS)
   ├─ React UI / App
   ├─ openLix({ backend })
   │   └─ Kysely (BackendDriver)   ← uses backend.exec(...)
+  │
   └─ Dedicated Worker (opfs-sah.worker.ts)
       ├─ sqlite-wasm (in-memory)
-      │   ├─ initDb() schemas, views, vtable, hooks
-      │   └─ plugin.detectChanges() (executeSync)
-      ├─ Persistence (internal)
-      │   ├─ import/export (importDatabase / contentFromDatabase)
-      │   └─ OPFS I/O (navigator.storage.*) in worker
+      ├─ Backend.init({ blob?, path?, boot, onEvent })
+      │   └─ runtime/boot.ts applies schema, vtable, file handlers, loads plugins
+      ├─ Persistence (internal import/export to OPFS)
       └─ Minimal RPC (postMessage/MessagePort)
 ```
 
@@ -77,37 +79,27 @@ Transport notes:
 
 ## Backend API (Minimal)
 
-Single host-side interface used by both implementations.
+Backends are generic hosts for SQLite + persistence. Lix runtime logic is injected at init time. Seeding a brand-new Lix (e.g., via newLixFile) is the caller's responsibility and happens before/within backend.init as needed.
 
 ```ts
 type ExecResult = { rows?: any[]; changes?: number; lastInsertRowid?: number }
-type EngineError = { name: string; code?: string | number; message: string }
 
 export interface LixBackend {
   init(opts: {
-    // Worker+OPFS: used; MainMemory: ignored
-    path?: string
-    // Optional seed (transferable)
-    blob?: ArrayBuffer
-    // EXPERIMENTAL: Provide stringified plugins for Worker engines.
-    // Each entry is an ESM module source code string imported via a Blob URL inside the Worker.
-    // For Worker engines only. For in‑process engines, prefer `providePlugins` on openLix.
-    expProvideStringifiedPlugins?: string[]
+    path?: string // e.g. OPFS file name (worker backend)
+    blob?: ArrayBuffer // optional seed snapshot
+    boot: { code: string; args: BootArgs }
+    onEvent: (ev: RuntimeEvent) => void // bridge events from runtime to host
   }): Promise<void>
 
   exec(sql: string, params?: unknown[]): Promise<ExecResult>
-
-  // Optional: reduce chatter during migrations
-  execBatch?(
-    batch: { sql: string; params?: unknown[] }[]
-  ): Promise<{ results: ExecResult[] }>
-
-  export(): Promise<ArrayBuffer> // snapshot of DB
+  execBatch?(batch: { sql: string; params?: unknown[] }[]): Promise<{ results: ExecResult[] }>
+  export(): Promise<ArrayBuffer>
   close(): Promise<void>
 }
 ```
 
-Transactions are plain SQL (`BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK TO`) via `exec`.
+Transactions are plain SQL via `exec`.
 
 ### Backends
 
@@ -151,14 +143,16 @@ Use transferables for any `ArrayBuffer`.
 Change `openLix` to accept a `backend` instead of `storage`. Kysely driver depends only on `LixBackend`.
 
 ```ts
-// Worker backend (plugins provided as ESM code strings)
-openLix({ backend: createOpfsSahWorker({ name: 'lix.db', expProvideStringifiedPlugins: [mdCode] }) })
+// Worker backend (plugins as stringified ESM)
+const backend = OpfsSahWorker()
+const lix = await openLixBackend({ backend, pluginsRaw: [mdCode] })
 
-// In‑process backend (supports existing providePlugins with function objects)
-openLix({ backend: createMainMemoryBackend(), providePlugins: [jsonPlugin] })
+// In‑process backend uses the same runtime boot (stringified ESM)
+const backend = InMemory()
+const lix = await openLixBackend({ backend, pluginsRaw: [mdCode] })
 ```
 
-No separate storage concept. Backends own persistence.
+No separate storage concept. Backends own persistence. Runtime boot is executed during `backend.init`.
 
 ## Worker-side shape (functional)
 
@@ -204,18 +198,18 @@ function createWorkerTransport(w: Worker) {
 
 ## Plugin Execution in Worker
 
-- Worker hosts `pluginRegistry: LixPlugin[]` loaded via dynamic import.
+- Runtime boot hosts `pluginRegistry: LixPlugin[]` loaded via dynamic import from stringified ESM.
 - The existing file handlers (`handleFileInsert/Update`) and vtable commit logic call `plugin.detectChanges` where relevant; with the whole engine in Worker, they can safely call `executeSync` and use `lix.sqlite` locally.
 - For prototype, pass plugin module specifiers from main; Worker imports them and registers.
 
-### Plugin Loading (expProvideStringifiedPlugins)
+### Plugin Loading (stringified ESM)
 
 Workers can import ESM modules via `import()`. Since functions cannot be structured‑cloned, do not pass plugin function objects. Provide importable module sources via `expProvideStringifiedPlugins` instead.
 
 Supported pattern (single):
 - Raw ESM code (string):
-  - Main passes code strings in `expProvideStringifiedPlugins: string[]`.
-  - Worker wraps each in a Blob URL: `const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }))`; then `await import(url)`; optionally `URL.revokeObjectURL(url)` after import.
+  - `pluginsRaw: string[]` passed into runtime boot.
+  - Boot wraps each in a Blob URL (browser/worker) or Node data: URL and dynamic-imports; expects `export const plugin`.
 
 Fallback (main-thread only):
 - If a plugin is not importable in a worker (e.g., inline code), use `createMainMemoryEngine()` and `providePlugins` for that path (blocks UI under load). Avoid for production.
@@ -229,10 +223,10 @@ Ensure plugins are bundled as single-file ESM without external imports.
 
 ## Persistence & Auto-Save
 
-- Worker maintains batched auto-save entirely inside Worker.
+- Worker backend maintains batched auto-save entirely inside Worker.
 - Save semantics: only on the outermost COMMIT (track transaction depth), debounced (e.g., 300 ms) to avoid storms.
 - Atomic write pattern: `const w = await fileHandle.createWritable({ keepExistingData: false }); await w.write(bytes); await w.close();`.
-- Persist ancillary JSON (e.g., active accounts) from within Worker if needed.
+- Runtime stays agnostic and only emits `state_commit` events; the backend decides when to persist.
 
 ## Developer Experience & Bundling (Minimal)
 
@@ -302,12 +296,13 @@ Ensure plugins are bundled as single-file ESM without external imports.
   - [x] Implement `createOpfsSahWorker` (init/exec/execBatch)
   - [x] Autosave: outermost COMMIT + debounce
   - [x] OPFS atomic write (createWritable → write → close)
-  - [x] Worker plugin loading via Blob URL
+  - [x] Evaluate runtime boot module during `init`
 
 - [ ] Phase 3 — Driver + Integration
   - [x] Implement `engine-kysely-driver.ts`
   - [x] Add experimental `openLixBackend({ backend })`
-  - [ ] Adapt examples (e.g., Flashtype) to worker engine
+  - [ ] Wire `openLixBackend` to pass boot code + args (pluginsRaw only)
+  - [ ] Adapt Flashtype to `openLixBackend` + worker backend
 
 - [ ] Phase 4 — Docs, Tests, Perf
   - [ ] Docs updates (README, plan)

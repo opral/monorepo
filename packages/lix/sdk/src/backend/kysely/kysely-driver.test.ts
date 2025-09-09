@@ -4,15 +4,21 @@ import { createDialect } from "./kysely-driver.js";
 import { InMemory } from "../main-thread.js";
 
 test("EngineDriver runs basic Kysely queries", async () => {
-  const backend = InMemory();
-  await backend.init({});
+	const backend = InMemory();
+	await backend.init({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
 
-  const db = new Kysely<any>({ dialect: createDialect({ backend }) });
+	const db = new Kysely<any>({ dialect: createDialect({ backend }) });
 
-  await db.executeQuery({ sql: "CREATE TABLE t(a)", parameters: [] } as any);
-  await db.executeQuery({ sql: "INSERT INTO t(a) VALUES (?), (?)", parameters: [1, 2] } as any);
+	await db.executeQuery({ sql: "CREATE TABLE t(a)", parameters: [] } as any);
+	await db.executeQuery({
+		sql: "INSERT INTO t(a) VALUES (?), (?)",
+		parameters: [1, 2],
+	} as any);
 
-  const res = await db.executeQuery({ sql: "SELECT a FROM t ORDER BY a", parameters: [] } as any);
-  expect((res.rows as any[]).length).toBe(2);
-  expect((res.rows as any[])[0]?.a ?? (res.rows as any[])[0]?.[0]).toBe(1);
+	const res = await db.executeQuery({
+		sql: "SELECT a FROM t ORDER BY a",
+		parameters: [],
+	} as any);
+	expect((res.rows as any[]).length).toBe(2);
+	expect((res.rows as any[])[0]?.a ?? (res.rows as any[])[0]?.[0]).toBe(1);
 });

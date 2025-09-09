@@ -18,8 +18,10 @@ async function bootstrap() {
   async function initEngine() {
     if (lix) await lix.close();
     const mode = modeEl.value as "worker" | "main";
-    const backend = mode === "worker" ? OpfsSahWorker({ name: "throwaway.lix" }) : InMemory();
-    lix = await openLixBackend({ backend });
+    const backend = mode === "worker" ? OpfsSahWorker() : InMemory();
+    lix = await openLixBackend({ backend, pluginsRaw: [] });
+    // Optional: leave logs commented for debugging
+    // console.log("[throwaway] initialized engine in mode", mode);
     // Ensure tables
     await lix.db.executeQuery({ sql: "CREATE TABLE IF NOT EXISTS kv(key TEXT PRIMARY KEY, value INTEGER)", parameters: [] } as any);
     await lix.db.executeQuery({ sql: "CREATE TABLE IF NOT EXISTS spam(x INTEGER)", parameters: [] } as any);

@@ -6,9 +6,12 @@ describe("InMemory backend", () => {
 		// nothing
 	});
 
-  test("initializes and executes basic SQL", async () => {
+	test("initializes and executes basic SQL", async () => {
 		const engine = InMemory();
-		await engine.init({});
+		await engine.init({
+			boot: { args: { pluginsRaw: [] } },
+			onEvent: () => {},
+		});
 
 		await engine.exec("CREATE TABLE t(a)");
 		await engine.exec("INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
@@ -24,9 +27,12 @@ describe("InMemory backend", () => {
 		await engine.close();
 	});
 
-  test("execBatch runs sequentially", async () => {
+	test("execBatch runs sequentially", async () => {
 		const engine = InMemory();
-		await engine.init({});
+		await engine.init({
+			boot: { args: { pluginsRaw: [] } },
+			onEvent: () => {},
+		});
 		await engine.exec("CREATE TABLE t(a)");
 		const batch = [
 			{ sql: "INSERT INTO t(a) VALUES (?)", params: [1] },
