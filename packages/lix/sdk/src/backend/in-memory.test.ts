@@ -1,11 +1,7 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect } from "vitest";
 import { InMemoryBackend } from "./in-memory.js";
 
 describe("InMemory backend", () => {
-	beforeEach(() => {
-		// nothing
-	});
-
 	test("initializes and executes basic SQL", async () => {
 		const engine = new InMemoryBackend();
 		await engine.open({

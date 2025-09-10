@@ -25,12 +25,14 @@ export class InMemoryBackend implements LixBackend {
 	private db: SqliteWasmDatabase | undefined;
 
 	async open(opts: Parameters<LixBackend["open"]>[0]): Promise<void> {
-		this.db = await createInMemoryDatabase({ readOnly: false });
-		await boot({
-			sqlite: this.db,
-			postEvent: (ev) => opts.onEvent(ev),
-			args: opts.boot.args,
-		});
+		if (!this.db) {
+			this.db = await createInMemoryDatabase({ readOnly: false });
+			await boot({
+				sqlite: this.db,
+				postEvent: (ev) => opts.onEvent(ev),
+				args: opts.boot.args,
+			});
+		}
 	}
 
 	async create(opts: Parameters<LixBackend["create"]>[0]): Promise<void> {
