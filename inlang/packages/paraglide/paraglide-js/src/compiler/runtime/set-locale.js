@@ -2,16 +2,16 @@ import { getLocale } from "./get-locale.js";
 import { localizeUrl } from "./localize-url.js";
 import { customClientStrategies, isCustomStrategy } from "./strategy.js";
 import {
-  cookieDomain,
-  cookieMaxAge,
-  cookieName,
-  isServer,
-  localStorageKey,
-  strategy,
-  TREE_SHAKE_COOKIE_STRATEGY_USED,
-  TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
-  TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
-  TREE_SHAKE_URL_STRATEGY_USED,
+	cookieDomain,
+	cookieMaxAge,
+	cookieName,
+	isServer,
+	localStorageKey,
+	strategy,
+	TREE_SHAKE_COOKIE_STRATEGY_USED,
+	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 
 /**
@@ -31,104 +31,104 @@ import {
  * @type {(newLocale: Locale, options?: { reload?: boolean }) => void}
  */
 export let setLocale = (newLocale, options) => {
-  const optionsWithDefaults = {
-    reload: true,
-    ...options,
-  };
-  // locale is already set
-  // https://github.com/opral/inlang-paraglide-js/issues/430
-  let currentLocale;
-  try {
-    currentLocale = getLocale();
-  } catch {
-    // do nothing, no locale has been set yet.
-  }
-  /** @type {Array<Promise<any>>} */
-  const customSetLocalePromises = [];
-  /** @type {string | undefined} */
-  let newLocation = undefined;
-  for (const strat of strategy) {
-    if (
-      TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
-      strat === "globalVariable"
-    ) {
-      // a default for a custom strategy to get started quickly
-      // is likely overwritten by `defineSetLocale()`
-      _locale = newLocale;
-    } else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-      if (
-        isServer ||
-        typeof document === "undefined" ||
-        typeof window === "undefined"
-      ) {
-        continue;
-      }
+	const optionsWithDefaults = {
+		reload: true,
+		...options,
+	};
+	// locale is already set
+	// https://github.com/opral/inlang-paraglide-js/issues/430
+	let currentLocale;
+	try {
+		currentLocale = getLocale();
+	} catch {
+		// do nothing, no locale has been set yet.
+	}
+	/** @type {Array<Promise<any>>} */
+	const customSetLocalePromises = [];
+	/** @type {string | undefined} */
+	let newLocation = undefined;
+	for (const strat of strategy) {
+		if (
+			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
+			strat === "globalVariable"
+		) {
+			// a default for a custom strategy to get started quickly
+			// is likely overwritten by `defineSetLocale()`
+			_locale = newLocale;
+		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
+			if (
+				isServer ||
+				typeof document === "undefined" ||
+				typeof window === "undefined"
+			) {
+				continue;
+			}
 
-      // set the cookie
-      const cookieString = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
-      document.cookie = cookieDomain
-        ? `${cookieString}; domain=${cookieDomain}`
-        : cookieString;
-    } else if (strat === "baseLocale") {
-      // nothing to be set here. baseLocale is only a fallback
-      continue;
-    } else if (
-      TREE_SHAKE_URL_STRATEGY_USED &&
-      strat === "url" &&
-      typeof window !== "undefined"
-    ) {
-      // route to the new url
-      //
-      // this triggers a page reload but a user rarely
-      // switches locales, so this should be fine.
-      //
-      // if the behavior is not desired, the implementation
-      // can be overwritten by `defineSetLocale()` to avoid
-      // a full page reload.
-      newLocation = localizeUrl(window.location.href, {
-        locale: newLocale,
-      }).href;
-    } else if (
-      TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
-      strat === "localStorage" &&
-      typeof window !== "undefined"
-    ) {
-      // set the localStorage
-      localStorage.setItem(localStorageKey, newLocale);
-    } else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
-      const handler = customClientStrategies.get(strat);
-      if (handler) {
-        const result = handler.setLocale(newLocale);
-        // Handle async setLocale - fire and forget
-        if (result instanceof Promise) {
-          result.catch((error) => {
-            console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
-          });
-          customSetLocalePromises.push(result);
-        }
-      }
-    }
-  }
+			// set the cookie
+			const cookieString = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
+			document.cookie = cookieDomain
+				? `${cookieString}; domain=${cookieDomain}`
+				: cookieString;
+		} else if (strat === "baseLocale") {
+			// nothing to be set here. baseLocale is only a fallback
+			continue;
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			typeof window !== "undefined"
+		) {
+			// route to the new url
+			//
+			// this triggers a page reload but a user rarely
+			// switches locales, so this should be fine.
+			//
+			// if the behavior is not desired, the implementation
+			// can be overwritten by `defineSetLocale()` to avoid
+			// a full page reload.
+			newLocation = localizeUrl(window.location.href, {
+				locale: newLocale,
+			}).href;
+		} else if (
+			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
+			strat === "localStorage" &&
+			typeof window !== "undefined"
+		) {
+			// set the localStorage
+			localStorage.setItem(localStorageKey, newLocale);
+		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
+			const handler = customClientStrategies.get(strat);
+			if (handler) {
+				const result = handler.setLocale(newLocale);
+				// Handle async setLocale - fire and forget
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
+					});
+					customSetLocalePromises.push(result);
+				}
+			}
+		}
+	}
 
-  if (
-    !isServer &&
-    optionsWithDefaults.reload &&
-    window.location &&
-    newLocale !== currentLocale
-  ) {
-    // Wait for any potentially async custom setLocale functions
-    Promise.all(customSetLocalePromises).then(() => {
-      if (newLocation) {
-        // reload the page by navigating to the new url
-        window.location.href = newLocation;
-      } else {
-        // reload the page to reflect the new locale
-        window.location.reload();
-      }
-    });
-  }
+	if (
+		!isServer &&
+		optionsWithDefaults.reload &&
+		window.location &&
+		newLocale !== currentLocale
+	) {
+		// Wait for any potentially async custom setLocale functions
+		Promise.all(customSetLocalePromises).then(() => {
+			if (newLocation) {
+				// reload the page by navigating to the new url
+				window.location.href = newLocation;
+			} else {
+				// reload the page to reflect the new locale
+				window.location.reload();
+			}
+		});
+	}
 
-  return;
+	return;
 };
 
 /**
@@ -146,5 +146,5 @@ export let setLocale = (newLocale, options) => {
  * @param {(newLocale: Locale) => void} fn
  */
 export const overwriteSetLocale = (fn) => {
-  setLocale = fn;
+	setLocale = fn;
 };
