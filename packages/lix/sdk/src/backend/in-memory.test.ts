@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from "vitest";
-import { InMemory } from "./main-thread.js";
+import { InMemoryBackend } from "./in-memory.js";
 
 describe("InMemory backend", () => {
 	beforeEach(() => {
@@ -7,7 +7,7 @@ describe("InMemory backend", () => {
 	});
 
 	test("initializes and executes basic SQL", async () => {
-		const engine = InMemory();
+		const engine = new InMemoryBackend();
 		await engine.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
@@ -28,7 +28,7 @@ describe("InMemory backend", () => {
 	});
 
 	test("execBatch runs sequentially", async () => {
-		const engine = InMemory();
+		const engine = new InMemoryBackend();
 		await engine.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},

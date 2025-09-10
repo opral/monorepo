@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
 import { Kysely } from "kysely";
 import { createDialect } from "./kysely-driver.js";
-import { InMemory } from "../main-thread.js";
+import { InMemoryBackend } from "../in-memory.js";
 
 test("EngineDriver runs basic Kysely queries", async () => {
-	const backend = InMemory();
-    await backend.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
+	const backend = new InMemoryBackend();
+	await backend.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
 
 	const db = new Kysely<any>({ dialect: createDialect({ backend }) });
 

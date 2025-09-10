@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { openLix } from "./open-lix.js";
 import { openLixBackend } from "./open-lix-backend.js";
-import { InMemory } from "../backend/main-thread.js";
+import { InMemoryBackend } from "../backend/in-memory.js";
 
 async function runKeyValueSequence(db: any) {
 	const out: any[] = [];
@@ -59,7 +59,7 @@ describe("openLix vs openLixBackend parity (key_value)", () => {
 		});
 
 		// Backend-based (in-memory backend, runtime booted)
-		const backend = InMemory();
+		const backend = new InMemoryBackend();
 		const hosted = await openLixBackend({
 			backend,
 			pluginsRaw: [],

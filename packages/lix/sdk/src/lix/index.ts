@@ -5,4 +5,4 @@ export { InMemoryStorage } from "./storage/in-memory.js";
 export { OpfsStorage } from "./storage/opfs.js";
 export { openLixBackend } from "./open-lix-backend.js";
 export { OpfsSahBackend } from "../backend/opfs-sah.js";
-export { InMemory } from "../backend/main-thread.js";
+export { InMemoryBackend } from "../backend/in-memory.js";
