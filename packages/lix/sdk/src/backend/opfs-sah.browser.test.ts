@@ -95,47 +95,89 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		}
 	});
 
-	test("clear wipes OPFS contents (browser)", async () => {
-		const name = `vitest-opfs-clear`;
+test("clear wipes OPFS contents (browser)", async () => {
+	const name = `vitest-opfs-clear`;
 
-		// 1) Create a DB and write a row
-		const lix1 = await openLixBackend({
-			backend: new OpfsSahBackend({ key: name }),
-			pluginsRaw: [],
-		});
-		try {
-			await lix1.db
-				.insertInto("file")
-				.values({
-					path: "/temp.txt",
-					data: new TextEncoder().encode("to be wiped"),
-				})
-				.execute();
-		} finally {
-			await lix1.close();
-		}
-
-		// Give the environment a moment to release any AccessHandles
-		await new Promise((r) => setTimeout(r, 250));
-
-		// 2) Enumerate OPFS to confirm content exists
-		const rootBefore = await navigator.storage.getDirectory();
-		const entriesBefore = [] as any[];
-		// @ts-expect-error - values() exists in modern browsers
-		for await (const entry of rootBefore.values()) entriesBefore.push(entry);
-		expect(entriesBefore.length).toBeGreaterThan(0);
-
-		// 3) Wipe all OPFS data for this origin
-		await OpfsSahBackend.clear();
-
-		// Ensure OPFS has settled
-		await new Promise((r) => setTimeout(r, 100));
-
-		// 4) Enumerate OPFS again – should be empty
-		const rootAfter = await navigator.storage.getDirectory();
-		const entriesAfter = [] as any[];
-		// @ts-expect-error - values() exists in modern browsers
-		for await (const entry of rootAfter.values()) entriesAfter.push(entry);
-		expect(entriesAfter.length).toBe(0);
+	// 1) Create a DB and write a row
+	const lix1 = await openLixBackend({
+		backend: new OpfsSahBackend({ key: name }),
+		pluginsRaw: [],
 	});
+	try {
+		await lix1.db
+			.insertInto("file")
+			.values({
+				path: "/temp.txt",
+				data: new TextEncoder().encode("to be wiped"),
+			})
+			.execute();
+	} finally {
+		await lix1.close();
+	}
+
+	// Give the environment a moment to release any AccessHandles
+	await new Promise((r) => setTimeout(r, 250));
+
+	// 2) Enumerate OPFS to confirm content exists
+	const rootBefore = await navigator.storage.getDirectory();
+	const entriesBefore = [] as any[];
+	// @ts-expect-error - values() exists in modern browsers
+	for await (const entry of rootBefore.values()) entriesBefore.push(entry);
+	expect(entriesBefore.length).toBeGreaterThan(0);
+
+	// 3) Wipe all OPFS data for this origin
+	await OpfsSahBackend.clear();
+
+	// Ensure OPFS has settled
+	await new Promise((r) => setTimeout(r, 100));
+
+	// 4) Enumerate OPFS again – should be empty
+	const rootAfter = await navigator.storage.getDirectory();
+	const entriesAfter = [] as any[];
+	// @ts-expect-error - values() exists in modern browsers
+	for await (const entry of rootAfter.values()) entriesAfter.push(entry);
+	expect(entriesAfter.length).toBe(0);
+});
+});
+
+test("loads plugin from string and processes *.json", async () => {
+	// Minimal mock plugin: matches *.json and emits one change with a simple schema
+	const mockPlugin = `
+export const plugin = {
+  key: 'mock_json',
+  detectChangesGlob: '*.json',
+  detectChanges: ({ after }) => {
+    const schema = { "x-lix-key": "mock_schema", "x-lix-version": "1.0", type: "object", properties: { name: { type: "string" } } };
+    return [{ entity_id: after.id + ':mock', schema, snapshot_content: { name: 'hello' } }];
+  }
+};
+export default plugin;
+`;
+
+	const lix = await openLixBackend({
+		backend: new OpfsSahBackend({ key: `vitest-opfs-plugin` }),
+		pluginsRaw: [mockPlugin],
+	});
+	try {
+		// Insert a JSON file which should trigger the mock plugin
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/foo.json",
+				data: new TextEncoder().encode('{"name":"x"}'),
+			})
+			.execute();
+
+		// Plugin should have inserted a state row with our mock schema key
+		const row = await lix.db
+			.selectFrom("state_all")
+			.selectAll()
+			.where("schema_key", "=", "mock_schema")
+			.executeTakeFirst();
+
+		expect(row).toBeTruthy();
+		expect(row?.plugin_key).toBe("mock_json");
+	} finally {
+		await lix.close();
+	}
 });

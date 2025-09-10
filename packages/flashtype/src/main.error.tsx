@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { OpfsStorage } from "@lix-js/sdk";
+import { OpfsSahBackend } from "@lix-js/sdk";
+import { RotateCcw, Bug } from "lucide-react";
 
 /**
  * Minimal error UI shown when Lix fails to load.
@@ -16,6 +17,29 @@ import { OpfsStorage } from "@lix-js/sdk";
 export function ErrorFallback(props: { error: unknown }) {
 	const [busy, setBusy] = useState(false);
 
+	function formatError(err: any): string {
+		try {
+			if (!err) return "Unknown error";
+			if (err instanceof Error) {
+				let out = `${err.name || "Error"}: ${err.message || ""}`;
+				if (err.stack) out += "\n" + String(err.stack);
+				const cause = (err as any).cause;
+				if (cause) out += "\nCaused by: " + formatError(cause);
+				const errors = (err as any).errors;
+				if (Array.isArray(errors)) {
+					for (let i = 0; i < errors.length; i++) {
+						out += `\nInner[${i}]: ` + formatError(errors[i]);
+					}
+				}
+				return out;
+			}
+			// Non-Error thrown
+			return typeof err === "string" ? err : JSON.stringify(err, null, 2);
+		} catch {
+			return String(err);
+		}
+	}
+
 	async function handleReset() {
 		if (busy) return;
 		const confirmed = window.confirm(
@@ -26,7 +50,7 @@ export function ErrorFallback(props: { error: unknown }) {
 		if (!confirmed) return;
 		try {
 			setBusy(true);
-			await OpfsStorage.clean();
+			await OpfsSahBackend.clear();
 			window.location.reload();
 		} catch (e) {
 			console.error("Failed to reset OPFS:", e);
@@ -62,18 +86,21 @@ export function ErrorFallback(props: { error: unknown }) {
 						onClick={() => window.location.reload()}
 						className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
 					>
-						Reload app
+						<RotateCcw className="h-4 w-4" /> Reload app
 					</button>
+					<a
+						href="https://github.com/opral/flashtype.ai/issues"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+					>
+						<Bug className="h-4 w-4" /> Report bug
+					</a>
 				</div>
-				{import.meta.env.DEV ? (
-					<pre className="mt-4 whitespace-pre-wrap text-xs opacity-70">
-						{String(
-							props.error instanceof Error
-								? props.error.stack || props.error.message
-								: props.error,
-						)}
-					</pre>
-				) : null}
+				<div className="mt-4 whitespace-pre-wrap text-xs opacity-80 border rounded p-3 bg-muted/20">
+					<div className="font-medium mb-2">Error details</div>
+					<pre>{formatError(props.error)}</pre>
+				</div>
 			</div>
 		</div>
 	);

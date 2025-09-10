@@ -7,6 +7,8 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
  * with Blob and URL.createObjectURL support. In Node, falls back to data: URL
  * with base64 encoding via global Buffer.
  */
+let __lixInlinePluginCounter = 0;
+
 export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 	// Prefer Node-safe data: URL path when running under Node – Node cannot import blob: URLs.
 	const isNode =
@@ -19,8 +21,17 @@ export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 		if (BufferAny && typeof BufferAny.from === "function") {
 			const base64 = BufferAny.from(code, "utf-8").toString("base64");
 			const dataUrl = `data:text/javascript;base64,${base64}`;
-			const mod: any = await import(/* @vite-ignore */ dataUrl);
-			return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
+			try {
+				const mod: any = await import(/* @vite-ignore */ dataUrl);
+				return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
+			} catch (e: any) {
+				const preview = code.slice(0, 200);
+				const err = new Error(
+					`loadPluginFromString(dataUrl) failed: ${e?.message ?? e}. Preview: ${preview}`
+				);
+				(err as any).cause = e;
+				throw err;
+			}
 		}
 	}
 
@@ -30,11 +41,24 @@ export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 		typeof URL !== "undefined" &&
 		"createObjectURL" in URL
 	) {
-		const blob = new Blob([code], { type: "text/javascript" });
+		const blob = new Blob([code], { type: "application/javascript" });
 		const url = URL.createObjectURL(blob);
 		try {
 			const mod: any = await import(/* @vite-ignore */ url);
 			return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
+		} catch (e: any) {
+			const preview = code.slice(0, 400);
+			const err = new SyntaxError(
+				`loadPluginFromString(blob) failed: ${e?.message ?? e}\npreview:\n${preview}`
+			);
+			(err as any).cause = e;
+			// Preserve original stack if available
+			if (e?.stack && typeof e.stack === "string") {
+				try {
+					(err as any).stack = e.stack;
+				} catch {}
+			}
+			throw err;
 		} finally {
 			URL.revokeObjectURL(url);
 		}

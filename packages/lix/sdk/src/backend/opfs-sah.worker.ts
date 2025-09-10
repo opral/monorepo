@@ -37,7 +37,12 @@ type Res =
 	| {
 			id: string;
 			ok: false;
-			error: { name: string; message: string; code?: string | number };
+			error: {
+				name: string;
+				message: string;
+				code?: string | number;
+				stack?: string;
+			};
 	  };
 
 let sqlite3Module: any;
@@ -270,6 +275,7 @@ async function handle(req: Req): Promise<Res> {
 				name: err?.name ?? "Error",
 				message: String(err?.message ?? err),
 				code: err?.code,
+				stack: err?.stack ? String(err.stack) : undefined,
 			},
 		};
 	}
