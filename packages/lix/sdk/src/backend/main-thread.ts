@@ -16,7 +16,7 @@ import { boot } from "../runtime/boot.js";
  *
  * @example
  * const engine = createMainMemoryEngine()
- * await engine.init({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
+ * await engine.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
  * await engine.exec("CREATE TABLE t(a)")
  * await engine.exec("INSERT INTO t(a) VALUES (?)", [1])
  * const out = await engine.exec("SELECT a FROM t")
@@ -25,13 +25,18 @@ export function InMemory(): LixBackend {
 	let db: SqliteWasmDatabase | undefined;
 
 	return {
-		async init(opts) {
+		async open(opts) {
 			db = await createInMemoryDatabase({ readOnly: false });
+			await boot({
+				sqlite: db,
+				postEvent: (ev) => opts.onEvent(ev),
+				args: opts.boot.args,
+			});
+		},
 
-			if (opts?.blob) {
-				importDatabase({ db, content: new Uint8Array(opts.blob) });
-			}
-
+		async create(opts) {
+			db = await createInMemoryDatabase({ readOnly: false });
+			importDatabase({ db, content: new Uint8Array(opts.blob) });
 			await boot({
 				sqlite: db,
 				postEvent: (ev) => opts.onEvent(ev),
@@ -92,11 +97,16 @@ export function InMemory(): LixBackend {
 			return copy.buffer;
 		},
 
-		async close(): Promise<void> {
-			if (db) {
-				db.close();
-				db = undefined;
-			}
-		},
-	};
+			async close(): Promise<void> {
+				if (db) {
+					db.close();
+					db = undefined;
+				}
+			},
+
+			async exists(): Promise<boolean> {
+				// In-memory backend has no persisted store bound to a key/path.
+				return false;
+			},
+		};
 }

@@ -8,7 +8,7 @@ describe("InMemory backend", () => {
 
 	test("initializes and executes basic SQL", async () => {
 		const engine = InMemory();
-		await engine.init({
+		await engine.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
 		});
@@ -29,7 +29,7 @@ describe("InMemory backend", () => {
 
 	test("execBatch runs sequentially", async () => {
 		const engine = InMemory();
-		await engine.init({
+		await engine.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
 		});

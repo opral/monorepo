@@ -3,7 +3,6 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixBackend } from "../backend/types.js";
 import { createDialect } from "../backend/kysely/kysely-driver.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import { newLixFile } from "./new-lix.js";
 import { createObserve } from "../observe/create-observe.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { LixSchemaViewMap } from "../database/schema.js";
@@ -34,36 +33,48 @@ export async function openLixBackend(args: {
 	toBlob: () => Promise<Blob>;
 }> {
 	const hooks = createHooks();
-	let blob = args.blob;
-	if (!blob) {
-		// Ensure deterministic bootstrap by default for backend usage so that
-		// active_version exists and first writes have a version context.
-		const keyValues = Array.isArray(args.keyValues) ? [...args.keyValues] : [];
-		const hasDeterministic = keyValues.some(
-			(kv) => kv.key === "lix_deterministic_mode"
-		);
-		if (!hasDeterministic) {
-			keyValues.push({
-				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
-				lixcol_version_id: "global",
+	const blob = args.blob;
+
+	// Default behavior: openOrCreate
+	// - If a blob is provided, attempt to create from it (backend may refuse if target exists)
+	// - If no blob is provided, attempt to create a fresh Lix; if backend reports existing DB,
+	//   fall back to open without a blob.
+	const boot = {
+		args: {
+			pluginsRaw: args.pluginsRaw,
+			account: args.account,
+			keyValues: args.keyValues,
+		},
+	} as const;
+
+	if (blob) {
+		await args.backend.create({
+			blob,
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
+		await args.backend.open({
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
+	} else {
+		// Exists-first flow: avoid throwing to decide; ask backend if a DB exists.
+		const exists = await args.backend.exists();
+		if (!exists) {
+			const { newLixFile } = await import("./new-lix.js");
+			const seed = await newLixFile({ keyValues: args.keyValues });
+			const seedBytes = await seed.arrayBuffer();
+			await args.backend.create({
+				blob: seedBytes,
+				boot,
+				onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 			});
 		}
-		const seed = await newLixFile({ keyValues: keyValues as any });
-		blob = await seed.arrayBuffer();
+		await args.backend.open({
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
 	}
-
-	await args.backend.init({
-		blob,
-		boot: {
-			args: {
-				pluginsRaw: args.pluginsRaw,
-				account: args.account,
-				keyValues: args.keyValues,
-			},
-		},
-		onEvent: (ev) => hooks._emit(ev.type, ev.payload),
-	});
 
 	// Build JSON column mapping to match openLix() parsing behavior
 	const ViewsWithJsonColumns = (() => {

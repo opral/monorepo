@@ -31,17 +31,31 @@ export type BackendError = {
  */
 export interface LixBackend {
 	/**
-	 * Initialize the backend and run Lix runtime boot next to SQLite.
+	 * Open the backend and run Lix runtime boot next to SQLite.
 	 *
-	 * @param opts.blob - Optional database snapshot to seed (transferable)
 	 * @param opts.boot - Runtime boot arguments (plugins, account, keyValues)
 	 * @param opts.onEvent - Event bridge (currently only 'state_commit')
 	 */
-	init(opts: {
-		blob?: ArrayBuffer;
+	open(opts: {
 		boot: { args: import("../runtime/boot.js").BootArgs };
 		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
 	}): Promise<void>;
+
+	/**
+	 * Create a brand‑new database from a provided snapshot and boot it.
+	 * Implementations should throw if the target already exists to avoid data loss.
+	 */
+	create(opts: {
+		blob: ArrayBuffer;
+		boot: { args: import("../runtime/boot.js").BootArgs };
+		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
+	}): Promise<void>;
+
+	/**
+	 * Returns true if a persistent database already exists for this backend's
+	 * target (e.g. OPFS key or filesystem path).
+	 */
+	exists(): Promise<boolean>;
 
 	/**
 	 * Execute a single SQL statement.
