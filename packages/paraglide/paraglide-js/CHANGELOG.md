@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 2.3.0
+
+### Minor Changes
+
+- bfe8518: Crash the build process (for example during `vite build`) if paraglide can't compile the project.
+- Removed local account loading which suddenly led to crashes for some users.
+
 ## 2.2.0
 
 ### Minor Changes
@@ -9,7 +16,6 @@
   This change introduces a new `extractLocaleFromRequestAsync` function that supports asynchronous custom server strategies, enabling use cases like fetching user locale preferences from databases.
 
   ## What's Changed
-
   - **New Function**: Added `extractLocaleFromRequestAsync` that supports async custom server strategies
   - **Middleware Update**: Server middleware now uses the async version to support async custom strategies
   - **Breaking Change**: The synchronous `extractLocaleFromRequest` no longer supports custom server strategies
@@ -78,7 +84,6 @@
   ```
 
   **Migration**:
-
   - If you want the previous behavior (subdomain sharing), explicitly set `cookieDomain` in your configuration:
 
   ```diff
@@ -96,7 +101,6 @@
 - 4255bd5: Provide functions for getting the preferred language on server and client.
 
   This defines two new functions for getting the preferred language:
-
   - `extractLocaleFromHeader`: Extracts the locale from the accept-language header on the server.
   - `extractLocaleFromNavigator`: Extracts the locale from the navigator.languages array on the client.
 
@@ -108,12 +112,10 @@
   This introduces a new way to define custom locale resolution strategies alongside built-in strategies. Custom strategies provide a cleaner, more composable approach compared to overwriting `getLocale()` and `setLocale()` functions directly.
 
   **New APIs:**
-
   - `defineCustomClientStrategy()`: Define custom strategies for client-side locale resolution
   - `defineCustomServerStrategy()`: Define custom strategies for server-side locale resolution
 
   **Key features:**
-
   - Custom strategies must follow the pattern `custom-<name>` where `<name>` contains only alphanumeric characters
   - Can be combined with built-in strategies in the strategy array
   - Respect strategy order for fallback handling
@@ -236,7 +238,6 @@
 - 698b9a9: add `cookieMaxAge` option to compiler and runtime
 
   Closes https://github.com/opral/inlang-paraglide-js/issues/483
-
   - Introduced `cookieMaxAge` option to `CompilerOptions`, allowing configuration of cookie expiration time.
   - Adjusted tests to verify `max-age` in cookies.
 
@@ -955,7 +956,6 @@ await compile({
 - 14d80b3: Removed the "Which tech-stack are you using?" prompt from the `init` command as it was not providing any real value. All it did was link you to the appropriate documentation.
 
   From now on we rely on the docuemntation site to guide people to the correct documenation for their framework.
-
   - SvelteKit: https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n
   - NextJs: https://inlang.com/m/osslbuzt/paraglide-next-i18n
   - Astro: https://inlang.com/m/iljlwzfs/paraglide-astro-i18n

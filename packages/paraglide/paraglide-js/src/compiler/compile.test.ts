@@ -44,7 +44,7 @@ test("loads a project and compiles it", async () => {
 	);
 });
 
-test("loads a local account from app data if exists", async () => {
+test.skip("loads a local account from app data if exists", async () => {
 	const accountPath = getAccountFilePath();
 	const fs = memfs({
 		[accountPath]: JSON.stringify({ id: "mock", name: "test" }),
@@ -76,7 +76,7 @@ test("loads a local account from app data if exists", async () => {
 	expect(spy).toHaveBeenCalledWith(accountPath, "utf8");
 });
 
-test("saves the local account to app data if not exists", async () => {
+test.skip("saves the local account to app data if not exists", async () => {
 	const accountPath = getAccountFilePath();
 	const fs = memfs().fs as unknown as typeof import("node:fs");
 
