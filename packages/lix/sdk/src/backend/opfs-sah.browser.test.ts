@@ -10,7 +10,10 @@ test("inserting a file", async () => {
 
 	await lix.db
 		.insertInto("file")
-		.values({ path: "/a.txt", data: new TextEncoder().encode("Hello, world!") })
+		.values({
+			path: "/a.txt",
+			data: new TextEncoder().encode("Hello, world!"),
+		})
 		.execute();
 
 	const row = await lix.db
@@ -29,7 +32,7 @@ test("inserting a file", async () => {
 test("creates OPFS file at given absolute path", async () => {
 	// Randomize filename to avoid AccessHandle contention and stale files
 	// across retries/parallel runs (OPFS allows only one open handle per file).
-	const name = `/vitest-opfs-create-${Math.random().toString(36).slice(2, 8)}.lix`;
+	const name = `/vitest-opfs-create-path.lix`;
 	const lix = await openLixBackend({
 		backend: OpfsSahWorker({ path: name }),
 		pluginsRaw: [],

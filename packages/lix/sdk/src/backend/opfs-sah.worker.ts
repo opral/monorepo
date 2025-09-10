@@ -42,36 +42,39 @@ async function handle(req: Req): Promise<Res> {
 					readOnly: false,
 				});
 				sqlite3Module = temp.sqlite3;
-				// Install SAHPool VFS
-				poolUtil = await sqlite3Module.installOpfsSAHPoolVfs();
 				// Name must be absolute-like for SAHPool (virtual path)
 				const opfsPath = req.payload.name.startsWith("/")
 					? req.payload.name
 					: "/" + req.payload.name;
 				currentOpfsPath = opfsPath;
-				// If a blob is provided, write it to OPFS before opening DB
-				if (
-					req.payload.blob &&
-					typeof navigator !== "undefined" &&
-					(navigator as any).storage?.getDirectory
-				) {
-					try {
-						const root: any = await (navigator as any).storage.getDirectory();
-						const fname = opfsPath.startsWith("/")
-							? opfsPath.slice(1)
-							: opfsPath;
-						const fileHandle = await root.getFileHandle(fname, {
-							create: true,
-						});
-						const writable = await fileHandle.createWritable({
-							keepExistingData: false,
-						});
-						await writable.write(new Uint8Array(req.payload.blob));
-						await writable.close();
-					} catch (e) {
-						// ignore if OPFS unavailable; DB will be empty
+				// Install SAHPool VFS
+				// Retry a few times in case a previous handle is still releasing.
+				{
+					let attempts = 0;
+					const maxAttempts = 4;
+					// 0, 25, 50, 100ms backoff
+					while (true) {
+						try {
+							poolUtil = await sqlite3Module.installOpfsSAHPoolVfs();
+							break;
+						} catch (e: any) {
+							attempts++;
+							if (attempts >= maxAttempts) throw e;
+							const delay = Math.pow(2, attempts - 1) * 25;
+							await new Promise((r) => setTimeout(r, delay));
+						}
 					}
 				}
+				// If a blob is provided, import via the SAH pool utility (assume importDb exists).
+				if (req.payload.blob) {
+					const seedBytes = new Uint8Array(req.payload.blob);
+					try {
+						(poolUtil as any).importDb(opfsPath, seedBytes);
+					} catch {
+						// Non-fatal: proceed to open/boot even if import fails
+					}
+				}
+
 				// Open DB using the installed SAHPool VFS via URI. Using sqlite3.oo1.DB ensures
 				// the returned object exposes sqlite3/capi and createFunction for runtime boot.
 				const uri = `file:${opfsPath}?vfs=opfs-sahpool`;
@@ -155,8 +158,13 @@ async function handle(req: Req): Promise<Res> {
 				return { id: req.id, ok: true, result: { blob: buf }, transfer: [buf] };
 			}
 			case "close": {
-				if (db) db.close();
-				db = undefined;
+				if (db) {
+					db.close();
+				}
+				// Release SAH pool VFS handles. Let errors bubble if any.
+				(poolUtil as any).removeVfs();
+				db = undefined as any;
+				currentOpfsPath = undefined;
 				return { id: req.id, ok: true };
 			}
 		}

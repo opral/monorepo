@@ -36,7 +36,20 @@ export async function openLixBackend(args: {
 	const hooks = createHooks();
 	let blob = args.blob;
 	if (!blob) {
-		const seed = await newLixFile({ keyValues: args.keyValues as any });
+		// Ensure deterministic bootstrap by default for backend usage so that
+		// active_version exists and first writes have a version context.
+		const keyValues = Array.isArray(args.keyValues) ? [...args.keyValues] : [];
+		const hasDeterministic = keyValues.some(
+			(kv) => kv.key === "lix_deterministic_mode"
+		);
+		if (!hasDeterministic) {
+			keyValues.push({
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
+			});
+		}
+		const seed = await newLixFile({ keyValues: keyValues as any });
 		blob = await seed.arrayBuffer();
 	}
 
