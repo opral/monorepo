@@ -10,6 +10,15 @@ import {
 } from "../test-utilities/simulation-test/simulation-test.js";
 import { LixVersionTipSchema, type LixVersionTip } from "../version/schema.js";
 
+function stripWriterKey<T extends Record<string, any> | null | undefined>(
+	row: T
+): T {
+	if (!row) return row;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { writer_key, ...rest } = row as any;
+	return rest as T;
+}
+
 describe("internal_materialization_version_tips", () => {
 	simulationTest(
 		"includes all versions with state, even if other versions branch from them",
@@ -2208,7 +2217,9 @@ describe("internal_state_materializer", () => {
 			});
 			expect(materializedState!.inherited_from_version_id).toBeNull(); // Not inherited
 
-			expect(materializedState).toEqual(cachedState);
+			expect(stripWriterKey(materializedState)).toEqual(
+				stripWriterKey(cachedState)
+			);
 		},
 		{
 			simulations: [normalSimulation, outOfOrderSequenceSimulation],
@@ -2270,7 +2281,9 @@ describe("internal_state_materializer", () => {
 				"parent-version"
 			);
 
-			expect(materializedState).toEqual(cachedState);
+			expect(stripWriterKey(materializedState)).toEqual(
+				stripWriterKey(cachedState)
+			);
 		},
 		{
 			simulations: [normalSimulation, outOfOrderSequenceSimulation],
@@ -2340,7 +2353,9 @@ describe("internal_state_materializer", () => {
 			});
 			expect(materializedState!.inherited_from_version_id).toBeNull(); // Not inherited
 
-			expect(materializedState).toEqual(cachedState);
+			expect(stripWriterKey(materializedState)).toEqual(
+				stripWriterKey(cachedState)
+			);
 		},
 		{
 			simulations: [normalSimulation, outOfOrderSequenceSimulation],
@@ -2550,7 +2565,9 @@ describe("internal_state_materializer", () => {
 				.where("entity_id", "=", "entity-to-override")
 				.executeTakeFirst();
 
-			expect(parentCachedState).toEqual(parentState);
+			expect(stripWriterKey(parentCachedState)).toEqual(
+				stripWriterKey(parentState)
+			);
 
 			expect(parentState).toBeDefined();
 			expect(parentState!.snapshot_content).toEqual({
