@@ -21,3 +21,4 @@ export type {
 // State operations
 export { createCheckpoint } from "./create-checkpoint.js";
 export { transition } from "./transition.js";
+export { withWriterKey } from "./writer.js";

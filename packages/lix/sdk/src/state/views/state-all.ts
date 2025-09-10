@@ -15,6 +15,7 @@ export type StateAllView = {
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
 	commit_id: Generated<string>;
+	writer_key: string | null;
 };
 
 // Kysely operation types

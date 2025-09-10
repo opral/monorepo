@@ -28,7 +28,8 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
       inherited_from_version_id,
       change_id,
       untracked,
-      commit_id
+      commit_id,
+      writer_key
     FROM state_all
     WHERE version_id IN (SELECT version_id FROM active_version);
 
