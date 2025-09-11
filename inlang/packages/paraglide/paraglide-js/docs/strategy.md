@@ -7,7 +7,7 @@ imports:
 
 Paraglide JS comes with various strategies to determine the locale out of the box.
 
-The strategy is defined with the `strategy` option. **Strategies are evaluated in order** - the first strategy that successfully returns a locale will be used, and subsequent strategies won't be checked.
+The strategy is defined with the `strategy` option. **Strategies are evaluated in order** - the first strategy that successfully returns a locale will be used, and subsequent strategies won't be checked. Think of the array as a simple fallback chain: each strategy is attempted until one succeeds, keeping the API predictable.
 
 In the example below, the `cookie` strategy first determines the locale. If no cookie is found (returns `undefined`), the `baseLocale` is used as a fallback.
 
@@ -19,9 +19,7 @@ compile({
 })
 ```
 
-<doc-callout type="important">
-**Strategy Order Matters**: The order of strategies in your array determines priority. Strategies that always resolve a locale (like `url` with wildcards or `baseLocale`) should typically be placed last as fallbacks, since they prevent subsequent strategies from being evaluated.
-</doc-callout>
+**Strategy order matters**: because the array is a fallthrough list, earlier strategies have priority. Strategies that always resolve a locale (like `url` with wildcards or `baseLocale`) should typically be placed last as fallbacks, since they prevent subsequent strategies from being evaluated. For example, placing `preferredLanguage` before `localStorage` means the browser's language will always win and a user's manual selection in `localStorage` will never take effect.
 
 ## Common Strategy Patterns
 
@@ -39,17 +37,14 @@ strategy: ["localStorage", "cookie", "url", "baseLocale"]
 ```
 Use this when you want returning visitors to see content in their previously selected language, regardless of the URL they land on. The URL only determines locale if no preference is stored.
 
-### Automatic language detection with URL fallback
+### Automatic language detection with persistent override
 ```js
-strategy: ["preferredLanguage", "url", "baseLocale"]
+strategy: ["localStorage", "preferredLanguage", "url", "baseLocale"]
 ```
-Use this for new visitors to automatically see content in their browser's language, with URL-based routing as a fallback.
+Use this when you want first-time visitors to see content in their browser's language but still allow manual language changes to persist via `localStorage`.
 
-### Session-based with persistence
-```js
-strategy: ["cookie", "localStorage", "preferredLanguage", "baseLocale"]
-```
-Use this for applications where the locale should persist across sessions but not be tied to the URL structure.
+The fallback chain flows left to right: `localStorage → preferredLanguage → url → baseLocale`.
+Because `localStorage` is first, a stored selection overrides the browser setting. If it's missing, the arrow falls through to `preferredLanguage`, then `url`, and finally `baseLocale`.
 
 ## Built-in strategies
 
