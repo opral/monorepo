@@ -30,30 +30,33 @@ export async function upsertConversationPointer(
 	lix: Lix,
 	conversationId: string
 ): Promise<void> {
-	const exists = await lix.db
-		.selectFrom("key_value_all")
-		.where("lixcol_version_id", "=", "global")
-		.where("key", "=", POINTER_KEY)
-		.select(["key"])
-		.executeTakeFirst();
-	if (exists) {
-		await lix.db
-			.updateTable("key_value_all")
-			.set({ value: conversationId, lixcol_untracked: true })
-			.where("key", "=", POINTER_KEY)
+	await lix.db.transaction().execute(async (trx) => {
+		const exists = await trx
+			.selectFrom("key_value_all")
 			.where("lixcol_version_id", "=", "global")
-			.execute();
-	} else {
-		await lix.db
-			.insertInto("key_value_all")
-			.values({
-				key: POINTER_KEY,
-				value: conversationId,
-				lixcol_version_id: "global",
-				lixcol_untracked: true,
-			})
-			.execute();
-	}
+			.where("key", "=", POINTER_KEY)
+			.select(["key"])
+			.executeTakeFirst();
+
+		if (exists) {
+			await trx
+				.updateTable("key_value_all")
+				.set({ value: conversationId, lixcol_untracked: true })
+				.where("key", "=", POINTER_KEY)
+				.where("lixcol_version_id", "=", "global")
+				.execute();
+		} else {
+			await trx
+				.insertInto("key_value_all")
+				.values({
+					key: POINTER_KEY,
+					value: conversationId,
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				})
+				.execute();
+		}
+	});
 }
 
 export async function appendUserMessage(
