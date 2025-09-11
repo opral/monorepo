@@ -5,6 +5,7 @@ import { useAgentChat } from "@/hooks/use-agent-chat";
 import { useLix } from "@lix-js/react-utils";
 import type { ChatMessage as UiMessage } from "./types";
 import { LoadingBar } from "./loading-bar";
+import { AcceptChangesMenu } from "./accept-changes-menu";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).
@@ -37,6 +38,13 @@ export function ChatPanel() {
 
 	// Focus management: pressing "/" anywhere inside the panel focuses the input.
 	const panelRef = React.useRef<HTMLDivElement>(null);
+	const [showDecision, setShowDecision] = React.useState(false);
+	const pendingPrev = React.useRef(false);
+	React.useEffect(() => {
+		// Show decision menu when pending flips from true -> false
+		if (pendingPrev.current && !pending) setShowDecision(true);
+		pendingPrev.current = pending;
+	}, [pending]);
 
 	React.useEffect(() => {
 		const el = panelRef.current;
@@ -68,28 +76,47 @@ export function ChatPanel() {
 		>
 			<ChatMessageList messages={messages} />
 			{pending ? <LoadingBar /> : null}
-			<ChatInput
-				onSend={(v) => {
-					if (pending) return; // prevent send while working
-					send(v);
-				}}
-				onCommand={async (cmd) => {
-					if (cmd === "clear" || cmd === "reset" || cmd === "new") {
-						await clear();
-						return;
-					}
-				}}
-				onQueryMentions={async (q) => {
-					if (!q) return [];
-					const rows = await lix.db
-						.selectFrom("file")
-						.where("path", "like", `%${q}%`)
-						.select(["path"])
-						.limit(50)
-						.execute();
-					return rows.map((r) => String((r as any).path));
-				}}
-			/>
+			{showDecision ? (
+				<AcceptChangesMenu
+					onPick={(idx) => {
+						setShowDecision(false);
+						// Mock: append a small summary message depending on choice
+						const text =
+							idx === 0
+								? "Accepted all changes (mock)."
+								: idx === 1
+									? "Rejected all changes (mock)."
+									: "Entering review mode (mock).";
+						// No real agent call here; just a visual cue via console
+						console.debug("Decision picked:", idx, text);
+					}}
+					onCancel={() => setShowDecision(false)}
+				/>
+			) : null}
+			{!showDecision && (
+				<ChatInput
+					onSend={(v) => {
+						if (pending) return; // prevent send while working
+						send(v);
+					}}
+					onCommand={async (cmd) => {
+						if (cmd === "clear" || cmd === "reset" || cmd === "new") {
+							await clear();
+							return;
+						}
+					}}
+					onQueryMentions={async (q) => {
+						if (!q) return [];
+						const rows = await lix.db
+							.selectFrom("file")
+							.where("path", "like", `%${q}%`)
+							.select(["path"])
+							.limit(50)
+							.execute();
+						return rows.map((r) => String((r as any).path));
+					}}
+				/>
+			)}
 		</div>
 	);
 }
