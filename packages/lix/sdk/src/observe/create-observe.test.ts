@@ -903,10 +903,6 @@ test("optimization prevents unnecessary query re-executions", async () => {
 	await lix.close();
 });
 
-// ---------------------------------------------------------------------------
-// Pooling tests — identical observe() calls share a single observable
-// ---------------------------------------------------------------------------
-
 test("observe pools identical compiled queries (same instance)", async () => {
 	const lix = await openLix({});
 

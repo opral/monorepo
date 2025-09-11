@@ -1,21 +1,9 @@
-import {
-	Change,
-	Lix,
-	createThread,
-	createCheckpoint,
-	Thread,
-	LixVersion,
-} from "@lix-js/sdk";
+import { Change, Lix, createConversation, createCheckpoint, LixVersion, type LixConversationMessage } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
-import {
-	activeFileAtom,
-	checkpointChangeSetsAtom,
-	getThreads,
-	workingChangeSetAtom,
-} from "../state-active-file.ts";
+import { activeFileAtom, checkpointChangeSetsAtom, getConversations, workingChangeSetAtom } from "../state-active-file.ts";
 import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import RowDiff from "./RowDiff.tsx";
@@ -40,7 +28,8 @@ export default function Component(props: {
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
 	>({});
-	const [threads, setThreads] = useState<Thread[]>([]);
+	type ConversationWithComments = { id: string; comments: LixConversationMessage[] };
+	const [threads, setThreads] = useState<ConversationWithComments[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
 		Awaited<ReturnType<typeof getIntermediateChanges>>
@@ -88,17 +77,22 @@ export default function Component(props: {
 
 	useEffect(() => {
 		const fetchThreads = async () => {
-			if (props.changeSetid) {
-				const threads = await getThreads(lix, props.changeSetid);
-				if (threads) setThreads(threads);
-			}
+			if (!props.changeSetid) return;
+			// Find the commit for this change set
+			const commit = await lix.db
+				.selectFrom("commit")
+				.where("change_set_id", "=", props.changeSetid)
+				.select(["id"]) 
+				.executeTakeFirst();
+			if (!commit) return;
+			const convs = await getConversations(lix, commit.id);
+			if (convs) setThreads(convs);
 		};
 
 		fetchThreads();
 	}, []);
 
 	// Get the first comment if it exists
-	// @ts-expect-error - Typescript doesn't know that threads are created with initial comment
 	const firstComment = threads?.[0]?.comments?.[0];
 
 	// Truncate comment content if it's longer than 50 characters
@@ -198,8 +192,8 @@ const CreateCheckpointBox = () => {
 				throw new Error("No commit found for working change set");
 			}
 
-			// Create thread with entity (commit) attachment using the new system
-			await createThread({
+			// Create conversation with entity (commit) attachment using the new system
+			await createConversation({
 				lix: { ...lix, db: trx },
 				comments: [{ body: args.content }],
 				entity: {

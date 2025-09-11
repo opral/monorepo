@@ -7,14 +7,14 @@ import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builde
 import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
-export function applyThreadDatabaseSchema(
+export function applyConversationDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">
 ): void {
-	// Create both primary and _all views for thread with default ID generation
+	// Create both primary and _all views for conversation with default ID generation
 	createEntityViewsIfNotExists({
 		lix,
-		schema: LixThreadSchema,
-		overrideName: "thread",
+		schema: LixConversationSchema,
+		overrideName: "conversation",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
@@ -22,11 +22,11 @@ export function applyThreadDatabaseSchema(
 		},
 	});
 
-	// Create both primary and _all views for thread_comment with default ID generation
+	// Create both primary and _all views for conversation_message with default ID generation
 	createEntityViewsIfNotExists({
 		lix,
-		schema: LixThreadCommentSchema,
-		overrideName: "thread_comment",
+		schema: LixConversationMessageSchema,
+		overrideName: "conversation_message",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
@@ -35,8 +35,8 @@ export function applyThreadDatabaseSchema(
 	});
 }
 
-export const LixThreadSchema = {
-	"x-lix-key": "lix_thread",
+export const LixConversationSchema = {
+	"x-lix-key": "lix_conversation",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	type: "object",
@@ -47,24 +47,24 @@ export const LixThreadSchema = {
 	required: ["id"],
 	additionalProperties: false,
 } as const;
-LixThreadSchema satisfies LixSchemaDefinition;
+LixConversationSchema satisfies LixSchemaDefinition;
 
-export const LixThreadCommentSchema = {
-	"x-lix-key": "lix_thread_comment",
+export const LixConversationMessageSchema = {
+	"x-lix-key": "lix_conversation_message",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["thread_id"],
+			properties: ["conversation_id"],
 			references: {
-				schemaKey: "lix_thread",
+				schemaKey: "lix_conversation",
 				properties: ["id"],
 			},
 		},
 		{
 			properties: ["parent_id"],
 			references: {
-				schemaKey: "lix_thread_comment",
+				schemaKey: "lix_conversation_message",
 				properties: ["id"],
 			},
 		},
@@ -72,19 +72,21 @@ export const LixThreadCommentSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
-		thread_id: { type: "string" },
+		conversation_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,
+		metadata: { type: "object", nullable: true },
 	},
-	required: ["id", "thread_id", "body"],
+	required: ["id", "conversation_id", "body"],
 	additionalProperties: false,
 } as const;
-LixThreadCommentSchema satisfies LixSchemaDefinition;
+LixConversationMessageSchema satisfies LixSchemaDefinition;
 
-// Business logic types with LixGenerated markers
-export type LixThread = FromLixSchemaDefinition<typeof LixThreadSchema>;
-export type LixThreadComment = FromLixSchemaDefinition<
-	typeof LixThreadCommentSchema
+export type LixConversation = FromLixSchemaDefinition<
+	typeof LixConversationSchema
+>;
+export type LixConversationMessage = FromLixSchemaDefinition<
+	typeof LixConversationMessageSchema
 > & {
 	body: ZettelDoc; // Override the body type
 };

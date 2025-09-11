@@ -2,14 +2,14 @@ import type { Lix } from "../../lix/open-lix.js";
 import type { LixEntity, LixEntityCanonical } from "../schema.js";
 
 /**
- * Creates a mapping between an entity and a label.
+ * Attaches a label to an entity (creates mapping).
  *
  * This function allows any entity in the system to be labeled,
  * enabling universal labeling across all entity types.
  *
  * @example
  * // Label a bundle entity
- * await createEntityLabel({
+ * await attachLabel({
  *   lix,
  *   entity: {
  *     entity_id: "bundle123",
@@ -21,7 +21,7 @@ import type { LixEntity, LixEntityCanonical } from "../schema.js";
  *
  * @example
  * // Label a change set
- * await createEntityLabel({
+ * await attachLabel({
  *   lix,
  *   entity: {
  *     entity_id: "cs123",
@@ -31,7 +31,7 @@ import type { LixEntity, LixEntityCanonical } from "../schema.js";
  *   label: { id: "reviewed-label-id" }
  * });
  */
-export async function createEntityLabel(args: {
+export async function attachLabel(args: {
 	lix: Pick<Lix, "db">;
 	entity: LixEntity | LixEntityCanonical;
 	label: { id: string };
@@ -76,10 +76,10 @@ export async function createEntityLabel(args: {
 }
 
 /**
- * Deletes a mapping between an entity and a label.
+ * Detaches a label from an entity (removes mapping).
  *
  * @example
- * await deleteEntityLabel({
+ * await detachLabel({
  *   lix,
  *   entity: {
  *     entity_id: "bundle123",
@@ -89,7 +89,7 @@ export async function createEntityLabel(args: {
  *   label: { id: "needs-translation-label-id" }
  * });
  */
-export async function deleteEntityLabel(args: {
+export async function detachLabel(args: {
 	lix: Pick<Lix, "db">;
 	entity: LixEntity | LixEntityCanonical;
 	label: { id: string };

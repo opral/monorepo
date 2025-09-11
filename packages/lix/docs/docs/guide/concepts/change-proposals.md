@@ -39,9 +39,9 @@ const featureChangeSet = await createChangeSet({
   ],
 });
 
-// Add a thread for discussion
-const thread = await lix.db
-  .insertInto("thread")
+// Add a conversation for discussion
+const conversation = await lix.db
+  .insertInto("conversation")
   .values({
     id: generateId(),
     title: "Add dark theme support",
@@ -77,12 +77,12 @@ The review process involves:
 Here's how to implement the review process:
 
 ```typescript
-// Add a comment to the proposal thread
+// Add a message to the proposal conversation
 await lix.db
-  .insertInto("comment")
+  .insertInto("conversation_message")
   .values({
     id: generateId(),
-    thread_id: thread.id,
+    conversation_id: conversation.id,
     content:
       "The dark theme looks good, but we should adjust the contrast ratio for better accessibility.",
     author: "reviewer@example.com",
@@ -184,12 +184,12 @@ await lix.db
   .where("key", "=", "status")
   .execute();
 
-// Add a merge comment to the thread
+// Add a merge message to the conversation
 await lix.db
-  .insertInto("comment")
+  .insertInto("conversation_message")
   .values({
     id: generateId(),
-    thread_id: thread.id,
+    conversation_id: conversation.id,
     content: `Merged into ${targetVersion.name} as change set ${mergeChangeSet.id}`,
     author: "system",
     created_at: new Date().toISOString(),
@@ -272,9 +272,9 @@ await lix.db
   .where("id", "=", featureVersion.id)
   .execute();
 
-// Create a discussion thread
-const thread = await lix.db
-  .insertInto("thread")
+// Create a discussion conversation
+const conversation = await lix.db
+  .insertInto("conversation")
   .values({
     id: generateId(),
     title: "Add dark theme support",
@@ -297,12 +297,12 @@ await lix.db
   })
   .execute();
 
-// Reviewer adds a comment
+// Reviewer adds a message
 await lix.db
-  .insertInto("comment")
+  .insertInto("conversation_message")
   .values({
     id: generateId(),
-    thread_id: thread.id,
+    conversation_id: conversation.id,
     content: "Please adjust the contrast of the secondary colors.",
     author: "reviewer@example.com",
     created_at: new Date().toISOString(),
@@ -349,12 +349,12 @@ await lix.db
   .where("id", "=", featureVersion.id)
   .execute();
 
-// Proposer adds a comment about the changes
+// Proposer adds a message about the changes
 await lix.db
-  .insertInto("comment")
+  .insertInto("conversation_message")
   .values({
     id: generateId(),
-    thread_id: thread.id,
+    conversation_id: conversation.id,
     content:
       "I've increased the contrast ratio as requested. The theme now passes WCAG AA standards.",
     author: "proposer@example.com",
@@ -411,10 +411,10 @@ await lix.db
 
 // Add a merge notification
 await lix.db
-  .insertInto("comment")
+  .insertInto("conversation_message")
   .values({
     id: generateId(),
-    thread_id: thread.id,
+    conversation_id: conversation.id,
     content: `Changes have been merged into the main version.`,
     author: "system",
     created_at: new Date().toISOString(),

@@ -5,12 +5,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { Thread, UiDiffComponentProps } from "@lix-js/sdk";
+import { UiDiffComponentProps, type LixConversationMessage } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { useAtom } from "jotai/react";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
+import { activeFileAtom, getChangeDiffs, getConversations } from "@/state-active-file.ts";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
@@ -27,15 +27,19 @@ export const CheckpointComponent = (props: {
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
-  const [threads, setThreads] = useState<Thread[]>([]);
+  type ConversationWithComments = {
+    id: string;
+    comments: (LixConversationMessage & { author_name?: string | null })[];
+  };
+  const [threads, setThreads] = useState<ConversationWithComments[]>([]);
   const [lix] = useAtom(lixAtom);
   const [activeFile] = useAtom(activeFileAtom);
 
   useEffect(() => {
     const fetchThreads = async () => {
       if (props.checkpointChangeSet.commit_id) {
-        const threads = await getThreads(lix, props.checkpointChangeSet.commit_id);
-        if (threads) setThreads(threads);
+        const convs = await getConversations(lix, props.checkpointChangeSet.commit_id);
+        if (convs) setThreads(convs);
       }
     };
 
@@ -79,7 +83,6 @@ export const CheckpointComponent = (props: {
   }, {});
 
   // Get the first comment if it exists
-  // @ts-expect-error - Typescript doesn't know that threads are created with initial comment
   const firstComment = threads?.[0]?.comments?.[0];
 
   // Truncate comment content if it's longer than 50 characters

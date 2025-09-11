@@ -20,9 +20,11 @@ test("should extract schema keys from simple table queries", async () => {
 
 	const schemaKeys = determineSchemaKeys(activeVersionQuery.compile());
 
-	// Should include schema keys for both active_version and version tables
-	expect(schemaKeys).toContain("lix_version");
-	// Note: active_version might not have a direct schema key mapping
+	// Should include underlying version descriptor/tip because the merged 'version' view depends on them
+	expect(schemaKeys).toContain("lix_version_descriptor");
+	expect(schemaKeys).toContain("lix_version_tip");
+	// Optionally include active version view dependency
+	expect(schemaKeys).toContain("lix_active_version");
 
 	await lix.close();
 });
@@ -67,7 +69,7 @@ test("should extract schema keys from state_all table queries", async () => {
 	// Test query using "state_all" table (includes all versions)
 	const stateAllQuery = lix.db
 		.selectFrom("state_all")
-		.where("schema_key", "=", "lix_version")
+		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", "test_version_id")
 		.selectAll();
 
@@ -211,36 +213,45 @@ test("should handle complex working changes query", async () => {
 	// Should include schema keys for all tables involved
 	expect(schemaKeys).toContain("change"); // change table
 	expect(schemaKeys).toContain("lix_change_set_element");
-	expect(schemaKeys).toContain("lix_version");
+	expect(schemaKeys).toContain("lix_version_descriptor");
+	expect(schemaKeys).toContain("lix_version_tip");
 	expect(schemaKeys).toContain("lix_key_value");
 
 	await lix.close();
 });
 
-test("should handle thread queries with json aggregation", async () => {
+test("should handle conversation queries with json aggregation", async () => {
 	const lix = await openLix({});
 
-	// Test selectThreads query updated to use entity_thread for universal commenting
+	// Test selectConversations query using entity_conversation for universal commenting
 	const threadsQuery = lix.db
-		.selectFrom("thread")
-		.leftJoin("entity_thread", "thread.id", "entity_thread.thread_id")
-		.leftJoin("thread_comment", "thread_comment.thread_id", "thread.id")
+		.selectFrom("conversation")
+		.leftJoin(
+			"entity_conversation",
+			"conversation.id",
+			"entity_conversation.conversation_id"
+		)
+		.leftJoin(
+			"conversation_message",
+			"conversation_message.conversation_id",
+			"conversation.id"
+		)
 		.leftJoin(
 			"change_author",
-			"thread_comment.lixcol_change_id",
+			"conversation_message.lixcol_change_id",
 			"change_author.change_id"
 		)
 		.leftJoin("account", "account.id", "change_author.account_id")
-		.where("entity_thread.entity_id", "=", "test_changeset")
-		.where("entity_thread.schema_key", "=", "lix_change_set")
-		.selectAll("thread");
+		.where("entity_conversation.entity_id", "=", "test_changeset")
+		.where("entity_conversation.schema_key", "=", "lix_change_set")
+		.selectAll("conversation");
 
 	const schemaKeys = determineSchemaKeys(threadsQuery.compile());
 
 	// Should include all joined tables
-	expect(schemaKeys).toContain("lix_thread");
-	expect(schemaKeys).toContain("lix_entity_thread");
-	expect(schemaKeys).toContain("lix_thread_comment");
+	expect(schemaKeys).toContain("lix_conversation");
+	expect(schemaKeys).toContain("lix_entity_conversation");
+	expect(schemaKeys).toContain("lix_conversation_message");
 	expect(schemaKeys).toContain("lix_change_author");
 	expect(schemaKeys).toContain("lix_account");
 
@@ -258,7 +269,7 @@ test("should correctly extract schema keys from real md-app queries", async () =
 				.selectFrom("active_version")
 				.innerJoin("version", "active_version.version_id", "version.id")
 				.selectAll("version"),
-			expectedKeys: ["lix_version"],
+			expectedKeys: ["lix_version_descriptor", "lix_version_tip"],
 		},
 		{
 			name: "selectCurrentLixName",
@@ -367,5 +378,25 @@ test("should observe key value and handle untracked insertions", async () => {
 	});
 
 	subscription.unsubscribe();
+	await lix.close();
+});
+
+test("determineSchemaKeys: query on version yields descriptor and tip keys", async () => {
+	const lix = await openLix({});
+	const q = lix.db.selectFrom("version").selectAll();
+	const compiled = q.compile();
+	const keys = determineSchemaKeys(compiled);
+	expect(keys).toContain("lix_version_descriptor");
+	expect(keys).toContain("lix_version_tip");
+	await lix.close();
+});
+
+test("determineSchemaKeys: query on version_all yields descriptor and tip keys", async () => {
+	const lix = await openLix({});
+	const q = lix.db.selectFrom("version_all").selectAll();
+	const compiled = q.compile();
+	const keys = determineSchemaKeys(compiled);
+	expect(keys).toContain("lix_version_descriptor");
+	expect(keys).toContain("lix_version_tip");
 	await lix.close();
 });

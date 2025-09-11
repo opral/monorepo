@@ -72,6 +72,15 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 		}
 	}
 
+	// Special case: the merged 'version' views are composed from descriptor + tip state
+	// Changes to those underlying schema keys should invalidate queries against 'version'.
+	if (tableNames.has("version") || tableNames.has("version_all")) {
+		if (!schemaKeys.includes("lix_version_descriptor"))
+			schemaKeys.push("lix_version_descriptor");
+		if (!schemaKeys.includes("lix_version_tip"))
+			schemaKeys.push("lix_version_tip");
+	}
+
 	// Try to detect literal schema_key filters from the compiled SQL and parameters.
 	// This allows more precise dependency tracking for state_all queries.
 	const sqlText: string | undefined = (compiledQuery?.sql ??

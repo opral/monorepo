@@ -11,7 +11,6 @@ import { ToolRunList } from "./tool-run-list";
  */
 export function ChatMessage({ message }: { message: Msg }) {
 	const isUser = message.role === "user";
-	const isAssistant = message.role === "assistant";
 	const isSystem = message.role === "system";
 
 	const chrome = isSystem

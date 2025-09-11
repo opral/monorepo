@@ -20,12 +20,12 @@ test("should throw error when using returning() on view insert", async () => {
 	// Test with returning() instead of returningAll()
 	expect(() => {
 		lix.db
-			.insertInto("thread")
+			.insertInto("conversation")
 			.values({ id: "test-id" })
 			.returning("id")
 			.compile();
 	}).toThrow(
-		"Cannot use returning() or returningAll() with INSERT operations on view 'thread'. " +
+		"Cannot use returning() or returningAll() with INSERT operations on view 'conversation'. " +
 			"Views do not support returning clauses in INSERT statements. " +
 			"Use a separate SELECT query after the INSERT to retrieve the data."
 	);

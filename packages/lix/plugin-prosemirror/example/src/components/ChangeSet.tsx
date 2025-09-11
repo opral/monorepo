@@ -9,12 +9,12 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import {
-	transition,
-	createThread,
-	type LixChangeSet as ChangeSetType,
+    transition,
+    createConversation,
+    type LixChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { selectActiveAccount, selectThreads } from "../queries";
+import { selectActiveAccount, selectConversations } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Composer, Thread } from "./Thread";
 import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
@@ -91,7 +91,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			if (!commit?.id) {
 				return [] as any;
 			}
-			return selectThreads(lix, { commitId: commit.id });
+			return selectConversations(lix, { commitId: commit.id });
 		});
 
 		// Removed the console.log statement as it is a debugging artifact.
@@ -115,17 +115,17 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		const onThreadComposerSubmit = async (args: { body: ZettelDoc }) => {
 			if (!commit?.id) {
-				console.error("Cannot create thread: commit not found for change set");
+				console.error("Cannot create conversation: commit not found for change set");
 				return;
 			}
 
-			// Create thread attached to the commit entity
-			await createThread({
-				lix,
-				versionId: "global",
-				comments: [{ body: args.body }],
-				entity: {
-					entity_id: commit.id,
+            // Create conversation attached to the commit entity
+            await createConversation({
+                lix,
+                versionId: "global",
+                comments: [{ body: args.body }],
+                entity: {
+                    entity_id: commit.id,
 					schema_key: "lix_commit",
 					file_id: "lix",
 				},

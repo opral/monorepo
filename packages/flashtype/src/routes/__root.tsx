@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { LeftSidebarProvider, useLeftSidebar } from "@/components/left-sidebar";
@@ -201,11 +200,9 @@ function Root() {
 												className="w-[3px] cursor-col-resize bg-transparent hover:bg-amber-500/30 active:bg-amber-500/40"
 											/>
 											<div
-												className="shrink-0 border-l bg-background flex h-full w-full max-h-full min-h-0 overflow-hidden"
+												className="shrink-0 border-l bg-background flex h-full w-full min-h-0 overflow-hidden"
 												style={{
 													width: agentChatWidth,
-													height:
-														"calc(100dvh - var(--lix-inspector-offset, 0px) - 3rem)",
 												}}
 											>
 												<SidebarTab
@@ -231,9 +228,6 @@ function Root() {
 								</div>
 							</div>
 						</div>
-						{import.meta.env.DEV ? (
-							<TanStackRouterDevtools position="bottom-right" />
-						) : null}
 					</SidebarInset>
 				</EditorProvider>
 			</SidebarProvider>

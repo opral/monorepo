@@ -1,7 +1,9 @@
 import * as React from "react";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
-import { useChatMock } from "./use-chat-mock";
+import { useAgentChat } from "@/hooks/use-agent-chat";
+import { useLix } from "@lix-js/react-utils";
+import type { ChatMessage as UiMessage } from "./types";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).
@@ -11,11 +13,28 @@ import { useChatMock } from "./use-chat-mock";
  * <ChatPanel />
  */
 export function ChatPanel() {
-	const { messages, isStreaming, send } = useChatMock();
+	const lix = useLix();
+	const {
+		messages: agentMsgs,
+		send,
+		clear,
+	} = useAgentChat({
+		lix,
+		system:
+			"You are running embedded in an app called 'Flashtype'. Flashtype is a WISIWYG markdown editor that runs in the browser with lix change control.",
+	});
+
+	const messages = React.useMemo<UiMessage[]>(() => {
+		return agentMsgs.map((m) => ({
+			id: m.id,
+			role: m.role,
+			content: m.content,
+			at: undefined,
+		}));
+	}, [agentMsgs]);
 
 	// Focus management: pressing "/" anywhere inside the panel focuses the input.
 	const panelRef = React.useRef<HTMLDivElement>(null);
-	const inputRef = React.useRef<{ focus: () => void } | null>(null);
 
 	React.useEffect(() => {
 		const el = panelRef.current;
@@ -46,7 +65,25 @@ export function ChatPanel() {
 			className="relative flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
 		>
 			<ChatMessageList messages={messages} />
-			<ChatInput onSend={send} />
+			<ChatInput
+				onSend={send}
+				onCommand={async (cmd) => {
+					if (cmd === "clear" || cmd === "reset" || cmd === "new") {
+						await clear();
+						return;
+					}
+				}}
+				onQueryMentions={async (q) => {
+					if (!q) return [];
+					const rows = await lix.db
+						.selectFrom("file")
+						.where("path", "like", `%${q}%`)
+						.select(["path"])
+						.limit(50)
+						.execute();
+					return rows.map((r) => String((r as any).path));
+				}}
+			/>
 		</div>
 	);
 }

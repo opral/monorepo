@@ -2363,12 +2363,12 @@ test("should prevent deletion when self-referential foreign keys reference the e
 test("should prevent foreign key references to inherited entities from different version contexts", async () => {
 	const lix = await openLix({});
 
-	// Create a thread in global context
+	// Create a conversation in global context
 	await lix.db
-		.insertInto("thread_all")
+		.insertInto("conversation_all")
 		.values({
 			id: "global_thread",
-			metadata: { title: "Global Thread" },
+			metadata: { title: "Global Conversation" },
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -2379,15 +2379,15 @@ test("should prevent foreign key references to inherited entities from different
 		.select("version_id")
 		.executeTakeFirstOrThrow();
 
-	// Get the thread comment schema
+	// Get the conversation message schema
 	const threadCommentSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_thread_comment")
+		.where("key", "=", "lix_conversation_message")
 		.executeTakeFirstOrThrow();
 
-	// This should FAIL: attempting to create a thread_comment in the active version
-	// that references a thread that only exists in global context.
+	// This should FAIL: attempting to create a conversation_message in the active version
+	// that references a conversation that only exists in global context.
 	// Foreign keys should only work within the same version context.
 	expect(() =>
 		validateStateMutation({
@@ -2395,7 +2395,7 @@ test("should prevent foreign key references to inherited entities from different
 			schema: threadCommentSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				id: "comment1",
-				thread_id: "global_thread", // References thread in global context
+				conversation_id: "global_thread", // References conversation in global context
 				parent_id: null,
 				body: {
 					type: "zettel_doc",
@@ -2412,7 +2412,9 @@ test("should prevent foreign key references to inherited entities from different
 			operation: "insert",
 			version_id: activeVersion.version_id, // But creating comment in active version context
 		})
-	).toThrow(/Foreign key constraint violation.*lix_thread.*global_thread/);
+	).toThrow(
+		/Foreign key constraint violation.*lix_conversation.*global_thread/
+	);
 });
 
 test("should prevent change set elements from referencing change sets defined in global context", async () => {

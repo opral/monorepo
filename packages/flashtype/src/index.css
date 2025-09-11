@@ -236,21 +236,16 @@
 	outline: none;
 }
 
-/* Allow editor surface to fill available height */
-.ProseMirror {
-	min-height: 100%;
-}
-
 /* Fill available space */
 html,
 body,
 #root {
 	height: 100%;
+	max-height: 100%;
 }
 
 .tiptap,
 .ProseMirror {
-	height: 100%;
 	width: 100%;
 }
 

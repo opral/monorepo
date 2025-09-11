@@ -3,21 +3,16 @@ import IconChevron from "./icons/IconChevron.tsx";
 import { useAtom } from "jotai/react";
 import { Button } from "./ui/button.tsx";
 import { clsx } from "clsx";
-import {
-	// activeVersionAtom,
-	threadSearchParamsAtom,
-	lixAtom
-} from "@/state.ts";
-// import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
+import { conversationSearchParamsAtom, lixAtom } from "@/state.ts";
+import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 
 const ConnectedChanges = () => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
-	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
+	const [threadSearchParams] = useAtom(conversationSearchParamsAtom);
 	const [lix] = useAtom(lixAtom);
-	// const [activeVersion] = useAtom(activeVersionAtom);
-	// const [activeFile] = useAtom(activeFileAtom);
+	const [activeFile] = useAtom(activeFileAtom);
 	const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
 
 	useEffect(() => {
@@ -35,17 +30,29 @@ const ConnectedChanges = () => {
 	}, {});
 
 	const getThreadChanges = async () => {
-		const discussionChangeSet = await lix.db
-			.selectFrom("thread")
-			.innerJoin("change_set", "change_set.id", "thread.id")
-			.where("thread.id", "=", threadSearchParams)
-			.select(["change_set.id"])
-			.executeTakeFirstOrThrow();
+		if (!threadSearchParams) return [];
 
-		if (!discussionChangeSet) return [];
+		// Find the commit attached to this conversation
+		const mapping = await lix.db
+			.selectFrom("entity_conversation")
+			.innerJoin("commit", "commit.id", "entity_conversation.entity_id")
+			.where("entity_conversation.conversation_id", "=", threadSearchParams)
+			.where("entity_conversation.schema_key", "=", "lix_commit")
+			.where("entity_conversation.file_id", "=", "lix")
+			.select(["commit.change_set_id"])
+			.executeTakeFirst();
 
-		const changes = [] as UiDiffComponentProps["diffs"];
-		// await getChangeDiffs(lix, discussionChangeSet.id, activeVersion!, activeFile);
+		if (!mapping) {
+			setDiffs([]);
+			return [];
+		}
+
+		const changes = await getChangeDiffs(
+			lix,
+			mapping.change_set_id,
+			undefined,
+			activeFile?.id ?? undefined
+		);
 		setDiffs(changes);
 		return changes;
 	};

@@ -29,7 +29,7 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 		<div
 			ref={ref}
 			data-testid="chat-scroller"
-			className={`flex-1 min-h-0 overflow-y-auto px-3 py-3 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
+			className={`flex-1 min-h-0 overflow-y-auto px-1 py-1 ${hideScrollbar ? "scrollbar-hidden" : ""}`}
 		>
 			<div className="w-full flex min-h-full max-w-none flex-col">
 				{/* Top‑aligned welcome message persists as the first item */}

@@ -6,7 +6,7 @@ import { Button } from "./ui/button.tsx";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
 import {
 	activeAccountAtom,
-	threadSearchParamsAtom,
+	conversationSearchParamsAtom,
 	lixAtom,
 } from "@/state.ts";
 import IconArrow from "./icons/IconArrow.tsx";
@@ -15,7 +15,7 @@ import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 const ChatInput = () => {
 	const [activeAccount] = useAtom(activeAccountAtom);
-	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
+	const [conversationSearchParams] = useAtom(conversationSearchParamsAtom);
 	const [lix] = useAtom(lixAtom);
 
 	const form = useForm({
@@ -39,10 +39,10 @@ const ChatInput = () => {
 
 	const handleAddComment = async () => {
 		await lix.db
-			.insertInto("thread_comment")
+			.insertInto("conversation_message")
 			.values({
 				body: fromPlainText(commentValue),
-				thread_id: threadSearchParams!,
+				conversation_id: conversationSearchParams!,
 			})
 			.execute();
 		await saveLixToOpfs({ lix });

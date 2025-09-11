@@ -10,11 +10,7 @@ import {
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import {
-	createCheckpoint,
-	createThread,
-	UiDiffComponentProps,
-} from "@lix-js/sdk";
+import { createCheckpoint, createConversation, UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
@@ -104,8 +100,8 @@ const CreateCheckpointInput = () => {
 			// Create the checkpoint first to get the commit ID
 			const checkpoint = await createCheckpoint({ lix: { ...lix, db: trx } });
 
-			// Now create the thread and attach it to the commit
-			await createThread({
+			// Now create the conversation and attach it to the commit
+			await createConversation({
 				lix: { ...lix, db: trx },
 				comments: [{ body: fromPlainText(description!) }],
 				entity: checkpoint,

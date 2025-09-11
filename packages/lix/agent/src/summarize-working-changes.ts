@@ -28,17 +28,17 @@ export async function summarizeWorkingChanges(args: {
 		.limit(Math.max(1, Math.min(1000, args.limit ?? 200)))
 		.execute();
 
-    const prompt = [
-        "You are writing a commit message describing the working changes since the last checkpoint in a Lix workspace.",
-        "IMPORTANT: Output ONLY 1–3 short paragraphs (plain text). No headings, no lists, no code fences, no preamble.",
-        "Use neutral, imperative voice (e.g., Add…, Update…, Remove…). Prefer human meaning over schema/IDs.",
-        "Algorithm:\n1) Classify each diff row as added / modified / removed.\n2) Merge similar changes.\n3) Keep paragraphs short.",
-        "Special cases:\n- If schema_key is 'lix_key_value':\n  • added:     Add key '<key>' = <value>\n  • modified:  Update key '<key>' to <value>\n  • removed:   Remove key '<key>'",
-        "Good (plain text):\nAdd onboarding copy to welcome screen.\nUpdate key 'homepage_title' to \"Getting Started\".\nRemove deprecated setting 'legacy_mode'.",
-        "Bad:\nHere is a summary of the changes: …\n### Summary\n- Bulleted list …\n``` … ```",
-        "Diff:",
-        JSON.stringify(diff, null, 2),
-    ].join("\n\n");
+	const prompt = [
+		"You are writing a commit message describing the working changes since the last checkpoint in a Lix workspace.",
+		"IMPORTANT: Output ONLY 1–3 short paragraphs (plain text). No headings, no lists, no code fences, no preamble.",
+		"Use neutral, imperative voice (e.g., Add…, Update…, Remove…). Prefer human meaning over schema/IDs.",
+		"Algorithm:\n1) Classify each diff row as added / modified / removed.\n2) Merge similar changes.\n3) Keep paragraphs short.",
+		"Special cases:\n- If schema_key is 'lix_key_value':\n  • added:     Add key '<key>' = <value>\n  • modified:  Update key '<key>' to <value>\n  • removed:   Remove key '<key>'",
+		"Good (plain text):\nAdd onboarding copy to welcome screen.\nUpdate key 'homepage_title' to \"Getting Started\".\nRemove deprecated setting 'legacy_mode'.",
+		"Bad:\nHere is a summary of the changes: …\n### Summary\n- Bulleted list …\n``` … ```",
+		"Diff:",
+		JSON.stringify(diff, null, 2),
+	].join("\n\n");
 	const res = await generateText({ model: args.agent.model, prompt });
 	return { text: res.text };
 }
