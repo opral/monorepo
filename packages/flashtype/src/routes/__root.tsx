@@ -14,7 +14,12 @@ import { FormattingToolbar } from "@/components/formatting-toolbar";
 import { ChangeIndicator } from "@/components/change-indicator";
 import { VersionDropdown } from "@/components/version-dropdown";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, BotMessageSquare, FilePlus } from "lucide-react";
+import {
+	ArrowUpRight,
+	BotMessageSquare,
+	FilePlus,
+	GitPullRequestArrow,
+} from "lucide-react";
 import { LixAgentChat } from "@/components/lix-agent-chat";
 import { EditorProvider } from "@/editor/editor-context";
 
@@ -93,6 +98,14 @@ function Root() {
 			.where("id", "=", activeFileId),
 	);
 
+	// Determine active version to conditionally show Compare button
+	const activeVersion = useQueryTakeFirst(({ lix }) =>
+		lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version"),
+	);
+
 	// Persisted agent chat open state (untracked/global)
 	const [agentChatOpenKV, setAgentChatOpenKV] = useKeyValue(
 		"flashtype_agent_chat_open",
@@ -160,6 +173,23 @@ function Root() {
 										<VersionDropdown />
 									</div>
 									<div className="ml-auto flex items-center gap-2">
+										{/* Compare button: shown only when not on main */}
+										{activeVersion?.name !== "main" ? (
+											<Button
+												aria-label="Compare"
+												variant="ghost"
+												size="sm"
+												className="h-7 px-2 text-muted-foreground gap-1"
+												onClick={() => {
+													// Placeholder for diff mode toggle
+													// This will later swap the formatting bar for a diff bar
+													console.debug("Compare clicked");
+												}}
+											>
+												<GitPullRequestArrow className="h-4 w-4" />
+												<span className="leading-none">Compare</span>
+											</Button>
+										) : null}
 										<ChangeIndicator />
 										<Button
 											aria-label="Open Lix Agent chat"

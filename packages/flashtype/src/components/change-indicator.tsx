@@ -58,15 +58,16 @@ export function ChangeIndicator() {
 						openedViaPointer.current = false;
 					}}
 				>
-					<span className="font-medium text-sm">
-						<span data-testid="change-count">{total}</span> changes
-					</span>
+					{/* Move visual bars to the left for better scan order */}
 					<DiffIndicator
 						added={added}
 						removed={removed}
 						highRange={30}
 						showCounts={false}
 					/>
+					<span className="font-medium text-sm">
+						<span data-testid="change-count">{total}</span> changes
+					</span>
 					<ChevronDown
 						className={`size-4 transition-transform duration-200 ${
 							open ? "rotate-180" : ""
