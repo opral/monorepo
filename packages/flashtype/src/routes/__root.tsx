@@ -11,6 +11,7 @@ import { LeftSidebarHistory } from "@/components/left-sidebar-history";
 import { LeftSidebarTab } from "@/components/left-sidebar-tab";
 import { SidebarTab } from "@/components/sidebar-tab";
 import { FormattingToolbar } from "@/components/formatting-toolbar";
+import { DiffToolbar } from "@/components/diff-toolbar";
 import { ChangeIndicator } from "@/components/change-indicator";
 import { VersionDropdown } from "@/components/version-dropdown";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,12 @@ function Root() {
 	}, [agentChatWidth]);
 	const mainRef = useRef<HTMLDivElement | null>(null);
 
+	// Diff view open state
+	const [diffOpen, setDiffOpen] = useKeyValue("flashtype_diff_open", {
+		defaultVersionId: "global",
+		untracked: true,
+	});
+
 	/**
 	 * Start drag-resizing the agent panel via a vertical separator.
 	 * Calculates width from the container's right edge.
@@ -180,11 +187,7 @@ function Root() {
 												variant="ghost"
 												size="sm"
 												className="h-7 px-2 text-muted-foreground gap-1"
-												onClick={() => {
-													// Placeholder for diff mode toggle
-													// This will later swap the formatting bar for a diff bar
-													console.debug("Compare clicked");
-												}}
+												onClick={() => void setDiffOpen(true)}
 											>
 												<GitPullRequestArrow className="h-4 w-4" />
 												<span className="leading-none">Compare</span>
@@ -215,7 +218,7 @@ function Root() {
 									}}
 								>
 									<div className="flex min-h-0 min-w-0 flex-1 flex-col text-sm">
-										<FormattingToolbar />
+										{diffOpen ? <DiffToolbar /> : <FormattingToolbar />}
 										<div className="flex-1 overflow-auto p-4">
 											<Outlet />
 										</div>

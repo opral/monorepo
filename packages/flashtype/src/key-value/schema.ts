@@ -28,6 +28,37 @@ export const KEY_VALUE_DEFINITIONS = {
 		untracked: true,
 		defaultValue: false,
 	} as KeyDef<boolean>,
+
+	/**
+	 * Whether the Diff view is open.
+	 * Untracked global UI state so the swap doesn't affect versions.
+	 */
+	flashtype_diff_open: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: false,
+	} as KeyDef<boolean>,
+
+	/**
+	 * Preferred diff layout mode.
+	 * Untracked global UI preference.
+	 */
+	flashtype_diff_view: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: "unified",
+	} as KeyDef<"unified" | "side-by-side">,
+
+	// Test-only keys used in unit tests to exercise tracked behavior
+	flashtype_test_tracked: {
+		defaultVersionId: "active",
+		untracked: false,
+	} as KeyDef<string | null>,
+
+	flashtype_test_tracked_external: {
+		defaultVersionId: "active",
+		untracked: false,
+	} as KeyDef<string | null>,
 } as const;
 
 export type KnownKey = keyof typeof KEY_VALUE_DEFINITIONS;
