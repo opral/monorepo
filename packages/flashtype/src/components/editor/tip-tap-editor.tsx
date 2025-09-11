@@ -51,31 +51,30 @@ export function TipTapEditor({
 		),
 	);
 
-	// subscribe to external state changes and version switches
-	const externalState = useQuery(() =>
-		lix.db
-			.selectFrom("state_with_tombstones")
-			.where("file_id", "=", activeFileId)
-			.where("plugin_key", "=", plugin.key)
-			.where(
-				"version_id",
-				"=",
-				lix.db.selectFrom("active_version").select("version_id"),
-			)
-			// External means: writer_key IS NOT my session writer (NULLs count as external)
-			.where(sql`writer_key IS NOT ${writerKey}` as any)
-			.select(["writer_key"]),
-	);
-
+	// Subscribe to commit events and refresh on external changes
 	useEffect(() => {
-		console.log("External STATE", externalState);
-	}, [externalState]);
+		if (!activeFileId || !editor) return;
+		const unsubscribe = lix.hooks.onStateCommit(({ changes }) => {
+			// External: writer_key is null or different from our writer
+			const hasExternal = changes?.some(
+				(c) =>
+					c.file_id === activeFileId &&
+					(c.writer_key == null || c.writer_key !== writerKey),
+			);
+			if (hasExternal) {
+				assembleMdAst({ lix, fileId: activeFileId }).then((ast) =>
+					editor.commands.setContent(astToTiptapDoc(ast)),
+				);
+			}
+		});
+		return () => unsubscribe();
+	}, [lix, editor, activeFileId]);
 
+	// Watch active version to refresh on version switches
 	const activeVersionRow = useQuery(() =>
 		lix.db.selectFrom("active_version").select(["version_id"]).limit(1),
 	);
 
-	// rebuild the editor content if external changes or a version switch happened
 	useEffect(() => {
 		if (!editor || !activeFileId) return;
 		let cancelled = false;
@@ -87,7 +86,7 @@ export function TipTapEditor({
 		return () => {
 			cancelled = true;
 		};
-	}, [editor, lix, activeFileId, externalState, activeVersionRow]);
+	}, [editor, lix, activeFileId, activeVersionRow]);
 
 	useEffect(() => {
 		if (!editor) return;

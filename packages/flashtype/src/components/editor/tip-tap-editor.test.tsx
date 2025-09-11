@@ -2,7 +2,7 @@ import React, { Suspense, StrictMode } from "react";
 import { expect, test } from "vitest";
 import { render, waitFor, screen, act } from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
-import { ebEntity, openLix, type Lix } from "@lix-js/sdk";
+import { openLix, type Lix } from "@lix-js/sdk";
 import { TipTapEditor } from "./tip-tap-editor";
 import { KeyValueProvider } from "../../key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "../../key-value/schema";
@@ -417,16 +417,12 @@ test("updates editor when file.data is updated externally (simulate updateFile w
 	const editorA = await screen.findByTestId("tiptap-editor");
 	expect(editorA).toHaveTextContent("Hello A");
 
-	console.log("updating file");
-
 	// External: write markdown into file.data directly (simulating lix.updateFile)
 	await lix.db
 		.updateTable("file")
 		.set({ data: new TextEncoder().encode("Hello B from file.data") })
 		.where("id", "=", fileId)
 		.execute();
-
-	console.log("updated file");
 
 	// Expect editor to pick up the updated file content (currently fails)
 	await waitFor(async () => {

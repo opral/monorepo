@@ -1,6 +1,13 @@
-// State commit emits state-shaped rows (not raw changes).
-// These include version_id/commit_id and may carry untracked flag.
-
+/**
+ * State-committed row emitted to `onStateCommit` subscribers.
+ *
+ * These are state-shaped (not low-level change rows) and include operational columns such as
+ * `version_id`, `commit_id`, optional `untracked`, and `writer_key`.
+ *
+ * The `writer_key` identifies the writer responsible for the materialized state row and enables
+ * echo suppression in UIs (filter out your own writes while reacting to external ones). See the
+ * writer key guide for patterns and pitfalls.
+ */
 export type StateCommitChange = {
 	id: string;
 	entity_id: string;
@@ -14,8 +21,13 @@ export type StateCommitChange = {
 	commit_id: string;
 	/** 0 for tracked, 1 for untracked */
 	untracked?: number;
-	/** Writer identity that produced this state row, if known */
-	writer_key: string | null;
+	/**
+	 * Writer identity that produced this state row, if known.
+	 *
+     * Used for echo suppression (ignore my own writes; react to external ones).
+     * See docs: https://lix.dev/guide/writer-key
+     */
+     writer_key: string | null;
 };
 
 /**
@@ -36,6 +48,19 @@ export type LixHooks = {
 	 *
 	 * Fires after any state mutation is committed to the database.
 	 * Useful for auto-saving, cache invalidation, sync operations, etc.
+	 *
+	 * Payload carries `changes: StateCommitChange[]`, including `writer_key` for each state row
+	 * (when applicable). For UIs, filter by writer to suppress echoes, e.g.:
+	 *
+	 * ```ts
+	 * const writer_key = 'app_component_<session_id>'
+	 * lix.hooks.onStateCommit(({ changes }) => {
+	 *   const external = changes.some(c =>
+	 *     c.file_id === activeFileId && (c.writer_key == null || c.writer_key !== writer_key)
+	 *   )
+	 *   if (external) refresh()
+	 * })
+	 * ```
 	 *
 	 * @param handler - Function to call when state is committed
 	 * @returns Unsubscribe function to remove the listener

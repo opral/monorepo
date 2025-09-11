@@ -22,21 +22,21 @@ npm i @lix-js/react-utils
 Wrap your app with `LixProvider` and pass a Lix instance.
 
 ```tsx
-import { createRoot } from 'react-dom/client'
-import { LixProvider } from '@lix-js/react-utils'
-import { openLix } from '@lix-js/sdk'
+import { createRoot } from "react-dom/client";
+import { LixProvider } from "@lix-js/react-utils";
+import { openLix } from "@lix-js/sdk";
 
 async function bootstrap() {
-  const lix = await openLix({})
-  const root = createRoot(document.getElementById('root')!)
-  root.render(
-    <LixProvider lix={lix}>
-      <App />
-    </LixProvider>
-  )
+	const lix = await openLix({});
+	const root = createRoot(document.getElementById("root")!);
+	root.render(
+		<LixProvider lix={lix}>
+			<App />
+		</LixProvider>,
+	);
 }
 
-bootstrap()
+bootstrap();
 ```
 
 ## useQuery
@@ -44,35 +44,34 @@ bootstrap()
 Subscribe to a live query using React Suspense. The callback receives an object with `{ lix }` and must return a Kysely `SelectQueryBuilder`.
 
 ```tsx
-import { Suspense } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
-import { useQuery } from '@lix-js/react-utils'
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { useQuery } from "@lix-js/react-utils";
 
 function KeyValueList() {
-  const rows = useQuery(({ lix }) =>
-    lix.db
-      .selectFrom('key_value')
-      .where('key', 'like', 'demo_%')
-      .selectAll()
-  )
+	const rows = useQuery(({ lix }) =>
+		lix.db.selectFrom("key_value").where("key", "like", "demo_%").selectAll(),
+	);
 
-  return (
-    <ul>
-      {rows.map((r) => (
-        <li key={r.key}>{r.key}: {r.value}</li>
-      ))}
-    </ul>
-  )
+	return (
+		<ul>
+			{rows.map((r) => (
+				<li key={r.key}>
+					{r.key}: {r.value}
+				</li>
+			))}
+		</ul>
+	);
 }
 
 export function Page() {
-  return (
-    <Suspense fallback={<div>Loading…</div>}>
-      <ErrorBoundary fallbackRender={() => <div>Failed to load.</div>}>
-        <KeyValueList />
-      </ErrorBoundary>
-    </Suspense>
-  )
+	return (
+		<Suspense fallback={<div>Loading…</div>}>
+			<ErrorBoundary fallbackRender={() => <div>Failed to load.</div>}>
+				<KeyValueList />
+			</ErrorBoundary>
+		</Suspense>
+	);
 }
 ```
 
@@ -80,10 +79,9 @@ Options
 
 ```tsx
 // One-time execution (no live updates)
-const rows = useQuery(
-  ({ lix }) => lix.db.selectFrom('config').selectAll(),
-  { subscribe: false }
-)
+const rows = useQuery(({ lix }) => lix.db.selectFrom("config").selectAll(), {
+	subscribe: false,
+});
 ```
 
 ### Behavior
@@ -98,44 +96,55 @@ const rows = useQuery(
 When you want just one row:
 
 ```tsx
-import { useQueryTakeFirst, useQueryTakeFirstOrThrow } from '@lix-js/react-utils'
+import {
+	useQueryTakeFirst,
+	useQueryTakeFirstOrThrow,
+} from "@lix-js/react-utils";
 
 // First row or undefined
 const file = useQueryTakeFirst(({ lix }) =>
-  lix.db.selectFrom('file').select(['id', 'path']).where('id', '=', fileId)
-)
+	lix.db.selectFrom("file").select(["id", "path"]).where("id", "=", fileId),
+);
 
 // First row or throw (suspends, then throws to ErrorBoundary if not found)
 const activeVersion = useQueryTakeFirstOrThrow(({ lix }) =>
-  lix.db
-    .selectFrom('active_version')
-    .innerJoin('version', 'version.id', 'active_version.version_id')
-    .selectAll('version')
-)
+	lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version"),
+);
 ```
 
-## Using with the Lix SDK selectors
+## Using with the Lix SDK query helpers
 
 This package aligns with the SDK’s object-arg convention:
 
 ```tsx
-import { selectWorkingDiff } from '@lix-js/sdk'
+import { selectWorkingDiff } from "@lix-js/sdk";
 
 const rows = useQuery(({ lix }) =>
-  selectWorkingDiff({ lix })
-    .where('diff.status', '!=', 'unchanged')
-    .orderBy('diff.entity_id')
-)
+	selectWorkingDiff({ lix })
+		.where("diff.status", "!=", "unchanged")
+		.orderBy("diff.entity_id"),
+);
 ```
+
+## Synchronizing external state updates (rich text editors, etc.)
+
+When building experiences like rich text editors, dashboards, or collaborative views, you often need to synchronize external changes while avoiding feedback loops from your own writes. Lix provides a simple pattern for this using a “writer key” and commit events.
+
+See the guide for the pattern, pitfalls, and a decision matrix:
+
+- https://lix.dev/guide/writer-key
 
 ## Provider and context
 
 ```tsx
-import { LixProvider, useLix } from '@lix-js/react-utils'
+import { LixProvider, useLix } from "@lix-js/react-utils";
 
 function NeedsLix() {
-  const lix = useLix() // same instance passed to LixProvider
-  // …
+	const lix = useLix(); // same instance passed to LixProvider
+	// …
 }
 ```
 
@@ -154,4 +163,3 @@ function NeedsLix() {
 ## License
 
 Apache-2.0
-
