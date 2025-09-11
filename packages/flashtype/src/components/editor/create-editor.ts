@@ -1,5 +1,5 @@
 import { Editor } from "@tiptap/core";
-import { nanoId, type Lix } from "@lix-js/sdk";
+import { nanoId, type Lix, withWriterKey } from "@lix-js/sdk";
 import {
 	MarkdownWc,
 	astToTiptapDoc,
@@ -19,6 +19,7 @@ type CreateEditorArgs = {
 	fileId?: string;
 	persistDebounceMs?: number;
 	persistState?: boolean;
+	writerKey?: string | null;
 };
 
 // Plain TipTap Editor factory (no React). Useful for unit/integration tests.
@@ -33,6 +34,7 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		fileId,
 		persistDebounceMs,
 		persistState = true,
+		writerKey,
 	} = args;
 	let initialMd = initialMarkdown;
 	if (initialMd === undefined && fileId) {
@@ -177,26 +179,30 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 					: [];
 				const order = ensureTopLevelIds(children);
 				try {
-					await lix.db.transaction().execute(async (trx) => {
-						await upsertNodes(trx, fileId, children);
-						await upsertRootOrder(trx, fileId, order);
-						const keepIds = [...order, "root"];
-						if (keepIds.length > 0) {
-							await trx
-								.deleteFrom("state")
-								.where("file_id", "=", fileId as any)
-								.where("plugin_key", "=", mdPlugin.key)
-								.where("entity_id", "not in", keepIds as any)
-								.execute();
-						} else {
-							await trx
-								.deleteFrom("state")
-								.where("file_id", "=", fileId as any)
-								.where("plugin_key", "=", mdPlugin.key)
-								.where("entity_id", "<>", "root")
-								.execute();
-						}
-					});
+					await withWriterKey(
+						lix.db,
+						writerKey ?? `flashtype_tiptap_editor`,
+						async (trx) => {
+							await upsertNodes(trx, fileId, children);
+							await upsertRootOrder(trx, fileId, order);
+							const keepIds = [...order, "root"];
+							if (keepIds.length > 0) {
+								await trx
+									.deleteFrom("state")
+									.where("file_id", "=", fileId as any)
+									.where("plugin_key", "=", mdPlugin.key)
+									.where("entity_id", "not in", keepIds as any)
+									.execute();
+							} else {
+								await trx
+									.deleteFrom("state")
+									.where("file_id", "=", fileId as any)
+									.where("plugin_key", "=", mdPlugin.key)
+									.where("entity_id", "<>", "root")
+									.execute();
+							}
+						},
+					);
 				} finally {
 					persistRunning = false;
 					if (persistQueued) {

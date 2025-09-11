@@ -41,27 +41,31 @@ import { sql } from "kysely";
  * });
  */
 export async function withWriterKey<DB, T>(
-  db: Kysely<DB>,
-  writer: string | null,
-  fn: (trx: Kysely<DB>) => Promise<T>
+	db: Kysely<DB>,
+	writer: string | null,
+	fn: (trx: Kysely<DB>) => Promise<T>
 ): Promise<T> {
-  const executeInTransaction = async (trx: Kysely<DB>) => {
-    const prevRes = await sql`SELECT lix_get_writer_key()`.execute(trx as any);
-    const prevWriter = (prevRes.rows?.[0] as any)?.["lix_get_writer_key()"] ?? null;
+	const executeInTransaction = async (trx: Kysely<DB>) => {
+		const prevRes = await sql`SELECT lix_get_writer_key()`.execute(trx as any);
+		const prevWriter =
+			(prevRes.rows?.[0] as any)?.["lix_get_writer_key()"] ?? null;
 
-    await sql`SELECT lix_set_writer_key(${writer})`.execute(trx as any);
-    try {
-      return await fn(trx);
-    } finally {
-      await sql`SELECT lix_set_writer_key(${prevWriter})`.execute(trx as any);
-    }
-  };
+		await sql`SELECT lix_set_writer_key(${writer})`.execute(trx as any);
+		try {
+			return await fn(trx);
+		} finally {
+			await sql`SELECT lix_set_writer_key(${prevWriter})`.execute(trx as any);
+		}
+	};
 
-  // If caller provided an open transaction, reuse it; otherwise open one.
-  const anyDb = db as unknown as { isTransaction?: boolean; transaction: () => any };
-  if (anyDb.isTransaction) {
-    return executeInTransaction(db);
-  } else {
-    return db.transaction().execute(executeInTransaction);
-  }
+	// If caller provided an open transaction, reuse it; otherwise open one.
+	const anyDb = db as unknown as {
+		isTransaction?: boolean;
+		transaction: () => any;
+	};
+	if (anyDb.isTransaction) {
+		return executeInTransaction(db);
+	} else {
+		return db.transaction().execute(executeInTransaction);
+	}
 }

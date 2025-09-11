@@ -85,13 +85,14 @@ export function insertTransactionState(args: {
 		schema_key: data.schema_key,
 		file_id: data.file_id,
 		plugin_key: data.plugin_key,
+		writer_key: sql`lix_get_writer_key()` as unknown as string | null,
 		snapshot_content: data.snapshot_content
 			? sql`jsonb(${data.snapshot_content})`
 			: null,
 		schema_version: data.schema_version,
-		lixcol_version_id: data.version_id,
+		version_id: data.version_id,
 		created_at: _timestamp,
-		lixcol_untracked: data.untracked === true ? 1 : 0,
+		untracked: data.untracked === true ? 1 : 0,
 	}));
 
 	executeSync({
@@ -101,14 +102,15 @@ export function insertTransactionState(args: {
 			.values(transactionRows)
 			.onConflict((oc) =>
 				oc
-					.columns(["entity_id", "file_id", "schema_key", "lixcol_version_id"])
+					.columns(["entity_id", "file_id", "schema_key", "version_id"])
 					.doUpdateSet((eb) => ({
 						id: eb.ref("excluded.id"),
 						plugin_key: eb.ref("excluded.plugin_key"),
 						snapshot_content: eb.ref("excluded.snapshot_content"),
 						schema_version: eb.ref("excluded.schema_version"),
 						created_at: eb.ref("excluded.created_at"),
-						lixcol_untracked: eb.ref("excluded.lixcol_untracked"),
+						untracked: eb.ref("excluded.untracked"),
+						writer_key: eb.ref("excluded.writer_key"),
 					}))
 			),
 	});
@@ -125,6 +127,7 @@ export function insertTransactionState(args: {
 		created_at: _timestamp,
 		updated_at: _timestamp,
 		untracked: data.untracked === true,
+		writer_key: data.writer_key ?? null,
 		inherited_from_version_id: null,
 		change_id: data.change_id,
 		commit_id: "pending",

@@ -14,6 +14,8 @@ export type StateCommitChange = {
 	commit_id: string;
 	/** 0 for tracked, 1 for untracked */
 	untracked?: number;
+	/** Writer identity that produced this state row, if known */
+	writer_key: string | null;
 };
 
 /**

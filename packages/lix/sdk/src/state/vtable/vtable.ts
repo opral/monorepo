@@ -59,7 +59,7 @@ export function applyStateVTable(
 	// Statement/transaction-scoped writer value set via withWriterKey helper.
 	let currentWriterKey: string | null = null;
 
-  // Register a setter UDF that stores the writer for the current statement.
+	// Register a setter UDF that stores the writer for the current statement.
 	sqlite.createFunction({
 		name: "lix_set_writer_key",
 		deterministic: false,
@@ -70,18 +70,17 @@ export function applyStateVTable(
 				v === null || v === undefined || v === "" ? null : String(v);
 			return 1; // value unused
 		},
-  });
+	});
 
-  // Getter UDF for nested-scoped restorations in withWriterKey helper
-  sqlite.createFunction({
-    name: "lix_get_writer_key",
-    deterministic: false,
-    arity: 0,
-    // @ts-expect-error
-    xFunc: () => {
-      return currentWriterKey ?? null;
-    },
-  });
+	// Getter UDF for nested-scoped restorations in withWriterKey helper
+	sqlite.createFunction({
+		name: "lix_get_writer_key",
+		deterministic: false,
+		arity: 0,
+		xFunc: () => {
+			return currentWriterKey ?? null;
+		},
+	});
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -568,8 +567,18 @@ export function applyStateVTable(
 						// Persist writer for DELETE (tombstone writer)
 						try {
 							const { fileId, entityId, versionId } = parseStatePk(oldPk);
-							const schemaKey = resolveSchemaKey({ fileId, entityId, versionId });
-							persistWriter({ fileId, versionId, entityId, schemaKey, writer: currentWriterKey });
+							const schemaKey = resolveSchemaKey({
+								fileId,
+								entityId,
+								versionId,
+							});
+							persistWriter({
+								fileId,
+								versionId,
+								entityId,
+								schemaKey,
+								writer: currentWriterKey,
+							});
 						} catch {
 							// best effort
 						}
@@ -759,7 +768,7 @@ export function applyStateVTable(
 		false
 	);
 
-  function persistWriter(args: {
+	function persistWriter(args: {
 		fileId: string;
 		versionId: string;
 		entityId: string;
@@ -801,52 +810,56 @@ export function applyStateVTable(
 		} catch {
 			// ignore writer persistence errors
 		}
-  }
+	}
 
-  function resolveSchemaKey(args: { fileId: string; entityId: string; versionId: string }): string {
-    try {
-      const res = executeSync({
-        lix,
-        query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-          .selectFrom("internal_resolved_state_all")
-          .select(["schema_key"]) 
-          .where("file_id", "=", args.fileId)
-          .where("entity_id", "=", args.entityId)
-          .where("version_id", "=", args.versionId)
-          .limit(1),
-      });
-      let sk = (res && res[0] && (res[0] as any).schema_key) || "";
-      if (!sk) {
-        const res2 = executeSync({
-          lix,
-          query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-            .selectFrom("state_all")
-            .select(["schema_key"]) 
-            .where("file_id", "=", args.fileId)
-            .where("entity_id", "=", args.entityId)
-            .where("version_id", "=", args.versionId)
-            .limit(1),
-        });
-        sk = (res2 && res2[0] && (res2[0] as any).schema_key) || "";
-      }
-      if (!sk) {
-        const res3 = executeSync({
-          lix,
-          query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-            .selectFrom("internal_state_cache")
-            .select(["schema_key"]) 
-            .where("file_id", "=", args.fileId)
-            .where("entity_id", "=", args.entityId)
-            .where("version_id", "=", args.versionId)
-            .limit(1),
-        });
-        sk = (res3 && res3[0] && (res3[0] as any).schema_key) || "";
-      }
-      return sk;
-    } catch {
-      return "";
-    }
-  }
+	function resolveSchemaKey(args: {
+		fileId: string;
+		entityId: string;
+		versionId: string;
+	}): string {
+		try {
+			const res = executeSync({
+				lix,
+				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+					.selectFrom("internal_resolved_state_all")
+					.select(["schema_key"])
+					.where("file_id", "=", args.fileId)
+					.where("entity_id", "=", args.entityId)
+					.where("version_id", "=", args.versionId)
+					.limit(1),
+			});
+			let sk = (res && res[0] && (res[0] as any).schema_key) || "";
+			if (!sk) {
+				const res2 = executeSync({
+					lix,
+					query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.selectFrom("state_all")
+						.select(["schema_key"])
+						.where("file_id", "=", args.fileId)
+						.where("entity_id", "=", args.entityId)
+						.where("version_id", "=", args.versionId)
+						.limit(1),
+				});
+				sk = (res2 && res2[0] && (res2[0] as any).schema_key) || "";
+			}
+			if (!sk) {
+				const res3 = executeSync({
+					lix,
+					query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.selectFrom("internal_state_cache")
+						.select(["schema_key"])
+						.where("file_id", "=", args.fileId)
+						.where("entity_id", "=", args.entityId)
+						.where("version_id", "=", args.versionId)
+						.limit(1),
+				});
+				sk = (res3 && res3[0] && (res3[0] as any).schema_key) || "";
+			}
+			return sk;
+		} catch {
+			return "";
+		}
+	}
 
 	function extractSchemaKeyForPk(_pk: string): string {
 		// We don't have schema_key in the pk; fall back to resolving from the row itself.

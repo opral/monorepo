@@ -205,7 +205,7 @@ simulationTest(
 		expectDeterministic(afterInsert.snapshot_content).toEqual({ value: "A" });
 
 		// Update with different writer via withWriterKey helper
-    await withWriterKey(db, `${ME}-2`, (trx) =>
+		await withWriterKey(db, `${ME}-2`, (trx) =>
 			trx
 				.updateTable("internal_state_vtable")
 				.set({ snapshot_content: JSON.stringify({ value: "B" }) })
@@ -296,7 +296,7 @@ simulationTest(
 			.execute();
 
 		// Delete WITH writer via withWriterKey helper
-    await withWriterKey(db, `${ME}-del`, (trx) =>
+		await withWriterKey(db, `${ME}-del`, (trx) =>
 			trx
 				.deleteFrom("internal_state_vtable")
 				.where("entity_id", "=", "wd1")
@@ -389,7 +389,7 @@ simulationTest(
 		const C = "app:state#child";
 
 		// Insert in parent with writer P
-    await withWriterKey(db, P, (trx) =>
+		await withWriterKey(db, P, (trx) =>
 			trx
 				.insertInto("internal_state_vtable")
 				.values({
@@ -423,7 +423,7 @@ simulationTest(
 		expectDeterministic(inherited.writer_key).toBe(P);
 
 		// Now override in child with its own writer C
-    await withWriterKey(db, C, (trx) =>
+		await withWriterKey(db, C, (trx) =>
 			trx
 				.insertInto("internal_state_vtable")
 				.values({
@@ -484,7 +484,7 @@ simulationTest(
 		const ME = "app:state#me";
 
 		// Insert with writer via withWriterKey helper
-    await withWriterKey(db, ME, (trx) =>
+		await withWriterKey(db, ME, (trx) =>
 			trx
 				.insertInto("internal_state_vtable")
 				.values({

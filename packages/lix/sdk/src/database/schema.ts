@@ -59,6 +59,15 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_state_vtable: InternalStateVTable;
 	internal_file_data_cache: InternalFileDataCacheTable;
 	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	internal_state_writer: InternalStateWriterTable;
+};
+
+export type InternalStateWriterTable = {
+	file_id: string;
+	version_id: string;
+	entity_id: string;
+	schema_key: string;
+	writer_key: string | null;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {

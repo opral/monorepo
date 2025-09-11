@@ -39,26 +39,26 @@ export function applyResolvedStateView(
       SELECT * FROM (
           -- 1. Transaction state (highest priority) - pending changes
           SELECT 
-              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(lixcol_version_id) as _pk,
+              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
               entity_id, 
               schema_key, 
               file_id, 
               plugin_key,
               json(snapshot_content) as snapshot_content, 
               schema_version, 
-              lixcol_version_id as version_id,
+              version_id as version_id,
               created_at, 
               created_at as updated_at,
               NULL as inherited_from_version_id, 
               id as change_id, 
-              lixcol_untracked as untracked,
+              untracked as untracked,
               'pending' as commit_id,
               (
                 SELECT w.writer_key FROM internal_state_writer w
                 WHERE w.file_id = internal_transaction_state.file_id
                   AND w.entity_id = internal_transaction_state.entity_id
                   AND w.schema_key = internal_transaction_state.schema_key
-                  AND w.version_id = internal_transaction_state.lixcol_version_id
+                  AND w.version_id = internal_transaction_state.version_id
                 LIMIT 1
               ) as writer_key
           FROM internal_transaction_state
@@ -100,7 +100,7 @@ export function applyResolvedStateView(
               WHERE txn.entity_id = internal_state_all_untracked.entity_id
                 AND txn.schema_key = internal_state_all_untracked.schema_key
                 AND txn.file_id = internal_state_all_untracked.file_id
-                AND txn.lixcol_version_id = internal_state_all_untracked.version_id
+                AND txn.version_id = internal_state_all_untracked.version_id
           )
 			
 			UNION ALL
@@ -139,7 +139,7 @@ export function applyResolvedStateView(
               WHERE txn.entity_id = internal_state_cache.entity_id
                 AND txn.schema_key = internal_state_cache.schema_key
                 AND txn.file_id = internal_state_cache.file_id
-                AND txn.lixcol_version_id = internal_state_cache.version_id
+                AND txn.version_id = internal_state_cache.version_id
           )
           AND NOT EXISTS (
               SELECT 1 FROM internal_state_all_untracked unt
@@ -203,8 +203,8 @@ export function applyResolvedStateView(
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state txn
-				WHERE txn.lixcol_version_id = vi.version_id
-				  AND txn.entity_id = isc.entity_id
+              WHERE txn.version_id = vi.version_id
+                  AND txn.entity_id = isc.entity_id
 				  AND txn.schema_key = isc.schema_key
 				  AND txn.file_id = isc.file_id
 			)
@@ -280,7 +280,7 @@ export function applyResolvedStateView(
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state txn
-				WHERE txn.lixcol_version_id = vi.version_id
+				WHERE txn.version_id = vi.version_id
 				  AND txn.entity_id = unt.entity_id
 				  AND txn.schema_key = unt.schema_key
 				  AND txn.file_id = unt.file_id
@@ -318,7 +318,7 @@ export function applyResolvedStateView(
 				txn.created_at as updated_at,
 				vi.parent_version_id as inherited_from_version_id, 
 				txn.id as change_id, 
-				txn.lixcol_untracked as untracked,
+				txn.untracked as untracked,
 				'pending' as commit_id,
 				COALESCE(
 				  (SELECT w.writer_key FROM internal_state_writer w
@@ -334,15 +334,15 @@ export function applyResolvedStateView(
             FROM internal_state_cache isc_v
             WHERE isc_v.schema_key = 'lix_version_descriptor'
 			) vi
-			JOIN internal_transaction_state txn ON txn.lixcol_version_id = vi.parent_version_id
+			JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent transaction
 			AND txn.snapshot_content IS NOT NULL
 			-- Don't inherit if child has direct transaction state
 			AND NOT EXISTS (
               SELECT 1 FROM internal_transaction_state child_txn
-				WHERE child_txn.lixcol_version_id = vi.version_id
-				  AND child_txn.entity_id = txn.entity_id
+              WHERE child_txn.version_id = vi.version_id
+                  AND child_txn.entity_id = txn.entity_id
 				  AND child_txn.schema_key = txn.schema_key
 				  AND child_txn.file_id = txn.file_id
 			)
