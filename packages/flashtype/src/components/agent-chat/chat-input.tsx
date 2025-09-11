@@ -14,11 +14,13 @@ export function ChatInput({
 	onCommand,
 	commands = DEFAULT_COMMANDS,
 	onQueryMentions,
+	disabled,
 }: {
 	onSend: (value: string) => void;
 	onCommand?: (command: string) => void;
 	commands?: SlashCommand[];
 	onQueryMentions?: (query: string) => Promise<string[]> | string[];
+	disabled?: boolean;
 }) {
 	const [value, setValue] = React.useState("");
 	const [history, setHistory] = React.useState<string[]>([]);
@@ -244,7 +246,12 @@ export function ChatInput({
 					onKeyDown={onKeyDown}
 					placeholder={'Prompt or try a command with "/"'}
 					rows={1}
-					className="min-h-[36px] w-full resize-none rounded-md border bg-background px-3 py-2 font-mono text-xs leading-snug shadow-[inset_0_1px_theme(colors.border)] focus-visible:outline-none focus-visible:ring-2"
+					disabled={!!disabled}
+					aria-disabled={!!disabled}
+					className={[
+						"min-h-[36px] w-full resize-none rounded-md border bg-background px-3 py-2 font-mono text-xs leading-snug shadow-[inset_0_1px_theme(colors.border)] focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
+						disabled ? "opacity-60 cursor-not-allowed" : "",
+					].join(" ")}
 				/>
 				{(openMenu || mentionOpen) && (
 					<div className="mt-1 mb-1 text-[11px] font-mono text-muted-foreground/70">

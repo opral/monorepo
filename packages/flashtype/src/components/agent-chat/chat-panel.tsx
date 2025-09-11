@@ -4,6 +4,7 @@ import { ChatInput } from "./chat-input";
 import { useAgentChat } from "@/hooks/use-agent-chat";
 import { useLix } from "@lix-js/react-utils";
 import type { ChatMessage as UiMessage } from "./types";
+import { LoadingBar } from "./loading-bar";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).
@@ -18,6 +19,7 @@ export function ChatPanel() {
 		messages: agentMsgs,
 		send,
 		clear,
+		pending,
 	} = useAgentChat({
 		lix,
 		system:
@@ -65,8 +67,12 @@ export function ChatPanel() {
 			className="relative flex h-full max-h-full w-full min-h-0 flex-col overflow-hidden text-xs"
 		>
 			<ChatMessageList messages={messages} />
+			{pending ? <LoadingBar /> : null}
 			<ChatInput
-				onSend={send}
+				onSend={(v) => {
+					if (pending) return; // prevent send while working
+					send(v);
+				}}
 				onCommand={async (cmd) => {
 					if (cmd === "clear" || cmd === "reset" || cmd === "new") {
 						await clear();
