@@ -944,7 +944,7 @@ test("observe pools identical compiled queries (same instance)", async () => {
 		.values({ key: "pool_same_1", value: "v1" })
 		.execute();
 	await new Promise((r) => setTimeout(r, 20));
-	
+
 	expect(a[a.length - 1]).toHaveLength(1);
 	expect(b[b.length - 1]).toHaveLength(1);
 
