@@ -64,7 +64,10 @@ test("creates tracked entity with pending change", async () => {
 
 	expect(changeInTransaction).toBeDefined();
 	expect(changeInTransaction.id).toBe(results[0]?.change_id);
-	expect(changeInTransaction.lixcol_untracked).toBe(0); // tracked entity
+	expect(
+		(changeInTransaction as any).untracked ??
+			(changeInTransaction as any).lixcol_untracked
+	).toBe(0); // tracked entity
 	expect(changeInTransaction.snapshot_content).toEqual({
 		value: "inserted-value",
 	});
@@ -195,12 +198,15 @@ test("creates tombstone for inherited entity deletion", async () => {
 		.selectFrom("internal_transaction_state")
 		.where("entity_id", "=", "inherited-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-	expect(transactionDeletion.lixcol_untracked).toBe(0); // tracked entity
+	expect(
+		(transactionDeletion as any).untracked ??
+			(transactionDeletion as any).lixcol_untracked
+	).toBe(0); // tracked entity
 
 	// Commit to create the tombstone
 	commit({ lix });
@@ -291,12 +297,15 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 		.selectFrom("internal_transaction_state")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-	expect(transactionDeletion.lixcol_untracked).toBe(1); // untracked entity
+	expect(
+		(transactionDeletion as any).untracked ??
+			(transactionDeletion as any).lixcol_untracked
+	).toBe(1); // untracked entity
 
 	// Commit to create the tombstone in untracked table
 	commit({ lix });
@@ -375,7 +384,10 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
-	expect(transactionEntity.lixcol_untracked).toBe(1); // marked as untracked
+	expect(
+		(transactionEntity as any).untracked ??
+			(transactionEntity as any).lixcol_untracked
+	).toBe(1); // marked as untracked
 	expect(transactionEntity.snapshot_content).toEqual({
 		key: "test-key",
 		value: "test-value",

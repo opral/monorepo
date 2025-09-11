@@ -10,11 +10,12 @@ export function applyTransactionStateSchema(lix: Pick<Lix, "sqlite">): void {
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    lixcol_version_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    writer_key TEXT NULL,
     snapshot_content BLOB,
     created_at TEXT NOT NULL,
-    lixcol_untracked INTEGER NOT NULL DEFAULT 0,
-    UNIQUE(entity_id, file_id, schema_key, lixcol_version_id)
+    untracked INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
 `);
 }
@@ -30,10 +31,11 @@ export type InternalTransactionStateTable = {
 	schema_version: string;
 	file_id: string;
 	plugin_key: string;
-	lixcol_version_id: string;
+	version_id: string;
+	writer_key: string | null;
 	snapshot_content: Record<string, any> | null;
 	created_at: Generated<string>;
-	lixcol_untracked: number;
+	untracked: number;
 };
 
 // Kysely typing for the new view with lixcol_* naming

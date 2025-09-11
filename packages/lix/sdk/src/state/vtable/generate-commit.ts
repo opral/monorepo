@@ -8,6 +8,15 @@ import {
 export type MaterializedState = LixChangeRaw & {
 	lixcol_version_id: string;
 	lixcol_commit_id: string;
+	writer_key?: string | null;
+};
+
+// Domain change input accepted by the generator with optional helpers:
+// - version_id: alternative to lixcol_version_id for grouping
+// - writer_key: propagated to materialized domain rows for hooks/observers
+export type DomainChangeInput = LixChangeRaw & {
+	version_id: string; // required input hint for grouping by version
+	writer_key?: string | null;
 };
 
 /**
@@ -21,7 +30,7 @@ export function generateCommit(args: {
 	 * Optional for now; implementation may ignore until author snapshots are wired.
 	 */
 	activeAccounts?: string[];
-	changes: LixChangeRaw[];
+	changes: DomainChangeInput[];
 	versions: Map<
 		string,
 		{
@@ -40,7 +49,7 @@ export function generateCommit(args: {
 		throw new Error("generateCommit: versions map is required");
 	}
 
-	const input: LixChangeRaw[] = Array.isArray(changes) ? changes : [];
+	const input: DomainChangeInput[] = Array.isArray(changes) ? changes : [];
 
 	// Validate uniqueness of change ids in input
 	const seenIds = new Set<string>();
@@ -69,10 +78,9 @@ export function generateCommit(args: {
 	for (const c of input) outputChanges.push(sanitize(c));
 
 	// Group domain changes by version
-	const domainByVersion = new Map<string, LixChangeRaw[]>();
+	const domainByVersion = new Map<string, DomainChangeInput[]>();
 	for (const c of input) {
-		const vid = ((c as any).lixcol_version_id ??
-			(c as any).version_id) as string;
+		const vid = c.version_id as string;
 		if (!vid) continue;
 		const list = domainByVersion.get(vid) ?? [];
 		list.push(c);
@@ -157,6 +165,8 @@ export function generateCommit(args: {
 				...(sanitize(dc) as any),
 				lixcol_version_id: vid,
 				lixcol_commit_id: meta.commitId,
+				// Propagate writer from input change when present
+				writer_key: dc.writer_key ?? null,
 			});
 			// materialized domain CSE (cache)
 			// Note: domain CSE is stored in global cache with the GLOBAL commit id
@@ -178,6 +188,7 @@ export function generateCommit(args: {
 				created_at: timestamp,
 				lixcol_version_id: "global",
 				lixcol_commit_id: globalMeta ? globalMeta.commitId : meta.commitId,
+				writer_key: null,
 			} as MaterializedState);
 		}
 	}
@@ -203,6 +214,7 @@ export function generateCommit(args: {
 					created_at: timestamp,
 					lixcol_version_id: "global",
 					lixcol_commit_id: meta.commitId,
+					writer_key: null,
 				} as MaterializedState);
 			}
 		}
@@ -255,6 +267,7 @@ export function generateCommit(args: {
 			created_at: timestamp,
 			lixcol_version_id: "global",
 			lixcol_commit_id: meta.commitId,
+			writer_key: null,
 		} as MaterializedState);
 	}
 
@@ -275,6 +288,7 @@ export function generateCommit(args: {
 			created_at: timestamp,
 			lixcol_version_id: "global",
 			lixcol_commit_id: meta.commitId,
+			writer_key: null,
 		} as MaterializedState);
 	}
 
@@ -298,6 +312,7 @@ export function generateCommit(args: {
 					created_at: timestamp,
 					lixcol_version_id: "global",
 					lixcol_commit_id: globalMeta3 ? globalMeta3.commitId : meta.commitId,
+					writer_key: null,
 				} as MaterializedState);
 			}
 		}
@@ -311,6 +326,7 @@ export function generateCommit(args: {
 				lixcol_version_id: "global",
 				// keep the commit id chosen during edge derivation
 				lixcol_commit_id: (ch as any).lixcol_commit_id,
+				writer_key: null,
 			});
 		}
 	}

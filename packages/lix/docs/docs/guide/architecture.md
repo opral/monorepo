@@ -103,6 +103,10 @@ graph RL
 
    `State = { e1: "julia", e2: "gunther" }`
 
+### Transactions and commit path
+
+During a transaction, Lix stages state mutations and then commits them in a single pass. The writer identity (`writer_key`) is carried through the pipeline — from the internal transaction staging table to the commit generator and into the materialized state — without per‑row lookups. This enables reliable attribution for echo suppression and external‑change detection. For usage patterns and pitfalls, see the Writer Key guide: [/guide/writer-key](/guide/writer-key).
+
 ## Global Change Set Graph
 
 The change set graph in Lix is global and shared across all versions. By having a global graph, all versions share the same understanding of history—each version may have a different lineage, but they all agree on what that lineage contains. If the change set graph were version-scoped, versions couldn't agree on what the history of another version is.

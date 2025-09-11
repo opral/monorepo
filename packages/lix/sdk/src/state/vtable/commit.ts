@@ -52,10 +52,11 @@ export function commit(args: {
 				"schema_version",
 				"file_id",
 				"plugin_key",
-				sql`lixcol_version_id`.as("version_id"),
+				"version_id",
+				"writer_key",
 				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 				"created_at",
-				sql`lixcol_untracked`.as("untracked"),
+				sql`untracked`.as("untracked"),
 			]),
 	});
 
@@ -480,8 +481,10 @@ export function commit(args: {
 		});
 	}
 
-	// Flatten domain changes as input to the generator
-	const domainChangesFlat: LixChangeRaw[] = [];
+	// Preload writer_key for all affected domain rows in this commit (batched)
+	// Flatten domain changes as input to the generator (carry writer_key when available)
+	const domainChangesFlat: import("./generate-commit.js").DomainChangeInput[] =
+		[];
 	for (const [vid, changes] of trackedChangesByVersion) {
 		for (const c of changes) {
 			domainChangesFlat.push({
@@ -493,9 +496,8 @@ export function commit(args: {
 				plugin_key: c.plugin_key,
 				snapshot_content: c.snapshot_content,
 				created_at: c.created_at,
-				// generator derives version from this field as alternative to lixcol_version_id
-				// @ts-expect-error - extra prop for generator
 				version_id: vid,
+				writer_key: c.writer_key ?? null,
 			});
 		}
 	}
@@ -645,6 +647,7 @@ export function commit(args: {
 
 	// Emit state commit hook after transaction is successfully committed
 	// Emit only materialized state so observers can read inline lixcol_version_id/lixcol_commit_id
+	// Include writer_key when present on materialized rows (domain rows carry it)
 	const hookChanges: StateCommitChange[] = genRes.materializedState.map(
 		(ms) => ({
 			id: ms.id,
@@ -660,6 +663,7 @@ export function commit(args: {
 			version_id: ms.lixcol_version_id,
 			commit_id: ms.lixcol_commit_id,
 			untracked: 0,
+			writer_key: ms.writer_key ?? null,
 		})
 	);
 	args.lix.hooks._emit("state_commit", { changes: hookChanges });

@@ -115,7 +115,7 @@ export async function mergeVersion(args: {
 					sql`json(snapshot_content)`.as("snapshot_content"),
 					"created_at",
 				])
-				.where("lixcol_version_id", "=", sourceVersion.id)
+				.where("version_id", "=", sourceVersion.id)
 				.where("id", "in", refIds)
 				.execute();
 

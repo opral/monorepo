@@ -15,6 +15,7 @@ export type StateWithTombstonesView = {
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
 	commit_id: Generated<string>;
+	writer_key: string | null;
 };
 
 export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;

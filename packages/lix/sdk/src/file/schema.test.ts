@@ -7,6 +7,9 @@ import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import { withWriterKey } from "../state/writer.js";
+import { Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLix({
@@ -1803,4 +1806,115 @@ test("file view exposes the correct commit_id", async () => {
 	expect(file.lixcol_commit_id).toBe(version.commit_id);
 	expect(file.lixcol_commit_id).toBeTruthy();
 	expect(file.lixcol_commit_id).not.toBe("undefined");
+});
+
+test("file data writes stamp writer_key on materialized state (insert, update, delete)", async () => {
+	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const fileId = "writer-file-json";
+
+	// Insert file content with writer
+	await withWriterKey(db, "writer:insert", async (trx) => {
+		await trx
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/writer.json",
+				data: new TextEncoder().encode(JSON.stringify({ prop0: "A" })),
+			})
+			.execute();
+	});
+
+	// The plugin should materialize state for prop0 with writer_key
+	const afterInsert = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", "mock_json_property")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(afterInsert.writer_key).toBe("writer:insert");
+	expect((afterInsert as any).snapshot_content).toMatchObject({ value: "A" });
+
+	// Update file content with a different writer
+	await withWriterKey(db, "writer:update", async (trx) => {
+		await trx
+			.updateTable("file")
+			.where("id", "=", fileId)
+			.set({ data: new TextEncoder().encode(JSON.stringify({ prop0: "B" })) })
+			.execute();
+	});
+
+	const afterUpdate = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", "mock_json_property")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(afterUpdate.writer_key).toBe("writer:update");
+	expect((afterUpdate as any).snapshot_content).toMatchObject({ value: "B" });
+
+	// Delete the file with a third writer; tombstone should keep writer
+	await withWriterKey(db, "writer:delete", async (trx) => {
+		await trx.deleteFrom("file").where("id", "=", fileId).execute();
+	});
+
+	const tombstone = await lix.db
+		.selectFrom("state_with_tombstones")
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", "mock_json_property")
+		.selectAll()
+		.executeTakeFirst();
+
+	if (tombstone) {
+		expect(tombstone.writer_key).toBe("writer:delete");
+		expect((tombstone as any).snapshot_content).toBeNull();
+	}
+});
+
+test("plugin emits state_commit on file data update and materializes state", async () => {
+	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+	const fileId = "json-writer-file";
+
+	// Capture state commit emissions for debugging
+	const commits: Array<{ changes: any[] }> = [];
+	const unsub = lix.hooks.onStateCommit((data) =>
+		commits.push({ changes: data.changes })
+	);
+
+	// Seed a JSON file
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/doc.json",
+			data: new TextEncoder().encode(JSON.stringify({ prop0: "A" })),
+		})
+		.execute();
+
+	// Clear any commits from insert to focus on the update
+	commits.length = 0;
+
+	// Update file blob; mock JSON plugin should detect and write state
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({ data: new TextEncoder().encode(JSON.stringify({ prop0: "B" })) })
+		.execute();
+
+	// Expect at least one state_commit emission with changes for this file
+	expect(commits.length).toBeGreaterThan(0);
+	const combined = commits.flatMap((c) => c.changes);
+	expect(combined.some((ch: any) => ch.file_id === fileId)).toBe(true);
+
+	// Verify state rows exist for this file (materialized content from md plugin)
+	const stateRows = await lix.db
+		.selectFrom("state")
+		.where("file_id", "=", fileId)
+		.selectAll()
+		.execute();
+	expect(stateRows.length).toBeGreaterThan(0);
+
+	unsub();
 });

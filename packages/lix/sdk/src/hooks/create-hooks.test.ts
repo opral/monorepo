@@ -3,6 +3,8 @@ import { createHooks } from "./create-hooks.js";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 import type { StateCommitChange } from "./create-hooks.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { withWriterKey } from "../state/writer.js";
 
 test("should create hooks with onStateCommit method", () => {
 	const hooks = createHooks();
@@ -170,6 +172,61 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 	expect(typeof domain!.commit_id).toBe("string");
 	expect((domain!.commit_id ?? "").length).toBeGreaterThan(0);
 	expect(domain!.untracked ?? 0).toBe(0);
+
+	unsubscribe();
+	await lix.close();
+});
+
+test("onStateCommit exposes writer_key for state changes", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema_writer_hook",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: { value: { type: "string" } },
+	};
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	const WRITER = "testapp:hooks#writer";
+	const events: any[][] = [];
+	const unsubscribe = lix.hooks.onStateCommit(({ changes }) => {
+		events.push(changes as any);
+	});
+
+	await withWriterKey(lix.db, WRITER, async (trx) => {
+		await trx
+			.insertInto("state")
+			.values({
+				entity_id: "w1",
+				file_id: "f1",
+				schema_key: mockSchema["x-lix-key"],
+				schema_version: mockSchema["x-lix-version"],
+				plugin_key: "test_plugin",
+				snapshot_content: { value: "A" } as any,
+			})
+			.execute();
+	});
+
+	const flat = events.flat();
+	const change = flat.find(
+		(c: any) =>
+			c?.entity_id === "w1" && c?.schema_key === mockSchema["x-lix-key"]
+	);
+	expect(change).toBeDefined();
+	expect(change.writer_key).toBe(WRITER);
 
 	unsubscribe();
 	await lix.close();
