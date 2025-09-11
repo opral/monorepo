@@ -95,49 +95,67 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		}
 	});
 
-test("clear wipes OPFS contents (browser)", async () => {
-	const name = `vitest-opfs-clear`;
+	test("clear wipes OPFS contents (browser)", async () => {
+		const name = `vitest-opfs-clear`;
 
-	// 1) Create a DB and write a row
-	const lix1 = await openLixBackend({
+		// 1) Create a DB and write a row
+		const lix1 = await openLixBackend({
+			backend: new OpfsSahBackend({ key: name }),
+			pluginsRaw: [],
+		});
+		try {
+			await lix1.db
+				.insertInto("file")
+				.values({
+					path: "/temp.txt",
+					data: new TextEncoder().encode("to be wiped"),
+				})
+				.execute();
+		} finally {
+			await lix1.close();
+		}
+
+		// Give the environment a moment to release any AccessHandles
+		await new Promise((r) => setTimeout(r, 250));
+
+		// 2) Enumerate OPFS to confirm content exists
+		const rootBefore = await navigator.storage.getDirectory();
+		const entriesBefore = [] as any[];
+		// @ts-expect-error - values() exists in modern browsers
+		for await (const entry of rootBefore.values()) entriesBefore.push(entry);
+		expect(entriesBefore.length).toBeGreaterThan(0);
+
+		// 3) Wipe all OPFS data for this origin
+		await OpfsSahBackend.clear();
+
+		// Ensure OPFS has settled
+		await new Promise((r) => setTimeout(r, 100));
+
+		// 4) Enumerate OPFS again – should be empty
+		const rootAfter = await navigator.storage.getDirectory();
+		const entriesAfter = [] as any[];
+		// @ts-expect-error - values() exists in modern browsers
+		for await (const entry of rootAfter.values()) entriesAfter.push(entry);
+		expect(entriesAfter.length).toBe(0);
+	});
+});
+
+test("clear() throws when a backend is open", async () => {
+	const name = `vitest-opfs-clear-open`;
+	const lix = await openLixBackend({
 		backend: new OpfsSahBackend({ key: name }),
 		pluginsRaw: [],
 	});
-	try {
-		await lix1.db
-			.insertInto("file")
-			.values({
-				path: "/temp.txt",
-				data: new TextEncoder().encode("to be wiped"),
-			})
-			.execute();
-	} finally {
-		await lix1.close();
-	}
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/hold.txt", data: new TextEncoder().encode("x") })
+		.execute();
 
-	// Give the environment a moment to release any AccessHandles
-	await new Promise((r) => setTimeout(r, 250));
+	await expect(OpfsSahBackend.clear()).rejects.toMatchObject({
+		code: "LIX_OPFS_BUSY",
+	});
 
-	// 2) Enumerate OPFS to confirm content exists
-	const rootBefore = await navigator.storage.getDirectory();
-	const entriesBefore = [] as any[];
-	// @ts-expect-error - values() exists in modern browsers
-	for await (const entry of rootBefore.values()) entriesBefore.push(entry);
-	expect(entriesBefore.length).toBeGreaterThan(0);
-
-	// 3) Wipe all OPFS data for this origin
-	await OpfsSahBackend.clear();
-
-	// Ensure OPFS has settled
-	await new Promise((r) => setTimeout(r, 100));
-
-	// 4) Enumerate OPFS again – should be empty
-	const rootAfter = await navigator.storage.getDirectory();
-	const entriesAfter = [] as any[];
-	// @ts-expect-error - values() exists in modern browsers
-	for await (const entry of rootAfter.values()) entriesAfter.push(entry);
-	expect(entriesAfter.length).toBe(0);
-});
+	await lix.close();
 });
 
 test("loads plugin from string and processes *.json", async () => {

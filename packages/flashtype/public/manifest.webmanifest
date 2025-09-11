@@ -1,25 +1,25 @@
 {
-  "name": "Flashtype",
-  "short_name": "Flashtype",
-  "id": "/",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "background_color": "#f59e0b",
-  "theme_color": "#f59e0b",
-  "description": "Flashtype — AI markdown editor with change control.",
-  "icons": [
-    {
-      "src": "/icons/flashtype/flashtype-favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/flashtype/flashtype-icon-maskable.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+	"name": "Flashtype",
+	"short_name": "Flashtype",
+	"id": "/",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#f59e0b",
+	"theme_color": "#f59e0b",
+	"description": "Flashtype — AI markdown editor with change control.",
+	"icons": [
+		{
+			"src": "/icons/flashtype/flashtype-favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/flashtype/flashtype-icon-maskable.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		}
+	]
 }

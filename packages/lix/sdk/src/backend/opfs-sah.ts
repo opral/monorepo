@@ -16,6 +16,7 @@ import type { LixBackend, ExecResult } from "./types.js";
  * await OpfsSahBackend.clear()
  */
 export class OpfsSahBackend implements LixBackend {
+	private static _instances = new Set<OpfsSahBackend>();
 	private worker: Worker;
 	private nextId = 0;
 	private inflight = new Map<string, (r: any) => void>();
@@ -27,6 +28,7 @@ export class OpfsSahBackend implements LixBackend {
 		this.worker = new Worker(new URL("./opfs-sah.worker.js", import.meta.url), {
 			type: "module",
 		});
+		OpfsSahBackend._instances.add(this);
 		this.worker.onmessage = (ev: MessageEvent) => {
 			const msg = (ev as any).data;
 			if (msg && msg.type === "event" && msg.event) {
@@ -113,6 +115,7 @@ export class OpfsSahBackend implements LixBackend {
 	async close(): Promise<void> {
 		await this.call("close", {});
 		this.worker.terminate();
+		OpfsSahBackend._instances.delete(this);
 	}
 
 	/**
@@ -122,6 +125,14 @@ export class OpfsSahBackend implements LixBackend {
 	 * WARNING! This will delete ALL files in OPFS, not just Lix files!
 	 */
 	static async clear(): Promise<void> {
+		// Refuse to clear if any backend instances are still open to avoid races
+		if (OpfsSahBackend._instances.size > 0) {
+			const err: any = new Error(
+				`Cannot clear OPFS: ${OpfsSahBackend._instances.size} database connection(s) are open. Close all connections before clearing.`
+			);
+			err.code = "LIX_OPFS_BUSY";
+			throw err;
+		}
 		if (typeof navigator === "undefined" || !navigator.storage?.getDirectory) {
 			throw new Error(
 				"OPFS not available: navigator.storage.getDirectory() is missing"

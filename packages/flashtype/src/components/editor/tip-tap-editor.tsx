@@ -1,4 +1,4 @@
-import { use as usePromise, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
@@ -31,19 +31,27 @@ export function TipTapEditor({
 		);
 	}
 
-	// Editor loads initial content and persists via createEditor using only fileId
-
-	const editor = usePromise(
-		useMemo(
-			() =>
-				createEditor({
-					lix,
-					fileId: activeFileId,
-					persistDebounceMs: PERSIST_DEBOUNCE_MS,
-				}),
-			[lix, activeFileId, PERSIST_DEBOUNCE_MS],
-		),
-	);
+	// Build editor once per (lix, activeFileId, debounce) without Suspense to avoid re-creation loops
+	const [editor, setLocalEditor] = useState<Editor | null>(null);
+	useEffect(() => {
+		let cancelled = false;
+		setLocalEditor(null);
+		(async () => {
+			const ed = await createEditor({
+				lix,
+				fileId: activeFileId,
+				persistDebounceMs: PERSIST_DEBOUNCE_MS,
+			});
+			if (cancelled) return;
+			setLocalEditor(ed);
+			setEditor(ed as any);
+			onReady?.(ed as any);
+		})();
+		return () => {
+			cancelled = true;
+			// intentionally do not destroy editor in strict mode to test stability
+		};
+	}, [lix, activeFileId, PERSIST_DEBOUNCE_MS, setEditor, onReady]);
 
 	useEffect(() => {
 		if (!editor) return;
@@ -55,12 +63,16 @@ export function TipTapEditor({
 	return (
 		<div className={className} style={{ height: "100%" }}>
 			<div className="w-full h-full bg-background p-3">
-				<EditorContent
-					editor={editor as any}
-					className="w-full h-full max-w-5xl mx-auto"
-					data-testid="tiptap-editor"
-					key={activeFileId ?? "no-file"}
-				/>
+				{editor ? (
+					<EditorContent
+						editor={editor as any}
+						className="w-full h-full max-w-5xl mx-auto"
+						data-testid="tiptap-editor"
+						key={activeFileId ?? "no-file"}
+					/>
+				) : (
+					<div style={{ padding: 12, opacity: 0.7 }}>Initializing editor…</div>
+				)}
 			</div>
 		</div>
 	);

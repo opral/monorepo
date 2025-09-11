@@ -27,7 +27,7 @@ import {
 import { useLix } from "@lix-js/react-utils";
 import { toggleLixInspector } from "@lix-js/inspector";
 import { seedMarkdownFiles } from "@/seed";
-import { OpfsStorage } from "@lix-js/sdk";
+import { OpfsSahBackend } from "@lix-js/sdk";
 
 export function FlashtypeMenu({
 	teams,
@@ -121,7 +121,13 @@ export function FlashtypeMenu({
 								<DropdownMenuItem
 									onSelect={async () => {
 										try {
-											await OpfsStorage.clean();
+											// Close any open Lix instance to release OPFS handles
+											if (lix) {
+												try {
+													await lix.close();
+												} catch {}
+											}
+											await OpfsSahBackend.clear();
 											window.location.reload();
 										} catch (e) {
 											console.error("Failed to reset OPFS", e);

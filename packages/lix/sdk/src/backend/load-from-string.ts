@@ -41,18 +41,25 @@ export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 		typeof URL !== "undefined" &&
 		"createObjectURL" in URL
 	) {
-		const blob = new Blob([code], { type: "application/javascript" });
+		// Sanitize content: strip BOM/CRLF and decorator property lines that break parsing
+		let cleaned = code.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+		cleaned = cleaned.replace(
+			/^[\t ]*@\w+\([^)]*\)\s+[A-Za-z_$][\w$]*\s*=\s*[^;]*;\s*$/gm,
+			""
+		);
+		const label = `lix-plugin-inline-${++__lixInlinePluginCounter}`;
+		const withSourceURL = `${cleaned}\n//# sourceURL=${label}`;
+		const blob = new Blob([withSourceURL], { type: "application/javascript" });
 		const url = URL.createObjectURL(blob);
 		try {
 			const mod: any = await import(/* @vite-ignore */ url);
 			return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
 		} catch (e: any) {
-			const preview = code.slice(0, 400);
+			const preview = cleaned.slice(0, 400);
 			const err = new SyntaxError(
-				`loadPluginFromString(blob) failed: ${e?.message ?? e}\npreview:\n${preview}`
+				`loadPluginFromString(blob) failed: ${e?.message ?? e}\nlabel: ${label}\npreview:\n${preview}`
 			);
 			(err as any).cause = e;
-			// Preserve original stack if available
 			if (e?.stack && typeof e.stack === "string") {
 				try {
 					(err as any).stack = e.stack;
