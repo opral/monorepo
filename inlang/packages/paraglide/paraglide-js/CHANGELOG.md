@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.3.1
+
+### Patch Changes
+
+- 090964b: fix(runtime/set-locale.js): ensure reload waits for async custom setLocale funcs https://github.com/opral/monorepo/pull/3692
+
 ## 2.3.0
 
 ### Minor Changes
