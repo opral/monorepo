@@ -34,6 +34,7 @@ import {
 	LixConversationMessageSchema,
 	type LixConversationMessage,
 } from "../conversation/schema.js";
+import { LixChangeProposalSchema } from "../change-proposal/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -87,6 +88,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	entity_conversation: LixEntityConversationSchema,
 	conversation: LixConversationSchema,
 	conversation_message: LixConversationMessageSchema,
+	change_proposal: LixChangeProposalSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -121,6 +123,7 @@ export type LixDatabaseSchema = {
 		"conversation_message",
 		{ body: LixConversationMessage["body"] }
 	> &
+	EntityViews<typeof LixChangeProposalSchema, "change_proposal"> &
 	EntityViews<
 		typeof LixVersionDescriptorSchema,
 		"version",

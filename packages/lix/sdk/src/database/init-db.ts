@@ -26,6 +26,7 @@ import { timestamp, uuidV7, generateHumanId } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
+import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
@@ -156,6 +157,7 @@ export function initDb(args: {
 	applyLabelDatabaseSchema(lix);
 	applyConversationDatabaseSchema(lix);
 	applyEntityConversationDatabaseSchema(lix);
+	applyChangeProposalDatabaseSchema(lix);
 	applyStateHistoryDatabaseSchema(lix);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(lix);
