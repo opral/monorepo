@@ -483,7 +483,7 @@ test("awaits async setLocale functions to resolve in multiple custom strategies"
 });
 
 test("reload should not run if async setLocale function rejects in custom strategy", async () => {
-	let customLocale1 = "en";
+	const customLocale1 = "en";
 
 	globalThis.window = {
 		location: {
@@ -504,7 +504,7 @@ test("reload should not run if async setLocale function rejects in custom strate
 
 	runtime.defineCustomClientStrategy("custom-async", {
 		getLocale: () => customLocale1,
-		setLocale: async (locale) => {
+		setLocale: async () => {
 			throw new Error("fetch error");
 		},
 	});

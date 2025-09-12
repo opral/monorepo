@@ -37,7 +37,7 @@ const navigateOrReload = (newLocation) => {
  * can be disabled by passing \`reload: false\` as an option. If
  * reloading is disabled, you need to ensure that the UI is updated
  * to reflect the new locale.
- * 
+ *
  * If any custom strategy's \`setLocale\` function is async, then this
  * function will become async as well.
  *

@@ -755,6 +755,7 @@ Custom strategies offer several advantages over the traditional `overwriteGetLoc
 **Async Support**: 
 - ✅ Server-side strategies support async `getLocale` methods
 - ❌ Client-side strategies must have synchronous `getLocale` methods (but `setLocale` can be async)
+- ✅ When any custom strategy uses async `setLocale`, the main `setLocale()` function becomes async and page reloads wait for all async operations to complete
 - If you need async client-side locale detection, use the `overwriteGetLocale()` approach instead
 
 **Strategy Priority**: 
