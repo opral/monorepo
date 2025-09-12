@@ -160,7 +160,6 @@ export async function createLixAgent(args: {
 			persistAssistant: (t: string) =>
 				appendAssistantMessage(lix, conversationId, t),
 		});
-
 		return { text: reply, usage };
 	}
 

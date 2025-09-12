@@ -6,6 +6,8 @@ import { useLix } from "@lix-js/react-utils";
 import type { ChatMessage as UiMessage } from "./types";
 import { LoadingBar } from "./loading-bar";
 import { AcceptChangesMenu } from "./accept-changes-menu";
+import { useKeyValue } from "@/key-value/use-key-value";
+import { selectVersionDiff } from "@lix-js/sdk";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).
@@ -40,9 +42,59 @@ export function ChatPanel() {
 	const panelRef = React.useRef<HTMLDivElement>(null);
 	const [showDecision, setShowDecision] = React.useState(false);
 	const pendingPrev = React.useRef(false);
+	const [, setDiffOpen] = useKeyValue("flashtype_diff_open", {
+		defaultVersionId: "global",
+		untracked: true,
+	});
+	const [, setDiffSource] = useKeyValue("flashtype_diff_source_version_id", {
+		defaultVersionId: "global",
+		untracked: true,
+	});
 	React.useEffect(() => {
-		// Show decision menu when pending flips from true -> false
-		if (pendingPrev.current && !pending) setShowDecision(true);
+		// When pending flips from true -> false, check if 'lix agent' produced diffs
+		async function checkDiffAndOpen() {
+			try {
+				const agent = await lix.db
+					.selectFrom("version")
+					.where("name", "=", "lix agent")
+					.select(["id"])
+					.limit(1)
+					.executeTakeFirst();
+				if (!agent) return;
+				const main = await lix.db
+					.selectFrom("version")
+					.where("name", "=", "main")
+					.select(["id"])
+					.limit(1)
+					.executeTakeFirst();
+				if (!main) return;
+				const activeFileIdQ = lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "flashtype_active_file_id")
+					.select("value");
+				const rows = await selectVersionDiff({
+					lix,
+					source: { id: agent.id as any },
+					target: { id: main.id as any },
+				})
+					.where("diff.status", "!=", "unchanged")
+					.where("diff.file_id", "=", activeFileIdQ)
+					.limit(1)
+					.selectAll()
+					.execute();
+				const changed = rows.length > 0;
+				if (changed) {
+					await setDiffSource(agent.id as any);
+					await setDiffOpen(true as any);
+					setShowDecision(true);
+				} else {
+					setShowDecision(false);
+				}
+			} catch {}
+		}
+		if (pendingPrev.current && !pending) {
+			void checkDiffAndOpen();
+		}
 		pendingPrev.current = pending;
 	}, [pending]);
 
@@ -96,8 +148,8 @@ export function ChatPanel() {
 			{!showDecision && (
 				<ChatInput
 					onSend={(v) => {
-						if (pending) return; // prevent send while working
-						send(v);
+						if (pending) return;
+						void send(v);
 					}}
 					onCommand={async (cmd) => {
 						if (cmd === "clear" || cmd === "reset" || cmd === "new") {

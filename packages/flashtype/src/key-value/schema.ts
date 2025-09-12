@@ -49,6 +49,16 @@ export const KEY_VALUE_DEFINITIONS = {
 		defaultValue: "unified",
 	} as KeyDef<"unified" | "side-by-side">,
 
+	/**
+	 * Optional source version id for DiffView.
+	 * If set, DiffView compares this version against Main.
+	 */
+	flashtype_diff_source_version_id: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: null,
+	} as KeyDef<string | null>,
+
 	// Test-only keys used in unit tests to exercise tracked behavior
 	flashtype_test_tracked: {
 		defaultVersionId: "active",
