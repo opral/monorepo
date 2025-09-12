@@ -15,12 +15,31 @@ import {
 } from "./variables.js";
 
 /**
+ * Navigates to the localized URL, or reloads the current page
+ *
+ * @param {string} [newLocation] The new location
+ * @return {undefined}
+ */
+const navigateOrReload = (newLocation) => {
+	if (newLocation) {
+		// reload the page by navigating to the new url
+		window.location.href = newLocation;
+	} else {
+		// reload the page to reflect the new locale
+		window.location.reload();
+	}
+};
+
+/**
  * Set the locale.
  *
  * Set locale reloads the site by default on the client. Reloading
  * can be disabled by passing \`reload: false\` as an option. If
  * reloading is disabled, you need to ensure that the UI is updated
  * to reflect the new locale.
+ * 
+ * If any custom strategy's \`setLocale\` function is async, then this
+ * function will become async as well.
  *
  * @example
  *   setLocale('en');
@@ -28,7 +47,7 @@ import {
  * @example
  *   setLocale('en', { reload: false });
  *
- * @type {(newLocale: Locale, options?: { reload?: boolean }) => void}
+ * @type {(newLocale: Locale, options?: { reload?: boolean }) => Promise<void> | void}
  */
 export let setLocale = (newLocale, options) => {
 	const optionsWithDefaults = {
@@ -102,7 +121,7 @@ export let setLocale = (newLocale, options) => {
 				// Handle async setLocale - fire and forget
 				if (result instanceof Promise) {
 					result.catch((error) => {
-						console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
+						error.message = `Custom strategy "${strat}" setLocale failed: ${error.message}`;
 					});
 					customSetLocalePromises.push(result);
 				}
@@ -116,16 +135,14 @@ export let setLocale = (newLocale, options) => {
 		window.location &&
 		newLocale !== currentLocale
 	) {
-		// Wait for any potentially async custom setLocale functions
-		Promise.all(customSetLocalePromises).then(() => {
-			if (newLocation) {
-				// reload the page by navigating to the new url
-				window.location.href = newLocation;
-			} else {
-				// reload the page to reflect the new locale
-				window.location.reload();
-			}
-		});
+		if (customSetLocalePromises.length) {
+			// Wait for any async custom setLocale functions
+			return Promise.all(customSetLocalePromises).then(() => {
+				navigateOrReload(newLocation);
+			});
+		} else {
+			navigateOrReload(newLocation);
+		}
 	}
 
 	return;
