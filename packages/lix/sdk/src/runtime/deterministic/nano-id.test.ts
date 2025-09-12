@@ -1,15 +1,15 @@
 import { expect, test, vi } from "vitest";
-import { _nanoIdAlphabet, nanoId } from "./nano-id.js";
-import { openLix } from "../lix/open-lix.js";
+import { _nanoIdAlphabet, nanoIdSync } from "./nano-id.js";
+import { openLix } from "../../lix/open-lix.js";
 
 test("nanoId returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const id1 = nanoId({ lix });
-	const id2 = nanoId({ lix });
-	const id3 = nanoId({ lix });
+	const id1 = nanoIdSync({ lix });
+	const id2 = nanoIdSync({ lix });
+	const id3 = nanoIdSync({ lix });
 
 	// Should have test_ prefix and 10 digits
 	expect(id1).toMatch(/^test_\d{10}$/);
@@ -31,9 +31,9 @@ test("nanoId returns random values when deterministic mode is disabled", async (
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
-	const id1 = nanoId({ lix });
-	const id2 = nanoId({ lix });
-	const id3 = nanoId({ lix });
+	const id1 = nanoIdSync({ lix });
+	const id2 = nanoIdSync({ lix });
+	const id3 = nanoIdSync({ lix });
 
 	// Should NOT have test_ prefix
 	expect(id1).not.toMatch(/^test_/);
@@ -57,7 +57,7 @@ test("nanoId toggles between deterministic and random", async () => {
 	});
 
 	// Start with deterministic
-	const deterministicId = nanoId({ lix });
+	const deterministicId = nanoIdSync({ lix });
 	expect(deterministicId).toMatch(/^test_\d{10}$/);
 
 	// Switch to random
@@ -67,7 +67,7 @@ test("nanoId toggles between deterministic and random", async () => {
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
-	const randomId = nanoId({ lix });
+	const randomId = nanoIdSync({ lix });
 	expect(randomId).not.toMatch(/^test_/);
 	expect(randomId.length).toBe(21);
 
@@ -78,7 +78,7 @@ test("nanoId toggles between deterministic and random", async () => {
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
-	const deterministicId2 = nanoId({ lix });
+	const deterministicId2 = nanoIdSync({ lix });
 	expect(deterministicId2).toMatch(/^test_\d{10}$/);
 });
 
@@ -88,16 +88,16 @@ test("nanoId is persisted across lix instances", async () => {
 	});
 
 	// Generate some IDs to advance the counter
-	const id1 = nanoId({ lix: lix1 });
-	const id2 = nanoId({ lix: lix1 });
-	const id3 = nanoId({ lix: lix1 });
+	const id1 = nanoIdSync({ lix: lix1 });
+	const id2 = nanoIdSync({ lix: lix1 });
+	const id3 = nanoIdSync({ lix: lix1 });
 
 	// Create a new instance from the blob
 	const blob = await lix1.toBlob();
 	const lix2 = await openLix({ blob });
 
 	// Next ID should continue from where we left off
-	const id4 = nanoId({ lix: lix2 });
+	const id4 = nanoIdSync({ lix: lix2 });
 
 	// Extract counters
 	const counters = [id1, id2, id3, id4].map((id) => parseInt(id.slice(5), 10));
@@ -116,7 +116,7 @@ test("nanoId advances correctly with many operations", async () => {
 	// Generate 100 nanoIds
 	const ids: string[] = [];
 	for (let i = 0; i < 100; i++) {
-		ids.push(nanoId({ lix }));
+		ids.push(nanoIdSync({ lix }));
 	}
 
 	// All should have test_ prefix
@@ -142,23 +142,23 @@ test("nanoId format is consistent across different counter values", async () => 
 	});
 
 	// Generate an ID with initial counter
-	const id1 = nanoId({ lix });
+	const id1 = nanoIdSync({ lix });
 	expect(id1).toMatch(/^test_\d{10}$/);
 	expect(id1.length).toBe(15); // "test_" (5) + 10 digits
 
 	// Generate many IDs to get different counter magnitudes
 	for (let i = 0; i < 1000; i++) {
-		nanoId({ lix });
+		nanoIdSync({ lix });
 	}
 
-	const idAfter1000 = nanoId({ lix });
+	const idAfter1000 = nanoIdSync({ lix });
 	expect(idAfter1000).toMatch(/^test_\d{10}$/);
 	expect(idAfter1000.length).toBe(15); // Should still be padded to same length
 });
 
 test("length is obeyed", async () => {
 	const lix = await openLix({});
-	const id = nanoId({ lix, length: 10 });
+	const id = nanoIdSync({ lix, length: 10 });
 	expect(id.length).toBe(10);
 });
 
@@ -186,7 +186,7 @@ test("polyfill works when crypto is not available", async () => {
 	vi.stubGlobal("crypto", undefined);
 
 	try {
-		const id = nanoId({ lix, length: 10 });
+		const id = nanoIdSync({ lix, length: 10 });
 		expect(id.length).toBe(10);
 		expect(typeof id).toBe("string");
 		// Check that it only contains characters from our alphabet

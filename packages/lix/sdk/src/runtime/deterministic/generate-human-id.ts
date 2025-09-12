@@ -1,6 +1,6 @@
-import type { Lix } from "../lix/open-lix.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
-import { nextDeterministicSequenceNumber } from "./sequence.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { nextSequenceNumberSync } from "./sequence.js";
 import { humanId } from "human-id";
 // Deterministic names for anonymous accounts
 const DETERMINISTIC_NAMES = [
@@ -66,15 +66,15 @@ export function deterministicHumanIdVocabularySize(): number {
  *
  * @example
  * ```ts
- * const name = generateHumanId({ lix });
+ * const name = humanIdSync({ lix });
  * // In deterministic mode: returns deterministic names like "Plum", "Coin", etc.
  * // In normal mode: returns random human-id names
  *
- * const lowercaseName = generateHumanId({ lix, capitalize: false });
+ * const lowercaseName = humanIdSync({ lix, capitalize: false });
  * // Returns lowercase names like "plum", "coin", etc.
  * ```
  */
-export function generateHumanId(args: {
+export function humanIdSync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 	separator?: string;
 	capitalize?: boolean;
@@ -82,9 +82,9 @@ export function generateHumanId(args: {
 	const capitalize = args.capitalize ?? true;
 	const separator = args.separator ?? "_";
 
-	if (isDeterministicMode({ lix: args.lix })) {
+	if (isDeterministicModeSync({ lix: args.lix })) {
 		// In deterministic mode, use sequence to get deterministic index
-		const sequence = nextDeterministicSequenceNumber({
+		const sequence = nextSequenceNumberSync({
 			lix: args.lix,
 		});
 

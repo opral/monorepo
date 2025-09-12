@@ -6,7 +6,7 @@ import {
 import {
 	validateLixSchema,
 	validateLixSchemaDefinition,
-} from "../schema-definition/validate-lix-schema.js";
+} from "../../schema-definition/validate-lix-schema.js";
 
 test("deterministic mode options schema is a valid LixSchemaDefinition", () => {
 	expect(() =>

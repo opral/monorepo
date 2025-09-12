@@ -1,9 +1,9 @@
 import { test, expect } from "vitest";
 import {
-	generateHumanId,
+	humanIdSync,
 	deterministicHumanIdVocabularySize,
 } from "./generate-human-id.js";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 
 test("returns deterministic names in deterministic mode", async () => {
 	// Open two separate lix instances with deterministic mode
@@ -15,14 +15,14 @@ test("returns deterministic names in deterministic mode", async () => {
 	});
 
 	// Generate IDs from both instances - they should match
-	const id1_lix1 = generateHumanId({ lix: lix1 });
-	const id1_lix2 = generateHumanId({ lix: lix2 });
+	const id1_lix1 = humanIdSync({ lix: lix1 });
+	const id1_lix2 = humanIdSync({ lix: lix2 });
 
-	const id2_lix1 = generateHumanId({ lix: lix1 });
-	const id2_lix2 = generateHumanId({ lix: lix2 });
+	const id2_lix1 = humanIdSync({ lix: lix1 });
+	const id2_lix2 = humanIdSync({ lix: lix2 });
 
-	const id3_lix1 = generateHumanId({ lix: lix1 });
-	const id3_lix2 = generateHumanId({ lix: lix2 });
+	const id3_lix1 = humanIdSync({ lix: lix1 });
+	const id3_lix2 = humanIdSync({ lix: lix2 });
 
 	// Both instances should generate the same sequence
 	expect(id1_lix1).toBe(id1_lix2);
@@ -39,7 +39,7 @@ test("cycles through names when exceeding array length", async () => {
 	const names: string[] = [];
 	const vocabSize = deterministicHumanIdVocabularySize();
 	for (let i = 0; i < vocabSize + 5; i++) {
-		names.push(generateHumanId({ lix }));
+		names.push(humanIdSync({ lix }));
 	}
 
 	// Find where the cycle starts repeating
@@ -65,8 +65,8 @@ test("returns non-deterministic names in normal mode", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
-	const id1 = generateHumanId({ lix });
-	const id2 = generateHumanId({ lix });
+	const id1 = humanIdSync({ lix });
+	const id2 = humanIdSync({ lix });
 
 	// Names should be strings
 	expect(typeof id1).toBe("string");
@@ -86,9 +86,9 @@ test("uses custom separator when provided", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
-	const idWithDash = generateHumanId({ lix, separator: "-" });
-	const idWithSpace = generateHumanId({ lix, separator: " " });
-	const idWithUnderscore = generateHumanId({ lix, separator: "_" });
+	const idWithDash = humanIdSync({ lix, separator: "-" });
+	const idWithSpace = humanIdSync({ lix, separator: " " });
+	const idWithUnderscore = humanIdSync({ lix, separator: "_" });
 
 	// All should be strings
 	expect(typeof idWithDash).toBe("string");
@@ -108,9 +108,9 @@ test("persists sequence across lix instances", async () => {
 	});
 
 	// Generate some IDs
-	const id1 = generateHumanId({ lix: lix1 });
-	const id2 = generateHumanId({ lix: lix1 });
-	const id3 = generateHumanId({ lix: lix1 });
+	const id1 = humanIdSync({ lix: lix1 });
+	const id2 = humanIdSync({ lix: lix1 });
+	const id3 = humanIdSync({ lix: lix1 });
 
 	// Get the blob
 	const blob = await lix1.toBlob();
@@ -122,7 +122,7 @@ test("persists sequence across lix instances", async () => {
 	});
 
 	// Generate next ID - should continue from where we left off
-	const id4 = generateHumanId({ lix: lix2 });
+	const id4 = humanIdSync({ lix: lix2 });
 
 	// Verify it's not repeating the sequence
 	expect(id4).not.toBe(id1);
@@ -136,8 +136,8 @@ test("handles capitalize option", async () => {
 	});
 
 	// Generate IDs with different capitalize options
-	const capitalizedId = generateHumanId({ lix, capitalize: true });
-	const lowercaseId = generateHumanId({ lix, capitalize: false });
+	const capitalizedId = humanIdSync({ lix, capitalize: true });
+	const lowercaseId = humanIdSync({ lix, capitalize: false });
 
 	// Capitalized should be uppercase first letter
 	expect(capitalizedId[0]).toBe(capitalizedId[0]?.toUpperCase());
@@ -151,7 +151,7 @@ test("default capitalize is true", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const id = generateHumanId({ lix });
+	const id = humanIdSync({ lix });
 
 	// Should be capitalized by default
 	expect(id[0]).toBe(id[0]?.toUpperCase());

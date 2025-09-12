@@ -3,7 +3,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../deterministic/index.js";
+import { nanoIdSync } from "../runtime/deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyChangeSetDatabaseSchema(
@@ -17,7 +17,7 @@ export function applyChangeSetDatabaseSchema(
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix }),
+			id: () => nanoIdSync({ lix }),
 		},
 	});
 

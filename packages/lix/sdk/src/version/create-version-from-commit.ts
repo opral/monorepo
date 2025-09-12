@@ -2,8 +2,8 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixCommit } from "../commit/schema.js";
 import type { LixVersion } from "./schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { nanoId, generateHumanId } from "../deterministic/index.js";
+import { uuidV7Sync } from "../runtime/deterministic/uuid-v7.js";
+import { nanoIdSync, humanIdSync } from "../runtime/deterministic/index.js";
 // Use state_all to write descriptor + tip; vtable commit handles persistence + cache
 
 /**
@@ -65,7 +65,7 @@ export async function createVersionFromCommit(args: {
 		});
 
 		// Create a fresh working commit pointing to the working change set
-		const workingCommitId = uuidV7({ lix: args.lix });
+		const workingCommitId = uuidV7Sync({ lix: args.lix });
 		await trx
 			.insertInto("commit_all")
 			.values({
@@ -83,8 +83,8 @@ export async function createVersionFromCommit(args: {
 					? null
 					: args.inheritsFrom.id;
 
-		const versionId = args.id ?? nanoId({ lix: args.lix });
-		const versionName = args.name ?? generateHumanId({ lix: args.lix });
+		const versionId = args.id ?? nanoIdSync({ lix: args.lix });
+		const versionName = args.name ?? humanIdSync({ lix: args.lix });
 
 		// Insert descriptor and tip via state_all; vtable commit will persist+materialize
 		await trx

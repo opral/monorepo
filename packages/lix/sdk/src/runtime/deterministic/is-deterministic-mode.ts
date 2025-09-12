@@ -1,7 +1,7 @@
-import type { Lix } from "../lix/open-lix.js";
-import { executeSync } from "../database/execute-sync.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
@@ -22,7 +22,7 @@ const hookListenersRegistered = new WeakSet<object>();
  * @param args - Object containing the lix instance with sqlite connection
  * @returns true if deterministic mode is enabled, false otherwise
  */
-export function isDeterministicMode(args: {
+export function isDeterministicModeSync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): boolean {
 	// Register hook listener for cache invalidation (only once per hooks instance)

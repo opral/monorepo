@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { updateUntrackedState } from "./update-untracked-state.js";
-import { timestamp } from "../../deterministic/index.js";
+import { getTimestampSync } from "../../runtime/deterministic/index.js";
 
 test("updateUntrackedState creates direct untracked entity", async () => {
 	const lix = await openLix({
@@ -22,7 +22,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create direct untracked entity
 	updateUntrackedState({
@@ -94,7 +94,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create initial entity
 	updateUntrackedState({
@@ -185,7 +185,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create direct untracked entity
 	updateUntrackedState({
@@ -264,7 +264,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create an untracked entity in global version (parent)
 	await lixInternalDb
@@ -346,7 +346,7 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create untracked entity
 	updateUntrackedState({
@@ -399,7 +399,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = getTimestampSync({ lix: lix as any });
 
 	// Create a tombstone first
 	updateUntrackedState({

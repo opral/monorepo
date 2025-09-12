@@ -5,7 +5,11 @@ import type { LixCommitEdge } from "../../commit/schema.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { commit } from "./commit.js";
 import { openLix } from "../../lix/open-lix.js";
-import { nanoId, timestamp, uuidV7 } from "../../deterministic/index.js";
+import {
+	nanoIdSync,
+	getTimestampSync,
+	uuidV7Sync,
+} from "../../runtime/deterministic/index.js";
 import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
@@ -57,7 +61,7 @@ test("commit writes business rows to active version; graph edges update globally
 	/*──────────────────────── 2. stage two user changes ───────────────────*/
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "para-1",
@@ -197,23 +201,23 @@ test("commit should handle multiple versions correctly", async () => {
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Create version A with dynamic IDs
-	const versionAId = nanoId({ lix });
-	const versionACommitId = uuidV7({ lix });
-	const versionAChangeSetId = nanoId({ lix });
-	const versionAWorkingChangeSetId = nanoId({ lix });
-	const versionAWorkingCommitId = uuidV7({ lix });
+	const versionAId = nanoIdSync({ lix });
+	const versionACommitId = uuidV7Sync({ lix });
+	const versionAChangeSetId = nanoIdSync({ lix });
+	const versionAWorkingChangeSetId = nanoIdSync({ lix });
+	const versionAWorkingCommitId = uuidV7Sync({ lix });
 
 	// Create version B with dynamic IDs
-	const versionBId = nanoId({ lix });
-	const versionBCommitId = uuidV7({ lix });
-	const versionBChangeSetId = nanoId({ lix });
-	const versionBWorkingChangeSetId = nanoId({ lix });
-	const versionBWorkingCommitId = uuidV7({ lix });
+	const versionBId = nanoIdSync({ lix });
+	const versionBCommitId = uuidV7Sync({ lix });
+	const versionBChangeSetId = nanoIdSync({ lix });
+	const versionBWorkingChangeSetId = nanoIdSync({ lix });
+	const versionBWorkingCommitId = uuidV7Sync({ lix });
 
 	// Create change sets for versions
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionAChangeSetId,
@@ -232,7 +236,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionAWorkingChangeSetId,
@@ -251,7 +255,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionBChangeSetId,
@@ -270,7 +274,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionBWorkingChangeSetId,
@@ -290,7 +294,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Create commits for version A
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionACommitId,
@@ -310,7 +314,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionAWorkingCommitId,
@@ -331,7 +335,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Create version A (descriptor + tip)
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionAId,
@@ -367,7 +371,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Create commits for version B
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionBCommitId,
@@ -387,7 +391,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionBWorkingCommitId,
@@ -408,7 +412,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Create version B (descriptor + tip)
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: versionBId,
@@ -444,7 +448,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Insert entity for version A
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "version-a-entity",
@@ -465,7 +469,7 @@ test("commit should handle multiple versions correctly", async () => {
 	// Insert entity for version B
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "version-b-entity",
@@ -849,7 +853,7 @@ test("global version should move forward when mutations occur", async () => {
 	// Insert data with version_id = "global"
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "test-global-entity",
@@ -974,7 +978,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	// Insert data with version_id = "global"
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "test-edge-entity",
@@ -1070,7 +1074,7 @@ test("active version should move forward when mutations occur", async () => {
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "test-active-entity",
@@ -1445,7 +1449,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 	// Insert a mock entity into global version via transaction
 	insertTransactionState({
 		lix,
-		timestamp: timestamp({ lix }),
+		timestamp: getTimestampSync({ lix }),
 		data: [
 			{
 				entity_id: "mock-global-entity",
@@ -1734,7 +1738,7 @@ describe("file lixcol cache updates", () => {
 		// Perform mixed operations
 		insertTransactionState({
 			lix,
-			timestamp: timestamp({ lix }),
+			timestamp: getTimestampSync({ lix }),
 			data: [
 				// New file
 				{

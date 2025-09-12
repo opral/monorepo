@@ -4,7 +4,7 @@ import type {
 } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../deterministic/index.js";
+import { nanoIdSync } from "../runtime/deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyThreadDatabaseSchema(
@@ -18,7 +18,7 @@ export function applyThreadDatabaseSchema(
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix }),
+			id: () => nanoIdSync({ lix }),
 		},
 	});
 
@@ -30,7 +30,7 @@ export function applyThreadDatabaseSchema(
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix }),
+			id: () => nanoIdSync({ lix }),
 		},
 	});
 }

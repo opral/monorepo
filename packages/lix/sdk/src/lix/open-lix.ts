@@ -13,13 +13,14 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
+import { commitDeterministicSequenceNumber } from "../runtime/deterministic/sequence.js";
 import {
 	commitDeterministicRngState,
-	random,
-} from "../deterministic/random.js";
+	randomSync,
+} from "../runtime/deterministic/random.js";
 import { newLixFile } from "./new-lix.js";
 import { switchAccount } from "../account/switch-account.js";
+import { uuidV7Sync as deterministicUuidV7 } from "../runtime/deterministic/uuid-v7.js";
 
 export type Lix = {
 	/**
@@ -50,6 +51,23 @@ export type Lix = {
 	 */
 	close: () => Promise<void>;
 	observe: ReturnType<typeof createObserve>;
+
+	/**
+	 * Calls a named runtime function and returns its result.
+	 *
+	 * This is the single, minimal boundary for invoking compute that runs next
+	 * to the Lix database engine. Depending on the environment, the runtime may
+	 * execute on the same thread (in‑memory) or inside a Worker. `callFn`
+	 * abstracts over that boundary and always returns a Promise.
+	 *
+	 * @example
+	 * const id = await lix.callFn("lix_uuid_v7");
+	 */
+	callFn: (
+		name: string,
+		payload?: unknown,
+		opts?: { signal?: AbortSignal }
+	) => Promise<unknown>;
 	/**
 	 * Serialises the Lix into a {@link Blob}.
 	 *
@@ -250,6 +268,13 @@ export async function openLix(args: {
 		plugin,
 		hooks,
 		observe,
+		callFn: async (
+			name: string,
+			_payload?: unknown,
+			_opts?: { signal?: AbortSignal }
+		): Promise<unknown> => {
+			throw new Error("Unimplemented");
+		},
 		close: async () => {
 			await storage.close();
 		},
@@ -303,7 +328,7 @@ async function captureOpened(args: { lix: Lix }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.lix.db);
-		if (random({ lix: args.lix }) > 0.1) {
+		if (randomSync({ lix: args.lix }) > 0.1) {
 			// Not awaiting to avoid boot up time and knowing that
 			// no database query is performed here. we dont care if the
 			// server responds with an error or not.

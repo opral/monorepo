@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { random } from "./random.js";
+import { openLix } from "../../lix/open-lix.js";
+import { randomSync } from "./random.js";
 
 test("random works in non-deterministic mode", async () => {
 	const lix = await openLix({
@@ -9,7 +9,7 @@ test("random works in non-deterministic mode", async () => {
 
 	const values = new Set<number>();
 	for (let i = 0; i < 1000; i++) {
-		const r = random({ lix });
+		const r = randomSync({ lix });
 		expect(r).toBeGreaterThanOrEqual(0);
 		expect(r).toBeLessThan(1);
 		values.add(r);
@@ -28,7 +28,7 @@ test("random works in deterministic mode", async () => {
 
 	const sequence1 = [];
 	for (let i = 0; i < 10; i++) {
-		const r = random({ lix });
+		const r = randomSync({ lix });
 		expect(r).toBeGreaterThanOrEqual(0);
 		expect(r).toBeLessThan(1);
 		sequence1.push(r);
@@ -43,7 +43,7 @@ test("random works in deterministic mode", async () => {
 
 	const sequence2 = [];
 	for (let i = 0; i < 10; i++) {
-		sequence2.push(random({ lix: lix2 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// After blob restore, sequence should continue from where it left off,
@@ -67,7 +67,7 @@ test("deterministic mode produces same sequence with same seed", async () => {
 
 	const sequence1 = [];
 	for (let i = 0; i < 5; i++) {
-		sequence1.push(random({ lix: lix1 }));
+		sequence1.push(randomSync({ lix: lix1 }));
 	}
 
 	// Test state persistence - continue generating after blob save/restore
@@ -75,7 +75,7 @@ test("deterministic mode produces same sequence with same seed", async () => {
 	const lix1b = await openLix({ blob });
 
 	for (let i = 0; i < 5; i++) {
-		sequence1.push(random({ lix: lix1b }));
+		sequence1.push(randomSync({ lix: lix1b }));
 	}
 
 	const lix2 = await openLix({
@@ -92,7 +92,7 @@ test("deterministic mode produces same sequence with same seed", async () => {
 
 	const sequence2 = [];
 	for (let i = 0; i < 10; i++) {
-		sequence2.push(random({ lix: lix2 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// Same seed should produce identical 10-number sequence,
@@ -115,7 +115,7 @@ test("deterministic mode produces different sequences with different seeds", asy
 
 	const sequence1 = [];
 	for (let i = 0; i < 100; i++) {
-		sequence1.push(random({ lix: lix1 }));
+		sequence1.push(randomSync({ lix: lix1 }));
 	}
 
 	const lix2 = await openLix({
@@ -132,7 +132,7 @@ test("deterministic mode produces different sequences with different seeds", asy
 
 	const sequence2: any[] = [];
 	for (let i = 0; i < 100; i++) {
-		sequence2.push(random({ lix: lix2 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// Different seeds should produce completely different sequences.
@@ -148,7 +148,7 @@ test("random state persists across blob operations", async () => {
 
 	const fullSequence = [];
 	for (let i = 0; i < 6; i++) {
-		fullSequence.push(random({ lix: lix1 }));
+		fullSequence.push(randomSync({ lix: lix1 }));
 	}
 
 	const lix2 = await openLix({
@@ -157,7 +157,7 @@ test("random state persists across blob operations", async () => {
 
 	const beforeBlob = [];
 	for (let i = 0; i < 3; i++) {
-		beforeBlob.push(random({ lix: lix2 }));
+		beforeBlob.push(randomSync({ lix: lix2 }));
 	}
 
 	const blob = await lix2.toBlob();
@@ -165,7 +165,7 @@ test("random state persists across blob operations", async () => {
 
 	const afterBlob = [];
 	for (let i = 0; i < 3; i++) {
-		afterBlob.push(random({ lix: lix3 }));
+		afterBlob.push(randomSync({ lix: lix3 }));
 	}
 
 	// The state should persist through blob serialization.
@@ -200,8 +200,8 @@ test("random uses lix_id as default seed when no seed specified", async () => {
 
 	// Generate values from each instance
 	for (let i = 0; i < 10; i++) {
-		sequence1.push(random({ lix: lix1 }));
-		sequence2.push(random({ lix: lix2 }));
+		sequence1.push(randomSync({ lix: lix1 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// With randomLixId: true, each instance gets a different lix_id,
@@ -226,8 +226,8 @@ test("random produces same sequence with deterministic mode", async () => {
 
 	// Generate values from each instance
 	for (let i = 0; i < 10; i++) {
-		sequence1.push(random({ lix: lix1 }));
-		sequence2.push(random({ lix: lix2 }));
+		sequence1.push(randomSync({ lix: lix1 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// With deterministic mode, both instances get the same lix_id (deterministic-lix-id),
@@ -239,7 +239,7 @@ test("random works after enabling deterministic mode", async () => {
 	const lix = await openLix({});
 
 	// Use random in non-deterministic mode first
-	const nonDeterministicValue = random({ lix });
+	const nonDeterministicValue = randomSync({ lix });
 	expect(nonDeterministicValue).toBeGreaterThanOrEqual(0);
 	expect(nonDeterministicValue).toBeLessThan(1);
 
@@ -252,7 +252,7 @@ test("random works after enabling deterministic mode", async () => {
 	// Generate deterministic values
 	const sequence1 = [];
 	for (let i = 0; i < 5; i++) {
-		sequence1.push(random({ lix }));
+		sequence1.push(randomSync({ lix }));
 	}
 
 	// Save state and reload
@@ -262,7 +262,7 @@ test("random works after enabling deterministic mode", async () => {
 	// Continue generating values
 	const sequence2 = [];
 	for (let i = 0; i < 5; i++) {
-		sequence2.push(random({ lix: lix2 }));
+		sequence2.push(randomSync({ lix: lix2 }));
 	}
 
 	// Values should continue from where they left off (deterministic state persisted)
@@ -281,7 +281,7 @@ test("non-deterministic mode without key specified", async () => {
 
 	const values = new Set<number>();
 	for (let i = 0; i < 100; i++) {
-		const r = random({ lix });
+		const r = randomSync({ lix });
 		expect(r).toBeGreaterThanOrEqual(0);
 		expect(r).toBeLessThan(1);
 		values.add(r);

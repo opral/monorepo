@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
@@ -19,7 +19,7 @@ test("populates v2 cache from materializer", async () => {
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// First, insert some test data using updateStateCacheV2
 	const testChanges: LixChangeRaw[] = [
@@ -95,7 +95,7 @@ test("populates v2 cache with version filter", async () => {
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// Insert test data for different versions
 	const changes: LixChangeRaw[] = [
@@ -175,7 +175,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// Insert data into multiple schema tables
 	const changes: LixChangeRaw[] = [
@@ -271,7 +271,7 @@ test("inheritance is queryable from the resolved view after population", async (
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// Create version hierarchy: C inherits from B, B inherits from A
 	const versionA = await createVersion({

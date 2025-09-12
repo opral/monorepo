@@ -1,12 +1,12 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { executeSync } from "../database/execute-sync.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import type { Lix } from "../lix/open-lix.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
-import { timestamp } from "./timestamp.js";
-import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { executeSync } from "../../database/execute-sync.js";
+import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { getTimestampSync } from "./timestamp.js";
+import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -27,7 +27,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * - Increments by exactly 1 per call (no gaps or duplicates)
  * - State persisted via `lix_deterministic_sequence_number` key value
  * - Clones continue from where the sequence left off
- * - Consider using {@link timestamp}, {@link uuidV7}, or {@link nanoId} for most ID generation needs
+ * - Consider using {@link getTimestampSync}, {@link uuidV7}, or {@link nanoId} for most ID generation needs
  *
  * @example Basic usage (deterministic mode required)
  * ```ts
@@ -57,11 +57,11 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @returns The next number in the sequence (starting from 0)
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
-export function nextDeterministicSequenceNumber(args: {
+export function nextSequenceNumberSync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
 	// Check if deterministic mode is enabled
-	if (!isDeterministicMode({ lix: args.lix })) {
+	if (!isDeterministicModeSync({ lix: args.lix })) {
 		throw new Error(
 			"nextDeterministicSequenceNumber() is available only when lix_deterministic_mode = true"
 		);
@@ -118,7 +118,7 @@ export function commitDeterministicSequenceNumber(args: {
 		value: state.highestSeen,
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? timestamp({ lix: args.lix });
+	const now = args.timestamp ?? getTimestampSync({ lix: args.lix });
 	updateUntrackedState({
 		lix: args.lix,
 		changes: [

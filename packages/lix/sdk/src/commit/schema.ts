@@ -3,7 +3,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
+import { uuidV7Sync } from "../runtime/deterministic/uuid-v7.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -129,7 +129,7 @@ export function applyCommitDatabaseSchema(
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => uuidV7({ lix }),
+			id: () => uuidV7Sync({ lix }),
 		},
 	});
 

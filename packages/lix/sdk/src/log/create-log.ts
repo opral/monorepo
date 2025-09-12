@@ -1,4 +1,4 @@
-import { nanoId } from "../deterministic/index.js";
+import { nanoIdSync } from "../runtime/deterministic/index.js";
 import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLog } from "./schema.js";
@@ -32,7 +32,7 @@ export async function createLog(args: {
 	key: string;
 }): Promise<State<LixLog>> {
 	// Insert the log entry
-	const id = nanoId({ lix: args.lix });
+	const id = nanoIdSync({ lix: args.lix });
 	await args.lix.db
 		.insertInto("log")
 		.values({

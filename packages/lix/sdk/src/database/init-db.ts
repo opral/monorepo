@@ -22,8 +22,12 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { Lix } from "../lix/open-lix.js";
-import { timestamp, uuidV7, generateHumanId } from "../deterministic/index.js";
-import { nanoId } from "../deterministic/nano-id.js";
+import {
+	getTimestampSync,
+	uuidV7Sync,
+	humanIdSync,
+} from "../runtime/deterministic/index.js";
+import { nanoIdSync } from "../runtime/deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
@@ -172,19 +176,19 @@ function initFunctions(args: {
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,
-		xFunc: () => uuidV7({ lix }),
+		xFunc: () => uuidV7Sync({ lix }),
 	});
 
 	args.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
-		xFunc: () => generateHumanId({ lix, separator: "-", capitalize: false }),
+		xFunc: () => humanIdSync({ lix, separator: "-", capitalize: false }),
 	});
 
 	args.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
-		xFunc: () => timestamp({ lix }),
+		xFunc: () => getTimestampSync({ lix }),
 	});
 
 	args.sqlite.createFunction({
@@ -192,7 +196,7 @@ function initFunctions(args: {
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoId({ lix, length });
+			return nanoIdSync({ lix, length });
 		},
 	});
 }

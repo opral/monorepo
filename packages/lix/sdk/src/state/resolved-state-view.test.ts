@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { getTimestampSync } from "../runtime/deterministic/timestamp.js";
 import { createVersion } from "../version/create-version.js";
 import type { LixVersionDescriptor } from "../version/schema.js";
 
@@ -270,7 +270,7 @@ test("resolved state view generates correct composite keys", async () => {
 	);
 
 	// Insert some test data into untracked state
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({
@@ -300,7 +300,7 @@ test("resolved state view generates correct composite keys", async () => {
 				plugin_key: "test_plugin",
 				snapshot_content: JSON.stringify({ test: "data2" }),
 				schema_version: "1.0",
-				created_at: timestamp({ lix }),
+				created_at: getTimestampSync({ lix }),
 			},
 		],
 		commit_id: "changeset1",
@@ -387,7 +387,7 @@ test("resolved state view should handle transitive inheritance (A->B->C)", async
 		],
 	});
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// Create version hierarchy: C inherits from B, B inherits from A
 	const versionA = await createVersion({
@@ -480,7 +480,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	const childVersionId = "child_version";
 
 	// Insert version descriptor records using updateStateCacheV2
-	const versionTimestamp = timestamp({ lix });
+	const versionTimestamp = getTimestampSync({ lix });
 	updateStateCacheV2({
 		lix,
 		changes: [
@@ -533,7 +533,7 @@ test("resolved state view generates correct composite keys for inherited state",
 				plugin_key: "test_plugin",
 				snapshot_content: JSON.stringify({ test: "inherited_data" }),
 				schema_version: "1.0",
-				created_at: timestamp({ lix }),
+				created_at: getTimestampSync({ lix }),
 			},
 		],
 		commit_id: "changeset3",
@@ -541,7 +541,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	});
 
 	// Insert data in parent version (untracked)
-	const untrackedTimestamp = timestamp({ lix });
+	const untrackedTimestamp = getTimestampSync({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({

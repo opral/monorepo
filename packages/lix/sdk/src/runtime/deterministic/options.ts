@@ -2,7 +2,7 @@ import type {
 	FromLixSchemaDefinition,
 	LixInsertable,
 	LixSchemaDefinition,
-} from "../schema-definition/index.js";
+} from "../../schema-definition/index.js";
 
 /**
  * Schema definition for deterministic mode options.

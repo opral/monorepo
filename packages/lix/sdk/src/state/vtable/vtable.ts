@@ -9,7 +9,7 @@ import { isStaleStateCache } from "../cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "../cache/mark-state-cache-as-stale.js";
 import { populateStateCache } from "../cache/populate-state-cache.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 
@@ -473,7 +473,7 @@ export function applyStateVTable(
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
-					const _timestamp = timestamp({ lix });
+					const _timestamp = getTimestampSync({ lix });
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 
@@ -650,7 +650,7 @@ export function applyStateVTable(
 					// Log error for debugging
 					insertVTableLog({
 						lix,
-						timestamp: timestamp({ lix }),
+						timestamp: getTimestampSync({ lix }),
 						key: "lix_state_xupdate_error",
 						level: "error",
 						message: `xUpdate error: ${errorMessage}`,

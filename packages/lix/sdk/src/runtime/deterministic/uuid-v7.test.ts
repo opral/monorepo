@@ -1,15 +1,15 @@
 import { expect, test } from "vitest";
-import { uuidV7 } from "./uuid-v7.js";
-import { openLix } from "../lix/open-lix.js";
+import { uuidV7Sync } from "./uuid-v7.js";
+import { openLix } from "../../lix/open-lix.js";
 
 test("uuidV7 returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const id1 = uuidV7({ lix });
-	const id2 = uuidV7({ lix });
-	const id3 = uuidV7({ lix });
+	const id1 = uuidV7Sync({ lix });
+	const id2 = uuidV7Sync({ lix });
+	const id3 = uuidV7Sync({ lix });
 
 	// Should be valid UUID v7 format
 	const uuidRegex =
@@ -37,9 +37,9 @@ test("uuidV7 returns random values when deterministic mode is disabled", async (
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
-	const id1 = uuidV7({ lix });
-	const id2 = uuidV7({ lix });
-	const id3 = uuidV7({ lix });
+	const id1 = uuidV7Sync({ lix });
+	const id2 = uuidV7Sync({ lix });
+	const id3 = uuidV7Sync({ lix });
 
 	// Should be valid UUID v7 format
 	const uuidRegex =
@@ -65,7 +65,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 	});
 
 	// Start with deterministic
-	const deterministicId = uuidV7({ lix });
+	const deterministicId = uuidV7Sync({ lix });
 	expect(deterministicId).toMatch(/^01920000-0000-7000-8000-/);
 
 	// Switch to random
@@ -75,7 +75,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
-	const randomId = uuidV7({ lix });
+	const randomId = uuidV7Sync({ lix });
 	expect(randomId).not.toMatch(/^01920000-0000-7000-8000-/);
 
 	// Switch back to deterministic
@@ -85,7 +85,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
-	const deterministicId2 = uuidV7({ lix });
+	const deterministicId2 = uuidV7Sync({ lix });
 	expect(deterministicId2).toMatch(/^01920000-0000-7000-8000-/);
 });
 
@@ -95,16 +95,16 @@ test("uuidV7 is persisted across lix instances", async () => {
 	});
 
 	// Generate some IDs to advance the counter
-	const id1 = uuidV7({ lix: lix1 });
-	const id2 = uuidV7({ lix: lix1 });
-	const id3 = uuidV7({ lix: lix1 });
+	const id1 = uuidV7Sync({ lix: lix1 });
+	const id2 = uuidV7Sync({ lix: lix1 });
+	const id3 = uuidV7Sync({ lix: lix1 });
 
 	// Create a new instance from the blob
 	const blob = await lix1.toBlob();
 	const lix2 = await openLix({ blob });
 
 	// Next ID should continue from where we left off
-	const id4 = uuidV7({ lix: lix2 });
+	const id4 = uuidV7Sync({ lix: lix2 });
 
 	// Extract counters
 	const counters = [id1, id2, id3, id4].map((id) => parseInt(id.slice(-8), 16));
@@ -123,7 +123,7 @@ test("uuidV7 advances correctly with many operations", async () => {
 	// Generate 100 UUIDs
 	const uuids: string[] = [];
 	for (let i = 0; i < 100; i++) {
-		uuids.push(uuidV7({ lix }));
+		uuids.push(uuidV7Sync({ lix }));
 	}
 
 	// All should match deterministic pattern

@@ -1,9 +1,9 @@
-import type { Lix } from "../lix/open-lix.js";
-import { nextDeterministicSequenceNumber } from "./sequence.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
-import { executeSync } from "../database/execute-sync.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { nextSequenceNumberSync } from "./sequence.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /**
  * Returns the current timestamp as an ISO 8601 string.
@@ -47,11 +47,11 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns ISO 8601 timestamp string
  */
-export function timestamp(args: {
+export function getTimestampSync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): string {
 	// Check if deterministic mode is enabled
-	if (isDeterministicMode({ lix: args.lix })) {
+	if (isDeterministicModeSync({ lix: args.lix })) {
 		// Check if timestamps are disabled in the config
 		const [config] = executeSync({
 			lix: args.lix,
@@ -74,7 +74,7 @@ export function timestamp(args: {
 
 		// Otherwise use deterministic timestamps
 		// Get the next deterministic counter value
-		const counter = nextDeterministicSequenceNumber({
+		const counter = nextSequenceNumberSync({
 			lix: args.lix,
 		});
 		// Use counter as milliseconds since epoch

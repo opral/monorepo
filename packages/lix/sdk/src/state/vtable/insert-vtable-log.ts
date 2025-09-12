@@ -1,6 +1,6 @@
 import { LixLogSchema, type LixLog } from "../../log/schema.js";
-import { uuidV7 } from "../../deterministic/uuid-v7.js";
-import { timestamp, type Lix } from "../../index.js";
+import { uuidV7Sync } from "../../runtime/deterministic/uuid-v7.js";
+import { getTimestampSync, type Lix } from "../../index.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 
 // Track if logging is in progress per Lix instance to prevent recursion
@@ -29,7 +29,7 @@ export function insertVTableLog(args: {
 
 	loggingInProgressMap.set(args.lix, true);
 	try {
-		const id = args.id ?? uuidV7({ lix: args.lix });
+		const id = args.id ?? uuidV7Sync({ lix: args.lix });
 		// Insert into transaction state (untracked) to preserve previous behavior.
 		// Note: If called outside a vtable write, this may require a later commit to flush.
 		insertTransactionState({
@@ -38,7 +38,7 @@ export function insertVTableLog(args: {
 				db: args.lix.db,
 				hooks: undefined as any,
 			},
-			timestamp: args.timestamp ?? timestamp({ lix: args.lix }),
+			timestamp: args.timestamp ?? getTimestampSync({ lix: args.lix }),
 			data: [
 				{
 					entity_id: id,

@@ -1,7 +1,7 @@
 import { bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 
 /**
@@ -80,7 +80,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			],
 		});
 
-		const ts = timestamp({ lix });
+		const ts = getTimestampSync({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
@@ -101,7 +101,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			],
 		});
 
-		const ts = timestamp({ lix });
+		const ts = getTimestampSync({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
@@ -124,7 +124,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 				],
 			});
 
-			const ts = timestamp({ lix });
+			const ts = getTimestampSync({ lix });
 
 			// Pre-populate with 100K rows across 5 schemas (20K per schema)
 			// Process in 10K batches to avoid memory issues

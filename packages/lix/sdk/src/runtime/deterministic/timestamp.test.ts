@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { timestamp } from "./timestamp.js";
-import { openLix } from "../lix/open-lix.js";
+import { getTimestampSync } from "./timestamp.js";
+import { openLix } from "../../lix/open-lix.js";
 
 test("timestamp returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
@@ -16,9 +16,9 @@ test("timestamp returns deterministic values when deterministic mode is enabled"
 		],
 	});
 
-	const t1 = timestamp({ lix });
-	const t2 = timestamp({ lix });
-	const t3 = timestamp({ lix });
+	const t1 = getTimestampSync({ lix });
+	const t2 = getTimestampSync({ lix });
+	const t3 = getTimestampSync({ lix });
 
 	// Verify they're sequential milliseconds from epoch
 	const t1ms = new Date(t1).getTime();
@@ -49,7 +49,7 @@ test("timestamp returns real time when deterministic mode is disabled", async ()
 	});
 
 	const before = Date.now();
-	const t1 = timestamp({ lix });
+	const t1 = getTimestampSync({ lix });
 	const after = Date.now();
 
 	const t1Time = new Date(t1).getTime();
@@ -76,7 +76,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 	});
 
 	// Start with deterministic
-	const t1 = timestamp({ lix });
+	const t1 = getTimestampSync({ lix });
 	expect(t1).toMatch(/^1970-/);
 
 	// Switch to real time by deleting the key (cleaner approach)
@@ -85,7 +85,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
-	const t2 = timestamp({ lix });
+	const t2 = getTimestampSync({ lix });
 	expect(t2).not.toMatch(/^1970-/);
 
 	// Switch back to deterministic
@@ -97,7 +97,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 		})
 		.execute();
 
-	const t3 = timestamp({ lix });
+	const t3 = getTimestampSync({ lix });
 	expect(t3).toMatch(/^1970-/);
 });
 
@@ -115,16 +115,16 @@ test("timestamp is persisted across lix instances", async () => {
 	});
 
 	// Generate some timestamps to advance the counter
-	const t1 = timestamp({ lix: lix1 });
-	const t2 = timestamp({ lix: lix1 });
-	const t3 = timestamp({ lix: lix1 });
+	const t1 = getTimestampSync({ lix: lix1 });
+	const t2 = getTimestampSync({ lix: lix1 });
+	const t3 = getTimestampSync({ lix: lix1 });
 
 	// Create a new instance from the blob
 	const blob = await lix1.toBlob();
 	const lix2 = await openLix({ blob });
 
 	// Next timestamp should continue from where we left off
-	const t4 = timestamp({ lix: lix2 });
+	const t4 = getTimestampSync({ lix: lix2 });
 
 	// Verify they continue sequentially
 	const t1ms = new Date(t1).getTime();
@@ -153,7 +153,7 @@ test("timestamp advances correctly with many operations", async () => {
 	// Generate 100 timestamps
 	const timestamps: string[] = [];
 	for (let i = 0; i < 100; i++) {
-		timestamps.push(timestamp({ lix }));
+		timestamps.push(getTimestampSync({ lix }));
 	}
 
 	// All should be strictly increasing by 1ms

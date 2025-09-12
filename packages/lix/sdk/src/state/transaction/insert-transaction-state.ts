@@ -1,6 +1,6 @@
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
-import { uuidV7 } from "../../deterministic/index.js";
+import { uuidV7Sync } from "../../runtime/deterministic/index.js";
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
@@ -75,7 +75,7 @@ export function insertTransactionState(args: {
 	// Generate change IDs for all entities upfront
 	const dataWithChangeIds = args.data.map((data) => ({
 		...data,
-		change_id: uuidV7({ lix: args.lix as any }),
+		change_id: uuidV7Sync({ lix: args.lix as any }),
 	}));
 
 	// Batch insert into internal_transaction_state

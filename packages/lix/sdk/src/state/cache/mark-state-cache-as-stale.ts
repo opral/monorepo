@@ -1,6 +1,6 @@
 import type { Lix } from "../../lix/open-lix.js";
 import { LixKeyValueSchema } from "../../key-value/schema.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
@@ -12,7 +12,7 @@ export function markStateCacheAsStale(args: {
 	// Set the cache stale flag to "true" in untracked state
 	const snapshotContent = JSON.stringify({ key: CACHE_STALE_KEY, value: true });
 
-	const ts = args.timestamp ?? timestamp({ lix: args.lix });
+	const ts = args.timestamp ?? getTimestampSync({ lix: args.lix });
 
 	updateUntrackedState({
 		lix: args.lix,
@@ -41,7 +41,7 @@ export function markStateCacheAsFresh(args: {
 		value: false,
 	});
 
-	const ts = args.timestamp ?? timestamp({ lix: args.lix });
+	const ts = args.timestamp ?? getTimestampSync({ lix: args.lix });
 
 	updateUntrackedState({
 		lix: args.lix,

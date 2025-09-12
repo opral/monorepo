@@ -1,9 +1,9 @@
 import type { LixCommit } from "../commit/schema.js";
-import { nanoId, uuidV7 } from "../deterministic/index.js";
+import { nanoIdSync, uuidV7Sync } from "../runtime/deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { getTimestampSync } from "../runtime/deterministic/timestamp.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
 
 /**
@@ -70,7 +70,7 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		// 2. Create new empty working change set for continued work
-		const newWorkingChangeSetId = nanoId({ lix: args.lix });
+		const newWorkingChangeSetId = nanoIdSync({ lix: args.lix });
 		await trx
 			.insertInto("change_set_all")
 			.values({
@@ -98,7 +98,7 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		// 4. Create a new commit for the new working change set
-		const newWorkingCommitId = uuidV7({ lix: args.lix });
+		const newWorkingCommitId = uuidV7Sync({ lix: args.lix });
 		await trx
 			.insertInto("commit_all")
 			.values({
@@ -120,9 +120,9 @@ export async function createCheckpoint(args: {
 		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
 
 		// Update version tip + descriptor via change + cache (avoid version view writes)
-		const now = timestamp({ lix: args.lix });
+		const now = getTimestampSync({ lix: args.lix });
 		const descriptorChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
+			id: uuidV7Sync({ lix: args.lix }),
 			entity_id: activeVersion.id,
 			schema_key: "lix_version_descriptor",
 			schema_version: "1.0",
@@ -138,7 +138,7 @@ export async function createCheckpoint(args: {
 			created_at: now,
 		};
 		const tipChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
+			id: uuidV7Sync({ lix: args.lix }),
 			entity_id: activeVersion.id,
 			schema_key: "lix_version_tip",
 			schema_version: "1.0",
@@ -153,7 +153,7 @@ export async function createCheckpoint(args: {
 
 		// Also materialize the commit edge parent=checkpoint, child=new working
 		const edgeChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
+			id: uuidV7Sync({ lix: args.lix }),
 			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
 			schema_key: "lix_commit_edge",
 			schema_version: "1.0",

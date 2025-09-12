@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
@@ -17,7 +17,7 @@ test("inserts into cache based on change", async () => {
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = getTimestampSync({ lix });
 
 	// Create a test change (materialized with inline version/commit)
 	const commitId = "test-commit-456";
@@ -84,7 +84,7 @@ test("upserts cache entry on conflict", async () => {
 		],
 	});
 
-	const initialTimestamp = timestamp({ lix });
+	const initialTimestamp = getTimestampSync({ lix });
 
 	// Create initial test change (materialized)
 	const versionId = "global";
@@ -130,7 +130,7 @@ test("upserts cache entry on conflict", async () => {
 	);
 
 	// Now update with new data (same entity, schema, file, version - should trigger upsert)
-	const updateTimestamp = timestamp({ lix });
+	const updateTimestamp = getTimestampSync({ lix });
 	const updatedCommitId = "updated-commit-456";
 	const updatedChange: MaterializedState = {
 		id: "test-change-updated",
@@ -200,7 +200,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const childVersion = "child-version";
 	const subchildVersion = "subchild-version";
 
-	const baseTimestamp = timestamp({ lix });
+	const baseTimestamp = getTimestampSync({ lix });
 	const testEntity = "inherited-entity";
 
 	// 1. Create entity in parent version
@@ -243,7 +243,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	});
 
 	// 3. Create tombstone in child version (deleting inherited entity)
-	const deleteTimestamp = timestamp({ lix });
+	const deleteTimestamp = getTimestampSync({ lix });
 	const deleteChange: MaterializedState = {
 		id: "delete-change-456",
 		entity_id: testEntity,
@@ -496,7 +496,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 	const parentId = "edge-parent";
 	const childId = "edge-child";
 	const changeSetId = "edge-cs";
@@ -578,7 +578,7 @@ test("commit caching materializes its change set in cache", async () => {
 		],
 	});
 
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 	const parentId = "cs-parent";
 	const childId = "cs-child";
 	const changeSetId = "cs-materialized";
@@ -643,7 +643,7 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 	const parentId = "commit-parent";
 	const childId = "commit-child";
 	const changeSetId = "cs-merge";
@@ -691,7 +691,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 		],
 	});
 
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 	const parentId = "commit-parent-2";
 	const childId = "commit-child-2";
 	const changeSetId = "cs-merge-2";

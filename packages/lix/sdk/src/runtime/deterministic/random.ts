@@ -1,12 +1,12 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { sql, type Kysely } from "kysely";
-import { executeSync } from "../database/execute-sync.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import type { Lix } from "../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
-import { timestamp } from "./timestamp.js";
-import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { executeSync } from "../../database/execute-sync.js";
+import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
+import type { Lix } from "../../lix/open-lix.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { getTimestampSync } from "./timestamp.js";
+import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
 
 /** State kept per SQLite connection - 16 bytes for xorshift128+ */
 type RngState = {
@@ -90,11 +90,11 @@ function randomUnstable(): number {
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns Random float between 0 (inclusive) and 1 (exclusive) with 53-bit precision
  */
-export function random(args: {
+export function randomSync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
 	// Non-deterministic mode: use crypto.getRandomValues()
-	if (!isDeterministicMode({ lix: args.lix })) {
+	if (!isDeterministicModeSync({ lix: args.lix })) {
 		return randomUnstable();
 	}
 
@@ -247,7 +247,7 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? timestamp({ lix: args.lix });
+	const now = args.timestamp ?? getTimestampSync({ lix: args.lix });
 	updateUntrackedState({
 		lix: args.lix,
 		changes: [

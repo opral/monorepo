@@ -1,4 +1,4 @@
-import { nanoId } from "../deterministic/nano-id.js";
+import { nanoIdSync } from "../runtime/deterministic/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixAccount } from "./schema.js";
 
@@ -23,7 +23,7 @@ export async function createAccount(args: {
 }): Promise<LixAccount> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
-		const accountId = args.id || nanoId({ lix: args.lix });
+		const accountId = args.id || nanoIdSync({ lix: args.lix });
 
 		// Insert the account (views don't support returningAll)
 		await trx

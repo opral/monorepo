@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { generateCommit } from "./generate-commit.js";
-import { timestamp } from "../../deterministic/timestamp.js";
-import { uuidV7 } from "../../deterministic/uuid-v7.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { uuidV7Sync } from "../../runtime/deterministic/uuid-v7.js";
 
 function groupBySchema(rows: any[]): Map<string, any[]> {
 	const m = new Map<string, any[]>();
@@ -22,7 +22,7 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 
 	// domain change on active version
 	const chgId = "chg_active";
@@ -72,7 +72,7 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => uuidV7Sync({ lix }),
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
@@ -130,7 +130,7 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 
 	const chgId = "chg_global";
 	const userChange = {
@@ -165,7 +165,7 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => uuidV7Sync({ lix }),
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
@@ -220,7 +220,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = getTimestampSync({ lix });
 
 	const changeA = {
 		id: "chg_A",
@@ -280,7 +280,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => uuidV7Sync({ lix }),
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);

@@ -2,12 +2,12 @@ import { test, expect } from "vitest";
 import { createThreadComment } from "./create-thread-comment.js";
 import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
-import { nanoId } from "../deterministic/index.js";
+import { nanoIdSync } from "../runtime/deterministic/index.js";
 
 test("creates a thread comment", async () => {
 	const lix = await openLix({});
 
-	const threadId = nanoId({ lix });
+	const threadId = nanoIdSync({ lix });
 	await lix.db.insertInto("thread").values({ id: threadId }).execute();
 
 	const thread = await lix.db
@@ -28,7 +28,7 @@ test("creates a thread comment", async () => {
 test("defaults to the version of the thread", async () => {
 	const lix = await openLix({});
 
-	const threadId = nanoId({ lix });
+	const threadId = nanoIdSync({ lix });
 	await lix.db.insertInto("thread").values({ id: threadId }).execute();
 
 	const activeVersionScopedThread = await lix.db
@@ -65,7 +65,7 @@ test("defaults to the version of the thread", async () => {
 test("defaults parent_id to the last comment when not provided", async () => {
 	const lix = await openLix({});
 
-	const threadId = nanoId({ lix });
+	const threadId = nanoIdSync({ lix });
 	await lix.db.insertInto("thread").values({ id: threadId }).execute();
 
 	const thread = await lix.db

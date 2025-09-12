@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import * as sequenceModule from "../../deterministic/sequence.js";
+import * as sequenceModule from "../../runtime/deterministic/sequence.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
@@ -50,19 +50,18 @@ export const outOfOrderSequenceSimulation: SimulationTestDef = {
 		let internalCounter = 0;
 
 		// Mock the nextDeterministicSequenceNumber function
-		vi.spyOn(
-			sequenceModule,
-			"nextDeterministicSequenceNumber"
-		).mockImplementation(() => {
-			// Use our internal counter instead of calling the real function
-			const normalSequence = internalCounter++;
+		vi.spyOn(sequenceModule, "nextSequenceNumberSync").mockImplementation(
+			() => {
+				// Use our internal counter instead of calling the real function
+				const normalSequence = internalCounter++;
 
-			// Look up the shuffled version, or use original if not in map
-			const shuffledSequence =
-				shuffleMapping.get(normalSequence) ?? normalSequence;
+				// Look up the shuffled version, or use original if not in map
+				const shuffledSequence =
+					shuffleMapping.get(normalSequence) ?? normalSequence;
 
-			return shuffledSequence;
-		});
+				return shuffledSequence;
+			}
+		);
 
 		return lix;
 	},

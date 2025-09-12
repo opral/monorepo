@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { simulationTest } from "./simulation-test.js";
-import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import { nextSequenceNumberSync } from "../../runtime/deterministic/sequence.js";
 import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
 
 test("out-of-order sequence simulation test discovery", () => {});
@@ -22,7 +22,7 @@ simulationTest(
 		// Get several sequence numbers
 		const sequences: number[] = [];
 		for (let i = 0; i < 10; i++) {
-			sequences.push(nextDeterministicSequenceNumber({ lix }));
+			sequences.push(nextSequenceNumberSync({ lix }));
 		}
 
 		// In out-of-order simulation, sequences should not be monotonic

@@ -1,10 +1,10 @@
 import { v7 } from "uuid";
-import { nextDeterministicSequenceNumber } from "./sequence.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
-import type { Lix } from "../lix/open-lix.js";
-import { executeSync } from "../database/execute-sync.js";
+import { nextSequenceNumberSync } from "./sequence.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /**
  * Returns a UUID v7 that is deterministic in deterministic mode.
@@ -17,7 +17,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  *
  * - Normal mode: Standard UUID v7 with current timestamp
  * - Deterministic mode: Fixed prefix "01920000-0000-7000-8800-" + 12-digit hex counter
- * - Counter state shared with {@link nextDeterministicSequenceNumber}
+ * - Counter state shared with {@link nextSequenceNumberSync}
  * - Choose UUID v7 for time-sortable database keys, {@link nanoId} for URL-friendly short IDs
  *
  * @example Normal mode - returns random UUID v7
@@ -50,11 +50,11 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns UUID v7 string
  */
-export function uuidV7(args: {
+export function uuidV7Sync(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): string {
 	// Check if deterministic mode is enabled
-	if (isDeterministicMode({ lix: args.lix })) {
+	if (isDeterministicModeSync({ lix: args.lix })) {
 		// Check if uuid_v7 is disabled in the config
 		const [config] = executeSync({
 			lix: args.lix,
@@ -75,7 +75,7 @@ export function uuidV7(args: {
 
 		// Otherwise use deterministic UUID
 		// Get the next deterministic counter value
-		const counter = nextDeterministicSequenceNumber({ lix: args.lix });
+		const counter = nextSequenceNumberSync({ lix: args.lix });
 		const hex = counter.toString(16).padStart(8, "0");
 		return `01920000-0000-7000-8000-0000${hex}`;
 	}
