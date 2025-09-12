@@ -66,14 +66,6 @@ export interface LixBackend {
 	exec(sql: string, params?: unknown[]): Promise<ExecResult>;
 
 	/**
-	 * Execute a batch of SQL statements sequentially, using the same connection.
-	 * No implicit transaction is created – wrap with BEGIN/COMMIT if atomicity is required.
-	 */
-	execBatch?(batch: { sql: string; params?: unknown[] }[]): Promise<{
-		results: ExecResult[];
-	}>;
-
-	/**
 	 * Export a snapshot of the current database as raw bytes.
 	 */
 	export(): Promise<ArrayBuffer>;
@@ -82,4 +74,17 @@ export interface LixBackend {
 	 * Close the engine and release resources.
 	 */
 	close(): Promise<void>;
+
+	/**
+	 * Invoke a runtime function inside the backend environment.
+	 *
+	 * Backends MUST implement this and route the call to the runtime that
+	 * booted next to SQLite, regardless of whether the engine runs on the main
+	 * thread or inside a Worker.
+	 */
+	call(
+		name: string,
+		payload?: unknown,
+		opts?: { signal?: AbortSignal }
+	): Promise<unknown>;
 }

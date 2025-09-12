@@ -1,4 +1,4 @@
-import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
+import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixBackend } from "../backend/types.js";
 import { createDialect } from "../backend/kysely/kysely-driver.js";
@@ -32,10 +32,9 @@ export async function openLixBackend(args: {
 	/**
 	 * Minimal runtime call boundary for worker-backed engines.
 	 *
-	 * For MVP, supports `lix_uuid_v7` by delegating to the SQL UDF registered
-	 * during engine boot. Additional routes can be added as needed.
+	 * Uses the backend's worker call transport.
 	 */
-	callFn: (
+	call: (
 		name: string,
 		payload?: unknown,
 		opts?: { signal?: AbortSignal }
@@ -132,22 +131,12 @@ export async function openLixBackend(args: {
 		db,
 		hooks,
 		observe,
-		callFn: async (
+		call: async (
 			name: string,
-			_payload?: unknown,
+			payload?: unknown,
 			_opts?: { signal?: AbortSignal }
 		): Promise<unknown> => {
-			switch (name) {
-				case "lix_uuid_v7": {
-					const res = await sql`select lix_uuid_v7() as id`.execute(db as any);
-					return (res.rows?.[0] as any)?.id ?? null;
-				}
-				default: {
-					const err: any = new Error(`Unknown runtime function: ${name}`);
-					err.code = "LIX_RPC_UNKNOWN_ROUTE";
-					throw err;
-				}
-			}
+			return args.backend.call(name, payload);
 		},
 		close: async () => {
 			await args.backend.close();

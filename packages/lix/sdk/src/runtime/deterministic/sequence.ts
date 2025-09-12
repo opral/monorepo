@@ -2,6 +2,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
@@ -57,24 +58,32 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @returns The next number in the sequence (starting from 0)
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
-export function nextSequenceNumberSync(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
-}): number {
+export function nextSequenceNumberSync(
+	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
+): number {
+	const lix =
+		"runtime" in args
+			? {
+					sqlite: args.runtime.sqlite,
+					db: args.runtime.db,
+					hooks: args.runtime.hooks,
+				}
+			: args.lix;
 	// Check if deterministic mode is enabled
-	if (!isDeterministicModeSync({ lix: args.lix })) {
+	if (!isDeterministicModeSync({ lix })) {
 		throw new Error(
 			"nextDeterministicSequenceNumber() is available only when lix_deterministic_mode = true"
 		);
 	}
 
-	let state = counterCache.get(args.lix.sqlite);
+	let state = counterCache.get(lix.sqlite);
 
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
 		const [row] = executeSync({
-			lix: { sqlite: args.lix.sqlite },
+			lix: { sqlite: lix.sqlite },
 			// Use internal_resolved_state_all to avoid virtual table recursion
-			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_sequence_number")
 				.where("schema_key", "=", "lix_key_value")
@@ -86,7 +95,7 @@ export function nextSequenceNumberSync(args: {
 		// The persisted value is the next counter to use
 		const start = row ? Number(row.value) + 1 : 0;
 		state = { next: start, highestSeen: start - 1, dirty: false };
-		counterCache.set(args.lix.sqlite, state);
+		counterCache.set(lix.sqlite, state);
 	}
 
 	/* Hand out current, then bump for the next call */
@@ -105,10 +114,18 @@ export function nextSequenceNumberSync(args: {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitDeterministicSequenceNumber(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	lix?: Pick<Lix, "sqlite" | "db" | "hooks">;
+	runtime?: LixRuntime;
 	timestamp?: string;
 }): void {
-	const state = counterCache.get(args.lix.sqlite);
+	const lix = args.runtime
+		? {
+				sqlite: args.runtime.sqlite,
+				db: args.runtime.db,
+				hooks: args.runtime.hooks,
+			}
+		: (args.lix as any);
+	const state = counterCache.get(lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -118,9 +135,9 @@ export function commitDeterministicSequenceNumber(args: {
 		value: state.highestSeen,
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? getTimestampSync({ lix: args.lix });
+	const now = args.timestamp ?? getTimestampSync({ lix });
 	updateUntrackedState({
-		lix: args.lix,
+		lix,
 		changes: [
 			{
 				entity_id: "lix_deterministic_sequence_number",

@@ -1,4 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
@@ -53,16 +54,25 @@ import { nextSequenceNumberSync } from "./sequence.js";
  * @param args.length - Custom length for non-deterministic mode (default: 21)
  * @returns Nano ID string
  */
-export function nanoIdSync(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
-	length?: number;
-}): string {
+export function nanoIdSync(
+	args:
+		| { lix: Pick<Lix, "sqlite" | "db" | "hooks">; length?: number }
+		| { runtime: LixRuntime; length?: number }
+): string {
+	const lix =
+		"runtime" in args
+			? {
+					sqlite: args.runtime.sqlite,
+					db: args.runtime.db,
+					hooks: args.runtime.hooks,
+				}
+			: args.lix;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ lix: args.lix })) {
+	if (isDeterministicModeSync({ lix })) {
 		// Check if nano_id is disabled in the config
 		const [config] = executeSync({
-			lix: args.lix,
-			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			lix: { sqlite: lix.sqlite },
+			query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
@@ -79,7 +89,7 @@ export function nanoIdSync(args: {
 
 		// Otherwise use deterministic nano ID
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumberSync({ lix: args.lix });
+		const counter = nextSequenceNumberSync({ lix });
 		// Return counter with test_ prefix and padded to 10 digits
 		return `test_${counter.toString().padStart(10, "0")}`;
 	}

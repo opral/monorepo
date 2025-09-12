@@ -23,21 +23,5 @@ describe("InMemory backend", () => {
 		await engine.close();
 	});
 
-	test("execBatch runs sequentially", async () => {
-		const engine = new InMemoryBackend();
-		await engine.open({
-			boot: { args: { pluginsRaw: [] } },
-			onEvent: () => {},
-		});
-		await engine.exec("CREATE TABLE t(a)");
-		const batch = [
-			{ sql: "INSERT INTO t(a) VALUES (?)", params: [1] },
-			{ sql: "INSERT INTO t(a) VALUES (?)", params: [2] },
-		];
-		const { results } = await engine.execBatch!(batch);
-		expect(results.length).toBe(2);
-		const out = await engine.exec("SELECT COUNT(*) as c FROM t");
-		expect(out.rows?.[0]?.c ?? out.rows?.[0]?.[0]).toBe(2);
-		await engine.close();
-	});
+	// execBatch removed; callers should loop over exec() or use transactions explicitly.
 });

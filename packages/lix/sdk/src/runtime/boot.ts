@@ -7,6 +7,9 @@ import { loadPluginFromString } from "../backend/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { switchAccount } from "../account/switch-account.js";
+import { createRuntimeRouter, type Call } from "./router.js";
+import type { LixDatabaseSchema } from "../database/schema.js";
+import type { LixHooks } from "../hooks/create-hooks.js";
 
 export type RuntimeEvent = {
 	type: "state_commit";
@@ -26,6 +29,19 @@ export type BootEnv = {
 };
 
 /**
+ * Runtime context bound to a live SQLite connection.
+ *
+ * Internal to the runtime: used by deterministic helpers and the runtime
+ * function router. Not exposed as a value to app code, but the type is
+ * exported for internal module boundaries.
+ */
+export type LixRuntime = {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixDatabaseSchema>;
+	hooks: LixHooks;
+};
+
+/**
  * Boot the Lix runtime next to a live SQLite connection.
  *
  * - Applies schema, vtable, UDFs via initDb
@@ -34,7 +50,9 @@ export type BootEnv = {
  * - Optionally seeds account and key-values
  * - Bridges state_commit events to the host via postEvent
  */
-export async function boot(env: BootEnv): Promise<void> {
+export async function boot(
+	env: BootEnv
+): Promise<{ runtime: LixRuntime; call: Call }> {
 	const hooks = createHooks();
 	const db = initDb({ sqlite: env.sqlite, hooks });
 
@@ -51,7 +69,12 @@ export async function boot(env: BootEnv): Promise<void> {
 	};
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
-	const lix = { sqlite: env.sqlite, db, plugin, hooks } as unknown as {
+	const runtime: LixRuntime = {
+		sqlite: env.sqlite,
+		db,
+		hooks,
+	};
+	const lix = { ...runtime, plugin } as unknown as {
 		sqlite: SqliteWasmDatabase;
 		db: Kysely<LixDatabaseSchema>;
 		plugin: {
@@ -179,4 +202,7 @@ export async function boot(env: BootEnv): Promise<void> {
 	} catch {
 		// non-fatal
 	}
+
+	const { call } = createRuntimeRouter({ runtime });
+	return { runtime, call };
 }

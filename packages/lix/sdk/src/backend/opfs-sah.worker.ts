@@ -3,6 +3,7 @@ import {
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
 import { boot } from "../runtime/boot.js";
+import type { Call } from "../runtime/router.js";
 import type { BootArgs } from "../runtime/boot.js";
 
 /**
@@ -11,23 +12,20 @@ import type { BootArgs } from "../runtime/boot.js";
 type Req =
 	| {
 			id: string;
-			type: "open";
+			op: "open";
 			payload: { name: string; bootArgs?: BootArgs };
 	  }
 	| {
 			id: string;
-			type: "create";
+			op: "create";
 			payload: { name: string; blob: ArrayBuffer; bootArgs?: BootArgs };
 	  }
-	| { id: string; type: "exists"; payload: { name: string } }
-	| { id: string; type: "exec"; payload: { sql: string; params?: unknown[] } }
-	| {
-			id: string;
-			type: "execBatch";
-			payload: { batch: { sql: string; params?: unknown[] }[] };
-	  }
-	| { id: string; type: "export"; payload: {} }
-	| { id: string; type: "close"; payload: {} };
+	| { id: string; op: "exists"; payload: { name: string } }
+	| { id: string; op: "exec"; payload: { sql: string; params?: unknown[] } }
+	// execBatch removed
+	| { id: string; op: "export"; payload: {} }
+	| { id: string; op: "close"; payload: {} }
+	| { id: string; op: "call"; payload: { route: string; payload?: unknown } };
 
 /**
  * Response envelope returned by the worker RPC.
@@ -49,6 +47,7 @@ let sqlite3Module: any;
 let poolUtil: any;
 let db: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
 let currentOpfsPath: string | undefined;
+let runtimeCall: Call | null = null;
 
 /**
  * Normalize the client-provided logical database name for the SAH pool VFS.
@@ -114,13 +113,13 @@ async function ensurePool(): Promise<void> {
  * - "create": import a blob for a new DB by key (refuses to overwrite) — no boot.
  * - "exists": check if a DB for the given key exists (via SAH pool metadata).
  * - "exec": run a single SQL statement.
- * - "execBatch": run multiple SQL statements sequentially.
+ * - execBatch: removed; host should loop over exec calls or use explicit transactions.
  * - "export": export the current DB bytes via the SAH pool.
  * - "close": close the current DB and release worker references (pool is kept).
  */
 async function handle(req: Req): Promise<Res> {
 	try {
-		switch (req.type) {
+		switch (req.op) {
 			case "open": {
 				// Ensure pool VFS is available
 				await ensurePool();
@@ -136,7 +135,7 @@ async function handle(req: Req): Promise<Res> {
 					pluginsRaw: [],
 				}) as BootArgs;
 
-				await boot({
+				const res = await boot({
 					// db is sqlite3.oo1 DB; runtime expects sqlite-wasm compatible surface
 					sqlite: db as any,
 					postEvent: (ev) => {
@@ -144,6 +143,7 @@ async function handle(req: Req): Promise<Res> {
 					},
 					args: bootArgs,
 				});
+				runtimeCall = res.call;
 
 				return { id: req.id, ok: true };
 			}
@@ -221,20 +221,6 @@ async function handle(req: Req): Promise<Res> {
 				};
 			}
 
-			case "execBatch": {
-				if (!db) throw new Error("Engine not initialized");
-				const results: any[] = [];
-				for (const item of req.payload.batch) {
-					const r = (await handle({
-						id: req.id,
-						type: "exec",
-						payload: item as any,
-					})) as any;
-					results.push(r.result);
-				}
-				return { id: req.id, ok: true, result: { results } };
-			}
-
 			case "export": {
 				if (!poolUtil || !db) throw new Error("Engine not initialized");
 				// Export using poolUtil (must match open path)
@@ -265,6 +251,24 @@ async function handle(req: Req): Promise<Res> {
 				db = undefined as any;
 				currentOpfsPath = undefined;
 				return { id: req.id, ok: true };
+			}
+
+			case "call": {
+				if (!db) throw new Error("Backend not initialized");
+				const { route, payload } = req.payload as any;
+				if (!runtimeCall) {
+					return {
+						id: req.id,
+						ok: false,
+						error: {
+							name: "LixRpcError",
+							message: "Runtime router unavailable",
+							code: "LIX_RPC_ROUTER_UNAVAILABLE",
+						},
+					};
+				}
+				const result = await runtimeCall(route, payload);
+				return { id: req.id, ok: true, result };
 			}
 		}
 	} catch (err: any) {

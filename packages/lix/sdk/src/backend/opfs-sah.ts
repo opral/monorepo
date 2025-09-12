@@ -43,8 +43,8 @@ export class OpfsSahBackend implements LixBackend {
 		};
 	}
 
-	private call<T = any>(
-		type: string,
+	private send<T = any>(
+		op: string,
 		payload: any,
 		transfer?: Transferable[]
 	): Promise<T> {
@@ -60,14 +60,25 @@ export class OpfsSahBackend implements LixBackend {
 						)
 					);
 			});
-			(this.worker as any).postMessage({ id, type, payload }, transfer ?? []);
+			(this.worker as any).postMessage({ id, op, payload }, transfer ?? []);
 		});
+	}
+
+	/**
+	 * Invoke a named runtime function inside the worker engine.
+	 */
+	async call(
+		name: string,
+		payload?: unknown,
+		_opts?: { signal?: AbortSignal }
+	): Promise<unknown> {
+		return this.send("call", { route: name, payload });
 	}
 
 	async open(initOpts: Parameters<LixBackend["open"]>[0]): Promise<void> {
 		this.eventHandler = initOpts.onEvent;
 		const payload: any = { name: this.dbKey, bootArgs: initOpts.boot.args };
-		await this.call("open", payload);
+		await this.send("open", payload);
 	}
 
 	async create(createOpts: Parameters<LixBackend["create"]>[0]): Promise<void> {
@@ -77,18 +88,14 @@ export class OpfsSahBackend implements LixBackend {
 			blob: createOpts.blob,
 			bootArgs: createOpts.boot.args,
 		};
-		await this.call("create", payload, [createOpts.blob]);
+		await this.send("create", payload, [createOpts.blob]);
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<ExecResult> {
-		return this.call("exec", { sql, params });
+		return this.send("exec", { sql, params });
 	}
 
-	async execBatch(
-		batch: { sql: string; params?: unknown[] }[]
-	): Promise<{ results: ExecResult[] }> {
-		return this.call("execBatch", { batch });
-	}
+	// execBatch intentionally omitted; loop over exec() instead.
 
 	/**
 	 * Export a snapshot of the current database as raw bytes.
@@ -98,7 +105,7 @@ export class OpfsSahBackend implements LixBackend {
 	 * - Fallback: `{ buffer, offset, length }` (single copy on host)
 	 */
 	async export(): Promise<ArrayBuffer> {
-		const res = await this.call<
+		const res = await this.send<
 			| { blob: ArrayBuffer }
 			| { buffer: ArrayBuffer; offset: number; length: number }
 		>("export", {});
@@ -109,11 +116,11 @@ export class OpfsSahBackend implements LixBackend {
 	}
 
 	async exists(): Promise<boolean> {
-		return this.call<boolean>("exists", { name: this.dbKey });
+		return this.send<boolean>("exists", { name: this.dbKey });
 	}
 
 	async close(): Promise<void> {
-		await this.call("close", {});
+		await this.send("close", {});
 		this.worker.terminate();
 		OpfsSahBackend._instances.delete(this);
 	}

@@ -23,26 +23,35 @@ import { boot } from "../runtime/boot.js";
  */
 export class InMemoryBackend implements LixBackend {
 	private db: SqliteWasmDatabase | undefined;
+	private callImpl:
+		| ((
+				name: string,
+				payload?: unknown,
+				opts?: { signal?: AbortSignal }
+		  ) => Promise<unknown>)
+		| undefined;
 
 	async open(opts: Parameters<LixBackend["open"]>[0]): Promise<void> {
 		if (!this.db) {
 			this.db = await createInMemoryDatabase({ readOnly: false });
-			await boot({
+			const res = await boot({
 				sqlite: this.db,
 				postEvent: (ev) => opts.onEvent(ev),
 				args: opts.boot.args,
 			});
+			this.callImpl = res.call;
 		}
 	}
 
 	async create(opts: Parameters<LixBackend["create"]>[0]): Promise<void> {
 		this.db = await createInMemoryDatabase({ readOnly: false });
 		importDatabase({ db: this.db, content: new Uint8Array(opts.blob) });
-		await boot({
+		const res = await boot({
 			sqlite: this.db,
 			postEvent: (ev) => opts.onEvent(ev),
 			args: opts.boot.args,
 		});
+		this.callImpl = res.call;
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<ExecResult> {
@@ -74,16 +83,7 @@ export class InMemoryBackend implements LixBackend {
 		return { rows, changes, lastInsertRowid };
 	}
 
-	async execBatch(
-		batch: { sql: string; params?: unknown[] }[]
-	): Promise<{ results: ExecResult[] }> {
-		if (!this.db) throw new Error("Engine not initialized");
-		const results: ExecResult[] = [];
-		for (const item of batch) {
-			results.push(await this.exec(item.sql, item.params));
-		}
-		return { results };
-	}
+	// execBatch intentionally omitted; loop over exec() instead.
 
 	async export(): Promise<ArrayBuffer> {
 		if (!this.db) throw new Error("Engine not initialized");
@@ -97,10 +97,20 @@ export class InMemoryBackend implements LixBackend {
 			this.db.close();
 			this.db = undefined;
 		}
+		this.callImpl = undefined;
 	}
 
 	async exists(): Promise<boolean> {
 		// In-memory backend has no persisted store bound to a key/path.
 		return false;
+	}
+
+	async call(
+		name: string,
+		payload?: unknown,
+		_opts?: { signal?: AbortSignal }
+	): Promise<unknown> {
+		if (!this.callImpl) throw new Error("Backend not initialized");
+		return this.callImpl(name, payload);
 	}
 }

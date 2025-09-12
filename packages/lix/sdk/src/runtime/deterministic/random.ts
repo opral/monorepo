@@ -3,6 +3,7 @@ import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
@@ -90,23 +91,31 @@ function randomUnstable(): number {
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns Random float between 0 (inclusive) and 1 (exclusive) with 53-bit precision
  */
-export function randomSync(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
-}): number {
+export function randomSync(
+	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
+): number {
+	const lix =
+		"runtime" in args
+			? {
+					sqlite: args.runtime.sqlite,
+					db: args.runtime.db,
+					hooks: args.runtime.hooks,
+				}
+			: args.lix;
 	// Non-deterministic mode: use crypto.getRandomValues()
-	if (!isDeterministicModeSync({ lix: args.lix })) {
+	if (!isDeterministicModeSync({ lix })) {
 		return randomUnstable();
 	}
 
 	// Deterministic mode: use xorshift128+
-	let state = rngCache.get(args.lix.sqlite);
+	let state = rngCache.get(lix.sqlite);
 
 	/* First use on this connection → initialize from seed */
 	if (!state) {
 		// Check if we have persisted RNG state
 		const [stateRow] = executeSync({
-			lix: { sqlite: args.lix.sqlite },
-			query: args.lix.db
+			lix: { sqlite: lix.sqlite },
+			query: lix.db
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
@@ -133,7 +142,7 @@ export function randomSync(args: {
 			state = seedXorshift128Plus(seed);
 		}
 
-		rngCache.set(args.lix.sqlite, state);
+		rngCache.set(lix.sqlite, state);
 	}
 
 	// Generate next random value using xorshift128+
@@ -231,10 +240,18 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	lix?: Pick<Lix, "sqlite" | "db" | "hooks">;
+	runtime?: LixRuntime;
 	timestamp?: string;
 }): void {
-	const state = rngCache.get(args.lix.sqlite);
+	const lix = args.runtime
+		? {
+				sqlite: args.runtime.sqlite,
+				db: args.runtime.db,
+				hooks: args.runtime.hooks,
+			}
+		: (args.lix as any);
+	const state = rngCache.get(lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -247,9 +264,9 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? getTimestampSync({ lix: args.lix });
+	const now = args.timestamp ?? getTimestampSync({ lix });
 	updateUntrackedState({
-		lix: args.lix,
+		lix,
 		changes: [
 			{
 				entity_id: "lix_deterministic_rng_state",

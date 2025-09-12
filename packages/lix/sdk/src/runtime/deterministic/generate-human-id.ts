@@ -1,4 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { humanId } from "human-id";
@@ -74,19 +75,30 @@ export function deterministicHumanIdVocabularySize(): number {
  * // Returns lowercase names like "plum", "coin", etc.
  * ```
  */
-export function humanIdSync(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
-	separator?: string;
-	capitalize?: boolean;
-}): string {
+export function humanIdSync(
+	args:
+		| {
+				lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+				separator?: string;
+				capitalize?: boolean;
+		  }
+		| { runtime: LixRuntime; separator?: string; capitalize?: boolean }
+): string {
 	const capitalize = args.capitalize ?? true;
 	const separator = args.separator ?? "_";
 
-	if (isDeterministicModeSync({ lix: args.lix })) {
+	const lix =
+		"runtime" in args
+			? {
+					sqlite: args.runtime.sqlite,
+					db: args.runtime.db,
+					hooks: args.runtime.hooks,
+				}
+			: args.lix;
+
+	if (isDeterministicModeSync({ lix })) {
 		// In deterministic mode, use sequence to get deterministic index
-		const sequence = nextSequenceNumberSync({
-			lix: args.lix,
-		});
+		const sequence = nextSequenceNumberSync({ lix });
 
 		// Use modulo to cycle through names
 		const name = DETERMINISTIC_NAMES[sequence % DETERMINISTIC_NAMES.length]!;
