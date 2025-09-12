@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 /**
  * Applies the schema for untracked state storage.
@@ -8,9 +8,9 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
  * configuration, and other data that doesn't need version history.
  */
 export function applyUntrackedStateSchema(args: {
-	sqlite: SqliteWasmDatabase;
+	runtime: Pick<LixRuntime, "sqlite">;
 }): void {
-	args.sqlite.exec(`
+	args.runtime.sqlite.exec(`
 		-- Table for untracked state that bypasses change control
 		CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
 			entity_id TEXT NOT NULL,

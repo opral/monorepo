@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
@@ -19,7 +19,7 @@ test("populates v2 cache from materializer", async () => {
 		],
 	});
 
-	const currentTimestamp = getTimestampSync({ lix });
+	const currentTimestamp = await getTimestamp({ lix });
 
 	// First, insert some test data using updateStateCacheV2
 	const testChanges: LixChangeRaw[] = [
@@ -95,7 +95,7 @@ test("populates v2 cache with version filter", async () => {
 		],
 	});
 
-	const currentTimestamp = getTimestampSync({ lix });
+	const currentTimestamp = await getTimestamp({ lix });
 
 	// Insert test data for different versions
 	const changes: LixChangeRaw[] = [
@@ -150,7 +150,10 @@ test("populates v2 cache with version filter", async () => {
 	expect(allData[1].version_id).toBe("version-2");
 
 	// Populate only version-1
-	populateStateCache(lix, { version_id: "version-1" });
+	populateStateCache({
+		runtime: { sqlite: lix.sqlite, db: lix.db },
+		options: { version_id: "version-1" },
+	});
 
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
@@ -175,7 +178,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 		],
 	});
 
-	const currentTimestamp = getTimestampSync({ lix });
+	const currentTimestamp = await getTimestamp({ lix });
 
 	// Insert data into multiple schema tables
 	const changes: LixChangeRaw[] = [
@@ -237,7 +240,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	expect(schemaC).toHaveLength(1);
 
 	// Populate with no filters (should clear all)
-	populateStateCache(lix);
+	populateStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
 
 	// All tables should be empty now (no materializer data)
 	const schemaAAfter = lix.sqlite.exec({
@@ -271,7 +274,7 @@ test("inheritance is queryable from the resolved view after population", async (
 		],
 	});
 
-	const currentTimestamp = getTimestampSync({ lix });
+	const currentTimestamp = await getTimestamp({ lix });
 
 	// Create version hierarchy: C inherits from B, B inherits from A
 	const versionA = await createVersion({
@@ -356,7 +359,10 @@ test("inheritance is queryable from the resolved view after population", async (
 	clearStateCache({ lix });
 
 	// ACT: Populate ONLY version C
-	populateStateCache(lix, { version_id: versionC.id });
+	populateStateCache({
+		runtime: { sqlite: lix.sqlite, db: lix.db },
+		options: { version_id: versionC.id },
+	});
 
 	// ASSERT: Check what got populated in the cache
 	// Read from the virtual table internal_state_cache using Kysely with json function
@@ -471,7 +477,10 @@ test("global version entities are populated when populating child versions", asy
 	clearStateCache({ lix });
 
 	// ACT: Populate the test version's cache (simulating cache miss recovery)
-	populateStateCache(lix, { version_id: testVersion.id });
+	populateStateCache({
+		runtime: { sqlite: lix.sqlite, db: lix.db },
+		options: { version_id: testVersion.id },
+	});
 
 	// ASSERT: After cache population, the test version should still see the global entity
 	const afterCachePopulation = await db

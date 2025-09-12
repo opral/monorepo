@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixBackend } from "../lix/open-lix-backend.js";
-import uuidV7 from "./uuid-v7.js";
+import { uuidV7 } from "./deterministic/uuid-v7.js";
 import { OpfsSahBackend } from "../backend/opfs-sah.js";
 
 test("generated a uuid v7", async () => {

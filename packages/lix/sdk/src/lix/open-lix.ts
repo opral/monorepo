@@ -13,14 +13,11 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterministicSequenceNumber } from "../runtime/deterministic/sequence.js";
-import {
-	commitDeterministicRngState,
-	randomSync,
-} from "../runtime/deterministic/random.js";
+import { commitSequenceNumberSync } from "../runtime/deterministic/sequence.js";
+import { commitDeterministicRngState } from "../runtime/deterministic/random.js";
 import { newLixFile } from "./new-lix.js";
 import { switchAccount } from "../account/switch-account.js";
-import { uuidV7Sync as deterministicUuidV7 } from "../runtime/deterministic/uuid-v7.js";
+import { createRuntimeRouter } from "../runtime/router.js";
 
 export type Lix = {
 	/**
@@ -51,6 +48,17 @@ export type Lix = {
 	 */
 	close: () => Promise<void>;
 	observe: ReturnType<typeof createObserve>;
+
+	/**
+	 * Calls a named runtime function and returns its result.
+	 *
+	 * Preferred entrypoint for invoking runtime functions.
+	 */
+	call: (
+		name: string,
+		payload?: unknown,
+		opts?: { signal?: AbortSignal }
+	) => Promise<unknown>;
 
 	/**
 	 * Calls a named runtime function and returns its result.
@@ -268,21 +276,19 @@ export async function openLix(args: {
 		plugin,
 		hooks,
 		observe,
-		callFn: async (
-			name: string,
-			_payload?: unknown,
-			_opts?: { signal?: AbortSignal }
-		): Promise<unknown> => {
-			throw new Error("Unimplemented");
-		},
+		// Provide both call (new) and callFn (back-compat) for runtime boundary
+		call: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
+			.call,
+		callFn: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
+			.call,
 		close: async () => {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterministicSequenceNumber({
-				lix: { sqlite: database, db, hooks },
+			commitSequenceNumberSync({
+				runtime: { sqlite: database, db, hooks },
 			});
-			commitDeterministicRngState({ lix: { sqlite: database, db, hooks } });
+			commitDeterministicRngState({ runtime: { sqlite: database, db, hooks } });
 			return storage.export();
 		},
 	};
@@ -328,7 +334,8 @@ async function captureOpened(args: { lix: Lix }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.lix.db);
-		if (randomSync({ lix: args.lix }) > 0.1) {
+		const sample = Number(await args.lix.call("lix_random"));
+		if (sample > 0.1) {
 			// Not awaiting to avoid boot up time and knowing that
 			// no database query is performed here. we dont care if the
 			// server responds with an error or not.

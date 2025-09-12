@@ -3,14 +3,15 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
-export function applyChangeAuthorDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
-): void {
+export function applyChangeAuthorDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite">;
+}): void {
 	// Create change_author view using the generalized entity view builder
+	const { runtime } = args;
 	createEntityViewsIfNotExists({
-		lix,
+		runtime,
 		schema: LixChangeAuthorSchema,
 		overrideName: "change_author",
 		pluginKey: "lix_own_entity",

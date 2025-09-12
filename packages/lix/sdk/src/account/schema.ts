@@ -4,26 +4,27 @@ import type {
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
-export function applyAccountDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyAccountDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+}): void {
+	const { runtime } = args;
 	// Create account view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		lix,
+		runtime,
 		schema: LixAccountSchema,
 		overrideName: "account",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ lix }),
+			id: () => nanoIdSync({ runtime }),
 		},
 	});
 
 	// Create active_account as an entity view (similar to active_version)
 	// Stores references to account IDs, joining with account table for details
-	lix.sqlite.exec(`
+	runtime.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_account AS
 		SELECT
 			json_extract(sa.snapshot_content, '$.account_id') AS account_id,

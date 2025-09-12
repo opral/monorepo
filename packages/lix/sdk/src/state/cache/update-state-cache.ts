@@ -203,10 +203,10 @@ export function updateStateCache(args: {
  */
 function ensureTableExists(lix: Pick<Lix, "sqlite">, tableName: string): void {
 	// Get cache for this Lix instance
-	const tableCache = getStateCacheV2Tables(lix);
+	const tableCache = getStateCacheV2Tables({ runtime: { sqlite: lix.sqlite } });
 
 	// Always run idempotent creator to ensure indexes exist
-	createSchemaCacheTable({ lix, tableName });
+	createSchemaCacheTable({ runtime: { sqlite: lix.sqlite } as any, tableName });
 
 	// Update cache set if newly seen
 	if (!tableCache.has(tableName)) {

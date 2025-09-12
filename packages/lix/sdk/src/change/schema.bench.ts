@@ -2,8 +2,8 @@ import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { uuidV7Sync } from "../runtime/deterministic/uuid-v7.js";
-import { getTimestampSync } from "../runtime/deterministic/timestamp.js";
+import { uuidV7 } from "../runtime/deterministic/uuid-v7.js";
+import { getTimestamp } from "../runtime/deterministic/timestamp.js";
 
 const ROW_NUM = 1000;
 // Safe batch size to avoid SQLite variable limit
@@ -13,7 +13,7 @@ bench(`insert ${ROW_NUM} changes with snapshots`, async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	const time = getTimestampSync({ lix });
+	const time = await getTimestamp({ lix });
 
 	// Process in batches to avoid SQLite variable limit
 	for (let batch = 0; batch < ROW_NUM; batch += BATCH_SIZE) {
@@ -22,7 +22,7 @@ bench(`insert ${ROW_NUM} changes with snapshots`, async () => {
 		const changes = [];
 
 		for (let i = batch; i < batch + batchSize; i++) {
-			const snapshotId = uuidV7Sync({ lix });
+			const snapshotId = await uuidV7({ lix });
 			const snapshotContent = {
 				entity_id: `entity-${i}`,
 				schema_key: "test_entity",
@@ -44,7 +44,7 @@ bench(`insert ${ROW_NUM} changes with snapshots`, async () => {
 			});
 
 			changes.push({
-				id: uuidV7Sync({ lix }),
+				id: await uuidV7({ lix }),
 				entity_id: `entity-${i}`,
 				schema_key: "test_entity",
 				schema_version: "1.0",
@@ -75,7 +75,7 @@ bench(
 		const lix = await openLix({});
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		const time = getTimestampSync({ lix });
+		const time = await getTimestamp({ lix });
 
 		// First, insert test data in batches
 		for (let batch = 0; batch < ROW_NUM; batch += BATCH_SIZE) {
@@ -84,7 +84,7 @@ bench(
 			const changes = [];
 
 			for (let i = batch; i < batch + batchSize; i++) {
-				const snapshotId = uuidV7Sync({ lix });
+				const snapshotId = await uuidV7({ lix });
 				const snapshotContent = {
 					entity_id: `entity-${i}`,
 					schema_key: "test_entity",
@@ -106,7 +106,7 @@ bench(
 				});
 
 				changes.push({
-					id: uuidV7Sync({ lix }),
+					id: await uuidV7({ lix }),
 					entity_id: `entity-${i}`,
 					schema_key: "test_entity",
 					schema_version: "1.0",
@@ -137,11 +137,11 @@ bench(`select single change by id from change view`, async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	const time = getTimestampSync({ lix });
+	const time = await getTimestamp({ lix });
 
 	// Insert a single test change
-	const snapshotId = uuidV7Sync({ lix });
-	const changeId = uuidV7Sync({ lix });
+	const snapshotId = await uuidV7({ lix });
+	const changeId = await uuidV7({ lix });
 
 	await db
 		.insertInto("internal_snapshot")
@@ -180,7 +180,7 @@ bench(`select changes with filtering by schema_key`, async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	const time = getTimestampSync({ lix });
+	const time = await getTimestamp({ lix });
 
 	// Insert test data with different schema keys in batches
 	for (let batch = 0; batch < ROW_NUM; batch += BATCH_SIZE) {
@@ -189,7 +189,7 @@ bench(`select changes with filtering by schema_key`, async () => {
 		const changes = [];
 
 		for (let i = batch; i < batch + batchSize; i++) {
-			const snapshotId = uuidV7Sync({ lix });
+			const snapshotId = await uuidV7({ lix });
 			const schemaKey =
 				i % 3 === 0
 					? "test_entity_a"
@@ -206,7 +206,7 @@ bench(`select changes with filtering by schema_key`, async () => {
 			});
 
 			changes.push({
-				id: uuidV7Sync({ lix }),
+				id: await uuidV7({ lix }),
 				entity_id: `entity-${i}`,
 				schema_key: schemaKey,
 				schema_version: "1.0",
@@ -240,11 +240,11 @@ bench(`compare: direct query vs change view`, async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	const time = getTimestampSync({ lix });
+	const time = await getTimestamp({ lix });
 
 	// Insert test data
-	const snapshotId = uuidV7Sync({ lix });
-	const changeId = uuidV7Sync({ lix });
+	const snapshotId = await uuidV7({ lix });
+	const changeId = await uuidV7({ lix });
 
 	await db
 		.insertInto("internal_snapshot")
@@ -298,7 +298,7 @@ bench(`select changes with NULL snapshots (deletions)`, async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	const time = getTimestampSync({ lix });
+	const time = await getTimestamp({ lix });
 
 	// Insert changes with no-content snapshot (deletions) in batches
 	const totalDeletions = Math.floor(ROW_NUM / 10);
@@ -308,7 +308,7 @@ bench(`select changes with NULL snapshots (deletions)`, async () => {
 
 		for (let i = batch; i < batch + batchSize; i++) {
 			changes.push({
-				id: uuidV7Sync({ lix }),
+				id: await uuidV7({ lix }),
 				entity_id: `deleted-entity-${i}`,
 				schema_key: "test_entity",
 				schema_version: "1.0",

@@ -70,7 +70,12 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		// 2. Create new empty working change set for continued work
-		const newWorkingChangeSetId = nanoIdSync({ lix: args.lix });
+		const runtime = {
+			sqlite: args.lix.sqlite,
+			db: args.lix.db as any,
+			hooks: args.lix.hooks as any,
+		};
+		const newWorkingChangeSetId = nanoIdSync({ runtime });
 		await trx
 			.insertInto("change_set_all")
 			.values({
@@ -98,7 +103,7 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		// 4. Create a new commit for the new working change set
-		const newWorkingCommitId = uuidV7Sync({ lix: args.lix });
+		const newWorkingCommitId = uuidV7Sync({ runtime });
 		await trx
 			.insertInto("commit_all")
 			.values({
@@ -120,9 +125,9 @@ export async function createCheckpoint(args: {
 		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
 
 		// Update version tip + descriptor via change + cache (avoid version view writes)
-		const now = getTimestampSync({ lix: args.lix });
+		const now = getTimestampSync({ runtime });
 		const descriptorChange: LixChangeRaw = {
-			id: uuidV7Sync({ lix: args.lix }),
+			id: uuidV7Sync({ runtime }),
 			entity_id: activeVersion.id,
 			schema_key: "lix_version_descriptor",
 			schema_version: "1.0",
@@ -138,7 +143,7 @@ export async function createCheckpoint(args: {
 			created_at: now,
 		};
 		const tipChange: LixChangeRaw = {
-			id: uuidV7Sync({ lix: args.lix }),
+			id: uuidV7Sync({ runtime }),
 			entity_id: activeVersion.id,
 			schema_key: "lix_version_tip",
 			schema_version: "1.0",
@@ -153,7 +158,7 @@ export async function createCheckpoint(args: {
 
 		// Also materialize the commit edge parent=checkpoint, child=new working
 		const edgeChange: LixChangeRaw = {
-			id: uuidV7Sync({ lix: args.lix }),
+			id: uuidV7Sync({ runtime }),
 			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
 			schema_key: "lix_commit_edge",
 			schema_version: "1.0",

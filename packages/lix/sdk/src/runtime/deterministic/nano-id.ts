@@ -1,5 +1,4 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
@@ -16,25 +15,17 @@ import { nextSequenceNumberSync } from "./sequence.js";
  *
  * @see nanoId
  */
-export function nanoIdSync(
-	args:
-		| { lix: Pick<Lix, "sqlite" | "db" | "hooks">; length?: number }
-		| { runtime: LixRuntime; length?: number }
-): string {
-	const lix =
-		"runtime" in args
-			? {
-					sqlite: args.runtime.sqlite,
-					db: args.runtime.db,
-					hooks: args.runtime.hooks,
-				}
-			: args.lix;
+export function nanoIdSync(args: {
+	runtime: LixRuntime;
+	length?: number;
+}): string {
+	const runtime = args.runtime;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ lix })) {
+	if (isDeterministicModeSync({ runtime })) {
 		// Check if nano_id is disabled in the config
 		const [config] = executeSync({
-			lix: { sqlite: lix.sqlite },
-			query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			lix: { sqlite: runtime.sqlite },
+			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
@@ -51,7 +42,7 @@ export function nanoIdSync(
 
 		// Otherwise use deterministic nano ID
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumberSync({ lix });
+		const counter = nextSequenceNumberSync({ runtime });
 		// Return counter with test_ prefix and padded to 10 digits
 		return `test_${counter.toString().padStart(10, "0")}`;
 	}
@@ -103,7 +94,7 @@ export function nanoIdSync(
  * @param args.length Optional length for non-deterministic mode (default: 21)
  */
 export async function nanoId(args: {
-	lix: { call: Call };
+	lix: Lix;
 	length?: number;
 }): Promise<string> {
 	const res = await args.lix.call("lix_nano_id", { length: args.length });

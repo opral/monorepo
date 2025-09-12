@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { commitIsAncestorOf } from "./commit-is-ancestor-of.js";
-import { uuidV7Sync } from "../runtime/deterministic/uuid-v7.js";
+import { uuidV7 } from "../runtime/deterministic/uuid-v7.js";
 
 // commits are authoritative: insert directly into commit_all (no pre-created change sets).
 
@@ -9,7 +9,7 @@ test("selects all ancestors of the current commit", async () => {
 	const lix = await openLix({});
 
 	// Create a linear chain of commits: c0 <- c1 <- c2 (global)
-	const c0Id = uuidV7Sync({ lix });
+	const c0Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -19,7 +19,7 @@ test("selects all ancestors of the current commit", async () => {
 		})
 		.execute();
 
-	const c1Id = uuidV7Sync({ lix });
+	const c1Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -30,7 +30,7 @@ test("selects all ancestors of the current commit", async () => {
 		})
 		.execute();
 
-	const c2Id = uuidV7Sync({ lix });
+	const c2Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -55,7 +55,7 @@ test("respects the optional depth limit", async () => {
 	const lix = await openLix({});
 
 	// c0 <- c1 <- c2
-	const c0Id = uuidV7Sync({ lix });
+	const c0Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -65,7 +65,7 @@ test("respects the optional depth limit", async () => {
 		})
 		.execute();
 
-	const c1Id = uuidV7Sync({ lix });
+	const c1Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -76,7 +76,7 @@ test("respects the optional depth limit", async () => {
 		})
 		.execute();
 
-	const c2Id = uuidV7Sync({ lix });
+	const c2Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -101,7 +101,7 @@ test("includeSelf true selects the current commit as well", async () => {
 	const lix = await openLix({});
 
 	// c0 <- c1 <- c2
-	const c0Id = uuidV7Sync({ lix });
+	const c0Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -111,7 +111,7 @@ test("includeSelf true selects the current commit as well", async () => {
 		})
 		.execute();
 
-	const c1Id = uuidV7Sync({ lix });
+	const c1Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -122,7 +122,7 @@ test("includeSelf true selects the current commit as well", async () => {
 		})
 		.execute();
 
-	const c2Id = uuidV7Sync({ lix });
+	const c2Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -147,7 +147,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 	const lix = await openLix({});
 
 	// Create chain: c1 <- c2 <- c3
-	const c1Id = uuidV7Sync({ lix });
+	const c1Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -157,7 +157,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 		})
 		.execute();
 
-	const c2Id = uuidV7Sync({ lix });
+	const c2Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({
@@ -168,7 +168,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 		})
 		.execute();
 
-	const c3Id = uuidV7Sync({ lix });
+	const c3Id = await uuidV7({ lix });
 	await lix.db
 		.insertInto("commit_all")
 		.values({

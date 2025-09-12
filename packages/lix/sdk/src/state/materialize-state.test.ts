@@ -2,7 +2,7 @@ import { describe, expect } from "vitest";
 import { sql } from "kysely";
 import { selectActiveVersion } from "../version/select-active-version.js";
 import { createVersion } from "../version/create-version.js";
-import { getTimestampSync } from "../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../runtime/deterministic/timestamp.js";
 import {
 	simulationTest,
 	normalSimulation,
@@ -845,7 +845,7 @@ describe("internal_materialization_commit_graph", () => {
 				.executeTakeFirstOrThrow();
 
 			// Create a merge commit manually with two parent edges
-			const ts = getTimestampSync({ lix });
+			const ts = await getTimestamp({ lix });
 			const mergeCommitId = `merge-${ts}`;
 			const mergeChangeSetId = `cs-${mergeCommitId}`;
 
@@ -1175,7 +1175,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		// Create a new commit that has both tips as parents
-		const ts = getTimestampSync({ lix });
+		const ts = await getTimestamp({ lix });
 		const mergeCommitId = `edge-merge-${ts}`;
 		const mergeChangeSetId = `cs-${mergeCommitId}`;
 

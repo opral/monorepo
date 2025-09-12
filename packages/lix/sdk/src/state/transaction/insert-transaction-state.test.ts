@@ -4,7 +4,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -27,7 +27,7 @@ test("creates tracked entity with pending change", async () => {
 	// Use insertPendingState function
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-insert",
@@ -175,7 +175,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-key",
@@ -271,7 +271,7 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-untracked-key",
@@ -346,7 +346,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-untracked-timestamp",
@@ -425,7 +425,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 	// First insert a direct untracked entity
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -478,7 +478,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 	// Now delete the direct untracked entity
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -1074,7 +1074,7 @@ test("inheritance works with resolved view before committing", async () => {
 	// Insert a global entity in transaction state
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-global-key",

@@ -3,13 +3,13 @@ import type {
 	FromLixSchemaDefinition,
 } from "../../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../../entity-views/entity-view-builder.js";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
-export function applyEntityLabelDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
-): void {
+export function applyEntityLabelDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite">;
+}): void {
 	createEntityViewsIfNotExists({
-		lix,
+		runtime: args.runtime,
 		schema: LixEntityLabelSchema,
 		overrideName: "entity_label",
 		pluginKey: "lix_own_entity",

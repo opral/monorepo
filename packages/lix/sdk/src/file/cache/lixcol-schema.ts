@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 export type InternalFileLixcolCacheRow =
 	Selectable<InternalFileLixcolCacheTable>;
@@ -24,9 +24,11 @@ export type InternalFileLixcolCacheTable = {
  * FROM internal_file_lixcol_cache
  * WHERE file_id = ? AND version_id = ?
  */
-export function applyFileLixcolCacheSchema(lix: Pick<Lix, "sqlite">): void {
+export function applyFileLixcolCacheSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite">;
+}): void {
 	// Create the cache table for file lixcol metadata
-	lix.sqlite.exec(`
+	args.runtime.sqlite.exec(`
 		CREATE TABLE IF NOT EXISTS internal_file_lixcol_cache (
 			file_id TEXT NOT NULL,
 			version_id TEXT NOT NULL,

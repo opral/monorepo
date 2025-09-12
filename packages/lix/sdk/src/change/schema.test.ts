@@ -380,7 +380,9 @@ test("untracked changes in transaction don't show up in change view after commit
 	// Insert an untracked change into the transaction state
 	insertTransactionState({
 		lix,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await (
+			await import("../runtime/deterministic/timestamp.js")
+		).getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test_untracked_entity",

@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 /**
  * Applies the file data cache schema to the database.
@@ -10,8 +10,10 @@ import type { Lix } from "../../lix/open-lix.js";
  * @example
  * applyFileDataCacheSchema(lix);
  */
-export function applyFileDataCacheSchema(lix: Pick<Lix, "sqlite">): void {
-	lix.sqlite.exec(`
+export function applyFileDataCacheSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite">;
+}): void {
+	args.runtime.sqlite.exec(`
     CREATE TABLE IF NOT EXISTS internal_file_data_cache (
       file_id TEXT NOT NULL,
       version_id TEXT NOT NULL,

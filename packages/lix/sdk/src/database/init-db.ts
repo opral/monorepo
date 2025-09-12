@@ -22,6 +22,7 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 import {
 	getTimestampSync,
 	uuidV7Sync,
@@ -135,34 +136,40 @@ export function initDb(args: {
 	});
 
 	const lix = { sqlite: args.sqlite, db, hooks: args.hooks } as unknown as Lix;
+	const runtime: LixRuntime = {
+		sqlite: args.sqlite,
+		db: db as any,
+		hooks: args.hooks,
+	} as any;
 
 	initFunctions({
 		sqlite: args.sqlite,
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+		hooks: args.hooks,
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
-	applyTransactionStateSchema(lix);
+	applyTransactionStateSchema({ runtime });
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
-	applyFileLixcolCacheSchema(lix);
+	applyFileLixcolCacheSchema({ runtime });
 	// Ensure file data cache table exists before any triggers may reference it
-	applyFileDataCacheSchema(lix);
-	applyStateDatabaseSchema(lix);
-	applyEntityDatabaseSchema(lix);
-	applyChangeSetDatabaseSchema(lix);
-	applyCommitDatabaseSchema(lix);
-	applyStoredSchemaDatabaseSchema(lix);
-	applyVersionDatabaseSchema(lix);
-	applyAccountDatabaseSchema(lix);
-	applyKeyValueDatabaseSchema(lix);
-	applyChangeAuthorDatabaseSchema(lix);
-	applyLabelDatabaseSchema(lix);
-	applyThreadDatabaseSchema(lix);
-	applyEntityThreadDatabaseSchema(lix);
-	applyStateHistoryDatabaseSchema(lix);
+	applyFileDataCacheSchema({ runtime });
+	applyStateDatabaseSchema({ runtime });
+	applyEntityDatabaseSchema({ runtime });
+	applyChangeSetDatabaseSchema({ runtime });
+	applyCommitDatabaseSchema({ runtime });
+	applyStoredSchemaDatabaseSchema({ runtime });
+	applyVersionDatabaseSchema({ runtime });
+	applyAccountDatabaseSchema({ runtime });
+	applyKeyValueDatabaseSchema({ runtime });
+	applyChangeAuthorDatabaseSchema({ runtime });
+	applyLabelDatabaseSchema({ runtime });
+	applyThreadDatabaseSchema({ runtime });
+	applyEntityThreadDatabaseSchema({ runtime });
+	applyStateHistoryDatabaseSchema({ runtime });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	applyLogDatabaseSchema(lix);
+	applyLogDatabaseSchema({ runtime });
 
 	return db;
 }
@@ -170,25 +177,30 @@ export function initDb(args: {
 function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
+	hooks: LixHooks;
 }) {
-	const lix = { sqlite: args.sqlite, db: args.db } as unknown as Lix;
+	const runtime = {
+		sqlite: args.sqlite,
+		db: args.db as any,
+		hooks: args.hooks,
+	} as const;
 
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,
-		xFunc: () => uuidV7Sync({ lix }),
+		xFunc: () => uuidV7Sync({ runtime }),
 	});
 
 	args.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
-		xFunc: () => humanIdSync({ lix, separator: "-", capitalize: false }),
+		xFunc: () => humanIdSync({ runtime, separator: "-", capitalize: false }),
 	});
 
 	args.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
-		xFunc: () => getTimestampSync({ lix }),
+		xFunc: () => getTimestampSync({ runtime }),
 	});
 
 	args.sqlite.createFunction({
@@ -196,7 +208,7 @@ function initFunctions(args: {
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoIdSync({ lix, length });
+			return nanoIdSync({ runtime, length });
 		},
 	});
 }

@@ -22,7 +22,15 @@ export async function createLabel(args: {
 }): Promise<LixLabel> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
-		const labelId = args.id || nanoIdSync({ lix: args.lix });
+		const labelId =
+			args.id ||
+			nanoIdSync({
+				runtime: {
+					sqlite: args.lix.sqlite,
+					db: trx as any,
+					hooks: args.lix.hooks as any,
+				},
+			});
 
 		// Insert the label (views don't support returningAll)
 		await trx

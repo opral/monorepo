@@ -5,32 +5,33 @@ import type {
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
-export function applyThreadDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyThreadDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+}): void {
+	const { runtime } = args;
 	// Create both primary and _all views for thread with default ID generation
 	createEntityViewsIfNotExists({
-		lix,
+		runtime,
 		schema: LixThreadSchema,
 		overrideName: "thread",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ lix }),
+			id: () => nanoIdSync({ runtime }),
 		},
 	});
 
 	// Create both primary and _all views for thread_comment with default ID generation
 	createEntityViewsIfNotExists({
-		lix,
+		runtime,
 		schema: LixThreadCommentSchema,
 		overrideName: "thread_comment",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ lix }),
+			id: () => nanoIdSync({ runtime }),
 		},
 	});
 }

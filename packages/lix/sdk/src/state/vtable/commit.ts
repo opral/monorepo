@@ -9,7 +9,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { type LixVersion } from "../../version/schema.js";
 import { nanoIdSync } from "../../runtime/deterministic/index.js";
 import { uuidV7Sync } from "../../runtime/deterministic/uuid-v7.js";
-import { commitDeterministicSequenceNumber } from "../../runtime/deterministic/sequence.js";
+import { commitSequenceNumberSync } from "../../runtime/deterministic/sequence.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
 import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
 import type { Lix } from "../../lix/open-lix.js";
@@ -34,7 +34,12 @@ import { generateCommit } from "./generate-commit.js";
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
-	const transactionTimestamp = getTimestampSync({ lix: args.lix });
+	const runtime = {
+		sqlite: args.lix.sqlite,
+		db: args.lix.db as any,
+		hooks: args.lix.hooks as any,
+	};
+	const transactionTimestamp = getTimestampSync({ runtime });
 	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Collect per-version snapshots once to avoid duplicate queries in this commit
@@ -145,8 +150,8 @@ export function commit(args: {
 		// Load version snapshot once (descriptor + tip)
 		const versionData = loadMergedVersion(version_id);
 		versionSnapshots.set(version_id, versionData);
-		const changeSetId = uuidV7Sync({ lix: args.lix });
-		const commitId = uuidV7Sync({ lix: args.lix });
+		const changeSetId = uuidV7Sync({ runtime });
+		const commitId = uuidV7Sync({ runtime });
 
 		// Store metadata for later use
 		versionMetadata.set(version_id, {
@@ -161,8 +166,8 @@ export function commit(args: {
 		// Load global version snapshot once (descriptor + tip)
 		const globalVersion = loadMergedVersion("global");
 		versionSnapshots.set("global", globalVersion);
-		const globalChangeSetId = nanoIdSync({ lix: args.lix });
-		const globalCommitId = uuidV7Sync({ lix: args.lix });
+		const globalChangeSetId = nanoIdSync({ runtime });
+		const globalCommitId = uuidV7Sync({ runtime });
 
 		// Store global metadata
 		versionMetadata.set("global", {
@@ -372,7 +377,7 @@ export function commit(args: {
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
 					workingUntrackedBatch.push({
-						id: uuidV7Sync({ lix: args.lix }),
+						id: uuidV7Sync({ runtime }),
 						entity_id: entityIdForDeletion,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
@@ -389,7 +394,7 @@ export function commit(args: {
 					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
 					if (entitiesAtCheckpoint.has(key)) {
 						workingUntrackedBatch.push({
-							id: uuidV7Sync({ lix: args.lix }),
+							id: uuidV7Sync({ runtime }),
 							entity_id: `${workingChangeSetId}~${deletion.id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
@@ -411,7 +416,7 @@ export function commit(args: {
 				// Add all non-deletions as untracked
 				for (const change of nonDeletionChanges) {
 					workingUntrackedBatch.push({
-						id: uuidV7Sync({ lix: args.lix }),
+						id: uuidV7Sync({ runtime }),
 						entity_id: `${workingChangeSetId}~${change.id}`,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
@@ -449,8 +454,8 @@ export function commit(args: {
 			lix: args.lix,
 			query: db.deleteFrom("internal_transaction_state"),
 		});
-		commitDeterministicSequenceNumber({
-			lix: args.lix,
+		commitSequenceNumberSync({
+			runtime,
 			timestamp: transactionTimestamp,
 		});
 		// Emit hook for untracked-only commit
@@ -505,7 +510,7 @@ export function commit(args: {
 		activeAccounts: activeAccounts.map((a) => a.account_id as string),
 		changes: domainChangesFlat,
 		versions: versionsInput,
-		generateUuid: () => uuidV7Sync({ lix: args.lix }),
+		generateUuid: () => uuidV7Sync({ runtime }),
 	});
 
 	// Single batch insert of all generated changes into the change table
@@ -638,8 +643,8 @@ export function commit(args: {
 		}
 	}
 
-	commitDeterministicSequenceNumber({
-		lix: args.lix,
+	commitSequenceNumberSync({
+		runtime,
 		timestamp: transactionTimestamp,
 	});
 

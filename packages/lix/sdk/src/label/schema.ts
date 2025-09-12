@@ -4,18 +4,19 @@ import type {
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
-export function applyLabelDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyLabelDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+}): void {
+	const { runtime } = args;
 	createEntityViewsIfNotExists({
-		lix,
+		runtime,
 		schema: LixLabelSchema,
 		overrideName: "label",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
-		defaultValues: { id: () => nanoIdSync({ lix }) },
+		defaultValues: { id: () => nanoIdSync({ runtime }) },
 	});
 }
 

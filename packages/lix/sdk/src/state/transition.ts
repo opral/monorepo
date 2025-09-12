@@ -165,14 +165,26 @@ WHERE rn = 1;
 		}> = [];
 		if (leafEntitiesToDelete.length > 0) {
 			const deletionRows = leafEntitiesToDelete.map((c) => ({
-				id: uuidV7Sync({ lix: args.lix }),
+				id: uuidV7Sync({
+					runtime: {
+						sqlite: args.lix.sqlite,
+						db: args.lix.db as any,
+						hooks: args.lix.hooks as any,
+					},
+				}),
 				entity_id: c.entity_id,
 				schema_key: c.schema_key,
 				file_id: c.file_id,
 				plugin_key: c.plugin_key,
 				schema_version: c.schema_version,
 				snapshot_content: null as null,
-				created_at: getTimestampSync({ lix: args.lix }),
+				created_at: getTimestampSync({
+					runtime: {
+						sqlite: args.lix.sqlite,
+						db: args.lix.db as any,
+						hooks: args.lix.hooks as any,
+					},
+				}),
 			}));
 			await trx
 				.insertInto("change")
@@ -194,18 +206,23 @@ WHERE rn = 1;
 		}
 
 		// 3) Create change set + commit + edges + tip as tracked change rows
-		const changeSetId = uuidV7Sync({ lix: args.lix });
-		const commitId = uuidV7Sync({ lix: args.lix });
-		const now = getTimestampSync({ lix: args.lix });
+		const runtime = {
+			sqlite: args.lix.sqlite,
+			db: args.lix.db as any,
+			hooks: args.lix.hooks as any,
+		};
+		const changeSetId = uuidV7Sync({ runtime });
+		const commitId = uuidV7Sync({ runtime });
+		const now = getTimestampSync({ runtime });
 
 		// Collect all raw changes to insert (with explicit ids + created_at)
 		const metadataChanges: LixChangeRaw[] = [];
 		// Pre-generate tip change id so we can reference it in commit.meta_change_ids
-		const versionChangeId = uuidV7Sync({ lix: args.lix });
+		const versionChangeId = uuidV7Sync({ runtime });
 
 		// change_set entity
 		metadataChanges.push({
-			id: uuidV7Sync({ lix: args.lix }),
+			id: uuidV7Sync({ runtime }),
 			entity_id: changeSetId,
 			schema_key: LixChangeSetSchema["x-lix-key"],
 			schema_version: LixChangeSetSchema["x-lix-version"],
@@ -218,7 +235,7 @@ WHERE rn = 1;
 		// change_set_element entities
 		for (const el of combinedElements) {
 			metadataChanges.push({
-				id: uuidV7Sync({ lix: args.lix }),
+				id: uuidV7Sync({ runtime }),
 				entity_id: `${changeSetId}~${el.id}`,
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
@@ -236,7 +253,7 @@ WHERE rn = 1;
 		}
 
 		// commit entity (track id for change_set_element)
-		const commitChangeId = uuidV7Sync({ lix: args.lix });
+		const commitChangeId = uuidV7Sync({ runtime });
 		metadataChanges.push({
 			id: commitChangeId,
 			entity_id: commitId,
@@ -266,7 +283,7 @@ WHERE rn = 1;
 			},
 		]) {
 			metadataChanges.push({
-				id: uuidV7Sync({ lix: args.lix }),
+				id: uuidV7Sync({ runtime }),
 				entity_id: `${changeSetId}~${meta.change_id}`,
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
@@ -308,7 +325,7 @@ WHERE rn = 1;
 		// Add derived edge cache rows (parent -> new commit) without inserting commit_edge changes
 		const derivedEdgesForCache: LixChangeRaw[] = [
 			{
-				id: uuidV7Sync({ lix: args.lix }),
+				id: uuidV7Sync({ runtime }),
 				entity_id: `${sourceCommitId}~${commitId}`,
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
@@ -321,7 +338,7 @@ WHERE rn = 1;
 				created_at: now,
 			},
 			{
-				id: uuidV7Sync({ lix: args.lix }),
+				id: uuidV7Sync({ runtime }),
 				entity_id: `${args.to.id}~${commitId}`,
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],

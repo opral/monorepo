@@ -2,7 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns
@@ -40,7 +40,7 @@ bench("commit transaction with 1 row", async () => {
 	insertTransactionState({
 		lix: lix as any,
 		data: multipleData,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
@@ -73,7 +73,7 @@ bench("commit transaction with 100 rows", async () => {
 	insertTransactionState({
 		lix: lix as any,
 		data: multipleData,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
@@ -111,7 +111,7 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 		insertTransactionState({
 			lix: lix as any,
 			data: batch,
-			timestamp: getTimestampSync({ lix }),
+			timestamp: await getTimestamp({ lix }),
 		});
 
 		// Commit the current transaction batch
@@ -145,7 +145,7 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 	insertTransactionState({
 		lix: lix as any,
 		data: baseRows,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 	commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
 
@@ -203,7 +203,7 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 	insertTransactionState({
 		lix: lix as any,
 		data: ops,
-		timestamp: getTimestampSync({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: single commit with mixed operations

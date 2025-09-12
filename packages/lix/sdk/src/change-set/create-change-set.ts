@@ -1,4 +1,4 @@
-import { nanoIdSync } from "../runtime/deterministic/index.js";
+import { nanoId } from "../runtime/deterministic/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixChangeSet, LixChangeSetElement } from "./schema.js";
 import type { LixLabel } from "../label/schema.js";
@@ -18,7 +18,7 @@ import type { NewState } from "../entity-views/types.js";
  */
 
 export async function createChangeSet(args: {
-	lix: Pick<Lix, "db" | "sqlite" | "hooks">;
+	lix: Lix;
 	id?: string;
 	elements?: Omit<NewState<LixChangeSetElement>, "change_set_id">[];
 	labels?: Pick<LixLabel, "id">[];
@@ -26,7 +26,7 @@ export async function createChangeSet(args: {
 	lixcol_version_id?: string;
 }): Promise<LixChangeSet & { lixcol_version_id: string }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const csId = args.id ?? nanoIdSync({ lix: args.lix });
+		const csId = args.id ?? (await nanoId({ lix: { ...args.lix, db: trx } }));
 
 		// Use _all view if version_id is specified, otherwise use regular view
 		if (args.lixcol_version_id) {

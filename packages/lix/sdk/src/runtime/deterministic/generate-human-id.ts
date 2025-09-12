@@ -1,5 +1,4 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { nextSequenceNumberSync } from "./sequence.js";
@@ -72,30 +71,17 @@ export function deterministicHumanIdVocabularySize(): number {
  *
  * @see humanId
  */
-export function humanIdSync(
-	args:
-		| {
-				lix: Pick<Lix, "sqlite" | "db" | "hooks">;
-				separator?: string;
-				capitalize?: boolean;
-		  }
-		| { runtime: LixRuntime; separator?: string; capitalize?: boolean }
-): string {
+export function humanIdSync(args: {
+	runtime: LixRuntime;
+	separator?: string;
+	capitalize?: boolean;
+}): string {
 	const capitalize = args.capitalize ?? true;
 	const separator = args.separator ?? "_";
 
-	const lix =
-		"runtime" in args
-			? {
-					sqlite: args.runtime.sqlite,
-					db: args.runtime.db,
-					hooks: args.runtime.hooks,
-				}
-			: args.lix;
-
-	if (isDeterministicModeSync({ lix })) {
+	if (isDeterministicModeSync({ runtime: args.runtime })) {
 		// In deterministic mode, use sequence to get deterministic index
-		const sequence = nextSequenceNumberSync({ lix });
+		const sequence = nextSequenceNumberSync({ runtime: args.runtime });
 
 		// Use modulo to cycle through names
 		const name = DETERMINISTIC_NAMES[sequence % DETERMINISTIC_NAMES.length]!;
@@ -125,7 +111,7 @@ export function humanIdSync(
  * const name = await humanId({ lix })
  */
 export async function humanId(args: {
-	lix: { call: Call };
+	lix: Lix;
 	separator?: string;
 	capitalize?: boolean;
 }): Promise<string> {

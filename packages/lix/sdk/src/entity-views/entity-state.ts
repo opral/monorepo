@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
@@ -278,7 +278,7 @@ export type ValidationCallbacks = {
  * ```
  */
 export function createEntityStateView(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] */
 	overrideName?: string;
@@ -311,7 +311,7 @@ export function createEntityStateView(args: {
 }
 
 function createSingleEntityView(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
 	quotedViewName?: string;
@@ -363,7 +363,7 @@ function createSingleEntityView(args: {
 
 			if (needsRow) {
 				// Function needs row data - use variadic function
-				args.lix.sqlite.createFunction(
+				args.runtime.sqlite.createFunction(
 					udfName,
 					(...rowValues: any[]) => {
 						// Reconstruct row object from passed values
@@ -395,7 +395,7 @@ function createSingleEntityView(args: {
 				); // -1 means variadic
 			} else {
 				// Function doesn't need row data - simple 0-arg function
-				args.lix.sqlite.createFunction(
+				args.runtime.sqlite.createFunction(
 					udfName,
 					() => (defaultFn as () => string)(),
 					{ arity: 0 }
@@ -580,5 +580,5 @@ function createSingleEntityView(args: {
       END;
     `);
 
-	args.lix.sqlite.exec(sqlQuery);
+	args.runtime.sqlite.exec(sqlQuery);
 }

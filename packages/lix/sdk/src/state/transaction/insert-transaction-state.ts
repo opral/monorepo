@@ -75,7 +75,13 @@ export function insertTransactionState(args: {
 	// Generate change IDs for all entities upfront
 	const dataWithChangeIds = args.data.map((data) => ({
 		...data,
-		change_id: uuidV7Sync({ lix: args.lix as any }),
+		change_id: uuidV7Sync({
+			runtime: {
+				sqlite: args.lix.sqlite,
+				db: args.lix.db as any,
+				hooks: args.lix.hooks as any,
+			},
+		}),
 	}));
 
 	// Batch insert into internal_transaction_state

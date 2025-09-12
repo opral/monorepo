@@ -3,7 +3,6 @@ import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
-import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
@@ -49,31 +48,22 @@ function randomUnstable(): number {
  *
  * @see random
  */
-export function randomSync(
-	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
-): number {
-	const lix =
-		"runtime" in args
-			? {
-					sqlite: args.runtime.sqlite,
-					db: args.runtime.db,
-					hooks: args.runtime.hooks,
-				}
-			: args.lix;
+export function randomSync(args: { runtime: LixRuntime }): number {
+	const runtime = args.runtime;
 	// Non-deterministic mode: use crypto.getRandomValues()
-	if (!isDeterministicModeSync({ lix })) {
+	if (!isDeterministicModeSync({ runtime })) {
 		return randomUnstable();
 	}
 
 	// Deterministic mode: use xorshift128+
-	let state = rngCache.get(lix.sqlite);
+	let state = rngCache.get(runtime.sqlite);
 
 	/* First use on this connection → initialize from seed */
 	if (!state) {
 		// Check if we have persisted RNG state
 		const [stateRow] = executeSync({
-			lix: { sqlite: lix.sqlite },
-			query: lix.db
+			lix: { sqlite: runtime.sqlite },
+			query: runtime.db
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
@@ -96,11 +86,11 @@ export function randomSync(
 			};
 		} else {
 			// Initialize from seed
-			const seed = getRngSeed(args);
+			const seed = getRngSeed({ runtime });
 			state = seedXorshift128Plus(seed);
 		}
 
-		rngCache.set(lix.sqlite, state);
+		rngCache.set(runtime.sqlite, state);
 	}
 
 	// Generate next random value using xorshift128+
@@ -112,11 +102,11 @@ export function randomSync(
 /**
  * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
-function getRngSeed(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
+function getRngSeed(args: { runtime: LixRuntime }): string {
 	// Check for seed in the deterministic mode config
 	const [configRow] = executeSync({
-		lix: { sqlite: args.lix.sqlite },
-		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		lix: { sqlite: args.runtime.sqlite },
+		query: (args.runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -134,8 +124,8 @@ function getRngSeed(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 
 	// Derive default seed from lix_id
 	const [idRow] = executeSync({
-		lix: { sqlite: args.lix.sqlite },
-		query: args.lix.db
+		lix: { sqlite: args.runtime.sqlite },
+		query: args.runtime.db
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")
 			.select("value"),
@@ -198,18 +188,11 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	lix?: Pick<Lix, "sqlite" | "db" | "hooks">;
-	runtime?: LixRuntime;
+	runtime: LixRuntime;
 	timestamp?: string;
 }): void {
-	const lix = args.runtime
-		? {
-				sqlite: args.runtime.sqlite,
-				db: args.runtime.db,
-				hooks: args.runtime.hooks,
-			}
-		: (args.lix as any);
-	const state = rngCache.get(lix.sqlite);
+	const runtime = args.runtime;
+	const state = rngCache.get(runtime.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -222,9 +205,12 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? getTimestampSync({ lix });
+	const now = args.timestamp ?? getTimestampSync({ runtime });
 	updateUntrackedState({
-		lix,
+		lix: {
+			sqlite: runtime.sqlite,
+			db: runtime.db as any,
+		},
 		changes: [
 			{
 				entity_id: "lix_deterministic_rng_state",
@@ -268,7 +254,7 @@ export function commitDeterministicRngState(args: {
  * await random({ lix }) // 0.543...
  * ```
  */
-export async function random(args: { lix: { call: Call } }): Promise<number> {
+export async function random(args: { lix: Lix }): Promise<number> {
 	const res = await args.lix.call("lix_random");
 	return Number(res);
 }

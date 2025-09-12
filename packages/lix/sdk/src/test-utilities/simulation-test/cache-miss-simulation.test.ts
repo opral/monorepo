@@ -4,8 +4,7 @@ import {
 	normalSimulation,
 	cacheMissSimulation,
 } from "./simulation-test.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
-import { nextSequenceNumberSync } from "../../runtime/deterministic/sequence.js";
+import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
 import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
 
 test("cache miss simulation test discovery", () => {});
@@ -110,10 +109,10 @@ simulationTest(
 			],
 		});
 
-		// Get initial sequence numbers
-		const seq1 = nextSequenceNumberSync({ lix });
-		const seq2 = nextSequenceNumberSync({ lix });
-		const seq3 = nextSequenceNumberSync({ lix });
+		// Get initial logical timestamps (1ms increments in deterministic mode)
+		const seq1 = Date.parse(await getTimestamp({ lix }));
+		const seq2 = Date.parse(await getTimestamp({ lix }));
+		const seq3 = Date.parse(await getTimestamp({ lix }));
 
 		// These should be deterministic across simulations
 		expectDeterministic(seq1).toBeDefined();
@@ -121,8 +120,8 @@ simulationTest(
 		expectDeterministic(seq3).toBe(seq2 + 1);
 
 		// Get timestamps (which use sequence numbers internally)
-		const ts1 = getTimestampSync({ lix });
-		const ts2 = getTimestampSync({ lix });
+		const ts1 = await getTimestamp({ lix });
+		const ts2 = await getTimestamp({ lix });
 
 		// Timestamps should also be deterministic
 		expectDeterministic(ts1).toBeDefined();
@@ -144,8 +143,8 @@ simulationTest(
 		expectDeterministic(result).toHaveLength(1);
 		expectDeterministic(result[0]?.value).toBe("test_value");
 
-		// Get sequence number after operations
-		const seqAfter = nextSequenceNumberSync({ lix });
+		// Get sequence number after operations (via timestamp)
+		const seqAfter = Date.parse(await getTimestamp({ lix }));
 
 		// This sequence number should be deterministic across simulations
 		expectDeterministic(seqAfter).toBeDefined();

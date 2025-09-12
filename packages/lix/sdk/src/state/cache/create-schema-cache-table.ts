@@ -1,4 +1,4 @@
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 /**
  * Creates (or updates) a per-schema internal state cache table with core indexes.
@@ -10,10 +10,10 @@ import type { Lix } from "../../lix/open-lix.js";
  * - Indexes to accelerate common access patterns used by views/benches
  */
 export function createSchemaCacheTable(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	tableName: string;
 }): void {
-	const { lix, tableName } = args;
+	const { runtime, tableName } = args;
 
 	// Create table if it doesn't exist
 	const createTableSql = `
@@ -35,26 +35,26 @@ export function createSchemaCacheTable(args: {
     ) STRICT, WITHOUT ROWID;
   `;
 
-	lix.sqlite.exec({ sql: createTableSql });
+	runtime.sqlite.exec({ sql: createTableSql });
 
 	// Core static indexes for common access patterns
 	// 1) Fast version-scoped lookups (frequent)
-	lix.sqlite.exec({
+	runtime.sqlite.exec({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
 	});
 
 	// 2) Fast lookups by (version_id, file_id, entity_id) – complements PK order
-	lix.sqlite.exec({
+	runtime.sqlite.exec({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_vfe ON ${tableName} (version_id, file_id, entity_id)`,
 	});
 
 	// 3) Fast scans by file within a version
-	lix.sqlite.exec({
+	runtime.sqlite.exec({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
 	});
 
 	// Update planner stats
-	lix.sqlite.exec({ sql: `ANALYZE ${tableName}` });
+	runtime.sqlite.exec({ sql: `ANALYZE ${tableName}` });
 }
 
 /** Utility to sanitize a schema_key for use in a physical table name */

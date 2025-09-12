@@ -29,7 +29,12 @@ export function insertVTableLog(args: {
 
 	loggingInProgressMap.set(args.lix, true);
 	try {
-		const id = args.id ?? uuidV7Sync({ lix: args.lix });
+		const runtime = {
+			sqlite: args.lix.sqlite,
+			db: args.lix.db as any,
+			hooks: args.lix.hooks as any,
+		};
+		const id = args.id ?? uuidV7Sync({ runtime });
 		// Insert into transaction state (untracked) to preserve previous behavior.
 		// Note: If called outside a vtable write, this may require a later commit to flush.
 		insertTransactionState({
@@ -38,7 +43,7 @@ export function insertVTableLog(args: {
 				db: args.lix.db,
 				hooks: undefined as any,
 			},
-			timestamp: args.timestamp ?? getTimestampSync({ lix: args.lix }),
+			timestamp: args.timestamp ?? getTimestampSync({ runtime }),
 			data: [
 				{
 					entity_id: id,

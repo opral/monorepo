@@ -1,4 +1,3 @@
-import type { Lix } from "../../lix/open-lix.js";
 import type { LixRuntime } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
@@ -23,23 +22,16 @@ const hookListenersRegistered = new WeakSet<object>();
  * @param args - Object containing the lix instance with sqlite connection
  * @returns true if deterministic mode is enabled, false otherwise
  */
-export function isDeterministicModeSync(
-	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
-): boolean {
-	const lix =
-		"runtime" in args
-			? {
-					sqlite: args.runtime.sqlite,
-					db: args.runtime.db,
-					hooks: args.runtime.hooks,
-				}
-			: args.lix;
+export function isDeterministicModeSync(args: {
+	runtime: LixRuntime;
+}): boolean {
+	const runtime = args.runtime;
 	// Register hook listener for cache invalidation (only once per hooks instance)
-	const key = lix.hooks as unknown as object;
-	if (!hookListenersRegistered.has(key) && lix.hooks) {
+	const key = runtime.hooks as unknown as object;
+	if (!hookListenersRegistered.has(key) && runtime.hooks) {
 		hookListenersRegistered.add(key);
 
-		lix.hooks.onStateCommit(({ changes }) => {
+		runtime.hooks.onStateCommit(({ changes }) => {
 			// Check if any change affects lix_deterministic_mode
 			for (const change of changes) {
 				if (
@@ -47,7 +39,7 @@ export function isDeterministicModeSync(
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(args.lix.sqlite);
+					deterministicModeCache.delete(runtime.sqlite);
 					break;
 				}
 			}
@@ -55,15 +47,15 @@ export function isDeterministicModeSync(
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(lix.sqlite)) {
-		return deterministicModeCache.get(lix.sqlite)!;
+	if (deterministicModeCache.has(runtime.sqlite)) {
+		return deterministicModeCache.get(runtime.sqlite)!;
 	}
 
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion
 	const [row] = executeSync({
-		lix: { sqlite: lix.sqlite },
-		query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		lix: { sqlite: runtime.sqlite },
+		query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -76,7 +68,7 @@ export function isDeterministicModeSync(
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(lix.sqlite, result);
+	deterministicModeCache.set(runtime.sqlite, result);
 
 	return result;
 }

@@ -3,13 +3,13 @@ import type {
 	FromLixSchemaDefinition,
 } from "../../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../../entity-views/entity-view-builder.js";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
-export function applyEntityThreadDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
-): void {
+export function applyEntityThreadDatabaseSchema(args: {
+	runtime: Pick<LixRuntime, "sqlite">;
+}): void {
 	createEntityViewsIfNotExists({
-		lix,
+		runtime: args.runtime,
 		schema: LixEntityThreadSchema,
 		overrideName: "entity_thread",
 		pluginKey: "lix_own_entity",

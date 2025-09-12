@@ -358,7 +358,7 @@ export function applyStateVTable(
 
 					if (cacheIsStale) {
 						// Populate cache directly with materialized state
-						populateStateCache({ sqlite, db: db as any });
+						populateStateCache({ runtime: { sqlite, db: db as any } });
 
 						// Do not log here: xFilter can be invoked during SELECT-only paths
 						// and should avoid writing to the transaction state/logs.
@@ -473,7 +473,9 @@ export function applyStateVTable(
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
-					const _timestamp = getTimestampSync({ lix });
+					const _timestamp = getTimestampSync({
+						runtime: { sqlite, db: db as any, hooks },
+					});
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 
@@ -650,7 +652,9 @@ export function applyStateVTable(
 					// Log error for debugging
 					insertVTableLog({
 						lix,
-						timestamp: getTimestampSync({ lix }),
+						timestamp: getTimestampSync({
+							runtime: { sqlite, db: db as any, hooks },
+						}),
 						key: "lix_state_xupdate_error",
 						level: "error",
 						message: `xUpdate error: ${errorMessage}`,

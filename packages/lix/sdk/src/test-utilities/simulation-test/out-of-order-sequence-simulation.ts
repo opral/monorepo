@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import * as sequenceModule from "../../runtime/deterministic/sequence.js";
+import * as tsModule from "../../runtime/deterministic/timestamp.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
@@ -49,19 +49,12 @@ export const outOfOrderSequenceSimulation: SimulationTestDef = {
 		// This avoids calling the real sequence function which would change database state
 		let internalCounter = 0;
 
-		// Mock the nextDeterministicSequenceNumber function
-		vi.spyOn(sequenceModule, "nextSequenceNumberSync").mockImplementation(
-			() => {
-				// Use our internal counter instead of calling the real function
-				const normalSequence = internalCounter++;
-
-				// Look up the shuffled version, or use original if not in map
-				const shuffledSequence =
-					shuffleMapping.get(normalSequence) ?? normalSequence;
-
-				return shuffledSequence;
-			}
-		);
+		// Mock the async getTimestamp to return shuffled timestamps
+		vi.spyOn(tsModule, "getTimestamp").mockImplementation(async () => {
+			const normal = internalCounter++;
+			const shuffled = shuffleMapping.get(normal) ?? normal;
+			return new Date(shuffled).toISOString();
+		});
 
 		return lix;
 	},

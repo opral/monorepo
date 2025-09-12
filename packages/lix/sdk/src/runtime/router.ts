@@ -5,6 +5,7 @@ import {
 	getTimestampSync,
 	humanIdSync,
 	randomSync,
+	nextSequenceNumberSync,
 } from "./deterministic/index.js";
 
 /**
@@ -40,6 +41,10 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 			(payload) => humanIdSync({ runtime: args.runtime, ...(payload ?? {}) }),
 		],
 		["lix_random", () => randomSync({ runtime: args.runtime })],
+		[
+			"lix_next_sequence_number",
+			() => nextSequenceNumberSync({ runtime: args.runtime }),
+		],
 	]);
 
 	return {

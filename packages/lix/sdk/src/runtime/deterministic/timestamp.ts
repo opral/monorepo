@@ -1,5 +1,4 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
@@ -8,31 +7,22 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /**
- * Sync variant of {@link timestamp}. See {@link timestamp} for behavior and examples.
+ * Sync variant of {@link getTimestamp}. See {@link getTimestamp} for behavior and examples.
  *
  * @remarks
  * - Accepts `{ runtime }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
- * - Intended for runtime/router and UDFs; app code should use {@link timestamp}.
+ * - Intended for runtime/router and UDFs; app code should use {@link getTimestamp}.
  *
- * @see timestamp
+ * @see getTimestamp
  */
-export function getTimestampSync(
-	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
-): string {
-	const lix =
-		"runtime" in args
-			? {
-					sqlite: args.runtime.sqlite,
-					db: args.runtime.db,
-					hooks: args.runtime.hooks,
-				}
-			: args.lix;
+export function getTimestampSync(args: { runtime: LixRuntime }): string {
+	const runtime = args.runtime;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ lix })) {
+	if (isDeterministicModeSync({ runtime })) {
 		// Check if timestamps are disabled in the config
 		const [config] = executeSync({
-			lix: { sqlite: lix.sqlite },
-			query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			lix: { sqlite: runtime.sqlite },
+			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
@@ -51,7 +41,7 @@ export function getTimestampSync(
 
 		// Otherwise use deterministic timestamps
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumberSync({ lix });
+		const counter = nextSequenceNumberSync({ runtime });
 		// Use counter as milliseconds since epoch
 		return new Date(counter).toISOString();
 	}
@@ -85,8 +75,8 @@ export function getTimestampSync(
  * await timestamp({ lix }) // "1970-01-01T00:00:00.002Z"
  * ```
  */
-export async function timestamp(args: {
-	lix: { call: Call };
+export async function getTimestamp(args: {
+	lix: { call: (name: string, payload?: unknown) => Promise<unknown> };
 }): Promise<string> {
 	const res = await args.lix.call("lix_timestamp");
 	return String(res);
