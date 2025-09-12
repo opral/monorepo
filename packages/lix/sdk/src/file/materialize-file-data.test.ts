@@ -58,7 +58,7 @@ test("materializeFileData with plugin that has changes", async () => {
 
 	// Test that materializeFileData processes the changes
 	const result = materializeFileData({
-		lix,
+		runtime: lix.runtime!,
 		file: {
 			id: file.id,
 			path: file.path,

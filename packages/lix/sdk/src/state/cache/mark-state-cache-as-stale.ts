@@ -6,17 +6,16 @@ import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
 export function markStateCacheAsStale(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db">;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "true" in untracked state
 	const snapshotContent = JSON.stringify({ key: CACHE_STALE_KEY, value: true });
 
-	const ts =
-		args.timestamp ?? getTimestampSync({ runtime: args.runtime as any });
+	const ts = args.timestamp ?? getTimestampSync({ runtime: args.runtime });
 
 	updateUntrackedState({
-		lix: args.runtime,
+		runtime: args.runtime,
 		changes: [
 			{
 				entity_id: CACHE_STALE_KEY,
@@ -46,7 +45,7 @@ export function markStateCacheAsFresh(args: {
 		args.timestamp ?? getTimestampSync({ runtime: args.runtime as any });
 
 	updateUntrackedState({
-		lix: { sqlite: args.runtime.sqlite, db: args.runtime.db as any },
+		runtime: args.runtime,
 		changes: [
 			{
 				entity_id: CACHE_STALE_KEY,

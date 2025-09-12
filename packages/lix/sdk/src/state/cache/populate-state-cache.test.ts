@@ -57,14 +57,14 @@ test("populates v2 cache from materializer", async () => {
 
 	// Insert data into v2 cache
 	updateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		changes: testChanges,
 		commit_id: "test-commit-1",
 		version_id: "global",
 	});
 
 	// Check lix_test table
-	const lixTestTable = lix.sqlite.exec({
+	const lixTestTable = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
@@ -75,7 +75,7 @@ test("populates v2 cache from materializer", async () => {
 	expect(lixTestTable[1].entity_id).toBe("entity-2");
 
 	// Check lix_other table
-	const lixOtherTable = lix.sqlite.exec({
+	const lixOtherTable = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_lix_other ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
@@ -112,7 +112,7 @@ test("populates v2 cache with version filter", async () => {
 	];
 
 	updateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		changes,
 		commit_id: "commit-v1",
 		version_id: "version-1",
@@ -132,14 +132,14 @@ test("populates v2 cache with version filter", async () => {
 	];
 
 	updateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		changes: changesV2,
 		commit_id: "commit-v2",
 		version_id: "version-2",
 	});
 
 	// Verify both versions exist
-	const allData = lix.sqlite.exec({
+	const allData = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
@@ -151,13 +151,13 @@ test("populates v2 cache with version filter", async () => {
 
 	// Populate only version-1
 	populateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		options: { version_id: "version-1" },
 	});
 
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
-	const afterPopulate = lix.sqlite.exec({
+	const afterPopulate = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
@@ -215,22 +215,22 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	];
 
 	updateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		changes,
 		commit_id: "commit-1",
 		version_id: "global",
 	});
 
 	// Verify data exists in all tables
-	const schemaA = lix.sqlite.exec({
+	const schemaA = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_a`,
 		returnValue: "resultRows",
 	});
-	const schemaB = lix.sqlite.exec({
+	const schemaB = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_b`,
 		returnValue: "resultRows",
 	});
-	const schemaC = lix.sqlite.exec({
+	const schemaC = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_c`,
 		returnValue: "resultRows",
 	});
@@ -240,18 +240,18 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	expect(schemaC).toHaveLength(1);
 
 	// Populate with no filters (should clear all)
-	populateStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
+	populateStateCache({ runtime: lix.runtime! });
 
 	// All tables should be empty now (no materializer data)
-	const schemaAAfter = lix.sqlite.exec({
+	const schemaAAfter = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_a`,
 		returnValue: "resultRows",
 	});
-	const schemaBAfter = lix.sqlite.exec({
+	const schemaBAfter = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_b`,
 		returnValue: "resultRows",
 	});
-	const schemaCAfter = lix.sqlite.exec({
+	const schemaCAfter = lix.runtime!.sqlite.exec({
 		sql: `SELECT * FROM internal_state_cache_schema_c`,
 		returnValue: "resultRows",
 	});
@@ -356,11 +356,11 @@ test("inheritance is queryable from the resolved view after population", async (
 		.execute();
 
 	// Clear all cache to start fresh
-	clearStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
+	clearStateCache({ runtime: lix.runtime! });
 
 	// ACT: Populate ONLY version C
 	populateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		options: { version_id: versionC.id },
 	});
 
@@ -474,11 +474,11 @@ test("global version entities are populated when populating child versions", asy
 	);
 
 	// Clear all cache to simulate cache miss
-	clearStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
+	clearStateCache({ runtime: lix.runtime! });
 
 	// ACT: Populate the test version's cache (simulating cache miss recovery)
 	populateStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		options: { version_id: testVersion.id },
 	});
 

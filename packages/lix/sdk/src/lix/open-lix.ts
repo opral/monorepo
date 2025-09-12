@@ -31,7 +31,7 @@ export type Lix = {
 	 * results like parsing json (similar to the db API)
 	 * is not guaranteed.
 	 */
-	sqlite: SqliteWasmDatabase;
+	sqlite?: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
@@ -62,22 +62,6 @@ export type Lix = {
 	) => Promise<unknown>;
 
 	/**
-	 * Calls a named runtime function and returns its result.
-	 *
-	 * This is the single, minimal boundary for invoking compute that runs next
-	 * to the Lix database engine. Depending on the environment, the runtime may
-	 * execute on the same thread (in‑memory) or inside a Worker. `callFn`
-	 * abstracts over that boundary and always returns a Promise.
-	 *
-	 * @example
-	 * const id = await lix.callFn("lix_uuid_v7");
-	 */
-	callFn: (
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	) => Promise<unknown>;
-	/**
 	 * Serialises the Lix into a {@link Blob}.
 	 *
 	 * Use this helper to persist the current state to disk or send it to a
@@ -101,8 +85,8 @@ export type Lix = {
 	 *
 	 * When Lix runs out‑of‑process (for example inside a Worker), the runtime
 	 * is not accessible from the main thread and will be `undefined`. In those
-	 * environments, use `lix.call`/`lix.callFn` to invoke runtime functions
-	 * across the boundary.
+	 * environments, use `lix.call` to invoke runtime functions across the
+	 * boundary.
 	 *
 	 * Guidance:
 	 * - Prefer `lix.db` for normal queries and `lix.call` for runtime
@@ -316,32 +300,32 @@ export async function openLix(args: {
 
 	const observe = createObserve({ hooks });
 
-    const lix = {
-			db,
-			sqlite: database,
-			plugin,
-			hooks,
-			observe,
-			// Expose runtime for internal/testing scenarios (undefined when running out-of-process)
-			runtime: { sqlite: database, db, hooks } as LixRuntime,
-			// Provide both call (new) and callFn (back-compat) for runtime boundary
-			call: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
-				.call,
-			callFn: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
-				.call,
-			close: async () => {
-				await storage.close();
-			},
-			toBlob: async () => {
-				commitSequenceNumberSync({
-					runtime: { sqlite: database, db, hooks },
-				});
-				commitDeterministicRngState({
-					runtime: { sqlite: database, db, hooks },
-				});
-				return storage.export();
-			},
-		};
+	const runtime: LixRuntime = {
+		sqlite: database,
+		db,
+		hooks,
+		getAllPluginsSync: () => plugin.getAllSync(),
+	};
+
+	const lix = {
+		db,
+		sqlite: database,
+		plugin,
+		hooks,
+		observe,
+		// Expose runtime for internal/testing scenarios (undefined when running out-of-process)
+		runtime: runtime,
+		// Provide the single runtime boundary via call()
+		call: createRuntimeRouter({ runtime }).call,
+		close: async () => {
+			await storage.close();
+		},
+		toBlob: async () => {
+			commitSequenceNumberSync({ runtime });
+			commitDeterministicRngState({ runtime });
+			return storage.export();
+		},
+	};
 
 	// MUST BE AWAITED
 	// The databse queries must run. Otherwise, we get super unexpected behavior
@@ -350,7 +334,7 @@ export async function openLix(args: {
 	await captureOpened({ lix });
 
 	// Apply file and account schemas now that we have the full lix object with plugins
-	applyFileDatabaseSchema(lix);
+	applyFileDatabaseSchema({ runtime });
 
 	// Connect storage to Lix if the adapter supports it
 	if (storage.connect) {

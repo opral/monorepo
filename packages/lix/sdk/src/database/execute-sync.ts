@@ -1,4 +1,4 @@
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
 /**
  * Execute a query synchronously.
@@ -19,14 +19,14 @@ import type { Lix } from "../lix/open-lix.js";
  *   result[0].metadata = JSON.parse(result[0].metadata);
  */
 export function executeSync(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	query: any;
 }): Array<any> {
 	const compiledQuery = args.query.compile();
 
 	const columnNames: string[] = [];
 
-	const result = args.lix.sqlite.exec({
+	const result = args.runtime.sqlite.exec({
 		sql: compiledQuery.sql,
 		bind: compiledQuery.parameters as any[],
 		returnValue: "resultRows",

@@ -10,7 +10,7 @@ export function isStaleStateCache(args: {
 }): boolean {
 	// Query the resolved view directly to avoid recursion on the vtable itself
 	const res = executeSync({
-		lix: { sqlite: args.runtime.sqlite },
+		runtime: args.runtime,
 		query: (args.runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", CACHE_STALE_KEY)

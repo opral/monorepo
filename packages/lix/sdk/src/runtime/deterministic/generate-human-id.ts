@@ -72,7 +72,7 @@ export function deterministicHumanIdVocabularySize(): number {
  * @see humanId
  */
 export function humanIdSync(args: {
-	runtime: LixRuntime;
+	runtime: Pick<LixRuntime, "db" | "hooks" | "sqlite">;
 	separator?: string;
 	capitalize?: boolean;
 }): string {

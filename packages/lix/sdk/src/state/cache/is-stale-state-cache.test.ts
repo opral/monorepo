@@ -27,13 +27,13 @@ test("cache is stale after cache clear", async () => {
 
 	// Clear the cache
 	clearStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 		timestamp: undefined,
 	});
 
 	// Cache should be stale after clearing
 	const result = isStaleStateCache({
-		runtime: { sqlite: lix.sqlite, db: lix.db },
+		runtime: lix.runtime!,
 	});
 
 	expect(result).toBe(true);

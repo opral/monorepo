@@ -23,7 +23,7 @@ describe("detectChanges()", () => {
 					]);
 
 				// Execute synchronously with JSON parsing compatibility
-				const rows = executeSync({ lix: lix!, query: qb });
+				const rows = executeSync({ runtime: lix!.runtime!, query: qb });
 
 				expect(Array.isArray(rows)).toBe(true);
 				expect(rows.length).toBeGreaterThan(0);
@@ -54,7 +54,7 @@ describe("detectChanges()", () => {
 			data: new Uint8Array(),
 			metadata: {},
 		};
-		const rc = handleFileInsert({ lix, file, versionId });
+		const rc = handleFileInsert({ runtime: lix.runtime!, file, versionId });
 		expect(rc).toBeTypeOf("number");
 	});
 });

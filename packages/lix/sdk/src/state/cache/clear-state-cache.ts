@@ -13,7 +13,7 @@ import { markStateCacheAsStale } from "./mark-state-cache-as-stale.js";
  * clearStateCache({ lix });
  */
 export function clearStateCache(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db">;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Mark the cache as stale first to prevent repopulation during delete

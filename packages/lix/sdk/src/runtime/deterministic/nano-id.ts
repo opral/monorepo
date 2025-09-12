@@ -16,7 +16,7 @@ import { nextSequenceNumberSync } from "./sequence.js";
  * @see nanoId
  */
 export function nanoIdSync(args: {
-	runtime: LixRuntime;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 	length?: number;
 }): string {
 	const runtime = args.runtime;
@@ -24,7 +24,7 @@ export function nanoIdSync(args: {
 	if (isDeterministicModeSync({ runtime })) {
 		// Check if nano_id is disabled in the config
 		const [config] = executeSync({
-			lix: { sqlite: runtime.sqlite },
+			runtime,
 			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")

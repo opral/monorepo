@@ -1,15 +1,15 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 
 function globSync(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	glob: string;
 	path: string;
 }): boolean {
 	const columnNames: string[] = [];
-	const result = args.lix.sqlite.exec({
+	const result = args.runtime.sqlite.exec({
 		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
 		bind: [args.path, args.glob],
 		returnValue: "resultRows",
@@ -20,18 +20,18 @@ function globSync(args: {
 }
 
 export function materializeFileData(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "getAllPluginsSync">;
 	file: Omit<LixFile, "data">;
 	versionId: string;
 }): Uint8Array {
-	const plugins = args.lix.plugin.getAllSync();
+	const plugins = args.runtime.getAllPluginsSync();
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
 			!globSync({
-				lix: args.lix,
+				runtime: args.runtime,
 				path: args.file.path,
 				glob: plugin.detectChangesGlob,
 			})
@@ -45,8 +45,8 @@ export function materializeFileData(args: {
 
 		// Get plugin changes from state table
 		const changes = executeSync({
-			lix: args.lix,
-			query: args.lix.db
+			runtime: args.runtime,
+			query: args.runtime.db
 				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", args.file.id)
@@ -81,8 +81,8 @@ export function materializeFileData(args: {
 
 	// If no specific plugin matched, use the fallback plugin
 	const changes = executeSync({
-		lix: args.lix,
-		query: args.lix.db
+		runtime: args.runtime,
+		query: args.runtime.db
 			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", args.file.id)

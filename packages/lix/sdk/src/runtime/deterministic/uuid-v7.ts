@@ -17,13 +17,15 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
  *
  * @see uuidV7
  */
-export function uuidV7Sync(args: { runtime: LixRuntime }): string {
+export function uuidV7Sync(args: {
+	runtime: Pick<LixRuntime, "db" | "sqlite" | "hooks">;
+}): string {
 	const runtime = args.runtime;
 	// Check if deterministic mode is enabled
 	if (isDeterministicModeSync({ runtime })) {
 		// Check if uuid_v7 is disabled in the config
 		const [config] = executeSync({
-			lix: { sqlite: runtime.sqlite },
+			runtime,
 			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")

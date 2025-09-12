@@ -38,6 +38,8 @@ export type LixRuntime = {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	hooks: LixHooks;
+	/** Return all loaded plugins synchronously */
+	getAllPluginsSync: () => LixPlugin[];
 };
 
 /**
@@ -72,19 +74,11 @@ export async function boot(
 		sqlite: env.sqlite,
 		db,
 		hooks,
-	};
-	const lix = { ...runtime, plugin } as unknown as {
-		sqlite: SqliteWasmDatabase;
-		db: Kysely<LixDatabaseSchema>;
-		plugin: {
-			getAll: () => Promise<LixPlugin[]>;
-			getAllSync: () => LixPlugin[];
-		};
-		hooks: ReturnType<typeof createHooks>;
+		getAllPluginsSync: () => plugin.getAllSync(),
 	};
 
 	// Install file functions + views that depend on plugin + hooks
-	applyFileDatabaseSchema(lix);
+	applyFileDatabaseSchema({ runtime });
 
 	// Event bridge: forward state_commit to host
 	hooks.onStateCommit(({ changes }) => {

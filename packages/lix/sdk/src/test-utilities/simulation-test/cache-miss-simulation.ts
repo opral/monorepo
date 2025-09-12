@@ -67,7 +67,7 @@ export const cacheMissSimulation: SimulationTestDef = {
 				if (!skipClear) {
 					// This forces re-materialization from changes
 					clearStateCache({
-						runtime: { sqlite: lix.sqlite, db: lix.db },
+						runtime: lix.runtime!,
 						timestamp: CACHE_TIMESTAMP,
 					});
 				}

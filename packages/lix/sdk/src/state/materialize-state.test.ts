@@ -412,7 +412,7 @@ simulationTest(
 		});
 
 		const tips =
-			(lix.sqlite.exec({
+			(lix.runtime?.sqlite!.exec({
 				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
 				bind: [versionId],
 				rowMode: "object",
@@ -422,7 +422,7 @@ simulationTest(
 		expectDeterministic(tips.length).toBe(1);
 
 		const matRows =
-			(lix.sqlite.exec({
+			(lix.runtime?.sqlite!.exec({
 				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
                       FROM internal_state_materializer
                       WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,
@@ -469,7 +469,7 @@ simulationTest(
 
 		// Read tip from materializer tips view
 		const tips =
-			(lix.sqlite.exec({
+			(lix.runtime?.sqlite!.exec({
 				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
 				bind: [versionA.id],
 				rowMode: "object",
@@ -481,7 +481,7 @@ simulationTest(
 
 		// Read tip from internal_state_materializer for lix_version_tip (global scope)
 		const matRows =
-			(lix.sqlite.exec({
+			(lix.runtime?.sqlite!.exec({
 				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
                   FROM internal_state_materializer
                   WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,

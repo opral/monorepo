@@ -91,7 +91,7 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 	const lix = await openLix({});
 
 	// Apply the schema again (this happens in real usage)
-	lix.sqlite.exec(`
+	lix.runtime!.sqlite.exec(`
 			INSERT OR IGNORE INTO internal_snapshot (id, content)
 			VALUES ('no-content', NULL);
 		`);
@@ -180,7 +180,7 @@ test("snapshot content validation - rejects arbitrary binary", async () => {
 	const arbitraryBytes = encoder.encode("arbitrary binary data");
 
 	await expect(async () => {
-		lix.sqlite.exec({
+		lix.runtime!.sqlite.exec({
 			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, ?)`,
 			bind: ["invalid-binary", arbitraryBytes],
 		});
@@ -212,7 +212,7 @@ test("snapshot content validation - prevents double-stringified JSON storage", a
 	// because a JSON string is valid JSON! But with our new json_type check,
 	// this should now be rejected since it's storing a string, not an object
 	expect(() => {
-		lix.sqlite.exec({
+		lix.runtime!.sqlite.exec({
 			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 			bind: ["double-stringified-jsonb", doubleStringified],
 		});
@@ -220,20 +220,20 @@ test("snapshot content validation - prevents double-stringified JSON storage", a
 
 	// Also verify that storing arrays is rejected (we only want objects)
 	expect(() => {
-		lix.sqlite.exec({
+		lix.runtime!.sqlite.exec({
 			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 			bind: ["array-content", JSON.stringify([1, 2, 3])],
 		});
 	}).toThrow(/CHECK constraint failed/);
 
 	// Verify the correct way: jsonb() on properly stringified JSON
-	lix.sqlite.exec({
+	lix.runtime!.sqlite.exec({
 		sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 		bind: ["correct-jsonb", onceStringified],
 	});
 
 	// Verify it retrieves correctly
-	const correctResult: any = lix.sqlite.exec({
+	const correctResult: any = lix.runtime!.sqlite.exec({
 		sql: `SELECT json(content) as json_content FROM internal_snapshot WHERE id = ?`,
 		bind: ["correct-jsonb"],
 		returnValue: "resultRows",

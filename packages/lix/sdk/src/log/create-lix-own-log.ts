@@ -80,7 +80,7 @@ export function createLixOwnLogSync(args: {
 	key: string;
 }): void {
 	const logLevels = executeSync({
-		lix: { sqlite: args.runtime.sqlite },
+		runtime: args.runtime,
 		query: args.runtime.db
 			.selectFrom("key_value")
 			.select("value")
@@ -94,7 +94,7 @@ export function createLixOwnLogSync(args: {
 
 	// Insert the log
 	executeSync({
-		lix: { sqlite: args.runtime.sqlite },
+		runtime: args.runtime,
 		query: args.runtime.db.insertInto("log").values({
 			key: args.key,
 			message: args.message,

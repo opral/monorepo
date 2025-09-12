@@ -152,8 +152,8 @@ describe("database operations are deterministic", async () => {
 				.execute();
 
 			// Get all tables and views from the database
-			const tablesAndViews = lix.sqlite
-				.exec({
+			const tablesAndViews = lix
+				.runtime!.sqlite.exec({
 					sql: `SELECT name FROM sqlite_master 
 				WHERE type IN ('table', 'view') 
 				AND name NOT LIKE 'sqlite_%'
@@ -164,7 +164,7 @@ describe("database operations are deterministic", async () => {
 
 			// Query each table/view and check determinism
 			for (const tableName of tablesAndViews) {
-				const data = lix.sqlite.exec({
+				const data = lix.runtime!.sqlite.exec({
 					sql: `SELECT * FROM "${tableName}"`,
 					returnValue: "resultRows",
 					columnNames: [],
@@ -198,7 +198,7 @@ describe("providing key values", async () => {
 			],
 		});
 
-		commit({ lix });
+		commit({ runtime: lix.runtime! });
 
 		const logLevels = await lix.db
 			.selectFrom("key_value")

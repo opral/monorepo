@@ -59,7 +59,7 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 					keyValues: [{ key: "lix_sync", value: "false" }],
 				});
 
-				lix.sqlite.exec("PRAGMA foreign_keys = OFF;");
+				lix.runtime!.sqlite.exec("PRAGMA foreign_keys = OFF;");
 
 				openLixes.set(args.id, lix);
 			}

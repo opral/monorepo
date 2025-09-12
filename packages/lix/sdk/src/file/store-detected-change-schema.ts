@@ -1,9 +1,9 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function storeDetectedChangeSchema(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	runtime: Pick<LixRuntime, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	untracked?: boolean;
 }): void {
@@ -12,8 +12,8 @@ export function storeDetectedChangeSchema(args: {
 
 	// Check if schema already exists
 	const existingSchema = executeSync({
-		lix: args.lix,
-		query: args.lix.db
+		runtime: args.runtime,
+		query: args.runtime.db
 			.selectFrom("stored_schema")
 			.where("key", "=", schemaKey)
 			.where("version", "=", schemaVersion)
@@ -40,8 +40,8 @@ export function storeDetectedChangeSchema(args: {
 	} else {
 		// Store new schema
 		executeSync({
-			lix: args.lix,
-			query: args.lix.db.insertInto("stored_schema").values({
+			runtime: args.runtime,
+			query: args.runtime.db.insertInto("stored_schema").values({
 				key: schemaKey,
 				version: schemaVersion,
 				value: args.schema as any,

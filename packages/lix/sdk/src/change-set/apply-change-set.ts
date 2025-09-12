@@ -61,7 +61,7 @@ export async function applyChangeSet(args: {
 		}));
 
 		updateStateCache({
-			runtime: { sqlite: args.lix.sqlite, db: args.lix.db as any },
+			runtime: args.lix.runtime!,
 			changes: changesForCache,
 			version_id: version.id,
 			commit_id: version.commit_id,
@@ -108,7 +108,7 @@ export async function applyChangeSet(args: {
 			// This is important because the file may have been updated by previous operations
 			// and we need the current state for plugin processing
 			clearFileDataCache({
-				runtime: { sqlite: args.lix.sqlite },
+				runtime: args.lix.runtime!,
 				fileId: file_id,
 				versionId: version.id,
 			});

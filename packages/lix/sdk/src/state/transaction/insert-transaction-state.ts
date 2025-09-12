@@ -97,7 +97,7 @@ export function insertTransactionState(args: {
 	}));
 
 	executeSync({
-		lix: { sqlite: args.runtime.sqlite },
+		runtime: args.runtime,
 		query: (args.runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.insertInto("internal_transaction_state")
 			.values(transactionRows)

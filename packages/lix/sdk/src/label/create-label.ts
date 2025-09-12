@@ -15,7 +15,7 @@ import { nanoIdSync } from "../runtime/deterministic/index.js";
  */
 
 export async function createLabel(args: {
-	lix: Pick<Lix, "db" | "sqlite" | "hooks">;
+	lix: Pick<Lix, "db" | "sqlite" | "hooks" | "runtime">;
 	id?: LixLabel["id"];
 	name: LixLabel["name"];
 	lixcol_version_id?: string;
@@ -25,11 +25,7 @@ export async function createLabel(args: {
 		const labelId =
 			args.id ||
 			nanoIdSync({
-				runtime: {
-					sqlite: args.lix.sqlite,
-					db: trx as any,
-					hooks: args.lix.hooks as any,
-				},
+				runtime: args.lix.runtime!,
 			});
 
 		// Insert the label (views don't support returningAll)

@@ -23,7 +23,7 @@ const hookListenersRegistered = new WeakSet<object>();
  * @returns true if deterministic mode is enabled, false otherwise
  */
 export function isDeterministicModeSync(args: {
-	runtime: LixRuntime;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 }): boolean {
 	const runtime = args.runtime;
 	// Register hook listener for cache invalidation (only once per hooks instance)
@@ -54,7 +54,7 @@ export function isDeterministicModeSync(args: {
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion
 	const [row] = executeSync({
-		lix: { sqlite: runtime.sqlite },
+		runtime,
 		query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")

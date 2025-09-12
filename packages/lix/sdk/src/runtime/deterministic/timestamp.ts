@@ -1,4 +1,3 @@
-import type { Lix } from "../../lix/open-lix.js";
 import type { LixRuntime } from "../boot.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
@@ -15,13 +14,15 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
  *
  * @see getTimestamp
  */
-export function getTimestampSync(args: { runtime: LixRuntime }): string {
+export function getTimestampSync(args: {
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+}): string {
 	const runtime = args.runtime;
 	// Check if deterministic mode is enabled
 	if (isDeterministicModeSync({ runtime })) {
 		// Check if timestamps are disabled in the config
 		const [config] = executeSync({
-			lix: { sqlite: runtime.sqlite },
+			runtime,
 			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")

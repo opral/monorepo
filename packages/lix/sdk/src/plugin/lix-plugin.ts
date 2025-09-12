@@ -8,8 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
 
 export type LixReadonly = {
 	db: { selectFrom: Lix["db"]["selectFrom"] };
-	/** Raw SQLite handle for sync execution (use executeSync({ lix, query })). */
-	sqlite: Lix["sqlite"];
+	runtime?: Lix["runtime"];
 };
 
 export type LixPlugin = {

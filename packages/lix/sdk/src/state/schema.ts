@@ -1,4 +1,3 @@
-import type { Lix } from "../lix/open-lix.js";
 import type { LixRuntime } from "../runtime/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
@@ -18,13 +17,8 @@ export function applyStateDatabaseSchema(args: {
 	applyUntrackedStateSchema({ runtime });
 	applyResolvedStateView({ runtime });
 
-	// Apply the virtual table (requires a Lix-like object)
-	const lix = {
-		sqlite: runtime.sqlite,
-		db: runtime.db,
-		hooks: runtime.hooks,
-	} as unknown as Pick<Lix, "sqlite" | "db" | "hooks">;
-	applyStateVTable(lix);
+	// Apply the virtual table (binds to the in-process runtime)
+	applyStateVTable(runtime);
 
 	// Public views over the internal vtable
 	applyStateView({ runtime });

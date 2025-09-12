@@ -58,7 +58,9 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @returns The next number in the sequence (starting from 0)
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
-export function nextSequenceNumberSync(args: { runtime: LixRuntime }): number {
+export function nextSequenceNumberSync(args: {
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+}): number {
 	const runtime = args.runtime;
 	// Check if deterministic mode is enabled
 	if (!isDeterministicModeSync({ runtime })) {
@@ -72,7 +74,7 @@ export function nextSequenceNumberSync(args: { runtime: LixRuntime }): number {
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
 		const [row] = executeSync({
-			lix: { sqlite: runtime.sqlite },
+			runtime,
 			// Use internal_resolved_state_all to avoid virtual table recursion
 			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
@@ -127,7 +129,7 @@ export async function nextSequenceNumber(args: { lix: Lix }): Promise<number> {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitSequenceNumberSync(args: {
-	runtime: LixRuntime;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	const runtime = args.runtime;
@@ -143,10 +145,7 @@ export function commitSequenceNumberSync(args: {
 
 	const now = args.timestamp ?? getTimestampSync({ runtime });
 	updateUntrackedState({
-		lix: {
-			sqlite: runtime.sqlite,
-			db: runtime.db,
-		},
+		runtime,
 		changes: [
 			{
 				entity_id: "lix_deterministic_sequence_number",

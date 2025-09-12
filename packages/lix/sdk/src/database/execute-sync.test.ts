@@ -16,7 +16,7 @@ test("executeSync returns raw SQL results (JSON columns as strings)", async () =
 		.where("key", "=", "foo")
 		.selectAll();
 
-	const result = executeSync({ lix, query });
+	const result = executeSync({ runtime: lix.runtime!, query });
 
 	// executeSync returns raw SQL - JSON columns are strings
 	expect(result).toMatchObject([{ key: "foo", value: "bar" }]);
@@ -31,7 +31,7 @@ test("handles simple joins with raw SQL results", async () => {
 		.leftJoin("key_value as kv2", "kv1.key", "kv2.key")
 		.select(["kv1.key", "kv1.value as value1", "kv2.value as value2"]);
 
-	const result = executeSync({ lix, query });
+	const result = executeSync({ runtime: lix.runtime!, query });
 
 	// Should return results (may be empty for this simple test)
 	expect(Array.isArray(result)).toBe(true);
@@ -50,7 +50,7 @@ test("manual JSON parsing with executeSync", async () => {
 		.execute();
 
 	const result = executeSync({
-		lix,
+		runtime: lix.runtime!,
 		query: lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test-key")
@@ -82,7 +82,7 @@ test("using executeSync with a 'fake async' function should work", async () => {
 			.selectFrom("key_value")
 			.where("key", "=", "foo")
 			.selectAll();
-		return executeSync({ lix, query }) as any;
+		return executeSync({ runtime: lix.runtime!, query }) as any;
 	}
 
 	const result = await fakeAsyncQuery(lix);
@@ -103,7 +103,7 @@ test("it works with kysely transactions", async () => {
 				.execute();
 
 			executeSync({
-				lix,
+				runtime: lix.runtime!,
 				query: trx
 					.insertInto("key_value")
 					.values({ key: "foo2", value: "bar2" }),
@@ -128,7 +128,7 @@ test("it works with kysely transactions", async () => {
 			.execute();
 
 		executeSync({
-			lix,
+			runtime: lix.runtime!,
 			query: trx.insertInto("key_value").values({ key: "foo2", value: "bar2" }),
 		});
 	});

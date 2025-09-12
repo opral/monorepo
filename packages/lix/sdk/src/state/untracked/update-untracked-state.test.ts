@@ -26,7 +26,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 
 	// Create direct untracked entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -98,7 +98,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 
 	// Create initial entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -119,7 +119,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 
 	// Update the entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-change-id-2",
@@ -189,7 +189,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 
 	// Create direct untracked entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -220,7 +220,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 
 	// Delete the entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-delete-change-id",
@@ -299,7 +299,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	// Delete the inherited entity (should create tombstone)
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-inherited-delete-change-id",
@@ -350,7 +350,7 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 
 	// Create untracked entity
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-timestamp-change-id",
@@ -403,7 +403,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 
 	// Create a tombstone first
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-tombstone-change-id",
@@ -433,7 +433,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 
 	// Update the tombstone with actual content
 	updateUntrackedState({
-		lix,
+		runtime: lix.runtime!,
 		changes: [
 			{
 				id: "test-tombstone-update-change-id",

@@ -1,4 +1,4 @@
-import type { Lix } from "../lix/open-lix.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
 export interface FileLixcol {
 	latest_change_id: string | null;
@@ -21,12 +21,12 @@ export interface FileLixcol {
  * });
  */
 export function selectFileLixcol(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	fileId: string;
 	versionId: string;
 }): FileLixcol {
 	// Check cache first
-	const cached = args.lix.sqlite.exec({
+	const cached = args.runtime.sqlite.exec({
 		sql: `
 			SELECT 
 				latest_change_id,
@@ -56,7 +56,7 @@ export function selectFileLixcol(args: {
 	// Cache miss - compute the metadata
 
 	// Get the commit_id directly from the version - this is always the source of truth
-	const versionCommit = args.lix.sqlite.exec({
+	const versionCommit = args.runtime.sqlite.exec({
 		sql: `SELECT commit_id FROM version WHERE id = ?`,
 		bind: [args.versionId],
 		returnValue: "resultRows",
@@ -65,7 +65,7 @@ export function selectFileLixcol(args: {
 	const commitId = versionCommit[0]?.[0] as string | null;
 
 	// Get the latest change and timestamps
-	const metadata = args.lix.sqlite.exec({
+	const metadata = args.runtime.sqlite.exec({
 		sql: `
 			WITH file_metadata AS (
 				SELECT 
@@ -109,7 +109,7 @@ export function selectFileLixcol(args: {
 	};
 
 	// Only cache if we have valid data (file exists)
-	args.lix.sqlite.exec({
+	args.runtime.sqlite.exec({
 		sql: `
 			INSERT OR REPLACE INTO internal_file_lixcol_cache 
 			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at)

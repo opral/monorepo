@@ -8,6 +8,7 @@ import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.j
 import { LixSchemaViewMap } from "../database/schema.js";
 import { isJsonType } from "../schema-definition/json-type.js";
 import type { LixRuntime } from "../runtime/boot.js";
+import type { Lix } from "./open-lix.js";
 
 /**
  * Experimental: Open a Lix-like instance backed by a LixBackend.
@@ -26,30 +27,7 @@ export async function openLixBackend(args: {
 	pluginsRaw: string[];
 	account?: { id: string; name: string };
 	keyValues?: Array<{ key: string; value: any; lixcol_version_id?: string }>;
-}): Promise<{
-	db: Kysely<LixDatabaseSchema>;
-	hooks: ReturnType<typeof createHooks>;
-	observe: ReturnType<typeof createObserve>;
-	/**
-	 * Main‑thread runtime if provided by the backend. In in‑process setups (e.g.,
-	 * InMemory backend), this may be defined and can be used in unit tests. For
-	 * worker/remote backends, this will be undefined; prefer `call()` in those
-	 * environments.
-	 */
-	runtime?: LixRuntime;
-	/**
-	 * Minimal runtime call boundary for worker-backed engines.
-	 *
-	 * Uses the backend's worker call transport.
-	 */
-	call: (
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	) => Promise<unknown>;
-	close: () => Promise<void>;
-	toBlob: () => Promise<Blob>;
-}> {
+}): Promise<Lix> {
 	const hooks = createHooks();
 	const blob = args.blob;
 	let runtime: LixRuntime | undefined;
@@ -138,25 +116,28 @@ export async function openLixBackend(args: {
 
 	const observe = createObserve({ hooks });
 
-	return {
+	const lix: Lix = {
+		// sqlite intentionally not exposed in backend mode
 		db,
 		hooks,
 		observe,
 		runtime,
+		plugin: {
+			getAll: async () => [],
+			getAllSync: () => [],
+		},
 		call: async (
 			name: string,
 			payload?: unknown,
 			_opts?: { signal?: AbortSignal }
-		): Promise<unknown> => {
-			return args.backend.call(name, payload);
-		},
+		): Promise<unknown> => args.backend.call(name, payload),
 		close: async () => {
 			await args.backend.close();
 		},
-		toBlob: async () => {
-			return new Blob([await args.backend.export()]);
-		},
+		toBlob: async () => new Blob([await args.backend.export()]),
 	};
+
+	return lix;
 }
 
 // Temporary alias for backwards compatibility while migrating terminology.
