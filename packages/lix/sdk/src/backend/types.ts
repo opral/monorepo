@@ -30,16 +30,30 @@ export type BackendError = {
  * interacts with the backend via these async methods.
  */
 export interface LixBackend {
-	/**
-	 * Open the backend and run Lix runtime boot next to SQLite.
-	 *
-	 * @param opts.boot - Runtime boot arguments (plugins, account, keyValues)
-	 * @param opts.onEvent - Event bridge (currently only 'state_commit')
-	 */
-	open(opts: {
-		boot: { args: import("../runtime/boot.js").BootArgs };
-		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
-	}): Promise<void>;
+    /**
+     * Open the backend and boot the runtime next to the database engine.
+     *
+     * Return value semantics:
+     * - In‑process (main‑thread) backends SHOULD return `{ runtime }` so the
+     *   runtime is directly accessible on the main thread — useful for unit
+     *   testing and local tools that need in‑process access.
+     * - Out‑of‑process backends (e.g., Worker or separate process) MUST NOT
+     *   return a runtime (resolve to `void`). In those environments, callers
+     *   should use `call()` to invoke runtime functions across the boundary.
+     *
+     * Guidance:
+     * - The optional `{ runtime }` is primarily for openers/frameworks to
+     *   attach onto the `Lix` object for main‑thread access in tests. App code
+     *   should not rely on it; prefer `call()` for runtime operations.
+     *
+     * @param opts.boot - Runtime boot arguments (plugins, account, keyValues)
+     * @param opts.onEvent - Event bridge (currently only 'state_commit')
+     * @returns `{ runtime }` for main‑thread engines, or `void` for worker/remote engines.
+     */
+    open(opts: {
+        boot: { args: import("../runtime/boot.js").BootArgs };
+        onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
+    }): Promise<void | { runtime?: import("../runtime/boot.js").LixRuntime }>;
 
 	/**
 	 * Create a brand‑new database from a provided snapshot and boot it.

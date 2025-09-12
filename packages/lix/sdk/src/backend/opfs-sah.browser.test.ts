@@ -31,6 +31,17 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		await lix.close();
 	});
 
+	test("open() does not expose runtime on main thread", async () => {
+		const backend = new OpfsSahBackend({ key: `vitest-opfs-no-runtime` });
+		const res = await backend.open({
+			boot: { args: { pluginsRaw: [] } },
+			onEvent: () => {},
+		});
+		// Worker-backed backend cannot expose an in-process runtime; must be undefined
+		expect(res).toBeUndefined();
+		await backend.close();
+	});
+
 	test("persists across reopen with same name", async () => {
 		const name = `vitest-opfs-persist`;
 		const lix1 = await openLixBackend({

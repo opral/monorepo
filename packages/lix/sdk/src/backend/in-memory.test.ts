@@ -23,5 +23,18 @@ describe("InMemory backend", () => {
 		await engine.close();
 	});
 
+	test("returns runtime handle from open()", async () => {
+		const backend = new InMemoryBackend();
+		const res = await backend.open({
+			boot: { args: { pluginsRaw: [] } },
+			onEvent: () => {},
+		});
+
+		// In-memory backend runs on the main thread; runtime should be available
+		expect(res && (res as any).runtime).toBeDefined();
+
+		await backend.close();
+	});
+
 	// execBatch removed; callers should loop over exec() or use transactions explicitly.
 });

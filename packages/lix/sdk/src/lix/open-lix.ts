@@ -18,6 +18,7 @@ import { commitDeterministicRngState } from "../runtime/deterministic/random.js"
 import { newLixFile } from "./new-lix.js";
 import { switchAccount } from "../account/switch-account.js";
 import { createRuntimeRouter } from "../runtime/router.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
 export type Lix = {
 	/**
@@ -90,6 +91,51 @@ export type Lix = {
 	 * ```
 	 */
 	toBlob: () => Promise<Blob>;
+
+	/**
+	 * In‑process runtime context bound to the live database.
+	 *
+	 * When Lix runs in‑process (same thread as the database),
+	 * `runtime` is available and tests can directly call helpers
+	 * that accept `{ runtime }`.
+	 *
+	 * When Lix runs out‑of‑process (for example inside a Worker), the runtime
+	 * is not accessible from the main thread and will be `undefined`. In those
+	 * environments, use `lix.call`/`lix.callFn` to invoke runtime functions
+	 * across the boundary.
+	 *
+	 * Guidance:
+	 * - Prefer `lix.db` for normal queries and `lix.call` for runtime
+	 *   operations. Reserve `lix.runtime` for unit tests or internal SDK code
+	 *   that explicitly requires in‑process access alongside the database.
+	 * - Do not rely on `lix.runtime` in application/business logic, since it
+	 *   may be `undefined` in worker/remote environments.
+	 *
+	 * Unit test in the same process
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * test("example test", async () => {
+	 *   // InMemory backend runs in the same process (in‑process engine).
+	 *   const lix = await openLix({
+	 *      backend: new InMemoryBackend()
+	 *   });
+	 *   executeSync({
+	 *     runtime: lix.runtime!,
+	 *     data: [...],
+	 *   });
+	 * });
+	 * ```
+	 *
+	 * Worker/remote environment – prefer router calls
+	 *
+	 * @example
+	 * ```ts
+	 * await lix.call("lix_insert_transaction_state", { timestamp, data });
+	 * ```
+	 */
+	runtime?: LixRuntime;
 };
 
 /**
@@ -270,28 +316,32 @@ export async function openLix(args: {
 
 	const observe = createObserve({ hooks });
 
-	const lix = {
-		db,
-		sqlite: database,
-		plugin,
-		hooks,
-		observe,
-		// Provide both call (new) and callFn (back-compat) for runtime boundary
-		call: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
-			.call,
-		callFn: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
-			.call,
-		close: async () => {
-			await storage.close();
-		},
-		toBlob: async () => {
-			commitSequenceNumberSync({
-				runtime: { sqlite: database, db, hooks },
-			});
-			commitDeterministicRngState({ runtime: { sqlite: database, db, hooks } });
-			return storage.export();
-		},
-	};
+    const lix = {
+			db,
+			sqlite: database,
+			plugin,
+			hooks,
+			observe,
+			// Expose runtime for internal/testing scenarios (undefined when running out-of-process)
+			runtime: { sqlite: database, db, hooks } as LixRuntime,
+			// Provide both call (new) and callFn (back-compat) for runtime boundary
+			call: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
+				.call,
+			callFn: createRuntimeRouter({ runtime: { sqlite: database, db, hooks } })
+				.call,
+			close: async () => {
+				await storage.close();
+			},
+			toBlob: async () => {
+				commitSequenceNumberSync({
+					runtime: { sqlite: database, db, hooks },
+				});
+				commitDeterministicRngState({
+					runtime: { sqlite: database, db, hooks },
+				});
+				return storage.export();
+			},
+		};
 
 	// MUST BE AWAITED
 	// The databse queries must run. Otherwise, we get super unexpected behavior

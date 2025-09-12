@@ -7,6 +7,7 @@ import { createObserve } from "../observe/create-observe.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import { isJsonType } from "../schema-definition/json-type.js";
+import type { LixRuntime } from "../runtime/boot.js";
 
 /**
  * Experimental: Open a Lix-like instance backed by a LixBackend.
@@ -30,6 +31,13 @@ export async function openLixBackend(args: {
 	hooks: ReturnType<typeof createHooks>;
 	observe: ReturnType<typeof createObserve>;
 	/**
+	 * Main‑thread runtime if provided by the backend. In in‑process setups (e.g.,
+	 * InMemory backend), this may be defined and can be used in unit tests. For
+	 * worker/remote backends, this will be undefined; prefer `call()` in those
+	 * environments.
+	 */
+	runtime?: LixRuntime;
+	/**
 	 * Minimal runtime call boundary for worker-backed engines.
 	 *
 	 * Uses the backend's worker call transport.
@@ -44,6 +52,7 @@ export async function openLixBackend(args: {
 }> {
 	const hooks = createHooks();
 	const blob = args.blob;
+	let runtime: LixRuntime | undefined;
 
 	// Default behavior: openOrCreate
 	// - If a blob is provided, attempt to create from it (backend may refuse if target exists)
@@ -63,10 +72,11 @@ export async function openLixBackend(args: {
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
-		await args.backend.open({
+		const res = await args.backend.open({
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
+		runtime = res?.runtime;
 	} else {
 		// Exists-first flow: avoid throwing to decide; ask backend if a DB exists.
 		const exists = await args.backend.exists();
@@ -80,10 +90,11 @@ export async function openLixBackend(args: {
 				onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 			});
 		}
-		await args.backend.open({
+		const res = await args.backend.open({
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
+		runtime = res?.runtime;
 	}
 
 	// Build JSON column mapping to match openLix() parsing behavior
@@ -131,6 +142,7 @@ export async function openLixBackend(args: {
 		db,
 		hooks,
 		observe,
+		runtime,
 		call: async (
 			name: string,
 			payload?: unknown,
