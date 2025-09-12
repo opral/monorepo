@@ -1,4 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
+import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
@@ -7,46 +8,13 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 /**
- * Returns the current timestamp as an ISO 8601 string.
+ * Sync variant of {@link timestamp}. See {@link timestamp} for behavior and examples.
  *
- * In deterministic mode, returns logical timestamps starting from Unix epoch (1970-01-01T00:00:00.000Z),
- * incrementing by 1ms per call. In normal mode, returns the current system time.
+ * @remarks
+ * - Accepts `{ runtime }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
+ * - Intended for runtime/router and UDFs; app code should use {@link timestamp}.
  *
- * - In deterministic mode: Advances by exactly 1ms per call
- * - Monotonically increasing (never goes backwards)
- * - State persisted across reopens via `lix_deterministic_sequence_number`
- * - Common uses: `createdAt` fields, TTL calculations, time-ordered queries
- *
- * @example Normal mode - returns current time
- * ```ts
- * const lix = await openLix();
- * timestamp({ lix }); // "2024-03-15T10:30:45.123Z"
- * ```
- *
- * @example Deterministic mode - logical clock from epoch
- * ```ts
- * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }]
- * });
- * timestamp({ lix }); // "1970-01-01T00:00:00.000Z"
- * timestamp({ lix }); // "1970-01-01T00:00:00.001Z" (+1ms)
- * timestamp({ lix }); // "1970-01-01T00:00:00.002Z" (+1ms)
- * ```
- *
- * @example Database operations - createdAt, TTL, time-ordered queries
- * ```ts
- * await lix.db
- *   .insertInto("log")
- *   .values({
- *     id: "log1",
- *     created_at: timestamp({ lix }),
- *     message: "User logged in"
- *   })
- *   .execute();
- * ```
- *
- * @param args.lix - The Lix instance with sqlite and db connections
- * @returns ISO 8601 timestamp string
+ * @see timestamp
  */
 export function getTimestampSync(
 	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
@@ -90,4 +58,36 @@ export function getTimestampSync(
 
 	// Return current timestamp in ISO format
 	return new Date().toISOString();
+}
+
+/**
+ * Get the current timestamp as an ISO 8601 string.
+ *
+ * In deterministic mode, returns logical timestamps starting from Unix epoch (1970-01-01T00:00:00.000Z),
+ * incrementing by 1ms per call. In normal mode, returns the current system time.
+ *
+ * - In deterministic mode: advances by exactly 1ms per call.
+ * - Monotonically increasing (never goes backwards).
+ * - State persisted via `lix_deterministic_sequence_number`.
+ * - Common uses: `createdAt` fields, TTL calculations, time-ordered queries.
+ *
+ * @example Normal mode – current time
+ * ```ts
+ * const lix = await openLix();
+ * const ts = await timestamp({ lix }) // "2024-03-15T10:30:45.123Z"
+ * ```
+ *
+ * @example Deterministic mode – logical clock from epoch
+ * ```ts
+ * const lix = await openLix({ keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }] });
+ * await timestamp({ lix }) // "1970-01-01T00:00:00.000Z"
+ * await timestamp({ lix }) // "1970-01-01T00:00:00.001Z"
+ * await timestamp({ lix }) // "1970-01-01T00:00:00.002Z"
+ * ```
+ */
+export async function timestamp(args: {
+	lix: { call: Call };
+}): Promise<string> {
+	const res = await args.lix.call("lix_timestamp");
+	return String(res);
 }

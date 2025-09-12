@@ -1,8 +1,9 @@
 import type { Lix } from "../../lix/open-lix.js";
+import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { nextSequenceNumberSync } from "./sequence.js";
-import { humanId } from "human-id";
+import { humanId as _human } from "human-id";
 // Deterministic names for anonymous accounts
 const DETERMINISTIC_NAMES = [
 	"Plum",
@@ -63,17 +64,13 @@ export function deterministicHumanIdVocabularySize(): number {
 }
 
 /**
- * Generates a human-readable ID that is deterministic in deterministic mode.
+ * Sync variant of {@link humanId}. See {@link humanId} for behavior and examples.
  *
- * @example
- * ```ts
- * const name = humanIdSync({ lix });
- * // In deterministic mode: returns deterministic names like "Plum", "Coin", etc.
- * // In normal mode: returns random human-id names
+ * @remarks
+ * - Accepts `{ runtime }` (or `{ lix }`) and runs next to SQLite.
+ * - Intended for runtime/router and UDFs; app code should use {@link humanId}.
  *
- * const lowercaseName = humanIdSync({ lix, capitalize: false });
- * // Returns lowercase names like "plum", "coin", etc.
- * ```
+ * @see humanId
  */
 export function humanIdSync(
 	args:
@@ -105,7 +102,7 @@ export function humanIdSync(
 		return capitalize ? name : name.toLowerCase();
 	} else {
 		// In non-deterministic mode, use human-id library
-		const name = humanId({
+		const name = _human({
 			capitalize: capitalize,
 			adjectiveCount: 0,
 			separator: separator,
@@ -117,4 +114,24 @@ export function humanIdSync(
 
 		return name;
 	}
+}
+
+/**
+ * Generate a human-readable ID.
+ *
+ * Deterministic in deterministic mode; otherwise uses random human-id.
+ *
+ * @example
+ * const name = await humanId({ lix })
+ */
+export async function humanId(args: {
+	lix: { call: Call };
+	separator?: string;
+	capitalize?: boolean;
+}): Promise<string> {
+	const res = await args.lix.call("lix_human_id", {
+		separator: args.separator,
+		capitalize: args.capitalize,
+	});
+	return String(res);
 }

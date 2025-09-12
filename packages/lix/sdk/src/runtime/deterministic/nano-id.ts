@@ -1,4 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
+import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
@@ -7,52 +8,13 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 
 /**
- * Returns a nano ID that is deterministic in deterministic mode.
+ * Sync variant of {@link nanoId}. See {@link nanoId} for behavior and examples.
  *
- * In normal mode, returns a random 21-character nano ID using the [nanoid](https://github.com/ai/nanoid) algorithm.
- * In deterministic mode, returns sequential IDs with "test_" prefix for easy identification.
+ * @remarks
+ * - Accepts `{ runtime }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
+ * - Intended for runtime/router and UDFs; app code should use {@link nanoId}.
  *
- * Use nano IDs when IDs will appear in URLs - their shorter length makes links easier to share.
- * For better database performance with time-ordered queries, consider {@link uuidV7} instead.
- *
- * - Normal mode: URL-safe random ID using custom alphabet (no `-` or `_`)
- * - Deterministic mode: "test_" + 10-digit zero-padded counter
- * - Counter state shared with {@link nextDeterministicSequenceNumber}
- * - The "test_" prefix makes deterministic IDs easily identifiable
- * - Choose nano IDs for URL-friendly short IDs, {@link uuidV7} for time-sortable database keys
- * - Use the [Nano ID collision calculator](https://zelark.github.io/nano-id-cc/) to find the optimal length for your shareability vs uniqueness needs
- *
- * @example Normal mode - returns random nanoid
- * ```ts
- * const lix = await openLix();
- * nanoId({ lix }); // "V1StGXR8_Z5jdHi6B-myT"
- * ```
- *
- * @example Deterministic mode - returns sequential IDs
- * ```ts
- * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true }, lixcol_version_id: "global" }]
- * });
- * nanoId({ lix }); // "test_0000000000"
- * nanoId({ lix }); // "test_0000000001"
- * nanoId({ lix }); // "test_0000000002"
- * ```
- *
- * @example Database operations
- * ```ts
- * await lix.db
- *   .insertInto("label")
- *   .values({
- *     id: nanoId({ lix }),
- *     name: "bug",
- *     color: "#ff0000"
- *   })
- *   .execute();
- * ```
- *
- * @param args.lix - The Lix instance with sqlite and db connections
- * @param args.length - Custom length for non-deterministic mode (default: 21)
- * @returns Nano ID string
+ * @see nanoId
  */
 export function nanoIdSync(
 	args:
@@ -96,6 +58,56 @@ export function nanoIdSync(
 
 	// Return regular nanoid
 	return randomNanoId(args.length);
+}
+
+/**
+ * Generate a nano ID.
+ *
+ * Deterministic in deterministic mode; otherwise returns a random 21-character nano ID using the nanoid algorithm.
+ *
+ * Use nano IDs when IDs will appear in URLs – their shorter length makes links easier to share.
+ * For better database performance with time-ordered queries, consider {@link uuidV7} instead.
+ *
+ * - Normal mode: URL-safe random ID using custom alphabet (no `-` or `_`).
+ * - Deterministic mode: "test_" + 10-digit zero-padded counter.
+ * - Counter state shared with {@link nextDetermininisticSequenceNumber | nextDeterministicSequenceNumber}.
+ * - The "test_" prefix makes deterministic IDs easily identifiable.
+ * - Choose nano IDs for URL-friendly short IDs, {@link uuidV7} for time-sortable database keys.
+ * - Use the Nano ID collision calculator to choose optimal length.
+ *
+ * @example Normal mode – random nanoid
+ * ```ts
+ * const lix = await openLix();
+ * const id = await nanoId({ lix }) // "V1StGXR8_Z5jdHi6B-myT"
+ * ```
+ *
+ * @example Deterministic mode – sequential IDs
+ * ```ts
+ * const lix = await openLix({
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true }, lixcol_version_id: "global" }]
+ * });
+ * await nanoId({ lix }) // "test_0000000000"
+ * await nanoId({ lix }) // "test_0000000001"
+ * await nanoId({ lix }) // "test_0000000002"
+ * ```
+ *
+ * @example Database operations
+ * ```ts
+ * await lix.db
+ *   .insertInto("label")
+ *   .values({ id: await nanoId({ lix }), name: "bug", color: "#ff0000" })
+ *   .execute();
+ * ```
+ *
+ * @param args.lix Lix instance used to call into the runtime.
+ * @param args.length Optional length for non-deterministic mode (default: 21)
+ */
+export async function nanoId(args: {
+	lix: { call: Call };
+	length?: number;
+}): Promise<string> {
+	const res = await args.lix.call("lix_nano_id", { length: args.length });
+	return String(res);
 }
 
 /**

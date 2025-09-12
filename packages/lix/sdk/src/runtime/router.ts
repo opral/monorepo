@@ -1,5 +1,11 @@
 import type { LixRuntime } from "./boot.js";
-import { uuidV7Sync } from "./deterministic/index.js";
+import {
+	uuidV7Sync,
+	nanoIdSync,
+	getTimestampSync,
+	humanIdSync,
+	randomSync,
+} from "./deterministic/index.js";
 
 /**
  * Creates a runtime function router bound to a specific Lix context.
@@ -24,6 +30,16 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 	// in a Promise by `callFn` for a unified async surface.
 	const routes = new Map<string, (payload?: unknown) => unknown>([
 		["lix_uuid_v7", () => uuidV7Sync({ runtime: args.runtime })],
+		[
+			"lix_nano_id",
+			(payload) => nanoIdSync({ runtime: args.runtime, ...(payload ?? {}) }),
+		],
+		["lix_timestamp", () => getTimestampSync({ runtime: args.runtime })],
+		[
+			"lix_human_id",
+			(payload) => humanIdSync({ runtime: args.runtime, ...(payload ?? {}) }),
+		],
+		["lix_random", () => randomSync({ runtime: args.runtime })],
 	]);
 
 	return {

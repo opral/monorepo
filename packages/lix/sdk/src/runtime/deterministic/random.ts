@@ -3,6 +3,7 @@ import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
+import type { Call } from "../router.js";
 import type { LixRuntime } from "../boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
@@ -40,56 +41,13 @@ function randomUnstable(): number {
 }
 
 /**
- * Returns a random float between 0 (inclusive) and 1 (exclusive).
+ * Sync variant of {@link random}. See {@link random} for behavior and examples.
  *
- * In deterministic mode, generates reproducible values using xorshift128+ PRNG
- * (the same algorithm used by V8/Chrome for Math.random()).
- * In normal mode, uses crypto.getRandomValues() for cryptographically secure randomness.
+ * @remarks
+ * - Accepts `{ runtime }` (or `{ lix }`) and runs next to SQLite.
+ * - Intended for runtime/router and UDFs; app code should use {@link random}.
  *
- * - Normal mode: Uses crypto.getRandomValues() for cryptographic quality
- * - Deterministic mode: Uses xorshift128+ PRNG (same as V8/Chrome's Math.random())
- * - Default seed: Uses `lix_id` value unless `lix_deterministic_rng_seed` is set
- * - State persisted via `lix_deterministic_rng_state` key value
- * - Both modes return 53-bit precision floats for consistency
- * - For ID generation, consider {@link uuidV7} or {@link nanoId} instead
- *
- * @example Normal mode - cryptographically secure randomness
- * ```ts
- * const lix = await openLix();
- * const r1 = random({ lix }); // 0.823... (unpredictable)
- * const r2 = random({ lix }); // 0.156... (unpredictable)
- * ```
- *
- * @example Deterministic mode - reproducible randomness
- * ```ts
- * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }]
- * });
- * const r1 = random({ lix }); // 0.318... (always same sequence)
- * const r2 = random({ lix }); // 0.937... (for same seed)
- * const r3 = random({ lix }); // 0.543...
- * ```
- *
- * @example Sampling and shuffling
- * ```ts
- * // Random selection
- * const items = ["a", "b", "c", "d"];
- * const idx = Math.floor(random({ lix }) * items.length);
- * const selected = items[idx];
- *
- * // Fisher-Yates shuffle
- * function shuffle<T>(array: T[], lix: Lix): T[] {
- *   const result = [...array];
- *   for (let i = result.length - 1; i > 0; i--) {
- *     const j = Math.floor(random({ lix }) * (i + 1));
- *     [result[i], result[j]] = [result[j], result[i]];
- *   }
- *   return result;
- * }
- * ```
- *
- * @param args.lix - The Lix instance with sqlite and db connections
- * @returns Random float between 0 (inclusive) and 1 (exclusive) with 53-bit precision
+ * @see random
  */
 export function randomSync(
 	args: { lix: Pick<Lix, "sqlite" | "db" | "hooks"> } | { runtime: LixRuntime }
@@ -280,4 +238,37 @@ export function commitDeterministicRngState(args: {
 			},
 		],
 	});
+}
+
+/**
+ * Returns a random float between 0 (inclusive) and 1 (exclusive).
+ *
+ * In deterministic mode, generates reproducible values using xorshift128+ PRNG
+ * (the same algorithm used by V8/Chrome for Math.random()). In normal mode, uses crypto.getRandomValues().
+ *
+ * - Normal mode: cryptographic quality via crypto.getRandomValues().
+ * - Deterministic mode: xorshift128+ PRNG (same as V8/Chrome's Math.random()).
+ * - Default seed: `lix_id` unless `lix_deterministic_rng_seed` is set.
+ * - State persisted via `lix_deterministic_rng_state`.
+ * - Returns 53-bit precision floats in both modes.
+ * - For ID generation, consider {@link uuidV7} or {@link nanoId} instead.
+ *
+ * @example Normal mode – cryptographically secure randomness
+ * ```ts
+ * const lix = await openLix();
+ * const r1 = await random({ lix }) // 0.823...
+ * const r2 = await random({ lix }) // 0.156...
+ * ```
+ *
+ * @example Deterministic mode – reproducible randomness
+ * ```ts
+ * const lix = await openLix({ keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }] });
+ * await random({ lix }) // 0.318...
+ * await random({ lix }) // 0.937...
+ * await random({ lix }) // 0.543...
+ * ```
+ */
+export async function random(args: { lix: { call: Call } }): Promise<number> {
+	const res = await args.lix.call("lix_random");
+	return Number(res);
 }
