@@ -406,7 +406,7 @@ export function handleFileUpdate(args: {
 
 	// Clear data cache AFTER all updates are complete
 	clearFileDataCache({
-		lix: args.lix,
+		runtime: { sqlite: args.lix.sqlite },
 		fileId: args.file.id,
 		versionId: args.versionId,
 	});

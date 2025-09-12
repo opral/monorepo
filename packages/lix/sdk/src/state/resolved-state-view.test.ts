@@ -290,7 +290,7 @@ test("resolved state view generates correct composite keys", async () => {
 
 	// Insert some test data into state cache using updateStateCacheV2
 	updateStateCacheV2({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [
 			{
 				id: "change1",
@@ -482,7 +482,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	// Insert version descriptor records using updateStateCacheV2
 	const versionTimestamp = await getTimestamp({ lix });
 	updateStateCacheV2({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [
 			{
 				id: "change1",
@@ -523,7 +523,7 @@ test("resolved state view generates correct composite keys for inherited state",
 
 	// Insert data in parent version (cached) using updateStateCacheV2
 	updateStateCacheV2({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [
 			{
 				id: "change3",

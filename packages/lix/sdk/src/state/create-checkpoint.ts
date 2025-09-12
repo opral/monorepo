@@ -177,7 +177,7 @@ export async function createCheckpoint(args: {
 			.values([descriptorChange as any, tipChange as any, edgeChange as any])
 			.execute();
 		updateStateCache({
-			lix: { sqlite: args.lix.sqlite, db: trx },
+			runtime: { sqlite: args.lix.sqlite, db: trx as any },
 			changes: [
 				{
 					...descriptorChange,

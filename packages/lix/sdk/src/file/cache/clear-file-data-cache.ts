@@ -1,4 +1,4 @@
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 /**
  * Clears the file data cache for a specific file and version.
@@ -11,13 +11,13 @@ import type { Lix } from "../../lix/open-lix.js";
  * });
  */
 export function clearFileDataCache(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	fileId?: string;
 	versionId?: string;
 }): void {
 	if (args.fileId && args.versionId) {
 		// Clear specific file in specific version
-		args.lix.sqlite.exec({
+		args.runtime.sqlite.exec({
 			sql: `
         DELETE FROM internal_file_data_cache 
         WHERE file_id = ? 
@@ -28,7 +28,7 @@ export function clearFileDataCache(args: {
 		});
 	} else if (args.versionId) {
 		// Clear all files in a specific version
-		args.lix.sqlite.exec({
+		args.runtime.sqlite.exec({
 			sql: `
         DELETE FROM internal_file_data_cache 
         WHERE version_id = ?
@@ -38,7 +38,7 @@ export function clearFileDataCache(args: {
 		});
 	} else if (args.fileId) {
 		// Clear specific file across all versions
-		args.lix.sqlite.exec({
+		args.runtime.sqlite.exec({
 			sql: `
         DELETE FROM internal_file_data_cache 
         WHERE file_id = ?
@@ -48,7 +48,7 @@ export function clearFileDataCache(args: {
 		});
 	} else {
 		// Clear entire cache
-		args.lix.sqlite.exec({
+		args.runtime.sqlite.exec({
 			sql: `DELETE FROM internal_file_data_cache`,
 			returnValue: "resultRows",
 		});

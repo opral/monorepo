@@ -66,7 +66,10 @@ export const cacheMissSimulation: SimulationTestDef = {
 				// Skip cache clear for internal_* views/tables
 				if (!skipClear) {
 					// This forces re-materialization from changes
-					clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
+					clearStateCache({
+						runtime: { sqlite: lix.sqlite, db: lix.db },
+						timestamp: CACHE_TIMESTAMP,
+					});
 				}
 
 				// Call the original execute

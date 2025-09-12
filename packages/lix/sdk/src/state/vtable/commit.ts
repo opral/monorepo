@@ -530,7 +530,10 @@ export function commit(args: {
 
 	// Update cache entries in a single call using materialized state with inline commit/version
 	if (genRes.materializedState.length > 0) {
-		updateStateCache({ lix: args.lix, changes: genRes.materializedState });
+		updateStateCache({
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db as any },
+			changes: genRes.materializedState,
+		});
 	}
 
 	// Delete untracked state for any tracked changes that were committed

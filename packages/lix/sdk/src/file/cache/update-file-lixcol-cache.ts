@@ -1,4 +1,4 @@
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 
 /**
  * Updates the file lixcol metadata cache.
@@ -15,12 +15,12 @@ import type { Lix } from "../../lix/open-lix.js";
  * });
  */
 export function updateFileLixcolCache(args: {
-	lix: Pick<Lix, "sqlite">;
+	runtime: Pick<LixRuntime, "sqlite">;
 	fileId: string;
 	versionId: string;
 }): void {
 	// Get the commit_id directly from the version
-	const versionCommit = args.lix.sqlite.exec({
+	const versionCommit = args.runtime.sqlite.exec({
 		sql: `SELECT commit_id FROM version WHERE id = ?`,
 		bind: [args.versionId],
 		returnValue: "resultRows",
@@ -29,7 +29,7 @@ export function updateFileLixcolCache(args: {
 	const commitId = versionCommit[0]?.[0] as string | null;
 
 	// Compute the expensive metadata once
-	const metadata = args.lix.sqlite.exec({
+	const metadata = args.runtime.sqlite.exec({
 		sql: `
 			WITH file_metadata AS (
 				SELECT 
@@ -62,7 +62,7 @@ export function updateFileLixcolCache(args: {
 	}
 
 	// Insert or update the cache entry, preserving created_at on updates
-	args.lix.sqlite.exec({
+	args.runtime.sqlite.exec({
 		sql: `
 			INSERT INTO internal_file_lixcol_cache 
 			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at)

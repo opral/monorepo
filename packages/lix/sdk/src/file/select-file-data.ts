@@ -48,7 +48,7 @@ export function selectFileData(args: {
 
 	// Update cache for next time (write-through)
 	updateFileDataCache({
-		lix: args.lix,
+		runtime: { sqlite: args.lix.sqlite },
 		fileId: args.file.id,
 		versionId: args.versionId,
 		data,

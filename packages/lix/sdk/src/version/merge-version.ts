@@ -495,9 +495,18 @@ export async function mergeVersion(args: {
 
 		// Write incremental cache in a single batched call
 		if (cacheBatch.length > 0) {
-			updateStateCache({ lix, changes: cacheBatch });
+			updateStateCache({
+				runtime: { sqlite: lix.sqlite, db: lix.db as any },
+				changes: cacheBatch,
+			});
 			// Mark cache fresh to prevent vtable from repopulating and discarding just-written rows
-			markStateCacheAsFresh({ lix });
+			markStateCacheAsFresh({
+				runtime: {
+					sqlite: lix.sqlite,
+					db: lix.db as any,
+					hooks: lix.hooks as any,
+				},
+			});
 			//
 		}
 	});

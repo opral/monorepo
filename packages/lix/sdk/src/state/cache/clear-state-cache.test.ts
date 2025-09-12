@@ -27,7 +27,7 @@ test("clearStateCache deletes all cache entries", async () => {
 	expect(cacheBeforeClear.length).toBeGreaterThan(0);
 
 	// Clear the cache
-	clearStateCache({ lix });
+	clearStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
 
 	// Verify cache is empty
 	const cacheAfterClear = await internalDb
@@ -38,6 +38,8 @@ test("clearStateCache deletes all cache entries", async () => {
 	expect(cacheAfterClear.length).toBe(0);
 
 	// Verify the cache is marked as stale
-	const isStale = isStaleStateCache({ lix });
+	const isStale = isStaleStateCache({
+		runtime: { sqlite: lix.sqlite, db: lix.db },
+	});
 	expect(isStale).toBe(true);
 });

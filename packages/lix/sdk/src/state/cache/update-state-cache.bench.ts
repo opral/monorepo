@@ -84,7 +84,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
-			lix,
+			runtime: { sqlite: lix.sqlite, db: lix.db },
 			changes,
 			commit_id: "commit-standard",
 			version_id: "v1",
@@ -105,7 +105,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
-			lix,
+			runtime: { sqlite: lix.sqlite, db: lix.db },
 			changes,
 			commit_id: "commit-multi",
 			version_id: "v1",
@@ -133,7 +133,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 					prefix: `warmup-${i}`,
 				});
 				updateStateCache({
-					lix,
+					runtime: { sqlite: lix.sqlite, db: lix.db },
 					changes: warmupChanges,
 					commit_id: `warmup-${i}`,
 					version_id: "v0",
@@ -148,7 +148,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			});
 
 			updateStateCache({
-				lix,
+				runtime: { sqlite: lix.sqlite, db: lix.db },
 				changes,
 				commit_id: "commit-warm",
 				version_id: "v1",

@@ -331,7 +331,7 @@ export function applyStateVTable(
 
 					// Normal path: check cache staleness
 					const cacheIsStale = isStaleStateCache({
-						lix: { sqlite, db: db as any },
+						runtime: { sqlite, db: db as any },
 					});
 
 					// Try cache first - but only if it's not stale
@@ -366,7 +366,9 @@ export function applyStateVTable(
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;
 						try {
-							markStateCacheAsFresh({ lix: { sqlite, db: db as any, hooks } });
+							markStateCacheAsFresh({
+								runtime: { sqlite, db: db as any, hooks },
+							});
 						} finally {
 							isUpdatingCacheState = false;
 						}

@@ -353,7 +353,7 @@ WHERE rn = 1;
 		];
 
 		updateStateCache({
-			lix: args.lix,
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db as any },
 			changes: [...metadataChanges, ...derivedEdgesForCache],
 			version_id: "global",
 			commit_id: commitId,
@@ -389,7 +389,7 @@ WHERE rn = 1;
 
 		// Update cache once at the very end for the scoped version (user entities only)
 		updateStateCache({
-			lix: args.lix,
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db as any },
 			changes: userChangesForCache,
 			version_id: version.id,
 			commit_id: commitId,

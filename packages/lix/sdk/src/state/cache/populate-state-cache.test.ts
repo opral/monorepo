@@ -57,7 +57,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Insert data into v2 cache
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: testChanges,
 		commit_id: "test-commit-1",
 		version_id: "global",
@@ -112,7 +112,7 @@ test("populates v2 cache with version filter", async () => {
 	];
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes,
 		commit_id: "commit-v1",
 		version_id: "version-1",
@@ -132,7 +132,7 @@ test("populates v2 cache with version filter", async () => {
 	];
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: changesV2,
 		commit_id: "commit-v2",
 		version_id: "version-2",
@@ -215,7 +215,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	];
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes,
 		commit_id: "commit-1",
 		version_id: "global",
@@ -356,7 +356,7 @@ test("inheritance is queryable from the resolved view after population", async (
 		.execute();
 
 	// Clear all cache to start fresh
-	clearStateCache({ lix });
+	clearStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
 
 	// ACT: Populate ONLY version C
 	populateStateCache({
@@ -474,7 +474,7 @@ test("global version entities are populated when populating child versions", asy
 	);
 
 	// Clear all cache to simulate cache miss
-	clearStateCache({ lix });
+	clearStateCache({ runtime: { sqlite: lix.sqlite, db: lix.db } });
 
 	// ACT: Populate the test version's cache (simulating cache miss recovery)
 	populateStateCache({

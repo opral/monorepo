@@ -37,7 +37,7 @@ test("inserts into cache based on change", async () => {
 
 	// Call updateStateCacheV2
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [testChange],
 	});
 
@@ -107,7 +107,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// First insert
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [initialChange],
 	});
 
@@ -150,7 +150,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// Second call should trigger onConflict upsert
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [updatedChange],
 	});
 
@@ -221,7 +221,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	};
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [createChange],
 	});
 
@@ -258,7 +258,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	};
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [deleteChange],
 	});
 
@@ -385,13 +385,13 @@ test("handles duplicate entity updates - last change wins", async () => {
 
 	// Apply first change
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [change1],
 	});
 
 	// Apply second change (should overwrite first)
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes: [change2],
 	});
 
@@ -467,7 +467,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 
 	// Apply all changes in a single batch
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		changes,
 	});
 
@@ -523,7 +523,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 
 	// Push to cache so edges are derived
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		version_id: "global",
 		commit_id: childId,
 		changes: [
@@ -605,7 +605,7 @@ test("commit caching materializes its change set in cache", async () => {
 
 	// Push to cache so commit edges + change set are materialized
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		version_id: "global",
 		commit_id: childId,
 		changes: [
@@ -649,7 +649,7 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 	const changeSetId = "cs-merge";
 
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		version_id: "global",
 		commit_id: "global-commit-edges-1",
 		changes: [
@@ -698,7 +698,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 
 	// Seed with a commit which has a parent
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		version_id: "global",
 		commit_id: "global-commit-edges-2",
 		changes: [
@@ -729,7 +729,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 
 	// Update commit with empty parents
 	updateStateCache({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		version_id: "global",
 		commit_id: "global-commit-edges-3",
 		changes: [
