@@ -921,7 +921,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:141](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:165](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -951,9 +951,9 @@ overwriteSetLocale((newLocale) => {
 
 ## setLocale()
 
-> **setLocale**(`newLocale`, `options?`): `void`
+> **setLocale**(`newLocale`, `options?`): `void` \| `Promise`\<`void`\>
 
-Defined in: [runtime/set-locale.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:52](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
@@ -961,6 +961,9 @@ Set locale reloads the site by default on the client. Reloading
 can be disabled by passing `reload: false` as an option. If
 reloading is disabled, you need to ensure that the UI is updated
 to reflect the new locale.
+
+If any custom strategy's `setLocale` function is async, then this
+function will become async as well.
 
 ### Parameters
 
@@ -976,7 +979,7 @@ to reflect the new locale.
 
 ### Returns
 
-`void`
+`void` \| `Promise`\<`void`\>
 
 ### Examples
 
