@@ -379,7 +379,7 @@ test("untracked changes in transaction don't show up in change view after commit
 
 	// Insert an untracked change into the transaction state
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await (
 			await import("../runtime/deterministic/timestamp.js")
 		).getTimestamp({ lix }),

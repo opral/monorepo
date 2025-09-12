@@ -26,7 +26,7 @@ test("creates tracked entity with pending change", async () => {
 
 	// Use insertPendingState function
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -174,7 +174,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -270,7 +270,7 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -345,7 +345,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -424,7 +424,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 
 	// First insert a direct untracked entity
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -477,7 +477,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 
 	// Now delete the direct untracked entity
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -1073,7 +1073,7 @@ test("inheritance works with resolved view before committing", async () => {
 
 	// Insert a global entity in transaction state
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{

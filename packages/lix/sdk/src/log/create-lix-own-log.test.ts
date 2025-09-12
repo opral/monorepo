@@ -89,25 +89,25 @@ test("should insert all levels contain wildcard '*'", async () => {
 
 async function createLogs(lix: Lix) {
 	await createLixOwnLog({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		key: "log_test_debug",
 		level: "debug",
 		message: "debug message",
 	});
 	await createLixOwnLog({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		key: "log_test_info",
 		level: "info",
 		message: "info message",
 	});
 	await createLixOwnLog({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		key: "log_test_warn",
 		level: "warn",
 		message: "warn message",
 	});
 	await createLixOwnLog({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db },
 		key: "log_test_error",
 		level: "error",
 		message: "error message",

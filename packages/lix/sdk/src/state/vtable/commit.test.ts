@@ -58,7 +58,7 @@ test("commit writes business rows to active version; graph edges update globally
 
 	/*──────────────────────── 2. stage two user changes ───────────────────*/
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -214,7 +214,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create change sets for versions
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -233,7 +233,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -252,7 +252,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -271,7 +271,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -291,7 +291,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version A
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -311,7 +311,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -332,7 +332,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version A (descriptor + tip)
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -368,7 +368,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version B
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -388,7 +388,7 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -409,7 +409,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version B (descriptor + tip)
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -445,7 +445,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version A
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -466,7 +466,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version B
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -850,7 +850,7 @@ test("global version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -975,7 +975,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -1071,7 +1071,7 @@ test("active version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -1446,7 +1446,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Insert a mock entity into global version via transaction
 	insertTransactionState({
-		lix,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
@@ -1735,7 +1735,7 @@ describe("file lixcol cache updates", () => {
 
 		// Perform mixed operations
 		insertTransactionState({
-			lix,
+			runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 			timestamp: await getTimestamp({ lix }),
 			data: [
 				// New file

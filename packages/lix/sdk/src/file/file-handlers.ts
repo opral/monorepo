@@ -40,7 +40,7 @@ export function handleFileInsert(args: {
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
 		createLixOwnLogSync({
-			lix: args.lix,
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 			key: "lix_file_skipped_insert_handler",
 			level: "debug",
 			message: `Skipping file insert for ${args.file.path} due to lix_skip_file_handlers flag`,
@@ -89,7 +89,7 @@ export function handleFileInsert(args: {
 
 		if (plugin.detectChanges === undefined) {
 			createLixOwnLogSync({
-				lix: args.lix,
+				runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 				key: "lix_file_no_plugin",
 				level: "warn",
 				message: `File inserted at ${args.file.path} but plugin does not support detecting changes`,
@@ -136,7 +136,7 @@ export function handleFileInsert(args: {
 	// Log appropriate messages based on what happened
 	if (!foundPlugin) {
 		createLixOwnLogSync({
-			lix: args.lix,
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 			key: "lix_file_no_plugin",
 			level: "warn",
 			message: `File inserted at ${args.file.path} but no plugin available to detect changes`,
@@ -177,7 +177,7 @@ export function handleFileInsert(args: {
 	} else {
 		if (!hasChanges) {
 			createLixOwnLogSync({
-				lix: args.lix,
+				runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 				key: "lix_file_no_changes_detected",
 				level: "debug",
 				message: `File inserted at ${args.file.path} but plugin detected no changes`,
@@ -218,7 +218,7 @@ export function handleFileUpdate(args: {
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
 		createLixOwnLogSync({
-			lix: args.lix,
+			runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 			key: "lix_file_skipped_update_handler",
 			level: "debug",
 			message: `Skipping file update for ${args.file.path} due to lix_skip_file_handlers flag`,
@@ -277,7 +277,7 @@ export function handleFileUpdate(args: {
 
 			if (plugin.detectChanges === undefined) {
 				createLixOwnLogSync({
-					lix: args.lix,
+					runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 					key: "lix_file_no_plugin",
 					level: "warn",
 					message: `File updated at ${args.file.path} but plugin does not support detecting changes`,
@@ -339,7 +339,7 @@ export function handleFileUpdate(args: {
 		// Log appropriate messages based on what happened
 		if (!foundPlugin) {
 			createLixOwnLogSync({
-				lix: args.lix,
+				runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 				key: "lix_file_no_plugin",
 				level: "warn",
 				message: `File updated at ${args.file.path} but no plugin available to detect changes`,
@@ -396,7 +396,7 @@ export function handleFileUpdate(args: {
 			}
 		} else if (!hasChanges) {
 			createLixOwnLogSync({
-				lix: args.lix,
+				runtime: { sqlite: args.lix.sqlite, db: args.lix.db },
 				key: "lix_file_no_changes_detected",
 				level: "debug",
 				message: `File updated at ${args.file.path} but plugin detected no changes`,

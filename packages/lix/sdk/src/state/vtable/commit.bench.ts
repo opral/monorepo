@@ -38,7 +38,7 @@ bench("commit transaction with 1 row", async () => {
 	}
 
 	insertTransactionState({
-		lix: lix as any,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		data: multipleData,
 		timestamp: await getTimestamp({ lix }),
 	});
@@ -71,7 +71,7 @@ bench("commit transaction with 100 rows", async () => {
 		});
 	}
 	insertTransactionState({
-		lix: lix as any,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		data: multipleData,
 		timestamp: await getTimestamp({ lix }),
 	});
@@ -109,7 +109,7 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 		}
 
 		insertTransactionState({
-			lix: lix as any,
+			runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 			data: batch,
 			timestamp: await getTimestamp({ lix }),
 		});
@@ -143,7 +143,7 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 		});
 	}
 	insertTransactionState({
-		lix: lix as any,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		data: baseRows,
 		timestamp: await getTimestamp({ lix }),
 	});
@@ -201,7 +201,7 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 	}
 
 	insertTransactionState({
-		lix: lix as any,
+		runtime: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
 		data: ops,
 		timestamp: await getTimestamp({ lix }),
 	});

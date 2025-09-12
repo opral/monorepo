@@ -1,11 +1,12 @@
 import { LixLogSchema, type LixLog } from "../../log/schema.js";
 import { uuidV7Sync } from "../../runtime/deterministic/uuid-v7.js";
-import { getTimestampSync, type Lix } from "../../index.js";
+import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import type { LixRuntime } from "../../runtime/boot.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 
 // Track if logging is in progress per Lix instance to prevent recursion
 const loggingInProgressMap = new WeakMap<
-	Pick<Lix, "sqlite" | "db" | "hooks">,
+	Pick<LixRuntime, "sqlite" | "db" | "hooks">,
 	boolean
 >();
 
@@ -16,34 +17,26 @@ const loggingInProgressMap = new WeakMap<
  * This is a minimal wrapper that can be mocked in tests to control timestamps.
  */
 export function insertVTableLog(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
 	id?: string;
 	key: string;
 	message: string;
 	level: string;
 	timestamp?: string;
 }): void {
-	if (loggingInProgressMap.get(args.lix)) {
+	if (loggingInProgressMap.get(args.runtime)) {
 		return;
 	}
 
-	loggingInProgressMap.set(args.lix, true);
+	loggingInProgressMap.set(args.runtime, true);
 	try {
-		const runtime = {
-			sqlite: args.lix.sqlite,
-			db: args.lix.db as any,
-			hooks: args.lix.hooks as any,
-		};
-		const id = args.id ?? uuidV7Sync({ runtime });
+		const id = args.id ?? uuidV7Sync({ runtime: args.runtime as any });
 		// Insert into transaction state (untracked) to preserve previous behavior.
 		// Note: If called outside a vtable write, this may require a later commit to flush.
 		insertTransactionState({
-			lix: {
-				sqlite: args.lix.sqlite,
-				db: args.lix.db,
-				hooks: undefined as any,
-			},
-			timestamp: args.timestamp ?? getTimestampSync({ runtime }),
+			runtime: args.runtime as any,
+			timestamp:
+				args.timestamp ?? getTimestampSync({ runtime: args.runtime as any }),
 			data: [
 				{
 					entity_id: id,
@@ -63,6 +56,6 @@ export function insertVTableLog(args: {
 			],
 		});
 	} finally {
-		loggingInProgressMap.set(args.lix, false);
+		loggingInProgressMap.set(args.runtime, false);
 	}
 }

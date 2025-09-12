@@ -542,7 +542,7 @@ export function applyStateVTable(
 
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
-						lix: lix as any,
+						runtime: lix as any,
 						timestamp: _timestamp,
 						data: [
 							{
@@ -653,7 +653,7 @@ export function applyStateVTable(
 
 					// Log error for debugging
 					insertVTableLog({
-						lix,
+						runtime: { sqlite, db: db as any, hooks },
 						timestamp: getTimestampSync({
 							runtime: { sqlite, db: db as any, hooks },
 						}),
@@ -728,7 +728,7 @@ export function handleStateDelete(
 		if (parsed.tag === "UI") {
 			// Inherited untracked: create a tombstone to block inheritance
 			insertTransactionState({
-				lix,
+				runtime: lix as any,
 				timestamp,
 				data: [
 					{
@@ -751,7 +751,7 @@ export function handleStateDelete(
 			// Overwrite the pending transaction row with a deletion so the commit drops it
 			// and nothing is persisted to the untracked table.
 			insertTransactionState({
-				lix,
+				runtime: lix as any,
 				timestamp,
 				data: [
 					{
@@ -794,7 +794,7 @@ export function handleStateDelete(
 	});
 
 	insertTransactionState({
-		lix,
+		runtime: lix as any,
 		timestamp,
 		data: [
 			{
