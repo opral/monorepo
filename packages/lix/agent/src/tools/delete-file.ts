@@ -1,6 +1,7 @@
 import type { Lix } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
+import { ensureAgentVersion } from "../agent-version.js";
 
 export const DeleteFileInputSchema = z
 	.object({
@@ -35,37 +36,43 @@ export async function deleteFile(
 ): Promise<DeleteFileOutput> {
 	const { lix, path, fileId } = args;
 
-	// Resolve the target row by path or id
-	const row = path
-		? await lix.db
-				.selectFrom("file")
-				.where("path", "=", path)
-				.select(["id", "path"])
-				.executeTakeFirst()
-		: await lix.db
-				.selectFrom("file")
-				.where("id", "=", fileId as string)
-				.select(["id", "path"])
-				.executeTakeFirst();
+	const exec = async (trx: Lix["db"]) => {
+		const agentVersion = await ensureAgentVersion({ ...lix, db: trx });
 
-	if (!row) {
+		// Resolve the target row by path or id within the agent version
+		const row = path
+			? await trx
+					.selectFrom("file_all")
+					.where("path", "=", path)
+					.where("lixcol_version_id", "=", agentVersion.id)
+					.select(["id", "path"])
+					.executeTakeFirst()
+			: await trx
+					.selectFrom("file_all")
+					.where("id", "=", fileId as string)
+					.where("lixcol_version_id", "=", agentVersion.id)
+					.select(["id", "path"])
+					.executeTakeFirst();
+
+		if (!row) {
+			return DeleteFileOutputSchema.parse({ path, fileId, deleted: false });
+		}
+
+		await trx
+			.deleteFrom("file_all")
+			.where("id", "=", row.id as string)
+			.where("lixcol_version_id", "=", agentVersion.id)
+			.execute();
+
 		return DeleteFileOutputSchema.parse({
-			path,
-			fileId,
-			deleted: false,
+			path: row.path as string,
+			fileId: row.id as string,
+			deleted: true,
 		});
-	}
+	};
 
-	await lix.db
-		.deleteFrom("file")
-		.where("id", "=", row.id as string)
-		.execute();
-
-	return DeleteFileOutputSchema.parse({
-		path: row.path as string,
-		fileId: row.id as string,
-		deleted: true,
-	});
+	if (lix.db.isTransaction) return exec(lix.db);
+	return lix.db.transaction().execute(exec);
 }
 
 export function createDeleteFileTool(args: { lix: Lix }) {
