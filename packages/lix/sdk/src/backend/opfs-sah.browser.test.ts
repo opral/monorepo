@@ -1,11 +1,11 @@
-import { openLixBackend } from "../lix/open-lix-backend.js";
+import { openLix } from "../lix/open-lix.js";
 import { test, expect, describe } from "vitest";
 import { OpfsSahBackend } from "./opfs-sah.js";
 import { newLixFile } from "../lix/new-lix.js";
 
 describe.sequential("OPFS SAH Backend (browser)", () => {
 	test("inserting a file", async () => {
-		const lix = await openLixBackend({
+		const lix = await openLix({
 			backend: new OpfsSahBackend({}),
 			pluginsRaw: [],
 		});
@@ -44,10 +44,11 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 
 	test("persists across reopen with same name", async () => {
 		const name = `vitest-opfs-persist`;
-		const lix1 = await openLixBackend({
+		const lix1 = await openLix({
 			backend: new OpfsSahBackend({ key: name }),
 			pluginsRaw: [],
 		});
+
 		try {
 			await lix1.db
 				.insertInto("file")
@@ -61,7 +62,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		}
 
 		// Second open: read the previously written row
-		const lix2 = await openLixBackend({
+		const lix2 = await openLix({
 			backend: new OpfsSahBackend({ key: name }),
 			pluginsRaw: [],
 		});
@@ -81,7 +82,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 	test("throws when attempting to seed an existing name", async () => {
 		const name = `vitest-opfs-overwrite`;
 		// First open (seeds a new DB)
-		const lix1 = await openLixBackend({
+		const lix1 = await openLix({
 			backend: new OpfsSahBackend({ key: name }),
 			pluginsRaw: [],
 		});
@@ -110,7 +111,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		const name = `vitest-opfs-clear`;
 
 		// 1) Create a DB and write a row
-		const lix1 = await openLixBackend({
+		const lix1 = await openLix({
 			backend: new OpfsSahBackend({ key: name }),
 			pluginsRaw: [],
 		});
@@ -153,7 +154,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 
 test("clear() throws when a backend is open", async () => {
 	const name = `vitest-opfs-clear-open`;
-	const lix = await openLixBackend({
+	const lix = await openLix({
 		backend: new OpfsSahBackend({ key: name }),
 		pluginsRaw: [],
 	});
@@ -183,7 +184,7 @@ export const plugin = {
 export default plugin;
 `;
 
-	const lix = await openLixBackend({
+	const lix = await openLix({
 		backend: new OpfsSahBackend({ key: `vitest-opfs-plugin` }),
 		pluginsRaw: [mockPlugin],
 	});
@@ -208,5 +209,51 @@ export default plugin;
 		expect(row?.plugin_key).toBe("mock_json");
 	} finally {
 		await lix.close();
+	}
+});
+
+test("persists provided account", async () => {
+	const name = `vitest-opfs-account-persist`;
+	const account = { id: "test-account", name: "Test User" };
+
+	// Open with initial account
+	const lix1 = await openLix({
+		backend: new OpfsSahBackend({ key: name }),
+		pluginsRaw: [],
+		account,
+	});
+
+	try {
+		// Verify current active account with details
+		const active1 = await lix1.db
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
+			.executeTakeFirstOrThrow();
+
+		expect(active1.account_id).toBe(account.id);
+		expect(active1.name).toBe(account.name);
+	} finally {
+		await lix1.close();
+	}
+
+	// Reopen the same backend key and verify persistence
+	const lix2 = await openLix({
+		backend: new OpfsSahBackend({ key: name }),
+		pluginsRaw: [],
+	});
+	try {
+		const active2 = await lix2.db
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
+			.executeTakeFirstOrThrow();
+
+		expect(active2.account_id).toBe(account.id);
+		expect(active2.name).toBe(account.name);
+	} finally {
+		await lix2.close();
 	}
 });

@@ -79,27 +79,46 @@ class BackendConnection implements DatabaseConnection {
 
 export class BackendDriver implements Driver {
 	readonly #config: BackendDriverConfig;
-	#connection?: BackendConnection;
+
+	// Global transaction coordination for a single engine.
+	// Ensures only one top‑level transaction owner at a time.
+	#owner?: BackendConnection;
+	#depth = 0; // total nesting depth for owner
+	#waiters: Array<() => void> = [];
 
 	constructor(config: BackendDriverConfig) {
 		this.#config = config;
 	}
 
 	async init(): Promise<void> {
-		this.#connection = new BackendConnection(this.#config.backend);
+		// no-op
 	}
 
 	async acquireConnection(): Promise<DatabaseConnection> {
-		return this.#connection!;
+		// Return a lightweight connection wrapper per acquire to isolate
+		// transaction state (savepoints) across concurrent transactions.
+		return new BackendConnection(this.#config.backend);
 	}
 
 	async beginTransaction(connection: DatabaseConnection): Promise<void> {
 		const conn = connection as unknown as BackendConnection;
-		conn._txDepth++;
-		if (conn._txDepth === 1) {
+
+		// Wait our turn if another connection owns the top‑level transaction
+		while (this.#depth > 0 && this.#owner !== conn) {
+			await new Promise<void>((resolve) => this.#waiters.push(resolve));
+		}
+
+		if (this.#depth === 0) {
+			// Acquire ownership and start top‑level txn
+			this.#owner = conn;
+			this.#depth = 1;
+			conn._txDepth = 1;
 			await connection.executeQuery(CompiledQuery.raw("begin"));
 		} else {
-			const spName = `lix_sp_${conn._txDepth}`;
+			// Nested transaction owned by same connection → savepoint
+			this.#depth++;
+			conn._txDepth++;
+			const spName = `lix_sp_${this.#depth}`;
 			conn._spNames.push(spName);
 			await connection.executeQuery(CompiledQuery.raw(`savepoint ${spName}`));
 		}
@@ -107,28 +126,47 @@ export class BackendDriver implements Driver {
 
 	async commitTransaction(connection: DatabaseConnection): Promise<void> {
 		const conn = connection as unknown as BackendConnection;
+		if (this.#owner !== conn) {
+			throw new Error("commit from non-owner connection");
+		}
+
 		if (conn._txDepth > 1) {
 			const spName = conn._spNames.pop()!;
 			await connection.executeQuery(
 				CompiledQuery.raw(`release savepoint ${spName}`)
 			);
+			conn._txDepth--;
+			this.#depth--;
 		} else {
 			await connection.executeQuery(CompiledQuery.raw("commit"));
+			conn._txDepth = 0;
+			this.#depth = 0;
+			this.#owner = undefined;
+			const w = this.#waiters.shift();
+			if (w) w();
 		}
-		conn._txDepth = Math.max(0, conn._txDepth - 1);
 	}
 
 	async rollbackTransaction(connection: DatabaseConnection): Promise<void> {
 		const conn = connection as unknown as BackendConnection;
+		if (this.#owner !== conn) {
+			throw new Error("rollback from non-owner connection");
+		}
 		if (conn._txDepth > 1) {
 			const spName = conn._spNames.pop()!;
 			await connection.executeQuery(
 				CompiledQuery.raw(`rollback to savepoint ${spName}`)
 			);
+			conn._txDepth--;
+			this.#depth--;
 		} else {
 			await connection.executeQuery(CompiledQuery.raw("rollback"));
+			conn._txDepth = 0;
+			this.#depth = 0;
+			this.#owner = undefined;
+			const w = this.#waiters.shift();
+			if (w) w();
 		}
-		conn._txDepth = Math.max(0, conn._txDepth - 1);
 	}
 
 	async releaseConnection(): Promise<void> {

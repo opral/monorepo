@@ -1,24 +1,28 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { initDb } from "../database/init-db.js";
-import { sql, type Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
+import {
+	LixSchemaViewMap,
+	type LixDatabaseSchema,
+} from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
-import { InMemoryStorage } from "./storage/in-memory.js";
-import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitSequenceNumberSync } from "../runtime/deterministic/sequence.js";
-import { commitDeterministicRngState } from "../runtime/deterministic/random.js";
-import { newLixFile } from "./new-lix.js";
-import { switchAccount } from "../account/switch-account.js";
-import { createRuntimeRouter } from "../runtime/router.js";
 import type { LixRuntime } from "../runtime/boot.js";
+import type { LixBackend } from "../backend/types.js";
+import { isJsonType } from "../schema-definition/json-type.js";
+import { createDialect } from "../backend/kysely/kysely-driver.js";
+import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
+import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
+import {
+	commitDeterministicRngState,
+	random,
+} from "../runtime/deterministic/random.js";
+import { commitSequenceNumberSync } from "../runtime/deterministic/sequence.js";
 
 export type Lix = {
 	/**
@@ -159,26 +163,18 @@ export async function openLix(args: {
 	 * Lix file data to initialize the database with.
 	 */
 	blob?: Blob;
+
+	backend?: LixBackend;
+
+	pluginsRaw?: string[];
 	/**
-	 * Storage adapter for persisting lix data.
+	 * Provide plugin instances directly (classic API).
 	 *
-	 * @default InMemoryStorage
-	 */
-	storage?: LixStorageAdapter;
-	/**
-	 * Usecase are lix apps that define their own file format,
-	 * like inlang (unlike a markdown, csv, or json plugin).
-	 *
-	 * (+) avoids separating app code from plugin code and
-	 *     resulting bundling logic.
-	 *
-	 * (-) such a file format must always be opened with the
-	 *     file format sdk. the file is not portable
-	 *
-	 * @example
-	 *   const lix = await openLix({ providePlugins: [myPlugin] })
+	 * Supported only by in‑process backends. In worker/remote backends,
+	 * plugins must be provided via `pluginsRaw` (stringified ESM modules).
 	 */
 	providePlugins?: LixPlugin[];
+
 	/**
 	 * Set the key values when opening the lix.
 	 *
@@ -189,162 +185,134 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<Lix> {
-	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
-	const database = await storage.open({
-		blob: args.blob,
-		createBlob: () => newLixFile({ keyValues: args.keyValues }),
-	});
-
-	// Create hooks before initializing database so they can be used in schema setup
 	const hooks = createHooks();
+	const blob = args.blob;
+	let runtime: LixRuntime | undefined;
 
-	const db = initDb({ sqlite: database, hooks });
+	const backend =
+		args.backend ??
+		(await import("../backend/in-memory.js").then(
+			(m) => new m.InMemoryBackend()
+		))!;
 
-	// Set up account IMMEDIATELY after db init, before any other operations
-	const persistedState = await storage.getPersistedState?.();
-	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
+	// Default behavior: openOrCreate
+	// - If a blob is provided, attempt to create from it (backend may refuse if target exists)
+	// - If no blob is provided, attempt to create a fresh Lix; if backend reports existing DB,
+	//   fall back to open without a blob.
+	const boot = {
+		args: {
+			pluginsRaw: args.pluginsRaw,
+			providePlugins: args.providePlugins,
+			account: args.account,
+			keyValues: args.keyValues,
+		},
+	} as const;
 
-	if (accountToSet) {
-		// First ensure the account exists (create it if it doesn't)
-		const existingAccount = await db
-			.selectFrom("account_all")
-			.where("id", "=", accountToSet.id)
-			.where("lixcol_version_id", "=", "global")
-			.selectAll()
-			.executeTakeFirst();
-
-		if (!existingAccount) {
-			// Create the account in global version
-			await db
-				.insertInto("account_all")
-				.values({
-					id: accountToSet.id,
-					name: accountToSet.name,
-					lixcol_version_id: "global",
-				})
-				.execute();
+	if (blob) {
+		await backend.create({
+			blob: await args.blob!.arrayBuffer(),
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
+		const res = await backend.open({
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
+		runtime = res?.runtime;
+	} else {
+		// Exists-first flow: avoid throwing to decide; ask backend if a DB exists.
+		const exists = await backend.exists();
+		if (!exists) {
+			const { newLixFile } = await import("./new-lix.js");
+			const seed = await newLixFile({ keyValues: args.keyValues });
+			const seedBytes = await seed.arrayBuffer();
+			await backend.create({
+				blob: seedBytes,
+				boot,
+				onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+			});
 		}
-
-		// Use switchAccount to properly set this as the only active account
-		await switchAccount({ lix: { db }, to: [accountToSet] });
+		const res = await backend.open({
+			boot,
+			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+		});
+		runtime = res?.runtime;
 	}
 
-	// Only process keyValues if we're opening an existing blob
-	// (newLixFile already handles keyValues during creation)
-	if (args.blob && args.keyValues && args.keyValues.length > 0) {
-		for (const keyValue of args.keyValues) {
-			// Determine which table to use based on whether version is specified
-			if (keyValue.lixcol_version_id) {
-				// Check if the key already exists in the specified version
-				const existing = await db
-					.selectFrom("key_value_all")
-					.select("key")
-					.where("key", "=", keyValue.key)
-					.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
-					.executeTakeFirst();
+	// Build JSON column mapping to match openLix() parsing behavior
+	const ViewsWithJsonColumns = (() => {
+		const result: Record<string, Record<string, { type: any }>> = {};
 
-				if (existing) {
-					// Update existing key in the specified version
-					await db
-						.updateTable("key_value_all")
-						.set({ value: keyValue.value })
-						.where("key", "=", keyValue.key)
-						.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
-						.execute();
-				} else {
-					// Insert new key into the specified version
-					await db
-						.insertInto("key_value_all")
-						.values({
-							key: keyValue.key,
-							value: keyValue.value,
-							lixcol_version_id: keyValue.lixcol_version_id,
-						})
-						.execute();
-				}
-			} else {
-				// No version specified, use default key_value table (active version)
-				const existing = await db
-					.selectFrom("key_value")
-					.select("key")
-					.where("key", "=", keyValue.key)
-					.executeTakeFirst();
+		// Hardcoded object-only columns
+		const hardcodedViews: Record<string, Record<string, { type: any }>> = {
+			state: { snapshot_content: { type: "object" } },
+			state_all: { snapshot_content: { type: "object" } },
+			state_history: { snapshot_content: { type: "object" } },
+			change: { snapshot_content: { type: "object" } },
+		};
+		Object.assign(result, hardcodedViews);
 
-				if (existing) {
-					// Update existing key
-					await db
-						.updateTable("key_value")
-						.set({ value: keyValue.value })
-						.where("key", "=", keyValue.key)
-						.execute();
-				} else {
-					// Insert new key
-					await db
-						.insertInto("key_value")
-						.values({ key: keyValue.key, value: keyValue.value })
-						.execute();
+		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
+			if (typeof schema === "boolean" || !schema.properties) continue;
+			const jsonColumns: Record<string, { type: any }> = {};
+			for (const [key, def] of Object.entries(schema.properties)) {
+				if (isJsonType(def)) {
+					jsonColumns[key] = {
+						type: ["string", "number", "boolean", "object", "array", "null"],
+					};
 				}
 			}
+			if (Object.keys(jsonColumns).length > 0) {
+				result[viewName] = jsonColumns;
+				result[viewName + "_all"] = jsonColumns;
+			}
 		}
-	}
+		return result;
+	})();
 
-	const plugins: LixPlugin[] = [];
-	if (args.providePlugins && args.providePlugins.length > 0) {
-		plugins.push(...args.providePlugins);
-	}
-
-	const plugin = {
-		getAll: async () => plugins,
-		getAllSync: () => plugins,
-	};
+	const db = new Kysely<LixDatabaseSchema>({
+		dialect: createDialect({ backend: backend }),
+		plugins: [
+			new ParseJSONResultsPlugin(),
+			JSONColumnPlugin(ViewsWithJsonColumns),
+			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
+		],
+	});
 
 	const observe = createObserve({ hooks });
 
-	const runtime: LixRuntime = {
-		sqlite: database,
-		db,
-		hooks,
-		getAllPluginsSync: () => plugin.getAllSync(),
-	};
+	await captureOpened({ lix: { db, call: backend.call } });
 
-	const lix = {
+	const lix: Lix = {
+		// sqlite intentionally not exposed in backend mode
 		db,
-		sqlite: database,
-		plugin,
 		hooks,
 		observe,
-		// Expose runtime for internal/testing scenarios (undefined when running out-of-process)
-		runtime: runtime,
-		// Provide the single runtime boundary via call()
-		call: createRuntimeRouter({ runtime }).call,
+		runtime,
+		plugin: {
+			getAll: async () => runtime?.getAllPluginsSync() ?? [],
+			getAllSync: () => runtime?.getAllPluginsSync() ?? [],
+		},
+		call: async (
+			name: string,
+			payload?: unknown,
+			_opts?: { signal?: AbortSignal }
+		): Promise<unknown> => backend.call(name, payload),
 		close: async () => {
-			await storage.close();
+			await backend.close();
 		},
 		toBlob: async () => {
+			// todo use backend.call instead
 			commitSequenceNumberSync({ runtime });
 			commitDeterministicRngState({ runtime });
-			return storage.export();
+			return new Blob([await backend.export()]);
 		},
 	};
-
-	// MUST BE AWAITED
-	// The databse queries must run. Otherwise, we get super unexpected behavior
-	// where something is tested and then the async queue kicks in and leads
-	// to unexpected results. For example, cache population!
-	await captureOpened({ lix });
-
-	// Apply file and account schemas now that we have the full lix object with plugins
-	applyFileDatabaseSchema({ runtime });
-
-	// Connect storage to Lix if the adapter supports it
-	if (storage.connect) {
-		storage.connect({ lix });
-	}
 
 	return lix;
 }
 
-async function captureOpened(args: { lix: Lix }) {
+async function captureOpened(args: { lix: Pick<Lix, "db" | "call"> }) {
 	try {
 		const telemetry = await args.lix.db
 			.selectFrom("key_value")
@@ -368,7 +336,7 @@ async function captureOpened(args: { lix: Lix }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.lix.db);
-		const sample = Number(await args.lix.call("lix_random"));
+		const sample = await random({ lix: args.lix });
 		if (sample > 0.1) {
 			// Not awaiting to avoid boot up time and knowing that
 			// no database query is performed here. we dont care if the

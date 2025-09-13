@@ -506,6 +506,8 @@ describe("internal_materialization_commit_graph", () => {
 					{
 						key: "lix_deterministic_mode",
 						value: { enabled: true },
+						lixcol_untracked: true,
+						lixcol_version_id: "global",
 					},
 				],
 			});
@@ -653,6 +655,8 @@ describe("internal_materialization_commit_graph", () => {
 					{
 						key: "lix_deterministic_mode",
 						value: { enabled: true },
+						lixcol_untracked: true,
+						lixcol_version_id: "global",
 					},
 				],
 			});
@@ -1026,6 +1030,8 @@ describe("internal_materialization_commit_graph", () => {
 					{
 						key: "lix_deterministic_mode",
 						value: { enabled: true },
+						lixcol_untracked: true,
+						lixcol_version_id: "global",
 					},
 				],
 			});

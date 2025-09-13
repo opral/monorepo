@@ -66,15 +66,7 @@ export async function createVersionFromCommit(args: {
 			lixcol_version_id: "global",
 		});
 
-		// Create a fresh working commit pointing to the working change set
-		const { call } = createRuntimeRouter({
-			runtime: {
-				sqlite: args.lix.sqlite,
-				db: trx as any,
-				hooks: args.lix.hooks as any,
-			} as any,
-		});
-		const workingCommitId = await uuidV7({ lix: { call } });
+		const workingCommitId = await uuidV7({ lix: args.lix });
 		await trx
 			.insertInto("commit_all")
 			.values({

@@ -38,3 +38,47 @@ describe("InMemory backend", () => {
 
 	// execBatch removed; callers should loop over exec() or use transactions explicitly.
 });
+
+test("export/import round-trip persists data", async () => {
+  const b1 = new InMemoryBackend();
+  await b1.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
+
+  await b1.exec("CREATE TABLE t(a)");
+  await b1.exec("INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
+
+  const snapshot = await b1.export();
+  await b1.close();
+
+  const b2 = new InMemoryBackend();
+  await b2.create({ blob: snapshot, boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
+
+  const out = await b2.exec("SELECT a FROM t ORDER BY a");
+  expect(out.rows?.map((r: any) => r.a ?? r[0])).toEqual([1, 2]);
+
+  await b2.close();
+});
+
+test("multiple engines are independent", async () => {
+  const b1 = new InMemoryBackend();
+  const b2 = new InMemoryBackend();
+
+  await b1.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
+  await b2.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
+
+  await b1.exec("CREATE TABLE t(a)");
+  await b2.exec("CREATE TABLE t(a)");
+
+  await b1.exec("INSERT INTO t(a) VALUES (?)", [42]);
+
+  const r1 = await b1.exec("SELECT COUNT(*) AS c FROM t");
+  const r2 = await b2.exec("SELECT COUNT(*) AS c FROM t");
+
+  const c1 = Number((r1.rows?.[0] as any)?.c ?? (r1.rows?.[0] as any)?.[0]);
+  const c2 = Number((r2.rows?.[0] as any)?.c ?? (r2.rows?.[0] as any)?.[0]);
+
+  expect(c1).toBe(1);
+  expect(c2).toBe(0);
+
+  await b1.close();
+  await b2.close();
+});

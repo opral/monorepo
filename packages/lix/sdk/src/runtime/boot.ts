@@ -9,6 +9,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";
 import { createRuntimeRouter, type Call } from "./router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
+import type { openLix } from "../lix/open-lix.js";
 
 export type RuntimeEvent = {
 	type: "state_commit";
@@ -16,9 +17,10 @@ export type RuntimeEvent = {
 };
 
 export type BootArgs = {
-	pluginsRaw: string[];
-	account?: { id: string; name: string };
-	keyValues?: Array<{ key: string; value: any; lixcol_version_id?: string }>;
+	pluginsRaw?: Parameters<typeof openLix>[0]["pluginsRaw"];
+	providePlugins?: Parameters<typeof openLix>[0]["providePlugins"];
+	account?: Parameters<typeof openLix>[0]["account"];
+	keyValues?: Parameters<typeof openLix>[0]["keyValues"];
 };
 
 export type BootEnv = {
@@ -57,10 +59,13 @@ export async function boot(
 	const hooks = createHooks();
 	const db = initDb({ sqlite: env.sqlite, hooks });
 
-	// Load plugins from raw ESM strings
+	// Load plugins from raw ESM strings and provided plugin objects
 	const plugins: LixPlugin[] = [];
 	for (const code of env.args.pluginsRaw ?? []) {
 		const p = await loadPluginFromString(code);
+		plugins.push(p);
+	}
+	for (const p of env.args.providePlugins ?? []) {
 		plugins.push(p);
 	}
 

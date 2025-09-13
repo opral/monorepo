@@ -640,7 +640,14 @@ test("commit caching materializes its change set in cache", async () => {
 // Edges caching from commit.parent_commit_ids
 test("caches commit edges from commit.parent_commit_ids", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_untracked: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	const now = await getTimestamp({ lix });
@@ -687,6 +694,8 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 			{
 				key: "lix_deterministic_mode",
 				value: { enabled: true },
+				lixcol_untracked: true,
+				lixcol_version_id: "global",
 			},
 		],
 	});

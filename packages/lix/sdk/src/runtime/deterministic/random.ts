@@ -255,7 +255,9 @@ export function commitDeterministicRngState(args: {
  * await random({ lix }) // 0.543...
  * ```
  */
-export async function random(args: { lix: Lix }): Promise<number> {
+export async function random(args: {
+	lix: Pick<Lix, "call">;
+}): Promise<number> {
 	const res = await args.lix.call("lix_random");
 	return Number(res);
 }
