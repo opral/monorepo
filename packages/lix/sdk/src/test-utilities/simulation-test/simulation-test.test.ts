@@ -186,19 +186,19 @@ describe("database operations are deterministic", async () => {
 });
 
 describe("providing key values", async () => {
-	simulationTest("", async ({ openSimulatedLix }) => {
-		const lix = await openSimulatedLix({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
-					lixcol_version_id: "global",
-				},
-				{ key: "test_key_1", value: ["*"], lixcol_version_id: "global" },
-			],
-		});
+    simulationTest("", async ({ openSimulatedLix }) => {
+        const lix = await openSimulatedLix({
+            keyValues: [
+                {
+                    key: "lix_deterministic_mode",
+                    value: { enabled: true, bootstrap: true },
+                    lixcol_version_id: "global",
+                },
+                { key: "test_key_1", value: ["*"], lixcol_version_id: "global" },
+            ],
+        });
 
-		commit({ runtime: lix.runtime! });
+        commit({ runtime: lix.runtime! });
 
 		const logLevels = await lix.db
 			.selectFrom("key_value")
@@ -211,8 +211,8 @@ describe("providing key values", async () => {
 				key: "test_key_1",
 				value: ["*"],
 			},
-		]);
-	});
+        ]);
+    }, { simulations: [normalSimulation] });
 });
 
 describe("expectDeterministic diff callback receives correct values", () => {
