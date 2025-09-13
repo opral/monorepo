@@ -33,7 +33,7 @@ export async function writeFile(
 	const enc = new TextEncoder();
 
 	const exec = async (trx: Lix["db"]) => {
-		// Ensure the agent staging version exists (non-hidden)
+		// Ensure the agent source version exists (non-hidden)
 		const agentVersion = await ensureAgentVersion({ ...lix, db: trx });
 
 		// Look up existing file row in the agent version
@@ -106,8 +106,8 @@ export async function writeFile(
 
 export function createWriteFileTool(args: { lix: Lix }) {
 	return tool({
-		description:
-			"Write a UTF-8 text file to the Lix workspace. Paths must be absolute ('/'). Supports replace or append modes.",
+    description:
+            "Write a UTF-8 text file to the Lix workspace. Paths must be absolute ('/'). Supports 'replace' or 'append' modes. Group all file modifications for a single user task together and finalize them with one create_change_proposal call when the task is complete.",
 		inputSchema: WriteFileInputSchema,
 		execute: async (input) =>
 			writeFile({ lix: args.lix, ...(input as WriteFileInput) }),

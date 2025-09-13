@@ -24,10 +24,10 @@ export type StateCommitChange = {
 	/**
 	 * Writer identity that produced this state row, if known.
 	 *
-     * Used for echo suppression (ignore my own writes; react to external ones).
-     * See docs: https://lix.dev/guide/writer-key
-     */
-     writer_key: string | null;
+	 * Used for echo suppression (ignore my own writes; react to external ones).
+	 * See docs: https://lix.dev/guide/writer-key
+	 */
+	writer_key: string | null;
 };
 
 /**

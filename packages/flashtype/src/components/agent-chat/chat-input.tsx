@@ -15,12 +15,16 @@ export function ChatInput({
 	commands = DEFAULT_COMMANDS,
 	onQueryMentions,
 	disabled,
+	variant = "default",
+	renderBelow,
 }: {
 	onSend: (value: string) => void;
 	onCommand?: (command: string) => void;
 	commands?: SlashCommand[];
 	onQueryMentions?: (query: string) => Promise<string[]> | string[];
 	disabled?: boolean;
+	variant?: "default" | "flat";
+	renderBelow?: (node: React.ReactNode) => void;
 }) {
 	const [value, setValue] = React.useState("");
 	const [history, setHistory] = React.useState<string[]>([]);
@@ -38,6 +42,10 @@ export function ChatInput({
 		end: number;
 		query: string;
 	} | null>(null);
+	// Debounce + stale-response guard for mention queries
+	const mentionDebounceRef = React.useRef<number | null>(null);
+	const mentionFetchIdRef = React.useRef(0);
+	const lastMentionQueryRef = React.useRef<string | null>(null);
 
 	React.useEffect(() => {
 		ref.current?.focus();
@@ -90,20 +98,49 @@ export function ChatInput({
 		const end = caret; // current caret
 		mentionCtx.current = { start, end, query };
 		if (query.length === 0) {
-			setMentionItems([]);
+			// Open the menu and fetch default suggestions immediately (no debounce)
 			setMentionOpen(true);
 			setMentionSelected(0);
+			const fetchId = ++mentionFetchIdRef.current;
+			try {
+				const res = await onQueryMentions("");
+				const items = Array.isArray(res) ? res.slice(0, 10) : [];
+				if (fetchId !== mentionFetchIdRef.current) return;
+				setMentionItems((prev) => (arraysEqual(prev, items) ? prev : items));
+			} catch {
+				if (fetchId !== mentionFetchIdRef.current) return;
+				setMentionItems([]);
+			}
+			lastMentionQueryRef.current = "";
 			return;
 		}
-		try {
-			const res = await onQueryMentions(query);
-			const items = Array.isArray(res) ? res.slice(0, 20) : [];
-			setMentionItems(items);
+
+		// Avoid refiring for identical query strings
+		if (lastMentionQueryRef.current === query) {
 			setMentionOpen(true);
-			setMentionSelected(0);
-		} catch {
-			setMentionOpen(false);
+			return;
 		}
+		lastMentionQueryRef.current = query;
+
+		// Debounce the file search to avoid floods while typing
+		if (mentionDebounceRef.current != null) {
+			window.clearTimeout(mentionDebounceRef.current);
+		}
+		mentionDebounceRef.current = window.setTimeout(async () => {
+			const fetchId = ++mentionFetchIdRef.current;
+			try {
+				const res = await onQueryMentions(query);
+				const items = Array.isArray(res) ? res.slice(0, 10) : [];
+				// Ignore stale responses
+				if (fetchId !== mentionFetchIdRef.current) return;
+				setMentionOpen(true);
+				setMentionSelected(0);
+				setMentionItems((prev) => (arraysEqual(prev, items) ? prev : items));
+			} catch {
+				if (fetchId !== mentionFetchIdRef.current) return;
+				setMentionOpen(false);
+			}
+		}, 150);
 	}, [onQueryMentions, value]);
 
 	const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -236,30 +273,38 @@ export function ChatInput({
 		void updateMention();
 	}, [value, updateMention]);
 
-	return (
-		<div className="px-1 py-2 shrink-0">
-			<div className="mx-auto max-w-[720px]">
-				<textarea
-					ref={ref}
-					value={value}
-					onChange={(e) => setValue(e.target.value)}
-					onKeyDown={onKeyDown}
-					placeholder={'Prompt or try a command with "/"'}
-					rows={1}
-					disabled={!!disabled}
-					aria-disabled={!!disabled}
-					className={[
-						"min-h-[36px] w-full resize-none rounded-md border bg-background px-3 py-2 font-mono text-xs leading-snug shadow-[inset_0_1px_theme(colors.border)] focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
-						disabled ? "opacity-60 cursor-not-allowed" : "",
-					].join(" ")}
-				/>
-				{(openMenu || mentionOpen) && (
-					<div className="mt-1 mb-1 text-[11px] font-mono text-muted-foreground/70">
-						Use ↑/↓ to navigate • Enter to execute
+	// Unified menu/mention fragment for both flat and non-flat variants
+	const menusFragment = React.useMemo(
+		() => (
+			<>
+				{!openMenu && mentionOpen && (
+					<div className="mt-0 pt-1 max-h-64 overflow-auto font-mono text-[12px] leading-[1.5]">
+						{mentionItems.length === 0 ? (
+							<div className="px-2 py-1 text-muted-foreground">
+								Type to search files…
+							</div>
+						) : (
+							mentionItems.map((p, i) => {
+								const isSel = i === mentionSelected;
+								const sel = "text-[rgb(7,182,212)]";
+								const rowColor = isSel ? sel : "text-foreground";
+								return (
+									<div
+										key={`${p}_${i}`}
+										className={[
+											"grid grid-cols-[1fr] items-start py-1",
+											rowColor,
+										].join(" ")}
+									>
+										<div className={["pr-2", rowColor].join(" ")}>{p}</div>
+									</div>
+								);
+							})
+						)}
 					</div>
 				)}
 				{openMenu && (
-					<div className="mt-2 max-h-64 overflow-auto font-mono text-[12px] leading-[1.5]">
+					<div className="mt-0 pt-1 max-h-64 overflow-auto font-mono text-[12px] leading-[1.5]">
 						{filtered.length === 0 ? (
 							<div className="px-2 py-1 text-muted-foreground">No commands</div>
 						) : (
@@ -293,32 +338,74 @@ export function ChatInput({
 						)}
 					</div>
 				)}
-				{mentionOpen && (
-					<div className="mt-2 max-h-64 overflow-auto font-mono text-[12px] leading-[1.5]">
-						{mentionItems.length === 0 ? (
-							<div className="px-2 py-1 text-muted-foreground">
-								Type to search files…
-							</div>
-						) : (
-							mentionItems.map((p, i) => {
-								const isSel = i === mentionSelected;
-								const sel = "text-[rgb(7,182,212)]";
-								const rowColor = isSel ? sel : "text-foreground";
-								return (
-									<div
-										key={`${p}_${i}`}
-										className={[
-											"grid grid-cols-[1fr] items-start py-1",
-											rowColor,
-										].join(" ")}
-									>
-										<div className={["pr-2", rowColor].join(" ")}>{p}</div>
-									</div>
-								);
-							})
-						)}
-					</div>
-				)}
+			</>
+		),
+		[openMenu, mentionOpen, mentionItems, mentionSelected, filtered, selected],
+	);
+
+	// For flat variant, surface hints/menus outside via callback
+	// Guard against render loops by only calling when content actually changes.
+	const belowKeyRef = React.useRef<string>("__init__");
+	React.useEffect(() => {
+		if (variant !== "flat" || !renderBelow) return;
+		// Build a light key to detect meaningful changes
+		const key = [
+			openMenu
+				? `m:${selected}:${filtered.map((c) => c.name).join(",")}`
+				: "m:closed",
+			mentionOpen
+				? `@:${mentionSelected}:${mentionItems.join("|")}`
+				: "@:closed",
+		].join("|");
+		if (key === belowKeyRef.current) return;
+		belowKeyRef.current = key;
+		renderBelow(menusFragment);
+		// Intentionally exclude renderBelow to avoid effect re-run due to changing function identity.
+		// Parent should pass a memoized renderBelow; we guard regardless with a key to avoid loops.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		variant,
+		menusFragment,
+		openMenu,
+		mentionOpen,
+		filtered,
+		selected,
+		mentionItems,
+		mentionSelected,
+	]);
+
+	return (
+		<div className={variant === "flat" ? "shrink-0" : "px-1 py-2 shrink-0"}>
+			<div className={variant === "flat" ? "w-full" : "mx-auto max-w-[720px]"}>
+				<textarea
+					ref={ref}
+					value={value}
+					onChange={(e) => {
+						setValue(e.target.value);
+						// Auto-resize to fit content
+						if (variant === "flat" && ref.current) {
+							const ta = ref.current;
+							ta.style.height = "auto";
+							ta.style.height = ta.scrollHeight + "px";
+						}
+					}}
+					onKeyDown={onKeyDown}
+					placeholder={'Prompt or try a command with "/"'}
+					rows={1}
+					disabled={!!disabled}
+					aria-disabled={!!disabled}
+					className={[
+						variant === "flat"
+							? "min-h-[36px] w-full resize-none overflow-hidden bg-background px-3 py-2 font-mono text-sm placeholder:text-xs leading-snug focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+							: "min-h-[36px] w-full resize-none bg-background px-3 py-2 font-mono text-xs placeholder:text-[11px] leading-snug focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
+						variant === "flat"
+							? "rounded-none border-0 shadow-none"
+							: "rounded-md border shadow-[inset_0_1px_theme(colors.border)]",
+						disabled ? "opacity-60 cursor-not-allowed" : "",
+					].join(" ")}
+				/>
+				{/* hint removed for non-flat variant as well */}
+				{variant !== "flat" && menusFragment}
 			</div>
 		</div>
 	);
@@ -328,4 +415,13 @@ function moveCaretToEnd(el: HTMLTextAreaElement | null) {
 	if (!el) return;
 	const len = el.value.length;
 	el.setSelectionRange(len, len);
+}
+
+function arraysEqual(a: string[], b: string[]) {
+	if (a === b) return true;
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
+	}
+	return true;
 }

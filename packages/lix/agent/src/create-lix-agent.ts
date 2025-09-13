@@ -7,6 +7,7 @@ import { createWriteFileTool } from "./tools/write-file.js";
 import { createDeleteFileTool } from "./tools/delete-file.js";
 import dedent from "dedent";
 import { sendMessageCore } from "./send-message.js";
+import { createCreateChangeProposalTool } from "./tools/create-change-proposal.js";
 import {
 	getOrCreateDefaultAgentConversationId,
 	loadConversationHistory,
@@ -33,23 +34,28 @@ export type ChatMessage = {
  * // Throws: not implemented yet
  */
 export type LixAgent = {
-	lix: Lix;
-	model: LanguageModelV2;
-	// Default conversation API
-	sendMessage(args: {
-		text: string;
-		system?: string;
-		signal?: AbortSignal;
-	}): Promise<{
-		text: string;
-		usage?: {
-			inputTokens?: number;
-			outputTokens?: number;
-			totalTokens?: number;
-		};
-	}>;
-	getHistory(): ChatMessage[];
-	clearHistory(): void;
+    lix: Lix;
+    model: LanguageModelV2;
+    // Default conversation API
+    sendMessage(args: {
+        text: string;
+        system?: string;
+        signal?: AbortSignal;
+        onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
+    }): Promise<{
+        text: string;
+        usage?: {
+            inputTokens?: number;
+            outputTokens?: number;
+            totalTokens?: number;
+        };
+        /**
+         * Optional id of a newly created change proposal during this send.
+         */
+        changeProposalId?: string;
+    }>;
+    getHistory(): ChatMessage[];
+    clearHistory(): void;
 };
 
 /**
@@ -68,8 +74,26 @@ export async function createLixAgent(args: {
 
 	// Default conversation state (in-memory)
 	const history: ChatMessage[] = [];
-	const LIX_BASE_SYSTEM = dedent`
-		You are the Lix Agent.
+    const LIX_BASE_SYSTEM = dedent`
+        You are the Lix Agent.
+
+        Core Workflow: Task‑Oriented Change Proposals
+
+        Your primary function is to understand a user's overall goal, execute
+        all necessary file modifications to achieve it, and then package the
+        entire set of changes into a single proposal for user review.
+
+        1. Understand the Full Task: Analyze the user's prompt to determine if
+           it requires single or multiple steps (e.g., writing several files,
+           deleting one and writing another).
+        2. Execute All Changes: Call the necessary tools (write_file,
+           delete_file, etc.) to fulfill the entirety of the user's request. You
+           may call these tools multiple times.
+        3. Propose the Completed Work: Once all file modifications for the
+           user's logical task are complete, your FINAL action MUST be to call
+           create_change_proposal. This bundles the task’s changes into one
+           reviewable unit. Do not create a proposal until you believe the
+           user's request has been fully addressed.
 
 		Your job is to assist users in managing their lix, modifying files, etc. 
 
@@ -114,6 +138,12 @@ export async function createLixAgent(args: {
 
 		- Say “change control” (never “version control”).
     - Use “the lix” to refer to the repository/workspace.
+
+        Change proposals
+
+        - Proposals are version-based review units. After you complete a
+          coherent unit of work (the user's task), call create_change_proposal
+          as the final step so the user can review and accept/reject.
 	`;
 
 	let systemInstruction: string | undefined = args.system
@@ -125,42 +155,100 @@ export async function createLixAgent(args: {
 	const initial = await loadConversationHistory(lix, conversationId);
 	for (const m of initial) history.push(m);
 
-	async function sendMessage({
-		text,
-		system,
-		signal,
-	}: {
-		text: string;
-		system?: string;
-		signal?: AbortSignal;
-	}) {
+	let lastChangeProposalId: string | undefined;
+
+    async function sendMessage({
+        text,
+        system,
+        signal,
+        onToolEvent,
+    }: {
+        text: string;
+        system?: string;
+        signal?: AbortSignal;
+        onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
+    }) {
 		if (system) {
 			// Prepend base system to any provided system override.
 			systemInstruction = `${LIX_BASE_SYSTEM}\n\n${system}`;
 		}
 
-		const { text: reply, usage } = await sendMessageCore({
-			lix,
-			model,
-			history,
-			text,
-			system: systemInstruction,
-			setSystem: (s?: string) => {
-				systemInstruction = s;
-			},
-			signal,
-			tools: {
-				read_file,
-				list_files,
-				sql_select_state,
-				write_file,
-				delete_file,
-			},
-			persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
-			persistAssistant: (t: string) =>
-				appendAssistantMessage(lix, conversationId, t),
-		});
-		return { text: reply, usage };
+		// Clear any previous capture before starting
+		lastChangeProposalId = undefined;
+
+        // Build Proposal Mode overlay if KV indicates an active proposal
+        let systemOverlay: string | undefined;
+        try {
+            const kv = await lix.db
+                .selectFrom("key_value_all")
+                .where("lixcol_version_id", "=", "global")
+                .where("key", "=", "lix_agent_active_proposal_id")
+                .select(["value"])
+                .executeTakeFirst();
+            const activeId = (kv?.value as any) as string | undefined;
+            if (activeId) {
+                const cp = await lix.db
+                    .selectFrom("change_proposal")
+                    .where("id", "=", activeId)
+                    .select(["id", "source_version_id", "status"])
+                    .executeTakeFirst();
+                if (cp && cp.status === "open") {
+                    systemOverlay = dedent`
+                        Proposal Mode (Active Change Proposal)
+
+                        - Active proposal id: ${String(cp.id)}
+                        - Source version id: ${String(cp.source_version_id)}
+
+                        You MUST:
+                        1) Apply all file changes (write_file, delete_file) to the source version of this active proposal.
+                        2) NOT call create_change_proposal again. Continue refining the existing proposal until the user accepts or rejects it.
+
+                        Only open a new proposal if the user explicitly requests a new one.
+                    `;
+                } else {
+                    // Clean stale KV if proposal is gone or closed
+                    try {
+                        await lix.db
+                            .deleteFrom("key_value_all")
+                            .where("lixcol_version_id", "=", "global")
+                            .where("key", "=", "lix_agent_active_proposal_id")
+                            .execute();
+                    } catch {}
+                }
+            }
+        } catch {}
+
+        const { text: reply, usage } = await sendMessageCore({
+            lix,
+            model,
+            history,
+            text,
+            system: systemOverlay ? `${systemInstruction}\n\n${systemOverlay}` : systemInstruction,
+            setSystem: (s?: string) => {
+                systemInstruction = s;
+            },
+            signal,
+            tools: {
+                read_file,
+                list_files,
+                sql_select_state,
+                write_file,
+                delete_file,
+                create_change_proposal,
+            },
+            persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
+            persistAssistant: (t: string) =>
+                appendAssistantMessage(lix, conversationId, t),
+            onToolEvent,
+        });
+		const result = {
+			text: reply,
+			usage,
+			changeProposalId: lastChangeProposalId,
+		};
+		// Reset capture to avoid leaking across calls
+		lastChangeProposalId = undefined;
+		return result;
 	}
 
 	function getHistory() {
@@ -179,6 +267,12 @@ export async function createLixAgent(args: {
 	const sql_select_state = createSqlSelectStateTool({ lix });
 	const write_file = createWriteFileTool({ lix });
 	const delete_file = createDeleteFileTool({ lix });
+	const create_change_proposal = createCreateChangeProposalTool({
+		lix,
+		onCreated: (p) => {
+			lastChangeProposalId = p.id;
+		},
+	});
 	return {
 		lix,
 		model,

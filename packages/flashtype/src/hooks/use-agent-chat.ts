@@ -19,7 +19,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const apiKey = import.meta.env.VITE_GOOGLE_API_KEY as string | undefined;
 	const modelName =
 		(import.meta.env.VITE_GOOGLE_MODEL as string | undefined) ??
-		"gemini-2.5-flash";
+		"gemini-2.5-pro";
 	const hasKey = !!apiKey;
 	const provider = useMemo(
 		() => (apiKey ? createGoogleGenerativeAI({ apiKey }) : null),
@@ -77,13 +77,20 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	}, [lix, model, hasKey, system]);
 
 	const send = useCallback(
-		async (text: string) => {
+		async (
+			text: string,
+			opts?: { onToolEvent?: (e: import("@lix-js/agent").ToolEvent) => void },
+		) => {
 			if (!agent) throw new Error("Agent not ready");
 			if (!text.trim()) return;
 			setError(null);
 			setPending(true);
 			try {
-				await agent.sendMessage({ text });
+				const res = await agent.sendMessage({
+					text,
+					onToolEvent: opts?.onToolEvent,
+				});
+				return res;
 			} finally {
 				setPending(false);
 			}

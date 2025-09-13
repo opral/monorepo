@@ -7,37 +7,13 @@ import type { ToolRun, ToolRunStatus } from "./types";
  * Expandable output per tool.
  */
 export function ToolRunList({ runs }: { runs: ToolRun[] }) {
-	const [open, setOpen] = React.useState<Record<string, boolean>>({});
-	const toggle = (id: string) => setOpen((s) => ({ ...s, [id]: !s[id] }));
-
 	return (
-		<div className="mb-2 flex flex-col gap-2">
+		<div className="mb-2 flex flex-col gap-1">
 			{runs.map((r) => (
-				<div key={r.id} className="flex items-start gap-2">
+				<div key={r.id} className="flex items-center gap-2 leading-none">
 					<StatusDot status={r.status} />
-					<div className="flex-1 min-w-0">
-						<div className="font-mono text-[12px]">
-							<span className="font-semibold">{r.title}</span>
-						</div>
-						{r.detail ? (
-							<div className="font-mono text-[11px] text-muted-foreground">
-								{r.detail}{" "}
-								{r.output ? (
-									<button
-										type="button"
-										className="underline-offset-2 hover:underline"
-										onClick={() => toggle(r.id)}
-									>
-										{open[r.id] ? "(collapse)" : "(expand)"}
-									</button>
-								) : null}
-							</div>
-						) : null}
-						{r.output && open[r.id] ? (
-							<pre className="mt-1 max-w-full break-words overflow-x-hidden rounded border bg-muted/40 p-2 text-[11px] leading-snug whitespace-pre-wrap">
-								{r.output}
-							</pre>
-						) : null}
+					<div className="font-mono text-[12px] font-semibold truncate">
+						{r.title}
 					</div>
 				</div>
 			))}
@@ -50,9 +26,13 @@ function StatusDot({ status }: { status: ToolRunStatus }) {
 		status === "success"
 			? "bg-emerald-500"
 			: status === "running"
-				? "bg-amber-500 animate-pulse"
+				? "bg-zinc-400 animate-pulse"
 				: status === "error"
 					? "bg-rose-500"
 					: "bg-zinc-300";
-	return <span className={`mt-1 inline-block size-2 rounded-full ${color}`} />;
+	return (
+		<span
+			className={`inline-block h-2.5 w-2.5 rounded-full ${color} shrink-0 align-middle`}
+		/>
+	);
 }

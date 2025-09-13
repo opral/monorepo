@@ -9,9 +9,9 @@ import type { DiffRow } from "../version/select-version-diff.js";
  * Unlike version-based diffs, this dynamically computes states without requiring version materialization.
  *
  * Diff status meanings:
- * 
+ *
  * - `added`: Entity exists only in `after` commit
- * - `removed`: Entity exists only in `before` commit  
+ * - `removed`: Entity exists only in `before` commit
  * - `modified`: Entity exists in both with different change_ids
  * - `unchanged`: Entity exists in both with same change_id
  *
@@ -19,23 +19,23 @@ import type { DiffRow } from "../version/select-version-diff.js";
  * changed entity triples, then only reconstructing leaf states for those.
  *
  * The `hints` parameter filters results at the database level for better performance:
- * 
+ *
  * - `includeUnchanged`: Include unchanged entities (default: true). Set false for fast-path optimization.
  * - `fileId`: Limit to specific file
- * - `pluginKey`: Filter by plugin that created changes  
+ * - `pluginKey`: Filter by plugin that created changes
  * - `schemaKeys`: Include only specific entity types
  * - `entityIds`: Include only specific entities
  *
  * @example
  * // Get changes between commits
- * const changes = await selectCommitDiff({ 
- *   lix, 
- *   before: 'abc123', 
+ * const changes = await selectCommitDiff({
+ *   lix,
+ *   before: 'abc123',
  *   after: 'xyz789',
  *   hints: { includeUnchanged: false }
  * }).execute();
  *
- * @example 
+ * @example
  * // Filter by file and status
  * const fileDiff = await selectCommitDiff({ lix, before, after })
  *   .where('diff.file_id', '=', 'messages.json')

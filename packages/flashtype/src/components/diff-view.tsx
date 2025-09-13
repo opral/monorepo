@@ -46,7 +46,6 @@ export function DiffView() {
 			source: { id: sourceId }, // head
 			target: { id: mainVersion!.id as unknown as string }, // base (main)
 		})
-			.where("diff.status", "!=", "unchanged")
 			// Restrict to active file
 			.where(
 				"diff.file_id",
@@ -63,21 +62,23 @@ export function DiffView() {
 			.select([
 				"diff.entity_id",
 				"diff.schema_key",
+				(eb) => eb.ref("diff.status").as("status"),
 				(eb) => eb.ref("after.plugin_key").as("plugin_key"),
 				(eb) => eb.ref("before.snapshot_content").as("snapshot_content_before"),
 				(eb) => eb.ref("after.snapshot_content").as("snapshot_content_after"),
 			]);
-
 		return q;
 	});
 
-	const hasRows = Array.isArray(diffs) && (diffs?.length ?? 0) > 0;
+	const hasChanges = Array.isArray(diffs)
+		? (diffs as any[]).some((d) => d.status !== "unchanged")
+		: false;
 
 	return (
 		<div>
 			<div className="w-full bg-background px-3 py-0">
 				<div className="w-full max-w-5xl mx-auto">
-					{!hasRows ? (
+					{!hasChanges ? (
 						<div className="text-sm text-muted-foreground p-3">
 							No differences for this file between this version and main.
 						</div>

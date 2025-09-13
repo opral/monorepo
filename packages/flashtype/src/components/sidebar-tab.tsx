@@ -32,7 +32,7 @@ export function SidebarTab({ title, actions, children, onClose }: Props) {
 					)}
 				</div>
 			</div>
-			<div className="min-h-0 flex-1 overflow-hidden p-2 flex flex-col">
+			<div className="min-h-0 flex-1 overflow-hidden flex flex-col">
 				{children}
 			</div>
 		</div>

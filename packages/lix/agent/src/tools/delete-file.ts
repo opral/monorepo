@@ -77,8 +77,8 @@ export async function deleteFile(
 
 export function createDeleteFileTool(args: { lix: Lix }) {
 	return tool({
-		description:
-			"Delete a file from the Lix workspace. Provide an absolute path (starting with '/') or a fileId.",
+    description:
+            "Delete a file from the Lix workspace. Provide an absolute path (starting with '/') or a fileId. Group all file modifications for a single user task together and finalize them with one create_change_proposal call when the task is complete.",
 		inputSchema: DeleteFileInputSchema,
 		execute: async (input) =>
 			deleteFile({ lix: args.lix, ...(input as DeleteFileInput) }),

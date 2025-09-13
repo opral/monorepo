@@ -9,6 +9,29 @@ export type ChatMessage = {
 	content: string;
 };
 
+export type ToolEvent =
+	| {
+			type: "start";
+			id: string;
+			name: string;
+			input?: unknown;
+			at: number;
+	  }
+	| {
+			type: "finish";
+			id: string;
+			name: string;
+			output?: unknown;
+			at: number;
+	  }
+	| {
+			type: "error";
+			id: string;
+			name: string;
+			errorText: string;
+			at: number;
+	  };
+
 export async function sendMessageCore(args: {
 	lix: Lix;
 	model: LanguageModelV2;
@@ -20,6 +43,7 @@ export async function sendMessageCore(args: {
 	tools: Record<string, any>;
 	persistUser: (text: string) => Promise<void>;
 	persistAssistant: (text: string) => Promise<void>;
+	onToolEvent?: (event: ToolEvent) => void;
 }): Promise<{
 	text: string;
 	usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number };
@@ -35,6 +59,7 @@ export async function sendMessageCore(args: {
 		tools,
 		persistUser,
 		persistAssistant,
+		onToolEvent,
 	} = args;
 
 	let systemInstruction = system;
@@ -50,6 +75,37 @@ export async function sendMessageCore(args: {
 			: undefined;
 
 	let stepNo = 0;
+	// Wrap tools to emit start/finish/error events as they execute
+	const wrappedTools = Object.fromEntries(
+		Object.entries(tools).map(([name, def]) => {
+			const originalExecute = def?.execute;
+			if (typeof originalExecute !== "function") return [name, def];
+			const wrapped = {
+				...def,
+				execute: async (input: unknown) => {
+					const id = uuidV7({ lix });
+					try {
+						onToolEvent?.({ type: "start", id, name, input, at: Date.now() });
+						const output = await originalExecute(input);
+						onToolEvent?.({ type: "finish", id, name, output, at: Date.now() });
+						return output;
+					} catch (err: any) {
+						const msg = err?.message ? String(err.message) : String(err);
+						onToolEvent?.({
+							type: "error",
+							id,
+							name,
+							errorText: msg,
+							at: Date.now(),
+						});
+						throw err;
+					}
+				},
+			};
+			return [name, wrapped];
+		})
+	);
+
 	const { text: reply, usage } = await generateText({
 		model,
 		system:
@@ -57,7 +113,7 @@ export async function sendMessageCore(args: {
 				? `${systemInstruction}\n\n${mentionGuidance}`
 				: (mentionGuidance ?? systemInstruction),
 		messages: toAiMessages(history),
-		tools: tools as any,
+		tools: wrappedTools as any,
 		stopWhen: stepCountIs(5),
 		prepareStep: async ({ messages }) => {
 			if (messages.length > 20) {

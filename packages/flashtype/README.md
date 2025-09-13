@@ -41,6 +41,7 @@ AI that understands your markdown. Generate content, get suggestions, review dif
 No lossy import/export cycles. Your document IS markdown, not converted to/from markdown. Copy from Flashtype → paste into GitHub → paste back into Flashtype with zero data loss. No vendor lock-in, no proprietary formats.
 
 💡 **Why This Matters:**
+
 - Most editors convert markdown to their own format, creating lossy copy/paste
 - Flashtype treats markdown as the native format - no conversion needed
 - True lossless workflows between ChatGPT, GitHub, Discord, and more
