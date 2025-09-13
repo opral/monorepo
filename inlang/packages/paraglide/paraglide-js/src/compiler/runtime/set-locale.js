@@ -47,7 +47,7 @@ const navigateOrReload = (newLocation) => {
  * @example
  *   setLocale('en', { reload: false });
  *
- * @type {(newLocale: Locale, options?: { reload?: boolean }) => Promise<void> | void}
+ * @type {(newLocale: Locale, options?: { reload?: boolean }) => Promise<any> | void}
  */
 export let setLocale = (newLocale, options) => {
 	const optionsWithDefaults = {
@@ -117,11 +117,13 @@ export let setLocale = (newLocale, options) => {
 		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
 			const handler = customClientStrategies.get(strat);
 			if (handler) {
-				const result = handler.setLocale(newLocale);
+				let result = handler.setLocale(newLocale);
 				// Handle async setLocale - fire and forget
 				if (result instanceof Promise) {
-					result.catch((error) => {
-						error.message = `Custom strategy "${strat}" setLocale failed: ${error.message}`;
+					result = result.catch((error) => {
+						throw new Error(`Custom strategy "${strat}" setLocale failed.`, {
+							cause: error,
+						});
 					});
 					customSetLocalePromises.push(result);
 				}
@@ -143,6 +145,8 @@ export let setLocale = (newLocale, options) => {
 		} else {
 			navigateOrReload(newLocation);
 		}
+	} else if (customSetLocalePromises.length) {
+		return Promise.all(customSetLocalePromises);
 	}
 
 	return;

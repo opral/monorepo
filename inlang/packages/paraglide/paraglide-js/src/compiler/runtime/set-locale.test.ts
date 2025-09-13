@@ -399,6 +399,36 @@ test("calls setLocale on multiple custom strategies", async () => {
 	expect(customLocale2).toBe("de");
 });
 
+test("setLocale should return a promise if any custom setLocale function is async", async () => {
+	let customLocale1 = "en";
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-async", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-async", {
+		getLocale: () => customLocale1,
+		setLocale: async (locale) => {
+			customLocale1 = locale;
+		},
+	});
+
+	const setLocalePromise = runtime.setLocale("de");
+	const setLocalePromiseWithoutReload = runtime.setLocale("de", {
+		reload: false,
+	});
+
+	expect(setLocalePromise).toBeInstanceOf(Promise);
+	expect(setLocalePromiseWithoutReload).toBeInstanceOf(Promise);
+});
+
 test("awaits async setLocale functions to resolve in custom strategy", async () => {
 	let customLocale1 = "en";
 
@@ -509,9 +539,9 @@ test("reload should not run if async setLocale function rejects in custom strate
 		},
 	});
 
-	await expect(() => runtime.setLocale("de")).rejects.toThrowError(
-		`Custom strategy "custom-async" setLocale failed: fetch error`
-	);
+	const error = expect(() => runtime.setLocale("de")).rejects;
+	await error.toThrowError(`Custom strategy "custom-async" setLocale failed.`);
+	await error.toMatchObject({ cause: { message: "fetch error" } });
 
 	// Verify that reload was never called
 	expect(window.location.reload).toHaveBeenCalledTimes(0);
