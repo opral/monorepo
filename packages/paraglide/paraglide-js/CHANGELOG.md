@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.3.2
+
+### Patch Changes
+
+- 4ea9e7a: fix: ensure that async custom setLocale funcs resolve with reload: false
+
 ## 2.3.1
 
 ### Patch Changes
