@@ -3,10 +3,10 @@ import { openLix } from "../../lix/open-lix.js";
 import type { LixBackend, ExecResult } from "../../backend/types.js";
 import { InMemoryBackend } from "../../backend/in-memory.js";
 
-export const runtimeBoundarySimulation: SimulationTestDef = {
-	name: "runtime boundary",
+export const engineBoundarySimulation: SimulationTestDef = {
+	name: "engine boundary",
 	setup: async (lix) => {
-		// Re-seed into an isomorphic boundary backend that hides runtime
+		// Re-seed into an isomorphic boundary backend that hides engine
 		const blob = await lix.toBlob();
 		// Preserve plugin instances from the original session if available
 		const providePlugins = await (async () => {
@@ -19,15 +19,15 @@ export const runtimeBoundarySimulation: SimulationTestDef = {
 		await lix.close();
 		const boundaryLix = await openLix({
 			blob,
-			backend: new RuntimeBoundaryBackend(),
+			backend: new EngineBoundaryBackend(),
 			providePlugins,
 		});
 		return boundaryLix;
 	},
 };
 
-// Inline, isomorphic backend wrapper that hides the runtime from openLix()
-class RuntimeBoundaryBackend implements LixBackend {
+// Inline, isomorphic backend wrapper that hides the engine from openLix()
+class EngineBoundaryBackend implements LixBackend {
 	private inner: InMemoryBackend;
 	private eventHandler: ((ev: any) => void) | undefined;
 
@@ -45,9 +45,9 @@ class RuntimeBoundaryBackend implements LixBackend {
 
 	async open(initOpts: Parameters<LixBackend["open"]>[0]): Promise<void> {
 		this.eventHandler = initOpts.onEvent;
-		// Boot the inner engine but intentionally do not return its runtime
+		// Boot the inner engine but intentionally do not return its engine
 		await this.inner.open(initOpts);
-		// undefined return keeps lix.runtime absent to simulate boundary
+		// undefined return keeps lix.engine absent to simulate boundary
 	}
 
 	async create(createOpts: Parameters<LixBackend["create"]>[0]): Promise<void> {

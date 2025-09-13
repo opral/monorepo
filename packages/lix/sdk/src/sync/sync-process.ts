@@ -3,7 +3,7 @@ import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
 export async function initSyncProcess(args: {
-	lix: Pick<Lix, "db" | "plugin" | "sqlite" | "toBlob" | "runtime">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite" | "toBlob" | "engine">;
 }): Promise<void> {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
@@ -69,7 +69,7 @@ export async function initSyncProcess(args: {
 	// naive implementation that syncs every second
 
 	function schedulePullAndPush() {
-		if (args.lix.runtime!.sqlite.isOpen() === false) {
+		if (args.lix.engine!.sqlite.isOpen() === false) {
 			return;
 		}
 		pullAndPush().catch((e) => {

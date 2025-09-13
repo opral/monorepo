@@ -7,11 +7,11 @@ import { applyFileDatabaseSchema } from "../file/schema.js";
 import { loadPluginFromString } from "../backend/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";
-import { createRuntimeRouter, type Call } from "./router.js";
+import { createEngineRouter, type Call } from "./router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 
-export type RuntimeEvent = {
+export type EngineEvent = {
 	type: "state_commit";
 	payload: { changes: StateCommitChange[] };
 };
@@ -25,18 +25,19 @@ export type BootArgs = {
 
 export type BootEnv = {
 	sqlite: SqliteWasmDatabase;
-	postEvent: (ev: RuntimeEvent) => void;
+	postEvent: (ev: EngineEvent) => void;
 	args: BootArgs;
 };
 
 /**
- * Runtime context bound to a live SQLite connection.
+ * Engine context bound to a live SQLite connection.
  *
- * Internal to the runtime: used by deterministic helpers and the runtime
+ * Internal to the engine: used by deterministic helpers and the engine
  * function router. Not exposed as a value to app code, but the type is
  * exported for internal module boundaries.
  */
-export type LixRuntime = {
+// Engine context bound to a live SQLite connection. Internal only.
+export type LixEngine = {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	hooks: LixHooks;
@@ -45,7 +46,7 @@ export type LixRuntime = {
 };
 
 /**
- * Boot the Lix runtime next to a live SQLite connection.
+ * Boot the Lix engine next to a live SQLite connection.
  *
  * - Applies schema, vtable, UDFs via initDb
  * - Installs file handlers and views
@@ -55,7 +56,7 @@ export type LixRuntime = {
  */
 export async function boot(
 	env: BootEnv
-): Promise<{ runtime: LixRuntime; call: Call }> {
+): Promise<{ engine: LixEngine; call: Call }> {
 	const hooks = createHooks();
 	const db = initDb({ sqlite: env.sqlite, hooks });
 
@@ -75,7 +76,7 @@ export async function boot(
 	};
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
-	const runtime: LixRuntime = {
+	const engine: LixEngine = {
 		sqlite: env.sqlite,
 		db,
 		hooks,
@@ -83,7 +84,7 @@ export async function boot(
 	};
 
 	// Install file functions + views that depend on plugin + hooks
-	applyFileDatabaseSchema({ runtime });
+	applyFileDatabaseSchema({ engine: engine });
 
 	// Event bridge: forward state_commit to host
 	hooks.onStateCommit(({ changes }) => {
@@ -201,6 +202,6 @@ export async function boot(
 		// non-fatal
 	}
 
-	const { call } = createRuntimeRouter({ runtime });
-	return { runtime, call };
+	const { call } = createEngineRouter({ engine: engine });
+	return { engine: engine, call };
 }

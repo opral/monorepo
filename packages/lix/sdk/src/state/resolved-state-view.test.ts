@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
-import { getTimestamp } from "../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../engine/deterministic/timestamp.js";
 import { createVersion } from "../version/create-version.js";
 import type { LixVersionDescriptor } from "../version/schema.js";
 
@@ -290,7 +290,7 @@ test("resolved state view generates correct composite keys", async () => {
 
 	// Insert some test data into state cache using updateStateCacheV2
 	updateStateCacheV2({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "change1",
@@ -482,7 +482,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	// Insert version descriptor records using updateStateCacheV2
 	const versionTimestamp = await getTimestamp({ lix });
 	updateStateCacheV2({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "change1",
@@ -523,7 +523,7 @@ test("resolved state view generates correct composite keys for inherited state",
 
 	// Insert data in parent version (cached) using updateStateCacheV2
 	updateStateCacheV2({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "change3",

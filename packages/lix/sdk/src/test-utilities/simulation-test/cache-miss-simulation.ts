@@ -68,11 +68,11 @@ export const cacheMissSimulation: SimulationTestDef = {
 				if (!skipClear) {
 					// This forces re-materialization from changes
 					clearStateCache({
-						runtime: lix.runtime!,
+						engine: lix.engine!,
 						timestamp: CACHE_TIMESTAMP,
 					});
 					// Also clear file data cache to prevent stale file reads
-					clearFileDataCache({ runtime: lix.runtime! });
+					clearFileDataCache({ engine: lix.engine! });
 				}
 
 				// Call the original execute

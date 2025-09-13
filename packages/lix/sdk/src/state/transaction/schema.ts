@@ -1,10 +1,10 @@
 import type { Selectable, Insertable, Generated } from "kysely";
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 export function applyTransactionStateSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_transaction_state (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,

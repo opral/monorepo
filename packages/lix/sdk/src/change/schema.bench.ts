@@ -2,8 +2,8 @@ import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { uuidV7 } from "../runtime/deterministic/uuid-v7.js";
-import { getTimestamp } from "../runtime/deterministic/timestamp.js";
+import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
+import { getTimestamp } from "../engine/deterministic/timestamp.js";
 
 const ROW_NUM = 1000;
 // Safe batch size to avoid SQLite variable limit

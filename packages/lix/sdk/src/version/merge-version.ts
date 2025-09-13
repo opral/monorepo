@@ -2,8 +2,8 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 import { sql, type Kysely } from "kysely";
-import { uuidV7 } from "../runtime/deterministic/uuid-v7.js";
-import { getTimestamp } from "../runtime/deterministic/timestamp.js";
+import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
+import { getTimestamp } from "../engine/deterministic/timestamp.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
@@ -495,7 +495,7 @@ export async function mergeVersion(args: {
 
 		// Write incremental cache in a single batched call
 		if (cacheBatch.length > 0) {
-			// Delegate cache updates to runtime via router when runtime is not exposed
+			// Delegate cache updates to engine via router when engine is not exposed
 			await lix.call("lix_update_state_cache", { changes: cacheBatch });
 			await lix.call("lix_mark_state_cache_as_fresh");
 		}

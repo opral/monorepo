@@ -4,34 +4,34 @@ import type {
 } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import { nanoIdSync } from "../engine/deterministic/index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyThreadDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): void {
-	const { runtime } = args;
+	const { engine } = args;
 	// Create both primary and _all views for thread with default ID generation
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixThreadSchema,
 		overrideName: "thread",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ runtime }),
+			id: () => nanoIdSync({ engine: engine }),
 		},
 	});
 
 	// Create both primary and _all views for thread_comment with default ID generation
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixThreadCommentSchema,
 		overrideName: "thread_comment",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ runtime }),
+			id: () => nanoIdSync({ engine: engine }),
 		},
 	});
 }

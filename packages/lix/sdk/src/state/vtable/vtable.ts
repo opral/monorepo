@@ -1,7 +1,7 @@
 import type { Kysely, Generated } from "kysely";
 import { sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
@@ -9,7 +9,7 @@ import { isStaleStateCache } from "../cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "../cache/mark-state-cache-as-stale.js";
 import { populateStateCache } from "../cache/populate-state-cache.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 
@@ -50,10 +50,10 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 ) WITHOUT ROWID;`;
 
 export function applyStateVTable(
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">
 ): void {
-	const { sqlite, hooks } = runtime;
-	const db = runtime.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const { sqlite, hooks } = engine;
+	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -62,7 +62,7 @@ export function applyStateVTable(
 		// @ts-expect-error - type mismatch
 		xFunc: (_ctxPtr: number, ...args: any[]) => {
 			return validateStateMutation({
-				runtime,
+				engine: engine,
 				schema: args[0] ? JSON.parse(args[0]) : null,
 				snapshot_content: JSON.parse(args[1]),
 				operation: args[2] || undefined,
@@ -149,7 +149,7 @@ export function applyStateVTable(
 			},
 
 			xCommit: () => {
-				return commit({ runtime });
+				return commit({ engine: engine });
 			},
 
 			xRollback: () => {
@@ -320,7 +320,7 @@ export function applyStateVTable(
 						}
 
 						const stateResults = executeSync({
-							runtime,
+							engine: engine,
 							query,
 						});
 
@@ -331,7 +331,7 @@ export function applyStateVTable(
 
 					// Normal path: check cache staleness
 					const cacheIsStale = isStaleStateCache({
-						runtime: { sqlite, db: db as any },
+						engine: { sqlite, db: db as any },
 					});
 
 					// Try cache first - but only if it's not stale
@@ -348,7 +348,7 @@ export function applyStateVTable(
 						}
 
 						cacheResults = executeSync({
-							runtime,
+							engine: engine,
 							query,
 						});
 					}
@@ -358,7 +358,7 @@ export function applyStateVTable(
 
 					if (cacheIsStale) {
 						// Populate cache directly with materialized state
-						populateStateCache({ runtime: { sqlite, db: db as any } });
+						populateStateCache({ engine: { sqlite, db: db as any } as any });
 
 						// Do not log here: xFilter can be invoked during SELECT-only paths
 						// and should avoid writing to the transaction state/logs.
@@ -367,7 +367,7 @@ export function applyStateVTable(
 						isUpdatingCacheState = true;
 						try {
 							markStateCacheAsFresh({
-								runtime: { sqlite, db: db as any, hooks },
+								engine: { sqlite, db: db as any, hooks } as any,
 							});
 						} finally {
 							isUpdatingCacheState = false;
@@ -383,7 +383,7 @@ export function applyStateVTable(
 						}
 
 						const newResults = executeSync({
-							runtime,
+							engine: engine,
 							query,
 						});
 						cursorState.results = newResults || [];
@@ -476,7 +476,7 @@ export function applyStateVTable(
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
 					const _timestamp = getTimestampSync({
-						runtime: { sqlite, db: db as any, hooks },
+						engine: { sqlite, db: db as any, hooks },
 					});
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
@@ -489,7 +489,7 @@ export function applyStateVTable(
 						}
 
 						// Use handleStateDelete for all cases - it handles both tracked and untracked
-						handleStateDelete(runtime, oldPk, _timestamp);
+						handleStateDelete(engine, oldPk, _timestamp);
 
 						return capi.SQLITE_OK;
 					}
@@ -528,10 +528,10 @@ export function applyStateVTable(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(runtime, schema_key);
+					const storedSchema = getStoredSchema(engine, schema_key);
 
 					validateStateMutation({
-						runtime,
+						engine: engine,
 						schema: storedSchema ? JSON.parse(storedSchema) : null,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
@@ -542,7 +542,7 @@ export function applyStateVTable(
 
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
-						runtime,
+						engine: engine,
 						timestamp: _timestamp,
 						data: [
 							{
@@ -653,9 +653,9 @@ export function applyStateVTable(
 
 					// Log error for debugging
 					insertVTableLog({
-						runtime,
+						engine: engine,
 						timestamp: getTimestampSync({
-							runtime,
+							engine: engine,
 						}),
 						key: "lix_state_xupdate_error",
 						level: "error",
@@ -684,14 +684,14 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
 	primaryKey: string,
 	timestamp: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
-		runtime,
-		query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine: engine,
+		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select([
 				"entity_id",
@@ -728,7 +728,7 @@ export function handleStateDelete(
 		if (parsed.tag === "UI") {
 			// Inherited untracked: create a tombstone to block inheritance
 			insertTransactionState({
-				runtime,
+				engine: engine,
 				timestamp,
 				data: [
 					{
@@ -751,7 +751,7 @@ export function handleStateDelete(
 			// Overwrite the pending transaction row with a deletion so the commit drops it
 			// and nothing is persisted to the untracked table.
 			insertTransactionState({
-				runtime,
+				engine: engine,
 				timestamp,
 				data: [
 					{
@@ -771,8 +771,8 @@ export function handleStateDelete(
 
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
 		executeSync({
-			runtime,
-			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			engine: engine,
+			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.deleteFrom("internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
@@ -782,10 +782,10 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(runtime, schema_key);
+	const storedSchema = getStoredSchema(engine, schema_key);
 
 	validateStateMutation({
-		runtime,
+		engine: engine,
 		schema: storedSchema ? JSON.parse(storedSchema) : null,
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
@@ -794,7 +794,7 @@ export function handleStateDelete(
 	});
 
 	insertTransactionState({
-		runtime,
+		engine: engine,
 		timestamp,
 		data: [
 			{
@@ -814,13 +814,13 @@ export function handleStateDelete(
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
 	schemaKey: any
 ): string | null {
 	// Query directly from internal_resolved_state_all to avoid vtable recursion
 	const result = executeSync({
-		runtime,
-		query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine: engine,
+		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")

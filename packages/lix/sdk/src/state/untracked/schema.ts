@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 /**
  * Applies the schema for untracked state storage.
@@ -8,9 +8,9 @@ import type { LixRuntime } from "../../runtime/boot.js";
  * configuration, and other data that doesn't need version history.
  */
 export function applyUntrackedStateSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
 		-- Table for untracked state that bypasses change control
 		CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
 			entity_id TEXT NOT NULL,

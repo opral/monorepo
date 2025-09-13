@@ -12,13 +12,13 @@ import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 import type { LixBackend } from "../backend/types.js";
 import { isJsonType } from "../schema-definition/json-type.js";
 import { createDialect } from "../backend/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
-import { random } from "../runtime/deterministic/random.js";
+import { random } from "../engine/deterministic/random.js";
 
 export type Lix = {
 	/**
@@ -51,9 +51,9 @@ export type Lix = {
 	observe: ReturnType<typeof createObserve>;
 
 	/**
-	 * Calls a named runtime function and returns its result.
+	 * Calls a named engine function and returns its result.
 	 *
-	 * Preferred entrypoint for invoking runtime functions.
+	 * Preferred entrypoint for invoking engine functions.
 	 */
 	call: (
 		name: string,
@@ -77,22 +77,22 @@ export type Lix = {
 	toBlob: () => Promise<Blob>;
 
 	/**
-	 * In‑process runtime context bound to the live database.
+	 * In‑process engine context bound to the live database.
 	 *
 	 * When Lix runs in‑process (same thread as the database),
-	 * `runtime` is available and tests can directly call helpers
-	 * that accept `{ runtime }`.
+	 * `engine` is available and tests can directly call helpers
+	 * that accept `{ engine }`.
 	 *
-	 * When Lix runs out‑of‑process (for example inside a Worker), the runtime
+	 * When Lix runs out‑of‑process (for example inside a Worker), the engine
 	 * is not accessible from the main thread and will be `undefined`. In those
-	 * environments, use `lix.call` to invoke runtime functions across the
+	 * environments, use `lix.call` to invoke engine functions across the
 	 * boundary.
 	 *
 	 * Guidance:
-	 * - Prefer `lix.db` for normal queries and `lix.call` for runtime
-	 *   operations. Reserve `lix.runtime` for unit tests or internal SDK code
+	 * - Prefer `lix.db` for normal queries and `lix.call` for engine
+	 *   operations. Reserve `lix.engine` for unit tests or internal SDK code
 	 *   that explicitly requires in‑process access alongside the database.
-	 * - Do not rely on `lix.runtime` in application/business logic, since it
+	 * - Do not rely on `lix.engine` in application/business logic, since it
 	 *   may be `undefined` in worker/remote environments.
 	 *
 	 * Unit test in the same process
@@ -106,7 +106,7 @@ export type Lix = {
 	 *      backend: new InMemoryBackend()
 	 *   });
 	 *   executeSync({
-	 *     runtime: lix.runtime!,
+	 *     engine: lix.engine!,
 	 *     data: [...],
 	 *   });
 	 * });
@@ -119,7 +119,7 @@ export type Lix = {
 	 * await lix.call("lix_insert_transaction_state", { timestamp, data });
 	 * ```
 	 */
-	runtime?: LixRuntime;
+	engine?: LixEngine;
 };
 
 /**
@@ -183,7 +183,7 @@ export async function openLix(args: {
 }): Promise<Lix> {
 	const hooks = createHooks();
 	const blob = args.blob;
-	let runtime: LixRuntime | undefined;
+	let engine: LixEngine | undefined;
 
 	const backend =
 		args.backend ??
@@ -214,7 +214,7 @@ export async function openLix(args: {
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
-		runtime = res?.runtime;
+		engine = res?.engine;
 	} else {
 		// Exists-first flow: avoid throwing to decide; ask backend if a DB exists.
 		const exists = await backend.exists();
@@ -232,7 +232,7 @@ export async function openLix(args: {
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
-		runtime = res?.runtime;
+		engine = res?.engine;
 	}
 
 	// Build JSON column mapping to match openLix() parsing behavior
@@ -284,10 +284,10 @@ export async function openLix(args: {
 		db,
 		hooks,
 		observe,
-		runtime,
+		engine: engine,
 		plugin: {
-			getAll: async () => runtime?.getAllPluginsSync() ?? [],
-			getAllSync: () => runtime?.getAllPluginsSync() ?? [],
+			getAll: async () => engine?.getAllPluginsSync() ?? [],
+			getAllSync: () => engine?.getAllPluginsSync() ?? [],
 		},
 		call: async (
 			name: string,

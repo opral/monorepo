@@ -3,15 +3,15 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyChangeAuthorDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	// Create change_author view using the generalized entity view builder
-	const { runtime } = args;
+	const { engine } = args;
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixChangeAuthorSchema,
 		overrideName: "change_author",
 		pluginKey: "lix_own_entity",

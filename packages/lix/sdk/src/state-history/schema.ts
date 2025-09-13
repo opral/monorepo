@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 /**
  * State history table interface for querying historical entity states.
@@ -102,9 +102,9 @@ export interface StateHistoryTable {
 export type StateHistoryView = Selectable<StateHistoryTable>;
 
 export function applyStateHistoryDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	args.runtime.sqlite.exec(STATE_HISTORY_VIEW_SQL);
+	args.engine.sqlite.exec(STATE_HISTORY_VIEW_SQL);
 }
 
 // Optimized to keep the generic history view, but add a fast path for depth=0

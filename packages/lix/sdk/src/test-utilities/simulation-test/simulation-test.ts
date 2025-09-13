@@ -2,7 +2,7 @@ import { test, expect, type Assertion, vi } from "vitest";
 import { type Lix, openLix } from "../../lix/open-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
 import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
-import { runtimeBoundarySimulation } from "./runtime-boundary-simulation.js";
+import { engineBoundarySimulation } from "./engine-boundary-simulation.js";
 
 export type SimulationTestDef = {
 	name: string;
@@ -22,7 +22,7 @@ const normalSimulation: SimulationTestDef = {
  */
 type SimulationTestOptions = {
 	/**
-	 * Array of simulations to run. If not specified, runs default simulations (normal, cache-miss, runtime-boundary).
+	 * Array of simulations to run. If not specified, runs default simulations (normal, cache-miss, engine-boundary).
 	 */
 	simulations?: SimulationTestDef[];
 };
@@ -31,12 +31,12 @@ type SimulationTestOptions = {
 export const defaultSimulations: SimulationTestDef[] = [
 	normalSimulation,
 	cacheMissSimulation,
-	runtimeBoundarySimulation,
+	engineBoundarySimulation,
 ];
 
 // Export individual simulations for custom use
 export {
-	runtimeBoundarySimulation,
+	engineBoundarySimulation,
 	normalSimulation,
 	cacheMissSimulation,
 	outOfOrderSequenceSimulation,

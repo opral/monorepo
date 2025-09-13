@@ -2,7 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns
@@ -11,7 +11,7 @@ bench("commit empty transaction (baseline)", async () => {
 	const lix = await openLix({});
 
 	commit({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 	});
 });
 
@@ -38,14 +38,14 @@ bench("commit transaction with 1 row", async () => {
 	}
 
 	insertTransactionState({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		data: multipleData,
 		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
 	commit({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 	});
 });
 
@@ -71,14 +71,14 @@ bench("commit transaction with 100 rows", async () => {
 		});
 	}
 	insertTransactionState({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		data: multipleData,
 		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
 	commit({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 	});
 });
 
@@ -109,14 +109,14 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 		}
 
 		insertTransactionState({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			data: batch,
 			timestamp: await getTimestamp({ lix }),
 		});
 
 		// Commit the current transaction batch
 		commit({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 		});
 	}
 });
@@ -143,11 +143,11 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 		});
 	}
 	insertTransactionState({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		data: baseRows,
 		timestamp: await getTimestamp({ lix }),
 	});
-	commit({ runtime: lix.runtime! });
+	commit({ engine: lix.engine! });
 
 	// Prepare a mixed batch: 10 inserts, 10 updates, 10 deletes
 	const INSERTS = 10;
@@ -201,13 +201,13 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 	}
 
 	insertTransactionState({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		data: ops,
 		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: single commit with mixed operations
 	commit({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 	});
 });

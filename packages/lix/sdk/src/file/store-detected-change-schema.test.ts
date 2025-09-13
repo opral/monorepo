@@ -17,7 +17,7 @@ test("storeDetectedChangeSchema stores new schema on first use", async () => {
 
 	// Store schema for the first time
 	storeDetectedChangeSchema({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		schema: testSchema,
 	});
 
@@ -47,14 +47,14 @@ test("storeDetectedChangeSchema allows identical schema to be used again", async
 
 	// Store schema first time
 	storeDetectedChangeSchema({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		schema: testSchema,
 	});
 
 	// Store same schema again - should not throw
 	expect(() => {
 		storeDetectedChangeSchema({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 		});
 	}).not.toThrow();
@@ -92,14 +92,14 @@ test("storeDetectedChangeSchema throws error when schema differs for same versio
 
 	// Store original schema
 	storeDetectedChangeSchema({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		schema: originalSchema,
 	});
 
 	// Try to store different schema with same version - should throw
 	expect(() => {
 		storeDetectedChangeSchema({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: differentSchema,
 		});
 	}).toThrow(
@@ -130,14 +130,14 @@ test("storeDetectedChangeSchema allows different schemas with different versions
 
 	// Store v1 schema
 	storeDetectedChangeSchema({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		schema: schemaV1,
 	});
 
 	// Store v2 schema - should not throw
 	expect(() => {
 		storeDetectedChangeSchema({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: schemaV2,
 		});
 	}).not.toThrow();
@@ -179,14 +179,14 @@ test("storeDetectedChangeSchema enforces strict JSON determinism", async () => {
 
 	// Store original schema
 	storeDetectedChangeSchema({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		schema: originalSchema,
 	});
 
 	// Try to store reordered schema - should throw because JSON.stringify will be different
 	expect(() => {
 		storeDetectedChangeSchema({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: reorderedSchema,
 		});
 	}).toThrow(

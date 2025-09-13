@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../boot.js";
+import type { LixEngine } from "../boot.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
@@ -9,21 +9,21 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
  * Sync variant of {@link getTimestamp}. See {@link getTimestamp} for behavior and examples.
  *
  * @remarks
- * - Accepts `{ runtime }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
- * - Intended for runtime/router and UDFs; app code should use {@link getTimestamp}.
+ * - Accepts `{ engine }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
+ * - Intended for engine/router and UDFs; app code should use {@link getTimestamp}.
  *
  * @see getTimestamp
  */
 export function getTimestampSync(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): string {
-	const runtime = args.runtime;
+	const engine = args.engine;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ runtime })) {
+	if (isDeterministicModeSync({ engine: engine })) {
 		// Check if timestamps are disabled in the config
 		const [config] = executeSync({
-			runtime,
-			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			engine: engine,
+			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
@@ -42,7 +42,7 @@ export function getTimestampSync(args: {
 
 		// Otherwise use deterministic timestamps
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumberSync({ runtime });
+		const counter = nextSequenceNumberSync({ engine: engine });
 		// Use counter as milliseconds since epoch
 		return new Date(counter).toISOString();
 	}

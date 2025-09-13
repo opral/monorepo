@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export type InternalStateCache = InternalStateCacheTable;
@@ -43,23 +43,23 @@ const stateCacheV2TablesMap = new WeakMap<object, Set<string>>();
 
 // Export a getter function to access the cache for a specific Lix instance
 export function getStateCacheV2Tables(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): Set<string> {
-	let cache = stateCacheV2TablesMap.get(args.runtime.sqlite as any);
+	let cache = stateCacheV2TablesMap.get(args.engine.sqlite as any);
 	if (!cache) {
 		cache = new Set<string>();
-		stateCacheV2TablesMap.set(args.runtime.sqlite as any, cache);
+		stateCacheV2TablesMap.set(args.engine.sqlite as any, cache);
 	}
 	return cache;
 }
 
 export function applyStateCacheV2Schema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	const { sqlite } = args.runtime;
+	const { sqlite } = args.engine;
 
 	// Get or create cache for this Lix instance
-	const tableCache = getStateCacheV2Tables({ runtime: args.runtime });
+	const tableCache = getStateCacheV2Tables({ engine: args.engine });
 
 	// Initialize cache with existing tables on startup
 	const existingTables = sqlite.exec({

@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { createThreadComment } from "./create-thread-comment.js";
 import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
-import { nanoId } from "../runtime/deterministic/nano-id.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 
 test("creates a thread comment", async () => {
 	const lix = await openLix({});

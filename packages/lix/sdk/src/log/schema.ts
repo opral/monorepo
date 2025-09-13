@@ -3,21 +3,21 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import { nanoIdSync } from "../engine/deterministic/index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyLogDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): void {
-	const { runtime } = args;
+	const { engine } = args;
 	// Create both primary and _all views for log
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixLogSchema,
 		overrideName: "log",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
-		defaultValues: { id: () => nanoIdSync({ runtime }) },
+		defaultValues: { id: () => nanoIdSync({ engine: engine }) },
 	});
 }
 
@@ -50,5 +50,5 @@ export const LixLogSchema = {
 } as const;
 LixLogSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (runtime/selectable type)
+// Pure business logic type (engine/selectable type)
 export type LixLog = FromLixSchemaDefinition<typeof LixLogSchema>;

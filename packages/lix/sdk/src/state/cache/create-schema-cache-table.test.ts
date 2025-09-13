@@ -11,10 +11,10 @@ test("createSchemaCacheTable creates table with core indexes and is idempotent",
 	const tableName = schemaKeyToCacheTableName("lix_test_create");
 
 	// First call should create the table and indexes
-	createSchemaCacheTable({ runtime: lix.runtime!, tableName });
+	createSchemaCacheTable({ engine: lix.engine!, tableName });
 
 	// Verify table exists and WITHOUT ROWID
-	const tbl = lix.runtime!.sqlite.exec({
+	const tbl = lix.engine!.sqlite.exec({
 		sql: `SELECT name, sql FROM sqlite_schema WHERE type='table' AND name = ?`,
 		bind: [tableName],
 		returnValue: "resultRows",
@@ -25,7 +25,7 @@ test("createSchemaCacheTable creates table with core indexes and is idempotent",
 	expect(String(tbl?.[0]?.sql || "")).toMatch(/WITHOUT ROWID/);
 
 	// Verify core indexes exist
-	const idxRows = lix.runtime!.sqlite.exec({
+	const idxRows = lix.engine!.sqlite.exec({
 		sql: `SELECT name, sql FROM sqlite_schema WHERE type='index' AND tbl_name = ? ORDER BY name`,
 		bind: [tableName],
 		returnValue: "resultRows",
@@ -42,9 +42,9 @@ test("createSchemaCacheTable creates table with core indexes and is idempotent",
 	);
 
 	// Second call should be a no-op (idempotent)
-	createSchemaCacheTable({ runtime: lix.runtime!, tableName });
+	createSchemaCacheTable({ engine: lix.engine!, tableName });
 
-	const idxRows2 = lix.runtime!.sqlite.exec({
+	const idxRows2 = lix.engine!.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema WHERE type='index' AND tbl_name = ?`,
 		bind: [tableName],
 		returnValue: "resultRows",

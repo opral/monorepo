@@ -1,5 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixRuntime } from "../boot.js";
+import type { LixEngine } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
@@ -10,22 +10,22 @@ import { nextSequenceNumberSync } from "./sequence.js";
  * Sync variant of {@link nanoId}. See {@link nanoId} for behavior and examples.
  *
  * @remarks
- * - Accepts `{ runtime }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
- * - Intended for runtime/router and UDFs; app code should use {@link nanoId}.
+ * - Accepts `{ engine }` (or `{ lix }` for backward‑compat) and runs next to SQLite.
+ * - Intended for engine/router and UDFs; app code should use {@link nanoId}.
  *
  * @see nanoId
  */
 export function nanoIdSync(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	length?: number;
 }): string {
-	const runtime = args.runtime;
+	const engine = args.engine;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ runtime })) {
+	if (isDeterministicModeSync({ engine: engine })) {
 		// Check if nano_id is disabled in the config
 		const [config] = executeSync({
-			runtime,
-			query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			engine: engine,
+			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
@@ -42,7 +42,7 @@ export function nanoIdSync(args: {
 
 		// Otherwise use deterministic nano ID
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumberSync({ runtime });
+		const counter = nextSequenceNumberSync({ engine: engine });
 		// Return counter with test_ prefix and padded to 10 digits
 		return `test_${counter.toString().padStart(10, "0")}`;
 	}
@@ -90,7 +90,7 @@ export function nanoIdSync(args: {
  *   .execute();
  * ```
  *
- * @param args.lix Lix instance used to call into the runtime.
+ * @param args.lix Lix instance used to call into the engine.
  * @param args.length Optional length for non-deterministic mode (default: 21)
  */
 export async function nanoId(args: {

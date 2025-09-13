@@ -65,7 +65,7 @@ export class OpfsSahBackend implements LixBackend {
 	}
 
 	/**
-	 * Invoke a named runtime function inside the worker engine.
+	 * Invoke a named engine function inside the worker engine.
 	 */
 	async call(
 		name: string,

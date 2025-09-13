@@ -3,7 +3,7 @@ import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { newLixFile } from "../lix/new-lix.js";
 import { boot } from "./boot.js";
 
-test("boot installs runtime and triggers plugin on file insert", async () => {
+test("boot installs engine and triggers plugin on file insert", async () => {
 	const sqlite = await createInMemoryDatabase({ readOnly: false });
 	try {
 		// Seed with a fresh Lix snapshot

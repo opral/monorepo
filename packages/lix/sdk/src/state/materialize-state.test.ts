@@ -2,7 +2,7 @@ import { describe, expect } from "vitest";
 import { sql } from "kysely";
 import { selectActiveVersion } from "../version/select-active-version.js";
 import { createVersion } from "../version/create-version.js";
-import { getTimestamp } from "../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../engine/deterministic/timestamp.js";
 import {
 	simulationTest,
 	normalSimulation,

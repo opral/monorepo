@@ -2,10 +2,9 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixCommit } from "../commit/schema.js";
 import type { LixVersion } from "./schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { uuidV7 } from "../runtime/deterministic/uuid-v7.js";
-import { nanoId } from "../runtime/deterministic/nano-id.js";
-import { humanId } from "../runtime/deterministic/generate-human-id.js";
-import { createRuntimeRouter } from "../runtime/router.js";
+import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
+import { humanId } from "../engine/deterministic/generate-human-id.js";
 // Use state_all to write descriptor + tip; vtable commit handles persistence + cache
 
 /**

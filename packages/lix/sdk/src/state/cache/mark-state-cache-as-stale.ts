@@ -1,21 +1,21 @@
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { LixKeyValueSchema } from "../../key-value/schema.js";
-import { getTimestampSync } from "../../runtime/deterministic/timestamp.js";
+import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
 export function markStateCacheAsStale(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "true" in untracked state
 	const snapshotContent = JSON.stringify({ key: CACHE_STALE_KEY, value: true });
 
-	const ts = args.timestamp ?? getTimestampSync({ runtime: args.runtime });
+	const ts = args.timestamp ?? getTimestampSync({ engine: args.engine });
 
 	updateUntrackedState({
-		runtime: args.runtime,
+		engine: args.engine,
 		changes: [
 			{
 				entity_id: CACHE_STALE_KEY,
@@ -32,7 +32,7 @@ export function markStateCacheAsStale(args: {
 }
 
 export function markStateCacheAsFresh(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "false" in untracked state
@@ -41,11 +41,10 @@ export function markStateCacheAsFresh(args: {
 		value: false,
 	});
 
-	const ts =
-		args.timestamp ?? getTimestampSync({ runtime: args.runtime as any });
+	const ts = args.timestamp ?? getTimestampSync({ engine: args.engine as any });
 
 	updateUntrackedState({
-		runtime: args.runtime,
+		engine: args.engine,
 		changes: [
 			{
 				entity_id: CACHE_STALE_KEY,

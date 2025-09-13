@@ -19,7 +19,7 @@ describe("file insert", () => {
 
 		// Insert unknown file type - should be handled by unknown file plugin
 		handleFileInsert({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			file: {
 				id: randomNanoId(),
 				path: "/test.unknown",
@@ -68,7 +68,7 @@ describe("file update", () => {
 
 		// Update with different data - should be handled by unknown file plugin
 		handleFileUpdate({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			file: {
 				id: fileId,
 				path: "/test.unknown",
@@ -106,7 +106,7 @@ describe("file update", () => {
 
 		// Insert the file initially - this should create entities for both users
 		handleFileInsert({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			file: {
 				id: fileId,
 				path: "/users.json",
@@ -137,7 +137,7 @@ describe("file update", () => {
 
 		// Update the file - this should trigger deletion of jane's entities
 		handleFileUpdate({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			file: {
 				id: fileId,
 				path: "/users.json",

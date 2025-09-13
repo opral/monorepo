@@ -5,7 +5,7 @@ import {
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
 import type { LixBackend, ExecResult } from "./types.js";
-import { boot, type LixRuntime } from "../runtime/boot.js";
+import { boot, type LixEngine } from "../engine/boot.js";
 
 /**
  * In‑process, in‑memory backend backed by WASM SQLite.
@@ -30,11 +30,11 @@ export class InMemoryBackend implements LixBackend {
 				opts?: { signal?: AbortSignal }
 		  ) => Promise<unknown>)
 		| undefined;
-	private runtime: LixRuntime | undefined;
+	private engine: LixEngine | undefined;
 
 	async open(
 		opts: Parameters<LixBackend["open"]>[0]
-	): Promise<void | { runtime?: LixRuntime }> {
+	): Promise<void | { engine?: LixEngine }> {
 		if (!this.db) {
 			this.db = await createInMemoryDatabase({ readOnly: false });
 			const res = await boot({
@@ -43,9 +43,9 @@ export class InMemoryBackend implements LixBackend {
 				args: opts.boot.args,
 			});
 			this.callImpl = res.call;
-			this.runtime = res.runtime;
+			this.engine = res.engine;
 		}
-		return { runtime: this.runtime };
+		return { engine: this.engine };
 	}
 
 	async create(opts: Parameters<LixBackend["create"]>[0]): Promise<void> {
@@ -57,7 +57,7 @@ export class InMemoryBackend implements LixBackend {
 			args: opts.boot.args,
 		});
 		this.callImpl = res.call;
-		this.runtime = res.runtime;
+		this.engine = res.engine;
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<ExecResult> {

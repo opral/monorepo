@@ -1,5 +1,5 @@
 import type { Insertable, Selectable, Updateable } from "kysely";
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { StateAllView } from "./state-all.js";
 
 export type StateView = Omit<StateAllView, "version_id">;
@@ -14,9 +14,9 @@ export type StateRowUpdate = Updateable<StateView>;
  * INSTEAD OF triggers that forward writes to state_all (which proxies to the vtable).
  */
 export function applyStateView(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state AS
     SELECT 
       entity_id,

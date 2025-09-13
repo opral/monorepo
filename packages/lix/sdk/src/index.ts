@@ -4,7 +4,7 @@ export * from "./change-author/index.js";
 export * from "./change-set/index.js";
 export * from "./commit/index.js";
 export * from "./database/index.js";
-export * from "./runtime/deterministic/index.js";
+export * from "./engine/deterministic/index.js";
 export * from "./entity/index.js";
 export * from "./entity-views/index.js";
 export * from "./file/index.js";

@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 /**
  * Updates the file data cache with materialized file content.
@@ -6,20 +6,20 @@ import type { LixRuntime } from "../../runtime/boot.js";
  *
  * @example
  * updateFileDataCache({
- *   lix,
+ *   engine: lix.engine!,
  *   fileId: "file_123",
  *   versionId: "version_456",
  *   data: new Uint8Array([...])
  * });
  */
 export function updateFileDataCache(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	fileId: string;
 	versionId: string;
 	data: Uint8Array;
 }): void {
 	// Use INSERT OR REPLACE for write-through caching
-	args.runtime.sqlite.exec({
+	args.engine.sqlite.exec({
 		sql: `
       INSERT OR REPLACE INTO internal_file_data_cache 
       (file_id, version_id, data)

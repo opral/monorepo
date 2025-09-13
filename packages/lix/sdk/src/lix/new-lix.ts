@@ -227,7 +227,7 @@ export async function newLixFile(args?: {
 
 	// Set active version using updateUntrackedState for proper inheritance handling
 	updateUntrackedState({
-		runtime: { sqlite, db },
+		engine: { sqlite, db },
 		changes: [
 			{
 				entity_id: "active",
@@ -251,7 +251,7 @@ export async function newLixFile(args?: {
 
 	// Create the anonymous account as untracked
 	updateUntrackedState({
-		runtime: { sqlite, db },
+		engine: { sqlite, db } as any,
 		changes: [
 			{
 				entity_id: activeAccountId,
@@ -271,7 +271,7 @@ export async function newLixFile(args?: {
 
 	// Set it as the active account
 	updateUntrackedState({
-		runtime: { sqlite, db },
+		engine: { sqlite, db } as any,
 		changes: [
 			{
 				entity_id: `active_${activeAccountId}`,
@@ -296,7 +296,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				runtime: { sqlite, db },
+				engine: { sqlite, db } as any,
 				changes: [
 					{
 						entity_id: kv.key,

@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixThread, LixThreadComment } from "./schema.js";
-import { nanoId } from "../runtime/deterministic/nano-id.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 import type { NewState } from "../entity-views/types.js";
 import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
 import { createEntityThread } from "../entity/thread/create-entity-thread.js";

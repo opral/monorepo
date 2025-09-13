@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
@@ -9,19 +9,19 @@ import { applyStateView } from "./views/state.js";
 import { applyStateVTable } from "./vtable/index.js";
 
 export function applyStateDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): void {
-	const { runtime } = args;
-	applyMaterializeStateSchema({ runtime });
-	applyStateCacheV2Schema({ runtime });
-	applyUntrackedStateSchema({ runtime });
-	applyResolvedStateView({ runtime });
+	const { engine } = args;
+	applyMaterializeStateSchema({ engine });
+	applyStateCacheV2Schema({ engine });
+	applyUntrackedStateSchema({ engine });
+	applyResolvedStateView({ engine });
 
-	// Apply the virtual table (binds to the in-process runtime)
-	applyStateVTable(runtime);
+	// Apply the virtual table (binds to the in-process engine)
+	applyStateVTable(engine);
 
 	// Public views over the internal vtable
-	applyStateView({ runtime });
-	applyStateAllView({ runtime });
-	applyStateWithTombstonesView({ runtime });
+	applyStateView({ engine });
+	applyStateAllView({ engine });
+	applyStateWithTombstonesView({ engine });
 }

@@ -3,28 +3,28 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import { nanoIdSync } from "../engine/deterministic/index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyChangeSetDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): void {
-	const { runtime } = args;
+	const { engine } = args;
 	// Create change_set view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixChangeSetSchema,
 		overrideName: "change_set",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ runtime }),
+			id: () => nanoIdSync({ engine: engine }),
 		},
 	});
 
 	// Create change_set_element views
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixChangeSetElementSchema,
 		overrideName: "change_set_element",
 		pluginKey: "lix_own_entity",
@@ -33,7 +33,7 @@ export function applyChangeSetDatabaseSchema(args: {
 
 	// Create change_set_label views
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixChangeSetLabelSchema,
 		overrideName: "change_set_label",
 		pluginKey: "lix_own_entity",

@@ -10,7 +10,7 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 
 	// Use the direct function to insert rows into different schemas
 	updateStateCache({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "change1",

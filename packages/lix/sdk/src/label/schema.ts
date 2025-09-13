@@ -3,20 +3,20 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoIdSync } from "../runtime/deterministic/index.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import { nanoIdSync } from "../engine/deterministic/index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyLabelDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): void {
-	const { runtime } = args;
+	const { engine } = args;
 	createEntityViewsIfNotExists({
-		runtime,
+		engine: engine,
 		schema: LixLabelSchema,
 		overrideName: "label",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
-		defaultValues: { id: () => nanoIdSync({ runtime }) },
+		defaultValues: { id: () => nanoIdSync({ engine: engine }) },
 	});
 }
 

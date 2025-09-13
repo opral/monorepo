@@ -2,9 +2,9 @@ import {
 	createInMemoryDatabase,
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
-import { boot } from "../runtime/boot.js";
-import type { Call } from "../runtime/router.js";
-import type { BootArgs } from "../runtime/boot.js";
+import { boot } from "../engine/boot.js";
+import type { Call } from "../engine/router.js";
+import type { BootArgs } from "../engine/boot.js";
 
 /**
  * Message types supported by the worker RPC.
@@ -47,7 +47,7 @@ let sqlite3Module: any;
 let poolUtil: any;
 let db: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
 let currentOpfsPath: string | undefined;
-let runtimeCall: Call | null = null;
+let engineCall: Call | null = null;
 
 /**
  * Normalize the client-provided logical database name for the SAH pool VFS.
@@ -109,7 +109,7 @@ async function ensurePool(): Promise<void> {
  * Handle a single host → worker RPC request and return a response.
  *
  * Supported operations:
- * - "open": open an existing DB by key and boot the Lix runtime.
+ * - "open": open an existing DB by key and boot the Lix engine.
  * - "create": import a blob for a new DB by key (refuses to overwrite) — no boot.
  * - "exists": check if a DB for the given key exists (via SAH pool metadata).
  * - "exec": run a single SQL statement.
@@ -126,7 +126,7 @@ async function handle(req: Req): Promise<Res> {
 				const opfsPath = opfsName(req.payload.name);
 				currentOpfsPath = opfsPath;
 
-				// Open DB and boot runtime
+				// Open DB and boot engine
 				const uri = `file:${opfsPath}?vfs=opfs-sahpool`;
 				db = new sqlite3Module.oo1.DB(uri, "c");
 				(db as any).sqlite3 = sqlite3Module;
@@ -136,14 +136,14 @@ async function handle(req: Req): Promise<Res> {
 				}) as BootArgs;
 
 				const res = await boot({
-					// db is sqlite3.oo1 DB; runtime expects sqlite-wasm compatible surface
+					// db is sqlite3.oo1 DB; engine expects sqlite-wasm compatible surface
 					sqlite: db as any,
 					postEvent: (ev) => {
 						(self as any).postMessage({ type: "event", event: ev });
 					},
 					args: bootArgs,
 				});
-				runtimeCall = res.call;
+				engineCall = res.call;
 
 				return { id: req.id, ok: true };
 			}
@@ -256,18 +256,18 @@ async function handle(req: Req): Promise<Res> {
 			case "call": {
 				if (!db) throw new Error("Backend not initialized");
 				const { route, payload } = req.payload as any;
-				if (!runtimeCall) {
+				if (!engineCall) {
 					return {
 						id: req.id,
 						ok: false,
 						error: {
 							name: "LixRpcError",
-							message: "Runtime router unavailable",
+							message: "engine router unavailable",
 							code: "LIX_RPC_ROUTER_UNAVAILABLE",
 						},
 					};
 				}
-				const result = await runtimeCall(route, payload);
+				const result = await engineCall(route, payload);
 				return { id: req.id, ok: true, result };
 			}
 		}

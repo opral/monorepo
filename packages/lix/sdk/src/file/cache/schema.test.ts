@@ -5,11 +5,11 @@ import type { Lix } from "../../lix/open-lix.js";
 
 // Helper function to query cache directly
 function getFileDataCache(args: {
-	lix: Pick<Lix, "runtime">;
+	lix: Pick<Lix, "engine">;
 	fileId: string;
 	versionId: string;
 }): Uint8Array | undefined {
-	const result = args.lix.runtime!.sqlite.exec({
+	const result = args.lix.engine!.sqlite.exec({
 		sql: `
 			SELECT data 
 			FROM internal_file_data_cache 

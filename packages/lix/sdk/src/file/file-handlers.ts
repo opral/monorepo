@@ -5,15 +5,15 @@ import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 function globSync(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	glob: string;
 	path: string;
 }): boolean {
 	const columnNames: string[] = [];
-	const result = args.runtime.sqlite.exec({
+	const result = args.engine.sqlite.exec({
 		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
 		bind: [args.path, args.glob],
 		returnValue: "resultRows",
@@ -24,14 +24,14 @@ function globSync(args: {
 }
 
 export function handleFileInsert(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
 	file: LixFile;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
 	const [shouldSkip] = executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
 			.select("value"),
@@ -40,7 +40,7 @@ export function handleFileInsert(args: {
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
 		createLixOwnLogSync({
-			runtime: args.runtime,
+			engine: args.engine,
 			key: "lix_file_skipped_insert_handler",
 			level: "debug",
 			message: `Skipping file insert for ${args.file.path} due to lix_skip_file_handlers flag`,
@@ -50,8 +50,8 @@ export function handleFileInsert(args: {
 
 	// Insert the file metadata into state table
 	executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db.insertInto("state_all").values({
+		engine: args.engine,
+		query: args.engine.db.insertInto("state_all").values({
 			entity_id: args.file.id,
 			schema_key: LixFileDescriptorSchema["x-lix-key"],
 			file_id: args.file.id,
@@ -68,7 +68,7 @@ export function handleFileInsert(args: {
 		}),
 	});
 
-	const plugins = args.runtime.getAllPluginsSync();
+	const plugins = args.engine.getAllPluginsSync();
 	let foundPlugin = false;
 	let hasChanges = false;
 
@@ -77,7 +77,7 @@ export function handleFileInsert(args: {
 		if (
 			!plugin.detectChangesGlob ||
 			!globSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				path: args.file.path,
 				glob: plugin.detectChangesGlob,
 			})
@@ -89,7 +89,7 @@ export function handleFileInsert(args: {
 
 		if (plugin.detectChanges === undefined) {
 			createLixOwnLogSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
 				message: `File inserted at ${args.file.path} but plugin does not support detecting changes`,
@@ -100,7 +100,7 @@ export function handleFileInsert(args: {
 		// Detect changes with the plugin
 		const detectedChanges = plugin.detectChanges({
 			after: args.file,
-			lix: { db: args.runtime.db as any, runtime: args.runtime } as any,
+			lix: { db: args.engine.db as any, engine: args.engine } as any,
 		});
 
 		if (detectedChanges.length > 0) {
@@ -108,9 +108,9 @@ export function handleFileInsert(args: {
 			// Validate and store schemas for all detected changes
 			for (const change of detectedChanges) {
 				storeDetectedChangeSchema({
-					runtime: {
-						sqlite: args.runtime.sqlite as any,
-						db: args.runtime.db as any,
+					engine: {
+						sqlite: args.engine.sqlite as any,
+						db: args.engine.db as any,
 					} as any,
 					schema: change.schema,
 					untracked: args.untracked || false,
@@ -120,8 +120,8 @@ export function handleFileInsert(args: {
 			// Store plugin detected changes in state table
 			for (const change of detectedChanges) {
 				executeSync({
-					runtime: args.runtime,
-					query: args.runtime.db.insertInto("state_all").values({
+					engine: args.engine,
+					query: args.engine.db.insertInto("state_all").values({
 						entity_id: change.entity_id,
 						schema_key: change.schema["x-lix-key"],
 						file_id: args.file.id,
@@ -139,7 +139,7 @@ export function handleFileInsert(args: {
 	// Log appropriate messages based on what happened
 	if (!foundPlugin) {
 		createLixOwnLogSync({
-			runtime: args.runtime,
+			engine: args.engine,
 			key: "lix_file_no_plugin",
 			level: "warn",
 			message: `File inserted at ${args.file.path} but no plugin available to detect changes`,
@@ -149,16 +149,16 @@ export function handleFileInsert(args: {
 		if (lixUnknownFileFallbackPlugin.detectChanges) {
 			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 				after: args.file,
-				lix: { runtime: args.runtime, db: args.runtime.db },
+				lix: { engine: args.engine, db: args.engine.db },
 			});
 
 			if (detectedChanges.length > 0) {
 				// Validate and store schemas for fallback plugin changes
 				for (const change of detectedChanges) {
 					storeDetectedChangeSchema({
-						runtime: {
-							sqlite: args.runtime.sqlite as any,
-							db: args.runtime.db as any,
+						engine: {
+							sqlite: args.engine.sqlite as any,
+							db: args.engine.db as any,
 						} as any,
 						schema: change.schema,
 					});
@@ -166,8 +166,8 @@ export function handleFileInsert(args: {
 
 				for (const change of detectedChanges) {
 					executeSync({
-						runtime: args.runtime,
-						query: args.runtime.db.insertInto("state_all").values({
+						engine: args.engine,
+						query: args.engine.db.insertInto("state_all").values({
 							entity_id: change.entity_id,
 							schema_key: change.schema["x-lix-key"],
 							file_id: args.file.id,
@@ -184,7 +184,7 @@ export function handleFileInsert(args: {
 	} else {
 		if (!hasChanges) {
 			createLixOwnLogSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
 				message: `File inserted at ${args.file.path} but plugin detected no changes`,
@@ -200,7 +200,7 @@ export function handleFileInsert(args: {
 	// The cache will be populated on first read via selectFileLixcol
 
 	// Emit file change event
-	args.runtime.hooks._emit("file_change", {
+	args.engine.hooks._emit("file_change", {
 		fileId: args.file.id,
 		operation: "inserted",
 	});
@@ -209,14 +209,14 @@ export function handleFileInsert(args: {
 }
 
 export function handleFileUpdate(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
 	file: LixFile;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
 	const [shouldSkip] = executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
 			.select("value"),
@@ -225,7 +225,7 @@ export function handleFileUpdate(args: {
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
 		createLixOwnLogSync({
-			runtime: args.runtime,
+			engine: args.engine,
 			key: "lix_file_skipped_update_handler",
 			level: "debug",
 			message: `Skipping file update for ${args.file.path} due to lix_skip_file_handlers flag`,
@@ -235,8 +235,8 @@ export function handleFileUpdate(args: {
 
 	// Update the file metadata in state table FIRST
 	executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.updateTable("state_all")
 			.set({
 				snapshot_content: {
@@ -254,8 +254,8 @@ export function handleFileUpdate(args: {
 
 	// Get current file data for comparison
 	const currentFile = executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("file_all")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
@@ -263,7 +263,7 @@ export function handleFileUpdate(args: {
 	})[0] as LixFile | undefined;
 
 	if (currentFile) {
-		const plugins = args.runtime.getAllPluginsSync();
+		const plugins = args.engine.getAllPluginsSync();
 		let foundPlugin = false;
 		let hasChanges = false;
 
@@ -272,7 +272,7 @@ export function handleFileUpdate(args: {
 			if (
 				!plugin.detectChangesGlob ||
 				!globSync({
-					runtime: args.runtime,
+					engine: args.engine,
 					path: args.file.path,
 					glob: plugin.detectChangesGlob,
 				})
@@ -284,7 +284,7 @@ export function handleFileUpdate(args: {
 
 			if (plugin.detectChanges === undefined) {
 				createLixOwnLogSync({
-					runtime: args.runtime,
+					engine: args.engine,
 					key: "lix_file_no_plugin",
 					level: "warn",
 					message: `File updated at ${args.file.path} but plugin does not support detecting changes`,
@@ -296,7 +296,7 @@ export function handleFileUpdate(args: {
 			const detectedChanges = plugin.detectChanges({
 				before: currentFile,
 				after: args.file,
-				lix: { db: args.runtime.db as any, runtime: args.runtime } as any,
+				lix: { db: args.engine.db as any, engine: args.engine } as any,
 			});
 
 			if (detectedChanges.length > 0) {
@@ -304,9 +304,9 @@ export function handleFileUpdate(args: {
 				// Validate and store schemas for all detected changes
 				for (const change of detectedChanges) {
 					storeDetectedChangeSchema({
-						runtime: {
-							sqlite: args.runtime.sqlite as any,
-							db: args.runtime.db as any,
+						engine: {
+							sqlite: args.engine.sqlite as any,
+							db: args.engine.db as any,
 						} as any,
 						schema: change.schema,
 						untracked: args.untracked || false,
@@ -318,8 +318,8 @@ export function handleFileUpdate(args: {
 					if (change.snapshot_content === null) {
 						// Handle deletion: remove the entity from state table
 						executeSync({
-							runtime: args.runtime,
-							query: args.runtime.db
+							engine: args.engine,
+							query: args.engine.db
 								.deleteFrom("state_all")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
@@ -329,8 +329,8 @@ export function handleFileUpdate(args: {
 					} else {
 						// Handle update/insert: upsert the entity in state table
 						executeSync({
-							runtime: args.runtime,
-							query: args.runtime.db.insertInto("state_all").values({
+							engine: args.engine,
+							query: args.engine.db.insertInto("state_all").values({
 								entity_id: change.entity_id,
 								schema_key: change.schema["x-lix-key"],
 								file_id: args.file.id,
@@ -349,7 +349,7 @@ export function handleFileUpdate(args: {
 		// Log appropriate messages based on what happened
 		if (!foundPlugin) {
 			createLixOwnLogSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
 				message: `File updated at ${args.file.path} but no plugin available to detect changes`,
@@ -361,8 +361,8 @@ export function handleFileUpdate(args: {
 					before: currentFile,
 					after: args.file,
 					lix: {
-						db: args.runtime.db as any,
-						sqlite: args.runtime.sqlite,
+						db: args.engine.db as any,
+						sqlite: args.engine.sqlite,
 					} as any,
 				});
 
@@ -370,9 +370,9 @@ export function handleFileUpdate(args: {
 					// Validate and store schemas for fallback plugin changes
 					for (const change of detectedChanges) {
 						storeDetectedChangeSchema({
-							runtime: {
-								sqlite: args.runtime.sqlite as any,
-								db: args.runtime.db as any,
+							engine: {
+								sqlite: args.engine.sqlite as any,
+								db: args.engine.db as any,
 							} as any,
 							schema: change.schema,
 							untracked: args.untracked || false,
@@ -383,8 +383,8 @@ export function handleFileUpdate(args: {
 						if (change.snapshot_content === null) {
 							// Handle deletion: remove the entity from state table
 							executeSync({
-								runtime: args.runtime,
-								query: args.runtime.db
+								engine: args.engine,
+								query: args.engine.db
 									.deleteFrom("state_all")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
@@ -394,8 +394,8 @@ export function handleFileUpdate(args: {
 						} else {
 							// Handle update/insert: upsert the entity in state table
 							executeSync({
-								runtime: args.runtime,
-								query: args.runtime.db.insertInto("state_all").values({
+								engine: args.engine,
+								query: args.engine.db.insertInto("state_all").values({
 									entity_id: change.entity_id,
 									schema_key: change.schema["x-lix-key"],
 									file_id: args.file.id,
@@ -412,7 +412,7 @@ export function handleFileUpdate(args: {
 			}
 		} else if (!hasChanges) {
 			createLixOwnLogSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
 				message: `File updated at ${args.file.path} but plugin detected no changes`,
@@ -422,13 +422,13 @@ export function handleFileUpdate(args: {
 
 	// Clear data cache AFTER all updates are complete
 	clearFileDataCache({
-		runtime: args.runtime,
+		engine: args.engine,
 		fileId: args.file.id,
 		versionId: args.versionId,
 	});
 
 	// Emit file change event
-	args.runtime.hooks._emit("file_change", {
+	args.engine.hooks._emit("file_change", {
 		fileId: args.file.id,
 		operation: "updated",
 	});

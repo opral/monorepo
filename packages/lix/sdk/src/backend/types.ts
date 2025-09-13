@@ -1,5 +1,5 @@
 /**
- * Public backend types for running the Lix SQLite database in different runtimes.
+ * Public backend types for running the Lix SQLite database in different engines.
  *
  * The backend exposes an async surface even when backed by a synchronous
  * in‑process WASM SQLite implementation to unify usage across implementations.
@@ -31,29 +31,29 @@ export type BackendError = {
  */
 export interface LixBackend {
 	/**
-	 * Open the backend and boot the runtime next to the database engine.
+	 * Open the backend and boot the engine next to the database engine.
 	 *
 	 * Return value semantics:
-	 * - In‑process (main‑thread) backends SHOULD return `{ runtime }` so the
-	 *   runtime is directly accessible on the main thread — useful for unit
+	 * - In‑process (main‑thread) backends SHOULD return `{ engine }` so the
+	 *   engine is directly accessible on the main thread — useful for unit
 	 *   testing and local tools that need in‑process access.
 	 * - Out‑of‑process backends (e.g., Worker or separate process) MUST NOT
-	 *   return a runtime (resolve to `void`). In those environments, callers
-	 *   should use `call()` to invoke runtime functions across the boundary.
+	 *   return a engine (resolve to `void`). In those environments, callers
+	 *   should use `call()` to invoke engine functions across the boundary.
 	 *
 	 * Guidance:
-	 * - The optional `{ runtime }` is primarily for openers/frameworks to
+	 * - The optional `{ engine }` is primarily for openers/frameworks to
 	 *   attach onto the `Lix` object for main‑thread access in tests. App code
-	 *   should not rely on it; prefer `call()` for runtime operations.
+	 *   should not rely on it; prefer `call()` for engine operations.
 	 *
-	 * @param opts.boot - Runtime boot arguments (plugins, account, keyValues)
+	 * @param opts.boot - engine boot arguments (plugins, account, keyValues)
 	 * @param opts.onEvent - Event bridge (currently only 'state_commit')
-	 * @returns `{ runtime }` for main‑thread engines, or `void` for worker/remote engines.
+	 * @returns `{ engine }` for main‑thread engines, or `void` for worker/remote engines.
 	 */
 	open(opts: {
-		boot: { args: import("../runtime/boot.js").BootArgs };
-		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
-	}): Promise<void | { runtime?: import("../runtime/boot.js").LixRuntime }>;
+		boot: { args: import("../engine/boot.js").BootArgs };
+		onEvent: (ev: import("../engine/boot.js").EngineEvent) => void;
+	}): Promise<void | { engine?: import("../engine/boot.js").LixEngine }>;
 
 	/**
 	 * Create a brand‑new database from a provided snapshot and boot it.
@@ -61,8 +61,8 @@ export interface LixBackend {
 	 */
 	create(opts: {
 		blob: ArrayBuffer;
-		boot: { args: import("../runtime/boot.js").BootArgs };
-		onEvent: (ev: import("../runtime/boot.js").RuntimeEvent) => void;
+		boot: { args: import("../engine/boot.js").BootArgs };
+		onEvent: (ev: import("../engine/boot.js").EngineEvent) => void;
 	}): Promise<void>;
 
 	/**
@@ -90,9 +90,9 @@ export interface LixBackend {
 	close(): Promise<void>;
 
 	/**
-	 * Invoke a runtime function inside the backend environment.
+	 * Invoke a engine function inside the backend environment.
 	 *
-	 * Backends MUST implement this and route the call to the runtime that
+	 * Backends MUST implement this and route the call to the engine that
 	 * booted next to SQLite, regardless of whether the engine runs on the main
 	 * thread or inside a Worker.
 	 */

@@ -4,7 +4,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixChangeSet } from "../change-set/schema.js";
 import type { LixCommit } from "../commit/schema.js";
-import { uuidV7, uuidV7Sync } from "../runtime/deterministic/uuid-v7.js";
+import { uuidV7, uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";
 import { createVersion } from "./create-version.js";
 

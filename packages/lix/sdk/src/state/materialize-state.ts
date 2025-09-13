@@ -1,11 +1,11 @@
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyMaterializeStateSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	// View 0: Unified commit edges (derived from all commit rows ∪ physical rows)
 	// Ensure latest definition is applied
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
         WITH derived AS (
             SELECT
@@ -32,7 +32,7 @@ export function applyMaterializeStateSchema(args: {
 	// A commit C is the tip for version V iff:
 	// • C appears in at least one lix_version_tip change row for V AND
 	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version_tip row of the same version V
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
         WITH
         -- 1. every (version, commit) ever recorded
@@ -71,7 +71,7 @@ export function applyMaterializeStateSchema(args: {
 
 	// View 2: Commit graph - lineage with depth (cache-free, DAG traversal)
 	// Assumes commit graph is a DAG; enforce cycle checks at write time if needed.
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
 		WITH RECURSIVE commit_paths(commit_id, version_id, depth) AS (
 			-- Start from version tips at depth 0
@@ -106,7 +106,7 @@ export function applyMaterializeStateSchema(args: {
 	// to obtain the actual change rows for that commit.
 	// Ensure latest definition is applied
 
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
         WITH cg_distinct AS (
             SELECT commit_id, version_id, MIN(depth) AS depth
@@ -437,7 +437,7 @@ export function applyMaterializeStateSchema(args: {
 	// - And so on up the inheritance chain
 	// Used by the state materializer to implement multi-level inheritance where
 	// child versions can see state from all ancestors unless overridden
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_ancestry AS
 		WITH RECURSIVE version_ancestry(version_id, ancestor_version_id, inheritance_depth, path) AS (
 			-- Each version is its own ancestor at depth 0
@@ -471,7 +471,7 @@ export function applyMaterializeStateSchema(args: {
 
 	// View 5: Final state materializer with multi-level inheritance
 	// Ensure latest definition is applied
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
 		WITH all_possible_states AS (
 			SELECT

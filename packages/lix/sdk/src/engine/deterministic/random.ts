@@ -3,7 +3,7 @@ import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixRuntime } from "../boot.js";
+import type { LixEngine } from "../boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
@@ -43,29 +43,29 @@ function randomUnstable(): number {
  * Sync variant of {@link random}. See {@link random} for behavior and examples.
  *
  * @remarks
- * - Accepts `{ runtime }` (or `{ lix }`) and runs next to SQLite.
- * - Intended for runtime/router and UDFs; app code should use {@link random}.
+ * - Accepts `{ engine }` (or `{ lix }`) and runs next to SQLite.
+ * - Intended for engine/router and UDFs; app code should use {@link random}.
  *
  * @see random
  */
 export function randomSync(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): number {
-	const runtime = args.runtime;
+	const engine = args.engine;
 	// Non-deterministic mode: use crypto.getRandomValues()
-	if (!isDeterministicModeSync({ runtime })) {
+	if (!isDeterministicModeSync({ engine })) {
 		return randomUnstable();
 	}
 
 	// Deterministic mode: use xorshift128+
-	let state = rngCache.get(runtime.sqlite);
+	let state = rngCache.get(engine.sqlite);
 
 	/* First use on this connection → initialize from seed */
 	if (!state) {
 		// Check if we have persisted RNG state
 		const [stateRow] = executeSync({
-			runtime,
-			query: runtime.db
+			engine,
+			query: engine.db
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
@@ -88,11 +88,11 @@ export function randomSync(args: {
 			};
 		} else {
 			// Initialize from seed
-			const seed = getRngSeed({ runtime });
+			const seed = getRngSeed({ engine });
 			state = seedXorshift128Plus(seed);
 		}
 
-		rngCache.set(runtime.sqlite, state);
+		rngCache.set(engine.sqlite, state);
 	}
 
 	// Generate next random value using xorshift128+
@@ -105,12 +105,12 @@ export function randomSync(args: {
  * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
 function getRngSeed(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db">;
 }): string {
 	// Check for seed in the deterministic mode config
 	const [configRow] = executeSync({
-		runtime: args.runtime,
-		query: (args.runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine: args.engine,
+		query: (args.engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -128,8 +128,8 @@ function getRngSeed(args: {
 
 	// Derive default seed from lix_id
 	const [idRow] = executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")
 			.select("value"),
@@ -192,11 +192,11 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
-	const runtime = args.runtime;
-	const state = rngCache.get(runtime.sqlite);
+	const engine = args.engine;
+	const state = rngCache.get(engine.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -209,9 +209,9 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
-	const now = args.timestamp ?? getTimestampSync({ runtime });
+	const now = args.timestamp ?? getTimestampSync({ engine });
 	updateUntrackedState({
-		runtime,
+		engine: engine,
 		changes: [
 			{
 				entity_id: "lix_deterministic_rng_state",

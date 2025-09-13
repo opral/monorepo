@@ -4,14 +4,14 @@ import type {
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyStoredSchemaDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	// Create both primary and _all views for stored_schema with validation
 	createEntityViewsIfNotExists({
-		runtime: args.runtime,
+		engine: args.engine,
 		schema: LixStoredSchemaSchema,
 		overrideName: "stored_schema",
 		pluginKey: "lix_own_entity",

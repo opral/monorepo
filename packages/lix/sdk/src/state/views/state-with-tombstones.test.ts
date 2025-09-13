@@ -14,7 +14,7 @@ test("state_with_tombstones exposes tracked deletions as tombstones", async () =
 	});
 
 	// Create the view (temporary until wired into schema bootstrap)
-	applyStateWithTombstonesView({ runtime: lix.runtime! });
+	applyStateWithTombstonesView({ engine: lix.engine! });
 
 	const active = await lix.db
 		.selectFrom("active_version")

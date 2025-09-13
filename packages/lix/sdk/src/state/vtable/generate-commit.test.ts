@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { generateCommit } from "./generate-commit.js";
-import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
-import { uuidV7 } from "../../runtime/deterministic/uuid-v7.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { uuidV7 } from "../../engine/deterministic/uuid-v7.js";
 
 function groupBySchema(rows: any[]): Map<string, any[]> {
 	const m = new Map<string, any[]>();

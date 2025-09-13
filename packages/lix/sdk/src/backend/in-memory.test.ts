@@ -23,15 +23,15 @@ describe("InMemory backend", () => {
 		await engine.close();
 	});
 
-	test("returns runtime handle from open()", async () => {
+	test("returns engine handle from open()", async () => {
 		const backend = new InMemoryBackend();
 		const res = await backend.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
 		});
 
-		// In-memory backend runs on the main thread; runtime should be available
-		expect(res && (res as any).runtime).toBeDefined();
+		// In-memory backend runs on the main thread; engine should be available
+		expect(res && (res as any).engine).toBeDefined();
 
 		await backend.close();
 	});

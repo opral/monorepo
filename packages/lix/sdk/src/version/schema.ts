@@ -2,14 +2,14 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 
 export function applyVersionDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	// 2) Composite "version" view that merges descriptor + tip into a single projection
 	// No backward-compat combined rows. The merged view exposes schema_key logically as 'lix_version'.
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS version AS
         WITH descriptor AS (
             SELECT 
@@ -372,7 +372,7 @@ export function applyVersionDatabaseSchema(args: {
     `);
 
 	// Create active_version as an entity view manually with untracked state
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_version AS
 		SELECT
 			json_extract(snapshot_content, '$.version_id') AS version_id,

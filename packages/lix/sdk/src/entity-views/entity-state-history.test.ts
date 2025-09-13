@@ -33,7 +33,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		expect(() => {
 			createEntityStateHistoryView({
-				runtime: lix.runtime!,
+				engine: lix.engine!,
 				schema: invalidSchema,
 			});
 		}).toThrow(
@@ -45,7 +45,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateHistoryView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_entity_history",
 		});
@@ -108,7 +108,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateHistoryView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			// No overrideName - should use schema["x-lix-key"] + "_history"
 		});
@@ -175,7 +175,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 			.execute();
 
 		createEntityStateHistoryView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_history",
 		});
@@ -250,7 +250,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateHistoryView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "readonly_history",
 		});
@@ -327,7 +327,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateHistoryView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_history_view",
 		});

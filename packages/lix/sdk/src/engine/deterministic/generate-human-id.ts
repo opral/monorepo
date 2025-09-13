@@ -1,5 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixRuntime } from "../boot.js";
+import type { LixEngine } from "../boot.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { humanId as _human } from "human-id";
@@ -66,22 +66,22 @@ export function deterministicHumanIdVocabularySize(): number {
  * Sync variant of {@link humanId}. See {@link humanId} for behavior and examples.
  *
  * @remarks
- * - Accepts `{ runtime }` (or `{ lix }`) and runs next to SQLite.
- * - Intended for runtime/router and UDFs; app code should use {@link humanId}.
+ * - Accepts `{ engine }` (or `{ lix }`) and runs next to SQLite.
+ * - Intended for engine/router and UDFs; app code should use {@link humanId}.
  *
  * @see humanId
  */
 export function humanIdSync(args: {
-	runtime: Pick<LixRuntime, "db" | "hooks" | "sqlite">;
+	engine: Pick<LixEngine, "db" | "hooks" | "sqlite">;
 	separator?: string;
 	capitalize?: boolean;
 }): string {
 	const capitalize = args.capitalize ?? true;
 	const separator = args.separator ?? "_";
 
-	if (isDeterministicModeSync({ runtime: args.runtime })) {
+	if (isDeterministicModeSync({ engine: args.engine })) {
 		// In deterministic mode, use sequence to get deterministic index
-		const sequence = nextSequenceNumberSync({ runtime: args.runtime });
+		const sequence = nextSequenceNumberSync({ engine: args.engine });
 
 		// Use modulo to cycle through names
 		const name = DETERMINISTIC_NAMES[sequence % DETERMINISTIC_NAMES.length]!;

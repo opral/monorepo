@@ -31,7 +31,7 @@ describe("createEntityAllViewIfNotExists", () => {
 
 		expect(() => {
 			createEntityStateAllView({
-				runtime: lix.runtime!,
+				engine: lix.engine!,
 				schema: invalidSchema,
 				pluginKey: "test_plugin",
 			});
@@ -44,7 +44,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -90,7 +90,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -149,7 +149,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -203,7 +203,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		let defaultValueCalled = false;
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -260,7 +260,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			// No overrideName - should use schema["x-lix-key"] + "_all"
 			pluginKey: "test_plugin",
@@ -302,7 +302,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "cross_version_test",
 			pluginKey: "test_plugin",
@@ -363,7 +363,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -453,7 +453,7 @@ describe("createEntityAllViewIfNotExists", () => {
 			.execute();
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -516,7 +516,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",
@@ -569,7 +569,7 @@ describe("createEntityAllViewIfNotExists", () => {
 
 		// Create the entity view
 		createEntityStateAllView({
-			runtime: lix.runtime!,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view_all",
 			pluginKey: "test_plugin",

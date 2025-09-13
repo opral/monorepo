@@ -1,5 +1,5 @@
 import type { Generated, Selectable } from "kysely";
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 export type StateWithTombstonesView = {
 	entity_id: string;
@@ -30,9 +30,9 @@ export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
  * each version only reports its own direct state or tombstones.
  */
 export function applyStateWithTombstonesView(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
-	args.runtime.sqlite.exec(`
+	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_with_tombstones AS
     SELECT * FROM internal_state_vtable;
   `);

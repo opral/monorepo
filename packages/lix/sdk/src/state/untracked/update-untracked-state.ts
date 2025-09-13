@@ -2,7 +2,7 @@ import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixChangeRaw } from "../../change/schema.js";
-import type { LixRuntime } from "../../runtime/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 /**
  * Change data for untracked state updates with optional ID.
@@ -35,13 +35,14 @@ export type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * @param args.version_id - Version ID to update
  */
 export function updateUntrackedState(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db">;
 	changes: UntrackedChangeData[];
 }): void {
-	const { runtime, changes } = args;
+	const engine = args.engine;
+	const changes = args.changes;
 	if (!changes || changes.length === 0) return;
 
-	const intDb = runtime.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const intDb = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Split into deletions and non-deletions
 	const deletions = changes.filter((c) => c.snapshot_content == null);
@@ -81,7 +82,7 @@ export function updateUntrackedState(args: {
 			if (filArr.length > 0) sel = sel.where("file_id", "in", filArr);
 
 			const existing = executeSync({
-				runtime,
+				engine: engine,
 				query: sel.select(["entity_id", "schema_key", "file_id"]),
 			});
 			const existingSet = new Set<string>(
@@ -93,7 +94,7 @@ export function updateUntrackedState(args: {
 				const key = `${c.entity_id}|${c.schema_key}|${c.file_id}`;
 				if (existingSet.has(key)) {
 					executeSync({
-						runtime,
+						engine: engine,
 						query: intDb
 							.deleteFrom("internal_state_all_untracked")
 							.where("entity_id", "=", c.entity_id)
@@ -125,7 +126,7 @@ export function updateUntrackedState(args: {
 
 			if (tombstoneValues.length > 0) {
 				executeSync({
-					runtime,
+					engine: engine,
 					query: intDb
 						.insertInto("internal_state_all_untracked")
 						.values(tombstoneValues)
@@ -150,7 +151,7 @@ export function updateUntrackedState(args: {
 		for (const c of inserts) {
 			const content: any = c.snapshot_content as any;
 			executeSync({
-				runtime,
+				engine: engine,
 				query: intDb
 					.insertInto("internal_state_all_untracked")
 					.values({

@@ -1,4 +1,4 @@
-import type { LixRuntime } from "./boot.js";
+import type { LixEngine } from "./boot.js";
 import {
 	uuidV7Sync,
 	nanoIdSync,
@@ -15,10 +15,10 @@ import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.
 import { createCheckpointSync } from "../state/create-checkpoint.js";
 
 /**
- * Creates a runtime function router bound to a specific Lix context.
+ * Creates an engine function router bound to a specific Lix context.
  *
  * The router provides a single `call(name, payload?)` entrypoint that invokes
- * built‑in runtime functions next to the database engine, regardless of whether
+ * built‑in engine functions next to the database engine, regardless of whether
  * the engine runs on the main thread or in a Worker.
  *
  * Functions are identified by stable string names (e.g. `"lix_uuid_v7"`).
@@ -30,7 +30,7 @@ export type Call = (
 	opts?: { signal?: AbortSignal }
 ) => Promise<unknown>;
 
-export function createRuntimeRouter(args: { runtime: LixRuntime }): {
+export function createEngineRouter(args: { engine: LixEngine }): {
 	call: Call;
 } {
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
@@ -39,20 +39,20 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 		string,
 		(payload?: unknown) => unknown | Promise<unknown>
 	>([
-		["lix_uuid_v7", () => uuidV7Sync({ runtime: args.runtime })],
+		["lix_uuid_v7", () => uuidV7Sync({ engine: args.engine })],
 		[
 			"lix_nano_id",
-			(payload) => nanoIdSync({ runtime: args.runtime, ...(payload ?? {}) }),
+			(payload) => nanoIdSync({ engine: args.engine, ...(payload ?? {}) }),
 		],
-		["lix_timestamp", () => getTimestampSync({ runtime: args.runtime })],
+		["lix_timestamp", () => getTimestampSync({ engine: args.engine })],
 		[
 			"lix_human_id",
-			(payload) => humanIdSync({ runtime: args.runtime, ...(payload ?? {}) }),
+			(payload) => humanIdSync({ engine: args.engine, ...(payload ?? {}) }),
 		],
-		["lix_random", () => randomSync({ runtime: args.runtime })],
+		["lix_random", () => randomSync({ engine: args.engine })],
 		[
 			"lix_next_sequence_number",
-			() => nextSequenceNumberSync({ runtime: args.runtime }),
+			() => nextSequenceNumberSync({ engine: args.engine }),
 		],
 		[
 			"lix_transition",
@@ -62,7 +62,7 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 					version?: { id: string };
 				};
 				return transitionSync({
-					runtime: args.runtime,
+					engine: args.engine,
 					to: p.to,
 					version: p.version,
 				});
@@ -72,7 +72,7 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 			"lix_commit_deterministic_rng_state",
 			(payload) =>
 				commitDeterministicRngState({
-					runtime: args.runtime,
+					engine: args.engine,
 					...(payload as any),
 				}),
 		],
@@ -80,7 +80,7 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 			"lix_commit_sequence_number",
 			(payload) =>
 				commitSequenceNumberSync({
-					runtime: args.runtime,
+					engine: args.engine,
 					...(payload as any),
 				}),
 		],
@@ -88,17 +88,17 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 			"lix_update_state_cache",
 			(payload) =>
 				updateStateCache({
-					runtime: args.runtime,
+					engine: args.engine,
 					...(payload as any),
 				}),
 		],
 		[
 			"lix_mark_state_cache_as_fresh",
-			() => markStateCacheAsFresh({ runtime: args.runtime }),
+			() => markStateCacheAsFresh({ engine: args.engine }),
 		],
 		[
 			"lix_create_checkpoint",
-			async () => createCheckpointSync({ runtime: args.runtime }),
+			async () => createCheckpointSync({ engine: args.engine }),
 		],
 	]);
 
@@ -106,7 +106,7 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 		call: async (name, payload) => {
 			const handler = routes.get(name);
 			if (!handler) {
-				const err: any = new Error(`Unknown runtime function: ${name}`);
+				const err: any = new Error(`Unknown engine function: ${name}`);
 				err.code = "LIX_RPC_UNKNOWN_ROUTE";
 				throw err;
 			}

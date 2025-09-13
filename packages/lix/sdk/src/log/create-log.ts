@@ -1,4 +1,4 @@
-import { nanoId } from "../runtime/deterministic/nano-id.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLog } from "./schema.js";

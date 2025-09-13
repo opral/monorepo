@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import * as tsModule from "../../runtime/deterministic/timestamp.js";
+import * as tsModule from "../../engine/deterministic/timestamp.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**

@@ -22,13 +22,13 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 import {
 	getTimestampSync,
 	uuidV7Sync,
 	humanIdSync,
-} from "../runtime/deterministic/index.js";
-import { nanoIdSync } from "../runtime/deterministic/nano-id.js";
+} from "../engine/deterministic/index.js";
+import { nanoIdSync } from "../engine/deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
 import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
@@ -136,7 +136,7 @@ export function initDb(args: {
 	});
 
 	const lix = { sqlite: args.sqlite, db, hooks: args.hooks } as unknown as Lix;
-	const runtime: LixRuntime = {
+	const engine: LixEngine = {
 		sqlite: args.sqlite,
 		db: db as any,
 		hooks: args.hooks,
@@ -149,27 +149,27 @@ export function initDb(args: {
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
-	applyTransactionStateSchema({ runtime });
+	applyTransactionStateSchema({ engine: engine });
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
-	applyFileLixcolCacheSchema({ runtime });
+	applyFileLixcolCacheSchema({ engine: engine });
 	// Ensure file data cache table exists before any triggers may reference it
-	applyFileDataCacheSchema({ runtime });
-	applyStateDatabaseSchema({ runtime });
-	applyEntityDatabaseSchema({ runtime });
-	applyChangeSetDatabaseSchema({ runtime });
-	applyCommitDatabaseSchema({ runtime });
-	applyStoredSchemaDatabaseSchema({ runtime });
-	applyVersionDatabaseSchema({ runtime });
-	applyAccountDatabaseSchema({ runtime });
-	applyKeyValueDatabaseSchema({ runtime });
-	applyChangeAuthorDatabaseSchema({ runtime });
-	applyLabelDatabaseSchema({ runtime });
-	applyThreadDatabaseSchema({ runtime });
-	applyEntityThreadDatabaseSchema({ runtime });
-	applyStateHistoryDatabaseSchema({ runtime });
+	applyFileDataCacheSchema({ engine: engine });
+	applyStateDatabaseSchema({ engine: engine });
+	applyEntityDatabaseSchema({ engine: engine });
+	applyChangeSetDatabaseSchema({ engine: engine });
+	applyCommitDatabaseSchema({ engine: engine });
+	applyStoredSchemaDatabaseSchema({ engine: engine });
+	applyVersionDatabaseSchema({ engine: engine });
+	applyAccountDatabaseSchema({ engine: engine });
+	applyKeyValueDatabaseSchema({ engine: engine });
+	applyChangeAuthorDatabaseSchema({ engine: engine });
+	applyLabelDatabaseSchema({ engine: engine });
+	applyThreadDatabaseSchema({ engine: engine });
+	applyEntityThreadDatabaseSchema({ engine: engine });
+	applyStateHistoryDatabaseSchema({ engine: engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	applyLogDatabaseSchema({ runtime });
+	applyLogDatabaseSchema({ engine: engine });
 
 	return db;
 }
@@ -179,7 +179,7 @@ function initFunctions(args: {
 	db: Kysely<LixInternalDatabaseSchema>;
 	hooks: LixHooks;
 }) {
-	const runtime = {
+	const engine = {
 		sqlite: args.sqlite,
 		db: args.db as any,
 		hooks: args.hooks,
@@ -188,19 +188,20 @@ function initFunctions(args: {
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,
-		xFunc: () => uuidV7Sync({ runtime }),
+		xFunc: () => uuidV7Sync({ engine: engine }),
 	});
 
 	args.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
-		xFunc: () => humanIdSync({ runtime, separator: "-", capitalize: false }),
+		xFunc: () =>
+			humanIdSync({ engine: engine, separator: "-", capitalize: false }),
 	});
 
 	args.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
-		xFunc: () => getTimestampSync({ runtime }),
+		xFunc: () => getTimestampSync({ engine: engine }),
 	});
 
 	args.sqlite.createFunction({
@@ -208,7 +209,7 @@ function initFunctions(args: {
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoIdSync({ runtime, length });
+			return nanoIdSync({ engine: engine, length });
 		},
 	});
 }

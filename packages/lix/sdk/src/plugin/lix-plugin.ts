@@ -8,7 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
 
 export type LixReadonly = {
 	db: { selectFrom: Lix["db"]["selectFrom"] };
-	runtime?: Lix["runtime"];
+	engine?: Lix["engine"];
 };
 
 export type LixPlugin = {

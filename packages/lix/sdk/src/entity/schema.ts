@@ -1,8 +1,8 @@
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 import { applyEntityLabelDatabaseSchema } from "./label/schema.js";
 
 export function applyEntityDatabaseSchema(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	applyEntityLabelDatabaseSchema(args);
 }

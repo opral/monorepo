@@ -6,7 +6,7 @@ import { newLixFile } from "../../lix/new-lix.js";
 test("isDeterministicMode returns false when lix_deterministic_mode is not set", async () => {
 	const lix = await openLix({ blob: await newLixFile() });
 
-	const result = isDeterministicModeSync({ runtime: lix.runtime! });
+	const result = isDeterministicModeSync({ engine: lix.engine! });
 
 	expect(result).toBe(false);
 });
@@ -17,7 +17,7 @@ test("isDeterministicMode returns false when lix_deterministic_mode is explicitl
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
-	const result = isDeterministicModeSync({ runtime: lix.runtime! });
+	const result = isDeterministicModeSync({ engine: lix.engine! });
 
 	expect(result).toBe(false);
 });
@@ -28,7 +28,7 @@ test("isDeterministicMode returns true when lix_deterministic_mode is true", asy
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const result = isDeterministicModeSync({ runtime: lix.runtime! });
+	const result = isDeterministicModeSync({ engine: lix.engine! });
 
 	expect(result).toBe(true);
 });
@@ -46,7 +46,7 @@ test("isDeterministicMode returns true for enabled values loosely equal to true"
 			keyValues: [{ key: "lix_deterministic_mode", value: { enabled } }],
 		});
 
-		const result = isDeterministicModeSync({ runtime: lix.runtime! });
+		const result = isDeterministicModeSync({ engine: lix.engine! });
 
 		expect(result).toBe(expected);
 	}
@@ -67,7 +67,7 @@ test("isDeterministicMode returns false for enabled values not loosely equal to 
 			keyValues: [{ key: "lix_deterministic_mode", value: { enabled } }],
 		});
 
-		const result = isDeterministicModeSync({ runtime: lix.runtime! });
+		const result = isDeterministicModeSync({ engine: lix.engine! });
 
 		expect(result).toBe(expected);
 	}
@@ -88,17 +88,17 @@ test("isDeterministicMode returns false for falsy enabled values", async () => {
 			keyValues: [{ key: "lix_deterministic_mode", value: { enabled } }],
 		});
 
-		const result = isDeterministicModeSync({ runtime: lix.runtime! });
+		const result = isDeterministicModeSync({ engine: lix.engine! });
 
 		expect(result).toBe(expected);
 	}
 });
 
-test("isDeterministicMode can be changed at runtime", async () => {
+test("isDeterministicMode can be changed at engine", async () => {
 	const lix = await openLix({ blob: await newLixFile() });
 
 	// Initially false
-	expect(isDeterministicModeSync({ runtime: lix.runtime! })).toBe(false);
+	expect(isDeterministicModeSync({ engine: lix.engine! })).toBe(false);
 
 	// Set to true
 	await lix.db
@@ -106,7 +106,7 @@ test("isDeterministicMode can be changed at runtime", async () => {
 		.values({ key: "lix_deterministic_mode", value: { enabled: true } })
 		.execute();
 
-	expect(isDeterministicModeSync({ runtime: lix.runtime! })).toBe(true);
+	expect(isDeterministicModeSync({ engine: lix.engine! })).toBe(true);
 
 	// Update to false
 	await lix.db
@@ -115,5 +115,5 @@ test("isDeterministicMode can be changed at runtime", async () => {
 		.set({ value: { enabled: false } })
 		.execute();
 
-	expect(isDeterministicModeSync({ runtime: lix.runtime! })).toBe(false);
+	expect(isDeterministicModeSync({ engine: lix.engine! })).toBe(false);
 });

@@ -4,7 +4,7 @@ import {
 	normalSimulation,
 	cacheMissSimulation,
 } from "./simulation-test.js";
-import { getTimestamp } from "../../runtime/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
 
 test("cache miss simulation test discovery", () => {});

@@ -1,4 +1,4 @@
-import type { LixRuntime } from "../boot.js";
+import type { LixEngine } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
@@ -23,15 +23,15 @@ const hookListenersRegistered = new WeakSet<object>();
  * @returns true if deterministic mode is enabled, false otherwise
  */
 export function isDeterministicModeSync(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): boolean {
-	const runtime = args.runtime;
+	const engine = args.engine;
 	// Register hook listener for cache invalidation (only once per hooks instance)
-	const key = runtime.hooks as unknown as object;
-	if (!hookListenersRegistered.has(key) && runtime.hooks) {
+	const key = engine.hooks as unknown as object;
+	if (!hookListenersRegistered.has(key) && engine.hooks) {
 		hookListenersRegistered.add(key);
 
-		runtime.hooks.onStateCommit(({ changes }) => {
+		engine.hooks.onStateCommit(({ changes }) => {
 			// Check if any change affects lix_deterministic_mode
 			for (const change of changes) {
 				if (
@@ -39,7 +39,7 @@ export function isDeterministicModeSync(args: {
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(runtime.sqlite);
+					deterministicModeCache.delete(engine.sqlite);
 					break;
 				}
 			}
@@ -47,15 +47,15 @@ export function isDeterministicModeSync(args: {
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(runtime.sqlite)) {
-		return deterministicModeCache.get(runtime.sqlite)!;
+	if (deterministicModeCache.has(engine.sqlite)) {
+		return deterministicModeCache.get(engine.sqlite)!;
 	}
 
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion
 	const [row] = executeSync({
-		runtime,
-		query: (runtime.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine: engine,
+		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -68,7 +68,7 @@ export function isDeterministicModeSync(args: {
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(runtime.sqlite, result);
+	deterministicModeCache.set(engine.sqlite, result);
 
 	return result;
 }

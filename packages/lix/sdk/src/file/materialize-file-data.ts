@@ -1,15 +1,15 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { LixRuntime } from "../runtime/boot.js";
+import type { LixEngine } from "../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 
 function globSync(args: {
-	runtime: Pick<LixRuntime, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	glob: string;
 	path: string;
 }): boolean {
 	const columnNames: string[] = [];
-	const result = args.runtime.sqlite.exec({
+	const result = args.engine.sqlite.exec({
 		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
 		bind: [args.path, args.glob],
 		returnValue: "resultRows",
@@ -20,18 +20,18 @@ function globSync(args: {
 }
 
 export function materializeFileData(args: {
-	runtime: Pick<LixRuntime, "sqlite" | "db" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
 	file: Omit<LixFile, "data">;
 	versionId: string;
 }): Uint8Array {
-	const plugins = args.runtime.getAllPluginsSync();
+	const plugins = args.engine.getAllPluginsSync();
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
 			!globSync({
-				runtime: args.runtime,
+				engine: args.engine,
 				path: args.file.path,
 				glob: plugin.detectChangesGlob,
 			})
@@ -45,8 +45,8 @@ export function materializeFileData(args: {
 
 		// Get plugin changes from state table
 		const changes = executeSync({
-			runtime: args.runtime,
-			query: args.runtime.db
+			engine: args.engine,
+			query: args.engine.db
 				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", args.file.id)
@@ -81,8 +81,8 @@ export function materializeFileData(args: {
 
 	// If no specific plugin matched, use the fallback plugin
 	const changes = executeSync({
-		runtime: args.runtime,
-		query: args.runtime.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", args.file.id)

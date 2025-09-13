@@ -27,13 +27,13 @@ test("cache is stale after cache clear", async () => {
 
 	// Clear the cache
 	clearStateCache({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 		timestamp: undefined,
 	});
 
 	// Cache should be stale after clearing
 	const result = isStaleStateCache({
-		runtime: lix.runtime!,
+		engine: lix.engine!,
 	});
 
 	expect(result).toBe(true);
