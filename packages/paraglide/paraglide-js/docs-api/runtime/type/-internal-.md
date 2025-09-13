@@ -921,7 +921,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:165](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:169](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -951,7 +951,7 @@ overwriteSetLocale((newLocale) => {
 
 ## setLocale()
 
-> **setLocale**(`newLocale`, `options?`): `void` \| `Promise`\<`void`\>
+> **setLocale**(`newLocale`, `options?`): `void` \| `Promise`\<`any`\>
 
 Defined in: [runtime/set-locale.js:52](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
@@ -979,7 +979,7 @@ function will become async as well.
 
 ### Returns
 
-`void` \| `Promise`\<`void`\>
+`void` \| `Promise`\<`any`\>
 
 ### Examples
 
