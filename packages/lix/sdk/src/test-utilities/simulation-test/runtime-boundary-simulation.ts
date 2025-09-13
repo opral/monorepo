@@ -8,10 +8,19 @@ export const runtimeBoundarySimulation: SimulationTestDef = {
 	setup: async (lix) => {
 		// Re-seed into an isomorphic boundary backend that hides runtime
 		const blob = await lix.toBlob();
+		// Preserve plugin instances from the original session if available
+		const providePlugins = await (async () => {
+			try {
+				return await (lix as any).plugin?.getAll?.();
+			} catch {
+				return undefined;
+			}
+		})();
 		await lix.close();
 		const boundaryLix = await openLix({
 			blob,
 			backend: new RuntimeBoundaryBackend(),
+			providePlugins,
 		});
 		return boundaryLix;
 	},

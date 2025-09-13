@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
+import { clearFileDataCache } from "../../file/cache/clear-file-data-cache.js";
 import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
@@ -70,6 +71,8 @@ export const cacheMissSimulation: SimulationTestDef = {
 						runtime: lix.runtime!,
 						timestamp: CACHE_TIMESTAMP,
 					});
+					// Also clear file data cache to prevent stale file reads
+					clearFileDataCache({ runtime: lix.runtime! });
 				}
 
 				// Call the original execute

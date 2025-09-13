@@ -18,11 +18,7 @@ import { isJsonType } from "../schema-definition/json-type.js";
 import { createDialect } from "../backend/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
-import {
-	commitDeterministicRngState,
-	random,
-} from "../runtime/deterministic/random.js";
-import { commitSequenceNumberSync } from "../runtime/deterministic/sequence.js";
+import { random } from "../runtime/deterministic/random.js";
 
 export type Lix = {
 	/**
@@ -302,9 +298,8 @@ export async function openLix(args: {
 			await backend.close();
 		},
 		toBlob: async () => {
-			// todo use backend.call instead
-			commitSequenceNumberSync({ runtime });
-			commitDeterministicRngState({ runtime });
+			await backend.call("lix_commit_sequence_number");
+			await backend.call("lix_commit_deterministic_rng_state");
 			return new Blob([await backend.export()]);
 		},
 	};

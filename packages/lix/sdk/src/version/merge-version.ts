@@ -495,15 +495,9 @@ export async function mergeVersion(args: {
 
 		// Write incremental cache in a single batched call
 		if (cacheBatch.length > 0) {
-			updateStateCache({
-				runtime: lix.runtime!,
-				changes: cacheBatch,
-			});
-			// Mark cache fresh to prevent vtable from repopulating and discarding just-written rows
-			markStateCacheAsFresh({
-				runtime: lix.runtime!,
-			});
-			//
+			// Delegate cache updates to runtime via router when runtime is not exposed
+			await lix.call("lix_update_state_cache", { changes: cacheBatch });
+			await lix.call("lix_mark_state_cache_as_fresh");
 		}
 	});
 }

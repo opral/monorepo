@@ -7,6 +7,12 @@ import {
 	randomSync,
 	nextSequenceNumberSync,
 } from "./deterministic/index.js";
+import { transitionSync } from "../state/transition.js";
+import { commitDeterministicRngState } from "./deterministic/random.js";
+import { commitSequenceNumberSync } from "./deterministic/sequence.js";
+import { updateStateCache } from "../state/cache/update-state-cache.js";
+import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
+import { createCheckpointSync } from "../state/create-checkpoint.js";
 
 /**
  * Creates a runtime function router bound to a specific Lix context.
@@ -29,7 +35,10 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 } {
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
 	// in a Promise by `callFn` for a unified async surface.
-	const routes = new Map<string, (payload?: unknown) => unknown>([
+	const routes = new Map<
+		string,
+		(payload?: unknown) => unknown | Promise<unknown>
+	>([
 		["lix_uuid_v7", () => uuidV7Sync({ runtime: args.runtime })],
 		[
 			"lix_nano_id",
@@ -44,6 +53,52 @@ export function createRuntimeRouter(args: { runtime: LixRuntime }): {
 		[
 			"lix_next_sequence_number",
 			() => nextSequenceNumberSync({ runtime: args.runtime }),
+		],
+		[
+			"lix_transition",
+			async (payload) => {
+				const p = (payload ?? {}) as {
+					to: { id: string };
+					version?: { id: string };
+				};
+				return transitionSync({
+					runtime: args.runtime,
+					to: p.to,
+					version: p.version,
+				});
+			},
+		],
+		[
+			"lix_commit_deterministic_rng_state",
+			(payload) =>
+				commitDeterministicRngState({
+					runtime: args.runtime,
+					...(payload as any),
+				}),
+		],
+		[
+			"lix_commit_sequence_number",
+			(payload) =>
+				commitSequenceNumberSync({
+					runtime: args.runtime,
+					...(payload as any),
+				}),
+		],
+		[
+			"lix_update_state_cache",
+			(payload) =>
+				updateStateCache({
+					runtime: args.runtime,
+					...(payload as any),
+				}),
+		],
+		[
+			"lix_mark_state_cache_as_fresh",
+			() => markStateCacheAsFresh({ runtime: args.runtime }),
+		],
+		[
+			"lix_create_checkpoint",
+			async () => createCheckpointSync({ runtime: args.runtime }),
 		],
 	]);
 

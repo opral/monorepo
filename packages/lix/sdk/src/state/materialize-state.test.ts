@@ -411,25 +411,21 @@ simulationTest(
 			name: "tip-vs-snapshot",
 		});
 
-		const tips =
-			(lix.runtime?.sqlite!.exec({
-				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
-				bind: [versionId],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+		const tips = await (lix.db as any)
+			.selectFrom("internal_materialization_version_tips" as any)
+			.selectAll()
+			.where("version_id", "=", versionId)
+			.execute();
 
 		expectDeterministic(tips.length).toBe(1);
 
-		const matRows =
-			(lix.runtime?.sqlite!.exec({
-				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
-                      FROM internal_state_materializer
-                      WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,
-				bind: [versionId],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{ commit_id: string | null }>) ?? [];
+		const matRows = await (lix.db as any)
+			.selectFrom("internal_state_materializer" as any)
+			.select(sql`json_extract(snapshot_content,'$.commit_id')`.as("commit_id"))
+			.where("schema_key", "=", "lix_version_tip")
+			.where("version_id", "=", "global")
+			.where("entity_id", "=", versionId)
+			.execute();
 
 		expectDeterministic(matRows.length).toBe(1);
 		expectDeterministic(matRows[0]!.commit_id).toBe(tips[0]!.tip_commit_id);
@@ -446,6 +442,7 @@ simulationTest(
 					key: "lix_deterministic_mode",
 					value: { enabled: true },
 					lixcol_version_id: "global",
+					lixcol_untracked: true,
 				},
 			],
 		});
@@ -467,28 +464,24 @@ simulationTest(
 			})
 			.execute();
 
-		// Read tip from materializer tips view
-		const tips =
-			(lix.runtime?.sqlite!.exec({
-				sql: `SELECT version_id, tip_commit_id FROM internal_materialization_version_tips WHERE version_id = ?`,
-				bind: [versionA.id],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{ version_id: string; tip_commit_id: string }>) ?? [];
+		// Read tip from materializer tips view via Kysely on internal view
+		const tips = await (lix.db as any)
+			.selectFrom("internal_materialization_version_tips" as any)
+			.selectAll()
+			.where("version_id", "=", versionA.id)
+			.execute();
 
 		expectDeterministic(tips.length).toBe(1);
 		expectDeterministic(tips[0]!.tip_commit_id).not.toEqual(versionA.commit_id);
 
-		// Read tip from internal_state_materializer for lix_version_tip (global scope)
-		const matRows =
-			(lix.runtime?.sqlite!.exec({
-				sql: `SELECT json_extract(snapshot_content,'$.commit_id') AS commit_id
-                  FROM internal_state_materializer
-                  WHERE schema_key = 'lix_version_tip' AND version_id = 'global' AND entity_id = ?`,
-				bind: [versionA.id],
-				rowMode: "object",
-				returnValue: "resultRows",
-			}) as Array<{ commit_id: string | null }>) ?? [];
+		// Read tip from internal_state_materializer via Kysely with expression select
+		const matRows = await (lix.db as any)
+			.selectFrom("internal_state_materializer" as any)
+			.select(sql`json_extract(snapshot_content,'$.commit_id')`.as("commit_id"))
+			.where("schema_key", "=", "lix_version_tip")
+			.where("version_id", "=", "global")
+			.where("entity_id", "=", versionA.id)
+			.execute();
 
 		expectDeterministic(matRows.length).toBe(1);
 		expectDeterministic(matRows[0]!.commit_id).toBe(tips[0]!.tip_commit_id);
