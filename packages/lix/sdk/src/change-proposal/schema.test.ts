@@ -73,3 +73,49 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 		.executeTakeFirst();
 	expect(afterDelete).toBeUndefined();
 });
+
+test("deleting a version referenced by a change proposal should fail (FK)", async () => {
+	const lix = await openLix({});
+
+	// Get main as target
+	const main = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a source version from main
+	const src = await createVersion({ lix, from: main, name: "cp_fk_src" });
+
+	// Create a change proposal referencing src -> main
+	await lix.db
+		.insertInto("change_proposal_all")
+		.values({
+			source_version_id: src.id,
+			target_version_id: main.id,
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	// Attempt to delete the referenced source version -> should fail due to FK
+	await expect(
+		lix.db.deleteFrom("version").where("id", "=", src.id).execute()
+	).rejects.toThrow();
+
+	// Cleanup: delete proposal, then deletion should succeed
+	const cp = await lix.db
+		.selectFrom("change_proposal")
+		.where("source_version_id", "=", src.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.deleteFrom("change_proposal_all")
+		.where("id", "=", cp.id)
+		.where("lixcol_version_id", "=", "global")
+		.execute();
+
+	await expect(
+		lix.db.deleteFrom("version").where("id", "=", src.id).execute()
+	).resolves.toBeDefined();
+});

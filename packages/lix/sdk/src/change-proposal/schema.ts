@@ -27,6 +27,16 @@ export const LixChangeProposalSchema = {
 	"x-lix-key": "lix_change_proposal",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
+	"x-lix-foreign-keys": [
+		{
+			properties: ["source_version_id"],
+			references: { schemaKey: "lix_version_descriptor", properties: ["id"] },
+		},
+		{
+			properties: ["target_version_id"],
+			references: { schemaKey: "lix_version_descriptor", properties: ["id"] },
+		},
+	],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
