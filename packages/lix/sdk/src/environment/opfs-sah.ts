@@ -1,22 +1,22 @@
-import type { LixBackend, ExecResult } from "./types.js";
+import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
 
 /**
- * OPFS SAH‑pool backend implemented with a Dedicated Worker.
+ * OPFS SAH‑pool environment implemented with a Dedicated Worker.
  *
  * Spawns a Worker and forwards calls via a minimal RPC while keeping the
- * `LixBackend` async surface. Use one instance per logical database key.
+ * environment async surface. Use one instance per logical database key.
  *
  * @example
  * // Instance API
- * const backend = new OpfsSahBackend({ key: 'default' })
- * await backend.open({ boot: { args: { pluginsRaw: [] } }, onEvent })
+ * const env = new OpfsSahEnvironment({ key: 'default' })
+ * await env.open({ boot: { args: { pluginsRaw: [] } }, onEvent })
  *
  * @example
  * // Static helper: clear all OPFS data for this origin (destructive)
- * await OpfsSahBackend.clear()
+ * await OpfsSahEnvironment.clear()
  */
-export class OpfsSahBackend implements LixBackend {
-	private static _instances = new Set<OpfsSahBackend>();
+export class OpfsSahEnvironment implements LixEnvironment {
+	private static _instances = new Set<OpfsSahEnvironment>();
 	private worker: Worker;
 	private nextId = 0;
 	private inflight = new Map<string, (r: any) => void>();
@@ -28,7 +28,7 @@ export class OpfsSahBackend implements LixBackend {
 		this.worker = new Worker(new URL("./opfs-sah.worker.js", import.meta.url), {
 			type: "module",
 		});
-		OpfsSahBackend._instances.add(this);
+		OpfsSahEnvironment._instances.add(this);
 		this.worker.onmessage = (ev: MessageEvent) => {
 			const msg = (ev as any).data;
 			if (msg && msg.type === "event" && msg.event) {
@@ -75,13 +75,15 @@ export class OpfsSahBackend implements LixBackend {
 		return this.send("call", { route: name, payload });
 	}
 
-	async open(initOpts: Parameters<LixBackend["open"]>[0]): Promise<void> {
+	async open(initOpts: Parameters<LixEnvironment["open"]>[0]): Promise<void> {
 		this.eventHandler = initOpts.onEvent;
 		const payload: any = { name: this.dbKey, bootArgs: initOpts.boot.args };
 		await this.send("open", payload);
 	}
 
-	async create(createOpts: Parameters<LixBackend["create"]>[0]): Promise<void> {
+	async create(
+		createOpts: Parameters<LixEnvironment["create"]>[0]
+	): Promise<void> {
 		this.eventHandler = createOpts.onEvent;
 		const payload: any = {
 			name: this.dbKey,
@@ -91,7 +93,7 @@ export class OpfsSahBackend implements LixBackend {
 		await this.send("create", payload, [createOpts.blob]);
 	}
 
-	async exec(sql: string, params?: unknown[]): Promise<ExecResult> {
+	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
 		return this.send("exec", { sql, params });
 	}
 
@@ -122,7 +124,7 @@ export class OpfsSahBackend implements LixBackend {
 	async close(): Promise<void> {
 		await this.send("close", {});
 		this.worker.terminate();
-		OpfsSahBackend._instances.delete(this);
+		OpfsSahEnvironment._instances.delete(this);
 	}
 
 	/**
@@ -132,10 +134,10 @@ export class OpfsSahBackend implements LixBackend {
 	 * WARNING! This will delete ALL files in OPFS, not just Lix files!
 	 */
 	static async clear(): Promise<void> {
-		// Refuse to clear if any backend instances are still open to avoid races
-		if (OpfsSahBackend._instances.size > 0) {
+		// Refuse to clear if any environment instances are still open to avoid races
+		if (OpfsSahEnvironment._instances.size > 0) {
 			const err: any = new Error(
-				`Cannot clear OPFS: ${OpfsSahBackend._instances.size} database connection(s) are open. Close all connections before clearing.`
+				`Cannot clear OPFS: ${OpfsSahEnvironment._instances.size} database connection(s) are open. Close all connections before clearing.`
 			);
 			err.code = "LIX_OPFS_BUSY";
 			throw err;

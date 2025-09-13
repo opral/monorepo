@@ -4,24 +4,24 @@ import {
 	contentFromDatabase,
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
-import type { LixBackend, ExecResult } from "./types.js";
+import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
 import { boot, type LixEngine } from "../engine/boot.js";
 
 /**
- * In‑process, in‑memory backend backed by WASM SQLite.
+ * In‑process, in‑memory environment.
  *
  * Runs on the calling thread; great for tests, CLI, or light usage. In
- * browsers, heavy operations can block the UI – prefer the Worker backend for
+ * browsers, heavy operations can block the UI – prefer the Worker environment for
  * production use.
  *
  * @example
- * const backend = new InMemoryBackend()
- * await backend.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
- * await backend.exec("CREATE TABLE t(a)")
- * await backend.exec("INSERT INTO t(a) VALUES (?)", [1])
- * const out = await backend.exec("SELECT a FROM t")
+ * const env = new InMemoryEnvironment()
+ * await env.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
+ * await env.exec("CREATE TABLE t(a)")
+ * await env.exec("INSERT INTO t(a) VALUES (?)", [1])
+ * const out = await env.exec("SELECT a FROM t")
  */
-export class InMemoryBackend implements LixBackend {
+export class InMemoryEnvironment implements LixEnvironment {
 	private db: SqliteWasmDatabase | undefined;
 	private callImpl:
 		| ((
@@ -33,7 +33,7 @@ export class InMemoryBackend implements LixBackend {
 	private engine: LixEngine | undefined;
 
 	async open(
-		opts: Parameters<LixBackend["open"]>[0]
+		opts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<void | { engine?: LixEngine }> {
 		if (!this.db) {
 			this.db = await createInMemoryDatabase({ readOnly: false });
@@ -48,7 +48,7 @@ export class InMemoryBackend implements LixBackend {
 		return { engine: this.engine };
 	}
 
-	async create(opts: Parameters<LixBackend["create"]>[0]): Promise<void> {
+	async create(opts: Parameters<LixEnvironment["create"]>[0]): Promise<void> {
 		this.db = await createInMemoryDatabase({ readOnly: false });
 		importDatabase({ db: this.db, content: new Uint8Array(opts.blob) });
 		const res = await boot({
@@ -60,7 +60,7 @@ export class InMemoryBackend implements LixBackend {
 		this.engine = res.engine;
 	}
 
-	async exec(sql: string, params?: unknown[]): Promise<ExecResult> {
+	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
 		if (!this.db) throw new Error("Engine not initialized");
 
 		const columnNames: string[] = [];
@@ -75,7 +75,7 @@ export class InMemoryBackend implements LixBackend {
 			}) as any[];
 		} catch (e: any) {
 			const err = new Error(
-				`backend.exec failed: ${e?.message ?? e} -- SQL: ${sql}`
+				`environment.exec failed: ${e?.message ?? e} -- SQL: ${sql}`
 			);
 			(err as any).cause = e;
 			throw err;
@@ -107,7 +107,7 @@ export class InMemoryBackend implements LixBackend {
 	}
 
 	async exists(): Promise<boolean> {
-		// In-memory backend has no persisted store bound to a key/path.
+		// In-memory environment has no persisted store bound to a key/path.
 		return false;
 	}
 
@@ -116,7 +116,7 @@ export class InMemoryBackend implements LixBackend {
 		payload?: unknown,
 		_opts?: { signal?: AbortSignal }
 	): Promise<unknown> {
-		if (!this.callImpl) throw new Error("Backend not initialized");
+		if (!this.callImpl) throw new Error("Environment not initialized");
 		return this.callImpl(name, payload);
 	}
 }

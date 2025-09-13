@@ -1,12 +1,12 @@
 import { openLix } from "../lix/open-lix.js";
 import { test, expect, describe } from "vitest";
-import { OpfsSahBackend } from "./opfs-sah.js";
+import { OpfsSahEnvironment } from "./opfs-sah.js";
 import { newLixFile } from "../lix/new-lix.js";
 
-describe.sequential("OPFS SAH Backend (browser)", () => {
+describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("inserting a file", async () => {
 		const lix = await openLix({
-			backend: new OpfsSahBackend({}),
+			environment: new OpfsSahEnvironment({}),
 			pluginsRaw: [],
 		});
 
@@ -32,20 +32,20 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 	});
 
 	test("open() does not expose engine on main thread", async () => {
-		const backend = new OpfsSahBackend({ key: `vitest-opfs-no-engine` });
-		const res = await backend.open({
+		const env = new OpfsSahEnvironment({ key: `vitest-opfs-no-engine` });
+		const res = await env.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
 		});
-		// Worker-backed backend cannot expose an in-process engine; must be undefined
+		// Worker environment cannot expose an in-process engine; must be undefined
 		expect(res).toBeUndefined();
-		await backend.close();
+		await env.close();
 	});
 
 	test("persists across reopen with same name", async () => {
 		const name = `vitest-opfs-persist`;
 		const lix1 = await openLix({
-			backend: new OpfsSahBackend({ key: name }),
+			environment: new OpfsSahEnvironment({ key: name }),
 			pluginsRaw: [],
 		});
 
@@ -63,7 +63,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 
 		// Second open: read the previously written row
 		const lix2 = await openLix({
-			backend: new OpfsSahBackend({ key: name }),
+			environment: new OpfsSahEnvironment({ key: name }),
 			pluginsRaw: [],
 		});
 		try {
@@ -83,7 +83,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		const name = `vitest-opfs-overwrite`;
 		// First open (seeds a new DB)
 		const lix1 = await openLix({
-			backend: new OpfsSahBackend({ key: name }),
+			environment: new OpfsSahEnvironment({ key: name }),
 			pluginsRaw: [],
 		});
 		await lix1.close();
@@ -92,18 +92,18 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		const fresh = await newLixFile();
 		const blob = await fresh.arrayBuffer();
 
-		// Use backend.create directly so we can properly close the worker even on error
-		const backend = new OpfsSahBackend({ key: name });
+		// Use environment.create directly so we can properly close the worker even on error
+		const env = new OpfsSahEnvironment({ key: name });
 		try {
 			await expect(
-				backend.create({
+				env.create({
 					blob,
 					boot: { args: { pluginsRaw: [] } },
 					onEvent: () => {},
 				})
 			).rejects.toThrow(/already exists|refusing to import/i);
 		} finally {
-			await backend.close();
+			await env.close();
 		}
 	});
 
@@ -112,7 +112,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 
 		// 1) Create a DB and write a row
 		const lix1 = await openLix({
-			backend: new OpfsSahBackend({ key: name }),
+			environment: new OpfsSahEnvironment({ key: name }),
 			pluginsRaw: [],
 		});
 		try {
@@ -138,7 +138,7 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 		expect(entriesBefore.length).toBeGreaterThan(0);
 
 		// 3) Wipe all OPFS data for this origin
-		await OpfsSahBackend.clear();
+		await OpfsSahEnvironment.clear();
 
 		// Ensure OPFS has settled
 		await new Promise((r) => setTimeout(r, 100));
@@ -152,10 +152,10 @@ describe.sequential("OPFS SAH Backend (browser)", () => {
 	});
 });
 
-test("clear() throws when a backend is open", async () => {
+test("clear() throws when an environment is open", async () => {
 	const name = `vitest-opfs-clear-open`;
 	const lix = await openLix({
-		backend: new OpfsSahBackend({ key: name }),
+		environment: new OpfsSahEnvironment({ key: name }),
 		pluginsRaw: [],
 	});
 	await lix.db
@@ -163,7 +163,7 @@ test("clear() throws when a backend is open", async () => {
 		.values({ path: "/hold.txt", data: new TextEncoder().encode("x") })
 		.execute();
 
-	await expect(OpfsSahBackend.clear()).rejects.toMatchObject({
+	await expect(OpfsSahEnvironment.clear()).rejects.toMatchObject({
 		code: "LIX_OPFS_BUSY",
 	});
 
@@ -185,7 +185,7 @@ export default plugin;
 `;
 
 	const lix = await openLix({
-		backend: new OpfsSahBackend({ key: `vitest-opfs-plugin` }),
+		environment: new OpfsSahEnvironment({ key: `vitest-opfs-plugin` }),
 		pluginsRaw: [mockPlugin],
 	});
 	try {
@@ -218,7 +218,7 @@ test("persists provided account", async () => {
 
 	// Open with initial account
 	const lix1 = await openLix({
-		backend: new OpfsSahBackend({ key: name }),
+		environment: new OpfsSahEnvironment({ key: name }),
 		pluginsRaw: [],
 		account,
 	});
@@ -238,9 +238,9 @@ test("persists provided account", async () => {
 		await lix1.close();
 	}
 
-	// Reopen the same backend key and verify persistence
+	// Reopen the same environment key and verify persistence
 	const lix2 = await openLix({
-		backend: new OpfsSahBackend({ key: name }),
+		environment: new OpfsSahEnvironment({ key: name }),
 		pluginsRaw: [],
 	});
 	try {

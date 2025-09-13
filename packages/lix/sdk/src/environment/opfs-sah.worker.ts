@@ -254,7 +254,7 @@ async function handle(req: Req): Promise<Res> {
 			}
 
 			case "call": {
-				if (!db) throw new Error("Backend not initialized");
+				if (!db) throw new Error("Environment not initialized");
 				const { route, payload } = req.payload as any;
 				if (!engineCall) {
 					return {

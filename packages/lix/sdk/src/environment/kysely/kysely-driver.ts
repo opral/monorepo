@@ -5,18 +5,18 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
-import type { LixBackend } from "../types.js";
+import type { LixEnvironment } from "../types.js";
 
-type BackendDriverConfig = {
-	backend: LixBackend;
+type LixEnvironmentDriverConfig = {
+	backend: LixEnvironment;
 };
 
-class BackendConnection implements DatabaseConnection {
-	#backend: LixBackend;
+class EnvironmentConnection implements DatabaseConnection {
+	#backend: LixEnvironment;
 	// Track nested transaction depth for savepoint emulation
 	_txDepth = 0;
 	_spNames: string[] = [];
-	constructor(backend: LixBackend) {
+	constructor(backend: LixEnvironment) {
 		this.#backend = backend;
 	}
 
@@ -77,16 +77,16 @@ class BackendConnection implements DatabaseConnection {
 	}
 }
 
-export class BackendDriver implements Driver {
-	readonly #config: BackendDriverConfig;
+export class EnvironmentDriver implements Driver {
+	readonly #config: LixEnvironmentDriverConfig;
 
 	// Global transaction coordination for a single engine.
 	// Ensures only one top‑level transaction owner at a time.
-	#owner?: BackendConnection;
+	#owner?: EnvironmentConnection;
 	#depth = 0; // total nesting depth for owner
 	#waiters: Array<() => void> = [];
 
-	constructor(config: BackendDriverConfig) {
+	constructor(config: LixEnvironmentDriverConfig) {
 		this.#config = config;
 	}
 
@@ -97,11 +97,11 @@ export class BackendDriver implements Driver {
 	async acquireConnection(): Promise<DatabaseConnection> {
 		// Return a lightweight connection wrapper per acquire to isolate
 		// transaction state (savepoints) across concurrent transactions.
-		return new BackendConnection(this.#config.backend);
+		return new EnvironmentConnection(this.#config.backend);
 	}
 
 	async beginTransaction(connection: DatabaseConnection): Promise<void> {
-		const conn = connection as unknown as BackendConnection;
+		const conn = connection as unknown as EnvironmentConnection;
 
 		// Wait our turn if another connection owns the top‑level transaction
 		while (this.#depth > 0 && this.#owner !== conn) {
@@ -125,7 +125,7 @@ export class BackendDriver implements Driver {
 	}
 
 	async commitTransaction(connection: DatabaseConnection): Promise<void> {
-		const conn = connection as unknown as BackendConnection;
+		const conn = connection as unknown as EnvironmentConnection;
 		if (this.#owner !== conn) {
 			throw new Error("commit from non-owner connection");
 		}
@@ -148,7 +148,7 @@ export class BackendDriver implements Driver {
 	}
 
 	async rollbackTransaction(connection: DatabaseConnection): Promise<void> {
-		const conn = connection as unknown as BackendConnection;
+		const conn = connection as unknown as EnvironmentConnection;
 		if (this.#owner !== conn) {
 			throw new Error("rollback from non-owner connection");
 		}
@@ -178,10 +178,10 @@ export class BackendDriver implements Driver {
 	}
 }
 
-export function createDialect(args: { backend: LixBackend }): Dialect {
+export function createDialect(args: { environment: LixEnvironment }): Dialect {
 	return {
 		createAdapter: () => new SqliteAdapter(),
-		createDriver: () => new BackendDriver({ backend: args.backend }),
+		createDriver: () => new EnvironmentDriver({ backend: args.environment }),
 		createIntrospector: (db: any) => new SqliteIntrospector(db),
 		createQueryCompiler: () => new SqliteQueryCompiler(),
 	};

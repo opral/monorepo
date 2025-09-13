@@ -1,11 +1,4 @@
-/**
- * Public backend types for running the Lix SQLite database in different engines.
- *
- * The backend exposes an async surface even when backed by a synchronous
- * in‑process WASM SQLite implementation to unify usage across implementations.
- */
-
-export type ExecResult = {
+export type LixEnvironmentResult = {
 	/** Rows returned by a SELECT, if any. */
 	rows?: any[];
 	/** Number of rows changed by a mutation, if available. */
@@ -14,7 +7,7 @@ export type ExecResult = {
 	lastInsertRowid?: number;
 };
 
-export type BackendError = {
+export type LixEnvironmentError = {
 	/** Error name, e.g. 'SqliteError'. */
 	name: string;
 	/** Optional database error code. */
@@ -24,20 +17,20 @@ export type BackendError = {
 };
 
 /**
- * Minimal backend interface used by drivers and openLix.
+ * Minimal environment interface used by drivers and openLix.
  *
- * Backends own persistence and plugin execution. The main thread always
- * interacts with the backend via these async methods.
+ * Environments own persistence and plugin execution. The main thread always
+ * interacts with the environment via these async methods.
  */
-export interface LixBackend {
+export interface LixEnvironment {
 	/**
-	 * Open the backend and boot the engine next to the database engine.
+	 * Open the environment and boot the engine next to the database engine.
 	 *
 	 * Return value semantics:
-	 * - In‑process (main‑thread) backends SHOULD return `{ engine }` so the
+	 * - In‑process (main‑thread) environments SHOULD return `{ engine }` so the
 	 *   engine is directly accessible on the main thread — useful for unit
 	 *   testing and local tools that need in‑process access.
-	 * - Out‑of‑process backends (e.g., Worker or separate process) MUST NOT
+	 * - Out‑of‑process environments (e.g., Worker or separate process) MUST NOT
 	 *   return a engine (resolve to `void`). In those environments, callers
 	 *   should use `call()` to invoke engine functions across the boundary.
 	 *
@@ -66,7 +59,7 @@ export interface LixBackend {
 	}): Promise<void>;
 
 	/**
-	 * Returns true if a persistent database already exists for this backend's
+	 * Returns true if a persistent database already exists for this environment's
 	 * target (e.g. OPFS key or filesystem path).
 	 */
 	exists(): Promise<boolean>;
@@ -75,9 +68,9 @@ export interface LixBackend {
 	 * Execute a single SQL statement.
 	 *
 	 * @example
-	 * await backend.exec("CREATE TABLE t(a)")
+	 * await env.exec("CREATE TABLE t(a)")
 	 */
-	exec(sql: string, params?: unknown[]): Promise<ExecResult>;
+	exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult>;
 
 	/**
 	 * Export a snapshot of the current database as raw bytes.
@@ -90,9 +83,9 @@ export interface LixBackend {
 	close(): Promise<void>;
 
 	/**
-	 * Invoke a engine function inside the backend environment.
+	 * Invoke an engine function inside the environment.
 	 *
-	 * Backends MUST implement this and route the call to the engine that
+	 * Environments MUST implement this and route the call to the engine that
 	 * booted next to SQLite, regardless of whether the engine runs on the main
 	 * thread or inside a Worker.
 	 */

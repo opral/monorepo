@@ -1,13 +1,15 @@
 import { test, expect } from "vitest";
 import { Kysely } from "kysely";
 import { createDialect } from "./kysely-driver.js";
-import { InMemoryBackend } from "../in-memory.js";
+import { InMemoryEnvironment } from "../in-memory.js";
 
 test("EngineDriver runs basic Kysely queries", async () => {
-	const backend = new InMemoryBackend();
+	const backend = new InMemoryEnvironment();
 	await backend.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
 
-	const db = new Kysely<any>({ dialect: createDialect({ backend }) });
+	const db = new Kysely<any>({
+		dialect: createDialect({ environment: backend }),
+	});
 
 	await db.executeQuery({ sql: "CREATE TABLE t(a)", parameters: [] } as any);
 	await db.executeQuery({

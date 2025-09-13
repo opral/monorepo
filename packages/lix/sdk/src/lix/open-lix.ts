@@ -13,9 +13,9 @@ import type { LixAccount } from "../account/schema.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
 import type { LixEngine } from "../engine/boot.js";
-import type { LixBackend } from "../backend/types.js";
+import type { LixEnvironment } from "../environment/types.js";
 import { isJsonType } from "../schema-definition/json-type.js";
-import { createDialect } from "../backend/kysely/kysely-driver.js";
+import { createDialect } from "../environment/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
 import { random } from "../engine/deterministic/random.js";
@@ -101,9 +101,9 @@ export type Lix = {
 	 *
 	 * ```ts
 	 * test("example test", async () => {
-	 *   // InMemory backend runs in the same process (in‑process engine).
+	 *   // InMemory environment runs in the same process (in‑process engine).
 	 *   const lix = await openLix({
-	 *      backend: new InMemoryBackend()
+	 *      environment: new InMemoryenvironment()
 	 *   });
 	 *   executeSync({
 	 *     engine: lix.engine!,
@@ -160,13 +160,13 @@ export async function openLix(args: {
 	 */
 	blob?: Blob;
 
-	backend?: LixBackend;
+	environment?: LixEnvironment;
 
 	pluginsRaw?: string[];
 	/**
 	 * Provide plugin instances directly (classic API).
 	 *
-	 * Supported only by in‑process backends. In worker/remote backends,
+	 * Supported only by in‑process environments. In worker/remote environments,
 	 * plugins must be provided via `pluginsRaw` (stringified ESM modules).
 	 */
 	providePlugins?: LixPlugin[];
@@ -185,15 +185,15 @@ export async function openLix(args: {
 	const blob = args.blob;
 	let engine: LixEngine | undefined;
 
-	const backend =
-		args.backend ??
-		(await import("../backend/in-memory.js").then(
-			(m) => new m.InMemoryBackend()
+	const environment =
+		args.environment ??
+		(await import("../environment/in-memory.js").then(
+			(m) => new m.InMemoryEnvironment()
 		))!;
 
 	// Default behavior: openOrCreate
-	// - If a blob is provided, attempt to create from it (backend may refuse if target exists)
-	// - If no blob is provided, attempt to create a fresh Lix; if backend reports existing DB,
+	// - If a blob is provided, attempt to create from it (environment may refuse if target exists)
+	// - If no blob is provided, attempt to create a fresh Lix; if environment reports existing DB,
 	//   fall back to open without a blob.
 	const boot = {
 		args: {
@@ -205,30 +205,30 @@ export async function openLix(args: {
 	} as const;
 
 	if (blob) {
-		await backend.create({
+		await environment.create({
 			blob: await args.blob!.arrayBuffer(),
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
-		const res = await backend.open({
+		const res = await environment.open({
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	} else {
-		// Exists-first flow: avoid throwing to decide; ask backend if a DB exists.
-		const exists = await backend.exists();
+		// Exists-first flow: avoid throwing to decide; ask environment if a DB exists.
+		const exists = await environment.exists();
 		if (!exists) {
 			const { newLixFile } = await import("./new-lix.js");
 			const seed = await newLixFile({ keyValues: args.keyValues });
 			const seedBytes = await seed.arrayBuffer();
-			await backend.create({
+			await environment.create({
 				blob: seedBytes,
 				boot,
 				onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 			});
 		}
-		const res = await backend.open({
+		const res = await environment.open({
 			boot,
 			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
 		});
@@ -267,7 +267,7 @@ export async function openLix(args: {
 	})();
 
 	const db = new Kysely<LixDatabaseSchema>({
-		dialect: createDialect({ backend: backend }),
+		dialect: createDialect({ environment: environment }),
 		plugins: [
 			new ParseJSONResultsPlugin(),
 			JSONColumnPlugin(ViewsWithJsonColumns),
@@ -277,10 +277,10 @@ export async function openLix(args: {
 
 	const observe = createObserve({ hooks });
 
-	await captureOpened({ lix: { db, call: backend.call } });
+	await captureOpened({ lix: { db, call: environment.call } });
 
 	const lix: Lix = {
-		// sqlite intentionally not exposed in backend mode
+		// sqlite intentionally not exposed in environment mode
 		db,
 		hooks,
 		observe,
@@ -293,14 +293,14 @@ export async function openLix(args: {
 			name: string,
 			payload?: unknown,
 			_opts?: { signal?: AbortSignal }
-		): Promise<unknown> => backend.call(name, payload),
+		): Promise<unknown> => environment.call(name, payload),
 		close: async () => {
-			await backend.close();
+			await environment.close();
 		},
 		toBlob: async () => {
-			await backend.call("lix_commit_sequence_number");
-			await backend.call("lix_commit_deterministic_rng_state");
-			return new Blob([await backend.export()]);
+			await environment.call("lix_commit_sequence_number");
+			await environment.call("lix_commit_deterministic_rng_state");
+			return new Blob([await environment.export()]);
 		},
 	};
 

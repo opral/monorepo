@@ -1,9 +1,9 @@
 import { describe, test, expect } from "vitest";
-import { InMemoryBackend } from "./in-memory.js";
+import { InMemoryEnvironment } from "./in-memory.js";
 
-describe("InMemory backend", () => {
+describe("InMemory environemnt", () => {
 	test("initializes and executes basic SQL", async () => {
-		const engine = new InMemoryBackend();
+		const engine = new InMemoryEnvironment();
 		await engine.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
@@ -24,13 +24,13 @@ describe("InMemory backend", () => {
 	});
 
 	test("returns engine handle from open()", async () => {
-		const backend = new InMemoryBackend();
+		const backend = new InMemoryEnvironment();
 		const res = await backend.open({
 			boot: { args: { pluginsRaw: [] } },
 			onEvent: () => {},
 		});
 
-		// In-memory backend runs on the main thread; engine should be available
+		// In-memory environment runs on the main thread; engine should be available
 		expect(res && (res as any).engine).toBeDefined();
 
 		await backend.close();
@@ -40,7 +40,7 @@ describe("InMemory backend", () => {
 });
 
 test("export/import round-trip persists data", async () => {
-	const b1 = new InMemoryBackend();
+	const b1 = new InMemoryEnvironment();
 	await b1.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
 
 	await b1.exec("CREATE TABLE t(a)");
@@ -49,7 +49,7 @@ test("export/import round-trip persists data", async () => {
 	const snapshot = await b1.export();
 	await b1.close();
 
-	const b2 = new InMemoryBackend();
+	const b2 = new InMemoryEnvironment();
 	await b2.create({
 		blob: snapshot,
 		boot: { args: { pluginsRaw: [] } },
@@ -63,8 +63,8 @@ test("export/import round-trip persists data", async () => {
 });
 
 test("multiple engines are independent", async () => {
-	const b1 = new InMemoryBackend();
-	const b2 = new InMemoryBackend();
+	const b1 = new InMemoryEnvironment();
+	const b2 = new InMemoryEnvironment();
 
 	await b1.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
 	await b2.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} });
