@@ -92,10 +92,8 @@ export default defineConfig({
               text: "Change Proposals",
               link: "/guide/features/change-proposals",
             },
-            { text: "Diffs", link: "/guide/features/diffs" },
+            { text: "Entity-level diffs", link: "/guide/features/diffs" },
             { text: "History", link: "/guide/features/history" },
-            { text: "Restore", link: "/guide/features/restore" },
-            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
             {
               text: "Validation Rules",
               link: "/guide/features/validation-rules",
@@ -104,27 +102,28 @@ export default defineConfig({
           ],
         },
         {
+          text: "More Features",
+          collapsed: true,
+          items: [
+            { text: "Attribution (Blame)", link: "/guide/features/attribution" },
+            { text: "Restore", link: "/guide/features/restore" },
+            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
+            { text: "Conversations", link: "/guide/features/conversations" },
+            { text: "Labels", link: "/guide/concepts/labels" },
+            { text: "Key Value Store", link: "/guide/concepts/key-value" },
+          ],
+        },
+        {
           text: "Core Concepts",
           collapsed: true,
           items: [
-            {
-              text: "Attribution (Blame)",
-              link: "/guide/features/attribution",
-            },
-            { text: "Conversations", link: "/guide/features/conversations" },
+            
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },
             { text: "Snapshots", link: "/guide/concepts/snapshots" },
             { text: "Change Graph", link: "/guide/concepts/change-graph" },
-            { text: "Labels", link: "/guide/concepts/labels" },
             { text: "Change Sets", link: "/guide/concepts/change-sets" },
             { text: "Merging", link: "/guide/concepts/merging" },
-            {
-              text: "Change Proposals",
-              link: "/guide/concepts/change-proposals",
-            },
-            { text: "Versions", link: "/guide/concepts/versions" },
-            { text: "Key-Value", link: "/guide/concepts/key-value" },
           ],
         },
         {
