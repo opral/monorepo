@@ -1,7 +1,7 @@
 import { bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 
 /**
@@ -80,11 +80,11 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			],
 		});
 
-		const ts = timestamp({ lix });
+		const ts = await getTimestamp({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
-			lix,
+			engine: lix.engine!,
 			changes,
 			commit_id: "commit-standard",
 			version_id: "v1",
@@ -101,11 +101,11 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			],
 		});
 
-		const ts = timestamp({ lix });
+		const ts = await getTimestamp({ lix });
 		const changes = generateChanges(1000, schemas, ts);
 
 		updateStateCache({
-			lix,
+			engine: lix.engine!,
 			changes,
 			commit_id: "commit-multi",
 			version_id: "v1",
@@ -124,7 +124,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 				],
 			});
 
-			const ts = timestamp({ lix });
+			const ts = await getTimestamp({ lix });
 
 			// Pre-populate with 100K rows across 5 schemas (20K per schema)
 			// Process in 10K batches to avoid memory issues
@@ -133,7 +133,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 					prefix: `warmup-${i}`,
 				});
 				updateStateCache({
-					lix,
+					engine: lix.engine!,
 					changes: warmupChanges,
 					commit_id: `warmup-${i}`,
 					version_id: "v0",
@@ -148,7 +148,7 @@ describe("updateStateCacheV2 Regression Tests", () => {
 			});
 
 			updateStateCache({
-				lix,
+				engine: lix.engine!,
 				changes,
 				commit_id: "commit-warm",
 				version_id: "v1",

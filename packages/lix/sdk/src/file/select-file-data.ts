@@ -1,4 +1,4 @@
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { updateFileDataCache } from "./cache/update-file-data-cache.js";
@@ -11,18 +11,18 @@ import { updateFileDataCache } from "./cache/update-file-data-cache.js";
  *
  * @example
  * const data = selectFileData({
- *   lix,
+ *   engine: lix.engine!,
  *   file: { id: "file_123", path: "/test.json", metadata: null },
  *   versionId: "version_456"
  * });
  */
 export function selectFileData(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
 	file: Omit<LixFile, "data">;
 	versionId: string;
 }): Uint8Array {
 	// Check cache first
-	const result = args.lix.sqlite.exec({
+	const result = args.engine.sqlite.exec({
 		sql: `
 			SELECT data 
 			FROM internal_file_data_cache 
@@ -41,14 +41,14 @@ export function selectFileData(args: {
 
 	// Cache miss - materialize the file data
 	const data = materializeFileData({
-		lix: args.lix,
+		engine: args.engine,
 		file: args.file,
 		versionId: args.versionId,
 	});
 
 	// Update cache for next time (write-through)
 	updateFileDataCache({
-		lix: args.lix,
+		engine: { sqlite: args.engine.sqlite } as any,
 		fileId: args.file.id,
 		versionId: args.versionId,
 		data,

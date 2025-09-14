@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { updateUntrackedState } from "./update-untracked-state.js";
-import { timestamp } from "../../deterministic/index.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 
 test("updateUntrackedState creates direct untracked entity", async () => {
 	const lix = await openLix({
@@ -22,11 +22,11 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create direct untracked entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -94,11 +94,11 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create initial entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -119,7 +119,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 
 	// Update the entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-change-id-2",
@@ -185,11 +185,11 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create direct untracked entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-change-id",
@@ -220,7 +220,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 
 	// Delete the entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-delete-change-id",
@@ -264,7 +264,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create an untracked entity in global version (parent)
 	await lixInternalDb
@@ -299,7 +299,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	// Delete the inherited entity (should create tombstone)
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-inherited-delete-change-id",
@@ -346,11 +346,11 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create untracked entity
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-timestamp-change-id",
@@ -399,11 +399,11 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const currentTime = timestamp({ lix: lix as any });
+	const currentTime = await getTimestamp({ lix });
 
 	// Create a tombstone first
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-tombstone-change-id",
@@ -433,7 +433,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 
 	// Update the tombstone with actual content
 	updateUntrackedState({
-		lix,
+		engine: lix.engine!,
 		changes: [
 			{
 				id: "test-tombstone-update-change-id",

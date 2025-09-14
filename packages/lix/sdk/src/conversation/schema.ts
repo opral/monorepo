@@ -4,33 +4,33 @@ import type {
 } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../deterministic/index.js";
-import type { Lix } from "../lix/open-lix.js";
+import { nanoIdSync } from "../engine/deterministic/index.js";
+import type { LixEngine } from "../engine/boot.js";
 
-export function applyConversationDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyConversationDatabaseSchema(args: {
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+}): void {
 	// Create both primary and _all views for conversation with default ID generation
 	createEntityViewsIfNotExists({
-		lix,
+		engine: args.engine,
 		schema: LixConversationSchema,
 		overrideName: "conversation",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix }),
+			id: () => nanoIdSync({ engine: args.engine }),
 		},
 	});
 
 	// Create both primary and _all views for conversation_message with default ID generation
 	createEntityViewsIfNotExists({
-		lix,
+		engine: args.engine,
 		schema: LixConversationMessageSchema,
 		overrideName: "conversation_message",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix }),
+			id: () => nanoIdSync({ engine: args.engine }),
 		},
 	});
 }

@@ -227,7 +227,7 @@ export async function newLixFile(args?: {
 
 	// Set active version using updateUntrackedState for proper inheritance handling
 	updateUntrackedState({
-		lix: { sqlite, db },
+		engine: { sqlite, db },
 		changes: [
 			{
 				entity_id: "active",
@@ -251,7 +251,7 @@ export async function newLixFile(args?: {
 
 	// Create the anonymous account as untracked
 	updateUntrackedState({
-		lix: { sqlite, db },
+		engine: { sqlite, db } as any,
 		changes: [
 			{
 				entity_id: activeAccountId,
@@ -271,7 +271,7 @@ export async function newLixFile(args?: {
 
 	// Set it as the active account
 	updateUntrackedState({
-		lix: { sqlite, db },
+		engine: { sqlite, db } as any,
 		changes: [
 			{
 				entity_id: `active_${activeAccountId}`,
@@ -296,7 +296,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				lix: { sqlite, db },
+				engine: { sqlite, db } as any,
 				changes: [
 					{
 						entity_id: kv.key,
@@ -478,7 +478,6 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			working_commit_id: globalWorkingCommitId,
 			inherits_from_version_id: null,
 			hidden: true,
 		} satisfies LixVersionDescriptor,
@@ -496,6 +495,7 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: "global",
 			commit_id: globalCommitId,
+			working_commit_id: globalWorkingCommitId,
 		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});
@@ -512,7 +512,6 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
-			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies LixVersionDescriptor,
@@ -530,6 +529,7 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: initialVersionId,
 			commit_id: mainCommitId,
+			working_commit_id: mainWorkingCommitId,
 		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});

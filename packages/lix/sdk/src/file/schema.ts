@@ -4,19 +4,18 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
 import { selectFileLixcol } from "./select-file-lixcol.js";
 
-export function applyFileDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
-): void {
+export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
+	const engine = args.engine;
 	// applied in databse itself before state because commit
 	// logic writes into the licol cache
 	// applyFileLixcolCacheSchema({ lix });
 
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "handle_file_insert",
 		arity: 7,
 		xFunc: (_ctx: number, ...args: any[]) => {
@@ -31,7 +30,7 @@ export function applyFileDatabaseSchema(
 			}
 
 			const result = handleFileInsert({
-				lix,
+				engine: engine,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -47,7 +46,7 @@ export function applyFileDatabaseSchema(
 		deterministic: true,
 	});
 
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "handle_file_update",
 		arity: 7,
 		xFunc: (_ctx: number, ...args: any[]) => {
@@ -62,7 +61,7 @@ export function applyFileDatabaseSchema(
 			}
 
 			const result = handleFileUpdate({
-				lix,
+				engine: engine,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -78,13 +77,13 @@ export function applyFileDatabaseSchema(
 		deterministic: true,
 	});
 
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "materialize_file_data",
 		arity: 4,
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			return materializeFileData({
-				lix,
+				engine: engine,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -95,13 +94,13 @@ export function applyFileDatabaseSchema(
 		},
 	});
 
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "select_file_data",
 		arity: 4,
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			return selectFileData({
-				lix,
+				engine: engine,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -114,13 +113,13 @@ export function applyFileDatabaseSchema(
 
 	// Register SQL functions for lixcol metadata caching
 	// Returns JSON string with {latest_change_id, latest_commit_id, created_at, updated_at}
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "select_file_lixcol",
 		arity: 2, // file_id, version_id
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			const lixcol = selectFileLixcol({
-				lix,
+				engine: engine,
 				fileId: args[0],
 				versionId: args[1],
 			});
@@ -129,13 +128,13 @@ export function applyFileDatabaseSchema(
 		},
 	});
 
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "materialize_file_data_at_commit",
 		arity: 5,
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			return materializeFileDataAtCommit({
-				lix,
+				engine: engine,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -147,7 +146,7 @@ export function applyFileDatabaseSchema(
 		},
 	});
 
-	lix.sqlite.exec(`
+	engine.sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
         SELECT 
                 id,

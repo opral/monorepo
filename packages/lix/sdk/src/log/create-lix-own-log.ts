@@ -1,5 +1,5 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 
 const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
 
@@ -39,7 +39,7 @@ export function shouldLog(
  * @example
  * // Basic info log (will be logged if 'info' is allowed by lix_log_levels)
  * createLixOwnLog({
- *   lix,
+ *   engine: { sqlite: lix.sqlite, db: lix.db },
  *   key: 'app.init',
  *   level: 'info',
  *   message: 'Application started.'
@@ -48,7 +48,7 @@ export function shouldLog(
  * @example
  * // Log a warning (will be logged if 'warn' is allowed by lix_log_levels)
  * createLixOwnLog({
- *   lix,
+ *   engine: { sqlite: lix.sqlite, db: lix.db },
  *   key: 'user.login.failed',
  *   level: 'warn',
  *   message: `Login failed for user ${userId}`
@@ -74,14 +74,14 @@ export function shouldLog(
  * @returns A promise that resolves with the created log entry, or undefined if filtered out.
  */
 export function createLixOwnLogSync(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db">;
 	message: string;
 	level: string;
 	key: string;
 }): void {
 	const logLevels = executeSync({
-		lix: args.lix,
-		query: args.lix.db
+		engine: args.engine,
+		query: args.engine.db
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_log_levels"),
@@ -94,8 +94,8 @@ export function createLixOwnLogSync(args: {
 
 	// Insert the log
 	executeSync({
-		lix: args.lix,
-		query: args.lix.db.insertInto("log").values({
+		engine: args.engine,
+		query: args.engine.db.insertInto("log").values({
 			key: args.key,
 			message: args.message,
 			level: args.level,
@@ -104,7 +104,7 @@ export function createLixOwnLogSync(args: {
 }
 
 export async function createLixOwnLog(args: {
-	lix: Pick<Lix, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db">;
 	message: string;
 	level: string;
 	key: string;

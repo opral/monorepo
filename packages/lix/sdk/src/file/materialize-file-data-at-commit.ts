@@ -1,15 +1,15 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 
 function globSync(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	glob: string;
 	path: string;
 }): boolean {
 	const columnNames: string[] = [];
-	const result = args.lix.sqlite.exec({
+	const result = args.engine.sqlite.exec({
 		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
 		bind: [args.path, args.glob],
 		returnValue: "resultRows",
@@ -20,19 +20,19 @@ function globSync(args: {
 }
 
 export function materializeFileDataAtCommit(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
 	file: Omit<LixFile, "data">;
 	rootCommitId: string;
 	depth: number;
 }): Uint8Array {
-	const plugins = args.lix.plugin.getAllSync();
+	const plugins = args.engine.getAllPluginsSync();
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
 			!globSync({
-				lix: args.lix,
+				engine: args.engine,
 				path: args.file.path,
 				glob: plugin.detectChangesGlob,
 			})
@@ -46,9 +46,9 @@ export function materializeFileDataAtCommit(args: {
 
 		// Get plugin changes from state_history table
 		const changes = executeSync({
-			lix: args.lix,
+			engine: args.engine,
 			query: selectFileChanges({
-				lix: args.lix,
+				engine: args.engine,
 				pluginKey: plugin.key,
 				fileId: args.file.id,
 				rootCommitId: args.rootCommitId,
@@ -75,9 +75,9 @@ export function materializeFileDataAtCommit(args: {
 
 	// If no specific plugin matched, use the fallback plugin
 	const changes = executeSync({
-		lix: args.lix,
+		engine: args.engine,
 		query: selectFileChanges({
-			lix: args.lix,
+			engine: args.engine,
 			pluginKey: lixUnknownFileFallbackPlugin.key,
 			fileId: args.file.id,
 			rootCommitId: args.rootCommitId,
@@ -109,13 +109,13 @@ export function materializeFileDataAtCommit(args: {
 }
 
 function selectFileChanges(args: {
-	lix: Pick<Lix, "db">;
+	engine: Pick<LixEngine, "db">;
 	pluginKey: string;
 	fileId: string;
 	rootCommitId: string;
 	depth: number;
 }) {
-	return args.lix.db
+	return args.engine.db
 		.selectFrom("state_history as sh1")
 		.where("sh1.plugin_key", "=", args.pluginKey)
 		.where("sh1.file_id", "=", args.fileId)

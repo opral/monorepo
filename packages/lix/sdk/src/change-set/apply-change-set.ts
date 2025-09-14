@@ -61,7 +61,7 @@ export async function applyChangeSet(args: {
 		}));
 
 		updateStateCache({
-			lix: args.lix,
+			engine: args.lix.engine!,
 			changes: changesForCache,
 			version_id: version.id,
 			commit_id: version.commit_id,
@@ -108,7 +108,7 @@ export async function applyChangeSet(args: {
 			// This is important because the file may have been updated by previous operations
 			// and we need the current state for plugin processing
 			clearFileDataCache({
-				lix: args.lix,
+				engine: args.lix.engine!,
 				fileId: file_id,
 				versionId: version.id,
 			});

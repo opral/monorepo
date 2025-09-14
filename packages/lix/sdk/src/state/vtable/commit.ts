@@ -7,12 +7,12 @@ import type { LixChangeRaw } from "../../change/schema.js";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { type LixVersion } from "../../version/schema.js";
-import { nanoId } from "../../deterministic/index.js";
-import { uuidV7 } from "../../deterministic/uuid-v7.js";
-import { commitDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import { nanoIdSync } from "../../engine/deterministic/index.js";
+import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
+import { commitSequenceNumberSync } from "../../engine/deterministic/sequence.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
-import { timestamp } from "../../deterministic/timestamp.js";
-import type { Lix } from "../../lix/open-lix.js";
+import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { updateStateCache } from "../cache/update-state-cache.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
@@ -28,21 +28,22 @@ import { generateCommit } from "./generate-commit.js";
  *
  * @example
  * // After accumulating changes via insertTransactionState
- * commit({ lix });
+ * commit({ engine: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 }): number {
-	const transactionTimestamp = timestamp({ lix: args.lix });
-	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const engine = args.engine;
+	const transactionTimestamp = getTimestampSync({ engine: engine });
+	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Collect per-version snapshots once to avoid duplicate queries in this commit
 	const versionSnapshots = new Map<string, LixVersion>();
 
 	// Query all transaction changes
 	const allTransactionChanges = executeSync({
-		lix: args.lix,
+		engine: engine,
 		query: db
 			.selectFrom("internal_transaction_state")
 			.select([
@@ -88,7 +89,7 @@ export function commit(args: {
 			created_at: change.created_at,
 			lixcol_version_id: change.version_id,
 		}));
-		updateUntrackedState({ lix: args.lix, changes: untrackedBatch });
+		updateUntrackedState({ engine, changes: untrackedBatch });
 	}
 
 	// Track metadata for each version that gets a commit
@@ -104,7 +105,7 @@ export function commit(args: {
 	// Helper to load merged version (descriptor + tip) from resolved state
 	const loadMergedVersion = (version_id: string): LixVersion => {
 		const [desc] = executeSync({
-			lix: args.lix,
+			engine: engine,
 			query: db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version_descriptor")
@@ -117,7 +118,7 @@ export function commit(args: {
 			throw new Error(`Version with id '${version_id}' not found.`);
 		const d = JSON.parse(desc.snapshot_content) as any;
 		const [tip] = executeSync({
-			lix: args.lix,
+			engine: engine,
 			query: db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version_tip")
@@ -132,7 +133,7 @@ export function commit(args: {
 		return {
 			id: d.id,
 			name: d.name,
-			working_commit_id: d.working_commit_id,
+			working_commit_id: t.working_commit_id,
 			inherits_from_version_id: d.inherits_from_version_id,
 			hidden: d.hidden,
 			commit_id: t.commit_id,
@@ -146,8 +147,8 @@ export function commit(args: {
 		// Load version snapshot once (descriptor + tip)
 		const versionData = loadMergedVersion(version_id);
 		versionSnapshots.set(version_id, versionData);
-		const changeSetId = uuidV7({ lix: args.lix });
-		const commitId = uuidV7({ lix: args.lix });
+		const changeSetId = uuidV7Sync({ engine: engine });
+		const commitId = uuidV7Sync({ engine: engine });
 
 		// Store metadata for later use
 		versionMetadata.set(version_id, {
@@ -162,8 +163,8 @@ export function commit(args: {
 		// Load global version snapshot once (descriptor + tip)
 		const globalVersion = loadMergedVersion("global");
 		versionSnapshots.set("global", globalVersion);
-		const globalChangeSetId = nanoId({ lix: args.lix });
-		const globalCommitId = uuidV7({ lix: args.lix });
+		const globalChangeSetId = nanoIdSync({ engine: engine });
+		const globalCommitId = uuidV7Sync({ engine: engine });
 
 		// Store global metadata
 		versionMetadata.set("global", {
@@ -175,7 +176,7 @@ export function commit(args: {
 
 	// Get active accounts for change_author records
 	const activeAccounts = executeSync({
-		lix: args.lix,
+		engine: engine,
 		query: db
 			.selectFrom("internal_resolved_state_all")
 			.where("schema_key", "=", "lix_active_account")
@@ -209,7 +210,7 @@ export function commit(args: {
 		const versionData = versionSnapshots.get(version_id)!;
 
 		const [workingCommitRow] = executeSync({
-			lix: args.lix,
+			engine: engine,
 			query: db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_commit")
@@ -256,7 +257,7 @@ export function commit(args: {
 				const entitiesAtCheckpoint = new Set<string>();
 				if (deletionChanges.length > 0) {
 					const checkpointCommitResult = executeSync({
-						lix: args.lix,
+						engine: engine,
 						query: db
 							.selectFrom("commit")
 							.innerJoin("entity_label", (join) =>
@@ -279,7 +280,7 @@ export function commit(args: {
 					const checkpointCommitId = checkpointCommitResult[0]?.id;
 					if (checkpointCommitId) {
 						const checkpointEntities = executeSync({
-							lix: args.lix,
+							engine: engine,
 							query: db
 								.selectFrom("state_history")
 								.where("depth", "=", 0)
@@ -308,7 +309,7 @@ export function commit(args: {
 
 				// Find existing working change set elements to delete
 				const existingEntities = executeSync({
-					lix: args.lix,
+					engine: engine,
 					query: db
 						.selectFrom("internal_resolved_state_all")
 						.select([
@@ -373,7 +374,7 @@ export function commit(args: {
 					// So existing.entity_id already contains the correct format
 					const entityIdForDeletion = existing.entity_id;
 					workingUntrackedBatch.push({
-						id: uuidV7({ lix: args.lix }),
+						id: uuidV7Sync({ engine: engine }),
 						entity_id: entityIdForDeletion,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
@@ -390,7 +391,7 @@ export function commit(args: {
 					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
 					if (entitiesAtCheckpoint.has(key)) {
 						workingUntrackedBatch.push({
-							id: uuidV7({ lix: args.lix }),
+							id: uuidV7Sync({ engine: engine }),
 							entity_id: `${workingChangeSetId}~${deletion.id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
@@ -412,7 +413,7 @@ export function commit(args: {
 				// Add all non-deletions as untracked
 				for (const change of nonDeletionChanges) {
 					workingUntrackedBatch.push({
-						id: uuidV7({ lix: args.lix }),
+						id: uuidV7Sync({ engine: engine }),
 						entity_id: `${workingChangeSetId}~${change.id}`,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
@@ -432,7 +433,7 @@ export function commit(args: {
 
 				if (workingUntrackedBatch.length > 0) {
 					updateUntrackedState({
-						lix: args.lix,
+						engine: args.engine,
 						changes: workingUntrackedBatch,
 					});
 				}
@@ -447,16 +448,16 @@ export function commit(args: {
 	if (totalTracked === 0) {
 		// Clear the transaction table after handling any untracked updates
 		executeSync({
-			lix: args.lix,
+			engine: engine,
 			query: db.deleteFrom("internal_transaction_state"),
 		});
-		commitDeterministicSequenceNumber({
-			lix: args.lix,
+		commitSequenceNumberSync({
+			engine: engine,
 			timestamp: transactionTimestamp,
 		});
 		// Emit hook for untracked-only commit
-		args.lix.hooks._emit("state_commit", { changes: untrackedChanges });
-		return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
+		args.engine.hooks._emit("state_commit", { changes: untrackedChanges });
+		return args.engine.sqlite.sqlite3.capi.SQLITE_OK;
 	}
 	// Build versions map: include all versions with tracked changes + global
 	const versionsInput = new Map<
@@ -507,27 +508,30 @@ export function commit(args: {
 		activeAccounts: activeAccounts.map((a) => a.account_id as string),
 		changes: domainChangesFlat,
 		versions: versionsInput,
-		generateUuid: () => uuidV7({ lix: args.lix }),
+		generateUuid: () => uuidV7Sync({ engine: engine }),
 	});
 
 	// Single batch insert of all generated changes into the change table
 	if (genRes.changes.length > 0) {
 		executeSync({
-			lix: args.lix,
+			engine: engine,
 			// @ts-expect-error - snapshot_content is a JSON string, not parsed object
-			query: args.lix.db.insertInto("change").values(genRes.changes),
+			query: db.insertInto("change").values(genRes.changes),
 		});
 	}
 
 	// Clear the transaction table after committing
 	executeSync({
-		lix: args.lix,
+		engine: engine,
 		query: db.deleteFrom("internal_transaction_state"),
 	});
 
 	// Update cache entries in a single call using materialized state with inline commit/version
 	if (genRes.materializedState.length > 0) {
-		updateStateCache({ lix: args.lix, changes: genRes.materializedState });
+		updateStateCache({
+			engine: engine,
+			changes: genRes.materializedState,
+		});
 	}
 
 	// Delete untracked state for any tracked changes that were committed
@@ -541,7 +545,7 @@ export function commit(args: {
 		for (const key of untrackedToDelete) {
 			const [entity_id, schema_key, file_id, vid] = key.split("|");
 			executeSync({
-				lix: args.lix,
+				engine: engine,
 				query: db
 					.deleteFrom("internal_state_all_untracked")
 					.where("entity_id", "=", entity_id!)
@@ -615,7 +619,7 @@ export function commit(args: {
 			}
 			if (filesToDelete.length > 0) {
 				executeSync({
-					lix: args.lix,
+					engine: engine,
 					query: db
 						.deleteFrom("internal_file_lixcol_cache")
 						.where("version_id", "=", version_id)
@@ -624,7 +628,7 @@ export function commit(args: {
 			}
 			if (filesToUpdate.length > 0) {
 				executeSync({
-					lix: args.lix,
+					engine: engine,
 					query: db
 						.insertInto("internal_file_lixcol_cache")
 						.values(filesToUpdate)
@@ -640,8 +644,8 @@ export function commit(args: {
 		}
 	}
 
-	commitDeterministicSequenceNumber({
-		lix: args.lix,
+	commitSequenceNumberSync({
+		engine: engine,
 		timestamp: transactionTimestamp,
 	});
 
@@ -666,6 +670,6 @@ export function commit(args: {
 			writer_key: ms.writer_key ?? null,
 		})
 	);
-	args.lix.hooks._emit("state_commit", { changes: hookChanges });
-	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
+	engine.hooks._emit("state_commit", { changes: hookChanges });
+	return engine.sqlite.sqlite3.capi.SQLITE_OK;
 }

@@ -38,7 +38,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			.execute();
 
 		createEntityViewsIfNotExists({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "triple_test",
 			pluginKey: "test_plugin",
@@ -127,7 +127,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 
 		// Create read-only views
 		createEntityViewsIfNotExists({
-			lix,
+			engine: lix.engine!,
 			schema: roSchema,
 			overrideName: "ro_test",
 			pluginKey: "test_plugin",
@@ -187,7 +187,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			.execute();
 
 		createEntityViewsIfNotExists({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "cross_test",
 			pluginKey: "test_plugin",
@@ -285,7 +285,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const lix = await openLix({});
 
 		createEntityViewsIfNotExists({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			// No overrideName - should use schema["x-lix-key"] as base
 			pluginKey: "test_plugin",
@@ -344,7 +344,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		// Should throw error for all view types when schema is invalid
 		expect(() => {
 			createEntityViewsIfNotExists({
-				lix,
+				engine: lix.engine!,
 				schema: invalidSchema,
 				pluginKey: "test_plugin",
 			});

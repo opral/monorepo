@@ -26,10 +26,15 @@ test("cache is stale after cache clear", async () => {
 	expect(cache.length).toBeGreaterThan(0);
 
 	// Clear the cache
-	clearStateCache({ lix });
+	clearStateCache({
+		engine: lix.engine!,
+		timestamp: undefined,
+	});
 
 	// Cache should be stale after clearing
-	const result = isStaleStateCache({ lix });
+	const result = isStaleStateCache({
+		engine: lix.engine!,
+	});
 
 	expect(result).toBe(true);
 });

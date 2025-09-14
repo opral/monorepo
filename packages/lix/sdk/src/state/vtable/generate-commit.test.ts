@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { generateCommit } from "./generate-commit.js";
-import { timestamp } from "../../deterministic/timestamp.js";
-import { uuidV7 } from "../../deterministic/uuid-v7.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { uuidV7 } from "../../engine/deterministic/uuid-v7.js";
 import type { MaterializedState } from "./generate-commit.js";
 
 function groupBySchema(rows: any[]): Map<string, any[]> {
@@ -23,7 +23,12 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
+	const preIds: string[] = [
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+	];
 
 	// domain change on active version
 	const chgId = "chg_active";
@@ -37,7 +42,7 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 		snapshot_content: JSON.stringify({ key: "a", value: "1" }),
 		created_at: now,
 		version_id: "version-main",
-	} as any;
+	};
 
 	const res = generateCommit({
 		timestamp: now,
@@ -73,7 +78,7 @@ test("scenario 1: 1 key_value on active (with author)", async () => {
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => preIds.shift() || "uuid_fallback",
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
@@ -206,7 +211,7 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 
 	const chgId = "chg_global";
 	const userChange = {
@@ -218,9 +223,14 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 		plugin_key: "lix_own_entity",
 		snapshot_content: JSON.stringify({ key: "g", value: "1" }),
 		created_at: now,
-		lixcol_version_id: "global",
-	} as any;
+		version_id: "global",
+	};
 
+	const preIds3: string[] = [
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+	];
 	const res = generateCommit({
 		timestamp: now,
 		activeAccounts: ["acct-1"],
@@ -241,7 +251,7 @@ test("scenario 2: 1 key_value on global (with author)", async () => {
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => preIds3.shift() || "uuid_fallback",
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);
@@ -296,7 +306,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 			},
 		],
 	});
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 
 	const changeA = {
 		id: "chg_A",
@@ -321,6 +331,12 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 		created_at: now,
 		version_id: "version-main",
 	} as any;
+
+	const preIds4: string[] = [
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+		await uuidV7({ lix }),
+	];
 
 	const res = generateCommit({
 		timestamp: now,
@@ -356,7 +372,7 @@ test("scenario 3: 2 key_values (active + global), each with both authors", async
 				},
 			],
 		]),
-		generateUuid: () => uuidV7({ lix }),
+		generateUuid: () => preIds4.shift() || "uuid_fallback",
 	});
 
 	const bySchema = groupBySchema(res.changes as any[]);

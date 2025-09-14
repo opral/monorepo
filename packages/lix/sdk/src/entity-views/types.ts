@@ -111,7 +111,7 @@ export type EntityStateHistoryView<T> = T & StateEntityHistoryColumns;
 /**
  * Type for querying entities from the active version.
  *
- * This type unwraps all LixGenerated markers, giving you the actual runtime types
+ * This type unwraps all LixGenerated markers, giving you the actual engine types
  * for entity properties and operational columns. Use this when working with
  * query results from the database or passing data to UI components.
  *

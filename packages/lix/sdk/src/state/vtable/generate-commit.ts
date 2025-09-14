@@ -80,8 +80,7 @@ export function generateCommit(args: {
 	// Group domain changes by version
 	const domainByVersion = new Map<string, DomainChangeInput[]>();
 	for (const c of input) {
-		const vid = c.version_id as string;
-		if (!vid) continue;
+		const vid = c.version_id;
 		const list = domainByVersion.get(vid) ?? [];
 		list.push(c);
 		domainByVersion.set(vid, list);
@@ -119,6 +118,7 @@ export function generateCommit(args: {
 	const metaChanges: LixChangeRaw[] = [];
 	const commitChangeIdByVersion = new Map<string, string>();
 	for (const [vid, meta] of metaByVersion) {
+		const vinfo = versions.get(vid)!;
 		// version_tip update
 		metaChanges.push({
 			id: generateUuid(),
@@ -130,6 +130,7 @@ export function generateCommit(args: {
 			snapshot_content: JSON.stringify({
 				id: vid,
 				commit_id: meta.commitId,
+				working_commit_id: vinfo.snapshot.working_commit_id,
 			} satisfies LixVersionTip),
 			created_at: timestamp,
 		});
@@ -273,6 +274,7 @@ export function generateCommit(args: {
 
 	// Materialize version tip rows to reflect pointers without SELECTs
 	for (const [vid, meta] of metaByVersion) {
+		const vinfo = versions.get(vid)!;
 		const tipChangeId = tipChangeIdByVersion.get(vid) ?? generateUuid();
 		materialized.push({
 			id: tipChangeId,
@@ -284,6 +286,7 @@ export function generateCommit(args: {
 			snapshot_content: JSON.stringify({
 				id: vid,
 				commit_id: meta.commitId,
+				working_commit_id: vinfo.snapshot.working_commit_id,
 			} satisfies LixVersionTip),
 			created_at: timestamp,
 			lixcol_version_id: "global",

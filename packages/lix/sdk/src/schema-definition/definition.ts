@@ -403,7 +403,7 @@ export type LixUpdateable<T> = {
 /**
  * Transform a type for select/query operations.
  *
- * This type unwraps all LixGenerated markers, giving you the actual runtime
+ * This type unwraps all LixGenerated markers, giving you the actual engine
  * types that will be returned from database queries. All fields are required
  * and have their base types.
  *

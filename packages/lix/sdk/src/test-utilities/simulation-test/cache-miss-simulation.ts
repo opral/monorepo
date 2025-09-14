@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
+import { clearFileDataCache } from "../../file/cache/clear-file-data-cache.js";
 import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
@@ -66,7 +67,12 @@ export const cacheMissSimulation: SimulationTestDef = {
 				// Skip cache clear for internal_* views/tables
 				if (!skipClear) {
 					// This forces re-materialization from changes
-					clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
+					clearStateCache({
+						engine: lix.engine!,
+						timestamp: CACHE_TIMESTAMP,
+					});
+					// Also clear file data cache to prevent stale file reads
+					clearFileDataCache({ engine: lix.engine! });
 				}
 
 				// Call the original execute

@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
@@ -232,7 +232,7 @@ export type StateEntityHistoryColumns = {
  * ```
  */
 export function createEntityStateHistoryView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] + "_history" */
 	overrideName?: string;
@@ -271,5 +271,5 @@ export function createEntityStateHistoryView(args: {
       WHERE schema_key = '${schema_key}';
     `;
 
-	args.lix.sqlite.exec(sqlQuery);
+	args.engine.sqlite.exec(sqlQuery);
 }

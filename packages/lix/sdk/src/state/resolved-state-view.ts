@@ -1,6 +1,6 @@
 import type { StateAllView } from "./views/state-all.js";
 import { encodeStatePkPart } from "./vtable/primary-key.js";
-import type { Lix } from "../index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 /**
  * Creates a view that provides direct access to resolved state data
@@ -19,11 +19,12 @@ import type { Lix } from "../index.js";
  *
  * See https://github.com/opral/lix-sdk/issues/355
  */
-export function applyResolvedStateView(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyResolvedStateView(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	const { engine } = args;
 	// Register a custom SQLite function for encoding primary key parts
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "lix_encode_pk_part",
 		deterministic: true,
 		arity: 1,
@@ -34,7 +35,7 @@ export function applyResolvedStateView(
 		},
 	});
 	// Create the view that provides resolved state by combining transaction, cache and untracked state
-	lix.sqlite.exec(`
+	engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
       SELECT * FROM (
           -- 1. Transaction state (highest priority) - pending changes

@@ -4,13 +4,13 @@ import type {
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { Lix } from "../index.js";
+import type { LixEngine } from "../engine/boot.js";
 
-export function applyKeyValueDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
-): void {
+export function applyKeyValueDatabaseSchema(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
 	return createEntityViewsIfNotExists({
-		lix,
+		engine: args.engine,
 		schema: LixKeyValueSchema,
 		overrideName: "key_value",
 		pluginKey: "lix_own_entity",

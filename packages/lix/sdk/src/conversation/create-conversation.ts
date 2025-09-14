@@ -1,9 +1,9 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixConversation, LixConversationMessage } from "./schema.js";
-import { nanoId } from "../deterministic/index.js";
 import type { NewState } from "../entity-views/types.js";
 import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
 import { attachConversation } from "../entity/conversation/attach-conversation.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 
 /**
  * Starts a new conversation.
@@ -45,7 +45,8 @@ export async function createConversation(args: {
 	}
 > {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const conversationId = args.id ?? nanoId({ lix: args.lix });
+		const conversationId =
+			args.id ?? (await nanoId({ lix: { ...args.lix, db: trx } }));
 		const versionId = args.versionId ?? "global";
 
 		await trx
@@ -63,7 +64,7 @@ export async function createConversation(args: {
 		const insertedMessages = [] as any[];
 
 		for (const [index, message] of (args.comments ?? []).entries()) {
-			const messageId = nanoId({ lix: args.lix });
+			const messageId = await nanoId({ lix: { ...args.lix, db: trx } });
 
 			await trx
 				.insertInto("conversation_message_all")

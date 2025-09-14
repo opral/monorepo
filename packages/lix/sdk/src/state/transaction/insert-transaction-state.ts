@@ -1,7 +1,7 @@
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
-import { uuidV7 } from "../../deterministic/index.js";
-import type { Lix } from "../../lix/open-lix.js";
+import { uuidV7Sync } from "../../engine/deterministic/index.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
 
@@ -21,7 +21,7 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
  * to permanent storage. All changes (both tracked and untracked) are stored
  * in the transaction table until commit time.
  *
- * @param args.lix - The Lix instance with SQLite database and Kysely query builder
+ * @param args.engine - The engine with SQLite database and Kysely query builder
  * @param args.data - The state data to insert, including entity details and snapshot
  * @param args.timestamp - Timestamp to use for the changes
  * @param args.createChangeAuthors - Whether to create change_author records (defaults to true)
@@ -31,7 +31,7 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
  * @example
  * // Insert a new entity state
  * insertTransactionState({
- *   lix: { sqlite, db },
+ *   engine: { sqlite, db, hooks },
  *   data: {
  *     entity_id: "user-123",
  *     schema_key: "user",
@@ -47,7 +47,7 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
  * @example
  * // Delete an entity (null snapshot_content)
  * insertTransactionState({
- *   lix: { sqlite, db },
+ *   engine: { sqlite, db, hooks },
  *   data: {
  *     entity_id: "user-123",
  *     schema_key: "user",
@@ -61,12 +61,13 @@ export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
  * });
  */
 export function insertTransactionState(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	data: NewTransactionStateRow[];
 	timestamp: string;
 	createChangeAuthors?: boolean;
 }): TransactionStateRow[] {
 	const _timestamp = args.timestamp;
+	const engine = args.engine;
 
 	if (args.data.length === 0) {
 		return [];
@@ -75,7 +76,7 @@ export function insertTransactionState(args: {
 	// Generate change IDs for all entities upfront
 	const dataWithChangeIds = args.data.map((data) => ({
 		...data,
-		change_id: uuidV7({ lix: args.lix as any }),
+		change_id: uuidV7Sync({ engine: engine as any }),
 	}));
 
 	// Batch insert into internal_transaction_state
@@ -96,8 +97,8 @@ export function insertTransactionState(args: {
 	}));
 
 	executeSync({
-		lix: args.lix,
-		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine,
+		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.insertInto("internal_transaction_state")
 			.values(transactionRows)
 			.onConflict((oc) =>

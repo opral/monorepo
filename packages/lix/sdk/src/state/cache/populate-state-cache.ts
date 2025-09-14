@@ -1,5 +1,5 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { getStateCacheV2Tables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
@@ -17,11 +17,12 @@ export interface PopulateStateCacheV2Options {
  * @param lix - The Lix instance with sqlite and db
  * @param options - Optional filters for selective population
  */
-export function populateStateCache(
-	lix: Pick<Lix, "sqlite" | "db">,
-	options: PopulateStateCacheV2Options = {}
-): void {
-	const { sqlite } = lix;
+export function populateStateCache(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	options?: PopulateStateCacheV2Options;
+}): void {
+	const { sqlite } = args.engine;
+	const options = args.options ?? {};
 
 	let versionsToPopulate: string[];
 
@@ -60,7 +61,9 @@ export function populateStateCache(
 	}
 
 	// Clear existing cache entries for the versions being populated
-	const tableCache = getStateCacheV2Tables(lix);
+	const tableCache = getStateCacheV2Tables({
+		engine: { sqlite: args.engine.sqlite } as any,
+	});
 	for (const tableName of tableCache) {
 		if (tableName === "internal_state_cache") continue;
 
@@ -198,7 +201,7 @@ function ensureTableExists(
 	tableName: string
 ): void {
 	// Use shared creator (idempotent) and update the cache set
-	createSchemaCacheTable({ lix: { sqlite } as any, tableName });
-	const tableCache = getStateCacheV2Tables({ sqlite } as any);
+	createSchemaCacheTable({ engine: { sqlite } as any, tableName });
+	const tableCache = getStateCacheV2Tables({ engine: { sqlite } as any });
 	if (!tableCache.has(tableName)) tableCache.add(tableName);
 }

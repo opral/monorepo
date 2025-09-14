@@ -5,7 +5,7 @@ import {
 } from "sqlite-wasm-kysely";
 
 // workaround for v1. v2 doesn't need to transform
-// jsonb columns during runtime
+// jsonb columns during engine
 let sqlite: SqliteWasmDatabase;
 
 export function ParseJsonBPluginV1(

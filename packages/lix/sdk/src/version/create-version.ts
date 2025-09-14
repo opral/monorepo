@@ -1,4 +1,4 @@
-import { nanoId } from "../deterministic/index.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";
@@ -35,10 +35,11 @@ export async function createVersion(args: {
 		}
 
 		// Delegate to the commit-based creator for a single code path
+		const genId = args.id ?? (await nanoId({ lix: { ...args.lix, db: trx } }));
 		return createVersionFromCommit({
 			lix: { ...args.lix, db: trx },
 			commit: { id: baseCommitId },
-			id: args.id ?? nanoId({ lix: args.lix }),
+			id: genId,
 			name: args.name,
 			inheritsFrom: args.inheritsFrom,
 		});

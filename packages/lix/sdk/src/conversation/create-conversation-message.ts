@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/open-lix.js";
-import { nanoId } from "../deterministic/index.js";
 import type { NewState, State } from "../entity-views/types.js";
 import type { LixConversationMessage } from "./schema.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 
 /**
  * Adds a message to an existing conversation.
@@ -11,7 +11,7 @@ export async function createConversationMessage(
 	args: { lix: Lix } & NewState<LixConversationMessage>
 ): Promise<State<LixConversationMessage>> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const messageId = args.id ?? nanoId({ lix: args.lix });
+		const messageId = args.id ?? (await nanoId({ lix: args.lix }));
 
 		const existingConversation = await trx
 			.selectFrom("conversation_all")

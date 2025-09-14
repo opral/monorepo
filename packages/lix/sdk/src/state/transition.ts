@@ -1,5 +1,4 @@
 import type { Lix } from "../lix/index.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
 // Using explicit commit-scoped leaf CTEs for performance and clarity
 import type { LixCommit } from "../commit/schema.js";
 import {
@@ -7,11 +6,18 @@ import {
 	LixChangeSetElementSchema,
 } from "../change-set/schema.js";
 import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
-import { LixVersionTipSchema, type LixVersion } from "../version/schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersion,
+	type LixVersionTip,
+} from "../version/schema.js";
 import { sql } from "kysely";
-import { timestamp } from "../deterministic/timestamp.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixEngine } from "../engine/boot.js";
+import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import { getTimestampSync } from "../engine/deterministic/timestamp.js";
 
 /**
  * Transitions a version's state to match the state at `toCommitId`.
@@ -21,12 +27,19 @@ import { updateStateCache } from "./cache/update-state-cache.js";
  * - Otherwise, creates a transition commit whose changeset transforms source → target,
  *   links it to both the source and target commits, and updates the version to point to it.
  */
-export async function transition(args: {
-	lix: Lix;
+/**
+ * @param args.engine - The engine context bound to SQLite
+ */
+export async function transitionSync(args: {
+	engine: LixEngine;
 	to: Pick<LixCommit, "id">;
 	version?: Pick<LixVersion, "id">;
 }): Promise<LixCommit> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
+	const engine = args.engine;
+	const db =
+		engine.db as unknown as import("kysely").Kysely<LixInternalDatabaseSchema>;
+
+	const executeInTransaction = async (trx: typeof db) => {
 		// Resolve target version
 		const version = args.version
 			? await trx
@@ -164,15 +177,16 @@ WHERE rn = 1;
 			created_at: string;
 		}> = [];
 		if (leafEntitiesToDelete.length > 0) {
+			const nowDel = getTimestampSync({ engine });
 			const deletionRows = leafEntitiesToDelete.map((c) => ({
-				id: uuidV7({ lix: args.lix }),
+				id: uuidV7Sync({ engine }),
 				entity_id: c.entity_id,
 				schema_key: c.schema_key,
 				file_id: c.file_id,
 				plugin_key: c.plugin_key,
 				schema_version: c.schema_version,
 				snapshot_content: null as null,
-				created_at: timestamp({ lix: args.lix }),
+				created_at: nowDel,
 			}));
 			await trx
 				.insertInto("change")
@@ -194,18 +208,18 @@ WHERE rn = 1;
 		}
 
 		// 3) Create change set + commit + edges + tip as tracked change rows
-		const changeSetId = uuidV7({ lix: args.lix });
-		const commitId = uuidV7({ lix: args.lix });
-		const now = timestamp({ lix: args.lix });
+		const changeSetId = uuidV7Sync({ engine });
+		const commitId = uuidV7Sync({ engine });
+		const now = getTimestampSync({ engine });
 
 		// Collect all raw changes to insert (with explicit ids + created_at)
 		const metadataChanges: LixChangeRaw[] = [];
 		// Pre-generate tip change id so we can reference it in commit.meta_change_ids
-		const versionChangeId = uuidV7({ lix: args.lix });
+		const versionChangeId = uuidV7Sync({ engine });
 
 		// change_set entity
 		metadataChanges.push({
-			id: uuidV7({ lix: args.lix }),
+			id: uuidV7Sync({ engine }),
 			entity_id: changeSetId,
 			schema_key: LixChangeSetSchema["x-lix-key"],
 			schema_version: LixChangeSetSchema["x-lix-version"],
@@ -218,7 +232,7 @@ WHERE rn = 1;
 		// change_set_element entities
 		for (const el of combinedElements) {
 			metadataChanges.push({
-				id: uuidV7({ lix: args.lix }),
+				id: uuidV7Sync({ engine }),
 				entity_id: `${changeSetId}~${el.id}`,
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
@@ -236,7 +250,7 @@ WHERE rn = 1;
 		}
 
 		// commit entity (track id for change_set_element)
-		const commitChangeId = uuidV7({ lix: args.lix });
+		const commitChangeId = uuidV7Sync({ engine });
 		metadataChanges.push({
 			id: commitChangeId,
 			entity_id: commitId,
@@ -266,7 +280,7 @@ WHERE rn = 1;
 			},
 		]) {
 			metadataChanges.push({
-				id: uuidV7({ lix: args.lix }),
+				id: uuidV7Sync({ engine }),
 				entity_id: `${changeSetId}~${meta.change_id}`,
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
@@ -292,7 +306,11 @@ WHERE rn = 1;
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: version.id, commit_id: commitId }),
+			snapshot_content: JSON.stringify({
+				id: version.id,
+				commit_id: commitId,
+				working_commit_id: version.working_commit_id,
+			} satisfies LixVersionTip),
 			created_at: now,
 		});
 
@@ -308,7 +326,7 @@ WHERE rn = 1;
 		// Add derived edge cache rows (parent -> new commit) without inserting commit_edge changes
 		const derivedEdgesForCache: LixChangeRaw[] = [
 			{
-				id: uuidV7({ lix: args.lix }),
+				id: uuidV7Sync({ engine }),
 				entity_id: `${sourceCommitId}~${commitId}`,
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
@@ -321,7 +339,7 @@ WHERE rn = 1;
 				created_at: now,
 			},
 			{
-				id: uuidV7({ lix: args.lix }),
+				id: uuidV7Sync({ engine }),
 				entity_id: `${args.to.id}~${commitId}`,
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
@@ -336,7 +354,7 @@ WHERE rn = 1;
 		];
 
 		updateStateCache({
-			lix: args.lix,
+			engine,
 			changes: [...metadataChanges, ...derivedEdgesForCache],
 			version_id: "global",
 			commit_id: commitId,
@@ -372,7 +390,7 @@ WHERE rn = 1;
 
 		// Update cache once at the very end for the scoped version (user entities only)
 		updateStateCache({
-			lix: args.lix,
+			engine,
 			changes: userChangesForCache,
 			version_id: version.id,
 			commit_id: commitId,
@@ -382,7 +400,20 @@ WHERE rn = 1;
 		return { id: commitId, change_set_id: changeSetId } satisfies LixCommit;
 	};
 
-	return args.lix.db.isTransaction
-		? executeInTransaction(args.lix.db)
-		: args.lix.db.transaction().execute(executeInTransaction);
+	return db.isTransaction
+		? executeInTransaction(db)
+		: db.transaction().execute(executeInTransaction);
+}
+
+export async function transition(args: {
+	lix: Lix;
+	to: Pick<LixCommit, "id">;
+	version?: Pick<LixVersion, "id">;
+}): Promise<LixCommit> {
+	type R = Awaited<ReturnType<typeof transitionSync>>;
+	const res = await args.lix.call("lix_transition", {
+		to: { id: args.to.id },
+		version: args.version ? { id: args.version.id } : undefined,
+	});
+	return res as R;
 }

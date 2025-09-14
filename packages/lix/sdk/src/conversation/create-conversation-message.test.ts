@@ -2,12 +2,12 @@ import { test, expect } from "vitest";
 import { createConversationMessage } from "./create-conversation-message.js";
 import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
-import { nanoId } from "../deterministic/index.js";
+import { nanoId } from "../engine/deterministic/nano-id.js";
 
 test("creates a conversation message", async () => {
 	const lix = await openLix({});
 
-	const conversationId = nanoId({ lix });
+	const conversationId = await nanoId({ lix });
 	await lix.db
 		.insertInto("conversation")
 		.values({ id: conversationId })
@@ -31,7 +31,7 @@ test("creates a conversation message", async () => {
 test("defaults to the version of the conversation", async () => {
 	const lix = await openLix({});
 
-	const conversationId = nanoId({ lix });
+	const conversationId = await nanoId({ lix });
 	await lix.db
 		.insertInto("conversation")
 		.values({ id: conversationId })
@@ -68,7 +68,7 @@ test("defaults to the version of the conversation", async () => {
 test("defaults parent_id to the last message when not provided (most recent leaf)", async () => {
 	const lix = await openLix({});
 
-	const conversationId = nanoId({ lix });
+	const conversationId = await nanoId({ lix });
 	await lix.db
 		.insertInto("conversation")
 		.values({ id: conversationId })

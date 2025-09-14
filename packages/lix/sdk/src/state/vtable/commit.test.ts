@@ -5,7 +5,9 @@ import type { LixCommitEdge } from "../../commit/schema.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { commit } from "./commit.js";
 import { openLix } from "../../lix/open-lix.js";
-import { nanoId, timestamp, uuidV7 } from "../../deterministic/index.js";
+import { nanoId } from "../../engine/deterministic/nano-id.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { uuidV7 } from "../../engine/deterministic/uuid-v7.js";
 import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
@@ -56,8 +58,8 @@ test("commit writes business rows to active version; graph edges update globally
 
 	/*──────────────────────── 2. stage two user changes ───────────────────*/
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "para-1",
@@ -83,7 +85,9 @@ test("commit writes business rows to active version; graph edges update globally
 	});
 
 	/*──────────────────────── 3. COMMIT ───────────────────────────────────*/
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	const activeVersionAfter = await db
 		.selectFrom("version")
@@ -173,7 +177,9 @@ test("commit with no changes should not create a change set", async () => {
 		.selectAll()
 		.execute();
 	// Commit with no changes
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Should have same number of changes and change sets
 	const changesAfterCommit = await db
@@ -197,23 +203,23 @@ test("commit should handle multiple versions correctly", async () => {
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Create version A with dynamic IDs
-	const versionAId = nanoId({ lix });
-	const versionACommitId = uuidV7({ lix });
-	const versionAChangeSetId = nanoId({ lix });
-	const versionAWorkingChangeSetId = nanoId({ lix });
-	const versionAWorkingCommitId = uuidV7({ lix });
+	const versionAId = await nanoId({ lix });
+	const versionACommitId = await uuidV7({ lix });
+	const versionAChangeSetId = await nanoId({ lix });
+	const versionAWorkingChangeSetId = await nanoId({ lix });
+	const versionAWorkingCommitId = await uuidV7({ lix });
 
 	// Create version B with dynamic IDs
-	const versionBId = nanoId({ lix });
-	const versionBCommitId = uuidV7({ lix });
-	const versionBChangeSetId = nanoId({ lix });
-	const versionBWorkingChangeSetId = nanoId({ lix });
-	const versionBWorkingCommitId = uuidV7({ lix });
+	const versionBId = await nanoId({ lix });
+	const versionBCommitId = await uuidV7({ lix });
+	const versionBChangeSetId = await nanoId({ lix });
+	const versionBWorkingChangeSetId = await nanoId({ lix });
+	const versionBWorkingCommitId = await uuidV7({ lix });
 
 	// Create change sets for versions
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAChangeSetId,
@@ -231,8 +237,8 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAWorkingChangeSetId,
@@ -250,8 +256,8 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBChangeSetId,
@@ -269,8 +275,8 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBWorkingChangeSetId,
@@ -289,8 +295,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version A
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionACommitId,
@@ -309,8 +315,8 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAWorkingCommitId,
@@ -330,8 +336,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version A (descriptor + tip)
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionAId,
@@ -366,8 +372,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create commits for version B
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBCommitId,
@@ -386,8 +392,8 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBWorkingCommitId,
@@ -407,8 +413,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version B (descriptor + tip)
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: versionBId,
@@ -443,8 +449,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version A
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "version-a-entity",
@@ -464,8 +470,8 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Insert entity for version B
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "version-b-entity",
@@ -484,7 +490,9 @@ test("commit should handle multiple versions correctly", async () => {
 	});
 
 	// Commit
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Test what matters: the versions should be properly created and working
 	// Version A should exist
@@ -848,8 +856,8 @@ test("global version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-global-entity",
@@ -868,7 +876,9 @@ test("global version should move forward when mutations occur", async () => {
 	});
 
 	// Commit the changes
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify at least one global edge originates from the previous global commit
 	const edges = await db
@@ -973,8 +983,8 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-edge-entity",
@@ -993,7 +1003,9 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	});
 
 	// Commit the changes
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Get the global version after changes
 	const globalVersionAfter = await db
@@ -1069,8 +1081,8 @@ test("active version should move forward when mutations occur", async () => {
 
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-active-entity",
@@ -1089,7 +1101,9 @@ test("active version should move forward when mutations occur", async () => {
 	});
 
 	// Commit the changes
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Get the version after changes
 	const versionAfter = await db
@@ -1444,8 +1458,8 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Insert a mock entity into global version via transaction
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "mock-global-entity",
@@ -1464,7 +1478,9 @@ test("global cache entry should be inherited by child versions in resolved view"
 	});
 
 	// Commit the changes
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify cache has exactly one entry for this entity (in global version)
 	const cacheEntries = await db
@@ -1733,8 +1749,8 @@ describe("file lixcol cache updates", () => {
 
 		// Perform mixed operations
 		insertTransactionState({
-			lix,
-			timestamp: timestamp({ lix }),
+			engine: lix.engine!,
+			timestamp: await getTimestamp({ lix }),
 			data: [
 				// New file
 				{
@@ -1780,7 +1796,9 @@ describe("file lixcol cache updates", () => {
 		});
 
 		// Commit the transaction
-		commit({ lix });
+		commit({
+			engine: lix.engine!,
+		});
 
 		// Check final cache state
 		const finalCache = await db
