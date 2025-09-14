@@ -14,7 +14,7 @@ import {
 	selectVersionDiff,
 } from "@lix-js/sdk";
 import { ToolRunList } from "./tool-run-list";
-import { ProposalReviewBarMock } from "./proposal-review-bar-mock";
+import { ProposalDecisionBar } from "./proposal-decision-bar";
 import { PromptStack } from "./prompt-stack";
 import type { ToolRun } from "./types";
 import type { ToolEvent } from "@lix-js/agent";
@@ -54,6 +54,7 @@ export function ChatPanel() {
 		null,
 	);
 	const [toolRuns, setToolRuns] = React.useState<ToolRun[]>([]);
+	const [showDecision, setShowDecision] = React.useState(false);
 	const [, setDiffOpen] = useKeyValue("flashtype_diff_open", {
 		defaultVersionId: "global",
 		untracked: true,
@@ -98,34 +99,21 @@ export function ChatPanel() {
 		});
 	}, []);
 
-	// Safe shortcuts: Ctrl/Cmd+1 = Accept, Ctrl/Cmd+2 = Reject (work while typing)
-	React.useEffect(() => {
-		const el = panelRef.current;
-		if (!el) return;
-		const onKey = async (e: KeyboardEvent) => {
-			if (!lastProposalId) return;
-			if (e.key === "Tab") {
-				e.preventDefault();
-				await handleAcceptReject(0);
-				return;
-			}
-			if (e.key === "Escape") {
-				e.preventDefault();
-				await handleAcceptReject(1);
-				return;
-			}
-		};
-		el.addEventListener("keydown", onKey, { capture: true } as any);
-		return () =>
-			el.removeEventListener("keydown", onKey, { capture: true } as any);
-	}, [lastProposalId]);
+	// Track accept/reject in-flight to avoid double handling (no global keys)
+	const [reviewActionPending, setReviewActionPending] = React.useState(false);
 
 	async function handleAcceptReject(idx: 0 | 1) {
+		if (reviewActionPending) return;
+		const id = lastProposalId;
+		if (!id) return;
+		setReviewActionPending(true);
 		try {
-			const id = lastProposalId;
-			if (!id) return;
 			if (idx === 0) {
 				await acceptChangeProposal({ lix, proposal: { id } });
+				// If auto-accept session was enabled, turn it off after one acceptance
+				try {
+					await setAutoAccept(false as any);
+				} catch {}
 			} else {
 				await rejectChangeProposal({ lix, proposal: { id } });
 			}
@@ -138,16 +126,47 @@ export function ChatPanel() {
 			if (main) await switchVersion({ lix, to: main as any });
 			await setDiffSource(null as any);
 			await setDiffOpen(false as any);
-		} finally {
 			setLastProposalId(null);
+			setShowDecision(false);
+		} catch (e) {
+			console.error(
+				"Failed to",
+				idx === 0 ? "accept" : "reject",
+				"proposal",
+				e,
+			);
+		} finally {
+			setReviewActionPending(false);
 		}
 	}
 
-	// Always compute counts text (safe even when no proposal is active)
+	// Session auto-accept toggle
+	const [autoAccept, setAutoAccept] = useKeyValue(
+		"flashtype_auto_accept_session",
+		{
+			defaultVersionId: "global",
+			untracked: true,
+			defaultValue: false,
+		},
+	);
+
+	// When leaving the decision view, focus the prompt input so the user can keep typing
+	React.useEffect(() => {
+		if (!showDecision) {
+			const ta = panelRef.current?.querySelector("textarea");
+			(ta as HTMLTextAreaElement | null)?.focus?.();
+		}
+	}, [showDecision]);
+
+	// Compute counts for active proposal (when diffSource is set)
 	const countsText = useProposalCountsText({
 		lix,
 		diffSource: diffSource as any,
 	});
+	const counts = React.useMemo(
+		() => parseCounts(countsText ?? "0 changes • +0 −0"),
+		[countsText],
+	);
 
 	// below content is managed by PromptStack now
 
@@ -164,72 +183,93 @@ export function ChatPanel() {
 					{/* Grouped stack: header + input + below */}
 					<PromptStack
 						header={
-							<ProposalReviewBarMock
-								embedded
-								total={6}
-								added={5}
-								removed={1}
-								onAccept={() => void handleAcceptReject(0)}
-								onReject={() => void handleAcceptReject(1)}
-							/>
+							lastProposalId && (diffSource as any) && showDecision ? (
+								<ProposalDecisionBar
+									total={counts.total}
+									added={counts.added}
+									removed={counts.removed}
+									onAccept={() => void handleAcceptReject(0)}
+									onAutoAccept={async () => {
+										await setAutoAccept(true as any);
+										await handleAcceptReject(0);
+									}}
+									onIterate={() => void handleAcceptReject(1)}
+								/>
+							) : undefined
 						}
 						className="mb-2"
+						headerNoBottomBorder
 					>
 						{({ renderBelow }) => (
-							<ChatInput
-								variant="flat"
-								renderBelow={renderBelow}
-								onSend={(v) => {
-									if (pending) return;
-									// reset per-turn tool runs
-									setToolRuns([]);
-									void send(v, { onToolEvent })?.then(async (res) => {
-										try {
-											if (!res || !res.changeProposalId) return;
-											// Fetch proposal to resolve source version id
-											const cp = await lix.db
-												.selectFrom("change_proposal")
-												.where("id", "=", String(res.changeProposalId))
-												.selectAll()
-												.executeTakeFirst();
-											if (!cp) return;
-											setLastProposalId(String((cp as any).id));
-											await setDiffSource(
-												String((cp as any).source_version_id) as any,
-											);
-											await setDiffOpen(true as any);
-										} catch {}
-									});
-								}}
-								onCommand={async (cmd) => {
-									if (cmd === "clear" || cmd === "reset" || cmd === "new") {
-										await clear();
-										return;
-									}
-								}}
-								onQueryMentions={React.useCallback(
-									async (q: string) => {
-										if (q.length === 0) {
-											const all = await lix.db
+							<div
+								// Hide the entire prompt area while in decision mode
+								// eslint-disable-next-line react/forbid-dom-props
+								style={
+									showDecision
+										? ({ display: "none" } as React.CSSProperties)
+										: undefined
+								}
+							>
+								<ChatInput
+									variant="flat"
+									renderBelow={showDecision ? ((() => {}) as any) : renderBelow}
+									disabled={showDecision}
+									onSend={(v) => {
+										if (pending) return;
+										// reset per-turn tool runs
+										setToolRuns([]);
+										void send(v, { onToolEvent })?.then(async (res) => {
+											try {
+												if (!res || !res.changeProposalId) return;
+												// Fetch proposal to resolve source version id
+												const cp = await lix.db
+													.selectFrom("change_proposal")
+													.where("id", "=", String(res.changeProposalId))
+													.selectAll()
+													.executeTakeFirst();
+												if (!cp) return;
+												setLastProposalId(String((cp as any).id));
+												setShowDecision(true);
+												await setDiffSource(
+													String((cp as any).source_version_id) as any,
+												);
+												await setDiffOpen(true as any);
+												if (autoAccept) {
+													await handleAcceptReject(0);
+												}
+											} catch {}
+										});
+									}}
+									onCommand={async (cmd) => {
+										if (cmd === "clear" || cmd === "reset" || cmd === "new") {
+											await clear();
+											return;
+										}
+									}}
+									onQueryMentions={React.useCallback(
+										async (q: string) => {
+											if (q.length === 0) {
+												const all = await lix.db
+													.selectFrom("file")
+													.select(["path"]) // provide stable ordering
+													.orderBy("path")
+													.limit(10)
+													.execute();
+												return all.map((r) => String((r as any).path));
+											}
+											const rows = await lix.db
 												.selectFrom("file")
-												.select(["path"]) // provide stable ordering
+												.where("path", "like", `%${q}%`)
+												.select(["path"])
 												.orderBy("path")
 												.limit(10)
 												.execute();
-											return all.map((r) => String((r as any).path));
-										}
-										const rows = await lix.db
-											.selectFrom("file")
-											.where("path", "like", `%${q}%`)
-											.select(["path"])
-											.orderBy("path")
-											.limit(10)
-											.execute();
-										return rows.map((r) => String((r as any).path));
-									},
-									[lix.db],
-								)}
-							/>
+											return rows.map((r) => String((r as any).path));
+										},
+										[lix.db],
+									)}
+								/>
+							</div>
 						)}
 					</PromptStack>
 				</>

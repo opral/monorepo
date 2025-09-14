@@ -8,7 +8,7 @@ function enc(s: string) {
 	return new TextEncoder().encode(s);
 }
 
-test("rejectChangeProposal deletes source version, does not merge, updates status", async () => {
+test("rejectChangeProposal deletes proposal first, then deletes source version (no merge)", async () => {
 	const lix = await openLix({});
 
 	const main = await lix.db
@@ -54,11 +54,11 @@ test("rejectChangeProposal deletes source version, does not merge, updates statu
 		.executeTakeFirst();
 	expect(fileInMain).toBeUndefined();
 
-	// Proposal status should be 'rejected'
+	// Proposal should be removed after rejection (FK-safe)
 	const cpAfter = await lix.db
 		.selectFrom("change_proposal")
 		.where("id", "=", cp.id)
 		.selectAll()
-		.executeTakeFirstOrThrow();
-	expect(cpAfter.status).toBe("rejected");
+		.executeTakeFirst();
+	expect(cpAfter).toBeUndefined();
 });

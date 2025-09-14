@@ -396,7 +396,7 @@ export function ChatInput({
 					aria-disabled={!!disabled}
 					className={[
 						variant === "flat"
-							? "min-h-[36px] w-full resize-none overflow-hidden bg-background px-3 py-2 font-mono text-sm placeholder:text-xs leading-snug focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+							? "min-h-[36px] w-full resize-none overflow-hidden bg-background px-3 py-2 font-mono text-xs placeholder:text-[11px] leading-snug focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
 							: "min-h-[36px] w-full resize-none bg-background px-3 py-2 font-mono text-xs placeholder:text-[11px] leading-snug focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
 						variant === "flat"
 							? "rounded-none border-0 shadow-none"

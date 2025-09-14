@@ -11,6 +11,7 @@ export function PromptStack({
 	header,
 	children,
 	className,
+	headerNoBottomBorder,
 }: {
 	header?: React.ReactNode;
 	/**
@@ -21,6 +22,7 @@ export function PromptStack({
 		renderBelow: (node: React.ReactNode) => void;
 	}) => React.ReactNode;
 	className?: string;
+	headerNoBottomBorder?: boolean;
 }) {
 	const [below, setBelow] = React.useState<React.ReactNode | null>(null);
 	const renderBelow = React.useCallback((node: React.ReactNode) => {
@@ -30,12 +32,19 @@ export function PromptStack({
 	return (
 		<div
 			className={[
-				"mx-auto max-w-[720px] w-full overflow-hidden",
+				"mx-auto max-w-[720px] w-full overflow-hidden border-t border-border",
 				className ?? "",
 			].join(" ")}
 		>
 			{header ? (
-				<div className="w-full border-y border-border">{header}</div>
+				<div
+					className={[
+						"w-full",
+						headerNoBottomBorder ? "" : "border-b border-border",
+					].join(" ")}
+				>
+					{header}
+				</div>
 			) : null}
 			{children({ renderBelow })}
 			{below ? <div className="px-3 pb-2">{below}</div> : null}

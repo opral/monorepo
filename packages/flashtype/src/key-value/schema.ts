@@ -40,6 +40,16 @@ export const KEY_VALUE_DEFINITIONS = {
 	} as KeyDef<boolean>,
 
 	/**
+	 * When true, the agent auto-accepts all change proposals during this session.
+	 * Untracked global UI toggle controlled via the prompt bar (1–2–3 menu).
+	 */
+	flashtype_auto_accept_session: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: false,
+	} as KeyDef<boolean>,
+
+	/**
 	 * Preferred diff layout mode.
 	 * Untracked global UI preference.
 	 */

@@ -8,7 +8,7 @@ function enc(s: string) {
 	return new TextEncoder().encode(s);
 }
 
-test("acceptChangeProposal merges source into target, deletes source version, and updates status", async () => {
+test("acceptChangeProposal merges source into target, deletes proposal, then deletes source version", async () => {
 	const lix = await openLix({});
 
 	const main = await lix.db
@@ -54,11 +54,11 @@ test("acceptChangeProposal merges source into target, deletes source version, an
 		.executeTakeFirst();
 	expect(fileInMain).toBeDefined();
 
-	// Proposal status should be 'accepted'
+	// Proposal should be removed after acceptance (FK-safe deletion order)
 	const cpAfter = await lix.db
 		.selectFrom("change_proposal")
 		.where("id", "=", cp.id)
 		.selectAll()
-		.executeTakeFirstOrThrow();
-	expect(cpAfter.status).toBe("accepted");
+		.executeTakeFirst();
+	expect(cpAfter).toBeUndefined();
 });

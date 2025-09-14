@@ -34,28 +34,28 @@ export type ChatMessage = {
  * // Throws: not implemented yet
  */
 export type LixAgent = {
-    lix: Lix;
-    model: LanguageModelV2;
-    // Default conversation API
-    sendMessage(args: {
-        text: string;
-        system?: string;
-        signal?: AbortSignal;
-        onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
-    }): Promise<{
-        text: string;
-        usage?: {
-            inputTokens?: number;
-            outputTokens?: number;
-            totalTokens?: number;
-        };
-        /**
-         * Optional id of a newly created change proposal during this send.
-         */
-        changeProposalId?: string;
-    }>;
-    getHistory(): ChatMessage[];
-    clearHistory(): void;
+	lix: Lix;
+	model: LanguageModelV2;
+	// Default conversation API
+	sendMessage(args: {
+		text: string;
+		system?: string;
+		signal?: AbortSignal;
+		onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
+	}): Promise<{
+		text: string;
+		usage?: {
+			inputTokens?: number;
+			outputTokens?: number;
+			totalTokens?: number;
+		};
+		/**
+		 * Optional id of a newly created change proposal during this send.
+		 */
+		changeProposalId?: string;
+	}>;
+	getHistory(): ChatMessage[];
+	clearHistory(): void;
 };
 
 /**
@@ -74,7 +74,7 @@ export async function createLixAgent(args: {
 
 	// Default conversation state (in-memory)
 	const history: ChatMessage[] = [];
-    const LIX_BASE_SYSTEM = dedent`
+	const LIX_BASE_SYSTEM = dedent`
         You are the Lix Agent.
 
         Core Workflow: Task‑Oriented Change Proposals
@@ -157,17 +157,17 @@ export async function createLixAgent(args: {
 
 	let lastChangeProposalId: string | undefined;
 
-    async function sendMessage({
-        text,
-        system,
-        signal,
-        onToolEvent,
-    }: {
-        text: string;
-        system?: string;
-        signal?: AbortSignal;
-        onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
-    }) {
+	async function sendMessage({
+		text,
+		system,
+		signal,
+		onToolEvent,
+	}: {
+		text: string;
+		system?: string;
+		signal?: AbortSignal;
+		onToolEvent?: (event: import("./send-message.js").ToolEvent) => void;
+	}) {
 		if (system) {
 			// Prepend base system to any provided system override.
 			systemInstruction = `${LIX_BASE_SYSTEM}\n\n${system}`;
@@ -176,24 +176,24 @@ export async function createLixAgent(args: {
 		// Clear any previous capture before starting
 		lastChangeProposalId = undefined;
 
-        // Build Proposal Mode overlay if KV indicates an active proposal
-        let systemOverlay: string | undefined;
-        try {
-            const kv = await lix.db
-                .selectFrom("key_value_all")
-                .where("lixcol_version_id", "=", "global")
-                .where("key", "=", "lix_agent_active_proposal_id")
-                .select(["value"])
-                .executeTakeFirst();
-            const activeId = (kv?.value as any) as string | undefined;
-            if (activeId) {
-                const cp = await lix.db
-                    .selectFrom("change_proposal")
-                    .where("id", "=", activeId)
-                    .select(["id", "source_version_id", "status"])
-                    .executeTakeFirst();
-                if (cp && cp.status === "open") {
-                    systemOverlay = dedent`
+		// Build Proposal Mode overlay if KV indicates an active proposal
+		let systemOverlay: string | undefined;
+		try {
+			const kv = await lix.db
+				.selectFrom("key_value_all")
+				.where("lixcol_version_id", "=", "global")
+				.where("key", "=", "lix_agent_active_proposal_id")
+				.select(["value"])
+				.executeTakeFirst();
+			const activeId = kv?.value as any as string | undefined;
+			if (activeId) {
+				const cp = await lix.db
+					.selectFrom("change_proposal")
+					.where("id", "=", activeId)
+					.select(["id", "source_version_id", "status"])
+					.executeTakeFirst();
+				if (cp && cp.status === "open") {
+					systemOverlay = dedent`
                         Proposal Mode (Active Change Proposal)
 
                         - Active proposal id: ${String(cp.id)}
@@ -205,42 +205,44 @@ export async function createLixAgent(args: {
 
                         Only open a new proposal if the user explicitly requests a new one.
                     `;
-                } else {
-                    // Clean stale KV if proposal is gone or closed
-                    try {
-                        await lix.db
-                            .deleteFrom("key_value_all")
-                            .where("lixcol_version_id", "=", "global")
-                            .where("key", "=", "lix_agent_active_proposal_id")
-                            .execute();
-                    } catch {}
-                }
-            }
-        } catch {}
+				} else {
+					// Clean stale KV if proposal is gone or closed
+					try {
+						await lix.db
+							.deleteFrom("key_value_all")
+							.where("lixcol_version_id", "=", "global")
+							.where("key", "=", "lix_agent_active_proposal_id")
+							.execute();
+					} catch {}
+				}
+			}
+		} catch {}
 
-        const { text: reply, usage } = await sendMessageCore({
-            lix,
-            model,
-            history,
-            text,
-            system: systemOverlay ? `${systemInstruction}\n\n${systemOverlay}` : systemInstruction,
-            setSystem: (s?: string) => {
-                systemInstruction = s;
-            },
-            signal,
-            tools: {
-                read_file,
-                list_files,
-                sql_select_state,
-                write_file,
-                delete_file,
-                create_change_proposal,
-            },
-            persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
-            persistAssistant: (t: string) =>
-                appendAssistantMessage(lix, conversationId, t),
-            onToolEvent,
-        });
+		const { text: reply, usage } = await sendMessageCore({
+			lix,
+			model,
+			history,
+			text,
+			system: systemOverlay
+				? `${systemInstruction}\n\n${systemOverlay}`
+				: systemInstruction,
+			setSystem: (s?: string) => {
+				systemInstruction = s;
+			},
+			signal,
+			tools: {
+				read_file,
+				list_files,
+				sql_select_state,
+				write_file,
+				delete_file,
+				create_change_proposal,
+			},
+			persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
+			persistAssistant: (t: string) =>
+				appendAssistantMessage(lix, conversationId, t),
+			onToolEvent,
+		});
 		const result = {
 			text: reply,
 			usage,

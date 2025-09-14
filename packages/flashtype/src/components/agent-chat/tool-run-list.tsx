@@ -8,17 +8,25 @@ import type { ToolRun, ToolRunStatus } from "./types";
  */
 export function ToolRunList({ runs }: { runs: ToolRun[] }) {
 	return (
-		<div className="mb-2 flex flex-col gap-1">
-			{runs.map((r) => (
-				<div key={r.id} className="flex items-center gap-2 leading-none">
-					<StatusDot status={r.status} />
-					<div className="font-mono text-[12px] font-semibold truncate">
-						{r.title}
+		<div className="mb-1 px-3">
+			<div className="flex flex-col gap-0.5">
+				{runs.map((r) => (
+					<div
+						key={r.id}
+						className="grid grid-cols-[12px_1fr] items-center leading-tight"
+					>
+						<StatusDot status={r.status} />
+						<div className={titleClass(r.status)}>{r.title}</div>
 					</div>
-				</div>
-			))}
+				))}
+			</div>
 		</div>
 	);
+}
+
+function titleClass(_status: ToolRunStatus): string {
+	// Keep tool call text neutral; status is conveyed by the dot
+	return "font-mono text-[12px] text-foreground";
 }
 
 function StatusDot({ status }: { status: ToolRunStatus }) {
@@ -32,7 +40,7 @@ function StatusDot({ status }: { status: ToolRunStatus }) {
 					: "bg-zinc-300";
 	return (
 		<span
-			className={`inline-block h-2.5 w-2.5 rounded-full ${color} shrink-0 align-middle`}
+			className={`inline-block h-1.5 w-1.5 rounded-full ${color} shrink-0`}
 		/>
 	);
 }
