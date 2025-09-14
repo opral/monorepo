@@ -1,4 +1,4 @@
-import { use as usePromise, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
