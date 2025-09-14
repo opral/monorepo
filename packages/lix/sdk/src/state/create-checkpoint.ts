@@ -1,4 +1,8 @@
-import type { LixCommit } from "../commit/schema.js";
+import {
+	LixCommitEdgeSchema,
+	LixCommitSchema,
+	type LixCommit,
+} from "../commit/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema.js";
@@ -8,6 +12,12 @@ import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
 import type { LixEngine } from "../engine/boot.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import {
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+} from "../version/schema.js";
 
 /**
  * Converts the current working change set into a checkpoint.
@@ -146,30 +156,30 @@ export async function createCheckpointSync(args: {
 		const descriptorChange: LixChangeRaw = {
 			id: uuidV7Sync({ engine }),
 			entity_id: activeVersion.id,
-			schema_key: "lix_version_descriptor",
-			schema_version: "1.0",
+			schema_key: LixVersionDescriptorSchema["x-lix-key"],
+			schema_version: LixVersionDescriptorSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				id: activeVersion.id,
 				name: activeVersion.name,
-				working_commit_id: newWorkingCommitId,
 				inherits_from_version_id: activeVersion.inherits_from_version_id,
 				hidden: activeVersion.hidden,
-			}),
+			} satisfies LixVersionDescriptor),
 			created_at: now,
 		};
 		const tipChange: LixChangeRaw = {
 			id: uuidV7Sync({ engine }),
 			entity_id: activeVersion.id,
-			schema_key: "lix_version_tip",
-			schema_version: "1.0",
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				id: activeVersion.id,
 				commit_id: checkpointCommitId,
-			}),
+				working_commit_id: newWorkingCommitId,
+			} satisfies LixVersionTip),
 			created_at: now,
 		};
 
@@ -177,8 +187,8 @@ export async function createCheckpointSync(args: {
 		const edgeChange: LixChangeRaw = {
 			id: uuidV7Sync({ engine }),
 			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
+			schema_key: LixCommitEdgeSchema["x-lix-key"],
+			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({

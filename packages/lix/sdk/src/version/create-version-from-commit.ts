@@ -1,6 +1,10 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixCommit } from "../commit/schema.js";
-import type { LixVersion } from "./schema.js";
+import type {
+	LixVersion,
+	LixVersionDescriptor,
+	LixVersionTip,
+} from "./schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
 import { nanoId } from "../engine/deterministic/nano-id.js";
@@ -101,10 +105,9 @@ export async function createVersionFromCommit(args: {
 					snapshot_content: {
 						id: versionId,
 						name: versionName,
-						working_commit_id: workingCommitId,
 						inherits_from_version_id,
 						hidden: false,
-					},
+					} satisfies LixVersionDescriptor,
 					schema_version: "1.0",
 				},
 				{
@@ -113,7 +116,11 @@ export async function createVersionFromCommit(args: {
 					file_id: "lix",
 					version_id: "global",
 					plugin_key: "lix_own_entity",
-					snapshot_content: { id: versionId, commit_id: args.commit.id },
+					snapshot_content: {
+						id: versionId,
+						commit_id: args.commit.id,
+						working_commit_id: workingCommitId,
+					} satisfies LixVersionTip,
 					schema_version: "1.0",
 				},
 			])

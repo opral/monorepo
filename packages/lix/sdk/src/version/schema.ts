@@ -15,7 +15,6 @@ export function applyVersionDatabaseSchema(args: {
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
                 json_extract(snapshot_content, '$.name') AS name,
-                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
                 json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
                 json_extract(snapshot_content, '$.hidden') AS hidden,
                 entity_id AS lixcol_entity_id,
@@ -48,6 +47,7 @@ export function applyVersionDatabaseSchema(args: {
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
                 json_extract(snapshot_content, '$.commit_id') AS commit_id,
+                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
                 change_id AS t_change_id,
                 created_at AS t_created_at,
                 updated_at AS t_updated_at,
@@ -74,7 +74,7 @@ export function applyVersionDatabaseSchema(args: {
             d.id,
             d.name,
             t.commit_id,
-            d.working_commit_id,
+            t.working_commit_id AS working_commit_id,
             d.inherits_from_version_id,
             d.hidden,
             d.lixcol_entity_id,
@@ -94,7 +94,6 @@ export function applyVersionDatabaseSchema(args: {
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
                 json_extract(snapshot_content, '$.name') AS name,
-                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
                 json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
                 json_extract(snapshot_content, '$.hidden') AS hidden,
                 entity_id AS lixcol_entity_id,
@@ -129,6 +128,7 @@ export function applyVersionDatabaseSchema(args: {
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
                 json_extract(snapshot_content, '$.commit_id') AS commit_id,
+                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
                 version_id AS lixcol_version_id,
                 change_id AS t_change_id,
                 created_at AS t_created_at,
@@ -156,7 +156,7 @@ export function applyVersionDatabaseSchema(args: {
             d.id,
             d.name,
             t.commit_id,
-            d.working_commit_id,
+            t.working_commit_id AS working_commit_id,
             d.inherits_from_version_id,
             d.hidden,
             d.lixcol_entity_id,
@@ -250,22 +250,6 @@ export function applyVersionDatabaseSchema(args: {
         CREATE TRIGGER IF NOT EXISTS version_all_insert
         INSTEAD OF INSERT ON version_all
         BEGIN
-
-            -- Enforce uniqueness of working_commit_id at descriptor level (latest descriptor in change table)
-            SELECT RAISE(FAIL, 'Unique constraint violation: working_commit_id ' || NEW.working_commit_id || ' must be unique among versions')
-            WHERE NEW.working_commit_id IS NOT NULL AND EXISTS (
-              SELECT 1 FROM change c1
-              WHERE c1.schema_key = 'lix_version_descriptor'
-                AND c1.snapshot_content IS NOT NULL
-                AND json_extract(c1.snapshot_content, '$.working_commit_id') = NEW.working_commit_id
-                AND NOT EXISTS (
-                  SELECT 1 FROM change c2
-                  WHERE c2.entity_id = c1.entity_id
-                    AND c2.schema_key = 'lix_version_descriptor'
-                    AND c2.created_at > c1.created_at
-                )
-            );
-
             -- Always write descriptor row
             INSERT INTO state_all (
                 entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
@@ -278,7 +262,6 @@ export function applyVersionDatabaseSchema(args: {
                 json_object(
                     'id', gen_id,
                     'name', COALESCE(NEW.name, human_id()),
-                    'working_commit_id', COALESCE(NEW.working_commit_id, lix_uuid_v7()),
                     'inherits_from_version_id', NEW.inherits_from_version_id,
                     'hidden', COALESCE(NEW.hidden, 0)
                 ),
@@ -295,7 +278,11 @@ export function applyVersionDatabaseSchema(args: {
                 'lix_version_tip',
                 'lix',
                 'lix_own_entity',
-                json_object('id', gen_id, 'commit_id', tip_cid),
+                json_object(
+                    'id', gen_id,
+                    'commit_id', tip_cid,
+                    'working_commit_id', COALESCE(NEW.working_commit_id, tip_cid)
+                ),
                 '1.0',
                 COALESCE(NEW.lixcol_version_id, 'global')
             FROM (
@@ -325,7 +312,6 @@ export function applyVersionDatabaseSchema(args: {
                 snapshot_content = json_object(
                     'id', NEW.id,
                     'name', COALESCE(NEW.name, (SELECT name FROM version WHERE id = NEW.id)),
-                    'working_commit_id', COALESCE(NEW.working_commit_id, (SELECT working_commit_id FROM version WHERE id = NEW.id)),
                     'inherits_from_version_id', NEW.inherits_from_version_id,
                     'hidden', COALESCE(NEW.hidden, (SELECT hidden FROM version WHERE id = NEW.id))
                 ),
@@ -341,7 +327,14 @@ export function applyVersionDatabaseSchema(args: {
             SET 
                 file_id = 'lix',
                 plugin_key = 'lix_own_entity',
-                snapshot_content = json_object('id', NEW.id, 'commit_id', NEW.commit_id),
+                snapshot_content = json_object(
+                    'id', NEW.id,
+                    'commit_id', NEW.commit_id,
+                    'working_commit_id', COALESCE(
+                        NEW.working_commit_id,
+                        (SELECT working_commit_id FROM version WHERE id = NEW.id)
+                    )
+                ),
                 schema_version = '1.0',
                 version_id = COALESCE(NEW.lixcol_version_id, 'global')
             WHERE NEW.commit_id IS NOT NULL
@@ -440,34 +433,32 @@ export const LixVersionDescriptorSchema = {
 	"x-lix-key": "lix_version_descriptor",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["working_commit_id"]],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["working_commit_id"],
-			references: { schemaKey: "lix_commit", properties: ["id"] },
-		},
-	],
+	"x-lix-foreign-keys": [],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
 		name: { type: "string", "x-lix-generated": true },
-		working_commit_id: { type: "string", "x-lix-generated": true },
 		inherits_from_version_id: { type: ["string", "null"] },
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},
-	required: ["id", "name", "working_commit_id"],
+	required: ["id", "name"],
 	additionalProperties: false,
 } as const;
 LixVersionDescriptorSchema satisfies LixSchemaDefinition;
 
-export type LixVersionTip = FromLixSchemaDefinition<typeof LixVersionTipSchema>;
 export const LixVersionTipSchema = {
 	"x-lix-key": "lix_version_tip",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
+	"x-lix-unique": [["working_commit_id"]],
 	"x-lix-foreign-keys": [
 		{
 			properties: ["commit_id"],
+			references: { schemaKey: "lix_commit", properties: ["id"] },
+			mode: "materialized",
+		},
+		{
+			properties: ["working_commit_id"],
 			references: { schemaKey: "lix_commit", properties: ["id"] },
 			mode: "materialized",
 		},
@@ -476,11 +467,13 @@ export const LixVersionTipSchema = {
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
 		commit_id: { type: "string", "x-lix-generated": true },
+		working_commit_id: { type: "string", "x-lix-generated": true },
 	},
-	required: ["id", "commit_id"],
+	required: ["id", "commit_id", "working_commit_id"],
 	additionalProperties: false,
 } as const;
 LixVersionTipSchema satisfies LixSchemaDefinition;
+export type LixVersionTip = FromLixSchemaDefinition<typeof LixVersionTipSchema>;
 
 export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",

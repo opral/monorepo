@@ -132,7 +132,7 @@ export function commit(args: {
 		return {
 			id: d.id,
 			name: d.name,
-			working_commit_id: d.working_commit_id,
+			working_commit_id: t.working_commit_id,
 			inherits_from_version_id: d.inherits_from_version_id,
 			hidden: d.hidden,
 			commit_id: t.commit_id,

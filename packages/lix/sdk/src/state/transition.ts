@@ -6,7 +6,11 @@ import {
 	LixChangeSetElementSchema,
 } from "../change-set/schema.js";
 import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
-import { LixVersionTipSchema, type LixVersion } from "../version/schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersion,
+	type LixVersionTip,
+} from "../version/schema.js";
 import { sql } from "kysely";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
@@ -302,7 +306,11 @@ WHERE rn = 1;
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({ id: version.id, commit_id: commitId }),
+			snapshot_content: JSON.stringify({
+				id: version.id,
+				commit_id: commitId,
+				working_commit_id: version.working_commit_id,
+			} satisfies LixVersionTip),
 			created_at: now,
 		});
 

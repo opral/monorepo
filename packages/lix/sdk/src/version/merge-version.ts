@@ -1,5 +1,9 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixVersion } from "./schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersion,
+	type LixVersionTip,
+} from "./schema.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 import { sql, type Kysely } from "kysely";
 import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
@@ -185,14 +189,15 @@ export async function mergeVersion(args: {
 		const versionTipRow: LixChangeRaw = {
 			id: await uuidV7({ lix }),
 			entity_id: target.id,
-			schema_key: "lix_version_tip",
-			schema_version: "1.0",
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				id: target.id,
 				commit_id: targetCommitId,
-			}),
+				working_commit_id: targetVersion.working_commit_id,
+			} satisfies LixVersionTip),
 			created_at: now,
 		};
 		changeRows.push(versionTipRow);

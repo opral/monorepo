@@ -115,7 +115,7 @@ export type LixDatabaseSchema = {
 	EntityViews<
 		typeof LixVersionDescriptorSchema,
 		"version",
-		{ commit_id: LixGenerated<string> }
+		{ commit_id: LixGenerated<string>; working_commit_id: LixGenerated<string> }
 	> &
 	EntityViews<typeof LixCommitSchema, "commit"> &
 	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

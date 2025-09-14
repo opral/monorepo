@@ -180,8 +180,9 @@ export function applyMaterializeStateSchema(args: {
             'lix'                  AS file_id,
             'lix_own_entity'       AS plugin_key,
             json_object(
-                'id',        t.version_id,
-                'commit_id', t.tip_commit_id
+                'id',                t.version_id,
+                'commit_id',         t.tip_commit_id,
+                'working_commit_id', json_extract(v.snapshot_content,'$.working_commit_id')
             )                      AS snapshot_content,
             COALESCE(MIN(v.schema_version), '1.0') AS schema_version,
             MIN(v.created_at)       AS entity_created_at,

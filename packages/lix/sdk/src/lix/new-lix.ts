@@ -478,7 +478,6 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			working_commit_id: globalWorkingCommitId,
 			inherits_from_version_id: null,
 			hidden: true,
 		} satisfies LixVersionDescriptor,
@@ -496,6 +495,7 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: "global",
 			commit_id: globalCommitId,
+			working_commit_id: globalWorkingCommitId,
 		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});
@@ -512,7 +512,6 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
-			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies LixVersionDescriptor,
@@ -530,6 +529,7 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: initialVersionId,
 			commit_id: mainCommitId,
+			working_commit_id: mainWorkingCommitId,
 		} satisfies LixVersionTip,
 		created_at: args.created_at,
 	});
