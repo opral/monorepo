@@ -14,11 +14,11 @@ import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
 import type { LixEngine } from "../engine/boot.js";
 import type { LixEnvironment } from "../environment/types.js";
-import { isJsonType } from "../schema-definition/json-type.js";
 import { createDialect } from "../environment/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
 import { random } from "../engine/deterministic/random.js";
+import { buildJsonColumnConfig } from "./json-column-config.js";
 
 export type Lix = {
 	/**
@@ -228,35 +228,9 @@ export async function openLix(args: {
 	}
 
 	// Build JSON column mapping to match openLix() parsing behavior
-	const ViewsWithJsonColumns = (() => {
-		const result: Record<string, Record<string, { type: any }>> = {};
-
-		// Hardcoded object-only columns
-		const hardcodedViews: Record<string, Record<string, { type: any }>> = {
-			state: { snapshot_content: { type: "object" } },
-			state_all: { snapshot_content: { type: "object" } },
-			state_history: { snapshot_content: { type: "object" } },
-			change: { snapshot_content: { type: "object" } },
-		};
-		Object.assign(result, hardcodedViews);
-
-		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
-			if (typeof schema === "boolean" || !schema.properties) continue;
-			const jsonColumns: Record<string, { type: any }> = {};
-			for (const [key, def] of Object.entries(schema.properties)) {
-				if (isJsonType(def)) {
-					jsonColumns[key] = {
-						type: ["string", "number", "boolean", "object", "array", "null"],
-					};
-				}
-			}
-			if (Object.keys(jsonColumns).length > 0) {
-				result[viewName] = jsonColumns;
-				result[viewName + "_all"] = jsonColumns;
-			}
-		}
-		return result;
-	})();
+	const ViewsWithJsonColumns = buildJsonColumnConfig({
+		includeChangeView: true,
+	});
 
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({ environment: environment }),

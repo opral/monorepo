@@ -105,6 +105,11 @@ export type StateEntityHistoryView = {
 	 * evolved to reach its current state.
 	 */
 	lixcol_depth: Generated<number>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this historical state.
+	 */
+	lixcol_metadata: Generated<Record<string, any> | null>;
 };
 
 /**
@@ -199,6 +204,11 @@ export type StateEntityHistoryColumns = {
 	 * evolved to reach its current state.
 	 */
 	lixcol_depth: LixGenerated<number>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this historical state.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -266,7 +276,8 @@ export function createEntityStateHistoryView(args: {
         change_id AS lixcol_change_id,
         commit_id AS lixcol_commit_id,
         root_commit_id AS lixcol_root_commit_id,
-        depth AS lixcol_depth
+        depth AS lixcol_depth,
+        metadata AS lixcol_metadata
       FROM state_history
       WHERE schema_key = '${schema_key}';
     `;

@@ -335,9 +335,10 @@ export async function newLixFile(args?: {
 	}
 }
 
-type BootstrapChange = Omit<LixChange, "snapshot_id"> & {
+type BootstrapChange = Omit<LixChange, "snapshot_id" | "metadata"> & {
 	snapshot_content: any;
 	snapshot_id: string;
+	metadata?: Record<string, any> | null;
 };
 
 /**

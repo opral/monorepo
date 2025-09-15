@@ -217,6 +217,15 @@ export type EntityStateColumns = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: LixGenerated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 *
+	 * This is sourced from the metadata stored alongside the originating change
+	 * and allows callers to attach additional contextual information without
+	 * modifying the entity schema.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -445,6 +454,7 @@ function createSingleEntityView(args: {
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
 		"commit_id AS lixcol_commit_id",
+		"metadata AS lixcol_metadata",
 	];
 
 	// Handle version_id for active view

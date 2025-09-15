@@ -78,7 +78,6 @@ export class InMemoryEnvironment implements LixEnvironment {
 			throw err;
 		}
 
-
 		return { rows };
 	}
 

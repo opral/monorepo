@@ -71,6 +71,7 @@ export function generateCommit(args: {
 		file_id: c.file_id,
 		plugin_key: c.plugin_key,
 		snapshot_content: c.snapshot_content,
+		metadata: c.metadata,
 		created_at: c.created_at,
 	});
 
@@ -127,6 +128,7 @@ export function generateCommit(args: {
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: vid,
 				commit_id: meta.commitId,
@@ -145,6 +147,7 @@ export function generateCommit(args: {
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: meta.commitId,
 				change_set_id: meta.changeSetId,
@@ -168,6 +171,7 @@ export function generateCommit(args: {
 				lixcol_commit_id: meta.commitId,
 				// Propagate writer from input change when present
 				writer_key: dc.writer_key ?? null,
+				metadata: dc.metadata,
 			});
 			// materialized domain CSE (cache)
 			// Note: domain CSE is stored in global cache with the GLOBAL commit id
@@ -190,6 +194,7 @@ export function generateCommit(args: {
 				lixcol_version_id: "global",
 				lixcol_commit_id: globalMeta ? globalMeta.commitId : meta.commitId,
 				writer_key: null,
+				metadata: null,
 			} as MaterializedState);
 		}
 	}
@@ -216,6 +221,7 @@ export function generateCommit(args: {
 					lixcol_version_id: "global",
 					lixcol_commit_id: meta.commitId,
 					writer_key: null,
+					metadata: null,
 				} as MaterializedState);
 			}
 		}

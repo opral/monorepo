@@ -225,6 +225,7 @@ WHERE rn = 1;
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({ id: changeSetId, metadata: null }),
 			created_at: now,
 		});
@@ -238,6 +239,7 @@ WHERE rn = 1;
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: el.id,
@@ -258,6 +260,7 @@ WHERE rn = 1;
 			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: commitId,
 				change_set_id: changeSetId,
@@ -286,6 +289,7 @@ WHERE rn = 1;
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: meta.change_id,
@@ -306,6 +310,7 @@ WHERE rn = 1;
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: version.id,
 				commit_id: commitId,
@@ -332,6 +337,7 @@ WHERE rn = 1;
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: sourceCommitId,
 					child_id: commitId,
@@ -345,6 +351,7 @@ WHERE rn = 1;
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: args.to.id,
 					child_id: commitId,

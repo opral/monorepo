@@ -21,6 +21,8 @@ export type StateCommitChange = {
 	commit_id: string;
 	/** 0 for tracked, 1 for untracked */
 	untracked?: number;
+	/** Arbitrary metadata attached to the originating change, if any. */
+	metadata?: Record<string, any> | null;
 	/**
 	 * Writer identity that produced this state row, if known.
 	 *

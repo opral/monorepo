@@ -22,6 +22,7 @@ test("it applies lix own entity changes", async () => {
 		id: "change1",
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		metadata: null,
 		snapshot_content: mockKeyValue,
 		entity_id: "test", // entity_id should match the key
 		schema_key: "lix_key_value",

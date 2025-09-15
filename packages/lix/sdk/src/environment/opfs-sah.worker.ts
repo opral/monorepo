@@ -205,7 +205,6 @@ async function handle(req: Req): Promise<Res> {
 					columnNames,
 				}) as any[];
 
-
 				return {
 					id: req.id,
 					ok: true,

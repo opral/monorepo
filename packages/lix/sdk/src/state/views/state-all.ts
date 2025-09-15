@@ -16,6 +16,7 @@ export type StateAllView = {
 	untracked: Generated<boolean>;
 	commit_id: Generated<string>;
 	writer_key: string | null;
+	metadata: Generated<Record<string, any> | null>;
 };
 
 // Kysely operation types
@@ -32,7 +33,27 @@ export function applyStateAllView(args: {
 }): void {
 	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_all AS
-    SELECT * FROM internal_state_vtable
+    SELECT 
+      entity_id,
+      schema_key,
+      file_id,
+      version_id,
+      plugin_key,
+      snapshot_content,
+      schema_version,
+      created_at,
+      updated_at,
+      inherited_from_version_id,
+      change_id,
+      untracked,
+      commit_id,
+      writer_key,
+      (
+        SELECT json(metadata)
+        FROM change
+        WHERE change.id = internal_state_vtable.change_id
+      ) AS metadata
+    FROM internal_state_vtable
     WHERE snapshot_content IS NOT NULL;
 
     -- Forward writes on state_all to the internal vtable
@@ -47,6 +68,7 @@ export function applyStateAllView(args: {
         plugin_key,
         snapshot_content,
         schema_version,
+        metadata,
         untracked
       ) VALUES (
         NEW.entity_id,
@@ -56,6 +78,7 @@ export function applyStateAllView(args: {
         NEW.plugin_key,
         NEW.snapshot_content,
         NEW.schema_version,
+        NEW.metadata,
         COALESCE(NEW.untracked, 0)
       );
 
@@ -77,6 +100,7 @@ export function applyStateAllView(args: {
         plugin_key = NEW.plugin_key,
         snapshot_content = NEW.snapshot_content,
         schema_version = NEW.schema_version,
+        metadata = NEW.metadata,
         untracked = COALESCE(NEW.untracked, 0)
       WHERE
         entity_id = OLD.entity_id AND

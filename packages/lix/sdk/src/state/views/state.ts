@@ -31,7 +31,8 @@ export function applyStateView(args: {
       change_id,
       untracked,
       commit_id,
-      writer_key
+      writer_key,
+      metadata
     FROM state_all
     WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -47,6 +48,7 @@ export function applyStateView(args: {
         plugin_key,
         snapshot_content,
         schema_version,
+        metadata,
         untracked
       ) VALUES (
         NEW.entity_id,
@@ -56,6 +58,7 @@ export function applyStateView(args: {
         NEW.plugin_key,
         NEW.snapshot_content,
         NEW.schema_version,
+        NEW.metadata,
         COALESCE(NEW.untracked, 0)
       );
     END;
@@ -72,6 +75,7 @@ export function applyStateView(args: {
         plugin_key = NEW.plugin_key,
         snapshot_content = NEW.snapshot_content,
         schema_version = NEW.schema_version,
+        metadata = NEW.metadata,
         untracked = COALESCE(NEW.untracked, 0)
       WHERE
         entity_id = OLD.entity_id

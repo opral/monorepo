@@ -20,7 +20,7 @@ const createTestFile = (id: string, data: string) => ({
 
 // This plugin doesn't use database access; provide a dummy to satisfy types.
 const dummyQuerySync = (() => {
-  throw new Error("querySync not expected to be called in these tests");
+	throw new Error("querySync not expected to be called in these tests");
 }) as any;
 
 describe("detectChanges", () => {
@@ -28,11 +28,11 @@ describe("detectChanges", () => {
 		const before = createTestFile("file1", "original content");
 		const after = createTestFile("file1", "updated content");
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
@@ -48,11 +48,11 @@ describe("detectChanges", () => {
 		const before = createTestFile("file1", "same content");
 		const after = createTestFile("file1", "same content");
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(0);
 	});
@@ -60,10 +60,10 @@ describe("detectChanges", () => {
 	it("should detect changes when before file is undefined (new file)", () => {
 		const after = createTestFile("file1", "new file content");
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
@@ -79,11 +79,11 @@ describe("detectChanges", () => {
 		const before = { ...createTestFile("file1", ""), data: undefined as any };
 		const after = createTestFile("file1", "new content");
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
@@ -101,11 +101,11 @@ describe("detectChanges", () => {
 		const before = { ...createTestFile("file1", ""), data: binaryData1 };
 		const after = { ...createTestFile("file1", ""), data: binaryData2 };
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]?.snapshot_content.value).toEqual(
@@ -117,11 +117,11 @@ describe("detectChanges", () => {
 		const before = createTestFile("file1", "some content");
 		const after = createTestFile("file1", "");
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]?.snapshot_content.value).toEqual(
@@ -135,11 +135,11 @@ describe("detectChanges", () => {
 		const before = createTestFile("file1", "simple ascii");
 		const after = createTestFile("file1", unicodeContent);
 
-    const changes = lixUnknownFileFallbackPlugin.detectChanges!({
-      before,
-      after,
-      querySync: dummyQuerySync,
-    });
+		const changes = lixUnknownFileFallbackPlugin.detectChanges!({
+			before,
+			after,
+			querySync: dummyQuerySync,
+		});
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({

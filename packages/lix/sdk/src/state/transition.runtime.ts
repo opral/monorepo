@@ -208,6 +208,7 @@ WHERE rn = 1;`.execute(trx);
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({ id: changeSetId, metadata: null }),
 			created_at: now,
 		});
@@ -220,6 +221,7 @@ WHERE rn = 1;`.execute(trx);
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: el.id,
@@ -239,6 +241,7 @@ WHERE rn = 1;`.execute(trx);
 			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: commitId,
 				change_set_id: changeSetId,
@@ -257,6 +260,7 @@ WHERE rn = 1;`.execute(trx);
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({
 				change_set_id: changeSetId,
 				change_id: commitChangeId,
@@ -275,6 +279,7 @@ WHERE rn = 1;`.execute(trx);
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			metadata: null,
 			snapshot_content: JSON.stringify({ id: version.id, commit_id: commitId }),
 			created_at: now,
 		});
@@ -295,6 +300,7 @@ WHERE rn = 1;`.execute(trx);
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: sourceCommitId,
 					child_id: commitId,
@@ -308,6 +314,7 @@ WHERE rn = 1;`.execute(trx);
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: args.to.id,
 					child_id: commitId,
@@ -331,6 +338,7 @@ WHERE rn = 1;`.execute(trx);
 				schema_version: c.schema_version,
 				file_id: c.file_id,
 				plugin_key: c.plugin_key,
+				metadata: null,
 				snapshot_content: c.snapshot_content
 					? JSON.stringify(c.snapshot_content)
 					: null,
@@ -343,6 +351,7 @@ WHERE rn = 1;`.execute(trx);
 				schema_version: c.schema_version,
 				file_id: c.file_id,
 				plugin_key: c.plugin_key,
+				metadata: null,
 				snapshot_content: null,
 				created_at: c.created_at ?? now,
 			})),

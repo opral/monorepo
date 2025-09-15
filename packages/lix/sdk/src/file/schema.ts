@@ -162,7 +162,8 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
                 lixcol_created_at,
                 lixcol_updated_at,
                 lixcol_commit_id,
-                lixcol_untracked
+                lixcol_untracked,
+                lixcol_metadata
         FROM file_all
         WHERE lixcol_version_id IN (SELECT version_id FROM active_version);
 
@@ -174,6 +175,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
                 fd.version_id,
                 fd.inherited_from_version_id,
                 fd.untracked,
+                fd.metadata AS change_metadata,
                 -- Call select_file_lixcol once per file/version and store the JSON result
                 select_file_lixcol(fd.entity_id, fd.version_id) AS lixcol_json
             FROM state_all fd
@@ -200,7 +202,8 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
                 json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
                 json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
                 json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
-                untracked AS lixcol_untracked
+                untracked AS lixcol_untracked,
+                change_metadata AS lixcol_metadata
         FROM file_lixcol;
 
 
@@ -333,7 +336,12 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
     change_id AS lixcol_change_id,
     commit_id AS lixcol_commit_id,
     root_commit_id AS lixcol_root_commit_id,
-    depth AS lixcol_depth
+    depth AS lixcol_depth,
+    (
+      SELECT json(metadata)
+      FROM change
+      WHERE change.id = state_history.change_id
+    ) AS lixcol_metadata
   FROM state_history
   WHERE schema_key = 'lix_file_descriptor';
 `);

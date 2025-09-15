@@ -5,7 +5,7 @@ import {
 	determineSchemaKeys,
 	extractLiteralFilters,
 } from "./determine-schema-keys.js";
-import type { Change } from "../change/index.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
 
 /**
  * Options for the observe method.
@@ -133,7 +133,7 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			}
 		};
 
-		const shouldReexecute = (data: { changes: Change[] }) => {
+		const shouldReexecute = (data: { changes: StateCommitChange[] }) => {
 			// Extract changes from the data structure
 			const changes = data.changes || [];
 

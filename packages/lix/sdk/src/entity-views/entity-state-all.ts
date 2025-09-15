@@ -126,6 +126,11 @@ export type StateEntityAllView = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: Generated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 */
+	lixcol_metadata: Generated<Record<string, any> | null>;
 };
 
 /**
@@ -240,6 +245,11 @@ export type EntityStateAllColumns = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: LixGenerated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -446,6 +456,7 @@ function createSingleEntityAllView(args: {
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
 		"commit_id AS lixcol_commit_id",
+		"metadata AS lixcol_metadata",
 	];
 
 	// Handle version_id for _all view
