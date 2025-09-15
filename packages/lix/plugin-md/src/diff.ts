@@ -1,5 +1,4 @@
 import { css, html, LitElement } from "lit";
-import { property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import type { UiDiffComponentProps } from "../../sdk/dist/index.js";
 import { serializeToHtml } from "@opral/markdown-wc/html";
@@ -7,10 +6,16 @@ import { renderHtmlDiff } from "@lix-js/html-diff";
 import { AstSchemas, type MarkdownNode, type Ast } from "@opral/markdown-wc";
 
 /**
- * Minimal Diff UI Component for Markdown-WC (v2 plugin)
+ * Diff UI Component for Markdown-WC (decorator-free)
  *
- * For now: render the before and after HTML blocks beneath each other (no diffing).
- * Later we will embed @lix-js/html-diff to render inline diffs like v1.
+ * Renders an inline HTML diff between the before and after AST snapshots.
+ * Uses Lit without TypeScript/Babel decorators to avoid bundler transform requirements.
+ *
+ * @example
+ * customElements.define('lix-md-diff', DiffComponent)
+ * const el = new DiffComponent()
+ * el.diffs = []
+ * document.body.appendChild(el)
  */
 export class DiffComponent extends LitElement {
 	static override styles = css`
@@ -86,7 +91,19 @@ export class DiffComponent extends LitElement {
 		}
 	`;
 
-	@property({ type: Array }) diffs: UiDiffComponentProps["diffs"] = [];
+	/**
+	 * The list of diffs to render.
+	 *
+	 * @example
+	 * element.diffs = [
+	 *   { plugin_key: 'plugin_md', schema_key: 'markdown_wc_paragraph', entity_id: 'p1', snapshot_content_before: {...}, snapshot_content_after: {...} }
+	 * ]
+	 */
+	static override properties = {
+		diffs: { type: Array },
+	};
+
+	diffs: UiDiffComponentProps["diffs"] = [];
 	private _beforeHtml = "";
 	private _afterHtml = "";
 	private _diffHtml = "";

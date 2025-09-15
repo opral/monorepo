@@ -1,4 +1,5 @@
 import { defineConfig } from "rolldown";
+import { dts } from "rolldown-plugin-dts";
 
 // Force Worker-safe decode of HTML entities by mapping the DOM variant
 // 'decode-named-character-reference/index.dom.js' to its non-DOM entry.
@@ -28,11 +29,12 @@ export default { decodeNamedCharacterReference };`;
 export default defineConfig([
 	// UI / App bundle (can include DOM/lit components)
 	{
-		input: "dist/index.js",
+		input: "src/index.ts",
 		treeshake: true,
-		plugins: [nonDomAlias],
+		plugins: [nonDomAlias, dts()],
 		output: {
-			file: "dist/index.bundle.js",
+			sourcemap: true,
+			dir: "dist",
 			format: "esm",
 			inlineDynamicImports: true,
 			minify: false,

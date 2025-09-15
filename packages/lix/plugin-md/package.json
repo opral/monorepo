@@ -5,33 +5,33 @@
 	"version": "0.1.2",
 	"license": "Apache-2.0",
 	"exports": {
-		".": "./dist/index.js",
-		"./dist/index.bundle.js": "./dist/index.bundle.js"
+		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "tsc --build && rolldown -c",
+		"build": "rolldown -c",
 		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",
 		"lint:fix": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --fix .",
-		"dev": "tsc --watch",
+		"dev": "rolldown --watch -c",
 		"format": "prettier ./src --write"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"dependencies": {
+		"@lix-js/html-diff": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@opral/markdown-wc": "workspace:*",
 		"@sanity/diff-match-patch": "^3.1.0",
-		"@lix-js/html-diff": "workspace:*",
-		"lit": "^3.2.1",
-		"character-entities": "^2.0.2"
+		"character-entities": "^2.0.2",
+		"lit": "^3.2.1"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
 		"oxlint": "^1.13.0",
 		"prettier": "^3.3.3",
 		"rolldown": "1.0.0-beta.36",
+		"rolldown-plugin-dts": "^0.16.5",
 		"typescript": "^5.5.4",
 		"vitest": "^3.0.5"
 	}
