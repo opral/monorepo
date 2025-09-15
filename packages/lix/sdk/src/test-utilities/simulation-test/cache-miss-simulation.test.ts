@@ -10,10 +10,10 @@ import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
 test("cache miss simulation test discovery", () => {});
 
 simulationTest(
-	"cache miss simulation clears cache before every select",
+	"cache miss simulation clears cache on first select after commit",
 	async ({ openSimulatedLix }) => {
-		// Spy on clearStateCache
-		const clearStateCacheSpy = vi.spyOn(clearCacheModule, "clearStateCache");
+		// Spy on clearStateCache (lazy clear)
+		const clearSpy = vi.spyOn(clearCacheModule, "clearStateCache");
 
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -27,7 +27,7 @@ simulationTest(
 		});
 
 		// Reset the spy counter after initialization
-		clearStateCacheSpy.mockClear();
+		clearSpy.mockClear();
 
 		// Insert test data
 		await lix.db
@@ -35,17 +35,17 @@ simulationTest(
 			.values([{ key: "test_1", value: "value_1" }])
 			.execute();
 
-		// First select query
+		// First select query (should trigger one clear lazily)
 		await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_1")
 			.selectAll()
 			.execute();
 
-		// Second select query
+		// Second select query (no new commit; should not clear again)
 		await lix.db.selectFrom("key_value").selectAll().execute();
 
-		expect(clearStateCacheSpy).toHaveBeenCalledTimes(2);
+		expect(clearSpy).toHaveBeenCalledTimes(1);
 	},
 	{
 		simulations: [cacheMissSimulation],
@@ -155,19 +155,12 @@ simulationTest(
 	}
 );
 
-// We must not clear the cache for internal_* tables.
-// Internal views/tables (e.g., internal_resolved_state_all, internal_materialization_*)
-// are used by the commit/materializer paths. Clearing the cache before those
-// reads can cause stale/missing reads or recursion. This test verifies that
-// cache-miss simulation does NOT intercept internal_* queries.
 simulationTest(
-	"cache miss simulation does not clear cache for internal_* tables",
+	"cache miss simulation clears even on internal_* tables",
 	async ({ openSimulatedLix }) => {
-		// Spy on the actual module export so we observe real calls
-		const clearCacheModule = await import(
-			"../../state/cache/clear-state-cache.js"
-		);
-		const spy = vi.spyOn(clearCacheModule, "clearStateCache");
+		// Spy on the actual clear export so we observe real calls
+		const clearModule = await import("../../state/cache/clear-state-cache.js");
+		const spy = vi.spyOn(clearModule, "clearStateCache");
 
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -182,16 +175,22 @@ simulationTest(
 
 		spy.mockClear();
 
-		// Internal query should NOT trigger cache clear
+		// Make a commit so the simulation marks repopulation as needed
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "internal-check", value: "v" })
+			.execute();
+
+		// Internal query SHOULD trigger clear
 		await (lix.db as any)
 			.selectFrom("internal_resolved_state_all")
 			.selectAll()
 			.limit(1)
 			.execute();
 
-		expect(spy).toHaveBeenCalledTimes(0);
+		expect(spy).toHaveBeenCalledTimes(1);
 
-		// Non-internal query SHOULD trigger cache clear at least once
+		// Non-internal query now has no pending clearance flag; should not call again
 		await lix.db.selectFrom("key_value").selectAll().execute();
 		expect(spy).toHaveBeenCalledTimes(1);
 	},

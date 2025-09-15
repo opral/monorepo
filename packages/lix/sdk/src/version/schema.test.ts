@@ -122,7 +122,7 @@ test("insert, update, delete on version descriptor", async () => {
 		.selectAll("change")
 		.execute();
 
-  expect(changes.map((c) => c.snapshot_content)).toMatchObject([
+	expect(changes.map((c) => c.snapshot_content)).toMatchObject([
 		{ name: "version0" },
 		{ name: "version1" },
 		{ name: "version0_renamed" },

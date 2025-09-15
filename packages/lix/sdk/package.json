@@ -35,14 +35,15 @@
 		"dist",
 		"src"
 	],
-	"scripts": {
-		"prebuild": "npm run env-variables",
-		"build": "tsc --build",
-		"test": "vitest run --typecheck",
-		"test:watch": "vitest --typecheck",
-		"env-variables": "node ./src/services/env-variables/create-index-file.js",
-		"bench": "vitest bench",
-		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
+  "scripts": {
+    "prebuild": "npm run env-variables",
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --typecheck",
+    "test:watch": "vitest --typecheck",
+    "env-variables": "node ./src/services/env-variables/create-index-file.js",
+    "bench": "vitest bench",
+    "lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
