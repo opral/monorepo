@@ -61,34 +61,7 @@ function getDefaults(
 }
 
 // Overloads for strong typing on known keys
-// default hook is suspense-enabled
-
-// Scope Suspense runtime caches per Lix instance.
-// Note: Using the Lix handle itself as the WeakMap key ensures stable identity
-// across renders. Some Lix implementations may expose `.sqlite` as a new object
-// on each access; keying by that would cause the Suspense promise to be thrown
-// repeatedly and never resolve. Keying by `lix` avoids that pitfall.
-type KvRuntime = {
-	loadedOnce: Set<string>;
-	loadPromises: Map<string, Promise<void>>;
-};
-const kvRuntimeByLix = new WeakMap<Lix, KvRuntime>();
-
-function getKvRuntime(lix: Lix): KvRuntime {
-	let rt = kvRuntimeByLix.get(lix);
-	if (!rt) {
-		rt = {
-			loadedOnce: new Set<string>(),
-			loadPromises: new Map<string, Promise<void>>(),
-		};
-		kvRuntimeByLix.set(lix, rt);
-	}
-	return rt;
-}
-
-function cacheKeyFor(key: string, versionId: string, untracked: boolean) {
-	return `${versionId}|${untracked ? "u" : "t"}|${key}`;
-}
+// Suspense behavior is handled by useQuery; no extra one-time loader needed.
 
 /**
  * React hook for reading and writing a key-value setting.
@@ -120,9 +93,7 @@ export function useKeyValue<K extends string>(
 	const defaultVersionId = opts?.defaultVersionId ?? d.defaultVersionId;
 	const untracked = opts?.untracked ?? d.untracked;
 
-	const ck = cacheKeyFor(key as string, String(defaultVersionId), untracked);
-	const { loadedOnce, loadPromises } = getKvRuntime(lix);
-	// Subscribe to live updates to ensure re-renders on changes
+	// Subscribe to live updates and suspend on first load via useQuery
 	const rows = useQuery(({ lix }) =>
 		selectValue(lix, key as string, {
 			defaultVersionId: String(defaultVersionId),
@@ -134,39 +105,14 @@ export function useKeyValue<K extends string>(
 		rows && rows[0]?.value !== undefined ? rows[0]?.value : defVal
 	) as ValueOf<K> | null;
 
-	if (!loadedOnce.has(ck)) {
-		// Kick a one-time loader to gate the first render behind Suspense
-		let p = loadPromises.get(ck);
-		if (!p) {
-			p = selectValue(lix, key as string, {
-				defaultVersionId: String(defaultVersionId),
-				untracked,
-			})
-				.execute()
-				.then(() => {
-					loadedOnce.add(ck);
-					loadPromises.delete(ck);
-				})
-				.catch((e) => {
-					loadedOnce.add(ck); // avoid infinite suspend loops on errors
-					loadPromises.delete(ck);
-					throw e;
-				});
-			loadPromises.set(ck, p);
-		}
-		throw p;
-	}
-
 	const setValue = useCallback(
 		async (newValue: ValueOf<K>) => {
 			await upsertValue(lix, key as string, newValue as unknown, {
 				defaultVersionId: String(defaultVersionId),
 				untracked,
 			});
-			// Mark as loaded; live subscription (useQuery) will notify consumers
-			loadedOnce.add(ck);
 		},
-		[lix, key, defaultVersionId, untracked, ck, loadedOnce],
+		[lix, key, defaultVersionId, untracked],
 	);
 
 	return [value, setValue] as const;

@@ -27,11 +27,6 @@ export function TipTapEditor({
 
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
-	if (!activeFileId) {
-		throw new Error(
-			"TipTapEditor: 'flashtype_active_file_id' is undefined. Set the active file id before rendering the editor.",
-		);
-	}
 	// Editor loads initial content and persists via createEditor using only fileId
 
 	const writerKey = `flashtype_tiptap_editor`;
@@ -39,12 +34,14 @@ export function TipTapEditor({
 	const editor = usePromise(
 		useMemo(
 			() =>
-				createEditor({
-					lix,
-					fileId: activeFileId,
-					persistDebounceMs: PERSIST_DEBOUNCE_MS,
-					writerKey,
-				}),
+				activeFileId
+					? createEditor({
+							lix,
+							fileId: activeFileId,
+							persistDebounceMs: PERSIST_DEBOUNCE_MS,
+							writerKey,
+						})
+					: Promise.resolve(null as unknown as Editor),
 			[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey],
 		),
 	);
@@ -91,6 +88,10 @@ export function TipTapEditor({
 		setEditor(editor as any);
 		onReady?.(editor as any);
 	}, [editor, setEditor, onReady]);
+
+	if (!activeFileId || !editor) {
+		return null;
+	}
 
 	return (
 		<div className={className ?? undefined}>
