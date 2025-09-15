@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { detectChanges } from "./detect-changes.js";
-import { openLix } from "../../sdk/dist/index.js";
+import { openLix, createQuerySync } from "../../sdk/dist/index.js";
 import { plugin } from "./index.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
@@ -101,6 +101,8 @@ function applySmallEdits(paras: string[], count: number, seed = 7): string[] {
 	return out;
 }
 
+// No helper wrapper — call createQuerySync({ engine: lix.engine! }) directly in tests.
+
 test("it should not detect changes if the markdown file did not update", async () => {
 	const lix = await openLix({ providePlugins: [plugin] });
 	const fileId = "f1";
@@ -114,7 +116,7 @@ test("it should not detect changes if the markdown file did not update", async (
 	const after = encode(beforeMarkdown);
 
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "x.md", data: after, metadata: {} },
 	});
 
@@ -133,7 +135,7 @@ test("it should detect a new node", async () => {
 		ids: ["h1", "p1"],
 	});
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "x.md",
@@ -166,7 +168,7 @@ test("it should detect an updated node", async () => {
 		ids: ["h1", "p1"],
 	});
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "x.md",
@@ -195,7 +197,7 @@ test("it should detect a deleted node", async () => {
 		ids: ["h1", "p1", "p2"],
 	});
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "x.md",
@@ -222,7 +224,7 @@ test("it should detect node reordering", async () => {
 		ids: ["p1", "p2"],
 	});
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "x.md",
@@ -243,7 +245,7 @@ test("it should handle empty documents", async () => {
 	const lix = await openLix({ providePlugins: [plugin] });
 	const fileId = "f6";
 	const detectedChanges = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "x.md",
@@ -266,7 +268,7 @@ test("preserves ID on paragraph edit (expected to fail with strict fingerprints)
 	const fileId = "f7";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1", "p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -283,7 +285,7 @@ test("preserves IDs on reorder", async () => {
 	const fileId = "f8";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -304,7 +306,7 @@ test("insert between preserves existing ids and mints new", async () => {
 	const fileId = "f9";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["pA", "pC"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(2);
@@ -335,7 +337,7 @@ test("delete emits deletion and preserves other ids", async () => {
 		ids: ["keep", "del"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -351,7 +353,7 @@ test("cross-type: do not map heading id to paragraph", async () => {
 	const fileId = "f11";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -372,7 +374,7 @@ test("canonicalization stability: hard break form changes keep id (mod or noop)"
 	const fileId = "f12";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -395,7 +397,7 @@ test("move section (heading + paragraph) preserves ids and updates root order", 
 		ids: ["hA", "pA", "hB", "pB"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -417,7 +419,7 @@ test("duplicate paragraphs reorder is ambiguous: no root order change", async ()
 	const fileId = "f14";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -437,7 +439,7 @@ test("code → paragraph (cross-type) results in deletion+addition", async () =>
 	const fileId = "f15";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -456,7 +458,7 @@ test("heading text edit preserves id", async () => {
 	const fileId = "f16";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -479,7 +481,7 @@ test("long document: insert 1, delete 1, reorder 2 (sanity)", async () => {
 	const after = afterParas.join("\n\n");
 
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -506,7 +508,7 @@ test("table cell edit preserves table id", async () => {
 	const fileId = "f18";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -527,7 +529,7 @@ test("duplicate paragraphs: edit the 2nd, keep p2 and no root change", async () 
 	const fileId = "f19";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -562,7 +564,7 @@ test("insert duplicate paragraph identical to existing: new id minted", async ()
 	const fileId = "f20";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(2);
@@ -594,7 +596,7 @@ test("three identical paragraphs; edit the middle only", async () => {
 		ids: ["p1", "p2", "p3"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -633,7 +635,7 @@ test("move a paragraph and add one word (keep id and update order)", async () =>
 	const fileId = "f27";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -665,7 +667,7 @@ test("move a section and tweak heading text slightly (ids preserved; heading mod
 		ids: ["hA", "pA", "hB", "pB"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -700,7 +702,7 @@ test("list item text change: only list block modified (id preserved)", async () 
 	const fileId = "f29";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 
@@ -722,7 +724,7 @@ test("reorder list items: single list modification and no root order change", as
 	const fileId = "f30";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -745,7 +747,7 @@ test("add a list item: single list modification and no root order change", async
 	const fileId = "f31";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -765,7 +767,7 @@ test("remove a list item: single list modification and no root order change", as
 	const fileId = "f32";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["list1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -785,7 +787,7 @@ test("table: add a row: single table modification and no root order change", asy
 	const fileId = "f33";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -811,7 +813,7 @@ test("table: remove a row: single table modification and no root order change", 
 	const fileId = "f34";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -837,7 +839,7 @@ test("table: reorder rows: single table modification and no root order change", 
 	const fileId = "f35";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["t1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -869,7 +871,7 @@ test("paragraph → blockquote (same text): deletion + addition + root order cha
 	const fileId = "f22";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
@@ -900,7 +902,7 @@ test("paragraph → heading (same text): deletion + addition + root order change
 	const fileId = "f23";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
@@ -931,7 +933,7 @@ test('paragraph split ("AB" → "A" + "B"): first keeps id, second gets new id',
 	const fileId = "f24";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
@@ -967,7 +969,7 @@ test('paragraph merge ("A" + "B" → "AB"): first keeps id (modified), second de
 	const fileId = "f25";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1", "p2"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(3);
@@ -1003,7 +1005,7 @@ test("CRLF ↔ LF normalization (entire file): no changes", async () => {
 		ids: ["p1", "p2"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(0);
@@ -1022,7 +1024,7 @@ test("hard break variants (spaces vs backslash, CRLF): same id, mod or noop", as
 		ids: ["p1"],
 	});
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: {
 			id: fileId,
 			path: "/f.md",
@@ -1045,7 +1047,7 @@ test("code block: edit content, same lang → keep id; single modification", asy
 	const fileId = "f50";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -1066,7 +1068,7 @@ test("code block: change lang only → same id; single modification", async () =
 	const fileId = "f36";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -1087,7 +1089,7 @@ test("code block: backtick fence length 3 ↔ 4 → same id; mod or noop", async
 	const fileId = "f37";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["code1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	// Canonical serializer should normalize either way; allow 0 or 1 change but never a new id
@@ -1105,7 +1107,7 @@ test("paragraph with link: change link text only → same paragraph id; single m
 	const fileId = "f38";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -1131,7 +1133,7 @@ test("paragraph with link: change only the url → same paragraph id; single mod
 	const fileId = "f39";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -1157,7 +1159,7 @@ test("top-level html node: text tweak → same id; single modification", async (
 	const fileId = "f40";
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["h1"] });
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	expect(changes).toHaveLength(1);
@@ -1182,7 +1184,7 @@ test.todo(
 		await seedMarkdownState({ lix, fileId, markdown: before, ids: [] });
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 		expect(changes).toHaveLength(2);
@@ -1210,7 +1212,7 @@ test.todo(
 		await seedMarkdownState({ lix, fileId, markdown: before, ids: ["html1"] });
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 		expect(changes).toHaveLength(2);
@@ -1238,7 +1240,7 @@ test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", asyn
 	await seedMarkdownState({ lix, fileId, markdown: before, ids: ["p1"] });
 
 	const changes = detectChanges({
-		lix,
+		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 	});
 	// Ideal: canonicalization eliminates differences => 0 or a single mod to same id
@@ -1279,7 +1281,7 @@ test(
 		const after = afterParas.join("\n\n");
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 
@@ -1328,7 +1330,7 @@ test(
 		const after = shuffle(paras, 123).join("\n\n");
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 
@@ -1359,7 +1361,7 @@ test(
 		const after = edited.join("\n\n");
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 
@@ -1399,7 +1401,7 @@ test(
 		const after = afterParas.join("\n\n");
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 
@@ -1443,7 +1445,7 @@ test(
 		const after = [...editedMoved, ...remaining].join("\n\n");
 
 		const changes = detectChanges({
-			lix,
+			querySync: createQuerySync({ engine: lix.engine! }),
 			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
 		});
 

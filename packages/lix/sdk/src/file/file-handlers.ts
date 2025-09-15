@@ -4,6 +4,7 @@ import { LixFileDescriptorSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
+import { createQuerySync } from "../plugin/query-sync.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
 import type { LixEngine } from "../engine/boot.js";
 
@@ -68,6 +69,8 @@ export function handleFileInsert(args: {
 		}),
 	});
 
+	const querySync = createQuerySync({ engine: args.engine });
+
 	const plugins = args.engine.getAllPluginsSync();
 	let foundPlugin = false;
 	let hasChanges = false;
@@ -98,9 +101,10 @@ export function handleFileInsert(args: {
 		}
 
 		// Detect changes with the plugin
+
 		const detectedChanges = plugin.detectChanges({
 			after: args.file,
-			lix: { db: args.engine.db as any, engine: args.engine } as any,
+			querySync,
 		});
 
 		if (detectedChanges.length > 0) {
@@ -149,7 +153,7 @@ export function handleFileInsert(args: {
 		if (lixUnknownFileFallbackPlugin.detectChanges) {
 			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 				after: args.file,
-				lix: { engine: args.engine, db: args.engine.db },
+				querySync,
 			});
 
 			if (detectedChanges.length > 0) {
@@ -263,6 +267,8 @@ export function handleFileUpdate(args: {
 	})[0] as LixFile | undefined;
 
 	if (currentFile) {
+		// Create querySync once per handler invocation
+		const querySync = createQuerySync({ engine: args.engine });
 		const plugins = args.engine.getAllPluginsSync();
 		let foundPlugin = false;
 		let hasChanges = false;
@@ -296,7 +302,7 @@ export function handleFileUpdate(args: {
 			const detectedChanges = plugin.detectChanges({
 				before: currentFile,
 				after: args.file,
-				lix: { db: args.engine.db as any, engine: args.engine } as any,
+				querySync,
 			});
 
 			if (detectedChanges.length > 0) {
@@ -360,10 +366,7 @@ export function handleFileUpdate(args: {
 				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 					before: currentFile,
 					after: args.file,
-					lix: {
-						db: args.engine.db as any,
-						sqlite: args.engine.sqlite,
-					} as any,
+					querySync,
 				});
 
 				if (detectedChanges.length > 0) {
