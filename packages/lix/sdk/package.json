@@ -52,7 +52,6 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@codspeed/vitest-plugin": "^4.0.1",
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"@opral/zettel-ast": "workspace:*",
 		"ajv": "^8.17.1",
@@ -62,6 +61,7 @@
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
+		"@codspeed/vitest-plugin": "^4.0.1",
 		"@opral/tsconfig": "workspace:*",
 		"@vitest/browser": "^4.0.0-beta.10",
 		"@vitest/coverage-v8": "4.0.0-beta.10",
