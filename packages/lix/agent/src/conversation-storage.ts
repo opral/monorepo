@@ -68,8 +68,8 @@ export async function appendUserMessage(
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		metadata: { lix_agent_role: "user" },
-	} as any);
+		lixcol_metadata: { lix_agent_role: "user" },
+	});
 }
 
 export async function appendAssistantMessage(
@@ -81,8 +81,8 @@ export async function appendAssistantMessage(
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		metadata: { lix_agent_role: "assistant" },
-	} as any);
+		lixcol_metadata: { lix_agent_role: "assistant" },
+	});
 }
 
 export async function loadConversationHistory(
@@ -92,14 +92,17 @@ export async function loadConversationHistory(
 	const rows = await lix.db
 		.selectFrom("conversation_message")
 		.where("conversation_id", "=", conversationId)
-		.select(["id", "body", "metadata", "lixcol_created_at"]) // created_at for ordering
+		.select(["id", "body", "lixcol_metadata", "lixcol_created_at"]) // created_at for ordering
 		.orderBy("lixcol_created_at", "asc")
 		.orderBy("id", "asc")
 		.execute();
 
+	type ConversationRow = (typeof rows)[number] & {
+		lixcol_metadata: Record<string, any> | null;
+	};
 	const history: ChatMessage[] = [];
-	for (const r of rows as any[]) {
-		const role = (r.metadata?.lix_agent_role as string) ?? "assistant";
+	for (const r of rows as ConversationRow[]) {
+		const role = (r.lixcol_metadata?.lix_agent_role as string) ?? "assistant";
 		const content = toPlainText(r.body).replace(
 			/^\[(user|assistant)\]\s*/i,
 			""
