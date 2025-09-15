@@ -57,17 +57,9 @@ class EnvironmentConnection implements DatabaseConnection {
 			const wrapped = new Error(lines.join("\n"), { cause: err });
 			throw wrapped;
 		}
-		// Map to Kysely QueryResult shape
-		const numAffectedRows =
-			res.changes !== undefined ? BigInt(res.changes) : undefined;
-		const insertId =
-			res.lastInsertRowid !== undefined
-				? BigInt(res.lastInsertRowid)
-				: undefined;
+		// Map to Kysely QueryResult shape (no affected rows/insert id available)
 		return {
 			rows: (res.rows ?? []) as O[],
-			numAffectedRows,
-			insertId,
 		} as QueryResult<O>;
 	}
 

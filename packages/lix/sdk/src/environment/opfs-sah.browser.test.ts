@@ -35,10 +35,10 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		const env = new OpfsSahEnvironment({ key: `vitest-opfs-no-engine` });
 		const res = await env.open({
 			boot: { args: { pluginsRaw: [] } },
-			onEvent: () => {},
+			emit: () => {},
 		});
-		// Worker environment cannot expose an in-process engine; must be undefined
-		expect(res).toBeUndefined();
+		// Worker environment cannot expose an in-process engine; engine must be undefined
+		expect(res.engine).toBeUndefined();
 		await env.close();
 	});
 
@@ -95,13 +95,9 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		// Use environment.create directly so we can properly close the worker even on error
 		const env = new OpfsSahEnvironment({ key: name });
 		try {
-			await expect(
-				env.create({
-					blob,
-					boot: { args: { pluginsRaw: [] } },
-					onEvent: () => {},
-				})
-			).rejects.toThrow(/already exists|refusing to import/i);
+			await expect(env.create({ blob })).rejects.toThrow(
+				/already exists|refusing to import/i
+			);
 		} finally {
 			await env.close();
 		}
