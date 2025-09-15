@@ -65,7 +65,7 @@ export async function sendMessageCore(args: {
 	let systemInstruction = system;
 	if (system && setSystem) setSystem(system);
 
-	history.push({ id: uuidV7({ lix }), role: "user", content: text });
+	history.push({ id: await uuidV7({ lix }), role: "user", content: text });
 	await persistUser(text);
 
 	const mentionPaths = extractMentionPaths(text);
@@ -83,7 +83,7 @@ export async function sendMessageCore(args: {
 			const wrapped = {
 				...def,
 				execute: async (input: unknown) => {
-					const id = uuidV7({ lix });
+					const id = await uuidV7({ lix });
 					try {
 						onToolEvent?.({ type: "start", id, name, input, at: Date.now() });
 						const output = await originalExecute(input);
@@ -147,7 +147,11 @@ export async function sendMessageCore(args: {
 		abortSignal: signal,
 	});
 
-	history.push({ id: uuidV7({ lix }), role: "assistant", content: reply });
+	history.push({
+		id: await uuidV7({ lix }),
+		role: "assistant",
+		content: reply,
+	});
 	await persistAssistant(reply);
 	return { text: reply, usage };
 }
