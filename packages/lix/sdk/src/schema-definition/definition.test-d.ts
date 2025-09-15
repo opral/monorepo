@@ -227,19 +227,19 @@ test("FromLixSchemaDefinition transforms empty object types to Record<string, an
 		type: "object",
 		properties: {
 			id: { type: "string" },
-			metadata: { type: "object" },
+			payload: { type: "object" },
 			config: { type: "object", nullable: true },
 		},
-		required: ["id", "metadata"],
+		required: ["id", "payload"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
 	type TestEntity = FromLixSchemaDefinition<typeof TestSchema>;
 
-	// Test that metadata is Record<string, any>
+	// Test that payload is Record<string, any>
 	const entity: TestEntity = {
 		id: "test",
-		metadata: {
+		payload: {
 			author: "test-user",
 			created_at: new Date().toISOString(),
 			nested: { deep: { value: 123 } },
@@ -248,6 +248,6 @@ test("FromLixSchemaDefinition transforms empty object types to Record<string, an
 	};
 
 	// Verify types
-	assertType<Record<string, any>>(entity.metadata);
+	assertType<Record<string, any>>(entity.payload);
 	assertType<Record<string, any> | null | undefined>(entity.config);
 });

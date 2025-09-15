@@ -41,9 +41,13 @@ export function buildJsonColumnConfig(args?: {
 				};
 			}
 		}
+
+		// All entity views expose lixcol_metadata as a JSON column sourced from change metadata.
+		jsonColumns.lixcol_metadata = { type: "object" };
 		if (Object.keys(jsonColumns).length > 0) {
 			result[viewName] = jsonColumns;
 			result[viewName + "_all"] = jsonColumns;
+			result[viewName + "_history"] = jsonColumns;
 		}
 	}
 

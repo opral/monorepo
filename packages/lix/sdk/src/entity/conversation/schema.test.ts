@@ -53,9 +53,9 @@ test("conversation_message supports metadata via createConversationMessage", asy
 		lix,
 		conversation_id: conv.id,
 		body: fromPlainText("world"),
-		metadata: { lix_agent_role: "assistant" },
-	} as any);
-	expect((c as any).metadata).toEqual({ lix_agent_role: "assistant" });
+		lixcol_metadata: { lix_agent_role: "assistant" },
+	});
+	expect(c.lixcol_metadata).toEqual({ lix_agent_role: "assistant" });
 });
 
 test("entity_conversation foreign key to state table should be enforced", async () => {

@@ -42,7 +42,6 @@ export const LixConversationSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
-		metadata: { type: "object", nullable: true },
 	},
 	required: ["id"],
 	additionalProperties: false,
@@ -75,7 +74,6 @@ export const LixConversationMessageSchema = {
 		conversation_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,
-		metadata: { type: "object", nullable: true },
 	},
 	required: ["id", "conversation_id", "body"],
 	additionalProperties: false,

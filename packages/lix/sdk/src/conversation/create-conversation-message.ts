@@ -21,7 +21,7 @@ export async function createConversationMessage(
 			.executeTakeFirstOrThrow();
 
 		// Default parent to most recent leaf
-		let parentId = (args as any).parent_id as string | null | undefined;
+		let parentId = args.parent_id as string | null | undefined;
 		if (parentId === undefined) {
 			const leaf = await trx
 				.selectFrom("conversation_message_all as m1")
@@ -59,8 +59,8 @@ export async function createConversationMessage(
 			.values({
 				id: messageId,
 				conversation_id: args.conversation_id,
-				body: (args as any).body,
-				metadata: (args as any).metadata ?? null,
+				body: args.body,
+				lixcol_metadata: args.lixcol_metadata ?? undefined,
 				parent_id: parentId,
 				lixcol_version_id: existingConversation.lixcol_version_id,
 			})

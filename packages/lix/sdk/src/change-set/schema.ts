@@ -48,7 +48,6 @@ export const LixChangeSetSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
-		metadata: { type: "object", nullable: true },
 	},
 	required: ["id"],
 	additionalProperties: false,
@@ -133,7 +132,6 @@ export const LixChangeSetLabelSchema = {
 	properties: {
 		change_set_id: { type: "string" },
 		label_id: { type: "string" },
-		metadata: { type: "object", nullable: true },
 	},
 	required: ["change_set_id", "label_id"],
 	additionalProperties: false,

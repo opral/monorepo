@@ -172,12 +172,15 @@ test("conversation_message supports metadata via createConversation", async () =
 	const conv = await createConversation({
 		lix,
 		comments: [
-			{ body: fromPlainText("hello"), metadata: { lix_agent_role: "user" } },
+			{
+				body: fromPlainText("hello"),
+				lixcol_metadata: { lix_agent_role: "user" },
+			},
 		],
 	});
 
 	expect(conv.comments).toHaveLength(1);
-	expect((conv.comments[0] as any).metadata).toEqual({
+	expect(conv.comments[0]!.lixcol_metadata).toEqual({
 		lix_agent_role: "user",
 	});
 });
