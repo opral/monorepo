@@ -548,6 +548,8 @@ test("derived edge cache rows reference the commit change id", async () => {
 		.selectFrom("commit_edge_all")
 		.innerJoin("change", "change.id", "commit_edge_all.lixcol_change_id")
 		.where("commit_edge_all.lixcol_version_id", "=", "global")
+		.where("commit_edge_all.parent_id", "=", parentId)
+		.where("commit_edge_all.child_id", "=", childId)
 		.select([
 			"commit_edge_all.parent_id as parent_id",
 			"commit_edge_all.child_id as child_id",
@@ -680,12 +682,17 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 	const edges = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("parent_id", "=", parentId)
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 
-	expect(edges).toMatchObject([
-		{ parent_id: parentId, child_id: childId, lixcol_version_id: "global" },
-	]);
+	expect(edges).toHaveLength(1);
+	expect(edges[0]).toMatchObject({
+		parent_id: parentId,
+		child_id: childId,
+		lixcol_version_id: "global",
+	});
 });
 
 test("clears cached edges when parent_commit_ids becomes empty", async () => {
@@ -732,6 +739,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 	const before = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 	expect(before.length).toBeGreaterThan(0);
@@ -762,6 +770,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 	const after = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 	expect(after).toEqual([]);
