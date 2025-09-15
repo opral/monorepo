@@ -18,7 +18,7 @@ type Req =
 	| {
 			id: string;
 			op: "create";
-			payload: { name: string; blob: ArrayBuffer; bootArgs?: BootArgs };
+			payload: { name: string; blob: ArrayBuffer };
 	  }
 	| { id: string; op: "exists"; payload: { name: string } }
 	| { id: string; op: "exec"; payload: { sql: string; params?: unknown[] } }
@@ -138,7 +138,7 @@ async function handle(req: Req): Promise<Res> {
 				const res = await boot({
 					// db is sqlite3.oo1 DB; engine expects sqlite-wasm compatible surface
 					sqlite: db as any,
-					postEvent: (ev) => {
+					emit: (ev) => {
 						(self as any).postMessage({ type: "event", event: ev });
 					},
 					args: bootArgs,
@@ -205,19 +205,11 @@ async function handle(req: Req): Promise<Res> {
 					columnNames,
 				}) as any[];
 
-				// Derive last_insert_rowid via SQL
-				const r = db.exec({
-					sql: "SELECT last_insert_rowid() AS id",
-					returnValue: "resultRows",
-					rowMode: "object",
-				}) as any[];
-				const lastInsertRowid = Number(r?.[0]?.id);
-				const changes = db.changes ? db.changes() || undefined : undefined;
 
 				return {
 					id: req.id,
 					ok: true,
-					result: { rows, changes, lastInsertRowid },
+					result: { rows },
 				};
 			}
 

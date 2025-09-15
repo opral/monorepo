@@ -9,7 +9,7 @@ import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
  * @example
  * // Instance API
  * const env = new OpfsSahEnvironment({ key: 'default' })
- * await env.open({ boot: { args: { pluginsRaw: [] } }, onEvent })
+ * await env.open({ boot: { args: { pluginsRaw: [] } }, emit })
  *
  * @example
  * // Static helper: clear all OPFS data for this origin (destructive)
@@ -75,20 +75,21 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		return this.send("call", { route: name, payload });
 	}
 
-	async open(initOpts: Parameters<LixEnvironment["open"]>[0]): Promise<void> {
-		this.eventHandler = initOpts.onEvent;
+	async open(
+		initOpts: Parameters<LixEnvironment["open"]>[0]
+	): Promise<{ engine?: import("../engine/boot.js").LixEngine }> {
+		this.eventHandler = initOpts.emit;
 		const payload: any = { name: this.dbKey, bootArgs: initOpts.boot.args };
 		await this.send("open", payload);
+		return {};
 	}
 
 	async create(
 		createOpts: Parameters<LixEnvironment["create"]>[0]
 	): Promise<void> {
-		this.eventHandler = createOpts.onEvent;
 		const payload: any = {
 			name: this.dbKey,
 			blob: createOpts.blob,
-			bootArgs: createOpts.boot.args,
 		};
 		await this.send("create", payload, [createOpts.blob]);
 	}
@@ -100,7 +101,7 @@ export class OpfsSahEnvironment implements LixEnvironment {
 	// execBatch intentionally omitted; loop over exec() instead.
 
 	/**
-	 * Export a snapshot of the current database as raw bytes.
+	 * Export the SQLite database image as raw bytes.
 	 *
 	 * Worker returns one of two shapes for performance:
 	 * - Fast path: `{ blob: ArrayBuffer }` (zero‑copy transfer)

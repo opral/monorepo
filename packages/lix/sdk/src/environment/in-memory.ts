@@ -16,7 +16,7 @@ import { boot, type LixEngine } from "../engine/boot.js";
  *
  * @example
  * const env = new InMemoryEnvironment()
- * await env.open({ boot: { args: { pluginsRaw: [] } }, onEvent: () => {} })
+ * await env.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} })
  * await env.exec("CREATE TABLE t(a)")
  * await env.exec("INSERT INTO t(a) VALUES (?)", [1])
  * const out = await env.exec("SELECT a FROM t")
@@ -34,12 +34,15 @@ export class InMemoryEnvironment implements LixEnvironment {
 
 	async open(
 		opts: Parameters<LixEnvironment["open"]>[0]
-	): Promise<void | { engine?: LixEngine }> {
+	): Promise<{ engine?: LixEngine }> {
 		if (!this.db) {
 			this.db = await createInMemoryDatabase({ readOnly: false });
+		}
+		// Boot the engine if not already booted.
+		if (!this.callImpl) {
 			const res = await boot({
 				sqlite: this.db,
-				postEvent: (ev) => opts.onEvent(ev),
+				emit: (ev) => opts.emit(ev),
 				args: opts.boot.args,
 			});
 			this.callImpl = res.call;
@@ -49,15 +52,9 @@ export class InMemoryEnvironment implements LixEnvironment {
 	}
 
 	async create(opts: Parameters<LixEnvironment["create"]>[0]): Promise<void> {
+		// Seed a fresh in-memory database from the provided blob (bytes).
 		this.db = await createInMemoryDatabase({ readOnly: false });
 		importDatabase({ db: this.db, content: new Uint8Array(opts.blob) });
-		const res = await boot({
-			sqlite: this.db,
-			postEvent: (ev) => opts.onEvent(ev),
-			args: opts.boot.args,
-		});
-		this.callImpl = res.call;
-		this.engine = res.engine;
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
@@ -81,12 +78,8 @@ export class InMemoryEnvironment implements LixEnvironment {
 			throw err;
 		}
 
-		const lastInsertRowid = Number(
-			this.db.sqlite3.capi.sqlite3_last_insert_rowid(this.db)
-		);
-		const changes = this.db.changes() || undefined;
 
-		return { rows, changes, lastInsertRowid };
+		return { rows };
 	}
 
 	// execBatch intentionally omitted; loop over exec() instead.

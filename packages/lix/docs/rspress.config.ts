@@ -133,6 +133,7 @@ export default defineConfig({
             { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
             { text: "React Utils", link: "/guide/react-utils" },
             { text: "Writer Key", link: "/guide/writer-key" },
+            { text: "Environment API", link: "/guide/environment-api" },
           ],
         },
         {

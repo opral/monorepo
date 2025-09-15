@@ -1,19 +1,6 @@
 export type LixEnvironmentResult = {
 	/** Rows returned by a SELECT, if any. */
 	rows?: any[];
-	/** Number of rows changed by a mutation, if available. */
-	changes?: number;
-	/** Last insert row id, if available. */
-	lastInsertRowid?: number;
-};
-
-export type LixEnvironmentError = {
-	/** Error name, e.g. 'SqliteError'. */
-	name: string;
-	/** Optional database error code. */
-	code?: string | number;
-	/** Human‑readable message. */
-	message: string;
 };
 
 /**
@@ -31,8 +18,8 @@ export interface LixEnvironment {
 	 *   engine is directly accessible on the main thread — useful for unit
 	 *   testing and local tools that need in‑process access.
 	 * - Out‑of‑process environments (e.g., Worker or separate process) MUST NOT
-	 *   return a engine (resolve to `void`). In those environments, callers
-	 *   should use `call()` to invoke engine functions across the boundary.
+	 *   expose a main‑thread engine. In those environments, callers should use
+	 *   `call()` to invoke engine functions across the boundary.
 	 *
 	 * Guidance:
 	 * - The optional `{ engine }` is primarily for openers/frameworks to
@@ -40,23 +27,29 @@ export interface LixEnvironment {
 	 *   should not rely on it; prefer `call()` for engine operations.
 	 *
 	 * @param opts.boot - engine boot arguments (plugins, account, keyValues)
-	 * @param opts.onEvent - Event bridge (currently only 'state_commit')
-	 * @returns `{ engine }` for main‑thread engines, or `void` for worker/remote engines.
+	 * @param opts.emit - Event bridge (currently only 'state_commit')
+	 *
+	 * Concurrency model:
+	 * - One environment instance equals one live session/connection.
+	 *   Create multiple environment instances for concurrency.
+	 *
+	 * @returns An object that may include `{ engine }` in in‑process environments.
 	 */
 	open(opts: {
 		boot: { args: import("../engine/boot.js").BootArgs };
-		onEvent: (ev: import("../engine/boot.js").EngineEvent) => void;
-	}): Promise<void | { engine?: import("../engine/boot.js").LixEngine }>;
+		emit: (ev: import("../engine/boot.js").EngineEvent) => void;
+	}): Promise<{ engine?: import("../engine/boot.js").LixEngine }>;
 
 	/**
-	 * Create a brand‑new database from a provided snapshot and boot it.
-	 * Implementations should throw if the target already exists to avoid data loss.
+	 * Create a brand‑new database from a provided database image.
+	 *
+	 * Semantics:
+	 * - Pure seed/import of the serialized SQLite file. Do not boot the engine here — boot happens in `open()`.
+	 * - Implementations should throw if the target already exists to avoid data loss.
+	 *
+	 * @param opts.blob Serialized SQLite database image (ArrayBuffer).
 	 */
-	create(opts: {
-		blob: ArrayBuffer;
-		boot: { args: import("../engine/boot.js").BootArgs };
-		onEvent: (ev: import("../engine/boot.js").EngineEvent) => void;
-	}): Promise<void>;
+	create(opts: { blob: ArrayBuffer }): Promise<void>;
 
 	/**
 	 * Returns true if a persistent database already exists for this environment's
@@ -73,7 +66,9 @@ export interface LixEnvironment {
 	exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult>;
 
 	/**
-	 * Export a snapshot of the current database as raw bytes.
+	 * Export the SQLite database image as raw bytes.
+	 *
+	 * Returns an ArrayBuffer containing the serialized SQLite file.
 	 */
 	export(): Promise<ArrayBuffer>;
 
@@ -89,9 +84,5 @@ export interface LixEnvironment {
 	 * booted next to SQLite, regardless of whether the engine runs on the main
 	 * thread or inside a Worker.
 	 */
-	call(
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	): Promise<unknown>;
+	call: import("../engine/router.js").Call;
 }
