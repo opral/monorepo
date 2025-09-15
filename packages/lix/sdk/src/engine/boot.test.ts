@@ -37,7 +37,7 @@ test("boot installs engine and triggers plugin on file insert", async () => {
 		const events: any[] = [];
 		await boot({
 			sqlite,
-			postEvent: (ev) => events.push(ev),
+			emit: (ev) => events.push(ev),
 			args: { pluginsRaw: [pluginCode] },
 		});
 

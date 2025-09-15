@@ -205,14 +205,10 @@ export async function openLix(args: {
 	} as const;
 
 	if (blob) {
-		await environment.create({
-			blob: await args.blob!.arrayBuffer(),
-			boot,
-			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
-		});
+		await environment.create({ blob: await args.blob!.arrayBuffer() });
 		const res = await environment.open({
 			boot,
-			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	} else {
@@ -222,15 +218,11 @@ export async function openLix(args: {
 			const { newLixFile } = await import("./new-lix.js");
 			const seed = await newLixFile({ keyValues: args.keyValues });
 			const seedBytes = await seed.arrayBuffer();
-			await environment.create({
-				blob: seedBytes,
-				boot,
-				onEvent: (ev) => hooks._emit(ev.type, ev.payload),
-			});
+			await environment.create({ blob: seedBytes });
 		}
 		const res = await environment.open({
 			boot,
-			onEvent: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	}

@@ -25,7 +25,7 @@ export type BootArgs = {
 
 export type BootEnv = {
 	sqlite: SqliteWasmDatabase;
-	postEvent: (ev: EngineEvent) => void;
+	emit: (ev: EngineEvent) => void;
 	args: BootArgs;
 };
 
@@ -52,7 +52,7 @@ export type LixEngine = {
  * - Installs file handlers and views
  * - Loads plugins from stringified ESM modules
  * - Optionally seeds account and key-values
- * - Bridges state_commit events to the host via postEvent
+ * - Bridges state_commit events to the host via emit
  */
 export async function boot(
 	env: BootEnv
@@ -88,7 +88,7 @@ export async function boot(
 
 	// Event bridge: forward state_commit to host
 	hooks.onStateCommit(({ changes }) => {
-		env.postEvent({ type: "state_commit", payload: { changes } });
+		env.emit({ type: "state_commit", payload: { changes } });
 	});
 
 	// Optional: ensure account exists and set as active

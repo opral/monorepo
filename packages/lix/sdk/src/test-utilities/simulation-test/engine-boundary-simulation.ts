@@ -46,17 +46,19 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 		return this.inner.call(name, payload, opts);
 	}
 
-	async open(initOpts: Parameters<LixEnvironment["open"]>[0]): Promise<void> {
-		this.eventHandler = initOpts.onEvent;
+	async open(
+		initOpts: Parameters<LixEnvironment["open"]>[0]
+	): Promise<{ engine?: import("../../engine/boot.js").LixEngine }> {
+		this.eventHandler = initOpts.emit;
 		// Boot the inner engine but intentionally do not return its engine
 		await this.inner.open(initOpts);
-		// undefined return keeps lix.engine absent to simulate boundary
+		// Return object without engine to simulate boundary
+		return {};
 	}
 
 	async create(
 		createOpts: Parameters<LixEnvironment["create"]>[0]
 	): Promise<void> {
-		this.eventHandler = createOpts.onEvent;
 		await this.inner.create(createOpts);
 	}
 
