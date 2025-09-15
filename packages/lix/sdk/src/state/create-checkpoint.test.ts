@@ -2,7 +2,10 @@ import { test } from "vitest";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import {
+	simulationTest,
+	normalSimulation,
+} from "../test-utilities/simulation-test/simulation-test.js";
 
 test("simulation test discovery", () => {});
 
@@ -257,6 +260,90 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 		expectDeterministic(after.commit_id).toBe(before.commit_id);
 		expectDeterministic(after.working_commit_id).toBe(before.working_commit_id);
+	}
+);
+
+//
+// Parent-merge at checkpoint (concise)
+//
+// 1) Create cp1 from working changes.
+// 2) Make one tracked change (m-2) creating F (new tip).
+// 3) Create cp2: the working commit becomes cp2 and merges parents (cp1 and F).
+//
+// Final (complete, unpruned) graph:
+//   C -> B -> A -> cp1 -> F -> cp2 [TIP]
+//               \---------------|--/
+//                               |
+//                               \-> WC (current working commit after cp2)
+//
+// The test asserts cp2 has both cp1 and F as parents via commit_edge and
+// parent_commit_ids.
+simulationTest(
+	"checkpoint merges existing working parents with previous tip",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_untracked: true,
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		// 1) Make some changes to create working elements, then checkpoint (cp1)
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "m-1", value: "v-1" })
+			.execute();
+
+		const cp1 = await createCheckpoint({ lix });
+
+		// 2) Create a tracked commit (F) by making a domain change
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "m-2", value: "v-2" })
+			.execute();
+
+		// Read version to capture current tip (F) and working (WC2)
+		const vBeforeCp2 = await lix.db
+			.selectFrom("version")
+			.where("name", "=", "main")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Second checkpoint (cp2) - merges existing parent (cp1) and previous tip (F)
+		const cp2 = await createCheckpoint({ lix });
+
+		// Verify commit_edge includes both parents -> cp2
+		const edgeFromCp1 = await lix.db
+			.selectFrom("commit_edge")
+			.where("parent_id", "=", cp1.id)
+			.where("child_id", "=", cp2.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expectDeterministic(!!edgeFromCp1).toBe(true);
+
+		const edgeFromPrevTip = await lix.db
+			.selectFrom("commit_edge")
+			.where("parent_id", "=", vBeforeCp2.commit_id)
+			.where("child_id", "=", cp2.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expectDeterministic(!!edgeFromPrevTip).toBe(true);
+
+		// Also verify parent_commit_ids contains both ids on the checkpoint commit
+		const cp2CommitRow = await lix.db
+			.selectFrom("commit")
+			.where("id", "=", cp2.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// parent_commit_ids is an array-like column; ensure both are present
+		const parents = (cp2CommitRow as any).parent_commit_ids ?? [];
+		expectDeterministic(parents.includes(cp1.id)).toBe(true);
+		expectDeterministic(parents.includes(vBeforeCp2.commit_id)).toBe(true);
 	}
 );
 
