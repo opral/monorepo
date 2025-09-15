@@ -378,6 +378,26 @@ export function applyMaterializeStateSchema(args: {
         entity_updated_at as updated_at
     FROM commit_rows_global
     WHERE first_seen = 1
+    -- Include working commit row alongside tips (global scope)
+    UNION ALL
+    SELECT 
+        'global' AS version_id,
+        CAST(json_extract(vg.snapshot_content,'$.working_commit_id') AS TEXT) AS commit_id,
+        0 AS depth,
+        c.id AS change_id,
+        c.entity_id,
+        'lix_commit' AS schema_key,
+        'lix' AS file_id,
+        'lix_own_entity' AS plugin_key,
+        c.snapshot_content,
+        c.schema_version,
+        c.created_at AS created_at,
+        c.created_at AS updated_at
+    FROM lvs_version_global vg
+    JOIN change c
+      ON c.entity_id = json_extract(vg.snapshot_content,'$.working_commit_id')
+     AND c.schema_key = 'lix_commit'
+    WHERE json_extract(vg.snapshot_content,'$.working_commit_id') IS NOT NULL
     UNION ALL
     SELECT 
         version_id,
@@ -410,6 +430,30 @@ export function applyMaterializeStateSchema(args: {
         entity_updated_at as updated_at
     FROM commit_edges
     WHERE first_seen = 1
+    -- Include tip -> working edge so repopulation brings in working branch
+    UNION ALL
+    SELECT 
+        'global' AS version_id,
+        CAST(json_extract(vg.snapshot_content,'$.working_commit_id') AS TEXT) AS commit_id,
+        0 AS depth,
+        c.id AS change_id,
+        (CAST(json_extract(vg.snapshot_content,'$.commit_id') AS TEXT) || '~' || CAST(json_extract(vg.snapshot_content,'$.working_commit_id') AS TEXT)) AS entity_id,
+        'lix_commit_edge' AS schema_key,
+        'lix' AS file_id,
+        'lix_own_entity' AS plugin_key,
+        json_object(
+            'parent_id', json_extract(vg.snapshot_content,'$.commit_id'),
+            'child_id',  json_extract(vg.snapshot_content,'$.working_commit_id')
+        ) AS snapshot_content,
+        '1.0' AS schema_version,
+        c.created_at AS created_at,
+        c.created_at AS updated_at
+    FROM lvs_version_global vg
+    JOIN change c
+      ON c.entity_id = json_extract(vg.snapshot_content,'$.working_commit_id')
+     AND c.schema_key = 'lix_commit'
+    WHERE json_extract(vg.snapshot_content,'$.working_commit_id') IS NOT NULL
+      AND json_extract(vg.snapshot_content,'$.working_commit_id') != json_extract(vg.snapshot_content,'$.commit_id')
     UNION ALL
     SELECT 
         version_id,
