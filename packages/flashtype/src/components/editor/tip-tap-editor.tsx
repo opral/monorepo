@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, use as usePromise, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
@@ -6,10 +6,8 @@ import { useLix } from "@lix-js/react-utils";
 import { useQuery } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
 import { createEditor } from "./create-editor";
-import { sql } from "@lix-js/sdk";
 import { assembleMdAst } from "./assemble-md-ast";
 import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
-import { plugin } from "@lix-js/plugin-md";
 
 type TipTapEditorProps = {
 	className?: string;
@@ -47,7 +45,7 @@ export function TipTapEditor({
 					persistDebounceMs: PERSIST_DEBOUNCE_MS,
 					writerKey,
 				}),
-			[lix, activeFileId, PERSIST_DEBOUNCE_MS],
+			[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey],
 		),
 	);
 
@@ -68,7 +66,7 @@ export function TipTapEditor({
 			}
 		});
 		return () => unsubscribe();
-	}, [lix, editor, activeFileId]);
+	}, [lix, editor, activeFileId, writerKey]);
 
 	// Watch active version to refresh on version switches
 	const activeVersionRow = useQuery(() =>

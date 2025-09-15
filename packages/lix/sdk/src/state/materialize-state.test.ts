@@ -840,7 +840,7 @@ describe("internal_materialization_commit_graph", () => {
 			// Get both version tips
 			const versionATip = await lix.db
 				.selectFrom("version")
-				.select("commit_id")
+				.selectAll()
 				.where("id", "=", "merge-version-a")
 				.executeTakeFirstOrThrow();
 
@@ -897,6 +897,7 @@ describe("internal_materialization_commit_graph", () => {
 					snapshot_content: {
 						id: "merge-version-a",
 						commit_id: mergeCommitId,
+						working_commit_id: versionATip.working_commit_id,
 					} satisfies LixVersionTip,
 					created_at: ts,
 				})

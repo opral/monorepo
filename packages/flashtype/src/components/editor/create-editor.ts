@@ -136,14 +136,14 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 	 * - Assigns a new id if missing.
 	 * - Regenerates ids for duplicates (e.g., paragraph split that cloned attrs).
 	 */
-	function ensureTopLevelIds(children: any[]): string[] {
+	async function ensureTopLevelIds(children: any[]): Promise<string[]> {
 		const order: string[] = [];
 		const seen = new Set<string>();
 		for (const node of children) {
 			node.data = node.data || {};
 			let id = (node.data.id ?? "") as string;
 			if (!id || seen.has(id)) {
-				id = nanoId({ lix, length: 10 });
+				id = await nanoId({ lix, length: 10 });
 				node.data.id = id;
 			}
 			seen.add(id);
@@ -153,9 +153,7 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 	}
 
 	return new Editor({
-		extensions: MarkdownWc({
-			idProvider: () => nanoId({ lix, length: 10 }),
-		}),
+		extensions: MarkdownWc({}),
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {
 			currentEditor = editor as Editor;
@@ -177,7 +175,7 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 				const children: any[] = Array.isArray((ast as any)?.children)
 					? ((ast as any).children as any[])
 					: [];
-				const order = ensureTopLevelIds(children);
+				const order = await ensureTopLevelIds(children);
 				try {
 					await withWriterKey(
 						lix.db,

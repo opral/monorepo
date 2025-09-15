@@ -3,8 +3,8 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoIdSync } from "../engine/deterministic/index.js";
 import type { LixEngine } from "../engine/boot.js";
+import { nanoIdSync } from "../engine/deterministic/nano-id.js";
 
 export function applyLabelDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;

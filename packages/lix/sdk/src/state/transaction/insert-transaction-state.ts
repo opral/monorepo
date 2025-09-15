@@ -1,9 +1,9 @@
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
-import { uuidV7Sync } from "../../engine/deterministic/index.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
+import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;

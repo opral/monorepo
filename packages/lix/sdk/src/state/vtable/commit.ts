@@ -3,11 +3,9 @@ import {
 	type LixChangeSetElement,
 	LixChangeSetElementSchema,
 } from "../../change-set/schema.js";
-import type { LixChangeRaw } from "../../change/schema.js";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { type LixVersion } from "../../version/schema.js";
-import { nanoIdSync } from "../../engine/deterministic/index.js";
 import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
 import { commitSequenceNumberSync } from "../../engine/deterministic/sequence.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
@@ -163,7 +161,7 @@ export function commit(args: {
 		// Load global version snapshot once (descriptor + tip)
 		const globalVersion = loadMergedVersion("global");
 		versionSnapshots.set("global", globalVersion);
-		const globalChangeSetId = nanoIdSync({ engine: engine });
+		const globalChangeSetId = uuidV7Sync({ engine: engine });
 		const globalCommitId = uuidV7Sync({ engine: engine });
 
 		// Store global metadata

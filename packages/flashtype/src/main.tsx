@@ -4,11 +4,11 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
 import { LixProvider } from "@lix-js/react-utils";
-import { openLix, OpfsStorage, type Lix } from "@lix-js/sdk";
+import { openLix, type Lix } from "@lix-js/sdk";
 import { initLixInspector } from "@lix-js/inspector";
 import { KeyValueProvider } from "./key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
-import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
+import mdPlugin from "@lix-js/plugin-md/dist/index.bundle.js?raw";
 import { ErrorFallback } from "./main.error";
 
 const router = createRouter({
@@ -32,8 +32,7 @@ function AppRoot() {
 		(async () => {
 			try {
 				const instance = await openLix({
-					providePlugins: [mdPlugin],
-					storage: new OpfsStorage({ path: "flashtype.lix" }),
+					pluginsRaw: [mdPlugin],
 				});
 				if (cancelled) return;
 				await initLixInspector({ lix: instance, show: false });

@@ -94,7 +94,8 @@ export function nanoIdSync(args: {
  * @param args.length Optional length for non-deterministic mode (default: 21)
  */
 export async function nanoId(args: {
-	lix: Lix;
+	// Allow additional properties to avoid excess property errors at call sites
+	lix: Pick<Lix, "call"> & Record<string, unknown>;
 	length?: number;
 }): Promise<string> {
 	const res = await args.lix.call("lix_nano_id", { length: args.length });

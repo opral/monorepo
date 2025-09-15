@@ -146,7 +146,6 @@ export function ChatPanel() {
 		{
 			defaultVersionId: "global",
 			untracked: true,
-			defaultValue: false,
 		},
 	);
 
@@ -278,45 +277,7 @@ export function ChatPanel() {
 	);
 }
 
-function formatToolTitle(name: string, input?: unknown): string {
-	try {
-		const arg = input == null ? "" : compactJson(input);
-		return `${name}(${arg})`;
-	} catch {
-		return name;
-	}
-}
-
-function summarizeInput(input?: unknown): string | undefined {
-	if (input == null) return undefined;
-	const s = compactJson(input);
-	return s.length > 64 ? s.slice(0, 61) + "…" : s;
-}
-
-function summarizeOutput(output?: unknown): string | undefined {
-	if (output == null) return undefined;
-	const s = compactJson(output);
-	return s.length > 64 ? s.slice(0, 61) + "…" : s;
-}
-
-function compactJson(v: unknown): string {
-	try {
-		return JSON.stringify(v);
-	} catch {
-		return String(v);
-	}
-}
-
-function prettyJson(v: unknown): string | undefined {
-	try {
-		return JSON.stringify(v, null, 2);
-	} catch {
-		return undefined;
-	}
-}
-
 function useProposalCountsText({
-	lix,
 	diffSource,
 }: {
 	lix: ReturnType<typeof useLix>;

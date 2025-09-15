@@ -115,7 +115,7 @@ export function LeftSidebarFiles({
 					onCreate={async (stem) => {
 						try {
 							const path = ensureUniqueMarkdownPath(stem, paths);
-							const id = nanoId({ lix });
+							const id = await nanoId({ lix });
 							await lix.db
 								.insertInto("file")
 								.values({ id, path, data: new TextEncoder().encode("") })

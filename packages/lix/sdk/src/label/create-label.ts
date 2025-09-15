@@ -1,6 +1,6 @@
+import { nanoId } from "../engine/deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLabel } from "./schema.js";
-import { nanoIdSync } from "../engine/deterministic/index.js";
 
 /**
  * Creates a label that can be attached to change sets.
@@ -15,7 +15,7 @@ import { nanoIdSync } from "../engine/deterministic/index.js";
  */
 
 export async function createLabel(args: {
-	lix: Pick<Lix, "db" | "sqlite" | "hooks" | "engine">;
+	lix: Pick<Lix, "db" | "sqlite" | "hooks" | "call">;
 	id?: LixLabel["id"];
 	name: LixLabel["name"];
 	lixcol_version_id?: string;
@@ -24,9 +24,9 @@ export async function createLabel(args: {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
 		const labelId =
 			args.id ||
-			nanoIdSync({
-				engine: args.lix.engine!,
-			});
+			(await nanoId({
+				lix: args.lix,
+			}));
 
 		// Insert the label (views don't support returningAll)
 		await trx
