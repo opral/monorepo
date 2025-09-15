@@ -8,7 +8,7 @@ export * from "./database/index.js";
 export * from "./engine/deterministic/index.js";
 export * from "./entity/index.js";
 export * from "./entity-views/index.js";
-export * from "./file/index.js";
+export * from "./filesystem/index.js";
 export * from "./hooks/create-hooks.js";
 export * from "./key-value/schema.js";
 export * from "./label/index.js";

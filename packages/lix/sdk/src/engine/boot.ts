@@ -3,7 +3,7 @@ import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initDb } from "../database/init-db.js";
 import { createHooks, type StateCommitChange } from "../hooks/create-hooks.js";
-import { applyFileDatabaseSchema } from "../file/schema.js";
+import { applyFileDatabaseSchema } from "../filesystem/file/schema.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";

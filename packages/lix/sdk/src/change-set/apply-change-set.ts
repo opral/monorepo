@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/index.js";
 import type { LixChangeSet } from "./schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
-import { clearFileDataCache } from "../file/cache/clear-file-data-cache.js";
+import { clearFileDataCache } from "../filesystem/file/cache/clear-file-data-cache.js";
 
 /**
  * Applies a change set to the lix.

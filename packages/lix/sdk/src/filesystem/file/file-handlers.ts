@@ -1,12 +1,12 @@
-import { executeSync } from "../database/execute-sync.js";
+import { executeSync } from "../../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
 import { LixFileDescriptorSchema } from "./schema.js";
-import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
+import { createLixOwnLogSync } from "../../log/create-lix-own-log.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
-import { createQuerySync } from "../plugin/query-sync.js";
+import { createQuerySync } from "../../plugin/query-sync.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
-import type { LixEngine } from "../engine/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 function globSync(args: {
 	engine: Pick<LixEngine, "sqlite">;

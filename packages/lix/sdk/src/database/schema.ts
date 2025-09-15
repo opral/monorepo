@@ -22,7 +22,7 @@ import type {
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import { LixFileDescriptorSchema } from "../file/schema.js";
+import { LixFileDescriptorSchema } from "../filesystem/file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
 import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
@@ -40,8 +40,8 @@ import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
-import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
-import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
+import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
+import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
 import type { InternalTransactionStateTable } from "../state/transaction/schema.js";
 import type { InternalStateVTable } from "../state/vtable/vtable.js";
 

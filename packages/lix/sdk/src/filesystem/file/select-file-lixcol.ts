@@ -1,4 +1,4 @@
-import type { LixEngine } from "../engine/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 export interface FileLixcol {
 	latest_change_id: string | null;

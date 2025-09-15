@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "../version/create-version.js";
+import { openLix } from "../../lix/open-lix.js";
+import { createVersion } from "../../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import { randomNanoId } from "../database/nano-id.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
+import { randomNanoId } from "../../database/nano-id.js";
 
 describe("file insert", () => {
 	it("should handle unknown file types with fallback plugin", async () => {

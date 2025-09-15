@@ -1,5 +1,5 @@
-import { executeSync } from "../database/execute-sync.js";
-import type { LixEngine } from "../engine/boot.js";
+import { executeSync } from "../../database/execute-sync.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 

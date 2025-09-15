@@ -3,8 +3,8 @@ import { materializeFileDataAtCommit } from "./materialize-file-data-at-commit.j
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
-import type { LixEngine } from "../engine/boot.js";
+} from "../../schema-definition/definition.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
 import { selectFileLixcol } from "./select-file-lixcol.js";

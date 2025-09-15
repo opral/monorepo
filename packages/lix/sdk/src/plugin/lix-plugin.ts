@@ -1,5 +1,5 @@
 import type { LixChange } from "../change/schema.js";
-import type { LixFile } from "../file/schema.js";
+import type { LixFile } from "../filesystem/file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { QuerySync } from "./query-sync.js";
 

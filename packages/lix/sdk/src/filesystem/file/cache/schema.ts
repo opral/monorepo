@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { LixEngine } from "../../engine/boot.js";
+import type { LixEngine } from "../../../engine/boot.js";
 
 /**
  * Applies the file data cache schema to the database.

@@ -1,4 +1,4 @@
-import type { LixEngine } from "../engine/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { updateFileDataCache } from "./cache/update-file-data-cache.js";

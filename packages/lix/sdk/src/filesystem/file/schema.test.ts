@@ -1,15 +1,15 @@
 import { test, expect, expectTypeOf } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "../version/create-version.js";
-import { createCheckpoint } from "../state/create-checkpoint.js";
-import { switchVersion } from "../version/switch-version.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import { openLix } from "../../lix/open-lix.js";
+import { createVersion } from "../../version/create-version.js";
+import { createCheckpoint } from "../../state/create-checkpoint.js";
+import { switchVersion } from "../../version/switch-version.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
+import type { LixPlugin } from "../../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
-import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
-import { withWriterKey } from "../state/writer.js";
+import { simulationTest } from "../../test-utilities/simulation-test/simulation-test.js";
+import { withWriterKey } from "../../state/writer.js";
 import { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLix({

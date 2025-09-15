@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
-import { clearFileDataCache } from "../../file/cache/clear-file-data-cache.js";
+import { clearFileDataCache } from "../../filesystem/file/cache/clear-file-data-cache.js";
 import { populateStateCache } from "../../state/cache/populate-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
 import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";

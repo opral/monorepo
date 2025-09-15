@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
-import { openLix } from "../../lix/open-lix.js";
-import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
-import type { Lix } from "../../lix/open-lix.js";
+import { openLix } from "../../../lix/open-lix.js";
+import { mockJsonPlugin } from "../../../plugin/mock-json-plugin.js";
+import type { Lix } from "../../../lix/open-lix.js";
 
 // Helper function to query cache directly
 function getFileDataCache(args: {

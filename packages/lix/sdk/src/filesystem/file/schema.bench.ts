@@ -1,6 +1,6 @@
 import { bench } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { openLix } from "../../lix/open-lix.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
 
 const NUM_FILES = 1;
 const NUM_READS = 10;
@@ -16,7 +16,7 @@ const NUM_READS = 10;
  * 5. Concurrent file reads
  *
  * @example
- * pnpm exec vitest bench src/file/schema.bench.ts
+ * pnpm exec vitest bench src/filesystem/file/schema.bench.ts
  */
 
 bench("sequential file reads - unique files", async () => {

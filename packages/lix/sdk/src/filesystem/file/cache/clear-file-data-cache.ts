@@ -1,4 +1,4 @@
-import type { LixEngine } from "../../engine/boot.js";
+import type { LixEngine } from "../../../engine/boot.js";
 
 /**
  * Clears the file data cache for a specific file and version.
