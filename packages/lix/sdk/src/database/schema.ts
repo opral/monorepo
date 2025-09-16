@@ -12,6 +12,7 @@ import {
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type {
+	FromLixSchemaDefinition,
 	LixGenerated,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
@@ -22,7 +23,15 @@ import type {
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import { LixFileDescriptorSchema } from "../filesystem/file/schema.js";
+import {
+	LixDirectoryDescriptorSchema,
+	LixFileDescriptorSchema,
+} from "../filesystem/index.js";
+import type {
+	EntityStateAllView,
+	EntityStateHistoryView,
+	EntityStateView,
+} from "../entity-views/types.js";
 import { LixLogSchema } from "../log/schema.js";
 import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
@@ -78,6 +87,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
+	directory_descriptor: LixDirectoryDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
@@ -91,6 +101,20 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_proposal: LixChangeProposalSchema,
 };
 
+type DirectoryDescriptorView = ToKysely<
+	EntityStateView<FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>>
+>;
+type DirectoryDescriptorAllView = ToKysely<
+	EntityStateAllView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>
+	>
+>;
+type DirectoryDescriptorHistoryView = ToKysely<
+	EntityStateHistoryView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>
+	>
+>;
+
 export type LixDatabaseSchema = {
 	active_account: ToKysely<LixActiveAccount>;
 	active_version: ToKysely<LixActiveVersion>;
@@ -101,6 +125,9 @@ export type LixDatabaseSchema = {
 	state_history: StateHistoryView;
 
 	change: ChangeView;
+	directory: DirectoryDescriptorView;
+	directory_all: DirectoryDescriptorAllView;
+	directory_history: DirectoryDescriptorHistoryView;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",

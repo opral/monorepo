@@ -1,0 +1,390 @@
+import { expect } from "vitest";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+
+simulationTest(
+	"inserting a file by path creates the first-level directory descriptor",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("hello"),
+			})
+			.execute();
+
+		const directories = await lix.db
+			.selectFrom("directory")
+			.select(["name", "parent_id", "hidden"])
+			.execute();
+
+		expectDeterministic(directories).toEqual([
+			{
+				name: "docs",
+				parent_id: null,
+				hidden: 0,
+			},
+		]);
+	}
+);
+
+simulationTest(
+	"inserting a nested file creates all ancestor directory descriptors",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/guides/intro.md",
+				data: new TextEncoder().encode("nested"),
+			})
+			.execute();
+
+		const directories = await lix.db
+			.selectFrom("directory")
+			.select(["id", "name", "parent_id"])
+			.execute();
+
+		expectDeterministic(directories).toHaveLength(2);
+		const docs = directories.find((dir) => dir.name === "docs");
+		const guides = directories.find((dir) => dir.name === "guides");
+		expectDeterministic(docs).toBeDefined();
+		expectDeterministic(docs?.parent_id).toBeNull();
+		expectDeterministic(guides).toBeDefined();
+		expectDeterministic(guides?.parent_id).toBe(docs?.id);
+	}
+);
+
+simulationTest(
+	"deleting a directory removes all nested files and directories",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/guides/intro.md",
+				data: new TextEncoder().encode("nested"),
+			})
+			.execute();
+
+		const docs = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirst();
+
+		expectDeterministic(docs).toBeDefined();
+
+		await lix.db.deleteFrom("directory").where("id", "=", docs!.id).execute();
+
+		const remainingDirectories = await lix.db
+			.selectFrom("directory")
+			.selectAll()
+			.execute();
+		const remainingFiles = await lix.db
+			.selectFrom("file")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(remainingDirectories).toEqual([]);
+		expectDeterministic(remainingFiles).toEqual([]);
+	}
+);
+
+simulationTest(
+	"inserting a directory directly populates the directory view",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		const directories = await lix.db
+			.selectFrom("directory")
+			.select(["name", "parent_id", "hidden"])
+			.execute();
+
+		expectDeterministic(directories).toEqual([
+			{ name: "docs", parent_id: null, hidden: 0 },
+		]);
+	}
+);
+
+simulationTest(
+	"directory view exposes composed path for directories",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		const docs = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "guides", parent_id: docs.id })
+			.execute();
+
+		const directoryPaths = await lix.db
+			.selectFrom("directory")
+			.select(["name", "parent_id", "path"] as any)
+			.execute();
+
+		expectDeterministic(directoryPaths).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "docs", path: "/docs/" }),
+				expect.objectContaining({ name: "guides", path: "/docs/guides/" }),
+			])
+		);
+	}
+);
+
+simulationTest(
+	"file paths cannot collide with directory descriptors at the same location",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("first"),
+			})
+			.execute();
+
+		const docs = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirst();
+
+		expect(docs, "directory descriptor should exist").toBeDefined();
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({ name: "readme.md", parent_id: docs!.id })
+				.execute()
+		).rejects.toThrowError();
+	}
+);
+
+simulationTest(
+	"inserting a file into a hidden directory keeps the directory hidden",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		const docs = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
+
+		await lix.db
+			.updateTable("directory")
+			.where("id", "=", docs.id)
+			.set({ hidden: true })
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("hidden"),
+			})
+			.execute();
+
+		const updatedDirectory = await lix.db
+			.selectFrom("directory")
+			.where("id", "=", docs.id)
+			.select(["hidden"])
+			.executeTakeFirst();
+
+		expectDeterministic(updatedDirectory?.hidden).toBe(1);
+	}
+);
+
+simulationTest(
+	"inserting multiple files into the same directory reuses the directory descriptor",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("first"),
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/changelog.md",
+				data: new TextEncoder().encode("second"),
+			})
+			.execute();
+
+		const directories = await lix.db
+			.selectFrom("directory")
+			.select(["name", "parent_id"])
+			.execute();
+
+		expectDeterministic(directories).toEqual([
+			{ name: "docs", parent_id: null },
+		]);
+	}
+);
+
+simulationTest(
+	"toggling a directory hidden flag does not mutate nested file hidden flags",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("content"),
+			})
+			.execute();
+
+		await lix.db
+			.updateTable("directory")
+			.where("name", "=", "docs")
+			.set({ hidden: true })
+			.execute();
+
+		const fileRow = await lix.db
+			.selectFrom("file")
+			.select(["hidden"])
+			.executeTakeFirst();
+
+		expectDeterministic(fileRow?.hidden).toBe(0);
+	}
+);
+
+simulationTest(
+	"toggling a file hidden flag does not mutate parent directory hidden flags",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/readme.md",
+				data: new TextEncoder().encode("content"),
+			})
+			.execute();
+
+		await lix.db
+			.updateTable("file")
+			.where("path", "=", "/docs/readme.md")
+			.set({ hidden: true })
+			.execute();
+
+		const directoryRow = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["hidden"])
+			.executeTakeFirst();
+
+		expectDeterministic(directoryRow?.hidden).toBe(0);
+	}
+);

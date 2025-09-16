@@ -2,6 +2,10 @@
  * Filesystem entry point aggregating file and directory utilities.
  *
  * @example
- * import { LixFileDescriptorSchema } from "@lix-js/sdk/filesystem";
+ * import { LixFileDescriptorSchema, LixDirectoryDescriptorSchema } from "@lix-js/sdk/filesystem";
  */
-export * from "./file/index.js";
+export { LixFileDescriptorSchema } from "./file/schema.js";
+export type { LixFileDescriptor, LixFile } from "./file/schema.js";
+
+export { LixDirectoryDescriptorSchema } from "./directory/schema.js";
+export type { LixDirectoryDescriptor } from "./directory/schema.js";

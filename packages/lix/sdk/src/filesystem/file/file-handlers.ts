@@ -7,6 +7,10 @@ import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 import { createQuerySync } from "../../plugin/query-sync.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
 import type { LixEngine } from "../../engine/boot.js";
+import {
+	ensureDirectoryAncestors,
+	assertNoDirectoryAtFilePath,
+} from "../directory/ensure-directories.js";
 
 function globSync(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -48,6 +52,18 @@ export function handleFileInsert(args: {
 		});
 		return 1; // Indicate no changes were made
 	}
+
+	ensureDirectoryAncestors({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: args.file.path,
+	});
+
+	assertNoDirectoryAtFilePath({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: args.file.path,
+	});
 
 	// Insert the file metadata into state table
 	executeSync({
@@ -236,6 +252,18 @@ export function handleFileUpdate(args: {
 		});
 		return 1; // Indicate no changes were made
 	}
+
+	ensureDirectoryAncestors({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: args.file.path,
+	});
+
+	assertNoDirectoryAtFilePath({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: args.file.path,
+	});
 
 	// Update the file metadata in state table FIRST
 	executeSync({

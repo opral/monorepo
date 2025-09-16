@@ -3,7 +3,7 @@ import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initDb } from "../database/init-db.js";
 import { createHooks, type StateCommitChange } from "../hooks/create-hooks.js";
-import { applyFileDatabaseSchema } from "../filesystem/file/schema.js";
+import { applyFilesystemSchema } from "../filesystem/schema.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";
@@ -83,8 +83,8 @@ export async function boot(
 		getAllPluginsSync: () => plugin.getAllSync(),
 	};
 
-	// Install file functions + views that depend on plugin + hooks
-	applyFileDatabaseSchema({ engine: engine });
+	// Install filesystem functions + views that depend on plugin + hooks
+	applyFilesystemSchema({ engine });
 
 	// Event bridge: forward state_commit to host
 	hooks.onStateCommit(({ changes }) => {
