@@ -20,18 +20,18 @@ describe("change_set", () => {
 		expect(viewAfterInsert).toMatchObject([
 			{
 				id: "cs0",
-				metadata: null,
+				lixcol_metadata: null,
 			},
 			{
 				id: "cs1",
-				metadata: null,
+				lixcol_metadata: null,
 			},
 		]);
 
 		await lix.db
 			.updateTable("change_set")
 			.where("id", "=", "cs0")
-			.set({ metadata: { foo: "bar" } })
+			.set({ lixcol_metadata: { foo: "bar" } })
 			.execute();
 
 		const viewAfterUpdate = await lix.db
@@ -44,11 +44,11 @@ describe("change_set", () => {
 		expect(viewAfterUpdate).toMatchObject([
 			{
 				id: "cs0",
-				metadata: { foo: "bar" },
+				lixcol_metadata: { foo: "bar" },
 			},
 			{
 				id: "cs1",
-				metadata: null,
+				lixcol_metadata: null,
 			},
 		]);
 
@@ -64,7 +64,7 @@ describe("change_set", () => {
 		expect(viewAfterDelete).toMatchObject([
 			{
 				id: "cs1",
-				metadata: null,
+				lixcol_metadata: null,
 			},
 		]);
 
@@ -80,19 +80,23 @@ describe("change_set", () => {
 			// insert
 			{
 				id: "cs0",
-				metadata: null,
 			},
 			// insert
 			{
 				id: "cs1",
-				metadata: null,
 			},
 			// update
 			{
 				id: "cs0",
-				metadata: { foo: "bar" },
 			},
 			// delete
+			null,
+		]);
+
+		expect(changes.map((change) => change.metadata)).toMatchObject([
+			null,
+			null,
+			{ foo: "bar" },
 			null,
 		]);
 	});
@@ -515,7 +519,7 @@ describe("change_set_label", () => {
 			.values({
 				change_set_id: "cs0",
 				label_id: "label0",
-				metadata: { priority: "high", assignee: "alice" },
+				lixcol_metadata: { priority: "high", assignee: "alice" },
 			})
 			.execute();
 
@@ -529,7 +533,7 @@ describe("change_set_label", () => {
 			{
 				change_set_id: "cs0",
 				label_id: "label0",
-				metadata: { priority: "high", assignee: "alice" },
+				lixcol_metadata: { priority: "high", assignee: "alice" },
 			},
 		]);
 
@@ -538,7 +542,13 @@ describe("change_set_label", () => {
 			.updateTable("change_set_label")
 			.where("change_set_id", "=", "cs0")
 			.where("label_id", "=", "label0")
-			.set({ metadata: { priority: "low", assignee: "bob", notes: "updated" } })
+			.set({
+				lixcol_metadata: {
+					priority: "low",
+					assignee: "bob",
+					notes: "updated",
+				},
+			})
 			.execute();
 
 		const viewAfterUpdate = await lix.db
@@ -551,7 +561,11 @@ describe("change_set_label", () => {
 			{
 				change_set_id: "cs0",
 				label_id: "label0",
-				metadata: { priority: "low", assignee: "bob", notes: "updated" },
+				lixcol_metadata: {
+					priority: "low",
+					assignee: "bob",
+					notes: "updated",
+				},
 			},
 		]);
 
@@ -585,15 +599,19 @@ describe("change_set_label", () => {
 			{
 				change_set_id: "cs0",
 				label_id: "label0",
-				metadata: { priority: "high", assignee: "alice" },
 			},
 			// update
 			{
 				change_set_id: "cs0",
 				label_id: "label0",
-				metadata: { priority: "low", assignee: "bob", notes: "updated" },
 			},
 			// delete
+			null,
+		]);
+
+		expect(changes.map((change) => change.metadata)).toMatchObject([
+			{ priority: "high", assignee: "alice" },
+			{ priority: "low", assignee: "bob", notes: "updated" },
 			null,
 		]);
 	});

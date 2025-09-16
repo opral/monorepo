@@ -2368,7 +2368,7 @@ test("should prevent foreign key references to inherited entities from different
 		.insertInto("conversation_all")
 		.values({
 			id: "global_thread",
-			metadata: { title: "Global Conversation" },
+			lixcol_metadata: { title: "Global Conversation" },
 			lixcol_version_id: "global",
 		})
 		.execute();

@@ -130,6 +130,7 @@ export default defineConfig({
           text: "Development & Debugging",
           collapsed: true,
           items: [
+            { text: "Metadata", link: "/guide/metadata" },
             { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
             { text: "React Utils", link: "/guide/react-utils" },
             { text: "Writer Key", link: "/guide/writer-key" },

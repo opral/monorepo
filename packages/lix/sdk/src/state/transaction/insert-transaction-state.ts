@@ -5,12 +5,20 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
 import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
 
-type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
+type NewTransactionStateRow = Omit<
+	NewStateAllRow,
+	"snapshot_content" | "metadata"
+> & {
 	snapshot_content: string | null;
+	metadata?: string | null;
 };
 
-export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
+export type TransactionStateRow = Omit<
+	StateAllRow,
+	"snapshot_content" | "metadata"
+> & {
 	snapshot_content: string | null;
+	metadata: string | null;
 };
 
 /**
@@ -90,6 +98,7 @@ export function insertTransactionState(args: {
 		snapshot_content: data.snapshot_content
 			? sql`jsonb(${data.snapshot_content})`
 			: null,
+		metadata: data.metadata ? sql`jsonb(${data.metadata})` : null,
 		schema_version: data.schema_version,
 		version_id: data.version_id,
 		created_at: _timestamp,
@@ -112,6 +121,7 @@ export function insertTransactionState(args: {
 						created_at: eb.ref("excluded.created_at"),
 						untracked: eb.ref("excluded.untracked"),
 						writer_key: eb.ref("excluded.writer_key"),
+						metadata: eb.ref("excluded.metadata"),
 					}))
 			),
 	});
@@ -123,6 +133,7 @@ export function insertTransactionState(args: {
 		file_id: data.file_id,
 		plugin_key: data.plugin_key,
 		snapshot_content: data.snapshot_content,
+		metadata: data.metadata ?? null,
 		schema_version: data.schema_version,
 		version_id: data.version_id,
 		created_at: _timestamp,

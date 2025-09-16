@@ -15,6 +15,7 @@ export function applyTransactionStateSchema(args: {
     version_id TEXT NOT NULL,
     writer_key TEXT NULL,
     snapshot_content BLOB,
+    metadata BLOB,
     created_at TEXT NOT NULL,
     untracked INTEGER NOT NULL DEFAULT 0,
     UNIQUE(entity_id, file_id, schema_key, version_id)
@@ -36,6 +37,7 @@ export type InternalTransactionStateTable = {
 	version_id: string;
 	writer_key: string | null;
 	snapshot_content: Record<string, any> | null;
+	metadata: Record<string, any> | null;
 	created_at: Generated<string>;
 	untracked: number;
 };

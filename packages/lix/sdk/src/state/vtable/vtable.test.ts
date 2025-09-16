@@ -38,6 +38,8 @@ simulationTest(
 			],
 		});
 
+		const internalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
 		await lix.db
 			.insertInto("stored_schema")
 			.values({ value: mockSchema })
@@ -881,6 +883,100 @@ simulationTest(
 			activeVersion.working_commit_id
 		);
 	}
+);
+
+simulationTest(
+	"metadata on committed state rows is preserved",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const selectStateMetadata = async () =>
+			await lix.db
+				.selectFrom("state_all")
+				.where("entity_id", "=", "meta-entity")
+				.where("schema_key", "=", "lix_key_value")
+				.select(["metadata"])
+				.executeTakeFirstOrThrow();
+
+		const selectChangeMetadata = async () =>
+			await lix.db
+				.selectFrom("change")
+				.where("entity_id", "=", "meta-entity")
+				.where("schema_key", "=", "lix_key_value")
+				.orderBy("created_at", "desc")
+				.select(["metadata"])
+				.executeTakeFirstOrThrow();
+
+		// Perform a regular insert via the public state view
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "meta-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: { key: "meta", value: "value" } as any,
+				schema_version: "1.0",
+				metadata: { foo: "bar" },
+			})
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({ foo: "bar" });
+		expect((await selectChangeMetadata()).metadata).toEqual({ foo: "bar" });
+
+		// Updating metadata via state should persist the new value
+		await lix.db
+			.updateTable("state")
+			.set({ metadata: { foo: "baz" } as any })
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({ foo: "baz" });
+		expect((await selectChangeMetadata()).metadata).toEqual({ foo: "baz" });
+
+		// Partially update metadata using SQL JSON helpers
+		await lix.db
+			.updateTable("state")
+			.set(({ eb }) => ({
+				metadata: sql<string>`json_set(${eb.ref("metadata")}, '$.bar', 'qux')`,
+			}))
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({
+			foo: "baz",
+			bar: "qux",
+		});
+		expect((await selectChangeMetadata()).metadata).toEqual({
+			foo: "baz",
+			bar: "qux",
+		});
+
+		// Clearing metadata via state should propagate null
+		await lix.db
+			.updateTable("state")
+			.set({ metadata: null })
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toBeNull();
+		expect((await selectChangeMetadata()).metadata).toBeNull();
+	},
+	{ simulations: [normalSimulation] }
 );
 simulationTest(
 	"untracked state in child overrides inherited untracked state",

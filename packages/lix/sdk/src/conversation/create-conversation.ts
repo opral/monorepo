@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixConversation, LixConversationMessage } from "./schema.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewState, StateAll } from "../entity-views/types.js";
 import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
 import { attachConversation } from "../entity/conversation/attach-conversation.js";
 import { nanoId } from "../engine/deterministic/nano-id.js";
@@ -31,17 +31,17 @@ import { nanoId } from "../engine/deterministic/nano-id.js";
 export async function createConversation(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<NewState<LixConversationMessage>, "body" | "metadata">[];
+	comments?: Pick<
+		NewState<LixConversationMessage>,
+		"body" | "lixcol_metadata"
+	>[];
 	/** defaults to global */
 	versionId?: string;
 	/** Optional entity to attach the conversation to */
 	entity?: LixEntity | LixEntityCanonical;
 }): Promise<
-	LixConversation & {
-		lixcol_version_id: string;
-		comments: (LixConversationMessage & {
-			lixcol_version_id: string;
-		})[];
+	StateAll<LixConversation> & {
+		comments: StateAll<LixConversationMessage>[];
 	}
 > {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -72,7 +72,7 @@ export async function createConversation(args: {
 					id: messageId,
 					conversation_id: conversation.id,
 					body: message.body,
-					metadata: (message as any).metadata ?? null,
+					lixcol_metadata: message.lixcol_metadata ?? undefined,
 					parent_id: index > 0 ? insertedMessages[index - 1]!.id : null,
 					lixcol_version_id: versionId,
 				})

@@ -241,7 +241,7 @@ test("entity can have multiple conversations", async () => {
 		.where("entity_conversation.entity_id", "=", keyValue.key)
 		.where("entity_conversation.schema_key", "=", "lix_key_value")
 		.where("entity_conversation.file_id", "=", "lix")
-		.select(["conversation.id", "conversation.metadata"])
+		.select(["conversation.id"])
 		.execute();
 
 	expect(rows).toHaveLength(3);

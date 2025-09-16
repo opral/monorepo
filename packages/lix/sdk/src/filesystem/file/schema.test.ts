@@ -851,6 +851,78 @@ test("file metadata updates create new change_id", async () => {
 	expect(finalFileChangeRecord?.schema_key).toBe("lix_file_descriptor");
 });
 
+test("file view keeps lixcol_metadata in sync with metadata lifecycle", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const fileId = "lixcol-metadata-lifecycle";
+	const initialMetadata = { owner: "initial" };
+
+	const fetchFile = async () =>
+		await lix.db
+			.selectFrom("file")
+			.select(["id", "metadata", "lixcol_metadata", "lixcol_change_id"])
+			.where("id", "=", fileId)
+			.executeTakeFirstOrThrow();
+
+	const fetchDescriptorChange = async () =>
+		await lix.db
+			.selectFrom("change")
+			.select(["id", "metadata"])
+			.where("entity_id", "=", fileId)
+			.where("schema_key", "=", "lix_file_descriptor")
+			.orderBy("created_at", "desc")
+			.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/lixcol-metadata.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "initial" })),
+			metadata: initialMetadata,
+		})
+		.execute();
+
+	const createdFile = await fetchFile();
+	expect(createdFile.metadata).toEqual(initialMetadata);
+	expect(createdFile.lixcol_metadata).toEqual(initialMetadata);
+
+	const createdChange = await fetchDescriptorChange();
+	expect(createdChange.metadata).toEqual(initialMetadata);
+
+	const updatedMetadata = { owner: "updated", version: 2 };
+
+	await lix.db
+		.updateTable("file")
+		.set({ metadata: updatedMetadata })
+		.where("id", "=", fileId)
+		.execute();
+
+	const updatedFile = await fetchFile();
+	expect(updatedFile.metadata).toEqual(updatedMetadata);
+	expect(updatedFile.lixcol_metadata).toEqual(updatedMetadata);
+
+	const updatedChange = await fetchDescriptorChange();
+	expect(updatedChange.id).not.toBe(createdChange.id);
+	expect(updatedChange.metadata).toEqual(updatedMetadata);
+
+	await lix.db
+		.updateTable("file")
+		.set({ metadata: null })
+		.where("id", "=", fileId)
+		.execute();
+
+	const clearedFile = await fetchFile();
+	expect(clearedFile.metadata).toBeNull();
+	expect(clearedFile.lixcol_metadata).toBeNull();
+
+	const clearedChange = await fetchDescriptorChange();
+	expect(clearedChange.id).not.toBe(updatedChange.id);
+	expect(clearedChange.metadata).toBeNull();
+});
+
 simulationTest(
 	"direct state updates invalidate file data cache",
 	async ({ openSimulatedLix }) => {

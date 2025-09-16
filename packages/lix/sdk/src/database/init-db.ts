@@ -4,7 +4,7 @@ import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
-import { isJsonType } from "../schema-definition/json-type.js";
+import { buildJsonColumnConfig } from "../lix/json-column-config.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -57,64 +57,7 @@ import { getTimestampSync } from "../engine/deterministic/timestamp.js";
  * }
  * ```
  */
-const ViewsWithJsonColumns = (() => {
-	const result: Record<
-		string,
-		Record<
-			string,
-			{
-				type:
-					| "object"
-					| Array<
-							"string" | "number" | "boolean" | "object" | "array" | "null"
-					  >;
-			}
-		>
-	> = {};
-
-	// Hardcoded object-only columns
-	const hardcodedViews = {
-		state: { snapshot_content: { type: "object" as const } },
-		state_all: { snapshot_content: { type: "object" as const } },
-		state_history: { snapshot_content: { type: "object" as const } },
-		change: { snapshot_content: { type: "object" as const } },
-	};
-
-	// Add the hardcoded columns first
-	Object.assign(result, hardcodedViews);
-
-	// Process schema-based columns
-	for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
-		// Check if schema is an object and has properties
-		if (typeof schema === "boolean" || !schema.properties) continue;
-
-		const jsonColumns: Record<
-			string,
-			{
-				type: Array<
-					"string" | "number" | "boolean" | "object" | "array" | "null"
-				>;
-			}
-		> = {};
-
-		for (const [key, def] of Object.entries(schema.properties)) {
-			if (isJsonType(def)) {
-				// All schema-based JSON columns accept any JSON value
-				jsonColumns[key] = {
-					type: ["string", "number", "boolean", "object", "array", "null"],
-				};
-			}
-		}
-
-		if (Object.keys(jsonColumns).length > 0) {
-			result[viewName] = jsonColumns;
-			// Also add the _all variant view with the same JSON columns
-			result[viewName + "_all"] = jsonColumns;
-		}
-	}
-
-	return result;
-})();
+const ViewsWithJsonColumns = buildJsonColumnConfig({ includeChangeView: true });
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;

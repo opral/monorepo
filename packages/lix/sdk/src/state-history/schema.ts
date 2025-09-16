@@ -23,6 +23,9 @@ export interface StateHistoryTable {
 	/** JSON content of the entity at this point in history */
 	snapshot_content: Record<string, any>;
 
+	/** Optional change metadata associated with this historical state. */
+	metadata: Record<string, any> | null;
+
 	/** Version of the schema used for this entity */
 	schema_version: string;
 
@@ -119,7 +122,11 @@ WITH
 			   CASE 
 			     WHEN ic.snapshot_id = 'no-content' THEN NULL
 			     ELSE json(s.content)
-			   END AS snapshot_content 
+			   END AS snapshot_content,
+			   CASE
+			     WHEN ic.metadata IS NULL THEN NULL
+			     ELSE json(ic.metadata)
+			   END AS metadata
 		FROM internal_change ic
 		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
 	),
@@ -132,6 +139,7 @@ WITH
 			chg.file_id,
 			chg.plugin_key,
 			chg.snapshot_content,
+			chg.metadata,
 			chg.schema_version,
 			cse.change_id AS target_change_id,
 			c.id AS origin_commit_id,
@@ -204,6 +212,7 @@ WITH
 			target_change.file_id,
 			target_change.plugin_key, 
 			target_change.snapshot_content,
+			target_change.metadata,
 			target_change.schema_version,
 			r.target_change_id,
 			r.origin_commit_id,
@@ -230,6 +239,7 @@ SELECT
 	es.file_id,
 	es.plugin_key,
 	es.snapshot_content,
+	es.metadata,
 	es.schema_version,
 	es.target_change_id as change_id,
 	es.origin_commit_id as commit_id,

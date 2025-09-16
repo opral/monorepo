@@ -29,6 +29,8 @@ export type InternalStateVTable = {
 	change_id: Generated<string>;
 	untracked: number; // SQLite uses INTEGER for boolean
 	commit_id: Generated<string>;
+	metadata: string | null;
+	writer_key: string | null;
 };
 
 // Virtual table schema definition
@@ -47,8 +49,28 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 	change_id TEXT,
 	untracked INTEGER,
 	commit_id TEXT,
+	metadata TEXT,
 	writer_key TEXT
 ) WITHOUT ROWID;`;
+
+const STATE_VTAB_COLUMN_NAMES = [
+	"_pk",
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"version_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"metadata",
+	"writer_key",
+];
 
 export function applyStateVTable(
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">
@@ -198,23 +220,7 @@ export function applyStateVTable(
 					let argIndex = 0;
 
 					// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
-					const columnMap = [
-						"_pk", // 0 (HIDDEN column)
-						"entity_id", // 1
-						"schema_key", // 2
-						"file_id", // 3
-						"version_id", // 4
-						"plugin_key", // 5
-						"snapshot_content", // 6
-						"schema_version", // 7
-						"created_at", // 8
-						"updated_at", // 9
-						"inherited_from_version_id", // 10
-						"change_id", // 11
-						"untracked", // 12
-						"commit_id", // 13
-						"writer_key", // 14 (read-only virtual)
-					];
+					const columnMap = STATE_VTAB_COLUMN_NAMES;
 
 					// Process constraints
 					// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
@@ -596,20 +602,30 @@ export function applyStateVTable(
 						throw new Error("Invalid xUpdate operation");
 					}
 
-					// Extract column values (args[2] through args[N+1])
-					// Column order: _pk, entity_id, schema_key, file_id, version_id, plugin_key,
-					//               snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
-					const entity_id = args[3];
-					const schema_key = args[4];
-					const file_id = args[5];
-					const version_id = args[6];
-					const plugin_key = args[7];
-					// this is an update where we have a snapshot_content
-					// the snapshot_content is a JSON string as returned by SQlite
-					const snapshot_content = args[8] as string;
-					const schema_version = args[9];
-					// Skip created_at (args[10]), updated_at (args[11]), inherited_from_version_id (args[12]), change_id (args[13])
-					const untracked = args[14] ?? false;
+					const baseIndex = 2; // skip old and new primary key slots
+					const columnOffset = (name: string): number => {
+						const idx = STATE_VTAB_COLUMN_NAMES.indexOf(name);
+						if (idx === -1)
+							throw new Error(
+								`Unknown column '${name}' in internal_state_vtable`
+							);
+						return idx;
+					};
+					const valueFor = (name: string) =>
+						args[baseIndex + columnOffset(name)];
+
+					const entity_id = valueFor("entity_id");
+					const schema_key = valueFor("schema_key");
+					const file_id = valueFor("file_id");
+					const version_id = valueFor("version_id");
+					const plugin_key = valueFor("plugin_key");
+					const snapshot_content = valueFor("snapshot_content") as string;
+					const schema_version = valueFor("schema_version");
+					const untracked = valueFor("untracked") ?? false;
+					const metadataValue =
+						baseIndex + columnOffset("metadata") < args.length
+							? valueFor("metadata")
+							: null;
 
 					// assert required fields
 					if (!entity_id || !schema_key || !file_id || !plugin_key) {
@@ -642,6 +658,13 @@ export function applyStateVTable(
 						untracked: Boolean(untracked),
 					});
 
+					const metadataJson =
+						metadataValue === null || metadataValue === undefined
+							? null
+							: typeof metadataValue === "string"
+								? metadataValue
+								: JSON.stringify(metadataValue);
+
 					// Use insertTransactionState which handles both tracked and untracked entities
 					insertTransactionState({
 						engine: engine,
@@ -656,6 +679,7 @@ export function applyStateVTable(
 								schema_version: String(schema_version),
 								version_id: String(version_id),
 								untracked: Boolean(untracked),
+								metadata: metadataJson,
 							},
 						],
 					});
@@ -1024,22 +1048,5 @@ function getStoredSchema(
 }
 
 function getColumnName(columnIndex: number): string {
-	const columns = [
-		"_pk",
-		"entity_id",
-		"schema_key",
-		"file_id",
-		"version_id",
-		"plugin_key",
-		"snapshot_content",
-		"schema_version",
-		"created_at",
-		"updated_at",
-		"inherited_from_version_id",
-		"change_id",
-		"untracked",
-		"commit_id",
-		"writer_key",
-	];
-	return columns[columnIndex] || "unknown";
+	return STATE_VTAB_COLUMN_NAMES[columnIndex] || "unknown";
 }

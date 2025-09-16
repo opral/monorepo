@@ -54,6 +54,7 @@ export function applyResolvedStateView(args: {
               id as change_id, 
               untracked as untracked,
               'pending' as commit_id,
+              json(metadata) as metadata,
               (
                 SELECT w.writer_key FROM internal_state_writer w
                 WHERE w.file_id = internal_transaction_state.file_id
@@ -83,6 +84,7 @@ export function applyResolvedStateView(args: {
               'untracked' as change_id, 
               1 as untracked,
               'untracked' as commit_id,
+              NULL as metadata,
               (
                 SELECT w.writer_key FROM internal_state_writer w
                 WHERE w.file_id = internal_state_all_untracked.file_id
@@ -122,6 +124,11 @@ export function applyResolvedStateView(args: {
               change_id, 
               0 as untracked,
               commit_id,
+              (
+                SELECT json(metadata)
+                FROM change
+                WHERE change.id = internal_state_cache.change_id
+              ) AS metadata,
               (
                 SELECT w.writer_key FROM internal_state_writer w
                 WHERE w.file_id = internal_state_cache.file_id
@@ -167,6 +174,11 @@ export function applyResolvedStateView(args: {
 				isc.change_id, 
 				0 as untracked,
 				isc.commit_id,
+				(
+				  SELECT json(metadata)
+				  FROM change
+				  WHERE change.id = isc.change_id
+				) AS metadata,
 				COALESCE(
 				  (SELECT w.writer_key FROM internal_state_writer w
 				   WHERE w.file_id = isc.file_id AND w.entity_id = isc.entity_id AND w.schema_key = isc.schema_key AND w.version_id = vi.version_id LIMIT 1),
@@ -244,6 +256,7 @@ export function applyResolvedStateView(args: {
 				'untracked' as change_id, 
 				1 as untracked,
 				'untracked' as commit_id,
+				NULL as metadata,
 				COALESCE(
 				  (SELECT w.writer_key FROM internal_state_writer w
 				   WHERE w.file_id = unt.file_id AND w.entity_id = unt.entity_id AND w.schema_key = unt.schema_key AND w.version_id = vi.version_id LIMIT 1),
@@ -321,6 +334,7 @@ export function applyResolvedStateView(args: {
 				txn.id as change_id, 
 				txn.untracked as untracked,
 				'pending' as commit_id,
+				json(txn.metadata) as metadata,
 				COALESCE(
 				  (SELECT w.writer_key FROM internal_state_writer w
 				   WHERE w.file_id = txn.file_id AND w.entity_id = txn.entity_id AND w.schema_key = txn.schema_key AND w.version_id = vi.version_id LIMIT 1),

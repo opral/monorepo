@@ -55,16 +55,28 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			const query = lix.db
 				.selectFrom("conversation_message")
 				.where("conversation_id", "=", String(conversationId))
-				.select(["id", "body", "metadata", "lixcol_created_at"])
+				.select(["id", "body", "lixcol_metadata", "lixcol_created_at"])
 				.orderBy("lixcol_created_at", "asc")
 				.orderBy("id", "asc");
 			sub = lix.observe(query).subscribe({
 				next: (rows) => {
-					const hist: AgentMessage[] = rows.map((r: any) => ({
-						id: String(r.id),
-						role: (r.metadata?.lix_agent_role as any) ?? "assistant",
-						content: toPlainText(r.body),
-					}));
+					type ConversationRow = (typeof rows)[number] & {
+						lixcol_metadata?: {
+							lix_agent_role?: "user" | "assistant" | string;
+						} | null;
+					};
+					const hist: AgentMessage[] = (rows as ConversationRow[]).map((r) => {
+						const role =
+							(r.lixcol_metadata?.lix_agent_role as
+								| "user"
+								| "assistant"
+								| undefined) ?? "assistant";
+						return {
+							id: String(r.id),
+							role,
+							content: toPlainText(r.body),
+						};
+					});
 					setMessages(hist);
 				},
 				error: (e) => setError(e?.message || String(e)),

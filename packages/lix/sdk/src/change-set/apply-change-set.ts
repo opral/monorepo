@@ -58,6 +58,7 @@ export async function applyChangeSet(args: {
 			snapshot_content: change.snapshot_content
 				? JSON.stringify(change.snapshot_content)
 				: null,
+			metadata: change.metadata ? JSON.stringify(change.metadata) : null,
 		}));
 
 		updateStateCache({

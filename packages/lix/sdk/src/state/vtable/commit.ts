@@ -54,6 +54,7 @@ export function commit(args: {
 				"version_id",
 				"writer_key",
 				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+				sql<string | null>`json(metadata)`.as("metadata"),
 				"created_at",
 				sql`untracked`.as("untracked"),
 			]),
@@ -86,6 +87,7 @@ export function commit(args: {
 			schema_version: change.schema_version,
 			created_at: change.created_at,
 			lixcol_version_id: change.version_id,
+			metadata: change.metadata ?? null,
 		}));
 		updateUntrackedState({ engine, changes: untrackedBatch });
 	}
@@ -494,6 +496,7 @@ export function commit(args: {
 				file_id: c.file_id,
 				plugin_key: c.plugin_key,
 				snapshot_content: c.snapshot_content,
+				metadata: c.metadata ?? null,
 				created_at: c.created_at,
 				version_id: vid,
 				writer_key: c.writer_key ?? null,
@@ -662,6 +665,7 @@ export function commit(args: {
 			snapshot_content: ms.snapshot_content
 				? JSON.parse(ms.snapshot_content)
 				: null,
+			metadata: ms.metadata ? JSON.parse(ms.metadata) : null,
 			version_id: ms.lixcol_version_id,
 			commit_id: ms.lixcol_commit_id,
 			untracked: 0,

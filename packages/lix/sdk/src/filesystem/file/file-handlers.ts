@@ -81,6 +81,7 @@ export function handleFileInsert(args: {
 			},
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
+			metadata: args.file.metadata ?? null,
 			untracked: args.untracked || false,
 		}),
 	});
@@ -277,6 +278,7 @@ export function handleFileUpdate(args: {
 					metadata: args.file.metadata || null,
 					hidden: args.file.hidden ?? false,
 				},
+				metadata: args.file.metadata ?? null,
 				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)

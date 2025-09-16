@@ -15,7 +15,7 @@ function stripWriterKey<T extends Record<string, any> | null | undefined>(
 ): T {
 	if (!row) return row;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { writer_key, ...rest } = row as any;
+	const { writer_key, metadata, ...rest } = row as any;
 	return rest as T;
 }
 
