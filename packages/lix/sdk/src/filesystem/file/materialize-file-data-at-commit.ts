@@ -6,22 +6,7 @@ import {
 	readFileDescriptorAtCommit,
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
-
-function globSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	glob: string;
-	path: string;
-}): boolean {
-	const columnNames: string[] = [];
-	const result = args.engine.sqlite.exec({
-		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.glob],
-		returnValue: "resultRows",
-		columnNames,
-	});
-
-	return (result[0]?.[0] as any) === 1;
-}
+import { matchesGlob } from "../util/glob.js";
 
 export function materializeFileDataAtCommit(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
@@ -70,10 +55,10 @@ export function materializeFileDataAtCommit(args: {
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
-			!globSync({
+			!matchesGlob({
 				engine: args.engine,
 				path: descriptor.path,
-				glob: plugin.detectChangesGlob,
+				pattern: plugin.detectChangesGlob,
 			})
 		) {
 			continue;

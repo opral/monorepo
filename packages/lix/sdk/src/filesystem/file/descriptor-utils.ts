@@ -132,7 +132,7 @@ export function composeFileNameFromFields(args: {
 	return composeFileName(args.name, args.extension ?? null);
 }
 
-function readDirectoryHistorySnapshot(args: {
+function readDirectoryHistoryLeafAtDepth(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;
 	directoryId: string;
 	rootCommitId: string;
@@ -141,12 +141,22 @@ function readDirectoryHistorySnapshot(args: {
 	const rows = executeSync({
 		engine: args.engine,
 		query: args.engine.db
-			.selectFrom("state_history")
-			.where("schema_key", "=", "lix_directory_descriptor")
-			.where("entity_id", "=", args.directoryId)
-			.where("root_commit_id", "=", args.rootCommitId)
-			.where("depth", "=", args.depth)
-			.select(["snapshot_content"]),
+			.selectFrom("state_history as sh1")
+			.select(["sh1.snapshot_content"])
+			.where("sh1.schema_key", "=", "lix_directory_descriptor")
+			.where("sh1.entity_id", "=", args.directoryId)
+			.where("sh1.root_commit_id", "=", args.rootCommitId)
+			.where("sh1.depth", "=", (eb) =>
+				eb
+					.selectFrom("state_history as sh2")
+					.select("sh2.depth")
+					.where("sh2.schema_key", "=", "lix_directory_descriptor")
+					.where("sh2.entity_id", "=", args.directoryId)
+					.where("sh2.root_commit_id", "=", args.rootCommitId)
+					.where("sh2.depth", ">=", args.depth)
+					.orderBy("sh2.depth")
+					.limit(1)
+			),
 	});
 	const raw = rows[0]?.snapshot_content as
 		| { id: string; parent_id: string | null; name: string }
@@ -184,7 +194,7 @@ export function composeDirectoryPathAtCommit(args: {
 			);
 		}
 		seen.add(current);
-		const snapshot = readDirectoryHistorySnapshot({
+		const snapshot = readDirectoryHistoryLeafAtDepth({
 			engine: args.engine,
 			directoryId: current,
 			rootCommitId: args.rootCommitId,

@@ -568,6 +568,167 @@ test("file_history provides access to historical file data", async () => {
 	expect(historicalFileAtUpdate.lixcol_commit_id).toBe(updateCheckpoint.id);
 });
 
+test("file_history reflects directory renames across commits", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const initialData = new TextEncoder().encode(
+		JSON.stringify({ content: "hello" })
+	);
+
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/docs/readme.json", data: initialData })
+		.execute();
+
+	const fileDescriptor = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/docs/readme.json")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+	const fileId = fileDescriptor.id;
+
+	const firstCheckpoint = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("directory")
+		.where("name", "=", "docs")
+		.set({ name: "guides" })
+		.execute();
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({ metadata: { stage: "after-rename" } })
+		.execute();
+
+	const secondCheckpoint = await createCheckpoint({ lix });
+
+	const historyBeforeRename = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", firstCheckpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path", "id"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterRename = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", secondCheckpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path", "id"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterRenameDepthOne = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", secondCheckpoint.id)
+		.where("lixcol_depth", "=", 1)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	expect(historyBeforeRename.path).toBe("/docs/readme.json");
+	expect(historyAfterRename.path).toBe("/guides/readme.json");
+	expect(historyAfterRenameDepthOne.path).toBe("/docs/readme.json");
+});
+
+test("file_history tracks directory moves across commits", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const payload = new TextEncoder().encode(JSON.stringify({ note: "move" }));
+
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/docs/guides/intro.json", data: payload })
+		.execute();
+
+	const insertedFile = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/docs/guides/intro.json")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+	const fileId = insertedFile.id;
+
+	await lix.db
+		.insertInto("directory")
+		.values({ name: "articles", parent_id: null })
+		.execute();
+
+	const docsDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "docs")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const guidesDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "guides")
+		.where("parent_id", "=", docsDirectory.id)
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const articlesDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "articles")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const checkpointBeforeMove = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("directory")
+		.where("id", "=", guidesDirectory.id)
+		.set({ parent_id: articlesDirectory.id })
+		.execute();
+
+	// Touch the target directory so directory history captures it in the commit
+	await lix.db
+		.updateTable("directory")
+		.where("id", "=", articlesDirectory.id)
+		.set({ name: "articles" })
+		.execute();
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({ metadata: { stage: "after-move" } })
+		.execute();
+
+	const checkpointAfterMove = await createCheckpoint({ lix });
+
+	const historyBeforeMove = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointBeforeMove.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterMove = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterMoveDepthOne = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+		.where("lixcol_depth", "=", 1)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	expect(historyBeforeMove.path).toBe("/docs/guides/intro.json");
+	expect(historyAfterMove.path).toBe("/articles/guides/intro.json");
+	expect(historyAfterMoveDepthOne.path).toBe("/docs/guides/intro.json");
+});
+
 // its super annoying to work with metadata otherwise
 test("file metadata is Record<string, any>", async () => {
 	const mockFile: LixFile = {

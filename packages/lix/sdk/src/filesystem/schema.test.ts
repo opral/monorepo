@@ -148,6 +148,33 @@ simulationTest(
 );
 
 simulationTest(
+	"duplicate root directory insertions are rejected",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({ name: "docs", parent_id: null })
+				.execute()
+		).rejects.toThrowError();
+	}
+);
+
+simulationTest(
 	"directory view exposes composed path for directories",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({

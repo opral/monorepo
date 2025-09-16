@@ -11,6 +11,7 @@ import {
 	ensureDirectoryAncestors,
 	assertNoDirectoryAtFilePath,
 } from "../directory/ensure-directories.js";
+import { matchesGlob } from "../util/glob.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 
 type FileMutationInput = {
@@ -20,22 +21,6 @@ type FileMutationInput = {
 	metadata: unknown;
 	hidden?: boolean;
 };
-
-function globSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	glob: string;
-	path: string;
-}): boolean {
-	const columnNames: string[] = [];
-	const result = args.engine.sqlite.exec({
-		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.glob],
-		returnValue: "resultRows",
-		columnNames,
-	});
-
-	return (result[0]?.[0] as any) === 1;
-}
 
 export function handleFileInsert(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
@@ -126,10 +111,10 @@ export function handleFileInsert(args: {
 		// Check if plugin glob matches file path
 		if (
 			!plugin.detectChangesGlob ||
-			!globSync({
+			!matchesGlob({
 				engine: args.engine,
 				path: args.file.path,
-				glob: plugin.detectChangesGlob,
+				pattern: plugin.detectChangesGlob,
 			})
 		) {
 			continue;
@@ -358,10 +343,10 @@ export function handleFileUpdate(args: {
 			// Check if plugin glob matches file path
 			if (
 				!plugin.detectChangesGlob ||
-				!globSync({
+				!matchesGlob({
 					engine: args.engine,
 					path: args.file.path,
-					glob: plugin.detectChangesGlob,
+					pattern: plugin.detectChangesGlob,
 				})
 			) {
 				continue;
