@@ -2,6 +2,7 @@ import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
+import { ensureCompleteDescriptor } from "./descriptor-utils.js";
 
 function globSync(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -21,11 +22,17 @@ function globSync(args: {
 
 export function materializeFileDataAtCommit(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
-	file: Omit<LixFile, "data">;
+	file: Pick<LixFile, "id" | "path"> &
+		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	rootCommitId: string;
 	depth: number;
 }): Uint8Array {
 	const plugins = args.engine.getAllPluginsSync();
+	const descriptor = ensureCompleteDescriptor({
+		engine: args.engine,
+		versionId: "global",
+		file: args.file,
+	});
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
@@ -33,7 +40,7 @@ export function materializeFileDataAtCommit(args: {
 			!plugin.detectChangesGlob ||
 			!globSync({
 				engine: args.engine,
-				path: args.file.path,
+				path: descriptor.path,
 				glob: plugin.detectChangesGlob,
 			})
 		) {
@@ -50,7 +57,7 @@ export function materializeFileDataAtCommit(args: {
 			query: selectFileChanges({
 				engine: args.engine,
 				pluginKey: plugin.key,
-				fileId: args.file.id,
+				fileId: descriptor.id,
 				rootCommitId: args.rootCommitId,
 				depth: args.depth,
 			}),
@@ -66,7 +73,7 @@ export function materializeFileDataAtCommit(args: {
 		}));
 
 		const file = plugin.applyChanges({
-			file: args.file,
+			file: descriptor,
 			changes: formattedChanges,
 		});
 
@@ -79,7 +86,7 @@ export function materializeFileDataAtCommit(args: {
 		query: selectFileChanges({
 			engine: args.engine,
 			pluginKey: lixUnknownFileFallbackPlugin.key,
-			fileId: args.file.id,
+			fileId: descriptor.id,
 			rootCommitId: args.rootCommitId,
 			depth: args.depth,
 		}),
@@ -101,7 +108,7 @@ export function materializeFileDataAtCommit(args: {
 	}
 
 	const file = lixUnknownFileFallbackPlugin.applyChanges!({
-		file: args.file,
+		file: descriptor,
 		changes: formattedChanges,
 	});
 

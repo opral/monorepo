@@ -25,6 +25,7 @@ describe("file insert", () => {
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some content"),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});
@@ -63,6 +64,7 @@ describe("file update", () => {
 				data: new TextEncoder().encode("some data"),
 				lixcol_version_id: version.id,
 				metadata: null,
+				hidden: false,
 			})
 			.execute();
 
@@ -74,6 +76,7 @@ describe("file update", () => {
 				path: "/test.unknown",
 				data: new TextEncoder().encode("updated data"),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});
@@ -112,6 +115,7 @@ describe("file update", () => {
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(initialJsonData)),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});

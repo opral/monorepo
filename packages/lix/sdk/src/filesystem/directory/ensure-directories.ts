@@ -21,15 +21,73 @@ export function readDirectoryByPath(args: {
 	versionId: string;
 	path: string;
 }): { id: string; parent_id: string | null; path: string } | undefined {
+	if (args.path === "/") {
+		return undefined;
+	}
+
+	const segments = args.path.slice(1, -1).split("/");
+	let parentId: string | null = null;
+	let lastRow: { id: string; parent_id: string | null } | undefined;
+	for (const segment of segments) {
+		const result = args.engine.sqlite.exec({
+			sql: `
+				SELECT
+					json_extract(snapshot_content, '$.id') AS id,
+					json_extract(snapshot_content, '$.parent_id') AS parent_id
+				FROM state_all
+				WHERE schema_key = 'lix_directory_descriptor'
+					AND version_id = ?
+					AND json_extract(snapshot_content, '$.name') = ?
+					AND ${parentId === null ? "json_extract(snapshot_content, '$.parent_id') IS NULL" : "json_extract(snapshot_content, '$.parent_id') = ?"}
+				LIMIT 1;
+			`,
+			bind:
+				parentId === null
+					? [args.versionId, segment]
+					: [args.versionId, segment, parentId],
+			returnValue: "resultRows",
+		}) as Array<Array<string>>;
+		const row = result[0];
+		if (!row) {
+			return undefined;
+		}
+		lastRow = {
+			id: row[0] as string,
+			parent_id: (row[1] as string | null) ?? null,
+		};
+		parentId = lastRow.id;
+	}
+
+	if (!lastRow) {
+		return undefined;
+	}
+
+	return { id: lastRow.id, parent_id: lastRow.parent_id, path: args.path };
+}
+
+function readDirectoryDescriptorById(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	versionId: string;
+	directoryId: string;
+}): { id: string; parent_id: string | null; name: string } | undefined {
 	const rows = executeSync({
 		engine: args.engine,
 		query: args.engine.db
-			.selectFrom("directory_all")
-			.where("path", "=", args.path)
-			.where("lixcol_version_id", "=", args.versionId)
-			.select(["id", "parent_id", "path"]),
+			.selectFrom("state_all")
+			.where("schema_key", "=", "lix_directory_descriptor")
+			.where("version_id", "=", args.versionId)
+			.where("entity_id", "=", args.directoryId)
+			.select(["snapshot_content"]),
 	});
-	return rows[0] as any;
+	const raw = rows[0]?.snapshot_content as
+		| { id: string; parent_id: string | null; name: string }
+		| string
+		| undefined;
+	if (!raw) {
+		return undefined;
+	}
+	const snapshot = typeof raw === "string" ? JSON.parse(raw) : raw;
+	return snapshot as { id: string; parent_id: string | null; name: string };
 }
 
 export function readDirectoryPathById(args: {
@@ -37,18 +95,14 @@ export function readDirectoryPathById(args: {
 	versionId: string;
 	directoryId: string;
 }): string | undefined {
-	const rows = executeSync({
+	return composeDirectoryPath({
 		engine: args.engine,
-		query: args.engine.db
-			.selectFrom("directory_all")
-			.where("id", "=", args.directoryId)
-			.where("lixcol_version_id", "=", args.versionId)
-			.select(["path"]),
+		versionId: args.versionId,
+		directoryId: args.directoryId,
 	});
-	return rows[0]?.path as string | undefined;
 }
 
-function assertNoFileAtPath(args: {
+export function assertNoFileAtPath(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;
 	versionId: string;
 	filePath: string;
@@ -100,26 +154,23 @@ export function computeDirectoryPath(args: {
 		throw new Error("Directory name must be provided");
 	}
 
-	let basePath: string;
-	if (!args.parentId) {
-		basePath = "/";
-	} else {
-		const parentPath = readDirectoryPathById({
-			engine: args.engine,
-			versionId: args.versionId,
-			directoryId: args.parentId,
-		});
-		if (!parentPath) {
-			throw new Error(
-				`Parent directory does not exist for id ${args.parentId}`
-			);
-		}
-		basePath = parentPath;
+	const parentPath = args.parentId
+		? composeDirectoryPath({
+				engine: args.engine,
+				versionId: args.versionId,
+				directoryId: args.parentId,
+		  })
+		: "/";
+
+	if (!parentPath) {
+		throw new Error(`Parent directory does not exist for id ${args.parentId}`);
 	}
 
-	const candidatePath = `${basePath}${name}/`;
+	const candidatePath = `${parentPath}${name}/`;
 	if (!isValidDirectoryPath(candidatePath)) {
-		throw new Error(`Invalid directory path ${candidatePath}`);
+		throw new Error(
+			`Invalid directory path ${candidatePath} (parent: ${parentPath}, name: ${name})`
+		);
 	}
 
 	assertNoFileAtPath({
@@ -166,8 +217,8 @@ export function ensureDirectoryAncestors(args: {
 
 		const name = dirPath.slice(1, -1).split("/").pop() ?? "";
 		const result = args.engine.sqlite.exec({
-			sql: `SELECT handle_directory_upsert(NULL, ?, ?, NULL, 0, ?);`,
-			bind: [parentId, name, versionId],
+			sql: `SELECT handle_directory_upsert(NULL, ?, ?, ?, 0, ?);`,
+			bind: [parentId, name, dirPath, versionId],
 			returnValue: "resultRows",
 		}) as Array<Array<string>>;
 		const insertedId = result[0]?.[0] as string | undefined;
@@ -176,4 +227,39 @@ export function ensureDirectoryAncestors(args: {
 		}
 		parentId = insertedId;
 	}
+}
+
+export function composeDirectoryPath(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	versionId: string;
+	directoryId: string | null;
+}): string | undefined {
+	if (args.directoryId === null) {
+		return "/";
+	}
+
+	const segments: string[] = [];
+	let currentId: string | null = args.directoryId;
+	let safety = 0;
+	while (currentId) {
+		if (safety++ > 1024) {
+			throw new Error("Directory hierarchy appears to be cyclic");
+		}
+		const descriptor = readDirectoryDescriptorById({
+			engine: args.engine,
+			versionId: args.versionId,
+			directoryId: currentId,
+		});
+		if (!descriptor) {
+			return undefined;
+		}
+		segments.push(descriptor.name);
+		currentId = descriptor.parent_id ?? null;
+	}
+
+	if (segments.length === 0) {
+		return "/";
+	}
+
+	return `/${segments.reverse().join("/")}/`;
 }

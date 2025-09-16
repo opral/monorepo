@@ -11,6 +11,15 @@ import {
 	ensureDirectoryAncestors,
 	assertNoDirectoryAtFilePath,
 } from "../directory/ensure-directories.js";
+import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
+
+type FileMutationInput = {
+	id: string;
+	path: string;
+	data: Uint8Array;
+	metadata: unknown;
+	hidden?: boolean;
+};
 
 function globSync(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -30,7 +39,7 @@ function globSync(args: {
 
 export function handleFileInsert(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
-	file: LixFile;
+	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
@@ -65,6 +74,25 @@ export function handleFileInsert(args: {
 		filePath: args.file.path,
 	});
 
+	const descriptorFields = deriveDescriptorFieldsFromPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		path: args.file.path,
+		metadata: args.file.metadata,
+		hidden: args.file.hidden ?? false,
+	});
+
+	const pluginFile: LixFile = {
+		id: args.file.id,
+		path: args.file.path,
+		directory_id: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		metadata: descriptorFields.metadata ?? null,
+		hidden: descriptorFields.hidden,
+		data: args.file.data,
+	};
+
 	// Insert the file metadata into state table
 	executeSync({
 		engine: args.engine,
@@ -75,13 +103,16 @@ export function handleFileInsert(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
 				id: args.file.id,
-				path: args.file.path,
-				metadata: args.file.metadata || null,
-				hidden: args.file.hidden ?? false,
+				directory_id: descriptorFields.directoryId,
+				name: descriptorFields.name,
+				extension: descriptorFields.extension ?? null,
+				path: descriptorFields.path,
+				metadata: descriptorFields.metadata ?? null,
+				hidden: descriptorFields.hidden,
 			},
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
-			metadata: args.file.metadata ?? null,
+			metadata: descriptorFields.metadata ?? null,
 			untracked: args.untracked || false,
 		}),
 	});
@@ -120,7 +151,7 @@ export function handleFileInsert(args: {
 		// Detect changes with the plugin
 
 		const detectedChanges = plugin.detectChanges({
-			after: args.file,
+			after: pluginFile,
 			querySync,
 		});
 
@@ -169,7 +200,7 @@ export function handleFileInsert(args: {
 		// Use fallback plugin to handle the file
 		if (lixUnknownFileFallbackPlugin.detectChanges) {
 			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
-				after: args.file,
+				after: pluginFile,
 				querySync,
 			});
 
@@ -231,7 +262,7 @@ export function handleFileInsert(args: {
 
 export function handleFileUpdate(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
-	file: LixFile;
+	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
@@ -266,19 +297,41 @@ export function handleFileUpdate(args: {
 		filePath: args.file.path,
 	});
 
+	const descriptorFields = deriveDescriptorFieldsFromPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		path: args.file.path,
+		metadata: args.file.metadata,
+		hidden: args.file.hidden ?? false,
+	});
+
+	const pluginFile: LixFile = {
+		id: args.file.id,
+		path: args.file.path,
+		directory_id: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		metadata: descriptorFields.metadata ?? null,
+		hidden: descriptorFields.hidden,
+		data: args.file.data,
+	};
+
 	// Update the file metadata in state table FIRST
 	executeSync({
 		engine: args.engine,
 		query: args.engine.db
 			.updateTable("state_all")
 			.set({
-				snapshot_content: {
-					id: args.file.id,
-					path: args.file.path,
-					metadata: args.file.metadata || null,
-					hidden: args.file.hidden ?? false,
-				},
-				metadata: args.file.metadata ?? null,
+			snapshot_content: {
+				id: args.file.id,
+				directory_id: descriptorFields.directoryId,
+				name: descriptorFields.name,
+				extension: descriptorFields.extension ?? null,
+				path: descriptorFields.path,
+				metadata: descriptorFields.metadata ?? null,
+				hidden: descriptorFields.hidden,
+			},
+				metadata: descriptorFields.metadata ?? null,
 				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)
@@ -329,11 +382,11 @@ export function handleFileUpdate(args: {
 			}
 
 			// Detect changes between current and updated file
-			const detectedChanges = plugin.detectChanges({
-				before: currentFile,
-				after: args.file,
-				querySync,
-			});
+		const detectedChanges = plugin.detectChanges({
+			before: currentFile,
+			after: pluginFile,
+			querySync,
+		});
 
 			if (detectedChanges.length > 0) {
 				hasChanges = true;
@@ -393,11 +446,11 @@ export function handleFileUpdate(args: {
 
 			// Use fallback plugin to handle the file
 			if (lixUnknownFileFallbackPlugin.detectChanges) {
-				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
-					before: currentFile,
-					after: args.file,
-					querySync,
-				});
+			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
+				before: currentFile,
+				after: pluginFile,
+				querySync,
+			});
 
 				if (detectedChanges.length > 0) {
 					// Validate and store schemas for fallback plugin changes

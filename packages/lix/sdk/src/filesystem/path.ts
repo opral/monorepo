@@ -56,3 +56,51 @@ export function isValidDirectoryPath(path: string): boolean {
 				(!segment.includes("%") || PERCENT_ENCODED_SEGMENT.test(segment))
 		);
 }
+
+export function splitFilePath(path: string): {
+	directoryPath: string | null;
+	name: string;
+	extension: string | null;
+} {
+	if (!isValidFilePath(path)) {
+		throw new Error(`Invalid file path ${path}`);
+	}
+
+	const segments = path.split("/");
+	const fileName = segments.pop();
+	if (!fileName) {
+		throw new Error(`File path ${path} is missing a file name`);
+	}
+
+	const directorySegments = segments.filter(Boolean);
+	const directoryPath =
+		directorySegments.length === 0
+			? null
+			: `/${directorySegments.join("/")}/`;
+
+	const lastDot = fileName.lastIndexOf(".");
+	if (lastDot > 0) {
+		const name = fileName.slice(0, lastDot);
+		const extension = fileName.slice(lastDot + 1);
+		return { directoryPath, name, extension: extension || null };
+	}
+
+	return { directoryPath, name: fileName, extension: null };
+}
+
+export function composeFileName(name: string, extension: string | null): string {
+	return extension ? `${name}.${extension}` : name;
+}
+
+export function composeFilePath(args: {
+	directoryPath: string | null;
+	name: string;
+	extension: string | null;
+}): string {
+	const dirPrefix =
+		args.directoryPath && args.directoryPath !== "/"
+			? args.directoryPath.slice(0, -1)
+			: "";
+	const filename = composeFileName(args.name, args.extension);
+	return dirPrefix ? `${dirPrefix}/${filename}` : `/${filename}`;
+}

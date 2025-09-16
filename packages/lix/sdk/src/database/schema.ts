@@ -102,16 +102,24 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 };
 
 type DirectoryDescriptorView = ToKysely<
-	EntityStateView<FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>>
+	EntityStateView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
+	>
 >;
 type DirectoryDescriptorAllView = ToKysely<
 	EntityStateAllView<
-		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
 	>
 >;
 type DirectoryDescriptorHistoryView = ToKysely<
 	EntityStateHistoryView<
-		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema>
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
 	>
 >;
 
@@ -138,7 +146,17 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
-	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
+	EntityViews<
+		typeof LixFileDescriptorSchema,
+		"file",
+		{
+			data: Uint8Array;
+			path: LixGenerated<string>;
+			directory_id: LixGenerated<string | null>;
+			name: LixGenerated<string>;
+			extension: LixGenerated<string | null>;
+		}
+	> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
 	EntityViews<typeof LixEntityConversationSchema, "entity_conversation"> &

@@ -388,3 +388,54 @@ simulationTest(
 		expectDeterministic(directoryRow?.hidden).toBe(0);
 	}
 );
+
+simulationTest(
+	"renaming a directory updates descendant file paths",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: "/docs/guides/readme.md",
+				data: new TextEncoder().encode("content"),
+			})
+			.execute();
+
+		const docsDirectory = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(docsDirectory.path).toBe("/docs/");
+
+		await lix.db
+			.updateTable("directory")
+			.set({ name: "articles" })
+			.where("id", "=", docsDirectory.id)
+			.execute();
+
+		const updatedDirectory = await lix.db
+			.selectFrom("directory")
+			.where("id", "=", docsDirectory.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(updatedDirectory.path).toBe("/articles/");
+
+		const files = await lix.db.selectFrom("file").select(["path"]).execute();
+
+		expectDeterministic(files).toEqual([
+			{ path: "/articles/guides/readme.md" },
+		]);
+	}
+);

@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { isValidDirectoryPath, isValidFilePath } from "./path.js";
+import {
+	isValidDirectoryPath,
+	isValidFilePath,
+	splitFilePath,
+	composeFilePath,
+} from "./path.js";
 
 const BASE_URL = "https://example.com";
 const decodePathname = (path: string) =>
@@ -76,4 +81,34 @@ describe("filesystem path validators", () => {
 			expect(decodePathname(path)).not.toBe(path);
 		}
 	});
+});
+
+test("splitFilePath derives directory, name, and extension", () => {
+	const { directoryPath, name, extension } = splitFilePath("/docs/readme.md");
+	expect(directoryPath).toBe("/docs/");
+	expect(name).toBe("readme");
+	expect(extension).toBe("md");
+
+	const rootFile = splitFilePath("/index");
+	expect(rootFile.directoryPath).toBeNull();
+	expect(rootFile.name).toBe("index");
+	expect(rootFile.extension).toBeNull();
+});
+
+test("composeFilePath rebuilds normalized paths", () => {
+	expect(
+		composeFilePath({
+			directoryPath: "/docs/",
+			name: "guide",
+			extension: "md",
+		})
+	).toBe("/docs/guide.md");
+
+	expect(
+		composeFilePath({
+			directoryPath: null,
+			name: "README",
+			extension: null,
+		})
+	).toBe("/README");
 });

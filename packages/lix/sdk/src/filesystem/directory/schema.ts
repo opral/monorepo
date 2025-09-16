@@ -3,13 +3,13 @@ import type {
 	LixSchemaDefinition,
 } from "../../schema-definition/definition.js";
 import type { LixEngine } from "../../engine/boot.js";
-import { DIRECTORY_PATH_PATTERN } from "../path.js";
+import { isValidDirectoryPath } from "../path.js";
 import { nanoIdSync } from "../../engine/deterministic/nano-id.js";
 import {
-	computeDirectoryPath,
 	getActiveVersionId,
 	readDirectoryByPath,
-	readDirectoryPathById,
+	composeDirectoryPath,
+	assertNoFileAtPath,
 } from "./ensure-directories.js";
 import { executeSync } from "../../database/execute-sync.js";
 
@@ -17,7 +17,7 @@ export const LixDirectoryDescriptorSchema = {
 	"x-lix-key": "lix_directory_descriptor",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["parent_id", "name"], ["path"]],
+	"x-lix-unique": [["parent_id", "name"]],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
@@ -32,15 +32,9 @@ export const LixDirectoryDescriptorSchema = {
 			pattern: "^[^/\\\\]+$",
 			description: "Directory segment without slashes.",
 		},
-		path: {
-			type: "string",
-			pattern: DIRECTORY_PATH_PATTERN as string,
-			description: "Absolute directory path ending with '/' (e.g. '/docs/').",
-			"x-lix-generated": true,
-		},
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},
-	required: ["id", "parent_id", "name", "path"],
+	required: ["id", "parent_id", "name"],
 	additionalProperties: false,
 } as const;
 LixDirectoryDescriptorSchema satisfies LixSchemaDefinition;
@@ -93,50 +87,14 @@ export function applyDirectoryDatabaseSchema(args: {
 		const versionId = versionIdArg
 			? String(versionIdArg)
 			: getActiveVersionId(engine);
-		const parentId =
-			parentIdArg === null || parentIdArg === undefined || parentIdArg === ""
-				? null
-				: String(parentIdArg);
-		const name = String(nameArg ?? "").trim();
 
-		if (!name) {
-			throw new Error("Directory name must be provided");
-		}
-
-		if (parentId) {
-			const parentPath = readDirectoryPathById({
-				engine,
-				versionId,
-				directoryId: parentId,
-			});
-			if (!parentPath) {
-				throw new Error(`Parent directory does not exist for id ${parentId}`);
-			}
-		}
-
-		let computedPath: string;
-		if (pathArg) {
-			const providedPath = String(pathArg);
-			const expectedPath = computeDirectoryPath({
-				engine,
-				versionId,
-				parentId,
-				name,
-			});
-			if (providedPath !== expectedPath) {
-				throw new Error(
-					`Provided directory path '${providedPath}' does not match computed path '${expectedPath}'`
-				);
-			}
-			computedPath = expectedPath;
-		} else {
-			computedPath = computeDirectoryPath({
-				engine,
-				versionId,
-				parentId,
-				name,
-			});
-		}
+		const { parentId, name, computedPath } = computeUpsertInputs({
+			engine,
+			versionId,
+			parentIdArg,
+			nameArg,
+			pathArg,
+		});
 
 		const existing = readDirectoryByPath({
 			engine,
@@ -175,7 +133,6 @@ export function applyDirectoryDatabaseSchema(args: {
 					id,
 					parent_id: parentId,
 					name,
-					path: computedPath,
 					hidden: Boolean(hidden),
 				},
 				schema_version: schemaVersion,
@@ -205,13 +162,30 @@ export function applyDirectoryDatabaseSchema(args: {
 		},
 	});
 
+	engine.sqlite.createFunction({
+		name: "compose_directory_path",
+		arity: 2,
+		deterministic: false,
+		xFunc: (_ctx: number, ...fnArgs: any[]) => {
+			const directoryId = fnArgs[0] as string | null;
+			const versionId = String(fnArgs[1]);
+			return (
+				composeDirectoryPath({
+					engine,
+					versionId,
+					directoryId,
+				}) ?? null
+			);
+		},
+	});
+
 	engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS directory_all AS
 		SELECT
 			json_extract(snapshot_content, '$.id') AS id,
 			json_extract(snapshot_content, '$.parent_id') AS parent_id,
 			json_extract(snapshot_content, '$.name') AS name,
-			json_extract(snapshot_content, '$.path') AS path,
+			compose_directory_path(json_extract(snapshot_content, '$.id'), version_id) AS path,
 			json_extract(snapshot_content, '$.hidden') AS hidden,
 			entity_id AS lixcol_entity_id,
 			'${schemaKey}' AS lixcol_schema_key,
@@ -235,7 +209,7 @@ export function applyDirectoryDatabaseSchema(args: {
 			json_extract(snapshot_content, '$.id') AS id,
 			json_extract(snapshot_content, '$.parent_id') AS parent_id,
 			json_extract(snapshot_content, '$.name') AS name,
-			json_extract(snapshot_content, '$.path') AS path,
+			compose_directory_path(json_extract(snapshot_content, '$.id'), version_id) AS path,
 			json_extract(snapshot_content, '$.hidden') AS hidden,
 			entity_id AS lixcol_entity_id,
 			'${schemaKey}' AS lixcol_schema_key,
@@ -294,7 +268,19 @@ export function applyDirectoryDatabaseSchema(args: {
 			DELETE FROM state_all
 			WHERE schema_key = '${schemaKey}'
 				AND version_id = (SELECT version_id FROM active_version)
-				AND json_extract(snapshot_content, '$.path') GLOB OLD.path || '*';
+				AND entity_id IN (
+					WITH RECURSIVE to_delete(id) AS (
+						SELECT OLD.id
+						UNION ALL
+						SELECT json_extract(child.snapshot_content, '$.id')
+						FROM state_all child
+						JOIN to_delete parent
+							ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
+						WHERE child.schema_key = '${schemaKey}'
+							AND child.version_id = (SELECT version_id FROM active_version)
+					)
+					SELECT id FROM to_delete
+				);
 		END;
 	`);
 
@@ -343,7 +329,101 @@ export function applyDirectoryDatabaseSchema(args: {
 			DELETE FROM state_all
 			WHERE schema_key = '${schemaKey}'
 				AND version_id = OLD.lixcol_version_id
-				AND json_extract(snapshot_content, '$.path') GLOB OLD.path || '*';
+				AND entity_id IN (
+					WITH RECURSIVE to_delete(id) AS (
+						SELECT OLD.id
+						UNION ALL
+						SELECT json_extract(child.snapshot_content, '$.id')
+						FROM state_all child
+						JOIN to_delete parent
+							ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
+						WHERE child.schema_key = '${schemaKey}'
+							AND child.version_id = OLD.lixcol_version_id
+					)
+					SELECT id FROM to_delete
+				);
 		END;
 	`);
+}
+
+function computeUpsertInputs(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	versionId: string;
+	parentIdArg: unknown;
+	nameArg: unknown;
+	pathArg: unknown;
+}): { parentId: string | null; name: string; computedPath: string } {
+	let parentId: string | null = null;
+	let name = "";
+
+	const rawParentId =
+		args.parentIdArg === null || args.parentIdArg === undefined || args.parentIdArg === ""
+			? null
+			: String(args.parentIdArg);
+
+	let computedPath: string;
+	if (typeof args.pathArg === "string" && args.pathArg.trim() !== "") {
+		const providedPath = args.pathArg.trim();
+		if (!isValidDirectoryPath(providedPath)) {
+			throw new Error(`Invalid directory path ${providedPath}`);
+		}
+		const segments = providedPath.slice(1, -1).split("/");
+		name = segments.pop() ?? "";
+		if (!name) {
+			throw new Error("Directory name must be provided");
+		}
+		const parentPath = segments.length === 0 ? null : `/${segments.join("/")}/`;
+		if (parentPath) {
+			const parentRow = readDirectoryByPath({
+				engine: args.engine,
+				versionId: args.versionId,
+				path: parentPath,
+			});
+			if (!parentRow) {
+				throw new Error(`Parent directory does not exist for path ${parentPath}`);
+			}
+			parentId = parentRow.id;
+		} else {
+			parentId = null;
+		}
+		if (rawParentId && parentId && rawParentId !== parentId) {
+			throw new Error(
+				`Provided parent_id ${rawParentId} does not match parent derived from path ${providedPath}`
+			);
+		}
+		if (rawParentId && !parentId) {
+			throw new Error("Provided parent_id does not match root directory");
+		}
+		computedPath = providedPath;
+	} else {
+		parentId = rawParentId;
+		name = String(args.nameArg ?? "").trim();
+		if (!name) {
+			throw new Error("Directory name must be provided");
+		}
+		const parentPath = parentId
+			? composeDirectoryPath({
+					engine: args.engine,
+					versionId: args.versionId,
+					directoryId: parentId,
+			  })
+			: "/";
+		if (!parentPath) {
+			throw new Error(`Parent directory does not exist for id ${parentId}`);
+		}
+		computedPath = `${parentPath}${name}/`;
+		if (!isValidDirectoryPath(computedPath)) {
+			throw new Error(
+				`Invalid directory path ${computedPath} (parent: ${parentPath}, name: ${name})`
+			);
+		}
+	}
+
+	assertNoFileAtPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: computedPath.slice(0, -1),
+	});
+
+	return { parentId, name, computedPath };
 }

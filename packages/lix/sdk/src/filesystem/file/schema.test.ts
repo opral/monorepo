@@ -258,7 +258,7 @@ test("invalid file paths should be rejected", async () => {
 				data: new Uint8Array(),
 			})
 			.execute()
-	).rejects.toThrowError("path must match pattern");
+	).rejects.toThrowError("Invalid file path");
 });
 
 test("files should have hidden property defaulting to false", async () => {
@@ -578,6 +578,10 @@ test("file metadata is Record<string, any>", async () => {
 			author: "test-user",
 			created_at: new Date().toISOString(),
 		},
+		directory_id: null,
+		name: "test",
+		extension: "json",
+		hidden: false,
 	};
 
 	expectTypeOf(mockFile.metadata).toEqualTypeOf<
@@ -1414,8 +1418,15 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 		return lixcols;
 	};
 
-	// Filter out columns that don't make sense for file views (files are themselves entities)
-	const blacklist = ["lixcol_file_id", "lixcol_plugin_key", "lixcol_entity_id"];
+	// Filter out columns that don't make sense for file views (files are themselves entities).
+	// These fields either duplicate intrinsic file identity (file/plugin/entity ids) or
+	// are constants in state_history (version_id always resolves to 'global').
+	const blacklist = [
+		"lixcol_file_id",
+		"lixcol_plugin_key",
+		"lixcol_entity_id",
+		"lixcol_version_id",
+	];
 
 	const filterColumns = (lixcols: Record<string, any>) => {
 		const filtered: Record<string, any> = {};
