@@ -79,6 +79,18 @@ export type LixPlugin = {
 	 */
 	diffUiComponent?: CustomElementConstructor;
 	/**
+	 * Render the diff for this plugin as HTML.
+	 *
+	 * Hosts can insert the returned markup directly or scope it inside a
+	 * ShadowRoot. The HTML should rely on CSS custom properties (e.g.
+	 * `--lix-diff-*`) instead of hardcoded colors so environments can theme it.
+	 *
+	 * @example
+	 * const html = await plugin.renderDiff?.({ diffs })
+	 * container.innerHTML = html ?? ""
+	 */
+	renderDiff?: (args: RenderDiffArgs) => Promise<string>;
+	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
 	// detectConflicts?: (args: {
@@ -140,6 +152,15 @@ export type DetectedChange<T = any> = {
 // 	 */
 // 	conflictingChangeIds: Set<Change["id"]>;
 // };
+
+export type RenderDiffArgs = {
+	diffs: Array<
+		Pick<LixChange, "entity_id" | "plugin_key" | "schema_key"> & {
+			before_snapshot_content: Record<string, any> | null;
+			after_snapshot_content: Record<string, any> | null;
+		}
+	>;
+};
 
 export type UiDiffComponentProps = {
 	diffs: Array<

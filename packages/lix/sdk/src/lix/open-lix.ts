@@ -12,8 +12,8 @@ import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import type { LixEngine } from "../engine/boot.js";
-import type { LixEnvironment } from "../environment/types.js";
+import type { EngineEvent, LixEngine } from "../engine/boot.js";
+import type { LixEnvironment } from "../environment/api.js";
 import { createDialect } from "../environment/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
@@ -208,7 +208,7 @@ export async function openLix(args: {
 		await environment.create({ blob: await args.blob!.arrayBuffer() });
 		const res = await environment.open({
 			boot,
-			emit: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	} else {
@@ -221,7 +221,7 @@ export async function openLix(args: {
 		}
 		const res = await environment.open({
 			boot,
-			emit: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	}
