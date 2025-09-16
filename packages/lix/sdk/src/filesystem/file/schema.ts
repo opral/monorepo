@@ -337,11 +337,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
     commit_id AS lixcol_commit_id,
     root_commit_id AS lixcol_root_commit_id,
     depth AS lixcol_depth,
-    (
-      SELECT json(metadata)
-      FROM change
-      WHERE change.id = state_history.change_id
-    ) AS lixcol_metadata
+    metadata AS lixcol_metadata
   FROM state_history
   WHERE schema_key = 'lix_file_descriptor';
 `);
