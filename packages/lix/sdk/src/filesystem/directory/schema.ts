@@ -234,7 +234,6 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_insert;
 		CREATE TRIGGER IF NOT EXISTS directory_insert
 		INSTEAD OF INSERT ON directory
 		BEGIN
@@ -250,7 +249,6 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_update;
 		CREATE TRIGGER IF NOT EXISTS directory_update
 		INSTEAD OF UPDATE ON directory
 		BEGIN
@@ -266,13 +264,15 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_delete;
 		CREATE TRIGGER IF NOT EXISTS directory_delete
 		INSTEAD OF DELETE ON directory
 		BEGIN
 			DELETE FROM file
 			WHERE path = substr(OLD.path, 1, length(OLD.path) - 1)
-				OR path GLOB substr(OLD.path, 1, length(OLD.path) - 1) || '/*';
+				OR (
+					path >= substr(OLD.path, 1, length(OLD.path) - 1) || '/'
+					AND path < substr(OLD.path, 1, length(OLD.path) - 1) || '0'
+				);
 
 			DELETE FROM state_all
 			WHERE schema_key = '${schemaKey}'
@@ -294,7 +294,6 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_all_insert;
 		CREATE TRIGGER IF NOT EXISTS directory_all_insert
 		INSTEAD OF INSERT ON directory_all
 		BEGIN
@@ -310,7 +309,6 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_all_update;
 		CREATE TRIGGER IF NOT EXISTS directory_all_update
 		INSTEAD OF UPDATE ON directory_all
 		BEGIN
@@ -326,13 +324,17 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		DROP TRIGGER IF EXISTS directory_all_delete;
 		CREATE TRIGGER IF NOT EXISTS directory_all_delete
 		INSTEAD OF DELETE ON directory_all
 		BEGIN
 			DELETE FROM file_all
-			WHERE (path = substr(OLD.path, 1, length(OLD.path) - 1)
-				OR path GLOB substr(OLD.path, 1, length(OLD.path) - 1) || '/*')
+			WHERE (
+				path = substr(OLD.path, 1, length(OLD.path) - 1)
+				OR (
+					path >= substr(OLD.path, 1, length(OLD.path) - 1) || '/'
+					AND path < substr(OLD.path, 1, length(OLD.path) - 1) || '0'
+				)
+			)
 				AND lixcol_version_id = OLD.lixcol_version_id;
 
 			DELETE FROM state_all
