@@ -23,7 +23,7 @@ type CreateEditorArgs = {
 };
 
 // Plain TipTap Editor factory (no React). Useful for unit/integration tests.
-export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
+export function createEditor(args: CreateEditorArgs): Editor {
 	const {
 		lix,
 		initialMarkdown,
@@ -36,17 +36,8 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		persistState = true,
 		writerKey,
 	} = args;
-	let initialMd = initialMarkdown;
-	if (initialMd === undefined && fileId) {
-		const row = await lix.db
-			.selectFrom("file")
-			.where("id", "=", fileId)
-			.selectAll()
-			.executeTakeFirst();
-		initialMd = new TextDecoder().decode(row?.data ?? new Uint8Array());
-	}
 
-	const ast = contentAst ?? (parseMarkdown(initialMd ?? "") as any);
+	const ast = contentAst ?? (parseMarkdown(initialMarkdown ?? "") as any);
 
 	let persistStateTimer: any = null;
 	// Serialize persist runs to avoid overlapping transactions causing inconsistent state snapshots.

@@ -17,11 +17,13 @@ import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
  */
 export class OpfsSahEnvironment implements LixEnvironment {
 	private static _instances = new Set<OpfsSahEnvironment>();
+	private static _openByKey = new Map<string, OpfsSahEnvironment>();
 	private worker: Worker;
 	private nextId = 0;
 	private inflight = new Map<string, (r: any) => void>();
 	private eventHandler: ((ev: any) => void) | undefined;
 	private readonly dbKey: string;
+	private isOpen = false;
 
 	constructor(opts?: { key?: string }) {
 		this.dbKey = opts?.key || "default";
@@ -78,9 +80,20 @@ export class OpfsSahEnvironment implements LixEnvironment {
 	async open(
 		initOpts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: import("../engine/boot.js").LixEngine }> {
+		if (this.isOpen) return {};
+		const existing = OpfsSahEnvironment._openByKey.get(this.dbKey);
+		if (existing && existing !== this) {
+			const err: any = new Error(
+				`OPFS environment for key "${this.dbKey}" is already open. Close the existing connection before opening a new one.`
+			);
+			err.code = "ENV_OPFS_ALREADY_OPEN";
+			throw err;
+		}
 		this.eventHandler = initOpts.emit;
 		const payload: any = { name: this.dbKey, bootArgs: initOpts.boot.args };
 		await this.send("open", payload);
+		this.isOpen = true;
+		OpfsSahEnvironment._openByKey.set(this.dbKey, this);
 		return {};
 	}
 
@@ -123,7 +136,16 @@ export class OpfsSahEnvironment implements LixEnvironment {
 	}
 
 	async close(): Promise<void> {
-		await this.send("close", {});
+		if (this.isOpen) {
+			try {
+				await this.send("close", {});
+			} finally {
+				this.isOpen = false;
+				if (OpfsSahEnvironment._openByKey.get(this.dbKey) === this) {
+					OpfsSahEnvironment._openByKey.delete(this.dbKey);
+				}
+			}
+		}
 		this.worker.terminate();
 		OpfsSahEnvironment._instances.delete(this);
 	}
@@ -140,7 +162,7 @@ export class OpfsSahEnvironment implements LixEnvironment {
 			const err: any = new Error(
 				`Cannot clear OPFS: ${OpfsSahEnvironment._instances.size} database connection(s) are open. Close all connections before clearing.`
 			);
-			err.code = "LIX_OPFS_BUSY";
+			err.code = "ENV_OPFS_BUSY";
 			throw err;
 		}
 		if (typeof navigator === "undefined" || !navigator.storage?.getDirectory) {

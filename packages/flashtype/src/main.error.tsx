@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OpfsSahBackend } from "@lix-js/sdk";
+import { OpfsSahEnvironment } from "@lix-js/sdk";
 import { RotateCcw, Bug } from "lucide-react";
 
 /**
@@ -50,7 +50,7 @@ export function ErrorFallback(props: { error: unknown }) {
 		if (!confirmed) return;
 		try {
 			setBusy(true);
-			await OpfsSahBackend.clear();
+			await OpfsSahEnvironment.clear();
 			window.location.reload();
 		} catch (e) {
 			console.error("Failed to reset OPFS:", e);

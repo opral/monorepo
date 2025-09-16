@@ -1,8 +1,8 @@
-import { useEffect, use as usePromise, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
-import { useLix } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
 import { useQuery } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
 import { createEditor } from "./create-editor";
@@ -21,29 +21,33 @@ export function TipTapEditor({
 	persistDebounceMs,
 }: TipTapEditorProps) {
 	const lix = useLix();
+	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+	const initialFile = useQueryTakeFirstOrThrow(
+		({ lix }) =>
+			lix.db.selectFrom("file").select("data").where("id", "=", activeFileId),
+		{ subscribe: false },
+	);
 
 	const { setEditor } = useEditorCtx();
-	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+
+	if (!activeFileId) {
+		throw new Error("File id not set");
+	}
 
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
-	// Editor loads initial content and persists via createEditor using only fileId
-
 	const writerKey = `flashtype_tiptap_editor`;
 
-	const editor = usePromise(
-		useMemo(
-			() =>
-				activeFileId
-					? createEditor({
-							lix,
-							fileId: activeFileId,
-							persistDebounceMs: PERSIST_DEBOUNCE_MS,
-							writerKey,
-						})
-					: Promise.resolve(null as unknown as Editor),
-			[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey],
-		),
+	const editor = useMemo(
+		() =>
+			createEditor({
+				lix,
+				initialMarkdown: new TextDecoder().decode(initialFile.data),
+				fileId: activeFileId,
+				persistDebounceMs: PERSIST_DEBOUNCE_MS,
+				writerKey,
+			}),
+		[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile],
 	);
 
 	// Subscribe to commit events and refresh on external changes
@@ -85,8 +89,8 @@ export function TipTapEditor({
 
 	useEffect(() => {
 		if (!editor) return;
-		setEditor(editor as any);
-		onReady?.(editor as any);
+		setEditor(editor);
+		onReady?.(editor);
 	}, [editor, setEditor, onReady]);
 
 	if (!activeFileId || !editor) {
@@ -97,7 +101,7 @@ export function TipTapEditor({
 		<div className={className ?? undefined}>
 			<div className="w-full bg-background px-3 py-0">
 				<EditorContent
-					editor={editor as any}
+					editor={editor}
 					className="w-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}

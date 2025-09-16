@@ -42,6 +42,22 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		await env.close();
 	});
 
+	test("open() rejects when another environment uses the same key", async () => {
+		const key = `vitest-opfs-key-lock-${Math.random().toString(16).slice(2)}`;
+		const env1 = new OpfsSahEnvironment({ key });
+		await env1.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+
+		const env2 = new OpfsSahEnvironment({ key });
+		await expect(
+			env2.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} })
+		).rejects.toMatchObject({ code: "ENV_OPFS_ALREADY_OPEN" });
+
+		await env1.close();
+		await env2.close();
+		await new Promise((r) => setTimeout(r, 50));
+		await OpfsSahEnvironment.clear();
+	});
+
 	test("persists across reopen with same name", async () => {
 		const name = `vitest-opfs-persist`;
 		const lix1 = await openLix({
@@ -146,29 +162,28 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		for await (const entry of rootAfter.values()) entriesAfter.push(entry);
 		expect(entriesAfter.length).toBe(0);
 	});
-});
+ 
+	test("clear() throws when an environment is open", async () => {
+		const name = `vitest-opfs-clear-open`;
+		const lix = await openLix({
+			environment: new OpfsSahEnvironment({ key: name }),
+			pluginsRaw: [],
+		});
+		await lix.db
+			.insertInto("file")
+			.values({ path: "/hold.txt", data: new TextEncoder().encode("x") })
+			.execute();
 
-test("clear() throws when an environment is open", async () => {
-	const name = `vitest-opfs-clear-open`;
-	const lix = await openLix({
-		environment: new OpfsSahEnvironment({ key: name }),
-		pluginsRaw: [],
+		await expect(OpfsSahEnvironment.clear()).rejects.toMatchObject({
+			code: "ENV_OPFS_BUSY",
+		});
+
+		await lix.close();
 	});
-	await lix.db
-		.insertInto("file")
-		.values({ path: "/hold.txt", data: new TextEncoder().encode("x") })
-		.execute();
 
-	await expect(OpfsSahEnvironment.clear()).rejects.toMatchObject({
-		code: "LIX_OPFS_BUSY",
-	});
-
-	await lix.close();
-});
-
-test("loads plugin from string and processes *.json", async () => {
-	// Minimal mock plugin: matches *.json and emits one change with a simple schema
-	const mockPlugin = `
+	test("loads plugin from string and processes *.json", async () => {
+		// Minimal mock plugin: matches *.json and emits one change with a simple schema
+		const mockPlugin = `
 export const plugin = {
   key: 'mock_json',
   detectChangesGlob: '*.json',
@@ -180,46 +195,46 @@ export const plugin = {
 export default plugin;
 `;
 
-	const lix = await openLix({
-		environment: new OpfsSahEnvironment({ key: `vitest-opfs-plugin` }),
-		pluginsRaw: [mockPlugin],
-	});
-	try {
-		// Insert a JSON file which should trigger the mock plugin
-		await lix.db
-			.insertInto("file")
-			.values({
-				path: "/foo.json",
-				data: new TextEncoder().encode('{"name":"x"}'),
-			})
-			.execute();
+		const lix = await openLix({
+			environment: new OpfsSahEnvironment({ key: `vitest-opfs-plugin` }),
+			pluginsRaw: [mockPlugin],
+		});
+		try {
+			// Insert a JSON file which should trigger the mock plugin
+			await lix.db
+				.insertInto("file")
+				.values({
+					path: "/foo.json",
+					data: new TextEncoder().encode('{"name":"x"}'),
+				})
+				.execute();
 
-		// Plugin should have inserted a state row with our mock schema key
-		const row = await lix.db
-			.selectFrom("state_all")
-			.selectAll()
-			.where("schema_key", "=", "mock_schema")
-			.executeTakeFirst();
+			// Plugin should have inserted a state row with our mock schema key
+			const row = await lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "mock_schema")
+				.executeTakeFirst();
 
-		expect(row).toBeTruthy();
-		expect(row?.plugin_key).toBe("mock_json");
-	} finally {
-		await lix.close();
-	}
-});
-
-test("persists provided account", async () => {
-	const name = `vitest-opfs-account-persist`;
-	const account = { id: "test-account", name: "Test User" };
-
-	// Open with initial account
-	const lix1 = await openLix({
-		environment: new OpfsSahEnvironment({ key: name }),
-		pluginsRaw: [],
-		account,
+			expect(row).toBeTruthy();
+			expect(row?.plugin_key).toBe("mock_json");
+		} finally {
+			await lix.close();
+		}
 	});
 
-	try {
+	test("persists provided account", async () => {
+		const name = `vitest-opfs-account-persist`;
+		const account = { id: "test-account", name: "Test User" };
+
+		// Open with initial account
+		const lix1 = await openLix({
+			environment: new OpfsSahEnvironment({ key: name }),
+			pluginsRaw: [],
+			account,
+		});
+
+		try {
 		// Verify current active account with details
 		const active1 = await lix1.db
 			.selectFrom("active_account as aa")
@@ -239,7 +254,7 @@ test("persists provided account", async () => {
 		environment: new OpfsSahEnvironment({ key: name }),
 		pluginsRaw: [],
 	});
-	try {
+		try {
 		const active2 = await lix2.db
 			.selectFrom("active_account as aa")
 			.innerJoin("account_all as a", "a.id", "aa.account_id")
@@ -252,4 +267,6 @@ test("persists provided account", async () => {
 	} finally {
 		await lix2.close();
 	}
+});
+
 });
