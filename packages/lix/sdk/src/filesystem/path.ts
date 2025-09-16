@@ -74,9 +74,7 @@ export function splitFilePath(path: string): {
 
 	const directorySegments = segments.filter(Boolean);
 	const directoryPath =
-		directorySegments.length === 0
-			? null
-			: `/${directorySegments.join("/")}/`;
+		directorySegments.length === 0 ? null : `/${directorySegments.join("/")}/`;
 
 	const lastDot = fileName.lastIndexOf(".");
 	if (lastDot > 0) {
@@ -88,7 +86,10 @@ export function splitFilePath(path: string): {
 	return { directoryPath, name: fileName, extension: null };
 }
 
-export function composeFileName(name: string, extension: string | null): string {
+export function composeFileName(
+	name: string,
+	extension: string | null
+): string {
 	return extension ? `${name}.${extension}` : name;
 }
 

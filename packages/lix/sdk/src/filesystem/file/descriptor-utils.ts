@@ -17,7 +17,6 @@ export type FileDescriptorFields = {
 	extension: string | null;
 	metadata: unknown;
 	hidden: boolean;
-	path: string;
 };
 
 export function deriveDescriptorFieldsFromPath(args: {
@@ -48,10 +47,8 @@ export function deriveDescriptorFieldsFromPath(args: {
 		extension,
 		metadata: args.metadata ?? null,
 		hidden: Boolean(args.hidden),
-		path: args.path,
 	};
 }
-
 
 export function readFileDescriptorSnapshot(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;
@@ -65,7 +62,6 @@ export function readFileDescriptorSnapshot(args: {
 			extension: string | null;
 			metadata: unknown;
 			hidden: boolean;
-			path: string | null;
 	  }
 	| undefined {
 	const rows = executeSync({
@@ -85,8 +81,7 @@ export function readFileDescriptorSnapshot(args: {
 				extension: string | null;
 				metadata?: unknown;
 				hidden?: boolean;
-				path?: string | null;
-			}
+		  }
 		| string
 		| undefined;
 	if (!raw) {
@@ -101,7 +96,6 @@ export function readFileDescriptorSnapshot(args: {
 		extension: snapshot.extension ?? null,
 		metadata: snapshot.metadata ?? null,
 		hidden: Boolean(snapshot.hidden),
-		path: snapshot.path ?? null,
 	};
 }
 
@@ -136,6 +130,151 @@ export function composeFileNameFromFields(args: {
 	extension: string | null;
 }): string {
 	return composeFileName(args.name, args.extension ?? null);
+}
+
+function readDirectoryHistorySnapshot(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	directoryId: string;
+	rootCommitId: string;
+	depth: number;
+}): { id: string; parent_id: string | null; name: string } | undefined {
+	const rows = executeSync({
+		engine: args.engine,
+		query: args.engine.db
+			.selectFrom("state_history")
+			.where("schema_key", "=", "lix_directory_descriptor")
+			.where("entity_id", "=", args.directoryId)
+			.where("root_commit_id", "=", args.rootCommitId)
+			.where("depth", "=", args.depth)
+			.select(["snapshot_content"]),
+	});
+	const raw = rows[0]?.snapshot_content as
+		| { id: string; parent_id: string | null; name: string }
+		| string
+		| undefined;
+	if (!raw) {
+		return undefined;
+	}
+	const snapshot = typeof raw === "string" ? JSON.parse(raw) : raw;
+	return {
+		id: snapshot.id,
+		parent_id: snapshot.parent_id ?? null,
+		name: snapshot.name,
+	};
+}
+
+export function composeDirectoryPathAtCommit(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	directoryId: string | null;
+	rootCommitId: string;
+	depth: number;
+}): string | undefined {
+	if (args.directoryId === null) {
+		return "/";
+	}
+
+	const seen = new Set<string>();
+	let current: string | null = args.directoryId;
+	const segments: string[] = [];
+
+	while (current) {
+		if (seen.has(current)) {
+			throw new Error(
+				`Directory cycle detected when composing path at commit ${args.rootCommitId}`
+			);
+		}
+		seen.add(current);
+		const snapshot = readDirectoryHistorySnapshot({
+			engine: args.engine,
+			directoryId: current,
+			rootCommitId: args.rootCommitId,
+			depth: args.depth,
+		});
+		if (!snapshot) {
+			return undefined;
+		}
+		segments.push(snapshot.name);
+		current = snapshot.parent_id;
+	}
+
+	return `/${segments.reverse().join("/")}/`;
+}
+
+export function composeFilePathAtCommit(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	directoryId: string | null;
+	name: string;
+	extension: string | null;
+	rootCommitId: string;
+	depth: number;
+}): string | undefined {
+	const directoryPath = composeDirectoryPathAtCommit({
+		engine: args.engine,
+		directoryId: args.directoryId,
+		rootCommitId: args.rootCommitId,
+		depth: args.depth,
+	});
+	if (directoryPath === undefined) {
+		return undefined;
+	}
+	const fileName = composeFileNameFromFields({
+		name: args.name,
+		extension: args.extension ?? null,
+	});
+	if (directoryPath === "/") {
+		return `/${fileName}`;
+	}
+	return `${directoryPath.slice(0, -1)}/${fileName}`;
+}
+
+export function readFileDescriptorAtCommit(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	fileId: string;
+	rootCommitId: string;
+	depth: number;
+}):
+	| {
+			id: string;
+			directory_id: string | null;
+			name: string;
+			extension: string | null;
+			metadata: unknown;
+			hidden: boolean;
+	  }
+	| undefined {
+	const rows = executeSync({
+		engine: args.engine,
+		query: args.engine.db
+			.selectFrom("state_history")
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("entity_id", "=", args.fileId)
+			.where("root_commit_id", "=", args.rootCommitId)
+			.where("depth", "=", args.depth)
+			.select(["snapshot_content"]),
+	});
+	const raw = rows[0]?.snapshot_content as
+		| {
+				id: string;
+				directory_id: string | null;
+				name: string;
+				extension: string | null;
+				metadata?: unknown;
+				hidden?: boolean;
+		  }
+		| string
+		| undefined;
+	if (!raw) {
+		return undefined;
+	}
+	const snapshot = typeof raw === "string" ? JSON.parse(raw) : raw;
+	return {
+		id: snapshot.id,
+		directory_id: snapshot.directory_id ?? null,
+		name: snapshot.name,
+		extension: snapshot.extension ?? null,
+		metadata: snapshot.metadata ?? null,
+		hidden: Boolean(snapshot.hidden),
+	};
 }
 
 export function ensureCompleteDescriptor(args: {
@@ -177,22 +316,21 @@ export function ensureCompleteDescriptor(args: {
 		versionId: args.versionId,
 		directoryId: snapshot.directory_id ?? null,
 	});
+	const computedPath = directoryPath
+		? composeFullFilePath({
+				directoryPath,
+				name: snapshot.name,
+				extension: snapshot.extension ?? null,
+			})
+		: args.file.path;
 
 	return {
 		id: snapshot.id,
-		path:
-			snapshot.path ??
-			(directoryPath
-				? composeFullFilePath({
-						directoryPath,
-						name: snapshot.name,
-						extension: snapshot.extension ?? null,
-				  })
-				: args.file.path) ?? args.file.path,
+		path: computedPath,
 		directory_id: snapshot.directory_id,
 		name: snapshot.name,
 		extension: snapshot.extension,
-		metadata: (args.file.metadata ?? snapshot.metadata) ?? null,
+		metadata: args.file.metadata ?? snapshot.metadata ?? null,
 		hidden: snapshot.hidden,
 	};
 }

@@ -695,7 +695,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	// Verify that the updated snapshot content in the change matches the file view
 	expect(newFileChangeRecord.snapshot_content).toMatchObject({
 		id: "change-id-test-file",
-		path: "/test-change-id-updated.json",
+		directory_id: null,
+		name: "test-change-id-updated",
+		extension: "json",
 	});
 	expect(updatedFileResult[0]?.path).toBe("/test-change-id-updated.json");
 });

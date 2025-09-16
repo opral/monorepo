@@ -229,6 +229,51 @@ simulationTest(
 );
 
 simulationTest(
+	"updating a directory to use a descendant as parent is rejected",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		const docs = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "guides", parent_id: docs.id })
+			.execute();
+
+		const guides = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "guides")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
+
+		await expect(
+			lix.db
+				.updateTable("directory")
+				.where("id", "=", docs.id)
+				.set({ parent_id: guides.id })
+				.execute()
+		).rejects.toThrowError();
+	}
+);
+
+simulationTest(
 	"inserting a file into a hidden directory keeps the directory hidden",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
@@ -437,5 +482,35 @@ simulationTest(
 		expectDeterministic(files).toEqual([
 			{ path: "/articles/guides/readme.md" },
 		]);
+	}
+);
+
+simulationTest(
+	"inserting a directory by path auto-creates missing ancestors",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/guides/api/" } as any)
+			.execute();
+
+		const directories = await lix.db
+			.selectFrom("directory")
+			.select(["path"] as any)
+			.orderBy("path")
+			.execute();
+
+		expectDeterministic(directories).toEqual(
+			expect.arrayContaining([{ path: "/guides/" }, { path: "/guides/api/" }])
+		);
 	}
 );

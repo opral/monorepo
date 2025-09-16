@@ -8,8 +8,10 @@ import type { LixEngine } from "../../engine/boot.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
 import { selectFileLixcol } from "./select-file-lixcol.js";
-import { composeFilePathFromDescriptor } from "./descriptor-utils.js";
-import { FILE_PATH_PATTERN } from "../path.js";
+import {
+	composeFilePathFromDescriptor,
+	composeFilePathAtCommit,
+} from "./descriptor-utils.js";
 
 export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	const engine = args.engine;
@@ -45,7 +47,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 			});
 			return result;
 		},
-		deterministic: true,
+		deterministic: false,
 	});
 
 	engine.sqlite.createFunction({
@@ -76,7 +78,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 			});
 			return result;
 		},
-		deterministic: true,
+		deterministic: false,
 	});
 
 	engine.sqlite.createFunction({
@@ -172,6 +174,28 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 					engine,
 					versionId,
 					fileId,
+				}) ?? null
+			);
+		},
+	});
+
+	engine.sqlite.createFunction({
+		name: "compose_file_path_at_commit",
+		arity: 5,
+		deterministic: false,
+		xFunc: (_ctx: number, ...fnArgs: any[]) => {
+			const [dirId, name, extension, rootCommitId, depth] = fnArgs;
+			return (
+				composeFilePathAtCommit({
+					engine,
+					directoryId: dirId ?? null,
+					name: String(name ?? ""),
+					extension:
+						extension === null || extension === undefined
+							? null
+							: String(extension),
+					rootCommitId: String(rootCommitId),
+					depth: Number(depth ?? 0),
 				}) ?? null
 			);
 		},
@@ -360,10 +384,22 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
     json_extract(snapshot_content, '$.directory_id') AS directory_id,
     json_extract(snapshot_content, '$.name') AS name,
     json_extract(snapshot_content, '$.extension') AS extension,
-    json_extract(snapshot_content, '$.path') AS path,
+    compose_file_path_at_commit(
+      json_extract(snapshot_content, '$.directory_id'),
+      json_extract(snapshot_content, '$.name'),
+      json_extract(snapshot_content, '$.extension'),
+      root_commit_id,
+      depth
+    ) AS path,
     materialize_file_data_at_commit(
       json_extract(snapshot_content, '$.id'),
-      json_extract(snapshot_content, '$.path'),
+      compose_file_path_at_commit(
+        json_extract(snapshot_content, '$.directory_id'),
+        json_extract(snapshot_content, '$.name'),
+        json_extract(snapshot_content, '$.extension'),
+        root_commit_id,
+        depth
+      ),
       root_commit_id,
       depth,
       json_extract(snapshot_content, '$.metadata'),
@@ -413,13 +449,8 @@ export const LixFileDescriptorSchema = {
 			type: "string",
 			nullable: true,
 			pattern: "^[^./\\\\]+$",
-			description: "File extension without the leading dot. Null when no extension is present.",
-		},
-		path: {
-			type: "string",
-			pattern: FILE_PATH_PATTERN as string,
-			"x-lix-generated": true,
-			description: "Full file path captured for historical queries.",
+			description:
+				"File extension without the leading dot. Null when no extension is present.",
 		},
 		metadata: {
 			type: "object",
@@ -427,7 +458,7 @@ export const LixFileDescriptorSchema = {
 		},
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},
-	required: ["id", "directory_id", "name", "extension", "path"],
+	required: ["id", "directory_id", "name", "extension"],
 	additionalProperties: false,
 } as const;
 LixFileDescriptorSchema satisfies LixSchemaDefinition;

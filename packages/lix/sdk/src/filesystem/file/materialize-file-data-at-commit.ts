@@ -2,7 +2,10 @@ import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
-import { ensureCompleteDescriptor } from "./descriptor-utils.js";
+import {
+	readFileDescriptorAtCommit,
+	composeFilePathAtCommit,
+} from "./descriptor-utils.js";
 
 function globSync(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -28,11 +31,40 @@ export function materializeFileDataAtCommit(args: {
 	depth: number;
 }): Uint8Array {
 	const plugins = args.engine.getAllPluginsSync();
-	const descriptor = ensureCompleteDescriptor({
+	const historicalSnapshot = readFileDescriptorAtCommit({
 		engine: args.engine,
-		versionId: "global",
-		file: args.file,
+		fileId: args.file.id,
+		rootCommitId: args.rootCommitId,
+		depth: args.depth,
 	});
+	if (!historicalSnapshot) {
+		throw new Error(
+			`[materializeFileDataAtCommit] Missing descriptor snapshot for file ${args.file.id} at commit ${args.rootCommitId}`
+		);
+	}
+
+	const historicalPath =
+		composeFilePathAtCommit({
+			engine: args.engine,
+			directoryId: historicalSnapshot.directory_id,
+			name: historicalSnapshot.name,
+			extension: historicalSnapshot.extension ?? null,
+			rootCommitId: args.rootCommitId,
+			depth: args.depth,
+		}) ?? args.file.path;
+
+	const initialData = (args.file as Partial<LixFile>).data ?? new Uint8Array();
+
+	const descriptor: LixFile = {
+		id: args.file.id,
+		path: historicalPath,
+		directory_id: historicalSnapshot.directory_id,
+		name: historicalSnapshot.name,
+		extension: historicalSnapshot.extension ?? null,
+		metadata: args.file.metadata ?? historicalSnapshot.metadata ?? null,
+		hidden: historicalSnapshot.hidden,
+		data: initialData,
+	};
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {

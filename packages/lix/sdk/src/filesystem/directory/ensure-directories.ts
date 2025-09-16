@@ -159,7 +159,7 @@ export function computeDirectoryPath(args: {
 				engine: args.engine,
 				versionId: args.versionId,
 				directoryId: args.parentId,
-		  })
+			})
 		: "/";
 
 	if (!parentPath) {
@@ -227,6 +227,51 @@ export function ensureDirectoryAncestors(args: {
 		}
 		parentId = insertedId;
 	}
+}
+
+export function ensureDirectoryPathExists(args: {
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	versionId: string;
+	path: string;
+}): string | null {
+	if (args.path === "/") {
+		return null;
+	}
+
+	if (!isValidDirectoryPath(args.path)) {
+		throw new Error(`Invalid directory path ${args.path}`);
+	}
+
+	const segments = args.path.slice(1, -1).split("/");
+	let parentId: string | null = null;
+	let currentPath = "";
+
+	for (const segment of segments) {
+		currentPath += `/${segment}`;
+		const fullPath = `${currentPath}/`;
+		const existing = readDirectoryByPath({
+			engine: args.engine,
+			versionId: args.versionId,
+			path: fullPath,
+		});
+		if (existing) {
+			parentId = existing.id;
+			continue;
+		}
+
+		const result = args.engine.sqlite.exec({
+			sql: `SELECT handle_directory_upsert(NULL, ?, ?, NULL, 0, ?);`,
+			bind: [parentId, segment, args.versionId],
+			returnValue: "resultRows",
+		}) as Array<Array<string>>;
+		const insertedId = result[0]?.[0] as string | undefined;
+		if (typeof insertedId !== "string") {
+			throw new Error(`Failed to create directory for path ${fullPath}`);
+		}
+		parentId = insertedId;
+	}
+
+	return parentId;
 }
 
 export function composeDirectoryPath(args: {

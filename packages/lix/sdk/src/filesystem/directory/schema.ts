@@ -10,6 +10,8 @@ import {
 	readDirectoryByPath,
 	composeDirectoryPath,
 	assertNoFileAtPath,
+	ensureDirectoryPathExists,
+	computeDirectoryPath,
 } from "./ensure-directories.js";
 import { executeSync } from "../../database/execute-sync.js";
 
@@ -110,6 +112,13 @@ export function applyDirectoryDatabaseSchema(args: {
 		if (existing && existing.id !== id) {
 			throw new Error(`Directory already exists at ${computedPath}`);
 		}
+
+		assertNoDirectoryCycle({
+			engine,
+			versionId,
+			directoryId: id,
+			newParentId: parentId,
+		});
 
 		const hidden = hiddenArg ? Number(hiddenArg) : 0;
 
@@ -347,7 +356,7 @@ export function applyDirectoryDatabaseSchema(args: {
 }
 
 function computeUpsertInputs(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	versionId: string;
 	parentIdArg: unknown;
 	nameArg: unknown;
@@ -357,7 +366,9 @@ function computeUpsertInputs(args: {
 	let name = "";
 
 	const rawParentId =
-		args.parentIdArg === null || args.parentIdArg === undefined || args.parentIdArg === ""
+		args.parentIdArg === null ||
+		args.parentIdArg === undefined ||
+		args.parentIdArg === ""
 			? null
 			: String(args.parentIdArg);
 
@@ -374,15 +385,11 @@ function computeUpsertInputs(args: {
 		}
 		const parentPath = segments.length === 0 ? null : `/${segments.join("/")}/`;
 		if (parentPath) {
-			const parentRow = readDirectoryByPath({
+			parentId = ensureDirectoryPathExists({
 				engine: args.engine,
 				versionId: args.versionId,
 				path: parentPath,
 			});
-			if (!parentRow) {
-				throw new Error(`Parent directory does not exist for path ${parentPath}`);
-			}
-			parentId = parentRow.id;
 		} else {
 			parentId = null;
 		}
@@ -394,7 +401,17 @@ function computeUpsertInputs(args: {
 		if (rawParentId && !parentId) {
 			throw new Error("Provided parent_id does not match root directory");
 		}
-		computedPath = providedPath;
+		computedPath = computeDirectoryPath({
+			engine: args.engine,
+			versionId: args.versionId,
+			parentId,
+			name,
+		});
+		if (computedPath !== providedPath) {
+			throw new Error(
+				`Provided directory path '${providedPath}' does not match normalized path '${computedPath}'`
+			);
+		}
 	} else {
 		parentId = rawParentId;
 		name = String(args.nameArg ?? "").trim();
@@ -406,7 +423,7 @@ function computeUpsertInputs(args: {
 					engine: args.engine,
 					versionId: args.versionId,
 					directoryId: parentId,
-			  })
+				})
 			: "/";
 		if (!parentPath) {
 			throw new Error(`Parent directory does not exist for id ${parentId}`);
@@ -426,4 +443,54 @@ function computeUpsertInputs(args: {
 	});
 
 	return { parentId, name, computedPath };
+}
+
+function assertNoDirectoryCycle(args: {
+	engine: Pick<LixEngine, "sqlite" | "db">;
+	versionId: string;
+	directoryId: string;
+	newParentId: string | null;
+}): void {
+	if (!args.newParentId) {
+		return;
+	}
+
+	if (args.newParentId === args.directoryId) {
+		throw new Error("Directory cannot be its own parent");
+	}
+	let current: string | null = args.newParentId;
+	let safety = 0;
+	while (current) {
+		if (current === args.directoryId) {
+			throw new Error("Directory parent would create a cycle");
+		}
+		if (safety++ > 1024) {
+			throw new Error("Directory hierarchy appears to be cyclic");
+		}
+		const rows = executeSync({
+			engine: args.engine,
+			query: args.engine.db
+				.selectFrom("state_all")
+				.where("schema_key", "=", "lix_directory_descriptor")
+				.where("version_id", "=", args.versionId)
+				.where("entity_id", "=", current)
+				.select(["snapshot_content"]),
+		});
+		if (rows.length === 0) {
+			throw new Error(`Parent directory does not exist for id ${current}`);
+		}
+		const snapshot = rows[0]?.snapshot_content as
+			| { parent_id: string | null }
+			| string
+			| undefined;
+		if (!snapshot) {
+			current = null;
+			continue;
+		}
+		const parsed =
+			typeof snapshot === "string"
+				? (JSON.parse(snapshot) as { parent_id: string | null })
+				: snapshot;
+		current = parsed.parent_id ?? null;
+	}
 }

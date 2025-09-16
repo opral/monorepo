@@ -106,7 +106,6 @@ export function handleFileInsert(args: {
 				directory_id: descriptorFields.directoryId,
 				name: descriptorFields.name,
 				extension: descriptorFields.extension ?? null,
-				path: descriptorFields.path,
 				metadata: descriptorFields.metadata ?? null,
 				hidden: descriptorFields.hidden,
 			},
@@ -322,15 +321,14 @@ export function handleFileUpdate(args: {
 		query: args.engine.db
 			.updateTable("state_all")
 			.set({
-			snapshot_content: {
-				id: args.file.id,
-				directory_id: descriptorFields.directoryId,
-				name: descriptorFields.name,
-				extension: descriptorFields.extension ?? null,
-				path: descriptorFields.path,
-				metadata: descriptorFields.metadata ?? null,
-				hidden: descriptorFields.hidden,
-			},
+				snapshot_content: {
+					id: args.file.id,
+					directory_id: descriptorFields.directoryId,
+					name: descriptorFields.name,
+					extension: descriptorFields.extension ?? null,
+					metadata: descriptorFields.metadata ?? null,
+					hidden: descriptorFields.hidden,
+				},
 				metadata: descriptorFields.metadata ?? null,
 				untracked: args.untracked || false,
 			})
@@ -382,11 +380,11 @@ export function handleFileUpdate(args: {
 			}
 
 			// Detect changes between current and updated file
-		const detectedChanges = plugin.detectChanges({
-			before: currentFile,
-			after: pluginFile,
-			querySync,
-		});
+			const detectedChanges = plugin.detectChanges({
+				before: currentFile,
+				after: pluginFile,
+				querySync,
+			});
 
 			if (detectedChanges.length > 0) {
 				hasChanges = true;
@@ -446,11 +444,11 @@ export function handleFileUpdate(args: {
 
 			// Use fallback plugin to handle the file
 			if (lixUnknownFileFallbackPlugin.detectChanges) {
-			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
-				before: currentFile,
-				after: pluginFile,
-				querySync,
-			});
+				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
+					before: currentFile,
+					after: pluginFile,
+					querySync,
+				});
 
 				if (detectedChanges.length > 0) {
 					// Validate and store schemas for fallback plugin changes

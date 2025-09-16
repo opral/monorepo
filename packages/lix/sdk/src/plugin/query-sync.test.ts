@@ -82,8 +82,8 @@ describe("querySync", () => {
 			directory_id: null,
 			name: "a",
 			extension: "txt",
-		hidden: false,
-	} as any;
+			hidden: false,
+		} as any;
 
 		// Use engine helper: write state_all row for file descriptor via Kysely
 		await lix.db
@@ -98,7 +98,6 @@ describe("querySync", () => {
 					directory_id: file.directory_id,
 					name: file.name,
 					extension: file.extension,
-					path: file.path,
 					metadata: file.metadata,
 					hidden: file.hidden,
 				},
