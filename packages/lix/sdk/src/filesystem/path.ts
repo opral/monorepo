@@ -105,3 +105,23 @@ export function composeFilePath(args: {
 	const filename = composeFileName(args.name, args.extension);
 	return dirPrefix ? `${dirPrefix}/${filename}` : `/${filename}`;
 }
+
+export function normalizeFilePath(path: string): string {
+	const normalized = path.normalize("NFC");
+	if (!isValidFilePath(normalized)) {
+		throw new Error(`Invalid file path ${path}`);
+	}
+	return normalized;
+}
+
+export function normalizeDirectoryPath(path: string): string {
+	const normalized = path.normalize("NFC");
+	if (!isValidDirectoryPath(normalized)) {
+		throw new Error(`Invalid directory path ${path}`);
+	}
+	return normalized;
+}
+
+export function normalizePathSegment(segment: string): string {
+	return segment.normalize("NFC");
+}

@@ -1,6 +1,10 @@
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
-import { isValidDirectoryPath } from "../path.js";
+import {
+	normalizeDirectoryPath,
+	normalizeFilePath,
+	normalizePathSegment,
+} from "../path.js";
 
 export function getActiveVersionId(
 	engine: Pick<LixEngine, "sqlite" | "db">
@@ -149,7 +153,8 @@ export function computeDirectoryPath(args: {
 	parentId: string | null;
 	name: string;
 }): string {
-	const name = args.name?.trim();
+	const rawName = args.name?.trim();
+	const name = normalizePathSegment(rawName ?? "");
 	if (!name) {
 		throw new Error("Directory name must be provided");
 	}
@@ -166,12 +171,7 @@ export function computeDirectoryPath(args: {
 		throw new Error(`Parent directory does not exist for id ${args.parentId}`);
 	}
 
-	const candidatePath = `${parentPath}${name}/`;
-	if (!isValidDirectoryPath(candidatePath)) {
-		throw new Error(
-			`Invalid directory path ${candidatePath} (parent: ${parentPath}, name: ${name})`
-		);
-	}
+	const candidatePath = normalizeDirectoryPath(`${parentPath}${name}/`);
 
 	assertNoFileAtPath({
 		engine: args.engine,
@@ -183,13 +183,15 @@ export function computeDirectoryPath(args: {
 }
 
 function listAncestorDirectories(filePath: string): string[] {
-	const segments = filePath.split("/").filter(Boolean);
+	const normalizedPath = normalizeFilePath(filePath);
+	const segments = normalizedPath.split("/").filter(Boolean);
 	segments.pop();
 	const paths: string[] = [];
 	let current = "";
 	for (const segment of segments) {
-		current += `/${segment}`;
-		paths.push(`${current}/`);
+		const normalizedSegment = normalizePathSegment(segment);
+		current += `/${normalizedSegment}`;
+		paths.push(`${current}/`.normalize("NFC"));
 	}
 	return paths;
 }
@@ -215,7 +217,9 @@ export function ensureDirectoryAncestors(args: {
 			continue;
 		}
 
-		const name = dirPath.slice(1, -1).split("/").pop() ?? "";
+		const name = normalizePathSegment(
+			dirPath.slice(1, -1).split("/").pop() ?? ""
+		);
 		const result = args.engine.sqlite.exec({
 			sql: `SELECT handle_directory_upsert(NULL, ?, ?, ?, 0, ?);`,
 			bind: [parentId, name, dirPath, versionId],
@@ -238,17 +242,15 @@ export function ensureDirectoryPathExists(args: {
 		return null;
 	}
 
-	if (!isValidDirectoryPath(args.path)) {
-		throw new Error(`Invalid directory path ${args.path}`);
-	}
-
-	const segments = args.path.slice(1, -1).split("/");
+	const normalizedPath = normalizeDirectoryPath(args.path);
+	const segments = normalizedPath.slice(1, -1).split("/");
 	let parentId: string | null = null;
 	let currentPath = "";
 
 	for (const segment of segments) {
-		currentPath += `/${segment}`;
-		const fullPath = `${currentPath}/`;
+		const normalizedSegment = normalizePathSegment(segment);
+		currentPath += `/${normalizedSegment}`;
+		const fullPath = normalizeDirectoryPath(`${currentPath}/`);
 		const existing = readDirectoryByPath({
 			engine: args.engine,
 			versionId: args.versionId,
@@ -261,7 +263,7 @@ export function ensureDirectoryPathExists(args: {
 
 		const result = args.engine.sqlite.exec({
 			sql: `SELECT handle_directory_upsert(NULL, ?, ?, NULL, 0, ?);`,
-			bind: [parentId, segment, args.versionId],
+			bind: [parentId, normalizedSegment, args.versionId],
 			returnValue: "resultRows",
 		}) as Array<Array<string>>;
 		const insertedId = result[0]?.[0] as string | undefined;
@@ -306,5 +308,5 @@ export function composeDirectoryPath(args: {
 		return "/";
 	}
 
-	return `/${segments.reverse().join("/")}/`;
+	return `/${segments.reverse().join("/")}/`.normalize("NFC");
 }

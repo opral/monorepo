@@ -4,6 +4,8 @@ import {
 	isValidFilePath,
 	splitFilePath,
 	composeFilePath,
+	normalizeFilePath,
+	normalizeDirectoryPath,
 } from "./path.js";
 
 const BASE_URL = "https://example.com";
@@ -61,6 +63,13 @@ describe("filesystem path validators", () => {
 		expect(decodePathname(path)).toBe(path);
 	});
 
+	test("normalizes file paths to NFC", () => {
+		const decomposed = "/Cafe\u0301/readme.md";
+		const composed = "/Café/readme.md";
+		expect(normalizeFilePath(decomposed)).toBe(composed);
+		expect(normalizeFilePath(composed)).toBe(composed);
+	});
+
 	test("accepts normalized directory paths", () => {
 		for (const path of ["/docs/", "/docs/guides/", "/unicodé/章节/"]) {
 			expect(isValidDirectoryPath(path)).toBe(true);
@@ -80,6 +89,13 @@ describe("filesystem path validators", () => {
 			expect(isValidDirectoryPath(path)).toBe(false);
 			expect(decodePathname(path)).not.toBe(path);
 		}
+	});
+
+	test("normalizes directory paths to NFC", () => {
+		const decomposed = "/Cafe\u0301/";
+		const composed = "/Café/";
+		expect(normalizeDirectoryPath(decomposed)).toBe(composed);
+		expect(normalizeDirectoryPath(composed)).toBe(composed);
 	});
 });
 

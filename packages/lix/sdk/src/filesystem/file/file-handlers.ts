@@ -12,6 +12,7 @@ import {
 	assertNoDirectoryAtFilePath,
 } from "../directory/ensure-directories.js";
 import { matchesGlob } from "../util/glob.js";
+import { normalizeFilePath } from "../path.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 
 type FileMutationInput = {
@@ -47,29 +48,31 @@ export function handleFileInsert(args: {
 		return 1; // Indicate no changes were made
 	}
 
+	const normalizedPath = normalizeFilePath(args.file.path);
+
 	ensureDirectoryAncestors({
 		engine: args.engine,
 		versionId: args.versionId,
-		filePath: args.file.path,
+		filePath: normalizedPath,
 	});
 
 	assertNoDirectoryAtFilePath({
 		engine: args.engine,
 		versionId: args.versionId,
-		filePath: args.file.path,
+		filePath: normalizedPath,
 	});
 
 	const descriptorFields = deriveDescriptorFieldsFromPath({
 		engine: args.engine,
 		versionId: args.versionId,
-		path: args.file.path,
+		path: normalizedPath,
 		metadata: args.file.metadata,
 		hidden: args.file.hidden ?? false,
 	});
 
 	const pluginFile: LixFile = {
 		id: args.file.id,
-		path: args.file.path,
+		path: normalizedPath,
 		directory_id: descriptorFields.directoryId,
 		name: descriptorFields.name,
 		extension: descriptorFields.extension ?? null,
@@ -113,7 +116,7 @@ export function handleFileInsert(args: {
 			!plugin.detectChangesGlob ||
 			!matchesGlob({
 				engine: args.engine,
-				path: args.file.path,
+				path: normalizedPath,
 				pattern: plugin.detectChangesGlob,
 			})
 		) {
@@ -127,7 +130,7 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File inserted at ${args.file.path} but plugin does not support detecting changes`,
+				message: `File inserted at ${normalizedPath} but plugin does not support detecting changes`,
 			});
 			continue;
 		}
@@ -178,7 +181,7 @@ export function handleFileInsert(args: {
 			engine: args.engine,
 			key: "lix_file_no_plugin",
 			level: "warn",
-			message: `File inserted at ${args.file.path} but no plugin available to detect changes`,
+			message: `File inserted at ${normalizedPath} but no plugin available to detect changes`,
 		});
 
 		// Use fallback plugin to handle the file
@@ -223,7 +226,7 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File inserted at ${args.file.path} but plugin detected no changes`,
+				message: `File inserted at ${normalizedPath} but plugin detected no changes`,
 			});
 		}
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
@@ -269,29 +272,31 @@ export function handleFileUpdate(args: {
 		return 1; // Indicate no changes were made
 	}
 
+	const normalizedPath = normalizeFilePath(args.file.path);
+
 	ensureDirectoryAncestors({
 		engine: args.engine,
 		versionId: args.versionId,
-		filePath: args.file.path,
+		filePath: normalizedPath,
 	});
 
 	assertNoDirectoryAtFilePath({
 		engine: args.engine,
 		versionId: args.versionId,
-		filePath: args.file.path,
+		filePath: normalizedPath,
 	});
 
 	const descriptorFields = deriveDescriptorFieldsFromPath({
 		engine: args.engine,
 		versionId: args.versionId,
-		path: args.file.path,
+		path: normalizedPath,
 		metadata: args.file.metadata,
 		hidden: args.file.hidden ?? false,
 	});
 
 	const pluginFile: LixFile = {
 		id: args.file.id,
-		path: args.file.path,
+		path: normalizedPath,
 		directory_id: descriptorFields.directoryId,
 		name: descriptorFields.name,
 		extension: descriptorFields.extension ?? null,
@@ -345,7 +350,7 @@ export function handleFileUpdate(args: {
 				!plugin.detectChangesGlob ||
 				!matchesGlob({
 					engine: args.engine,
-					path: args.file.path,
+					path: normalizedPath,
 					pattern: plugin.detectChangesGlob,
 				})
 			) {
@@ -359,7 +364,7 @@ export function handleFileUpdate(args: {
 					engine: args.engine,
 					key: "lix_file_no_plugin",
 					level: "warn",
-					message: `File updated at ${args.file.path} but plugin does not support detecting changes`,
+					message: `File updated at ${normalizedPath} but plugin does not support detecting changes`,
 				});
 				continue;
 			}
@@ -424,7 +429,7 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File updated at ${args.file.path} but no plugin available to detect changes`,
+				message: `File updated at ${normalizedPath} but no plugin available to detect changes`,
 			});
 
 			// Use fallback plugin to handle the file
@@ -484,7 +489,7 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File updated at ${args.file.path} but plugin detected no changes`,
+				message: `File updated at ${normalizedPath} but plugin detected no changes`,
 			});
 		}
 	}

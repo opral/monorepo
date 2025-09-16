@@ -217,6 +217,119 @@ simulationTest(
 	}
 );
 
+// Future-proofing: ensure special dot segments never materialize as directory names.
+simulationTest(
+	"directory names cannot be dot segments",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({ name: ".", parent_id: null })
+				.execute()
+		).rejects.toThrowError();
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({ name: "..", parent_id: null })
+				.execute()
+		).rejects.toThrowError();
+
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "docs", parent_id: null })
+			.execute();
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({
+					name: ".",
+					parent_id: (
+						await lix.db
+							.selectFrom("directory")
+							.where("name", "=", "docs")
+							.select("id")
+							.executeTakeFirstOrThrow()
+					).id,
+				})
+				.execute()
+		).rejects.toThrowError();
+
+		await expect(
+			lix.db
+				.insertInto("directory")
+				.values({
+					name: "..",
+					parent_id: (
+						await lix.db
+							.selectFrom("directory")
+							.where("name", "=", "docs")
+							.select("id")
+							.executeTakeFirstOrThrow()
+					).id,
+				})
+				.execute()
+		).rejects.toThrowError();
+	}
+);
+
+// Future-proofing: ensure all stored paths collapse canonically via NFC normalization.
+simulationTest(
+	"file and directory paths normalize to NFC",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const decomposedDir = "/Cafe\u0301/Guides/";
+		const decomposedFile = "/Cafe\u0301/Guides/intro\u0301.md";
+		const expectedParentDir = "/Café/";
+		const expectedChildDir = "/Café/Guides/";
+		const expectedFile = "/Café/Guides/intró.md";
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: decomposedFile,
+				data: new Uint8Array([1, 2, 3]),
+			})
+			.execute();
+
+		const fileRow = await lix.db
+			.selectFrom("file")
+			.select(["path"])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(fileRow.path).toBe(expectedFile);
+
+		const directoryRows = await lix.db
+			.selectFrom("directory")
+			.select(["path"] as any)
+			.orderBy("path")
+			.execute();
+		expectDeterministic(directoryRows.map((row: any) => row.path)).toEqual([
+			expectedParentDir,
+			expectedChildDir,
+		]);
+	}
+);
+
 simulationTest(
 	"file paths cannot collide with directory descriptors at the same location",
 	async ({ openSimulatedLix }) => {

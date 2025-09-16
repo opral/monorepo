@@ -4,6 +4,7 @@ import {
 	composeFileName,
 	composeFilePath as composeFullFilePath,
 	splitFilePath,
+	normalizeFilePath,
 } from "../path.js";
 import type { LixFile } from "./schema.js";
 import {
@@ -26,7 +27,8 @@ export function deriveDescriptorFieldsFromPath(args: {
 	metadata: unknown;
 	hidden: boolean;
 }): FileDescriptorFields {
-	const { directoryPath, name, extension } = splitFilePath(args.path);
+	const normalizedPath = normalizeFilePath(args.path);
+	const { directoryPath, name, extension } = splitFilePath(normalizedPath);
 
 	let directoryId: string | null = null;
 	if (directoryPath) {

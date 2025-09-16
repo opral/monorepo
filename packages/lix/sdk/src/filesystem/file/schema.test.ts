@@ -261,6 +261,29 @@ test("invalid file paths should be rejected", async () => {
 	).rejects.toThrowError("Invalid file path");
 });
 
+// Future-proofing: ensure glob logic never admits leading/trailing dot segments.
+test("file paths cannot contain dot segments", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const payload = new TextEncoder().encode(JSON.stringify({ note: "dot" }));
+
+	await expect(
+		lix.db
+			.insertInto("file")
+			.values({ path: "/./readme.json", data: payload })
+			.execute()
+	).rejects.toThrow(/Invalid (directory|file) path/);
+
+	await expect(
+		lix.db
+			.insertInto("file")
+			.values({ path: "/docs/../readme.json", data: payload })
+			.execute()
+	).rejects.toThrow(/Invalid (directory|file) path/);
+});
+
 test("files should have hidden property defaulting to false", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],

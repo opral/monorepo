@@ -3,7 +3,7 @@ import type {
 	LixSchemaDefinition,
 } from "../../schema-definition/definition.js";
 import type { LixEngine } from "../../engine/boot.js";
-import { isValidDirectoryPath } from "../path.js";
+import { normalizeDirectoryPath, normalizePathSegment } from "../path.js";
 import { nanoIdSync } from "../../engine/deterministic/nano-id.js";
 import {
 	getActiveVersionId,
@@ -378,16 +378,19 @@ function computeUpsertInputs(args: {
 
 	let computedPath: string;
 	if (typeof args.pathArg === "string" && args.pathArg.trim() !== "") {
-		const providedPath = args.pathArg.trim();
-		if (!isValidDirectoryPath(providedPath)) {
-			throw new Error(`Invalid directory path ${providedPath}`);
-		}
-		const segments = providedPath.slice(1, -1).split("/");
-		name = segments.pop() ?? "";
+		const normalizedPath = normalizeDirectoryPath(args.pathArg.trim());
+		const segments = normalizedPath.slice(1, -1).split("/");
+		name = normalizePathSegment(segments.pop() ?? "");
 		if (!name) {
 			throw new Error("Directory name must be provided");
 		}
-		const parentPath = segments.length === 0 ? null : `/${segments.join("/")}/`;
+		if (name === "." || name === "..") {
+			throw new Error("Directory name cannot be '.' or '..'");
+		}
+		const parentPath =
+			segments.length === 0
+				? null
+				: normalizeDirectoryPath(`/${segments.join("/")}/`);
 		if (parentPath) {
 			parentId = ensureDirectoryPathExists({
 				engine: args.engine,
@@ -399,28 +402,33 @@ function computeUpsertInputs(args: {
 		}
 		if (rawParentId && parentId && rawParentId !== parentId) {
 			throw new Error(
-				`Provided parent_id ${rawParentId} does not match parent derived from path ${providedPath}`
+				`Provided parent_id ${rawParentId} does not match parent derived from path ${normalizedPath}`
 			);
 		}
 		if (rawParentId && !parentId) {
 			throw new Error("Provided parent_id does not match root directory");
 		}
-		computedPath = computeDirectoryPath({
-			engine: args.engine,
-			versionId: args.versionId,
-			parentId,
-			name,
-		});
-		if (computedPath !== providedPath) {
+		computedPath = normalizeDirectoryPath(
+			computeDirectoryPath({
+				engine: args.engine,
+				versionId: args.versionId,
+				parentId,
+				name,
+			})
+		);
+		if (computedPath !== normalizedPath) {
 			throw new Error(
-				`Provided directory path '${providedPath}' does not match normalized path '${computedPath}'`
+				`Provided directory path '${normalizedPath}' does not match normalized path '${computedPath}'`
 			);
 		}
 	} else {
 		parentId = rawParentId;
-		name = String(args.nameArg ?? "").trim();
+		name = normalizePathSegment(String(args.nameArg ?? "").trim());
 		if (!name) {
 			throw new Error("Directory name must be provided");
+		}
+		if (name === "." || name === "..") {
+			throw new Error("Directory name cannot be '.' or '..'");
 		}
 		const parentPath = parentId
 			? composeDirectoryPath({
@@ -432,12 +440,14 @@ function computeUpsertInputs(args: {
 		if (!parentPath) {
 			throw new Error(`Parent directory does not exist for id ${parentId}`);
 		}
-		computedPath = `${parentPath}${name}/`;
-		if (!isValidDirectoryPath(computedPath)) {
-			throw new Error(
-				`Invalid directory path ${computedPath} (parent: ${parentPath}, name: ${name})`
-			);
-		}
+		computedPath = normalizeDirectoryPath(
+			computeDirectoryPath({
+				engine: args.engine,
+				versionId: args.versionId,
+				parentId,
+				name,
+			})
+		);
 	}
 
 	assertNoFileAtPath({
