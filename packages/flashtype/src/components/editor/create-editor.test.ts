@@ -8,6 +8,30 @@ import { handlePaste } from "./handle-paste";
 import { AstSchemas } from "@opral/markdown-wc";
 import { Editor } from "@tiptap/core";
 
+async function createEditorFromFile(args: {
+	lix: Awaited<ReturnType<typeof openLix>>;
+	fileId: string;
+	persistDebounceMs?: number;
+}) {
+	const row = await args.lix.db
+		.selectFrom("file")
+		.where("id", "=", args.fileId)
+		.select(["data"])
+		.executeTakeFirst();
+
+	const initialMarkdown = new TextDecoder().decode(
+		row?.data ?? new Uint8Array(),
+	);
+	const editor = createEditor({
+		lix: args.lix,
+		fileId: args.fileId,
+		initialMarkdown,
+		persistDebounceMs: args.persistDebounceMs,
+	});
+
+	return editor;
+}
+
 // TipTap + Lix persistence paste tests (no React)
 test("paste at start inserts before existing content (TipTap + Lix)", async () => {
 	const lix = await openLix({
@@ -33,7 +57,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 		.execute();
 
 	// Create editor from fileId (auto-loads initial content)
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -41,6 +65,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 
 	// Set cursor at start and simulate paste of plain text
 	editor.commands.setTextSelection(1);
+	await new Promise((resolve) => setTimeout(resolve, 0));
 	await handlePaste({
 		editor,
 		event: {
@@ -50,6 +75,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 			},
 		},
 	});
+	await new Promise((resolve) => setTimeout(resolve, 0));
 
 	const rootOrderAfter = await lix.db
 		.selectFrom("state")
@@ -60,32 +86,31 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 
 	expect(rootOrderAfter).toHaveLength(1);
 	expect(rootOrderAfter[0]?.snapshot_content.order.length).toBe(2);
+	const orderIds = rootOrderAfter[0]?.snapshot_content.order as string[];
 
 	const paragraphsAfter = await lix.db
 		.selectFrom("state")
 		.where("file_id", "=", fileId)
 		.where("schema_key", "=", AstSchemas.ParagraphSchema["x-lix-key"])
-		.orderBy("entity_id", "asc")
-		.select(["snapshot_content"])
+		.select(["entity_id", "snapshot_content"])
 		.execute();
 
 	expect(paragraphsAfter).toHaveLength(2);
-	expect(paragraphsAfter).toEqual([
-		{
-			snapshot_content: {
-				type: "paragraph",
-				children: [{ type: "text", value: "New" }],
-				data: expect.any(Object),
-			},
-		},
-		{
-			snapshot_content: {
-				type: "paragraph",
-				children: [{ type: "text", value: "Start" }],
-				data: expect.any(Object),
-			},
-		},
-	]);
+	const paragraphById = new Map(
+		paragraphsAfter.map((row: any) => [
+			row.entity_id as string,
+			row.snapshot_content as any,
+		]),
+	);
+	const orderedTexts = orderIds.map((id) => {
+		const snap = paragraphById.get(id);
+		if (!snap) return "";
+		const children = Array.isArray(snap.children)
+			? (snap.children as any[])
+			: [];
+		return children.map((child) => child.value ?? "").join("");
+	});
+	expect(orderedTexts).toEqual(["New", "Start"]);
 
 	const fileAfter = await lix.db
 		.selectFrom("file")
@@ -113,7 +138,7 @@ test("paste at end inserts after existing content (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -154,7 +179,7 @@ test("replace word selection with paste (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -195,7 +220,7 @@ test("replace entire document with paste (TipTap + Lix)", async () => {
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -235,7 +260,7 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -274,7 +299,7 @@ test("Enter splits paragraph → assigns unique ids and root order has no duplic
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -335,7 +360,7 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -417,7 +442,7 @@ test("normalize CRLF line endings on paste (TipTap + Lix)", async () => {
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -454,7 +479,7 @@ test("paste complex markdown with lists and code blocks (TipTap + Lix)", async (
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -495,7 +520,7 @@ test("paste inline formatting markdown (TipTap + Lix)", async () => {
 			data: new TextEncoder().encode(""),
 		})
 		.execute();
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -544,7 +569,7 @@ test("rapid Enter/type coalescing persists 3 paragraphs with unique ids", async 
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
@@ -636,7 +661,7 @@ test("state cleanup on delete removes row and prunes root order", async () => {
 		})
 		.execute();
 
-	const editor: Editor = await createEditor({
+	const editor: Editor = await createEditorFromFile({
 		lix,
 		fileId,
 		persistDebounceMs: 0,
