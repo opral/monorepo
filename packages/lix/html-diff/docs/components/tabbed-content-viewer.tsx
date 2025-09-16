@@ -72,7 +72,7 @@ function CodeBlock({
   editable?: boolean;
 }) {
   // Calculate height based on content lines (with min/max bounds)
-  const lineCount = htmlContent.split('\n').length;
+  const lineCount = htmlContent.split("\n").length;
   const calculatedHeight = Math.max(150, Math.min(400, lineCount * 19 + 40));
 
   return (

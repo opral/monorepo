@@ -15,8 +15,8 @@ import { renderHtmlDiff } from "@lix-js/html-diff";
 const tableBefore = renderTable(beforeData);
 const tableAfter = renderTable(afterData);
 
-const diff = renderHtmlDiff({ 
-  beforeHtml: tableBefore, 
+const diff = renderHtmlDiff({
+  beforeHtml: tableBefore,
   afterHtml: tableAfter,
   // Optional: use a custom attribute to match elements
   // diffAttribute: 'data-id',

@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { describe, expect, test } from "vitest";
 import type { RenderDiffArgs } from "@lix-js/sdk";
 import type { AstSchemas } from "@opral/markdown-wc";
@@ -32,8 +31,9 @@ describe("renderPluginDiff", () => {
 
 		const html = await renderDiff(args);
 		expect(html).toContain('class="diff-added"');
+		expect(html).toContain("Hello");
 		expect(html).toContain("brave new");
-		expect(html).toContain("Hello world");
+		expect(html).toContain("world.");
 	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });

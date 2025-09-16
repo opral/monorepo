@@ -17,9 +17,10 @@ When the diff engine processes your HTML, it adds CSS classes to elements and pr
 ```html
 <!-- After diff processing -->
 <p data-diff-key="intro" data-diff-mode="words" class="diff-modified">
-  Welcome to our <span class="diff-removed">comprehensive</span> 
-  <span class="diff-added">updated</span> guide for new 
-  <span class="diff-removed">users</span><span class="diff-added">developers</span>.
+  Welcome to our <span class="diff-removed">comprehensive</span>
+  <span class="diff-added">updated</span> guide for new
+  <span class="diff-removed">users</span
+  ><span class="diff-added">developers</span>.
 </p>
 ```
 
@@ -37,27 +38,31 @@ const diffResult = renderHtmlDiff({ beforeHtml, afterHtml });
 container.innerHTML = diffResult;
 
 // 3. Query for interactive elements
-const modifiedElements = container.querySelectorAll('.diff-modified[data-diff-key]');
-const addedElements = container.querySelectorAll('.diff-added[data-diff-key]');
-const removedElements = container.querySelectorAll('.diff-removed[data-diff-key]');
+const modifiedElements = container.querySelectorAll(
+  ".diff-modified[data-diff-key]",
+);
+const addedElements = container.querySelectorAll(".diff-added[data-diff-key]");
+const removedElements = container.querySelectorAll(
+  ".diff-removed[data-diff-key]",
+);
 
 // 4. Add any interactivity you want
-modifiedElements.forEach(element => {
-  const diffKey = element.getAttribute('data-diff-key');
-  
+modifiedElements.forEach((element) => {
+  const diffKey = element.getAttribute("data-diff-key");
+
   // Add hover cards
-  element.addEventListener('mouseenter', () => showHoverCard(diffKey));
-  
-  // Add click handlers  
-  element.addEventListener('click', () => showDetailedDiff(diffKey));
-  
+  element.addEventListener("mouseenter", () => showHoverCard(diffKey));
+
+  // Add click handlers
+  element.addEventListener("click", () => showDetailedDiff(diffKey));
+
   // Add keyboard navigation
-  element.setAttribute('tabindex', '0');
-  element.addEventListener('keydown', handleKeyNavigation);
-  
+  element.setAttribute("tabindex", "0");
+  element.addEventListener("keydown", handleKeyNavigation);
+
   // Add custom styling
-  element.style.cursor = 'pointer';
-  element.style.position = 'relative';
+  element.style.cursor = "pointer";
+  element.style.position = "relative";
 });
 
 // 5. Store original data for comparisons
@@ -74,8 +79,8 @@ function showDetailedDiff(diffKey) {
 
 function handleKeyNavigation(event) {
   // Handle arrow keys to navigate between changes
-  if (event.key === 'ArrowRight') navigateToNextChange();
-  if (event.key === 'ArrowLeft') navigateToPreviousChange();
+  if (event.key === "ArrowRight") navigateToNextChange();
+  if (event.key === "ArrowLeft") navigateToPreviousChange();
 }
 ```
 
@@ -120,8 +125,8 @@ export function InteractiveHtmlDiff() {
 
   // Store original values for hover cards
   const originalData = {
-    'basic-price': { before: '$9', after: '$12' },
-    'pro-price': { before: '$29', after: '$39' }
+    "basic-price": { before: "$9", after: "$12" },
+    "pro-price": { before: "$29", after: "$39" },
   };
 
   useEffect(() => {
@@ -132,17 +137,19 @@ export function InteractiveHtmlDiff() {
     ref.current.innerHTML = diffResult;
 
     // Add event listeners to modified elements
-    const modifiedElements = ref.current.querySelectorAll('.diff-modified[data-diff-key]');
-    
+    const modifiedElements = ref.current.querySelectorAll(
+      ".diff-modified[data-diff-key]",
+    );
+
     const handleMouseEnter = (e) => {
       const element = e.target;
-      const diffKey = element.getAttribute('data-diff-key');
-      
+      const diffKey = element.getAttribute("data-diff-key");
+
       if (!diffKey || !originalData[diffKey]) return;
-      
+
       const rect = element.getBoundingClientRect();
       const data = originalData[diffKey];
-      
+
       setHoverCard({
         x: rect.left,
         y: rect.bottom + 8,
@@ -156,21 +163,21 @@ export function InteractiveHtmlDiff() {
       setHoverCard(null);
     };
 
-    modifiedElements.forEach(element => {
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseLeave);
+    modifiedElements.forEach((element) => {
+      element.addEventListener("mouseenter", handleMouseEnter);
+      element.addEventListener("mouseleave", handleMouseLeave);
     });
 
     return () => {
-      modifiedElements.forEach(element => {
-        element.removeEventListener('mouseenter', handleMouseEnter);
-        element.removeEventListener('mouseleave', handleMouseLeave);
+      modifiedElements.forEach((element) => {
+        element.removeEventListener("mouseenter", handleMouseEnter);
+        element.removeEventListener("mouseleave", handleMouseLeave);
       });
     };
   }, []);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: "relative" }}>
       {/* CSS Styles */}
       <style>{`
         .pricing-table {
@@ -192,7 +199,7 @@ export function InteractiveHtmlDiff() {
           transform: scale(1.02);
         }
       `}</style>
-      
+
       {/* Diff Container */}
       <div ref={ref} />
 
@@ -214,73 +221,87 @@ export function InteractiveHtmlDiff() {
           }}
         >
           {/* Header */}
-          <div style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            justifyContent: 'space-between',
-            background: '#f9fafb',
-            borderRadius: '8px 8px 0 0'
-          }}>
-            <span style={{
-              background: '#fef3c7',
-              color: '#92400e',
-              padding: '3px 8px',
-              borderRadius: '12px',
-              fontSize: '10px',
-              fontWeight: 600,
-              textTransform: 'uppercase'
-            }}>
+          <div
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid #e5e7eb",
+              display: "flex",
+              justifyContent: "space-between",
+              background: "#f9fafb",
+              borderRadius: "8px 8px 0 0",
+            }}
+          >
+            <span
+              style={{
+                background: "#fef3c7",
+                color: "#92400e",
+                padding: "3px 8px",
+                borderRadius: "12px",
+                fontSize: "10px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+              }}
+            >
               MODIFIED
             </span>
-            <span style={{
-              fontFamily: 'monospace',
-              fontSize: '11px',
-              color: '#6b7280'
-            }}>
+            <span
+              style={{
+                fontFamily: "monospace",
+                fontSize: "11px",
+                color: "#6b7280",
+              }}
+            >
               {hoverCard.diffKey}
             </span>
           </div>
-          
+
           {/* Content */}
-          <div style={{ padding: '16px' }}>
-            <div style={{ marginBottom: '12px' }}>
-              <h4 style={{ 
-                margin: '0 0 6px 0', 
-                fontSize: '11px', 
-                color: '#6b7280',
-                textTransform: 'uppercase'
-              }}>
+          <div style={{ padding: "16px" }}>
+            <div style={{ marginBottom: "12px" }}>
+              <h4
+                style={{
+                  margin: "0 0 6px 0",
+                  fontSize: "11px",
+                  color: "#6b7280",
+                  textTransform: "uppercase",
+                }}
+              >
                 BEFORE
               </h4>
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '4px',
-                padding: '8px 10px',
-                fontFamily: 'monospace',
-                fontSize: '13px'
-              }}>
+              <div
+                style={{
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "4px",
+                  padding: "8px 10px",
+                  fontFamily: "monospace",
+                  fontSize: "13px",
+                }}
+              >
                 {hoverCard.before}
               </div>
             </div>
             <div>
-              <h4 style={{ 
-                margin: '0 0 6px 0', 
-                fontSize: '11px', 
-                color: '#6b7280',
-                textTransform: 'uppercase'
-              }}>
+              <h4
+                style={{
+                  margin: "0 0 6px 0",
+                  fontSize: "11px",
+                  color: "#6b7280",
+                  textTransform: "uppercase",
+                }}
+              >
                 AFTER
               </h4>
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '4px',
-                padding: '8px 10px',
-                fontFamily: 'monospace',
-                fontSize: '13px'
-              }}>
+              <div
+                style={{
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "4px",
+                  padding: "8px 10px",
+                  fontFamily: "monospace",
+                  fontSize: "13px",
+                }}
+              >
                 {hoverCard.after}
               </div>
             </div>

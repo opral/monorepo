@@ -36,6 +36,7 @@ function buildChangesFromAst(astMarkdown: string): Change[] {
 			file_id: "mock",
 			plugin_key: "mock",
 			created_at,
+			metadata: null,
 		},
 		...nodes.map((node, idx) => ({
 			id: `change-${idx + 1}`,
@@ -45,6 +46,7 @@ function buildChangesFromAst(astMarkdown: string): Change[] {
 			snapshot_content: node as any,
 			file_id: "mock",
 			plugin_key: "mock",
+			metadata: null,
 			created_at,
 		})),
 	];

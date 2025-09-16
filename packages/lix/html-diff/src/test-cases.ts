@@ -68,7 +68,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
   ],
   "data-diff-mode='element'": [
     {
-      name: "should use atomic element diffing when data-diff-mode=\"element\" is specified",
+      name: 'should use atomic element diffing when data-diff-mode="element" is specified',
       beforeHtml: dedent`
         <div class="card" data-diff-key="complex" data-diff-mode="element">Old content here</div>
       `,

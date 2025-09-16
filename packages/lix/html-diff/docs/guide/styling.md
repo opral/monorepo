@@ -9,7 +9,7 @@ When you render a diff using Lix HTML Diff, it only adds CSS classes to highligh
 The diff renderer uses semantic CSS classes to highlight changes:
 
 - `.diff-added` — applied to newly added elements
-- `.diff-modified` — applied to modified elements  
+- `.diff-modified` — applied to modified elements
 - `.diff-removed` — applied to removed elements
 
 ### Example: Your Styling is Preserved
@@ -21,7 +21,11 @@ The diff renderer uses semantic CSS classes to highlight changes:
 </button>
 
 <!-- After diff processing (text changed) -->
-<button class="diff-modified primary-btn large-size" id="submit-btn" data-diff-key="btn1">
+<button
+  class="diff-modified primary-btn large-size"
+  id="submit-btn"
+  data-diff-key="btn1"
+>
   Complete Purchase
 </button>
 ```
@@ -29,7 +33,7 @@ The diff renderer uses semantic CSS classes to highlight changes:
 Notice how:
 
 - Your `primary-btn` and `large-size` classes remain untouched
-- Your `id` and `data-diff-key` attributes are preserved  
+- Your `id` and `data-diff-key` attributes are preserved
 - Only `diff-modified` was added to highlight the change
 - All your existing CSS for `.primary-btn` and `.large-size` continues to work
 
@@ -77,7 +81,7 @@ HTML diff uses a **prepend strategy** for CSS classes to ensure diff highlightin
 <!-- After diff (added) -->
 <div class="diff-added card featured">Content</div>
 
-<!-- After diff (modified) -->  
+<!-- After diff (modified) -->
 <div class="diff-modified card featured">Content</div>
 ```
 
@@ -89,13 +93,24 @@ Since diff classes are prepended, you can rely on CSS cascade:
 
 ```css
 /* Your existing styles work as normal */
-.card { padding: 20px; border: 1px solid #ccc; }
-.featured { border-color: gold; }
+.card {
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+.featured {
+  border-color: gold;
+}
 
 /* Diff styles override conflicting properties */
-.diff-modified { color: orange; }  /* This color wins */
-.diff-added { color: green; }   /* This color wins */
-.diff-removed { color: red; }     /* This color wins */
+.diff-modified {
+  color: orange;
+} /* This color wins */
+.diff-added {
+  color: green;
+} /* This color wins */
+.diff-removed {
+  color: red;
+} /* This color wins */
 ```
 
 This ensures your app's layout and design remain intact while only the diff highlighting is added on top.
