@@ -212,7 +212,6 @@ export async function openLix(args: {
 		});
 		engine = res?.engine;
 	} else {
-		// Exists-first flow: avoid throwing to decide; ask environment if a DB exists.
 		const exists = await environment.exists();
 		if (!exists) {
 			const { newLixFile } = await import("./new-lix.js");

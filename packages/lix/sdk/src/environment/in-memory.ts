@@ -4,7 +4,7 @@ import {
 	contentFromDatabase,
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
-import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
+import type { LixEnvironment, LixEnvironmentResult } from "./api.js";
 import { boot, type LixEngine } from "../engine/boot.js";
 
 /**
@@ -38,7 +38,6 @@ export class InMemoryEnvironment implements LixEnvironment {
 		if (!this.db) {
 			this.db = await createInMemoryDatabase({ readOnly: false });
 		}
-		// Boot the engine if not already booted.
 		if (!this.callImpl) {
 			const res = await boot({
 				sqlite: this.db,
@@ -52,9 +51,10 @@ export class InMemoryEnvironment implements LixEnvironment {
 	}
 
 	async create(opts: Parameters<LixEnvironment["create"]>[0]): Promise<void> {
-		// Seed a fresh in-memory database from the provided blob (bytes).
 		this.db = await createInMemoryDatabase({ readOnly: false });
 		importDatabase({ db: this.db, content: new Uint8Array(opts.blob) });
+		this.callImpl = undefined;
+		this.engine = undefined;
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
@@ -96,19 +96,19 @@ export class InMemoryEnvironment implements LixEnvironment {
 			this.db = undefined;
 		}
 		this.callImpl = undefined;
+		this.engine = undefined;
 	}
 
 	async exists(): Promise<boolean> {
-		// In-memory environment has no persisted store bound to a key/path.
 		return false;
 	}
 
 	async call(
 		name: string,
 		payload?: unknown,
-		_opts?: { signal?: AbortSignal }
+		opts?: { signal?: AbortSignal }
 	): Promise<unknown> {
 		if (!this.callImpl) throw new Error("Environment not initialized");
-		return this.callImpl(name, payload);
+		return this.callImpl(name, payload, opts);
 	}
 }

@@ -42,6 +42,35 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		await env.close();
 	});
 
+	test("spawnActor echoes messages", async () => {
+		const env = new OpfsSahEnvironment({ key: `vitest-opfs-actor` });
+		await env.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+
+		const entryModule = new URL("./test-actors/echo.actor.js", import.meta.url)
+			.href;
+		const actor = await env.spawnActor?.({
+			entryModule,
+			name: "echo",
+			initialMessage: { type: "init" },
+		});
+		expect(actor).toBeDefined();
+
+		const received: Array<any> = [];
+		const unsubscribe = actor?.subscribe((event) => received.push(event));
+
+		actor?.post({ type: "ping", payload: 1 });
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(received.length).toBeGreaterThan(0);
+		expect(received[0]).toMatchObject({ received: { type: "init" } });
+		const pingEvent = received.find((msg) => msg.received?.type === "ping");
+		expect(pingEvent).toBeDefined();
+
+		unsubscribe?.();
+		await actor?.terminate();
+		await env.close();
+	});
+
 	test("open() rejects when another environment uses the same key", async () => {
 		const key = `vitest-opfs-key-lock-${Math.random().toString(16).slice(2)}`;
 		const env1 = new OpfsSahEnvironment({ key });
@@ -162,7 +191,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		for await (const entry of rootAfter.values()) entriesAfter.push(entry);
 		expect(entriesAfter.length).toBe(0);
 	});
- 
+
 	test("clear() throws when an environment is open", async () => {
 		const name = `vitest-opfs-clear-open`;
 		const lix = await openLix({
@@ -235,38 +264,37 @@ export default plugin;
 		});
 
 		try {
-		// Verify current active account with details
-		const active1 = await lix1.db
-			.selectFrom("active_account as aa")
-			.innerJoin("account_all as a", "a.id", "aa.account_id")
-			.where("a.lixcol_version_id", "=", "global")
-			.select(["aa.account_id", "a.id", "a.name"])
-			.executeTakeFirstOrThrow();
+			// Verify current active account with details
+			const active1 = await lix1.db
+				.selectFrom("active_account as aa")
+				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.where("a.lixcol_version_id", "=", "global")
+				.select(["aa.account_id", "a.id", "a.name"])
+				.executeTakeFirstOrThrow();
 
-		expect(active1.account_id).toBe(account.id);
-		expect(active1.name).toBe(account.name);
-	} finally {
-		await lix1.close();
-	}
+			expect(active1.account_id).toBe(account.id);
+			expect(active1.name).toBe(account.name);
+		} finally {
+			await lix1.close();
+		}
 
-	// Reopen the same environment key and verify persistence
-	const lix2 = await openLix({
-		environment: new OpfsSahEnvironment({ key: name }),
-		pluginsRaw: [],
-	});
+		// Reopen the same environment key and verify persistence
+		const lix2 = await openLix({
+			environment: new OpfsSahEnvironment({ key: name }),
+			pluginsRaw: [],
+		});
 		try {
-		const active2 = await lix2.db
-			.selectFrom("active_account as aa")
-			.innerJoin("account_all as a", "a.id", "aa.account_id")
-			.where("a.lixcol_version_id", "=", "global")
-			.select(["aa.account_id", "a.id", "a.name"])
-			.executeTakeFirstOrThrow();
+			const active2 = await lix2.db
+				.selectFrom("active_account as aa")
+				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.where("a.lixcol_version_id", "=", "global")
+				.select(["aa.account_id", "a.id", "a.name"])
+				.executeTakeFirstOrThrow();
 
-		expect(active2.account_id).toBe(account.id);
-		expect(active2.name).toBe(account.name);
-	} finally {
-		await lix2.close();
-	}
-});
-
+			expect(active2.account_id).toBe(account.id);
+			expect(active2.name).toBe(account.name);
+		} finally {
+			await lix2.close();
+		}
+	});
 });
