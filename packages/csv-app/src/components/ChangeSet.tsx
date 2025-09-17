@@ -348,6 +348,7 @@ const getChanges = async (
 				schema_key: change.schema_key,
 				schema_version: change.schema_version,
 				created_at: "",
+				metadata: null,
 				snapshot_content: null,
 			};
 		}
@@ -478,6 +479,7 @@ const getIntermediateChanges = async (
 					schema_key: change.schema_key,
 					schema_version: change.schema_version,
 					created_at: "",
+					metadata: null,
 					snapshot_content: null,
 				};
 			}

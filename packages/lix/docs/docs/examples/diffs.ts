@@ -15,16 +15,13 @@ export default async function runExample(console: any) {
 
   console.log("SECTION START 'plugin-diffs'");
   const plugin = (await lix.plugin.getAll()).find(
-    (p: any) => p.key === "csv_plugin",
+    (p: any) => p.key === "lix_plugin_csv",
   );
 
-  if (plugin?.diffUiComponent) {
-    // In a real application, you would define the custom element:
-    // customElements.define("csv-diff-component", plugin.diffComponent);
-    // Then render: <csv-diff-component diffs={changes} />;
-    console.log("Plugin diff component available:", !!plugin.diffUiComponent);
+  if (plugin?.renderDiff) {
+    console.log("Plugin renderDiff available:", true);
   } else {
-    console.log("No diff component found for CSV plugin");
+    console.log("No renderDiff function found for CSV plugin");
   }
 
   console.log("SECTION END 'plugin-diffs'");

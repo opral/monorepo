@@ -2,17 +2,25 @@ import { describe, test, expect } from "vitest";
 import { applyChanges } from "./apply-changes.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast, MarkdownNode } from "@opral/markdown-wc";
-import type { Change } from "@lix-js/sdk";
+import type { Change, LixPlugin } from "@lix-js/sdk";
 
-const createMockFile = (data: Uint8Array) => ({
-	id: "mock",
-	path: "/mock.md",
-	data,
-	metadata: {},
-	lixcol_inherited_from_version_id: null,
-	lixcol_created_at: new Date().toISOString(),
-	lixcol_updated_at: new Date().toISOString(),
-});
+type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
+type ApplyChangesFile = ApplyChangesArgs["file"];
+
+const createMockFile = (data: Uint8Array): ApplyChangesFile =>
+	({
+		id: "mock",
+		directory_id: null,
+		name: "mock",
+		extension: "md",
+		path: "/mock.md",
+		data,
+		metadata: {},
+		hidden: false,
+		lixcol_inherited_from_version_id: null,
+		lixcol_created_at: new Date().toISOString(),
+		lixcol_updated_at: new Date().toISOString(),
+	}) as ApplyChangesFile;
 
 function buildChangesFromAst(astMarkdown: string): Change[] {
 	const ast = parseMarkdown(astMarkdown) as Ast;
@@ -67,7 +75,7 @@ describe("applyChanges", () => {
 		const result = applyChanges({
 			file: createMockFile(beforeData),
 			changes,
-		});
+		} as ApplyChangesArgs);
 
 		const resultMarkdown = new TextDecoder().decode(result.fileData);
 
@@ -90,7 +98,7 @@ describe("applyChanges", () => {
 		const result = applyChanges({
 			file: createMockFile(beforeData),
 			changes,
-		});
+		} as ApplyChangesArgs);
 
 		const resultMarkdown = new TextDecoder().decode(result.fileData);
 
@@ -113,7 +121,7 @@ describe("applyChanges", () => {
 		const result = applyChanges({
 			file: createMockFile(beforeData),
 			changes,
-		});
+		} as ApplyChangesArgs);
 
 		const resultMarkdown = new TextDecoder().decode(result.fileData);
 
@@ -135,7 +143,7 @@ describe("applyChanges", () => {
 		const result = applyChanges({
 			file: createMockFile(beforeData),
 			changes,
-		});
+		} as ApplyChangesArgs);
 
 		const resultMarkdown = new TextDecoder().decode(result.fileData);
 
@@ -155,7 +163,7 @@ describe("applyChanges", () => {
 		const result = applyChanges({
 			file: createMockFile(data),
 			changes: [],
-		});
+		} as ApplyChangesArgs);
 
 		const resultMarkdown = new TextDecoder().decode(result.fileData);
 

@@ -5,7 +5,7 @@ import { Button } from "./ui/button.tsx";
 import { clsx } from "clsx";
 import { conversationSearchParamsAtom, lixAtom } from "@/state.ts";
 import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
-import { UiDiffComponentProps } from "@lix-js/sdk";
+import { type RenderDiffArgs } from "@lix-js/sdk";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 
 const ConnectedChanges = () => {
@@ -13,14 +13,14 @@ const ConnectedChanges = () => {
 	const [threadSearchParams] = useAtom(conversationSearchParamsAtom);
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
-	const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
+	const [diffs, setDiffs] = useState<RenderDiffArgs["diffs"]>([]);
 
 	useEffect(() => {
 		getThreadChanges()
 	}, []);
 
 	// Group changes by plugin_key
-	const groupedChanges = diffs.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+	const groupedChanges = diffs.reduce((acc: { [key: string]: RenderDiffArgs["diffs"] }, change) => {
 		const key = change.plugin_key;
 		if (!acc[key]) {
 			acc[key] = [];

@@ -1,6 +1,34 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
+import type { LixPlugin } from "@lix-js/sdk";
+
+type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
+type ApplyChangesFile = ApplyChangesArgs["file"] & {
+	lixcol_metadata?: ApplyChangesArgs["file"]["metadata"];
+};
+
+const createMockFile = ({
+	data,
+	path = "/mock.json",
+}: {
+	data?: Uint8Array;
+	path?: string;
+} = {}): ApplyChangesFile =>
+	({
+		id: "mock",
+		directory_id: null,
+		name: path.split("/").pop() ?? "mock",
+		extension: path.includes(".") ? (path.split(".").pop() ?? "") : null,
+		path,
+		data,
+		metadata: {},
+		lixcol_metadata: {},
+		hidden: false,
+		lixcol_inherited_from_version_id: null,
+		lixcol_created_at: new Date().toISOString(),
+		lixcol_updated_at: new Date().toISOString(),
+	}) as ApplyChangesFile;
 
 test("it applies an insert change", async () => {
 	const before = new TextEncoder().encode(
@@ -18,14 +46,14 @@ test("it applies an insert change", async () => {
 	);
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata: {} },
+		file: createMockFile({}),
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createMockFile({ data: before }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(new TextDecoder().decode(applied)).toEqual(
 		new TextDecoder().decode(after),
@@ -47,14 +75,14 @@ test("it applies an update change", async () => {
 	);
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata: {} },
+		file: createMockFile({}),
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createMockFile({ data: before }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(new TextDecoder().decode(applied)).toEqual(
 		new TextDecoder().decode(after),
@@ -75,14 +103,14 @@ test("it applies a delete change", async () => {
 	);
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata: {} },
+		file: createMockFile({}),
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createMockFile({ data: before }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(new TextDecoder().decode(applied)).toEqual(
 		new TextDecoder().decode(after),
