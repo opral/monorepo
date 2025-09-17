@@ -34,13 +34,13 @@ export function shouldLog(
  * `["info", "warn", "error"]`. The log entry is only created if the provided
  * `level` is included in the determined list of allowed levels or if the list is '["*"]'.
  *
- * It is recommended to use dot notation for log keys (e.g., 'app.module.component').
+ * Use `snake_case` for log keys (e.g., `app_module_component`) to keep filters predictable.
  *
  * @example
  * // Basic info log (will be logged if 'info' is allowed by lix_log_levels)
  * createLixOwnLog({
  *   engine,
- *   key: 'app.init',
+ *   key: 'app_init',
  *   level: 'info',
  *   message: 'Application started.'
  * });
@@ -49,7 +49,7 @@ export function shouldLog(
  * // Log a warning (will be logged if 'warn' is allowed by lix_log_levels)
  * createLixOwnLog({
  *   engine,
- *   key: 'user.login.failed',
+ *   key: 'user_login_failed',
  *   level: 'warn',
  *   message: `Login failed for user ${userId}`
  * });

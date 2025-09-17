@@ -2,10 +2,8 @@ import { test } from "vitest";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import {
-	simulationTest,
-	normalSimulation,
-} from "../test-utilities/simulation-test/simulation-test.js";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import { LixCommitSchema } from "../commit/schema.js";
 
 test("simulation test discovery", () => {});
 
@@ -118,6 +116,73 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(newWorkingElements).toHaveLength(0);
+	}
+);
+
+simulationTest(
+	"emits state_commit materialization when checkpointing",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_untracked: true,
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const emitted: Array<
+			Array<{
+				schema_key: string;
+				commit_id: string;
+				snapshot_content: any;
+			}>
+		> = [];
+		const unsubscribe = lix.hooks.onStateCommit(({ changes }) => {
+			emitted.push(changes as (typeof emitted)[number]);
+		});
+
+		try {
+			await lix.db
+				.insertInto("key_value")
+				.values({ key: "state-commit-test", value: "value" })
+				.execute();
+
+			const baselineEvents = emitted.length;
+
+			const checkpoint = await createCheckpoint({ lix });
+
+			const updatedVersion = await lix.db
+				.selectFrom("version")
+				.where("name", "=", "main")
+				.selectAll()
+				.executeTakeFirstOrThrow();
+
+			const newEvents = emitted.slice(baselineEvents);
+			expectDeterministic(newEvents.length).toBeGreaterThan(0);
+
+			const containsDescriptor = newEvents.some((batch) =>
+				batch.some(
+					(change) =>
+						change.schema_key === "lix_version_descriptor" &&
+						change.commit_id === checkpoint.id
+				)
+			);
+			expectDeterministic(containsDescriptor).toBe(true);
+
+			const containsWorkingCommit = newEvents.some((batch) =>
+				batch.some(
+					(change) =>
+						change.schema_key === LixCommitSchema["x-lix-key"] &&
+						change.commit_id === updatedVersion.working_commit_id
+				)
+			);
+			expectDeterministic(containsWorkingCommit).toBe(true);
+		} finally {
+			unsubscribe();
+		}
 	}
 );
 
@@ -334,16 +399,34 @@ simulationTest(
 		expectDeterministic(!!edgeFromPrevTip).toBe(true);
 
 		// Also verify parent_commit_ids contains both ids on the checkpoint commit
-		const cp2CommitRow = await lix.db
-			.selectFrom("commit")
-			.where("id", "=", cp2.id)
-			.selectAll()
+		const cp2Change = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", cp2.id)
+			.where("schema_key", "=", LixCommitSchema["x-lix-key"])
+			.orderBy("created_at", "desc")
+			.select(["snapshot_content"])
 			.executeTakeFirstOrThrow();
 
-		// parent_commit_ids is an array-like column; ensure both are present
-		const parents = (cp2CommitRow as any).parent_commit_ids ?? [];
+		const snapshot = cp2Change.snapshot_content;
+		const parents = snapshot?.parent_commit_ids ?? [];
 		expectDeterministic(parents.includes(cp1.id)).toBe(true);
 		expectDeterministic(parents.includes(vBeforeCp2.commit_id)).toBe(true);
+
+		const cp2CommitState = await lix.db
+			.selectFrom("commit")
+			.where("id", "=", cp2.id)
+			.select(["parent_commit_ids"])
+			.executeTakeFirstOrThrow();
+
+		console.log("cp2 commit state", cp2CommitState, {
+			cp2: cp2.id,
+			cp1: cp1.id,
+			prevTip: vBeforeCp2.commit_id,
+		});
+
+		const cachedParents = cp2CommitState.parent_commit_ids ?? [];
+		expectDeterministic(cachedParents.includes(cp1.id)).toBe(true);
+		expectDeterministic(cachedParents.includes(vBeforeCp2.commit_id)).toBe(true);
 	}
 );
 

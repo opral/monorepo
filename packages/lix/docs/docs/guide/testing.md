@@ -1,33 +1,25 @@
-# Writing Tests
+# Testing
 
-This guide is for developers embedding Lix who want confidence in their own code. The workflow stays straightforward: open Lix in memory, call the same APIs you use in production, and assert on the data that comes back. No mocks, no alternate code paths.
+Testing code that uses Lix is straightforward because you can run a real, in-memory Lix instance in your test environment. This approach avoids mocks and ensures your tests exercise the same code paths that run in production, giving you high confidence in your application's behavior.
 
-**Do's**
+## Quick Start
 
-- Run Lix in memory with `openLix({})` for fast, isolated tests.
-- Exercise your real business logic and SDK calls rather than stubbing layers.
-
-**Dont's**
-
-- Mock out the Lix database or filesystem—use the actual engine instead.
-- Persist temporary blobs to disk unless you explicitly need cross-test state.
-
-## The simplest possible test
-
-`openLix({})` boots an isolated SQLite + WASM instance in memory. You can interact with it through the Kysely-based query builder exposed on `lix.db`.
+Use `openLix({})` to create a fast, isolated, in-memory Lix instance for each test. Then, interact with it using the same APIs you use in your application.
 
 ```ts
 import { expect, test } from "vitest";
 import { openLix } from "@lix-js/sdk";
 
-test("stores a key-value pair", async () => {
+test("should store and retrieve a key-value pair", async () => {
   const lix = await openLix({});
 
+  // Use the same API as your app
   await lix.db
     .insertInto("key_value")
     .values({ key: "greeting", value: { message: "hello" } })
     .execute();
 
+  // Assert on the result
   const row = await lix.db
     .selectFrom("key_value")
     .selectAll()
@@ -35,57 +27,59 @@ test("stores a key-value pair", async () => {
     .executeTakeFirstOrThrow();
 
   expect(row.value).toEqual({ message: "hello" });
-
 });
 ```
 
-Running this inside Vitest or Jest is enough to simulate an end-to-end flow: the real persistence layer kicks in, triggers fire, and queries go through the production code paths.
+## Core Principles
 
-## Testing with plugins
+Adhering to a few principles ensures your tests are robust, fast, and easy to maintain.
 
-When testing applications that use Lix plugins, provide the plugins during initialization to test the complete integration:
+| Principle             | Why It Matters                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Test the Real Thing** | By using a real Lix instance, you verify the entire stack, from your business logic to the persistence layer. No brittle mocks, no surprises in production. |
+| **Isolate Tests**       | Each call to `openLix({})` creates a fresh, ephemeral database in memory. This guarantees that tests run in isolation and don't leak state, making them parallelizable and reliable. |
+| **Use Production APIs** | Write tests that call your application's functions and services. This ensures you're testing your app's behavior, not just the underlying Lix functionality. |
+
+## Common Testing Scenarios
+
+### Testing with Plugins
+
+If your application uses plugins, provide them during initialization to test the complete, integrated behavior.
 
 ```ts
 import { expect, test } from "vitest";
 import { openLix } from "@lix-js/sdk";
-import { plugin } from "./my-plugin.js";
+import { myPlugin } from "./my-plugin.js"; // Your plugin
 
-test("detects changes when inserting a file", async () => {
-  // Initialize Lix with your plugin
+test("should trigger plugin change detection", async () => {
   const lix = await openLix({
-    providePlugins: [plugin],
+    providePlugins: [myPlugin],
   });
 
-  // Insert file data - this triggers plugin.detectChanges
-  const fileContent = "# Heading\n\nParagraph text";
+  // This action will trigger your plugin's logic
   await lix.db
     .insertInto("file")
     .values({
       id: "doc",
       path: "/document.md",
-      data: new TextEncoder().encode(fileContent),
+      data: new TextEncoder().encode("# Hello"),
     })
     .execute();
 
-  // Query the changes detected by your plugin
+  // Assert that the plugin produced the expected entities
   const changes = await lix.db
     .selectFrom("change")
-    .innerJoin("file", "change.file_id", "file.id")
-    .where("file.path", "=", "/document.md")
-    .where("plugin_key", "=", plugin.key)
+    .where("plugin_key", "=", myPlugin.key)
     .selectAll()
     .execute();
 
   expect(changes.length).toBeGreaterThan(0);
-  // Assert on specific plugin behavior...
 });
 ```
 
-This tests the complete plugin lifecycle: file insertion triggers change detection, entities are created, and you can verify the plugin's behavior against real data.
+### Deterministic Mode
 
-## Deterministic mode for consistent results
-
-For tests that rely on timestamps, random numbers, or UUIDs, enable deterministic mode to ensure consistent results across test runs:
+For tests involving timestamps, random numbers, or UUIDs, enable deterministic mode. This guarantees your tests produce the same results every time they run.
 
 ```ts
 const lix = await openLix({
@@ -97,6 +91,8 @@ const lix = await openLix({
     },
   ],
 });
+
+// Now, any Lix-generated IDs or timestamps will be predictable
 ```
 
-See [Deterministic Mode](./deterministic-mode.md) for the complete configuration options including custom seeds and random Lix IDs.
+See [Deterministic Mode](./deterministic-mode.md) for more configuration options.

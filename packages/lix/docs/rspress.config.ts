@@ -130,6 +130,7 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: "Testing", link: "/guide/testing" },
+            { text: "Logging", link: "/guide/logging" },
             { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
             { text: "React Utils", link: "/guide/react-utils" },
           ],

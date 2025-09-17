@@ -56,26 +56,48 @@ export function selectFilesystemEntries(lix: Lix) {
 		.$castTo<FilesystemEntryRow>();
 }
 
-// Working diff for the active file: total/added/removed in current working change set
-// Note: Excludes the Markdown root order schema so pure reorders don't count as content changes.
+/**
+ * Aggregated working diff counts for the active file.
+ *
+ * The query scopes the change-set elements to the version's current working commit
+ * so that live observers reset when checkpoints promote a new commit. Markdown
+ * root-order changes are excluded to avoid counting pure reorders.
+ *
+ * @example
+ * const counts = await selectWorkingDiffCount(lix).executeTakeFirst();
+ * console.log(counts?.total ?? 0);
+ */
 export function selectWorkingDiffCount(lix: Lix) {
-	const workingChangeSetIdQ = lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.innerJoin("commit", "version.working_commit_id", "commit.id")
-		.select("commit.change_set_id");
-
 	const activeFileIdQ = lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "flashtype_active_file_id")
 		.select("value");
 
-	// Delegate to generic diff counter, scoped to the active file
-	return selectDiffCount({ lix, changeSetId: workingChangeSetIdQ }).where(
-		"change_set_element.file_id",
-		"=",
-		activeFileIdQ,
-	);
+	return selectDiffCount({
+		lix,
+		changeSetId: sql.ref("commit.change_set_id"),
+	})
+		.innerJoin(
+			"commit",
+			"commit.change_set_id",
+			"change_set_element.change_set_id",
+		)
+		.innerJoin("change_set", "change_set.id", "commit.change_set_id")
+		.innerJoin(
+			"version",
+			"version.working_commit_id",
+			"commit.id",
+		)
+		.innerJoin(
+			"active_version",
+			"active_version.version_id",
+			"version.id",
+		)
+		.where(
+			"change_set_element.file_id",
+			"=",
+			activeFileIdQ,
+		);
 }
 
 /**

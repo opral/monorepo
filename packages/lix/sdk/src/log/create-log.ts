@@ -10,7 +10,7 @@ import type { LixLog } from "./schema.js";
  * in the key-value store. It is the responsibility of the calling application
  * to implement any desired log level filtering before invoking this function.
  *
- * It is recommended to use dot notation for log keys (e.g., 'app.module.component').
+ * Use `snake_case` for log keys (e.g., `app_checkout_submit`) to keep filters predictable.
  *
  * @example
  * // Directly log an info message
@@ -18,7 +18,7 @@ import type { LixLog } from "./schema.js";
  * if (shouldLog) {
  *   await createLog({
  *     lix,
- *     key: 'app.init',
+ *     key: 'app_init',
  *     level: 'info',
  *     message: 'Application initialized'
  * });
