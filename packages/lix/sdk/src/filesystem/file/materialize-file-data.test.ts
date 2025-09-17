@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import type { LixPlugin } from "../../plugin/lix-plugin.js";
 
 test("materializeFileData with plugin that has changes", async () => {
 	const mockPlugin: LixPlugin = {

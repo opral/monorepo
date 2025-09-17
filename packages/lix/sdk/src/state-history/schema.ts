@@ -244,7 +244,8 @@ SELECT
 	es.target_change_id as change_id,
 	es.origin_commit_id as commit_id,
 	es.root_commit_id as root_commit_id,
-	es.commit_depth as depth
+	es.commit_depth as depth,
+	'global' as version_id
 FROM (
 	SELECT * FROM depth0_entity_states
 	UNION ALL

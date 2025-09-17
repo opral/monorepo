@@ -11,6 +11,51 @@ export function selectFiles(lix: Lix) {
 		.orderBy("path", "asc");
 }
 
+export type FilesystemEntryRow = {
+	id: string;
+	parent_id: string | null;
+	path: string;
+	display_name: string;
+	kind: "directory" | "file";
+	hidden: number;
+};
+
+/**
+ * Unified filesystem listing containing both directories and files ordered by path.
+ *
+ * Each row represents either a directory (with `kind === "directory"`) or a file
+ * (`kind === "file"`) and is shaped to make tree construction straightforward on
+ * the client.
+ */
+export function selectFilesystemEntries(lix: Lix) {
+	return lix.db
+		.selectFrom("directory")
+		.select((eb) => [
+			eb.ref("directory.id").as("id"),
+			eb.ref("directory.parent_id").as("parent_id"),
+			eb.ref("directory.path").as("path"),
+			eb.ref("directory.name").as("display_name"),
+			sql<string>`'directory'`.as("kind"),
+			eb.ref("directory.hidden").as("hidden"),
+		])
+		.unionAll(
+			lix.db.selectFrom("file").select((eb) => [
+				eb.ref("file.id").as("id"),
+				eb.ref("file.directory_id").as("parent_id"),
+				eb.ref("file.path").as("path"),
+				sql<string>`CASE
+						WHEN file.extension IS NULL OR file.extension = ''
+							THEN file.name
+						ELSE file.name || '.' || file.extension
+					END`.as("display_name"),
+				sql<string>`'file'`.as("kind"),
+				eb.ref("file.hidden").as("hidden"),
+			]),
+		)
+		.orderBy("path", "asc")
+		.$castTo<FilesystemEntryRow>();
+}
+
 // Working diff for the active file: total/added/removed in current working change set
 // Note: Excludes the Markdown root order schema so pure reorders don't count as content changes.
 export function selectWorkingDiffCount(lix: Lix) {

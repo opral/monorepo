@@ -1,40 +1,64 @@
-import { executeSync } from "../database/execute-sync.js";
-import type { LixEngine } from "../engine/boot.js";
+import { executeSync } from "../../database/execute-sync.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
-
-function globSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	glob: string;
-	path: string;
-}): boolean {
-	const columnNames: string[] = [];
-	const result = args.engine.sqlite.exec({
-		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.glob],
-		returnValue: "resultRows",
-		columnNames,
-	});
-
-	return (result[0]?.[0] as any) === 1;
-}
+import {
+	readFileDescriptorAtCommit,
+	composeFilePathAtCommit,
+} from "./descriptor-utils.js";
+import { matchesGlob } from "../util/glob.js";
 
 export function materializeFileDataAtCommit(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
-	file: Omit<LixFile, "data">;
+	file: Pick<LixFile, "id" | "path"> &
+		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	rootCommitId: string;
 	depth: number;
 }): Uint8Array {
 	const plugins = args.engine.getAllPluginsSync();
+	const historicalSnapshot = readFileDescriptorAtCommit({
+		engine: args.engine,
+		fileId: args.file.id,
+		rootCommitId: args.rootCommitId,
+		depth: args.depth,
+	});
+	if (!historicalSnapshot) {
+		throw new Error(
+			`[materializeFileDataAtCommit] Missing descriptor snapshot for file ${args.file.id} at commit ${args.rootCommitId}`
+		);
+	}
+
+	const historicalPath =
+		composeFilePathAtCommit({
+			engine: args.engine,
+			directoryId: historicalSnapshot.directory_id,
+			name: historicalSnapshot.name,
+			extension: historicalSnapshot.extension ?? null,
+			rootCommitId: args.rootCommitId,
+			depth: args.depth,
+		}) ?? args.file.path;
+
+	const initialData = (args.file as Partial<LixFile>).data ?? new Uint8Array();
+
+	const descriptor: LixFile = {
+		id: args.file.id,
+		path: historicalPath,
+		directory_id: historicalSnapshot.directory_id,
+		name: historicalSnapshot.name,
+		extension: historicalSnapshot.extension ?? null,
+		metadata: args.file.metadata ?? historicalSnapshot.metadata ?? null,
+		hidden: historicalSnapshot.hidden,
+		data: initialData,
+	};
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
-			!globSync({
+			!matchesGlob({
 				engine: args.engine,
-				path: args.file.path,
-				glob: plugin.detectChangesGlob,
+				path: descriptor.path,
+				pattern: plugin.detectChangesGlob,
 			})
 		) {
 			continue;
@@ -50,7 +74,7 @@ export function materializeFileDataAtCommit(args: {
 			query: selectFileChanges({
 				engine: args.engine,
 				pluginKey: plugin.key,
-				fileId: args.file.id,
+				fileId: descriptor.id,
 				rootCommitId: args.rootCommitId,
 				depth: args.depth,
 			}),
@@ -66,7 +90,7 @@ export function materializeFileDataAtCommit(args: {
 		}));
 
 		const file = plugin.applyChanges({
-			file: args.file,
+			file: descriptor,
 			changes: formattedChanges,
 		});
 
@@ -79,7 +103,7 @@ export function materializeFileDataAtCommit(args: {
 		query: selectFileChanges({
 			engine: args.engine,
 			pluginKey: lixUnknownFileFallbackPlugin.key,
-			fileId: args.file.id,
+			fileId: descriptor.id,
 			rootCommitId: args.rootCommitId,
 			depth: args.depth,
 		}),
@@ -101,7 +125,7 @@ export function materializeFileDataAtCommit(args: {
 	}
 
 	const file = lixUnknownFileFallbackPlugin.applyChanges!({
-		file: args.file,
+		file: descriptor,
 		changes: formattedChanges,
 	});
 

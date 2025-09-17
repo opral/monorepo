@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
-import { openLix } from "../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import type { LixPlugin } from "../../plugin/lix-plugin.js";
 
 test("storeDetectedChangeSchema stores new schema on first use", async () => {
 	const lix = await openLix({});

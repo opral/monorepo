@@ -1,39 +1,31 @@
-import { executeSync } from "../database/execute-sync.js";
-import type { LixEngine } from "../engine/boot.js";
+import { executeSync } from "../../database/execute-sync.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
-
-function globSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	glob: string;
-	path: string;
-}): boolean {
-	const columnNames: string[] = [];
-	const result = args.engine.sqlite.exec({
-		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.glob],
-		returnValue: "resultRows",
-		columnNames,
-	});
-
-	return (result[0]?.[0] as any) === 1;
-}
+import { ensureCompleteDescriptor } from "./descriptor-utils.js";
+import { matchesGlob } from "../util/glob.js";
 
 export function materializeFileData(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
-	file: Omit<LixFile, "data">;
+	file: Pick<LixFile, "id" | "path"> &
+		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	versionId: string;
 }): Uint8Array {
 	const plugins = args.engine.getAllPluginsSync();
+	const descriptor = ensureCompleteDescriptor({
+		engine: args.engine,
+		versionId: args.versionId,
+		file: args.file,
+	});
 
 	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
-			!globSync({
+			!matchesGlob({
 				engine: args.engine,
-				path: args.file.path,
-				glob: plugin.detectChangesGlob,
+				path: descriptor.path,
+				pattern: plugin.detectChangesGlob,
 			})
 		) {
 			continue;
@@ -49,7 +41,7 @@ export function materializeFileData(args: {
 			query: args.engine.db
 				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
-				.where("file_id", "=", args.file.id)
+				.where("file_id", "=", descriptor.id)
 				.where("version_id", "=", args.versionId)
 				.select([
 					"entity_id",
@@ -72,7 +64,7 @@ export function materializeFileData(args: {
 		}));
 
 		const file = plugin.applyChanges({
-			file: args.file,
+			file: descriptor,
 			changes: formattedChanges,
 		});
 
@@ -85,7 +77,7 @@ export function materializeFileData(args: {
 		query: args.engine.db
 			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
-			.where("file_id", "=", args.file.id)
+			.where("file_id", "=", descriptor.id)
 			.where("version_id", "=", args.versionId)
 			.select([
 				"entity_id",
@@ -114,7 +106,7 @@ export function materializeFileData(args: {
 	}
 
 	const file = lixUnknownFileFallbackPlugin.applyChanges!({
-		file: args.file,
+		file: descriptor,
 		changes: formattedChanges,
 	});
 

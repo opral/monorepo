@@ -1,5 +1,5 @@
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import type { DetectedChange, LixPlugin } from "../../plugin/lix-plugin.js";
 
 export const LixUnknownFileSchema = {
 	type: "object",

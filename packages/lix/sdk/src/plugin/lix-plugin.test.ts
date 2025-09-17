@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixPlugin } from "./lix-plugin.js";
-import { handleFileInsert } from "../file/file-handlers.js";
+import { handleFileInsert } from "../filesystem/file/file-handlers.js";
 // no direct executeSync import needed with querySync
 
 describe("detectChanges()", () => {

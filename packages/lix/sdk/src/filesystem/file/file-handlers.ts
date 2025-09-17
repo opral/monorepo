@@ -1,32 +1,31 @@
-import { executeSync } from "../database/execute-sync.js";
+import { executeSync } from "../../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
 import { LixFileDescriptorSchema } from "./schema.js";
-import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
+import { createLixOwnLogSync } from "../../log/create-lix-own-log.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
-import { createQuerySync } from "../plugin/query-sync.js";
+import { createQuerySync } from "../../plugin/query-sync.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
-import type { LixEngine } from "../engine/boot.js";
+import type { LixEngine } from "../../engine/boot.js";
+import {
+	ensureDirectoryAncestors,
+	assertNoDirectoryAtFilePath,
+} from "../directory/ensure-directories.js";
+import { matchesGlob } from "../util/glob.js";
+import { normalizeFilePath } from "../path.js";
+import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 
-function globSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	glob: string;
+type FileMutationInput = {
+	id: string;
 	path: string;
-}): boolean {
-	const columnNames: string[] = [];
-	const result = args.engine.sqlite.exec({
-		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.glob],
-		returnValue: "resultRows",
-		columnNames,
-	});
-
-	return (result[0]?.[0] as any) === 1;
-}
+	data: Uint8Array;
+	metadata: unknown;
+	hidden?: boolean;
+};
 
 export function handleFileInsert(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
-	file: LixFile;
+	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
@@ -49,6 +48,39 @@ export function handleFileInsert(args: {
 		return 1; // Indicate no changes were made
 	}
 
+	const normalizedPath = normalizeFilePath(args.file.path);
+
+	ensureDirectoryAncestors({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: normalizedPath,
+	});
+
+	assertNoDirectoryAtFilePath({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: normalizedPath,
+	});
+
+	const descriptorFields = deriveDescriptorFieldsFromPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		path: normalizedPath,
+		metadata: args.file.metadata,
+		hidden: args.file.hidden ?? false,
+	});
+
+	const pluginFile: LixFile = {
+		id: args.file.id,
+		path: normalizedPath,
+		directory_id: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		metadata: descriptorFields.metadata ?? null,
+		hidden: descriptorFields.hidden,
+		data: args.file.data,
+	};
+
 	// Insert the file metadata into state table
 	executeSync({
 		engine: args.engine,
@@ -59,13 +91,15 @@ export function handleFileInsert(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
 				id: args.file.id,
-				path: args.file.path,
-				metadata: args.file.metadata || null,
-				hidden: args.file.hidden ?? false,
+				directory_id: descriptorFields.directoryId,
+				name: descriptorFields.name,
+				extension: descriptorFields.extension ?? null,
+				metadata: descriptorFields.metadata ?? null,
+				hidden: descriptorFields.hidden,
 			},
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
-			metadata: args.file.metadata ?? null,
+			metadata: descriptorFields.metadata ?? null,
 			untracked: args.untracked || false,
 		}),
 	});
@@ -80,10 +114,10 @@ export function handleFileInsert(args: {
 		// Check if plugin glob matches file path
 		if (
 			!plugin.detectChangesGlob ||
-			!globSync({
+			!matchesGlob({
 				engine: args.engine,
-				path: args.file.path,
-				glob: plugin.detectChangesGlob,
+				path: normalizedPath,
+				pattern: plugin.detectChangesGlob,
 			})
 		) {
 			continue;
@@ -96,7 +130,7 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File inserted at ${args.file.path} but plugin does not support detecting changes`,
+				message: `File inserted at ${normalizedPath} but plugin does not support detecting changes`,
 			});
 			continue;
 		}
@@ -104,7 +138,7 @@ export function handleFileInsert(args: {
 		// Detect changes with the plugin
 
 		const detectedChanges = plugin.detectChanges({
-			after: args.file,
+			after: pluginFile,
 			querySync,
 		});
 
@@ -147,13 +181,13 @@ export function handleFileInsert(args: {
 			engine: args.engine,
 			key: "lix_file_no_plugin",
 			level: "warn",
-			message: `File inserted at ${args.file.path} but no plugin available to detect changes`,
+			message: `File inserted at ${normalizedPath} but no plugin available to detect changes`,
 		});
 
 		// Use fallback plugin to handle the file
 		if (lixUnknownFileFallbackPlugin.detectChanges) {
 			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
-				after: args.file,
+				after: pluginFile,
 				querySync,
 			});
 
@@ -192,7 +226,7 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File inserted at ${args.file.path} but plugin detected no changes`,
+				message: `File inserted at ${normalizedPath} but plugin detected no changes`,
 			});
 		}
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
@@ -215,7 +249,7 @@ export function handleFileInsert(args: {
 
 export function handleFileUpdate(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
-	file: LixFile;
+	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
@@ -238,6 +272,39 @@ export function handleFileUpdate(args: {
 		return 1; // Indicate no changes were made
 	}
 
+	const normalizedPath = normalizeFilePath(args.file.path);
+
+	ensureDirectoryAncestors({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: normalizedPath,
+	});
+
+	assertNoDirectoryAtFilePath({
+		engine: args.engine,
+		versionId: args.versionId,
+		filePath: normalizedPath,
+	});
+
+	const descriptorFields = deriveDescriptorFieldsFromPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		path: normalizedPath,
+		metadata: args.file.metadata,
+		hidden: args.file.hidden ?? false,
+	});
+
+	const pluginFile: LixFile = {
+		id: args.file.id,
+		path: normalizedPath,
+		directory_id: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		metadata: descriptorFields.metadata ?? null,
+		hidden: descriptorFields.hidden,
+		data: args.file.data,
+	};
+
 	// Update the file metadata in state table FIRST
 	executeSync({
 		engine: args.engine,
@@ -246,11 +313,13 @@ export function handleFileUpdate(args: {
 			.set({
 				snapshot_content: {
 					id: args.file.id,
-					path: args.file.path,
-					metadata: args.file.metadata || null,
-					hidden: args.file.hidden ?? false,
+					directory_id: descriptorFields.directoryId,
+					name: descriptorFields.name,
+					extension: descriptorFields.extension ?? null,
+					metadata: descriptorFields.metadata ?? null,
+					hidden: descriptorFields.hidden,
 				},
-				metadata: args.file.metadata ?? null,
+				metadata: descriptorFields.metadata ?? null,
 				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)
@@ -279,10 +348,10 @@ export function handleFileUpdate(args: {
 			// Check if plugin glob matches file path
 			if (
 				!plugin.detectChangesGlob ||
-				!globSync({
+				!matchesGlob({
 					engine: args.engine,
-					path: args.file.path,
-					glob: plugin.detectChangesGlob,
+					path: normalizedPath,
+					pattern: plugin.detectChangesGlob,
 				})
 			) {
 				continue;
@@ -295,7 +364,7 @@ export function handleFileUpdate(args: {
 					engine: args.engine,
 					key: "lix_file_no_plugin",
 					level: "warn",
-					message: `File updated at ${args.file.path} but plugin does not support detecting changes`,
+					message: `File updated at ${normalizedPath} but plugin does not support detecting changes`,
 				});
 				continue;
 			}
@@ -303,7 +372,7 @@ export function handleFileUpdate(args: {
 			// Detect changes between current and updated file
 			const detectedChanges = plugin.detectChanges({
 				before: currentFile,
-				after: args.file,
+				after: pluginFile,
 				querySync,
 			});
 
@@ -360,14 +429,14 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File updated at ${args.file.path} but no plugin available to detect changes`,
+				message: `File updated at ${normalizedPath} but no plugin available to detect changes`,
 			});
 
 			// Use fallback plugin to handle the file
 			if (lixUnknownFileFallbackPlugin.detectChanges) {
 				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
 					before: currentFile,
-					after: args.file,
+					after: pluginFile,
 					querySync,
 				});
 
@@ -420,7 +489,7 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File updated at ${args.file.path} but plugin detected no changes`,
+				message: `File updated at ${normalizedPath} but plugin detected no changes`,
 			});
 		}
 	}

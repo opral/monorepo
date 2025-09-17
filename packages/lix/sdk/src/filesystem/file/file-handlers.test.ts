@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "../version/create-version.js";
+import { openLix } from "../../lix/open-lix.js";
+import { createVersion } from "../../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import { randomNanoId } from "../database/nano-id.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
+import { randomNanoId } from "../../database/nano-id.js";
 
 describe("file insert", () => {
 	it("should handle unknown file types with fallback plugin", async () => {
@@ -25,6 +25,7 @@ describe("file insert", () => {
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some content"),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});
@@ -63,6 +64,7 @@ describe("file update", () => {
 				data: new TextEncoder().encode("some data"),
 				lixcol_version_id: version.id,
 				metadata: null,
+				hidden: false,
 			})
 			.execute();
 
@@ -74,6 +76,7 @@ describe("file update", () => {
 				path: "/test.unknown",
 				data: new TextEncoder().encode("updated data"),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});
@@ -112,6 +115,7 @@ describe("file update", () => {
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(initialJsonData)),
 				metadata: null,
+				hidden: false,
 			},
 			versionId: version.id,
 		});

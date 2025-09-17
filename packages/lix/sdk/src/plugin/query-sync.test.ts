@@ -79,6 +79,10 @@ describe("querySync", () => {
 			path: "/a.txt",
 			data: new Uint8Array(),
 			metadata: {},
+			directory_id: null,
+			name: "a",
+			extension: "txt",
+			hidden: false,
 		} as any;
 
 		// Use engine helper: write state_all row for file descriptor via Kysely
@@ -91,9 +95,11 @@ describe("querySync", () => {
 				plugin_key: "lix_own_entity",
 				snapshot_content: {
 					id: file.id,
-					path: file.path,
+					directory_id: file.directory_id,
+					name: file.name,
+					extension: file.extension,
 					metadata: file.metadata,
-					hidden: false,
+					hidden: file.hidden,
 				},
 				schema_version: "1.0",
 				version_id: versionId,

@@ -19,6 +19,7 @@ import {
 	ArrowUpRight,
 	BotMessageSquare,
 	FilePlus,
+	FolderPlus,
 	GitPullRequestArrow,
 } from "lucide-react";
 import { LixAgentChat } from "@/components/lix-agent-chat";
@@ -42,6 +43,7 @@ function LeftSidebarArea() {
 
 	// Local UI state for the Files tab: inline "new file" creator
 	const [creatingNewFile, setCreatingNewFile] = useState(false);
+	const [creatingNewDirectory, setCreatingNewDirectory] = useState(false);
 
 	const handleClose = () => {
 		setActive(null);
@@ -61,22 +63,45 @@ function LeftSidebarArea() {
 							handleClose();
 						}}
 						actions={
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-7 px-2 cursor-pointer"
-								onClick={() => setCreatingNewFile(true)}
-								aria-label="Create new file"
-								title="New file"
-							>
-								<FilePlus className="h-4 w-4" />
-								<span className="sr-only">New</span>
-							</Button>
+							<div className="flex items-center gap-1">
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-7 px-2 cursor-pointer"
+									onClick={() => {
+										setCreatingNewDirectory(false);
+										setCreatingNewFile(true);
+									}}
+									aria-label="Create new file"
+									title="New file"
+								>
+									<FilePlus className="h-4 w-4" />
+									<span className="sr-only">New file</span>
+								</Button>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-7 px-2 cursor-pointer"
+									onClick={() => {
+										setCreatingNewFile(false);
+										setCreatingNewDirectory(true);
+									}}
+									aria-label="Create new directory"
+									title="New directory"
+								>
+									<FolderPlus className="h-4 w-4" />
+									<span className="sr-only">New directory</span>
+								</Button>
+							</div>
 						}
 					>
 						<LeftSidebarFiles
-							creating={creatingNewFile}
-							onRequestCloseCreate={() => setCreatingNewFile(false)}
+							creatingFile={creatingNewFile}
+							onRequestCloseCreateFile={() => setCreatingNewFile(false)}
+							creatingDirectory={creatingNewDirectory}
+							onRequestCloseCreateDirectory={() =>
+								setCreatingNewDirectory(false)
+							}
 						/>
 					</LeftSidebarTab>
 				)}

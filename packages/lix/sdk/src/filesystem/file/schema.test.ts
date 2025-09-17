@@ -1,15 +1,15 @@
 import { test, expect, expectTypeOf } from "vitest";
-import { openLix } from "../lix/open-lix.js";
-import { createVersion } from "../version/create-version.js";
-import { createCheckpoint } from "../state/create-checkpoint.js";
-import { switchVersion } from "../version/switch-version.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import { openLix } from "../../lix/open-lix.js";
+import { createVersion } from "../../version/create-version.js";
+import { createCheckpoint } from "../../state/create-checkpoint.js";
+import { switchVersion } from "../../version/switch-version.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
+import type { LixPlugin } from "../../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
-import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
-import { withWriterKey } from "../state/writer.js";
+import { simulationTest } from "../../test-utilities/simulation-test/simulation-test.js";
+import { withWriterKey } from "../../state/writer.js";
 import { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLix({
@@ -258,7 +258,30 @@ test("invalid file paths should be rejected", async () => {
 				data: new Uint8Array(),
 			})
 			.execute()
-	).rejects.toThrowError("path must match pattern");
+	).rejects.toThrowError("Invalid file path");
+});
+
+// Future-proofing: ensure glob logic never admits leading/trailing dot segments.
+test("file paths cannot contain dot segments", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const payload = new TextEncoder().encode(JSON.stringify({ note: "dot" }));
+
+	await expect(
+		lix.db
+			.insertInto("file")
+			.values({ path: "/./readme.json", data: payload })
+			.execute()
+	).rejects.toThrow(/Invalid (directory|file) path/);
+
+	await expect(
+		lix.db
+			.insertInto("file")
+			.values({ path: "/docs/../readme.json", data: payload })
+			.execute()
+	).rejects.toThrow(/Invalid (directory|file) path/);
 });
 
 test("files should have hidden property defaulting to false", async () => {
@@ -568,6 +591,167 @@ test("file_history provides access to historical file data", async () => {
 	expect(historicalFileAtUpdate.lixcol_commit_id).toBe(updateCheckpoint.id);
 });
 
+test("file_history reflects directory renames across commits", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const initialData = new TextEncoder().encode(
+		JSON.stringify({ content: "hello" })
+	);
+
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/docs/readme.json", data: initialData })
+		.execute();
+
+	const fileDescriptor = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/docs/readme.json")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+	const fileId = fileDescriptor.id;
+
+	const firstCheckpoint = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("directory")
+		.where("name", "=", "docs")
+		.set({ name: "guides" })
+		.execute();
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({ metadata: { stage: "after-rename" } })
+		.execute();
+
+	const secondCheckpoint = await createCheckpoint({ lix });
+
+	const historyBeforeRename = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", firstCheckpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path", "id"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterRename = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", secondCheckpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path", "id"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterRenameDepthOne = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", secondCheckpoint.id)
+		.where("lixcol_depth", "=", 1)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	expect(historyBeforeRename.path).toBe("/docs/readme.json");
+	expect(historyAfterRename.path).toBe("/guides/readme.json");
+	expect(historyAfterRenameDepthOne.path).toBe("/docs/readme.json");
+});
+
+test("file_history tracks directory moves across commits", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const payload = new TextEncoder().encode(JSON.stringify({ note: "move" }));
+
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/docs/guides/intro.json", data: payload })
+		.execute();
+
+	const insertedFile = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/docs/guides/intro.json")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+	const fileId = insertedFile.id;
+
+	await lix.db
+		.insertInto("directory")
+		.values({ name: "articles", parent_id: null })
+		.execute();
+
+	const docsDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "docs")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const guidesDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "guides")
+		.where("parent_id", "=", docsDirectory.id)
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const articlesDirectory = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "articles")
+		.select(["id"])
+		.executeTakeFirstOrThrow();
+
+	const checkpointBeforeMove = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("directory")
+		.where("id", "=", guidesDirectory.id)
+		.set({ parent_id: articlesDirectory.id })
+		.execute();
+
+	// Touch the target directory so directory history captures it in the commit
+	await lix.db
+		.updateTable("directory")
+		.where("id", "=", articlesDirectory.id)
+		.set({ name: "articles" })
+		.execute();
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({ metadata: { stage: "after-move" } })
+		.execute();
+
+	const checkpointAfterMove = await createCheckpoint({ lix });
+
+	const historyBeforeMove = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointBeforeMove.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterMove = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+		.where("lixcol_depth", "=", 0)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	const historyAfterMoveDepthOne = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", fileId)
+		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+		.where("lixcol_depth", "=", 1)
+		.select(["path"])
+		.executeTakeFirstOrThrow();
+
+	expect(historyBeforeMove.path).toBe("/docs/guides/intro.json");
+	expect(historyAfterMove.path).toBe("/articles/guides/intro.json");
+	expect(historyAfterMoveDepthOne.path).toBe("/docs/guides/intro.json");
+});
+
 // its super annoying to work with metadata otherwise
 test("file metadata is Record<string, any>", async () => {
 	const mockFile: LixFile = {
@@ -578,6 +762,10 @@ test("file metadata is Record<string, any>", async () => {
 			author: "test-user",
 			created_at: new Date().toISOString(),
 		},
+		directory_id: null,
+		name: "test",
+		extension: "json",
+		hidden: false,
 	};
 
 	expectTypeOf(mockFile.metadata).toEqualTypeOf<
@@ -691,7 +879,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	// Verify that the updated snapshot content in the change matches the file view
 	expect(newFileChangeRecord.snapshot_content).toMatchObject({
 		id: "change-id-test-file",
-		path: "/test-change-id-updated.json",
+		directory_id: null,
+		name: "test-change-id-updated",
+		extension: "json",
 	});
 	expect(updatedFileResult[0]?.path).toBe("/test-change-id-updated.json");
 });
@@ -1414,8 +1604,15 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 		return lixcols;
 	};
 
-	// Filter out columns that don't make sense for file views (files are themselves entities)
-	const blacklist = ["lixcol_file_id", "lixcol_plugin_key", "lixcol_entity_id"];
+	// Filter out columns that don't make sense for file views (files are themselves entities).
+	// These fields either duplicate intrinsic file identity (file/plugin/entity ids) or
+	// are constants in state_history (version_id always resolves to 'global').
+	const blacklist = [
+		"lixcol_file_id",
+		"lixcol_plugin_key",
+		"lixcol_entity_id",
+		"lixcol_version_id",
+	];
 
 	const filterColumns = (lixcols: Record<string, any>) => {
 		const filtered: Record<string, any> = {};

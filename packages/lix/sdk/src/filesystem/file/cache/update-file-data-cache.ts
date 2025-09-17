@@ -1,4 +1,4 @@
-import type { LixEngine } from "../../engine/boot.js";
+import type { LixEngine } from "../../../engine/boot.js";
 
 /**
  * Updates the file data cache with materialized file content.

@@ -14,8 +14,11 @@ const createTestFile = (id: string, data: string) => ({
 	id,
 	path: `/test/${id}.unknown`,
 	data: new TextEncoder().encode(data),
-	version_id: "test-version",
+	directory_id: null,
+	name: id,
+	extension: "unknown",
 	metadata: null,
+	hidden: false,
 });
 
 // This plugin doesn't use database access; provide a dummy to satisfy types.

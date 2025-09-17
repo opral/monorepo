@@ -1,6 +1,6 @@
-import { executeSync } from "../database/execute-sync.js";
-import type { LixEngine } from "../engine/boot.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { executeSync } from "../../database/execute-sync.js";
+import type { LixEngine } from "../../engine/boot.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 export function storeDetectedChangeSchema(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;

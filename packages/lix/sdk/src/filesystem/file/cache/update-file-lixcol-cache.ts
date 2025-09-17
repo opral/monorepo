@@ -1,4 +1,4 @@
-import type { LixEngine } from "../../engine/boot.js";
+import type { LixEngine } from "../../../engine/boot.js";
 
 /**
  * Updates the file lixcol metadata cache.
