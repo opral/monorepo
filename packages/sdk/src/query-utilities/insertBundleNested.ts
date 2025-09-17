@@ -1,4 +1,6 @@
 import type { Kysely } from "kysely";
+import { v7 } from "uuid";
+import { humanId } from "../human-id/human-id.js";
 import type {
 	InlangDatabaseSchema,
 	NewBundleNested,
@@ -9,35 +11,36 @@ export const insertBundleNested = async (
 	bundle: NewBundleNested
 ): Promise<void> => {
 	await db.transaction().execute(async (trx) => {
-		const insertedBundle = await trx
+		const bundleId = bundle.id ?? humanId();
+		await trx
 			.insertInto("bundle")
 			.values({
-				id: bundle.id,
-				declarations: bundle.declarations,
+				id: bundleId,
+				declarations: bundle.declarations ?? [],
 			})
-			.returning("id")
-			.executeTakeFirstOrThrow();
+			.execute();
 
 		for (const message of bundle.messages) {
-			const insertedMessage = await trx
+			const messageId = message.id ?? v7();
+			await trx
 				.insertInto("message")
 				.values({
-					id: message.id,
-					bundleId: insertedBundle.id,
+					id: messageId,
+					bundleId,
 					locale: message.locale,
-					selectors: message.selectors,
+					selectors: message.selectors ?? [],
 				})
-				.returning("id")
-				.executeTakeFirstOrThrow();
+				.execute();
 
 			for (const variant of message.variants) {
+				const variantId = variant.id ?? v7();
 				await trx
 					.insertInto("variant")
 					.values({
-						id: variant.id,
-						messageId: insertedMessage.id,
-						matches: variant.matches,
-						pattern: variant.pattern,
+						id: variantId,
+						messageId: messageId,
+						matches: variant.matches ?? [],
+						pattern: variant.pattern ?? [],
 					})
 					.execute();
 			}

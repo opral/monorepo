@@ -1,6 +1,7 @@
 import { openLix, type LixKeyValue, type NewState } from "@lix-js/sdk";
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { loadProject } from "./loadProject.js";
+import { applySchema } from "../database/schema.js";
 
 /**
  * Load a project from a blob in memory.
@@ -24,10 +25,15 @@ export async function loadProjectInMemory(
 		.selectFrom("file")
 		.select("data")
 		.where("path", "=", "/db.sqlite")
-		.executeTakeFirstOrThrow();
+		.executeTakeFirst();
 
 	const sqlite = await createInMemoryDatabase({});
-	importDatabase({ db: sqlite, content: new Uint8Array(dbFile.data) });
+
+	if (dbFile) {
+		importDatabase({ db: sqlite, content: new Uint8Array(dbFile.data) });
+	} else {
+		applySchema({ sqlite });
+	}
 
 	return await loadProject({
 		// pass common arguments to loadProject

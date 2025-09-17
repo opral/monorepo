@@ -8,10 +8,10 @@ test("bundle default values", async () => {
 	const lix = await openLix({});
 	const db = initDb({ lix });
 
+	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
-		.insertInto("bundle")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("bundle")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(isHumanId(bundle.id)).toBe(true);
@@ -23,19 +23,22 @@ test("message default values", async () => {
 
 	const db = initDb({ lix });
 
+	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
-		.insertInto("bundle")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("bundle")
+		.select("id")
 		.executeTakeFirstOrThrow();
 
-	const message = await db
+	await db
 		.insertInto("message")
 		.values({
 			bundleId: bundle.id,
 			locale: "en",
 		})
-		.returningAll()
+		.execute();
+	const message = await db
+		.selectFrom("message")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(isUuid(message.id)).toBe(true);
@@ -47,27 +50,33 @@ test("variant default values", async () => {
 
 	const db = initDb({ lix });
 
+	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
-		.insertInto("bundle")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("bundle")
+		.select("id")
 		.executeTakeFirstOrThrow();
 
-	const message = await db
+	await db
 		.insertInto("message")
 		.values({
 			bundleId: bundle.id,
 			locale: "en",
 		})
-		.returningAll()
+		.execute();
+	const message = await db
+		.selectFrom("message")
+		.select("id")
 		.executeTakeFirstOrThrow();
 
-	const variant = await db
+	await db
 		.insertInto("variant")
 		.values({
 			messageId: message.id,
 		})
-		.returningAll()
+		.execute();
+	const variant = await db
+		.selectFrom("variant")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(isUuid(variant.id)).toBe(true);
@@ -80,7 +89,7 @@ test("it should handle json serialization and parsing for bundles", async () => 
 
 	const db = initDb({ lix });
 
-	const bundle = await db
+	await db
 		.insertInto("bundle")
 		.values({
 			declarations: [
@@ -90,7 +99,10 @@ test("it should handle json serialization and parsing for bundles", async () => 
 				},
 			],
 		})
-		.returningAll()
+		.execute();
+	const bundle = await db
+		.selectFrom("bundle")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(bundle.declarations).toStrictEqual([

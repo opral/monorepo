@@ -18,6 +18,7 @@ import type {
 } from "../json-schema/old-v1-message/schemaV1.js";
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
+import { v7 } from "uuid";
 
 const simpleJsonPlugin: InlangPlugin = {
 	key: "test-json-plugin",
@@ -335,16 +336,25 @@ test("project survives repeated save and load cycles with JSON plugin", async ()
 		(initialBundles[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value
 	).toBe("Hello");
 
-	await project.db.insertInto("bundle").values({ id: "welcome" }).execute();
-	const newMessage = await project.db
+	await project.db
+		.insertInto("bundle")
+		.values({ id: "welcome", declarations: [] })
+		.execute();
+	const newMessageId = v7();
+	await project.db
 		.insertInto("message")
-		.values({ bundleId: "welcome", locale: "en" })
-		.returning("id")
-		.executeTakeFirstOrThrow();
+		.values({
+			id: newMessageId,
+			bundleId: "welcome",
+			locale: "en",
+			selectors: [],
+		})
+		.execute();
 	await project.db
 		.insertInto("variant")
 		.values({
-			messageId: newMessage.id,
+			id: v7(),
+			messageId: newMessageId,
 			matches: [],
 			pattern: [{ type: "text", value: "Welcome" }],
 		})
