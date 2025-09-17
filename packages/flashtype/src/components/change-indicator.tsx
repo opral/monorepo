@@ -157,8 +157,8 @@ function PanelDiff() {
 				"diff.entity_id",
 				"diff.schema_key",
 				"after.plugin_key as plugin_key",
-				"before.snapshot_content as snapshot_content_before",
-				"after.snapshot_content as snapshot_content_after",
+				"before.snapshot_content as before_snapshot_content",
+				"after.snapshot_content as after_snapshot_content",
 			]);
 	});
 

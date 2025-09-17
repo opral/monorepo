@@ -12,13 +12,14 @@ import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import type { LixEngine } from "../engine/boot.js";
-import type { LixEnvironment } from "../environment/types.js";
+import type { EngineEvent, LixEngine } from "../engine/boot.js";
+import type { LixEnvironment } from "../environment/api.js";
 import { createDialect } from "../environment/kysely/kysely-driver.js";
 import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
 import { random } from "../engine/deterministic/random.js";
 import { buildJsonColumnConfig } from "./json-column-config.js";
+import { loadPluginFromString } from "../environment/load-from-string.js";
 
 export type Lix = {
 	/**
@@ -35,7 +36,6 @@ export type Lix = {
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
-		getAllSync: () => LixPlugin[];
 	};
 	/**
 	 * Hooks for listening to database lifecycle events.
@@ -162,14 +162,41 @@ export async function openLix(args: {
 
 	environment?: LixEnvironment;
 
-	pluginsRaw?: string[];
 	/**
-	 * Provide plugin instances directly (classic API).
+	 * Provide plugin instances directly (in-process environments only).
 	 *
-	 * Supported only by in‑process environments. In worker/remote environments,
-	 * plugins must be provided via `pluginsRaw` (stringified ESM modules).
+	 * Use this when executing in the same thread as the engine, e.g. tests or
+	 * scripts running with {@link InMemoryEnvironment}. Plugins supplied this
+	 * way are not transferable across worker boundaries.
+	 *
+	 * Prefer {@link providePluginsRaw} when the environment can access bundled
+	 * plugin source (for example via `?raw` import). Raw strings load on the
+	 * target thread and work in both workers and main-thread contexts, but are
+	 * usually unavailable in unit tests.
+	 *
+	 * @example
+	 * ```ts
+	 * const lix = await openLix({
+	 *   providePlugins: [jsonPlugin]
+	 * })
+	 * ```
 	 */
 	providePlugins?: LixPlugin[];
+
+	/**
+	 * Provide plugins as stringified ESM modules.
+	 *
+	 * This is the portable format for worker or cross-thread environments where
+	 * functions cannot be structured cloned. Each string is evaluated via
+	 * {@link loadPluginFromString} inside the target environment.
+	 *
+	 * @example
+	 * ```ts
+	 * const jsonPlugin = await fetch("/plugins/json.js").then((res) => res.text());
+	 * const lix = await openLix({ providePluginsRaw: [jsonPlugin] });
+	 * ```
+	 */
+	providePluginsRaw?: string[];
 
 	/**
 	 * Set the key values when opening the lix.
@@ -184,6 +211,17 @@ export async function openLix(args: {
 	const hooks = createHooks();
 	const blob = args.blob;
 	let engine: LixEngine | undefined;
+	const hostPlugins: LixPlugin[] = [];
+
+	const providedPluginObjects = [...(args.providePlugins ?? [])];
+	const providedPluginStrings = [...(args.providePluginsRaw ?? [])];
+
+	for (const plugin of providedPluginObjects) {
+		hostPlugins.push(plugin);
+	}
+	for (const plugin of providedPluginStrings) {
+		hostPlugins.push(await loadPluginFromString(plugin));
+	}
 
 	const environment =
 		args.environment ??
@@ -197,8 +235,8 @@ export async function openLix(args: {
 	//   fall back to open without a blob.
 	const boot = {
 		args: {
-			pluginsRaw: args.pluginsRaw,
-			providePlugins: args.providePlugins,
+			providePlugins: providedPluginObjects,
+			providePluginsRaw: providedPluginStrings,
 			account: args.account,
 			keyValues: args.keyValues,
 		},
@@ -208,11 +246,10 @@ export async function openLix(args: {
 		await environment.create({ blob: await args.blob!.arrayBuffer() });
 		const res = await environment.open({
 			boot,
-			emit: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	} else {
-		// Exists-first flow: avoid throwing to decide; ask environment if a DB exists.
 		const exists = await environment.exists();
 		if (!exists) {
 			const { newLixFile } = await import("./new-lix.js");
@@ -222,7 +259,7 @@ export async function openLix(args: {
 		}
 		const res = await environment.open({
 			boot,
-			emit: (ev) => hooks._emit(ev.type, ev.payload),
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
 		});
 		engine = res?.engine;
 	}
@@ -252,8 +289,7 @@ export async function openLix(args: {
 		observe,
 		engine: engine,
 		plugin: {
-			getAll: async () => engine?.getAllPluginsSync() ?? [],
-			getAllSync: () => engine?.getAllPluginsSync() ?? [],
+			getAll: async () => hostPlugins,
 		},
 		call: async (
 			name: string,

@@ -5,7 +5,7 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
-import type { LixEnvironment } from "../types.js";
+import type { LixEnvironment } from "../api.js";
 
 type LixEnvironmentDriverConfig = {
 	backend: LixEnvironment;

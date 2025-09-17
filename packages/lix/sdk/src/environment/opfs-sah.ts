@@ -1,16 +1,15 @@
-import type { LixEnvironment, LixEnvironmentResult } from "./types.js";
+import type {
+	EnvironmentActorHandle,
+	LixEnvironment,
+	LixEnvironmentResult,
+	SpawnActorOptions,
+} from "./api.js";
 
 /**
  * OPFS SAH‑pool environment implemented with a Dedicated Worker.
  *
  * Spawns a Worker and forwards calls via a minimal RPC while keeping the
  * environment async surface. Use one instance per logical database key.
- *
- * @example
- * // Instance API
- * const env = new OpfsSahEnvironment({ key: 'default' })
- * await env.open({ boot: { args: { pluginsRaw: [] } }, emit })
- *
  * @example
  * // Static helper: clear all OPFS data for this origin (destructive)
  * await OpfsSahEnvironment.clear()
@@ -24,6 +23,7 @@ export class OpfsSahEnvironment implements LixEnvironment {
 	private eventHandler: ((ev: any) => void) | undefined;
 	private readonly dbKey: string;
 	private isOpen = false;
+	private actorWorkers = new Set<Worker>();
 
 	constructor(opts?: { key?: string }) {
 		this.dbKey = opts?.key || "default";
@@ -66,17 +66,6 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		});
 	}
 
-	/**
-	 * Invoke a named engine function inside the worker engine.
-	 */
-	async call(
-		name: string,
-		payload?: unknown,
-		_opts?: { signal?: AbortSignal }
-	): Promise<unknown> {
-		return this.send("call", { route: name, payload });
-	}
-
 	async open(
 		initOpts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: import("../engine/boot.js").LixEngine }> {
@@ -95,6 +84,13 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		this.isOpen = true;
 		OpfsSahEnvironment._openByKey.set(this.dbKey, this);
 		return {};
+	}
+
+	/**
+	 * Invoke a named engine function inside the worker engine.
+	 */
+	async call(name: string, payload?: unknown): Promise<unknown> {
+		return this.send("call", { route: name, payload });
 	}
 
 	async create(
@@ -146,8 +142,53 @@ export class OpfsSahEnvironment implements LixEnvironment {
 				}
 			}
 		}
+		for (const worker of this.actorWorkers) {
+			worker.terminate();
+		}
+		this.actorWorkers.clear();
 		this.worker.terminate();
 		OpfsSahEnvironment._instances.delete(this);
+		this.eventHandler = undefined;
+	}
+
+	async spawnActor(opts: SpawnActorOptions): Promise<EnvironmentActorHandle> {
+		const workerUrl = new URL(opts.entryModule, import.meta.url);
+		const actor = new Worker(workerUrl, {
+			type: "module",
+			name: opts.name,
+		});
+		this.actorWorkers.add(actor);
+
+		const handle: EnvironmentActorHandle = {
+			post: (message: unknown, transfer?: Transferable[]) => {
+				if (transfer && transfer.length > 0) {
+					actor.postMessage(message, transfer);
+					return;
+				}
+				actor.postMessage(message);
+			},
+			subscribe: (listener: (message: unknown) => void) => {
+				const handler = (event: MessageEvent) => listener(event.data);
+				actor.addEventListener("message", handler);
+				return () => {
+					actor.removeEventListener("message", handler);
+				};
+			},
+			terminate: async () => {
+				this.actorWorkers.delete(actor);
+				actor.terminate();
+			},
+		};
+
+		if (opts.initialMessage !== undefined || (opts.transfer?.length ?? 0) > 0) {
+			if (opts.transfer && opts.transfer.length > 0) {
+				actor.postMessage(opts.initialMessage, opts.transfer);
+			} else {
+				actor.postMessage(opts.initialMessage);
+			}
+		}
+
+		return handle;
 	}
 
 	/**

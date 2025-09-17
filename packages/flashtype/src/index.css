@@ -143,6 +143,29 @@
 	--sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Diff rendering helpers (scoped to plugin output) */
+.lix-diff-content .diff-added {
+	color: #1f883d;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content .diff-modified {
+	color: #f59e0b;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content .diff-removed {
+	color: #d1242f;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content [data-diff-mode="words"] .diff-removed {
+	text-decoration: line-through;
+}
+
 .dark {
 	--background: oklch(0.145 0 0);
 

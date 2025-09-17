@@ -17,8 +17,8 @@ export type EngineEvent = {
 };
 
 export type BootArgs = {
-	pluginsRaw?: Parameters<typeof openLix>[0]["pluginsRaw"];
-	providePlugins?: Parameters<typeof openLix>[0]["providePlugins"];
+	providePlugins?: LixPlugin[];
+	providePluginsRaw?: string[];
 	account?: Parameters<typeof openLix>[0]["account"];
 	keyValues?: Parameters<typeof openLix>[0]["keyValues"];
 };
@@ -62,25 +62,20 @@ export async function boot(
 
 	// Load plugins from raw ESM strings and provided plugin objects
 	const plugins: LixPlugin[] = [];
-	for (const code of env.args.pluginsRaw ?? []) {
-		const p = await loadPluginFromString(code);
-		plugins.push(p);
+	for (const code of env.args.providePluginsRaw ?? []) {
+		const plugin = await loadPluginFromString(code);
+		plugins.push(plugin);
 	}
-	for (const p of env.args.providePlugins ?? []) {
-		plugins.push(p);
+	for (const input of env.args.providePlugins ?? []) {
+		plugins.push(input);
 	}
-
-	const plugin = {
-		getAll: async () => plugins,
-		getAllSync: () => plugins,
-	};
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
 	const engine: LixEngine = {
 		sqlite: env.sqlite,
 		db,
 		hooks,
-		getAllPluginsSync: () => plugin.getAllSync(),
+		getAllPluginsSync: () => plugins,
 	};
 
 	// Install file functions + views that depend on plugin + hooks

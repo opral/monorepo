@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import type {
 	LixEnvironment,
 	LixEnvironmentResult,
-} from "../../environment/types.js";
+} from "../../environment/api.js";
 import { InMemoryEnvironment } from "../../environment/in-memory.js";
 
 export const engineBoundarySimulation: SimulationTestDef = {
@@ -38,21 +38,11 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 		this.inner = new InMemoryEnvironment();
 	}
 
-	async call(
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	): Promise<unknown> {
-		return this.inner.call(name, payload, opts);
-	}
-
 	async open(
 		initOpts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: import("../../engine/boot.js").LixEngine }> {
 		this.eventHandler = initOpts.emit;
-		// Boot the inner engine but intentionally do not return its engine
 		await this.inner.open(initOpts);
-		// Return object without engine to simulate boundary
 		return {};
 	}
 
@@ -72,6 +62,14 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 
 	async exists(): Promise<boolean> {
 		return this.inner.exists();
+	}
+
+	async call(
+		name: string,
+		payload?: unknown,
+		opts?: { signal?: AbortSignal }
+	): Promise<unknown> {
+		return this.inner.call(name, payload, opts);
 	}
 
 	async close(): Promise<void> {

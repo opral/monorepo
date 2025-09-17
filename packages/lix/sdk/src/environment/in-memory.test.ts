@@ -5,7 +5,7 @@ describe("InMemory environemnt", () => {
 	test("initializes and executes basic SQL", async () => {
 		const engine = new InMemoryEnvironment();
 		await engine.open({
-			boot: { args: { pluginsRaw: [] } },
+			boot: { args: { providePlugins: [] } },
 			emit: () => {},
 		});
 
@@ -26,7 +26,7 @@ describe("InMemory environemnt", () => {
 	test("returns engine handle from open()", async () => {
 		const backend = new InMemoryEnvironment();
 		const res = await backend.open({
-			boot: { args: { pluginsRaw: [] } },
+			boot: { args: { providePlugins: [] } },
 			emit: () => {},
 		});
 
@@ -41,7 +41,7 @@ describe("InMemory environemnt", () => {
 
 test("export/import round-trip persists data", async () => {
 	const b1 = new InMemoryEnvironment();
-	await b1.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+	await b1.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
 	await b1.exec("CREATE TABLE t(a)");
 	await b1.exec("INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
@@ -51,7 +51,7 @@ test("export/import round-trip persists data", async () => {
 
 	const b2 = new InMemoryEnvironment();
 	await b2.create({ blob: snapshot });
-	await b2.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+	await b2.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
 	const out = await b2.exec("SELECT a FROM t ORDER BY a");
 	expect(out.rows?.map((r: any) => r.a ?? r[0])).toEqual([1, 2]);
@@ -63,8 +63,8 @@ test("multiple engines are independent", async () => {
 	const b1 = new InMemoryEnvironment();
 	const b2 = new InMemoryEnvironment();
 
-	await b1.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
-	await b2.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+	await b1.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
+	await b2.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
 	await b1.exec("CREATE TABLE t(a)");
 	await b2.exec("CREATE TABLE t(a)");

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
-import { selectVersionDiff } from "@lix-js/sdk";
+import { selectVersionDiff, type RenderDiffArgs } from "@lix-js/sdk";
 import { Diff } from "@/components/diff";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
@@ -64,15 +64,15 @@ export function DiffView() {
 				"diff.schema_key",
 				(eb) => eb.ref("diff.status").as("status"),
 				(eb) => eb.ref("after.plugin_key").as("plugin_key"),
-				(eb) => eb.ref("before.snapshot_content").as("snapshot_content_before"),
-				(eb) => eb.ref("after.snapshot_content").as("snapshot_content_after"),
+				(eb) => eb.ref("before.snapshot_content").as("before_snapshot_content"),
+				(eb) => eb.ref("after.snapshot_content").as("after_snapshot_content"),
 			]);
 		return q;
 	});
 
-	const hasChanges = Array.isArray(diffs)
-		? (diffs as any[]).some((d) => d.status !== "unchanged")
-		: false;
+	const diffArray = Array.isArray(diffs) ? (diffs as any[]) : [];
+	const hasChanges = diffArray.some((d) => d.status !== "unchanged");
+	const renderDiffs = diffArray as unknown as RenderDiffArgs["diffs"];
 
 	return (
 		<div>
@@ -85,10 +85,8 @@ export function DiffView() {
 					) : (
 						// Plugin-rendered diff component
 						<Diff
-							diffs={diffs as any}
-							contentClassName={
-								mode === "unified" ? "ProseMirror" : "ProseMirror"
-							}
+							diffs={renderDiffs}
+							contentClassName={`lix-diff-content ProseMirror`}
 						/>
 					)}
 				</div>

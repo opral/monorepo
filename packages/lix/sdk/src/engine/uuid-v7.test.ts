@@ -6,7 +6,7 @@ import { uuidV7 } from "./deterministic/uuid-v7.js";
 test("generated a uuid v7", async () => {
 	const engine = await openLix({
 		environment: new InMemoryEnvironment(),
-		pluginsRaw: [],
+		providePlugins: [],
 	});
 
 	const id = await uuidV7({ lix: engine });

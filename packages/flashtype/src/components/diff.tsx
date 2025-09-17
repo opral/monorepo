@@ -1,50 +1,64 @@
-import { useEffect, useRef, useState } from "react";
-import type { UiDiffComponentProps } from "@lix-js/sdk";
+import { useEffect, useState } from "react";
+import type { RenderDiffArgs } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
 
 export function Diff(props: {
-	diffs: UiDiffComponentProps["diffs"];
+	diffs: RenderDiffArgs["diffs"];
 	className?: string;
 	contentClassName?: string;
 }) {
 	const lix = useLix();
-	const [ready, setReady] = useState(false);
-	const elRef = useRef<any>(null);
+	const [renderedHtml, setRenderedHtml] = useState<string | null>(null);
 	const pluginKey = props.diffs?.[0]?.plugin_key;
-	const CustomElementName = pluginKey
-		? `diff-${String(pluginKey).replace(/_/g, "-")}`
-		: null;
 
 	useEffect(() => {
+		let cancelled = false;
+
 		const load = async () => {
-			if (!lix || !pluginKey || !CustomElementName) {
-				setReady(false);
+			if (!lix || !pluginKey) {
+				if (!cancelled) setRenderedHtml(null);
 				return;
 			}
-			const comp = (await lix.plugin.getAll()).find(
-				(p) => p.key === pluginKey,
-			)?.diffUiComponent;
-			if (comp && !customElements.get(CustomElementName)) {
-				customElements.define(CustomElementName, comp);
+
+			try {
+				console.log("rendering diff");
+				const plugins = await lix.plugin.getAll();
+				const plugin = plugins[0];
+				if (cancelled) return;
+				if (!plugin?.renderDiff) {
+					setRenderedHtml(null);
+					return;
+				}
+
+				const html = await plugin.renderDiff({ diffs: props.diffs });
+				console.log("diff html", html);
+				if (!cancelled) setRenderedHtml(html ?? null);
+			} catch (error) {
+				if (!cancelled) {
+					console.error("Failed to render diff", error);
+					setRenderedHtml(null);
+				}
 			}
-			setReady(true);
 		};
+
 		load();
-	}, [lix, pluginKey, CustomElementName]);
+		return () => {
+			cancelled = true;
+		};
+	}, [lix, pluginKey, props.diffs]);
 
-	// Ensure complex prop is set as a property (React sets attributes by default on custom elements)
-	useEffect(() => {
-		if (ready && elRef.current) elRef.current.diffs = props.diffs;
-	}, [ready, props.diffs]);
+	if (!renderedHtml) return null;
 
-	if (!ready || !CustomElementName) return null;
+	const contentClasses = ["lix-diff-content", props.contentClassName]
+		.filter(Boolean)
+		.join(" ");
 
-	const AnyTag: any = CustomElementName;
 	return (
 		<div className={props.className}>
-			<div className={props.contentClassName}>
-				<AnyTag ref={elRef} />
-			</div>
+			<div
+				className={contentClasses}
+				dangerouslySetInnerHTML={{ __html: renderedHtml }}
+			/>
 		</div>
 	);
 }

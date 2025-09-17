@@ -19,19 +19,19 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 ```html
 <!-- Before -->
 <div>
-  <p data-diff-key='ixn4'>First paragraph</p>
+  <p data-diff-key="ixn4">First paragraph</p>
 </div>
 
 <!-- After -->
 <div>
-  <p data-diff-key='ixn4'>First paragraph</p>
-  <p data-diff-key='zm7q'>Second paragraph</p>
+  <p data-diff-key="ixn4">First paragraph</p>
+  <p data-diff-key="zm7q">Second paragraph</p>
 </div>
 ```
 
-<Showcase 
-  before="<div><p data-diff-key='ixn4'>First paragraph</p></div>" 
-  after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>" 
+<Showcase
+  before="<div><p data-diff-key='ixn4'>First paragraph</p></div>"
+  after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
@@ -40,19 +40,19 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 ```html
 <!-- Before -->
 <div>
-  <p data-diff-key='bw5c'>Keep this</p>
-  <p data-diff-key='ft9x'>Remove this</p>
+  <p data-diff-key="bw5c">Keep this</p>
+  <p data-diff-key="ft9x">Remove this</p>
 </div>
 
 <!-- After -->
 <div>
-  <p data-diff-key='bw5c'>Keep this</p>
+  <p data-diff-key="bw5c">Keep this</p>
 </div>
 ```
 
-<Showcase 
-  before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>" 
-  after="<div><p data-diff-key='bw5c'>Keep this</p></div>" 
+<Showcase
+  before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>"
+  after="<div><p data-diff-key='bw5c'>Keep this</p></div>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
@@ -80,21 +80,23 @@ Use `data-diff-mode="element"` to explicitly mark the element for atomic element
 </div>
 ```
 
-<Showcase 
-  before="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>Old Title</h3><p>Old content</p></div>" 
-  after="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>New Title</h3><p>New content</p></div>" 
+<Showcase
+  before="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>Old Title</h3><p>Old content</p></div>"
+  after="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>New Title</h3><p>New content</p></div>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
 />
 
 #### When to use element mode
 
 ✅ **Use for complex HTML structures:**
+
 - Components with nested elements and specific styling
 - Elements where word-level diffing would break the UI
 - Cards, panels, or widgets with multiple child elements
 - Interactive components (buttons, forms, etc.)
 
 ❌ **Avoid for simple text content:**
+
 - Plain paragraphs or headings
 - Simple text spans
 - Content where word-level diffing would be more useful
@@ -107,15 +109,15 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 
 ```html
 <!-- Before -->
-<p data-diff-key='qr8n'>Hello there</p>
+<p data-diff-key="qr8n">Hello there</p>
 
 <!-- After -->
-<p data-diff-key='qr8n'>Hello world</p>
+<p data-diff-key="qr8n">Hello world</p>
 ```
 
-<Showcase 
-  before="<p data-diff-key='qr8n'>Hello there</p>" 
-  after="<p data-diff-key='qr8n'>Hello world</p>" 
+<Showcase
+  before="<p data-diff-key='qr8n'>Hello there</p>"
+  after="<p data-diff-key='qr8n'>Hello world</p>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
@@ -123,26 +125,28 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 
 ```html
 <!-- Before -->
-<p data-diff-key='kv3m' data-diff-mode="words">Hello there</p>
+<p data-diff-key="kv3m" data-diff-mode="words">Hello there</p>
 
 <!-- After -->
-<p data-diff-key='kv3m' data-diff-mode="words">Hello world</p>
+<p data-diff-key="kv3m" data-diff-mode="words">Hello world</p>
 ```
 
-<Showcase 
-  before="<p data-diff-key='kv3m' data-diff-mode='words'>Hello there</p>" 
-  after="<p data-diff-key='kv3m' data-diff-mode='words'>Hello world</p>" 
+<Showcase
+  before="<p data-diff-key='kv3m' data-diff-mode='words'>Hello there</p>"
+  after="<p data-diff-key='kv3m' data-diff-mode='words'>Hello world</p>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 
 #### When to use data-diff-mode="words"
 
 ✅ **Use for simple text content:**
+
 - Paragraphs with plain text
 - Headings
 - Simple spans
 
 ❌ **Avoid for complex components:**
+
 - Components with nested HTML structure
 - Elements with specific styling that would break with inserted spans
 - Interactive components (buttons, forms, etc.)
@@ -153,21 +157,21 @@ This example shows how using `data-diff-mode="words"` on complex components brea
 
 ```html
 <!-- ❌ DON'T: Using words mode on complex component -->
-<div class='card' data-diff-key='jx9w' data-diff-mode="words">
+<div class="card" data-diff-key="jx9w" data-diff-mode="words">
   <h3>Old Title</h3>
   <p>Some content here</p>
 </div>
 
 <!-- After -->
-<div class='card' data-diff-key='jx9w' data-diff-mode="words">
+<div class="card" data-diff-key="jx9w" data-diff-mode="words">
   <h3>New Title</h3>
   <p>Different content here</p>
 </div>
 ```
 
-<Showcase 
-  before="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>Old Title</h3><p>Some content here</p></div>" 
-  after="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>New Title</h3><p>Different content here</p></div>" 
+<Showcase
+  before="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>Old Title</h3><p>Some content here</p></div>"
+  after="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>New Title</h3><p>Different content here</p></div>"
   css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
 />
 
@@ -182,12 +186,14 @@ By default, when elements are removed, they are not inserted into the diff resul
 ### When to use data-diff-show-when-removed
 
 ✅ **Use for elements safe to re-insert:**
+
 - Table rows (`<tr>`) that won't break table layout
-- List items (`<li>`) that can be safely displayed  
+- List items (`<li>`) that can be safely displayed
 - Elements where showing deletions improves clarity
 - Content elements that flow naturally
 
 ❌ **Avoid for layout-sensitive elements:**
+
 - Elements in flexbox/grid layouts where extra DOM nodes break positioning
 - Components with strict child count requirements
 - Interactive elements that might cause confusion when deleted
@@ -225,9 +231,9 @@ By default, when elements are removed, they are not inserted into the diff resul
 </tbody>
 ```
 
-<Showcase 
-  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-removed><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>" 
-  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>" 
+<Showcase
+  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-removed><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>"
+  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>"
   css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; text-decoration: line-through; }"
 />
 
@@ -252,9 +258,9 @@ You can be selective about which elements show when removed:
 
 Without the `data-diff-show-when-removed` attribute, removed elements are not inserted:
 
-<Showcase 
-  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2'><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
-  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
+<Showcase
+  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2'><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>"
+  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>"
   css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
 />
 

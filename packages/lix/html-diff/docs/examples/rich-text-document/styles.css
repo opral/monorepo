@@ -152,7 +152,6 @@
     display: list-item;
   }
 
-
   img,
   svg,
   video,
@@ -224,7 +223,6 @@
     resize: vertical;
   }
 
-
   :-moz-ui-invalid {
     box-shadow: none;
   }
@@ -249,9 +247,6 @@
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
   }
-
-
-
 }
 
 @layer components;
@@ -305,11 +300,6 @@
       max-width: 90cqi;
     }
   }
-
-
-
-
-
 
   .btn {
     cursor: pointer;
@@ -447,11 +437,6 @@
     isolation: isolate;
   }
 
-
-
-
-
-
   .input {
     cursor: text;
     border: var(--border) solid #0000;
@@ -551,7 +536,6 @@
     position: absolute;
     inset-inline-end: 0.75em;
   }
-
 
   .select {
     border: var(--border) solid #0000;
@@ -655,7 +639,6 @@
     cursor: not-allowed;
   }
 
-
   .absolute {
     position: absolute;
   }
@@ -680,7 +663,6 @@
     bottom: calc(var(--spacing) * 2);
   }
 
-
   .z-10 {
     z-index: 10;
   }
@@ -692,8 +674,6 @@
   .col-span-8 {
     grid-column: span 8 / span 8;
   }
-
-
 
   .mx-5 {
     margin-inline: calc(var(--spacing) * 5);
@@ -710,8 +690,6 @@
   .my-5 {
     margin-block: calc(var(--spacing) * 5);
   }
-
-
 
   .mt-1 {
     margin-top: calc(var(--spacing) * 1);
@@ -821,8 +799,6 @@
     );
     background-image: none;
   }
-
-
 
   .block {
     display: block;
@@ -1394,7 +1370,6 @@ body {
     Helvetica Neue,
     sans-serif;
 }
-
 
 @property --tw-rotate-x {
   syntax: "*";

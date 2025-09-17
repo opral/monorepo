@@ -5,7 +5,10 @@ import { InMemoryEnvironment } from "../in-memory.js";
 
 test("EngineDriver runs basic Kysely queries", async () => {
 	const backend = new InMemoryEnvironment();
-	await backend.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+	await backend.open({
+		boot: { args: { providePlugins: [] } },
+		emit: () => {},
+	});
 
 	const db = new Kysely<any>({
 		dialect: createDialect({ environment: backend }),
