@@ -16,7 +16,7 @@ import { boot, type LixEngine } from "../engine/boot.js";
  *
  * @example
  * const env = new InMemoryEnvironment()
- * await env.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} })
+ * await env.open({ boot: { args: { providePlugins: [], providePluginsRaw: [] } }, emit: () => {} })
  * await env.exec("CREATE TABLE t(a)")
  * await env.exec("INSERT INTO t(a) VALUES (?)", [1])
  * const out = await env.exec("SELECT a FROM t")

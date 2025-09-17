@@ -38,7 +38,7 @@ test("boot installs engine and triggers plugin on file insert", async () => {
 		await boot({
 			sqlite,
 			emit: (ev) => events.push(ev),
-			args: { pluginsRaw: [pluginCode] },
+			args: { providePluginsRaw: [pluginCode] },
 		});
 
 		// Insert a markdown file; plugin should detect a change

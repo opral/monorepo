@@ -15,6 +15,21 @@ test("providing plugins should be possible", async () => {
 	expect(await lix.plugin.getAll()).toContain(mockPlugin);
 });
 
+test("providing plugins as raw code should be possible", async () => {
+	const lix = await openLix({
+		blob: await newLixFile(),
+		providePluginsRaw: [
+			`
+			export const plugin = {
+				key: "string-plugin",
+			};
+			`,
+		],
+	});
+	const loaded = await lix.plugin.getAll();
+	expect(loaded.some((plugin) => plugin.key === "string-plugin")).toBe(true);
+});
+
 test("providing key values should be possible", async () => {
 	const lix = await openLix({
 		blob: await newLixFile(),

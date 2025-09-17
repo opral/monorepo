@@ -34,7 +34,7 @@ function AppRoot() {
 		(async () => {
 			try {
 				const instance = await openLix({
-					pluginsRaw: [mdPlugin],
+					providePluginsRaw: [mdPlugin],
 					environment: env,
 				});
 				if (cancelled) {

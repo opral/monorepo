@@ -7,7 +7,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("inserting a file", async () => {
 		const lix = await openLix({
 			environment: new OpfsSahEnvironment({}),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 
 		await lix.db
@@ -34,7 +34,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("open() does not expose engine on main thread", async () => {
 		const env = new OpfsSahEnvironment({ key: `vitest-opfs-no-engine` });
 		const res = await env.open({
-			boot: { args: { pluginsRaw: [] } },
+			boot: { args: { providePlugins: [] } },
 			emit: () => {},
 		});
 		// Worker environment cannot expose an in-process engine; engine must be undefined
@@ -44,7 +44,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 
 	test("spawnActor echoes messages", async () => {
 		const env = new OpfsSahEnvironment({ key: `vitest-opfs-actor` });
-		await env.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+		await env.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
 		const entryModule = new URL("./test-actors/echo.actor.js", import.meta.url)
 			.href;
@@ -74,11 +74,11 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("open() rejects when another environment uses the same key", async () => {
 		const key = `vitest-opfs-key-lock-${Math.random().toString(16).slice(2)}`;
 		const env1 = new OpfsSahEnvironment({ key });
-		await env1.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} });
+		await env1.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
 		const env2 = new OpfsSahEnvironment({ key });
 		await expect(
-			env2.open({ boot: { args: { pluginsRaw: [] } }, emit: () => {} })
+			env2.open({ boot: { args: { providePlugins: [] } }, emit: () => {} })
 		).rejects.toMatchObject({ code: "ENV_OPFS_ALREADY_OPEN" });
 
 		await env1.close();
@@ -91,7 +91,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		const name = `vitest-opfs-persist`;
 		const lix1 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 
 		try {
@@ -109,7 +109,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		// Second open: read the previously written row
 		const lix2 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 		try {
 			const row = await lix2.db
@@ -129,7 +129,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		// First open (seeds a new DB)
 		const lix1 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 		await lix1.close();
 
@@ -154,7 +154,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		// 1) Create a DB and write a row
 		const lix1 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 		try {
 			await lix1.db
@@ -196,7 +196,7 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		const name = `vitest-opfs-clear-open`;
 		const lix = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 		await lix.db
 			.insertInto("file")
@@ -226,7 +226,7 @@ export default plugin;
 
 		const lix = await openLix({
 			environment: new OpfsSahEnvironment({ key: `vitest-opfs-plugin` }),
-			pluginsRaw: [mockPlugin],
+			providePluginsRaw: [mockPlugin],
 		});
 		try {
 			// Insert a JSON file which should trigger the mock plugin
@@ -259,7 +259,7 @@ export default plugin;
 		// Open with initial account
 		const lix1 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 			account,
 		});
 
@@ -281,7 +281,7 @@ export default plugin;
 		// Reopen the same environment key and verify persistence
 		const lix2 = await openLix({
 			environment: new OpfsSahEnvironment({ key: name }),
-			pluginsRaw: [],
+			providePlugins: [],
 		});
 		try {
 			const active2 = await lix2.db

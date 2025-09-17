@@ -77,7 +77,6 @@ export type LixPlugin = {
 	/**
 	 * UI components that are used to render the diff view.
 	 */
-	diffUiComponent?: CustomElementConstructor;
 	/**
 	 * Render the diff for this plugin as HTML.
 	 *
@@ -158,15 +157,6 @@ export type RenderDiffArgs = {
 		Pick<LixChange, "entity_id" | "plugin_key" | "schema_key"> & {
 			before_snapshot_content: Record<string, any> | null;
 			after_snapshot_content: Record<string, any> | null;
-		}
-	>;
-};
-
-export type UiDiffComponentProps = {
-	diffs: Array<
-		Pick<LixChange, "entity_id" | "plugin_key" | "schema_key"> & {
-			snapshot_content_before: Record<string, any> | null;
-			snapshot_content_after: Record<string, any> | null;
 		}
 	>;
 };

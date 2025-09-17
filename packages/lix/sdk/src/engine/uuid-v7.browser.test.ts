@@ -6,7 +6,7 @@ import { OpfsSahEnvironment } from "../environment/opfs-sah.js";
 test("generated a uuid v7", async () => {
 	const engine = await openLix({
 		environment: new OpfsSahEnvironment(),
-		pluginsRaw: [],
+		providePlugins: [],
 	});
 
 	const id = await uuidV7({ lix: engine });

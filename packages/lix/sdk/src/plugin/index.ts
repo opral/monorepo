@@ -1,7 +1,6 @@
 export type {
 	LixPlugin,
 	DetectedChange,
-	UiDiffComponentProps,
 	RenderDiffArgs,
 } from "./lix-plugin.js";
 

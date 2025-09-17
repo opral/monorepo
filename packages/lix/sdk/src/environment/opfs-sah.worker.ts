@@ -132,7 +132,8 @@ async function handle(req: Req): Promise<Res> {
 				(db as any).sqlite3 = sqlite3Module;
 
 				const bootArgs = (req.payload.bootArgs ?? {
-					pluginsRaw: [],
+					providePlugins: [],
+					providePluginsRaw: [],
 				}) as BootArgs;
 
 				const res = await boot({

@@ -105,7 +105,10 @@ export default defineConfig({
           text: "More Features",
           collapsed: true,
           items: [
-            { text: "Attribution (Blame)", link: "/guide/features/attribution" },
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
             { text: "Restore", link: "/guide/features/restore" },
             { text: "Undo/Redo", link: "/guide/features/undo-redo" },
             { text: "Conversations", link: "/guide/features/conversations" },
@@ -117,7 +120,6 @@ export default defineConfig({
           text: "Core Concepts",
           collapsed: true,
           items: [
-            
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },
             { text: "Snapshots", link: "/guide/concepts/snapshots" },
@@ -135,18 +137,6 @@ export default defineConfig({
             { text: "React Utils", link: "/guide/react-utils" },
             { text: "Writer Key", link: "/guide/writer-key" },
             { text: "Environment API", link: "/guide/environment-api" },
-          ],
-        },
-        {
-          text: "Advanced",
-          collapsed: true,
-          items: [
-            { text: "SQL Queries", link: "/guide/advanced/sql-queries" },
-            {
-              text: "Browser Integration",
-              link: "/guide/advanced/browser-integration",
-            },
-            { text: "Plugins", link: "/guide/advanced/plugins" },
           ],
         },
       ],
