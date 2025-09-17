@@ -3,6 +3,7 @@ import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
+	createInMemoryDatabase,
 	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
@@ -16,6 +17,8 @@ import { v4 } from "uuid";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { importFiles } from "../import-export/importFiles.js";
 import { exportFiles } from "../import-export/exportFiles.js";
+import type { Kysely } from "kysely";
+import type { InlangDatabaseSchema } from "../database/schema.js";
 
 /**
  * Common load project logic.
@@ -109,6 +112,8 @@ export async function loadProject(args: {
 		appId: args.appId,
 	});
 
+	await ensureDbFileExists({ projectDb: db, lix: args.lix });
+
 	return {
 		db,
 		id: {
@@ -197,13 +202,13 @@ export async function loadProject(args: {
 			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
-			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
+			await saveDbToLix({ projectDb: db, lix: args.lix });
 			await db.destroy();
 			await args.lix.db.destroy();
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
+			await saveDbToLix({ projectDb: db, lix: args.lix });
 			return await args.lix.toBlob();
 		},
 		lix: args.lix,
@@ -211,15 +216,76 @@ export async function loadProject(args: {
 }
 
 async function saveDbToLix(args: {
-	sqlite: SqliteWasmDatabase;
+	projectDb: Kysely<InlangDatabaseSchema>;
 	lix: Lix;
 }): Promise<void> {
-	const data = contentFromDatabase(args.sqlite);
-	await args.lix.db
-		.updateTable("file")
-		.set("data", data)
+	const sqlite = await createInMemoryDatabase({});
+	const legacyDb = initDb({ sqlite });
+
+	const [bundles, messages, variants] = await Promise.all([
+		args.projectDb
+			.selectFrom("bundle")
+			.select(["id", "declarations"])
+			.execute(),
+		args.projectDb
+			.selectFrom("message")
+			.select(["id", "bundleId", "locale", "selectors"])
+			.execute(),
+		args.projectDb
+			.selectFrom("variant")
+			.select(["id", "messageId", "matches", "pattern"])
+			.execute(),
+	]);
+
+	await legacyDb.transaction().execute(async (trx) => {
+		if (bundles.length > 0) {
+			await trx.insertInto("bundle").values(bundles).execute();
+		}
+		if (messages.length > 0) {
+			await trx.insertInto("message").values(messages).execute();
+		}
+		if (variants.length > 0) {
+			await trx.insertInto("variant").values(variants).execute();
+		}
+	});
+
+	const data = contentFromDatabase(sqlite);
+	await legacyDb.destroy();
+	sqlite.close();
+
+	const existingFile = await args.lix.db
+		.selectFrom("file")
+		.select("path")
 		.where("path", "=", "/db.sqlite")
-		.execute();
+		.executeTakeFirst();
+
+	if (existingFile) {
+		await args.lix.db
+			.updateTable("file")
+			.set("data", data)
+			.where("path", "=", "/db.sqlite")
+			.execute();
+	} else {
+		await args.lix.db
+			.insertInto("file")
+			.values({ path: "/db.sqlite", data })
+			.execute();
+	}
+}
+
+async function ensureDbFileExists(args: {
+	projectDb: Kysely<InlangDatabaseSchema>;
+	lix: Lix;
+}): Promise<void> {
+	const existing = await args.lix.db
+		.selectFrom("file")
+		.select("path")
+		.where("path", "=", "/db.sqlite")
+		.executeTakeFirst();
+
+	if (!existing) {
+		await saveDbToLix(args);
+	}
 }
 
 /**

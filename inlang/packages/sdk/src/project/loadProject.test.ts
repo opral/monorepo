@@ -2,30 +2,36 @@ import { expect, test, vi } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { PluginImportError } from "../plugin/errors.js";
-import { validate } from "uuid";
+import { validate, v7 } from "uuid";
+import { humanId } from "../human-id/human-id.js";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
 	const project1 = await loadProjectInMemory({ blob: file1 });
-	const bundle = await project1.db
+	const bundleId = humanId();
+	await project1.db
 		.insertInto("bundle")
-		.defaultValues()
-		.returning("id")
-		.executeTakeFirstOrThrow();
+		.values({ id: bundleId, declarations: [] })
+		.execute();
 
-	const message = await project1.db
+	const messageId = v7();
+	await project1.db
 		.insertInto("message")
 		.values({
-			bundleId: bundle.id,
+			id: messageId,
+			bundleId,
 			locale: "en",
+			selectors: [],
 		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
+		.execute();
 
 	await project1.db
 		.insertInto("variant")
 		.values({
-			messageId: message.id,
+			id: v7(),
+			messageId,
+			matches: [],
+			pattern: [],
 		})
 		.execute();
 
