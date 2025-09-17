@@ -83,21 +83,9 @@ export function selectWorkingDiffCount(lix: Lix) {
 			"change_set_element.change_set_id",
 		)
 		.innerJoin("change_set", "change_set.id", "commit.change_set_id")
-		.innerJoin(
-			"version",
-			"version.working_commit_id",
-			"commit.id",
-		)
-		.innerJoin(
-			"active_version",
-			"active_version.version_id",
-			"version.id",
-		)
-		.where(
-			"change_set_element.file_id",
-			"=",
-			activeFileIdQ,
-		);
+		.innerJoin("version", "version.working_commit_id", "commit.id")
+		.innerJoin("active_version", "active_version.version_id", "version.id")
+		.where("change_set_element.file_id", "=", activeFileIdQ);
 }
 
 /**
