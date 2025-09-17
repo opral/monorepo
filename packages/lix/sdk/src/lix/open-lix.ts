@@ -22,17 +22,6 @@ import { buildJsonColumnConfig } from "./json-column-config.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 
 export type Lix = {
-	/**
-	 * The raw SQLite instance.
-	 *
-	 * Required for advanced use cases that can't be
-	 * expressed with the db API.
-	 *
-	 * Use with caution, automatic transformation of
-	 * results like parsing json (similar to the db API)
-	 * is not guaranteed.
-	 */
-	sqlite?: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;

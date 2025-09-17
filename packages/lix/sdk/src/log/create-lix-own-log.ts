@@ -39,7 +39,7 @@ export function shouldLog(
  * @example
  * // Basic info log (will be logged if 'info' is allowed by lix_log_levels)
  * createLixOwnLog({
- *   engine: { sqlite: lix.sqlite, db: lix.db },
+ *   engine,
  *   key: 'app.init',
  *   level: 'info',
  *   message: 'Application started.'
@@ -48,7 +48,7 @@ export function shouldLog(
  * @example
  * // Log a warning (will be logged if 'warn' is allowed by lix_log_levels)
  * createLixOwnLog({
- *   engine: { sqlite: lix.sqlite, db: lix.db },
+ *   engine,
  *   key: 'user.login.failed',
  *   level: 'warn',
  *   message: `Login failed for user ${userId}`

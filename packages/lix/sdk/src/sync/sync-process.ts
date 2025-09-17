@@ -3,7 +3,7 @@ import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
 export async function initSyncProcess(args: {
-	lix: Pick<Lix, "db" | "plugin" | "sqlite" | "toBlob" | "engine">;
+	lix: Pick<Lix, "db" | "plugin" | "toBlob">;
 }): Promise<void> {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
@@ -68,23 +68,36 @@ export async function initSyncProcess(args: {
 
 	// naive implementation that syncs every second
 
-	function schedulePullAndPush() {
-		if (args.lix.engine!.sqlite.isOpen() === false) {
-			return;
-		}
-		pullAndPush().catch((e) => {
+	let stopSync = false;
+
+	async function runPullAndPush() {
+		try {
+			await pullAndPush();
+		} catch (e) {
 			if (e instanceof Error && e.message.includes("DB has been closed.")) {
 				// stop the syncing process, the database has been closed.
+				stopSync = true;
 				return;
 			}
 			console.error("Error in sync process", e);
-		});
-		// schedule next sync
+		}
+	}
+
+	async function schedulePullAndPush() {
+		if (stopSync) {
+			return;
+		}
+
+		await runPullAndPush();
+
+		if (stopSync) {
+			return;
+		}
+
 		setTimeout(() => {
-			schedulePullAndPush();
+			void schedulePullAndPush();
 		}, 750);
 	}
 
-	schedulePullAndPush();
-	return;
+	void schedulePullAndPush();
 }

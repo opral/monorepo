@@ -26,7 +26,7 @@ import { generateCommit } from "./generate-commit.js";
  *
  * @example
  * // After accumulating changes via insertTransactionState
- * commit({ engine: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
+ * commit({ engine });
  * // All pending changes are now persisted
  */
 export function commit(args: {

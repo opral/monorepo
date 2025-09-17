@@ -15,7 +15,7 @@ import type { LixLabel } from "./schema.js";
  */
 
 export async function createLabel(args: {
-	lix: Pick<Lix, "db" | "sqlite" | "hooks" | "call">;
+	lix: Pick<Lix, "db" | "call">;
 	id?: LixLabel["id"];
 	name: LixLabel["name"];
 	lixcol_version_id?: string;
