@@ -19,6 +19,68 @@ import type {
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 
+const simpleJsonPlugin: InlangPlugin = {
+	key: "test-json-plugin",
+	toBeImportedFiles: async ({ settings }) =>
+		settings.locales.map((locale) => ({
+			locale,
+			path: `messages/${locale}.json`,
+		})),
+	importFiles: async ({ files }) => {
+		const bundles: { id: string; declarations: [] }[] = [];
+		const messages: { bundleId: string; locale: string; selectors: [] }[] = [];
+		const variants: {
+			messageBundleId: string;
+			messageLocale: string;
+			matches: [];
+			pattern: Text[];
+		}[] = [];
+
+		for (const file of files) {
+			const decoded = new TextDecoder().decode(file.content);
+			if (!decoded) continue;
+			const parsed = JSON.parse(decoded) as Record<string, string>;
+			for (const [bundleId, value] of Object.entries(parsed)) {
+				bundles.push({ id: bundleId, declarations: [] });
+				messages.push({ bundleId, locale: file.locale, selectors: [] });
+				variants.push({
+					messageBundleId: bundleId,
+					messageLocale: file.locale,
+					matches: [],
+					pattern: [
+						{
+							type: "text",
+							value,
+						},
+					],
+				});
+			}
+		}
+
+		return { bundles, messages, variants };
+	},
+	exportFiles: async ({ messages, variants }) => {
+		const byLocale = new Map<string, Record<string, string>>();
+		for (const message of messages) {
+			const correspondingVariant = variants.find(
+				(variant) => variant.messageId === message.id
+			);
+			if (!correspondingVariant) continue;
+			const pattern = correspondingVariant.pattern[0] as Text;
+			if (!byLocale.has(message.locale)) {
+				byLocale.set(message.locale, {});
+			}
+			byLocale.get(message.locale)![message.bundleId] = pattern.value;
+		}
+
+		return Array.from(byLocale.entries()).map(([locale, json]) => ({
+			locale,
+			name: `messages/${locale}.json`,
+			content: new TextEncoder().encode(`${JSON.stringify(json, null, 2)}\n`),
+		}));
+	},
+};
+
 test("plugin.loadMessages and plugin.saveMessages must not be configured together with import export", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-legacy-plugin",
@@ -248,6 +310,92 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	// expect(
 	// 	(bundlesOrdered[1]?.messages[1]?.variants[0]?.pattern[0] as Text)?.value
 	// ).toBe("wert2");
+});
+
+test("project survives repeated save and load cycles with JSON plugin", async () => {
+	const formattedResource = '{\n  "hello": "Hello"\n}\n';
+	const fs = Volume.fromJSON({
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: [],
+		} satisfies ProjectSettings),
+		"/messages/en.json": formattedResource,
+	});
+
+	let project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [simpleJsonPlugin],
+	});
+
+	const initialBundles = await selectBundleNested(project.db).execute();
+	expect(initialBundles).toHaveLength(1);
+	expect(
+		(initialBundles[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value
+	).toBe("Hello");
+
+	await project.db.insertInto("bundle").values({ id: "welcome" }).execute();
+	const newMessage = await project.db
+		.insertInto("message")
+		.values({ bundleId: "welcome", locale: "en" })
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await project.db
+		.insertInto("variant")
+		.values({
+			messageId: newMessage.id,
+			matches: [],
+			pattern: [{ type: "text", value: "Welcome" }],
+		})
+		.execute();
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		path: "/project.inlang",
+		project,
+	});
+
+	project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [simpleJsonPlugin],
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		path: "/project.inlang",
+		project,
+	});
+
+	project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [simpleJsonPlugin],
+	});
+
+	const bundles = await selectBundleNested(project.db).execute();
+	const helloMessage = bundles.find((bundle) => bundle.id === "hello")
+		?.messages[0];
+	const welcomeMessage = bundles.find((bundle) => bundle.id === "welcome")
+		?.messages[0];
+
+	expect(helloMessage?.variants[0]?.pattern[0]).toEqual({
+		type: "text",
+		value: "Hello",
+	});
+	expect(welcomeMessage?.variants[0]?.pattern[0]).toEqual({
+		type: "text",
+		value: "Welcome",
+	});
+
+	const writtenFile = (await fs.promises.readFile(
+		"/messages/en.json",
+		"utf-8"
+	)) as string;
+	expect(writtenFile.endsWith("\n")).toBe(true);
+	expect(writtenFile).toContain('"hello": "Hello"');
+	expect(writtenFile).toContain('"welcome": "Welcome"');
 });
 
 const mockSettings = {
