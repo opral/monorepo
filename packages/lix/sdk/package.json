@@ -39,6 +39,7 @@
     "prebuild": "npm run env-variables",
     "build": "tsc --build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "install-ci-deps": "playwright install --with-deps",
     "test": "vitest run --typecheck",
     "test:watch": "vitest --typecheck",
     "env-variables": "node ./src/services/env-variables/create-index-file.js",

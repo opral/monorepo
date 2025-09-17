@@ -40,7 +40,7 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        run: pnpm --filter @lix-js/sdk run install-ci-deps
 
       - run: pnpm run ci
         env:
