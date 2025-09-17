@@ -1,14 +1,12 @@
-import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isHumanId } from "../human-id/human-id.js";
 import { validate as isUuid } from "uuid";
+import { openLix } from "@lix-js/sdk";
 
 test("bundle default values", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+	const lix = await openLix({});
+	const db = initDb({ lix });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -21,10 +19,9 @@ test("bundle default values", async () => {
 });
 
 test("message default values", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+	const lix = await openLix({});
+
+	const db = initDb({ lix });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -46,10 +43,9 @@ test("message default values", async () => {
 });
 
 test("variant default values", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+	const lix = await openLix({});
+
+	const db = initDb({ lix });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -80,10 +76,9 @@ test("variant default values", async () => {
 });
 
 test("it should handle json serialization and parsing for bundles", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+	const lix = await openLix({});
+
+	const db = initDb({ lix });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -108,10 +103,9 @@ test("it should handle json serialization and parsing for bundles", async () => 
 
 // https://github.com/opral/inlang-sdk/issues/209
 test.todo("it should enable foreign key constraints", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+	const lix = await openLix({});
+
+	const db = initDb({ lix });
 
 	expect(() =>
 		db
