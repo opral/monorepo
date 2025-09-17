@@ -49,10 +49,14 @@ export function Diff(props: {
 
 	if (!renderedHtml) return null;
 
+	const contentClasses = ["lix-diff-content", props.contentClassName]
+		.filter(Boolean)
+		.join(" ");
+
 	return (
 		<div className={props.className}>
 			<div
-				className={props.contentClassName}
+				className={contentClasses}
 				dangerouslySetInnerHTML={{ __html: renderedHtml }}
 			/>
 		</div>

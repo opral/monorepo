@@ -86,9 +86,7 @@ export function DiffView() {
 						// Plugin-rendered diff component
 						<Diff
 							diffs={renderDiffs}
-							contentClassName={
-								mode === "unified" ? "ProseMirror" : "ProseMirror"
-							}
+							contentClassName={`lix-diff-content ProseMirror`}
 						/>
 					)}
 				</div>
