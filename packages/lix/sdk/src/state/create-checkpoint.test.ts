@@ -418,15 +418,11 @@ simulationTest(
 			.select(["parent_commit_ids"])
 			.executeTakeFirstOrThrow();
 
-		console.log("cp2 commit state", cp2CommitState, {
-			cp2: cp2.id,
-			cp1: cp1.id,
-			prevTip: vBeforeCp2.commit_id,
-		});
-
 		const cachedParents = cp2CommitState.parent_commit_ids ?? [];
 		expectDeterministic(cachedParents.includes(cp1.id)).toBe(true);
-		expectDeterministic(cachedParents.includes(vBeforeCp2.commit_id)).toBe(true);
+		expectDeterministic(cachedParents.includes(vBeforeCp2.commit_id)).toBe(
+			true
+		);
 	}
 );
 
