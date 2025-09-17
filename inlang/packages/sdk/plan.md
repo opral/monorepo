@@ -13,7 +13,11 @@
 ## Phased plan
 
 ### Phase 0 — Hardening
-1. Add regression tests that cover the key bundle/message/variant flows (e.g. `selectBundleNested`, import/export, `saveProject`).
+1. Add regression tests that cover the key bundle/message/variant flows. At minimum:
+   - `loadProjectInMemory` → ensure `selectBundleNested` returns newly inserted bundles/variants.
+   - `importFiles` / `exportFiles` round-trips for the JSON plugin (preserve ordering/formatting assertions).
+   - `saveProject()` persists localized edits via the plugin pipeline without mutating untouched files.
+   - CLI surfaces (`newProject`, `loadProjectFromDirectory`) survive multiple save/load cycles.
 2. Capture the current schema expectations (primary keys, defaults, JSON columns) so we can mirror them in Lix with confidence.
 
 *Exit criteria:* additional tests land; behaviour unchanged.
