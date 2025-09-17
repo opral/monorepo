@@ -92,3 +92,29 @@ createRoot(document.getElementById("root")!).render(
 		<AppRoot />
 	</StrictMode>,
 );
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		navigator.serviceWorker
+			.register("/sw.js")
+			.then((registration) => {
+				registration.addEventListener("updatefound", () => {
+					const worker = registration.installing;
+					if (!worker) return;
+					worker.addEventListener("statechange", () => {
+						if (
+							worker.state === "installed" &&
+							navigator.serviceWorker.controller
+						) {
+							// Service worker messaging doesn't use targetOrigin; suppress lint warning.
+							// eslint-disable-next-line unicorn/require-post-message-target-origin
+							worker.postMessage("SKIP_WAITING");
+						}
+					});
+				});
+			})
+			.catch(() => {
+				// Ignore registration errors; app continues without offline shell.
+			});
+	});
+}
