@@ -32,6 +32,8 @@ No more annoying preview tabs. Type `# Heading` and see it rendered as a heading
 
 Open in any browser - Chrome, Safari, Firefox. No downloads, no installations, no desktop apps. Your documents live in browser storage, work offline, and sync optionally.
 
+Flashtype is also installable as a Progressive Web App (PWA). In any supported browser, open the app, choose **Install** from the address bar menu, and you’ll get a standalone window with offline support and taskbar/dock integration.
+
 ### 🤖 Claude Code AI Experience
 
 AI that understands your markdown. Generate content, get suggestions, review diffs, and accept/reject changes just like Claude Code. Copy your markdown and paste it directly into ChatGPT or any other tool.
