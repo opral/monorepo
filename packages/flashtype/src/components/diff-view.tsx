@@ -75,7 +75,7 @@ export function DiffView() {
 	const renderDiffs = diffArray as unknown as RenderDiffArgs["diffs"];
 
 	return (
-		<div>
+		<div data-diff-view-mode={mode}>
 			<div className="w-full bg-background px-3 py-0">
 				<div className="w-full max-w-5xl mx-auto">
 					{!hasChanges ? (

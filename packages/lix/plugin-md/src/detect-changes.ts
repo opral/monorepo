@@ -10,17 +10,17 @@
  * remain block-level (add/mod/del per top-level node + root order change).
  */
 import type {
-    DetectedChange,
-    LixPlugin,
-    LixSchemaDefinition,
+	DetectedChange,
+	LixPlugin,
+	LixSchemaDefinition,
 } from "@lix-js/sdk";
 import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
-    querySync,
-    after,
+	querySync,
+	after,
 }) => {
 	const THRESHOLDS = {
 		simStrong: 0.6,
@@ -38,25 +38,25 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	const afterAst = parseMarkdown(afterMarkdown) as Ast;
 	const detectedChanges: DetectedChange[] = [];
 
-    // Build before index from state via querySync: entity_id -> node snapshot
-    const beforeNodes = new Map<string, any>();
-    let beforeOrder: string[] = [];
-    const rows = querySync("state")
-        .where("file_id", "=", after.id)
-        .select(["entity_id", "schema_key", "snapshot_content"]) 
-        .execute();
-    for (const row of rows) {
-        const sk = row.schema_key as string;
-        const content = (row as any).snapshot_content;
-        if (sk === (AstSchemas.RootOrderSchema as any)["x-lix-key"]) {
-            const order = (content as any)?.order;
-            if (Array.isArray(order)) beforeOrder = order as string[];
-            continue;
-        }
-        if (typeof sk === "string" && sk.startsWith("markdown_wc_")) {
-            if (content) beforeNodes.set(row.entity_id, content);
-        }
-    }
+	// Build before index from state via querySync: entity_id -> node snapshot
+	const beforeNodes = new Map<string, any>();
+	let beforeOrder: string[] = [];
+	const rows = querySync("state")
+		.where("file_id", "=", after.id)
+		.select(["entity_id", "schema_key", "snapshot_content"])
+		.execute();
+	for (const row of rows) {
+		const sk = row.schema_key as string;
+		const content = (row as any).snapshot_content;
+		if (sk === (AstSchemas.RootOrderSchema as any)["x-lix-key"]) {
+			const order = (content as any)?.order;
+			if (Array.isArray(order)) beforeOrder = order as string[];
+			continue;
+		}
+		if (typeof sk === "string" && sk.startsWith("markdown_wc_")) {
+			if (content) beforeNodes.set(row.entity_id, content);
+		}
+	}
 
 	// Fingerprint helper: drop meta and stable-stringify with normalized strings
 	const omitMeta = (n: any): any => {

@@ -111,8 +111,7 @@ export function ProposalDecisionBar({
 						type="button"
 						onClick={onAccept}
 						className="grid grid-cols-[max-content_1fr] gap-2 items-baseline text-left w-full hover:underline underline-offset-2 focus:outline-none focus-visible:outline-none"
-						role="menuitem"
-						aria-selected={sel === 0}
+						aria-pressed={sel === 0}
 					>
 						<span
 							className={[
@@ -138,8 +137,7 @@ export function ProposalDecisionBar({
 						type="button"
 						onClick={onAutoAccept}
 						className="grid grid-cols-[max-content_1fr] gap-2 items-baseline text-left w-full hover:underline underline-offset-2 mt-1 focus:outline-none focus-visible:outline-none"
-						role="menuitem"
-						aria-selected={sel === 1}
+						aria-pressed={sel === 1}
 					>
 						<span
 							className={[
@@ -166,8 +164,7 @@ export function ProposalDecisionBar({
 						type="button"
 						onClick={onIterate}
 						className="grid grid-cols-[max-content_1fr] gap-2 items-baseline text-left w-full hover:underline underline-offset-2 mt-1 focus:outline-none focus-visible:outline-none"
-						role="menuitem"
-						aria-selected={sel === 2}
+						aria-pressed={sel === 2}
 					>
 						<span
 							className={[

@@ -464,71 +464,138 @@ function Tree({
 	activeFilePath?: string;
 }) {
 	if (node.type === "file") {
-		const id = pathToId.get(node.path);
-		const isActive = activeId === id;
 		return (
-			<SidebarMenuItem>
-				<div
-					data-active={isActive ? "true" : undefined}
-					data-hidden={node.hidden ? "true" : undefined}
-					className={cn(
-						"group/menu-item flex w-full items-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-secondary",
-						node.hidden && "text-muted-foreground opacity-60",
-					)}
-				>
-					<SidebarMenuButton
-						isActive={false}
-						onClick={() => {
-							if (id) onSelect(id);
-						}}
-						className={cn(
-							"cursor-pointer flex-1 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent",
-							node.hidden && "text-muted-foreground",
-						)}
-						draggable
-						onDragStart={(event) => {
-							if (!id) return;
-							event.dataTransfer.effectAllowed = "move";
-							event.dataTransfer.setData(
-								"application/json",
-								JSON.stringify({ kind: "file", id, path: node.path }),
-							);
-						}}
-						onDragEnd={() => setDragOverPath(null)}
-					>
-						<File />
-						{node.name}
-					</SidebarMenuButton>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="ml-1 h-6 w-6 p-0 text-muted-foreground opacity-0 transition-opacity group-hover/menu-item:opacity-100"
-								aria-label={`More actions for ${node.path}`}
-								title="More actions"
-								onClick={(e) => e.stopPropagation()}
-							>
-								<MoreHorizontal className="h-3.5 w-3.5" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-40 p-1">
-							<DropdownMenuItem
-								className="cursor-pointer text-red-600 hover:text-red-600 focus:text-red-600"
-								onClick={async (e) => {
-									e.stopPropagation();
-									await onRequestDelete(node.path);
-								}}
-							>
-								<Trash2 className="mr-2 h-3.5 w-3.5 text-red-600" /> Delete
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-			</SidebarMenuItem>
+			<FileTreeItem
+				node={node}
+				activeId={activeId}
+				onSelect={onSelect}
+				pathToId={pathToId}
+				onRequestDelete={onRequestDelete}
+				setDragOverPath={setDragOverPath}
+			/>
 		);
 	}
 
+	return (
+		<FolderTreeItem
+			node={node}
+			activeId={activeId}
+			onSelect={onSelect}
+			pathToId={pathToId}
+			onRequestDelete={onRequestDelete}
+			onMoveFile={onMoveFile}
+			dragOverPath={dragOverPath}
+			setDragOverPath={setDragOverPath}
+			activeFilePath={activeFilePath}
+		/>
+	);
+}
+
+function FileTreeItem({
+	node,
+	activeId,
+	onSelect,
+	pathToId,
+	onRequestDelete,
+	setDragOverPath,
+}: {
+	node: FilesystemTreeNode & { type: "file" };
+	activeId: string | null;
+	onSelect: (id: string) => Promise<void>;
+	pathToId: Map<string, string>;
+	onRequestDelete: (fullPath: string) => Promise<void>;
+	setDragOverPath: Dispatch<SetStateAction<string | null>>;
+}) {
+	const id = pathToId.get(node.path);
+	const isActive = activeId === id;
+	return (
+		<SidebarMenuItem>
+			<div
+				data-active={isActive ? "true" : undefined}
+				data-hidden={node.hidden ? "true" : undefined}
+				className={cn(
+					"group/menu-item flex w-full items-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-secondary",
+					node.hidden && "text-muted-foreground opacity-60",
+				)}
+			>
+				<SidebarMenuButton
+					isActive={false}
+					onClick={() => {
+						if (id) onSelect(id);
+					}}
+					className={cn(
+						"cursor-pointer flex-1 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent",
+						node.hidden && "text-muted-foreground",
+					)}
+					draggable
+					onDragStart={(event) => {
+						if (!id) return;
+						event.dataTransfer.effectAllowed = "move";
+						event.dataTransfer.setData(
+							"application/json",
+							JSON.stringify({ kind: "file", id, path: node.path }),
+						);
+					}}
+					onDragEnd={() => setDragOverPath(null)}
+				>
+					<File />
+					{node.name}
+				</SidebarMenuButton>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="ml-1 h-6 w-6 p-0 text-muted-foreground opacity-0 transition-opacity group-hover/menu-item:opacity-100"
+							aria-label={`More actions for ${node.path}`}
+							title="More actions"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<MoreHorizontal className="h-3.5 w-3.5" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-40 p-1">
+						<DropdownMenuItem
+							className="cursor-pointer text-red-600 hover:text-red-600 focus:text-red-600"
+							onClick={async (e) => {
+								e.stopPropagation();
+								await onRequestDelete(node.path);
+							}}
+						>
+							<Trash2 className="mr-2 h-3.5 w-3.5 text-red-600" /> Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
+		</SidebarMenuItem>
+	);
+}
+
+function FolderTreeItem({
+	node,
+	activeId,
+	onSelect,
+	pathToId,
+	onRequestDelete,
+	onMoveFile,
+	dragOverPath,
+	setDragOverPath,
+	activeFilePath,
+}: {
+	node: FilesystemTreeNode & { type: "directory" };
+	activeId: string | null;
+	onSelect: (id: string) => Promise<void>;
+	pathToId: Map<string, string>;
+	onRequestDelete: (fullPath: string) => Promise<void>;
+	onMoveFile: (
+		id: string,
+		currentPath: string,
+		targetDir: string,
+	) => Promise<void>;
+	dragOverPath: string | null;
+	setDragOverPath: Dispatch<SetStateAction<string | null>>;
+	activeFilePath?: string;
+}) {
 	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
@@ -536,6 +603,7 @@ function Tree({
 			setOpen(true);
 		}
 	}, [activeFilePath, node.path]);
+
 	const isDragOver = dragOverPath === node.path;
 
 	return (
@@ -558,34 +626,41 @@ function Tree({
 							if (!data) return;
 							try {
 								const parsed = JSON.parse(data);
-								if (parsed?.kind === "file") {
-									event.preventDefault();
-									event.dataTransfer.dropEffect = "move";
-									setDragOverPath(node.path);
-								}
-							} catch {}
-						}}
-						onDragLeave={(event) => {
-							if (event.currentTarget === event.target) {
-								setDragOverPath((prev) => (prev === node.path ? null : prev));
+								if (parsed?.kind !== "file") return;
+								if (parsed.path === node.path) return;
+								setDragOverPath(node.path);
+								event.preventDefault();
+								event.dataTransfer.dropEffect = "move";
+							} catch {
+								// ignore invalid drag payloads
 							}
 						}}
+						onDragLeave={() => {
+							if (dragOverPath === node.path) setDragOverPath(null);
+						}}
 						onDrop={async (event) => {
-							setDragOverPath(null);
 							const data = event.dataTransfer.getData("application/json");
 							if (!data) return;
 							try {
 								const parsed = JSON.parse(data);
-								if (parsed?.kind === "file") {
-									await onMoveFile(parsed.id, parsed.path, node.path);
-									setOpen(true);
-								}
-							} catch {}
+								if (parsed?.kind !== "file") return;
+								if (parsed.path.startsWith(node.path)) return;
+								setDragOverPath(null);
+								await onMoveFile(parsed.id, parsed.path, node.path);
+							} catch {
+								// ignore invalid drag payloads
+							}
 						}}
 					>
-						<ChevronRight className="transition-transform" />
-						{open ? <FolderOpen /> : <Folder />}
-						{node.name}
+						<div className="flex flex-1 items-center gap-2 text-left">
+							<ChevronRight className="h-3 w-3 transition-transform" />
+							{open ? (
+								<FolderOpen className="h-4 w-4" />
+							) : (
+								<Folder className="h-4 w-4" />
+							)}
+							{node.name}
+						</div>
 					</SidebarMenuButton>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
