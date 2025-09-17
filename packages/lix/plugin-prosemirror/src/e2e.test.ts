@@ -214,8 +214,7 @@ test("detects and applies moved nodes correctly", async () => {
 				id: fileRecord.id,
 				path: fileRecord.path,
 				data: initialData, // Start from initial state
-				metadata: fileRecord.metadata,
-			},
+			} as any,
 			changes: allChanges,
 		});
 
