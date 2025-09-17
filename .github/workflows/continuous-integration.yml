@@ -39,9 +39,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install Playwright browsers
-        run: pnpm --filter @lix-js/sdk run install-ci-deps
-
       - run: pnpm run ci
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}

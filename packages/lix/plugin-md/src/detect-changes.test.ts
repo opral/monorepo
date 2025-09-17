@@ -1254,217 +1254,192 @@ test("Unicode NFC vs NFD accents: normalize and keep id (no extra change)", asyn
 	expect(foreignParagraph).toBeUndefined();
 });
 
-test(
-	"large doc (500 paras): delete 1, insert 1, move 10 → 3 changes",
-	{ timeout: 30000 },
-	async () => {
-		// Build 500 paragraphs via for-loop
-		const paras: string[] = [];
-		const beforeIds: string[] = [];
-		for (let i = 1; i <= 500; i++) {
-			paras.push(`P${i}`);
-			beforeIds.push(`p${i}`);
-		}
-		const before = paras.join("\n\n");
-		const lix = await openLix({ providePlugins: [plugin] });
-		const fileId = "f44";
-		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
+test("large doc (500 paras): delete 1, insert 1, move 10 → 3 changes", async () => {
+	// Build 500 paragraphs via for-loop
+	const paras: string[] = [];
+	const beforeIds: string[] = [];
+	for (let i = 1; i <= 500; i++) {
+		paras.push(`P${i}`);
+		beforeIds.push(`p${i}`);
+	}
+	const before = paras.join("\n\n");
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f44";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-		// After: move P451..P460 to the front, delete P500, insert PX after P300
-		const moved = paras.slice(450, 460); // P451..P460
-		const remaining = paras.slice(0, 450).concat(paras.slice(460)); // exclude moved
-		const remainingNoP500 = remaining.filter((s) => s !== "P500");
-		const idxP300 = remainingNoP500.indexOf("P300");
-		const afterParas = [
-			...moved,
-			...remainingNoP500.slice(0, idxP300 + 1),
-			"PX",
-			...remainingNoP500.slice(idxP300 + 1),
-		];
-		const after = afterParas.join("\n\n");
+	// After: move P451..P460 to the front, delete P500, insert PX after P300
+	const moved = paras.slice(450, 460); // P451..P460
+	const remaining = paras.slice(0, 450).concat(paras.slice(460)); // exclude moved
+	const remainingNoP500 = remaining.filter((s) => s !== "P500");
+	const idxP300 = remainingNoP500.indexOf("P300");
+	const afterParas = [
+		...moved,
+		...remainingNoP500.slice(0, idxP300 + 1),
+		"PX",
+		...remainingNoP500.slice(idxP300 + 1),
+	];
+	const after = afterParas.join("\n\n");
 
-		const changes = detectChanges({
-			querySync: createQuerySync({ engine: lix.engine! }),
-			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
-		} as DetectChangesArgs);
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
 
-		// One deletion (p500)
-		const del = changes.find((c) => c.entity_id === "p500");
-		expect(del).toBeTruthy();
-		expect(del!.snapshot_content).toBeNull();
+	// One deletion (p500)
+	const del = changes.find((c) => c.entity_id === "p500");
+	expect(del).toBeTruthy();
+	expect(del!.snapshot_content).toBeNull();
 
-		// One addition (PX)
-		const add = changes.find(
-			(c) =>
-				c.snapshot_content?.type === "paragraph" &&
-				c.snapshot_content?.children?.[0]?.value === "PX",
-		);
-		expect(add).toBeTruthy();
-		expect(beforeIds).not.toContain(add!.entity_id);
+	// One addition (PX)
+	const add = changes.find(
+		(c) =>
+			c.snapshot_content?.type === "paragraph" &&
+			c.snapshot_content?.children?.[0]?.value === "PX",
+	);
+	expect(add).toBeTruthy();
+	expect(beforeIds).not.toContain(add!.entity_id);
 
-		// Root order updated with length 500
-		const root = changes.find((c) => c.entity_id === "root");
-		expect(root).toBeTruthy();
-		const order = (root!.snapshot_content as { order: string[] })
-			.order as string[];
-		expect(order.length).toBe(500);
+	// Root order updated with length 500
+	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
+	const order = (root!.snapshot_content as { order: string[] })
+		.order as string[];
+	expect(order.length).toBe(500);
 
-		// Starts with moved ids p451..p460
-		const expectedStart = Array.from({ length: 10 }, (_, i) => `p${451 + i}`);
-		expect(order.slice(0, 10)).toEqual(expectedStart);
+	// Starts with moved ids p451..p460
+	const expectedStart = Array.from({ length: 10 }, (_, i) => `p${451 + i}`);
+	expect(order.slice(0, 10)).toEqual(expectedStart);
 
-		// p500 not in order; PX appears right after p300
-		expect(order).not.toContain("p500");
-		const addedId = add!.entity_id;
-		const idx300 = order.indexOf("p300");
-		expect(idx300).toBeGreaterThanOrEqual(0);
-		expect(order[idx300 + 1]).toBe(addedId);
-	},
-);
+	// p500 not in order; PX appears right after p300
+	expect(order).not.toContain("p500");
+	const addedId = add!.entity_id;
+	const idx300 = order.indexOf("p300");
+	expect(idx300).toBeGreaterThanOrEqual(0);
+	expect(order[idx300 + 1]).toBe(addedId);
+});
 
-test(
-	"large doc (500): pure shuffle → root change only",
-	{ timeout: 30000 },
-	async () => {
-		const { paras, beforeIds, markdown } = makeBigDoc(500);
-		const lix = await openLix({ providePlugins: [plugin] });
-		const fileId = "f45";
-		await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
-		const after = shuffle(paras, 123).join("\n\n");
+test("large doc (500): pure shuffle → root change only", async () => {
+	const { paras, beforeIds, markdown } = makeBigDoc(500);
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f45";
+	await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
+	const after = shuffle(paras, 123).join("\n\n");
 
-		const changes = detectChanges({
-			querySync: createQuerySync({ engine: lix.engine! }),
-			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
-		} as DetectChangesArgs);
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
 
-		// Expect ONLY a root order change
-		const dels = changes.filter((c) => c.snapshot_content === null);
-		const adds = changes.filter((c) => c.snapshot_content?.type);
-		expect(dels.length).toBe(0);
-		expect(adds.length).toBe(0);
+	// Expect ONLY a root order change
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter((c) => c.snapshot_content?.type);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
 
-		const root = changes.find((c) => c.entity_id === "root");
-		expect(root).toBeTruthy();
-		const order = (root!.snapshot_content as { order: string[] })
-			.order as string[];
-		expect(order.length).toBe(500);
-	},
-);
+	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
+	const order = (root!.snapshot_content as { order: string[] })
+		.order as string[];
+	expect(order.length).toBe(500);
+});
 
-test(
-	"large doc (500): ~1% tiny edits → equal number of mods, no adds/dels",
-	{ timeout: 30000 },
-	async () => {
-		const { paras, beforeIds, markdown } = makeBigDoc(500);
-		const lix = await openLix({ providePlugins: [plugin] });
-		const fileId = "f46";
-		await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
+test("large doc (500): ~1% tiny edits → equal number of mods, no adds/dels", async () => {
+	const { paras, beforeIds, markdown } = makeBigDoc(500);
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f46";
+	await seedMarkdownState({ lix, fileId, markdown, ids: beforeIds });
 
-		const edited = applySmallEdits(paras, Math.floor(paras.length * 0.01), 99);
-		const after = edited.join("\n\n");
+	const edited = applySmallEdits(paras, Math.floor(paras.length * 0.01), 99);
+	const after = edited.join("\n\n");
 
-		const changes = detectChanges({
-			querySync: createQuerySync({ engine: lix.engine! }),
-			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
-		} as DetectChangesArgs);
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
 
-		const dels = changes.filter((c) => c.snapshot_content === null);
-		const adds = changes.filter(
-			(c) =>
-				c.snapshot_content?.type &&
-				c.entity_id &&
-				!beforeIds.includes(c.entity_id),
-		);
-		const mods = changes.filter(
-			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-		);
-		expect(dels.length).toBe(0);
-		expect(adds.length).toBe(0);
-		expect(mods.length).toBeGreaterThan(0);
-		// Allow a little slack but expect close to 1% (±2)
-		expect(
-			Math.abs(mods.length - Math.floor(paras.length * 0.01)),
-		).toBeLessThanOrEqual(2);
-	},
-);
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter(
+		(c) =>
+			c.snapshot_content?.type &&
+			c.entity_id &&
+			!beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+	);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
+	expect(mods.length).toBeGreaterThan(0);
+	// Allow a little slack but expect close to 1% (±2)
+	expect(
+		Math.abs(mods.length - Math.floor(paras.length * 0.01)),
+	).toBeLessThanOrEqual(2);
+});
 
-test(
-	"duplicates (500 Same): edit #350 only → 1 mod, no root change",
-	{ timeout: 30000 },
-	async () => {
-		const paras = Array.from({ length: 500 }, () => "Same");
-		const beforeIds = Array.from({ length: 500 }, (_, i) => `p${i + 1}`);
-		const before = paras.join("\n\n");
-		const lix = await openLix({ providePlugins: [plugin] });
-		const fileId = "f47";
-		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
+test("duplicates (500 Same): edit #350 only → 1 mod, no root change", async () => {
+	const paras = Array.from({ length: 500 }, () => "Same");
+	const beforeIds = Array.from({ length: 500 }, (_, i) => `p${i + 1}`);
+	const before = paras.join("\n\n");
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f47";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-		const afterParas = paras.slice();
-		afterParas[349] = "Same updated";
-		const after = afterParas.join("\n\n");
+	const afterParas = paras.slice();
+	afterParas[349] = "Same updated";
+	const after = afterParas.join("\n\n");
 
-		const changes = detectChanges({
-			querySync: createQuerySync({ engine: lix.engine! }),
-			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
-		} as DetectChangesArgs);
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
 
-		const mods = changes.filter(
-			(c) => c.snapshot_content?.type === "paragraph",
-		);
-		expect(mods.length).toBe(1);
-		expect(mods[0]!.entity_id).toBe("p350");
+	const mods = changes.filter((c) => c.snapshot_content?.type === "paragraph");
+	expect(mods.length).toBe(1);
+	expect(mods[0]!.entity_id).toBe("p350");
 
-		const root = changes.find((c) => c.entity_id === "root");
-		if (root) {
-			expect((root.snapshot_content as { order: string[] }).order).toEqual(
-				beforeIds,
-			); // order stable
-		}
-	},
-);
+	const root = changes.find((c) => c.entity_id === "root");
+	if (root) {
+		expect((root.snapshot_content as { order: string[] }).order).toEqual(
+			beforeIds,
+		); // order stable
+	}
+});
 
-test(
-	"large mixed (500): 300 dup 'Same' + move 200 unique → 1 root + targeted mods",
-	{ timeout: 30000 },
-	async () => {
-		// Build 300 'Same' + 200 unique tail (total 500)
-		const dups = Array.from({ length: 300 }, () => "Same");
-		const uniques = Array.from({ length: 200 }, (_, i) => `U${i + 1}`);
-		const paras = [...dups, ...uniques];
-		const beforeIds = Array.from(
-			{ length: paras.length },
-			(_, i) => `p${i + 1}`,
-		);
-		const before = paras.join("\n\n");
-		const lix = await openLix({ providePlugins: [plugin] });
-		const fileId = "f48";
-		await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
+test("large mixed (500): 300 dup 'Same' + move 200 unique → 1 root + targeted mods", async () => {
+	// Build 300 'Same' + 200 unique tail (total 500)
+	const dups = Array.from({ length: 300 }, () => "Same");
+	const uniques = Array.from({ length: 200 }, (_, i) => `U${i + 1}`);
+	const paras = [...dups, ...uniques];
+	const beforeIds = Array.from({ length: paras.length }, (_, i) => `p${i + 1}`);
+	const before = paras.join("\n\n");
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "f48";
+	await seedMarkdownState({ lix, fileId, markdown: before, ids: beforeIds });
 
-		// Move the last 200 uniques to the front; edit U10 slightly
-		const moved = uniques.slice();
-		const remaining = dups.slice();
-		const editedMoved = moved.slice();
-		editedMoved[9] = editedMoved[9] + " x";
-		const after = [...editedMoved, ...remaining].join("\n\n");
+	// Move the last 200 uniques to the front; edit U10 slightly
+	const moved = uniques.slice();
+	const remaining = dups.slice();
+	const editedMoved = moved.slice();
+	editedMoved[9] = editedMoved[9] + " x";
+	const after = [...editedMoved, ...remaining].join("\n\n");
 
-		const changes = detectChanges({
-			querySync: createQuerySync({ engine: lix.engine! }),
-			after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
-		} as DetectChangesArgs);
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
 
-		// Expect one root, plus exactly one mod (U10), no adds/dels
-		const root = changes.find((c) => c.entity_id === "root");
-		expect(root).toBeTruthy();
+	// Expect one root, plus exactly one mod (U10), no adds/dels
+	const root = changes.find((c) => c.entity_id === "root");
+	expect(root).toBeTruthy();
 
-		const dels = changes.filter((c) => c.snapshot_content === null);
-		const adds = changes.filter(
-			(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
-		);
-		const mods = changes.filter(
-			(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
-		);
-		expect(dels.length).toBe(0);
-		expect(adds.length).toBe(0);
-		expect(mods.length).toBe(1);
-	},
-);
+	const dels = changes.filter((c) => c.snapshot_content === null);
+	const adds = changes.filter(
+		(c) => c.snapshot_content?.type && !beforeIds.includes(c.entity_id),
+	);
+	const mods = changes.filter(
+		(c) => c.snapshot_content?.type && beforeIds.includes(c.entity_id),
+	);
+	expect(dels.length).toBe(0);
+	expect(adds.length).toBe(0);
+	expect(mods.length).toBe(1);
+});
