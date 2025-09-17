@@ -64,7 +64,7 @@ export async function loadProject(args: {
 	 */
 	appId?: string;
 }): Promise<InlangProject> {
-	const db = initDb({ sqlite: args.sqlite });
+	const db = initDb({ lix: args.lix });
 
 	await maybeMigrateFirstProjectId({ lix: args.lix });
 

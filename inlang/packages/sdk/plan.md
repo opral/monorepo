@@ -25,8 +25,6 @@
 ### Phase 1 — Define schemas and query through Lix
 1. Define `inlang_bundle`, `inlang_message`, and `inlang_variant` schemas using the Lix schema-definition helpers (`x-primary-key`, FK chain, generated defaults via Lix functions).
 2. On project boot, call `createEntityViewsIfNotExists` to register the new entity views.
-3. Update the SDK to issue read/write queries against `project.lix.db.selectFrom(...)` for these entities while the legacy SQLite remains in place for anything else.
-4. Extend tests to assert that operations routed through `project.lix.db` behave exactly like the previous in-memory tables.
 
 *Exit criteria:* CRUD paths run against Lix views; tests stay green.
 
