@@ -15,7 +15,23 @@ import {
 } from "./variables.js";
 
 /**
- * @typedef {(newLocale: Locale, options?: { reload?: boolean }) => void} SetLocaleFn
+ * Navigates to the localized URL, or reloads the current page
+ *
+ * @param {string} [newLocation] The new location
+ * @return {undefined}
+ */
+const navigateOrReload = (newLocation) => {
+	if (newLocation) {
+		// reload the page by navigating to the new url
+		window.location.href = newLocation;
+	} else {
+		// reload the page to reflect the new locale
+		window.location.reload();
+	}
+};
+
+/**
+ * @typedef {(newLocale: Locale, options?: { reload?: boolean }) => void | Promise<void>} SetLocaleFn
  */
 
 /**
@@ -25,6 +41,9 @@ import {
  * can be disabled by passing \`reload: false\` as an option. If
  * reloading is disabled, you need to ensure that the UI is updated
  * to reflect the new locale.
+ *
+ * If any custom strategy's \`setLocale\` function is async, then this
+ * function will become async as well.
  *
  * @example
  *   setLocale('en');
@@ -41,12 +60,15 @@ export let setLocale = (newLocale, options) => {
 	};
 	// locale is already set
 	// https://github.com/opral/inlang-paraglide-js/issues/430
+	/** @type {Locale | undefined} */
 	let currentLocale;
 	try {
 		currentLocale = getLocale();
 	} catch {
 		// do nothing, no locale has been set yet.
 	}
+	/** @type {Array<Promise<any>>} */
+	const customSetLocalePromises = [];
 	/** @type {string | undefined} */
 	let newLocation = undefined;
 	for (const strat of strategy) {
@@ -100,30 +122,38 @@ export let setLocale = (newLocale, options) => {
 		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
 			const handler = customClientStrategies.get(strat);
 			if (handler) {
-				const result = handler.setLocale(newLocale);
-				// Handle async setLocale - fire and forget
+				let result = handler.setLocale(newLocale);
+				// Handle async setLocale
 				if (result instanceof Promise) {
-					result.catch((error) => {
-						console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
+					result = result.catch((error) => {
+						throw new Error(`Custom strategy "${strat}" setLocale failed.`, {
+							cause: error,
+						});
 					});
+					customSetLocalePromises.push(result);
 				}
 			}
 		}
 	}
-	if (
-		!isServer &&
-		optionsWithDefaults.reload &&
-		window.location &&
-		newLocale !== currentLocale
-	) {
-		if (newLocation) {
-			// reload the page by navigating to the new url
-			window.location.href = newLocation;
-		} else {
-			// reload the page to reflect the new locale
-			window.location.reload();
+
+	const runReload = () => {
+		if (
+			!isServer &&
+			optionsWithDefaults.reload &&
+			window.location &&
+			newLocale !== currentLocale
+		) {
+			navigateOrReload(newLocation);
 		}
+	};
+
+	if (customSetLocalePromises.length) {
+		return Promise.all(customSetLocalePromises).then(() => {
+			runReload();
+		});
 	}
+
+	runReload();
 
 	return;
 };

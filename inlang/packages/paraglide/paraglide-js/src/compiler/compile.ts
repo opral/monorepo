@@ -3,10 +3,10 @@ import path from "node:path";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { compileProject } from "./compile-project.js";
 import { writeOutput } from "../services/file-handling/write-output.js";
-import {
-	getLocalAccount,
-	saveLocalAccount,
-} from "../services/account/index.js";
+// import {
+// 	getLocalAccount,
+// 	saveLocalAccount,
+// } from "../services/account/index.js";
 import {
 	defaultCompilerOptions,
 	type CompilerOptions,
@@ -60,12 +60,12 @@ export async function compile(
 				withDefaultOptions.outdir
 			);
 
-			const localAccount = getLocalAccount({ fs });
+			// const localAccount = getLocalAccount({ fs });
 
 			const project = await loadProjectFromDirectory({
 				path: withDefaultOptions.project,
 				fs,
-				account: localAccount,
+				// account: localAccount,
 				appId: ENV_VARIABLES.PARJS_APP_ID,
 			});
 
@@ -82,16 +82,16 @@ export async function compile(
 				previousOutputHashes: options.previousCompilation?.outputHashes,
 			});
 
-			if (!localAccount) {
-				const activeAccount = await project.lix.db
-					.selectFrom("active_account as aa")
-					.innerJoin("account_all as a", "a.id", "aa.account_id")
-					.where("a.lixcol_version_id", "=", "global")
-					.select(["a.id", "a.name"])
-					.executeTakeFirstOrThrow();
+			// if (!localAccount) {
+			// 	const activeAccount = await project.lix.db
+			// 		.selectFrom("active_account as aa")
+			// 		.innerJoin("account_all as a", "a.id", "aa.account_id")
+			// 		.where("a.lixcol_version_id", "=", "global")
+			// 		.select(["a.id", "a.name"])
+			// 		.executeTakeFirstOrThrow();
 
-				saveLocalAccount({ fs, account: activeAccount });
-			}
+			// 	saveLocalAccount({ fs, account: activeAccount });
+			// }
 
 			const warningsAndErrors = await project.errors.get();
 
