@@ -109,6 +109,14 @@ export type StateEntityView = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: Generated<string>;
+
+	/**
+	 * Writer key associated with the last mutation that produced this entity state.
+	 *
+	 * Used to attribute writes to individual clients/sessions for echo suppression.
+	 * Null when no writer key was set for the mutation.
+	 */
+	lixcol_writer_key: Generated<string | null>;
 };
 
 /**
@@ -217,6 +225,14 @@ export type EntityStateColumns = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: LixGenerated<string>;
+
+	/**
+	 * Writer key associated with the last mutation that produced this entity state.
+	 *
+	 * Used to attribute writes to individual clients/sessions for echo suppression.
+	 * Null when no writer key was set for the mutation.
+	 */
+	lixcol_writer_key: LixGenerated<string | null>;
 
 	/**
 	 * Arbitrary metadata attached to the change that produced this entity state.

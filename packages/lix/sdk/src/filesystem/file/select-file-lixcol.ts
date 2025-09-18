@@ -99,6 +99,7 @@ export function selectFileLixcol(args: {
 	});
 
 	const row = metadata[0];
+	const writerKey = normalizeWriterKey(row?.[1]);
 
 	// If no metadata found (file doesn't exist or has no changes), return nulls
 	// Don't cache non-existent files
@@ -108,7 +109,7 @@ export function selectFileLixcol(args: {
 			latest_commit_id: null,
 			created_at: null,
 			updated_at: null,
-			writer_key: row?.[1] ?? null,
+			writer_key: writerKey,
 		};
 	}
 
@@ -117,7 +118,7 @@ export function selectFileLixcol(args: {
 		latest_commit_id: commitId!,
 		created_at: row[2] as string,
 		updated_at: row[3] as string,
-		writer_key: (row[1] as string | null) ?? null,
+		writer_key: writerKey,
 	};
 
 	// Only cache if we have valid data (file exists)
@@ -140,4 +141,11 @@ export function selectFileLixcol(args: {
 	});
 
 	return result;
+}
+
+function normalizeWriterKey(value: unknown): string | null {
+	if (value === null || value === undefined) {
+		return null;
+	}
+	return String(value);
 }

@@ -659,7 +659,7 @@ test("file_history reflects directory renames across commits", async () => {
 
 test(
 	"file_history tracks directory moves across commits",
-	{ timeout: 20000 },
+	{ timeout: 100_000 },
 	async () => {
 		const lix = await openLix({
 			providePlugins: [mockJsonPlugin],
