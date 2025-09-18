@@ -67,18 +67,16 @@ jobs:
         if: steps.version.outputs.changed != 'true'
         run: echo "No version bump detected for packages/flashtype/package.json; skipping deploy."
 
+      - name: Setup Pnpm
+        if: steps.version.outputs.changed == 'true'
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js 22
         if: steps.version.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-
-      - name: Setup pnpm
-        if: steps.version.outputs.changed == 'true'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
 
       - name: Install dependencies
         if: steps.version.outputs.changed == 'true'
