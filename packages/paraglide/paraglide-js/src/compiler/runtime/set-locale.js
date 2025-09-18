@@ -136,8 +136,10 @@ export let setLocale = (newLocale, options) => {
  *     return Cookies.set('locale', newLocale)
  *   });
  *
- * @param {(newLocale: Locale) => void} fn
+ * @param {(newLocale: Locale, options?: { reload?: boolean }) => void} fn
  */
 export const overwriteSetLocale = (fn) => {
-	setLocale = fn;
+	setLocale = (newLocale, options) => {
+		fn(newLocale, options);
+	};
 };
