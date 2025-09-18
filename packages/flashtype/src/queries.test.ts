@@ -1,7 +1,11 @@
 import { describe, test, expect } from "vitest";
 import { openLix, createCheckpoint } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
-import { selectFiles, selectWorkingDiffCount } from "@/queries";
+import {
+	selectFiles,
+	selectFilesystemEntries,
+	selectWorkingDiffCount,
+} from "@/queries";
 
 describe("selectFiles", () => {
 	test("returns minimal rows sorted by path", async () => {
@@ -22,6 +26,112 @@ describe("selectFiles", () => {
 		// Minimal shape
 		expect(rows[0]).toHaveProperty("id");
 		expect(rows[0]).toHaveProperty("path");
+	});
+});
+
+describe("selectFilesystemEntries", () => {
+	test("returns directories and files with hierarchy metadata", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+
+		// Seed directories (nested) via the view so triggers normalize inputs.
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/docs/" } as any)
+			.returning(["id"])
+			.execute();
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/docs/guides/" } as any)
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values([
+				{ id: "f_root", path: "/README.md", data: new Uint8Array() },
+				{
+					id: "f_nested",
+					path: "/docs/guides/intro.md",
+					data: new Uint8Array(),
+				},
+			])
+			.execute();
+
+		const rows = await selectFilesystemEntries(lix).execute();
+		expect(rows.map((row) => row.kind)).toEqual([
+			"file",
+			"directory",
+			"directory",
+			"file",
+		]);
+		expect(rows.map((row) => row.path)).toEqual([
+			"/README.md",
+			"/docs/",
+			"/docs/guides/",
+			"/docs/guides/intro.md",
+		]);
+
+		const docsRow = rows.find((row) => row.path === "/docs/");
+		expect(docsRow?.parent_id).toBeNull();
+		expect(docsRow?.display_name).toBe("docs");
+
+		const guidesRow = rows.find((row) => row.path === "/docs/guides/");
+		expect(guidesRow?.parent_id).toBe(docsRow?.id);
+		expect(guidesRow?.display_name).toBe("guides");
+
+		const nestedFile = rows.find((row) => row.path === "/docs/guides/intro.md");
+		expect(nestedFile?.parent_id).toBe(guidesRow?.id);
+		expect(nestedFile?.display_name).toBe("intro.md");
+		expect(nestedFile?.hidden).toBe(0);
+	});
+
+	test("distinguishes root files from nested files", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/docs/" } as any)
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values([
+				{ id: "root_file", path: "/root.md", data: new Uint8Array() },
+				{ id: "nested_file", path: "/docs/deep.md", data: new Uint8Array() },
+			])
+			.execute();
+
+		const rows = await selectFilesystemEntries(lix).execute();
+		const rootRow = rows.find((row) => row.id === "root_file");
+		expect(rootRow?.parent_id).toBeNull();
+		const docsRow = rows.find((row) => row.path === "/docs/");
+		const nestedRow = rows.find((row) => row.id === "nested_file");
+		expect(docsRow).toBeDefined();
+		expect(nestedRow?.parent_id).toBe(docsRow?.id);
+	});
+
+	test("includes hidden flags for directories and files", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/private/", hidden: true } as any)
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "hidden_file",
+				path: "/secret.md",
+				data: new Uint8Array(),
+				hidden: true,
+			})
+			.execute();
+
+		const rows = await selectFilesystemEntries(lix).execute();
+		const dirRow = rows.find((row) => row.path === "/private/");
+		expect(dirRow?.hidden).toBe(1);
+		const fileRow = rows.find((row) => row.path === "/secret.md");
+		expect(fileRow?.hidden).toBe(1);
 	});
 });
 

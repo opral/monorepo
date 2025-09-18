@@ -902,3 +902,191 @@ test("optimization prevents unnecessary query re-executions", async () => {
 	accountSub.unsubscribe();
 	await lix.close();
 });
+
+test("observe pools identical compiled queries (same instance)", async () => {
+	const lix = await openLix({});
+
+	// Create two separate builders that compile to the same SQL and params
+	const q1 = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "like", "pool_same_%");
+	const q2 = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "like", "pool_same_%");
+
+	const obs1 = lix.observe(q1);
+	const obs2 = lix.observe(q2);
+
+	// Expect a single pooled observable instance
+	expect(obs1).toBe(obs2);
+
+	const a: any[] = [];
+	const b: any[] = [];
+	const sub1 = obs1.subscribe({ next: (rows) => a.push(rows) });
+	const sub2 = obs2.subscribe({ next: (rows) => b.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	// Both receive the same initial emission
+	expect(a).toHaveLength(1);
+	expect(b).toHaveLength(1);
+	expect(a[0]).toEqual([]);
+	expect(b[0]).toEqual([]);
+
+	// Mutate and ensure both receive the update
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "pool_same_1", value: "v1" })
+		.execute();
+	await new Promise((r) => setTimeout(r, 20));
+
+	expect(a[a.length - 1]).toHaveLength(1);
+	expect(b[b.length - 1]).toHaveLength(1);
+
+	sub1.unsubscribe();
+	sub2.unsubscribe();
+	await lix.close();
+});
+
+test("pooled observable persists until last unsubscribe", async () => {
+	const lix = await openLix({});
+	const q = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "like", "pool_persist_%");
+
+	const obs = lix.observe(q);
+	const values1: any[] = [];
+	const values2: any[] = [];
+	const sub1 = obs.subscribe({ next: (rows) => values1.push(rows) });
+	const sub2 = obs.subscribe({ next: (rows) => values2.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	const before = values1.length + values2.length;
+
+	// Unsub first; second remains
+	sub1.unsubscribe();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "pool_persist_1", value: "v1" })
+		.execute();
+	await new Promise((r) => setTimeout(r, 20));
+
+	// Second subscriber still updates
+	expect(values2.length).toBeGreaterThan(0);
+	expect(values1.length + values2.length).toBeGreaterThan(before);
+
+	// Unsub second — pooled upstream should tear down
+	sub2.unsubscribe();
+
+	// Observing again should produce a new instance (cache entry cleaned)
+	const obs2 = lix.observe(q);
+	expect(obs2).not.toBe(obs);
+
+	await lix.close();
+});
+
+test("pooling key includes mode: array vs first", async () => {
+	const lix = await openLix({});
+	const q = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "like", "pool_mode_%");
+
+	const obsArray = lix.observe(q, { mode: "array" });
+	const obsFirst = lix.observe(q, { mode: "first" });
+
+	// Different modes should not pool together
+	expect(obsArray).not.toBe(obsFirst);
+
+	await lix.close();
+});
+
+test("observe pools identical SQL even from different builder instances", async () => {
+	const lix = await openLix({});
+
+	// Construct queries in different orders that compile to identical SQL/params
+	const q1 = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_identity_key");
+
+	const q2 = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_identity_key");
+
+	const obs1 = lix.observe(q1);
+	const obs2 = lix.observe(q2);
+	// Same compiled SQL -> pooled
+	expect(obs1).toBe(obs2);
+
+	await lix.close();
+});
+
+test("observe does not pool different SQL (different where parameters)", async () => {
+	const lix = await openLix({});
+
+	const qa = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_diff_a");
+	const qb = lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_diff_b");
+
+	const obsa = lix.observe(qa);
+	const obsb = lix.observe(qb);
+	// Different params -> no pooling
+	expect(obsa).not.toBe(obsb);
+
+	await lix.close();
+});
+
+test("observe does not pool across different Lix instances", async () => {
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
+
+	const q1 = lix1.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_cross_instance");
+	const q2 = lix2.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "pool_cross_instance");
+
+	const obs1 = lix1.observe(q1);
+	const obs2 = lix2.observe(q2);
+
+	// Different Lix instances must not share the same observable
+	expect(obs1).not.toBe(obs2);
+
+	const a: any[] = [];
+	const b: any[] = [];
+	const sub1 = obs1.subscribe({ next: (rows) => a.push(rows) });
+	const sub2 = obs2.subscribe({ next: (rows) => b.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	expect(a).toHaveLength(1);
+	expect(b).toHaveLength(1);
+
+	// Mutate only lix1; lix2 should not receive updates
+	await lix1.db
+		.insertInto("key_value")
+		.values({ key: "pool_cross_instance", value: "v1" })
+		.execute();
+	await new Promise((r) => setTimeout(r, 20));
+
+	expect(a).toHaveLength(2);
+	expect(a[a.length - 1]).toHaveLength(1);
+	expect(b).toHaveLength(1); // Still just initial emission
+
+	sub1.unsubscribe();
+	sub2.unsubscribe();
+	await lix1.close();
+	await lix2.close();
+});

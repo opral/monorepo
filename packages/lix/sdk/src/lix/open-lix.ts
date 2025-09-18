@@ -1,42 +1,30 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { initDb } from "../database/init-db.js";
-import { sql, type Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
+import {
+	LixSchemaViewMap,
+	type LixDatabaseSchema,
+} from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
-import { InMemoryStorage } from "./storage/in-memory.js";
-import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
-import {
-	commitDeterministicRngState,
-	random,
-} from "../deterministic/random.js";
-import { newLixFile } from "./new-lix.js";
-import { switchAccount } from "../account/switch-account.js";
+import type { EngineEvent, LixEngine } from "../engine/boot.js";
+import type { LixEnvironment } from "../environment/api.js";
+import { createDialect } from "../environment/kysely/kysely-driver.js";
+import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
+import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
+import { random } from "../engine/deterministic/random.js";
+import { buildJsonColumnConfig } from "./json-column-config.js";
+import { loadPluginFromString } from "../environment/load-from-string.js";
 
 export type Lix = {
-	/**
-	 * The raw SQLite instance.
-	 *
-	 * Required for advanced use cases that can't be
-	 * expressed with the db API.
-	 *
-	 * Use with caution, automatic transformation of
-	 * results like parsing json (similar to the db API)
-	 * is not guaranteed.
-	 */
-	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
-		getAllSync: () => LixPlugin[];
 	};
 	/**
 	 * Hooks for listening to database lifecycle events.
@@ -50,6 +38,18 @@ export type Lix = {
 	 */
 	close: () => Promise<void>;
 	observe: ReturnType<typeof createObserve>;
+
+	/**
+	 * Calls a named engine function and returns its result.
+	 *
+	 * Preferred entrypoint for invoking engine functions.
+	 */
+	call: (
+		name: string,
+		payload?: unknown,
+		opts?: { signal?: AbortSignal }
+	) => Promise<unknown>;
+
 	/**
 	 * Serialises the Lix into a {@link Blob}.
 	 *
@@ -64,6 +64,51 @@ export type Lix = {
 	 * ```
 	 */
 	toBlob: () => Promise<Blob>;
+
+	/**
+	 * In‑process engine context bound to the live database.
+	 *
+	 * When Lix runs in‑process (same thread as the database),
+	 * `engine` is available and tests can directly call helpers
+	 * that accept `{ engine }`.
+	 *
+	 * When Lix runs out‑of‑process (for example inside a Worker), the engine
+	 * is not accessible from the main thread and will be `undefined`. In those
+	 * environments, use `lix.call` to invoke engine functions across the
+	 * boundary.
+	 *
+	 * Guidance:
+	 * - Prefer `lix.db` for normal queries and `lix.call` for engine
+	 *   operations. Reserve `lix.engine` for unit tests or internal SDK code
+	 *   that explicitly requires in‑process access alongside the database.
+	 * - Do not rely on `lix.engine` in application/business logic, since it
+	 *   may be `undefined` in worker/remote environments.
+	 *
+	 * Unit test in the same process
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * test("example test", async () => {
+	 *   // InMemory environment runs in the same process (in‑process engine).
+	 *   const lix = await openLix({
+	 *      environment: new InMemoryenvironment()
+	 *   });
+	 *   executeSync({
+	 *     engine: lix.engine!,
+	 *     data: [...],
+	 *   });
+	 * });
+	 * ```
+	 *
+	 * Worker/remote environment – prefer router calls
+	 *
+	 * @example
+	 * ```ts
+	 * await lix.call("lix_insert_transaction_state", { timestamp, data });
+	 * ```
+	 */
+	engine?: LixEngine;
 };
 
 /**
@@ -103,26 +148,45 @@ export async function openLix(args: {
 	 * Lix file data to initialize the database with.
 	 */
 	blob?: Blob;
+
+	environment?: LixEnvironment;
+
 	/**
-	 * Storage adapter for persisting lix data.
+	 * Provide plugin instances directly (in-process environments only).
 	 *
-	 * @default InMemoryStorage
-	 */
-	storage?: LixStorageAdapter;
-	/**
-	 * Usecase are lix apps that define their own file format,
-	 * like inlang (unlike a markdown, csv, or json plugin).
+	 * Use this when executing in the same thread as the engine, e.g. tests or
+	 * scripts running with {@link InMemoryEnvironment}. Plugins supplied this
+	 * way are not transferable across worker boundaries.
 	 *
-	 * (+) avoids separating app code from plugin code and
-	 *     resulting bundling logic.
-	 *
-	 * (-) such a file format must always be opened with the
-	 *     file format sdk. the file is not portable
+	 * Prefer {@link providePluginsRaw} when the environment can access bundled
+	 * plugin source (for example via `?raw` import). Raw strings load on the
+	 * target thread and work in both workers and main-thread contexts, but are
+	 * usually unavailable in unit tests.
 	 *
 	 * @example
-	 *   const lix = await openLix({ providePlugins: [myPlugin] })
+	 * ```ts
+	 * const lix = await openLix({
+	 *   providePlugins: [jsonPlugin]
+	 * })
+	 * ```
 	 */
 	providePlugins?: LixPlugin[];
+
+	/**
+	 * Provide plugins as stringified ESM modules.
+	 *
+	 * This is the portable format for worker or cross-thread environments where
+	 * functions cannot be structured cloned. Each string is evaluated via
+	 * {@link loadPluginFromString} inside the target environment.
+	 *
+	 * @example
+	 * ```ts
+	 * const jsonPlugin = await fetch("/plugins/json.js").then((res) => res.text());
+	 * const lix = await openLix({ providePluginsRaw: [jsonPlugin] });
+	 * ```
+	 */
+	providePluginsRaw?: string[];
+
 	/**
 	 * Set the key values when opening the lix.
 	 *
@@ -133,153 +197,108 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<Lix> {
-	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
-	const database = await storage.open({
-		blob: args.blob,
-		createBlob: () => newLixFile({ keyValues: args.keyValues }),
+	const hooks = createHooks();
+	const blob = args.blob;
+	let engine: LixEngine | undefined;
+	const hostPlugins: LixPlugin[] = [];
+
+	const providedPluginObjects = [...(args.providePlugins ?? [])];
+	const providedPluginStrings = [...(args.providePluginsRaw ?? [])];
+
+	for (const plugin of providedPluginObjects) {
+		hostPlugins.push(plugin);
+	}
+	for (const plugin of providedPluginStrings) {
+		hostPlugins.push(await loadPluginFromString(plugin));
+	}
+
+	const environment =
+		args.environment ??
+		(await import("../environment/in-memory.js").then(
+			(m) => new m.InMemoryEnvironment()
+		))!;
+
+	// Default behavior: openOrCreate
+	// - If a blob is provided, attempt to create from it (environment may refuse if target exists)
+	// - If no blob is provided, attempt to create a fresh Lix; if environment reports existing DB,
+	//   fall back to open without a blob.
+	const boot = {
+		args: {
+			providePlugins: providedPluginObjects,
+			providePluginsRaw: providedPluginStrings,
+			account: args.account,
+			keyValues: args.keyValues,
+		},
+	} as const;
+
+	if (blob) {
+		await environment.create({ blob: await args.blob!.arrayBuffer() });
+		const res = await environment.open({
+			boot,
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
+		});
+		engine = res?.engine;
+	} else {
+		const exists = await environment.exists();
+		if (!exists) {
+			const { newLixFile } = await import("./new-lix.js");
+			const seed = await newLixFile({ keyValues: args.keyValues });
+			const seedBytes = await seed.arrayBuffer();
+			await environment.create({ blob: seedBytes });
+		}
+		const res = await environment.open({
+			boot,
+			emit: (ev: EngineEvent) => hooks._emit(ev.type, ev.payload),
+		});
+		engine = res?.engine;
+	}
+
+	// Build JSON column mapping to match openLix() parsing behavior
+	const ViewsWithJsonColumns = buildJsonColumnConfig({
+		includeChangeView: true,
 	});
 
-	// Create hooks before initializing database so they can be used in schema setup
-	const hooks = createHooks();
-
-	const db = initDb({ sqlite: database, hooks });
-
-	// Set up account IMMEDIATELY after db init, before any other operations
-	const persistedState = await storage.getPersistedState?.();
-	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
-
-	if (accountToSet) {
-		// First ensure the account exists (create it if it doesn't)
-		const existingAccount = await db
-			.selectFrom("account_all")
-			.where("id", "=", accountToSet.id)
-			.where("lixcol_version_id", "=", "global")
-			.selectAll()
-			.executeTakeFirst();
-
-		if (!existingAccount) {
-			// Create the account in global version
-			await db
-				.insertInto("account_all")
-				.values({
-					id: accountToSet.id,
-					name: accountToSet.name,
-					lixcol_version_id: "global",
-				})
-				.execute();
-		}
-
-		// Use switchAccount to properly set this as the only active account
-		await switchAccount({ lix: { db }, to: [accountToSet] });
-	}
-
-	// Only process keyValues if we're opening an existing blob
-	// (newLixFile already handles keyValues during creation)
-	if (args.blob && args.keyValues && args.keyValues.length > 0) {
-		for (const keyValue of args.keyValues) {
-			// Determine which table to use based on whether version is specified
-			if (keyValue.lixcol_version_id) {
-				// Check if the key already exists in the specified version
-				const existing = await db
-					.selectFrom("key_value_all")
-					.select("key")
-					.where("key", "=", keyValue.key)
-					.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
-					.executeTakeFirst();
-
-				if (existing) {
-					// Update existing key in the specified version
-					await db
-						.updateTable("key_value_all")
-						.set({ value: keyValue.value })
-						.where("key", "=", keyValue.key)
-						.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
-						.execute();
-				} else {
-					// Insert new key into the specified version
-					await db
-						.insertInto("key_value_all")
-						.values({
-							key: keyValue.key,
-							value: keyValue.value,
-							lixcol_version_id: keyValue.lixcol_version_id,
-						})
-						.execute();
-				}
-			} else {
-				// No version specified, use default key_value table (active version)
-				const existing = await db
-					.selectFrom("key_value")
-					.select("key")
-					.where("key", "=", keyValue.key)
-					.executeTakeFirst();
-
-				if (existing) {
-					// Update existing key
-					await db
-						.updateTable("key_value")
-						.set({ value: keyValue.value })
-						.where("key", "=", keyValue.key)
-						.execute();
-				} else {
-					// Insert new key
-					await db
-						.insertInto("key_value")
-						.values({ key: keyValue.key, value: keyValue.value })
-						.execute();
-				}
-			}
-		}
-	}
-
-	const plugins: LixPlugin[] = [];
-	if (args.providePlugins && args.providePlugins.length > 0) {
-		plugins.push(...args.providePlugins);
-	}
-
-	const plugin = {
-		getAll: async () => plugins,
-		getAllSync: () => plugins,
-	};
+	const db = new Kysely<LixDatabaseSchema>({
+		dialect: createDialect({ environment: environment }),
+		plugins: [
+			new ParseJSONResultsPlugin(),
+			JSONColumnPlugin(ViewsWithJsonColumns),
+			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
+		],
+	});
 
 	const observe = createObserve({ hooks });
 
-	const lix = {
+	await captureOpened({ lix: { db, call: environment.call } });
+
+	const lix: Lix = {
+		// sqlite intentionally not exposed in environment mode
 		db,
-		sqlite: database,
-		plugin,
 		hooks,
 		observe,
+		engine: engine,
+		plugin: {
+			getAll: async () => hostPlugins,
+		},
+		call: async (
+			name: string,
+			payload?: unknown,
+			_opts?: { signal?: AbortSignal }
+		): Promise<unknown> => environment.call(name, payload),
 		close: async () => {
-			await storage.close();
+			await environment.close();
 		},
 		toBlob: async () => {
-			commitDeterministicSequenceNumber({
-				lix: { sqlite: database, db, hooks },
-			});
-			commitDeterministicRngState({ lix: { sqlite: database, db, hooks } });
-			return storage.export();
+			await environment.call("lix_commit_sequence_number");
+			await environment.call("lix_commit_deterministic_rng_state");
+			return new Blob([await environment.export()]);
 		},
 	};
-
-	// MUST BE AWAITED
-	// The databse queries must run. Otherwise, we get super unexpected behavior
-	// where something is tested and then the async queue kicks in and leads
-	// to unexpected results. For example, cache population!
-	await captureOpened({ lix });
-
-	// Apply file and account schemas now that we have the full lix object with plugins
-	applyFileDatabaseSchema(lix);
-
-	// Connect storage to Lix if the adapter supports it
-	if (storage.connect) {
-		storage.connect({ lix });
-	}
 
 	return lix;
 }
 
-async function captureOpened(args: { lix: Lix }) {
+async function captureOpened(args: { lix: Pick<Lix, "db" | "call"> }) {
 	try {
 		const telemetry = await args.lix.db
 			.selectFrom("key_value")
@@ -303,7 +322,8 @@ async function captureOpened(args: { lix: Lix }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.lix.db);
-		if (random({ lix: args.lix }) > 0.1) {
+		const sample = await random({ lix: args.lix });
+		if (sample > 0.1) {
 			// Not awaiting to avoid boot up time and knowing that
 			// no database query is performed here. we dont care if the
 			// server responds with an error or not.

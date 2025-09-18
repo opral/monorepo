@@ -1,55 +1,64 @@
 import { useEffect, useState } from "react";
-import { UiDiffComponentProps } from "@lix-js/sdk";
+import type { RenderDiffArgs } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
 import clsx from "clsx";
 
 export const ChangeDiffComponent = (props: {
-	diffs: UiDiffComponentProps["diffs"];
+	diffs: RenderDiffArgs["diffs"];
 	className?: string;
 	contentClassName?: string;
 	debug?: boolean;
 }) => {
 	const [lix] = useAtom(lixAtom);
-	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
-
+	const [renderedHtml, setRenderedHtml] = useState<string | null>(null);
 	const pluginKey = props.diffs[0]?.plugin_key;
-	const CustomElementName = `diff-${pluginKey.replace(/_/g, "-")}`;
 
 	useEffect(() => {
-		const loadDiffComponent = async () => {
-			const component = (await lix.plugin.getAll()).find(
-				(p) => p.key === pluginKey
-			)?.diffUiComponent;
+		let cancelled = false;
 
-			if (!customElements.get(CustomElementName)) {
-				if (component) {
-					customElements.define(CustomElementName, component);
-					setIsComponentLoaded(true);
-				} else {
-					console.warn(`No diff UI component found for plugin key '${pluginKey}'`);
-					// Fallback logic
+		const loadDiff = async () => {
+			if (!lix || !pluginKey || props.diffs.length === 0) {
+				if (!cancelled) setRenderedHtml(null);
+				return;
+			}
+
+			try {
+				const plugin = (await lix.plugin.getAll()).find(
+					(p) => p.key === pluginKey,
+				);
+				if (!plugin?.renderDiff) {
+					if (!cancelled) setRenderedHtml(null);
+					return;
 				}
-			} else {
-				setIsComponentLoaded(true);
+
+				const html = await plugin.renderDiff({ diffs: props.diffs });
+				if (!cancelled) setRenderedHtml(html ?? null);
+			} catch (error) {
+				console.error("Failed to render diff", error);
+				if (!cancelled) setRenderedHtml(null);
 			}
 		};
 
-		loadDiffComponent();
-	}, [lix, pluginKey]);
+		loadDiff();
 
-	if (!isComponentLoaded) {
+		return () => {
+			cancelled = true;
+		};
+	}, [lix, pluginKey, props.diffs]);
+
+	if (!renderedHtml && !props.debug) {
 		return null;
 	}
 
 	return (
 		<div className={clsx("w-full overflow-x-auto pb-4", props.className)}>
-			<div className={props.contentClassName}>
-				<CustomElementName
-					// @ts-expect-error - Custom element props
-					diffs={props.diffs}
+			{renderedHtml && (
+				<div
+					className={props.contentClassName}
+					dangerouslySetInnerHTML={{ __html: renderedHtml }}
 				/>
-			</div>
+			)}
 			{props.debug && (
 				<pre className="text-xs text-gray-500 whitespace-pre-wrap break-all">
 					{JSON.stringify(props.diffs, null, 2)}

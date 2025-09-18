@@ -3,11 +3,24 @@ import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { CellSchemaV1 } from "./schemas/cell.js";
 
+const extractUniqueColumn = (input: unknown): string | undefined => {
+	if (input && typeof input === "object") {
+		const record = input as Record<string, unknown>;
+		const value = record.unique_column;
+		if (typeof value === "string" && value.length > 0) {
+			return value;
+		}
+	}
+	return undefined;
+};
+
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
 	changes,
 }) => {
-	const uniqueColumn = file.metadata?.unique_column as string | undefined;
+	const uniqueColumn = extractUniqueColumn(
+		(file as { lixcol_metadata?: unknown }).lixcol_metadata ?? file.metadata,
+	);
 
 	if (uniqueColumn === undefined) {
 		throw new Error("The unique_column metadata is required to apply changes");

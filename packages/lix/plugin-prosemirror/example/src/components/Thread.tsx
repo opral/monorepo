@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-	createThreadComment,
+	createConversationMessage,
 	Lix,
 	State,
-	type Thread,
-	type ThreadComment,
+	type LixConversation,
+	type LixConversationMessage,
 } from "@lix-js/sdk";
 import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { toRelativeTime } from "../utilities/timeUtils";
@@ -12,9 +12,9 @@ import { getInitials } from "../utilities/nameUtils";
 
 export function Thread(props: {
 	lix: Lix;
-	thread: Thread;
+	thread: LixConversation;
 	comments: Array<
-		Pick<State<ThreadComment>, "id" | "lixcol_created_at" | "body"> & {
+		Pick<State<LixConversationMessage>, "id" | "lixcol_created_at" | "body"> & {
 			author_name: string;
 		}
 	>;
@@ -22,10 +22,10 @@ export function Thread(props: {
 }) {
 	// Handler for adding a new comment to THIS thread
 	const handleCommentSubmit = async (args: { body: ZettelDoc }) => {
-		await createThreadComment({
+		await createConversationMessage({
 			lix: props.lix,
 			body: args.body,
-			thread_id: props.thread.id,
+			conversation_id: props.thread.id,
 		});
 	};
 
@@ -50,7 +50,7 @@ export function Thread(props: {
 
 export function Composer(props: {
 	lix: Lix;
-	threadId?: Thread["id"];
+	threadId?: LixConversation["id"];
 	onComposerSubmit: (args: { body: ZettelDoc }) => void;
 }) {
 	const [value, setValue] = useState<string | undefined>(undefined);
@@ -96,7 +96,7 @@ export function Composer(props: {
 
 function ThreadComment(props: {
 	lix: Lix;
-	comment: Pick<State<ThreadComment>, "lixcol_created_at" | "body"> & {
+	comment: Pick<State<LixConversationMessage>, "lixcol_created_at" | "body"> & {
 		author_name: string;
 	};
 }) {

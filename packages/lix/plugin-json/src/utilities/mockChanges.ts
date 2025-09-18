@@ -1,5 +1,11 @@
-import { type Change, type LixFile } from "@lix-js/sdk";
+import { type Change, type LixFile, type LixPlugin } from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
+
+type DetectArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
+type MockFile = Pick<LixFile, "id" | "path"> & {
+	metadata?: LixFile["metadata"];
+	lixcol_metadata?: LixFile["metadata"];
+};
 
 /**
  * Directly feeds an array of file updates into the plugin's detectChanges function,
@@ -11,7 +17,7 @@ import { detectChanges } from "../detectChanges.js";
  *   ```
  */
 export function mockChanges(args: {
-	file: Omit<LixFile, "data">;
+	file: MockFile;
 	fileUpdates: Uint8Array[];
 }) {
 	const allChanges = [];
@@ -21,21 +27,17 @@ export function mockChanges(args: {
 		const before =
 			i === 0
 				? undefined
-				: {
-						id: args.file.id ?? "mock",
-						path: args.file.path,
+				: ({
+						...args.file,
 						data: args.fileUpdates[i - 1],
-						metadata: args.file.metadata,
-					};
+					} as DetectArgs["before"]);
 
 		const after = {
-			id: args.file.id ?? "mock",
-			path: args.file.path,
+			...args.file,
 			data: args.fileUpdates[i]!,
-			metadata: args.file.metadata,
-		};
+		} as DetectArgs["after"];
 
-		const detectedChanges = detectChanges({ before, after });
+		const detectedChanges = detectChanges({ before, after } as DetectArgs);
 
 		// Transform DetectedChange objects to the format expected by applyChanges
 		const formattedChanges: (Change & { snapshot_content: any })[] =
@@ -49,6 +51,7 @@ export function mockChanges(args: {
 				file_id: after.id,
 				plugin_key: "mock",
 				snapshot_id: "mock",
+				metadata: null,
 			}));
 
 		allChanges.push(...formattedChanges);

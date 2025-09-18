@@ -1,341 +1,424 @@
 import { diffWords } from "diff";
+import { parse } from "parse5";
 
-/**
- * Applies granular text diffing to an element by comparing before and after text content
- * and wrapping changed parts in spans with appropriate diff classes.
- */
-function applyGranularTextDiff(
-  element: HTMLElement,
-  beforeText: string,
-  afterText: string,
-): void {
-  // If texts are identical, no changes needed
-  if (beforeText === afterText) {
-    return;
+type Node = ElementNode | TextNode;
+
+type ElementNode = {
+  type: "element";
+  tagName: string;
+  attrs: Record<string, string>;
+  children: Node[];
+  parent: ElementNode | null;
+};
+
+type TextNode = {
+  type: "text";
+  value: string;
+  parent: ElementNode | null;
+};
+
+type Tree = {
+  roots: Node[];
+  elementsById: Map<string, ElementNode>;
+  order: ElementNode[];
+  significantRootCount: number;
+};
+
+function buildTree(html: string, diffAttr: string): Tree {
+  const doc = parse(html) as any;
+  const htmlNode = doc.childNodes.find(
+    (n: any) => n.nodeName === "html",
+  ) as any;
+  const bodyNode = htmlNode?.childNodes?.find(
+    (n: any) => n.nodeName === "body",
+  ) as any;
+
+  const elementsById = new Map<string, ElementNode>();
+  const order: ElementNode[] = [];
+  const roots: Node[] = [];
+
+  const convert = (node: any, parent: ElementNode | null): Node | null => {
+    if (node.nodeName === "#text") {
+      return { type: "text", value: node.value ?? "", parent };
+    }
+    if (node.nodeName.startsWith("#")) return null;
+
+    const attrs: Record<string, string> = {};
+    if (Array.isArray(node.attrs)) {
+      for (const attr of node.attrs) {
+        attrs[attr.name] = attr.value;
+      }
+    }
+    const element: ElementNode = {
+      type: "element",
+      tagName: node.tagName,
+      attrs,
+      children: [],
+      parent,
+    };
+    const convertedChildren: Node[] = [];
+    for (const childNode of node.childNodes ?? []) {
+      const converted = convert(childNode, element);
+      if (converted) convertedChildren.push(converted);
+    }
+    element.children = convertedChildren;
+
+    const id = attrs[diffAttr];
+    if (id) {
+      if (!elementsById.has(id)) {
+        elementsById.set(id, element);
+      }
+      order.push(element);
+    }
+    return element;
+  };
+
+  const children = bodyNode?.childNodes ?? [];
+  let significantRootCount = 0;
+  for (const child of children) {
+    const converted = convert(child, null);
+    if (converted) {
+      roots.push(converted);
+      if (
+        converted.type === "element" ||
+        (converted.type === "text" && converted.value.trim() !== "")
+      ) {
+        significantRootCount++;
+      }
+    }
   }
 
-  // Get word-level diff
-  const changes = diffWords(beforeText, afterText);
-
-  // Clear the element's content
-  element.innerHTML = "";
-
-  // Build the new content with diff spans
-  changes.forEach((change) => {
-    if (change.added) {
-      // Text was added
-      const span = document.createElement("span");
-      span.className = "diff-added";
-      span.textContent = change.value;
-      element.appendChild(span);
-    } else if (change.removed) {
-      // Text was removed - show as removed text
-      const span = document.createElement("span");
-      span.className = "diff-removed";
-      span.textContent = change.value;
-      element.appendChild(span);
-    } else {
-      // Text is unchanged
-      const textNode = document.createTextNode(change.value);
-      element.appendChild(textNode);
-    }
-  });
+  return { roots, elementsById, order, significantRootCount };
 }
 
-/**
- * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
- * that visually represents the differences.
- *
- * Use this if you want to bypass parsing and DOM creation by
- * directly working with the DOM elements instead of the HTML string
- * output of `renderHtmlDiff()`.
- *
- * @example
- *   renderHtmlDiffElement({
- *     beforeHtml: `<p data-diff-key="abc">Test</p>`,
- *     afterHtml: `<p data-diff-key="abc">Test World</p>`,
- *   });
- *
- */
-function renderHtmlDiffElement(args: {
+function cloneElement(
+  node: ElementNode,
+  parent: ElementNode | null = null,
+): ElementNode {
+  const clone: ElementNode = {
+    type: "element",
+    tagName: node.tagName,
+    attrs: { ...node.attrs },
+    children: [],
+    parent,
+  };
+  clone.children = node.children.map((child) =>
+    child.type === "text"
+      ? { type: "text", value: child.value, parent: clone }
+      : cloneElement(child, clone),
+  );
+  return clone;
+}
+
+function appendClass(node: ElementNode, className: string): void {
+  const existing = node.attrs.class
+    ? node.attrs.class.split(/\s+/).filter(Boolean)
+    : [];
+  if (!existing.includes(className)) {
+    existing.unshift(className);
+  }
+  node.attrs.class = existing.join(" ");
+}
+
+function setAttribute(node: ElementNode, key: string, value: string): void {
+  node.attrs[key] = value;
+}
+
+function removeAttribute(node: ElementNode, key: string): void {
+  delete node.attrs[key];
+}
+
+function hasAttribute(node: ElementNode, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(node.attrs, key);
+}
+
+function getAttribute(node: ElementNode, key: string): string | undefined {
+  return node.attrs[key];
+}
+
+function setChildren(node: ElementNode, children: Node[]): void {
+  node.children = children;
+  for (const child of children) {
+    child.parent = node;
+  }
+}
+
+function createTextNode(value: string, parent: ElementNode): TextNode {
+  return { type: "text", value, parent };
+}
+
+function createSpanNode(
+  className: string,
+  value: string,
+  parent: ElementNode,
+): ElementNode {
+  const span: ElementNode = {
+    type: "element",
+    tagName: "span",
+    attrs: { class: className },
+    children: [],
+    parent,
+  };
+  span.children = [createTextNode(value, span)];
+  return span;
+}
+
+function getNodeText(node: ElementNode): string {
+  const parts: string[] = [];
+  const walk = (current: Node) => {
+    if (current.type === "text") {
+      parts.push(current.value);
+      return;
+    }
+    for (const child of current.children) {
+      walk(child);
+    }
+  };
+  walk(node);
+  return parts.join("");
+}
+
+function applyWordDiff(beforeNode: ElementNode, afterNode: ElementNode): void {
+  const beforeText = getNodeText(beforeNode);
+  const afterText = getNodeText(afterNode);
+  if (beforeText === afterText) return;
+
+  const diff = diffWords(beforeText, afterText);
+  const newChildren: Node[] = diff.map((part) => {
+    if (part.added) {
+      return createSpanNode("diff-added", part.value, afterNode);
+    }
+    if (part.removed) {
+      return createSpanNode("diff-removed", part.value, afterNode);
+    }
+    return createTextNode(part.value, afterNode);
+  });
+
+  setChildren(afterNode, newChildren);
+}
+
+const INTERACTIVE_TAGS = new Set(["button", "input", "select", "textarea"]);
+
+function setPointerNone(node: ElementNode): void {
+  const pointerRule = "pointer-events: none";
+  const style = node.attrs.style ?? "";
+  if (!style.includes(pointerRule)) {
+    const newStyle =
+      style.trim().length > 0 ? `${style}; ${pointerRule}` : pointerRule;
+    setAttribute(node, "style", newStyle);
+  }
+}
+
+function markElementNonInteractive(node: ElementNode): void {
+  if (INTERACTIVE_TAGS.has(node.tagName)) {
+    setAttribute(node, "disabled", "true");
+    setPointerNone(node);
+  }
+  if (node.tagName === "a") {
+    removeAttribute(node, "href");
+    setPointerNone(node);
+  }
+  for (const child of node.children) {
+    if (child.type === "element") {
+      markElementNonInteractive(child);
+    }
+  }
+}
+
+function insertBefore(
+  roots: Node[],
+  parent: ElementNode | null,
+  newNode: ElementNode,
+  beforeNode: ElementNode | null,
+): void {
+  newNode.parent = parent;
+  const list = parent ? parent.children : roots;
+  if (beforeNode) {
+    const index = list.indexOf(beforeNode);
+    if (index >= 0) {
+      list.splice(index, 0, newNode);
+      return;
+    }
+  }
+  list.push(newNode);
+}
+
+function renderNode(node: Node): string {
+  if (node.type === "text") {
+    return node.value ?? "";
+  }
+  const attrs = Object.entries(node.attrs)
+    .map(([name, value]) => `${name}="${value.replace(/"/g, "&quot;")}"`)
+    .join(" ");
+  const inner = node.children.map(renderNode).join("");
+  return `<${node.tagName}${attrs ? " " + attrs : ""}>${inner}</${node.tagName}>`;
+}
+
+function renderNodes(nodes: Node[]): string {
+  return nodes.map(renderNode).join("");
+}
+
+function shallowAttributesEqual(
+  beforeNode: ElementNode,
+  afterNode: ElementNode,
+): boolean {
+  const beforeKeys = Object.keys(beforeNode.attrs).sort();
+  const afterKeys = Object.keys(afterNode.attrs).sort();
+  if (beforeKeys.length !== afterKeys.length) return false;
+  for (let i = 0; i < beforeKeys.length; i++) {
+    const key = beforeKeys[i]!;
+    if (key !== afterKeys[i]) return false;
+    if (beforeNode.attrs[key] !== afterNode.attrs[key]) return false;
+  }
+  return true;
+}
+
+function hasShallowDifference(
+  beforeNode: ElementNode,
+  afterNode: ElementNode,
+): boolean {
+  if (beforeNode.tagName !== afterNode.tagName) return true;
+  if (!shallowAttributesEqual(beforeNode, afterNode)) return true;
+
+  const beforeTexts = beforeNode.children.filter(
+    (child) => child.type === "text",
+  );
+  const afterTexts = afterNode.children.filter(
+    (child) => child.type === "text",
+  );
+  const filteredBefore = beforeTexts.filter(
+    (child) => child.value.trim() !== "",
+  );
+  const filteredAfter = afterTexts.filter((child) => child.value.trim() !== "");
+  if (filteredBefore.length !== filteredAfter.length) return true;
+  for (let i = 0; i < filteredBefore.length; i++) {
+    const beforeText = filteredBefore[i]!;
+    const afterText = filteredAfter[i]!;
+    if (beforeText.value !== afterText.value) return true;
+  }
+  return false;
+}
+
+function renderHtmlDiffInternal(args: {
   beforeHtml: string;
   afterHtml: string;
-  /**
-   * Attribute used to identify corresponding elements between before/after.
-   * Defaults to `data-diff-key`. You can set this to `data-id` (or any data-* attribute)
-   * if your HTML already contains stable identifiers.
-   *
-   * @default "data-diff-key"
-   */
   diffAttribute?: string;
-}): HTMLElement {
+}): string {
   const diffAttr = args.diffAttribute ?? "data-diff-key";
-  const parser = new DOMParser();
-  const beforeDoc = parser.parseFromString(args.beforeHtml, "text/html");
-  const afterDoc = parser.parseFromString(args.afterHtml, "text/html");
-
-  // Create a container element for the result
-  // Clone the 'after' body content into it, as we'll modify this clone
-  const resultContainer = document.createElement("div");
-  resultContainer.innerHTML = afterDoc.body.innerHTML;
-
-  // --- Step 1: Map elements and identify changes ---
-  const beforeElementsMap = new Map<string, Element>();
-  const beforeElementOrder: { id: string; element: Element }[] = [];
-  beforeDoc.body.querySelectorAll(`[${diffAttr}]`).forEach((el) => {
-    const id = el.getAttribute(diffAttr);
-    if (id) {
-      beforeElementsMap.set(id, el);
-      beforeElementOrder.push({ id, element: el });
-    }
-  });
-
-  const afterElementsInResultMap = new Map<string, Element>();
-  // Query within the result container which holds the 'after' structure clone
-  const afterElementsInResult = resultContainer.querySelectorAll(
-    `[${diffAttr}]`,
-  );
-  afterElementsInResult.forEach((el) => {
-    const id = el.getAttribute(diffAttr);
-    if (id) {
-      afterElementsInResultMap.set(id, el);
-    }
-  });
+  const before = buildTree(args.beforeHtml, diffAttr);
+  const after = buildTree(args.afterHtml, diffAttr);
 
   const addedIds = new Set<string>();
-  const modifiedIds = new Set<string>(); // Potential modifications
-  const removedIds = new Set<string>();
-
-  afterElementsInResultMap.forEach((_, id) => {
-    if (!beforeElementsMap.has(id)) {
+  const modifiedIds = new Set<string>();
+  for (const id of after.elementsById.keys()) {
+    if (!before.elementsById.has(id)) {
       addedIds.add(id);
     } else {
-      modifiedIds.add(id); // Initially assume all common elements might be modified
+      modifiedIds.add(id);
     }
-  });
+  }
 
-  beforeElementsMap.forEach((_, id) => {
-    if (!afterElementsInResultMap.has(id)) {
+  const removedIds = new Set<string>();
+  for (const id of before.elementsById.keys()) {
+    if (!after.elementsById.has(id)) {
       removedIds.add(id);
     }
-  });
+  }
 
-  // --- Step 2: Process elements in the result container (adds/modifications) ---
-  afterElementsInResultMap.forEach((afterEl, id) => {
-    if (addedIds.has(id)) {
-      // Handle Added Element
-      if (afterEl instanceof HTMLElement) {
-        if (afterEl.hasAttribute("class")) {
-          afterEl.className = "diff-added " + afterEl.className;
-        } else {
-          afterEl.className = "diff-added";
-        }
-      }
-    } else if (modifiedIds.has(id)) {
-      // Handle Potentially Modified Element
-      const beforeEl = beforeElementsMap.get(id)!; // Should always exist
+  // Handle additions
+  for (const id of addedIds) {
+    const node = after.elementsById.get(id);
+    if (!node) continue;
+    appendClass(node, "diff-added");
+  }
 
-      // Check if direct child structure changed
-      const beforeChildIds = new Set(
-        Array.from(beforeEl.querySelectorAll(`:scope > [${diffAttr}]`)).map(
-          (el) => el.getAttribute(diffAttr),
-        ),
-      );
-      const afterChildIds = new Set(
-        Array.from(afterEl.querySelectorAll(`:scope > [${diffAttr}]`)).map(
-          (el) => el.getAttribute(diffAttr),
-        ),
-      );
-      const areChildSetsEqual =
-        beforeChildIds.size === afterChildIds.size &&
-        [...beforeChildIds].every((id) => afterChildIds.has(id));
+  // Handle modifications
+  for (const id of modifiedIds) {
+    const beforeNode = before.elementsById.get(id);
+    const afterNode = after.elementsById.get(id);
+    if (!beforeNode || !afterNode) continue;
 
-      if (!areChildSetsEqual) {
-        // Child structure differs, parent modification is implied by children.
-        // Do nothing to the parent element itself.
-      } else if (beforeEl.textContent !== afterEl.textContent) {
-        // Child structure is the same, but text content differs.
-        const diffMode =
-          afterEl instanceof HTMLElement
-            ? afterEl.getAttribute("data-diff-mode")
-            : null;
+    const mode =
+      getAttribute(afterNode, "data-diff-mode") ??
+      getAttribute(beforeNode, "data-diff-mode");
 
-        if (diffMode === "words") {
-          // Apply granular word diffing for elements that opt in
-          applyGranularTextDiff(
-            afterEl as HTMLElement,
-            beforeEl.textContent || "",
-            afterEl.textContent || "",
-          );
-        } else if (diffMode === "element") {
-          // Explicit atomic element diffing - show old as removed, new as added
-          // Mark the after element as added
-          if (afterEl.hasAttribute("class")) {
-            afterEl.className = "diff-added " + afterEl.className;
-          } else {
-            afterEl.className = "diff-added";
-          }
+    if (mode === "element") {
+      const clone = cloneElement(beforeNode);
+      appendClass(clone, "diff-removed");
+      setAttribute(clone, "contenteditable", "false");
+      markElementNonInteractive(clone);
 
-          // Insert the old element as removed before the new one
-          const deletedEl = beforeEl.cloneNode(true) as HTMLElement;
-          if (deletedEl.hasAttribute("class")) {
-            deletedEl.className = "diff-removed " + deletedEl.className;
-          } else {
-            deletedEl.className = "diff-removed";
-          }
-
-          // Make the deleted element non-interactive
-          deletedEl.setAttribute("contenteditable", "false");
-          deletedEl
-            .querySelectorAll("button, input, select, textarea, a[href]")
-            .forEach((interactiveEl) => {
-              if (interactiveEl instanceof HTMLElement) {
-                interactiveEl.setAttribute("disabled", "true");
-                interactiveEl.style.pointerEvents = "none";
-              }
-              if (interactiveEl instanceof HTMLAnchorElement) {
-                interactiveEl.removeAttribute("href");
-              }
-            });
-
-          // Insert the removed element before the new one
-          afterEl.parentNode?.insertBefore(deletedEl, afterEl);
-        } else {
-          // Default behavior: mark the after element as modified
-          if (afterEl.hasAttribute("class")) {
-            afterEl.className = "diff-modified " + afterEl.className;
-          } else {
-            afterEl.className = "diff-modified";
-          }
-        }
-      } else {
-        // Child structure same, text content same. Check attributes? (TODO)
-      }
+      appendClass(afterNode, "diff-added");
+      const parent = afterNode.parent;
+      insertBefore(after.roots, parent, clone, afterNode);
+    } else if (mode === "words") {
+      applyWordDiff(beforeNode, afterNode);
+    } else if (hasShallowDifference(beforeNode, afterNode)) {
+      appendClass(afterNode, "diff-modified");
     }
-  });
+  }
 
-  // --- Step 3: Insert markers for removed elements ---
-  // Iterate in the original order to insert removed items correctly
-  for (const { id, element: beforeEl } of beforeElementOrder) {
-    if (removedIds.has(id)) {
-      // Only insert removed elements if they opt in via data-diff-show-when-removed
-      if (!beforeEl.hasAttribute("data-diff-show-when-removed")) {
-        continue; // Skip insertion - element doesn't want to be shown when removed
-      }
+  // Handle removals
+  for (const beforeNode of before.order) {
+    const id = getAttribute(beforeNode, diffAttr);
+    if (!id || !removedIds.has(id)) continue;
+    if (!hasAttribute(beforeNode, "data-diff-show-when-removed")) {
+      continue;
+    }
 
-      // Check if parent was also removed. If so, skip (it'll be handled with the parent)
-      const parentId = beforeEl.parentElement?.getAttribute(diffAttr);
-      if (parentId && removedIds.has(parentId)) {
+    const parentBefore = beforeNode.parent;
+    const parentId = parentBefore
+      ? getAttribute(parentBefore, diffAttr)
+      : undefined;
+    if (parentId && removedIds.has(parentId)) {
+      continue;
+    }
+
+    let parentAfter: ElementNode | null = null;
+    if (parentId) {
+      parentAfter = after.elementsById.get(parentId) ?? null;
+      if (!parentAfter) continue;
+    }
+
+    const siblingsBefore = parentBefore ? parentBefore.children : before.roots;
+    let insertBeforeNode: ElementNode | null = null;
+    let passedSelf = false;
+    for (const sibling of siblingsBefore) {
+      if (sibling === beforeNode) {
+        passedSelf = true;
         continue;
       }
-
-      // Find the parent in the *result* container
-      let parentInResult: Element | null = null;
-      if (parentId) {
-        parentInResult = resultContainer.querySelector(
-          `[${diffAttr}="${parentId}"]`,
-        );
-      } else if (beforeEl.parentElement === beforeDoc.body) {
-        parentInResult = resultContainer; // Element was direct child of body
-      }
-
-      if (parentInResult) {
-        // Find the anchor node (the next sibling in the original order that still exists in the result)
-        let insertBeforeNode: Node | null = null;
-        let currentSibling = beforeEl.nextSibling;
-        while (currentSibling) {
-          if (currentSibling.nodeType === Node.ELEMENT_NODE) {
-            const siblingId = (currentSibling as Element).getAttribute(
-              "data-diff-key",
-            );
-            // Check if this sibling exists in the 'after' state (i.e., wasn't removed)
-            if (siblingId && afterElementsInResultMap.has(siblingId)) {
-              insertBeforeNode = afterElementsInResultMap.get(siblingId)!;
-              break;
-            }
-          }
-          currentSibling = currentSibling.nextSibling;
+      if (!passedSelf) continue;
+      if (sibling.type !== "element") continue;
+      const siblingId = getAttribute(sibling, diffAttr);
+      if (siblingId && !removedIds.has(siblingId)) {
+        const afterSibling = after.elementsById.get(siblingId);
+        if (afterSibling) {
+          insertBeforeNode = afterSibling;
+          break;
         }
-
-        // Clone the removed element, style it, and insert
-        const clone = beforeEl.cloneNode(true) as HTMLElement;
-        // Style with class
-        if (clone.hasAttribute("class")) {
-          clone.className = "diff-removed " + clone.className;
-        } else {
-          clone.className = "diff-removed";
-        }
-
-        // Ensure contenteditable is false on the clone to prevent interaction
-        clone.setAttribute("contenteditable", "false");
-        // Optionally remove interactive elements or add disabled attributes within the clone
-        clone
-          .querySelectorAll("button, input, select, textarea, a[href]")
-          .forEach((interactiveEl) => {
-            if (interactiveEl instanceof HTMLElement) {
-              interactiveEl.setAttribute("disabled", "true");
-              interactiveEl.style.pointerEvents = "none";
-            }
-            if (interactiveEl instanceof HTMLAnchorElement) {
-              interactiveEl.removeAttribute("href");
-            }
-          });
-
-        parentInResult.insertBefore(clone, insertBeforeNode); // insertBefore(node, null) appends at the end
       }
     }
+
+    const clone = cloneElement(beforeNode);
+    appendClass(clone, "diff-removed");
+    setAttribute(clone, "contenteditable", "false");
+    markElementNonInteractive(clone);
+
+    insertBefore(after.roots, parentAfter, clone, insertBeforeNode);
   }
 
-  // --- Step 4: Return the result ---
-  // If the result container itself has only one direct child element after modifications,
-  // and the original HTML likely represented a single root, return that element.
-  // Otherwise, return the container div which holds potentially multiple top-level elements.
-  if (
-    resultContainer.children.length === 1 &&
-    resultContainer.firstElementChild?.nodeType === Node.ELEMENT_NODE
-  ) {
-    // Basic check: was the original 'after' also likely a single element?
-    const originalAfterChildren = Array.from(afterDoc.body.childNodes).filter(
-      (node) =>
-        node.nodeType === Node.ELEMENT_NODE ||
-        (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
-    );
-    if (originalAfterChildren.length === 1) {
-      return resultContainer.firstElementChild as HTMLElement;
-    }
+  const htmlContent = renderNodes(after.roots);
+  if (after.roots.length === 1 && after.significantRootCount === 1) {
+    return htmlContent;
   }
-
-  return resultContainer;
+  return `<div>${htmlContent}</div>`;
 }
 
-/**
- * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
- * that visually represents the differences.
- *
- * Use this if you want to bypass parsing and DOM creation by
- * directly working with the DOM elements instead of the HTML string
- * output of `renderHtmlDiff()`.
- *
- * @example
- *   renderHtmlDiffElement({
- *     beforeHtml: `<p data-diff-key="abc">Test</p>`,
- *     afterHtml: `<p data-diff-key="abc">Test World</p>`,
- *   });
- *
- */
-/**
- * Compare two HTML strings and return an HTML string with inline diff markup.
- *
- * @param args.beforeHtml - The "before" version of the HTML
- * @param args.afterHtml - The "after" version of the HTML
- * @param args.diffAttribute - The attribute used to match elements between versions.
- *   Defaults to `data-diff-key`. Set to `data-id` (or any data-* attribute) if you
- *   already output stable identifiers in your HTML.
- */
 export function renderHtmlDiff(args: {
   beforeHtml: string;
   afterHtml: string;
   diffAttribute?: string;
 }): string {
-  return renderHtmlDiffElement(args).outerHTML;
+  return renderHtmlDiffInternal(args);
 }

@@ -232,4 +232,46 @@ describe("Keyboard shortcuts (keymap)", () => {
 		expect(root.child(0).type.name).toBe("bulletList")
 		expect(root.child(1).type.name).toBe("paragraph")
 	})
+
+	// Why this matters: Top-level ids are used for persistence/threading. Pressing Enter
+	// inside list items should not create/modify top-level ids beyond the list container.
+	// This test ensures that editing within a list keeps the list's top-level id stable.
+	test("Enter inside list items does not affect top-level root ids", () => {
+		const editor = createEditor()
+		// Create a bullet list with content
+		typeText(editor, "- ")
+		typeText(editor, "abc")
+
+		const topLevelIds = () => {
+			const doc: any = editor.getJSON()
+			const content: any[] = (doc?.content ?? []) as any[]
+			return content
+				.filter((n) => n?.type === "bulletList")
+				.map((n) => n?.attrs?.data?.id)
+				.filter(Boolean)
+		}
+
+		// Trigger id assignment by creating the first list
+		let before = topLevelIds()
+		// If the id is not yet assigned, press Enter to force a transaction
+		if (before.length === 0) {
+			sendKey(editor, "Enter")
+			before = topLevelIds()
+		}
+		expect(before.length).toBe(1)
+		const listId = before[0]
+
+		// Create another list item
+		typeText(editor, "xyz")
+		sendKey(editor, "Enter")
+		const afterItem = topLevelIds()
+		expect(afterItem.length).toBe(1)
+		expect(afterItem[0]).toBe(listId)
+
+		// Exit the list (Enter on empty item)
+		sendKey(editor, "Enter")
+		const afterExit = topLevelIds()
+		expect(afterExit.length).toBe(1)
+		expect(afterExit[0]).toBe(listId)
+	})
 })

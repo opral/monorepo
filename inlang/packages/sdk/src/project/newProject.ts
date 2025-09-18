@@ -61,7 +61,7 @@ export async function newProject(args?: {
 			])
 			.execute();
 		const blob = await lix.toBlob();
-		lix.sqlite.close();
+		await lix.close();
 		return blob;
 	} catch (e) {
 		const error = new Error(`Failed to create new inlang project: ${e}`, {

@@ -67,7 +67,6 @@ export default defineConfig({
     darkMode: false,
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
-      { text: "Plugins", link: "/plugins/" },
       { text: "Reference", link: "/api/" },
     ],
     sidebar: {
@@ -90,62 +89,51 @@ export default defineConfig({
           items: [
             {
               text: "Change Proposals",
-              link: "/guide/features/change-proposals",
+              link: "/guide/change-proposals",
             },
-            { text: "Diffs", link: "/guide/features/diffs" },
-            { text: "History", link: "/guide/features/history" },
-            { text: "Restore", link: "/guide/features/restore" },
-            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
+            { text: "Entity-level diffs", link: "/guide/diffs" },
+            { text: "History", link: "/guide/history" },
             {
               text: "Validation Rules",
-              link: "/guide/features/validation-rules",
+              link: "/guide/validation-rules",
             },
             { text: "Versions (Branching)", link: "/guide/versions" },
           ],
         },
         {
-          text: "Core Concepts",
+          text: "More Features",
           collapsed: true,
           items: [
             {
               text: "Attribution (Blame)",
-              link: "/guide/features/attribution",
+              link: "/guide/attribution",
             },
-            { text: "Comments", link: "/guide/features/comments" },
-            { text: "Files", link: "/guide/concepts/files" },
-            { text: "Changes", link: "/guide/concepts/changes" },
-            { text: "Snapshots", link: "/guide/concepts/snapshots" },
-            { text: "Change Graph", link: "/guide/concepts/change-graph" },
+            { text: "Restore", link: "/guide/restore" },
+            { text: "Undo/Redo", link: "/guide/undo-redo" },
+            { text: "Conversations", link: "/guide/conversations" },
             { text: "Labels", link: "/guide/concepts/labels" },
-            { text: "Change Sets", link: "/guide/concepts/change-sets" },
-            { text: "Merging", link: "/guide/concepts/merging" },
-            {
-              text: "Change Proposals",
-              link: "/guide/concepts/change-proposals",
-            },
-            { text: "Versions", link: "/guide/concepts/versions" },
-            { text: "Discussions", link: "/guide/concepts/discussions" },
-            { text: "Key-Value", link: "/guide/concepts/key-value" },
+            { text: "Key Value Store", link: "/guide/concepts/key-value" },
+          ],
+        },
+        {
+          text: "Concepts",
+          collapsed: true,
+          items: [
+            { text: "What is an Entity?", link: "/guide/entity" },
+            { text: "Lix Schema", link: "/guide/schema" },
+            { text: "Metadata", link: "/guide/metadata" },
+            { text: "Writer Key", link: "/guide/writer-key" },
+            { text: "Environment API", link: "/guide/environment-api" },
           ],
         },
         {
           text: "Development & Debugging",
           collapsed: true,
           items: [
+            { text: "Testing", link: "/guide/testing" },
+            { text: "Logging", link: "/guide/logging" },
             { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
             { text: "React Utils", link: "/guide/react-utils" },
-          ],
-        },
-        {
-          text: "Advanced",
-          collapsed: true,
-          items: [
-            { text: "SQL Queries", link: "/guide/advanced/sql-queries" },
-            {
-              text: "Browser Integration",
-              link: "/guide/advanced/browser-integration",
-            },
-            { text: "Plugins", link: "/guide/advanced/plugins" },
           ],
         },
       ],

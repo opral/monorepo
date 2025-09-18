@@ -1,4 +1,4 @@
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { markStateCacheAsStale } from "./mark-state-cache-as-stale.js";
 
 /**
@@ -10,19 +10,22 @@ import { markStateCacheAsStale } from "./mark-state-cache-as-stale.js";
  * 3. Deletes all entries from each table
  *
  * @example
- * clearStateCache({ lix });
+ * clearStateCache({ engine: lix.engine! });
  */
 export function clearStateCache(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	timestamp?: string;
 }): void {
 	// Mark the cache as stale first to prevent repopulation during delete
-	markStateCacheAsStale({ lix: args.lix as Lix, timestamp: args.timestamp });
+	markStateCacheAsStale({
+		engine: args.engine,
+		timestamp: args.timestamp,
+	});
 
 	// Find ALL physical cache tables in the database (not just cached ones)
 	// This ensures we clear tables even if they weren't in our cache
 	// Exclude the v2 virtual table itself
-	const existingTables = args.lix.sqlite.exec({
+	const existingTables = args.engine.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' 
 		      AND name LIKE 'internal_state_cache_%' 
@@ -38,7 +41,7 @@ export function clearStateCache(args: {
 			// Skip virtual tables (shouldn't happen with our query, but be safe)
 			if (tableName === "internal_state_cache") continue;
 
-			args.lix.sqlite.exec({
+			args.engine.sqlite.exec({
 				sql: `DELETE FROM ${tableName}`,
 				returnValue: "resultRows",
 			});

@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
@@ -217,6 +217,15 @@ export type EntityStateColumns = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: LixGenerated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 *
+	 * This is sourced from the metadata stored alongside the originating change
+	 * and allows callers to attach additional contextual information without
+	 * modifying the entity schema.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -278,7 +287,7 @@ export type ValidationCallbacks = {
  * ```
  */
 export function createEntityStateView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] */
 	overrideName?: string;
@@ -311,7 +320,7 @@ export function createEntityStateView(args: {
 }
 
 function createSingleEntityView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
 	quotedViewName?: string;
@@ -363,7 +372,7 @@ function createSingleEntityView(args: {
 
 			if (needsRow) {
 				// Function needs row data - use variadic function
-				args.lix.sqlite.createFunction(
+				args.engine.sqlite.createFunction(
 					udfName,
 					(...rowValues: any[]) => {
 						// Reconstruct row object from passed values
@@ -395,7 +404,7 @@ function createSingleEntityView(args: {
 				); // -1 means variadic
 			} else {
 				// Function doesn't need row data - simple 0-arg function
-				args.lix.sqlite.createFunction(
+				args.engine.sqlite.createFunction(
 					udfName,
 					() => (defaultFn as () => string)(),
 					{ arity: 0 }
@@ -445,6 +454,7 @@ function createSingleEntityView(args: {
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
 		"commit_id AS lixcol_commit_id",
+		"metadata AS lixcol_metadata",
 	];
 
 	// Handle version_id for active view
@@ -515,6 +525,7 @@ function createSingleEntityView(args: {
           snapshot_content,
           schema_version,
           version_id,
+          metadata,
           untracked
         ) ${
 					hasDefaults
@@ -527,11 +538,13 @@ function createSingleEntityView(args: {
           json_object(${buildJsonEntries((prop) => `with_default_values.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
+          with_default_values.lixcol_metadata,
           COALESCE(with_default_values.lixcol_untracked, 0)
         FROM (
           SELECT
             ${defaultsSubquery},
             NEW.lixcol_file_id AS lixcol_file_id,
+            NEW.lixcol_metadata AS lixcol_metadata,
             COALESCE(NEW.lixcol_untracked, 0) AS lixcol_untracked
         ) AS with_default_values`
 						: `
@@ -543,6 +556,7 @@ function createSingleEntityView(args: {
           json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference},
+          NEW.lixcol_metadata,
           COALESCE(NEW.lixcol_untracked, 0)
         )`
 				};
@@ -560,6 +574,7 @@ function createSingleEntityView(args: {
           plugin_key = '${args.pluginKey}',
           snapshot_content = json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           version_id = ${versionIdReference},
+          metadata = NEW.lixcol_metadata,
           untracked = NEW.lixcol_untracked
         WHERE
           state_all.entity_id = ${entityIdOld}
@@ -580,5 +595,5 @@ function createSingleEntityView(args: {
       END;
     `);
 
-	args.lix.sqlite.exec(sqlQuery);
+	args.engine.sqlite.exec(sqlQuery);
 }

@@ -6,12 +6,28 @@ import {
 	type KnownKey,
 	KEY_VALUE_DEFINITIONS,
 } from "./schema";
-import { createContext, useContext, createElement } from "react";
+import { createContext, useContext, createElement, useCallback } from "react";
 import type React from "react";
 
 type KVDefs = Record<string, KeyDef<any>>;
 const KVDefsContext = createContext<KVDefs | null>(null);
 
+/**
+ * Provides key-value definitions to `useKeyValue` within a React subtree.
+ *
+ * Pass in a map of key definitions (version scope, tracking, defaults) so the
+ * hook can infer behavior for known keys.
+ *
+ * @example
+ * const lix = await openLix({})
+ * render(
+ *   <LixProvider lix={lix}>
+ *     <KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+ *       <App />
+ *     </KeyValueProvider>
+ *   </LixProvider>
+ * )
+ */
 export function KeyValueProvider({
 	defs,
 	children,
@@ -23,6 +39,9 @@ export function KeyValueProvider({
 	return createElement(KVDefsContext.Provider, { value: defs, children });
 }
 
+/**
+ * Options passed to `useKeyValue` to override defaults for a specific key.
+ */
 export type UseKeyValueOptions = {
 	defaultVersionId?: "active" | "global" | string;
 	untracked?: boolean;
@@ -42,19 +61,31 @@ function getDefaults(
 }
 
 // Overloads for strong typing on known keys
+// Suspense behavior is handled by useQuery; no extra one-time loader needed.
+
+/**
+ * React hook for reading and writing a key-value setting.
+ *
+ * - Suspends on first load to ensure deterministic rendering.
+ * - Re-renders on live DB updates via `useQuery` subscription.
+ * - Honors per-key defaults from `KeyValueProvider` or built-in schema.
+ *
+ * @example
+ * function SidebarTab() {
+ *   const [tab, setTab] = useKeyValue('flashtype_left_sidebar_active_tab')
+ *   return (
+ *     <button onClick={() => setTab('history')}>{tab ?? 'loading'}</button>
+ *   )
+ * }
+ */
 export function useKeyValue<K extends KnownKey>(
 	key: K,
 	opts?: UseKeyValueOptions,
 ): readonly [ValueOf<K> | null, (newValue: ValueOf<K>) => Promise<void>];
 export function useKeyValue<K extends string>(
-	key: Exclude<K, KnownKey>,
-	opts?: UseKeyValueOptions,
-): readonly [unknown | null, (newValue: unknown) => Promise<void>];
-
-export function useKeyValue<K extends string>(
 	key: K,
 	opts?: UseKeyValueOptions,
-) {
+): readonly [ValueOf<K> | null, (newValue: ValueOf<K>) => Promise<void>] {
 	const lix = useLix();
 	const providedDefs =
 		useContext(KVDefsContext) ?? (KEY_VALUE_DEFINITIONS as KVDefs);
@@ -62,17 +93,27 @@ export function useKeyValue<K extends string>(
 	const defaultVersionId = opts?.defaultVersionId ?? d.defaultVersionId;
 	const untracked = opts?.untracked ?? d.untracked;
 
-	type T = ValueOf<K>;
+	// Subscribe to live updates and suspend on first load via useQuery
 	const rows = useQuery(({ lix }) =>
-		selectValue(lix, key, { defaultVersionId, untracked }),
+		selectValue(lix, key as string, {
+			defaultVersionId: String(defaultVersionId),
+			untracked,
+		}),
 	);
-	const value = (rows[0]?.value ??
-		(providedDefs as any)[key]?.defaultValue ??
-		null) as T | null;
+	const defVal = (providedDefs as any)[key]?.defaultValue ?? null;
+	const value = (
+		rows && rows[0]?.value !== undefined ? rows[0]?.value : defVal
+	) as ValueOf<K> | null;
 
-	const setValue = async (newValue: T) => {
-		await upsertValue(lix, key, newValue, { defaultVersionId, untracked });
-	};
+	const setValue = useCallback(
+		async (newValue: ValueOf<K>) => {
+			await upsertValue(lix, key as string, newValue as unknown, {
+				defaultVersionId: String(defaultVersionId),
+				untracked,
+			});
+		},
+		[lix, key, defaultVersionId, untracked],
+	);
 
 	return [value, setValue] as const;
 }

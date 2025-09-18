@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
@@ -105,6 +105,11 @@ export type StateEntityHistoryView = {
 	 * evolved to reach its current state.
 	 */
 	lixcol_depth: Generated<number>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this historical state.
+	 */
+	lixcol_metadata: Generated<Record<string, any> | null>;
 };
 
 /**
@@ -199,6 +204,11 @@ export type StateEntityHistoryColumns = {
 	 * evolved to reach its current state.
 	 */
 	lixcol_depth: LixGenerated<number>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this historical state.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -232,7 +242,7 @@ export type StateEntityHistoryColumns = {
  * ```
  */
 export function createEntityStateHistoryView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] + "_history" */
 	overrideName?: string;
@@ -266,10 +276,11 @@ export function createEntityStateHistoryView(args: {
         change_id AS lixcol_change_id,
         commit_id AS lixcol_commit_id,
         root_commit_id AS lixcol_root_commit_id,
-        depth AS lixcol_depth
+        depth AS lixcol_depth,
+        metadata AS lixcol_metadata
       FROM state_history
       WHERE schema_key = '${schema_key}';
     `;
 
-	args.lix.sqlite.exec(sqlQuery);
+	args.engine.sqlite.exec(sqlQuery);
 }

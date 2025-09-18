@@ -145,7 +145,10 @@ export const MarkdownWcShortcuts = Extension.create({
 						break
 					}
 				}
-				if (!inListItem) return false
+				if (!inListItem) {
+					// Default behavior outside lists: split the block (new paragraph)
+					return this.editor.chain().focus().splitBlock().run()
+				}
 				// If current paragraph is empty, exit the list (lift)
 				const para: any = $from.parent
 				const isEmptyPara =

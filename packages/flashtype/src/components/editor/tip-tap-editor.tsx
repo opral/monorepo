@@ -1,10 +1,13 @@
-import { use as usePromise, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
-import { useLix } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
+import { useQuery } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
 import { createEditor } from "./create-editor";
+import { assembleMdAst } from "./assemble-md-ast";
+import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
 
 type TipTapEditorProps = {
 	className?: string;
@@ -18,46 +21,88 @@ export function TipTapEditor({
 	persistDebounceMs,
 }: TipTapEditorProps) {
 	const lix = useLix();
+	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+	const initialFile = useQueryTakeFirstOrThrow(
+		({ lix }) =>
+			lix.db.selectFrom("file").select("data").where("id", "=", activeFileId),
+		{ subscribe: false },
+	);
 
 	const { setEditor } = useEditorCtx();
-	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+
+	if (!activeFileId) {
+		throw new Error("File id not set");
+	}
 
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 
-	// Require an active file id to operate
-	if (!activeFileId) {
-		throw new Error(
-			"TipTapEditor: 'flashtype_active_file_id' is undefined. Set the active file id before rendering the editor.",
-		);
-	}
+	const writerKey = `flashtype_tiptap_editor`;
 
-	// Editor loads initial content and persists via createEditor using only fileId
+	const editor = useMemo(
+		() =>
+			createEditor({
+				lix,
+				initialMarkdown: new TextDecoder().decode(initialFile.data),
+				fileId: activeFileId,
+				persistDebounceMs: PERSIST_DEBOUNCE_MS,
+				writerKey,
+			}),
+		[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile],
+	);
 
-	const editor = usePromise(
-		useMemo(
-			() =>
-				createEditor({
-					lix,
-					fileId: activeFileId,
-					persistDebounceMs: PERSIST_DEBOUNCE_MS,
-				}),
-			[lix, activeFileId, PERSIST_DEBOUNCE_MS],
-		),
+	// Subscribe to commit events and refresh on external changes
+	useEffect(() => {
+		if (!activeFileId || !editor) return;
+		const unsubscribe = lix.hooks.onStateCommit(({ changes }) => {
+			// External: writer_key is null or different from our writer
+			const hasExternal = changes?.some(
+				(c) =>
+					c.file_id === activeFileId &&
+					(c.writer_key == null || c.writer_key !== writerKey),
+			);
+			if (hasExternal) {
+				assembleMdAst({ lix, fileId: activeFileId }).then((ast) =>
+					editor.commands.setContent(astToTiptapDoc(ast)),
+				);
+			}
+		});
+		return () => unsubscribe();
+	}, [lix, editor, activeFileId, writerKey]);
+
+	// Watch active version to refresh on version switches
+	const activeVersionRow = useQuery(() =>
+		lix.db.selectFrom("active_version").select(["version_id"]).limit(1),
 	);
 
 	useEffect(() => {
+		if (!editor || !activeFileId) return;
+		let cancelled = false;
+		(async () => {
+			const ast = await assembleMdAst({ lix, fileId: activeFileId });
+			if (cancelled) return;
+			editor.commands.setContent(astToTiptapDoc(ast));
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [editor, lix, activeFileId, activeVersionRow]);
+
+	useEffect(() => {
 		if (!editor) return;
-		setEditor(editor as any);
-		onReady?.(editor as any);
-		// No cleanup/destroy to test strict-mode stability
+		setEditor(editor);
+		onReady?.(editor);
 	}, [editor, setEditor, onReady]);
 
+	if (!activeFileId || !editor) {
+		return null;
+	}
+
 	return (
-		<div className={className} style={{ height: "100%" }}>
-			<div className="w-full h-full bg-background p-3">
+		<div className={className ?? undefined}>
+			<div className="w-full bg-background px-3 py-0">
 				<EditorContent
-					editor={editor as any}
-					className="w-full h-full max-w-5xl mx-auto"
+					editor={editor}
+					className="w-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}
 				/>

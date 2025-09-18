@@ -25,7 +25,7 @@ export default async function runExample(console: any) {
   // Get the most recent change set from the history
   const lastChangeSet = await lix.db
     .selectFrom("change_set")
-    .select(["id", "metadata"])
+    .select(["id", "lixcol_metadata"])
     .executeTakeFirstOrThrow();
 
   // Restore the repository to that change set

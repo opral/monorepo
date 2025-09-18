@@ -4,7 +4,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -26,8 +26,8 @@ test("creates tracked entity with pending change", async () => {
 
 	// Use insertPendingState function
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-insert",
@@ -64,7 +64,10 @@ test("creates tracked entity with pending change", async () => {
 
 	expect(changeInTransaction).toBeDefined();
 	expect(changeInTransaction.id).toBe(results[0]?.change_id);
-	expect(changeInTransaction.lixcol_untracked).toBe(0); // tracked entity
+	expect(
+		(changeInTransaction as any).untracked ??
+			(changeInTransaction as any).lixcol_untracked
+	).toBe(0); // tracked entity
 	expect(changeInTransaction.snapshot_content).toEqual({
 		value: "inserted-value",
 	});
@@ -79,7 +82,9 @@ test("creates tracked entity with pending change", async () => {
 	expect(cacheBeforeCommit).toHaveLength(0); // No cache entry before commit
 
 	// Trigger a commit
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// After commit, check that the change is in the internal_change table
 	const changeAfterCommit = await lixInternalDb
@@ -174,8 +179,8 @@ test("creates tombstone for inherited entity deletion", async () => {
 
 	// Use insertTransactionState directly for deletion (tracked)
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-key",
@@ -195,15 +200,20 @@ test("creates tombstone for inherited entity deletion", async () => {
 		.selectFrom("internal_transaction_state")
 		.where("entity_id", "=", "inherited-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-	expect(transactionDeletion.lixcol_untracked).toBe(0); // tracked entity
+	expect(
+		(transactionDeletion as any).untracked ??
+			(transactionDeletion as any).lixcol_untracked
+	).toBe(0); // tracked entity
 
 	// Commit to create the tombstone
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify tombstone exists in cache after commit
 	const tombstoneAfterCommit = await lixInternalDb
@@ -270,8 +280,8 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 
 	// Use insertTransactionState directly for deletion (untracked)
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "inherited-untracked-key",
@@ -291,15 +301,20 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 		.selectFrom("internal_transaction_state")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("lixcol_version_id", "=", activeVersion.version_id)
+		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(transactionDeletion.snapshot_content).toBe(null); // Deletion
-	expect(transactionDeletion.lixcol_untracked).toBe(1); // untracked entity
+	expect(
+		(transactionDeletion as any).untracked ??
+			(transactionDeletion as any).lixcol_untracked
+	).toBe(1); // untracked entity
 
 	// Commit to create the tombstone in untracked table
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify tombstone exists in untracked table (not cache)
 	const tombstone = await lixInternalDb
@@ -345,8 +360,8 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 
 	// Use insertTransactionState for untracked entity
 	const result = insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-untracked-timestamp",
@@ -375,14 +390,19 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.executeTakeFirstOrThrow();
 
-	expect(transactionEntity.lixcol_untracked).toBe(1); // marked as untracked
+	expect(
+		(transactionEntity as any).untracked ??
+			(transactionEntity as any).lixcol_untracked
+	).toBe(1); // marked as untracked
 	expect(transactionEntity.snapshot_content).toEqual({
 		key: "test-key",
 		value: "test-value",
 	});
 
 	// Commit to move untracked entities to final state
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// After commit, verify in the untracked table
 	const untrackedEntity = await lixInternalDb
@@ -424,8 +444,8 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 
 	// First insert a direct untracked entity
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -444,7 +464,9 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 	});
 
 	// Commit to move the untracked entity to its final state
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify it exists in untracked table after commit
 	const beforeDelete = await lixInternalDb
@@ -477,8 +499,8 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 
 	// Now delete the direct untracked entity
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "direct-untracked-key",
@@ -494,7 +516,9 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 	});
 
 	// Commit to finalize the deletion
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify it's deleted from untracked table
 	const afterDelete = await lixInternalDb
@@ -650,7 +674,9 @@ test("updates working change set elements on entity updates (latest change wins)
 		.execute();
 
 	// Commit to create working changeset element for the insert
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Get the working commit to find its change set
 	const workingCommit = await lix.db
@@ -680,7 +706,9 @@ test("updates working change set elements on entity updates (latest change wins)
 		.execute();
 
 	// Commit the transaction to process working changeset logic
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Check that working change set still has only one element for this entity (latest change)
 	const workingElementsAfterUpdate = await lix.db
@@ -759,7 +787,9 @@ test("mutation handler removes working change set elements on entity deletion", 
 		.execute();
 
 	// Commit to create working changeset element for the insert
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Get the working commit to find its change set
 	const workingCommit = await lix.db
@@ -784,7 +814,9 @@ test("mutation handler removes working change set elements on entity deletion", 
 	await lix.db.deleteFrom("key_value").where("key", "=", "test_key").execute();
 
 	// Commit the transaction to process working changeset logic
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Check that working change set no longer includes this entity
 	const workingElementsAfterDelete = await lix.db
@@ -856,7 +888,9 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 		.execute();
 
 	// Commit to create working changeset element for the insert
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Get the working commit to find its change set
 	const workingCommit = await lix.db
@@ -884,7 +918,9 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 		.execute();
 
 	// Commit the transaction to process working changeset logic
-	commit({ lix });
+	commit({
+		engine: lix.engine!,
+	});
 
 	// Verify entity is excluded from working change set (added after checkpoint then deleted)
 	const workingElementsAfterDelete = await lix.db
@@ -1073,8 +1109,8 @@ test("inheritance works with resolved view before committing", async () => {
 
 	// Insert a global entity in transaction state
 	insertTransactionState({
-		lix,
-		timestamp: timestamp({ lix }),
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
 				entity_id: "test-global-key",

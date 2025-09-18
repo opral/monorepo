@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
@@ -17,7 +17,7 @@ test("inserts into cache based on change", async () => {
 		],
 	});
 
-	const currentTimestamp = timestamp({ lix });
+	const currentTimestamp = await getTimestamp({ lix });
 
 	// Create a test change (materialized with inline version/commit)
 	const commitId = "test-commit-456";
@@ -37,7 +37,7 @@ test("inserts into cache based on change", async () => {
 
 	// Call updateStateCacheV2
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [testChange],
 	});
 
@@ -84,7 +84,7 @@ test("upserts cache entry on conflict", async () => {
 		],
 	});
 
-	const initialTimestamp = timestamp({ lix });
+	const initialTimestamp = await getTimestamp({ lix });
 
 	// Create initial test change (materialized)
 	const versionId = "global";
@@ -107,7 +107,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// First insert
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [initialChange],
 	});
 
@@ -130,7 +130,7 @@ test("upserts cache entry on conflict", async () => {
 	);
 
 	// Now update with new data (same entity, schema, file, version - should trigger upsert)
-	const updateTimestamp = timestamp({ lix });
+	const updateTimestamp = await getTimestamp({ lix });
 	const updatedCommitId = "updated-commit-456";
 	const updatedChange: MaterializedState = {
 		id: "test-change-updated",
@@ -150,7 +150,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// Second call should trigger onConflict upsert
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [updatedChange],
 	});
 
@@ -200,7 +200,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	const childVersion = "child-version";
 	const subchildVersion = "subchild-version";
 
-	const baseTimestamp = timestamp({ lix });
+	const baseTimestamp = await getTimestamp({ lix });
 	const testEntity = "inherited-entity";
 
 	// 1. Create entity in parent version
@@ -221,7 +221,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	};
 
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [createChange],
 	});
 
@@ -243,7 +243,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	});
 
 	// 3. Create tombstone in child version (deleting inherited entity)
-	const deleteTimestamp = timestamp({ lix });
+	const deleteTimestamp = await getTimestamp({ lix });
 	const deleteChange: MaterializedState = {
 		id: "delete-change-456",
 		entity_id: testEntity,
@@ -258,7 +258,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	};
 
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [deleteChange],
 	});
 
@@ -385,13 +385,13 @@ test("handles duplicate entity updates - last change wins", async () => {
 
 	// Apply first change
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [change1],
 	});
 
 	// Apply second change (should overwrite first)
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes: [change2],
 	});
 
@@ -467,7 +467,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 
 	// Apply all changes in a single batch
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		changes,
 	});
 
@@ -496,7 +496,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 	const parentId = "edge-parent";
 	const childId = "edge-child";
 	const changeSetId = "edge-cs";
@@ -523,7 +523,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 
 	// Push to cache so edges are derived
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		version_id: "global",
 		commit_id: childId,
 		changes: [
@@ -548,6 +548,8 @@ test("derived edge cache rows reference the commit change id", async () => {
 		.selectFrom("commit_edge_all")
 		.innerJoin("change", "change.id", "commit_edge_all.lixcol_change_id")
 		.where("commit_edge_all.lixcol_version_id", "=", "global")
+		.where("commit_edge_all.parent_id", "=", parentId)
+		.where("commit_edge_all.child_id", "=", childId)
 		.select([
 			"commit_edge_all.parent_id as parent_id",
 			"commit_edge_all.child_id as child_id",
@@ -578,7 +580,7 @@ test("commit caching materializes its change set in cache", async () => {
 		],
 	});
 
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 	const parentId = "cs-parent";
 	const childId = "cs-child";
 	const changeSetId = "cs-materialized";
@@ -605,7 +607,7 @@ test("commit caching materializes its change set in cache", async () => {
 
 	// Push to cache so commit edges + change set are materialized
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		version_id: "global",
 		commit_id: childId,
 		changes: [
@@ -640,16 +642,23 @@ test("commit caching materializes its change set in cache", async () => {
 // Edges caching from commit.parent_commit_ids
 test("caches commit edges from commit.parent_commit_ids", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_untracked: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 	const parentId = "commit-parent";
 	const childId = "commit-child";
 	const changeSetId = "cs-merge";
 
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		version_id: "global",
 		commit_id: "global-commit-edges-1",
 		changes: [
@@ -673,12 +682,17 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 	const edges = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("parent_id", "=", parentId)
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 
-	expect(edges).toMatchObject([
-		{ parent_id: parentId, child_id: childId, lixcol_version_id: "global" },
-	]);
+	expect(edges).toHaveLength(1);
+	expect(edges[0]).toMatchObject({
+		parent_id: parentId,
+		child_id: childId,
+		lixcol_version_id: "global",
+	});
 });
 
 test("clears cached edges when parent_commit_ids becomes empty", async () => {
@@ -687,18 +701,20 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 			{
 				key: "lix_deterministic_mode",
 				value: { enabled: true },
+				lixcol_untracked: true,
+				lixcol_version_id: "global",
 			},
 		],
 	});
 
-	const now = timestamp({ lix });
+	const now = await getTimestamp({ lix });
 	const parentId = "commit-parent-2";
 	const childId = "commit-child-2";
 	const changeSetId = "cs-merge-2";
 
 	// Seed with a commit which has a parent
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		version_id: "global",
 		commit_id: "global-commit-edges-2",
 		changes: [
@@ -723,13 +739,14 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 	const before = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 	expect(before.length).toBeGreaterThan(0);
 
 	// Update commit with empty parents
 	updateStateCache({
-		lix,
+		engine: lix.engine!,
 		version_id: "global",
 		commit_id: "global-commit-edges-3",
 		changes: [
@@ -753,6 +770,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 	const after = await lix.db
 		.selectFrom("commit_edge_all")
 		.where("lixcol_version_id", "=", "global")
+		.where("child_id", "=", childId)
 		.selectAll()
 		.execute();
 	expect(after).toEqual([]);

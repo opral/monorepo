@@ -2,10 +2,10 @@ import { useAtom } from "jotai/react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip.tsx";
-import { activeThreadAtom } from "@/state-active-file.ts";
+import { activeConversationAtom } from "@/state-active-file.ts";
 
 const DiscussionThread = () => {
-  const [activeThread] = useAtom(activeThreadAtom);
+  const [activeThread] = useAtom(activeConversationAtom);
 
   return (
     <div>

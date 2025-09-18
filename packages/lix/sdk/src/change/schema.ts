@@ -13,6 +13,7 @@ export function applyChangeDatabaseSchema(
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL, -- Foreign key to internal_snapshot
+    metadata BLOB,
     created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
 
     UNIQUE (id, entity_id, file_id, schema_key),
@@ -27,6 +28,7 @@ export function applyChangeDatabaseSchema(
     c.schema_version,
     c.file_id,
     c.plugin_key,
+    json(c.metadata) AS metadata,
     c.created_at,
     json(s.content) AS snapshot_content
   FROM 
@@ -43,11 +45,12 @@ export function applyChangeDatabaseSchema(
     t.schema_version,
     t.file_id,
     t.plugin_key,
+    json(t.metadata) AS metadata,
     t.created_at,
     json(t.snapshot_content) AS snapshot_content
   FROM 
     internal_transaction_state AS t
-  WHERE t.lixcol_untracked = 0;
+  WHERE t.untracked = 0;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change
@@ -68,6 +71,7 @@ export function applyChangeDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_id,
+      metadata,
       created_at
     ) VALUES (
       COALESCE(NEW.id, lix_uuid_v7()),
@@ -79,6 +83,10 @@ export function applyChangeDatabaseSchema(
       CASE 
         WHEN NEW.snapshot_content IS NULL THEN 'no-content'
         ELSE (SELECT id FROM internal_snapshot WHERE rowid = last_insert_rowid())
+      END,
+      CASE
+        WHEN NEW.metadata IS NULL THEN NULL
+        ELSE jsonb(NEW.metadata)
       END,
       COALESCE(NEW.created_at, lix_timestamp())
     );
@@ -97,6 +105,7 @@ export type InternalChangeTable = {
 	file_id: string;
 	plugin_key: string;
 	snapshot_id: string; // The foreign key
+	metadata?: Record<string, any> | null;
 	created_at: Generated<string>;
 };
 
@@ -118,8 +127,9 @@ export type InternalChangeTable = {
  * };
  * ```
  */
-export type LixChangeRaw = Omit<LixChange, "snapshot_content"> & {
+export type LixChangeRaw = Omit<LixChange, "snapshot_content" | "metadata"> & {
 	snapshot_content: string | null; // JSON string or null
+	metadata?: string | null;
 };
 
 /**
@@ -148,6 +158,7 @@ export type ChangeView = {
 	schema_version: string;
 	file_id: string;
 	plugin_key: string;
+	metadata?: Record<string, any> | null;
 	created_at: Generated<string>;
 	snapshot_content: Record<string, any> | null;
 };

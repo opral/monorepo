@@ -28,7 +28,7 @@ test("throws if the schema is not a valid lix schema", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			// @ts-expect-error - x-key is missing
 			schema,
 			snapshot_content: {},
@@ -89,7 +89,7 @@ test("valid lix schema with a valid snapshot passes", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: snapshot.content,
 			operation: "insert",
@@ -125,7 +125,7 @@ test("an invalid snapshot fails", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: snapshot.content,
 			operation: "insert",
@@ -164,7 +164,7 @@ test("passes when primary key is unique", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: snapshot.content,
 			operation: "insert",
@@ -221,7 +221,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: duplicateSnapshot.content,
 			operation: "insert",
@@ -338,7 +338,7 @@ test("handles composite primary keys", async () => {
 	// This should pass (different composite key)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				user_id: "user1",
@@ -353,7 +353,7 @@ test("handles composite primary keys", async () => {
 	// This should fail (same composite key)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				user_id: "user1",
@@ -401,7 +401,7 @@ test("passes when unique constraint is satisfied", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: snapshot.content,
 			version_id: activeVersion.version_id,
@@ -468,7 +468,7 @@ test("throws when single field unique constraint is violated", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: duplicateEmailSnapshot.content,
 			operation: "insert",
@@ -488,7 +488,7 @@ test("throws when single field unique constraint is violated", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: duplicateUsernameSnapshot.content,
 			operation: "insert",
@@ -551,7 +551,7 @@ test("handles composite unique constraints", async () => {
 	// This should pass (different composite unique key)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "product2",
@@ -568,7 +568,7 @@ test("handles composite unique constraints", async () => {
 	// This should pass (same name in different category)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "product3",
@@ -585,7 +585,7 @@ test("handles composite unique constraints", async () => {
 	// This should fail (same composite unique key: category + name)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "product4",
@@ -602,7 +602,7 @@ test("handles composite unique constraints", async () => {
 	// This should fail (same SKU)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "product5",
@@ -687,7 +687,7 @@ test("passes when foreign key references exist", async () => {
 	// This should pass - foreign key reference exists
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post1",
@@ -753,7 +753,7 @@ test("throws when foreign key reference does not exist", async () => {
 	// This should fail - foreign key reference does not exist
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post1",
@@ -875,7 +875,7 @@ test("handles multiple foreign keys", async () => {
 	// This should pass - all foreign key references exist
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post1",
@@ -891,7 +891,7 @@ test("handles multiple foreign keys", async () => {
 	// This should fail - category reference does not exist
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post2",
@@ -958,7 +958,7 @@ test("allows null foreign key values", async () => {
 	// This should pass - null foreign key is allowed
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post1",
@@ -973,7 +973,7 @@ test("allows null foreign key values", async () => {
 	// This should also pass - undefined foreign key (when not required)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post2",
@@ -1069,7 +1069,7 @@ test("handles composite foreign keys", async () => {
 	// This should pass - composite foreign key reference exists
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: deliverySchema,
 			snapshot_content: {
 				id: "delivery1",
@@ -1086,7 +1086,7 @@ test("handles composite foreign keys", async () => {
 	// This should fail - composite foreign key reference doesn't exist (wrong postal code)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: deliverySchema,
 			snapshot_content: {
 				id: "delivery2",
@@ -1159,7 +1159,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 	// This should pass - foreign key references existing change record
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: changeSetElementSchema,
 			snapshot_content: {
 				id: "element1",
@@ -1173,7 +1173,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 	// This should fail - foreign key references non-existent change
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: changeSetElementSchema,
 			snapshot_content: {
 				id: "element2",
@@ -1226,7 +1226,7 @@ test("allows updates with same primary key", async () => {
 	// This should pass - updating existing record with same primary key
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "user1", // Same primary key
@@ -1291,7 +1291,7 @@ test("unique constraints are validated per version, not globally", async () => {
 	// This should pass - same path in different version should be allowed
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "file2",
@@ -1306,7 +1306,7 @@ test("unique constraints are validated per version, not globally", async () => {
 	// This should fail - same path in same version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: {
 				id: "file3",
@@ -1337,7 +1337,7 @@ test("throws when version_id is not provided", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: { id: "user1", name: "John" },
 			operation: "insert",
@@ -1365,7 +1365,7 @@ test("throws when referenced version does not exist", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: { id: "user1", name: "John" },
 			operation: "insert",
@@ -1397,7 +1397,7 @@ test("passes when version_id is provided and version exists", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema,
 			snapshot_content: { id: "user1", name: "John" },
 			operation: "insert",
@@ -1494,7 +1494,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 	// This should fail - cannot delete user because post references it
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: userSchema,
 			snapshot_content: {}, // Not used for delete operations
 			operation: "delete",
@@ -1553,7 +1553,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 	// This should pass - no foreign keys reference this user
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: userSchema,
 			snapshot_content: {}, // Not used for delete operations
 			operation: "delete",
@@ -1618,7 +1618,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 	// Insert child referencing a not-yet-existing parent: should NOT throw (materialized mode skips insert-time check)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: childSchema,
 			snapshot_content: { id: "c1", parent_id: "p1", title: "hello" },
 			operation: "insert",
@@ -1668,7 +1668,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 	// Delete-time: p1 is referenced by child → should throw
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: parentSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -1682,7 +1682,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 	// Delete-time: p2 has no references → should not throw
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: parentSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -1716,7 +1716,7 @@ test("should throw when deleting non-existent entity", async () => {
 	// This should fail - entity does not exist
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: userSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -1750,7 +1750,7 @@ test("should throw when entity_id is missing for delete operations", async () =>
 	// This should fail - entity_id is required for delete
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: userSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -1815,7 +1815,7 @@ test("should handle deletion validation for change sets referenced by versions",
 	// This should fail - cannot delete change set because version references it
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: changeSetSchema.value as LixSchemaDefinition,
 			snapshot_content: {},
 			operation: "delete",
@@ -1882,7 +1882,7 @@ test("should parse JSON object properties before validation", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: documentSchema,
 			snapshot_content: validSnapshotContent,
 			operation: "insert",
@@ -1901,7 +1901,7 @@ test("should parse JSON object properties before validation", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: documentSchema,
 			snapshot_content: invalidSnapshotContent,
 			operation: "insert",
@@ -1918,7 +1918,7 @@ test("should parse JSON object properties before validation", async () => {
 
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: documentSchema,
 			snapshot_content: malformedSnapshotContent,
 			operation: "insert",
@@ -2012,7 +2012,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 	// and incorrectly allow this validation to succeed
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post-1",
@@ -2106,7 +2106,7 @@ test("should allow self-referential foreign keys", async () => {
 	// This should pass - child version referencing parent version (valid self-referential FK)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {
 				id: "version1",
@@ -2121,7 +2121,7 @@ test("should allow self-referential foreign keys", async () => {
 	// This should also pass - version with null inheritance (no foreign key constraint)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {
 				id: "version2",
@@ -2136,7 +2136,7 @@ test("should allow self-referential foreign keys", async () => {
 	// This should fail - referencing non-existent version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {
 				id: "version3",
@@ -2223,7 +2223,7 @@ test("should allow self-referential foreign keys for update operations", async (
 	// This should pass - updating to reference a different valid version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {
 				id: "version1",
@@ -2239,7 +2239,7 @@ test("should allow self-referential foreign keys for update operations", async (
 	// This should fail - updating to reference non-existent version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {
 				id: "version1",
@@ -2327,7 +2327,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 	// This should fail - cannot delete version0 because version1 references it
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -2341,7 +2341,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 	// This should pass - can delete version1 (no other versions reference it)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: versionSchema,
 			snapshot_content: {},
 			operation: "delete",
@@ -2363,12 +2363,12 @@ test("should prevent deletion when self-referential foreign keys reference the e
 test("should prevent foreign key references to inherited entities from different version contexts", async () => {
 	const lix = await openLix({});
 
-	// Create a thread in global context
+	// Create a conversation in global context
 	await lix.db
-		.insertInto("thread_all")
+		.insertInto("conversation_all")
 		.values({
 			id: "global_thread",
-			metadata: { title: "Global Thread" },
+			lixcol_metadata: { title: "Global Conversation" },
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -2379,23 +2379,23 @@ test("should prevent foreign key references to inherited entities from different
 		.select("version_id")
 		.executeTakeFirstOrThrow();
 
-	// Get the thread comment schema
+	// Get the conversation message schema
 	const threadCommentSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_thread_comment")
+		.where("key", "=", "lix_conversation_message")
 		.executeTakeFirstOrThrow();
 
-	// This should FAIL: attempting to create a thread_comment in the active version
-	// that references a thread that only exists in global context.
+	// This should FAIL: attempting to create a conversation_message in the active version
+	// that references a conversation that only exists in global context.
 	// Foreign keys should only work within the same version context.
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: threadCommentSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				id: "comment1",
-				thread_id: "global_thread", // References thread in global context
+				conversation_id: "global_thread", // References conversation in global context
 				parent_id: null,
 				body: {
 					type: "zettel_doc",
@@ -2412,7 +2412,9 @@ test("should prevent foreign key references to inherited entities from different
 			operation: "insert",
 			version_id: activeVersion.version_id, // But creating comment in active version context
 		})
-	).toThrow(/Foreign key constraint violation.*lix_thread.*global_thread/);
+	).toThrow(
+		/Foreign key constraint violation.*lix_conversation.*global_thread/
+	);
 });
 
 test("should prevent change set elements from referencing change sets defined in global context", async () => {
@@ -2445,7 +2447,7 @@ test("should prevent change set elements from referencing change sets defined in
 	// The bug is that this currently passes when it should fail.
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: changeSetElementSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				change_set_id: "global_change_set", // References change set in global context
@@ -2539,7 +2541,7 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 	// This should FAIL - tracked entity cannot reference untracked entity
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: postSchema,
 			snapshot_content: {
 				id: "post1",
@@ -2629,7 +2631,7 @@ test("should allow untracked entities to reference tracked entities", async () =
 
 	// Create validation arguments for untracked post
 	const validationArgs = {
-		lix,
+		engine: lix.engine!,
 		schema: postSchema,
 		snapshot_content: {
 			id: "untracked_post",
@@ -2720,7 +2722,7 @@ test("should allow untracked entities to reference other untracked entities", as
 
 	// Create validation arguments for untracked post
 	const validationArgs = {
-		lix,
+		engine: lix.engine!,
 		schema: postSchema,
 		snapshot_content: {
 			id: "untracked_post",
@@ -2785,7 +2787,7 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 	// This should fail - creating commit3 -> commit1 would create a cycle
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				parent_id: "commit3",
@@ -2801,7 +2803,7 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 	// This should also fail - self-loop
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				parent_id: "commit1",
@@ -2863,7 +2865,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	// (This is intentional for performance - cycle detection is expensive)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
 				parent_id: "commit3",
@@ -2938,7 +2940,7 @@ test("should validate foreign keys that reference changes in internal_transactio
 		// which doesn't include internal_transaction_state
 		expect(() =>
 			validateStateMutation({
-				lix: { sqlite: lix.sqlite, db: trx as any },
+				engine: lix.engine!,
 				schema: mockChangeReferencingSchema,
 				snapshot_content: {
 					change_id: changeId,
@@ -3037,7 +3039,7 @@ test("should allow foreign keys to changes from any version context", async () =
 	// This should PASS because changes are versionless and can be referenced from global version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockSchema,
 			snapshot_content: {
 				change_id: realChangeId,
@@ -3050,7 +3052,7 @@ test("should allow foreign keys to changes from any version context", async () =
 	// This should ALSO PASS because changes are versionless and can be referenced from any version
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockSchema,
 			snapshot_content: {
 				change_id: realChangeId,
@@ -3118,7 +3120,7 @@ test("should validate composite foreign keys referencing state table", async () 
 	// This should PASS - entity exists in state table
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "test_entity",
@@ -3134,7 +3136,7 @@ test("should validate composite foreign keys referencing state table", async () 
 	// This should FAIL - entity doesn't exist in state table
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "nonexistent_entity",
@@ -3228,7 +3230,7 @@ test("state foreign key references should respect version context", async () => 
 	// Reference from main version should only see main entities
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "main_only_entity",
@@ -3244,7 +3246,7 @@ test("state foreign key references should respect version context", async () => 
 	// Reference from main version to version2 entity should fail
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "version2_only_entity",
@@ -3260,7 +3262,7 @@ test("state foreign key references should respect version context", async () => 
 	// Reference from version2 should only see version2 entities
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "version2_only_entity",
@@ -3276,7 +3278,7 @@ test("state foreign key references should respect version context", async () => 
 	// Reference from version2 to main entity should fail
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "main_only_entity",
@@ -3356,7 +3358,7 @@ test("state foreign key references should handle inherited entities", async () =
 	// because foreign keys only validate entities in the same version (not inherited)
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: mockStateReferenceSchema,
 			snapshot_content: {
 				entity_id: "shared_entity",
@@ -3457,7 +3459,7 @@ test("state foreign key with mixed single and composite properties", async () =>
 	// This should PASS - both foreign keys are satisfied
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: complexSchema,
 			snapshot_content: {
 				id: "complex1",
@@ -3474,7 +3476,7 @@ test("state foreign key with mixed single and composite properties", async () =>
 	// This should FAIL - state foreign key not satisfied
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: complexSchema,
 			snapshot_content: {
 				id: "complex2",
@@ -3491,7 +3493,7 @@ test("state foreign key with mixed single and composite properties", async () =>
 	// This should FAIL - change foreign key not satisfied
 	expect(() =>
 		validateStateMutation({
-			lix,
+			engine: lix.engine!,
 			schema: complexSchema,
 			snapshot_content: {
 				id: "complex3",

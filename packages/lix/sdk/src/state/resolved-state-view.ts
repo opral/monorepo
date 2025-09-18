@@ -1,6 +1,6 @@
 import type { StateAllView } from "./views/state-all.js";
 import { encodeStatePkPart } from "./vtable/primary-key.js";
-import type { Lix } from "../index.js";
+import type { LixEngine } from "../engine/boot.js";
 
 /**
  * Creates a view that provides direct access to resolved state data
@@ -19,11 +19,12 @@ import type { Lix } from "../index.js";
  *
  * See https://github.com/opral/lix-sdk/issues/355
  */
-export function applyResolvedStateView(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyResolvedStateView(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	const { engine } = args;
 	// Register a custom SQLite function for encoding primary key parts
-	lix.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "lix_encode_pk_part",
 		deterministic: true,
 		arity: 1,
@@ -34,25 +35,34 @@ export function applyResolvedStateView(
 		},
 	});
 	// Create the view that provides resolved state by combining transaction, cache and untracked state
-	lix.sqlite.exec(`
+	engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
       SELECT * FROM (
           -- 1. Transaction state (highest priority) - pending changes
           SELECT 
-              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(lixcol_version_id) as _pk,
+              'T' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
               entity_id, 
               schema_key, 
               file_id, 
               plugin_key,
               json(snapshot_content) as snapshot_content, 
               schema_version, 
-              lixcol_version_id as version_id,
+              version_id as version_id,
               created_at, 
               created_at as updated_at,
               NULL as inherited_from_version_id, 
               id as change_id, 
-              lixcol_untracked as untracked,
-              'pending' as commit_id
+              untracked as untracked,
+              'pending' as commit_id,
+              json(metadata) as metadata,
+              (
+                SELECT w.writer_key FROM internal_state_writer w
+                WHERE w.file_id = internal_transaction_state.file_id
+                  AND w.entity_id = internal_transaction_state.entity_id
+                  AND w.schema_key = internal_transaction_state.schema_key
+                  AND w.version_id = internal_transaction_state.version_id
+                LIMIT 1
+              ) as writer_key
           FROM internal_transaction_state
           -- Include both live rows and deletion tombstones (NULL snapshot_content)
 			
@@ -73,7 +83,16 @@ export function applyResolvedStateView(
               NULL as inherited_from_version_id, 
               'untracked' as change_id, 
               1 as untracked,
-              'untracked' as commit_id
+              'untracked' as commit_id,
+              NULL as metadata,
+              (
+                SELECT w.writer_key FROM internal_state_writer w
+                WHERE w.file_id = internal_state_all_untracked.file_id
+                  AND w.entity_id = internal_state_all_untracked.entity_id
+                  AND w.schema_key = internal_state_all_untracked.schema_key
+                  AND w.version_id = internal_state_all_untracked.version_id
+                LIMIT 1
+              ) as writer_key
           FROM internal_state_all_untracked
           WHERE (
             (inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL)  -- live
@@ -84,7 +103,7 @@ export function applyResolvedStateView(
               WHERE txn.entity_id = internal_state_all_untracked.entity_id
                 AND txn.schema_key = internal_state_all_untracked.schema_key
                 AND txn.file_id = internal_state_all_untracked.file_id
-                AND txn.lixcol_version_id = internal_state_all_untracked.version_id
+                AND txn.version_id = internal_state_all_untracked.version_id
           )
 			
 			UNION ALL
@@ -104,7 +123,20 @@ export function applyResolvedStateView(
               inherited_from_version_id, 
               change_id, 
               0 as untracked,
-              commit_id
+              commit_id,
+              (
+                SELECT json(metadata)
+                FROM change
+                WHERE change.id = internal_state_cache.change_id
+              ) AS metadata,
+              (
+                SELECT w.writer_key FROM internal_state_writer w
+                WHERE w.file_id = internal_state_cache.file_id
+                  AND w.entity_id = internal_state_cache.entity_id
+                  AND w.schema_key = internal_state_cache.schema_key
+                  AND w.version_id = internal_state_cache.version_id
+                LIMIT 1
+              ) as writer_key
           FROM internal_state_cache
           WHERE (
             (inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL)  -- live
@@ -115,7 +147,7 @@ export function applyResolvedStateView(
               WHERE txn.entity_id = internal_state_cache.entity_id
                 AND txn.schema_key = internal_state_cache.schema_key
                 AND txn.file_id = internal_state_cache.file_id
-                AND txn.lixcol_version_id = internal_state_cache.version_id
+                AND txn.version_id = internal_state_cache.version_id
           )
           AND NOT EXISTS (
               SELECT 1 FROM internal_state_all_untracked unt
@@ -141,7 +173,18 @@ export function applyResolvedStateView(
 				isc.version_id as inherited_from_version_id, -- The actual version containing the entity
 				isc.change_id, 
 				0 as untracked,
-				isc.commit_id
+				isc.commit_id,
+				(
+				  SELECT json(metadata)
+				  FROM change
+				  WHERE change.id = isc.change_id
+				) AS metadata,
+				COALESCE(
+				  (SELECT w.writer_key FROM internal_state_writer w
+				   WHERE w.file_id = isc.file_id AND w.entity_id = isc.entity_id AND w.schema_key = isc.schema_key AND w.version_id = vi.version_id LIMIT 1),
+				  (SELECT w2.writer_key FROM internal_state_writer w2
+				   WHERE w2.file_id = isc.file_id AND w2.entity_id = isc.entity_id AND w2.schema_key = isc.schema_key AND w2.version_id = isc.version_id LIMIT 1)
+				) as writer_key
 			FROM (
 				-- Get all ancestor versions using recursive CTE for transitive inheritance
 				WITH RECURSIVE version_inheritance AS (
@@ -173,8 +216,8 @@ export function applyResolvedStateView(
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state txn
-				WHERE txn.lixcol_version_id = vi.version_id
-				  AND txn.entity_id = isc.entity_id
+              WHERE txn.version_id = vi.version_id
+                  AND txn.entity_id = isc.entity_id
 				  AND txn.schema_key = isc.schema_key
 				  AND txn.file_id = isc.file_id
 			)
@@ -212,7 +255,14 @@ export function applyResolvedStateView(
 				unt.version_id as inherited_from_version_id, -- The actual version containing the entity
 				'untracked' as change_id, 
 				1 as untracked,
-				'untracked' as commit_id
+				'untracked' as commit_id,
+				NULL as metadata,
+				COALESCE(
+				  (SELECT w.writer_key FROM internal_state_writer w
+				   WHERE w.file_id = unt.file_id AND w.entity_id = unt.entity_id AND w.schema_key = unt.schema_key AND w.version_id = vi.version_id LIMIT 1),
+				  (SELECT w2.writer_key FROM internal_state_writer w2
+				   WHERE w2.file_id = unt.file_id AND w2.entity_id = unt.entity_id AND w2.schema_key = unt.schema_key AND w2.version_id = unt.version_id LIMIT 1)
+				) as writer_key
 			FROM (
 				-- Get all ancestor versions using recursive CTE for transitive inheritance
 				WITH RECURSIVE version_inheritance AS (
@@ -244,7 +294,7 @@ export function applyResolvedStateView(
 			-- Don't inherit if child has transaction state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state txn
-				WHERE txn.lixcol_version_id = vi.version_id
+				WHERE txn.version_id = vi.version_id
 				  AND txn.entity_id = unt.entity_id
 				  AND txn.schema_key = unt.schema_key
 				  AND txn.file_id = unt.file_id
@@ -282,8 +332,15 @@ export function applyResolvedStateView(
 				txn.created_at as updated_at,
 				vi.parent_version_id as inherited_from_version_id, 
 				txn.id as change_id, 
-				txn.lixcol_untracked as untracked,
-				'pending' as commit_id
+				txn.untracked as untracked,
+				'pending' as commit_id,
+				json(txn.metadata) as metadata,
+				COALESCE(
+				  (SELECT w.writer_key FROM internal_state_writer w
+				   WHERE w.file_id = txn.file_id AND w.entity_id = txn.entity_id AND w.schema_key = txn.schema_key AND w.version_id = vi.version_id LIMIT 1),
+				  (SELECT w2.writer_key FROM internal_state_writer w2
+				   WHERE w2.file_id = txn.file_id AND w2.entity_id = txn.entity_id AND w2.schema_key = txn.schema_key AND w2.version_id = vi.parent_version_id LIMIT 1)
+				) as writer_key
 			FROM (
 				-- Get version inheritance relationships from cache
 				SELECT DISTINCT
@@ -292,15 +349,15 @@ export function applyResolvedStateView(
             FROM internal_state_cache isc_v
             WHERE isc_v.schema_key = 'lix_version_descriptor'
 			) vi
-			JOIN internal_transaction_state txn ON txn.lixcol_version_id = vi.parent_version_id
+			JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent transaction
 			AND txn.snapshot_content IS NOT NULL
 			-- Don't inherit if child has direct transaction state
 			AND NOT EXISTS (
               SELECT 1 FROM internal_transaction_state child_txn
-				WHERE child_txn.lixcol_version_id = vi.version_id
-				  AND child_txn.entity_id = txn.entity_id
+              WHERE child_txn.version_id = vi.version_id
+                  AND child_txn.entity_id = txn.entity_id
 				  AND child_txn.schema_key = txn.schema_key
 				  AND child_txn.file_id = txn.file_id
 			)

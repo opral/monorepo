@@ -8,6 +8,10 @@ import { HeaderSchemaV1 } from "./schemas/header.js";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { RowSchemaV1 } from "./schemas/row.js";
 
+type DetectArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
+type DetectBefore = NonNullable<DetectArgs["before"]>;
+type DetectAfter = DetectArgs["after"];
+
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>
 	// so we can just append the column name to it
@@ -15,16 +19,40 @@ function toEntityId(rowId: string, columnName: string) {
 	return rowId + "|" + columnName;
 }
 
+function extractUniqueColumn(input: unknown): string | undefined {
+	if (input && typeof input === "object") {
+		const record = input as Record<string, unknown>;
+		const value = record.unique_column;
+		return typeof value === "string" && value.length > 0 ? value : undefined;
+	}
+	return undefined;
+}
+
+const getMetadataSource = (file?: DetectBefore | DetectAfter) => {
+	return (
+		(file as { lixcol_metadata?: unknown } | undefined)?.lixcol_metadata ??
+		file?.metadata
+	);
+};
+
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
 	// heuristic can be improved later by deriving a unique column
-	const uniqueColumnBefore = before?.metadata?.unique_column as string;
-	const uniqueColumnAfter = after?.metadata?.unique_column as string;
+	const uniqueColumnBefore = extractUniqueColumn(getMetadataSource(before));
+	const uniqueColumnAfter = extractUniqueColumn(getMetadataSource(after));
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
 		console.warn("The unique_column metadata is required to detect changes");
+		return [];
+	}
+
+	const columnForBefore = uniqueColumnBefore ?? uniqueColumnAfter;
+	const columnForAfter = uniqueColumnAfter ?? uniqueColumnBefore;
+
+	if (columnForBefore === undefined || columnForAfter === undefined) {
+		// This should not happen due to the guard above, but narrows types for TS.
 		return [];
 	}
 
@@ -34,8 +62,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		>
 	>[] = [];
 
-	const beforeParsed = parseCsv(before?.data, uniqueColumnBefore);
-	const afterParsed = parseCsv(after?.data, uniqueColumnAfter);
+	const beforeParsed = parseCsv(before?.data, columnForBefore);
+	const afterParsed = parseCsv(after?.data, columnForAfter);
 
 	const headerChanged = checkHeaderChange(
 		beforeParsed.delimeter,
@@ -47,7 +75,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	if (
 		headerChanged ||
 		// in case the unique column has been set, the change needs to be detected
-		before?.metadata?.unique_column !== after?.metadata?.unique_column
+		uniqueColumnBefore !== uniqueColumnAfter
 	) {
 		detectedChanges.push({
 			schema: HeaderSchemaV1,

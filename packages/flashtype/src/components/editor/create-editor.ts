@@ -1,5 +1,5 @@
 import { Editor } from "@tiptap/core";
-import { nanoId, type Lix } from "@lix-js/sdk";
+import { nanoId, type Lix, withWriterKey } from "@lix-js/sdk";
 import {
 	MarkdownWc,
 	astToTiptapDoc,
@@ -19,10 +19,11 @@ type CreateEditorArgs = {
 	fileId?: string;
 	persistDebounceMs?: number;
 	persistState?: boolean;
+	writerKey?: string | null;
 };
 
 // Plain TipTap Editor factory (no React). Useful for unit/integration tests.
-export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
+export function createEditor(args: CreateEditorArgs): Editor {
 	const {
 		lix,
 		initialMarkdown,
@@ -33,20 +34,15 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		fileId,
 		persistDebounceMs,
 		persistState = true,
+		writerKey,
 	} = args;
-	let initialMd = initialMarkdown;
-	if (initialMd === undefined && fileId) {
-		const row = await lix.db
-			.selectFrom("file")
-			.where("id", "=", fileId)
-			.selectAll()
-			.executeTakeFirst();
-		initialMd = new TextDecoder().decode(row?.data ?? new Uint8Array());
-	}
 
-	const ast = contentAst ?? (parseMarkdown(initialMd ?? "") as any);
+	const ast = contentAst ?? (parseMarkdown(initialMarkdown ?? "") as any);
 
 	let persistStateTimer: any = null;
+	// Serialize persist runs to avoid overlapping transactions causing inconsistent state snapshots.
+	let persistRunning = false;
+	let persistQueued = false;
 	let currentEditor: Editor | null = null;
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 0;
 
@@ -126,20 +122,29 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 		}
 	}
 
-	function ensureTopLevelIds(children: any[]): string[] {
+	/**
+	 * Ensure each top-level block has a stable, unique data.id.
+	 * - Assigns a new id if missing.
+	 * - Regenerates ids for duplicates (e.g., paragraph split that cloned attrs).
+	 */
+	async function ensureTopLevelIds(children: any[]): Promise<string[]> {
 		const order: string[] = [];
+		const seen = new Set<string>();
 		for (const node of children) {
 			node.data = node.data || {};
-			if (!node.data.id) node.data.id = nanoId({ lix, length: 10 });
-			order.push(node.data.id as string);
+			let id = (node.data.id ?? "") as string;
+			if (!id || seen.has(id)) {
+				id = await nanoId({ lix, length: 10 });
+				node.data.id = id;
+			}
+			seen.add(id);
+			order.push(id);
 		}
 		return order;
 	}
 
 	return new Editor({
-		extensions: MarkdownWc({
-			idProvider: () => nanoId({ lix, length: 10 }),
-		}),
+		extensions: MarkdownWc({}),
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {
 			currentEditor = editor as Editor;
@@ -151,31 +156,50 @@ export async function createEditor(args: CreateEditorArgs): Promise<Editor> {
 			// Debounce state writes using the provided debounce ms
 			const ms = PERSIST_DEBOUNCE_MS;
 			const run = async () => {
+				if (persistRunning) {
+					// Coalesce multiple rapid updates; run again after the current one finishes
+					persistQueued = true;
+					return;
+				}
+				persistRunning = true;
 				const ast = tiptapDocToAst(editor.getJSON() as any);
 				const children: any[] = Array.isArray((ast as any)?.children)
 					? ((ast as any).children as any[])
 					: [];
-				const order = ensureTopLevelIds(children);
-				await lix.db.transaction().execute(async (trx) => {
-					await upsertNodes(trx, fileId, children);
-					await upsertRootOrder(trx, fileId, order);
-					const keepIds = [...order, "root"];
-					if (keepIds.length > 0) {
-						await trx
-							.deleteFrom("state")
-							.where("file_id", "=", fileId as any)
-							.where("plugin_key", "=", mdPlugin.key)
-							.where("entity_id", "not in", keepIds as any)
-							.execute();
-					} else {
-						await trx
-							.deleteFrom("state")
-							.where("file_id", "=", fileId as any)
-							.where("plugin_key", "=", mdPlugin.key)
-							.where("entity_id", "<>", "root")
-							.execute();
+				const order = await ensureTopLevelIds(children);
+				try {
+					await withWriterKey(
+						lix.db,
+						writerKey ?? `flashtype_tiptap_editor`,
+						async (trx) => {
+							await upsertNodes(trx, fileId, children);
+							await upsertRootOrder(trx, fileId, order);
+							const keepIds = [...order, "root"];
+							if (keepIds.length > 0) {
+								await trx
+									.deleteFrom("state")
+									.where("file_id", "=", fileId as any)
+									.where("plugin_key", "=", mdPlugin.key)
+									.where("entity_id", "not in", keepIds as any)
+									.execute();
+							} else {
+								await trx
+									.deleteFrom("state")
+									.where("file_id", "=", fileId as any)
+									.where("plugin_key", "=", mdPlugin.key)
+									.where("entity_id", "<>", "root")
+									.execute();
+							}
+						},
+					);
+				} finally {
+					persistRunning = false;
+					if (persistQueued) {
+						persistQueued = false;
+						// Run again to capture the latest editor state
+						await run();
 					}
-				});
+				}
 			};
 			if (ms <= 0) {
 				void run();

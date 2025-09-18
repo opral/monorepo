@@ -8,14 +8,14 @@ import {
 	fileIdSearchParamsAtom,
 	withPollingAtom,
 	activeVersionAtom,
-	threadSearchParamsAtom,
+	conversationSearchParamsAtom,
 } from "./state.ts";
 import {
     commitIsAncestorOf,
     jsonArrayFrom,
     Lix,
     sql,
-    UiDiffComponentProps,
+    RenderDiffArgs,
     ebEntity,
 } from "@lix-js/sdk";
 import { redirect } from "react-router-dom";
@@ -101,7 +101,7 @@ export const workingChangeSetAtom = atom(async (get) => {
 
 // The file manager app treats changes that are not in a change set as intermediate changes.
 export const intermediateChangesAtom = atom<
-	Promise<UiDiffComponentProps["diffs"]>
+	Promise<RenderDiffArgs["diffs"]>
 >(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
@@ -150,7 +150,7 @@ export const intermediateChangesAtom = atom<
 	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
 	// If there are no checkpoint changes, we can't get the before snapshot
 
-	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
+	const changesWithBeforeSnapshots: RenderDiffArgs["diffs"] =
 		await Promise.all(
 			intermediateLeafChanges.map(async (change) => {
 				let snapshotBefore = null;
@@ -190,12 +190,12 @@ export const intermediateChangesAtom = atom<
 
 				return {
 					...rest,
-					snapshot_content_after: change.snapshot_content_after
+					after_snapshot_content: change.snapshot_content_after
 						? typeof change.snapshot_content_after === "string"
 							? JSON.parse(change.snapshot_content_after)
 							: change.snapshot_content_after
 						: null,
-					snapshot_content_before: snapshotBefore?.snapshot_content_before
+					before_snapshot_content: snapshotBefore?.snapshot_content_before
 						? typeof snapshotBefore.snapshot_content_before === "string"
 							? JSON.parse(snapshotBefore.snapshot_content_before)
 							: snapshotBefore.snapshot_content_before
@@ -274,7 +274,7 @@ export const getChangeDiffs = async (
 	changeSetId: string,
 	changeSetBeforeId?: string | null,
 	activeFileId?: string | null
-): Promise<UiDiffComponentProps["diffs"]> => {
+): Promise<RenderDiffArgs["diffs"]> => {
 	// Get active version to filter by current version
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -309,7 +309,7 @@ export const getChangeDiffs = async (
 	const checkpointChanges = await checkpointChangesQuery.execute();
 
 	// Process each change to include before snapshots
-	const changesWithBeforeSnapshot: UiDiffComponentProps["diffs"] =
+	const changesWithBeforeSnapshot: RenderDiffArgs["diffs"] =
 		await Promise.all(
 			checkpointChanges.map(async (change) => {
 				let snapshotBefore = null;
@@ -346,12 +346,12 @@ export const getChangeDiffs = async (
 
 				return {
 					...rest,
-					snapshot_content_after: change.snapshot_content_after
+					after_snapshot_content: change.snapshot_content_after
 						? typeof change.snapshot_content_after === "string"
 							? JSON.parse(change.snapshot_content_after)
 							: change.snapshot_content_after
 						: null,
-					snapshot_content_before: snapshotBefore?.snapshot_content_before
+					before_snapshot_content: snapshotBefore?.snapshot_content_before
 						? typeof snapshotBefore.snapshot_content_before === "string"
 							? JSON.parse(snapshotBefore.snapshot_content_before)
 							: snapshotBefore.snapshot_content_before
@@ -363,65 +363,73 @@ export const getChangeDiffs = async (
 	return changesWithBeforeSnapshot;
 };
 
-export const getThreads = async (lix: Lix, commitId: string) => {
+export const getConversations = async (lix: Lix, commitId: string) => {
 	if (!commitId || !lix) return null;
 
 	return await lix.db
-		.selectFrom("thread")
-		.leftJoin("entity_thread", "thread.id", "entity_thread.thread_id")
-		.where("entity_thread.entity_id", "=", commitId)
-		.where("entity_thread.schema_key", "=", "lix_commit")
-		.where("entity_thread.file_id", "=", "lix")
+		.selectFrom("conversation")
+		.leftJoin(
+			"entity_conversation",
+			"conversation.id",
+			"entity_conversation.conversation_id"
+		)
+		.where("entity_conversation.entity_id", "=", commitId)
+		.where("entity_conversation.schema_key", "=", "lix_commit")
+		.where("entity_conversation.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb
-					.selectFrom("thread_comment")
-					.innerJoin("change", "change.entity_id", "thread_comment.id")
+					.selectFrom("conversation_message")
+					.innerJoin("change", "change.entity_id", "conversation_message.id")
 					.innerJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
-						"thread_comment.id",
-						"thread_comment.body",
-						"thread_comment.thread_id",
-						"thread_comment.parent_id",
+						"conversation_message.id",
+						"conversation_message.body",
+						"conversation_message.conversation_id",
+						"conversation_message.parent_id",
 					])
 					.select(["change.created_at", "account.name as author_name"])
-					.whereRef("thread_comment.thread_id", "=", "thread.id")
+					.whereRef(
+						"conversation_message.conversation_id",
+						"=",
+						"conversation.id"
+					)
 			).as("comments"),
 		])
-		.selectAll("thread")
+		.selectAll("conversation")
 		.execute();
 };
 
 export const selectedChangeIdsAtom = atom<string[]>([]);
 
-export const activeThreadAtom = atom(async (get) => {
+export const activeConversationAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeVersion = await get(activeVersionAtom);
 	const fileIdSearchParams = get(fileIdSearchParamsAtom);
 	if (!fileIdSearchParams || !activeVersion) return null;
-	const threadSearchParams = await get(threadSearchParamsAtom);
+	const threadSearchParams = await get(conversationSearchParamsAtom);
 	if (!threadSearchParams) return null;
 
-	// Fetch the thread and its comments in a single query
+	// Fetch the conversation and its comments in a single query
 	const threadsWithComments = await lix.db
-		.selectFrom("thread")
-		.where("thread.id", "=", threadSearchParams)
+		.selectFrom("conversation")
+		.where("conversation.id", "=", threadSearchParams)
 		.select((eb) => [
-			"thread.id",
+			"conversation.id",
 			jsonArrayFrom(
 				eb
-					.selectFrom("thread_comment")
+					.selectFrom("conversation_message")
 					.innerJoin("change", (join) =>
 						join
-							.onRef("change.entity_id", "=", "thread_comment.id")
+							.onRef("change.entity_id", "=", "conversation_message.id")
 							.on("change.schema_key", "=", "lix_comment_table")
 					)
 					.leftJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
-						"thread_comment.id",
-						"thread_comment.body",
+						"conversation_message.id",
+						"conversation_message.body",
 						"change.created_at",
 						"account.id as account_id",
 						"account.name as account_name",
@@ -429,7 +437,11 @@ export const activeThreadAtom = atom(async (get) => {
 						// "account.id as account_id",
 						// "account.name as account_name",
 					])
-					.whereRef("thread_comment.thread_id", "=", "thread.id")
+					.whereRef(
+						"conversation_message.conversation_id",
+						"=",
+						"conversation.id"
+					)
 					.orderBy("change.created_at", "asc")
 			).as("comments"),
 		])

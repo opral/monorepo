@@ -14,13 +14,12 @@ import type {
 	LixPlugin,
 	LixSchemaDefinition,
 } from "@lix-js/sdk";
-import { executeSync } from "@lix-js/sdk";
 import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
-	lix,
+	querySync,
 	after,
 }) => {
 	const THRESHOLDS = {
@@ -39,22 +38,16 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	const afterAst = parseMarkdown(afterMarkdown) as Ast;
 	const detectedChanges: DetectedChange[] = [];
 
-	// Build before index from state via lix: entity_id -> node snapshot
+	// Build before index from state via querySync: entity_id -> node snapshot
 	const beforeNodes = new Map<string, any>();
 	let beforeOrder: string[] = [];
-	if (!lix) return [];
-	const qb = lix.db
-		.selectFrom("state")
+	const rows = querySync("state")
 		.where("file_id", "=", after.id)
-		.select(["entity_id", "schema_key", "snapshot_content"]);
-	const rows = executeSync({ lix, query: qb });
+		.select(["entity_id", "schema_key", "snapshot_content"])
+		.execute();
 	for (const row of rows) {
 		const sk = row.schema_key as string;
-		// JSON columns returned from executeSync are strings; parse if needed
-		const content =
-			typeof (row as any).snapshot_content === "string"
-				? JSON.parse((row as any).snapshot_content)
-				: (row as any).snapshot_content;
+		const content = (row as any).snapshot_content;
 		if (sk === (AstSchemas.RootOrderSchema as any)["x-lix-key"]) {
 			const order = (content as any)?.order;
 			if (Array.isArray(order)) beforeOrder = order as string[];

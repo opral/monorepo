@@ -4,11 +4,11 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
 import { LixProvider } from "@lix-js/react-utils";
-import { openLix, OpfsStorage, type Lix } from "@lix-js/sdk";
+import { openLix, OpfsSahEnvironment, type Lix } from "@lix-js/sdk";
 import { initLixInspector } from "@lix-js/inspector";
 import { KeyValueProvider } from "./key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
-import { plugin as mdPlugin } from "../../lix/plugin-md/dist";
+import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
 
 const router = createRouter({
@@ -29,21 +29,44 @@ function AppRoot() {
 
 	useEffect(() => {
 		let cancelled = false;
+		const env = new OpfsSahEnvironment({ key: "flashtype" });
+		let current: Lix | undefined;
 		(async () => {
 			try {
 				const instance = await openLix({
-					providePlugins: [mdPlugin],
-					storage: new OpfsStorage({ path: "flashtype.lix" }),
+					providePluginsRaw: [mdPlugin],
+					environment: env,
 				});
-				if (cancelled) return;
+				if (cancelled) {
+					await instance.close();
+					return;
+				}
+				current = instance;
 				await initLixInspector({ lix: instance, show: false });
-				setLix(instance);
+				if (!cancelled) setLix(instance);
 			} catch (e) {
 				if (!cancelled) setError(e);
+				try {
+					await env.close();
+				} catch {
+					// ignore cleanup errors
+				}
 			}
 		})();
 		return () => {
 			cancelled = true;
+			setLix(null);
+			void (async () => {
+				try {
+					if (current) await current.close();
+				} finally {
+					try {
+						await env.close();
+					} catch {
+						// ignore teardown errors
+					}
+				}
+			})();
 		};
 	}, []);
 
@@ -69,3 +92,29 @@ createRoot(document.getElementById("root")!).render(
 		<AppRoot />
 	</StrictMode>,
 );
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		navigator.serviceWorker
+			.register("/sw.js")
+			.then((registration) => {
+				registration.addEventListener("updatefound", () => {
+					const worker = registration.installing;
+					if (!worker) return;
+					worker.addEventListener("statechange", () => {
+						if (
+							worker.state === "installed" &&
+							navigator.serviceWorker.controller
+						) {
+							// Service worker messaging doesn't use targetOrigin; suppress lint warning.
+							// eslint-disable-next-line unicorn/require-post-message-target-origin
+							worker.postMessage("SKIP_WAITING");
+						}
+					});
+				});
+			})
+			.catch(() => {
+				// Ignore registration errors; app continues without offline shell.
+			});
+	});
+}

@@ -18,7 +18,7 @@ export function syncReactUtilsReadmePlugin(): RspressPlugin {
 
       const readme = await fs.readFile(src, "utf8");
       const banner =
-        "{/* NOTE: This page is generated from @lix-js/react-utils/README.md. Do not edit directly. */}\n\n";
+        "> [!NOTE]\n> This page is mirrored from [packages/lix/react-utils](https://github.com/opral/monorepo/tree/main/packages/lix/react-utils).\n\n";
       await fs.mkdir(path.dirname(dest), { recursive: true });
       await fs.writeFile(dest, banner + readme, "utf8");
       console.log(

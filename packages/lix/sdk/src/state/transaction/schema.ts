@@ -1,8 +1,10 @@
 import type { Selectable, Insertable, Generated } from "kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixEngine } from "../../engine/boot.js";
 
-export function applyTransactionStateSchema(lix: Pick<Lix, "sqlite">): void {
-	lix.sqlite.exec(`
+export function applyTransactionStateSchema(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	args.engine.sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_transaction_state (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,
@@ -10,11 +12,13 @@ export function applyTransactionStateSchema(lix: Pick<Lix, "sqlite">): void {
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    lixcol_version_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    writer_key TEXT NULL,
     snapshot_content BLOB,
+    metadata BLOB,
     created_at TEXT NOT NULL,
-    lixcol_untracked INTEGER NOT NULL DEFAULT 0,
-    UNIQUE(entity_id, file_id, schema_key, lixcol_version_id)
+    untracked INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
 `);
 }
@@ -30,10 +34,12 @@ export type InternalTransactionStateTable = {
 	schema_version: string;
 	file_id: string;
 	plugin_key: string;
-	lixcol_version_id: string;
+	version_id: string;
+	writer_key: string | null;
 	snapshot_content: Record<string, any> | null;
+	metadata: Record<string, any> | null;
 	created_at: Generated<string>;
-	lixcol_untracked: number;
+	untracked: number;
 };
 
 // Kysely typing for the new view with lixcol_* naming

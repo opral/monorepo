@@ -5,12 +5,12 @@ import { useAtom } from "jotai/react";
 import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import CustomLink from "./CustomLink.tsx";
-import { ThreadComment } from "@lix-js/sdk";
+import { LixConversationMessage } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
   const [lix] = useAtom(lixAtom);
-  const [firstComment, setFirstComment] = useState<ThreadComment & {
+  const [firstComment, setFirstComment] = useState<LixConversationMessage & {
     author_name: string;
     created_at: string;
   } | undefined>(undefined);
@@ -22,23 +22,23 @@ const DiscussionPreview = ({ threadId }: { threadId: string }) => {
 
   const getFirstComment = async (threadId: string) => {
     const comment = await lix.db
-      .selectFrom("thread_comment")
+      .selectFrom("conversation_message")
       .innerJoin("change", (join) =>
         join
-          .onRef("change.entity_id", "=", "thread_comment.id")
+          .onRef("change.entity_id", "=", "conversation_message.id")
           .on("change.schema_key", "=", "lix_comment_table")
       )
       .innerJoin("change_author", "change_author.change_id", "change.id")
       .innerJoin("account", "account.id", "change_author.account_id")
       .select([
-        "thread_comment.id",
-        "thread_comment.thread_id",
-        "thread_comment.parent_id",
-        "thread_comment.body",
+        "conversation_message.id",
+        "conversation_message.conversation_id",
+        "conversation_message.parent_id",
+        "conversation_message.body",
         "change.created_at",
         "account.name as author_name",
       ])
-      .where("thread_comment.thread_id", "=", threadId)
+      .where("conversation_message.conversation_id", "=", threadId)
       .orderBy("change.created_at", "asc")
       .limit(1)
       .executeTakeFirstOrThrow();

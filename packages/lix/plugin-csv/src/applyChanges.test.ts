@@ -1,6 +1,36 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
+import type { LixPlugin } from "@lix-js/sdk";
+
+type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
+type ApplyChangesFile = ApplyChangesArgs["file"] & {
+	lixcol_metadata?: ApplyChangesArgs["file"]["metadata"];
+};
+
+const createMockFile = ({
+	data,
+	metadata = { unique_column: "Name" },
+	path = "/mock.csv",
+}: {
+	data?: Uint8Array;
+	metadata?: Record<string, unknown> | null;
+	path?: string;
+} = {}): ApplyChangesFile =>
+	({
+		id: "mock",
+		directory_id: null,
+		name: "mock",
+		extension: "csv",
+		path,
+		data,
+		metadata,
+		lixcol_metadata: metadata,
+		hidden: false,
+		lixcol_inherited_from_version_id: null,
+		lixcol_created_at: new Date().toISOString(),
+		lixcol_updated_at: new Date().toISOString(),
+	}) as ApplyChangesFile;
 
 test("it applies an insert change", async () => {
 	const before = new TextEncoder().encode(
@@ -15,7 +45,7 @@ test("it applies an insert change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata },
+		file: createMockFile({ metadata }),
 		fileUpdates: [before, after],
 	});
 
@@ -23,9 +53,9 @@ test("it applies an insert change", async () => {
 	// TODO we ignore the ordering of the rows - FYI
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata },
+		file: createMockFile({ data: before, metadata }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(applied).toEqual(after);
 });
@@ -37,14 +67,14 @@ test("it applies an update change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata },
+		file: createMockFile({ metadata }),
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata },
+		file: createMockFile({ data: before, metadata }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(new TextDecoder().decode(applied)).toEqual(
 		new TextDecoder().decode(after),
@@ -58,14 +88,14 @@ test("it applies a delete change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata },
+		file: createMockFile({ metadata }),
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: before, metadata },
+		file: createMockFile({ data: before, metadata }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 	expect(applied).toEqual(after);
 });
 
@@ -82,14 +112,14 @@ test("it applies a row order change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const changes = mockChanges({
-		file: { id: "mock", path: "/mock", metadata },
+		file: createMockFile({ metadata }),
 		fileUpdates: [initial, update0],
 	});
 
 	const { fileData: applied } = applyChanges({
-		file: { id: "mock", path: "/mock", data: initial, metadata },
+		file: createMockFile({ data: initial, metadata }),
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(applied).toEqual(update0);
 });
@@ -97,12 +127,10 @@ test("it applies a row order change", async () => {
 test("applies changes to a new csv file", async () => {
 	const initialCsv = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 
-	const file = {
-		id: "file0",
-		path: "/mock.csv",
+	const file = createMockFile({
 		data: initialCsv,
 		metadata: { unique_column: "Name" },
-	};
+	});
 
 	const changes = mockChanges({
 		file,
@@ -112,7 +140,7 @@ test("applies changes to a new csv file", async () => {
 	const { fileData: applied } = await applyChanges({
 		file: { ...file, data: undefined },
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	expect(applied).toEqual(initialCsv);
 });

@@ -65,6 +65,8 @@ test("ChangeIndicator shows zero and updates on edit, then resets after checkpoi
 	await act(async () => {
 		await createCheckpoint({ lix });
 	});
-	const countAfter = await screen.findByTestId("change-count");
-	expect(countAfter).toHaveTextContent(/^0$/);
+	await waitFor(async () => {
+		const countAfter = await screen.findByTestId("change-count");
+		expect(countAfter).toHaveTextContent(/^0$/);
+	});
 });

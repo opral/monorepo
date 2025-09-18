@@ -35,16 +35,19 @@
 		"dist",
 		"src"
 	],
-	"scripts": {
-		"prebuild": "npm run env-variables",
-		"build": "tsc --build",
-		"test": "vitest run --typecheck",
-		"test:watch": "vitest --typecheck",
-		"env-variables": "node ./src/services/env-variables/create-index-file.js",
-		"bench": "vitest bench",
-		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
+  "scripts": {
+    "prebuild": "npm run env-variables",
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "pretest": "playwright install --with-deps",
+    "test": "vitest run --typecheck",
+    "test:watch": "vitest --typecheck",
+    "env-variables": "node ./src/services/env-variables/create-index-file.js",
+    "bench": "vitest bench",
+    "lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
 		"dev": "tsc --watch",
-		"format": "prettier ./src --write"
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
@@ -52,7 +55,6 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@codspeed/vitest-plugin": "^4.0.1",
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"@opral/zettel-ast": "workspace:*",
 		"ajv": "^8.17.1",
@@ -62,10 +64,13 @@
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
+		"@codspeed/vitest-plugin": "^4.0.1",
 		"@opral/tsconfig": "workspace:*",
+		"@vitest/browser": "^4.0.0-beta.10",
 		"@vitest/coverage-v8": "4.0.0-beta.10",
-		"oxlint": "^1.14.0",
 		"json-schema-to-ts": "^3.1.1",
+		"oxlint": "^1.14.0",
+		"playwright": "^1.55.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
 		"vitest": "4.0.0-beta.10"

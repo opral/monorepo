@@ -1,5 +1,5 @@
 import type { Insertable, Selectable, Updateable } from "kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixEngine } from "../../engine/boot.js";
 import type { StateAllView } from "./state-all.js";
 
 export type StateView = Omit<StateAllView, "version_id">;
@@ -13,8 +13,10 @@ export type StateRowUpdate = Updateable<StateView>;
  * Creates the public 'state' view filtered to the active version, and
  * INSTEAD OF triggers that forward writes to state_all (which proxies to the vtable).
  */
-export function applyStateView(lix: Pick<Lix, "sqlite">): void {
-	lix.sqlite.exec(`
+export function applyStateView(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state AS
     SELECT 
       entity_id,
@@ -28,7 +30,9 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
       inherited_from_version_id,
       change_id,
       untracked,
-      commit_id
+      commit_id,
+      writer_key,
+      metadata
     FROM state_all
     WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -44,6 +48,7 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
         plugin_key,
         snapshot_content,
         schema_version,
+        metadata,
         untracked
       ) VALUES (
         NEW.entity_id,
@@ -53,6 +58,7 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
         NEW.plugin_key,
         NEW.snapshot_content,
         NEW.schema_version,
+        NEW.metadata,
         COALESCE(NEW.untracked, 0)
       );
     END;
@@ -69,6 +75,7 @@ export function applyStateView(lix: Pick<Lix, "sqlite">): void {
         plugin_key = NEW.plugin_key,
         snapshot_content = NEW.snapshot_content,
         schema_version = NEW.schema_version,
+        metadata = NEW.metadata,
         untracked = COALESCE(NEW.untracked, 0)
       WHERE
         entity_id = OLD.entity_id

@@ -4,7 +4,7 @@
  */
 
 /**
- * Env variables that are available at runtime.
+ * Env variables that are available at engine.
  */
 export declare const ENV_VARIABLES: {
 	LIX_SDK_POSTHOG_TOKEN?: string;

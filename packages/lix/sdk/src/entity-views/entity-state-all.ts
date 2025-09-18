@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
@@ -126,6 +126,11 @@ export type StateEntityAllView = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: Generated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 */
+	lixcol_metadata: Generated<Record<string, any> | null>;
 };
 
 /**
@@ -240,6 +245,11 @@ export type EntityStateAllColumns = {
 	 * enabling history queries and version comparison.
 	 */
 	lixcol_commit_id: LixGenerated<string>;
+
+	/**
+	 * Arbitrary metadata attached to the change that produced this entity state.
+	 */
+	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
 
 /**
@@ -278,7 +288,7 @@ export type EntityStateAllColumns = {
  * ```
  */
 export function createEntityStateAllView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] + "_all" */
 	overrideName?: string;
@@ -311,7 +321,7 @@ export function createEntityStateAllView(args: {
 }
 
 function createSingleEntityAllView(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
 	quotedViewName?: string;
@@ -363,7 +373,7 @@ function createSingleEntityAllView(args: {
 
 			if (needsRow) {
 				// Function needs row data - use variadic function
-				args.lix.sqlite.createFunction(
+				args.engine.sqlite.createFunction(
 					udfName,
 					(...rowValues: any[]) => {
 						// Reconstruct row object from passed values
@@ -395,7 +405,7 @@ function createSingleEntityAllView(args: {
 				); // -1 means variadic
 			} else {
 				// Function doesn't need row data - simple 0-arg function
-				args.lix.sqlite.createFunction(
+				args.engine.sqlite.createFunction(
 					udfName,
 					() => (defaultFn as () => string)(),
 					{ arity: 0 }
@@ -446,6 +456,7 @@ function createSingleEntityAllView(args: {
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
 		"commit_id AS lixcol_commit_id",
+		"metadata AS lixcol_metadata",
 	];
 
 	// Handle version_id for _all view
@@ -518,6 +529,7 @@ function createSingleEntityAllView(args: {
           snapshot_content,
           schema_version,
           version_id,
+          metadata,
           untracked
         ) ${
 					hasDefaults
@@ -530,12 +542,14 @@ function createSingleEntityAllView(args: {
           json_object(${buildJsonEntries((prop) => `with_default_values.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
+          with_default_values.lixcol_metadata,
           COALESCE(with_default_values.lixcol_untracked, 0)
         FROM (
           SELECT
             ${defaultsSubquery},
             ${versionIdInDefaults}
             NEW.lixcol_file_id AS lixcol_file_id,
+            NEW.lixcol_metadata AS lixcol_metadata,
             COALESCE(NEW.lixcol_untracked, 0) AS lixcol_untracked
         ) AS with_default_values`
 						: `
@@ -547,6 +561,7 @@ function createSingleEntityAllView(args: {
           json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference},
+          NEW.lixcol_metadata,
           COALESCE(NEW.lixcol_untracked, 0)
         )`
 				};
@@ -564,6 +579,7 @@ function createSingleEntityAllView(args: {
           plugin_key = '${args.pluginKey}',
           snapshot_content = json_object(${buildJsonEntries((prop) => `NEW.${prop}`)}),
           version_id = ${versionIdReference},
+          metadata = NEW.lixcol_metadata,
           untracked = NEW.lixcol_untracked
         WHERE
           state_all.entity_id = ${entityIdOld}
@@ -584,5 +600,5 @@ function createSingleEntityAllView(args: {
       END;
     `);
 
-	args.lix.sqlite.exec(sqlQuery);
+	args.engine.sqlite.exec(sqlQuery);
 }

@@ -1,16 +1,7 @@
 import type { LixChange } from "../change/schema.js";
-import type { LixFile } from "../file/schema.js";
+import type { LixFile } from "../filesystem/file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { Lix } from "../lix/open-lix.js";
-
-// named lixplugin to avoid conflict with built-in plugin type
-// Query builder + executor are provided to plugins.
-
-export type LixReadonly = {
-	db: { selectFrom: Lix["db"]["selectFrom"] };
-	/** Raw SQLite handle for sync execution (use executeSync({ lix, query })). */
-	sqlite: Lix["sqlite"];
-};
+import type { QuerySync } from "./query-sync.js";
 
 export type LixPlugin = {
 	key: string;
@@ -35,38 +26,37 @@ export type LixPlugin = {
 	detectChanges?: ({
 		before,
 		after,
-		lix,
+		querySync,
 	}: {
 		before?: Omit<LixFile, "data"> & { data?: Uint8Array };
 		after: Omit<LixFile, "data"> & { data: Uint8Array };
 		/**
-		 * Readonly Lix context exposing only `db.selectFrom` for typed queries.
+		 * Build synchronous SQL queries.
 		 *
-		 * Detecting changes can require reading current state to preserve stable entity ids,
-		 * compare snapshots, or infer ordering without reparsing files.
+		 * Detecting changes can require reading current state to preserve stable
+		 * entity ids, compare snapshots, or infer ordering without reparsing
+		 * files.
 		 *
-		 * How to use (with synchronous execution)
-		 * - Import `executeSync` from `@lix-js/sdk` and run `executeSync({ lix, query: qb })` to execute
-		 *   synchronously and receive JSON‑parsed rows (matching the async driver behavior).
+		 * Why is a sync possible and allowed?
 		 *
-		 * Example (reuse stable ids)
-		 * ```ts
-		 * detectChanges: ({ after, lix }) => {
-		 *   const qb = lix!.db
-		 *     .selectFrom('state')
+		 * The engine can run in a separate thread/process. SQLite executes
+		 * queries synchronously and the engine cannot await async calls to the
+		 * host thread during `detectChanges()`. `querySync` provides a Kysely
+		 * builder whose `.execute()` runs synchronously inside the engine.
+		 *
+		 * @example
+		 * detectChanges: ({ after, querySync }) => {
+		 *   const rows = querySync('state')
 		 *     .where('file_id', '=', after.id)
 		 *     .where('plugin_key', '=', 'plugin_md')
 		 *     .select(['entity_id', 'schema_key', 'snapshot_content'])
-		 *
-		 *   import { executeSync } from '@lix-js/sdk'
-		 *   const rows = executeSync({ lix: lix as any, query: qb })
+		 *     .execute()
 		 *   const latestById = new Map(rows.map(r => [r.entity_id, r]))
 		 *   // ...use latestById to assign/reuse ids in emitted changes...
-		 *   return detected
+		 *   return []
 		 * }
-		 * ```
 		 */
-		lix?: LixReadonly;
+		querySync: QuerySync;
 	}) => DetectedChange[];
 	applyChanges?: ({
 		file,
@@ -87,7 +77,18 @@ export type LixPlugin = {
 	/**
 	 * UI components that are used to render the diff view.
 	 */
-	diffUiComponent?: CustomElementConstructor;
+	/**
+	 * Render the diff for this plugin as HTML.
+	 *
+	 * Hosts can insert the returned markup directly or scope it inside a
+	 * ShadowRoot. The HTML should rely on CSS custom properties (e.g.
+	 * `--lix-diff-*`) instead of hardcoded colors so environments can theme it.
+	 *
+	 * @example
+	 * const html = await plugin.renderDiff?.({ diffs })
+	 * container.innerHTML = html ?? ""
+	 */
+	renderDiff?: (args: RenderDiffArgs) => Promise<string>;
 	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
@@ -151,11 +152,11 @@ export type DetectedChange<T = any> = {
 // 	conflictingChangeIds: Set<Change["id"]>;
 // };
 
-export type UiDiffComponentProps = {
+export type RenderDiffArgs = {
 	diffs: Array<
 		Pick<LixChange, "entity_id" | "plugin_key" | "schema_key"> & {
-			snapshot_content_before: Record<string, any> | null;
-			snapshot_content_after: Record<string, any> | null;
+			before_snapshot_content: Record<string, any> | null;
+			after_snapshot_content: Record<string, any> | null;
 		}
 	>;
 };

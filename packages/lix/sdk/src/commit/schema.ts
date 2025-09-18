@@ -3,8 +3,8 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import type { Lix } from "../lix/open-lix.js";
+import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import type { LixEngine } from "../engine/boot.js";
 
 /**
  * Schema definition for commits.
@@ -118,24 +118,25 @@ export type LixCommitEdge = FromLixSchemaDefinition<typeof LixCommitEdgeSchema>;
 /**
  * Apply commit database schema by creating entity views for commits and commit edges.
  */
-export function applyCommitDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">
-): void {
+export function applyCommitDatabaseSchema(args: {
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+}): void {
+	const { engine } = args;
 	// Create commit views with UUID v7 as default ID
 	createEntityViewsIfNotExists({
-		lix,
+		engine: engine,
 		schema: LixCommitSchema,
 		overrideName: "commit",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => uuidV7({ lix }),
+			id: () => uuidV7Sync({ engine: engine }),
 		},
 	});
 
 	// Create commit_edge views (read-only)
 	createEntityViewsIfNotExists({
-		lix,
+		engine: engine,
 		schema: LixCommitEdgeSchema,
 		overrideName: "commit_edge",
 		pluginKey: "lix_own_entity",

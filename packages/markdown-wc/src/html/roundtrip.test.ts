@@ -5,9 +5,9 @@ import { serializeToHtml } from "./serialize-to-html.js"
 import { parseFromHtml } from "./parse-from-html.js"
 
 async function roundtripHtml(markdown: string): Promise<string> {
-	const ast = parseMarkdown(markdown) as any
+	const ast = parseMarkdown(markdown)
 	const html = await serializeToHtml(ast)
-	const ast2 = (await parseFromHtml(html)) as any
+	const ast2 = await parseFromHtml(html)
 	return serializeAst(ast2)
 }
 

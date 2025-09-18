@@ -4,10 +4,9 @@
 	"compilerOptions": {
 		"skipDefaultLibCheck": true,
 		"emitDeclarationOnly": false,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
+		"experimentalDecorators": false,
 		"useDefineForClassFields": false,
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"noUnusedLocals": true,
 		"outDir": "./dist",
 		"rootDir": "./src",

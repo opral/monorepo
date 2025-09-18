@@ -12,6 +12,7 @@ import {
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type {
+	FromLixSchemaDefinition,
 	LixGenerated,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
@@ -22,25 +23,34 @@ import type {
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import { LixFileDescriptorSchema } from "../file/schema.js";
+import {
+	LixDirectoryDescriptorSchema,
+	LixFileDescriptorSchema,
+} from "../filesystem/index.js";
+import type {
+	EntityStateAllView,
+	EntityStateHistoryView,
+	EntityStateView,
+} from "../entity-views/types.js";
 import { LixLogSchema } from "../log/schema.js";
 import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import { LixEntityLabelSchema } from "../entity/label/schema.js";
-import { LixEntityThreadSchema } from "../entity/thread/schema.js";
+import { LixEntityConversationSchema } from "../entity/conversation/schema.js";
 import {
-	LixThreadSchema,
-	LixThreadCommentSchema,
-	type LixThreadComment,
-} from "../thread/schema.js";
+	LixConversationSchema,
+	LixConversationMessageSchema,
+	type LixConversationMessage,
+} from "../conversation/schema.js";
+import { LixChangeProposalSchema } from "../change-proposal/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
-import type { InternalFileDataCacheTable } from "../file/cache/schema.js";
-import type { InternalFileLixcolCacheTable } from "../file/cache/lixcol-schema.js";
+import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
+import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
 import type { InternalTransactionStateTable } from "../state/transaction/schema.js";
 import type { InternalStateVTable } from "../state/vtable/vtable.js";
 
@@ -59,6 +69,15 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_state_vtable: InternalStateVTable;
 	internal_file_data_cache: InternalFileDataCacheTable;
 	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	internal_state_writer: InternalStateWriterTable;
+};
+
+export type InternalStateWriterTable = {
+	file_id: string;
+	version_id: string;
+	entity_id: string;
+	schema_key: string;
+	writer_key: string | null;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
@@ -68,6 +87,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
+	directory_descriptor: LixDirectoryDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
@@ -75,10 +95,33 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,
-	entity_thread: LixEntityThreadSchema,
-	thread: LixThreadSchema,
-	thread_comment: LixThreadCommentSchema,
+	entity_conversation: LixEntityConversationSchema,
+	conversation: LixConversationSchema,
+	conversation_message: LixConversationMessageSchema,
+	change_proposal: LixChangeProposalSchema,
 };
+
+type DirectoryDescriptorView = ToKysely<
+	EntityStateView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
+	>
+>;
+type DirectoryDescriptorAllView = ToKysely<
+	EntityStateAllView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
+	>
+>;
+type DirectoryDescriptorHistoryView = ToKysely<
+	EntityStateHistoryView<
+		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
+			path: LixGenerated<string>;
+		}
+	>
+>;
 
 export type LixDatabaseSchema = {
 	active_account: ToKysely<LixActiveAccount>;
@@ -90,6 +133,9 @@ export type LixDatabaseSchema = {
 	state_history: StateHistoryView;
 
 	change: ChangeView;
+	directory: DirectoryDescriptorView;
+	directory_all: DirectoryDescriptorAllView;
+	directory_history: DirectoryDescriptorHistoryView;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",
@@ -100,22 +146,33 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
-	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
+	EntityViews<
+		typeof LixFileDescriptorSchema,
+		"file",
+		{
+			data: Uint8Array;
+			path: LixGenerated<string>;
+			directory_id: LixGenerated<string | null>;
+			name: LixGenerated<string>;
+			extension: LixGenerated<string | null>;
+		}
+	> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
-	EntityViews<typeof LixEntityThreadSchema, "entity_thread"> &
+	EntityViews<typeof LixEntityConversationSchema, "entity_conversation"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
-	EntityViews<typeof LixThreadSchema, "thread"> &
+	EntityViews<typeof LixConversationSchema, "conversation"> &
 	EntityViews<
-		typeof LixThreadCommentSchema,
-		"thread_comment",
-		{ body: LixThreadComment["body"] }
+		typeof LixConversationMessageSchema,
+		"conversation_message",
+		{ body: LixConversationMessage["body"] }
 	> &
+	EntityViews<typeof LixChangeProposalSchema, "change_proposal"> &
 	EntityViews<
 		typeof LixVersionDescriptorSchema,
 		"version",
-		{ commit_id: LixGenerated<string> }
+		{ commit_id: LixGenerated<string>; working_commit_id: LixGenerated<string> }
 	> &
 	EntityViews<typeof LixCommitSchema, "commit"> &
 	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

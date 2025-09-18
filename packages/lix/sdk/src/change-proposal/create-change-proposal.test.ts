@@ -1,106 +1,81 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
+import { createVersion } from "../version/create-version.js";
 import { createChangeProposal } from "./create-change-proposal.js";
 
-test.skip("creating a change proposal should compute the symmetric difference", async () => {
+test("createChangeProposal creates a global, open proposal with correct refs", async () => {
 	const lix = await openLix({});
 
-	// Create some changes for change sets
-	const mockChanges = await lix.db
-		.insertInto("change")
-		.values([
-			// Change 1 - only in source change set
-			{
-				schema_key: "file",
-				schema_version: "1.0",
-				entity_id: "value1",
-				file_id: "mock1",
-				plugin_key: "mock-plugin",
-				snapshot_content: null,
-			},
-			// Change 2 - in both source and target (so not in symmetric difference)
-			{
-				schema_key: "file",
-				schema_version: "1.0",
-				entity_id: "value2",
-				file_id: "mock2",
-				plugin_key: "mock-plugin",
-				snapshot_content: null,
-			},
-			// Change 3 - only in target change set
-			{
-				schema_key: "file",
-				entity_id: "value3",
-				file_id: "mock3",
-				schema_version: "1.0",
-				plugin_key: "mock-plugin",
-				snapshot_content: null,
-			},
-		])
-		.returningAll()
-		.execute();
-
-	// Create source change set with changes 1 and 2
-	const sourceChangeSet = await createChangeSet({
-		lix: lix,
-		elements: mockChanges.slice(0, 2).map((change) => ({
-			change_id: change.id,
-			entity_id: change.entity_id,
-			schema_key: change.schema_key,
-			file_id: change.file_id,
-		})),
-	});
-
-	// Create target change set with changes 2 and 3
-	const targetChangeSet = await createChangeSet({
-		lix: lix,
-		elements: mockChanges.slice(1, 3).map((change) => ({
-			change_id: change.id,
-			entity_id: change.entity_id,
-			schema_key: change.schema_key,
-			file_id: change.file_id,
-		})),
-	});
-
-	// Create a change proposal
-	const proposal = await createChangeProposal({
-		lix: lix,
-		sourceChangeSet: sourceChangeSet,
-		targetChangeSet: targetChangeSet,
-	});
-
-	// Verify the change proposal was created with the correct data
-	expect(proposal).toMatchObject({
-		id: expect.any(String),
-		source_change_set_id: sourceChangeSet.id,
-		target_change_set_id: targetChangeSet.id,
-	});
-
-	// The change_set_id should be a new change set
-	expect(proposal.change_set_id).not.toBe(sourceChangeSet.id);
-	expect(proposal.change_set_id).not.toBe(targetChangeSet.id);
-
-	// Verify the new change set contains only the changes in the symmetric difference
-	const changeSetElements = await lix.db
-		.selectFrom("change_set_element")
+	// Resolve main and create a source version
+	const main = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
 		.selectAll()
-		.where("change_set_id", "=", proposal.change_set_id)
-		.execute();
+		.executeTakeFirstOrThrow();
 
-	// Should have 2 changes: change1 and change3, but not change2 (which is in both sets)
-	expect(changeSetElements).toHaveLength(2);
+	const source = await createVersion({
+		lix,
+		from: main,
+		name: "cp_source_test",
+	});
 
-	// Expected change IDs: the first and third change
-	const expectedChangeIds = [mockChanges[0]!.id, mockChanges[2]!.id];
+	const cp = await createChangeProposal({ lix, source, target: main });
 
-	// Verify that both expected change IDs are in the result
-	expect(changeSetElements.map((el) => el.change_id)).toEqual(
-		expect.arrayContaining(expectedChangeIds)
-	);
+	// Basic shape
+	expect(typeof cp.id).toBe("string");
+	expect(cp.id.length).toBeGreaterThan(0);
+	expect(cp.source_version_id).toBe(source.id);
+	expect(cp.target_version_id).toBe(main.id);
+	expect(cp.status).toBe("open");
 
-	// Verify no other changes are included (particularly not the common change)
-	expect(
-		changeSetElements.some((el) => el.change_id === mockChanges[1]!.id)
-	).toBe(false);
+	// Lives in global scope
+	const rowAll = await lix.db
+		.selectFrom("change_proposal_all")
+		.where("id", "=", cp.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	expect(rowAll.lixcol_version_id).toBe("global");
+
+	// Also visible via scoped view
+	const row = await lix.db
+		.selectFrom("change_proposal")
+		.where("id", "=", cp.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	expect(row.status).toBe("open");
+});
+
+test("createChangeProposal respects explicit id and status overrides", async () => {
+	const lix = await openLix({});
+
+	const main = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const source = await createVersion({
+		lix,
+		from: main,
+		name: "cp_source_override",
+	});
+
+	const customId = "cp_custom_id_123";
+	const cp = await createChangeProposal({
+		lix,
+		id: customId,
+		source,
+		target: main,
+		status: "rejected",
+	});
+
+	expect(cp.id).toBe(customId);
+	expect(cp.status).toBe("rejected");
+
+	const fetched = await lix.db
+		.selectFrom("change_proposal")
+		.where("id", "=", customId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	expect(fetched.status).toBe("rejected");
 });

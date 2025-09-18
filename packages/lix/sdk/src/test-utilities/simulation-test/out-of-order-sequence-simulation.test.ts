@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { simulationTest } from "./simulation-test.js";
-import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
 
 test("out-of-order sequence simulation test discovery", () => {});
@@ -19,10 +19,10 @@ simulationTest(
 			],
 		});
 
-		// Get several sequence numbers
+		// Get several logical timestamps
 		const sequences: number[] = [];
 		for (let i = 0; i < 10; i++) {
-			sequences.push(nextDeterministicSequenceNumber({ lix }));
+			sequences.push(Date.parse(await getTimestamp({ lix })));
 		}
 
 		// In out-of-order simulation, sequences should not be monotonic

@@ -4,7 +4,7 @@
 
 Lix represents all data through four fundamental concepts that build upon each other.
 
-Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./features/versions.md) (branching), merging, and time-travel queries.
+Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./versions.mdx) (branching), merging, and time-travel queries.
 
 **Change** A single modification (e.g., `c1`).
 
@@ -102,6 +102,10 @@ graph RL
 3. The resulting state is:
 
    `State = { e1: "julia", e2: "gunther" }`
+
+### Transactions and commit path
+
+During a transaction, Lix stages state mutations and then commits them in a single pass. The writer identity (`writer_key`) is carried through the pipeline — from the internal transaction staging table to the commit generator and into the materialized state — without per‑row lookups. This enables reliable attribution for echo suppression and external‑change detection. For usage patterns and pitfalls, see the Writer Key guide: [/guide/writer-key](/guide/writer-key).
 
 ## Global Change Set Graph
 

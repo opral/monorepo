@@ -163,10 +163,7 @@ export const useQueryTakeFirst = <TResult>(
 	query: QueryFactory<TResult>,
 	options: UseQueryOptions = {},
 ): TResult | undefined => {
-	const rows = useQuery<TResult>(
-		({ lix }) => query({ lix }).limit(1) as any,
-		options,
-	);
+	const rows = useQuery<TResult>(query, options);
 	return rows[0] as TResult | undefined;
 };
 

@@ -9,6 +9,7 @@ import {
 } from "../../test-utilities/simulation-test/simulation-test.js";
 import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
 import { openLix } from "../../lix/open-lix.js";
+import { withWriterKey } from "../writer.js";
 
 test("simulation test discover", () => {});
 
@@ -31,11 +32,13 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
 		});
+
+		const internalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 		await lix.db
 			.insertInto("stored_schema")
@@ -147,13 +150,392 @@ simulationTest(
 );
 
 simulationTest(
+	"writer_key persists on insert/update and clears on update without writer",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_writer",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: { value: { type: "string" } },
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const ME = "testapp:state#me";
+
+		// Insert with writer via withWriterKey helper
+		await withWriterKey(db, ME, (trx) =>
+			trx
+				.insertInto("internal_state_vtable")
+				.values({
+					entity_id: "w1",
+					file_id: "f1",
+					schema_key: "mock_schema_writer",
+					plugin_key: "test_plugin",
+					schema_version: "1.0",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: JSON.stringify({ value: "A" }),
+					untracked: 0,
+				})
+				.execute()
+		);
+
+		const afterInsert = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "w1")
+			.select([
+				"entity_id",
+				sql`writer_key`.as("writer_key"),
+				sql`json(snapshot_content)`.as("snapshot_content"),
+			])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(afterInsert.writer_key).toBe(ME);
+		expectDeterministic(afterInsert.snapshot_content).toEqual({ value: "A" });
+
+		// Update with different writer via withWriterKey helper
+		await withWriterKey(db, `${ME}-2`, (trx) =>
+			trx
+				.updateTable("internal_state_vtable")
+				.set({ snapshot_content: JSON.stringify({ value: "B" }) })
+				.where("entity_id", "=", "w1")
+				.where("schema_key", "=", "mock_schema_writer")
+				.where("file_id", "=", "f1")
+				.execute()
+		);
+
+		const afterUpdateWithWriter = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "w1")
+			.select([
+				sql`writer_key`.as("writer_key"),
+				sql`json(snapshot_content)`.as("snapshot_content"),
+			])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(afterUpdateWithWriter.writer_key).toBe(`${ME}-2`);
+		expectDeterministic(afterUpdateWithWriter.snapshot_content).toEqual({
+			value: "B",
+		});
+
+		// Update WITHOUT writer_key should clear writer (delete writer row)
+		await db
+			.updateTable("internal_state_vtable")
+			.set({ snapshot_content: JSON.stringify({ value: "C" }) })
+			.where("entity_id", "=", "w1")
+			.where("schema_key", "=", "mock_schema_writer")
+			.where("file_id", "=", "f1")
+			.execute();
+
+		const afterUpdateNoWriter = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "w1")
+			.select([
+				sql`writer_key`.as("writer_key"),
+				sql`json(snapshot_content)`.as("snapshot_content"),
+			])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(afterUpdateNoWriter.writer_key).toBeNull();
+		expectDeterministic(afterUpdateNoWriter.snapshot_content).toEqual({
+			value: "C",
+		});
+	}
+);
+
+simulationTest(
+	"writer_key on delete: provided writer retained on tombstone; missing writer clears",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_writer_del",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: { value: { type: "string" } },
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const ME = "testapp:state#me";
+
+		// Insert tracked row (no writer yet)
+		await db
+			.insertInto("internal_state_vtable")
+			.values({
+				entity_id: "wd1",
+				file_id: "fd",
+				schema_key: "mock_schema_writer_del",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: JSON.stringify({ value: "L" }),
+				untracked: 0,
+			})
+			.execute();
+
+		// Delete WITH writer via withWriterKey helper
+		await withWriterKey(db, `${ME}-del`, (trx) =>
+			trx
+				.deleteFrom("internal_state_vtable")
+				.where("entity_id", "=", "wd1")
+				.where("schema_key", "=", "mock_schema_writer_del")
+				.where("file_id", "=", "fd")
+				.where(
+					"version_id",
+					"=",
+					trx.selectFrom("active_version").select("version_id")
+				)
+				.execute()
+		);
+
+		const tombstoneWithWriter = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "wd1")
+			.where("schema_key", "=", "mock_schema_writer_del")
+			.where("file_id", "=", "fd")
+			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(tombstoneWithWriter.snapshot_content).toBeNull();
+		expectDeterministic(tombstoneWithWriter.writer_key).toBe(`${ME}-del`);
+
+		// Recreate and delete WITHOUT writer -> writer row cleared
+		await db
+			.insertInto("internal_state_vtable")
+			.values({
+				entity_id: "wd1",
+				file_id: "fd",
+				schema_key: "mock_schema_writer_del",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: JSON.stringify({ value: "X" }),
+				untracked: 0,
+			})
+			.execute();
+		await db
+			.deleteFrom("internal_state_vtable")
+			.where("entity_id", "=", "wd1")
+			.where("schema_key", "=", "mock_schema_writer_del")
+			.where("file_id", "=", "fd")
+			.where(
+				"version_id",
+				"=",
+				db.selectFrom("active_version").select("version_id")
+			)
+			.execute();
+
+		const tombstoneNoWriter = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "wd1")
+			.where("schema_key", "=", "mock_schema_writer_del")
+			.where("file_id", "=", "fd")
+			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(tombstoneNoWriter.snapshot_content).toBeNull();
+		expectDeterministic(tombstoneNoWriter.writer_key).toBeNull();
+	}
+);
+
+simulationTest(
+	"inheritance exposes parent writer when child has no local writer; child override replaces",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_writer_inherit",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: { value: { type: "string" } },
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const child = await createVersion({ lix, name: "child" });
+		const P = "app:state#parent";
+		const C = "app:state#child";
+
+		// Insert in parent with writer P
+		await withWriterKey(db, P, (trx) =>
+			trx
+				.insertInto("internal_state_vtable")
+				.values({
+					entity_id: "wi1",
+					file_id: "fi1",
+					schema_key: "mock_schema_writer_inherit",
+					plugin_key: "tp",
+					schema_version: "1.0",
+					version_id: "global",
+					snapshot_content: JSON.stringify({ value: "parent" }),
+					untracked: 0,
+				})
+				.execute()
+		);
+
+		// Child inherits content; should expose parent's writer_key
+		const inherited = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "wi1")
+			.where("version_id", "=", child.id)
+			.select([
+				sql`writer_key`.as("writer_key"),
+				sql`json(snapshot_content)`.as("snapshot_content"),
+				"inherited_from_version_id",
+			])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(inherited.snapshot_content).toEqual({
+			value: "parent",
+		});
+		expectDeterministic(inherited.inherited_from_version_id).toBe("global");
+		expectDeterministic(inherited.writer_key).toBe(P);
+
+		// Now override in child with its own writer C
+		await withWriterKey(db, C, (trx) =>
+			trx
+				.insertInto("internal_state_vtable")
+				.values({
+					entity_id: "wi1",
+					file_id: "fi1",
+					schema_key: "mock_schema_writer_inherit",
+					plugin_key: "tp",
+					schema_version: "1.0",
+					version_id: child.id,
+					snapshot_content: JSON.stringify({ value: "child" }),
+					untracked: 0,
+				})
+				.execute()
+		);
+
+		const childNow = await db
+			.selectFrom("internal_state_vtable")
+			.where("entity_id", "=", "wi1")
+			.where("version_id", "=", child.id)
+			.select([
+				sql`writer_key`.as("writer_key"),
+				sql`json(snapshot_content)`.as("snapshot_content"),
+				"inherited_from_version_id",
+			])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(childNow.snapshot_content).toEqual({ value: "child" });
+		expectDeterministic(childNow.inherited_from_version_id).toBeNull();
+		expectDeterministic(childNow.writer_key).toBe(C);
+	}
+);
+
+simulationTest(
+	"writer_key exposed on state/state_all/state_with_tombstones",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_writer_views",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: { value: { type: "string" } },
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const ME = "app:state#me";
+
+		// Insert with writer via withWriterKey helper
+		await withWriterKey(db, ME, (trx) =>
+			trx
+				.insertInto("internal_state_vtable")
+				.values({
+					entity_id: "vw1",
+					file_id: "fv",
+					schema_key: "mock_schema_writer_views",
+					plugin_key: "tp",
+					schema_version: "1.0",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: JSON.stringify({ value: "X" }),
+					untracked: 0,
+				})
+				.execute()
+		);
+
+		// state_all
+		const sAll = await db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "vw1")
+			.select(["entity_id", sql`writer_key`.as("writer_key")])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(sAll.writer_key).toBe(ME);
+
+		// state (active)
+		const s = await db
+			.selectFrom("state")
+			.where("entity_id", "=", "vw1")
+			.select(["entity_id", sql`writer_key`.as("writer_key")])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(s.writer_key).toBe(ME);
+
+		// state_with_tombstones should expose writer_key as well
+		const swt = await db
+			.selectFrom("state_with_tombstones")
+			.where("entity_id", "=", "vw1")
+			.select(["entity_id", sql`writer_key`.as("writer_key")])
+			.executeTakeFirstOrThrow();
+		expectDeterministic(swt.writer_key).toBe(ME);
+	}
+);
+
+simulationTest(
 	"exposes tracked deletions as tombstones (NULL snapshot_content)",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -235,7 +617,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -310,7 +692,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -502,6 +884,100 @@ simulationTest(
 		);
 	}
 );
+
+simulationTest(
+	"metadata on committed state rows is preserved",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const selectStateMetadata = async () =>
+			await lix.db
+				.selectFrom("state_all")
+				.where("entity_id", "=", "meta-entity")
+				.where("schema_key", "=", "lix_key_value")
+				.select(["metadata"])
+				.executeTakeFirstOrThrow();
+
+		const selectChangeMetadata = async () =>
+			await lix.db
+				.selectFrom("change")
+				.where("entity_id", "=", "meta-entity")
+				.where("schema_key", "=", "lix_key_value")
+				.orderBy("created_at", "desc")
+				.select(["metadata"])
+				.executeTakeFirstOrThrow();
+
+		// Perform a regular insert via the public state view
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "meta-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: { key: "meta", value: "value" } as any,
+				schema_version: "1.0",
+				metadata: { foo: "bar" },
+			})
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({ foo: "bar" });
+		expect((await selectChangeMetadata()).metadata).toEqual({ foo: "bar" });
+
+		// Updating metadata via state should persist the new value
+		await lix.db
+			.updateTable("state")
+			.set({ metadata: { foo: "baz" } as any })
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({ foo: "baz" });
+		expect((await selectChangeMetadata()).metadata).toEqual({ foo: "baz" });
+
+		// Partially update metadata using SQL JSON helpers
+		await lix.db
+			.updateTable("state")
+			.set(({ eb }) => ({
+				metadata: sql<string>`json_set(${eb.ref("metadata")}, '$.bar', 'qux')`,
+			}))
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toEqual({
+			foo: "baz",
+			bar: "qux",
+		});
+		expect((await selectChangeMetadata()).metadata).toEqual({
+			foo: "baz",
+			bar: "qux",
+		});
+
+		// Clearing metadata via state should propagate null
+		await lix.db
+			.updateTable("state")
+			.set({ metadata: null })
+			.where("entity_id", "=", "meta-entity")
+			.where("schema_key", "=", "lix_key_value")
+			.where("file_id", "=", "lix")
+			.execute();
+
+		expect((await selectStateMetadata()).metadata).toBeNull();
+		expect((await selectChangeMetadata()).metadata).toBeNull();
+	},
+	{ simulations: [normalSimulation] }
+);
 simulationTest(
 	"untracked state in child overrides inherited untracked state",
 	async ({ openSimulatedLix, expectDeterministic }) => {
@@ -509,7 +985,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -599,7 +1075,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -696,7 +1172,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -789,7 +1265,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -869,7 +1345,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1119,7 +1595,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1274,7 +1750,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1335,7 +1811,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1482,7 +1958,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1717,7 +2193,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1853,7 +2329,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1917,7 +2393,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -1987,7 +2463,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2070,7 +2546,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2141,7 +2617,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2256,7 +2732,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2469,7 +2945,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2584,7 +3060,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2682,7 +3158,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -2991,7 +3467,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],

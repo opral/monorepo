@@ -2,6 +2,17 @@ import { expect, test } from "vitest";
 import { mockJsonPlugin } from "./mock-json-plugin.js";
 import { openLix } from "../lix/open-lix.js";
 
+const createPluginFile = (data: Uint8Array) => ({
+	id: "mock",
+	path: "/mock.json",
+	data,
+	metadata: {},
+	directory_id: null,
+	name: "mock",
+	extension: "json",
+	hidden: false,
+});
+
 test("it handles insert changes", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
@@ -45,7 +56,7 @@ test("it handles insert changes", async () => {
 		.execute();
 
 	const { fileData: applied } = mockJsonPlugin.applyChanges!({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createPluginFile(before),
 		changes,
 	});
 
@@ -97,7 +108,7 @@ test("it handles update changes", async () => {
 		.execute();
 
 	const { fileData: applied } = mockJsonPlugin.applyChanges!({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createPluginFile(before),
 		changes,
 	});
 
@@ -148,7 +159,7 @@ test("it handles delete changes", async () => {
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createPluginFile(before),
 		changes,
 	});
 
@@ -204,7 +215,7 @@ test("it handles nested properties and arrays", async () => {
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
-		file: { id: "mock", path: "/mock", data: before, metadata: {} },
+		file: createPluginFile(before),
 		changes,
 	});
 

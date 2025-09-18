@@ -13,7 +13,16 @@ export type PMNode = {
 }
 
 export function tiptapDocToAst(doc: PMNode): any {
-	return { type: "root", children: (doc.content || []).map(pmBlockToAst) } as any
+	const outChildren: any[] = []
+	for (const n of doc.content || []) {
+		// Drop empty top-level paragraphs (UI scaffold) from persisted AST
+		if (n.type === "paragraph") {
+			const inline = pmInlineToMd(n.content || [])
+			if (!inline.length) continue
+		}
+		outChildren.push(pmBlockToAst(n))
+	}
+	return { type: "root", children: outChildren } as any
 }
 
 function pmBlockToAst(node: PMNode): any {

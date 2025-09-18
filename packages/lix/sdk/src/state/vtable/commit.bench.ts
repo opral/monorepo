@@ -2,7 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns
@@ -11,7 +11,7 @@ bench("commit empty transaction (baseline)", async () => {
 	const lix = await openLix({});
 
 	commit({
-		lix: lix as any,
+		engine: lix.engine!,
 	});
 });
 
@@ -38,14 +38,14 @@ bench("commit transaction with 1 row", async () => {
 	}
 
 	insertTransactionState({
-		lix: lix as any,
+		engine: lix.engine!,
 		data: multipleData,
-		timestamp: timestamp({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
 	commit({
-		lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
+		engine: lix.engine!,
 	});
 });
 
@@ -71,14 +71,14 @@ bench("commit transaction with 100 rows", async () => {
 		});
 	}
 	insertTransactionState({
-		lix: lix as any,
+		engine: lix.engine!,
 		data: multipleData,
-		timestamp: timestamp({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: Commit all transaction states
 	commit({
-		lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
+		engine: lix.engine!,
 	});
 });
 
@@ -109,14 +109,14 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 		}
 
 		insertTransactionState({
-			lix: lix as any,
+			engine: lix.engine!,
 			data: batch,
-			timestamp: timestamp({ lix }),
+			timestamp: await getTimestamp({ lix }),
 		});
 
 		// Commit the current transaction batch
 		commit({
-			lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks },
+			engine: lix.engine!,
 		});
 	}
 });
@@ -143,11 +143,11 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 		});
 	}
 	insertTransactionState({
-		lix: lix as any,
+		engine: lix.engine!,
 		data: baseRows,
-		timestamp: timestamp({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
-	commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
+	commit({ engine: lix.engine! });
 
 	// Prepare a mixed batch: 10 inserts, 10 updates, 10 deletes
 	const INSERTS = 10;
@@ -201,11 +201,13 @@ bench("commit with mixed operations (insert/update/delete)", async () => {
 	}
 
 	insertTransactionState({
-		lix: lix as any,
+		engine: lix.engine!,
 		data: ops,
-		timestamp: timestamp({ lix }),
+		timestamp: await getTimestamp({ lix }),
 	});
 
 	// Benchmark: single commit with mixed operations
-	commit({ lix: { sqlite: lix.sqlite, db: lix.db as any, hooks: lix.hooks } });
+	commit({
+		engine: lix.engine!,
+	});
 });

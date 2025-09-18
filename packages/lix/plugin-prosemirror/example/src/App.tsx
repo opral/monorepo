@@ -5,21 +5,28 @@ import AccountSelector from "./components/AccountSelector";
 import VersionToolbar from "./components/VersionToolbar";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { openLix, OpfsStorage } from "@lix-js/sdk";
+import { openLix, OpfsSahEnvironment } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 import { initLixInspector } from "@lix-js/inspector";
 import { LixProvider } from "@lix-js/react-utils";
 
 // Initialize Lix
+const environment = new OpfsSahEnvironment({ key: "prosemirror-example" });
+
 let lix;
 try {
 	lix = await openLix({
 		providePlugins: [prosemirrorPlugin],
-		storage: new OpfsStorage({ path: "example.lix" }),
+		environment,
 	});
 } catch (error) {
 	console.error("Failed to open Lix, cleaning OPFS and reloading:", error);
-	await OpfsStorage.clean();
+	try {
+		await environment.close();
+	} catch {
+		// ignore close errors during recovery
+	}
+	await OpfsSahEnvironment.clear();
 	window.location.reload();
 }
 

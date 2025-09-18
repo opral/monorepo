@@ -1,5 +1,8 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
+import type { LixPlugin } from "@lix-js/sdk";
+
+type DetectChangesArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
 
 test("it should not detect changes if the document did not update", async () => {
 	const before = new TextEncoder().encode(
@@ -27,15 +30,13 @@ test("it should not detect changes if the document did not update", async () => 
 			id: "random",
 			path: "prosemirror.json",
 			data: before,
-			metadata: null,
 		},
 		after: {
 			id: "random",
 			path: "prosemirror.json",
 			data: after,
-			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 	expect(detectedChanges).toEqual([]);
 });
 
@@ -99,7 +100,7 @@ test("it should detect insertion of a new node", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(2);
 
@@ -166,7 +167,7 @@ test("it should detect modification of an existing node", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -239,7 +240,7 @@ test("it should detect deletion of a node", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(2);
 
@@ -348,7 +349,7 @@ test("it should detect multiple changes in a single document", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(4);
 
@@ -444,7 +445,7 @@ test("it should detect changes in headings with different levels", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -523,7 +524,7 @@ test("it should detect changes in text marks", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -655,7 +656,7 @@ test("it should detect changes in complex block structures like lists", async ()
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	// Should detect: modified item-1, added nested list, added item-3
 	expect(detectedChanges.length).toBeGreaterThanOrEqual(2);
@@ -737,7 +738,7 @@ test("it should detect changes in nodes with custom attributes", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -882,7 +883,7 @@ test("it should detect changes in tables", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	// Should at minimum detect: changed cell-1-1-p and added row-2
 	expect(detectedChanges.length).toBeGreaterThanOrEqual(2);
@@ -963,7 +964,7 @@ test("it should detect changes in code blocks", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -1052,7 +1053,7 @@ test("it should detect changes in blockquotes", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	// Should detect changes in quote-p-1, addition of quote-p-2, and possibly the parent quote-1
 	expect(detectedChanges.length).toBeGreaterThanOrEqual(2);
@@ -1167,7 +1168,7 @@ test("it should detect changes in links", async () => {
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
@@ -1254,7 +1255,7 @@ test("it should NOT report changes for parent nodes when only children change", 
 			data: after,
 			metadata: null,
 		},
-	});
+	} as DetectChangesArgs);
 
 	// We expect only the paragraph to be reported as changed, not the description
 	expect(detectedChanges).toHaveLength(1);

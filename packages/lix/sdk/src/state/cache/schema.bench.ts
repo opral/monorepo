@@ -2,7 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { timestamp } from "../../deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/deterministic/timestamp.js";
 
 const ROW_NUM = 1000;
 
@@ -12,7 +12,7 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 	// Generate test rows for cache
 	const rows = [];
 
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
@@ -59,7 +59,7 @@ bench("query with json_extract from cache", async () => {
 
 	// First, insert test data
 	const rows = [];
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
@@ -119,7 +119,7 @@ bench("query through resolved_state_all view", async () => {
 
 	// First, insert test data
 	const rows = [];
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
@@ -179,7 +179,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 
 	// First, insert test data
 	const rows = [];
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
@@ -269,7 +269,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 
 	// First, insert test data
 	const rows = [];
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM / 10; i++) {
 		const snapshotContent = {
@@ -319,7 +319,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 			.updateTable("internal_state_cache")
 			.set({
 				snapshot_content: sql`jsonb(${JSON.stringify(updatedSnapshot)})`,
-				updated_at: timestamp({ lix }),
+				updated_at: await getTimestamp({ lix }),
 			})
 			.where("entity_id", "=", `entity-${i}`)
 			.where("schema_key", "=", "lix_test")
@@ -335,7 +335,7 @@ bench(`delete ${ROW_NUM / 10} rows from cache`, async () => {
 
 	// First, insert test data
 	const rows = [];
-	const time = timestamp({ lix });
+	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM / 10; i++) {
 		const snapshotContent = {

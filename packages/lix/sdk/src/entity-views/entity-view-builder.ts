@@ -1,4 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
@@ -107,7 +108,7 @@ export type EntityViews<
  * ```
  */
 export function createEntityViewsIfNotExists(args: {
-	lix: Pick<Lix, "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] */
 	overrideName?: string;
@@ -145,7 +146,7 @@ export function createEntityViewsIfNotExists(args: {
 
 	// Create the _history view (historical states)
 	createEntityStateHistoryView({
-		lix: args.lix,
+		engine: args.engine,
 		schema: args.schema,
 		overrideName: view_name + "_history",
 	});

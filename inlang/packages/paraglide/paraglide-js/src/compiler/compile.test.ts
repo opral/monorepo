@@ -389,6 +389,15 @@ test("emits warnings for modules that couldn't be imported via http", async () =
 	consola.mockTypes(() => mock);
 
 	const fs = memfs().fs as unknown as typeof import("node:fs");
+	const fetchMock = vi.fn().mockRejectedValue(new TypeError("network error"));
+	vi.stubGlobal("fetch", fetchMock);
+
+	const errorsSpy = vi.spyOn(project.errors, "get").mockResolvedValue([
+		{
+			message:
+				"Failed to import module https://example.com/non-existent-paraglide-plugin.js",
+		} as any,
+	]);
 
 	// save project to directory to test loading
 	await saveProjectToDirectory({
@@ -397,11 +406,16 @@ test("emits warnings for modules that couldn't be imported via http", async () =
 		fs: fs.promises,
 	});
 
-	await compile({
-		project: "/project.inlang",
-		outdir: "/output",
-		fs: fs,
-	});
+	try {
+		await compile({
+			project: "/project.inlang",
+			outdir: "/output",
+			fs: fs,
+		});
+	} finally {
+		vi.unstubAllGlobals();
+		errorsSpy.mockRestore();
+	}
 
 	expect(mock).toHaveBeenCalled();
 });

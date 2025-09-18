@@ -1,9 +1,13 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixVersion } from "./schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersion,
+	type LixVersionTip,
+} from "./schema.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 import { sql, type Kysely } from "kysely";
-import { uuidV7 } from "../deterministic/uuid-v7.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
+import { getTimestamp } from "../engine/deterministic/timestamp.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
@@ -115,7 +119,7 @@ export async function mergeVersion(args: {
 					sql`json(snapshot_content)`.as("snapshot_content"),
 					"created_at",
 				])
-				.where("lixcol_version_id", "=", sourceVersion.id)
+				.where("version_id", "=", sourceVersion.id)
 				.where("id", "in", refIds)
 				.execute();
 
@@ -153,16 +157,16 @@ export async function mergeVersion(args: {
 			return;
 		}
 		// One-commit model IDs
-		const targetChangeSetId = uuidV7({ lix });
-		const targetCommitId = uuidV7({ lix });
-		const now = timestamp({ lix });
+		const targetChangeSetId = await uuidV7({ lix });
+		const targetCommitId = await uuidV7({ lix });
+		const now = await getTimestamp({ lix });
 		//
 
 		// Build change rows (manual meta for one-commit model)
 		const changeRows: LixChangeRaw[] = [];
 
 		// commit (target) with parent ordering [target.tip, source.tip]
-		const targetCommitChangeId = uuidV7({ lix });
+		const targetCommitChangeId = await uuidV7({ lix });
 		const commitRow: LixChangeRaw = {
 			id: targetCommitChangeId,
 			entity_id: targetCommitId,
@@ -183,16 +187,17 @@ export async function mergeVersion(args: {
 
 		// tip (target -> commit-anchored pointer)
 		const versionTipRow: LixChangeRaw = {
-			id: uuidV7({ lix }),
+			id: await uuidV7({ lix }),
 			entity_id: target.id,
-			schema_key: "lix_version_tip",
-			schema_version: "1.0",
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
 				id: target.id,
 				commit_id: targetCommitId,
-			}),
+				working_commit_id: targetVersion.working_commit_id,
+			} satisfies LixVersionTip),
 			created_at: now,
 		};
 		changeRows.push(versionTipRow);
@@ -203,7 +208,7 @@ export async function mergeVersion(args: {
 		// Create deletion change rows (domain tombstones) for target
 		const deletionChanges: LixChangeRaw[] = [];
 		for (const del of toDelete) {
-			const delChangeId = uuidV7({ lix });
+			const delChangeId = await uuidV7({ lix });
 			deletionChanges.push({
 				id: delChangeId,
 				entity_id: del.entity_id,
@@ -220,7 +225,7 @@ export async function mergeVersion(args: {
 		const cseChangeRows: LixChangeRaw[] = [];
 		for (const ref of toReference) {
 			cseChangeRows.push({
-				id: uuidV7({ lix }),
+				id: await uuidV7({ lix }),
 				entity_id: `${targetChangeSetId}~${ref.id}`,
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
@@ -238,7 +243,7 @@ export async function mergeVersion(args: {
 		}
 		for (const del of deletionChanges) {
 			cseChangeRows.push({
-				id: uuidV7({ lix }),
+				id: await uuidV7({ lix }),
 				entity_id: `${targetChangeSetId}~${del.id}`,
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
@@ -287,7 +292,7 @@ export async function mergeVersion(args: {
 				});
 				// Also anchor an explicit CSE change row for the author under target change_set
 				cseChangeRows.push({
-					id: uuidV7({ lix }),
+					id: await uuidV7({ lix }),
 					entity_id: `${targetChangeSetId}~${row.id}`,
 					schema_key: "lix_change_set_element",
 					schema_version: "1.0",
@@ -451,13 +456,13 @@ export async function mergeVersion(args: {
 		}
 
 		// Global CSEs for winners, deletions, and meta (commit + version)
-		const mkCse = (
+		const mkCse = async (
 			change_id: string,
 			entity_id: string,
 			schema_key: string,
 			file_id: string
-		): Mat => ({
-			id: uuidV7({ lix }),
+		): Promise<Mat> => ({
+			id: await uuidV7({ lix }),
 			entity_id: `${targetChangeSetId}~${change_id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: "1.0",
@@ -477,26 +482,27 @@ export async function mergeVersion(args: {
 
 		for (const ref of toReference) {
 			cacheBatch.push(
-				mkCse(ref.id, ref.entity_id, ref.schema_key, ref.file_id)
+				await mkCse(ref.id, ref.entity_id, ref.schema_key, ref.file_id)
 			);
 		}
 		for (const del of deletionChanges) {
 			cacheBatch.push(
-				mkCse(del.id, del.entity_id, del.schema_key, del.file_id)
+				await mkCse(del.id, del.entity_id, del.schema_key, del.file_id)
 			);
 		}
 		// No meta CSEs (commit/version/change_set) to keep CSE domain-only
 		// Author CSEs (copied from source)
 		for (const au of authorEntries) {
-			cacheBatch.push(mkCse(au.id, au.entity_id, "lix_change_author", "lix"));
+			cacheBatch.push(
+				await mkCse(au.id, au.entity_id, "lix_change_author", "lix")
+			);
 		}
 
 		// Write incremental cache in a single batched call
 		if (cacheBatch.length > 0) {
-			updateStateCache({ lix, changes: cacheBatch });
-			// Mark cache fresh to prevent vtable from repopulating and discarding just-written rows
-			markStateCacheAsFresh({ lix });
-			//
+			// Delegate cache updates to engine via router when engine is not exposed
+			await lix.call("lix_update_state_cache", { changes: cacheBatch });
+			await lix.call("lix_mark_state_cache_as_fresh");
 		}
 	});
 }

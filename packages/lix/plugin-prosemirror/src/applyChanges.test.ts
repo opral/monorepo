@@ -1,6 +1,9 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
+import type { LixPlugin } from "@lix-js/sdk";
+
+type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
 
 // Test that detectChanges and applyChanges are in sync using mockChanges function
 test("it detects and applies changes to a Prosemirror document", async () => {
@@ -148,7 +151,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			metadata: null,
 		},
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	// Parse the document
 	const appliedDoc = JSON.parse(new TextDecoder().decode(applied));
@@ -276,7 +279,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 			metadata: null,
 		},
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	// Parse the document
 	const appliedDoc = JSON.parse(new TextDecoder().decode(applied));
@@ -390,7 +393,7 @@ test("it correctly applies changes to text with marks", async () => {
 			metadata: null,
 		},
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	// Parse the document
 	const appliedDoc = JSON.parse(new TextDecoder().decode(applied));
@@ -528,7 +531,7 @@ test("it correctly applies changes to mixed content", async () => {
 			metadata: null,
 		},
 		changes,
-	});
+	} as ApplyChangesArgs);
 
 	// Parse the document
 	const appliedDoc = JSON.parse(new TextDecoder().decode(applied));

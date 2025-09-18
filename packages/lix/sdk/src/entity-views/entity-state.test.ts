@@ -44,7 +44,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		expect(() => {
 			createEntityStateView({
-				lix,
+				engine: lix.engine!,
 				schema: invalidSchema,
 				pluginKey: "test_plugin",
 			});
@@ -57,7 +57,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -103,7 +103,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -154,7 +154,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -209,7 +209,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -267,7 +267,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -312,7 +312,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: compositeKeySchema,
 			overrideName: "composite_view",
 			pluginKey: "test_plugin",
@@ -381,7 +381,7 @@ describe("createEntityViewIfNotExists", () => {
 		let defaultValueCalled = false;
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -455,7 +455,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -489,7 +489,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			// No overrideName - should use schema["x-lix-key"]
 			pluginKey: "test_plugin",
@@ -519,7 +519,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -601,7 +601,7 @@ describe("createEntityViewIfNotExists", () => {
 			.execute();
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -648,7 +648,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: testSchema,
 			overrideName: "test_view",
 			pluginKey: "test_plugin",
@@ -691,7 +691,7 @@ describe("createEntityViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		createEntityStateView({
-			lix,
+			engine: lix.engine!,
 			schema: compositeKeySchema,
 			overrideName: "composite_view",
 			pluginKey: "test_plugin",

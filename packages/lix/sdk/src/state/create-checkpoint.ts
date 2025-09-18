@@ -1,10 +1,24 @@
-import type { LixCommit } from "../commit/schema.js";
-import { nanoId, uuidV7 } from "../deterministic/index.js";
+import { type LixCommit, LixCommitSchema } from "../commit/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
+import { getTimestampSync } from "../engine/deterministic/timestamp.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
+import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import type { LixEngine } from "../engine/boot.js";
+import { type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import {
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+} from "../version/schema.js";
+import {
+	LixEntityLabelSchema,
+	type LixEntityLabel,
+} from "../entity/label/schema.js";
 
 /**
  * Converts the current working change set into a checkpoint.
@@ -19,10 +33,17 @@ import { updateStateCache } from "./cache/update-state-cache.js";
  * ```
  */
 
-export async function createCheckpoint(args: {
-	lix: Lix;
+/**
+ * @param args.engine - The engine context bound to SQLite
+ */
+export async function createCheckpointSync(args: {
+	engine: LixEngine;
 }): Promise<State<LixCommit>> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
+	const engine = args.engine;
+	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const executeInTransaction = async (
+		trx: Kysely<LixInternalDatabaseSchema>
+	) => {
 		// Get current active version
 		const activeVersion = await trx
 			.selectFrom("active_version")
@@ -34,7 +55,7 @@ export async function createCheckpoint(args: {
 		const workingCommit = await trx
 			.selectFrom("commit")
 			.where("id", "=", activeVersion.working_commit_id)
-			.selectAll()
+			.select(["id", "parent_commit_ids", "change_set_id"])
 			.executeTakeFirstOrThrow();
 
 		const workingChangeSetId = workingCommit.change_set_id;
@@ -43,8 +64,9 @@ export async function createCheckpoint(args: {
 		const workingElements = await trx
 			.selectFrom("change_set_element_all")
 			.where("change_set_id", "=", workingChangeSetId)
+			.innerJoin("change", "change.id", "change_set_element_all.change_id")
 			.where("lixcol_version_id", "=", "global")
-			.selectAll()
+			.select(["change.id", "change.snapshot_content"])
 			.execute();
 
 		if (workingElements.length === 0) {
@@ -58,58 +80,185 @@ export async function createCheckpoint(args: {
 			return headCommit;
 		}
 
-		// 1. The old working commit becomes the checkpoint commit
+		// 1) Prepare ids
 		const checkpointCommitId = activeVersion.working_commit_id;
+		const newWorkingChangeSetId = uuidV7Sync({ engine });
+		const newWorkingCommitId = uuidV7Sync({ engine });
 
-		// Link checkpoint to previous head by setting its parent_commit_ids
-		await trx
-			.updateTable("commit_all")
-			.set({ parent_commit_ids: [activeVersion.commit_id] as any })
-			.where("id", "=", checkpointCommitId)
-			.where("lixcol_version_id", "=", "global")
-			.execute();
-
-		// 2. Create new empty working change set for continued work
-		const newWorkingChangeSetId = nanoId({ lix: args.lix });
-		await trx
-			.insertInto("change_set_all")
-			.values({
-				id: newWorkingChangeSetId,
-				lixcol_version_id: "global",
-			})
-			.execute();
-
-		// 3. Get checkpoint label and assign it to the checkpoint commit
+		// 2) Ensure checkpoint label exists
 		const checkpointLabel = await trx
 			.selectFrom("label")
 			.where("name", "=", "checkpoint")
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		await trx
-			.insertInto("entity_label_all")
-			.values({
+		// Update version tip + descriptor via change + cache (avoid version view writes)
+		const now = getTimestampSync({ engine });
+		const descriptorChange: LixChangeRaw = {
+			id: uuidV7Sync({ engine }),
+			entity_id: activeVersion.id,
+			schema_key: LixVersionDescriptorSchema["x-lix-key"],
+			schema_version: LixVersionDescriptorSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				name: activeVersion.name,
+				inherits_from_version_id: activeVersion.inherits_from_version_id,
+				hidden: activeVersion.hidden,
+			} satisfies LixVersionDescriptor),
+			created_at: now,
+		};
+		const tipChange: LixChangeRaw = {
+			id: uuidV7Sync({ engine }),
+			entity_id: activeVersion.id,
+			schema_key: LixVersionTipSchema["x-lix-key"],
+			schema_version: LixVersionTipSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: activeVersion.id,
+				commit_id: checkpointCommitId,
+				working_commit_id: newWorkingCommitId,
+			} satisfies LixVersionTip),
+			created_at: now,
+		};
+
+		const workingDomainChangeIds = workingElements
+			.map((r: any) => r.change_id as string | null)
+			.filter((id): id is string => Boolean(id));
+
+		// Merge in the previous tip (A) as an additional parent to WC
+		const mergedParents = Array.from(
+			new Set<string>([
+				...(workingCommit.parent_commit_ids ?? []),
+				activeVersion.commit_id,
+			])
+		);
+
+		// Pre-generate label change id so we can track it in checkpoint change_ids
+		const labelChangeId = uuidV7Sync({ engine });
+
+		// Commit change rows (checkpoint + new working)
+		const checkpointCommitChange: LixChangeRaw = {
+			id: uuidV7Sync({ engine }),
+			entity_id: checkpointCommitId,
+			schema_key: LixCommitSchema["x-lix-key"],
+			schema_version: LixCommitSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: checkpointCommitId,
+				change_set_id: workingChangeSetId,
+				parent_commit_ids: mergedParents,
+				change_ids: [...workingDomainChangeIds, labelChangeId],
+			}),
+			created_at: now,
+		};
+		const newWorkingCommitChange: LixChangeRaw = {
+			id: uuidV7Sync({ engine }),
+			entity_id: newWorkingCommitId,
+			schema_key: LixCommitSchema["x-lix-key"],
+			schema_version: LixCommitSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: newWorkingCommitId,
+				change_set_id: newWorkingChangeSetId,
+				parent_commit_ids: [checkpointCommitId],
+				change_ids: [],
+			} satisfies LixCommit),
+			created_at: now,
+		};
+		const labelChange: LixChangeRaw = {
+			id: labelChangeId,
+			entity_id: `${checkpointCommitId}~${checkpointLabel.id}`,
+			schema_key: LixEntityLabelSchema["x-lix-key"],
+			schema_version: LixEntityLabelSchema["x-lix-version"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
 				entity_id: checkpointCommitId,
 				schema_key: "lix_commit",
 				file_id: "lix",
 				label_id: checkpointLabel.id,
-				lixcol_version_id: "global",
-			})
-			.execute();
+			} satisfies LixEntityLabel),
+			created_at: now,
+		};
 
-		// 4. Create a new commit for the new working change set
-		const newWorkingCommitId = uuidV7({ lix: args.lix });
+		// Persist changes and update cache without creating a meta-commit
 		await trx
-			.insertInto("commit_all")
-			.values({
-				id: newWorkingCommitId,
-				change_set_id: newWorkingChangeSetId,
-				// new working commit is a child of the checkpoint
-				parent_commit_ids: [checkpointCommitId] as any,
-				lixcol_version_id: "global",
-			})
+			.insertInto("change")
+			.values([
+				descriptorChange as any,
+				tipChange as any,
+				checkpointCommitChange as any,
+				newWorkingCommitChange as any,
+				labelChange as any,
+			])
 			.execute();
+		const materializedChanges = [
+			{
+				...descriptorChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...tipChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...checkpointCommitChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...newWorkingCommitChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: newWorkingCommitId,
+			},
+			{
+				...labelChange,
+				lixcol_version_id: activeVersion.id,
+				lixcol_commit_id: checkpointCommitId,
+			},
+		] satisfies Array<
+			LixChangeRaw & {
+				lixcol_version_id: string;
+				lixcol_commit_id: string;
+			}
+		>;
 
+		updateStateCache({
+			engine,
+			changes: materializedChanges,
+		});
+
+		const hookChanges: StateCommitChange[] = materializedChanges.map(
+			(change) => ({
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				schema_version: change.schema_version,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				created_at: change.created_at,
+				snapshot_content: change.snapshot_content
+					? JSON.parse(change.snapshot_content)
+					: null,
+				metadata: change.metadata ? JSON.parse(change.metadata) : null,
+				version_id: change.lixcol_version_id,
+				commit_id: change.lixcol_commit_id,
+				untracked: 0,
+				writer_key: null,
+			})
+		);
+
+		// Bridge state_commit so reactive queries observe the new working commit/descriptor state.
+		args.engine.hooks._emit("state_commit", { changes: hookChanges });
+
+		// Return the checkpoint commit (old working)
 		const createdCommit = await trx
 			.selectFrom("commit_all")
 			.selectAll()
@@ -117,87 +266,20 @@ export async function createCheckpoint(args: {
 			.where("lixcol_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
-		// Edges are derived from parent_commit_ids; no direct writes to commit_edge_all
-
-		// Update version tip + descriptor via change + cache (avoid version view writes)
-		const now = timestamp({ lix: args.lix });
-		const descriptorChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
-			entity_id: activeVersion.id,
-			schema_key: "lix_version_descriptor",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: activeVersion.id,
-				name: activeVersion.name,
-				working_commit_id: newWorkingCommitId,
-				inherits_from_version_id: activeVersion.inherits_from_version_id,
-				hidden: activeVersion.hidden,
-			}),
-			created_at: now,
-		};
-		const tipChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
-			entity_id: activeVersion.id,
-			schema_key: "lix_version_tip",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				id: activeVersion.id,
-				commit_id: checkpointCommitId,
-			}),
-			created_at: now,
-		};
-
-		// Also materialize the commit edge parent=checkpoint, child=new working
-		const edgeChange: LixChangeRaw = {
-			id: uuidV7({ lix: args.lix }),
-			entity_id: `${checkpointCommitId}~${newWorkingCommitId}`,
-			schema_key: "lix_commit_edge",
-			schema_version: "1.0",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				parent_id: checkpointCommitId,
-				child_id: newWorkingCommitId,
-			}),
-			created_at: now,
-		};
-
-		// Persist changes and update cache without creating a meta-commit
-		await trx
-			.insertInto("change")
-			.values([descriptorChange as any, tipChange as any, edgeChange as any])
-			.execute();
-		updateStateCache({
-			lix: { sqlite: args.lix.sqlite, db: trx },
-			changes: [
-				{
-					...descriptorChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				} as any,
-				{
-					...tipChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				} as any,
-				{
-					...edgeChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				} as any,
-			],
-		});
-
 		return createdCommit;
 	};
 
-	if (args.lix.db.isTransaction) {
-		return executeInTransaction(args.lix.db);
+	if (db.isTransaction) {
+		return executeInTransaction(db);
 	} else {
-		return args.lix.db.transaction().execute(executeInTransaction);
+		return db.transaction().execute(executeInTransaction);
 	}
+}
+
+export async function createCheckpoint(args: {
+	lix: Lix;
+}): Promise<State<LixCommit>> {
+	type R = Awaited<ReturnType<typeof createCheckpointSync>>;
+	const res = await args.lix.call("lix_create_checkpoint");
+	return res as R;
 }

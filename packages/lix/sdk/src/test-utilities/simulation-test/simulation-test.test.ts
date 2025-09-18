@@ -152,8 +152,8 @@ describe("database operations are deterministic", async () => {
 				.execute();
 
 			// Get all tables and views from the database
-			const tablesAndViews = lix.sqlite
-				.exec({
+			const tablesAndViews = lix
+				.engine!.sqlite.exec({
 					sql: `SELECT name FROM sqlite_master 
 				WHERE type IN ('table', 'view') 
 				AND name NOT LIKE 'sqlite_%'
@@ -164,7 +164,7 @@ describe("database operations are deterministic", async () => {
 
 			// Query each table/view and check determinism
 			for (const tableName of tablesAndViews) {
-				const data = lix.sqlite.exec({
+				const data = lix.engine!.sqlite.exec({
 					sql: `SELECT * FROM "${tableName}"`,
 					returnValue: "resultRows",
 					columnNames: [],
@@ -186,33 +186,37 @@ describe("database operations are deterministic", async () => {
 });
 
 describe("providing key values", async () => {
-	simulationTest("", async ({ openSimulatedLix }) => {
-		const lix = await openSimulatedLix({
-			keyValues: [
+	simulationTest(
+		"",
+		async ({ openSimulatedLix }) => {
+			const lix = await openSimulatedLix({
+				keyValues: [
+					{
+						key: "lix_deterministic_mode",
+						value: { enabled: true, bootstrap: true },
+						lixcol_version_id: "global",
+					},
+					{ key: "test_key_1", value: ["*"], lixcol_version_id: "global" },
+				],
+			});
+
+			commit({ engine: lix.engine! });
+
+			const logLevels = await lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "test_key_1")
+				.selectAll()
+				.execute();
+
+			expect(logLevels).toMatchObject([
 				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
-					lixcol_version_id: "global",
+					key: "test_key_1",
+					value: ["*"],
 				},
-				{ key: "test_key_1", value: ["*"], lixcol_version_id: "global" },
-			],
-		});
-
-		commit({ lix });
-
-		const logLevels = await lix.db
-			.selectFrom("key_value")
-			.where("key", "=", "test_key_1")
-			.selectAll()
-			.execute();
-
-		expect(logLevels).toMatchObject([
-			{
-				key: "test_key_1",
-				value: ["*"],
-			},
-		]);
-	});
+			]);
+		},
+		{ simulations: [normalSimulation] }
+	);
 });
 
 describe("expectDeterministic diff callback receives correct values", () => {

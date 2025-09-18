@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixEngine } from "../engine/boot.js";
 
 /**
  * State history table interface for querying historical entity states.
@@ -22,6 +22,9 @@ export interface StateHistoryTable {
 
 	/** JSON content of the entity at this point in history */
 	snapshot_content: Record<string, any>;
+
+	/** Optional change metadata associated with this historical state. */
+	metadata: Record<string, any> | null;
 
 	/** Version of the schema used for this entity */
 	schema_version: string;
@@ -101,10 +104,10 @@ export interface StateHistoryTable {
 
 export type StateHistoryView = Selectable<StateHistoryTable>;
 
-export function applyStateHistoryDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db">
-): void {
-	lix.sqlite.exec(STATE_HISTORY_VIEW_SQL);
+export function applyStateHistoryDatabaseSchema(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	args.engine.sqlite.exec(STATE_HISTORY_VIEW_SQL);
 }
 
 // Optimized to keep the generic history view, but add a fast path for depth=0
@@ -119,7 +122,11 @@ WITH
 			   CASE 
 			     WHEN ic.snapshot_id = 'no-content' THEN NULL
 			     ELSE json(s.content)
-			   END AS snapshot_content 
+			   END AS snapshot_content,
+			   CASE
+			     WHEN ic.metadata IS NULL THEN NULL
+			     ELSE json(ic.metadata)
+			   END AS metadata
 		FROM internal_change ic
 		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
 	),
@@ -132,6 +139,7 @@ WITH
 			chg.file_id,
 			chg.plugin_key,
 			chg.snapshot_content,
+			chg.metadata,
 			chg.schema_version,
 			cse.change_id AS target_change_id,
 			c.id AS origin_commit_id,
@@ -204,6 +212,7 @@ WITH
 			target_change.file_id,
 			target_change.plugin_key, 
 			target_change.snapshot_content,
+			target_change.metadata,
 			target_change.schema_version,
 			r.target_change_id,
 			r.origin_commit_id,
@@ -230,11 +239,13 @@ SELECT
 	es.file_id,
 	es.plugin_key,
 	es.snapshot_content,
+	es.metadata,
 	es.schema_version,
 	es.target_change_id as change_id,
 	es.origin_commit_id as commit_id,
 	es.root_commit_id as root_commit_id,
-	es.commit_depth as depth
+	es.commit_depth as depth,
+	'global' as version_id
 FROM (
 	SELECT * FROM depth0_entity_states
 	UNION ALL

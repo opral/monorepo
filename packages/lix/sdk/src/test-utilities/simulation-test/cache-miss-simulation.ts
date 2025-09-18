@@ -1,6 +1,9 @@
 import { vi } from "vitest";
 import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
+import { clearFileDataCache } from "../../filesystem/file/cache/clear-file-data-cache.js";
+import { populateStateCache } from "../../state/cache/populate-state-cache.js";
+import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
 import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
@@ -49,73 +52,45 @@ export const cacheMissSimulation: SimulationTestDef = {
 			wrappedInsertVTableLog
 		);
 
-		// Don't clear cache on bootup - it consumes sequence numbers
-		// The cache will be cleared before each query anyway
+		// Strategy: do not mutate cache inside transactions or during SELECTs.
+		// After any state commit, mark that a repopulation is needed. Before the
+		// next non-internal SELECT, repopulate the cache from the materializer
+		// (which deletes and rebuilds in one pass) and refresh file caches.
 
-		// Helper to wrap a query builder to clear cache before execute
-		const wrapQueryBuilder = (
-			query: any,
-			opts?: { skipClear?: boolean; tableName?: string }
-		): any => {
-			const skipClear = opts?.skipClear === true;
-			const tableName = opts?.tableName;
-			const originalExecute = query.execute;
+		let needsCacheClearance = false;
 
-			// Override execute
-			query.execute = async function (...args: any[]) {
-				// Skip cache clear for internal_* views/tables
-				if (!skipClear) {
-					// This forces re-materialization from changes
-					clearStateCache({ lix, timestamp: CACHE_TIMESTAMP });
-				}
+		// 1) Set pending repopulation on state commit (no writes here!)
+		const unsubscribe = lix.hooks.onStateCommit(() => {
+			needsCacheClearance = true;
+		});
 
-				// Call the original execute
-				return originalExecute.apply(this, args);
-			};
-
-			// Wrap methods that return query builders
-			const methodsToWrap = [
-				"where",
-				"orderBy",
-				"limit",
-				"offset",
-				"innerJoin",
-				"leftJoin",
-				"rightJoin",
-				"fullJoin",
-				"select",
-				"selectAll",
-			];
-
-			for (const method of methodsToWrap) {
-				if (query[method]) {
-					const originalMethod = query[method];
-					query[method] = function (...args: any[]) {
-						const result = originalMethod.apply(this, args);
-						// If it returns a query builder, wrap it too
-						if (result && typeof result === "object" && "execute" in result) {
-							return wrapQueryBuilder(result, { skipClear, tableName });
-						}
-						return result;
-					};
-				}
-			}
-
-			return query;
-		};
-
-		// Wrap the db.selectFrom method
+		// 2) Repopulate lazily before the next SELECT (including internal_* for tests)
 		const originalSelectFrom = lix.db.selectFrom.bind(lix.db);
-
+		// @ts-expect-error
 		lix.db.selectFrom = (table: any) => {
-			const query = originalSelectFrom(table);
-			// Detect internal_* tables and skip cache clearing for them
-			const tableName = String(table ?? "");
-			const isInternal = tableName.startsWith("internal_");
-			return wrapQueryBuilder(query, { skipClear: isInternal, tableName });
+			if (needsCacheClearance) {
+				// Clear tracked cache and mark stale with deterministic timestamp
+				clearStateCache({ engine: lix.engine!, timestamp: CACHE_TIMESTAMP });
+				clearFileDataCache({ engine: lix.engine! });
+				// Immediately repopulate from the materializer to avoid writes during SELECT
+				populateStateCache({ engine: lix.engine! });
+				// Mark as fresh so vtable won't try to repopulate
+				markStateCacheAsFresh({
+					engine: lix.engine!,
+					timestamp: CACHE_TIMESTAMP,
+				});
+				needsCacheClearance = false;
+			}
+			return originalSelectFrom(table);
 		};
 
 		// Return the modified lix object
-		return lix;
+		return {
+			...lix,
+			close: async () => {
+				unsubscribe();
+				await lix.close();
+			},
+		} as typeof lix;
 	},
 };

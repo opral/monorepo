@@ -66,8 +66,7 @@ test("should only write once if the output hasn't changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
-	// @ts-expect-error - spy
-	fs.writeFile = vi.spyOn(fs, "writeFile");
+	const writeFileSpy = vi.spyOn(fs as any, "writeFile");
 
 	const hashes = await writeOutput({
 		directory: "/output",
@@ -84,15 +83,14 @@ test("should only write once if the output hasn't changed", async () => {
 	expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe(
 		"test"
 	);
-	expect(fs.writeFile).toHaveBeenCalledTimes(1);
+	expect(writeFileSpy).toHaveBeenCalledTimes(1);
 });
 
 test("should write again if the output has changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
-	// @ts-expect-error - spy
-	fs.writeFile = vi.spyOn(fs, "writeFile");
+	const writeFileSpy = vi.spyOn(fs as any, "writeFile");
 
 	const hashes = await writeOutput({
 		directory: "/output",
@@ -108,15 +106,14 @@ test("should write again if the output has changed", async () => {
 	expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe(
 		"test2"
 	);
-	expect(fs.writeFile).toHaveBeenCalledTimes(2);
+	expect(writeFileSpy).toHaveBeenCalledTimes(2);
 });
 
 test("should write files if output has partially changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
-	// @ts-expect-error - spy
-	fs.writeFile = vi.spyOn(fs, "writeFile");
+	const writeFileSpy = vi.spyOn(fs as any, "writeFile");
 
 	const hashes = await writeOutput({
 		directory: "/output",
@@ -130,8 +127,8 @@ test("should write files if output has partially changed", async () => {
 		fs,
 		previousOutputHashes: hashes,
 	});
-	expect(fs.writeFile).toHaveBeenCalledWith("/output/file2.txt", "test2");
-	expect(fs.writeFile).toHaveBeenCalledTimes(3);
+	expect(writeFileSpy).toHaveBeenCalledWith("/output/file2.txt", "test2");
+	expect(writeFileSpy).toHaveBeenCalledTimes(3);
 });
 
 test("should delete files that have been removed from the output", async () => {

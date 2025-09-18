@@ -1,5 +1,5 @@
 import type { Generated, Selectable } from "kysely";
-import type { Lix } from "../../lix/open-lix.js";
+import type { LixEngine } from "../../engine/boot.js";
 
 export type StateWithTombstonesView = {
 	entity_id: string;
@@ -15,6 +15,8 @@ export type StateWithTombstonesView = {
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
 	commit_id: Generated<string>;
+	writer_key: string | null;
+	metadata: Generated<Record<string, any> | null>;
 };
 
 export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
@@ -29,9 +31,31 @@ export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
  * We restrict to non-inherited rows (inherited_from_version_id IS NULL) so that
  * each version only reports its own direct state or tombstones.
  */
-export function applyStateWithTombstonesView(lix: Pick<Lix, "sqlite">): void {
-	lix.sqlite.exec(`
+export function applyStateWithTombstonesView(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_with_tombstones AS
-    SELECT * FROM internal_state_vtable;
+    SELECT 
+      entity_id,
+      schema_key,
+      file_id,
+      version_id,
+      plugin_key,
+      snapshot_content,
+      schema_version,
+      created_at,
+      updated_at,
+      inherited_from_version_id,
+      change_id,
+      untracked,
+      commit_id,
+      writer_key,
+      (
+        SELECT json(metadata)
+        FROM change
+        WHERE change.id = internal_state_vtable.change_id
+      ) AS metadata
+    FROM internal_state_vtable;
   `);
 }

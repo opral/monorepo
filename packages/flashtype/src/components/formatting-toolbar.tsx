@@ -35,6 +35,27 @@ import { Separator } from "@/components/ui/separator";
 import { tiptapDocToAst } from "@opral/markdown-wc/tiptap";
 import { serializeAst } from "@opral/markdown-wc";
 
+/**
+ * Observe the container width using ResizeObserver.
+ */
+function useContainerWidth() {
+	const ref = React.useRef<HTMLDivElement | null>(null);
+	const [width, setWidth] = React.useState(0);
+	React.useLayoutEffect(() => {
+		const el = ref.current;
+		if (!el) return;
+		const ro = new ResizeObserver((entries) => {
+			for (const e of entries) {
+				setWidth(Math.floor(e.contentRect.width));
+			}
+		});
+		ro.observe(el);
+		setWidth(Math.floor(el.getBoundingClientRect().width));
+		return () => ro.disconnect();
+	}, []);
+	return { ref, width } as const;
+}
+
 function Tb({
 	label,
 	onClick,
@@ -63,7 +84,19 @@ function Tb({
 	);
 }
 
+/**
+ * Formatting toolbar with responsive collapsing.
+ *
+ * Progressive hiding rules when horizontal space is constrained:
+ * - Hide the style dropdown first
+ * - Hide the "Copy Markdown" action next
+ * - Hide the entire bar if extremely narrow
+ *
+ * The container width is measured via ResizeObserver to react when the agent
+ * chat panel is resized.
+ */
 export function FormattingToolbar() {
+	const { ref } = useContainerWidth();
 	const { editor } = useEditorCtx();
 	const [copied, setCopied] = React.useState(false);
 	const copiedTimerRef = React.useRef<number | null>(null);
@@ -130,8 +163,8 @@ export function FormattingToolbar() {
 		};
 	}, []);
 	return (
-		<div className="w-full border-b bg-background">
-			<div className="mx-auto flex h-10 items-center justify-center gap-1 px-4">
+		<div ref={ref} className="w-full min-w-0 shrink border-b bg-background">
+			<div className="mx-auto flex h-10 min-w-0 shrink items-center justify-center gap-1 px-2 sm:px-4 flex-wrap overflow-y-auto">
 				{/* Turn into dropdown (style) */}
 				<DropdownTurnInto />
 				{/* Divider: style | formatting */}
@@ -342,7 +375,7 @@ function DropdownTurnInto() {
 							type="button"
 							variant="ghost"
 							size="sm"
-							className="inline-flex items-center gap-1 px-2 w-32 justify-between"
+							className="inline-flex items-center gap-1 px-2 w-28 justify-between"
 							aria-label="Turn into"
 						>
 							<span className="text-sm font-medium">{label}</span>

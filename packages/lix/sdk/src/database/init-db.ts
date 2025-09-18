@@ -4,7 +4,7 @@ import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
-import { isJsonType } from "../schema-definition/json-type.js";
+import { buildJsonColumnConfig } from "../lix/json-column-config.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -17,18 +17,21 @@ import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
-import { applyThreadDatabaseSchema } from "../thread/schema.js";
+import { applyConversationDatabaseSchema } from "../conversation/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
-import type { Lix } from "../lix/open-lix.js";
-import { timestamp, uuidV7, generateHumanId } from "../deterministic/index.js";
-import { nanoId } from "../deterministic/nano-id.js";
+import type { LixEngine } from "../engine/boot.js";
+import { nanoIdSync } from "../engine/deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
-import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
-import { applyFileLixcolCacheSchema } from "../file/cache/lixcol-schema.js";
-import { applyFileDataCacheSchema } from "../file/cache/schema.js";
+import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
+import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
+import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
+import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
+import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import { humanIdSync } from "../engine/deterministic/generate-human-id.js";
+import { getTimestampSync } from "../engine/deterministic/timestamp.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -54,64 +57,7 @@ import { applyTransactionStateSchema } from "../state/transaction/schema.js";
  * }
  * ```
  */
-const ViewsWithJsonColumns = (() => {
-	const result: Record<
-		string,
-		Record<
-			string,
-			{
-				type:
-					| "object"
-					| Array<
-							"string" | "number" | "boolean" | "object" | "array" | "null"
-					  >;
-			}
-		>
-	> = {};
-
-	// Hardcoded object-only columns
-	const hardcodedViews = {
-		state: { snapshot_content: { type: "object" as const } },
-		state_all: { snapshot_content: { type: "object" as const } },
-		state_history: { snapshot_content: { type: "object" as const } },
-		change: { snapshot_content: { type: "object" as const } },
-	};
-
-	// Add the hardcoded columns first
-	Object.assign(result, hardcodedViews);
-
-	// Process schema-based columns
-	for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
-		// Check if schema is an object and has properties
-		if (typeof schema === "boolean" || !schema.properties) continue;
-
-		const jsonColumns: Record<
-			string,
-			{
-				type: Array<
-					"string" | "number" | "boolean" | "object" | "array" | "null"
-				>;
-			}
-		> = {};
-
-		for (const [key, def] of Object.entries(schema.properties)) {
-			if (isJsonType(def)) {
-				// All schema-based JSON columns accept any JSON value
-				jsonColumns[key] = {
-					type: ["string", "number", "boolean", "object", "array", "null"],
-				};
-			}
-		}
-
-		if (Object.keys(jsonColumns).length > 0) {
-			result[viewName] = jsonColumns;
-			// Also add the _all variant view with the same JSON columns
-			result[viewName + "_all"] = jsonColumns;
-		}
-	}
-
-	return result;
-})();
+const ViewsWithJsonColumns = buildJsonColumnConfig({ includeChangeView: true });
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
@@ -130,35 +76,41 @@ export function initDb(args: {
 		],
 	});
 
-	const lix = { sqlite: args.sqlite, db, hooks: args.hooks } as unknown as Lix;
+	const engine: LixEngine = {
+		sqlite: args.sqlite,
+		db: db as any,
+		hooks: args.hooks,
+	} as any;
 
 	initFunctions({
 		sqlite: args.sqlite,
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+		hooks: args.hooks,
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
-	applyTransactionStateSchema(lix);
+	applyTransactionStateSchema({ engine: engine });
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
-	applyFileLixcolCacheSchema(lix);
+	applyFileLixcolCacheSchema({ engine: engine });
 	// Ensure file data cache table exists before any triggers may reference it
-	applyFileDataCacheSchema(lix);
-	applyStateDatabaseSchema(lix);
-	applyEntityDatabaseSchema(lix);
-	applyChangeSetDatabaseSchema(lix);
-	applyCommitDatabaseSchema(lix);
-	applyStoredSchemaDatabaseSchema(lix);
-	applyVersionDatabaseSchema(lix);
-	applyAccountDatabaseSchema(lix);
-	applyKeyValueDatabaseSchema(lix);
-	applyChangeAuthorDatabaseSchema(lix);
-	applyLabelDatabaseSchema(lix);
-	applyThreadDatabaseSchema(lix);
-	applyEntityThreadDatabaseSchema(lix);
-	applyStateHistoryDatabaseSchema(lix);
+	applyFileDataCacheSchema({ engine: engine });
+	applyStateDatabaseSchema({ engine: engine });
+	applyEntityDatabaseSchema({ engine: engine });
+	applyChangeSetDatabaseSchema({ engine: engine });
+	applyCommitDatabaseSchema({ engine: engine });
+	applyStoredSchemaDatabaseSchema({ engine: engine });
+	applyVersionDatabaseSchema({ engine: engine });
+	applyAccountDatabaseSchema({ engine: engine });
+	applyKeyValueDatabaseSchema({ engine: engine });
+	applyChangeAuthorDatabaseSchema({ engine: engine });
+	applyLabelDatabaseSchema({ engine: engine });
+	applyStateHistoryDatabaseSchema({ engine: engine });
+	applyConversationDatabaseSchema({ engine });
+	applyEntityConversationDatabaseSchema({ engine });
+	applyChangeProposalDatabaseSchema({ engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	applyLogDatabaseSchema(lix);
+	applyLogDatabaseSchema({ engine: engine });
 
 	return db;
 }
@@ -166,25 +118,31 @@ export function initDb(args: {
 function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
+	hooks: LixHooks;
 }) {
-	const lix = { sqlite: args.sqlite, db: args.db } as unknown as Lix;
+	const engine = {
+		sqlite: args.sqlite,
+		db: args.db as any,
+		hooks: args.hooks,
+	} as const;
 
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,
-		xFunc: () => uuidV7({ lix }),
+		xFunc: () => uuidV7Sync({ engine: engine }),
 	});
 
 	args.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
-		xFunc: () => generateHumanId({ lix, separator: "-", capitalize: false }),
+		xFunc: () =>
+			humanIdSync({ engine: engine, separator: "-", capitalize: false }),
 	});
 
 	args.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
-		xFunc: () => timestamp({ lix }),
+		xFunc: () => getTimestampSync({ engine: engine }),
 	});
 
 	args.sqlite.createFunction({
@@ -192,7 +150,7 @@ function initFunctions(args: {
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoId({ lix, length });
+			return nanoIdSync({ engine: engine, length });
 		},
 	});
 }

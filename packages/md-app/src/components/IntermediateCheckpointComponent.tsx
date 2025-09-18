@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
+import { UiDiffComponentProps, createCheckpoint, createConversation } from "@lix-js/sdk";
 import { selectCheckpoints, selectWorkingChanges, selectWorkingChangeSet } from "@/queries";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
@@ -127,8 +127,8 @@ const CreateCheckpointInput = () => {
         .selectAll()
         .executeTakeFirstOrThrow();
 
-      // Create thread with commit entity
-      await createThread({
+      // Create conversation with commit entity
+      await createConversation({
 				lix: { ...lix, db: trx },
 				comments: [{ body: args.content }],
 				entity: commit,

@@ -143,6 +143,29 @@
 	--sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Diff rendering helpers (scoped to plugin output) */
+.lix-diff-content .diff-added {
+	color: #1f883d;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content .diff-modified {
+	color: #f59e0b;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content .diff-removed {
+	color: #d1242f;
+	text-decoration: none;
+	outline: none;
+}
+
+.lix-diff-content [data-diff-mode="words"] .diff-removed {
+	text-decoration: line-through;
+}
+
 .dark {
 	--background: oklch(0.145 0 0);
 
@@ -216,6 +239,16 @@
 	}
 }
 
+/* Utility to temporarily hide scrollbars (e.g., during programmatic scroll) */
+.scrollbar-hidden {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
 /* TipTap / ProseMirror editor tweaks */
 .ProseMirror:focus,
 .ProseMirror:focus-visible {
@@ -226,21 +259,16 @@
 	outline: none;
 }
 
-/* Allow editor surface to fill available height */
-.ProseMirror {
-	min-height: 100%;
-}
-
 /* Fill available space */
 html,
 body,
 #root {
 	height: 100%;
+	max-height: 100%;
 }
 
 .tiptap,
 .ProseMirror {
-	height: 100%;
 	width: 100%;
 }
 

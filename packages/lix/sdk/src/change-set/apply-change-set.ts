@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/index.js";
 import type { LixChangeSet } from "./schema.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
-import { clearFileDataCache } from "../file/cache/clear-file-data-cache.js";
+import { clearFileDataCache } from "../filesystem/file/cache/clear-file-data-cache.js";
 
 /**
  * Applies a change set to the lix.
@@ -58,10 +58,11 @@ export async function applyChangeSet(args: {
 			snapshot_content: change.snapshot_content
 				? JSON.stringify(change.snapshot_content)
 				: null,
+			metadata: change.metadata ? JSON.stringify(change.metadata) : null,
 		}));
 
 		updateStateCache({
-			lix: args.lix,
+			engine: args.lix.engine!,
 			changes: changesForCache,
 			version_id: version.id,
 			commit_id: version.commit_id,
@@ -108,7 +109,7 @@ export async function applyChangeSet(args: {
 			// This is important because the file may have been updated by previous operations
 			// and we need the current state for plugin processing
 			clearFileDataCache({
-				lix: args.lix,
+				engine: args.lix.engine!,
 				fileId: file_id,
 				versionId: version.id,
 			});

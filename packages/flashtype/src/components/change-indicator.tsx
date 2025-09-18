@@ -58,15 +58,16 @@ export function ChangeIndicator() {
 						openedViaPointer.current = false;
 					}}
 				>
-					<span className="font-medium text-sm">
-						<span data-testid="change-count">{total}</span> changes
-					</span>
+					{/* Move visual bars to the left for better scan order */}
 					<DiffIndicator
 						added={added}
 						removed={removed}
 						highRange={30}
 						showCounts={false}
 					/>
+					<span className="font-medium text-sm">
+						<span data-testid="change-count">{total}</span> changes
+					</span>
 					<ChevronDown
 						className={`size-4 transition-transform duration-200 ${
 							open ? "rotate-180" : ""
@@ -117,6 +118,10 @@ export function ChangeIndicator() {
 						variant="default"
 						disabled={total === 0}
 						data-testid="create-checkpoint"
+						onClick={async () => {
+							await createCheckpoint({ lix });
+							setOpen(false);
+						}}
 					>
 						Create checkpoint
 					</Button>
@@ -152,8 +157,8 @@ function PanelDiff() {
 				"diff.entity_id",
 				"diff.schema_key",
 				"after.plugin_key as plugin_key",
-				"before.snapshot_content as snapshot_content_before",
-				"after.snapshot_content as snapshot_content_after",
+				"before.snapshot_content as before_snapshot_content",
+				"after.snapshot_content as after_snapshot_content",
 			]);
 	});
 

@@ -1,11 +1,12 @@
 import { LixLogSchema, type LixLog } from "../../log/schema.js";
-import { uuidV7 } from "../../deterministic/uuid-v7.js";
-import { timestamp, type Lix } from "../../index.js";
+import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
+import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import type { LixEngine } from "../../engine/boot.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 
 // Track if logging is in progress per Lix instance to prevent recursion
 const loggingInProgressMap = new WeakMap<
-	Pick<Lix, "sqlite" | "db" | "hooks">,
+	Pick<LixEngine, "sqlite" | "db" | "hooks">,
 	boolean
 >();
 
@@ -16,29 +17,26 @@ const loggingInProgressMap = new WeakMap<
  * This is a minimal wrapper that can be mocked in tests to control timestamps.
  */
 export function insertVTableLog(args: {
-	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	id?: string;
 	key: string;
 	message: string;
 	level: string;
 	timestamp?: string;
 }): void {
-	if (loggingInProgressMap.get(args.lix)) {
+	if (loggingInProgressMap.get(args.engine)) {
 		return;
 	}
 
-	loggingInProgressMap.set(args.lix, true);
+	loggingInProgressMap.set(args.engine, true);
 	try {
-		const id = args.id ?? uuidV7({ lix: args.lix });
+		const id = args.id ?? uuidV7Sync({ engine: args.engine as any });
 		// Insert into transaction state (untracked) to preserve previous behavior.
 		// Note: If called outside a vtable write, this may require a later commit to flush.
 		insertTransactionState({
-			lix: {
-				sqlite: args.lix.sqlite,
-				db: args.lix.db,
-				hooks: undefined as any,
-			},
-			timestamp: args.timestamp ?? timestamp({ lix: args.lix }),
+			engine: args.engine as any,
+			timestamp:
+				args.timestamp ?? getTimestampSync({ engine: args.engine as any }),
 			data: [
 				{
 					entity_id: id,
@@ -58,6 +56,6 @@ export function insertVTableLog(args: {
 			],
 		});
 	} finally {
-		loggingInProgressMap.set(args.lix, false);
+		loggingInProgressMap.set(args.engine, false);
 	}
 }
