@@ -932,7 +932,7 @@ modify a cookie, env variable, or a user's preference.
 
 #### fn
 
-(`newLocale`) => `void`
+(`newLocale`, `options?`) => `void`
 
 ### Returns
 
