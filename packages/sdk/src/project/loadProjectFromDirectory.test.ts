@@ -423,6 +423,139 @@ const mockDirectory = {
 };
 
 describe("it should keep files between the inlang directory and lix in sync", async () => {
+	test("only the touched locale file is rewritten", async () => {
+		const syncInterval = 100;
+		const fs = Volume.fromJSON({
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+			"/project.inlang/messages/en.json": JSON.stringify({
+				greeting: "Hello",
+			}),
+			"/project.inlang/messages/de.json": JSON.stringify({
+				greeting: "Hallo",
+			}),
+		}) as any;
+		const writeFileSyncSpy = vi.spyOn(fs, "writeFileSync");
+
+		const project = await loadProjectFromDirectory({
+			fs,
+			path: "/project.inlang",
+			syncInterval,
+		});
+
+		const originalDeContent = fs.readFileSync(
+			"/project.inlang/messages/de.json",
+			"utf-8"
+		);
+		writeFileSyncSpy.mockClear();
+
+		await project.lix.db
+			.updateTable("file")
+			.where("path", "=", "/messages/en.json")
+			.set({
+				data: new TextEncoder().encode(JSON.stringify({ greeting: "Hi" })),
+			})
+			.execute();
+
+		await new Promise((resolve) =>
+			setTimeout(resolve, syncInterval + syncInterval / 2)
+		);
+
+		const updatedEn = JSON.parse(
+			fs.readFileSync("/project.inlang/messages/en.json", "utf-8")
+		);
+		expect(updatedEn.greeting).toBe("Hi");
+
+		const deAfterSync = fs.readFileSync(
+			"/project.inlang/messages/de.json",
+			"utf-8"
+		);
+		expect(deAfterSync).toBe(originalDeContent);
+		const writtenPaths = writeFileSyncSpy.mock.calls.map((call) => call[0]);
+		expect(
+			writtenPaths.filter((path) => path === "/project.inlang/messages/en.json")
+		).toHaveLength(1);
+		expect(
+			writtenPaths.filter((path) => path === "/project.inlang/messages/de.json")
+		).toHaveLength(0);
+		writeFileSyncSpy.mockRestore();
+	});
+
+	test("plugin export path writes every locale file", async () => {
+		const syncInterval = 100;
+		const fs = Volume.fromJSON({
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+			"/project.inlang/messages/en.json": `${JSON.stringify({ greeting: "Hello" }, null, 2)}\n`,
+			"/project.inlang/messages/de.json": `${JSON.stringify({ greeting: "Hallo" }, null, 4)}\n`,
+		}) as any;
+		const writeFileSyncSpy = vi.spyOn(fs, "writeFileSync");
+
+		const project = await loadProjectFromDirectory({
+			fs,
+			path: "/project.inlang",
+			syncInterval,
+			providePlugins: [simpleJsonPlugin],
+		});
+
+		await new Promise((resolve) =>
+			setTimeout(resolve, syncInterval + syncInterval / 2)
+		);
+
+		writeFileSyncSpy.mockClear();
+
+		const initialFiles = ["en", "de"].map((locale) => ({
+			locale,
+			content: new TextEncoder().encode(
+				fs.readFileSync(`/project.inlang/messages/${locale}.json`, "utf-8")
+			),
+		}));
+		await project.importFiles({
+			pluginKey: simpleJsonPlugin.key,
+			files: initialFiles,
+		});
+		const messagesAfterImport = await project.db
+			.selectFrom("message")
+			.selectAll()
+			.execute();
+		expect(messagesAfterImport.length).not.toBe(0);
+
+		const englishMessage = messagesAfterImport.find(
+			(message) => message.locale === "en"
+		);
+		expect(englishMessage).toBeDefined();
+		const englishMessageId = englishMessage!.id;
+
+		await project.db
+			.updateTable("variant")
+			.set({ pattern: [{ type: "text", value: "Hi" }] })
+			.where("messageId", "=", englishMessageId)
+			.execute();
+
+		const exportedFiles = await project.exportFiles({
+			pluginKey: simpleJsonPlugin.key,
+		});
+
+		for (const file of exportedFiles) {
+			await project.lix.db
+				.updateTable("file")
+				.set({ data: file.content })
+				.where("path", "=", `/${file.name}`)
+				.execute();
+		}
+
+		await new Promise((resolve) =>
+			setTimeout(resolve, syncInterval + syncInterval / 2)
+		);
+
+		const writtenPaths = writeFileSyncSpy.mock.calls.map((call) => call[0]);
+		expect(
+			writtenPaths.filter((path) => path === "/project.inlang/messages/en.json")
+		).toHaveLength(1);
+		expect(
+			writtenPaths.filter((path) => path === "/project.inlang/messages/de.json")
+		).toHaveLength(0);
+
+		writeFileSyncSpy.mockRestore();
+	});
 	test("files from directory should be available via lix after project has been loaded from directory", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
