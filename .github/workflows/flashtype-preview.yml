@@ -1,0 +1,54 @@
+name: Flashtype Preview
+
+# Requires secrets:
+# - CLOUDFLARE_ACCOUNT_ID: Cloudflare account ID for the worker.
+# - CLOUDFLARE_API_TOKEN: Token with Workers Scripts Edit + Workers KV Storage Edit (if needed).
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - "packages/flashtype/**"
+      - ".github/workflows/flashtype-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  upload-preview:
+    name: Upload Worker Preview
+    runs-on: ubuntu-latest
+    environment: flashtype-preview
+    env:
+      PR_ALIAS: pr-${{ github.event.number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Upload preview Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/flashtype
+          command: versions upload --preview-alias ${{ env.PR_ALIAS }}
+          packageManager: pnpm
+
+      - name: Summarize preview URL
+        if: success()
+        run: |
+          echo "### Preview uploaded" >> "$GITHUB_STEP_SUMMARY"
+          echo "Alias: $PR_ALIAS" >> "$GITHUB_STEP_SUMMARY"
+          echo "The exact preview URL is shown in the Wrangler action logs." >> "$GITHUB_STEP_SUMMARY"
