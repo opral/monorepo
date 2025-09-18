@@ -1,7 +1,7 @@
 import { Kysely } from "kysely";
 import { type InlangDatabaseSchema } from "./schema.js";
 import { humanId } from "../human-id/human-id.js";
-import { JsonbPlugin } from "./jsonbPlugin.js";
+import { JsonPlugin } from "./jsonPlugin.js";
 import {
 	createEntityViewsIfNotExists,
 	uuidV7Sync,
@@ -60,6 +60,6 @@ export function initDb(lix: Lix): Kysely<InlangDatabaseSchema> {
 	});
 
 	return lix.db
-		.withPlugin(new JsonbPlugin({ database: engine.sqlite }))
+		.withPlugin(new JsonPlugin({ engine }))
 		.withTables<InlangDatabaseSchema>() as unknown as Kysely<InlangDatabaseSchema>;
 }
