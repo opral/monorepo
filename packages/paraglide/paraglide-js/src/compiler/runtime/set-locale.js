@@ -31,6 +31,10 @@ const navigateOrReload = (newLocation) => {
 };
 
 /**
+ * @typedef {(newLocale: Locale, options?: { reload?: boolean }) => void | Promise<void>} SetLocaleFn
+ */
+
+/**
  * Set the locale.
  *
  * Set locale reloads the site by default on the client. Reloading
@@ -47,7 +51,7 @@ const navigateOrReload = (newLocation) => {
  * @example
  *   setLocale('en', { reload: false });
  *
- * @type {(newLocale: Locale, options?: { reload?: boolean }) => Promise<any> | void}
+ * @type {SetLocaleFn}
  */
 export let setLocale = (newLocale, options) => {
 	const optionsWithDefaults = {
@@ -56,6 +60,7 @@ export let setLocale = (newLocale, options) => {
 	};
 	// locale is already set
 	// https://github.com/opral/inlang-paraglide-js/issues/430
+	/** @type {Locale | undefined} */
 	let currentLocale;
 	try {
 		currentLocale = getLocale();
@@ -118,7 +123,7 @@ export let setLocale = (newLocale, options) => {
 			const handler = customClientStrategies.get(strat);
 			if (handler) {
 				let result = handler.setLocale(newLocale);
-				// Handle async setLocale - fire and forget
+				// Handle async setLocale
 				if (result instanceof Promise) {
 					result = result.catch((error) => {
 						throw new Error(`Custom strategy "${strat}" setLocale failed.`, {
@@ -131,23 +136,24 @@ export let setLocale = (newLocale, options) => {
 		}
 	}
 
-	if (
-		!isServer &&
-		optionsWithDefaults.reload &&
-		window.location &&
-		newLocale !== currentLocale
-	) {
-		if (customSetLocalePromises.length) {
-			// Wait for any async custom setLocale functions
-			return Promise.all(customSetLocalePromises).then(() => {
-				navigateOrReload(newLocation);
-			});
-		} else {
+	const runReload = () => {
+		if (
+			!isServer &&
+			optionsWithDefaults.reload &&
+			window.location &&
+			newLocale !== currentLocale
+		) {
 			navigateOrReload(newLocation);
 		}
-	} else if (customSetLocalePromises.length) {
-		return Promise.all(customSetLocalePromises);
+	};
+
+	if (customSetLocalePromises.length) {
+		return Promise.all(customSetLocalePromises).then(() => {
+			runReload();
+		});
 	}
+
+	runReload();
 
 	return;
 };
@@ -164,8 +170,8 @@ export let setLocale = (newLocale, options) => {
  *     return Cookies.set('locale', newLocale)
  *   });
  *
- * @param {(newLocale: Locale) => void} fn
+ * @param {SetLocaleFn} fn
  */
 export const overwriteSetLocale = (fn) => {
-	setLocale = fn;
+	setLocale = /** @type {SetLocaleFn} */ (fn);
 };

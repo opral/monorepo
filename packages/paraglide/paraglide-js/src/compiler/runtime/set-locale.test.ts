@@ -197,6 +197,36 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 	);
 });
 
+test("overwriteSetLocale receives the options object", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
+	});
+
+	// Provide minimal browser globals to avoid strategy branches failing.
+	/** @ts-expect-error - browser shim for tests */
+	globalThis.document = { cookie: "" };
+	globalThis.window = {
+		location: {
+			href: "https://example.com/en",
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const spy = vi.fn();
+	runtime.overwriteSetLocale(spy);
+
+	runtime.setLocale("fr", { reload: false });
+
+	expect(spy).toHaveBeenCalledWith("fr", { reload: false });
+});
+
 // https://github.com/opral/inlang-paraglide-js/issues/430
 test("should not reload when setting locale to current locale", async () => {
 	// @ts-expect-error - global variable definition
