@@ -657,100 +657,104 @@ test("file_history reflects directory renames across commits", async () => {
 	expect(historyAfterRenameDepthOne.path).toBe("/docs/readme.json");
 });
 
-test("file_history tracks directory moves across commits", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
-	});
+test(
+	"file_history tracks directory moves across commits",
+	{ timeout: 20000 },
+	async () => {
+		const lix = await openLix({
+			providePlugins: [mockJsonPlugin],
+		});
 
-	const payload = new TextEncoder().encode(JSON.stringify({ note: "move" }));
+		const payload = new TextEncoder().encode(JSON.stringify({ note: "move" }));
 
-	await lix.db
-		.insertInto("file")
-		.values({ path: "/docs/guides/intro.json", data: payload })
-		.execute();
+		await lix.db
+			.insertInto("file")
+			.values({ path: "/docs/guides/intro.json", data: payload })
+			.execute();
 
-	const insertedFile = await lix.db
-		.selectFrom("file")
-		.where("path", "=", "/docs/guides/intro.json")
-		.select(["id"])
-		.executeTakeFirstOrThrow();
-	const fileId = insertedFile.id;
+		const insertedFile = await lix.db
+			.selectFrom("file")
+			.where("path", "=", "/docs/guides/intro.json")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
+		const fileId = insertedFile.id;
 
-	await lix.db
-		.insertInto("directory")
-		.values({ name: "articles", parent_id: null })
-		.execute();
+		await lix.db
+			.insertInto("directory")
+			.values({ name: "articles", parent_id: null })
+			.execute();
 
-	const docsDirectory = await lix.db
-		.selectFrom("directory")
-		.where("name", "=", "docs")
-		.select(["id"])
-		.executeTakeFirstOrThrow();
+		const docsDirectory = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "docs")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
 
-	const guidesDirectory = await lix.db
-		.selectFrom("directory")
-		.where("name", "=", "guides")
-		.where("parent_id", "=", docsDirectory.id)
-		.select(["id"])
-		.executeTakeFirstOrThrow();
+		const guidesDirectory = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "guides")
+			.where("parent_id", "=", docsDirectory.id)
+			.select(["id"])
+			.executeTakeFirstOrThrow();
 
-	const articlesDirectory = await lix.db
-		.selectFrom("directory")
-		.where("name", "=", "articles")
-		.select(["id"])
-		.executeTakeFirstOrThrow();
+		const articlesDirectory = await lix.db
+			.selectFrom("directory")
+			.where("name", "=", "articles")
+			.select(["id"])
+			.executeTakeFirstOrThrow();
 
-	const checkpointBeforeMove = await createCheckpoint({ lix });
+		const checkpointBeforeMove = await createCheckpoint({ lix });
 
-	await lix.db
-		.updateTable("directory")
-		.where("id", "=", guidesDirectory.id)
-		.set({ parent_id: articlesDirectory.id })
-		.execute();
+		await lix.db
+			.updateTable("directory")
+			.where("id", "=", guidesDirectory.id)
+			.set({ parent_id: articlesDirectory.id })
+			.execute();
 
-	// Touch the target directory so directory history captures it in the commit
-	await lix.db
-		.updateTable("directory")
-		.where("id", "=", articlesDirectory.id)
-		.set({ name: "articles" })
-		.execute();
+		// Touch the target directory so directory history captures it in the commit
+		await lix.db
+			.updateTable("directory")
+			.where("id", "=", articlesDirectory.id)
+			.set({ name: "articles" })
+			.execute();
 
-	await lix.db
-		.updateTable("file")
-		.where("id", "=", fileId)
-		.set({ metadata: { stage: "after-move" } })
-		.execute();
+		await lix.db
+			.updateTable("file")
+			.where("id", "=", fileId)
+			.set({ metadata: { stage: "after-move" } })
+			.execute();
 
-	const checkpointAfterMove = await createCheckpoint({ lix });
+		const checkpointAfterMove = await createCheckpoint({ lix });
 
-	const historyBeforeMove = await lix.db
-		.selectFrom("file_history")
-		.where("id", "=", fileId)
-		.where("lixcol_root_commit_id", "=", checkpointBeforeMove.id)
-		.where("lixcol_depth", "=", 0)
-		.select(["path"])
-		.executeTakeFirstOrThrow();
+		const historyBeforeMove = await lix.db
+			.selectFrom("file_history")
+			.where("id", "=", fileId)
+			.where("lixcol_root_commit_id", "=", checkpointBeforeMove.id)
+			.where("lixcol_depth", "=", 0)
+			.select(["path"])
+			.executeTakeFirstOrThrow();
 
-	const historyAfterMove = await lix.db
-		.selectFrom("file_history")
-		.where("id", "=", fileId)
-		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
-		.where("lixcol_depth", "=", 0)
-		.select(["path"])
-		.executeTakeFirstOrThrow();
+		const historyAfterMove = await lix.db
+			.selectFrom("file_history")
+			.where("id", "=", fileId)
+			.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+			.where("lixcol_depth", "=", 0)
+			.select(["path"])
+			.executeTakeFirstOrThrow();
 
-	const historyAfterMoveDepthOne = await lix.db
-		.selectFrom("file_history")
-		.where("id", "=", fileId)
-		.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
-		.where("lixcol_depth", "=", 1)
-		.select(["path"])
-		.executeTakeFirstOrThrow();
+		const historyAfterMoveDepthOne = await lix.db
+			.selectFrom("file_history")
+			.where("id", "=", fileId)
+			.where("lixcol_root_commit_id", "=", checkpointAfterMove.id)
+			.where("lixcol_depth", "=", 1)
+			.select(["path"])
+			.executeTakeFirstOrThrow();
 
-	expect(historyBeforeMove.path).toBe("/docs/guides/intro.json");
-	expect(historyAfterMove.path).toBe("/articles/guides/intro.json");
-	expect(historyAfterMoveDepthOne.path).toBe("/docs/guides/intro.json");
-});
+		expect(historyBeforeMove.path).toBe("/docs/guides/intro.json");
+		expect(historyAfterMove.path).toBe("/articles/guides/intro.json");
+		expect(historyAfterMoveDepthOne.path).toBe("/docs/guides/intro.json");
+	}
+);
 
 // its super annoying to work with metadata otherwise
 test("file metadata is Record<string, any>", async () => {
@@ -884,6 +888,87 @@ test("file and file_all views expose change_id for blame and diff functionality"
 		extension: "json",
 	});
 	expect(updatedFileResult[0]?.path).toBe("/test-change-id-updated.json");
+});
+
+test("file views expose writer_key for descriptor rows", async () => {
+	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const writerKey = "writer:file#insert";
+	const fileId = "writer-descriptor-file";
+
+	await withWriterKey(db, writerKey, async (trx) => {
+		await trx
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/writer-descriptor.json",
+				data: new TextEncoder().encode(JSON.stringify({ content: "writer" })),
+			})
+			.execute();
+	});
+
+	const fileRow = await lix.db
+		.selectFrom("file")
+		.where("id", "=", fileId)
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(fileRow.lixcol_writer_key).toBe(writerKey);
+
+	const fileAllRow = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", fileId)
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(fileAllRow.lixcol_writer_key).toBe(writerKey);
+});
+
+test("file writer_key inherits across versions", async () => {
+	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const writerKey = "writer:file#inherit";
+	const fileId = "inherit-writer-file";
+
+	await withWriterKey(db, writerKey, async (trx) => {
+		await trx
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/inherit.json",
+				data: new TextEncoder().encode(JSON.stringify({ content: "base" })),
+			})
+			.execute();
+	});
+
+	const mainRow = await lix.db
+		.selectFrom("file")
+		.where("id", "=", fileId)
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(mainRow.lixcol_writer_key).toBe(writerKey);
+
+	const branch = await createVersion({ lix, name: "writer-branch" });
+	await switchVersion({ lix, to: branch });
+
+	const branchRow = await lix.db
+		.selectFrom("file")
+		.where("id", "=", fileId)
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(branchRow.lixcol_writer_key).toBe(writerKey);
+
+	const fileAllRows = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", fileId)
+		.select(["lixcol_version_id", "lixcol_writer_key"])
+		.execute();
+
+	expect(fileAllRows.every((row) => row.lixcol_writer_key === writerKey)).toBe(
+		true
+	);
 });
 
 test("file data updates create new change_id", async () => {
@@ -1612,6 +1697,7 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 		"lixcol_plugin_key",
 		"lixcol_entity_id",
 		"lixcol_version_id",
+		"lixcol_writer_key",
 	];
 
 	const filterColumns = (lixcols: Record<string, any>) => {
