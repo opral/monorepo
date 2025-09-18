@@ -183,6 +183,26 @@ test("closing a project should not lead to a throw", async () => {
 	await new Promise((resolve) => setTimeout(resolve, 250));
 });
 
+test("schemas are stored in Lix stored_schema views", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	const storedSchemas = await project.lix.db
+		.selectFrom("stored_schema_all")
+		.select(["key", "version"])
+		.where("key", "in", ["inlang_bundle", "inlang_message", "inlang_variant"])
+		.execute();
+
+	expect(storedSchemas).toEqual(
+		expect.arrayContaining([
+			{ key: "inlang_bundle", version: "1.0" },
+			{ key: "inlang_message", version: "1.0" },
+			{ key: "inlang_variant", version: "1.0" },
+		])
+	);
+
+	await project.close();
+});
+
 test("project.errors.get() returns errors for modules that couldn't be imported via http", async () => {
 	// Mock global fetch to simulate a network error
 	global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
