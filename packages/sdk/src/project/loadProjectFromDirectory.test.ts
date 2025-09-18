@@ -556,6 +556,37 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		writeFileSyncSpy.mockRestore();
 	});
+
+	test("no-op sync avoids redundant fs operations", async () => {
+		const syncInterval = 50;
+		const fs = Volume.fromJSON({
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+			"/project.inlang/messages/en.json": JSON.stringify({ greeting: "Hello" }),
+			"/project.inlang/messages/de.json": JSON.stringify({ greeting: "Hallo" }),
+		}) as any;
+		const readFileSyncSpy = vi.spyOn(fs, "readFileSync");
+		const writeFileSyncSpy = vi.spyOn(fs, "writeFileSync");
+
+		const project = await loadProjectFromDirectory({
+			fs,
+			path: "/project.inlang",
+			syncInterval,
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		readFileSyncSpy.mockClear();
+		writeFileSyncSpy.mockClear();
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		expect(readFileSyncSpy).not.toHaveBeenCalled();
+		expect(writeFileSyncSpy).not.toHaveBeenCalled();
+
+		readFileSyncSpy.mockRestore();
+		writeFileSyncSpy.mockRestore();
+		await project.close();
+	});
 	test("files from directory should be available via lix after project has been loaded from directory", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
