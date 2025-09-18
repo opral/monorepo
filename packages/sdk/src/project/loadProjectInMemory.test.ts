@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
-import { v7 } from "uuid";
+import { uuidV7 } from "@lix-js/sdk";
 
 test("roundtrip should succeed", async () => {
 	const file1 = await newProject();
@@ -38,7 +38,7 @@ test("selectBundleNested returns newly inserted bundles with variants", async ()
 		.insertInto("bundle")
 		.values({ id: "greeting", declarations: [] })
 		.execute();
-	const messageId = v7();
+	const messageId = await uuidV7({ lix: project.lix });
 	await project.db
 		.insertInto("message")
 		.values({
@@ -52,7 +52,7 @@ test("selectBundleNested returns newly inserted bundles with variants", async ()
 	await project.db
 		.insertInto("variant")
 		.values({
-			id: v7(),
+			id: await uuidV7({ lix: project.lix }),
 			messageId,
 			matches: [],
 			pattern: [{ type: "text", value: "Hello world" }],

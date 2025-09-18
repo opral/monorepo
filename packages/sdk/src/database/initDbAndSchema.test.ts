@@ -1,12 +1,14 @@
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isHumanId } from "../human-id/human-id.js";
-import { validate as isUuid } from "uuid";
 import { openLix } from "@lix-js/sdk";
+
+const uuidRegex =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 test("bundle default values", async () => {
 	const lix = await openLix({});
-	const db = initDb({ lix });
+	const db = initDb(lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
@@ -21,7 +23,7 @@ test("bundle default values", async () => {
 test("message default values", async () => {
 	const lix = await openLix({});
 
-	const db = initDb({ lix });
+	const db = initDb(lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
@@ -41,14 +43,14 @@ test("message default values", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(isUuid(message.id)).toBe(true);
+	expect(uuidRegex.test(message.id)).toBe(true);
 	expect(message.selectors).toStrictEqual([]);
 });
 
 test("variant default values", async () => {
 	const lix = await openLix({});
 
-	const db = initDb({ lix });
+	const db = initDb(lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
@@ -79,7 +81,7 @@ test("variant default values", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(isUuid(variant.id)).toBe(true);
+	expect(uuidRegex.test(variant.id)).toBe(true);
 	expect(variant.matches).toStrictEqual([]);
 	expect(variant.pattern).toStrictEqual([]);
 });
@@ -87,7 +89,7 @@ test("variant default values", async () => {
 test("it should handle json serialization and parsing for bundles", async () => {
 	const lix = await openLix({});
 
-	const db = initDb({ lix });
+	const db = initDb(lix);
 
 	await db
 		.insertInto("bundle")
@@ -117,7 +119,7 @@ test("it should handle json serialization and parsing for bundles", async () => 
 test.todo("it should enable foreign key constraints", async () => {
 	const lix = await openLix({});
 
-	const db = initDb({ lix });
+	const db = initDb(lix);
 
 	expect(() =>
 		db

@@ -4,7 +4,7 @@ import { newProject } from "./newProject.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { capture } from "../services/telemetry/capture.js";
 import { humanId } from "../human-id/human-id.js";
-import { v7 } from "uuid";
+import { uuidV7 } from "@lix-js/sdk";
 
 test("it should capture as expected", async () => {
 	vi.mock("../services/telemetry/capture.js", async () => {
@@ -37,7 +37,7 @@ test("it should capture as expected", async () => {
 		.values({ id: bundleId, declarations: [] })
 		.execute();
 
-	const messageId = v7();
+	const messageId = await uuidV7({ lix: project.lix });
 	await project.db
 		.insertInto("message")
 		.values({
@@ -51,7 +51,7 @@ test("it should capture as expected", async () => {
 	await project.db
 		.insertInto("variant")
 		.values({
-			id: v7(),
+			id: await uuidV7({ lix: project.lix }),
 			messageId,
 			matches: [],
 			pattern: [],

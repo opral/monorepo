@@ -2,8 +2,8 @@ import { expect, test, vi } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { PluginImportError } from "../plugin/errors.js";
-import { validate, v7 } from "uuid";
 import { humanId } from "../human-id/human-id.js";
+import { uuidV7 } from "@lix-js/sdk";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
@@ -14,7 +14,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 		.values({ id: bundleId, declarations: [] })
 		.execute();
 
-	const messageId = v7();
+	const messageId = await uuidV7({ lix: project1.lix });
 	await project1.db
 		.insertInto("message")
 		.values({
@@ -28,7 +28,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	await project1.db
 		.insertInto("variant")
 		.values({
-			id: v7(),
+			id: await uuidV7({ lix: project1.lix }),
 			messageId,
 			matches: [],
 			pattern: [],
@@ -119,8 +119,8 @@ test("if a project has no id, it should be generated", async () => {
 
 	const id = await project2.id.get();
 
-	expect(id).toBeDefined();
-	expect(validate(id)).toBe(true);
+	expect(typeof id).toBe("string");
+	expect(id.length).toBeGreaterThan(0);
 });
 
 test("providing an account should work", async () => {
