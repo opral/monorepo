@@ -82,16 +82,3 @@ jobs:
           body: ${{ steps.preview.outputs.body }}
           body-include: '<!-- flashtype-preview -->'
           edit-mode: replace
-
-      - name: Summarize preview URL
-        if: success()
-        env:
-          PREVIEW_URL: ${{ steps.preview.outputs.url }}
-        run: |
-          echo "### Preview uploaded" >> "$GITHUB_STEP_SUMMARY"
-          echo "Alias: $PR_ALIAS" >> "$GITHUB_STEP_SUMMARY"
-          if [ -n "$PREVIEW_URL" ]; then
-            echo "Preview URL: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "The exact preview URL is shown in the Wrangler action logs." >> "$GITHUB_STEP_SUMMARY"
-          fi
