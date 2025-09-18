@@ -15,6 +15,10 @@ import {
 } from "./variables.js";
 
 /**
+ * @typedef {(newLocale: Locale, options?: { reload?: boolean }) => void} SetLocaleFn
+ */
+
+/**
  * Set the locale.
  *
  * Set locale reloads the site by default on the client. Reloading
@@ -28,7 +32,7 @@ import {
  * @example
  *   setLocale('en', { reload: false });
  *
- * @type {(newLocale: Locale, options?: { reload?: boolean }) => void}
+ * @type {SetLocaleFn}
  */
 export let setLocale = (newLocale, options) => {
 	const optionsWithDefaults = {
@@ -136,10 +140,8 @@ export let setLocale = (newLocale, options) => {
  *     return Cookies.set('locale', newLocale)
  *   });
  *
- * @param {(newLocale: Locale, options?: { reload?: boolean }) => void} fn
+ * @param {SetLocaleFn} fn
  */
 export const overwriteSetLocale = (fn) => {
-	setLocale = (newLocale, options) => {
-		fn(newLocale, options);
-	};
+	setLocale = /** @type {SetLocaleFn} */ (fn);
 };
