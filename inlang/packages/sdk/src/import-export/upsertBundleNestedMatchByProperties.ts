@@ -1,9 +1,6 @@
-import type { Kysely } from "kysely";
-import { v7 } from "uuid";
-import type {
-	InlangDatabaseSchema,
-	NewBundleNested,
-} from "../database/schema.js";
+import type { InlangProject } from "../project/api.js";
+import { uuidV7 } from "@lix-js/sdk";
+import type { NewBundleNested } from "../database/schema.js";
 
 const isUniqueConstraintError = (error: unknown): boolean => {
 	const resultCode = (error as any)?.resultCode;
@@ -11,7 +8,7 @@ const isUniqueConstraintError = (error: unknown): boolean => {
 };
 
 export const upsertBundleNestedMatchByProperties = async (
-	db: Kysely<InlangDatabaseSchema>,
+	context: Pick<InlangProject, "db" | "lix">,
 	bundle: NewBundleNested
 ): Promise<void> => {
 	if (bundle.id === undefined) {
@@ -25,6 +22,9 @@ export const upsertBundleNestedMatchByProperties = async (
 	const bundleUpdate = {
 		declarations: bundle.declarations ?? [],
 	};
+
+	const db = context.db;
+	const generateUuid = () => uuidV7({ lix: context.lix });
 
 	await db.transaction().execute(async (trx) => {
 		try {
@@ -53,7 +53,8 @@ export const upsertBundleNestedMatchByProperties = async (
 				(m) => m.locale === message.locale
 			);
 
-			const messageId = existingMessage?.id ?? message.id ?? v7();
+			const messageId =
+				existingMessage?.id ?? message.id ?? (await generateUuid());
 			const messageToInsert = {
 				id: messageId,
 				bundleId,
@@ -99,7 +100,8 @@ export const upsertBundleNestedMatchByProperties = async (
 					(v) => JSON.stringify(v.matches) === JSON.stringify(variant.matches)
 				);
 
-				const variantId = existingVariant?.id ?? variant.id ?? v7();
+				const variantId =
+					existingVariant?.id ?? variant.id ?? (await generateUuid());
 				const variantToInsert = {
 					id: variantId,
 					messageId,

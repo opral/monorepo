@@ -18,7 +18,7 @@ import type {
 } from "../json-schema/old-v1-message/schemaV1.js";
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
-import { v7 } from "uuid";
+import { uuidV7 } from "@lix-js/sdk";
 
 const simpleJsonPlugin: InlangPlugin = {
 	key: "test-json-plugin",
@@ -251,7 +251,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 		providePlugins: [mockLegacyPlugin],
 	});
 
-	await insertBundleNested(project.db, {
+	await insertBundleNested(project, {
 		id: "key-id",
 		messages: [
 			{
@@ -340,7 +340,7 @@ test("project survives repeated save and load cycles with JSON plugin", async ()
 		.insertInto("bundle")
 		.values({ id: "welcome", declarations: [] })
 		.execute();
-	const newMessageId = v7();
+	const newMessageId = await uuidV7({ lix: project.lix });
 	await project.db
 		.insertInto("message")
 		.values({
@@ -353,7 +353,7 @@ test("project survives repeated save and load cycles with JSON plugin", async ()
 	await project.db
 		.insertInto("variant")
 		.values({
-			id: v7(),
+			id: await uuidV7({ lix: project.lix }),
 			messageId: newMessageId,
 			matches: [],
 			pattern: [{ type: "text", value: "Welcome" }],
@@ -435,9 +435,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		const files = await project.lix.db.selectFrom("file").selectAll().execute();
 
-		expect(files.length).toBe(
-			5 + 1 /* the db.sqlite file */ + 1 /* project_id */
-		);
+		expect(files.length).toBe(5 + 1 /* project_id */);
 
 		const filesByPath = files.reduce((acc, file) => {
 			acc[file.path] = new TextDecoder().decode(file.data);
@@ -480,9 +478,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		const files = await project.lix.db.selectFrom("file").selectAll().execute();
 
-		expect(files.length).toBe(
-			5 + 1 /* the db.sqlite file */ + 1 /* project_id */
-		);
+		expect(files.length).toBe(5 + 1 /* project_id */);
 
 		const filesByPath = files.reduce((acc, file) => {
 			acc[file.path] = new TextDecoder().decode(file.data);

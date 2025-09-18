@@ -1,15 +1,15 @@
-import type { Kysely } from "kysely";
-import { v7 } from "uuid";
+import type { InlangProject } from "../project/api.js";
+import { uuidV7 } from "@lix-js/sdk";
 import { humanId } from "../human-id/human-id.js";
-import type {
-	InlangDatabaseSchema,
-	NewBundleNested,
-} from "../database/schema.js";
+import type { NewBundleNested } from "../database/schema.js";
 
 export const insertBundleNested = async (
-	db: Kysely<InlangDatabaseSchema>,
+	context: Pick<InlangProject, "db" | "lix">,
 	bundle: NewBundleNested
 ): Promise<void> => {
+	const db = context.db;
+	const generateUuid = async () => uuidV7({ lix: context.lix });
+
 	await db.transaction().execute(async (trx) => {
 		const bundleId = bundle.id ?? humanId();
 		await trx
@@ -21,7 +21,7 @@ export const insertBundleNested = async (
 			.execute();
 
 		for (const message of bundle.messages) {
-			const messageId = message.id ?? v7();
+			const messageId = message.id ?? (await generateUuid());
 			await trx
 				.insertInto("message")
 				.values({
@@ -33,7 +33,7 @@ export const insertBundleNested = async (
 				.execute();
 
 			for (const variant of message.variants) {
-				const variantId = variant.id ?? v7();
+				const variantId = variant.id ?? (await generateUuid());
 				await trx
 					.insertInto("variant")
 					.values({

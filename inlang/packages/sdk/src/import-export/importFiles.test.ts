@@ -17,7 +17,7 @@ test("it should insert a message as is if the id is provided", async () => {
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],
@@ -33,7 +33,10 @@ test("it should insert a message as is if the id is provided", async () => {
 test("it should match an existing message if the id is not provided", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
-	await project.db.insertInto("bundle").values({ id: "mock-bundle" }).execute();
+	await project.db
+		.insertInto("bundle")
+		.values({ id: "mock-bundle", declarations: [] })
+		.execute();
 	await project.db
 		.insertInto("message")
 		.values({
@@ -60,7 +63,7 @@ test("it should match an existing message if the id is not provided", async () =
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],
@@ -89,7 +92,7 @@ test("it should create a bundle for a message if the bundle does not exist to av
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],
@@ -105,7 +108,10 @@ test("it should create a bundle for a message if the bundle does not exist to av
 test("it should insert a variant as is if the id is provided", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
-	await project.db.insertInto("bundle").values({ id: "mock-bundle" }).execute();
+	await project.db
+		.insertInto("bundle")
+		.values({ id: "mock-bundle", declarations: [] })
+		.execute();
 	await project.db
 		.insertInto("message")
 		.values({
@@ -125,7 +131,7 @@ test("it should insert a variant as is if the id is provided", async () => {
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],
@@ -141,7 +147,10 @@ test("it should insert a variant as is if the id is provided", async () => {
 test("it should match an existing variant if the id is not provided", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
-	await project.db.insertInto("bundle").values({ id: "mock-bundle" }).execute();
+	await project.db
+		.insertInto("bundle")
+		.values({ id: "mock-bundle", declarations: [] })
+		.execute();
 	await project.db
 		.insertInto("message")
 		.values({
@@ -161,7 +170,7 @@ test("it should match an existing variant if the id is not provided", async () =
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],
@@ -178,7 +187,10 @@ test("it should match an existing variant if the id is not provided", async () =
 test("it should create a message for a variant if the message does not exist to avoid foreign key conflicts and enable partial imports", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
-	await project.db.insertInto("bundle").values({ id: "mock-bundle" }).execute();
+	await project.db
+		.insertInto("bundle")
+		.values({ id: "mock-bundle", declarations: [] })
+		.execute();
 
 	const mockPlugin: InlangPlugin = {
 		key: "mock",
@@ -190,7 +202,7 @@ test("it should create a message for a variant if the message does not exist to 
 	};
 
 	await importFiles({
-		db: project.db,
+		project,
 		files: [{ content: new Uint8Array(), locale: "mock" }],
 		pluginKey: "mock",
 		plugins: [mockPlugin],

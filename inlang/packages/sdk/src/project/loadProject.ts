@@ -1,11 +1,7 @@
 import { type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import {
-	contentFromDatabase,
-	createInMemoryDatabase,
-	type SqliteWasmDatabase,
-} from "sqlite-wasm-kysely";
+import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import {
 	importPlugins,
@@ -13,12 +9,10 @@ import {
 } from "../plugin/importPlugins.js";
 import type { InlangProject } from "./api.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
-import { v4 } from "uuid";
+import { uuidV7 } from "@lix-js/sdk";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { importFiles } from "../import-export/importFiles.js";
 import { exportFiles } from "../import-export/exportFiles.js";
-import type { Kysely } from "kysely";
-import type { InlangDatabaseSchema } from "../database/schema.js";
 
 /**
  * Common load project logic.
@@ -67,7 +61,7 @@ export async function loadProject(args: {
 	 */
 	appId?: string;
 }): Promise<InlangProject> {
-	const db = initDb({ lix: args.lix });
+	const db = initDb(args.lix);
 
 	await maybeMigrateFirstProjectId({ lix: args.lix });
 
@@ -111,8 +105,6 @@ export async function loadProject(args: {
 		lix: args.lix,
 		appId: args.appId,
 	});
-
-	await ensureDbFileExists({ projectDb: db, lix: args.lix });
 
 	return {
 		db,
@@ -172,12 +164,12 @@ export async function loadProject(args: {
 			) as ProjectSettings;
 
 			return await importFiles({
+				project: { db, lix: args.lix },
 				files,
 				pluginKey,
 				settings,
 				// TODO don't use global state, might be stale
 				plugins,
-				db,
 			});
 		},
 		exportFiles: async ({ pluginKey }) => {
@@ -202,90 +194,15 @@ export async function loadProject(args: {
 			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
-			await saveDbToLix({ projectDb: db, lix: args.lix });
 			await db.destroy();
 			await args.lix.db.destroy();
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			await saveDbToLix({ projectDb: db, lix: args.lix });
 			return await args.lix.toBlob();
 		},
 		lix: args.lix,
 	};
-}
-
-async function saveDbToLix(args: {
-	projectDb: Kysely<InlangDatabaseSchema>;
-	lix: Lix;
-}): Promise<void> {
-	const sqlite = await createInMemoryDatabase({});
-	const legacyDb = initDb({ sqlite });
-
-	const [bundles, messages, variants] = await Promise.all([
-		args.projectDb
-			.selectFrom("bundle")
-			.select(["id", "declarations"])
-			.execute(),
-		args.projectDb
-			.selectFrom("message")
-			.select(["id", "bundleId", "locale", "selectors"])
-			.execute(),
-		args.projectDb
-			.selectFrom("variant")
-			.select(["id", "messageId", "matches", "pattern"])
-			.execute(),
-	]);
-
-	await legacyDb.transaction().execute(async (trx) => {
-		if (bundles.length > 0) {
-			await trx.insertInto("bundle").values(bundles).execute();
-		}
-		if (messages.length > 0) {
-			await trx.insertInto("message").values(messages).execute();
-		}
-		if (variants.length > 0) {
-			await trx.insertInto("variant").values(variants).execute();
-		}
-	});
-
-	const data = contentFromDatabase(sqlite);
-	await legacyDb.destroy();
-	sqlite.close();
-
-	const existingFile = await args.lix.db
-		.selectFrom("file")
-		.select("path")
-		.where("path", "=", "/db.sqlite")
-		.executeTakeFirst();
-
-	if (existingFile) {
-		await args.lix.db
-			.updateTable("file")
-			.set("data", data)
-			.where("path", "=", "/db.sqlite")
-			.execute();
-	} else {
-		await args.lix.db
-			.insertInto("file")
-			.values({ path: "/db.sqlite", data })
-			.execute();
-	}
-}
-
-async function ensureDbFileExists(args: {
-	projectDb: Kysely<InlangDatabaseSchema>;
-	lix: Lix;
-}): Promise<void> {
-	const existing = await args.lix.db
-		.selectFrom("file")
-		.select("path")
-		.where("path", "=", "/db.sqlite")
-		.executeTakeFirst();
-
-	if (!existing) {
-		await saveDbToLix(args);
-	}
 }
 
 /**
@@ -305,7 +222,7 @@ async function maybeMigrateFirstProjectId(args: { lix: Lix }): Promise<void> {
 			.insertInto("file")
 			.values({
 				path: "/project_id",
-				data: new TextEncoder().encode(v4()),
+				data: new TextEncoder().encode(await uuidV7({ lix: args.lix })),
 			})
 			.execute();
 	}

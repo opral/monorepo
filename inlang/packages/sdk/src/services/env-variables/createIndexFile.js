@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-imports */
 /* eslint-disable no-undef */
 /**
  * This script writes public environment variables
@@ -32,8 +31,7 @@ export const ENV_VARIABLES = {
 `
 );
 
-// eslint-disable-next-line no-console
-// console.log("✅ Created env variable index file.");
+console.log("✅ Created env variable index file.");
 
 function ifDefined(value) {
 	return value ? `"${value}"` : undefined;

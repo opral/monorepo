@@ -207,7 +207,7 @@ async function loadLegacyMessages(args: {
 		const messageBundle = fromMessageV1(legacyMessage);
 
 		upsertQueries.push(
-			upsertBundleNestedMatchByProperties(args.project.db, messageBundle)
+			upsertBundleNestedMatchByProperties(args.project, messageBundle)
 		);
 	}
 

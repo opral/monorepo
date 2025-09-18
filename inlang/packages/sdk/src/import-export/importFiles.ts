@@ -1,14 +1,13 @@
-import type { Kysely } from "kysely";
-import { v7 } from "uuid";
+import type { ProjectSettings } from "../json-schema/settings.js";
+import type { NewVariant } from "../database/schema.js";
+import type { InlangPlugin, VariantImport } from "../plugin/schema.js";
+import type { ImportFile, InlangProject } from "../project/api.js";
+import { humanId } from "../human-id/human-id.js";
+import { uuidV7 } from "@lix-js/sdk";
 import {
 	PluginDoesNotImplementFunctionError,
 	PluginMissingError,
 } from "../plugin/errors.js";
-import type { ProjectSettings } from "../json-schema/settings.js";
-import type { InlangDatabaseSchema, NewVariant } from "../database/schema.js";
-import type { InlangPlugin, VariantImport } from "../plugin/schema.js";
-import type { ImportFile } from "../project/api.js";
-import { humanId } from "../human-id/human-id.js";
 
 const isUniqueConstraintError = (error: unknown): boolean => {
 	const resultCode = (error as any)?.resultCode;
@@ -20,7 +19,7 @@ export async function importFiles(args: {
 	readonly pluginKey: string;
 	readonly settings: ProjectSettings;
 	readonly plugins: readonly InlangPlugin[];
-	readonly db: Kysely<InlangDatabaseSchema>;
+	readonly project: Pick<InlangProject, "db" | "lix">;
 }) {
 	const plugin = args.plugins.find((p) => p.key === args.pluginKey);
 
@@ -38,7 +37,9 @@ export async function importFiles(args: {
 		settings: structuredClone(args.settings),
 	});
 
-	await args.db.transaction().execute(async (trx) => {
+	const generateUuid = () => uuidV7({ lix: args.project.lix });
+
+	await args.project.db.transaction().execute(async (trx) => {
 		const insertBundleIfMissing = async (
 			bundleId: string,
 			declarations: any[] = []
@@ -90,7 +91,7 @@ export async function importFiles(args: {
 					.where("locale", "=", message.locale)
 					.select("id")
 					.executeTakeFirst();
-				message.id = existingMessage?.id ?? v7();
+				message.id = existingMessage?.id ?? (await generateUuid());
 			}
 
 			const messageRecord = {
@@ -123,23 +124,23 @@ export async function importFiles(args: {
 		}
 		// upsert every variant
 		for (const variant of imported.variants) {
-				if (variant.id === undefined || variant.messageId === undefined) {
-					let messageId: string | undefined = variant.messageId;
-					if (messageId === undefined) {
-						const existingMessage = await trx
-							.selectFrom("message")
-							.where("bundleId", "=", variant.messageBundleId)
-							.where("locale", "=", variant.messageLocale)
-							.selectAll()
-							.executeTakeFirst();
+			if (variant.id === undefined || variant.messageId === undefined) {
+				let messageId: string | undefined = variant.messageId;
+				if (messageId === undefined) {
+					const existingMessage = await trx
+						.selectFrom("message")
+						.where("bundleId", "=", variant.messageBundleId)
+						.where("locale", "=", variant.messageLocale)
+						.selectAll()
+						.executeTakeFirst();
 
-						if (existingMessage) {
-							messageId = existingMessage.id;
-						} else {
-							await insertBundleIfMissing(variant.messageBundleId);
-							messageId = v7();
-							await trx
-								.insertInto("message")
+					if (existingMessage) {
+						messageId = existingMessage.id;
+					} else {
+						await insertBundleIfMissing(variant.messageBundleId);
+						messageId = await generateUuid();
+						await trx
+							.insertInto("message")
 							.values({
 								id: messageId,
 								bundleId: variant.messageBundleId,
@@ -161,13 +162,14 @@ export async function importFiles(args: {
 					(v) => JSON.stringify(v.matches) === JSON.stringify(variant.matches)
 				);
 
-				(variant as VariantImport).id = duplicateVariant?.id ?? variant.id ?? v7();
+				(variant as VariantImport).id =
+					duplicateVariant?.id ?? variant.id ?? (await generateUuid());
 				(variant as VariantImport).messageId = resolvedMessageId;
 			}
 
 			const toBeInsertedVariant: NewVariant = {
 				...variant,
-				id: variant.id ?? v7(),
+				id: variant.id ?? (await generateUuid()),
 				messageId: variant.messageId!,
 				matches: variant.matches ?? [],
 				pattern: variant.pattern ?? [],

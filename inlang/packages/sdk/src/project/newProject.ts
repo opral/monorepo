@@ -24,7 +24,7 @@ export async function newProject(args?: {
 		}),
 	});
 
-	initDb({ lix });
+	initDb(lix);
 
 	try {
 		const { value: lixId } = await lix.db
