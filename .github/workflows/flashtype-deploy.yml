@@ -1,7 +1,6 @@
 name: Flashtype Deploy
 
 # Requires secrets:
-# - CLOUDFLARE_ACCOUNT_ID: Cloudflare account ID for the worker.
 # - CLOUDFLARE_API_TOKEN: Token with Workers Scripts Edit permissions (and KV access if needed).
 
 on:
@@ -23,8 +22,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      PNPM_HOME: ~/.pnpm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,13 +74,11 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Enable Corepack
+      - name: Setup pnpm
         if: steps.version.outputs.changed == 'true'
-        run: corepack enable
-
-      - name: Prepare pnpm
-        if: steps.version.outputs.changed == 'true'
-        run: corepack prepare pnpm@10.13.1 --activate
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
 
       - name: Install dependencies
         if: steps.version.outputs.changed == 'true'

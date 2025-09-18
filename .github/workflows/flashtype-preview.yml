@@ -1,7 +1,6 @@
 name: Flashtype Preview
 
 # Requires secrets:
-# - CLOUDFLARE_ACCOUNT_ID: Cloudflare account ID for the worker.
 # - CLOUDFLARE_API_TOKEN: Token with Workers Scripts Edit + Workers KV Storage Edit (if needed).
 
 on:
@@ -19,7 +18,6 @@ jobs:
     name: Upload Worker Preview
     runs-on: ubuntu-latest
     env:
-      PNPM_HOME: ~/.pnpm
       PR_ALIAS: pr-${{ github.event.number }}
     steps:
       - name: Checkout
@@ -31,11 +29,10 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Prepare pnpm
-        run: corepack prepare pnpm@10.13.1 --activate
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
