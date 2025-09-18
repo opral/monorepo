@@ -114,6 +114,32 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 ***
 
+## SetLocaleFn()
+
+> **SetLocaleFn**\<\> = (`newLocale`, `options?`) => `void`
+
+Defined in: [runtime/set-locale.js:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+
+### Type Parameters
+
+### Parameters
+
+#### newLocale
+
+[`Locale`](#locale)
+
+#### options?
+
+##### reload?
+
+`boolean`
+
+### Returns
+
+`void`
+
+***
+
 ## baseLocale
 
 > `const` **baseLocale**: `"en"` = `"en"`
@@ -921,7 +947,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:141](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:145](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -932,7 +958,7 @@ modify a cookie, env variable, or a user's preference.
 
 #### fn
 
-(`newLocale`, `options?`) => `void`
+[`SetLocaleFn`](#setlocalefn)
 
 ### Returns
 
@@ -953,7 +979,7 @@ overwriteSetLocale((newLocale) => {
 
 > **setLocale**(`newLocale`, `options?`): `void`
 
-Defined in: [runtime/set-locale.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
