@@ -480,7 +480,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		writeFileSyncSpy.mockRestore();
 	});
 
-	test("plugin export path writes every locale file", async () => {
+	test("plugin export path writes only the changed locale file", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON({
 			"/project.inlang/settings.json": JSON.stringify(mockSettings),
@@ -557,6 +557,86 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		writeFileSyncSpy.mockRestore();
 	});
 
+	test("branch switch retains filesystem edits despite stale lix export", async () => {
+		const syncInterval = 100;
+		const branchSettings = {
+			...mockSettings,
+			"test-json-plugin": {
+				pathPattern: "./project.inlang/messages/{locale}.json",
+			},
+		};
+		const fs = Volume.fromJSON({
+			"/project.inlang/settings.json": JSON.stringify(branchSettings),
+			"/project.inlang/messages/en.json": `${JSON.stringify({ greeting: "Hello" }, null, 2)}\n`,
+			"/project.inlang/messages/de.json": `${JSON.stringify({ greeting: "Hallo" }, null, 2)}\n`,
+		}) as any;
+
+		const project = await loadProjectFromDirectory({
+			fs,
+			path: "/project.inlang",
+			syncInterval,
+			providePlugins: [simpleJsonPlugin],
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		const initialFiles = ["en", "de"].map((locale) => ({
+			locale,
+			content: new TextEncoder().encode(
+				fs.readFileSync(`/project.inlang/messages/${locale}.json`, "utf-8")
+			),
+		}));
+		await project.importFiles({
+			pluginKey: simpleJsonPlugin.key,
+			files: initialFiles,
+		});
+
+		const { id: englishMessageId } = await project.db
+			.selectFrom("message")
+			.select("id")
+			.where("locale", "=", "en")
+			.executeTakeFirstOrThrow();
+
+		await project.db
+			.updateTable("variant")
+			.set({ pattern: [{ type: "text", value: "Hi" }] })
+			.where("messageId", "=", englishMessageId)
+			.execute();
+
+		const exportedFiles = await project.exportFiles({
+			pluginKey: simpleJsonPlugin.key,
+		});
+
+		for (const file of exportedFiles) {
+			await project.lix.db
+				.updateTable("file")
+				.set({ data: file.content })
+				.where("path", "=", `/${file.name}`)
+				.execute();
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		const branchContent = `${JSON.stringify({ greeting: "Branch" }, null, 2)}\n`;
+		fs.writeFileSync("/project.inlang/messages/en.json", branchContent);
+
+		await saveProjectToDirectory({
+			fs: fs.promises as any,
+			project,
+			path: "/project.inlang",
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		const finalContent = fs.readFileSync(
+			"/project.inlang/messages/en.json",
+			"utf-8"
+		);
+		expect(finalContent).toBe(branchContent);
+
+		await project.close();
+	});
+
 	test("no-op sync avoids redundant fs operations", async () => {
 		const syncInterval = 50;
 		const fs = Volume.fromJSON({
@@ -584,6 +664,49 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(writeFileSyncSpy).not.toHaveBeenCalled();
 
 		readFileSyncSpy.mockRestore();
+		writeFileSyncSpy.mockRestore();
+		await project.close();
+	});
+
+	test("lix-only updates flush just the changed locale", async () => {
+		const syncInterval = 100;
+		const fs = Volume.fromJSON({
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+			"/project.inlang/messages/en.json": JSON.stringify({ greeting: "Hello" }),
+			"/project.inlang/messages/de.json": JSON.stringify({ greeting: "Hallo" }),
+		}) as any;
+		const writeFileSyncSpy = vi.spyOn(fs, "writeFileSync");
+
+		const project = await loadProjectFromDirectory({
+			fs,
+			path: "/project.inlang",
+			syncInterval,
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+		writeFileSyncSpy.mockClear();
+
+		await project.lix.db
+			.updateTable("file")
+			.set({
+				data: new TextEncoder().encode(JSON.stringify({ greeting: "Hi" })),
+			})
+			.where("path", "=", "/messages/en.json")
+			.execute();
+
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+
+		expect(
+			writeFileSyncSpy.mock.calls.filter(
+				([callPath]) => callPath === "/project.inlang/messages/en.json"
+			)
+		).toHaveLength(1);
+		expect(
+			writeFileSyncSpy.mock.calls.filter(
+				([callPath]) => callPath === "/project.inlang/messages/de.json"
+			)
+		).toHaveLength(0);
+
 		writeFileSyncSpy.mockRestore();
 		await project.close();
 	});
