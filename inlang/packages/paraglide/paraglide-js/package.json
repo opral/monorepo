@@ -33,7 +33,7 @@
 		"test": "npm run env-variables && tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "npm run env-variables && vitest --watch ./src/**/*",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
-		"lint": "eslint ./src --fix",
+		"lint": "oxlint --config .oxlintrc.json --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
@@ -47,22 +47,20 @@
 		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.18.0",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@opral/tsconfig": "workspace:*",
 		"@rollup/plugin-virtual": "3.0.2",
 		"@ts-morph/bootstrap": "0.26.0",
 		"@types/node": "^22.10.6",
 		"@vitest/coverage-v8": "2.1.8",
-		"eslint": "^9.18.0",
 		"memfs": "4.17.0",
+		"oxlint": "^1.14.0",
 		"prettier": "^3.4.2",
 		"rolldown": "1.0.0-beta.1",
 		"typedoc": "0.28.12",
 		"typedoc-plugin-markdown": "4.7.0",
 		"typedoc-plugin-missing-exports": "4.0.0",
 		"typescript": "5.8.3",
-		"typescript-eslint": "^8.20.0",
 		"vitest": "2.1.8"
 	},
 	"keywords": [
