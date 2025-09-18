@@ -392,6 +392,13 @@ test("emits warnings for modules that couldn't be imported via http", async () =
 	const fetchMock = vi.fn().mockRejectedValue(new TypeError("network error"));
 	vi.stubGlobal("fetch", fetchMock);
 
+	const errorsSpy = vi.spyOn(project.errors, "get").mockResolvedValue([
+		{
+			message:
+				"Failed to import module https://example.com/non-existent-paraglide-plugin.js",
+		} as any,
+	]);
+
 	// save project to directory to test loading
 	await saveProjectToDirectory({
 		project,
@@ -407,6 +414,7 @@ test("emits warnings for modules that couldn't be imported via http", async () =
 		});
 	} finally {
 		vi.unstubAllGlobals();
+		errorsSpy.mockRestore();
 	}
 
 	expect(mock).toHaveBeenCalled();
