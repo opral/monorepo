@@ -1,7 +1,6 @@
 import { type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import {
 	importPlugins,
@@ -18,7 +17,6 @@ import { exportFiles } from "../import-export/exportFiles.js";
  * Common load project logic.
  */
 export async function loadProject(args: {
-	sqlite: SqliteWasmDatabase;
 	lix: Lix;
 	/**
 	 * The account that loaded the project.
@@ -61,6 +59,13 @@ export async function loadProject(args: {
 	 */
 	appId?: string;
 }): Promise<InlangProject> {
+	const engine = args.lix.engine;
+	if (!engine) {
+		throw new Error(
+			"loadProject requires a Lix engine. Did you initialize the project with openLix?"
+		);
+	}
+
 	const db = initDb(args.lix);
 
 	await maybeMigrateFirstProjectId({ lix: args.lix });
@@ -197,7 +202,6 @@ export async function loadProject(args: {
 			await db.destroy();
 			await args.lix.db.destroy();
 		},
-		_sqlite: args.sqlite,
 		toBlob: async () => {
 			return await args.lix.toBlob();
 		},
