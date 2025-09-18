@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { UiDiffComponentProps, type LixConversationMessage } from "@lix-js/sdk";
+import { type RenderDiffArgs, type LixConversationMessage } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { useAtom } from "jotai/react";
 import { lixAtom } from "@/state.ts";
@@ -26,7 +26,7 @@ export const CheckpointComponent = (props: {
   showBottomLine: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
+  const [diffs, setDiffs] = useState<RenderDiffArgs["diffs"]>([]);
   type ConversationWithComments = {
     id: string;
     comments: (LixConversationMessage & { author_name?: string | null })[];
@@ -73,7 +73,7 @@ export const CheckpointComponent = (props: {
   };
 
   // Group changes by plugin_key
-  const groupedChanges = diffs.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+  const groupedChanges = diffs.reduce((acc: { [key: string]: RenderDiffArgs["diffs"] }, change) => {
     const key = change.plugin_key;
     if (!acc[key]) {
       acc[key] = [];

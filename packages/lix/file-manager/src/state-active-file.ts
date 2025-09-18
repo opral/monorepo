@@ -15,7 +15,7 @@ import {
     jsonArrayFrom,
     Lix,
     sql,
-    UiDiffComponentProps,
+    RenderDiffArgs,
     ebEntity,
 } from "@lix-js/sdk";
 import { redirect } from "react-router-dom";
@@ -101,7 +101,7 @@ export const workingChangeSetAtom = atom(async (get) => {
 
 // The file manager app treats changes that are not in a change set as intermediate changes.
 export const intermediateChangesAtom = atom<
-	Promise<UiDiffComponentProps["diffs"]>
+	Promise<RenderDiffArgs["diffs"]>
 >(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
@@ -150,7 +150,7 @@ export const intermediateChangesAtom = atom<
 	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
 	// If there are no checkpoint changes, we can't get the before snapshot
 
-	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
+	const changesWithBeforeSnapshots: RenderDiffArgs["diffs"] =
 		await Promise.all(
 			intermediateLeafChanges.map(async (change) => {
 				let snapshotBefore = null;
@@ -190,12 +190,12 @@ export const intermediateChangesAtom = atom<
 
 				return {
 					...rest,
-					snapshot_content_after: change.snapshot_content_after
+					after_snapshot_content: change.snapshot_content_after
 						? typeof change.snapshot_content_after === "string"
 							? JSON.parse(change.snapshot_content_after)
 							: change.snapshot_content_after
 						: null,
-					snapshot_content_before: snapshotBefore?.snapshot_content_before
+					before_snapshot_content: snapshotBefore?.snapshot_content_before
 						? typeof snapshotBefore.snapshot_content_before === "string"
 							? JSON.parse(snapshotBefore.snapshot_content_before)
 							: snapshotBefore.snapshot_content_before
@@ -274,7 +274,7 @@ export const getChangeDiffs = async (
 	changeSetId: string,
 	changeSetBeforeId?: string | null,
 	activeFileId?: string | null
-): Promise<UiDiffComponentProps["diffs"]> => {
+): Promise<RenderDiffArgs["diffs"]> => {
 	// Get active version to filter by current version
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -309,7 +309,7 @@ export const getChangeDiffs = async (
 	const checkpointChanges = await checkpointChangesQuery.execute();
 
 	// Process each change to include before snapshots
-	const changesWithBeforeSnapshot: UiDiffComponentProps["diffs"] =
+	const changesWithBeforeSnapshot: RenderDiffArgs["diffs"] =
 		await Promise.all(
 			checkpointChanges.map(async (change) => {
 				let snapshotBefore = null;
@@ -346,12 +346,12 @@ export const getChangeDiffs = async (
 
 				return {
 					...rest,
-					snapshot_content_after: change.snapshot_content_after
+					after_snapshot_content: change.snapshot_content_after
 						? typeof change.snapshot_content_after === "string"
 							? JSON.parse(change.snapshot_content_after)
 							: change.snapshot_content_after
 						: null,
-					snapshot_content_before: snapshotBefore?.snapshot_content_before
+					before_snapshot_content: snapshotBefore?.snapshot_content_before
 						? typeof snapshotBefore.snapshot_content_before === "string"
 							? JSON.parse(snapshotBefore.snapshot_content_before)
 							: snapshotBefore.snapshot_content_before

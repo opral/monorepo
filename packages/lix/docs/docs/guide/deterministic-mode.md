@@ -13,12 +13,12 @@ Use deterministic mode for:
 **Normal mode (default)** - different results each run:
 
 ```ts
-import { openLix, timestamp, random } from "@lix-js/sdk";
+import { openLix, getTimestamp, random } from "@lix-js/sdk";
 
 const lix = await openLix({ blob });
 
-timestamp({ lix }); // "2024-03-15T10:32:45.123Z" (current time)
-timestamp({ lix }); // "2024-03-15T10:32:45.124Z" (real time passes)
+getTimestamp({ lix }); // "2024-03-15T10:32:45.123Z" (current time)
+getTimestamp({ lix }); // "2024-03-15T10:32:45.124Z" (real time passes)
 random({ lix }); // 0.7234... (unpredictable)
 random({ lix }); // 0.1823... (unpredictable)
 ```
@@ -39,8 +39,8 @@ const lix = await openLix({
   ],
 });
 
-timestamp({ lix }); // "1970-01-01T00:00:00.000Z" (always epoch)
-timestamp({ lix }); // "1970-01-01T00:00:00.001Z" (always +1ms)
+getTimestamp({ lix }); // "1970-01-01T00:00:00.000Z" (always epoch)
+getTimestamp({ lix }); // "1970-01-01T00:00:00.001Z" (always +1ms)
 random({ lix }); // 0.318... (always this sequence)
 random({ lix }); // 0.937... (always this sequence)
 ```
@@ -189,8 +189,8 @@ The following functions provide deterministic behavior when `lix_deterministic_m
 
 | Function                                   | Purpose                          | Docs                                                       |
 | ------------------------------------------ | -------------------------------- | ---------------------------------------------------------- |
-| `timestamp({ lix })`                       | Logical clock timestamps         | [API docs](/api/functions/timestamp)                       |
+| `getTimestamp({ lix })`                       | Logical clock timestamps         | [API docs](/api/functions/timestamp)                       |
 | `random({ lix })`                          | Reproducible random numbers      | [API docs](/api/functions/random)                          |
 | `uuidV7({ lix })`                          | Deterministic UUID v7 generation | [API docs](/api/functions/uuidV7)                          |
 | `nanoId({ lix })`                          | Deterministic nano ID generation | [API docs](/api/functions/nanoId)                          |
-| `nextDeterministicSequenceNumber({ lix })` | Monotonic counter (advanced)     | [API docs](/api/functions/nextDeterministicSequenceNumber) |
+| `nextSequenceNumber({ lix })` | Monotonic counter (advanced)     | [API docs](/api/functions/nextDeterministicSequenceNumber) |

@@ -220,6 +220,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
                 lixcol_created_at,
                 lixcol_updated_at,
                 lixcol_commit_id,
+                lixcol_writer_key,
                 lixcol_untracked,
                 lixcol_metadata
         FROM file_all
@@ -306,6 +307,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
 	                json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
 	                json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+	                json_extract(lixcol_json, '$.writer_key') AS lixcol_writer_key,
 	                untracked AS lixcol_untracked,
 	                change_metadata AS lixcol_metadata
 	        FROM file_rows;

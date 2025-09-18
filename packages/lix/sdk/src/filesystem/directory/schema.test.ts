@@ -1,5 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
+import { withWriterKey } from "../../state/writer.js";
+import type { Kysely } from "kysely";
 
 test("insert, update, delete on the directory view", async () => {
 	const lix = await openLix({});
@@ -72,4 +74,35 @@ test("insert, update, delete on the directory view", async () => {
 	const remaining = await lix.db.selectFrom("directory").selectAll().execute();
 
 	expect(remaining).toHaveLength(0);
+});
+
+test("directory views expose writer_key for descriptor rows", async () => {
+	const lix = await openLix({});
+	const writerKey = "writer:directory#insert";
+
+	await withWriterKey(lix.db, writerKey, async (trx) => {
+		await trx
+			.insertInto("directory")
+			.values({
+				parent_id: null,
+				name: "docs",
+			})
+			.execute();
+	});
+
+	const directoryRow = await lix.db
+		.selectFrom("directory")
+		.where("name", "=", "docs")
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(directoryRow.lixcol_writer_key).toBe(writerKey);
+
+	const directoryAllRow = await lix.db
+		.selectFrom("directory_all")
+		.where("id", "=", directoryRow.id)
+		.select(["id", "lixcol_writer_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(directoryAllRow.lixcol_writer_key).toBe(writerKey);
 });

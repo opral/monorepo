@@ -1,9 +1,64 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import { type DetectedChange, type FromLixSchemaDefinition } from "@lix-js/sdk";
+import {
+	type DetectedChange,
+	type FromLixSchemaDefinition,
+	type LixPlugin,
+} from "@lix-js/sdk";
 import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { RowSchemaV1 } from "./schemas/row.js";
+
+type DetectChangesArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
+type DetectBefore = NonNullable<DetectChangesArgs["before"]>;
+type DetectAfter = DetectChangesArgs["after"];
+type TestBefore = DetectBefore & {
+	lixcol_metadata?: DetectBefore["metadata"];
+};
+type TestAfter = DetectAfter & {
+	lixcol_metadata?: DetectAfter["metadata"];
+};
+
+const noopQuerySync = undefined as unknown as DetectChangesArgs["querySync"];
+
+const createTestFile = ({
+	id = "random",
+	path = "x.csv",
+	data,
+	metadata,
+}: {
+	id?: string;
+	path?: string;
+	data: Uint8Array;
+	metadata: DetectAfter["metadata"];
+}): TestAfter =>
+	({
+		id,
+		path,
+		directory_id: null,
+		name: path.split("/").pop() ?? path,
+		extension: path.includes(".") ? (path.split(".").pop() ?? "") : null,
+		data,
+		metadata,
+		hidden: false,
+		lixcol_metadata: metadata,
+		lixcol_inherited_from_version_id: null,
+		lixcol_created_at: new Date().toISOString(),
+		lixcol_updated_at: new Date().toISOString(),
+	}) as TestAfter;
+
+const runDetectChanges = ({
+	before,
+	after,
+}: {
+	before?: TestBefore;
+	after: TestAfter;
+}) =>
+	detectChanges?.({
+		before: before as DetectChangesArgs["before"],
+		after: after as DetectChangesArgs["after"],
+		querySync: noopQuerySync,
+	} as DetectChangesArgs);
 
 test("it should not detect changes if the csv did not update", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
@@ -12,9 +67,9 @@ test("it should not detect changes if the csv did not update", async () => {
 
 	const metadata = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata },
-		after: { id: "random", path: "x.csv", data: after, metadata },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata }),
+		after: createTestFile({ data: after, metadata }),
 	});
 	expect(detectedChanges).toEqual([]);
 });
@@ -30,9 +85,9 @@ test("it should detect a new row with its cells", async () => {
 
 	const metadata = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata },
-		after: { id: "random", path: "x.csv", data: after, metadata },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata }),
+		after: createTestFile({ data: after, metadata }),
 	});
 
 	expect(detectedChanges).toStrictEqual([
@@ -62,9 +117,9 @@ test("it should detect updates", async () => {
 
 	const metadata = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "mock", path: "x.csv", data: before, metadata },
-		after: { id: "mock", path: "x.csv", data: after, metadata },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ id: "mock", data: before, metadata }),
+		after: createTestFile({ id: "mock", data: after, metadata }),
 	});
 
 	expect(detectedChanges).toEqual([
@@ -82,9 +137,9 @@ test("it should detect a deletion of a row and its cells", async () => {
 
 	const metadata = { unique_column: "Name" };
 
-	const detectedChanges = await detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata },
-		after: { id: "random", path: "x.csv", data: after, metadata },
+	const detectedChanges = await runDetectChanges({
+		before: createTestFile({ data: before, metadata }),
+		after: createTestFile({ data: after, metadata }),
 	});
 
 	expect(detectedChanges).toStrictEqual([
@@ -117,9 +172,9 @@ test("it should return [] if the unique column is not set", async () => {
 
 	const metadata = { unique_column: undefined };
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.csv", data: before, metadata },
-		after: { id: "random", path: "x.csv", data: after, metadata },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata }),
+		after: createTestFile({ data: after, metadata }),
 	});
 
 	expect(detectedChanges).toEqual([]);
@@ -135,9 +190,9 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 	const metaBefore = { unique_column: "Name" };
 	const metaAfter = { unique_column: "Age" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata: metaBefore },
-		after: { id: "random", path: "x.csv", data: after, metadata: metaAfter },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata: metaBefore }),
+		after: createTestFile({ data: after, metadata: metaAfter }),
 	});
 
 	expect(detectedChanges).toEqual(
@@ -199,9 +254,9 @@ test("changing the header order should result in a change", async () => {
 
 	const meta = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata: meta },
-		after: { id: "random", path: "x.csv", data: after, metadata: meta },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata: meta }),
+		after: createTestFile({ data: after, metadata: meta }),
 	});
 
 	expect(detectedChanges).toEqual([
@@ -223,9 +278,9 @@ test("row order changes should be detected", async () => {
 
 	const meta = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata: meta },
-		after: { id: "random", path: "x.csv", data: after, metadata: meta },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata: meta }),
+		after: createTestFile({ data: after, metadata: meta }),
 	});
 
 	expect(detectedChanges).toEqual([
@@ -248,9 +303,9 @@ test("it detects the header entity", async () => {
 
 	const metadata = { unique_column: "Name" };
 
-	const detectedChanges = detectChanges?.({
-		before: { id: "random", path: "x.csv", data: before, metadata: null },
-		after: { id: "random", path: "x.csv", data: after, metadata },
+	const detectedChanges = runDetectChanges({
+		before: createTestFile({ data: before, metadata: null }),
+		after: createTestFile({ data: after, metadata }),
 	});
 
 	const header = detectedChanges.find(

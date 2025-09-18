@@ -6,7 +6,7 @@
 		"emitDeclarationOnly": false,
 		"experimentalDecorators": false,
 		"useDefineForClassFields": false,
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"noUnusedLocals": true,
 		"outDir": "./dist",
 		"rootDir": "./src",

@@ -3,6 +3,7 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"packageManager": "pnpm@10.13.1",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
@@ -15,13 +16,12 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"ai": "^5.0.34",
 		"@ai-sdk/google": "^2.0.12",
 		"@lix-js/agent": "workspace:*",
-		"@lix-js/react-utils": "workspace:*",
-		"@lix-js/sdk": "workspace:*",
 		"@lix-js/inspector": "workspace:*",
 		"@lix-js/plugin-md": "workspace:*",
+		"@lix-js/react-utils": "workspace:*",
+		"@lix-js/sdk": "workspace:*",
 		"@opral/markdown-wc": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.10",
 		"@radix-ui/react-collapsible": "^1.1.12",
@@ -34,6 +34,7 @@
 		"@tanstack/react-router": "^1.131.28",
 		"@tiptap/core": "^3.3.0",
 		"@tiptap/react": "^3.0.0",
+		"ai": "^5.0.34",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
@@ -43,6 +44,7 @@
 		"tailwind-merge": "^3.3.1"
 	},
 	"devDependencies": {
+		"@railway/cli": "^4.8.0",
 		"@tailwindcss/vite": "^4.0.0",
 		"@tanstack/router-devtools": "^1.131.28",
 		"@tanstack/router-plugin": "^1.131.28",
@@ -58,6 +60,7 @@
 		"tw-animate-css": "^1.3.7",
 		"typescript": "^5.9.2",
 		"vite": "^7.1.3",
-		"vitest": "^3.2.4"
+		"vitest": "^3.2.4",
+		"wrangler": "^4.38.0"
 	}
 }

@@ -10,7 +10,7 @@ import {
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createCheckpoint, createConversation, UiDiffComponentProps } from "@lix-js/sdk";
+import { createCheckpoint, createConversation, type RenderDiffArgs } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
@@ -27,7 +27,7 @@ export const IntermediateCheckpointComponent = () => {
 
 	// Group changes by plugin_key
 	const groupedChanges = intermediateChanges.reduce(
-		(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+		(acc: { [key: string]: RenderDiffArgs["diffs"] }, change) => {
 			const key = change.plugin_key;
 			if (!acc[key]) {
 				acc[key] = [];

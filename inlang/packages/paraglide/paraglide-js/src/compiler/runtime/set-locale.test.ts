@@ -197,6 +197,36 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 	);
 });
 
+test("overwriteSetLocale receives the options object", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
+	});
+
+	// Provide minimal browser globals to avoid strategy branches failing.
+	/** @ts-expect-error - browser shim for tests */
+	globalThis.document = { cookie: "" };
+	globalThis.window = {
+		location: {
+			href: "https://example.com/en",
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const spy = vi.fn();
+	runtime.overwriteSetLocale(spy);
+
+	runtime.setLocale("fr", { reload: false });
+
+	expect(spy).toHaveBeenCalledWith("fr", { reload: false });
+});
+
 // https://github.com/opral/inlang-paraglide-js/issues/430
 test("should not reload when setting locale to current locale", async () => {
 	// @ts-expect-error - global variable definition
@@ -397,6 +427,155 @@ test("calls setLocale on multiple custom strategies", async () => {
 	expect(setLocaleCalled2).toBe(true);
 	expect(customLocale1).toBe("de");
 	expect(customLocale2).toBe("de");
+});
+
+test("setLocale should return a promise if any custom setLocale function is async", async () => {
+	let customLocale1 = "en";
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-async", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-async", {
+		getLocale: () => customLocale1,
+		setLocale: async (locale) => {
+			customLocale1 = locale;
+		},
+	});
+
+	const setLocalePromise = runtime.setLocale("de");
+	const setLocalePromiseWithoutReload = runtime.setLocale("de", {
+		reload: false,
+	});
+
+	expect(setLocalePromise).toBeInstanceOf(Promise);
+	expect(setLocalePromiseWithoutReload).toBeInstanceOf(Promise);
+});
+
+test("awaits async setLocale functions to resolve in custom strategy", async () => {
+	let customLocale1 = "en";
+
+	globalThis.window = {
+		location: {
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-async", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-async", {
+		getLocale: () => customLocale1,
+		setLocale: async (locale) => {
+			customLocale1 = locale;
+		},
+	});
+
+	const setLocalePromise = runtime.setLocale("de");
+	expect(window.location.reload).not.toHaveBeenCalled();
+
+	await setLocalePromise;
+
+	// Verify that setLocale resolved before reload was called
+	expect(window.location.reload).toHaveBeenCalledTimes(1);
+	expect(customLocale1).toBe("de");
+});
+
+test("awaits async setLocale functions to resolve in multiple custom strategies", async () => {
+	let customLocale1 = "en";
+	let customLocale2 = "en";
+
+	globalThis.window = {
+		location: {
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-async1", "custom-async2", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-async1", {
+		getLocale: () => customLocale1,
+		setLocale: async (locale) => {
+			customLocale1 = locale;
+		},
+	});
+
+	runtime.defineCustomClientStrategy("custom-async2", {
+		getLocale: () => customLocale2,
+		setLocale: async (locale) => {
+			customLocale2 = locale;
+		},
+	});
+
+	const setLocalePromise = runtime.setLocale("de");
+	expect(window.location.reload).not.toHaveBeenCalled();
+
+	await setLocalePromise;
+
+	// Verify that setLocale resolved before reload was called
+	expect(window.location.reload).toHaveBeenCalledTimes(1);
+	expect(customLocale1).toBe("de");
+	expect(customLocale2).toBe("de");
+});
+
+test("reload should not run if async setLocale function rejects in custom strategy", async () => {
+	const customLocale1 = "en";
+
+	globalThis.window = {
+		location: {
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-async", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-async", {
+		getLocale: () => customLocale1,
+		setLocale: async () => {
+			throw new Error("fetch error");
+		},
+	});
+
+	const error = expect(() => runtime.setLocale("de")).rejects;
+	await error.toThrowError(`Custom strategy "custom-async" setLocale failed.`);
+	await error.toMatchObject({ cause: { message: "fetch error" } });
+
+	// Verify that reload was never called
+	expect(window.location.reload).toHaveBeenCalledTimes(0);
+	expect(customLocale1).toBe("en");
 });
 
 test("custom strategy setLocale works with cookie and localStorage", async () => {

@@ -154,7 +154,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 		</LixProvider>
 	);
 
-	let hookResult: { current: State<LixKeyValue> | undefined };
+	let hookResult: { current: State<LixKeyValue> | undefined } | undefined;
 
 	await act(async () => {
 		const { result } = renderHook(
@@ -174,7 +174,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 	});
 
 	await waitFor(() => {
-		expect(hookResult.current).toMatchObject({
+		expect(hookResult!.current).toMatchObject({
 			key: "first_test_1",
 			value: "first",
 		});
@@ -213,6 +213,109 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 
 	await waitFor(() => {
 		expect(hookResult.current).toBeUndefined();
+	});
+
+	await lix.close();
+});
+
+test("useSuspenseQueryTakeFirst updates reference when underlying row changes", async () => {
+	const lix = await openLix({});
+	const rowKey = "react_first_ref";
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: rowKey, value: "initial" })
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<LixKeyValue> | undefined };
+
+	await act(async () => {
+		const { result } = renderHook(
+			() =>
+				useQueryTakeFirst(({ lix }) =>
+					lix.db.selectFrom("key_value").selectAll().where("key", "=", rowKey),
+				),
+			{ wrapper },
+		);
+		hookResult = result;
+	});
+
+	await waitFor(() => {
+		expect(hookResult!.current?.value).toBe("initial");
+	});
+
+	const initialRef = hookResult!.current;
+
+	await act(async () => {
+		await lix.db
+			.updateTable("key_value")
+			.set({ value: "updated" })
+			.where("key", "=", rowKey)
+			.execute();
+	});
+
+	await waitFor(() => {
+		expect(hookResult!.current?.value).toBe("updated");
+		expect(hookResult!.current).not.toBe(initialRef);
+	});
+
+	await lix.close();
+});
+
+test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the initial value", async () => {
+	const lix = await openLix({});
+	const key = "agg_count_test";
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: { count: number | null } | undefined } | undefined;
+
+	await act(async () => {
+		const { result } = renderHook(
+			() =>
+				useQueryTakeFirst(({ lix }) =>
+					lix.db
+						.selectFrom("key_value")
+						.select((eb) => [eb.fn.count<number>("value").as("count")])
+						.where("key", "=", key),
+				),
+			{ wrapper },
+		);
+		hookResult = result;
+	});
+
+	await waitFor(() => {
+		expect(hookResult!.current?.count ?? 0).toBe(0);
+	});
+
+	await act(async () => {
+		await lix.db.insertInto("key_value").values({ key, value: "v1" }).execute();
+	});
+
+	await waitFor(() => {
+		expect(hookResult!.current?.count ?? 0).toBe(1);
+	});
+
+	await act(async () => {
+		await lix.db.deleteFrom("key_value").where("key", "=", key).execute();
+	});
+
+	await waitFor(() => {
+		expect(hookResult!.current?.count ?? -1).toBe(0);
 	});
 
 	await lix.close();

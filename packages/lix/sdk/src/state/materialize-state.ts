@@ -148,7 +148,7 @@ export function applyMaterializeStateSchema(args: {
             c.created_at,
             ROW_NUMBER() OVER (
                 PARTITION BY ct.version_id, c.entity_id, c.schema_key, c.file_id
-                ORDER BY ct.depth ASC
+                ORDER BY ct.depth ASC, c.created_at DESC, c.id DESC
             ) as first_seen,
             FIRST_VALUE(c.created_at) OVER (
                 PARTITION BY ct.version_id, c.entity_id, c.schema_key, c.file_id
@@ -209,10 +209,10 @@ export function applyMaterializeStateSchema(args: {
             c.schema_version,
             c.created_at AS entity_created_at,
             c.created_at AS entity_updated_at,
-            ROW_NUMBER() OVER (
-                PARTITION BY 'global', c.entity_id, 'lix_commit', 'lix'
-                ORDER BY cg.depth ASC
-            ) AS first_seen
+		ROW_NUMBER() OVER (
+			PARTITION BY 'global', c.entity_id, 'lix_commit', 'lix'
+			ORDER BY cg.depth ASC, c.created_at DESC, c.id DESC
+		) AS first_seen
         FROM internal_materialization_commit_graph cg
         JOIN change c ON c.entity_id = cg.commit_id AND c.schema_key = 'lix_commit'
     ),
@@ -239,7 +239,7 @@ export function applyMaterializeStateSchema(args: {
             c.created_at AS created_at,
             ROW_NUMBER() OVER (
                 PARTITION BY 'global', (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
-                ORDER BY ct.depth ASC
+                ORDER BY ct.depth ASC, cmt.created_at DESC, cmt.id DESC
             ) AS first_seen,
             FIRST_VALUE(c.created_at) OVER (
                 PARTITION BY 'global', (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id), 'lix_change_set_element', 'lix'
@@ -276,7 +276,7 @@ export function applyMaterializeStateSchema(args: {
             cmt.created_at AS created_at,
             ROW_NUMBER() OVER (
                 PARTITION BY 'global', (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
-                ORDER BY cg.depth ASC
+                ORDER BY cg.depth ASC, cmt.created_at DESC, cmt.id DESC
             ) AS first_seen,
             FIRST_VALUE(cmt.created_at) OVER (
                 PARTITION BY 'global', (je.value || '~' || cg.commit_id), 'lix_commit_edge', 'lix'
@@ -314,7 +314,7 @@ export function applyMaterializeStateSchema(args: {
             cmt.created_at AS created_at,
             ROW_NUMBER() OVER (
                 PARTITION BY 'global', (c.id || '~' || ja.value), 'lix_change_author', 'lix'
-                ORDER BY ct.depth ASC
+                ORDER BY ct.depth ASC, cmt.created_at DESC, cmt.id DESC
             ) AS first_seen,
             FIRST_VALUE(cmt.created_at) OVER (
                 PARTITION BY 'global', (c.id || '~' || ja.value), 'lix_change_author', 'lix'

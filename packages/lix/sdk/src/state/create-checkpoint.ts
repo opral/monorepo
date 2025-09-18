@@ -2,11 +2,12 @@ import { type LixCommit, LixCommitSchema } from "../commit/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
 import { getTimestampSync } from "../engine/deterministic/timestamp.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
 import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
 import type { LixEngine } from "../engine/boot.js";
-import { sql, type Kysely } from "kysely";
+import { type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import {
 	LixVersionDescriptorSchema,
@@ -123,9 +124,9 @@ export async function createCheckpointSync(args: {
 			created_at: now,
 		};
 
-		const workingDomainChangeIds = workingElements.map(
-			(r: any) => r.change_id as string
-		);
+		const workingDomainChangeIds = workingElements
+			.map((r: any) => r.change_id as string | null)
+			.filter((id): id is string => Boolean(id));
 
 		// Merge in the previous tip (A) as an additional parent to WC
 		const mergedParents = Array.from(
@@ -196,36 +197,66 @@ export async function createCheckpointSync(args: {
 				labelChange as any,
 			])
 			.execute();
+		const materializedChanges = [
+			{
+				...descriptorChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...tipChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...checkpointCommitChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: checkpointCommitId,
+			},
+			{
+				...newWorkingCommitChange,
+				lixcol_version_id: "global" as const,
+				lixcol_commit_id: newWorkingCommitId,
+			},
+			{
+				...labelChange,
+				lixcol_version_id: activeVersion.id,
+				lixcol_commit_id: checkpointCommitId,
+			},
+		] satisfies Array<
+			LixChangeRaw & {
+				lixcol_version_id: string;
+				lixcol_commit_id: string;
+			}
+		>;
+
 		updateStateCache({
 			engine,
-			changes: [
-				{
-					...descriptorChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				},
-				{
-					...tipChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				},
-				{
-					...checkpointCommitChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: checkpointCommitId,
-				},
-				{
-					...newWorkingCommitChange,
-					lixcol_version_id: "global",
-					lixcol_commit_id: newWorkingCommitId,
-				},
-				{
-					...labelChange,
-					lixcol_version_id: activeVersion.id,
-					lixcol_commit_id: checkpointCommitId,
-				},
-			],
+			changes: materializedChanges,
 		});
+
+		const hookChanges: StateCommitChange[] = materializedChanges.map(
+			(change) => ({
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				schema_version: change.schema_version,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				created_at: change.created_at,
+				snapshot_content: change.snapshot_content
+					? JSON.parse(change.snapshot_content)
+					: null,
+				metadata: change.metadata ? JSON.parse(change.metadata) : null,
+				version_id: change.lixcol_version_id,
+				commit_id: change.lixcol_commit_id,
+				untracked: 0,
+				writer_key: null,
+			})
+		);
+
+		// Bridge state_commit so reactive queries observe the new working commit/descriptor state.
+		args.engine.hooks._emit("state_commit", { changes: hookChanges });
 
 		// Return the checkpoint commit (old working)
 		const createdCommit = await trx

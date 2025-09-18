@@ -1,0 +1,15 @@
+{
+	"$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+	"name": "flashtype",
+	"main": "worker.ts",
+	"compatibility_date": "2025-09-15",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "dist"
+	},
+	"build": {
+		"cwd": "../..",
+		"command": "pnpm --filter @opral/flashtype... build"
+	},
+	"preview_urls": true
+}

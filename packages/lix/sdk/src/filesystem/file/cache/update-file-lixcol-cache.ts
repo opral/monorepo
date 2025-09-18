@@ -4,7 +4,7 @@ import type { LixEngine } from "../../../engine/boot.js";
  * Updates the file lixcol metadata cache.
  *
  * This function computes and caches the expensive lixcol columns
- * (latest_change_id, latest_commit_id, created_at, updated_at)
+ * (latest_change_id, latest_commit_id, created_at, updated_at, writer_key)
  * to avoid expensive subqueries in the file view.
  *
  * @example
@@ -31,22 +31,22 @@ export function updateFileLixcolCache(args: {
 	// Compute the expensive metadata once
 	const metadata = args.engine.sqlite.exec({
 		sql: `
-			WITH file_metadata AS (
-				SELECT 
-					-- Get the latest change for this file
-					(SELECT s.change_id 
-					 FROM state_all s 
-					 WHERE s.file_id = ?
-					   AND s.version_id = ?
-					 ORDER BY s.updated_at DESC 
-					 LIMIT 1) as latest_change_id
+			WITH latest_state AS (
+				SELECT
+					s.change_id AS latest_change_id,
+					s.writer_key AS writer_key
+				FROM state_all s
+				WHERE s.file_id = ?
+				  AND s.version_id = ?
+				ORDER BY s.updated_at DESC, s.change_id DESC
+				LIMIT 1
 			)
 			SELECT 
-				fm.latest_change_id,
-				-- Get timestamps from the change
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as created_at,
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as updated_at
-			FROM file_metadata fm
+				ls.latest_change_id,
+				ls.writer_key,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS created_at,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS updated_at
+			FROM latest_state ls
 		`,
 		bind: [args.fileId, args.versionId],
 		returnValue: "resultRows",
@@ -65,12 +65,13 @@ export function updateFileLixcolCache(args: {
 	args.engine.sqlite.exec({
 		sql: `
 			INSERT INTO internal_file_lixcol_cache 
-			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?)
+			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at, writer_key)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT (file_id, version_id) DO UPDATE SET
 				latest_change_id = excluded.latest_change_id,
 				latest_commit_id = excluded.latest_commit_id,
-				updated_at = excluded.updated_at
+				updated_at = excluded.updated_at,
+				writer_key = excluded.writer_key
 				-- Don't update created_at to preserve the original
 		`,
 		bind: [
@@ -78,8 +79,9 @@ export function updateFileLixcolCache(args: {
 			args.versionId,
 			row[0], // latest_change_id
 			commitId, // latest_commit_id from version table
-			row[1], // created_at
-			row[2], // updated_at
+			row[2], // created_at
+			row[3], // updated_at
+			row[1], // writer_key
 		],
 		returnValue: "resultRows",
 	});
