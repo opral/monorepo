@@ -70,31 +70,24 @@ export function selectFileLixcol(args: {
 	// Get the latest change and timestamps
 	const metadata = args.engine.sqlite.exec({
 		sql: `
-			WITH file_metadata AS (
-				SELECT 
-					-- Get the latest change for this file
-					(SELECT s.change_id 
-					 FROM state_all s 
-					 WHERE s.file_id = ?
-					   AND s.version_id = ?
-					 ORDER BY s.updated_at DESC 
-					 LIMIT 1) as latest_change_id,
-					(SELECT s.writer_key
-					 FROM state_all s 
-					 WHERE s.file_id = ?
-					   AND s.version_id = ?
-					 ORDER BY s.updated_at DESC 
-					 LIMIT 1) as writer_key
+			WITH latest_state AS (
+				SELECT
+					s.change_id AS latest_change_id,
+					s.writer_key AS writer_key
+				FROM state_all s
+				WHERE s.file_id = ?
+				  AND s.version_id = ?
+				ORDER BY s.updated_at DESC, s.change_id DESC
+				LIMIT 1
 			)
 			SELECT 
-				fm.latest_change_id,
-				fm.writer_key,
-				-- Get timestamps from the change
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as created_at,
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as updated_at
-			FROM file_metadata fm
+				ls.latest_change_id,
+				ls.writer_key,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS created_at,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS updated_at
+			FROM latest_state ls
 		`,
-		bind: [args.fileId, args.versionId, args.fileId, args.versionId],
+		bind: [args.fileId, args.versionId],
 		returnValue: "resultRows",
 	});
 
