@@ -599,6 +599,7 @@ export function commit(args: {
 				latest_commit_id: string;
 				created_at: string;
 				updated_at: string;
+				writer_key: string | null;
 			}> = [];
 			for (const [fileId, { change_id, created_at }] of fileChanges) {
 				const changeData = versionChanges.find((c: any) => c.id === change_id);
@@ -615,6 +616,7 @@ export function commit(args: {
 						latest_commit_id: metaCommitId ?? "",
 						created_at: created_at,
 						updated_at: created_at,
+						writer_key: changeData?.writer_key ?? null,
 					});
 				}
 			}
@@ -638,6 +640,7 @@ export function commit(args: {
 								latest_change_id: sql`excluded.latest_change_id`,
 								latest_commit_id: sql`excluded.latest_commit_id`,
 								updated_at: sql`excluded.updated_at`,
+								writer_key: sql`excluded.writer_key`,
 							})
 						),
 				});

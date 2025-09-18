@@ -5,6 +5,7 @@ export interface FileLixcol {
 	latest_commit_id: string | null;
 	created_at: string | null;
 	updated_at: string | null;
+	writer_key: string | null;
 }
 
 /**
@@ -32,7 +33,8 @@ export function selectFileLixcol(args: {
 				latest_change_id,
 				latest_commit_id,
 				created_at,
-				updated_at
+				updated_at,
+				writer_key
 			FROM internal_file_lixcol_cache 
 			WHERE file_id = ? AND version_id = ?
 		`,
@@ -49,6 +51,7 @@ export function selectFileLixcol(args: {
 				latest_commit_id: row[1] as string | null,
 				created_at: row[2] as string | null,
 				updated_at: row[3] as string | null,
+				writer_key: (row[4] as string | null) ?? null,
 			};
 		}
 	}
@@ -67,28 +70,29 @@ export function selectFileLixcol(args: {
 	// Get the latest change and timestamps
 	const metadata = args.engine.sqlite.exec({
 		sql: `
-			WITH file_metadata AS (
-				SELECT 
-					-- Get the latest change for this file
-					(SELECT s.change_id 
-					 FROM state_all s 
-					 WHERE s.file_id = ?
-					   AND s.version_id = ?
-					 ORDER BY s.updated_at DESC 
-					 LIMIT 1) as latest_change_id
+			WITH latest_state AS (
+				SELECT
+					s.change_id AS latest_change_id,
+					s.writer_key AS writer_key
+				FROM state_all s
+				WHERE s.file_id = ?
+				  AND s.version_id = ?
+				ORDER BY s.updated_at DESC, s.change_id DESC
+				LIMIT 1
 			)
 			SELECT 
-				fm.latest_change_id,
-				-- Get timestamps from the change
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as created_at,
-				(SELECT created_at FROM change WHERE id = fm.latest_change_id) as updated_at
-			FROM file_metadata fm
+				ls.latest_change_id,
+				ls.writer_key,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS created_at,
+				(SELECT created_at FROM change WHERE id = ls.latest_change_id) AS updated_at
+			FROM latest_state ls
 		`,
 		bind: [args.fileId, args.versionId],
 		returnValue: "resultRows",
 	});
 
 	const row = metadata[0];
+	const writerKey = normalizeWriterKey(row?.[1]);
 
 	// If no metadata found (file doesn't exist or has no changes), return nulls
 	// Don't cache non-existent files
@@ -98,22 +102,24 @@ export function selectFileLixcol(args: {
 			latest_commit_id: null,
 			created_at: null,
 			updated_at: null,
+			writer_key: writerKey,
 		};
 	}
 
 	const result = {
 		latest_change_id: row[0] as string,
 		latest_commit_id: commitId!,
-		created_at: row[1] as string,
-		updated_at: row[2] as string,
+		created_at: row[2] as string,
+		updated_at: row[3] as string,
+		writer_key: writerKey,
 	};
 
 	// Only cache if we have valid data (file exists)
 	args.engine.sqlite.exec({
 		sql: `
 			INSERT OR REPLACE INTO internal_file_lixcol_cache 
-			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?)
+			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at, writer_key)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`,
 		bind: [
 			args.fileId,
@@ -122,9 +128,17 @@ export function selectFileLixcol(args: {
 			result.latest_commit_id,
 			result.created_at,
 			result.updated_at,
+			result.writer_key,
 		],
 		returnValue: "resultRows",
 	});
 
 	return result;
+}
+
+function normalizeWriterKey(value: unknown): string | null {
+	if (value === null || value === undefined) {
+		return null;
+	}
+	return String(value);
 }

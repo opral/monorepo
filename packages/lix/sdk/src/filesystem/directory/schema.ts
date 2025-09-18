@@ -205,6 +205,7 @@ export function applyDirectoryDatabaseSchema(args: {
 			created_at AS lixcol_created_at,
 			updated_at AS lixcol_updated_at,
 			commit_id AS lixcol_commit_id,
+			writer_key AS lixcol_writer_key,
 			untracked AS lixcol_untracked
 		FROM state_all
 		WHERE schema_key = '${schemaKey}';
