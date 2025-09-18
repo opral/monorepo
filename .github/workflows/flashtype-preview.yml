@@ -17,7 +17,7 @@ permissions:
 jobs:
   upload-preview:
     name: Upload Worker Preview
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: flashtype-preview
     env:
       PR_ALIAS: pr-${{ github.event.number }}

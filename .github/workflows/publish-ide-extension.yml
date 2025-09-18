@@ -11,7 +11,7 @@ on:
 
 jobs:
   vs-code-marketplace:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: vscode-marketplace
     steps:
       - name: Checkout project
