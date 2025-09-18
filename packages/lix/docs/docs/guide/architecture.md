@@ -4,7 +4,7 @@
 
 Lix represents all data through four fundamental concepts that build upon each other.
 
-Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./features/versions.md) (branching), merging, and time-travel queries.
+Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./versions.mdx) (branching), merging, and time-travel queries.
 
 **Change** A single modification (e.g., `c1`).
 

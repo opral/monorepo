@@ -89,13 +89,13 @@ export default defineConfig({
           items: [
             {
               text: "Change Proposals",
-              link: "/guide/features/change-proposals",
+              link: "/guide/change-proposals",
             },
-            { text: "Entity-level diffs", link: "/guide/features/diffs" },
-            { text: "History", link: "/guide/features/history" },
+            { text: "Entity-level diffs", link: "/guide/diffs" },
+            { text: "History", link: "/guide/history" },
             {
               text: "Validation Rules",
-              link: "/guide/features/validation-rules",
+              link: "/guide/validation-rules",
             },
             { text: "Versions (Branching)", link: "/guide/versions" },
           ],
@@ -106,11 +106,11 @@ export default defineConfig({
           items: [
             {
               text: "Attribution (Blame)",
-              link: "/guide/features/attribution",
+              link: "/guide/attribution",
             },
-            { text: "Restore", link: "/guide/features/restore" },
-            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
-            { text: "Conversations", link: "/guide/features/conversations" },
+            { text: "Restore", link: "/guide/restore" },
+            { text: "Undo/Redo", link: "/guide/undo-redo" },
+            { text: "Conversations", link: "/guide/conversations" },
             { text: "Labels", link: "/guide/concepts/labels" },
             { text: "Key Value Store", link: "/guide/concepts/key-value" },
           ],
@@ -119,6 +119,8 @@ export default defineConfig({
           text: "Concepts",
           collapsed: true,
           items: [
+            { text: "What is an Entity?", link: "/guide/entity" },
+            { text: "Lix Schema", link: "/guide/schema" },
             { text: "Metadata", link: "/guide/metadata" },
             { text: "Writer Key", link: "/guide/writer-key" },
             { text: "Environment API", link: "/guide/environment-api" },
