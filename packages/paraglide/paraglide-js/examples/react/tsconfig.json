@@ -23,5 +23,5 @@
 		"noUncheckedSideEffectImports": true
 	},
 	"include": ["src"],
-	"exclude": ["src/paraglide"]
+	"exclude": ["src/paraglide", "src/paraglide/**"]
 }
