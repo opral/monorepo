@@ -13,7 +13,7 @@
 	},
 	"routes": [
 		{
-			"pattern": "flashtype.ai",
+			"pattern": "flashtype.ai/*",
 			"custom_domain": true
 		}
 	],
