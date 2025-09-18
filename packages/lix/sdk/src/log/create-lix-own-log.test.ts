@@ -19,12 +19,18 @@ test("should insert logs default log levels when lix_log_levels is not set)", as
 	expect(logs.find((log) => log.level === "info")?.message).toBe(
 		"info message"
 	);
+	expect(logs.find((log) => log.level === "info")?.payload).toBeNull();
 	expect(logs.find((log) => log.level === "warn")?.message).toBe(
 		"warn message"
 	);
+	expect(logs.find((log) => log.level === "warn")?.payload).toEqual({
+		reason: "detected",
+		path: "/tmp/example.txt",
+	});
 	expect(logs.find((log) => log.level === "error")?.message).toBe(
 		"error message"
 	);
+	expect(logs.find((log) => log.level === "error")?.payload).toBeNull();
 });
 
 test("should insert only specified levels when lix_log_levels=['warn', 'error']", async () => {
@@ -42,9 +48,14 @@ test("should insert only specified levels when lix_log_levels=['warn', 'error']"
 	expect(logs.find((log) => log.level === "warn")?.message).toBe(
 		"warn message"
 	);
+	expect(logs.find((log) => log.level === "warn")?.payload).toEqual({
+		reason: "detected",
+		path: "/tmp/example.txt",
+	});
 	expect(logs.find((log) => log.level === "error")?.message).toBe(
 		"error message"
 	);
+	expect(logs.find((log) => log.level === "error")?.payload).toBeNull();
 });
 
 test("should insert only specified levels when lix_log_levels=['debug']", async () => {
@@ -56,9 +67,11 @@ test("should insert only specified levels when lix_log_levels=['debug']", async 
 
 	const logs = await getLogs(lix);
 	expect(logs).toHaveLength(1); // debug
-	expect(logs.find((log) => log.level === "debug")?.message).toBe(
-		"debug message"
-	);
+	expect(logs.find((log) => log.level === "debug")?.message).toBeNull();
+	expect(logs.find((log) => log.level === "debug")?.payload).toEqual({
+		reason: "verbose",
+		details: { retries: 0 },
+	});
 	expect(logs.find((log) => log.level === "info")).toBeUndefined();
 	expect(logs.find((log) => log.level === "warn")).toBeUndefined();
 	expect(logs.find((log) => log.level === "error")).toBeUndefined();
@@ -73,18 +86,26 @@ test("should insert all levels contain wildcard '*'", async () => {
 
 	const logs = await getLogs(lix);
 	expect(logs).toHaveLength(4); // debug, info, warn, error
-	expect(logs.find((log) => log.level === "debug")?.message).toBe(
-		"debug message"
-	);
+	expect(logs.find((log) => log.level === "debug")?.message).toBeNull();
+	expect(logs.find((log) => log.level === "debug")?.payload).toEqual({
+		reason: "verbose",
+		details: { retries: 0 },
+	});
 	expect(logs.find((log) => log.level === "info")?.message).toBe(
 		"info message"
 	);
+	expect(logs.find((log) => log.level === "info")?.payload).toBeNull();
 	expect(logs.find((log) => log.level === "warn")?.message).toBe(
 		"warn message"
 	);
+	expect(logs.find((log) => log.level === "warn")?.payload).toEqual({
+		reason: "detected",
+		path: "/tmp/example.txt",
+	});
 	expect(logs.find((log) => log.level === "error")?.message).toBe(
 		"error message"
 	);
+	expect(logs.find((log) => log.level === "error")?.payload).toBeNull();
 });
 
 async function createLogs(lix: Lix) {
@@ -92,25 +113,28 @@ async function createLogs(lix: Lix) {
 		engine: lix.engine!,
 		key: "log_test_debug",
 		level: "debug",
-		message: "debug message",
+		payload: { reason: "verbose", details: { retries: 0 } },
 	});
 	await createLixOwnLog({
 		engine: lix.engine!,
 		key: "log_test_info",
 		level: "info",
 		message: "info message",
+		payload: null,
 	});
 	await createLixOwnLog({
 		engine: lix.engine!,
 		key: "log_test_warn",
 		level: "warn",
 		message: "warn message",
+		payload: { reason: "detected", path: "/tmp/example.txt" },
 	});
 	await createLixOwnLog({
 		engine: lix.engine!,
 		key: "log_test_error",
 		level: "error",
 		message: "error message",
+		payload: null,
 	});
 }
 

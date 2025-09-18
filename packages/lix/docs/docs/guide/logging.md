@@ -18,6 +18,7 @@ await lix.db
     key: "app_boot_success",
     level: "info",
     message: "Application booted and ready.",
+    payload: { version: "1.4.0", mode: "production" },
   })
   .execute();
 ```
@@ -26,11 +27,11 @@ await lix.db
 
 Use Lix for logs that are part of your application's state. Because logs are stored and versioned in the repository, they are queryable, shareable, and available long after the original process has exited.
 
-| Use Lix Logging For...                       | Use `console.log` For...                    |
-| -------------------------------------------- | ------------------------------------------- |
-| **User-facing logs** (errors, activity)   | **Developer-only diagnostics**              |
-| **Persistent state** to be queried & synced  | **Ephemeral data** for immediate inspection |
-| **Testable application logic**               | **Debugging the current execution**         |
+| Use Lix Logging For...                      | Use `console.log` For...                    |
+| ------------------------------------------- | ------------------------------------------- |
+| **User-facing logs** (errors, activity)     | **Developer-only diagnostics**              |
+| **Persistent state** to be queried & synced | **Ephemeral data** for immediate inspection |
+| **Testable application logic**              | **Debugging the current execution**         |
 
 ## Querying Logs
 
@@ -57,6 +58,7 @@ A primary use case for Lix Logging is to create a queryable history of events th
 Instead of only logging errors to the console where they are lost, you can write them to Lix. This allows you to build an in-app "Error History" or "Activity" panel, giving users or support staff visibility into what went wrong.
 
 **1. Log an error when it occurs:**
+
 ```ts
 async function handleSubmit(formData) {
   try {
@@ -64,9 +66,10 @@ async function handleSubmit(formData) {
   } catch (error) {
     await createLog({
       lix,
-      key: 'form_submit_failed',
-      level: 'error',
-      message: `Submission failed: ${error.message}`,
+      key: "form_submit_failed",
+      level: "error",
+      message: "Submission failed",
+      payload: { message: error.message, fields: Object.keys(formData) },
     });
     // Also notify the user immediately
   }
@@ -84,9 +87,9 @@ function ErrorHistoryPanel({ lix }) {
   useEffect(() => {
     const fetchErrors = async () => {
       const result = await lix.db
-        .selectFrom('log')
-        .where('level', '=', 'error')
-        .orderBy('timestamp', 'desc')
+        .selectFrom("log")
+        .where("level", "=", "error")
+        .orderBy("timestamp", "desc")
         .limit(50)
         .selectAll()
         .execute();
@@ -100,15 +103,39 @@ function ErrorHistoryPanel({ lix }) {
     <div>
       <h3>Error History</h3>
       <ul>
-        {errors.map(error => (
+        {errors.map((error) => (
           <li key={error.id}>
-            <strong>{error.key}</strong>: {error.message} ({error.timestamp})
+            <strong>{error.key}</strong>: {error.message ?? "No message"} (
+            {error.timestamp})
+            {error.payload ? (
+              <pre>{JSON.stringify(error.payload, null, 2)}</pre>
+            ) : null}
           </li>
         ))}
       </ul>
     </div>
   );
 }
+```
+
+## Querying Payload Fields
+
+Because `payload` stores JSON, you can filter logs by payload fields using SQLite's `json_extract` helper through Kysely's `sql` tagged template.
+
+```ts
+import { sql } from "@lix-js/sdk";
+
+const uploadFailures = await lix.db
+  .selectFrom("log")
+  .selectAll()
+  .where("level", "=", "error")
+  .where(sql`json_extract(payload, '$.operation')`, "=", "file_upload")
+  .where(sql`json_extract(payload, '$.retryable')`, "=", 1)
+  .orderBy("timestamp", "desc")
+  .execute();
+
+// uploadFailures now contains only error logs whose payload.operation is "file_upload"
+// and payload.retryable === true.
 ```
 
 ## Best Practices
@@ -121,11 +148,11 @@ function ErrorHistoryPanel({ lix }) {
 
 The default `log` table provides a minimal, effective schema.
 
-| Column    | Type     | Description                                     |
-| --------- | -------- | ----------------------------------------------- |
-| `id`      | `string` | A unique identifier for the log entry.          |
-| `timestamp` | `string` | ISO 8601 timestamp of when the log was created. |
-| `key`     | `string` | A structured, `snake_case` key for filtering.   |
-| `level`   | `string` | The log level (e.g., `info`, `error`).          |
-| `message` | `string` | The descriptive log message.                    |
-
+| Column      | Type      | Description                                     |
+| ----------- | --------- | ----------------------------------------------- |
+| `id`        | `string`  | A unique identifier for the log entry.          |
+| `timestamp` | `string`  | ISO 8601 timestamp of when the log was created. |
+| `key`       | `string`  | A structured, `snake_case` key for filtering.   |
+| `level`     | `string`  | The log level (e.g., `info`, `error`).          |
+| `message`   | `string?` | Optional descriptive message for the log.       |
+| `payload`   | `JSON`    | Structured payload for storing queryable data.  |

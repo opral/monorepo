@@ -1,5 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { LixEngine } from "../engine/boot.js";
+import type { JSONType } from "../schema-definition/json-type.js";
 
 const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
 
@@ -35,10 +36,12 @@ export function shouldLog(
  * `level` is included in the determined list of allowed levels or if the list is '["*"]'.
  *
  * Use `snake_case` for log keys (e.g., `app_module_component`) to keep filters predictable.
+ * Provide either a `message`, a structured `payload`, or both depending on your needs.
  *
  * @example
  * // Basic info log (will be logged if 'info' is allowed by lix_log_levels)
- * createLixOwnLog({
+ *
+ * await createLixOwnLog({
  *   engine,
  *   key: 'app_init',
  *   level: 'info',
@@ -46,12 +49,13 @@ export function shouldLog(
  * });
  *
  * @example
- * // Log a warning (will be logged if 'warn' is allowed by lix_log_levels)
- * createLixOwnLog({
+ * // Log structured data without a message
+ *
+ * await createLixOwnLog({
  *   engine,
- *   key: 'user_login_failed',
- *   level: 'warn',
- *   message: `Login failed for user ${userId}`
+ *   key: 'user_login_attempt',
+ *   level: 'info',
+ *   payload: { userId, success: false }
  * });
  *
  * @example
@@ -75,7 +79,8 @@ export function shouldLog(
  */
 export function createLixOwnLogSync(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;
-	message: string;
+	message?: string | null;
+	payload?: JSONType;
 	level: string;
 	key: string;
 }): void {
@@ -97,7 +102,8 @@ export function createLixOwnLogSync(args: {
 		engine: args.engine,
 		query: args.engine.db.insertInto("log").values({
 			key: args.key,
-			message: args.message,
+			message: args.message ?? null,
+			payload: args.payload ?? null,
 			level: args.level,
 		}),
 	});
@@ -105,7 +111,8 @@ export function createLixOwnLogSync(args: {
 
 export async function createLixOwnLog(args: {
 	engine: Pick<LixEngine, "sqlite" | "db">;
-	message: string;
+	message?: string | null;
+	payload?: JSONType;
 	level: string;
 	key: string;
 }): Promise<void> {
