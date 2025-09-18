@@ -5,7 +5,16 @@ import type { NewBundleNested } from "../database/schema.js";
 
 const isUniqueConstraintError = (error: unknown): boolean => {
 	const resultCode = (error as any)?.resultCode;
-	return resultCode === 1555 || resultCode === 2067;
+	if (resultCode === 1555 || resultCode === 2067) {
+		return true;
+	}
+	const maybeMessage = (error as any)?.message;
+	const message = typeof maybeMessage === "string" ? maybeMessage : "";
+	return (
+		message.includes("Primary key constraint violation") ||
+		message.includes("Unique constraint violation") ||
+		message.includes("unique constraint failed")
+	);
 };
 
 export const upsertBundleNested = async (

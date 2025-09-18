@@ -1,6 +1,9 @@
 import { newLixFile, openLix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import { initDb } from "../database/initDb.js";
+import { InlangBundleSchema } from "../schema-definitions/bundle.js";
+import { InlangMessageSchema } from "../schema-definitions/message.js";
+import { InlangVariantSchema } from "../schema-definitions/variant.js";
 
 /**
  * Creates a new inlang project.
@@ -27,6 +30,15 @@ export async function newProject(args?: {
 	initDb(lix);
 
 	try {
+		await lix.db
+			.insertInto("stored_schema_all")
+			.values([
+				{ value: InlangBundleSchema, lixcol_version_id: "global" },
+				{ value: InlangMessageSchema, lixcol_version_id: "global" },
+				{ value: InlangVariantSchema, lixcol_version_id: "global" },
+			])
+			.execute();
+
 		const { value: lixId } = await lix.db
 			.selectFrom("key_value")
 			.select("value")

@@ -1,15 +1,10 @@
 import { Kysely } from "kysely";
 import { type InlangDatabaseSchema } from "./schema.js";
-import { humanId } from "../human-id/human-id.js";
 import { JsonPlugin } from "./jsonPlugin.js";
-import {
-	createEntityViewsIfNotExists,
-	uuidV7Sync,
-	type Lix,
-} from "@lix-js/sdk";
-import { InlangBundleSchema } from "../schema-definitions/bundle.js";
-import { InlangMessageSchema } from "../schema-definitions/message.js";
-import { InlangVariantSchema } from "../schema-definitions/variant.js";
+import { type Lix } from "@lix-js/sdk";
+import { createBundleView } from "../schema-definitions/bundle.js";
+import { createMessageView } from "../schema-definitions/message.js";
+import { createVariantView } from "../schema-definitions/variant.js";
 
 const INLANG_PLUGIN_KEY = "inlang_sdk";
 const INLANG_FILE_ID = "inlang";
@@ -22,41 +17,22 @@ export function initDb(lix: Lix): Kysely<InlangDatabaseSchema> {
 		);
 	}
 
-	createEntityViewsIfNotExists({
-		engine,
-		schema: InlangBundleSchema,
-		overrideName: "bundle",
-		pluginKey: INLANG_PLUGIN_KEY,
-		hardcodedFileId: INLANG_FILE_ID,
-		defaultValues: {
-			id: () => humanId(),
-			declarations: () => JSON.stringify([]),
-		},
-	});
+	engine.sqlite.exec("PRAGMA foreign_keys = ON");
 
-	createEntityViewsIfNotExists({
+	createBundleView({
 		engine,
-		schema: InlangMessageSchema,
-		overrideName: "message",
 		pluginKey: INLANG_PLUGIN_KEY,
 		hardcodedFileId: INLANG_FILE_ID,
-		defaultValues: {
-			id: () => uuidV7Sync({ engine }),
-			selectors: () => JSON.stringify([]),
-		},
 	});
-
-	createEntityViewsIfNotExists({
+	createMessageView({
 		engine,
-		schema: InlangVariantSchema,
-		overrideName: "variant",
 		pluginKey: INLANG_PLUGIN_KEY,
 		hardcodedFileId: INLANG_FILE_ID,
-		defaultValues: {
-			id: () => uuidV7Sync({ engine }),
-			matches: () => JSON.stringify([]),
-			pattern: () => JSON.stringify([]),
-		},
+	});
+	createVariantView({
+		engine,
+		pluginKey: INLANG_PLUGIN_KEY,
+		hardcodedFileId: INLANG_FILE_ID,
 	});
 
 	return lix.db
