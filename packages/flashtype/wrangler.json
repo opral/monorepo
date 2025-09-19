@@ -11,5 +11,11 @@
 		"cwd": "../..",
 		"command": "pnpm --filter @opral/flashtype... build"
 	},
+	"routes": [
+		{
+			"pattern": "flashtype.ai/*",
+			"custom_domain": true
+		}
+	],
 	"preview_urls": true
 }

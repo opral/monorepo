@@ -215,22 +215,6 @@ services:
         name: Access-Control-Allow-Headers
         value: Content-Type
 
-  - name: flashtype.ai
-    type: web
-    runtime: static
-    autoDeploy: true
-    staticPublishPath: ./packages/md-app/dist
-    previews:
-      generation: automatic
-    envVars:
-      - fromGroup: production
-    buildCommand: pnpm install && pnpm run --filter md-app... build
-    buildFilter:
-      paths:
-        - packages/md-app/**
-    domains:
-      - flashtype.ai
-      
   - name: lix-docs
     type: web
     runtime: static
