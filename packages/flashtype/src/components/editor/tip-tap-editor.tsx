@@ -44,19 +44,16 @@ export function TipTapEditor({
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 	const writerKey = `flashtype_tiptap_editor`;
 
-	const editor = useMemo(
-		() => {
-			if (!activeFileId || !initialFile) return null;
-			return createEditor({
-				lix,
-				initialMarkdown: new TextDecoder().decode(initialFile.data),
-				fileId: activeFileId,
-				persistDebounceMs: PERSIST_DEBOUNCE_MS,
-				writerKey,
-			});
-		},
-		[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile],
-	);
+	const editor = useMemo(() => {
+		if (!activeFileId || !initialFile) return null;
+		return createEditor({
+			lix,
+			initialMarkdown: new TextDecoder().decode(initialFile.data),
+			fileId: activeFileId,
+			persistDebounceMs: PERSIST_DEBOUNCE_MS,
+			writerKey,
+		});
+	}, [lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile]);
 
 	// Subscribe to commit events and refresh on external changes
 	useEffect(() => {
