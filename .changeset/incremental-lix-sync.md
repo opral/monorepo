@@ -2,29 +2,20 @@
 "@inlang/sdk": major
 ---
 
-## Highlights
+## Lix v0.5 Integration
 
-- Upgraded the SDK to the Lix v0.5 event pipeline: file sync now reacts instantly to state commits and filesystem watcher signals with per-path granularity.
-- Retired the dual SQLite connection so project reads and writes flow straight into Lix state—`project.lix.db` is now the single source of truth.
-- Exposed subscriptions and writer-key workflows documented in the [Lix guide](https://lix.dev/guide/writer-key), enabling echo suppression without extra plumbing.
+This major update to the Inlang SDK integrates Lix v0.5.
 
-## Example
+### Key Changes
 
-```ts
-import { loadProjectFromDirectory } from "@inlang/sdk";
+-   **Direct State Writes to Lix:** The SDK now writes all changes (bundles, messages, variants) directly to Lix, removing the previous periodic in-memory SQLite snapshotting.
+-   **Granular Filesystem Sync:** Given that state is now directly written to lix, the inlang SDK can track changes on a per-file basis. When you edit a message in one locale file, only that specific file will be marked as changed and updated on disk.
 
-const project = await loadProjectFromDirectory({
-  fs,
-  path: "/project.inlang",
-});
+### Why it Matters: The Benefits
 
-// React instantly when a Lix v0.5 commit touches project files.
-project.lix.hooks.onStateCommit(({ changes }) => {
-  const external = changes.filter(
-    (change) => change.writer_key !== "my-writer"
-  );
-  if (external.length > 0) {
-    console.log("Fresh state detected – project is already in sync with disk");
-  }
-});
-```
+-   **Minimized Filesystem Sync Issues:** The new granular sync mechanism minimizes a major pain point where editing a single message would cause all locale files to be rewritten, preserving manual formatting and preventing stale content from being reintroduced [opral/inlang-sherlock#173](https://github.com/opral/inlang-sherlock/issues/173).
+
+-  **Simplified Architecture:** By replacing the "dual database" system with a single source of truth (`project.lix.db`), the SDK is now simpler, more robust, and easier to debug.
+  
+
+-   **Full Change Control:** The inlang SDK and apps can now leverage lix change control to it's fullest: Change proposals, subscriptions, history, etc.
