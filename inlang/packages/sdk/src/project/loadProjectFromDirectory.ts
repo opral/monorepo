@@ -1,6 +1,11 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { openLix, withWriterKey, type Lix } from "@lix-js/sdk";
+import {
+	openLix,
+	withWriterKey,
+	type Lix,
+	type StateCommitChange,
+} from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -274,6 +279,11 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	let scheduled = false;
 	let pendingFsScan = false;
 	let pendingLixScan = false;
+	let fullFsScanPending = true;
+	let fullLixScanPending = true;
+
+	const fsPendingPaths = new Set<string>();
+	const lixPendingPaths = new Set<string>();
 
 	const fileStates = {
 		fsFileStates: {} as FsFileState,
@@ -298,8 +308,8 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 			if (stopped) {
 				return;
 			}
-			scheduleSync({ scanFs: true });
 			if (!filename) {
+				scheduleSync({ scanFs: true });
 				return;
 			}
 			const candidate = nodePath.join(dirPath, filename.toString());
@@ -311,6 +321,11 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 			} catch {
 				// File or directory might have been removed before the stat call completes – ignore.
 			}
+			const relative = toRelativePath(candidate);
+			if (relative) {
+				fsPendingPaths.add(relative);
+			}
+			scheduleSync({ scanFs: true });
 		};
 
 		let watcher: { close: () => void } | undefined = undefined;
@@ -346,6 +361,14 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 				? relative
 				: "./" + relative;
 		return nodePath.resolve(args.path, normalized);
+	};
+
+	const toRelativePath = (absolute: string) => {
+		const relative = nodePath.relative(args.path, absolute);
+		if (!relative || relative.startsWith("..")) {
+			return undefined;
+		}
+		return "/" + relative.split(nodePath.sep).join("/");
 	};
 
 	// NOTE this function is async - while it runs 100% sync in the naive implementation - we may want to change to an async version to optimize
@@ -701,23 +724,144 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 		}
 	}
 
+	const markDirectoryTreeAsGone = (stateMap: FsFileState, prefix: string) => {
+		const normalizedPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		for (const [path, state] of Object.entries(stateMap)) {
+			if (path === prefix || path.startsWith(normalizedPrefix)) {
+				state.state = "gone";
+			}
+		}
+	};
+
+	async function refreshFsEntry(relativePath: string) {
+		const absolute = resolveToFsPath(relativePath);
+		try {
+			const stat = args.fs.statSync(absolute);
+			if (stat.isDirectory()) {
+				ensureDirectoryWatcher(absolute);
+				markDirectoryTreeAsGone(fileStates.fsFileStates, relativePath);
+				await checkFsStateRecursive(absolute, fileStates.fsFileStates);
+				return;
+			}
+			const fileData = args.fs.readFileSync(absolute) as Buffer;
+			const data = fileData.buffer.slice(
+				fileData.byteOffset,
+				fileData.byteOffset + fileData.byteLength
+			) as ArrayBuffer;
+			const current = fileStates.fsFileStates[relativePath];
+			if (!current) {
+				fileStates.fsFileStates[relativePath] = {
+					content: data,
+					state: "unknown",
+					mtimeMs: stat.mtimeMs,
+					size: stat.size,
+				};
+				return;
+			}
+			const mtimeChanged = current.mtimeMs !== stat.mtimeMs;
+			const sizeChanged = current.size !== stat.size;
+			if (!mtimeChanged && !sizeChanged) {
+				current.state = "known";
+				return;
+			}
+			if (arrayBuffersEqual(current.content, data)) {
+				current.state = "known";
+				current.mtimeMs = stat.mtimeMs;
+				current.size = stat.size;
+			} else {
+				current.state = "updated";
+				current.content = data;
+				current.mtimeMs = stat.mtimeMs;
+				current.size = stat.size;
+			}
+		} catch {
+			const current = fileStates.fsFileStates[relativePath];
+			if (current) {
+				current.state = "gone";
+			}
+			if (directoryWatchers?.has(absolute)) {
+				try {
+					directoryWatchers.get(absolute)?.close();
+				} catch {
+					// watcher already closed or invalid – safe to ignore
+				}
+				directoryWatchers.delete(absolute);
+			}
+		}
+	}
+
+	async function refreshLixEntry(path: string) {
+		const row = await args.lix.db
+			.selectFrom("file" as any)
+			.select(["path", "data", "lixcol_writer_key"])
+			.where("path", "=", path)
+			.executeTakeFirst();
+
+		const current = fileStates.lixFileStates[path];
+		if (!row) {
+			if (current) {
+				current.state = "gone";
+			}
+			return;
+		}
+
+		const writerKey = (row as any).lixcol_writer_key ?? null;
+		const dataView = new Uint8Array(row.data as Uint8Array);
+		const buffer = dataView.slice().buffer as ArrayBuffer;
+		if (!current) {
+			fileStates.lixFileStates[path] = {
+				content: buffer,
+				state: "unknown",
+				writerKey,
+			};
+			return;
+		}
+		current.writerKey = writerKey;
+		if (arrayBuffersEqual(current.content, buffer)) {
+			current.state = "known";
+			return;
+		}
+		current.content = buffer;
+		current.state = "updated";
+	}
+
 	async function syncFiles(options: { scanFs: boolean; scanLix: boolean }) {
 		if (stopped) {
 			return;
 		}
 
 		if (options.scanFs) {
-			for (const fsState of Object.values(fileStates.fsFileStates)) {
-				fsState.state = "gone";
+			if (fullFsScanPending) {
+				for (const fsState of Object.values(fileStates.fsFileStates)) {
+					fsState.state = "gone";
+				}
+				await checkFsStateRecursive(args.path, fileStates.fsFileStates);
+				fullFsScanPending = false;
+				fsPendingPaths.clear();
+			} else {
+				const paths = Array.from(fsPendingPaths);
+				fsPendingPaths.clear();
+				for (const path of paths) {
+					await refreshFsEntry(path);
+				}
 			}
-			await checkFsStateRecursive(args.path, fileStates.fsFileStates);
 		}
 
 		if (options.scanLix) {
-			for (const lixState of Object.values(fileStates.lixFileStates)) {
-				lixState.state = "gone";
+			if (fullLixScanPending) {
+				for (const lixState of Object.values(fileStates.lixFileStates)) {
+					lixState.state = "gone";
+				}
+				await checkLixState(fileStates.lixFileStates);
+				fullLixScanPending = false;
+				lixPendingPaths.clear();
+			} else {
+				const paths = Array.from(lixPendingPaths);
+				lixPendingPaths.clear();
+				for (const path of paths) {
+					await refreshLixEntry(path);
+				}
 			}
-			await checkLixState(fileStates.lixFileStates);
 		}
 
 		await syncUpFsAndLixFiles(fileStates);
@@ -775,29 +919,34 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	pendingLixScan = true;
 	await runSyncLoop();
 
-	let skipInitialLixEmission = true;
-	const fileSubscription = args.lix
-		.observe(
-			args.lix.db
-				.selectFrom("file" as any)
-				.where("path", "not like", "%db.sqlite")
-				.select(["path", "lixcol_writer_key"])
-		)
-		.subscribe({
-			next: () => {
-				if (stopped) {
-					return;
+	const unsubscribeCommit = args.lix.hooks.onStateCommit(
+		({ changes }: { changes: StateCommitChange[] }) => {
+			if (stopped) {
+				return;
+			}
+			let shouldScan = false;
+			for (const change of changes) {
+				if (!change.schema_key.startsWith("lix_file")) {
+					continue;
 				}
-				if (skipInitialLixEmission) {
-					skipInitialLixEmission = false;
-					return;
+				if (change.writer_key === FS_WRITER_KEY) {
+					continue;
 				}
+				const path = (change.snapshot_content as any)?.path as
+					| string
+					| undefined;
+				if (typeof path === "string") {
+					lixPendingPaths.add(path);
+				} else {
+					fullLixScanPending = true;
+				}
+				shouldScan = true;
+			}
+			if (shouldScan) {
 				scheduleSync({ scanLix: true });
-			},
-			error: (error) => {
-				console.error("Failed to observe Lix file changes", error);
-			},
-		});
+			}
+		}
+	);
 
 	return () => {
 		stopped = true;
@@ -811,7 +960,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 			}
 			directoryWatchers.clear();
 		}
-		fileSubscription.unsubscribe();
+		unsubscribeCommit();
 	};
 }
 
