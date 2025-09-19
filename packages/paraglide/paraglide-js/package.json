@@ -39,7 +39,7 @@
 	},
 	"dependencies": {
 		"@inlang/recommend-sherlock": "workspace:*",
-		"@inlang/sdk": "2.4.9",
+		"@inlang/sdk": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
