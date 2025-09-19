@@ -19,7 +19,7 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
       }),
     });
 
-    await insertBundleNested(project.db, {
+    await insertBundleNested(project, {
       id: "mock",
       messages: [
         {

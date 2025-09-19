@@ -95,7 +95,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
         errors.push(bundle.error);
         continue;
       } else if (bundle.data) {
-        await upsertBundleNested(args.project.db, bundle.data);
+        await upsertBundleNested(args.project, bundle.data);
       }
     }
     bar?.stop();
