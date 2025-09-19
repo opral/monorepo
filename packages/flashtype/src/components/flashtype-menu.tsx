@@ -5,6 +5,7 @@ import {
 	Search,
 	FilePlus,
 	RotateCcw,
+	Download,
 } from "lucide-react";
 
 import {
@@ -43,6 +44,26 @@ export function FlashtypeMenu({
 	const { isMobile } = useSidebar();
 	const lix = useLix();
 	const [activeTeam] = React.useState(teams[0]);
+	const handleExportLix = React.useCallback(async () => {
+		if (!lix) return;
+		try {
+			const blob = await lix.toBlob();
+			const url = URL.createObjectURL(blob);
+			const anchor = document.createElement("a");
+			anchor.href = url;
+			anchor.download = `flashtype-export-${new Date()
+				.toISOString()
+				.slice(0, 10)}.lix`;
+			document.body.appendChild(anchor);
+			anchor.click();
+			setTimeout(() => {
+				document.body.removeChild(anchor);
+				URL.revokeObjectURL(url);
+			}, 100);
+		} catch (error) {
+			console.error("Failed to export Lix blob", error);
+		}
+	}, [lix]);
 
 	if (!activeTeam) {
 		return null;
@@ -117,6 +138,14 @@ export function FlashtypeMenu({
 								>
 									<FilePlus />
 									Seed Markdown files
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onSelect={() => {
+										handleExportLix();
+									}}
+								>
+									<Download />
+									Export Lix blob
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onSelect={async () => {
