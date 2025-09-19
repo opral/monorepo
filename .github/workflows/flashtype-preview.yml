@@ -62,7 +62,7 @@ jobs:
           fi
 
           export PREVIEW_URL="$url"
-          python <<'PY' >preview_comment.txt
+          python <<'PY'
 import os
 import textwrap
 
@@ -95,8 +95,9 @@ body_lines = [
     "┗" + "━" * (width - 2) + "┛",
 ]
 
-print("<!-- flashtype-preview -->")
-print("\n".join(body_lines))
+with open("preview_comment.txt", "w", encoding="utf-8") as fh:
+    fh.write("<!-- flashtype-preview -->\n")
+    fh.write("\n".join(body_lines))
 PY
 
           {
