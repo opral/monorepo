@@ -7,8 +7,10 @@ export default function AgentChat() {
 		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
 	const lix = useLix();
 
-	const { messages, send, pending, error, ready, hasKey } =
-		useAgentChat({ lix, system });
+	const { messages, send, pending, error, ready, hasKey } = useAgentChat({
+		lix,
+		system,
+	});
 	const [input, setInput] = useState("");
 	const listRef = useRef<HTMLDivElement>(null);
 

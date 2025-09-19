@@ -20,8 +20,8 @@ export function Diff(props: {
 				return;
 			}
 
-				try {
-					const plugins = await lix.plugin.getAll();
+			try {
+				const plugins = await lix.plugin.getAll();
 				const plugin = plugins[0];
 				if (cancelled) return;
 				if (!plugin?.renderDiff) {
