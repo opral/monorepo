@@ -1,6 +1,12 @@
 import React, { Suspense, StrictMode } from "react";
 import { expect, test } from "vitest";
-import { render, waitFor, screen, act } from "@testing-library/react";
+import {
+	render,
+	waitFor,
+	screen,
+	act,
+	fireEvent,
+} from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, type Lix } from "@lix-js/sdk";
 import { TipTapEditor } from "./tip-tap-editor";
@@ -249,7 +255,8 @@ test("shows placeholder only while focused on an empty document", async () => {
 	});
 
 	await act(async () => {
-		editorRef?.commands.focus();
+		fireEvent.mouseDown(container as HTMLElement);
+		fireEvent.click(container as HTMLElement);
 	});
 
 	await waitFor(() => {
@@ -264,6 +271,60 @@ test("shows placeholder only while focused on an empty document", async () => {
 
 	await waitFor(() => {
 		expect(container?.getAttribute("data-editor-focused")).toBe("false");
+	});
+});
+
+test("clicking the surface focuses the editor even when content exists", async () => {
+	const fileId = "file_focus_surface";
+	const lix = await openLix({
+		providePlugins: [mdPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+			{
+				key: "flashtype_active_file_id",
+				value: fileId,
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/has-content.md",
+			data: new TextEncoder().encode("Hello world"),
+		})
+		.execute();
+
+	await act(async () => {
+		render(
+			<Suspense>
+				<Providers lix={lix}>
+					<TipTapEditor />
+				</Providers>
+			</Suspense>,
+		);
+	});
+
+	const editorNode = await screen.findByTestId("tiptap-editor");
+	const container = editorNode.closest(".tiptap-container");
+	await waitFor(() => {
+		expect(container?.getAttribute("data-editor-focused")).toBe("false");
+	});
+
+	await act(async () => {
+		fireEvent.mouseDown(container as HTMLElement);
+		fireEvent.click(container as HTMLElement);
+	});
+
+	await waitFor(() => {
+		expect(container?.getAttribute("data-editor-focused")).toBe("true");
 	});
 });
 
