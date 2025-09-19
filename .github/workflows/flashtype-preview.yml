@@ -56,13 +56,11 @@ jobs:
           issue-number: ${{ github.event.number }}
           body: |
             <!-- flashtype-preview -->
-            ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-            ┃ 🚀 Flashtype Preview            ┃
-            ┃                                  ┃
-            ┃ • Alias   : `pr-${{ github.event.number }}`
-            ┃ • Preview : ${{ steps.wrangler.outputs.deployment-url || 'Check Wrangler logs for URL' }}
-            ┃                                  ┃
-            ┃ _(push to refresh)_ ┃
-            ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+            **Flashtype Preview** 🚀
+
+            - Alias: `pr-${{ github.event.number }}`
+            - Preview: ${{ steps.wrangler.outputs.deployment-url && format('[Open preview]({0})', steps.wrangler.outputs.deployment-url) || 'Check Wrangler logs for URL' }}
+
+            _Re-run the workflow to refresh the preview._
           body-include: "<!-- flashtype-preview -->"
           edit-mode: replace
