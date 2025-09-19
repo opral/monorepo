@@ -53,6 +53,21 @@ export function createSchemaCacheTable(args: {
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
 	});
 
+	// Extra expression indexes for descriptor cache
+	if (tableName === "internal_state_cache_lix_version_descriptor") {
+		// Speed up recursive inheritance walks by indexing the parent pointer extracted from JSON
+		engine.sqlite.exec({
+			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_inherits_from
+		        ON ${tableName}(json_extract(snapshot_content, '$.inherits_from_version_id'))
+		        WHERE json_extract(snapshot_content, '$.inherits_from_version_id') IS NOT NULL`,
+		});
+		// Pair child/parent ids to avoid temp b-trees when deduping inheritance edges
+		engine.sqlite.exec({
+			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_id_parent
+		        ON ${tableName}(json_extract(snapshot_content, '$.id'), json_extract(snapshot_content, '$.inherits_from_version_id'))`,
+		});
+	}
+
 	// Update planner stats
 	engine.sqlite.exec({ sql: `ANALYZE ${tableName}` });
 }
