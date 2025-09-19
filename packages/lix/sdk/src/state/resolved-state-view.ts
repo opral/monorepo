@@ -35,7 +35,7 @@ export function applyResolvedStateView(args: {
 		},
 	});
 	// Create the view that provides resolved state by combining transaction, cache and untracked state
-	engine.sqlite.exec(`
+		engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
       WITH RECURSIVE
         version_descriptor_base AS (
@@ -45,27 +45,23 @@ export function applyResolvedStateView(args: {
           FROM internal_state_cache isc_v
           WHERE isc_v.schema_key = 'lix_version_descriptor'
         ),
-        version_inheritance_raw AS (
+        version_inheritance(version_id, ancestor_version_id) AS (
           -- Base case: direct inheritance relationships
           SELECT
             vdb.version_id,
-            vdb.inherits_from_version_id AS ancestor_version_id
+            vdb.inherits_from_version_id
           FROM version_descriptor_base vdb
           WHERE vdb.inherits_from_version_id IS NOT NULL
 
-          UNION ALL
+          UNION
 
           -- Recursive case: follow the inheritance chain
           SELECT
             vir.version_id,
-            vdb.inherits_from_version_id AS ancestor_version_id
-          FROM version_inheritance_raw vir
+            vdb.inherits_from_version_id
+          FROM version_inheritance vir
           JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
           WHERE vdb.inherits_from_version_id IS NOT NULL
-        ),
-        version_inheritance AS (
-          SELECT DISTINCT version_id, ancestor_version_id
-          FROM version_inheritance_raw
         ),
         version_parent AS (
           SELECT DISTINCT
