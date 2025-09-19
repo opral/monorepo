@@ -53,16 +53,27 @@ export async function importFiles(args: {
 			bundleId: string,
 			declarations: any[] = []
 		) => {
-			try {
-				await trx
-					.insertInto("bundle")
-					.values({ id: bundleId, declarations })
-					.execute();
-			} catch (error) {
-				if (!isUniqueConstraintError(error)) {
-					throw error;
+			const existingBundle = await trx
+				.selectFrom("bundle")
+				.select("id")
+				.where("id", "=", bundleId)
+				.executeTakeFirst();
+
+			if (existingBundle) {
+				if (declarations.length > 0) {
+					await trx
+						.updateTable("bundle")
+						.set({ declarations })
+						.where("id", "=", bundleId)
+						.execute();
 				}
+				return;
 			}
+
+			await trx
+				.insertInto("bundle")
+				.values({ id: bundleId, declarations })
+				.execute();
 		};
 		// upsert every bundle
 		for (const bundle of imported.bundles) {
@@ -206,6 +217,18 @@ export async function importFiles(args: {
 					throw error;
 				}
 			}
+		}
+
+		// ensure bundles retain the declarations calculated by the plugin
+		for (const bundle of imported.bundles) {
+			if (!bundle.id) {
+				continue;
+			}
+			await trx
+				.updateTable("bundle")
+				.set({ declarations: bundle.declarations ?? [] })
+				.where("id", "=", bundle.id)
+				.execute();
 		}
 	});
 }
