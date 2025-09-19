@@ -1,4 +1,5 @@
 import { Editor } from "@tiptap/core";
+import Placeholder from "@tiptap/extension-placeholder";
 import { nanoId, type Lix, withWriterKey } from "@lix-js/sdk";
 import {
 	MarkdownWc,
@@ -144,7 +145,19 @@ export function createEditor(args: CreateEditorArgs): Editor {
 	}
 
 	return new Editor({
-		extensions: MarkdownWc({}),
+		extensions: [
+			...MarkdownWc({}),
+			Placeholder.configure({
+				placeholder: ({ node }) =>
+					node.type.name === "paragraph" && node.childCount === 0
+						? "Start typing..."
+						: "",
+				showOnlyWhenEditable: true,
+				includeChildren: true,
+				shouldShow: ({ editor, node }) =>
+					editor.isFocused && node.type.name === "paragraph" && node.childCount === 0,
+			}),
+		],
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {
 			currentEditor = editor as Editor;

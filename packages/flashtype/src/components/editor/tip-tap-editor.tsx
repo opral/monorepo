@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
@@ -55,6 +55,36 @@ export function TipTapEditor({
 		});
 	}, [lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile]);
 
+	const [isEditorFocused, setIsEditorFocused] = useState(false);
+
+	useEffect(() => {
+		if (!editor) return;
+		const syncFocus = () => setIsEditorFocused(editor.isFocused);
+		syncFocus();
+		editor.on("focus", syncFocus);
+		editor.on("blur", syncFocus);
+		return () => {
+			editor.off("focus", syncFocus);
+			editor.off("blur", syncFocus);
+		};
+	}, [editor]);
+
+	const handleSurfacePointerDown = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			if (!editor) return;
+			const target = event.target as HTMLElement | null;
+			const insideContent = target?.closest(".ProseMirror");
+			if (insideContent) return;
+			event.preventDefault();
+			if (editor.isEmpty) {
+				editor.commands.focus("start");
+			} else {
+				editor.commands.focus("end");
+			}
+		},
+		[editor],
+	);
+
 	// Subscribe to commit events and refresh on external changes
 	useEffect(() => {
 		if (!activeFileId || !editor) return;
@@ -98,16 +128,38 @@ export function TipTapEditor({
 		onReady?.(editor);
 	}, [editor, setEditor, onReady]);
 
-	if (!activeFileId || !editor) {
-		return null;
+	if (!activeFileId) {
+		return (
+			<div className={className ?? undefined}>
+				<div className="flex h-full min-h-[200px] items-center justify-center bg-background px-3 py-12">
+					<p className="text-sm text-muted-foreground">
+						Select a file to start writing.
+					</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (!editor) {
+		return (
+			<div className={className ?? undefined}>
+				<div className="w-full bg-background px-3 py-12">
+					<div className="mx-auto h-48 w-full max-w-5xl animate-pulse rounded-md bg-muted" />
+				</div>
+			</div>
+		);
 	}
 
 	return (
 		<div className={className ?? undefined}>
-			<div className="w-full bg-background px-3 py-0">
+			<div
+				className="tiptap-container w-full h-full min-h-screen bg-background px-3 py-0 cursor-text"
+				data-editor-focused={isEditorFocused ? "true" : "false"}
+				onMouseDown={handleSurfacePointerDown}
+			>
 				<EditorContent
 					editor={editor}
-					className="w-full max-w-5xl mx-auto"
+					className="tiptap w-full h-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}
 				/>
