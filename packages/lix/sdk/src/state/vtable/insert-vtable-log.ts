@@ -1,6 +1,7 @@
 import { LixLogSchema, type LixLog } from "../../log/schema.js";
 import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
 import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import type { JSONType } from "../../schema-definition/json-type.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 
@@ -20,7 +21,8 @@ export function insertVTableLog(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
 	id?: string;
 	key: string;
-	message: string;
+	message?: string | null;
+	payload?: JSONType;
 	level: string;
 	timestamp?: string;
 }): void {
@@ -46,7 +48,8 @@ export function insertVTableLog(args: {
 					snapshot_content: JSON.stringify({
 						id,
 						key: args.key,
-						message: args.message,
+						message: args.message ?? null,
+						payload: args.payload ?? null,
 						level: args.level,
 					} satisfies LixLog),
 					schema_version: LixLogSchema["x-lix-version"],

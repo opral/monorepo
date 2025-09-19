@@ -785,7 +785,8 @@ export function applyStateVTable(
 						}),
 						key: "lix_state_xupdate_error",
 						level: "error",
-						message: `xUpdate error: ${errorMessage}`,
+						message: "xUpdate error",
+						payload: { message: errorMessage },
 					});
 
 					throw error; // Re-throw to propagate error
