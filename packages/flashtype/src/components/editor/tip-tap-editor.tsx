@@ -2,8 +2,7 @@ import { useEffect, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
-import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
-import { useQuery } from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
 import { createEditor } from "./create-editor";
 import { assembleMdAst } from "./assemble-md-ast";
@@ -15,6 +14,15 @@ type TipTapEditorProps = {
 	persistDebounceMs?: number;
 };
 
+/**
+ * Rich text editor for Markdown files backed by the Lix store.
+ *
+ * Loads the active file lazily, keeps the ProseMirror instance in sync with
+ * remote changes, and persists edits via the collaborative Lix writer.
+ *
+ * @example
+ * <TipTapEditor className="grow" onReady={(editor) => editor.commands.focus()} />
+ */
 export function TipTapEditor({
 	className,
 	onReady,
@@ -22,31 +30,31 @@ export function TipTapEditor({
 }: TipTapEditorProps) {
 	const lix = useLix();
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
-	const initialFile = useQueryTakeFirstOrThrow(
+	const initialFile = useQueryTakeFirst(
 		({ lix }) =>
-			lix.db.selectFrom("file").select("data").where("id", "=", activeFileId),
+			lix.db
+				.selectFrom("file")
+				.select("data")
+				.where("id", "=", activeFileId ?? ""),
 		{ subscribe: false },
 	);
 
 	const { setEditor } = useEditorCtx();
 
-	if (!activeFileId) {
-		throw new Error("File id not set");
-	}
-
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
-
 	const writerKey = `flashtype_tiptap_editor`;
 
 	const editor = useMemo(
-		() =>
-			createEditor({
+		() => {
+			if (!activeFileId || !initialFile) return null;
+			return createEditor({
 				lix,
 				initialMarkdown: new TextDecoder().decode(initialFile.data),
 				fileId: activeFileId,
 				persistDebounceMs: PERSIST_DEBOUNCE_MS,
 				writerKey,
-			}),
+			});
+		},
 		[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile],
 	);
 
