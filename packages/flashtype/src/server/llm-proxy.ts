@@ -37,10 +37,7 @@ export async function handleLlmProxyRequest(args: {
 		});
 	}
 
-	console.log("Request");
-
 	if (!env.GOOGLE_API_KEY) {
-		console.log("NO API KEY");
 		return createCorsResponse({
 			status: 500,
 			body: "Missing GOOGLE_API_KEY",

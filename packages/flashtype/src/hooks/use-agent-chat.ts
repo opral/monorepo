@@ -18,6 +18,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 
 	const modelName = "gemini-2.5-pro";
+	const [missingKey, setMissingKey] = useState(false);
 	const provider = useMemo(() => {
 		return createGoogleGenerativeAI({
 			apiKey: "proxy", // placeholder, the worker injects the real key
@@ -27,12 +28,29 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 					input instanceof Request ? input : new Request(input, init);
 				const headers = new Headers(request.headers);
 				headers.delete("x-goog-api-key");
-				return fetch(new Request(request, { headers }));
+				const response = await fetch(new Request(request, { headers }));
+				if (response.status === 500) {
+					try {
+						const clone = response.clone();
+						const text = await clone.text();
+						if (text.includes("Missing GOOGLE_API_KEY")) {
+							setMissingKey(true);
+						}
+					} catch {
+						// ignore clone failures
+					}
+				} else {
+					setMissingKey((prev) => (prev ? false : prev));
+				}
+				return response;
 			},
 		});
 	}, []);
-	const model = useMemo(() => provider(modelName), [provider, modelName]);
-	const hasKey = true;
+	const model = useMemo(
+		() => (missingKey ? null : provider(modelName)),
+		[missingKey, provider, modelName],
+	);
+	const hasKey = !missingKey;
 
 	// Boot agent and subscribe to message changes for transcript
 	useEffect(() => {

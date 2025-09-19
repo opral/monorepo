@@ -58,9 +58,8 @@ export default function AgentChat() {
 				) : null}
 				{!hasKey ? (
 					<div className="rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-800">
-						Missing proxy configuration. Set
-						<code>VITE_GOOGLE_API_PROXY_BASE_URL</code> to enable chat. Using
-						model <code>{modelName}</code>.
+						The server proxy is missing a Google API key. Set
+						<code>GOOGLE_API_KEY</code> for the Flashtype worker to enable chat.
 					</div>
 				) : null}
 				<div className="flex items-end gap-2">
