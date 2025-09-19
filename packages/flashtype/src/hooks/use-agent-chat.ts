@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { Lix } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
+import { LLM_PROXY_PREFIX } from "@/config/proxy";
 import {
 	createLixAgent,
 	type LixAgent,
@@ -16,19 +17,40 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 
-	const apiKey = import.meta.env.VITE_GOOGLE_API_KEY as string | undefined;
-	const modelName =
-		(import.meta.env.VITE_GOOGLE_MODEL as string | undefined) ??
-		"gemini-2.5-pro";
-	const hasKey = !!apiKey;
-	const provider = useMemo(
-		() => (apiKey ? createGoogleGenerativeAI({ apiKey }) : null),
-		[apiKey],
-	);
+	const modelName = "gemini-2.5-pro";
+	const [missingKey, setMissingKey] = useState(false);
+	const provider = useMemo(() => {
+		return createGoogleGenerativeAI({
+			apiKey: "proxy", // placeholder, the worker injects the real key
+			baseURL: `${LLM_PROXY_PREFIX}/v1beta`,
+			fetch: async (input, init) => {
+				const request =
+					input instanceof Request ? input : new Request(input, init);
+				const headers = new Headers(request.headers);
+				headers.delete("x-goog-api-key");
+				const response = await fetch(new Request(request, { headers }));
+				if (response.status === 500) {
+					try {
+						const clone = response.clone();
+						const text = await clone.text();
+						if (text.includes("Missing GOOGLE_API_KEY")) {
+							setMissingKey(true);
+						}
+					} catch {
+						// ignore clone failures
+					}
+				} else {
+					setMissingKey((prev) => (prev ? false : prev));
+				}
+				return response;
+			},
+		});
+	}, []);
 	const model = useMemo(
-		() => (provider ? provider(modelName) : null),
-		[provider, modelName],
+		() => (missingKey ? null : provider(modelName)),
+		[missingKey, provider, modelName],
 	);
+	const hasKey = !missingKey;
 
 	// Boot agent and subscribe to message changes for transcript
 	useEffect(() => {
@@ -107,7 +129,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 				setPending(false);
 			}
 		},
-		[agent, system],
+		[agent],
 	);
 
 	const clear = useCallback(async () => {

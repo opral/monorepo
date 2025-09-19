@@ -245,28 +245,26 @@ export function ChatPanel() {
 											return;
 										}
 									}}
-									onQueryMentions={React.useCallback(
-										async (q: string) => {
-											if (q.length === 0) {
-												const all = await lix.db
-													.selectFrom("file")
-													.select(["path"]) // provide stable ordering
-													.orderBy("path")
-													.limit(10)
-													.execute();
-												return all.map((r) => String((r as any).path));
-											}
-											const rows = await lix.db
+									onQueryMentions={async (q: string) => {
+										const database = lix.db;
+										if (q.length === 0) {
+											const all = await database
 												.selectFrom("file")
-												.where("path", "like", `%${q}%`)
-												.select(["path"])
+												.select(["path"]) // provide stable ordering
 												.orderBy("path")
 												.limit(10)
 												.execute();
-											return rows.map((r) => String((r as any).path));
-										},
-										[lix.db],
-									)}
+											return all.map((r) => String((r as any).path));
+										}
+										const rows = await database
+											.selectFrom("file")
+											.where("path", "like", `%${q}%`)
+											.select(["path"])
+											.orderBy("path")
+											.limit(10)
+											.execute();
+										return rows.map((r) => String((r as any).path));
+									}}
 								/>
 							</div>
 						)}

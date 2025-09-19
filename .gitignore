@@ -10,6 +10,7 @@ examples/sveltekit/package-lock.json
 /build
 /package
 .env*
+.dev.vars
 .nx
 
 # Playwright

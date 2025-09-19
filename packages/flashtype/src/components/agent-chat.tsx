@@ -7,7 +7,7 @@ export default function AgentChat() {
 		"You are a helpful coding assistant for Flashtype. Keep answers concise and practical. Avoid unnecessary markdown formatting.";
 	const lix = useLix();
 
-	const { messages, send, pending, error, ready, modelName, hasKey } =
+	const { messages, send, pending, error, ready, hasKey } =
 		useAgentChat({ lix, system });
 	const [input, setInput] = useState("");
 	const listRef = useRef<HTMLDivElement>(null);
@@ -58,8 +58,8 @@ export default function AgentChat() {
 				) : null}
 				{!hasKey ? (
 					<div className="rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-800">
-						Missing Google API key. Set <code>VITE_GOOGLE_API_KEY</code> to
-						enable chat. Using model <code>{modelName}</code>.
+						The server proxy is missing a Google API key. Set
+						<code>GOOGLE_API_KEY</code> for the Flashtype worker to enable chat.
 					</div>
 				) : null}
 				<div className="flex items-end gap-2">

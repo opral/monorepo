@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build app + worker
+        run: pnpm --filter @opral/flashtype... build
+
       - name: Upload preview Worker
         id: wrangler
         uses: cloudflare/wrangler-action@v3
@@ -45,7 +48,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: packages/flashtype
-          command: versions upload --preview-alias ${{ env.PR_ALIAS }}
+          command: versions upload --preview-alias ${{ env.PR_ALIAS }} --config dist/flashtype/wrangler.json
           packageManager: pnpm
 
       - name: Comment preview link

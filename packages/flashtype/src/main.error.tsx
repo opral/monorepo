@@ -2,6 +2,29 @@ import { useState } from "react";
 import { OpfsSahEnvironment } from "@lix-js/sdk";
 import { RotateCcw, Bug } from "lucide-react";
 
+function formatError(err: unknown): string {
+	const asAny = err as any;
+	try {
+		if (!err) return "Unknown error";
+		if (err instanceof Error) {
+			let out = `${err.name || "Error"}: ${err.message || ""}`;
+			if (err.stack) out += "\n" + String(err.stack);
+			const cause = asAny?.cause;
+			if (cause) out += "\nCaused by: " + formatError(cause);
+			const errors = asAny?.errors;
+			if (Array.isArray(errors)) {
+				for (let i = 0; i < errors.length; i++) {
+					out += `\nInner[${i}]: ` + formatError(errors[i]);
+				}
+			}
+			return out;
+		}
+		return typeof err === "string" ? err : JSON.stringify(err, null, 2);
+	} catch {
+		return String(err);
+	}
+}
+
 /**
  * Minimal error UI shown when Lix fails to load.
  *
@@ -16,29 +39,6 @@ import { RotateCcw, Bug } from "lucide-react";
  */
 export function ErrorFallback(props: { error: unknown }) {
 	const [busy, setBusy] = useState(false);
-
-	function formatError(err: any): string {
-		try {
-			if (!err) return "Unknown error";
-			if (err instanceof Error) {
-				let out = `${err.name || "Error"}: ${err.message || ""}`;
-				if (err.stack) out += "\n" + String(err.stack);
-				const cause = (err as any).cause;
-				if (cause) out += "\nCaused by: " + formatError(cause);
-				const errors = (err as any).errors;
-				if (Array.isArray(errors)) {
-					for (let i = 0; i < errors.length; i++) {
-						out += `\nInner[${i}]: ` + formatError(errors[i]);
-					}
-				}
-				return out;
-			}
-			// Non-Error thrown
-			return typeof err === "string" ? err : JSON.stringify(err, null, 2);
-		} catch {
-			return String(err);
-		}
-	}
 
 	async function handleReset() {
 		if (busy) return;

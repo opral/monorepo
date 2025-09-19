@@ -25,6 +25,9 @@ import {
 import { LixAgentChat } from "@/components/lix-agent-chat";
 import { EditorProvider } from "@/editor/editor-context";
 
+const clamp = (n: number, a: number, b: number): number =>
+	Math.max(a, Math.min(b, n));
+
 export const Route = createRootRoute({
 	component: Root,
 	notFoundComponent: () => (
@@ -185,9 +188,6 @@ function Root() {
 		document.body.style.userSelect = "none";
 	}
 
-	function clamp(n: number, a: number, b: number) {
-		return Math.max(a, Math.min(b, n));
-	}
 	return (
 		<LeftSidebarProvider>
 			<SidebarProvider defaultOpen={false} enableKeyboardShortcut={false}>

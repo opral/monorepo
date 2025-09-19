@@ -17,6 +17,20 @@ export type FilesystemTreeDirectory = {
 
 export type FilesystemTreeNode = FilesystemTreeFile | FilesystemTreeDirectory;
 
+function sortChildren(nodes: FilesystemTreeNode[]): void {
+	nodes.sort((a, b) => {
+		if (a.type !== b.type) {
+			return a.type === "directory" ? -1 : 1;
+		}
+		return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+	});
+	for (const node of nodes) {
+		if (node.type === "directory") {
+			sortChildren(node.children);
+		}
+	}
+}
+
 /**
  * Builds a nested tree from flat filesystem entries.
  *
@@ -69,20 +83,6 @@ export function buildFilesystemTree(
 			roots.push(fileNode);
 		}
 	}
-
-	const sortChildren = (nodes: FilesystemTreeNode[]) => {
-		nodes.sort((a, b) => {
-			if (a.type !== b.type) {
-				return a.type === "directory" ? -1 : 1;
-			}
-			return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
-		});
-		for (const node of nodes) {
-			if (node.type === "directory") {
-				sortChildren(node.children);
-			}
-		}
-	};
 
 	sortChildren(roots);
 	return roots;

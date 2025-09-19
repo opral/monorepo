@@ -20,7 +20,7 @@ const data = {
 	user: {
 		name: "flashtype",
 		email: "local@flashtype.app",
-		avatar: "/avatars/shadcn.jpg",
+		avatar: null,
 	},
 	teams: [
 		{
