@@ -516,6 +516,14 @@ function createSingleEntityAllView(args: {
 		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
 
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
+	// Apply the hardcoded file filter at view definition time so queries hit the
+	// `(schema_key, version_id, file_id)` indexes directly. Without this clause
+	// SQLite would scan every file for the same version whenever callers read or
+	// update `_all` views.
+	const fileFilterClause = args.hardcodedFileId
+		? ` AND file_id = '${args.hardcodedFileId}'`
+		: "";
+
 	const sqlQuery =
 		`
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
@@ -527,7 +535,7 @@ function createSingleEntityAllView(args: {
 					.join(",\n        ")},
         ${operationalColumns.join(",\n        ")}
       FROM ${args.stateTable}
-      WHERE schema_key = '${schema_key}';
+      WHERE schema_key = '${schema_key}'${fileFilterClause};
     ` +
 		(args.readOnly
 			? ""

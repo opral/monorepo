@@ -246,6 +246,8 @@ export function createEntityStateHistoryView(args: {
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] + "_history" */
 	overrideName?: string;
+	/** Optional hardcoded file_id to constrain history queries */
+	hardcodedFileId?: string;
 }): void {
 	if (!args.schema["x-lix-primary-key"]) {
 		throw new Error(
@@ -260,6 +262,13 @@ export function createEntityStateHistoryView(args: {
 	const properties = Object.keys((args.schema as any).properties);
 
 	// Generated SQL query for history view
+	// History lookups benefit from the same optimisation—restricting to the
+	// known file id lets SQLite answer with a single indexed probe instead of
+	// exploring every file's history for the schema.
+	const fileFilterClause = args.hardcodedFileId
+		? ` AND file_id = '${args.hardcodedFileId}'`
+		: "";
+
 	const sqlQuery = `
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
       SELECT
@@ -279,7 +288,7 @@ export function createEntityStateHistoryView(args: {
         depth AS lixcol_depth,
         metadata AS lixcol_metadata
       FROM state_history
-      WHERE schema_key = '${schema_key}';
+      WHERE schema_key = '${schema_key}'${fileFilterClause};
     `;
 
 	args.engine.sqlite.exec(sqlQuery);
