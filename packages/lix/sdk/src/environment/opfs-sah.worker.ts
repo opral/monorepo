@@ -1,7 +1,7 @@
 import {
 	createInMemoryDatabase,
 	type SqliteWasmDatabase,
-} from "sqlite-wasm-kysely";
+} from "../database/sqlite-wasm/index.js";
 import { boot } from "../engine/boot.js";
 import type { Call } from "../engine/router.js";
 import type { BootArgs } from "../engine/boot.js";

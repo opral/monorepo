@@ -2,7 +2,7 @@ import type { LixEngine } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
 
 const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
 

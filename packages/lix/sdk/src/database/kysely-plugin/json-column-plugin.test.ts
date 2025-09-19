@@ -1,6 +1,6 @@
 import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
-import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
+import { createDialect, createInMemoryDatabase } from "../sqlite-wasm/index.js";
 import { JSONColumnPlugin } from "./json-column-plugin.js";
 
 test("properly serializes string values for any-json columns", async () => {

@@ -1,7 +1,7 @@
 import {
 	createInMemoryDatabase,
 	contentFromDatabase,
-} from "sqlite-wasm-kysely";
+} from "../database/sqlite-wasm/index.js";
 import { initDb } from "../database/init-db.js";
 import {
 	LixActiveVersionSchema,

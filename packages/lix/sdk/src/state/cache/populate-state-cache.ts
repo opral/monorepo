@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { getStateCacheV2Tables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
