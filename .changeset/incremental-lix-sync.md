@@ -5,7 +5,7 @@
 "vs-code-extension": minor
 ---
 
-Upgraded the inlang SDK to [Lix](https://lix.dev/) v0.5 🎉 
+Upgraded the [inlang SDK](https://github.com/opral/inlang-sdk) to [Lix](https://lix.dev/) v0.5 🎉 
 
 ## Highlights
 
