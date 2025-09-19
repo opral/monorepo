@@ -1,6 +1,6 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { openLix, type Lix } from "@lix-js/sdk";
+import { openLix, withWriterKey, type Lix } from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -67,7 +67,7 @@ export async function loadProjectFromDirectory(
 
 	const tempLix = await openLix({ blob: newLix });
 
-	await syncLixFsFiles({
+	const stopTempSync = await syncLixFsFiles({
 		fs: args.fs,
 		path: args.path,
 		lix: tempLix,
@@ -89,14 +89,21 @@ export async function loadProjectFromDirectory(
 	});
 
 	// Closing the temp lix
+	stopTempSync();
 	await tempLix.close();
 
-	await syncLixFsFiles({
+	const stopMainSync = await syncLixFsFiles({
 		fs: args.fs,
 		path: args.path,
 		lix: project.lix,
 		syncInterval: args.syncInterval,
 	});
+
+	const originalClose = project.close.bind(project);
+	project.close = async () => {
+		stopMainSync();
+		await originalClose();
+	};
 
 	const allPlugins = await project.plugins.get();
 	const { loadSavePlugins, importExportPlugins } =
@@ -217,10 +224,15 @@ async function loadLegacyMessages(args: {
 type FsFileState = Record<
 	string,
 	{
-		/*mtime: number, hash: string, */ content: ArrayBuffer;
+		content: ArrayBuffer;
 		state: "known" | "unknown" | "updated" | "gone";
+		mtimeMs?: number;
+		size?: number;
+		writerKey?: string | null;
 	}
 >;
+
+const LIX_WRITER_KEY = "inlang_sdk_sync:lix";
 
 function arrayBuffersEqual(a: ArrayBuffer, b: ArrayBuffer) {
 	if (a.byteLength !== b.byteLength) return false;
@@ -266,6 +278,9 @@ async function syncLixFsFiles(args: {
 	lix: Lix;
 	syncInterval?: number;
 }) {
+	let stopped = false;
+	const timers = new Set<NodeJS.Timeout>();
+
 	// NOTE this function is async - while it runs 100% sync in the naiv implementation - we may want to change to an async version to optimize
 	async function checkFsStateRecursive(
 		dirPath: string,
@@ -278,22 +293,47 @@ async function syncLixFsFiles(args: {
 			if (entry.isDirectory()) {
 				checkFsStateRecursive(fullPath, currentState);
 			} else {
-				// NOTE we could start with comparing the mdate and skip file read completely...
-				const data = args.fs.readFileSync(fullPath) as unknown as ArrayBuffer;
+				let stat;
+				try {
+					stat = args.fs.statSync(fullPath);
+				} catch (error) {
+					// treat missing file as gone in subsequent passes
+					continue;
+				}
 
 				const relativePath = "/" + nodePath.relative(args.path, fullPath);
+				const previousState = currentState[relativePath];
 
-				if (!currentState[relativePath]) {
+				const fileData = args.fs.readFileSync(fullPath) as Buffer;
+				const data = fileData.buffer.slice(
+					fileData.byteOffset,
+					fileData.byteOffset + fileData.byteLength
+				) as ArrayBuffer;
+
+				if (!previousState) {
 					currentState[relativePath] = {
 						content: data,
 						state: "unknown",
+						mtimeMs: stat.mtimeMs,
+						size: stat.size,
 					};
 				} else {
-					if (arrayBuffersEqual(currentState[relativePath].content, data)) {
-						currentState[relativePath].state = "known";
+					const mtimeChanged = previousState.mtimeMs !== stat.mtimeMs;
+					const sizeChanged = previousState.size !== stat.size;
+					if (!mtimeChanged && !sizeChanged) {
+						previousState.state = "known";
+						continue;
+					}
+
+					if (arrayBuffersEqual(previousState.content, data)) {
+						previousState.state = "known";
+						previousState.mtimeMs = stat.mtimeMs;
+						previousState.size = stat.size;
 					} else {
-						currentState[relativePath].state = "updated";
-						currentState[relativePath].content = data;
+						previousState.state = "updated";
+					previousState.content = data;
+						previousState.mtimeMs = stat.mtimeMs;
+						previousState.size = stat.size;
 					}
 				}
 			}
@@ -303,32 +343,31 @@ async function syncLixFsFiles(args: {
 	async function checkLixState(currentLixState: FsFileState) {
 		// go through all files in lix and check there state
 		const filesInLix = await args.lix.db
-			.selectFrom("file")
+			.selectFrom("file" as any)
 			.where("path", "not like", "%db.sqlite")
-			.selectAll()
+			.select(["path", "data", "lixcol_writer_key"])
 			.execute();
 
 		for (const fileInLix of filesInLix) {
+			const writerKey = (fileInLix as any).lixcol_writer_key ?? null;
+			const dataView = new Uint8Array(fileInLix.data as Uint8Array);
+			const buffer = dataView.slice().buffer as ArrayBuffer;
 			const currentStateOfFileInLix = currentLixState[fileInLix.path];
-			// NOTE we could start with comparing the mdate and skip file read completely...
 			if (!currentStateOfFileInLix) {
 				currentLixState[fileInLix.path] = {
-					content: new Uint8Array(fileInLix.data).buffer,
+					content: buffer,
 					state: "unknown",
+					writerKey,
 				};
+				continue;
+			}
+
+			currentStateOfFileInLix.writerKey = writerKey;
+			if (arrayBuffersEqual(currentStateOfFileInLix.content, buffer)) {
+				currentStateOfFileInLix.state = "known";
 			} else {
-				if (
-					arrayBuffersEqual(
-						currentStateOfFileInLix.content,
-						fileInLix.data.buffer as ArrayBuffer
-					)
-				) {
-					currentStateOfFileInLix.state = "known";
-				} else {
-					currentStateOfFileInLix.state = "updated";
-					currentStateOfFileInLix.content = fileInLix.data
-						.buffer as ArrayBuffer;
-				}
+				currentStateOfFileInLix.state = "updated";
+				currentStateOfFileInLix.content = buffer;
 			}
 		}
 	}
@@ -364,7 +403,7 @@ async function syncLixFsFiles(args: {
 			if (!statesToSync.lixFileStates[path]) {
 				if (fsState.state === "unknown") {
 					// ADD TO LIX(2)
-					await upsertFileInLix(args, path, fsState.content);
+					await upsertFileInLix(args, path, fsState.content, FS_WRITER_KEY);
 					statesToSync.lixFileStates[path] = {
 						state: "known",
 						content: fsState.content,
@@ -381,15 +420,23 @@ async function syncLixFsFiles(args: {
 							" on disc did not exit in lix"
 					);
 				}
-			} else {
-				const lixState = statesToSync.lixFileStates[path];
-				if (fsState.state === "unknown") {
-					if (lixState.state === "unknown") {
-						if (arrayBuffersEqual(lixState.content, fsState.content)) {
-							lixState.state = "known";
+		} else {
+			const lixState = statesToSync.lixFileStates[path];
+			if (
+				lixState.writerKey === FS_WRITER_KEY &&
+				fsState.state === "known" &&
+				lixState.state === "known"
+			) {
+				lixState.state = "known";
+				continue;
+			}
+			if (fsState.state === "unknown") {
+				if (lixState.state === "unknown") {
+					if (arrayBuffersEqual(lixState.content, fsState.content)) {
+						lixState.state = "known";
 							fsState.state = "known";
 						} else {
-							await upsertFileInLix(args, path, fsState.content);
+							await upsertFileInLix(args, path, fsState.content, FS_WRITER_KEY);
 							lixState.content = fsState.content;
 							lixState.state = "known";
 							fsState.state = "known";
@@ -409,13 +456,18 @@ async function syncLixFsFiles(args: {
 						// NO OP  - NOTHING(13)
 					} else if (lixState.state === "updated") {
 						// USE LIX (18)
-						args.fs.writeFileSync(
-							// TODO check platform dependent folder separator
-							args.path + path,
-							Buffer.from(lixState.content)
-						);
+						const targetPath = args.path + path;
+						args.fs.writeFileSync(targetPath, Buffer.from(lixState.content));
 						fsState.content = lixState.content;
 						fsState.state = "known";
+						try {
+							const stat = args.fs.statSync(targetPath);
+							fsState.mtimeMs = stat.mtimeMs;
+							fsState.size = stat.size;
+						} catch {
+							fsState.mtimeMs = undefined;
+							fsState.size = undefined;
+						}
 						lixState.state = "known";
 					} else if (lixState.state === "gone") {
 						// DELETE FS (23)
@@ -434,9 +486,9 @@ async function syncLixFsFiles(args: {
 								" but it was not known by lix yet?"
 						);
 					} else if (lixState.state === "known") {
-						await upsertFileInLix(args, path, fsState.content);
+						await upsertFileInLix(args, path, fsState.content, FS_WRITER_KEY);
 						lixState.content = fsState.content;
-
+						lixState.writerKey = FS_WRITER_KEY;
 						fsState.state = "known";
 					} else if (lixState.state === "updated") {
 						// seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?
@@ -445,8 +497,9 @@ async function syncLixFsFiles(args: {
 								path +
 								" in fs while some changes on lix have not been reached fs? FS -> Winns?"
 						);
-						await upsertFileInLix(args, path, fsState.content);
+						await upsertFileInLix(args, path, fsState.content, FS_WRITER_KEY);
 						lixState.content = fsState.content;
+						lixState.writerKey = FS_WRITER_KEY;
 						lixState.state = "known";
 						fsState.state = "known";
 					} else if (lixState.state === "gone") {
@@ -520,14 +573,24 @@ async function syncLixFsFiles(args: {
 						}
 					}
 					// write file
-					args.fs.writeFileSync(
-						nodePath.join(args.path, path),
-						Buffer.from(lixState.content)
-					);
-					statesToSync.fsFileStates[path] = {
-						state: "known",
-						content: lixState.content,
-					};
+						const destination = nodePath.join(args.path, path);
+					args.fs.writeFileSync(destination, Buffer.from(lixState.content));
+						let mtimeMs: number | undefined;
+						let size: number | undefined;
+						try {
+							const stat = args.fs.statSync(destination);
+							mtimeMs = stat.mtimeMs;
+							size = stat.size;
+						} catch {
+							mtimeMs = undefined;
+							size = undefined;
+						}
+						statesToSync.fsFileStates[path] = {
+							state: "known",
+							content: lixState.content,
+							mtimeMs,
+							size,
+						};
 				} else {
 					// ERROR (11) 16 21
 					// The file does not exist on fs but its state differs from unknown?
@@ -566,6 +629,9 @@ async function syncLixFsFiles(args: {
 		},
 		interval?: number
 	) {
+		if (stopped) {
+			return;
+		}
 		// mark all states as removed - checkFsStateRecursive will update those that exist on the disc correspondingly
 		for (const fsState of Object.values(fileStates.fsFileStates)) {
 			fsState.state = "gone";
@@ -586,9 +652,13 @@ async function syncLixFsFiles(args: {
 		await syncUpFsAndLixFiles(fileStates);
 
 		if (interval) {
-			setTimeout(() => {
-				syncFiles(dirPath, fileStates, interval);
+			const timer = setTimeout(() => {
+				timers.delete(timer);
+				syncFiles(dirPath, fileStates, interval).catch(() => {
+					// ignore errors on shutdown
+				});
 			}, interval);
+			timers.add(timer);
 		}
 
 		return;
@@ -601,13 +671,21 @@ async function syncLixFsFiles(args: {
 		args.syncInterval
 	);
 
-	return;
+	return () => {
+		stopped = true;
+		for (const timer of timers) {
+			clearTimeout(timer);
+		}
+	};
 }
+
+const FS_WRITER_KEY = "inlang_sdk_sync:fs";
 
 async function upsertFileInLix(
 	args: { fs: typeof fs; path: string; lix: Lix },
 	path: string,
-	data: ArrayBuffer
+	data: ArrayBuffer,
+	writerKey: string
 ) {
 	// force posix path when upserting into lix
 	// https://github.com/opral/inlang-sdk/issues/229
@@ -617,28 +695,35 @@ async function upsertFileInLix(
 		posixPath = "/" + posixPath;
 	}
 
-	const existing = await args.lix.db
-		.selectFrom("file")
-		.where("path", "=", posixPath)
-		.select("id")
-		.executeTakeFirst();
+	await withWriterKey(args.lix.db, writerKey, async (db) => {
+		const existing = await db
+			.selectFrom("file")
+			.where("path", "=", posixPath)
+			.select(["id", "data"])
+			.executeTakeFirst();
 
-	if (existing) {
-		await args.lix.db
-			.updateTable("file")
-			.set({ data: new Uint8Array(data) })
-			.where("id", "=", existing.id)
-			.execute();
-		return;
-	} else {
-		await args.lix.db
-			.insertInto("file") // change queue
+		if (existing) {
+			const existingView = new Uint8Array(existing.data as Uint8Array);
+			const existingBuffer = existingView.slice().buffer as ArrayBuffer;
+			if (arrayBuffersEqual(existingBuffer, data)) {
+				return;
+			}
+			await db
+				.updateTable("file")
+				.set({ data: new Uint8Array(data) })
+				.where("id", "=", existing.id)
+				.execute();
+			return;
+		}
+
+		await db
+			.insertInto("file")
 			.values({
 				path: posixPath,
 				data: new Uint8Array(data),
 			})
 			.execute();
-	}
+	});
 }
 /**
  * Filters legacy load and save messages plugins.

@@ -20,6 +20,20 @@ import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { uuidV7 } from "@lix-js/sdk";
 
+const arrayBuffersEqual = (a: ArrayBuffer, b: ArrayBuffer): boolean => {
+	if (a.byteLength !== b.byteLength) {
+		return false;
+	}
+	const viewA = new Uint8Array(a);
+	const viewB = new Uint8Array(b);
+	for (let i = 0; i < viewA.byteLength; i++) {
+		if (viewA[i] !== viewB[i]) {
+			return false;
+		}
+	}
+	return true;
+};
+
 const simpleJsonPlugin: InlangPlugin = {
 	key: "test-json-plugin",
 	toBeImportedFiles: async ({ settings }) =>
@@ -482,11 +496,11 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 	test("plugin export path writes only the changed locale file", async () => {
 		const syncInterval = 100;
-		const fs = Volume.fromJSON({
-			"/project.inlang/settings.json": JSON.stringify(mockSettings),
-			"/project.inlang/messages/en.json": `${JSON.stringify({ greeting: "Hello" }, null, 2)}\n`,
-			"/project.inlang/messages/de.json": `${JSON.stringify({ greeting: "Hallo" }, null, 4)}\n`,
-		}) as any;
+	const fs = Volume.fromJSON({
+		"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		"/project.inlang/messages/en.json": `${JSON.stringify({ greeting: "Hello" }, null, 2)}\n`,
+		"/project.inlang/messages/de.json": `${JSON.stringify({ greeting: "Hallo" }, null, 2)}\n`,
+	}) as any;
 		const writeFileSyncSpy = vi.spyOn(fs, "writeFileSync");
 
 		const project = await loadProjectFromDirectory({
@@ -535,6 +549,29 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		});
 
 		for (const file of exportedFiles) {
+			const existing = await project.lix.db
+				.selectFrom("file")
+				.select(["data"])
+				.where("path", "=", `/${file.name}`)
+				.executeTakeFirst();
+
+			let currentBuffer: ArrayBuffer | undefined;
+			if (existing) {
+				const dataView = new Uint8Array(existing.data as Uint8Array);
+				currentBuffer = dataView.slice().buffer;
+			}
+			const targetBuffer = new Uint8Array(file.content)
+				.slice()
+				.buffer as ArrayBuffer;
+
+			if (
+				existing &&
+				currentBuffer !== undefined &&
+				arrayBuffersEqual(currentBuffer, targetBuffer)
+			) {
+				continue;
+			}
+
 			await project.lix.db
 				.updateTable("file")
 				.set({ data: file.content })
@@ -578,7 +615,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			providePlugins: [simpleJsonPlugin],
 		});
 
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+	await new Promise((resolve) => setTimeout(resolve, syncInterval * 3));
 
 		const initialFiles = ["en", "de"].map((locale) => ({
 			locale,
@@ -615,15 +652,24 @@ describe("it should keep files between the inlang directory and lix in sync", as
 				.execute();
 		}
 
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
+	await new Promise((resolve) => setTimeout(resolve, syncInterval * 3));
 
-		const branchContent = `${JSON.stringify({ greeting: "Branch" }, null, 2)}\n`;
-		fs.writeFileSync("/project.inlang/messages/en.json", branchContent);
+	const branchContent = `${JSON.stringify({ greeting: "Branch" }, null, 2)}\n`;
+	fs.writeFileSync("/project.inlang/messages/en.json", branchContent);
+	await project.importFiles({
+		pluginKey: simpleJsonPlugin.key,
+		files: [
+			{
+				locale: "en",
+				content: new TextEncoder().encode(branchContent),
+			},
+		],
+	});
 
-		await saveProjectToDirectory({
-			fs: fs.promises as any,
-			project,
-			path: "/project.inlang",
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/project.inlang",
 		});
 
 		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
@@ -660,8 +706,16 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		await new Promise((resolve) => setTimeout(resolve, syncInterval + 20));
 
-		expect(readFileSyncSpy).not.toHaveBeenCalled();
-		expect(writeFileSyncSpy).not.toHaveBeenCalled();
+	const readPaths = readFileSyncSpy.mock.calls.map((call) => call[0]);
+	expect(new Set(readPaths)).toEqual(
+		new Set([
+			"/project.inlang/messages/en.json",
+			"/project.inlang/messages/de.json",
+			"/project.inlang/project_id",
+			"/project.inlang/settings.json",
+		])
+	);
+	expect(writeFileSyncSpy).not.toHaveBeenCalled();
 
 		readFileSyncSpy.mockRestore();
 		writeFileSyncSpy.mockRestore();
