@@ -2,7 +2,7 @@
 "@inlang/sdk": major
 "@inlang/paraglide-js": minor
 "@inlang/cli": minor
-"@inlang/sherlock": minor
+"vs-code-extension": minor
 ---
 
 Upgraded the inlang SDK to [Lix](https://lix.dev/) v0.5 🎉 
