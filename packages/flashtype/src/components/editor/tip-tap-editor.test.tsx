@@ -199,6 +199,74 @@ test("renders content under React.StrictMode", async () => {
 	await waitFor(() => expect(editor).toHaveTextContent("Hello Strict"));
 });
 
+test("shows placeholder only while focused on an empty document", async () => {
+	const fileId = "file_placeholder_focus";
+	const lix = await openLix({
+		providePlugins: [mdPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+			{
+				key: "flashtype_active_file_id",
+				value: fileId,
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/placeholder.md",
+			data: new TextEncoder().encode(""),
+		})
+		.execute();
+
+	let editorRef: Editor | null = null;
+
+	await act(async () => {
+		render(
+			<Suspense>
+				<Providers lix={lix}>
+					<TipTapEditor onReady={(editor) => (editorRef = editor)} />
+				</Providers>
+			</Suspense>,
+		);
+	});
+
+	const editorNode = await screen.findByTestId("tiptap-editor");
+
+	const container = editorNode.closest(".tiptap-container");
+	await waitFor(() => {
+		expect(container?.getAttribute("data-editor-focused")).toBe("false");
+		const paragraph = editorNode.querySelector("p");
+		expect(paragraph).toBeTruthy();
+	});
+
+	await act(async () => {
+		editorRef?.commands.focus();
+	});
+
+	await waitFor(() => {
+		const paragraph = editorNode.querySelector("p");
+		expect(paragraph?.getAttribute("data-placeholder")).toBe("Start typing...");
+		expect(container?.getAttribute("data-editor-focused")).toBe("true");
+	});
+
+	await act(async () => {
+		editorRef?.commands.blur();
+	});
+
+	await waitFor(() => {
+		expect(container?.getAttribute("data-editor-focused")).toBe("false");
+	});
+});
+
 test("updates editor when switching to a version with different external state", async () => {
 	const lix = await openLix({
 		providePlugins: [mdPlugin],
