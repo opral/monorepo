@@ -2,6 +2,7 @@ import type { LixEngine } from "../../engine/boot.js";
 import { LixKeyValueSchema } from "../../key-value/schema.js";
 import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
+import { setStaleStateCacheMemo } from "./is-stale-state-cache.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
@@ -29,6 +30,8 @@ export function markStateCacheAsStale(args: {
 			},
 		],
 	});
+
+	setStaleStateCacheMemo({ engine: args.engine, value: true });
 }
 
 export function markStateCacheAsFresh(args: {
@@ -41,7 +44,7 @@ export function markStateCacheAsFresh(args: {
 		value: false,
 	});
 
-	const ts = args.timestamp ?? getTimestampSync({ engine: args.engine as any });
+	const ts = args.timestamp ?? getTimestampSync({ engine: args.engine });
 
 	updateUntrackedState({
 		engine: args.engine,
@@ -58,4 +61,6 @@ export function markStateCacheAsFresh(args: {
 			},
 		],
 	});
+
+	setStaleStateCacheMemo({ engine: args.engine, value: false });
 }
