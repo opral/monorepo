@@ -41,6 +41,9 @@ export function applyUntrackedStateSchema(args: {
 		-- Index for fast version_id filtering
 		CREATE INDEX IF NOT EXISTS idx_internal_state_all_untracked_version_id 
 			ON internal_state_all_untracked (version_id);
+
+		CREATE INDEX IF NOT EXISTS ix_unt_v_f_s_e
+			ON internal_state_all_untracked (version_id, file_id, schema_key, entity_id);
 	`);
 }
 
