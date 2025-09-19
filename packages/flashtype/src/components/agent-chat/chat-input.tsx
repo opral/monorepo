@@ -74,7 +74,7 @@ export function ChatInput({
 		setHistory((h) => [next, ...h].slice(0, 50));
 		setIdx(-1);
 		setValue("");
-	}, [onSend, value]);
+	}, [commands, onCommand, onSend, value]);
 
 	// Mention detection and querying
 	const updateMention = React.useCallback(async () => {
@@ -360,9 +360,6 @@ export function ChatInput({
 		if (key === belowKeyRef.current) return;
 		belowKeyRef.current = key;
 		renderBelow(menusFragment);
-		// Intentionally exclude renderBelow to avoid effect re-run due to changing function identity.
-		// Parent should pass a memoized renderBelow; we guard regardless with a key to avoid loops.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		variant,
 		menusFragment,
@@ -372,6 +369,7 @@ export function ChatInput({
 		selected,
 		mentionItems,
 		mentionSelected,
+		renderBelow,
 	]);
 
 	return (

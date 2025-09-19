@@ -7,9 +7,5 @@
 		"binding": "ASSETS",
 		"directory": "dist"
 	},
-	"build": {
-		"cwd": "../..",
-		"command": "pnpm --filter @opral/flashtype... build"
-	},
 	"preview_urls": true
 }

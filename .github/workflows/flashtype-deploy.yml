@@ -84,6 +84,10 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: pnpm install --frozen-lockfile
 
+      - name: Build app + worker
+        if: steps.version.outputs.changed == 'true'
+        run: pnpm --filter @opral/flashtype... build
+
       - name: Deploy Worker
         if: steps.version.outputs.changed == 'true'
         uses: cloudflare/wrangler-action@v3
@@ -91,7 +95,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: packages/flashtype
-          command: deploy
+          command: deploy --config dist/flashtype/wrangler.json
           packageManager: pnpm
 
       - name: Summarize deployment
