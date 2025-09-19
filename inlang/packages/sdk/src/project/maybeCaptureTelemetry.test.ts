@@ -3,6 +3,8 @@ import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { newProject } from "./newProject.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { capture } from "../services/telemetry/capture.js";
+import { humanId } from "../human-id/human-id.js";
+import { uuidV7 } from "@lix-js/sdk";
 
 test("it should capture as expected", async () => {
 	vi.mock("../services/telemetry/capture.js", async () => {
@@ -29,23 +31,32 @@ test("it should capture as expected", async () => {
 		.select("account_id")
 		.executeTakeFirstOrThrow();
 
-	const bundle = await project.db
+	const bundleId = humanId();
+	await project.db
 		.insertInto("bundle")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+		.values({ id: bundleId, declarations: [] })
+		.execute();
 
-	const message = await project.db
+	const messageId = await uuidV7({ lix: project.lix });
+	await project.db
 		.insertInto("message")
-		.values({ bundleId: bundle.id, locale: "en" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+		.values({
+			id: messageId,
+			bundleId,
+			locale: "en",
+			selectors: [],
+		})
+		.execute();
 
 	await project.db
 		.insertInto("variant")
-		.values({ messageId: message.id })
-		.returningAll()
-		.executeTakeFirst();
+		.values({
+			id: await uuidV7({ lix: project.lix }),
+			messageId,
+			matches: [],
+			pattern: [],
+		})
+		.execute();
 
 	const settings = await project.settings.get();
 

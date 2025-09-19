@@ -2,30 +2,36 @@ import { expect, test, vi } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { PluginImportError } from "../plugin/errors.js";
-import { validate } from "uuid";
+import { humanId } from "../human-id/human-id.js";
+import { uuidV7 } from "@lix-js/sdk";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
 	const project1 = await loadProjectInMemory({ blob: file1 });
-	const bundle = await project1.db
+	const bundleId = humanId();
+	await project1.db
 		.insertInto("bundle")
-		.defaultValues()
-		.returning("id")
-		.executeTakeFirstOrThrow();
+		.values({ id: bundleId, declarations: [] })
+		.execute();
 
-	const message = await project1.db
+	const messageId = await uuidV7({ lix: project1.lix });
+	await project1.db
 		.insertInto("message")
 		.values({
-			bundleId: bundle.id,
+			id: messageId,
+			bundleId,
 			locale: "en",
+			selectors: [],
 		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
+		.execute();
 
 	await project1.db
 		.insertInto("variant")
 		.values({
-			messageId: message.id,
+			id: await uuidV7({ lix: project1.lix }),
+			messageId,
+			matches: [],
+			pattern: [],
 		})
 		.execute();
 
@@ -113,8 +119,8 @@ test("if a project has no id, it should be generated", async () => {
 
 	const id = await project2.id.get();
 
-	expect(id).toBeDefined();
-	expect(validate(id)).toBe(true);
+	expect(typeof id).toBe("string");
+	expect(id.length).toBeGreaterThan(0);
 });
 
 test("providing an account should work", async () => {
@@ -175,6 +181,26 @@ test("closing a project should not lead to a throw", async () => {
 
 	// capture async throws
 	await new Promise((resolve) => setTimeout(resolve, 250));
+});
+
+test("schemas are stored in Lix stored_schema views", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	const storedSchemas = await project.lix.db
+		.selectFrom("stored_schema_all")
+		.select(["key", "version"])
+		.where("key", "in", ["inlang_bundle", "inlang_message", "inlang_variant"])
+		.execute();
+
+	expect(storedSchemas).toEqual(
+		expect.arrayContaining([
+			{ key: "inlang_bundle", version: "1.0" },
+			{ key: "inlang_message", version: "1.0" },
+			{ key: "inlang_variant", version: "1.0" },
+		])
+	);
+
+	await project.close();
 });
 
 test("project.errors.get() returns errors for modules that couldn't be imported via http", async () => {
