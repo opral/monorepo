@@ -88,55 +88,60 @@ export async function saveProjectToDirectory(args: {
 					? pathPattern
 					: [pathPattern];
 
-			for (const pathPattern of formattedPathPatterns) {
-				const p = pathPattern
-					? absolutePathFromProject(
-							args.path,
-							pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
-						)
-					: absolutePathFromProject(args.path, file.name);
-				const dirname = path.dirname(p);
-				if ((await args.fs.stat(dirname)).isDirectory() === false) {
-					await args.fs.mkdir(dirname, { recursive: true });
-				}
+				for (const pathPattern of formattedPathPatterns) {
+					const p = pathPattern
+						? absolutePathFromProject(
+								args.path,
+								pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
+							)
+						: absolutePathFromProject(args.path, file.name);
+					const dirname = path.dirname(p);
+					if ((await args.fs.stat(dirname)).isDirectory() === false) {
+						await args.fs.mkdir(dirname, { recursive: true });
+					}
 
-				let shouldWrite = true;
-				try {
-					const existingStat = await args.fs.stat(p);
-					const existing = (await args.fs.readFile(p)) as Uint8Array;
-					if (existing && existing.length === file.content.byteLength) {
-						const existingView = new Uint8Array(existing).slice().buffer as ArrayBuffer;
-						const targetView = new Uint8Array(file.content).slice().buffer as ArrayBuffer;
-						if (arrayBuffersEqual(existingView, targetView)) {
-							shouldWrite = false;
-						} else {
-							const fileRow = await args.project.lix.db
-								.selectFrom("file")
-								.where("path", "=", p.replace(args.path, ""))
-								.select("lixcol_updated_at")
-								.executeTakeFirst();
-							const lixUpdatedAt = fileRow?.lixcol_updated_at
-								? new Date(fileRow.lixcol_updated_at).getTime()
-								: 0;
-							if (existingStat.mtimeMs > lixUpdatedAt && existingStat.mtimeMs > Date.now() - 5000) {
+					let shouldWrite = true;
+					try {
+						const existingStat = await args.fs.stat(p);
+						const existing = (await args.fs.readFile(p)) as Uint8Array;
+						if (existing && existing.length === file.content.byteLength) {
+							const existingView = new Uint8Array(existing).slice()
+								.buffer as ArrayBuffer;
+							const targetView = new Uint8Array(file.content).slice()
+								.buffer as ArrayBuffer;
+							if (arrayBuffersEqual(existingView, targetView)) {
 								shouldWrite = false;
+							} else {
+								const fileRow = await args.project.lix.db
+									.selectFrom("file")
+									.where("path", "=", p.replace(args.path, ""))
+									.select("lixcol_updated_at")
+									.executeTakeFirst();
+								const lixUpdatedAt = fileRow?.lixcol_updated_at
+									? new Date(fileRow.lixcol_updated_at).getTime()
+									: 0;
+								if (
+									existingStat.mtimeMs > lixUpdatedAt &&
+									existingStat.mtimeMs > Date.now() - 5000
+								) {
+									shouldWrite = false;
+								}
 							}
 						}
+					} catch (error) {
+						if ((error as any)?.code !== "ENOENT") {
+							throw error;
+						}
 					}
-				} catch (error) {
-					if ((error as any)?.code !== "ENOENT") {
-						throw error;
-					}
-				}
 
-				if (shouldWrite === false) {
-					continue;
-				}
-				if (p.endsWith(".json")) {
-					try {
-						const existing = await args.fs.readFile(p, "utf-8");
-						const stringify = detectJsonFormatting(existing);
-						await args.fs.writeFile(
+					if (shouldWrite === false) {
+						continue;
+					}
+					if (p.endsWith(".json")) {
+						try {
+							const existing = await args.fs.readFile(p, "utf-8");
+							const stringify = detectJsonFormatting(existing);
+							await args.fs.writeFile(
 								p,
 								new TextEncoder().encode(
 									stringify(JSON.parse(new TextDecoder().decode(file.content)))
