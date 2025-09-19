@@ -13,11 +13,12 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   upload-preview:
     name: Upload Worker Preview
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     environment: flashtype-preview
     env:
       PR_ALIAS: pr-${{ github.event.number }}
@@ -41,6 +42,7 @@ jobs:
         run: pnpm --filter @opral/flashtype... build
 
       - name: Upload preview Worker
+        id: wrangler
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -49,9 +51,19 @@ jobs:
           command: versions upload --preview-alias ${{ env.PR_ALIAS }} --config dist/flashtype/wrangler.json
           packageManager: pnpm
 
-      - name: Summarize preview URL
+      - name: Comment preview link
         if: success()
-        run: |
-          echo "### Preview uploaded" >> "$GITHUB_STEP_SUMMARY"
-          echo "Alias: $PR_ALIAS" >> "$GITHUB_STEP_SUMMARY"
-          echo "The exact preview URL is shown in the Wrangler action logs." >> "$GITHUB_STEP_SUMMARY"
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.number }}
+          body: |
+            <!-- flashtype-preview -->
+            **Flashtype Preview** 🚀
+
+            - Alias: `pr-${{ github.event.number }}`
+            - Preview: ${{ steps.wrangler.outputs.deployment-url && format('[Open preview]({0})', steps.wrangler.outputs.deployment-url) || 'Check Wrangler logs for URL' }}
+
+            _Re-run the workflow to refresh the preview._
+          body-include: "<!-- flashtype-preview -->"
+          edit-mode: replace

@@ -10,6 +10,7 @@ test("log insert creates entries in the view", async () => {
 		.values({
 			key: "test_log",
 			message: "Test log message",
+			payload: { meta: "value" },
 			level: "info",
 		})
 		.execute();
@@ -25,6 +26,7 @@ test("log insert creates entries in the view", async () => {
 	expect(logs[0]).toMatchObject({
 		key: "test_log",
 		message: "Test log message",
+		payload: { meta: "value" },
 		level: "info",
 	});
 });
@@ -39,7 +41,8 @@ test("log insert with custom id", async () => {
 		.values({
 			id: customId,
 			key: "custom.log",
-			message: "Custom ID log",
+			message: null,
+			payload: { context: "custom" },
 			level: "debug",
 		})
 		.execute();
@@ -53,7 +56,8 @@ test("log insert with custom id", async () => {
 	expect(logs).toHaveLength(1);
 	expect(logs[0]?.id).toBe(customId);
 	expect(logs[0]?.key).toBe("custom.log");
-	expect(logs[0]?.message).toBe("Custom ID log");
+	expect(logs[0]?.message).toBeNull();
+	expect(logs[0]?.payload).toEqual({ context: "custom" });
 	expect(logs[0]?.level).toBe("debug");
 });
 
@@ -67,11 +71,13 @@ test("log delete removes entries from the view", async () => {
 			{
 				key: "test_log_to_keep",
 				message: "Keep this log",
+				payload: null,
 				level: "info",
 			},
 			{
 				key: "test_log_to_delete",
 				message: "Delete this log",
+				payload: { delete: true },
 				level: "error",
 			},
 		])
@@ -101,6 +107,7 @@ test("log delete removes entries from the view", async () => {
 	expect(remainingLogs).toHaveLength(1);
 	expect(remainingLogs[0]?.key).toBe("test_log_to_keep");
 	expect(remainingLogs[0]?.message).toBe("Keep this log");
+	expect(remainingLogs[0]?.payload).toBeNull();
 
 	// Verify the deleted log is gone
 	const deletedLogs = await lix.db
@@ -121,16 +128,19 @@ test("multiple log inserts with unique ids", async () => {
 			{
 				key: "test_log1",
 				message: "First log",
+				payload: { idx: 1 },
 				level: "info",
 			},
 			{
 				key: "test_log2",
 				message: "Second log",
+				payload: null,
 				level: "warn",
 			},
 			{
 				key: "test_log3",
 				message: "Third log",
+				payload: { idx: 3 },
 				level: "error",
 			},
 		])
@@ -153,10 +163,17 @@ test("multiple log inserts with unique ids", async () => {
 	expect(logs.find((log) => log.key === "test_log1")?.message).toBe(
 		"First log"
 	);
+	expect(logs.find((log) => log.key === "test_log1")?.payload).toEqual({
+		idx: 1,
+	});
 	expect(logs.find((log) => log.key === "test_log2")?.message).toBe(
 		"Second log"
 	);
+	expect(logs.find((log) => log.key === "test_log2")?.payload).toBeNull();
 	expect(logs.find((log) => log.key === "test_log3")?.message).toBe(
 		"Third log"
 	);
+	expect(logs.find((log) => log.key === "test_log3")?.payload).toEqual({
+		idx: 3,
+	});
 });

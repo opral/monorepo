@@ -1,5 +1,6 @@
 import { nanoId } from "../engine/deterministic/nano-id.js";
 import type { State } from "../entity-views/types.js";
+import type { JSONType } from "../schema-definition/json-type.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLog } from "./schema.js";
 
@@ -11,23 +12,32 @@ import type { LixLog } from "./schema.js";
  * to implement any desired log level filtering before invoking this function.
  *
  * Use `snake_case` for log keys (e.g., `app_checkout_submit`) to keep filters predictable.
+ * Provide either a `message`, a structured `payload`, or both depending on your needs.
  *
  * @example
- * // Directly log an info message
  *
- * if (shouldLog) {
- *   await createLog({
- *     lix,
- *     key: 'app_init',
- *     level: 'info',
- *     message: 'Application initialized'
+ * await createLog({
+ *   lix,
+ *   key: 'app_init',
+ *   level: 'info',
+ *   message: 'Application initialized'
+ * });
+ *
+ * @example
+ *
+ * await createLog({
+ *   lix,
+ *   key: 'app_init_state',
+ *   level: 'debug',
+ *   payload: { ready: true }
  * });
  *
  * @returns A promise that resolves with the created log entry.
  */
 export async function createLog(args: {
 	lix: Lix;
-	message: string;
+	message?: string | null;
+	payload?: JSONType;
 	level: string;
 	key: string;
 }): Promise<State<LixLog>> {
@@ -38,7 +48,8 @@ export async function createLog(args: {
 		.values({
 			id,
 			key: args.key,
-			message: args.message,
+			message: args.message ?? null,
+			payload: args.payload ?? null,
 			level: args.level,
 		})
 		.execute();

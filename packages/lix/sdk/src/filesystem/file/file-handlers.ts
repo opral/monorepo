@@ -43,7 +43,11 @@ export function handleFileInsert(args: {
 			engine: args.engine,
 			key: "lix_file_skipped_insert_handler",
 			level: "debug",
-			message: `Skipping file insert for ${args.file.path} due to lix_skip_file_handlers flag`,
+			message: "Skipping file insert; file handlers disabled",
+			payload: {
+				path: args.file.path,
+				reason: "lix_skip_file_handlers",
+			},
 		});
 		return 1; // Indicate no changes were made
 	}
@@ -130,7 +134,12 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File inserted at ${normalizedPath} but plugin does not support detecting changes`,
+				message: "Plugin matched insert but cannot detect changes",
+				payload: {
+					operation: "insert",
+					path: normalizedPath,
+					pluginKey: plugin.key,
+				},
 			});
 			continue;
 		}
@@ -181,7 +190,11 @@ export function handleFileInsert(args: {
 			engine: args.engine,
 			key: "lix_file_no_plugin",
 			level: "warn",
-			message: `File inserted at ${normalizedPath} but no plugin available to detect changes`,
+			message: "No plugin matched file insert",
+			payload: {
+				operation: "insert",
+				path: normalizedPath,
+			},
 		});
 
 		// Use fallback plugin to handle the file
@@ -226,7 +239,11 @@ export function handleFileInsert(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File inserted at ${normalizedPath} but plugin detected no changes`,
+				message: "Plugin detected no changes during insert",
+				payload: {
+					operation: "insert",
+					path: normalizedPath,
+				},
 			});
 		}
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
@@ -267,7 +284,11 @@ export function handleFileUpdate(args: {
 			engine: args.engine,
 			key: "lix_file_skipped_update_handler",
 			level: "debug",
-			message: `Skipping file update for ${args.file.path} due to lix_skip_file_handlers flag`,
+			message: "Skipping file update; file handlers disabled",
+			payload: {
+				path: args.file.path,
+				reason: "lix_skip_file_handlers",
+			},
 		});
 		return 1; // Indicate no changes were made
 	}
@@ -364,7 +385,12 @@ export function handleFileUpdate(args: {
 					engine: args.engine,
 					key: "lix_file_no_plugin",
 					level: "warn",
-					message: `File updated at ${normalizedPath} but plugin does not support detecting changes`,
+					message: "Plugin matched update but cannot detect changes",
+					payload: {
+						operation: "update",
+						path: normalizedPath,
+						pluginKey: plugin.key,
+					},
 				});
 				continue;
 			}
@@ -429,7 +455,11 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_plugin",
 				level: "warn",
-				message: `File updated at ${normalizedPath} but no plugin available to detect changes`,
+				message: "No plugin matched file update",
+				payload: {
+					operation: "update",
+					path: normalizedPath,
+				},
 			});
 
 			// Use fallback plugin to handle the file
@@ -489,7 +519,11 @@ export function handleFileUpdate(args: {
 				engine: args.engine,
 				key: "lix_file_no_changes_detected",
 				level: "debug",
-				message: `File updated at ${normalizedPath} but plugin detected no changes`,
+				message: "Plugin detected no changes during update",
+				payload: {
+					operation: "update",
+					path: normalizedPath,
+				},
 			});
 		}
 	}
