@@ -48,71 +48,21 @@ jobs:
           command: versions upload --preview-alias ${{ env.PR_ALIAS }}
           packageManager: pnpm
 
-      - name: Gather preview info
-        id: preview
-        if: success()
-        env:
-          WRANGLER_URL: ${{ steps.wrangler.outputs.deployment-url }}
-          WRANGLER_OUTPUT: ${{ steps.wrangler.outputs.command-output }}
-          PR_ALIAS: ${{ env.PR_ALIAS }}
-        run: |
-          url="$WRANGLER_URL"
-          if [ -z "$url" ]; then
-            url=$(printf '%s' "$WRANGLER_OUTPUT" | grep -Eo 'https://[^ "\\]+' | head -n1 || true)
-          fi
-
-          export PREVIEW_URL="$url"
-          python <<'PY'
-import os
-import textwrap
-
-alias = os.environ["PR_ALIAS"]
-url = os.environ.get("PREVIEW_URL", "").strip()
-
-width = 38  # total characters including borders
-
-def frame_lines(content: str) -> list[str]:
-    if not content:
-        return [f"┃ {' ' * (width - 4)} ┃"]
-
-    wrapped = textwrap.wrap(content, width=width - 4, break_long_words=True, replace_whitespace=False)
-    return [f"┃ {line.ljust(width - 4)} ┃" for line in wrapped]
-
-alias_line = f"• Alias   : `{alias}`"
-if url:
-    preview_line = f"• Preview : {url}"
-else:
-    preview_line = "• Preview : Check Wrangler logs"
-
-body_lines = [
-    "┏" + "━" * (width - 2) + "┓",
-    *frame_lines("🚀 Flashtype Preview"),
-    *frame_lines(""),
-    *frame_lines(alias_line),
-    *frame_lines(preview_line),
-    *frame_lines(""),
-    *frame_lines("(rerun the workflow to refresh)"),
-    "┗" + "━" * (width - 2) + "┛",
-]
-
-with open("preview_comment.txt", "w", encoding="utf-8") as fh:
-    fh.write("<!-- flashtype-preview -->\n")
-    fh.write("\n".join(body_lines))
-PY
-
-          {
-            printf 'url=%s\n' "$url"
-            printf 'body<<EOF\n'
-            cat preview_comment.txt
-            printf '\nEOF\n'
-          } >>"$GITHUB_OUTPUT"
-
       - name: Comment preview link
         if: success()
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.number }}
-          body: ${{ steps.preview.outputs.body }}
-          body-include: '<!-- flashtype-preview -->'
+          body: |
+            <!-- flashtype-preview -->
+            ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+            ┃ 🚀 Flashtype Preview            ┃
+            ┃                                  ┃
+            ┃ • Alias   : `pr-${{ github.event.number }}`
+            ┃ • Preview : ${{ steps.wrangler.outputs.deployment-url || 'Check Wrangler logs for URL' }}
+            ┃                                  ┃
+            ┃ _(push to refresh)_ ┃
+            ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+          body-include: "<!-- flashtype-preview -->"
           edit-mode: replace
