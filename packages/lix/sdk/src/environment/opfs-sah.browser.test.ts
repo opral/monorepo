@@ -210,6 +210,45 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		await lix.close();
 	});
 
+	test("lix.toBlob exports current database image", async () => {
+		const key = `vitest-opfs-export-${Math.random().toString(16).slice(2)}`;
+		const lix = await openLix({
+			environment: new OpfsSahEnvironment({ key }),
+			providePlugins: [],
+		});
+
+		try {
+			await lix.db
+				.insertInto("file")
+				.values({
+					path: "/export.txt",
+					data: new TextEncoder().encode("export me"),
+				})
+				.execute();
+
+			const blob = await lix.toBlob();
+			expect(blob.size).toBeGreaterThan(0);
+
+			const reopened = await openLix({ blob });
+			try {
+				const row = await reopened.db
+					.selectFrom("file")
+					.where("path", "=", "/export.txt")
+					.selectAll()
+					.executeTakeFirst();
+				expect(row).toBeDefined();
+				expect(new TextDecoder().decode(row?.data as Uint8Array)).toBe(
+					"export me"
+				);
+			} finally {
+				await reopened.close();
+			}
+		} finally {
+			await lix.close();
+			await OpfsSahEnvironment.clear();
+		}
+	});
+
 	test("loads plugin from string and processes *.json", async () => {
 		// Minimal mock plugin: matches *.json and emits one change with a simple schema
 		const mockPlugin = `

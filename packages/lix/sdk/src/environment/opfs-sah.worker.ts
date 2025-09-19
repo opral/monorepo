@@ -216,12 +216,13 @@ async function handle(req: Req): Promise<Res> {
 			case "export": {
 				if (!poolUtil || !db) throw new Error("Engine not initialized");
 				// Export using poolUtil (must match open path)
-				const name = (
+				const rawName = (
 					db?.getFilename?.() ??
 					db?.filename ??
 					currentOpfsPath ??
 					""
 				).replace(/^file:/, "");
+				const name = rawName.split("?")[0] || currentOpfsPath || rawName;
 				const bytes: Uint8Array = poolUtil.exportFile(name);
 				const buf = bytes.buffer.slice(
 					bytes.byteOffset,
