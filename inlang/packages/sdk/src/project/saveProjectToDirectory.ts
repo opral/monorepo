@@ -9,6 +9,18 @@ import {
 import { detectJsonFormatting } from "../utilities/detectJsonFormatting.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 
+const arrayBuffersEqual = (a: ArrayBuffer, b: ArrayBuffer): boolean => {
+	if (a.byteLength !== b.byteLength) return false;
+	const viewA = new Uint8Array(a);
+	const viewB = new Uint8Array(b);
+	for (let i = 0; i < viewA.byteLength; i++) {
+		if (viewA[i] !== viewB[i]) {
+			return false;
+		}
+	}
+	return true;
+};
+
 export async function saveProjectToDirectory(args: {
 	fs: typeof fs;
 	project: InlangProject;
@@ -86,6 +98,44 @@ export async function saveProjectToDirectory(args: {
 					const dirname = path.dirname(p);
 					if ((await args.fs.stat(dirname)).isDirectory() === false) {
 						await args.fs.mkdir(dirname, { recursive: true });
+					}
+
+					let shouldWrite = true;
+					try {
+						const existingStat = await args.fs.stat(p);
+						const existing = (await args.fs.readFile(p)) as Uint8Array;
+						if (existing && existing.length === file.content.byteLength) {
+							const existingView = new Uint8Array(existing).slice()
+								.buffer as ArrayBuffer;
+							const targetView = new Uint8Array(file.content).slice()
+								.buffer as ArrayBuffer;
+							if (arrayBuffersEqual(existingView, targetView)) {
+								shouldWrite = false;
+							} else {
+								const fileRow = await args.project.lix.db
+									.selectFrom("file")
+									.where("path", "=", p.replace(args.path, ""))
+									.select("lixcol_updated_at")
+									.executeTakeFirst();
+								const lixUpdatedAt = fileRow?.lixcol_updated_at
+									? new Date(fileRow.lixcol_updated_at).getTime()
+									: 0;
+								if (
+									existingStat.mtimeMs > lixUpdatedAt &&
+									existingStat.mtimeMs > Date.now() - 5000
+								) {
+									shouldWrite = false;
+								}
+							}
+						}
+					} catch (error) {
+						if ((error as any)?.code !== "ENOENT") {
+							throw error;
+						}
+					}
+
+					if (shouldWrite === false) {
+						continue;
 					}
 					if (p.endsWith(".json")) {
 						try {

@@ -1,34 +1,41 @@
-import { CamelCasePlugin, Kysely } from "kysely";
-import { applySchema, type InlangDatabaseSchema } from "./schema.js";
-import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { v7 } from "uuid";
-import { humanId } from "../human-id/human-id.js";
-import { JsonbPlugin } from "./jsonbPlugin.js";
+import { Kysely } from "kysely";
+import { type InlangDatabaseSchema } from "./schema.js";
+import { JsonPlugin } from "./jsonPlugin.js";
+import { type Lix } from "@lix-js/sdk";
+import { createBundleView } from "../schema-definitions/bundle.js";
+import { createMessageView } from "../schema-definitions/message.js";
+import { createVariantView } from "../schema-definitions/variant.js";
 
-export function initDb(args: { sqlite: SqliteWasmDatabase }) {
-	initDefaultValueFunctions({ sqlite: args.sqlite });
-	applySchema({ sqlite: args.sqlite });
-	const db = new Kysely<InlangDatabaseSchema>({
-		dialect: createDialect({
-			database: args.sqlite,
-		}),
-		plugins: [
-			new CamelCasePlugin(),
-			new JsonbPlugin({ database: args.sqlite }),
-		],
-	});
-	return db;
-}
+const INLANG_PLUGIN_KEY = "inlang_sdk";
+const INLANG_FILE_ID = "inlang";
 
-function initDefaultValueFunctions(args: { sqlite: SqliteWasmDatabase }) {
-	args.sqlite.createFunction({
-		name: "uuid_v7",
-		arity: 0,
-		xFunc: () => v7(),
+export function initDb(lix: Lix): Kysely<InlangDatabaseSchema> {
+	const engine = lix.engine;
+	if (engine === undefined) {
+		throw new Error(
+			"Lix engine is not available. initDb requires an in-process Lix engine to register entity views."
+		);
+	}
+
+	engine.sqlite.exec("PRAGMA foreign_keys = ON");
+
+	createBundleView({
+		engine,
+		pluginKey: INLANG_PLUGIN_KEY,
+		hardcodedFileId: INLANG_FILE_ID,
 	});
-	args.sqlite.createFunction({
-		name: "human_id",
-		arity: 0,
-		xFunc: () => humanId(),
+	createMessageView({
+		engine,
+		pluginKey: INLANG_PLUGIN_KEY,
+		hardcodedFileId: INLANG_FILE_ID,
 	});
+	createVariantView({
+		engine,
+		pluginKey: INLANG_PLUGIN_KEY,
+		hardcodedFileId: INLANG_FILE_ID,
+	});
+
+	return lix.db
+		.withPlugin(new JsonPlugin({ engine }))
+		.withTables<InlangDatabaseSchema>() as unknown as Kysely<InlangDatabaseSchema>;
 }

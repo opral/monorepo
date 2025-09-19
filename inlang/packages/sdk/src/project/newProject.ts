@@ -1,10 +1,9 @@
 import { newLixFile, openLix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import {
-	contentFromDatabase,
-	createInMemoryDatabase,
-} from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
+import { InlangBundleSchema } from "../schema-definitions/bundle.js";
+import { InlangMessageSchema } from "../schema-definitions/message.js";
+import { InlangVariantSchema } from "../schema-definitions/variant.js";
 
 /**
  * Creates a new inlang project.
@@ -15,20 +14,30 @@ import { initDb } from "../database/initDb.js";
 export async function newProject(args?: {
 	settings?: ProjectSettings;
 }): Promise<Blob> {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
+	const lix = await openLix({
+		blob: await newLixFile({
+			keyValues: [
+				{
+					key: "lix_telemetry",
+					value: args?.settings?.telemetry ?? "on",
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+			],
+		}),
 	});
-	initDb({ sqlite });
+
+	initDb(lix);
 
 	try {
-		const inlangDbContent = contentFromDatabase(sqlite);
-
-		const lix = await openLix({
-			blob: await newLixFile(),
-			keyValues: [
-				{ key: "lix_telemetry", value: args?.settings?.telemetry ?? "on" },
-			],
-		});
+		await lix.db
+			.insertInto("stored_schema_all")
+			.values([
+				{ value: InlangBundleSchema, lixcol_version_id: "global" },
+				{ value: InlangMessageSchema, lixcol_version_id: "global" },
+				{ value: InlangVariantSchema, lixcol_version_id: "global" },
+			])
+			.execute();
 
 		const { value: lixId } = await lix.db
 			.selectFrom("key_value")
@@ -40,10 +49,6 @@ export async function newProject(args?: {
 		await lix.db
 			.insertInto("file")
 			.values([
-				{
-					path: "/db.sqlite",
-					data: inlangDbContent,
-				},
 				{
 					path: "/settings.json",
 					data: new TextEncoder().encode(
@@ -69,7 +74,7 @@ export async function newProject(args?: {
 		});
 		throw error;
 	} finally {
-		sqlite.close();
+		lix.close();
 	}
 }
 
