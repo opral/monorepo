@@ -1,6 +1,6 @@
 import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
-import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
+import { createDialect, createInMemoryDatabase } from "../sqlite-wasm/index.js";
 import { ParseJsonBPluginV1 } from "./parse-jsonb-plugin-v1.js";
 
 test("select()", async () => {

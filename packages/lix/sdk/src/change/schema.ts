@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "../database/sqlite-wasm/index.js";
 import type { Selectable, Insertable, Generated } from "kysely";
 
 export function applyChangeDatabaseSchema(

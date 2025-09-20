@@ -1,5 +1,5 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import { type SqliteWasmDatabase } from "../database/sqlite-wasm/index.js";
 import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
 import {
 	LixSchemaViewMap,

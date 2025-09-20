@@ -2,7 +2,7 @@ import { type KyselyPlugin } from "kysely";
 import {
 	createInMemoryDatabase,
 	type SqliteWasmDatabase,
-} from "sqlite-wasm-kysely";
+} from "../sqlite-wasm/index.js";
 
 // workaround for v1. v2 doesn't need to transform
 // jsonb columns during engine

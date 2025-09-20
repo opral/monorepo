@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { LixEngine } from "../boot.js";

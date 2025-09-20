@@ -60,7 +60,7 @@
 		"ajv": "^8.17.1",
 		"human-id": "^4.1.1",
 		"kysely": "^0.27.4",
-		"sqlite-wasm-kysely": "workspace:*",
+		"@sqlite.org/sqlite-wasm": "^3.48.0-build2",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {

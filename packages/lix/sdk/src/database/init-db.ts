@@ -1,5 +1,5 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
-import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import { createDialect, type SqliteWasmDatabase } from "./sqlite-wasm/index.js";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
