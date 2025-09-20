@@ -1,4 +1,7 @@
-import { createInMemoryDatabase } from "./createInMemoryDatabase.js";
+import {
+	createInMemoryDatabase,
+	type SqliteWasmDatabase,
+} from "./createInMemoryDatabase.js";
 import { importDatabase } from "./importDatabase.js";
 
 /**
@@ -11,7 +14,9 @@ import { importDatabase } from "./importDatabase.js";
  * @example
  *   const db = await loadDatabaseInMemory(await fetch("/db.sqlite").then(r => r.arrayBuffer()));
  */
-export async function loadDatabaseInMemory(data: ArrayBuffer) {
+export async function loadDatabaseInMemory(
+	data: ArrayBuffer
+): Promise<SqliteWasmDatabase> {
 	const database = await createInMemoryDatabase({
 		readOnly: false,
 	});

@@ -15,12 +15,13 @@ import type { SqliteWasmDatabase } from "./util/createInMemoryDatabase.js";
  */
 export const createDialect = (args: { database: SqliteWasmDatabase }) => {
 	return {
-		createAdapter: () => new SqliteAdapter(),
-		createDriver: () =>
+		createAdapter: (): SqliteAdapter => new SqliteAdapter(),
+		createDriver: (): SqliteWasmDriver =>
 			new SqliteWasmDriver({
 				database: args.database,
 			}),
-		createIntrospector: (db: any) => new SqliteIntrospector(db),
-		createQueryCompiler: () => new SqliteQueryCompiler(),
+		createIntrospector: (db: any): SqliteIntrospector =>
+			new SqliteIntrospector(db),
+		createQueryCompiler: (): SqliteQueryCompiler => new SqliteQueryCompiler(),
 	};
 };

@@ -52,7 +52,7 @@ export class SqliteWasmConnection implements DatabaseConnection {
 	}
 
 	// eslint-disable-next-line require-yield
-	async *streamQuery() {
+	async *streamQuery(): AsyncGenerator<never, void, unknown> {
 		throw new Error("not supported for wasm driver yet");
 	}
 }

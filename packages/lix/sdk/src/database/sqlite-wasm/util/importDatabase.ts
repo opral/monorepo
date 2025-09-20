@@ -20,7 +20,7 @@ export const importDatabase = ({
 	content: Uint8Array;
 	schema?: string;
 	readOnly?: boolean;
-}) => {
+}): SqliteWasmDatabase => {
 	const deserializeFlag = readOnly
 		? db.sqlite3.capi.SQLITE_DESERIALIZE_READONLY
 		: db.sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE |
