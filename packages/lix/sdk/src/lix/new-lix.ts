@@ -118,6 +118,8 @@ export async function newLixFile(args?: {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
+	// Configure persisted page size before schema creation so fresh Lix files use 8 KiB pages.
+	sqlite.exec({ sql: "PRAGMA page_size = 8192;" });
 
 	const hooks = createHooks();
 
