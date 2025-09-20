@@ -1,9 +1,8 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../../editor/editor-context";
-import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
-import { useQuery } from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "../../key-value/use-key-value";
 import { createEditor } from "./create-editor";
 import { assembleMdAst } from "./assemble-md-ast";
@@ -15,6 +14,15 @@ type TipTapEditorProps = {
 	persistDebounceMs?: number;
 };
 
+/**
+ * Rich text editor for Markdown files backed by the Lix store.
+ *
+ * Loads the active file lazily, keeps the ProseMirror instance in sync with
+ * remote changes, and persists edits via the collaborative Lix writer.
+ *
+ * @example
+ * <TipTapEditor className="grow" onReady={(editor) => editor.commands.focus()} />
+ */
 export function TipTapEditor({
 	className,
 	onReady,
@@ -22,32 +30,59 @@ export function TipTapEditor({
 }: TipTapEditorProps) {
 	const lix = useLix();
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
-	const initialFile = useQueryTakeFirstOrThrow(
+	const initialFile = useQueryTakeFirst(
 		({ lix }) =>
-			lix.db.selectFrom("file").select("data").where("id", "=", activeFileId),
+			lix.db
+				.selectFrom("file")
+				.select("data")
+				.where("id", "=", activeFileId ?? ""),
 		{ subscribe: false },
 	);
 
 	const { setEditor } = useEditorCtx();
 
-	if (!activeFileId) {
-		throw new Error("File id not set");
-	}
-
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
-
 	const writerKey = `flashtype_tiptap_editor`;
 
-	const editor = useMemo(
-		() =>
-			createEditor({
-				lix,
-				initialMarkdown: new TextDecoder().decode(initialFile.data),
-				fileId: activeFileId,
-				persistDebounceMs: PERSIST_DEBOUNCE_MS,
-				writerKey,
-			}),
-		[lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile],
+	const editor = useMemo(() => {
+		if (!activeFileId || !initialFile) return null;
+		return createEditor({
+			lix,
+			initialMarkdown: new TextDecoder().decode(initialFile.data),
+			fileId: activeFileId,
+			persistDebounceMs: PERSIST_DEBOUNCE_MS,
+			writerKey,
+		});
+	}, [lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile]);
+
+	const [isEditorFocused, setIsEditorFocused] = useState(false);
+
+	useEffect(() => {
+		if (!editor) return;
+		const syncFocus = () => setIsEditorFocused(editor.isFocused);
+		syncFocus();
+		editor.on("focus", syncFocus);
+		editor.on("blur", syncFocus);
+		return () => {
+			editor.off("focus", syncFocus);
+			editor.off("blur", syncFocus);
+		};
+	}, [editor]);
+
+	const handleSurfacePointerDown = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			if (!editor) return;
+			const target = event.target as HTMLElement | null;
+			const insideContent = target?.closest(".ProseMirror");
+			if (insideContent) return;
+			event.preventDefault();
+			if (editor.isEmpty) {
+				editor.commands.focus("start");
+			} else {
+				editor.commands.focus("end");
+			}
+		},
+		[editor],
 	);
 
 	// Subscribe to commit events and refresh on external changes
@@ -93,16 +128,38 @@ export function TipTapEditor({
 		onReady?.(editor);
 	}, [editor, setEditor, onReady]);
 
-	if (!activeFileId || !editor) {
-		return null;
+	if (!activeFileId) {
+		return (
+			<div className={className ?? undefined}>
+				<div className="flex h-full min-h-[200px] items-center justify-center bg-background px-3 py-12">
+					<p className="text-sm text-muted-foreground">
+						Select a file to start writing.
+					</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (!editor) {
+		return (
+			<div className={className ?? undefined}>
+				<div className="w-full bg-background px-3 py-12">
+					<div className="mx-auto h-48 w-full max-w-5xl animate-pulse rounded-md bg-muted" />
+				</div>
+			</div>
+		);
 	}
 
 	return (
 		<div className={className ?? undefined}>
-			<div className="w-full bg-background px-3 py-0">
+			<div
+				className="tiptap-container w-full h-full min-h-screen bg-background px-3 py-0 cursor-text"
+				data-editor-focused={isEditorFocused ? "true" : "false"}
+				onMouseDown={handleSurfacePointerDown}
+			>
 				<EditorContent
 					editor={editor}
-					className="w-full max-w-5xl mx-auto"
+					className="tiptap w-full h-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}
 				/>

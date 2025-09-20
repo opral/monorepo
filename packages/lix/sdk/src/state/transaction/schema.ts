@@ -20,6 +20,9 @@ export function applyTransactionStateSchema(args: {
     untracked INTEGER NOT NULL DEFAULT 0,
     UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
+
+  CREATE INDEX IF NOT EXISTS ix_txn_v_f_s_e
+    ON internal_transaction_state(version_id, file_id, schema_key, entity_id);
 `);
 }
 

@@ -21,7 +21,6 @@ export function Diff(props: {
 			}
 
 			try {
-				console.log("rendering diff");
 				const plugins = await lix.plugin.getAll();
 				const plugin = plugins[0];
 				if (cancelled) return;
@@ -31,7 +30,6 @@ export function Diff(props: {
 				}
 
 				const html = await plugin.renderDiff({ diffs: props.diffs });
-				console.log("diff html", html);
 				if (!cancelled) setRenderedHtml(html ?? null);
 			} catch (error) {
 				if (!cancelled) {

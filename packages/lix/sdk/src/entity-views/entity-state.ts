@@ -511,6 +511,15 @@ function createSingleEntityView(args: {
 		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
 
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
+	// When a schema has a hardcoded file_id (e.g. most built-in Lix entities),
+	// we can add the file filter directly to the generated view. This keeps
+	// SQLite anchored on the `(schema_key, version_id, file_id)` index instead of
+	// scanning every file for the same version, which noticeably speeds up
+	// lookups and the generated UPDATE statements.
+	const fileFilterClause = args.hardcodedFileId
+		? ` AND file_id = '${args.hardcodedFileId}'`
+		: "";
+
 	const sqlQuery =
 		`
     CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
@@ -522,7 +531,7 @@ function createSingleEntityView(args: {
 					.join(",\n        ")},
         ${operationalColumns.join(",\n        ")}
       FROM ${args.stateTable}
-      WHERE schema_key = '${schema_key}';
+      WHERE schema_key = '${schema_key}'${fileFilterClause};
 
     ` +
 		(args.readOnly

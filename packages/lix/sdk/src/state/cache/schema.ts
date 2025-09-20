@@ -166,7 +166,16 @@ export function applyStateCacheV2Schema(args: {
 
 							// Mark this constraint as used
 							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
-							idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+							const usage = idxInfo.nthConstraintUsage(i);
+							usage.$argvIndex = ++argIndex;
+							if (columnName === "schema_key") {
+								// schema_key determines which physical cache table we read from, so
+								// once the planner hands us this constraint we can omit re-applying
+								// it at SQL level. Preventing SQLite from emitting `WHERE schema_key = ?`
+								// makes it clear that each cache table already holds rows for exactly
+								// one schema.
+								usage.$omit = 1;
+							}
 						}
 					}
 				}

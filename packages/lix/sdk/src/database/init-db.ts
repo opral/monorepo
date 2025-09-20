@@ -63,6 +63,11 @@ export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;
 }): Kysely<LixDatabaseSchema> {
+	// Lower fsync frequency for better write throughput; NORMAL still syncs at txn boundaries.
+	args.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
+	// Enlarge the page cache to keep more hot pages in memory (approximately 40 MiB at 4 KiB pages).
+	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
+
 	const db = new Kysely<LixDatabaseSchema>({
 		// log: ["error", "query"],
 		dialect: createDialect({

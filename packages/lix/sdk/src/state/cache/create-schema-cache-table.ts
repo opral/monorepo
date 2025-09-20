@@ -8,6 +8,7 @@ import type { LixEngine } from "../../engine/boot.js";
  * - STRICT + WITHOUT ROWID for compact storage and fast PK lookups
  * - PK(entity_id, file_id, version_id) to reflect logical identity
  * - Indexes to accelerate common access patterns used by views/benches
+ * - Partial indexes for live/tombstone scans so SQLite can skip dead rows quickly
  */
 export function createSchemaCacheTable(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -52,6 +53,35 @@ export function createSchemaCacheTable(args: {
 	engine.sqlite.exec({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
 	});
+
+	// 4) Partial index for live rows only to skip tombstones when applying predicates
+	engine.sqlite.exec({
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_live_vfe
+			ON ${tableName} (version_id, file_id, entity_id)
+			WHERE inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
+	});
+
+	// 5) Partial index for tombstones when they are queried explicitly
+	engine.sqlite.exec({
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_tomb_vfe
+			ON ${tableName} (version_id, file_id, entity_id)
+			WHERE inheritance_delete_marker = 1 AND snapshot_content IS NULL`,
+	});
+
+	// Extra expression indexes for descriptor cache
+	if (tableName === "internal_state_cache_lix_version_descriptor") {
+		// Speed up recursive inheritance walks by indexing the parent pointer extracted from JSON
+		engine.sqlite.exec({
+			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_inherits_from
+		        ON ${tableName}(json_extract(snapshot_content, '$.inherits_from_version_id'))
+		        WHERE json_extract(snapshot_content, '$.inherits_from_version_id') IS NOT NULL`,
+		});
+		// Pair child/parent ids to avoid temp b-trees when deduping inheritance edges
+		engine.sqlite.exec({
+			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_id_parent
+		        ON ${tableName}(json_extract(snapshot_content, '$.id'), json_extract(snapshot_content, '$.inherits_from_version_id'))`,
+		});
+	}
 
 	// Update planner stats
 	engine.sqlite.exec({ sql: `ANALYZE ${tableName}` });

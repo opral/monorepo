@@ -357,7 +357,7 @@ export function applyStateVTable(
 						}
 
 						const stateResults = executeSync({
-							engine: engine,
+							engine,
 							query,
 						});
 
@@ -368,7 +368,7 @@ export function applyStateVTable(
 
 					// Normal path: check cache staleness
 					const cacheIsStale = isStaleStateCache({
-						engine: { sqlite, db: db as any },
+						engine,
 					});
 
 					// Try cache first - but only if it's not stale

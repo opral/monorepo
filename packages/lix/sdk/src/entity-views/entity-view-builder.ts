@@ -149,5 +149,6 @@ export function createEntityViewsIfNotExists(args: {
 		engine: args.engine,
 		schema: args.schema,
 		overrideName: view_name + "_history",
+		hardcodedFileId: args.hardcodedFileId,
 	});
 }

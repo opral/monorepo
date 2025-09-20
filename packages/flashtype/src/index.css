@@ -270,6 +270,8 @@ body,
 .tiptap,
 .ProseMirror {
 	width: 100%;
+	min-height: 100vh;
+	cursor: text;
 }
 
 /* TipTap content typography */
@@ -337,5 +339,17 @@ body,
 	}
 	.ProseMirror li[data-task] p {
 		@apply my-0;
+	}
+
+	.tiptap-container[data-editor-focused="true"]
+		.ProseMirror
+		p.is-editor-empty:first-child::before {
+		color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
+		opacity: 0.82;
+		font-style: italic;
+		content: attr(data-placeholder);
+		pointer-events: none;
+		height: 0;
+		float: left;
 	}
 }
