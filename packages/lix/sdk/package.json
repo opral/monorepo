@@ -36,16 +36,14 @@
 		"src"
 	],
   "scripts": {
-    "prebuild": "npm run env-variables",
-    "build": "tsc --build",
+    "build": "node ./scripts/build.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pretest": "playwright install --with-deps",
-    "test": "vitest run --typecheck",
-    "test:watch": "vitest --typecheck",
-    "env-variables": "node ./src/services/env-variables/create-index-file.js",
+    "test": "node ./scripts/build.js --setup-only && vitest run --typecheck",
+    "test:watch": "node ./scripts/build.js --setup-only && vitest --typecheck",
     "bench": "vitest bench",
     "lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
-		"dev": "tsc --watch",
+		"dev": "node ./scripts/build.js --watch",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},

@@ -1,5 +1,5 @@
 import { sql, type Kysely } from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/util/index.js";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
