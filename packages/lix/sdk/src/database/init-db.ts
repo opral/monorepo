@@ -1,10 +1,8 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
-import { createDialect, type SqliteWasmDatabase } from "./sqlite-wasm/index.js";
+import { Kysely } from "kysely";
+import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
-import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
-import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
-import { LixSchemaViewMap } from "./schema.js";
-import { buildJsonColumnConfig } from "../lix/json-column-config.js";
+import { createEngineDialect } from "./sqlite/engine-dialect.js";
+import { createDefaultPlugins } from "./kysely/plugins.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -57,8 +55,6 @@ import { getTimestampSync } from "../engine/deterministic/timestamp.js";
  * }
  * ```
  */
-const ViewsWithJsonColumns = buildJsonColumnConfig({ includeChangeView: true });
-
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;
@@ -69,16 +65,8 @@ export function initDb(args: {
 	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
 
 	const db = new Kysely<LixDatabaseSchema>({
-		// log: ["error", "query"],
-		dialect: createDialect({
-			database: args.sqlite,
-		}),
-		plugins: [
-			// needed for things like `jsonArrayFrom()`
-			new ParseJSONResultsPlugin(),
-			JSONColumnPlugin(ViewsWithJsonColumns),
-			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
-		],
+		dialect: createEngineDialect({ database: args.sqlite }),
+		plugins: createDefaultPlugins(),
 	});
 
 	const engine: LixEngine = {

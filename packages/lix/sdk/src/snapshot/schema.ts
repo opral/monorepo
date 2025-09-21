@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "../database/sqlite-wasm/index.js";
+import type { SqliteWasmDatabase } from "../database/sqlite/index.js";
 import type { Generated } from "kysely";
 
 export function applySnapshotDatabaseSchema(

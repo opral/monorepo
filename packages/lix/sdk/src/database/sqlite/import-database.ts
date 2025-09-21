@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "./createInMemoryDatabase.js";
+import type { SqliteWasmDatabase } from "./create-in-memory-database.js";
 
 /**
  * Loads serialized SQLite bytes into an in-memory database.

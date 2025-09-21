@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "../database/sqlite-wasm/index.js";
+import type { SqliteWasmDatabase } from "../database/sqlite/index.js";
 import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initDb } from "../database/init-db.js";

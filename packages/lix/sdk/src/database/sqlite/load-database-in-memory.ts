@@ -1,8 +1,8 @@
 import {
 	createInMemoryDatabase,
 	type SqliteWasmDatabase,
-} from "./createInMemoryDatabase.js";
-import { importDatabase } from "./importDatabase.js";
+} from "./create-in-memory-database.js";
+import { importDatabase } from "./import-database.js";
 
 /**
  * Convenience helper that instantiates a database and hydrates it from bytes.

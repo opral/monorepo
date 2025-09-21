@@ -1,6 +1,6 @@
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 import type { Database, Sqlite3Static } from "@sqlite.org/sqlite-wasm";
-import { wasmBinary } from "./sqliteWasmBinary.js";
+import { wasmBinary } from "./sqlite-wasm-binary.js";
 
 // https://github.com/opral/lix-sdk/issues/231
 // @ts-expect-error -  globalThis

@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "./createInMemoryDatabase.js";
+import type { SqliteWasmDatabase } from "./create-in-memory-database.js";
 
 /**
  * Exports the content of a database as a Uint8Array.

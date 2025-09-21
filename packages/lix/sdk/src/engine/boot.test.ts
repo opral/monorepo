@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import {
 	createInMemoryDatabase,
 	importDatabase,
-} from "../database/sqlite-wasm/index.js";
+} from "../database/sqlite/index.js";
 import { newLixFile } from "../lix/new-lix.js";
 import { boot } from "./boot.js";
 

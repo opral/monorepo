@@ -1,5 +1,5 @@
 import type { DatabaseConnection } from "kysely";
-import type { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
+import type { SqliteWasmDatabase } from "../create-in-memory-database.js";
 
 export interface SqliteWasmDialectConfig {
 	/**

@@ -1,6 +1,6 @@
 import { SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from "kysely";
-import { SqliteWasmDriver } from "./kysely/SqliteWasmDriver.js";
-import type { SqliteWasmDatabase } from "./util/createInMemoryDatabase.js";
+import { SqliteWasmDriver } from "./kysely-driver/sqlite-wasm-driver.js";
+import type { SqliteWasmDatabase } from "./create-in-memory-database.js";
 
 /**
  * Creates a Kysely dialect that talks to a WebAssembly powered SQLite database.
@@ -11,9 +11,9 @@ import type { SqliteWasmDatabase } from "./util/createInMemoryDatabase.js";
  *
  * @example
  *   const db = await createInMemoryDatabase({ readOnly: false });
- *   const dialect = createDialect({ database: db });
+ *   const dialect = createEngineDialect({ database: db });
  */
-export const createDialect = (args: { database: SqliteWasmDatabase }) => {
+export const createEngineDialect = (args: { database: SqliteWasmDatabase }) => {
 	return {
 		createAdapter: (): SqliteAdapter => new SqliteAdapter(),
 		createDriver: (): SqliteWasmDriver =>

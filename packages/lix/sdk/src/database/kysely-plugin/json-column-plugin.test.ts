@@ -1,6 +1,9 @@
 import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
-import { createDialect, createInMemoryDatabase } from "../sqlite-wasm/index.js";
+import {
+	createEngineDialect,
+	createInMemoryDatabase,
+} from "../sqlite/index.js";
 import { JSONColumnPlugin } from "./json-column-plugin.js";
 
 test("properly serializes string values for any-json columns", async () => {
@@ -107,7 +110,7 @@ test("object-only columns prevent double serialization", async () => {
 			any_json: any;
 		};
 	}>({
-		dialect: createDialect({ database }),
+		dialect: createEngineDialect({ database }),
 		plugins: [
 			JSONColumnPlugin({
 				mock_table: {
@@ -199,7 +202,7 @@ const mockDatabase = async () => {
 			other: string;
 		};
 	}>({
-		dialect: createDialect({
+		dialect: createEngineDialect({
 			database,
 		}),
 		plugins: [

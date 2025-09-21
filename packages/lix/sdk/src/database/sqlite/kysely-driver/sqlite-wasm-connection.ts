@@ -1,5 +1,5 @@
 import type { CompiledQuery, DatabaseConnection, QueryResult } from "kysely";
-import type { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
+import type { SqliteWasmDatabase } from "../create-in-memory-database.js";
 
 export class SqliteWasmConnection implements DatabaseConnection {
 	readonly #db: SqliteWasmDatabase;

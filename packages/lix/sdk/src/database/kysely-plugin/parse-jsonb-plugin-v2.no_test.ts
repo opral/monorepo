@@ -1,6 +1,9 @@
 import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
-import { createDialect, createInMemoryDatabase } from "../sqlite-wasm/index.js";
+import {
+	createEngineDialect,
+	createInMemoryDatabase,
+} from "../sqlite/index.js";
 import { ParseJsonBPluginV2 } from "./parse-jsonb-plugin-v2.js";
 
 test("select()", async () => {
@@ -173,7 +176,7 @@ const mockDatabase = async () => {
 			json_column: Record<string, any>;
 		};
 	}>({
-		dialect: createDialect({
+		dialect: createEngineDialect({
 			database,
 		}),
 		plugins: [

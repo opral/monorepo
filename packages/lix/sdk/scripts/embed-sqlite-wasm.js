@@ -7,8 +7,8 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
 const wasmRelativePath = "sqlite-wasm/jswasm/sqlite3.wasm";
-const targetDir = "../src/database/sqlite-wasm/util";
-const targetBaseName = "sqliteWasmBinary";
+const targetDir = "../src/database/sqlite";
+const targetBaseName = "sqlite-wasm-binary";
 const bytesPerLine = 20;
 
 function chunk(values, size) {
@@ -39,22 +39,14 @@ async function main() {
 	const jsBody = `${header}export const wasmBinary = new Uint8Array([\n${literal}\n]).buffer;\n\nexport default wasmBinary;\n`;
 	const dtsBody = `export declare const wasmBinary: ArrayBuffer;\nexport default wasmBinary;\n`;
 
-	const baseUrl = new URL(targetDir + "/", import.meta.url);
+	const baseUrl = new URL(`${targetDir}/`, import.meta.url);
 	const jsPath = fileURLToPath(new URL(`${targetBaseName}.js`, baseUrl));
 	const dtsPath = fileURLToPath(new URL(`${targetBaseName}.d.ts`, baseUrl));
-	const tsPath = fileURLToPath(new URL(`${targetBaseName}.ts`, baseUrl));
 
 	await fs.mkdir(dirname(jsPath), { recursive: true });
 	await fs.writeFile(jsPath, jsBody);
 	await fs.writeFile(dtsPath, dtsBody);
 
-	try {
-		await fs.unlink(tsPath);
-	} catch (error) {
-		if (error && error.code !== "ENOENT") {
-			throw error;
-		}
-	}
 }
 
 main().catch((error) => {

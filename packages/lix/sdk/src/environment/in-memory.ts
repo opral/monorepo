@@ -3,7 +3,7 @@ import {
 	importDatabase,
 	contentFromDatabase,
 	type SqliteWasmDatabase,
-} from "../database/sqlite-wasm/index.js";
+} from "../database/sqlite/index.js";
 import type { LixEnvironment, LixEnvironmentResult } from "./api.js";
 import { boot, type LixEngine } from "../engine/boot.js";
 

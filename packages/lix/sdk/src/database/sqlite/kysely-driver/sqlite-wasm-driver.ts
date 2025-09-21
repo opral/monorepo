@@ -1,9 +1,9 @@
 import { CompiledQuery } from "kysely";
 import type { DatabaseConnection, Driver } from "kysely";
-import type { SqliteWasmDialectConfig } from "./SqliteWasmDialectConfig.js";
-import { ConnectionMutex } from "./ConnectionMutex.js";
-import { SqliteWasmConnection } from "./SqliteWasmConnection.js";
-import type { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
+import type { SqliteWasmDialectConfig } from "./sqlite-wasm-dialect-config.js";
+import { ConnectionMutex } from "./connection-mutex.js";
+import { SqliteWasmConnection } from "./sqlite-wasm-connection.js";
+import type { SqliteWasmDatabase } from "../create-in-memory-database.js";
 
 export class SqliteWasmDriver implements Driver {
 	readonly #config: SqliteWasmDialectConfig;

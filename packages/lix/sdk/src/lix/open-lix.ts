@@ -1,10 +1,6 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { type SqliteWasmDatabase } from "../database/sqlite-wasm/index.js";
-import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
-import {
-	LixSchemaViewMap,
-	type LixDatabaseSchema,
-} from "../database/schema.js";
+import { Kysely, sql } from "kysely";
+import { type LixDatabaseSchema } from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
@@ -14,11 +10,9 @@ import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
 import type { EngineEvent, LixEngine } from "../engine/boot.js";
 import type { LixEnvironment } from "../environment/api.js";
-import { createDialect } from "../environment/kysely/kysely-driver.js";
-import { JSONColumnPlugin } from "../database/kysely-plugin/json-column-plugin.js";
-import { ViewInsertReturningErrorPlugin } from "../database/kysely-plugin/view-insert-returning-error-plugin.js";
+import { createEnvironmentDialect } from "../database/sqlite/environment-dialect.js";
+import { createDefaultPlugins } from "../database/kysely/index.js";
 import { random } from "../engine/deterministic/random.js";
-import { buildJsonColumnConfig } from "./json-column-config.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 
 export type Lix = {
@@ -253,18 +247,9 @@ export async function openLix(args: {
 		engine = res?.engine;
 	}
 
-	// Build JSON column mapping to match openLix() parsing behavior
-	const ViewsWithJsonColumns = buildJsonColumnConfig({
-		includeChangeView: true,
-	});
-
 	const db = new Kysely<LixDatabaseSchema>({
-		dialect: createDialect({ environment: environment }),
-		plugins: [
-			new ParseJSONResultsPlugin(),
-			JSONColumnPlugin(ViewsWithJsonColumns),
-			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
-		],
+		dialect: createEnvironmentDialect({ environment }),
+		plugins: createDefaultPlugins(),
 	});
 
 	const observe = createObserve({ hooks });

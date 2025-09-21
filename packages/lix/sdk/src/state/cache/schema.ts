@@ -1,5 +1,5 @@
 import type { LixEngine } from "../../engine/boot.js";
-import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
+import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
 
 export type InternalStateCache = InternalStateCacheTable;
 

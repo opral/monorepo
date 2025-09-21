@@ -5,7 +5,7 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
-import type { LixEnvironment } from "../api.js";
+import type { LixEnvironment } from "../../environment/api.js";
 
 type LixEnvironmentDriverConfig = {
 	backend: LixEnvironment;
@@ -170,7 +170,9 @@ export class EnvironmentDriver implements Driver {
 	}
 }
 
-export function createDialect(args: { environment: LixEnvironment }): Dialect {
+export function createEnvironmentDialect(args: {
+	environment: LixEnvironment;
+}): Dialect {
 	return {
 		createAdapter: () => new SqliteAdapter(),
 		createDriver: () => new EnvironmentDriver({ backend: args.environment }),

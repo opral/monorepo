@@ -1,6 +1,9 @@
 import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
-import { createDialect, createInMemoryDatabase } from "../sqlite-wasm/index.js";
+import {
+	createEngineDialect,
+	createInMemoryDatabase,
+} from "../sqlite/index.js";
 import { SerializeJsonBPlugin } from "./serialize-jsonb-plugin.js";
 import { ParseJsonBPluginV1 } from "./parse-jsonb-plugin-v1.js";
 
@@ -274,7 +277,7 @@ const mockDatabase = async () => {
 			content: Record<string, any>;
 		};
 	}>({
-		dialect: createDialect({
+		dialect: createEngineDialect({
 			database,
 		}),
 		plugins: [
