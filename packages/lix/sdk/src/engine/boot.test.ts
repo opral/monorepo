@@ -38,11 +38,15 @@ test("boot installs engine and triggers plugin on file insert", async () => {
     `;
 
 		const events: any[] = [];
-		await boot({
+		const engine = await boot({
 			sqlite,
 			emit: (ev) => events.push(ev),
 			args: { providePluginsRaw: [pluginCode] },
 		});
+
+		// Sanity check: execSync should return rows as mapped objects including column names.
+		const execResult = engine.executeSync("select 1 as value");
+		expect(execResult.rows).toEqual([{ value: 1 }]);
 
 		// Insert a markdown file; plugin should detect a change
 		const data = new Uint8Array([1, 2, 3]);
@@ -62,6 +66,29 @@ test("boot installs engine and triggers plugin on file insert", async () => {
 
 		// Verify a state_commit event was bridged
 		expect(events.find((e) => e?.type === "state_commit")).toBeTruthy();
+	} finally {
+		sqlite.close();
+	}
+});
+
+test("execSync.rows returns a mapped object", async () => {
+	const sqlite = await createInMemoryDatabase({ readOnly: false });
+	try {
+		const blob = await newLixFile();
+		const buf = new Uint8Array(await blob.arrayBuffer());
+		importDatabase({ db: sqlite, content: buf });
+
+		const engine = await boot({
+			sqlite,
+			emit: () => {},
+			args: {},
+		});
+
+		const result = engine.executeSync(
+			"select 42 as answer, 'meaning' as label"
+		);
+
+		expect(result.rows).toEqual([{ answer: 42, label: "meaning" }]);
 	} finally {
 		sqlite.close();
 	}

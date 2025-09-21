@@ -41,7 +41,7 @@ export type LixEngine = {
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
 	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
-	execSync: (sql: string, params?: unknown[]) => { rows?: any[] };
+	executeSync: (sql: string, params?: unknown[]) => { rows?: any[] };
 	/** Invoke an engine function (router) */
 	call: Call;
 };
@@ -75,7 +75,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		db,
 		hooks,
 		getAllPluginsSync: () => plugins,
-		execSync: (sql: string, params?: unknown[]) => {
+		executeSync: (sql: string, params?: unknown[]) => {
 			const columnNames: string[] = [];
 			const rows = env.sqlite.exec({
 				sql,

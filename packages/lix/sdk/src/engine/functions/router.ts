@@ -28,7 +28,7 @@ export type Call = (
 ) => Promise<unknown>;
 
 export function createCallRouter(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "execSync" | "call">;
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "executeSync" | "call">;
 }): {
 	call: Call;
 } {
@@ -88,7 +88,7 @@ export function createCallRouter(args: {
 					sql: string;
 					params?: unknown[];
 				};
-				return args.engine.execSync(body.sql, body.params);
+				return args.engine.executeSync(body.sql, body.params);
 			},
 		],
 	]);
