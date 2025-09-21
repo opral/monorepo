@@ -7,7 +7,7 @@ import { applyFilesystemSchema } from "../filesystem/schema.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";
-import { createEngineRouter, type Call } from "./functions/router.js";
+import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 
@@ -44,7 +44,9 @@ export type LixEngine = {
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
 	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
-	exec: (sql: string, params?: unknown[]) => { rows?: any[] };
+	execSync: (sql: string, params?: unknown[]) => { rows?: any[] };
+	/** Invoke an engine function (router) */
+	call: Call;
 };
 
 /**
@@ -56,9 +58,7 @@ export type LixEngine = {
  * - Optionally seeds account and key-values
  * - Bridges state_commit events to the host via emit
  */
-export async function boot(
-	env: BootEnv
-): Promise<{ engine: LixEngine; call: Call }> {
+export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const db = initDb({ sqlite: env.sqlite, hooks });
 
@@ -73,12 +73,12 @@ export async function boot(
 	}
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
-	const engine: LixEngine = {
+	const engine = {
 		sqlite: env.sqlite,
 		db,
 		hooks,
 		getAllPluginsSync: () => plugins,
-		exec: (sql: string, params?: unknown[]) => {
+		execSync: (sql: string, params?: unknown[]) => {
 			const columnNames: string[] = [];
 			const rows = env.sqlite.exec({
 				sql,
@@ -89,7 +89,10 @@ export async function boot(
 			});
 			return { rows };
 		},
-	};
+		call: async () => {
+			throw new Error("Engine router not initialised");
+		},
+	} as LixEngine;
 
 	// Install filesystem functions + views that depend on plugin + hooks
 	applyFilesystemSchema({ engine });
@@ -170,6 +173,7 @@ export async function boot(
 		}
 	}
 
-	const { call } = createEngineRouter({ engine: engine });
-	return { engine: engine, call };
+	const { call } = createCallRouter({ engine });
+	engine.call = call;
+	return engine;
 }

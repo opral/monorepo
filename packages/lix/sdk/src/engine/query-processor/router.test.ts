@@ -18,7 +18,7 @@ async function createTestDb() {
 			plugins: [
 				...createDefaultPlugins(),
 				createCachePopulator({ engine }),
-				createStateRouter({ engine }),
+				createStateRouter(),
 			],
 		}),
 	};
@@ -36,6 +36,19 @@ test("routes state view reads to per-schema cache tables", async () => {
 	expect(compiled.sql).toContain("internal_state_cache_lix_key_value");
 	expect(compiled.sql).not.toContain('FROM "state"');
 	expect(compiled.sql).toContain("active_version");
+});
+
+test("routes state view without alias", async () => {
+	const { db } = await createTestDb();
+
+	const query = db
+		.selectFrom("state")
+		.selectAll()
+		.where("schema_key", "=", "lix_key_value");
+
+	const compiled = query.compile();
+	expect(compiled.sql).toContain("internal_state_cache_lix_key_value");
+	expect(compiled.sql).not.toContain('FROM "state"');
 });
 
 test("routes state_all view reads to per-schema cache tables", async () => {

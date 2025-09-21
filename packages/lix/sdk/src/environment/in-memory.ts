@@ -16,13 +16,7 @@ import { boot, type LixEngine } from "../engine/boot.js";
  */
 export class InMemoryEnvironment implements LixEnvironment {
 	private sqlite: SqliteWasmDatabase | undefined;
-	private callImpl:
-		| ((
-				name: string,
-				payload?: unknown,
-				opts?: { signal?: AbortSignal }
-		  ) => Promise<unknown>)
-		| undefined;
+
 	private engine: LixEngine | undefined;
 
 	async open(
@@ -31,14 +25,13 @@ export class InMemoryEnvironment implements LixEnvironment {
 		if (!this.sqlite) {
 			this.sqlite = await createInMemoryDatabase({ readOnly: false });
 		}
-		if (!this.callImpl) {
-			const res = await boot({
+		if (!this.engine) {
+			const engine = await boot({
 				sqlite: this.sqlite,
 				emit: (ev) => opts.emit(ev),
 				args: opts.boot.args,
 			});
-			this.callImpl = res.call;
-			this.engine = res.engine;
+			this.engine = engine;
 		}
 		return { engine: this.engine };
 	}
@@ -46,7 +39,6 @@ export class InMemoryEnvironment implements LixEnvironment {
 	async create(opts: Parameters<LixEnvironment["create"]>[0]): Promise<void> {
 		this.sqlite = await createInMemoryDatabase({ readOnly: false });
 		importDatabase({ db: this.sqlite, content: new Uint8Array(opts.blob) });
-		this.callImpl = undefined;
 		this.engine = undefined;
 	}
 
@@ -62,7 +54,6 @@ export class InMemoryEnvironment implements LixEnvironment {
 			this.sqlite.close();
 			this.sqlite = undefined;
 		}
-		this.callImpl = undefined;
 		this.engine = undefined;
 	}
 
@@ -75,7 +66,7 @@ export class InMemoryEnvironment implements LixEnvironment {
 		payload?: unknown,
 		opts?: { signal?: AbortSignal }
 	): Promise<unknown> {
-		if (!this.callImpl) throw new Error("Environment not initialized");
-		return this.callImpl(name, payload, opts);
+		if (!this.engine) throw new Error("Environment not initialized");
+		return this.engine.call(name, payload, opts);
 	}
 }

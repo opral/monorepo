@@ -1,5 +1,4 @@
 import type { LixEngine } from "../boot.js";
-import { transitionSync } from "../../state/transition.js";
 import { commitDeterministicRngState, randomSync } from "./random.js";
 import {
 	commitSequenceNumberSync,
@@ -7,7 +6,6 @@ import {
 } from "./sequence.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
-import { createCheckpointSync } from "../../state/create-checkpoint.js";
 import { uuidV7Sync } from "./uuid-v7.js";
 import { nanoIdSync } from "./nano-id.js";
 import { getTimestampSync } from "./timestamp.js";
@@ -29,7 +27,9 @@ export type Call = (
 	opts?: { signal?: AbortSignal }
 ) => Promise<unknown>;
 
-export function createEngineRouter(args: { engine: LixEngine }): {
+export function createCallRouter(args: {
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "db" | "execSync" | "call">;
+}): {
 	call: Call;
 } {
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
@@ -52,20 +52,6 @@ export function createEngineRouter(args: { engine: LixEngine }): {
 		[
 			"lix_next_sequence_number",
 			() => nextSequenceNumberSync({ engine: args.engine }),
-		],
-		[
-			"lix_transition",
-			async (payload) => {
-				const p = (payload ?? {}) as {
-					to: { id: string };
-					version?: { id: string };
-				};
-				return transitionSync({
-					engine: args.engine,
-					to: p.to,
-					version: p.version,
-				});
-			},
 		],
 		[
 			"lix_commit_deterministic_rng_state",
@@ -96,17 +82,13 @@ export function createEngineRouter(args: { engine: LixEngine }): {
 			() => markStateCacheAsFresh({ engine: args.engine }),
 		],
 		[
-			"lix_create_checkpoint",
-			async () => createCheckpointSync({ engine: args.engine }),
-		],
-		[
 			"lix_exec_sync",
 			(payload) => {
 				const body = (payload ?? {}) as {
 					sql: string;
 					params?: unknown[];
 				};
-				return args.engine.exec(body.sql, body.params);
+				return args.engine.execSync(body.sql, body.params);
 			},
 		],
 	]);

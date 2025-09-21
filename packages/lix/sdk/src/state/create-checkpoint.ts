@@ -3,10 +3,8 @@ import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import type { StateCommitChange } from "../hooks/create-hooks.js";
-import { getTimestampSync } from "../engine/functions/timestamp.js";
-import { updateStateCache } from "./cache/update-state-cache.js";
-import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
-import type { LixEngine } from "../engine/boot.js";
+import { getTimestamp } from "../engine/functions/timestamp.js";
+import { uuidV7 } from "../engine/functions/uuid-v7.js";
 import { type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import {
@@ -25,7 +23,10 @@ import {
  *
  * The working change set becomes immutable and receives the
  * `checkpoint` label. A fresh empty working change set is created so
- * that new changes can continue to accumulate.
+ * that new changes can continue to accumulate. Cache tables are
+ * updated and a `state_commit` hook fires for observers.
+ *
+ * @param args.lix - Active Lix instance executing the operation.
  *
  * @example
  * ```ts
@@ -33,14 +34,10 @@ import {
  * ```
  */
 
-/**
- * @param args.engine - The engine context bound to SQLite
- */
-export async function createCheckpointSync(args: {
-	engine: LixEngine;
+export async function createCheckpoint(args: {
+	lix: Lix;
 }): Promise<State<LixCommit>> {
-	const engine = args.engine;
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const db = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 	const executeInTransaction = async (
 		trx: Kysely<LixInternalDatabaseSchema>
 	) => {
@@ -82,8 +79,8 @@ export async function createCheckpointSync(args: {
 
 		// 1) Prepare ids
 		const checkpointCommitId = activeVersion.working_commit_id;
-		const newWorkingChangeSetId = uuidV7Sync({ engine });
-		const newWorkingCommitId = uuidV7Sync({ engine });
+		const newWorkingChangeSetId = await uuidV7({ lix: args.lix });
+		const newWorkingCommitId = await uuidV7({ lix: args.lix });
 
 		// 2) Ensure checkpoint label exists
 		const checkpointLabel = await trx
@@ -93,9 +90,9 @@ export async function createCheckpointSync(args: {
 			.executeTakeFirstOrThrow();
 
 		// Update version tip + descriptor via change + cache (avoid version view writes)
-		const now = getTimestampSync({ engine });
+		const now = await getTimestamp({ lix: args.lix });
 		const descriptorChange: LixChangeRaw = {
-			id: uuidV7Sync({ engine }),
+			id: await uuidV7({ lix: args.lix }),
 			entity_id: activeVersion.id,
 			schema_key: LixVersionDescriptorSchema["x-lix-key"],
 			schema_version: LixVersionDescriptorSchema["x-lix-version"],
@@ -110,7 +107,7 @@ export async function createCheckpointSync(args: {
 			created_at: now,
 		};
 		const tipChange: LixChangeRaw = {
-			id: uuidV7Sync({ engine }),
+			id: await uuidV7({ lix: args.lix }),
 			entity_id: activeVersion.id,
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
@@ -137,11 +134,11 @@ export async function createCheckpointSync(args: {
 		);
 
 		// Pre-generate label change id so we can track it in checkpoint change_ids
-		const labelChangeId = uuidV7Sync({ engine });
+		const labelChangeId = await uuidV7({ lix: args.lix });
 
 		// Commit change rows (checkpoint + new working)
 		const checkpointCommitChange: LixChangeRaw = {
-			id: uuidV7Sync({ engine }),
+			id: await uuidV7({ lix: args.lix }),
 			entity_id: checkpointCommitId,
 			schema_key: LixCommitSchema["x-lix-key"],
 			schema_version: LixCommitSchema["x-lix-version"],
@@ -156,7 +153,7 @@ export async function createCheckpointSync(args: {
 			created_at: now,
 		};
 		const newWorkingCommitChange: LixChangeRaw = {
-			id: uuidV7Sync({ engine }),
+			id: await uuidV7({ lix: args.lix }),
 			entity_id: newWorkingCommitId,
 			schema_key: LixCommitSchema["x-lix-key"],
 			schema_version: LixCommitSchema["x-lix-version"],
@@ -230,8 +227,7 @@ export async function createCheckpointSync(args: {
 			}
 		>;
 
-		updateStateCache({
-			engine,
+		await args.lix.call("lix_update_state_cache", {
 			changes: materializedChanges,
 		});
 
@@ -256,7 +252,7 @@ export async function createCheckpointSync(args: {
 		);
 
 		// Bridge state_commit so reactive queries observe the new working commit/descriptor state.
-		args.engine.hooks._emit("state_commit", { changes: hookChanges });
+		args.lix.hooks._emit("state_commit", { changes: hookChanges });
 
 		// Return the checkpoint commit (old working)
 		const createdCommit = await trx
@@ -269,17 +265,7 @@ export async function createCheckpointSync(args: {
 		return createdCommit;
 	};
 
-	if (db.isTransaction) {
-		return executeInTransaction(db);
-	} else {
-		return db.transaction().execute(executeInTransaction);
-	}
-}
-
-export async function createCheckpoint(args: {
-	lix: Lix;
-}): Promise<State<LixCommit>> {
-	type R = Awaited<ReturnType<typeof createCheckpointSync>>;
-	const res = await args.lix.call("lix_create_checkpoint");
-	return res as R;
+	return db.isTransaction
+		? executeInTransaction(db)
+		: db.transaction().execute(executeInTransaction);
 }

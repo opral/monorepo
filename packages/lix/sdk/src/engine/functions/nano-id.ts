@@ -1,10 +1,10 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
-import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { sql } from "kysely";
 import { nextSequenceNumberSync } from "./sequence.js";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 /**
  * Sync variant of {@link nanoId}. See {@link nanoId} for behavior and examples.
@@ -16,7 +16,7 @@ import { nextSequenceNumberSync } from "./sequence.js";
  * @see nanoId
  */
 export function nanoIdSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	length?: number;
 }): string {
 	const engine = args.engine;
@@ -25,7 +25,7 @@ export function nanoIdSync(args: {
 		// Check if nano_id is disabled in the config
 		const [config] = executeSync({
 			engine: engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")

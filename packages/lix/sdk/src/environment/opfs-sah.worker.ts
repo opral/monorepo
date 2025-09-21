@@ -46,7 +46,6 @@ let sqlite3Module: any;
 let poolUtil: any;
 let sqlite: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
 let currentOpfsPath: string | undefined;
-let engineCall: Call | null = null;
 let engine: LixEngine | null = null;
 
 /**
@@ -135,7 +134,7 @@ async function handle(req: Req): Promise<Res> {
 					providePluginsRaw: [],
 				}) as BootArgs;
 
-				const res = await boot({
+				const bootedEngine = await boot({
 					// db is sqlite3.oo1 DB; engine expects sqlite-wasm compatible surface
 					sqlite,
 					emit: (ev) => {
@@ -143,8 +142,7 @@ async function handle(req: Req): Promise<Res> {
 					},
 					args: bootArgs,
 				});
-				engineCall = res.call ?? null;
-				engine = res.engine ?? null;
+				engine = bootedEngine;
 
 				return { id: req.id, ok: true };
 			}
@@ -179,7 +177,6 @@ async function handle(req: Req): Promise<Res> {
 				sqlite = undefined;
 				currentOpfsPath = opfsPath;
 				engine = null;
-				engineCall = null;
 				return { id: req.id, ok: true };
 			}
 
@@ -228,14 +225,13 @@ async function handle(req: Req): Promise<Res> {
 				sqlite = undefined as any;
 				currentOpfsPath = undefined;
 				engine = null;
-				engineCall = null;
 				return { id: req.id, ok: true };
 			}
 
 			case "call": {
 				if (!sqlite) throw new Error("Environment not initialized");
 				const { route, payload } = req.payload as any;
-				if (!engineCall) {
+				if (!engine?.call) {
 					return {
 						id: req.id,
 						ok: false,
@@ -246,7 +242,7 @@ async function handle(req: Req): Promise<Res> {
 						},
 					};
 				}
-				const result = await engineCall(route, payload);
+				const result = await engine.call(route, payload);
 				return { id: req.id, ok: true, result };
 			}
 		}

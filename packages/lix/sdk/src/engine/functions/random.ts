@@ -1,13 +1,13 @@
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
-import { sql, type Kysely } from "kysely";
+import { sql } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 /** State kept per SQLite connection - 16 bytes for xorshift128+ */
 type RngState = {
@@ -49,7 +49,7 @@ function randomUnstable(): number {
  * @see random
  */
 export function randomSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): number {
 	const engine = args.engine;
 	// Non-deterministic mode: use crypto.getRandomValues()
@@ -65,7 +65,7 @@ export function randomSync(args: {
 		// Check if we have persisted RNG state
 		const [stateRow] = executeSync({
 			engine,
-			query: engine.db
+			query: internalQueryBuilder
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
@@ -104,13 +104,11 @@ export function randomSync(args: {
 /**
  * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
-function getRngSeed(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
-}): string {
+function getRngSeed(args: { engine: Pick<LixEngine, "sqlite"> }): string {
 	// Check for seed in the deterministic mode config
 	const [configRow] = executeSync({
 		engine: args.engine,
-		query: (args.engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -129,7 +127,7 @@ function getRngSeed(args: {
 	// Derive default seed from lix_id
 	const [idRow] = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")
 			.select("value"),

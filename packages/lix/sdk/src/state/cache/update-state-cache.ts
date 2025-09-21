@@ -5,6 +5,7 @@ import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getStateCacheV2Tables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
@@ -37,7 +38,7 @@ import { createSchemaCacheTable } from "./create-schema-cache-table.js";
  * });
  */
 export function updateStateCache(args: {
-	engine: Pick<LixEngine, "db" | "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 	// Accepts standard changes or materialized changes which include inline
 	// lixcol_version_id and lixcol_commit_id. When inline values are present,
 	// they take precedence over top-level commit/version arguments.
@@ -47,7 +48,7 @@ export function updateStateCache(args: {
 }): void {
 	const engine = args.engine;
 	const changes = args.changes;
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const db = internalQueryBuilder;
 
 	// Group changes by schema_key for efficient batch processing
 	const changesBySchema = new Map<

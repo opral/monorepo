@@ -1,11 +1,12 @@
 import { v7 } from "uuid";
 import { nextSequenceNumberSync } from "./sequence.js";
-import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
+import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import type { Call } from "./router.js";
 import type { LixEngine } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 /**
  * Sync variant of {@link uuidV7}. See {@link uuidV7} for behavior and examples.
@@ -17,7 +18,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
  * @see uuidV7
  */
 export function uuidV7Sync(args: {
-	engine: Pick<LixEngine, "db" | "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -25,7 +26,7 @@ export function uuidV7Sync(args: {
 		// Check if uuid_v7 is disabled in the config
 		const [config] = executeSync({
 			engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")

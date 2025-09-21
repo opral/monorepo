@@ -6,7 +6,6 @@ import {
 	type RootOperationNode,
 	type SelectQueryNode,
 } from "kysely";
-import type { LixEngine } from "../boot.js";
 import {
 	extractColumnName,
 	extractTableName,
@@ -30,27 +29,38 @@ const STATE_VIEW_NAMES = new Set<StateViewName>([
  * @example
  * const db = new Kysely({
  *   dialect: createEngineDialect({ database }),
- *   plugins: [createCachePopulator({ engine }), createStateRouter({ engine })],
+ *   plugins: [createCachePopulator({ engine }), createStateRouter()],
  * });
  */
-export function createStateRouter(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
-}): KyselyPlugin {
-	void args;
 
+export function createStateRouter(): KyselyPlugin {
 	return {
 		transformQuery(transformArgs: PluginTransformQueryArgs): RootOperationNode {
-			if (transformArgs.node.kind !== "SelectQueryNode") {
-				return transformArgs.node;
-			}
-
-			return rewriteSelectQuery(transformArgs.node as SelectQueryNode);
+			const { node: rewritten, changed } = rewriteStateQueryNode(
+				transformArgs.node
+			);
+			return changed ? (rewritten as RootOperationNode) : transformArgs.node;
 		},
 		transformResult: async (resultArgs) => resultArgs.result,
 	};
 }
 
-function rewriteSelectQuery(node: SelectQueryNode): SelectQueryNode {
+export function rewriteStateQueryNode(node: RootOperationNode): {
+	node: RootOperationNode;
+	changed: boolean;
+} {
+	if (node.kind !== "SelectQueryNode") {
+		return { node, changed: false };
+	}
+
+	const rewritten = rewriteSelectQuery(node as SelectQueryNode);
+	return { node: rewritten.node, changed: rewritten.changed };
+}
+
+function rewriteSelectQuery(node: SelectQueryNode): {
+	node: SelectQueryNode;
+	changed: boolean;
+} {
 	const from = node.from;
 	const where = node.where?.where;
 
@@ -78,19 +88,22 @@ function rewriteSelectQuery(node: SelectQueryNode): SelectQueryNode {
 	});
 
 	if (!changed) {
-		return node;
+		return { node, changed: false };
 	}
 
 	return {
-		...node,
-		from:
-			from && rewrittenFroms
-				? {
-						kind: "FromNode",
-						froms: rewrittenFroms,
-					}
-				: from,
-		joins: rewrittenJoins ?? node.joins,
+		node: {
+			...node,
+			from:
+				from && rewrittenFroms
+					? {
+							kind: "FromNode",
+							froms: rewrittenFroms,
+						}
+					: from,
+			joins: rewrittenJoins ?? node.joins,
+		},
+		changed: true,
 	};
 }
 
