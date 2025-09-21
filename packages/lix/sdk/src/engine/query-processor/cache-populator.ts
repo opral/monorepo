@@ -9,6 +9,11 @@ import type { LixEngine } from "../boot.js";
 import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
 import { populateStateCache } from "../../state/cache/populate-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
+import {
+	extractColumnName,
+	extractTableName,
+	extractValues,
+} from "./operation-node-utils.js";
 
 const STATE_TABLE_NAMES = new Set([
 	"state",
@@ -20,7 +25,7 @@ const STATE_TABLE_NAMES = new Set([
  * reads: before the query hits SQLite we ensure the cache is populated and mark
  * it as fresh so subsequent reads avoid redundant work.
  */
-export function cachePopulator(args: {
+export function createCachePopulator(args: {
 	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): KyselyPlugin {
 	return {
@@ -78,22 +83,6 @@ function extractStateTables(selectNode: SelectQueryNode): string[] {
 	return tables;
 }
 
-function extractTableName(node: OperationNode | undefined): string | undefined {
-	if (!node) return undefined;
-
-	switch (node.kind) {
-		case "TableNode": {
-			const identifier = (node as any).table?.identifier;
-			return identifier?.name;
-		}
-		case "AliasNode": {
-			return extractTableName((node as any).node);
-		}
-		default:
-			return undefined;
-	}
-}
-
 function collectVersionFilters(node: OperationNode | undefined): string[] {
 	const values = new Set<string>();
 	collectVersionFiltersRecursive(node, values);
@@ -129,41 +118,5 @@ function collectVersionFiltersRecursive(
 		}
 		default:
 			return;
-	}
-}
-
-function extractColumnName(
-	node: OperationNode | undefined
-): string | undefined {
-	if (!node) return undefined;
-
-	switch (node.kind) {
-		case "ReferenceNode":
-			return extractColumnName((node as any).column);
-		case "ColumnNode":
-			return (node as any).column?.name;
-		default:
-			return undefined;
-	}
-}
-
-function extractValues(node: OperationNode | undefined): unknown[] {
-	if (!node) return [];
-
-	switch (node.kind) {
-		case "ValueNode":
-			return [(node as any).value];
-		case "PrimitiveValueListNode":
-			return [...((node as any).values ?? [])];
-		case "ValueListNode":
-			return ((node as any).values ?? []).flatMap((valueNode: OperationNode) =>
-				extractValues(valueNode)
-			);
-		case "RawNode": {
-			const parameters = (node as any).parameters ?? [];
-			return parameters.flatMap((param: OperationNode) => extractValues(param));
-		}
-		default:
-			return [];
 	}
 }

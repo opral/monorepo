@@ -7,7 +7,7 @@ import type { LixDatabaseSchema } from "../../database/schema.js";
 import { markStateCacheAsStale } from "../../state/cache/mark-state-cache-as-stale.js";
 import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
 import { clearStateCache } from "../../state/cache/clear-state-cache.js";
-import { cachePopulator } from "./cache-populator.js";
+import { createCachePopulator } from "./cache-populator.js";
 
 test("warms the state cache when the stale flag is set", async () => {
 	const lix = await openLix({});
@@ -18,7 +18,7 @@ test("warms the state cache when the stale flag is set", async () => {
 
 	const testDb = new Kysely<LixDatabaseSchema>({
 		dialect: createEngineDialect({ database: engine.sqlite }),
-		plugins: [...createDefaultPlugins(), cachePopulator({ engine })],
+		plugins: [...createDefaultPlugins(), createCachePopulator({ engine })],
 	});
 
 	await testDb
@@ -43,7 +43,7 @@ test("state query repopulates the physical cache table", async () => {
 
 	const testDb = new Kysely<LixDatabaseSchema>({
 		dialect: createEngineDialect({ database: engine.sqlite }),
-		plugins: [...createDefaultPlugins(), cachePopulator({ engine })],
+		plugins: [...createDefaultPlugins(), createCachePopulator({ engine })],
 	});
 
 	const { rows: before } = await sql<{ count: number }>`
@@ -83,7 +83,7 @@ test("skips repopulation when cache is already fresh", async () => {
 
 	const testDb = new Kysely<LixDatabaseSchema>({
 		dialect: createEngineDialect({ database: engine.sqlite }),
-		plugins: [...createDefaultPlugins(), cachePopulator({ engine })],
+		plugins: [...createDefaultPlugins(), createCachePopulator({ engine })],
 	});
 
 	const { rows: before } = await sql<{ count: number }>`
