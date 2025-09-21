@@ -5,7 +5,7 @@ import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
 

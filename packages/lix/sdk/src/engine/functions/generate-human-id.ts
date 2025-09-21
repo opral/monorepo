@@ -1,6 +1,6 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { humanId as _human } from "human-id";
 // Deterministic names for anonymous accounts

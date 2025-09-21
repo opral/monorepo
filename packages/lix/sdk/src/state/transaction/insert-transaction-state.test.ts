@@ -4,7 +4,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({

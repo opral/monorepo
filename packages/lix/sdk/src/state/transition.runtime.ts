@@ -10,8 +10,8 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema.js";
 import type { LixEngine } from "../engine/boot.js";
-import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
-import { getTimestampSync } from "../engine/deterministic/timestamp.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
+import { getTimestampSync } from "../engine/functions/timestamp.js";
 import { updateStateCache } from "./cache/update-state-cache.js";
 
 /**

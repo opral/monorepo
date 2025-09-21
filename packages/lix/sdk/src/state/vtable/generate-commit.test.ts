@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { generateCommit } from "./generate-commit.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
-import { uuidV7 } from "../../engine/deterministic/uuid-v7.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
+import { uuidV7 } from "../../engine/functions/uuid-v7.js";
 import type { MaterializedState } from "./generate-commit.js";
 
 function groupBySchema(rows: any[]): Map<string, any[]> {

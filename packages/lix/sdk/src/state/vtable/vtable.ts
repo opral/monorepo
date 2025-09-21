@@ -6,7 +6,7 @@ import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 

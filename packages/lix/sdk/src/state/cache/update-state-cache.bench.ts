@@ -1,7 +1,7 @@
 import { bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 
 /**

@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { commitIsDescendantOf } from "./commit-is-descendant-of.js";
 import { commitIsAncestorOf } from "./commit-is-ancestor-of.js";
-import { uuidV7 } from "../engine/deterministic/uuid-v7.js";
+import { uuidV7 } from "../engine/functions/uuid-v7.js";
 
 // commits are authoritative: insert directly into commit_all (no pre-created change sets).
 

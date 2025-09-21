@@ -3,7 +3,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 import type { LixEngine } from "../engine/boot.js";
 
 /**

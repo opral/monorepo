@@ -3,7 +3,7 @@ import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
-import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
+import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 
 type NewTransactionStateRow = Omit<
 	NewStateAllRow,

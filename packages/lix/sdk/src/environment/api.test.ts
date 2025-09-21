@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest";
 import type {
 	EnvironmentActorHandle,
 	LixEnvironment,
-	LixEnvironmentResult,
 	SpawnActorOptions,
 } from "./api.js";
 
@@ -33,7 +32,7 @@ class StubActorEnvironment implements LixEnvironment {
 
 	async call(name: string, payload?: unknown): Promise<unknown> {
 		if (name === "lix_exec_sync") {
-			return { rows: [] } satisfies LixEnvironmentResult;
+			return { rows: [] } satisfies { rows?: any[] };
 		}
 		return undefined;
 	}

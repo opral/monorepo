@@ -2,7 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 
 const ROW_NUM = 1000;
 

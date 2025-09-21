@@ -3,7 +3,7 @@ import {
 	type SqliteWasmDatabase,
 } from "../database/sqlite/index.js";
 import { boot } from "../engine/boot.js";
-import type { Call } from "../engine/router.js";
+import type { Call } from "../engine/functions/router.js";
 import type { BootArgs, LixEngine } from "../engine/boot.js";
 
 /**

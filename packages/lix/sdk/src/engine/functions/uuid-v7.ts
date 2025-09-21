@@ -1,7 +1,7 @@
 import { v7 } from "uuid";
 import { nextSequenceNumberSync } from "./sequence.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
-import type { Call } from "../router.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
+import type { Call } from "./router.js";
 import type { LixEngine } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";

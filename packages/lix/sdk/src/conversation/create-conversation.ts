@@ -3,7 +3,7 @@ import type { LixConversation, LixConversationMessage } from "./schema.js";
 import type { NewState, StateAll } from "../entity-views/types.js";
 import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
 import { attachConversation } from "../entity/conversation/attach-conversation.js";
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 
 /**
  * Starts a new conversation.

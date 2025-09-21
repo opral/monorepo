@@ -1,4 +1,4 @@
-import { nanoId } from "../engine/deterministic/index.js";
+import { nanoId } from "../engine/functions/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLabel } from "./schema.js";
 

@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { NewState, State } from "../entity-views/types.js";
 import type { LixConversationMessage } from "./schema.js";
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 
 /**
  * Adds a message to an existing conversation.

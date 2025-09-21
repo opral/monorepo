@@ -7,7 +7,7 @@ import { applyFilesystemSchema } from "../filesystem/schema.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { switchAccount } from "../account/switch-account.js";
-import { createEngineRouter, type Call } from "./router.js";
+import { createEngineRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 

@@ -1,6 +1,6 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";

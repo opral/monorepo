@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { createConversationMessage } from "./create-conversation-message.js";
 import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 
 test("creates a conversation message", async () => {
 	const lix = await openLix({});

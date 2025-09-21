@@ -4,7 +4,7 @@ import type {
 } from "../../schema-definition/definition.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { normalizeDirectoryPath, normalizePathSegment } from "../path.js";
-import { nanoIdSync } from "../../engine/deterministic/nano-id.js";
+import { nanoIdSync } from "../../engine/functions/nano-id.js";
 import {
 	getActiveVersionId,
 	readDirectoryByPath,

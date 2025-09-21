@@ -1,4 +1,4 @@
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";

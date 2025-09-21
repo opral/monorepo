@@ -1,6 +1,6 @@
 import type { LixEngine } from "../../engine/boot.js";
 import { LixKeyValueSchema } from "../../key-value/schema.js";
-import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { setStaleStateCacheMemo } from "./is-stale-state-cache.js";
 

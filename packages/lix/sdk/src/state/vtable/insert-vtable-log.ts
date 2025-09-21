@@ -1,6 +1,6 @@
 import { LixLogSchema, type LixLog } from "../../log/schema.js";
-import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
-import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
+import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import type { JSONType } from "../../schema-definition/json-type.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";

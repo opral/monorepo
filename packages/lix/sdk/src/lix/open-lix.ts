@@ -12,7 +12,7 @@ import type { EngineEvent, LixEngine } from "../engine/boot.js";
 import type { LixEnvironment } from "../environment/api.js";
 import { createEnvironmentDialect } from "../database/sqlite/environment-dialect.js";
 import { createDefaultPlugins } from "../database/kysely/index.js";
-import { random } from "../engine/deterministic/random.js";
+import { random } from "../engine/functions/random.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 
 export type Lix = {

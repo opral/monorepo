@@ -5,10 +5,7 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
-import type {
-	LixEnvironment,
-	LixEnvironmentResult,
-} from "../../environment/api.js";
+import type { LixEnvironment } from "../../environment/api.js";
 
 type LixEnvironmentDriverConfig = {
 	backend: LixEnvironment;
@@ -25,12 +22,12 @@ class EnvironmentConnection implements DatabaseConnection {
 
 	async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
 		const { sql, parameters } = compiledQuery;
-		let res: LixEnvironmentResult | undefined;
+		let res: any;
 		try {
-			res = (await this.#backend.call("lix_exec_sync", {
+			res = await this.#backend.call("lix_exec_sync", {
 				sql,
 				params: (parameters ?? []) as unknown[],
-			})) as LixEnvironmentResult;
+			});
 		} catch (err: any) {
 			const previewParam = (v: unknown) => {
 				try {

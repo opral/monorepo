@@ -5,7 +5,7 @@ import type {
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/deterministic/nano-id.js";
+import { nanoIdSync } from "../engine/functions/nano-id.js";
 
 export function applyConversationDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;

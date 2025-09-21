@@ -21,16 +21,16 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/deterministic/nano-id.js";
+import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
 import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
 import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
-import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
-import { humanIdSync } from "../engine/deterministic/generate-human-id.js";
-import { getTimestampSync } from "../engine/deterministic/timestamp.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
+import { humanIdSync } from "../engine/functions/generate-human-id.js";
+import { getTimestampSync } from "../engine/functions/timestamp.js";
 
 /**
  * Configuration for JSON columns in database views.

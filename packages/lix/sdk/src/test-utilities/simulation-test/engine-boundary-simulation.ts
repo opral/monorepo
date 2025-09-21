@@ -29,7 +29,6 @@ export const engineBoundarySimulation: SimulationTestDef = {
 // Inline, isomorphic environment wrapper that hides the engine from openLix()
 class EngineBoundaryEnvironment implements LixEnvironment {
 	private inner: InMemoryEnvironment;
-	private eventHandler: ((ev: any) => void) | undefined;
 
 	constructor() {
 		this.inner = new InMemoryEnvironment();
@@ -38,7 +37,6 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 	async open(
 		initOpts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: import("../../engine/boot.js").LixEngine }> {
-		this.eventHandler = initOpts.emit;
 		await this.inner.open(initOpts);
 		return {};
 	}

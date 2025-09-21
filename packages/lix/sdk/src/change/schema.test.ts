@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { type Kysely } from "kysely";
 import { insertTransactionState } from "../state/transaction/insert-transaction-state.js";
-import { getTimestampSync } from "../engine/deterministic/timestamp.js";
+import { getTimestampSync } from "../engine/functions/timestamp.js";
 
 test("insert on the change view", async () => {
 	const lix = await openLix({});
@@ -381,7 +381,7 @@ test("untracked changes in transaction don't show up in change view after commit
 	insertTransactionState({
 		engine: lix.engine!,
 		timestamp: await (
-			await import("../engine/deterministic/timestamp.js")
+			await import("../engine/functions/timestamp.js")
 		).getTimestamp({ lix }),
 		data: [
 			{

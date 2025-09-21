@@ -1,4 +1,4 @@
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 import type { State } from "../entity-views/types.js";
 import type { JSONType } from "../schema-definition/json-type.js";
 import type { Lix } from "../lix/open-lix.js";

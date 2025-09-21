@@ -6,10 +6,10 @@ import {
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { type LixVersion } from "../../version/schema.js";
-import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
-import { commitSequenceNumberSync } from "../../engine/deterministic/sequence.js";
+import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
+import { commitSequenceNumberSync } from "../../engine/functions/sequence.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
-import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { updateStateCache } from "../cache/update-state-cache.js";

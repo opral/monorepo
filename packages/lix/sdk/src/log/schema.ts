@@ -5,7 +5,7 @@ import type {
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 
 export function applyLogDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
