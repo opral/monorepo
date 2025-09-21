@@ -11,6 +11,7 @@ import {
 	composeDirectoryPath,
 	readDirectoryByPath,
 } from "../directory/ensure-directories.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export type FileDescriptorFields = {
 	directoryId: string | null;
@@ -21,7 +22,7 @@ export type FileDescriptorFields = {
 };
 
 export function deriveDescriptorFieldsFromPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	path: string;
 	metadata: unknown;
@@ -53,7 +54,7 @@ export function deriveDescriptorFieldsFromPath(args: {
 }
 
 export function readFileDescriptorSnapshot(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	fileId: string;
 }):
@@ -68,7 +69,7 @@ export function readFileDescriptorSnapshot(args: {
 	| undefined {
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_file_descriptor")
 			.where("version_id", "=", args.versionId)
@@ -102,7 +103,7 @@ export function readFileDescriptorSnapshot(args: {
 }
 
 export function composeFilePathFromDescriptor(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	fileId: string;
 }): string | undefined {
@@ -135,14 +136,14 @@ export function composeFileNameFromFields(args: {
 }
 
 function readDirectoryHistoryLeafAtDepth(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	directoryId: string;
 	rootCommitId: string;
 	depth: number;
 }): { id: string; parent_id: string | null; name: string } | undefined {
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_history as sh1")
 			.select(["sh1.snapshot_content"])
 			.where("sh1.schema_key", "=", "lix_directory_descriptor")
@@ -176,7 +177,7 @@ function readDirectoryHistoryLeafAtDepth(args: {
 }
 
 export function composeDirectoryPathAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	directoryId: string | null;
 	rootCommitId: string;
 	depth: number;
@@ -213,7 +214,7 @@ export function composeDirectoryPathAtCommit(args: {
 }
 
 export function composeFilePathAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	directoryId: string | null;
 	name: string;
 	extension: string | null;
@@ -240,7 +241,7 @@ export function composeFilePathAtCommit(args: {
 }
 
 export function readFileDescriptorAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	fileId: string;
 	rootCommitId: string;
 	depth: number;
@@ -256,7 +257,7 @@ export function readFileDescriptorAtCommit(args: {
 	| undefined {
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_history")
 			.where("schema_key", "=", "lix_file_descriptor")
 			.where("entity_id", "=", args.fileId)
@@ -290,7 +291,7 @@ export function readFileDescriptorAtCommit(args: {
 }
 
 export function ensureCompleteDescriptor(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;

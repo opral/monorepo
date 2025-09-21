@@ -19,7 +19,7 @@ export {
  * Apply commit database schema by creating entity views for commits and commit edges.
  */
 export function applyCommitDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	const { engine } = args;
 	// Create commit views with UUID v7 as default ID

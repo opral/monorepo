@@ -1,15 +1,10 @@
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
 import { nanoIdSync } from "../engine/functions/nano-id.js";
-import {
-	LixAccountSchema,
-	type LixAccount,
-	LixActiveAccountSchema,
-	type LixActiveAccount,
-} from "./schema-definition.js";
+import { LixAccountSchema } from "./schema-definition.js";
 
 export function applyAccountDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	const { engine } = args;
 	// Create account view using the generalized entity view builder

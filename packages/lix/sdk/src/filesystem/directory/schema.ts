@@ -10,10 +10,8 @@ import {
 	computeDirectoryPath,
 } from "./ensure-directories.js";
 import { executeSync } from "../../database/execute-sync.js";
-import {
-	LixDirectoryDescriptorSchema,
-	type LixDirectoryDescriptor,
-} from "./schema-definition.js";
+import { LixDirectoryDescriptorSchema } from "./schema-definition.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Installs directory descriptors into the database via generated views/triggers.
@@ -22,7 +20,7 @@ import {
  * applyDirectoryDatabaseSchema({ engine });
  */
 export function applyDirectoryDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	const { engine } = args;
 	const schemaKey = LixDirectoryDescriptorSchema["x-lix-key"];
@@ -83,7 +81,7 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		executeSync({
 			engine,
-			query: engine.db
+			query: internalQueryBuilder
 				.deleteFrom("state_all")
 				.where("entity_id", "=", id)
 				.where("schema_key", "=", schemaKey)
@@ -92,7 +90,7 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		executeSync({
 			engine,
-			query: engine.db.insertInto("state_all").values({
+			query: internalQueryBuilder.insertInto("state_all").values({
 				entity_id: id,
 				schema_key: schemaKey,
 				file_id: fileId,
@@ -322,7 +320,7 @@ export function applyDirectoryDatabaseSchema(args: {
 }
 
 function computeUpsertInputs(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	versionId: string;
 	parentIdArg: unknown;
 	nameArg: unknown;
@@ -422,7 +420,7 @@ function computeUpsertInputs(args: {
 }
 
 function assertNoDirectoryCycle(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	directoryId: string;
 	newParentId: string | null;
@@ -445,7 +443,7 @@ function assertNoDirectoryCycle(args: {
 		}
 		const rows = executeSync({
 			engine: args.engine,
-			query: args.engine.db
+			query: internalQueryBuilder
 				.selectFrom("state_all")
 				.where("schema_key", "=", "lix_directory_descriptor")
 				.where("version_id", "=", args.versionId)

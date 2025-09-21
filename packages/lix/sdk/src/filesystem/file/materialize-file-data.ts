@@ -4,9 +4,10 @@ import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { ensureCompleteDescriptor } from "./descriptor-utils.js";
 import { matchesGlob } from "../util/glob.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export function materializeFileData(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	versionId: string;
@@ -38,7 +39,7 @@ export function materializeFileData(args: {
 		// Get plugin changes from state table
 		const changes = executeSync({
 			engine: args.engine,
-			query: args.engine.db
+			query: internalQueryBuilder
 				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", descriptor.id)
@@ -74,7 +75,7 @@ export function materializeFileData(args: {
 	// If no specific plugin matched, use the fallback plugin
 	const changes = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", descriptor.id)

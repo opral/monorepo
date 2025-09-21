@@ -28,7 +28,7 @@ export type Call = (
 ) => Promise<unknown>;
 
 export function createCallRouter(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "db" | "execSync" | "call">;
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "execSync" | "call">;
 }): {
 	call: Call;
 } {
@@ -101,11 +101,7 @@ export function createCallRouter(args: {
 				err.code = "LIX_RPC_UNKNOWN_ROUTE";
 				throw err;
 			}
-			try {
-				return Promise.resolve(handler(payload));
-			} catch (e) {
-				throw e;
-			}
+			return Promise.resolve(handler(payload));
 		},
 	};
 }

@@ -5,13 +5,10 @@ import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
-	type LixChangeSet,
-	type LixChangeSetElement,
-	type LixChangeSetLabel,
 } from "./schema-definition.js";
 
 export function applyChangeSetDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	const { engine } = args;
 	// Create change_set view using the generalized entity view builder

@@ -4,12 +4,10 @@ import { nanoIdSync } from "../engine/functions/nano-id.js";
 import {
 	LixConversationSchema,
 	LixConversationMessageSchema,
-	type LixConversation,
-	type LixConversationMessage,
 } from "./schema-definition.js";
 
 export function applyConversationDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	// Create both primary and _all views for conversation with default ID generation
 	createEntityViewsIfNotExists({

@@ -8,11 +8,6 @@ import { switchAccount } from "../account/switch-account.js";
 import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
-import type { Kysely } from "kysely";
-import type {
-	LixDatabaseSchema,
-	LixInternalDatabaseSchema,
-} from "../database/schema.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -42,7 +37,6 @@ export type BootEnv = {
 // Engine context bound to a live SQLite connection. Internal only.
 export type LixEngine = {
 	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixDatabaseSchema>;
 	hooks: LixHooks;
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];

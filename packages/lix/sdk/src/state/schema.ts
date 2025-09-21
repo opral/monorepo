@@ -9,7 +9,7 @@ import { applyStateView } from "./views/state.js";
 import { applyStateVTable } from "./vtable/index.js";
 
 export function applyStateDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): void {
 	const { engine } = args;
 	applyMaterializeStateSchema({ engine });

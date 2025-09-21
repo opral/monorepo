@@ -7,9 +7,10 @@ import {
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
 import { matchesGlob } from "../util/glob.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export function materializeFileDataAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	rootCommitId: string;
@@ -72,7 +73,6 @@ export function materializeFileDataAtCommit(args: {
 		const changes = executeSync({
 			engine: args.engine,
 			query: selectFileChanges({
-				engine: args.engine,
 				pluginKey: plugin.key,
 				fileId: descriptor.id,
 				rootCommitId: args.rootCommitId,
@@ -101,7 +101,6 @@ export function materializeFileDataAtCommit(args: {
 	const changes = executeSync({
 		engine: args.engine,
 		query: selectFileChanges({
-			engine: args.engine,
 			pluginKey: lixUnknownFileFallbackPlugin.key,
 			fileId: descriptor.id,
 			rootCommitId: args.rootCommitId,
@@ -133,13 +132,12 @@ export function materializeFileDataAtCommit(args: {
 }
 
 function selectFileChanges(args: {
-	engine: Pick<LixEngine, "db">;
 	pluginKey: string;
 	fileId: string;
 	rootCommitId: string;
 	depth: number;
 }) {
-	return args.engine.db
+	return internalQueryBuilder
 		.selectFrom("state_history as sh1")
 		.where("sh1.plugin_key", "=", args.pluginKey)
 		.where("sh1.file_id", "=", args.fileId)

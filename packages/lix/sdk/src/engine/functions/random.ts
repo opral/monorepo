@@ -193,7 +193,7 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;

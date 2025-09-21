@@ -1,5 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { LixEngine } from "../engine/boot.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 import type { JSONType } from "../schema-definition/json-type.js";
 
 const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
@@ -78,7 +79,7 @@ export function shouldLog(
  * @returns A promise that resolves with the created log entry, or undefined if filtered out.
  */
 export function createLixOwnLogSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	message?: string | null;
 	payload?: JSONType;
 	level: string;
@@ -86,7 +87,7 @@ export function createLixOwnLogSync(args: {
 }): void {
 	const logLevels = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_log_levels"),
@@ -100,7 +101,7 @@ export function createLixOwnLogSync(args: {
 	// Insert the log
 	executeSync({
 		engine: args.engine,
-		query: args.engine.db.insertInto("log").values({
+		query: internalQueryBuilder.insertInto("log").values({
 			key: args.key,
 			message: args.message ?? null,
 			payload: args.payload ?? null,
@@ -110,7 +111,7 @@ export function createLixOwnLogSync(args: {
 }
 
 export async function createLixOwnLog(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	message?: string | null;
 	payload?: JSONType;
 	level: string;

@@ -14,6 +14,7 @@ import {
 import { matchesGlob } from "../util/glob.js";
 import { normalizeFilePath } from "../path.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 type FileMutationInput = {
 	id: string;
@@ -24,14 +25,14 @@ type FileMutationInput = {
 };
 
 export function handleFileInsert(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "getAllPluginsSync">;
 	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
 	const [shouldSkip] = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
 			.select("value"),
@@ -88,7 +89,7 @@ export function handleFileInsert(args: {
 	// Insert the file metadata into state table
 	executeSync({
 		engine: args.engine,
-		query: args.engine.db.insertInto("state_all").values({
+		query: internalQueryBuilder.insertInto("state_all").values({
 			entity_id: args.file.id,
 			schema_key: LixFileDescriptorSchema["x-lix-key"],
 			file_id: args.file.id,
@@ -158,7 +159,7 @@ export function handleFileInsert(args: {
 				storeDetectedChangeSchema({
 					engine: {
 						sqlite: args.engine.sqlite as any,
-						db: args.engine.db as any,
+						db: internalQueryBuilder as any,
 					} as any,
 					schema: change.schema,
 					untracked: args.untracked || false,
@@ -169,7 +170,7 @@ export function handleFileInsert(args: {
 			for (const change of detectedChanges) {
 				executeSync({
 					engine: args.engine,
-					query: args.engine.db.insertInto("state_all").values({
+					query: internalQueryBuilder.insertInto("state_all").values({
 						entity_id: change.entity_id,
 						schema_key: change.schema["x-lix-key"],
 						file_id: args.file.id,
@@ -210,7 +211,7 @@ export function handleFileInsert(args: {
 					storeDetectedChangeSchema({
 						engine: {
 							sqlite: args.engine.sqlite as any,
-							db: args.engine.db as any,
+							db: internalQueryBuilder as any,
 						} as any,
 						schema: change.schema,
 					});
@@ -219,7 +220,7 @@ export function handleFileInsert(args: {
 				for (const change of detectedChanges) {
 					executeSync({
 						engine: args.engine,
-						query: args.engine.db.insertInto("state_all").values({
+						query: internalQueryBuilder.insertInto("state_all").values({
 							entity_id: change.entity_id,
 							schema_key: change.schema["x-lix-key"],
 							file_id: args.file.id,
@@ -265,14 +266,14 @@ export function handleFileInsert(args: {
 }
 
 export function handleFileUpdate(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "getAllPluginsSync">;
 	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
 	const [shouldSkip] = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
 			.select("value"),
@@ -329,7 +330,7 @@ export function handleFileUpdate(args: {
 	// Update the file metadata in state table FIRST
 	executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.updateTable("state_all")
 			.set({
 				snapshot_content: {
@@ -351,7 +352,7 @@ export function handleFileUpdate(args: {
 	// Get current file data for comparison
 	const currentFile = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("file_all")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
@@ -409,7 +410,7 @@ export function handleFileUpdate(args: {
 					storeDetectedChangeSchema({
 						engine: {
 							sqlite: args.engine.sqlite as any,
-							db: args.engine.db as any,
+							db: internalQueryBuilder as any,
 						} as any,
 						schema: change.schema,
 						untracked: args.untracked || false,
@@ -422,7 +423,7 @@ export function handleFileUpdate(args: {
 						// Handle deletion: remove the entity from state table
 						executeSync({
 							engine: args.engine,
-							query: args.engine.db
+							query: internalQueryBuilder
 								.deleteFrom("state_all")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
@@ -433,7 +434,7 @@ export function handleFileUpdate(args: {
 						// Handle update/insert: upsert the entity in state table
 						executeSync({
 							engine: args.engine,
-							query: args.engine.db.insertInto("state_all").values({
+							query: internalQueryBuilder.insertInto("state_all").values({
 								entity_id: change.entity_id,
 								schema_key: change.schema["x-lix-key"],
 								file_id: args.file.id,
@@ -476,7 +477,7 @@ export function handleFileUpdate(args: {
 						storeDetectedChangeSchema({
 							engine: {
 								sqlite: args.engine.sqlite as any,
-								db: args.engine.db as any,
+								db: internalQueryBuilder as any,
 							} as any,
 							schema: change.schema,
 							untracked: args.untracked || false,
@@ -488,7 +489,7 @@ export function handleFileUpdate(args: {
 							// Handle deletion: remove the entity from state table
 							executeSync({
 								engine: args.engine,
-								query: args.engine.db
+								query: internalQueryBuilder
 									.deleteFrom("state_all")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
@@ -499,7 +500,7 @@ export function handleFileUpdate(args: {
 							// Handle update/insert: upsert the entity in state table
 							executeSync({
 								engine: args.engine,
-								query: args.engine.db.insertInto("state_all").values({
+								query: internalQueryBuilder.insertInto("state_all").values({
 									entity_id: change.entity_id,
 									schema_key: change.schema["x-lix-key"],
 									file_id: args.file.id,

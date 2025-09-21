@@ -1,6 +1,7 @@
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixEngine } from "../engine/boot.js";
 import { executeSync } from "../database/execute-sync.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 /**
  * Build synchronous, Kysely-compatible SELECT queries for plugins.
@@ -86,7 +87,7 @@ export type QuerySyncFunction = <
  * expect(Array.isArray(changes)).toBe(true)
  */
 export function createQuerySync(args: {
-	engine: Pick<LixEngine, "db" | "sqlite">;
+	engine: Pick<LixEngine, "sqlite">;
 }): QuerySyncFunction {
 	/**
 	 * Starts a SELECT from the given table and returns a Kysely builder
@@ -95,7 +96,7 @@ export function createQuerySync(args: {
 	function querySync<Table extends keyof LixDatabaseSchema & string>(
 		table: Table
 	): any {
-		const base = args.engine.db.selectFrom(table) as any;
+		const base = internalQueryBuilder.selectFrom(table) as any;
 		return wrapBuilder(base, args.engine);
 	}
 
