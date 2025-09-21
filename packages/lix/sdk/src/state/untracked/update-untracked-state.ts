@@ -1,8 +1,8 @@
-import { sql, type Kysely } from "kysely";
+import { sql } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixChangeRaw } from "../../change/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Change data for untracked state updates with optional ID.
@@ -35,14 +35,12 @@ export type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * @param args.version_id - Version ID to update
  */
 export function updateUntrackedState(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	changes: UntrackedChangeData[];
 }): void {
 	const engine = args.engine;
 	const changes = args.changes;
 	if (!changes || changes.length === 0) return;
-
-	const intDb = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Split into deletions and non-deletions
 	const deletions = changes.filter((c) => c.snapshot_content == null);
@@ -71,7 +69,7 @@ export function updateUntrackedState(args: {
 				fil.add(c.file_id);
 			}
 
-			let sel = intDb
+			let sel = internalQueryBuilder
 				.selectFrom("internal_state_all_untracked")
 				.where("version_id", "=", versionId);
 			const entArr = Array.from(ent);
@@ -95,7 +93,7 @@ export function updateUntrackedState(args: {
 				if (existingSet.has(key)) {
 					executeSync({
 						engine: engine,
-						query: intDb
+						query: internalQueryBuilder
 							.deleteFrom("internal_state_all_untracked")
 							.where("entity_id", "=", c.entity_id)
 							.where("schema_key", "=", c.schema_key)
@@ -127,7 +125,7 @@ export function updateUntrackedState(args: {
 			if (tombstoneValues.length > 0) {
 				executeSync({
 					engine: engine,
-					query: intDb
+					query: internalQueryBuilder
 						.insertInto("internal_state_all_untracked")
 						.values(tombstoneValues)
 						.onConflict((oc) =>
@@ -152,7 +150,7 @@ export function updateUntrackedState(args: {
 			const content: any = c.snapshot_content as any;
 			executeSync({
 				engine: engine,
-				query: intDb
+				query: internalQueryBuilder
 					.insertInto("internal_state_all_untracked")
 					.values({
 						entity_id: c.entity_id,

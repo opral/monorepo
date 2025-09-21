@@ -1,8 +1,8 @@
 import type { LixEngine } from "../boot.js";
 import { executeSync } from "../../database/execute-sync.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { sql } from "kysely";
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
 
@@ -23,7 +23,7 @@ const hookListenersRegistered = new WeakSet<object>();
  * @returns true if deterministic mode is enabled, false otherwise
  */
 export function isDeterministicModeSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): boolean {
 	const engine = args.engine;
 	// Register hook listener for cache invalidation (only once per hooks instance)
@@ -55,7 +55,7 @@ export function isDeterministicModeSync(args: {
 	// Need to query from underlying state to avoid recursion
 	const [row] = executeSync({
 		engine: engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")

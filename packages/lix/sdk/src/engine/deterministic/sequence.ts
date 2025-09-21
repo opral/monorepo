@@ -6,8 +6,8 @@ import type { Lix } from "../../lix/open-lix.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { sql } from "kysely";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -59,7 +59,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
 export function nextSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): number {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -76,7 +76,7 @@ export function nextSequenceNumberSync(args: {
 		const [row] = executeSync({
 			engine: engine,
 			// Use internal_resolved_state_all to avoid virtual table recursion
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_sequence_number")
 				.where("schema_key", "=", "lix_key_value")
@@ -129,7 +129,7 @@ export async function nextSequenceNumber(args: { lix: Lix }): Promise<number> {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;

@@ -3,6 +3,7 @@ import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { createEngineDialect } from "./sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "./kysely/plugins.js";
+import { createQueryPreprocessorPlugin } from "../engine/query-preprocessor/plugin.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -66,7 +67,12 @@ export function initDb(args: {
 
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createEngineDialect({ database: args.sqlite }),
-		plugins: createDefaultPlugins(),
+		plugins: [
+			...createDefaultPlugins(),
+			createQueryPreprocessorPlugin({
+				engine: { sqlite: args.sqlite, hooks: args.hooks },
+			}),
+		],
 	});
 
 	const engine: LixEngine = {

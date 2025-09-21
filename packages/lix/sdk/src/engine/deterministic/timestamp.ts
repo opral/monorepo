@@ -2,8 +2,8 @@ import type { LixEngine } from "../boot.js";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";
 import { executeSync } from "../../database/execute-sync.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { sql } from "kysely";
+import { internalQueryBuilder } from "../internal-query-builder.js";
 
 /**
  * Sync variant of {@link getTimestamp}. See {@link getTimestamp} for behavior and examples.
@@ -15,7 +15,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
  * @see getTimestamp
  */
 export function getTimestampSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -23,7 +23,7 @@ export function getTimestampSync(args: {
 		// Check if timestamps are disabled in the config
 		const [config] = executeSync({
 			engine: engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")

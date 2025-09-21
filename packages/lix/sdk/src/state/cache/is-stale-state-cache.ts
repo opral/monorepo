@@ -1,8 +1,8 @@
-import { sql, type Kysely } from "kysely";
+import { sql } from "kysely";
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
 import { executeSync } from "../../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 const CACHE_SCHEMA_KEY = "lix_key_value";
@@ -31,10 +31,10 @@ export function invalidateStaleStateCacheMemo(args: {
 	staleStateCache.delete(sqlite);
 }
 
-function readStaleFlag(engine: Pick<LixEngine, "sqlite" | "db">): boolean {
+function readStaleFlag(engine: Pick<LixEngine, "sqlite">): boolean {
 	const res = executeSync({
 		engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", CACHE_SCHEMA_KEY)
@@ -60,7 +60,7 @@ function readStaleFlag(engine: Pick<LixEngine, "sqlite" | "db">): boolean {
  * const stale = isStaleStateCache({ engine: lix.engine! });
  */
 export function isStaleStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): boolean {
 	const { engine } = args;
 	const sqlite = engine.sqlite as SqliteWasmDatabase;

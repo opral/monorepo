@@ -395,7 +395,7 @@ export function applyStateVTable(
 
 					if (cacheIsStale) {
 						// Populate cache directly with materialized state
-						populateStateCache({ engine: { sqlite, db: db as any } as any });
+						populateStateCache({ engine: { sqlite } });
 
 						// Do not log here: xFilter can be invoked during SELECT-only paths
 						// and should avoid writing to the transaction state/logs.
@@ -404,7 +404,7 @@ export function applyStateVTable(
 						isUpdatingCacheState = true;
 						try {
 							markStateCacheAsFresh({
-								engine: { sqlite, db: db as any, hooks } as any,
+								engine: { sqlite, hooks },
 							});
 						} finally {
 							isUpdatingCacheState = false;
@@ -561,7 +561,7 @@ export function applyStateVTable(
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
 					const _timestamp = getTimestampSync({
-						engine: { sqlite, db: db as any, hooks },
+						engine: { sqlite, hooks },
 					});
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);

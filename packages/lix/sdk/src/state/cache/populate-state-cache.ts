@@ -18,7 +18,7 @@ export interface PopulateStateCacheV2Options {
  * @param options - Optional filters for selective population
  */
 export function populateStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	options?: PopulateStateCacheV2Options;
 }): void {
 	const { sqlite } = args.engine;
