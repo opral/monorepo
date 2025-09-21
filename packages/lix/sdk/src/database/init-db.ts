@@ -3,7 +3,7 @@ import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { createEngineDialect } from "./sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "./kysely/plugins.js";
-import { cachePopulator } from "../engine/query-processor/cache-populator.js";
+import { createCachePopulator } from "../engine/query-processor/cache-populator.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -69,7 +69,7 @@ export function initDb(args: {
 		dialect: createEngineDialect({ database: args.sqlite }),
 		plugins: [
 			...createDefaultPlugins(),
-			cachePopulator({
+			createCachePopulator({
 				engine: { sqlite: args.sqlite, hooks: args.hooks },
 			}),
 		],
