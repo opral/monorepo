@@ -2913,8 +2913,8 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       kysely:
-        specifier: ^0.27.4
-        version: 0.27.6
+        specifier: ^0.28.7
+        version: 0.28.7
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -15644,6 +15644,10 @@ packages:
   kysely@0.27.6:
     resolution: {integrity: sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==}
     engines: {node: '>=14.0.0'}
+
+  kysely@0.28.7:
+    resolution: {integrity: sha512-u/cAuTL4DRIiO2/g4vNGRgklEKNIj5Q3CG7RoUB5DV5SfEC2hMvPxKi0GWPmnzwL2ryIeud2VTcEEmqzTzEPNw==}
+    engines: {node: '>=20.0.0'}
 
   langium@3.3.1:
     resolution: {integrity: sha512-QJv/h939gDpvT+9SiLVlY7tZC3xB2qK57v0J04Sh9wpMb6MP1q8gB21L3WIo8T5P1MSMg3Ep14L7KkDCFG3y4w==}
@@ -37630,6 +37634,8 @@ snapshots:
   ky@0.33.3: {}
 
   kysely@0.27.6: {}
+
+  kysely@0.28.7: {}
 
   langium@3.3.1:
     dependencies:
