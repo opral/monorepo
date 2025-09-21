@@ -45,7 +45,7 @@ type Res =
 
 let sqlite3Module: any;
 let poolUtil: any;
-let db: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
+let sqlite: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
 let currentOpfsPath: string | undefined;
 let engineCall: Call | null = null;
 
@@ -128,8 +128,8 @@ async function handle(req: Req): Promise<Res> {
 
 				// Open DB and boot engine
 				const uri = `file:${opfsPath}?vfs=opfs-sahpool`;
-				db = new sqlite3Module.oo1.DB(uri, "c");
-				(db as any).sqlite3 = sqlite3Module;
+				sqlite = new sqlite3Module.oo1.DB(uri, "c");
+				(sqlite as any).sqlite3 = sqlite3Module;
 
 				const bootArgs = (req.payload.bootArgs ?? {
 					providePlugins: [],
@@ -138,7 +138,7 @@ async function handle(req: Req): Promise<Res> {
 
 				const res = await boot({
 					// db is sqlite3.oo1 DB; engine expects sqlite-wasm compatible surface
-					sqlite: db as any,
+					sqlite,
 					emit: (ev) => {
 						(self as any).postMessage({ type: "event", event: ev });
 					},
@@ -176,7 +176,7 @@ async function handle(req: Req): Promise<Res> {
 				(poolUtil as any).importDb(opfsPath, new Uint8Array(req.payload.blob));
 
 				// Creation is import-only. The host is expected to call "open" next.
-				db = undefined;
+				sqlite = undefined;
 				currentOpfsPath = opfsPath;
 				return { id: req.id, ok: true };
 			}
@@ -196,9 +196,9 @@ async function handle(req: Req): Promise<Res> {
 			}
 
 			case "exec": {
-				if (!db) throw new Error("Engine not initialized");
+				if (!sqlite) throw new Error("Engine not initialized");
 				const columnNames: string[] = [];
-				const rows = db.exec({
+				const rows = sqlite.exec({
 					sql: req.payload.sql,
 					bind: (req.payload.params ?? []) as any[],
 					returnValue: "resultRows",
@@ -214,11 +214,11 @@ async function handle(req: Req): Promise<Res> {
 			}
 
 			case "export": {
-				if (!poolUtil || !db) throw new Error("Engine not initialized");
+				if (!poolUtil || !sqlite) throw new Error("Engine not initialized");
 				// Export using poolUtil (must match open path)
 				const rawName = (
-					db?.getFilename?.() ??
-					db?.filename ??
+					sqlite?.getFilename?.() ??
+					sqlite?.filename ??
 					currentOpfsPath ??
 					""
 				).replace(/^file:/, "");
@@ -237,17 +237,17 @@ async function handle(req: Req): Promise<Res> {
 			}
 
 			case "close": {
-				if (db) {
-					db.close();
+				if (sqlite) {
+					sqlite.close();
 				}
 				// Keep VFS installed so the pool persists across sessions in this worker
-				db = undefined as any;
+				sqlite = undefined as any;
 				currentOpfsPath = undefined;
 				return { id: req.id, ok: true };
 			}
 
 			case "call": {
-				if (!db) throw new Error("Environment not initialized");
+				if (!sqlite) throw new Error("Environment not initialized");
 				const { route, payload } = req.payload as any;
 				if (!engineCall) {
 					return {

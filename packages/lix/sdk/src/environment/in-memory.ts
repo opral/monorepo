@@ -22,7 +22,7 @@ import { boot, type LixEngine } from "../engine/boot.js";
  * const out = await env.exec("SELECT a FROM t")
  */
 export class InMemoryEnvironment implements LixEnvironment {
-	private db: SqliteWasmDatabase | undefined;
+	private sqlite: SqliteWasmDatabase | undefined;
 	private callImpl:
 		| ((
 				name: string,
@@ -35,12 +35,12 @@ export class InMemoryEnvironment implements LixEnvironment {
 	async open(
 		opts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: LixEngine }> {
-		if (!this.db) {
-			this.db = await createInMemoryDatabase({ readOnly: false });
+		if (!this.sqlite) {
+			this.sqlite = await createInMemoryDatabase({ readOnly: false });
 		}
 		if (!this.callImpl) {
 			const res = await boot({
-				sqlite: this.db,
+				sqlite: this.sqlite,
 				emit: (ev) => opts.emit(ev),
 				args: opts.boot.args,
 			});
@@ -51,19 +51,19 @@ export class InMemoryEnvironment implements LixEnvironment {
 	}
 
 	async create(opts: Parameters<LixEnvironment["create"]>[0]): Promise<void> {
-		this.db = await createInMemoryDatabase({ readOnly: false });
-		importDatabase({ db: this.db, content: new Uint8Array(opts.blob) });
+		this.sqlite = await createInMemoryDatabase({ readOnly: false });
+		importDatabase({ db: this.sqlite, content: new Uint8Array(opts.blob) });
 		this.callImpl = undefined;
 		this.engine = undefined;
 	}
 
 	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
-		if (!this.db) throw new Error("Engine not initialized");
+		if (!this.sqlite) throw new Error("Engine not initialized");
 
 		const columnNames: string[] = [];
 		let rows: any[];
 		try {
-			rows = this.db.exec({
+			rows = this.sqlite.exec({
 				sql,
 				bind: (params ?? []) as any[],
 				returnValue: "resultRows",
@@ -84,16 +84,16 @@ export class InMemoryEnvironment implements LixEnvironment {
 	// execBatch intentionally omitted; loop over exec() instead.
 
 	async export(): Promise<ArrayBuffer> {
-		if (!this.db) throw new Error("Engine not initialized");
-		const bytes = contentFromDatabase(this.db);
+		if (!this.sqlite) throw new Error("Engine not initialized");
+		const bytes = contentFromDatabase(this.sqlite);
 		const copy = bytes.slice();
 		return copy.buffer;
 	}
 
 	async close(): Promise<void> {
-		if (this.db) {
-			this.db.close();
-			this.db = undefined;
+		if (this.sqlite) {
+			this.sqlite.close();
+			this.sqlite = undefined;
 		}
 		this.callImpl = undefined;
 		this.engine = undefined;
