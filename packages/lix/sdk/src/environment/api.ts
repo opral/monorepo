@@ -1,8 +1,3 @@
-export type LixEnvironmentResult = {
-	/** Rows returned by a SELECT, if any. */
-	rows?: any[];
-};
-
 /**
  * Options for spawning an isolated actor inside an environment.
  *
@@ -86,14 +81,6 @@ export interface LixEnvironment {
 	exists(): Promise<boolean>;
 
 	/**
-	 * Execute a single SQL statement.
-	 *
-	 * @example
-	 * await env.exec("CREATE TABLE t(a)")
-	 */
-	exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult>;
-
-	/**
 	 * Export the SQLite database image as raw bytes.
 	 *
 	 * Returns an ArrayBuffer containing the serialized SQLite file.
@@ -110,7 +97,8 @@ export interface LixEnvironment {
 	 *
 	 * Environments MUST implement this and route the call to the engine that
 	 * booted next to SQLite, regardless of whether the engine runs on the main
-	 * thread or inside a Worker.
+	 * thread or inside a Worker. The SQL driver uses the `"lix_exec_sync"`
+	 * route to execute compiled statements.
 	 */
 	call: import("../engine/router.js").Call;
 

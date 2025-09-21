@@ -1,9 +1,6 @@
 import type { SimulationTestDef } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
-import type {
-	LixEnvironment,
-	LixEnvironmentResult,
-} from "../../environment/api.js";
+import type { LixEnvironment } from "../../environment/api.js";
 import { InMemoryEnvironment } from "../../environment/in-memory.js";
 
 export const engineBoundarySimulation: SimulationTestDef = {
@@ -50,10 +47,6 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 		createOpts: Parameters<LixEnvironment["create"]>[0]
 	): Promise<void> {
 		await this.inner.create(createOpts);
-	}
-
-	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
-		return this.inner.exec(sql, params);
 	}
 
 	async export(): Promise<ArrayBuffer> {

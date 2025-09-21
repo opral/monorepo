@@ -102,6 +102,16 @@ export function createEngineRouter(args: { engine: LixEngine }): {
 			"lix_create_checkpoint",
 			async () => createCheckpointSync({ engine: args.engine }),
 		],
+		[
+			"lix_exec_sync",
+			(payload) => {
+				const body = (payload ?? {}) as {
+					sql: string;
+					params?: unknown[];
+				};
+				return args.engine.exec(body.sql, body.params);
+			},
+		],
 	]);
 
 	return {

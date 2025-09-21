@@ -1,5 +1,17 @@
 import { describe, test, expect } from "vitest";
 import { InMemoryEnvironment } from "./in-memory.js";
+import type { LixEnvironmentResult } from "./api.js";
+
+async function exec(
+	env: InMemoryEnvironment,
+	sql: string,
+	params?: unknown[]
+): Promise<LixEnvironmentResult> {
+	return (await env.call("lix_exec_sync", {
+		sql,
+		params,
+	})) as LixEnvironmentResult;
+}
 
 describe("InMemory environemnt", () => {
 	test("initializes and executes basic SQL", async () => {
@@ -9,10 +21,10 @@ describe("InMemory environemnt", () => {
 			emit: () => {},
 		});
 
-		await engine.exec("CREATE TABLE t(a)");
-		await engine.exec("INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
+		await exec(engine, "CREATE TABLE t(a)");
+		await exec(engine, "INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
 
-		const result = await engine.exec("SELECT a FROM t ORDER BY a");
+		const result = await exec(engine, "SELECT a FROM t ORDER BY a");
 		expect(result.rows?.length).toBe(2);
 		expect(result.rows?.[0]?.a ?? result.rows?.[0]?.[0]).toBe(1);
 		expect(result.rows?.[1]?.a ?? result.rows?.[1]?.[0]).toBe(2);
@@ -36,15 +48,15 @@ describe("InMemory environemnt", () => {
 		await backend.close();
 	});
 
-	// execBatch removed; callers should loop over exec() or use transactions explicitly.
+	// execBatch removed; callers should loop over call('lix_exec_sync', ...) or use transactions explicitly.
 });
 
 test("export/import round-trip persists data", async () => {
 	const b1 = new InMemoryEnvironment();
 	await b1.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
-	await b1.exec("CREATE TABLE t(a)");
-	await b1.exec("INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
+	await exec(b1, "CREATE TABLE t(a)");
+	await exec(b1, "INSERT INTO t(a) VALUES (?), (?)", [1, 2]);
 
 	const snapshot = await b1.export();
 	await b1.close();
@@ -53,7 +65,7 @@ test("export/import round-trip persists data", async () => {
 	await b2.create({ blob: snapshot });
 	await b2.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
-	const out = await b2.exec("SELECT a FROM t ORDER BY a");
+	const out = await exec(b2, "SELECT a FROM t ORDER BY a");
 	expect(out.rows?.map((r: any) => r.a ?? r[0])).toEqual([1, 2]);
 
 	await b2.close();
@@ -66,13 +78,13 @@ test("multiple engines are independent", async () => {
 	await b1.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 	await b2.open({ boot: { args: { providePlugins: [] } }, emit: () => {} });
 
-	await b1.exec("CREATE TABLE t(a)");
-	await b2.exec("CREATE TABLE t(a)");
+	await exec(b1, "CREATE TABLE t(a)");
+	await exec(b2, "CREATE TABLE t(a)");
 
-	await b1.exec("INSERT INTO t(a) VALUES (?)", [42]);
+	await exec(b1, "INSERT INTO t(a) VALUES (?)", [42]);
 
-	const r1 = await b1.exec("SELECT COUNT(*) AS c FROM t");
-	const r2 = await b2.exec("SELECT COUNT(*) AS c FROM t");
+	const r1 = await exec(b1, "SELECT COUNT(*) AS c FROM t");
+	const r2 = await exec(b2, "SELECT COUNT(*) AS c FROM t");
 
 	const c1 = Number((r1.rows?.[0] as any)?.c ?? (r1.rows?.[0] as any)?.[0]);
 	const c2 = Number((r2.rows?.[0] as any)?.c ?? (r2.rows?.[0] as any)?.[0]);

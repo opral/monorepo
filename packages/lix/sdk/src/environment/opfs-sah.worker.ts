@@ -4,7 +4,7 @@ import {
 } from "../database/sqlite/index.js";
 import { boot } from "../engine/boot.js";
 import type { Call } from "../engine/router.js";
-import type { BootArgs } from "../engine/boot.js";
+import type { BootArgs, LixEngine } from "../engine/boot.js";
 
 /**
  * Message types supported by the worker RPC.
@@ -21,7 +21,6 @@ type Req =
 			payload: { name: string; blob: ArrayBuffer };
 	  }
 	| { id: string; op: "exists"; payload: { name: string } }
-	| { id: string; op: "exec"; payload: { sql: string; params?: unknown[] } }
 	// execBatch removed
 	| { id: string; op: "export"; payload: {} }
 	| { id: string; op: "close"; payload: {} }
@@ -48,6 +47,7 @@ let poolUtil: any;
 let sqlite: any; // OpfsSAHPoolDb (sqlite3.oo1.DB subclass)
 let currentOpfsPath: string | undefined;
 let engineCall: Call | null = null;
+let engine: LixEngine | null = null;
 
 /**
  * Normalize the client-provided logical database name for the SAH pool VFS.
@@ -112,8 +112,7 @@ async function ensurePool(): Promise<void> {
  * - "open": open an existing DB by key and boot the Lix engine.
  * - "create": import a blob for a new DB by key (refuses to overwrite) — no boot.
  * - "exists": check if a DB for the given key exists (via SAH pool metadata).
- * - "exec": run a single SQL statement.
- * - execBatch: removed; host should loop over exec calls or use explicit transactions.
+ * - execBatch: removed; host should loop over call('lix_exec_sync', ...) or use explicit transactions.
  * - "export": export the current DB bytes via the SAH pool.
  * - "close": close the current DB and release worker references (pool is kept).
  */
@@ -144,7 +143,8 @@ async function handle(req: Req): Promise<Res> {
 					},
 					args: bootArgs,
 				});
-				engineCall = res.call;
+				engineCall = res.call ?? null;
+				engine = res.engine ?? null;
 
 				return { id: req.id, ok: true };
 			}
@@ -178,6 +178,8 @@ async function handle(req: Req): Promise<Res> {
 				// Creation is import-only. The host is expected to call "open" next.
 				sqlite = undefined;
 				currentOpfsPath = opfsPath;
+				engine = null;
+				engineCall = null;
 				return { id: req.id, ok: true };
 			}
 
@@ -193,24 +195,6 @@ async function handle(req: Req): Promise<Res> {
 					exists = false;
 				}
 				return { id: req.id, ok: true, result: exists };
-			}
-
-			case "exec": {
-				if (!sqlite) throw new Error("Engine not initialized");
-				const columnNames: string[] = [];
-				const rows = sqlite.exec({
-					sql: req.payload.sql,
-					bind: (req.payload.params ?? []) as any[],
-					returnValue: "resultRows",
-					rowMode: "object",
-					columnNames,
-				}) as any[];
-
-				return {
-					id: req.id,
-					ok: true,
-					result: { rows },
-				};
 			}
 
 			case "export": {
@@ -243,6 +227,8 @@ async function handle(req: Req): Promise<Res> {
 				// Keep VFS installed so the pool persists across sessions in this worker
 				sqlite = undefined as any;
 				currentOpfsPath = undefined;
+				engine = null;
+				engineCall = null;
 				return { id: req.id, ok: true };
 			}
 

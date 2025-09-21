@@ -4,22 +4,15 @@ import {
 	contentFromDatabase,
 	type SqliteWasmDatabase,
 } from "../database/sqlite/index.js";
-import type { LixEnvironment, LixEnvironmentResult } from "./api.js";
+import type { LixEnvironment } from "./api.js";
 import { boot, type LixEngine } from "../engine/boot.js";
 
 /**
- * In‑process, in‑memory environment.
+ * In-process, in-memory environment.
  *
  * Runs on the calling thread; great for tests, CLI, or light usage. In
  * browsers, heavy operations can block the UI – prefer the Worker environment for
  * production use.
- *
- * @example
- * const env = new InMemoryEnvironment()
- * await env.open({ boot: { args: { providePlugins: [], providePluginsRaw: [] } }, emit: () => {} })
- * await env.exec("CREATE TABLE t(a)")
- * await env.exec("INSERT INTO t(a) VALUES (?)", [1])
- * const out = await env.exec("SELECT a FROM t")
  */
 export class InMemoryEnvironment implements LixEnvironment {
 	private sqlite: SqliteWasmDatabase | undefined;
@@ -56,32 +49,6 @@ export class InMemoryEnvironment implements LixEnvironment {
 		this.callImpl = undefined;
 		this.engine = undefined;
 	}
-
-	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
-		if (!this.sqlite) throw new Error("Engine not initialized");
-
-		const columnNames: string[] = [];
-		let rows: any[];
-		try {
-			rows = this.sqlite.exec({
-				sql,
-				bind: (params ?? []) as any[],
-				returnValue: "resultRows",
-				rowMode: "object",
-				columnNames,
-			}) as any[];
-		} catch (e: any) {
-			const err = new Error(
-				`environment.exec failed: ${e?.message ?? e} -- SQL: ${sql}`
-			);
-			(err as any).cause = e;
-			throw err;
-		}
-
-		return { rows };
-	}
-
-	// execBatch intentionally omitted; loop over exec() instead.
 
 	async export(): Promise<ArrayBuffer> {
 		if (!this.sqlite) throw new Error("Engine not initialized");
