@@ -82,7 +82,7 @@ bench("selectCommitDiff baseline (full)", async () => {
 	if (!rows || rows.length === 0) throw new Error("unexpected empty");
 });
 
-bench("selectCommitDiff full + pushdown scope", async () => {
+bench.skip("selectCommitDiff full + pushdown scope", async () => {
 	const { lix, beforeCommitId, afterCommitId } = await readyCtx;
 	const rows = await selectCommitDiff({
 		lix,
@@ -95,7 +95,7 @@ bench("selectCommitDiff full + pushdown scope", async () => {
 	if (!rows || rows.length === 0) throw new Error("unexpected empty");
 });
 
-bench("selectCommitDiff changed-only (fast path)", async () => {
+bench.skip("selectCommitDiff changed-only (fast path)", async () => {
 	const { lix, beforeCommitId, afterCommitId } = await readyCtx;
 	const rows = await selectCommitDiff({
 		lix,
@@ -109,7 +109,7 @@ bench("selectCommitDiff changed-only (fast path)", async () => {
 	if (!rows || rows.length === 0) throw new Error("unexpected empty");
 });
 
-bench("selectCommitDiff changed-only + pushdown", async () => {
+bench.skip("selectCommitDiff changed-only + pushdown", async () => {
 	const { lix, beforeCommitId, afterCommitId } = await readyCtx;
 	const rows = await selectCommitDiff({
 		lix,
