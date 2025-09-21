@@ -25,6 +25,8 @@ import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { populateStateCache } from "../state/cache/populate-state-cache.js";
+import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import {
@@ -206,7 +208,7 @@ export async function newLixFile(args?: {
 		// Insert the change record
 		sqlite.exec({
 			sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
-				   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			bind: [
 				change.id,
 				change.entity_id,
@@ -317,6 +319,10 @@ export async function newLixFile(args?: {
 			});
 		}
 	}
+
+	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
+	markStateCacheAsFresh({ engine: { sqlite } as any, timestamp: created_at });
+	populateStateCache({ engine: { sqlite } });
 
 	try {
 		const blob = new Blob([

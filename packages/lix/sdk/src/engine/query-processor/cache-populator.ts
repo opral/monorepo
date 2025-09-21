@@ -20,7 +20,7 @@ const STATE_TABLE_NAMES = new Set([
  * reads: before the query hits SQLite we ensure the cache is populated and mark
  * it as fresh so subsequent reads avoid redundant work.
  */
-export function createQueryPreprocessorPlugin(args: {
+export function cachePopulator(args: {
 	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): KyselyPlugin {
 	return {
@@ -54,7 +54,6 @@ export function createQueryPreprocessorPlugin(args: {
 					});
 				}
 			}
-
 			markStateCacheAsFresh({ engine });
 
 			return transformArgs.node;

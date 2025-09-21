@@ -157,46 +157,6 @@ export async function boot(
 		}
 	}
 
-	/**
-	 * TODO(opral): Boot-time vtable priming to avoid cold-start write rollbacks.
-	 *
-	 * Why this is needed now:
-	 * - The first entity write (INSERT into a view like key_value) triggers the vtable's write path
-	 *   which runs validation. Validation reads from internal_resolved_state_all to fetch schemas and
-	 *   enforce constraints. That SELECT hits the vtable's xFilter.
-	 * - On a cold database, xFilter detects a stale cache and attempts to populate/mark-fresh the
-	 *   cache. That population writes to cache tables. Performing writes from within a vtable write
-	 *   callback (xUpdate -> SELECT -> xFilter -> populate) causes SQLite to abort with
-	 *   SQLITE_ABORT_ROLLBACK.
-	 * - The classic opener (openLix) happens to perform early reads (telemetry, active account, lix_id)
-	 *   which prime the vtable/cache before user writes, avoiding the issue. openLixBackend did not,
-	 *   so the first write could hit this cold-start condition and abort.
-	 *
-	 * Temporary mitigation:
-	 * - Perform a harmless read that goes through vtable-backed views after boot, but before user
-	 *   writes. This ensures cache population occurs outside any write transaction.
-	 *
-	 * Future improvements to remove this priming:
-	 * 1) Guard xFilter during write-in-progress to avoid populate/mark-fresh from xFilter when
-	 *    called within xUpdate. Return empty results for resolved-state reads from within writes.
-	 * 2) Adjust validation (e.g., getStoredSchema) to avoid internal_resolved_state_all in the write
-	 *    path, reading from materializer/change tables instead to prevent invoking xFilter.
-	 * 3) Proactively populate cache (or mark as fresh) at boot using dedicated routines which are
-	 *    safe outside vtable callbacks.
-	 */
-	try {
-		await db
-			.selectFrom("active_version")
-			.select("version_id")
-			.executeTakeFirst();
-		await db
-			.selectFrom("state_all")
-			.select((eb) => eb.fn.countAll().as("c"))
-			.executeTakeFirst();
-	} catch {
-		// non-fatal
-	}
-
 	const { call } = createEngineRouter({ engine: engine });
 	return { engine: engine, call };
 }

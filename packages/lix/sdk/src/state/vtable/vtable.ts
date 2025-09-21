@@ -5,9 +5,6 @@ import type { LixEngine } from "../../engine/boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { isStaleStateCache } from "../cache/is-stale-state-cache.js";
-import { markStateCacheAsFresh } from "../cache/mark-state-cache-as-stale.js";
-import { populateStateCache } from "../cache/populate-state-cache.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
@@ -366,65 +363,25 @@ export function applyStateVTable(
 						return capi.SQLITE_OK;
 					}
 
-					// Normal path: check cache staleness
-					const cacheIsStale = isStaleStateCache({
+					/*
+					 * Legacy cache-miss handling (populateStateCache + markStateCacheAsFresh) lived here.
+					 * The query preprocessor warms caches before execution, so we simply read from the
+					 * resolved state view each time.
+					 */
+
+					let query = db.selectFrom("internal_resolved_state_all").selectAll();
+
+					for (const [column, value] of Object.entries(filters)) {
+						query = query.where(column as any, "=", value);
+					}
+
+					const results = executeSync({
 						engine,
+						query,
 					});
 
-					// Try cache first - but only if it's not stale
-					let cacheResults: any[] | null = null;
-					if (!cacheIsStale) {
-						// Select directly from resolved state using Kysely (includes tombstones)
-						let query = db
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
-
-						// Apply filters
-						for (const [column, value] of Object.entries(filters)) {
-							query = query.where(column as any, "=", value);
-						}
-
-						cacheResults = executeSync({
-							engine: engine,
-							query,
-						});
-					}
-
-					cursorState.results = cacheResults || [];
+					cursorState.results = results ?? [];
 					cursorState.rowIndex = 0;
-
-					if (cacheIsStale) {
-						// Populate cache directly with materialized state
-						populateStateCache({ engine: { sqlite } });
-
-						// Do not log here: xFilter can be invoked during SELECT-only paths
-						// and should avoid writing to the transaction state/logs.
-
-						// Mark cache as fresh after population
-						isUpdatingCacheState = true;
-						try {
-							markStateCacheAsFresh({
-								engine: { sqlite, hooks },
-							});
-						} finally {
-							isUpdatingCacheState = false;
-						}
-
-						let query = db
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
-
-						// Apply filters
-						for (const [column, value] of Object.entries(filters)) {
-							query = query.where(column as any, "=", value);
-						}
-
-						const newResults = executeSync({
-							engine: engine,
-							query,
-						});
-						cursorState.results = newResults || [];
-					}
 
 					return capi.SQLITE_OK;
 				} finally {
