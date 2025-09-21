@@ -1,4 +1,4 @@
-import { LixLogSchema, type LixLog } from "../../log/schema.js";
+import { LixLogSchema, type LixLog } from "../../log/schema-definition.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import type { JSONType } from "../../schema-definition/json-type.js";
@@ -7,7 +7,7 @@ import { insertTransactionState } from "../transaction/insert-transaction-state.
 
 // Track if logging is in progress per Lix instance to prevent recursion
 const loggingInProgressMap = new WeakMap<
-	Pick<LixEngine, "sqlite" | "db" | "hooks">,
+	Pick<LixEngine, "sqlite" | "hooks">,
 	boolean
 >();
 
@@ -18,7 +18,7 @@ const loggingInProgressMap = new WeakMap<
  * This is a minimal wrapper that can be mocked in tests to control timestamps.
  */
 export function insertVTableLog(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	id?: string;
 	key: string;
 	message?: string | null;

@@ -1,7 +1,10 @@
-import { type LixCommit, LixCommitSchema } from "../commit/schema.js";
+import {
+	type LixCommit,
+	LixCommitSchema,
+} from "../commit/schema-definition.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { State } from "../entity-views/types.js";
-import type { LixChangeRaw } from "../change/schema.js";
+import type { LixChangeRaw } from "../change/schema-definition.js";
 import type { StateCommitChange } from "../hooks/create-hooks.js";
 import { getTimestamp } from "../engine/functions/timestamp.js";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
@@ -12,11 +15,11 @@ import {
 	LixVersionTipSchema,
 	type LixVersionDescriptor,
 	type LixVersionTip,
-} from "../version/schema.js";
+} from "../version/schema-definition.js";
 import {
 	LixEntityLabelSchema,
 	type LixEntityLabel,
-} from "../entity/label/schema.js";
+} from "../entity/label/schema-definition.js";
 
 /**
  * Converts the current working change set into a checkpoint.

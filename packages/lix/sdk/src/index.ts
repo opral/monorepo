@@ -10,7 +10,7 @@ export * from "./entity/index.js";
 export * from "./entity-views/index.js";
 export * from "./filesystem/index.js";
 export * from "./hooks/create-hooks.js";
-export * from "./key-value/schema.js";
+export * from "./key-value/index.js";
 export * from "./label/index.js";
 export * from "./lix/index.js";
 export * from "./log/index.js";

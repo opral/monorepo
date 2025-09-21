@@ -1,6 +1,9 @@
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
 import { executeSync } from "../../database/execute-sync.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../../key-value/schema.js";
+import {
+	LixKeyValueSchema,
+	type LixKeyValue,
+} from "../../key-value/schema-definition.js";
 import type { LixEngine } from "../boot.js";
 import type { Lix } from "../../lix/open-lix.js";
 import { isDeterministicModeSync } from "./is-deterministic-mode.js";

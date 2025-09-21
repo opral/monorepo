@@ -1,5 +1,5 @@
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { isJsonType } from "../schema-definition/json-type.js";
-import { LixSchemaViewMap } from "../database/schema.js";
 
 export function buildJsonColumnConfig(args?: {
 	includeChangeView?: boolean;

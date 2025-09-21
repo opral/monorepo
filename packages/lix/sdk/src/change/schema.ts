@@ -95,8 +95,6 @@ export function applyChangeDatabaseSchema(
 }
 
 // Types for the internal_change TABLE
-export type InternalChange = Selectable<InternalChangeTable>;
-export type NewInternalChange = Insertable<InternalChangeTable>;
 export type InternalChangeTable = {
 	id: Generated<string>;
 	entity_id: string;
@@ -107,58 +105,4 @@ export type InternalChangeTable = {
 	snapshot_id: string; // The foreign key
 	metadata?: Record<string, any> | null;
 	created_at: Generated<string>;
-};
-
-/**
- * Raw change type with snapshot_content as a JSON string or null.
- *
- * This type exists to avoid parsing and serializing the snapshot_content
- * when working directly with database operations or internal cache functions.
- * Use this type when you need to work with the raw JSON string representation
- * of the snapshot content.
- *
- * @example
- * ```typescript
- * const rawChange: LixChangeRaw = {
- *   id: "change-123",
- *   entity_id: "entity-456",
- *   // ... other fields
- *   snapshot_content: JSON.stringify({ key: "value" }) // JSON string
- * };
- * ```
- */
-export type LixChangeRaw = Omit<LixChange, "snapshot_content" | "metadata"> & {
-	snapshot_content: string | null; // JSON string or null
-	metadata?: string | null;
-};
-
-/**
- * Change type with parsed snapshot_content as a JavaScript object.
- *
- * This is the standard change type used throughout the application when
- * working with business logic. The snapshot_content field is automatically
- * parsed from JSON into a JavaScript object for easy manipulation.
- *
- * @example
- * ```typescript
- * const change: LixChange = {
- *   id: "change-123",
- *   entity_id: "entity-456",
- *   // ... other fields
- *   snapshot_content: { key: "value" } // Parsed JavaScript object
- * };
- * ```
- */
-export type LixChange = Selectable<ChangeView>;
-export type NewLixChange = Insertable<ChangeView>;
-export type ChangeView = {
-	id: Generated<string>;
-	entity_id: string;
-	schema_key: string;
-	schema_version: string;
-	file_id: string;
-	plugin_key: string;
-	metadata?: Record<string, any> | null;
-	created_at: Generated<string>;
-	snapshot_content: Record<string, any> | null;
 };

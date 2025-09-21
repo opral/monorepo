@@ -1,6 +1,4 @@
 import type { SqliteWasmDatabase } from "../database/sqlite/index.js";
-import { Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
 import { initDb } from "../database/init-db.js";
 import { createHooks, type StateCommitChange } from "../hooks/create-hooks.js";
 import { applyFilesystemSchema } from "../filesystem/schema.js";
@@ -10,6 +8,11 @@ import { switchAccount } from "../account/switch-account.js";
 import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
+import type { Kysely } from "kysely";
+import type {
+	LixDatabaseSchema,
+	LixInternalDatabaseSchema,
+} from "../database/schema.js";
 
 export type EngineEvent = {
 	type: "state_commit";

@@ -1,7 +1,7 @@
 import { nanoId } from "../engine/functions/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixChangeSet, LixChangeSetElement } from "./schema.js";
-import type { LixLabel } from "../label/schema.js";
+import type { LixChangeSet, LixChangeSetElement } from "./schema-definition.js";
+import type { LixLabel } from "../label/schema-definition.js";
 import type { NewState } from "../entity-views/types.js";
 
 /**

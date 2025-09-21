@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixChangeProposal } from "./schema.js";
+import type { LixChangeProposal } from "./schema-definition.js";
 
 export async function rejectChangeProposal(args: {
 	lix: Lix;

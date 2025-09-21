@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixAccount } from "./schema.js";
+import type { LixAccount } from "./schema-definition.js";
 
 /**
  * Switch the current account to the provided account.

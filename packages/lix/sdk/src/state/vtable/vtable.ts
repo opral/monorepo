@@ -1,6 +1,5 @@
-import type { Kysely, Generated } from "kysely";
+import type { Generated } from "kysely";
 import { sql } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
@@ -9,6 +8,7 @@ import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 // Type definition for the internal state virtual table
 export type InternalStateVTable = {
@@ -70,10 +70,9 @@ const STATE_VTAB_COLUMN_NAMES = [
 ];
 
 export function applyStateVTable(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">
+	engine: Pick<LixEngine, "sqlite" | "hooks">
 ): void {
 	const { sqlite, hooks } = engine;
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Statement/transaction-scoped writer value set via withWriterKey helper.
 	let currentWriterKey: string | null = null;
@@ -344,7 +343,7 @@ export function applyStateVTable(
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
 						// Query directly from resolved state (now includes tombstones)
-						let query = db
+						let query = internalQueryBuilder
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();
 
@@ -369,7 +368,9 @@ export function applyStateVTable(
 					 * resolved state view each time.
 					 */
 
-					let query = db.selectFrom("internal_resolved_state_all").selectAll();
+					let query = internalQueryBuilder
+						.selectFrom("internal_resolved_state_all")
+						.selectAll();
 
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
@@ -445,9 +446,7 @@ export function applyStateVTable(
 						try {
 							const key = executeSync({
 								engine,
-								query: (
-									engine.db as unknown as Kysely<LixInternalDatabaseSchema>
-								)
+								query: internalQueryBuilder
 									.selectFrom("internal_state_writer")
 									.select(["writer_key"])
 									.where("file_id", "=", String(row.file_id))
@@ -463,9 +462,7 @@ export function applyStateVTable(
 								if (parent) {
 									const p = executeSync({
 										engine,
-										query: (
-											engine.db as unknown as Kysely<LixInternalDatabaseSchema>
-										)
+										query: internalQueryBuilder
 											.selectFrom("internal_state_writer")
 											.select(["writer_key"])
 											.where("file_id", "=", String(row.file_id))
@@ -764,7 +761,7 @@ export function applyStateVTable(
 			// UPSERT writer
 			executeSync({
 				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				query: internalQueryBuilder
 					.insertInto("internal_state_writer")
 					.values({
 						file_id: args.fileId,
@@ -783,7 +780,7 @@ export function applyStateVTable(
 			// DELETE writer row (no NULL storage)
 			executeSync({
 				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				query: internalQueryBuilder
 					.deleteFrom("internal_state_writer")
 					.where("file_id", "=", args.fileId)
 					.where("version_id", "=", args.versionId)
@@ -800,7 +797,7 @@ export function applyStateVTable(
 	}): string {
 		const res = executeSync({
 			engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.select(["schema_key"])
 				.where("file_id", "=", args.fileId)
@@ -812,7 +809,7 @@ export function applyStateVTable(
 		if (!sk) {
 			const res2 = executeSync({
 				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				query: internalQueryBuilder
 					.selectFrom("state_all")
 					.select(["schema_key"])
 					.where("file_id", "=", args.fileId)
@@ -825,7 +822,7 @@ export function applyStateVTable(
 		if (!sk) {
 			const res3 = executeSync({
 				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				query: internalQueryBuilder
 					.selectFrom("internal_state_cache")
 					.select(["schema_key"])
 					.where("file_id", "=", args.fileId)
@@ -853,14 +850,14 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "sqlite" | "hooks">,
 	primaryKey: string,
 	timestamp: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
 		engine: engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.select([
 				"entity_id",
@@ -941,7 +938,7 @@ export function handleStateDelete(
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
 		executeSync({
 			engine: engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			query: internalQueryBuilder
 				.deleteFrom("internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
@@ -983,13 +980,13 @@ export function handleStateDelete(
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "sqlite" | "hooks">,
 	schemaKey: any
 ): string | null {
 	// Query directly from internal_resolved_state_all to avoid vtable recursion
 	const result = executeSync({
 		engine: engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")

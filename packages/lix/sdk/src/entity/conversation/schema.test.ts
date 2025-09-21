@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { LixEntityConversationSchema } from "./schema.js";
+import { LixEntityConversationSchema } from "./schema-definition.js";
 import { attachConversation } from "./attach-conversation.js";
 import { createConversation } from "../../conversation/create-conversation.js";
 import { createConversationMessage } from "../../conversation/create-conversation-message.js";

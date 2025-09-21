@@ -1,14 +1,17 @@
-import type { LixCommit } from "../commit/schema.js";
+import type { LixCommit } from "../commit/schema-definition.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
-} from "../change-set/schema.js";
-import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
-import type { LixVersion } from "../version/schema.js";
-import { LixVersionTipSchema } from "../version/schema.js";
+} from "../change-set/schema-definition.js";
+import {
+	LixCommitSchema,
+	LixCommitEdgeSchema,
+} from "../commit/schema-definition.js";
+import type { LixVersion } from "../version/schema-definition.js";
+import { LixVersionTipSchema } from "../version/schema-definition.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { LixChangeRaw } from "../change/schema.js";
+import type { LixChangeRaw } from "../change/schema-definition.js";
 import type { LixEngine } from "../engine/boot.js";
 import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";

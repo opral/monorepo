@@ -1,4 +1,4 @@
-import { LixSchemaViewMap } from "../database/schema.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
 
 /**
  * Maps table names to their corresponding schema keys.

@@ -8,7 +8,10 @@ import {
 	normalSimulation,
 	outOfOrderSequenceSimulation,
 } from "../test-utilities/simulation-test/simulation-test.js";
-import { LixVersionTipSchema, type LixVersionTip } from "../version/schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersionTip,
+} from "../version/schema-definition.js";
 
 function stripWriterKey<T extends Record<string, any> | null | undefined>(
 	row: T

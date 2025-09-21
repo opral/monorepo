@@ -148,7 +148,7 @@ function readDirectoryHistoryLeafAtDepth(args: {
 			.where("sh1.schema_key", "=", "lix_directory_descriptor")
 			.where("sh1.entity_id", "=", args.directoryId)
 			.where("sh1.root_commit_id", "=", args.rootCommitId)
-			.where("sh1.depth", "=", (eb) =>
+			.where("sh1.depth", "=", (eb: any) =>
 				eb
 					.selectFrom("state_history as sh2")
 					.select("sh2.depth")

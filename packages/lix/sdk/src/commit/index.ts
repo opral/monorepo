@@ -3,5 +3,5 @@ export {
 	LixCommitEdgeSchema,
 	type LixCommit,
 	type LixCommitEdge,
-	applyCommitDatabaseSchema,
-} from "./schema.js";
+} from "./schema-definition.js";
+export { applyCommitDatabaseSchema } from "./schema.js";

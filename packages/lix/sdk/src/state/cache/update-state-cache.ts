@@ -1,5 +1,5 @@
 import type { LixEngine } from "../../engine/boot.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";

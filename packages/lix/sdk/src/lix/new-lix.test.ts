@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import { openLix } from "./open-lix.js";
-import { LixSchemaViewMap } from "../database/schema.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
 
 test("newLixFile creates a valid lix that can be reopened", async () => {
 	// Create a new lix file

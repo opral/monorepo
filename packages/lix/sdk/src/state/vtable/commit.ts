@@ -1,11 +1,10 @@
-import { type Kysely, sql } from "kysely";
+import { sql } from "kysely";
 import {
 	type LixChangeSetElement,
 	LixChangeSetElementSchema,
-} from "../../change-set/schema.js";
+} from "../../change-set/schema-definition.js";
 import { executeSync } from "../../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import { type LixVersion } from "../../version/schema.js";
+import { type LixVersion } from "../../version/schema-definition.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 import { commitSequenceNumberSync } from "../../engine/functions/sequence.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
@@ -15,6 +14,7 @@ import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js"
 import { updateStateCache } from "../cache/update-state-cache.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { generateCommit } from "./generate-commit.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Commits all transaction changes to permanent storage.
@@ -30,11 +30,11 @@ import { generateCommit } from "./generate-commit.js";
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 }): number {
 	const engine = args.engine;
 	const transactionTimestamp = getTimestampSync({ engine: engine });
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const db = internalQueryBuilder;
 
 	// Collect per-version snapshots once to avoid duplicate queries in this commit
 	const versionSnapshots = new Map<string, LixVersion>();

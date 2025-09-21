@@ -3,8 +3,9 @@ import type { LixEngine } from "../../engine/boot.js";
 import { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
-import type { LixChange } from "../../change/schema.js";
+import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -21,7 +22,7 @@ const ajv = new Ajv({
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
 export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
@@ -42,7 +43,7 @@ export function validateStateMutation(args: {
 
 	const existingVersion = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("version")
 			.select("id")
 			.where("id", "=", args.version_id),
@@ -148,7 +149,7 @@ export function validateStateMutation(args: {
 		if (args.operation === "insert") {
 			const debugEnabled = executeSync({
 				engine: args.engine,
-				query: args.engine.db
+				query: internalQueryBuilder
 					.selectFrom("key_value_all")
 					.select("value")
 					.where("key", "=", "lix_debug")
@@ -167,7 +168,7 @@ export function validateStateMutation(args: {
 }
 
 function validatePrimaryKeyConstraints(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
@@ -194,7 +195,8 @@ function validatePrimaryKeyConstraints(args: {
 	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates,
 	// but ignore transaction rows (tag 'T' in _pk) so that multiple inserts within the same
 	// transaction can overwrite without tripping PK validation.
-	const db = args.engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const db =
+		internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 	let query = db
 		.selectFrom("internal_resolved_state_all")
 		.select(["snapshot_content"])
@@ -238,7 +240,7 @@ function validatePrimaryKeyConstraints(args: {
 }
 
 function validateUniqueConstraints(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
@@ -274,7 +276,8 @@ function validateUniqueConstraints(args: {
 		}
 
 		// Query existing resolved state for duplicates, excluding transaction-state rows (tag 'T')
-		const db = args.engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const db =
+			internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 		let query = db
 			.selectFrom("internal_resolved_state_all")
 			.select(["snapshot_content"])
@@ -328,7 +331,7 @@ function getValueByPath(obj: any, path: string): any {
 }
 
 function validateForeignKeyConstraints(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	snapshot_content: LixChange["snapshot_content"];
 	version_id: string;
@@ -394,7 +397,7 @@ function validateForeignKeyConstraints(args: {
 
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
-				query = args.engine.db
+				query = internalQueryBuilder
 					.selectFrom("state_all" as any)
 					.select(foreignKey.references.properties as any);
 
@@ -413,7 +416,7 @@ function validateForeignKeyConstraints(args: {
 					);
 				}
 
-				query = args.engine.db
+				query = internalQueryBuilder
 					.selectFrom(tableName as any)
 					.select(foreignKey.references.properties[0] as any)
 					.where(
@@ -424,7 +427,7 @@ function validateForeignKeyConstraints(args: {
 			}
 		} else {
 			// Query JSON schema entities in the state table
-			query = args.engine.db
+			query = internalQueryBuilder
 				.selectFrom("state_all")
 				.select("snapshot_content")
 				.where("schema_key", "=", foreignKey.references.schemaKey);
@@ -446,7 +449,7 @@ function validateForeignKeyConstraints(args: {
 			// Get stored schema with specific version
 			const referencedSchema = executeSync({
 				engine: args.engine,
-				query: args.engine.db
+				query: internalQueryBuilder
 					.selectFrom("stored_schema")
 					.select("value")
 					.where(
@@ -485,7 +488,7 @@ function validateForeignKeyConstraints(args: {
 			// Get version name for the error message
 			const versionInfo = executeSync({
 				engine: args.engine,
-				query: args.engine.db
+				query: internalQueryBuilder
 					.selectFrom("version")
 					.select("name")
 					.where("id", "=", args.version_id),
@@ -536,7 +539,7 @@ function validateForeignKeyConstraints(args: {
 		// If this is a tracked entity, check if the referenced entity is untracked
 		if (!args.untracked && !isSpecialEntity) {
 			// Build query to check for untracked references
-			let untrackedQuery = args.engine.db
+			let untrackedQuery = internalQueryBuilder
 				.selectFrom("state_all")
 				.select("entity_id")
 				.where("schema_key", "=", foreignKey.references.schemaKey)
@@ -578,7 +581,7 @@ function validateForeignKeyConstraints(args: {
 }
 
 function validateDeletionConstraints(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	schema: LixSchemaDefinition;
 	entity_id?: string;
 	version_id: string;
@@ -591,7 +594,7 @@ function validateDeletionConstraints(args: {
 	// Check both direct entities and inherited entities
 	const currentEntity = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_all")
 			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
@@ -617,7 +620,7 @@ function validateDeletionConstraints(args: {
 		// Check if entity exists in other versions
 		const entityInOtherVersions = executeSync({
 			engine: args.engine,
-			query: args.engine.db
+			query: internalQueryBuilder
 				.selectFrom("state_all")
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
@@ -665,7 +668,7 @@ function validateDeletionConstraints(args: {
 	// Get all schemas to check which ones have foreign keys that might reference this entity
 	const allSchemas = executeSync({
 		engine: args.engine,
-		query: args.engine.db.selectFrom("stored_schema").selectAll(),
+		query: internalQueryBuilder.selectFrom("stored_schema").selectAll(),
 	});
 
 	// Check each schema for foreign keys that reference this entity's schema
@@ -717,7 +720,7 @@ function validateDeletionConstraints(args: {
 			}
 
 			// Build query to check if any entities reference these values
-			let query = args.engine.db
+			let query = internalQueryBuilder
 				.selectFrom("state_all")
 				.select("entity_id")
 				.where("schema_key", "=", schema["x-lix-key"])
@@ -818,14 +821,14 @@ function parseJsonPropertiesInSnapshotContent(
  * Uses depth-first search to detect cycles.
  */
 function validateAcyclicCommitGraph(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	newEdge: { parent_id: string; child_id: string };
 	version_id: string;
 }): void {
 	// Get all existing edges
 	const existingEdges = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("commit_edge_all")
 			.select(["parent_id", "child_id"])
 			.where("lixcol_version_id", "=", args.version_id),

@@ -1,10 +1,10 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixCommit } from "../commit/schema.js";
+import type { LixCommit } from "../commit/schema-definition.js";
 import type {
 	LixVersion,
 	LixVersionDescriptor,
 	LixVersionTip,
-} from "./schema.js";
+} from "./schema-definition.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
 import { nanoId } from "../engine/functions/nano-id.js";

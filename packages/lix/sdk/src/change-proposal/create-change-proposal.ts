@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixChangeProposal } from "./schema.js";
-import type { LixVersion } from "../version/schema.js";
+import type { LixChangeProposal } from "./schema-definition.js";
+import type { LixVersion } from "../version/schema-definition.js";
 
 /**
  * Creates a change proposal that tracks an isolated source version

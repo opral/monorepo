@@ -5,7 +5,7 @@ import {
 	type ExpressionWrapper,
 } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { LixCommit } from "../commit/schema.js";
+import type { LixCommit } from "../commit/schema-definition.js";
 
 /**
  * Filters commits that are descendants of the given commit.

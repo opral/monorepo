@@ -3,13 +3,13 @@ import {
 	LixVersionTipSchema,
 	type LixVersion,
 	type LixVersionTip,
-} from "./schema.js";
+} from "./schema-definition.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 import { sql, type Kysely } from "kysely";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
 import { getTimestamp } from "../engine/functions/timestamp.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { LixChangeRaw } from "../change/schema.js";
+import type { LixChangeRaw } from "../change/schema-definition.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
 import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 export async function mergeVersion(args: {

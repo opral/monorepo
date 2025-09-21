@@ -6,6 +6,7 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { createDefaultPlugins } from "../database/index.js";
 
 /**
  * Cold Kysely instance wired to the SQLite dialect for compiling queries against
@@ -19,4 +20,5 @@ export const internalQueryBuilder: Kysely<LixInternalDatabaseSchema> =
 			createIntrospector: (db) => new SqliteIntrospector(db),
 			createQueryCompiler: () => new SqliteQueryCompiler(),
 		},
+		plugins: [...createDefaultPlugins()],
 	});

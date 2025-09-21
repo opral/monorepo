@@ -9,18 +9,20 @@ import {
 	LixVersionTipSchema,
 	type LixVersionDescriptor,
 	type LixVersionTip,
-} from "../version/schema.js";
+} from "../version/schema-definition.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
 	type LixChangeSet,
 	type LixChangeSetElement,
-} from "../change-set/schema.js";
-import { LixLabelSchema, type LixLabel } from "../label/schema.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import { LixSchemaViewMap } from "../database/schema.js";
-import type { LixChange } from "../change/schema.js";
-import type { LixStoredSchema } from "../stored-schema/schema.js";
+} from "../change-set/schema-definition.js";
+import { LixLabelSchema, type LixLabel } from "../label/schema-definition.js";
+import {
+	LixKeyValueSchema,
+	type LixKeyValue,
+} from "../key-value/schema-definition.js";
+import type { LixChange } from "../change/schema-definition.js";
+import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
@@ -34,7 +36,8 @@ import {
 	LixActiveAccountSchema,
 	type LixAccount,
 	type LixActiveAccount,
-} from "../account/schema.js";
+} from "../account/schema-definition.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.

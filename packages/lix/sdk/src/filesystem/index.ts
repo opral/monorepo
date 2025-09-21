@@ -1,8 +1,13 @@
-export { LixFileDescriptorSchema } from "./file/schema.js";
-export type { LixFileDescriptor, LixFile } from "./file/schema.js";
+export {
+	LixFileDescriptorSchema,
+	type LixFileDescriptor,
+} from "./file/schema-definition.js";
+export type { LixFile } from "./file/schema.js";
 
-export { LixDirectoryDescriptorSchema } from "./directory/schema.js";
-export type { LixDirectoryDescriptor } from "./directory/schema.js";
+export {
+	LixDirectoryDescriptorSchema,
+	type LixDirectoryDescriptor,
+} from "./directory/schema-definition.js";
 export {
 	normalizeFilePath,
 	normalizeDirectoryPath,

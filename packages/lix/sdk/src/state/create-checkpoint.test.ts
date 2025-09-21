@@ -3,7 +3,7 @@ import { createCheckpoint } from "./create-checkpoint.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
-import { LixCommitSchema } from "../commit/schema.js";
+import { LixCommitSchema } from "../commit/schema-definition.js";
 
 test("simulation test discovery", () => {});
 

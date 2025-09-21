@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
 import { Kysely, sql } from "kysely";

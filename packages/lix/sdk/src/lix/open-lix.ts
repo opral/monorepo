@@ -1,11 +1,11 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { Kysely, sql } from "kysely";
 import { type LixDatabaseSchema } from "../database/schema.js";
-import type { LixKeyValue } from "../key-value/schema.js";
+import type { LixKeyValue } from "../key-value/schema-definition.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { NewStateAll } from "../entity-views/types.js";
-import type { LixAccount } from "../account/schema.js";
+import type { LixAccount } from "../account/schema-definition.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
 import type { EngineEvent, LixEngine } from "../engine/boot.js";

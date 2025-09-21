@@ -1,18 +1,21 @@
 import type { Lix } from "../lix/index.js";
 // Using explicit commit-scoped leaf CTEs for performance and clarity
-import type { LixCommit } from "../commit/schema.js";
+import type { LixCommit } from "../commit/schema-definition.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
-} from "../change-set/schema.js";
-import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
+} from "../change-set/schema-definition.js";
+import {
+	LixCommitSchema,
+	LixCommitEdgeSchema,
+} from "../commit/schema-definition.js";
 import {
 	LixVersionTipSchema,
 	type LixVersion,
 	type LixVersionTip,
-} from "../version/schema.js";
+} from "../version/schema-definition.js";
 import { sql, type Kysely } from "kysely";
-import type { LixChangeRaw } from "../change/schema.js";
+import type { LixChangeRaw } from "../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
 import { getTimestamp } from "../engine/functions/timestamp.js";

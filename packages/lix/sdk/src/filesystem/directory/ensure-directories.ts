@@ -1,17 +1,18 @@
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import {
 	normalizeDirectoryPath,
 	normalizeFilePath,
 	normalizePathSegment,
 } from "../path.js";
 
-export function getActiveVersionId(
-	engine: Pick<LixEngine, "sqlite" | "db">
-): string {
+export function getActiveVersionId(engine: Pick<LixEngine, "sqlite">): string {
 	const result = executeSync({
 		engine,
-		query: engine.db.selectFrom("active_version").select("version_id"),
+		query: internalQueryBuilder
+			.selectFrom("active_version")
+			.select("version_id"),
 	});
 	const versionId = result[0]?.version_id;
 	if (!versionId) {
@@ -21,7 +22,7 @@ export function getActiveVersionId(
 }
 
 export function readDirectoryByPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	path: string;
 }): { id: string; parent_id: string | null; path: string } | undefined {
@@ -70,13 +71,13 @@ export function readDirectoryByPath(args: {
 }
 
 function readDirectoryDescriptorById(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	directoryId: string;
 }): { id: string; parent_id: string | null; name: string } | undefined {
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_directory_descriptor")
 			.where("version_id", "=", args.versionId)
@@ -95,7 +96,7 @@ function readDirectoryDescriptorById(args: {
 }
 
 export function readDirectoryPathById(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	directoryId: string;
 }): string | undefined {
@@ -107,13 +108,13 @@ export function readDirectoryPathById(args: {
 }
 
 export function assertNoFileAtPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	filePath: string;
 }): void {
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("file_all")
 			.where("path", "=", args.filePath)
 			.where("lixcol_version_id", "=", args.versionId)
@@ -127,14 +128,14 @@ export function assertNoFileAtPath(args: {
 }
 
 export function assertNoDirectoryAtFilePath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	filePath: string;
 }): void {
 	const directoryPath = `${args.filePath}/`;
 	const rows = executeSync({
 		engine: args.engine,
-		query: args.engine.db
+		query: internalQueryBuilder
 			.selectFrom("directory_all")
 			.where("path", "=", directoryPath)
 			.where("lixcol_version_id", "=", args.versionId)
@@ -148,7 +149,7 @@ export function assertNoDirectoryAtFilePath(args: {
 }
 
 export function computeDirectoryPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	parentId: string | null;
 	name: string;
@@ -197,7 +198,7 @@ function listAncestorDirectories(filePath: string): string[] {
 }
 
 export function ensureDirectoryAncestors(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	versionId?: string;
 	filePath: string;
 }): void {
@@ -234,7 +235,7 @@ export function ensureDirectoryAncestors(args: {
 }
 
 export function ensureDirectoryPathExists(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	versionId: string;
 	path: string;
 }): string | null {
@@ -277,7 +278,7 @@ export function ensureDirectoryPathExists(args: {
 }
 
 export function composeDirectoryPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "sqlite">;
 	versionId: string;
 	directoryId: string | null;
 }): string | undefined {

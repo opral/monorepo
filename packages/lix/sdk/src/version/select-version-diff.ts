@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixVersion } from "./schema.js";
+import type { LixVersion } from "./schema-definition.js";
 import { sql, type SelectQueryBuilder } from "kysely";
 
 export type DiffRow = {

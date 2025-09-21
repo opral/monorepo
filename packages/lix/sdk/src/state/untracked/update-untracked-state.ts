@@ -1,6 +1,6 @@
 import { sql } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 

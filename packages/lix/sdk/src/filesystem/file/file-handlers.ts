@@ -1,6 +1,6 @@
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
-import { LixFileDescriptorSchema } from "./schema.js";
+import { LixFileDescriptorSchema } from "./schema-definition.js";
 import { createLixOwnLogSync } from "../../log/create-lix-own-log.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";

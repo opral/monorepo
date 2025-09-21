@@ -145,7 +145,7 @@ function selectFileChanges(args: {
 		.where("sh1.file_id", "=", args.fileId)
 		.where("sh1.root_commit_id", "=", args.rootCommitId)
 		.where("sh1.depth", ">=", args.depth)
-		.where("sh1.depth", "=", (eb) =>
+		.where("sh1.depth", "=", (eb: any) =>
 			// This subquery finds the "leaf state" for each entity at the requested depth in history.
 			//
 			// What this does: "For each entity in the file, find its most recent state that existed
@@ -164,7 +164,7 @@ function selectFileChanges(args: {
 			// min(depth): For each entity, get its most recent state (leaf) at or after the requested depth
 			eb
 				.selectFrom("state_history as sh2")
-				.select((eb) => eb.fn.min("sh2.depth").as("min_depth"))
+				.select((eb: any) => eb.fn.min("sh2.depth").as("min_depth"))
 				.whereRef("sh2.entity_id", "=", "sh1.entity_id")
 				.whereRef("sh2.file_id", "=", "sh1.file_id")
 				.whereRef("sh2.plugin_key", "=", "sh1.plugin_key")

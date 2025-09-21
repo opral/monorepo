@@ -1,49 +1,58 @@
-import type { ChangeView, InternalChangeTable } from "../change/schema.js";
+import type {
+	ChangeView,
+	InternalChangeTable,
+} from "../change/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
-} from "../change-set/schema.js";
-import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
+} from "../change-set/schema-definition.js";
+import {
+	LixCommitSchema,
+	LixCommitEdgeSchema,
+} from "../commit/schema-definition.js";
 import {
 	LixVersionDescriptorSchema,
 	type LixActiveVersion,
-} from "../version/schema.js";
+} from "../version/schema-definition.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
-import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
+import { LixStoredSchemaSchema } from "../stored-schema/schema-definition.js";
 import type {
 	FromLixSchemaDefinition,
 	LixGenerated,
-	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
+import {
+	LixKeyValueSchema,
+	type LixKeyValue,
+} from "../key-value/schema-definition.js";
 import type {
 	StateView,
 	StateAllView,
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import {
-	LixDirectoryDescriptorSchema,
-	LixFileDescriptorSchema,
-} from "../filesystem/index.js";
+import { LixDirectoryDescriptorSchema } from "../filesystem/directory/schema-definition.js";
+import { LixFileDescriptorSchema } from "../filesystem/file/schema-definition.js";
 import type {
 	EntityStateAllView,
 	EntityStateHistoryView,
 	EntityStateView,
 } from "../entity-views/types.js";
-import { LixLogSchema } from "../log/schema.js";
-import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
-import { LixChangeAuthorSchema } from "../change-author/schema.js";
-import { LixLabelSchema } from "../label/schema.js";
-import { LixEntityLabelSchema } from "../entity/label/schema.js";
-import { LixEntityConversationSchema } from "../entity/conversation/schema.js";
+import { LixLogSchema } from "../log/schema-definition.js";
+import {
+	LixAccountSchema,
+	type LixActiveAccount,
+} from "../account/schema-definition.js";
+import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
+import { LixLabelSchema } from "../label/schema-definition.js";
+import { LixEntityLabelSchema } from "../entity/label/schema-definition.js";
+import { LixEntityConversationSchema } from "../entity/conversation/schema-definition.js";
 import {
 	LixConversationSchema,
 	LixConversationMessageSchema,
 	type LixConversationMessage,
-} from "../conversation/schema.js";
-import { LixChangeProposalSchema } from "../change-proposal/schema.js";
+} from "../conversation/schema-definition.js";
+import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -78,27 +87,6 @@ export type InternalStateWriterTable = {
 	entity_id: string;
 	schema_key: string;
 	writer_key: string | null;
-};
-
-export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
-	change_set: LixChangeSetSchema,
-	change_set_element: LixChangeSetElementSchema,
-	change_set_label: LixChangeSetLabelSchema,
-	commit: LixCommitSchema,
-	commit_edge: LixCommitEdgeSchema,
-	file: LixFileDescriptorSchema,
-	directory_descriptor: LixDirectoryDescriptorSchema,
-	log: LixLogSchema,
-	stored_schema: LixStoredSchemaSchema,
-	key_value: LixKeyValueSchema,
-	account: LixAccountSchema,
-	change_author: LixChangeAuthorSchema,
-	label: LixLabelSchema,
-	entity_label: LixEntityLabelSchema,
-	entity_conversation: LixEntityConversationSchema,
-	conversation: LixConversationSchema,
-	conversation_message: LixConversationMessageSchema,
-	change_proposal: LixChangeProposalSchema,
 };
 
 type DirectoryDescriptorView = ToKysely<

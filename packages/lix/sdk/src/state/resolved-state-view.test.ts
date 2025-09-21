@@ -5,7 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./vtable/primary-key.js";
 import { getTimestamp } from "../engine/functions/timestamp.js";
 import { createVersion } from "../version/create-version.js";
-import type { LixVersionDescriptor } from "../version/schema.js";
+import type { LixVersionDescriptor } from "../version/schema-definition.js";
 
 /**
  * Strips the internal vtable primary key column `_pk` from result rows.

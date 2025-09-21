@@ -1,9 +1,9 @@
-import { sql, type Kysely } from "kysely";
+import { sql } from "kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 type NewTransactionStateRow = Omit<
 	NewStateAllRow,
@@ -69,7 +69,7 @@ export type TransactionStateRow = Omit<
  * });
  */
 export function insertTransactionState(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks">;
 	data: NewTransactionStateRow[];
 	timestamp: string;
 	createChangeAuthors?: boolean;
@@ -107,7 +107,7 @@ export function insertTransactionState(args: {
 
 	executeSync({
 		engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		query: internalQueryBuilder
 			.insertInto("internal_transaction_state")
 			.values(transactionRows)
 			.onConflict((oc) =>

@@ -1,10 +1,14 @@
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
-import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
+import {
+	LixStoredSchemaSchema,
+	type LixStoredSchema,
+} from "./schema-definition.js";
+
+export {
+	LixStoredSchemaSchema,
+	type LixStoredSchema,
+} from "./schema-definition.js";
 
 export function applyStoredSchemaDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -43,25 +47,3 @@ export function applyStoredSchemaDatabaseSchema(args: {
 		},
 	});
 }
-
-export const LixStoredSchemaSchema = {
-	"x-lix-key": "lix_stored_schema",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["key", "version"],
-	type: "object",
-	properties: {
-		key: { type: "string", "x-lix-generated": true },
-		version: { type: "string", "x-lix-generated": true },
-		value: JSONTypeSchema as any,
-	},
-	additionalProperties: false,
-} as const;
-
-LixStoredSchemaSchema satisfies LixSchemaDefinition;
-
-export type LixStoredSchema = FromLixSchemaDefinition<
-	typeof LixStoredSchemaSchema
-> & {
-	// override the value to any to allow any JSON type (instead of unknown which is annoying)
-	value: any;
-};
