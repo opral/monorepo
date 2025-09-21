@@ -2904,8 +2904,8 @@ importers:
         specifier: workspace:*
         version: link:../../zettel/zettel-ast
       '@sqlite.org/sqlite-wasm':
-        specifier: ^3.48.0-build2
-        version: 3.48.0-build4
+        specifier: ^3.50.4-build1
+        version: 3.50.4-build1
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -8963,8 +8963,8 @@ packages:
     resolution: {integrity: sha512-10s/u/Main1RGO+jjzK+mgC/zh1ls1CEnq3Dujr03TwvzLg+j4FAohOmlYkQj8KQOj1vGR9cuB9F8tVBTwVGVA==}
     hasBin: true
 
-  '@sqlite.org/sqlite-wasm@3.48.0-build4':
-    resolution: {integrity: sha512-hI6twvUkzOmyGZhQMza1gpfqErZxXRw6JEsiVjUbo7tFanVD+8Oil0Ih3l2nGzHdxPI41zFmfUQG7GHqhciKZQ==}
+  '@sqlite.org/sqlite-wasm@3.50.4-build1':
+    resolution: {integrity: sha512-Qig2Wso7gPkU1PtXwFzndh+CTRzrIFxVGqv6eCetjU7YqxlHItj+GvQYwYTppCRgAPawtRN/4AJcEgB9xDHGug==}
     hasBin: true
 
   '@standard-schema/spec@1.0.0':
@@ -28562,7 +28562,7 @@ snapshots:
 
   '@sqlite.org/sqlite-wasm@3.46.0-build2': {}
 
-  '@sqlite.org/sqlite-wasm@3.48.0-build4': {}
+  '@sqlite.org/sqlite-wasm@3.50.4-build1': {}
 
   '@standard-schema/spec@1.0.0': {}
 

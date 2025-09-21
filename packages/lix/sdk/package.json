@@ -58,7 +58,7 @@
 		"ajv": "^8.17.1",
 		"human-id": "^4.1.1",
 		"kysely": "^0.28.7",
-		"@sqlite.org/sqlite-wasm": "^3.48.0-build2",
+		"@sqlite.org/sqlite-wasm": "^3.50.4-build1",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
