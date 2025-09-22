@@ -26,7 +26,7 @@ Plan:
   - SCAN t
   - SEARCH c USING INDEX idx_internal_state_cache_lix_key_value_live_vfe (version_id=?)
   - LIST SUBQUERY 1
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
   - CREATE BLOOM FILTER
   - SCAN ch LEFT-JOIN
   - SEARCH ws USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN

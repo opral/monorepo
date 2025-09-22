@@ -7,7 +7,7 @@ select * from "state" as "s" where "s"."schema_key" = ? and "s"."entity_id" = ?
 Plan:
   - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:version_id,schema_key,entity_id
   - LIST SUBQUERY 7
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
   - CREATE BLOOM FILTER
   - CORRELATED SCALAR SUBQUERY 4
   - COMPOUND QUERY

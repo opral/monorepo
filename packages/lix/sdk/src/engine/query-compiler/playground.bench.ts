@@ -70,12 +70,7 @@ describe("state benchmarks", () => {
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "like", `${prefix}%`)
 			.execute();
-		await instance.engine.executeQuerySync({
-			query: instance.db
-				.deleteFrom("state")
-				.where("schema_key", "=", "lix_key_value")
-				.where("entity_id", "like", `${prefix}%`)
-				.compile(),
+
 		});
 	});
 
@@ -102,15 +97,7 @@ describe("state benchmarks", () => {
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "=", targetEntity)
 			.execute();
-		await instance.engine.executeQuerySync({
-			query: instance.db
-				.deleteFrom("state")
-				.where("schema_key", "=", "lix_key_value")
-				.where("entity_id", "like", `${prefix}%`)
-				.compile(),
-		});
 	});
-});
 
 function requireLix() {
 	if (!lix) throw new Error("lix instance not initialised");
