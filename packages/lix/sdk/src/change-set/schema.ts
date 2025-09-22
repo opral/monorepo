@@ -1,14 +1,17 @@
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/functions/nano-id.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
 } from "./schema-definition.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 
 export function applyChangeSetDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	const { engine } = args;
 	// Create change_set view using the generalized entity view builder
@@ -19,7 +22,7 @@ export function applyChangeSetDatabaseSchema(args: {
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ engine: engine }),
+			id: () => uuidV7Sync({ engine: engine }),
 		},
 	});
 

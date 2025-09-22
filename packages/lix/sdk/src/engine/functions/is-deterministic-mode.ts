@@ -1,10 +1,8 @@
 import type { LixEngine } from "../boot.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { sql } from "kysely";
-import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
 import { internalQueryBuilder } from "../internal-query-builder.js";
 
-const deterministicModeCache = new WeakMap<SqliteWasmDatabase, boolean>();
+const deterministicModeCache = new WeakMap<object, boolean>();
 
 // Track which hooks instances have a listener registered
 // Using hooks object identity is stable, unlike ad-hoc { sqlite, db, hooks } wrappers
@@ -23,9 +21,10 @@ const hookListenersRegistered = new WeakSet<object>();
  * @returns true if deterministic mode is enabled, false otherwise
  */
 export function isDeterministicModeSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): boolean {
 	const engine = args.engine;
+	const cacheRef = engine.runtimeCacheRef;
 	// Register hook listener for cache invalidation (only once per hooks instance)
 	const key = engine.hooks as unknown as object;
 	if (!hookListenersRegistered.has(key) && engine.hooks) {
@@ -39,7 +38,7 @@ export function isDeterministicModeSync(args: {
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(engine.sqlite);
+					deterministicModeCache.delete(cacheRef);
 					break;
 				}
 			}
@@ -47,28 +46,28 @@ export function isDeterministicModeSync(args: {
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(engine.sqlite)) {
-		return deterministicModeCache.get(engine.sqlite)!;
+	if (deterministicModeCache.has(cacheRef)) {
+		return deterministicModeCache.get(cacheRef)!;
 	}
 
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion
-	const [row] = executeSync({
-		engine: engine,
-		query: internalQueryBuilder
+	const [row] = engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)
 			.select(
 				sql`json_extract(snapshot_content, '$.value.enabled')`.as("enabled")
-			),
-	});
+			)
+			.compile()
+	).rows;
 
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(engine.sqlite, result);
+	deterministicModeCache.set(cacheRef, result);
 
 	return result;
 }

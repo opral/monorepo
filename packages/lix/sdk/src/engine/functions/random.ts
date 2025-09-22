@@ -1,6 +1,4 @@
-import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
 import { sql } from "kysely";
-import { executeSync } from "../../database/execute-sync.js";
 import {
 	LixKeyValueSchema,
 	type LixKeyValue,
@@ -19,7 +17,7 @@ type RngState = {
 	dirty: boolean;
 };
 
-const rngCache = new WeakMap<SqliteWasmDatabase, RngState>();
+const rngCache = new WeakMap<object, RngState>();
 
 /**
  * Non-deterministic random number generator using crypto.getRandomValues().
@@ -52,7 +50,7 @@ function randomUnstable(): number {
  * @see random
  */
 export function randomSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): number {
 	const engine = args.engine;
 	// Non-deterministic mode: use crypto.getRandomValues()
@@ -61,19 +59,19 @@ export function randomSync(args: {
 	}
 
 	// Deterministic mode: use xorshift128+
-	let state = rngCache.get(engine.sqlite);
+	let state = rngCache.get(engine.runtimeCacheRef);
 
 	/* First use on this connection → initialize from seed */
 	if (!state) {
 		// Check if we have persisted RNG state
-		const [stateRow] = executeSync({
-			engine,
-			query: internalQueryBuilder
+		const [stateRow] = engine.executeSync(
+			internalQueryBuilder
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
-				.select("value"),
-		});
+				.select("value")
+				.compile()
+		).rows;
 
 		if (stateRow && stateRow.value) {
 			// Restore persisted state
@@ -95,7 +93,7 @@ export function randomSync(args: {
 			state = seedXorshift128Plus(seed);
 		}
 
-		rngCache.set(engine.sqlite, state);
+		rngCache.set(engine.runtimeCacheRef, state);
 	}
 
 	// Generate next random value using xorshift128+
@@ -107,11 +105,12 @@ export function randomSync(args: {
 /**
  * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
-function getRngSeed(args: { engine: Pick<LixEngine, "sqlite"> }): string {
+function getRngSeed(args: {
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+}): string {
 	// Check for seed in the deterministic mode config
-	const [configRow] = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const [configRow] = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
@@ -120,21 +119,22 @@ function getRngSeed(args: { engine: Pick<LixEngine, "sqlite"> }): string {
 				sql`json_extract(snapshot_content, '$.value.random_seed')`.as(
 					"random_seed"
 				)
-			),
-	});
+			)
+			.compile()
+	).rows;
 
 	if (configRow && configRow.random_seed) {
 		return configRow.random_seed as string;
 	}
 
 	// Derive default seed from lix_id
-	const [idRow] = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const [idRow] = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")
-			.select("value"),
-	});
+			.select("value")
+			.compile()
+	).rows;
 
 	if (!idRow || !idRow.value) {
 		throw new Error("Could not find lix_id for RNG seed");
@@ -193,11 +193,11 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;
-	const state = rngCache.get(engine.sqlite);
+	const state = rngCache.get(engine.runtimeCacheRef);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write

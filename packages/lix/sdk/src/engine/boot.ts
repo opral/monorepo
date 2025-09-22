@@ -8,6 +8,7 @@ import { switchAccount } from "../account/switch-account.js";
 import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
+import { createExecuteSync } from "./create-execute-sync.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -40,8 +41,32 @@ export type LixEngine = {
 	hooks: LixHooks;
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
+	/**
+	 * Stable runtime-only cache token.
+	 *
+	 * Each engine instance gets a unique object that survives for the lifetime of
+	 * the engine. Use it when you need to memoise values in a WeakMap without
+	 * holding on to the whole engine:
+	 *
+	 * @example
+	 * ```ts
+	 * const rngState = new WeakMap<object, RngState>();
+	 *
+	 * function randomSync(engine: LixEngine) {
+	 *   let state = rngState.get(engine.runtimeCacheRef);
+	 *   if (!state) {
+	 *     state = seedRng();
+	 *     rngState.set(engine.runtimeCacheRef, state);
+	 *   }
+	 *   return state.next();
+	 * }
+	 * ```
+	 */
+	runtimeCacheRef: object;
 	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
-	executeSync: (sql: string, params?: unknown[]) => { rows?: any[] };
+	executeSync: (args: { sql: string; parameters?: Readonly<unknown[]> }) => {
+		rows: any[];
+	};
 	/** Invoke an engine function (router) */
 	call: Call;
 };
@@ -57,7 +82,14 @@ export type LixEngine = {
  */
 export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
-	const db = initDb({ sqlite: env.sqlite, hooks });
+	const runtimeCacheRef = {};
+	const executeSync = createExecuteSync({ sqlite: env.sqlite });
+	const db = initDb({
+		sqlite: env.sqlite,
+		hooks,
+		executeSync,
+		runtimeCacheRef,
+	});
 
 	// Load plugins from raw ESM strings and provided plugin objects
 	const plugins: LixPlugin[] = [];
@@ -70,26 +102,16 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	}
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
-	const engine = {
+	const engine: LixEngine = {
 		sqlite: env.sqlite,
-		db,
 		hooks,
 		getAllPluginsSync: () => plugins,
-		executeSync: (sql: string, params?: unknown[]) => {
-			const columnNames: string[] = [];
-			const rows = env.sqlite.exec({
-				sql,
-				bind: (params ?? []) as any[],
-				returnValue: "resultRows",
-				rowMode: "object",
-				columnNames,
-			});
-			return { rows };
-		},
+		runtimeCacheRef,
+		executeSync,
 		call: async () => {
 			throw new Error("Engine router not initialised");
 		},
-	} as LixEngine;
+	};
 
 	// Install filesystem functions + views that depend on plugin + hooks
 	applyFilesystemSchema({ engine });

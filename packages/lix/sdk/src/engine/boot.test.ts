@@ -45,7 +45,7 @@ test("boot installs engine and triggers plugin on file insert", async () => {
 		});
 
 		// Sanity check: execSync should return rows as mapped objects including column names.
-		const execResult = engine.executeSync("select 1 as value");
+		const execResult = engine.executeSync({ sql: "select 1 as value" });
 		expect(execResult.rows).toEqual([{ value: 1 }]);
 
 		// Insert a markdown file; plugin should detect a change
@@ -84,9 +84,9 @@ test("execSync.rows returns a mapped object", async () => {
 			args: {},
 		});
 
-		const result = engine.executeSync(
-			"select 42 as answer, 'meaning' as label"
-		);
+		const result = engine.executeSync({
+			sql: "select 42 as answer, 'meaning' as label",
+		});
 
 		expect(result.rows).toEqual([{ answer: 42, label: "meaning" }]);
 	} finally {

@@ -4,7 +4,10 @@ import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { LixAccountSchema } from "./schema-definition.js";
 
 export function applyAccountDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	const { engine } = args;
 	// Create account view using the generalized entity view builder

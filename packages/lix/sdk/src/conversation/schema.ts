@@ -7,7 +7,10 @@ import {
 } from "./schema-definition.js";
 
 export function applyConversationDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	// Create both primary and _all views for conversation with default ID generation
 	createEntityViewsIfNotExists({

@@ -20,7 +20,10 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * applyDirectoryDatabaseSchema({ engine });
  */
 export function applyDirectoryDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	const { engine } = args;
 	const schemaKey = LixDirectoryDescriptorSchema["x-lix-key"];

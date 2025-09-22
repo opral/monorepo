@@ -7,7 +7,10 @@ import { setStaleStateCacheMemo } from "./is-stale-state-cache.js";
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
 export function markStateCacheAsStale(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "true" in untracked state
@@ -35,7 +38,7 @@ export function markStateCacheAsStale(args: {
 }
 
 export function markStateCacheAsFresh(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef">;
 	timestamp?: string;
 }): void {
 	// Set the cache stale flag to "false" in untracked state

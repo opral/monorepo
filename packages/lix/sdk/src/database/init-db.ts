@@ -1,6 +1,6 @@
 import { Kysely } from "kysely";
 import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
-import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
+import type { LixDatabaseSchema } from "./schema.js";
 import { createEngineDialect } from "./sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "./kysely/plugins.js";
 // Schema imports
@@ -56,6 +56,8 @@ import { getTimestampSync } from "../engine/functions/timestamp.js";
  * ```
  */
 export function initDb(args: {
+	executeSync: LixEngine["executeSync"];
+	runtimeCacheRef: LixEngine["runtimeCacheRef"];
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;
 }): Kysely<LixDatabaseSchema> {
@@ -69,16 +71,21 @@ export function initDb(args: {
 		plugins: [...createDefaultPlugins()],
 	});
 
-	const engine: LixEngine = {
+	const engine = {
 		sqlite: args.sqlite,
-		db: db as any,
 		hooks: args.hooks,
-	} as any;
+		executeSync: args.executeSync,
+		runtimeCacheRef: args.runtimeCacheRef,
+	} as const satisfies Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 
 	initFunctions({
 		sqlite: args.sqlite,
-		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+		executeSync: args.executeSync,
 		hooks: args.hooks,
+		runtimeCacheRef: args.runtimeCacheRef,
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
@@ -110,14 +117,19 @@ export function initDb(args: {
 
 function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	executeSync: LixEngine["executeSync"];
+	runtimeCacheRef: LixEngine["runtimeCacheRef"];
 	hooks: LixHooks;
 }) {
 	const engine = {
 		sqlite: args.sqlite,
-		db: args.db as any,
 		hooks: args.hooks,
-	} as const;
+		executeSync: args.executeSync,
+		runtimeCacheRef: args.runtimeCacheRef,
+	} as const satisfies Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",

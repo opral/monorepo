@@ -1,10 +1,13 @@
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { LixChangeProposalSchema } from "./schema-definition.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 
 export function applyChangeProposalDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	createEntityViewsIfNotExists({
 		engine: args.engine,
@@ -14,7 +17,7 @@ export function applyChangeProposalDatabaseSchema(args: {
 		hardcodedFileId: "lix",
 		hardcodedVersionId: "global",
 		defaultValues: {
-			id: () => nanoIdSync({ engine: args.engine }),
+			id: () => uuidV7Sync({ engine: args.engine }),
 			status: () => "open",
 		},
 	});

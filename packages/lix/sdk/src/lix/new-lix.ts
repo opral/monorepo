@@ -38,6 +38,7 @@ import {
 	type LixActiveAccount,
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
+import { createExecuteSync } from "../engine/create-execute-sync.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -127,9 +128,11 @@ export async function newLixFile(args?: {
 	sqlite.exec({ sql: "PRAGMA page_size = 8192;" });
 
 	const hooks = createHooks();
+	const executeSync = createExecuteSync({ sqlite });
+	const runtimeCacheRef = {};
 
 	// applying the schema etc.
-	const db = initDb({ sqlite, hooks });
+	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
 
 	// Check if deterministic mode is enabled
 	const deterministicModeConfig = args?.keyValues?.find(
@@ -234,7 +237,7 @@ export async function newLixFile(args?: {
 
 	// Set active version using updateUntrackedState for proper inheritance handling
 	updateUntrackedState({
-		engine: { sqlite },
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: "active",
@@ -258,7 +261,7 @@ export async function newLixFile(args?: {
 
 	// Create the anonymous account as untracked
 	updateUntrackedState({
-		engine: { sqlite },
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: activeAccountId,
@@ -278,7 +281,7 @@ export async function newLixFile(args?: {
 
 	// Set it as the active account
 	updateUntrackedState({
-		engine: { sqlite },
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: `active_${activeAccountId}`,
@@ -303,7 +306,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				engine: { sqlite },
+				engine: { executeSync, runtimeCacheRef },
 				changes: [
 					{
 						entity_id: kv.key,
@@ -324,7 +327,10 @@ export async function newLixFile(args?: {
 	}
 
 	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
-	markStateCacheAsFresh({ engine: { sqlite } as any, timestamp: created_at });
+	markStateCacheAsFresh({
+		engine: { executeSync, runtimeCacheRef, hooks },
+		timestamp: created_at,
+	});
 	populateStateCache({ engine: { sqlite } });
 
 	try {

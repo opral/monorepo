@@ -28,7 +28,7 @@ export type Call = (
 ) => Promise<unknown>;
 
 export function createCallRouter(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "executeSync" | "call">;
+	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef" | "call">;
 }): {
 	call: Call;
 } {
@@ -82,13 +82,9 @@ export function createCallRouter(args: {
 			() => markStateCacheAsFresh({ engine: args.engine }),
 		],
 		[
-			"lix_exec_sync",
+			"lix_execute_sync",
 			(payload) => {
-				const body = (payload ?? {}) as {
-					sql: string;
-					params?: unknown[];
-				};
-				return args.engine.executeSync(body.sql, body.params);
+				return args.engine.executeSync(payload as any);
 			},
 		],
 	]);

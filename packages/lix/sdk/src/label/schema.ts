@@ -4,7 +4,10 @@ import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { LixLabelSchema } from "./schema-definition.js";
 
 export function applyLabelDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	const { engine } = args;
 	createEntityViewsIfNotExists({

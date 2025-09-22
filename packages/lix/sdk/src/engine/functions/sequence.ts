@@ -1,5 +1,3 @@
-import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
-import { executeSync } from "../../database/execute-sync.js";
 import {
 	LixKeyValueSchema,
 	type LixKeyValue,
@@ -19,7 +17,7 @@ type CounterState = {
 	dirty: boolean; // true ⇢ we have to persist on commit
 };
 
-const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
+const counterCache = new WeakMap<object, CounterState>();
 
 /**
  * Returns the next monotonic sequence number, starting at 0.
@@ -62,7 +60,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
 export function nextSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): number {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -72,26 +70,28 @@ export function nextSequenceNumberSync(args: {
 		);
 	}
 
-	let state = counterCache.get(engine.sqlite);
+	let state = counterCache.get(engine.runtimeCacheRef);
 
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
-		const [row] = executeSync({
-			engine: engine,
-			// Use internal_resolved_state_all to avoid virtual table recursion
-			query: internalQueryBuilder
-				.selectFrom("internal_resolved_state_all")
-				.where("entity_id", "=", "lix_deterministic_sequence_number")
-				.where("schema_key", "=", "lix_key_value")
-				.where("version_id", "=", "global")
-				.where("snapshot_content", "is not", null)
-				.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
+		const compiled = internalQueryBuilder
+			.selectFrom("internal_resolved_state_all")
+			.where("entity_id", "=", "lix_deterministic_sequence_number")
+			.where("schema_key", "=", "lix_key_value")
+			.where("version_id", "=", "global")
+			.where("snapshot_content", "is not", null)
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.compile();
+		const { rows } = engine.executeSync({
+			sql: compiled.sql,
+			parameters: compiled.parameters,
 		});
+		const row = rows[0];
 
 		// The persisted value is the next counter to use
 		const start = row ? Number(row.value) + 1 : 0;
 		state = { next: start, highestSeen: start - 1, dirty: false };
-		counterCache.set(engine.sqlite, state);
+		counterCache.set(engine.runtimeCacheRef, state);
 	}
 
 	/* Hand out current, then bump for the next call */
@@ -132,11 +132,11 @@ export async function nextSequenceNumber(args: { lix: Lix }): Promise<number> {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;
-	const state = counterCache.get(engine.sqlite);
+	const state = counterCache.get(engine.runtimeCacheRef);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write

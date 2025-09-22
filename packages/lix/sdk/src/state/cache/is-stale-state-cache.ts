@@ -1,47 +1,43 @@
 import { sql } from "kysely";
-import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 const CACHE_SCHEMA_KEY = "lix_key_value";
 
-const staleStateCache = new WeakMap<SqliteWasmDatabase, boolean>();
+const staleStateCache = new WeakMap<any, boolean>();
 const hookListeners = new WeakSet<object>();
 
 /**
  * Memoize the stale flag for a given SQLite connection.
  */
 export function setStaleStateCacheMemo(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 	value: boolean;
 }): void {
-	const sqlite = args.engine.sqlite as SqliteWasmDatabase;
-	staleStateCache.set(sqlite, args.value);
+	staleStateCache.set(args.engine.executeSync, args.value);
 }
 
 /**
  * Remove the cached stale flag so the next read re-queries SQLite.
  */
 export function invalidateStaleStateCacheMemo(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 }): void {
-	const sqlite = args.engine.sqlite as SqliteWasmDatabase;
-	staleStateCache.delete(sqlite);
+	staleStateCache.delete(args.engine.executeSync);
 }
 
-function readStaleFlag(engine: Pick<LixEngine, "sqlite">): boolean {
-	const res = executeSync({
-		engine,
-		query: internalQueryBuilder
+function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
+	const res = engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", CACHE_SCHEMA_KEY)
 			.where("version_id", "=", "global")
 			.where("snapshot_content", "is not", null)
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
-	});
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.compile()
+	).rows;
 
 	if (!res || res.length === 0) {
 		return true;
@@ -60,14 +56,12 @@ function readStaleFlag(engine: Pick<LixEngine, "sqlite">): boolean {
  * const stale = isStaleStateCache({ engine: lix.engine! });
  */
 export function isStaleStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 }): boolean {
 	const { engine } = args;
-	const sqlite = engine.sqlite as SqliteWasmDatabase;
 
-	const hooks = engine.hooks as unknown as object | undefined;
-	if (hooks && !hookListeners.has(hooks) && engine.hooks) {
-		hookListeners.add(hooks);
+	if (!hookListeners.has(args.engine.hooks)) {
+		hookListeners.add(args.engine.hooks);
 		engine.hooks.onStateCommit(({ changes }) => {
 			for (const change of changes) {
 				if (
@@ -81,11 +75,11 @@ export function isStaleStateCache(args: {
 		});
 	}
 
-	if (staleStateCache.has(sqlite)) {
-		return staleStateCache.get(sqlite)!;
+	if (staleStateCache.has(args.engine.executeSync)) {
+		return staleStateCache.get(args.engine.executeSync)!;
 	}
 
-	const result = readStaleFlag(engine);
+	const result = readStaleFlag(args.engine);
 	setStaleStateCacheMemo({ engine, value: result });
 	return result;
 }

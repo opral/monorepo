@@ -70,9 +70,12 @@ const STATE_VTAB_COLUMN_NAMES = [
 ];
 
 export function applyStateVTable(
-	engine: Pick<LixEngine, "sqlite" | "hooks">
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>
 ): void {
-	const { sqlite, hooks } = engine;
+	const { sqlite } = engine;
 
 	// Statement/transaction-scoped writer value set via withWriterKey helper.
 	let currentWriterKey: string | null = null;
@@ -514,9 +517,7 @@ export function applyStateVTable(
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
-					const _timestamp = getTimestampSync({
-						engine: { sqlite, hooks },
-					});
+					const _timestamp = getTimestampSync({ engine });
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 

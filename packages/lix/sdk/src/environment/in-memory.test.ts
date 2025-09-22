@@ -2,9 +2,9 @@ import { describe, test, expect } from "vitest";
 import { InMemoryEnvironment } from "./in-memory.js";
 
 async function exec(env: InMemoryEnvironment, sql: string, params?: unknown[]) {
-	return env.call("lix_exec_sync", {
+	return env.call("lix_execute_sync", {
 		sql,
-		params,
+		parameters: params,
 	});
 }
 

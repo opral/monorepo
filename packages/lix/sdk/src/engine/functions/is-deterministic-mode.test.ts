@@ -6,6 +6,8 @@ import { newLixFile } from "../../lix/new-lix.js";
 test("isDeterministicMode returns false when lix_deterministic_mode is not set", async () => {
 	const lix = await openLix({ blob: await newLixFile() });
 
+	// @ts-ignore investigative log
+	process.stdout.write(`exec type: ${typeof lix.engine?.executeSync}\n`);
 	const result = isDeterministicModeSync({ engine: lix.engine! });
 
 	expect(result).toBe(false);
