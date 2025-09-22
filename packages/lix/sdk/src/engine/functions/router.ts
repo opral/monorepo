@@ -10,6 +10,7 @@ import { uuidV7Sync } from "./uuid-v7.js";
 import { nanoIdSync } from "./nano-id.js";
 import { getTimestampSync } from "./timestamp.js";
 import { humanIdSync } from "./generate-human-id.js";
+import { createExplainQuery } from "../explain-query.js";
 
 /**
  * Creates an engine function router bound to a specific Lix context.
@@ -30,11 +31,17 @@ export type Call = (
 export function createCallRouter(args: {
 	engine: Pick<
 		LixEngine,
-		"hooks" | "executeSync" | "executeQuerySync" | "runtimeCacheRef" | "call"
+		| "hooks"
+		| "executeSync"
+		| "executeQuerySync"
+		| "runtimeCacheRef"
+		| "call"
+		| "sqlite"
 	>;
 }): {
 	call: Call;
 } {
+	const explainQuery = createExplainQuery({ engine: args.engine });
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
 	// in a Promise by `callFn` for a unified async surface.
 	const routes = new Map<
@@ -90,6 +97,7 @@ export function createCallRouter(args: {
 				return args.engine.executeQuerySync(payload as any);
 			},
 		],
+		["lix_explain_query", explainQuery as any],
 	]);
 
 	return {
