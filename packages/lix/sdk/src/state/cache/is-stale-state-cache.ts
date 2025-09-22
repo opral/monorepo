@@ -1,8 +1,8 @@
 import { sql, type Kysely } from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { executeSync } from "../../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
+import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 const CACHE_SCHEMA_KEY = "lix_key_value";
