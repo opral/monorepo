@@ -11,7 +11,7 @@ The vtable approach for SELECT queries leads to severe performance degration:
 
 ## Solution
 
-Implement a query compiler which takes SQL and routes it to the underlying tables. That bypasses the vtable(s) for SELECT queries, enabling materialized cache, avoiding JS <-> WASM bridgeing, and the full SQLite query planner.
+Implement a query processor which takes SQL and routes it to the underlying tables. That bypasses the vtable(s) for SELECT queries, enabling materialized cache, avoiding JS <-> WASM bridgeing, and the full SQLite query planner.
 
 ### TODOs
 

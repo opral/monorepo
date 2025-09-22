@@ -1,7 +1,7 @@
 import type { CompiledQuery } from "kysely";
 
 import type { LixEngine } from "./boot.js";
-import { createQueryCompiler } from "./query-compiler/index.js";
+import { createQueryCompiler } from "./query-processor/index.js";
 
 export function createExplainQuery(args: {
 	engine: Pick<

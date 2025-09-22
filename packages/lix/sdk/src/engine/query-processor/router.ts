@@ -236,28 +236,38 @@ function buildStateSubquery(args: {
 	viewName: StateViewName;
 }): OperationNode {
 	const { schemaKey, alias, viewName } = args;
-	const tableName = schemaKeyToCacheTableName(schemaKey);
+	const conditions = [sql`schema_key = ${schemaKey}`];
+	if (viewName === "state") {
+		conditions.push(sql`version_id IN (SELECT version_id FROM active_version)`);
+	}
+	const whereClause = sql.join(conditions, sql` AND `);
 
-	const selectColumns = buildSelectColumns(viewName);
-	const selectList = sql.join(selectColumns, sql`, `);
-
-	const whereClauses: ReturnType<typeof buildWhereClauses> = buildWhereClauses(
-		viewName,
-		schemaKey
-	);
-	const selectableWhere = sql.join(whereClauses, sql` AND `);
+	const baseColumns = [
+		sql`entity_id`,
+		sql`schema_key`,
+		sql`file_id`,
+		sql`plugin_key`,
+		sql`snapshot_content`,
+		sql`schema_version`,
+		sql`created_at`,
+		sql`updated_at`,
+		sql`inherited_from_version_id`,
+		sql`change_id`,
+		sql`untracked`,
+		sql`commit_id`,
+		sql`writer_key`,
+		sql`metadata`,
+	];
+	const columns =
+		viewName === "state"
+			? baseColumns
+			: [sql`version_id`, ...baseColumns];
+	const selectList = sql.join(columns, sql`, `);
 
 	const subquery = sql`
-		(SELECT
-			${selectList}
-		FROM ${sql.id(tableName)} AS c
-		LEFT JOIN change ch ON ch.id = c.change_id
-		LEFT JOIN internal_state_writer ws
-			ON ws.file_id = c.file_id
-			AND ws.version_id = c.version_id
-			AND ws.schema_key = c.schema_key
-			AND ws.entity_id = c.entity_id
-		WHERE ${selectableWhere}
+		(SELECT ${selectList}
+		 FROM internal_resolved_state_all
+		 WHERE ${whereClause}
 		) AS ${sql.id(alias)}
 	`;
 
