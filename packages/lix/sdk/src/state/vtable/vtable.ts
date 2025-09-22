@@ -1,7 +1,6 @@
 import type { Generated } from "kysely";
 import { sql } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
@@ -355,12 +354,9 @@ export function applyStateVTable(
 							query = query.where(column as any, "=", value);
 						}
 
-						const stateResults = executeSync({
-							engine,
-							query,
-						});
+						const stateResults = engine.executeSync(query.compile()).rows;
 
-						cursorState.results = stateResults || [];
+						cursorState.results = stateResults ?? [];
 						cursorState.rowIndex = 0;
 						return capi.SQLITE_OK;
 					}
@@ -379,10 +375,7 @@ export function applyStateVTable(
 						query = query.where(column as any, "=", value);
 					}
 
-					const results = executeSync({
-						engine,
-						query,
-					});
+					const results = engine.executeSync(query.compile()).rows;
 
 					cursorState.results = results ?? [];
 					cursorState.rowIndex = 0;
@@ -447,34 +440,39 @@ export function applyStateVTable(
 					if (columnName === "writer_key") {
 						// Compute writer on demand from internal_state_writer with inheritance fallback
 						try {
-							const key = executeSync({
-								engine,
-								query: internalQueryBuilder
+							const keyRows = engine.executeSync(
+								internalQueryBuilder
 									.selectFrom("internal_state_writer")
 									.select(["writer_key"])
 									.where("file_id", "=", String(row.file_id))
 									.where("version_id", "=", String(row.version_id))
 									.where("entity_id", "=", String(row.entity_id))
 									.where("schema_key", "=", String(row.schema_key))
-									.limit(1),
-							});
+									.limit(1)
+									.compile()
+							).rows;
 							let w: string | null =
-								(key && key[0] && (key[0] as any).writer_key) || null;
+								(keyRows && keyRows[0] && (keyRows[0] as any).writer_key) ||
+								null;
 							if (!w) {
 								const parent = row.inherited_from_version_id;
 								if (parent) {
-									const p = executeSync({
-										engine,
-										query: internalQueryBuilder
+									const parentRows = engine.executeSync(
+										internalQueryBuilder
 											.selectFrom("internal_state_writer")
 											.select(["writer_key"])
 											.where("file_id", "=", String(row.file_id))
 											.where("version_id", "=", String(parent))
 											.where("entity_id", "=", String(row.entity_id))
 											.where("schema_key", "=", String(row.schema_key))
-											.limit(1),
-									});
-									w = (p && p[0] && (p[0] as any).writer_key) || null;
+											.limit(1)
+											.compile()
+									).rows;
+									w =
+										(parentRows &&
+											parentRows[0] &&
+											(parentRows[0] as any).writer_key) ||
+										null;
 								}
 							}
 							if (w === null || w === undefined) {
@@ -760,9 +758,8 @@ export function applyStateVTable(
 	}): void {
 		if (args.writer && args.writer.length > 0) {
 			// UPSERT writer
-			executeSync({
-				engine,
-				query: internalQueryBuilder
+			engine.executeSync(
+				internalQueryBuilder
 					.insertInto("internal_state_writer")
 					.values({
 						file_id: args.fileId,
@@ -775,19 +772,20 @@ export function applyStateVTable(
 						oc
 							.columns(["file_id", "version_id", "entity_id", "schema_key"])
 							.doUpdateSet({ writer_key: args.writer as any })
-					),
-			});
+					)
+					.compile()
+			);
 		} else {
 			// DELETE writer row (no NULL storage)
-			executeSync({
-				engine,
-				query: internalQueryBuilder
+			engine.executeSync(
+				internalQueryBuilder
 					.deleteFrom("internal_state_writer")
 					.where("file_id", "=", args.fileId)
 					.where("version_id", "=", args.versionId)
 					.where("entity_id", "=", args.entityId)
-					.where("schema_key", "=", args.schemaKey),
-			});
+					.where("schema_key", "=", args.schemaKey)
+					.compile()
+			);
 		}
 	}
 
@@ -796,41 +794,41 @@ export function applyStateVTable(
 		entityId: string;
 		versionId: string;
 	}): string {
-		const res = executeSync({
-			engine,
-			query: internalQueryBuilder
+		const res = engine.executeSync(
+			internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.select(["schema_key"])
 				.where("file_id", "=", args.fileId)
 				.where("entity_id", "=", args.entityId)
 				.where("version_id", "=", args.versionId)
-				.limit(1),
-		});
+				.limit(1)
+				.compile()
+		).rows;
 		let sk = (res && res[0] && (res[0] as any).schema_key) || "";
 		if (!sk) {
-			const res2 = executeSync({
-				engine,
-				query: internalQueryBuilder
+			const res2 = engine.executeSync(
+				internalQueryBuilder
 					.selectFrom("state_all")
 					.select(["schema_key"])
 					.where("file_id", "=", args.fileId)
 					.where("entity_id", "=", args.entityId)
 					.where("version_id", "=", args.versionId)
-					.limit(1),
-			});
+					.limit(1)
+					.compile()
+			).rows;
 			sk = (res2 && res2[0] && (res2[0] as any).schema_key) || "";
 		}
 		if (!sk) {
-			const res3 = executeSync({
-				engine,
-				query: internalQueryBuilder
+			const res3 = engine.executeSync(
+				internalQueryBuilder
 					.selectFrom("internal_state_cache")
 					.select(["schema_key"])
 					.where("file_id", "=", args.fileId)
 					.where("entity_id", "=", args.entityId)
 					.where("version_id", "=", args.versionId)
-					.limit(1),
-			});
+					.limit(1)
+					.compile()
+			).rows;
 			sk = (res3 && res3[0] && (res3[0] as any).schema_key) || "";
 		}
 		return sk;

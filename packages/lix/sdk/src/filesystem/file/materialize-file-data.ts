@@ -1,13 +1,13 @@
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
+import type { LixChange } from "../../change/schema-definition.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import { ensureCompleteDescriptor } from "./descriptor-utils.js";
 import { matchesGlob } from "../util/glob.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export function materializeFileData(args: {
-	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync" | "executeSync">;
+	engine: Pick<LixEngine, "getAllPluginsSync" | "executeSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	versionId: string;
@@ -36,10 +36,8 @@ export function materializeFileData(args: {
 			continue;
 		}
 
-		// Get plugin changes from state table
-		const changes = executeSync({
-			engine: args.engine,
-			query: internalQueryBuilder
+		const rows = args.engine.executeSync(
+			internalQueryBuilder
 				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", descriptor.id)
@@ -47,22 +45,18 @@ export function materializeFileData(args: {
 				.select([
 					"entity_id",
 					"schema_key",
+					"schema_version",
 					"file_id",
 					"plugin_key",
 					"snapshot_content",
-					"version_id",
+					"metadata",
 					"created_at",
-				]),
-		});
+					"change_id",
+				])
+				.compile()
+		).rows;
 
-		// Format changes for plugin
-		const formattedChanges = changes.map((change) => ({
-			...change,
-			snapshot_content:
-				typeof change.snapshot_content === "string"
-					? JSON.parse(change.snapshot_content)
-					: change.snapshot_content,
-		}));
+		const formattedChanges = mapStateRowsToLixChanges(rows);
 
 		const file = plugin.applyChanges({
 			file: descriptor,
@@ -73,9 +67,8 @@ export function materializeFileData(args: {
 	}
 
 	// If no specific plugin matched, use the fallback plugin
-	const changes = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const fallbackRows = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", descriptor.id)
@@ -83,22 +76,18 @@ export function materializeFileData(args: {
 			.select([
 				"entity_id",
 				"schema_key",
+				"schema_version",
 				"file_id",
 				"plugin_key",
 				"snapshot_content",
-				"version_id",
+				"metadata",
 				"created_at",
-			]),
-	});
+				"change_id",
+			])
+			.compile()
+	).rows;
 
-	// Format changes for plugin
-	const formattedChanges = changes.map((change) => ({
-		...change,
-		snapshot_content:
-			typeof change.snapshot_content === "string"
-				? JSON.parse(change.snapshot_content)
-				: change.snapshot_content,
-	}));
+	const formattedChanges = mapStateRowsToLixChanges(fallbackRows);
 
 	if (formattedChanges.length === 0) {
 		throw new Error(
@@ -112,4 +101,40 @@ export function materializeFileData(args: {
 	});
 
 	return file.fileData;
+}
+
+function mapStateRowsToLixChanges(rows: any[]): LixChange[] {
+	return rows.map((row) => {
+		const snapshotValue = row.snapshot_content;
+		const snapshot =
+			typeof snapshotValue === "string"
+				? JSON.parse(snapshotValue)
+				: (snapshotValue ?? null);
+
+		const metadataValue = row.metadata;
+		let metadata: Record<string, any> | null = null;
+		if (metadataValue != null) {
+			if (typeof metadataValue === "string") {
+				try {
+					metadata = JSON.parse(metadataValue);
+				} catch {
+					metadata = null;
+				}
+			} else if (typeof metadataValue === "object") {
+				metadata = metadataValue as Record<string, any>;
+			}
+		}
+
+		return {
+			id: (row.change_id as string | undefined) ?? (row.entity_id as string),
+			entity_id: row.entity_id as string,
+			schema_key: row.schema_key as string,
+			schema_version: row.schema_version as string,
+			file_id: row.file_id as string,
+			plugin_key: row.plugin_key as string,
+			metadata,
+			created_at: row.created_at as string,
+			snapshot_content: snapshot as Record<string, any> | null,
+		};
+	});
 }

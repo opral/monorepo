@@ -9,7 +9,6 @@ import {
 	ensureDirectoryPathExists,
 	computeDirectoryPath,
 } from "./ensure-directories.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { LixDirectoryDescriptorSchema } from "./schema-definition.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
@@ -20,10 +19,7 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * applyDirectoryDatabaseSchema({ engine });
  */
 export function applyDirectoryDatabaseSchema(args: {
-	engine: Pick<
-		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
+	engine: LixEngine;
 }): void {
 	const { engine } = args;
 	const schemaKey = LixDirectoryDescriptorSchema["x-lix-key"];
@@ -82,33 +78,35 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		const hidden = hiddenArg ? Number(hiddenArg) : 0;
 
-		executeSync({
-			engine,
-			query: internalQueryBuilder
+		engine.executeSync(
+			internalQueryBuilder
 				.deleteFrom("state_all")
 				.where("entity_id", "=", id)
 				.where("schema_key", "=", schemaKey)
-				.where("version_id", "=", versionId),
-		});
+				.where("version_id", "=", versionId)
+				.compile()
+		);
 
-		executeSync({
-			engine,
-			query: internalQueryBuilder.insertInto("state_all").values({
-				entity_id: id,
-				schema_key: schemaKey,
-				file_id: fileId,
-				plugin_key: pluginKey,
-				snapshot_content: {
-					id,
-					parent_id: parentId,
-					name,
-					hidden: Boolean(hidden),
-				},
-				schema_version: schemaVersion,
-				version_id: versionId,
-				untracked: false,
-			}),
-		});
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("state_all")
+				.values({
+					entity_id: id,
+					schema_key: schemaKey,
+					file_id: fileId,
+					plugin_key: pluginKey,
+					snapshot_content: {
+						id,
+						parent_id: parentId,
+						name,
+						hidden: Boolean(hidden),
+					},
+					schema_version: schemaVersion,
+					version_id: versionId,
+					untracked: false,
+				})
+				.compile()
+		);
 
 		return id;
 	};
@@ -430,7 +428,7 @@ function computeUpsertInputs(args: {
 }
 
 function assertNoDirectoryCycle(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	directoryId: string;
 	newParentId: string | null;
@@ -451,15 +449,15 @@ function assertNoDirectoryCycle(args: {
 		if (safety++ > 1024) {
 			throw new Error("Directory hierarchy appears to be cyclic");
 		}
-		const rows = executeSync({
-			engine: args.engine,
-			query: internalQueryBuilder
+		const rows = args.engine.executeSync(
+			internalQueryBuilder
 				.selectFrom("state_all")
 				.where("schema_key", "=", "lix_directory_descriptor")
 				.where("version_id", "=", args.versionId)
 				.where("entity_id", "=", current)
-				.select(["snapshot_content"]),
-		});
+				.select(["snapshot_content"])
+				.compile()
+		).rows;
 		if (rows.length === 0) {
 			throw new Error(`Parent directory does not exist for id ${current}`);
 		}

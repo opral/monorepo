@@ -1,4 +1,3 @@
-import { executeSync } from "../database/execute-sync.js";
 import type { LixEngine } from "../engine/boot.js";
 import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 import type { JSONType } from "../schema-definition/json-type.js";
@@ -111,4 +110,3 @@ export function createLixOwnLogSync(args: {
 			.compile()
 	);
 }
-
