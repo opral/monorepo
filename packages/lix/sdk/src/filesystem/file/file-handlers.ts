@@ -1,4 +1,3 @@
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
 import { LixFileDescriptorSchema } from "./schema-definition.js";
 import { createLixOwnLogSync } from "../../log/create-lix-own-log.js";
@@ -25,18 +24,19 @@ type FileMutationInput = {
 };
 
 export function handleFileInsert(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "hooks" | "getAllPluginsSync" | "executeSync">;
 	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
-	const [shouldSkip] = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const { rows: skipRows } = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
-			.select("value"),
-	});
+			.select("value")
+			.compile()
+	);
+	const shouldSkip = skipRows[0]?.value;
 
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
@@ -87,27 +87,29 @@ export function handleFileInsert(args: {
 	};
 
 	// Insert the file metadata into state table
-	executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder.insertInto("state_all").values({
-			entity_id: args.file.id,
-			schema_key: LixFileDescriptorSchema["x-lix-key"],
-			file_id: args.file.id,
-			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				id: args.file.id,
-				directory_id: descriptorFields.directoryId,
-				name: descriptorFields.name,
-				extension: descriptorFields.extension ?? null,
+	args.engine.executeSync(
+		internalQueryBuilder
+			.insertInto("state_all")
+			.values({
+				entity_id: args.file.id,
+				schema_key: LixFileDescriptorSchema["x-lix-key"],
+				file_id: args.file.id,
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					id: args.file.id,
+					directory_id: descriptorFields.directoryId,
+					name: descriptorFields.name,
+					extension: descriptorFields.extension ?? null,
+					metadata: descriptorFields.metadata ?? null,
+					hidden: descriptorFields.hidden,
+				},
+				schema_version: LixFileDescriptorSchema["x-lix-version"],
+				version_id: args.versionId,
 				metadata: descriptorFields.metadata ?? null,
-				hidden: descriptorFields.hidden,
-			},
-			schema_version: LixFileDescriptorSchema["x-lix-version"],
-			version_id: args.versionId,
-			metadata: descriptorFields.metadata ?? null,
-			untracked: args.untracked || false,
-		}),
-	});
+				untracked: args.untracked || false,
+			})
+			.compile()
+	);
 
 	const querySync = createQuerySync({ engine: args.engine });
 
@@ -157,10 +159,7 @@ export function handleFileInsert(args: {
 			// Validate and store schemas for all detected changes
 			for (const change of detectedChanges) {
 				storeDetectedChangeSchema({
-					engine: {
-						sqlite: args.engine.sqlite as any,
-						db: internalQueryBuilder as any,
-					} as any,
+					engine: args.engine,
 					schema: change.schema,
 					untracked: args.untracked || false,
 				});
@@ -168,19 +167,21 @@ export function handleFileInsert(args: {
 
 			// Store plugin detected changes in state table
 			for (const change of detectedChanges) {
-				executeSync({
-					engine: args.engine,
-					query: internalQueryBuilder.insertInto("state_all").values({
-						entity_id: change.entity_id,
-						schema_key: change.schema["x-lix-key"],
-						file_id: args.file.id,
-						plugin_key: plugin.key,
-						snapshot_content: change.snapshot_content as any,
-						schema_version: change.schema["x-lix-version"],
-						version_id: args.versionId,
-						untracked: args.untracked || false,
-					}),
-				});
+				args.engine.executeSync(
+					internalQueryBuilder
+						.insertInto("state_all")
+						.values({
+							entity_id: change.entity_id,
+							schema_key: change.schema["x-lix-key"],
+							file_id: args.file.id,
+							plugin_key: plugin.key,
+							snapshot_content: change.snapshot_content as any,
+							schema_version: change.schema["x-lix-version"],
+							version_id: args.versionId,
+							untracked: args.untracked || false,
+						})
+						.compile()
+				);
 			}
 		}
 	}
@@ -209,28 +210,27 @@ export function handleFileInsert(args: {
 				// Validate and store schemas for fallback plugin changes
 				for (const change of detectedChanges) {
 					storeDetectedChangeSchema({
-						engine: {
-							sqlite: args.engine.sqlite as any,
-							db: internalQueryBuilder as any,
-						} as any,
+						engine: args.engine,
 						schema: change.schema,
 					});
 				}
 
 				for (const change of detectedChanges) {
-					executeSync({
-						engine: args.engine,
-						query: internalQueryBuilder.insertInto("state_all").values({
-							entity_id: change.entity_id,
-							schema_key: change.schema["x-lix-key"],
-							file_id: args.file.id,
-							plugin_key: lixUnknownFileFallbackPlugin.key,
-							snapshot_content: change.snapshot_content as any,
-							schema_version: change.schema["x-lix-version"],
-							version_id: args.versionId,
-							untracked: args.untracked || false,
-						}),
-					});
+					args.engine.executeSync(
+						internalQueryBuilder
+							.insertInto("state_all")
+							.values({
+								entity_id: change.entity_id,
+								schema_key: change.schema["x-lix-key"],
+								file_id: args.file.id,
+								plugin_key: lixUnknownFileFallbackPlugin.key,
+								snapshot_content: change.snapshot_content as any,
+								schema_version: change.schema["x-lix-version"],
+								version_id: args.versionId,
+								untracked: args.untracked || false,
+							})
+							.compile()
+					);
 				}
 			}
 		}
@@ -266,18 +266,22 @@ export function handleFileInsert(args: {
 }
 
 export function handleFileUpdate(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "getAllPluginsSync">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "getAllPluginsSync" | "executeSync"
+	>;
 	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
-	const [shouldSkip] = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const { rows: skipRowsUpdate } = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_skip_file_handlers")
-			.select("value"),
-	});
+			.select("value")
+			.compile()
+	);
+	const shouldSkip = skipRowsUpdate[0]?.value;
 
 	if (shouldSkip) {
 		// If skip flag is set, do not process the file
@@ -328,9 +332,8 @@ export function handleFileUpdate(args: {
 	};
 
 	// Update the file metadata in state table FIRST
-	executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	args.engine.executeSync(
+		internalQueryBuilder
 			.updateTable("state_all")
 			.set({
 				snapshot_content: {
@@ -346,18 +349,20 @@ export function handleFileUpdate(args: {
 			})
 			.where("entity_id", "=", args.file.id)
 			.where("schema_key", "=", "lix_file_descriptor")
-			.where("version_id", "=", args.versionId),
-	});
+			.where("version_id", "=", args.versionId)
+			.compile()
+	);
 
 	// Get current file data for comparison
-	const currentFile = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const currentFileRows = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("file_all")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
-			.selectAll(),
-	})[0] as LixFile | undefined;
+			.selectAll()
+			.compile()
+	).rows as LixFile[];
+	const currentFile = currentFileRows[0];
 
 	if (currentFile) {
 		// Create querySync once per handler invocation
@@ -408,10 +413,7 @@ export function handleFileUpdate(args: {
 				// Validate and store schemas for all detected changes
 				for (const change of detectedChanges) {
 					storeDetectedChangeSchema({
-						engine: {
-							sqlite: args.engine.sqlite as any,
-							db: internalQueryBuilder as any,
-						} as any,
+						engine: args.engine,
 						schema: change.schema,
 						untracked: args.untracked || false,
 					});
@@ -421,30 +423,32 @@ export function handleFileUpdate(args: {
 				for (const change of detectedChanges) {
 					if (change.snapshot_content === null) {
 						// Handle deletion: remove the entity from state table
-						executeSync({
-							engine: args.engine,
-							query: internalQueryBuilder
+						args.engine.executeSync(
+							internalQueryBuilder
 								.deleteFrom("state_all")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
-								.where("version_id", "=", args.versionId),
-						});
+								.where("version_id", "=", args.versionId)
+								.compile()
+						);
 					} else {
 						// Handle update/insert: upsert the entity in state table
-						executeSync({
-							engine: args.engine,
-							query: internalQueryBuilder.insertInto("state_all").values({
-								entity_id: change.entity_id,
-								schema_key: change.schema["x-lix-key"],
-								file_id: args.file.id,
-								plugin_key: plugin.key,
-								snapshot_content: change.snapshot_content as any,
-								schema_version: change.schema["x-lix-version"],
-								version_id: args.versionId,
-								untracked: args.untracked || false,
-							}),
-						});
+						args.engine.executeSync(
+							internalQueryBuilder
+								.insertInto("state_all")
+								.values({
+									entity_id: change.entity_id,
+									schema_key: change.schema["x-lix-key"],
+									file_id: args.file.id,
+									plugin_key: plugin.key,
+									snapshot_content: change.snapshot_content as any,
+									schema_version: change.schema["x-lix-version"],
+									version_id: args.versionId,
+									untracked: args.untracked || false,
+								})
+								.compile()
+						);
 					}
 				}
 			}
@@ -475,10 +479,7 @@ export function handleFileUpdate(args: {
 					// Validate and store schemas for fallback plugin changes
 					for (const change of detectedChanges) {
 						storeDetectedChangeSchema({
-							engine: {
-								sqlite: args.engine.sqlite as any,
-								db: internalQueryBuilder as any,
-							} as any,
+							engine: args.engine,
 							schema: change.schema,
 							untracked: args.untracked || false,
 						});
@@ -487,30 +488,32 @@ export function handleFileUpdate(args: {
 					for (const change of detectedChanges) {
 						if (change.snapshot_content === null) {
 							// Handle deletion: remove the entity from state table
-							executeSync({
-								engine: args.engine,
-								query: internalQueryBuilder
+							args.engine.executeSync(
+								internalQueryBuilder
 									.deleteFrom("state_all")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
-									.where("version_id", "=", args.versionId),
-							});
+									.where("version_id", "=", args.versionId)
+									.compile()
+							);
 						} else {
 							// Handle update/insert: upsert the entity in state table
-							executeSync({
-								engine: args.engine,
-								query: internalQueryBuilder.insertInto("state_all").values({
-									entity_id: change.entity_id,
-									schema_key: change.schema["x-lix-key"],
-									file_id: args.file.id,
-									plugin_key: lixUnknownFileFallbackPlugin.key,
-									snapshot_content: change.snapshot_content as any,
-									schema_version: change.schema["x-lix-version"],
-									version_id: args.versionId,
-									untracked: args.untracked || false,
-								}),
-							});
+							args.engine.executeSync(
+								internalQueryBuilder
+									.insertInto("state_all")
+									.values({
+										entity_id: change.entity_id,
+										schema_key: change.schema["x-lix-key"],
+										file_id: args.file.id,
+										plugin_key: lixUnknownFileFallbackPlugin.key,
+										snapshot_content: change.snapshot_content as any,
+										schema_version: change.schema["x-lix-version"],
+										version_id: args.versionId,
+										untracked: args.untracked || false,
+									})
+									.compile()
+							);
 						}
 					}
 				}

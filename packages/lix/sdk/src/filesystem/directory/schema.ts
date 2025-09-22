@@ -323,7 +323,7 @@ export function applyDirectoryDatabaseSchema(args: {
 }
 
 function computeUpsertInputs(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 	versionId: string;
 	parentIdArg: unknown;
 	nameArg: unknown;
@@ -369,6 +369,13 @@ function computeUpsertInputs(args: {
 			);
 		}
 		if (rawParentId && !parentId) {
+			console.error("upsertDirectory parent mismatch", {
+				rawParentId,
+				computedParent: parentId,
+				normalizedPath,
+				versionId: args.versionId,
+				name,
+			});
 			throw new Error("Provided parent_id does not match root directory");
 		}
 		computedPath = normalizeDirectoryPath(

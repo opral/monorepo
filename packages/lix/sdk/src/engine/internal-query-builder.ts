@@ -6,7 +6,7 @@ import {
 	SqliteQueryCompiler,
 } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { createDefaultPlugins } from "../database/index.js";
+import { createDefaultPlugins } from "../database/kysely/plugins.js";
 
 /**
  * Cold Kysely instance wired to the SQLite dialect for compiling queries against

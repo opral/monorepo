@@ -10,7 +10,7 @@ import { matchesGlob } from "../util/glob.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export function materializeFileDataAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync" | "executeSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	rootCommitId: string;

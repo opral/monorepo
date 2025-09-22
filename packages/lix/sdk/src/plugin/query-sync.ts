@@ -1,6 +1,5 @@
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixEngine } from "../engine/boot.js";
-import { executeSync } from "../database/execute-sync.js";
 import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 /**
@@ -87,7 +86,7 @@ export type QuerySyncFunction = <
  * expect(Array.isArray(changes)).toBe(true)
  */
 export function createQuerySync(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 }): QuerySyncFunction {
 	/**
 	 * Starts a SELECT from the given table and returns a Kysely builder
@@ -105,17 +104,18 @@ export function createQuerySync(args: {
 
 function wrapBuilder<T extends object>(
 	builder: T,
-	engine: Pick<LixEngine, "sqlite">
+	engine: Pick<LixEngine, "executeSync">
 ): any {
 	return new Proxy(builder as any, {
 		get(target, prop, _receiver) {
 			if (prop === "execute") {
-				return () => parseSnapshotRows(executeSync({ engine, query: target }));
+				return () =>
+					parseSnapshotRows(engine.executeSync(target.compile()).rows);
 			}
 			if (prop === "executeTakeFirst") {
 				return () => {
 					const rows = parseSnapshotRows(
-						executeSync({ engine, query: target })
+						engine.executeSync(target.compile()).rows
 					);
 					return rows[0] ?? undefined;
 				};
@@ -123,7 +123,7 @@ function wrapBuilder<T extends object>(
 			if (prop === "executeTakeFirstOrThrow") {
 				return () => {
 					const rows = parseSnapshotRows(
-						executeSync({ engine, query: target })
+						engine.executeSync(target.compile()).rows
 					);
 					if (!rows[0]) throw new Error("No result");
 					return rows[0];

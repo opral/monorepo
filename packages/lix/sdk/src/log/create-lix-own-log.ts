@@ -79,19 +79,19 @@ export function shouldLog(
  * @returns A promise that resolves with the created log entry, or undefined if filtered out.
  */
 export function createLixOwnLogSync(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 	message?: string | null;
 	payload?: JSONType;
 	level: string;
 	key: string;
 }): void {
-	const logLevels = executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder
+	const [logLevels] = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("key_value")
 			.select("value")
-			.where("key", "=", "lix_log_levels"),
-	})[0];
+			.where("key", "=", "lix_log_levels")
+			.compile()
+	).rows;
 
 	// Check if the level is allowed
 	if (!shouldLog(logLevels?.value, args.level)) {
@@ -99,23 +99,16 @@ export function createLixOwnLogSync(args: {
 	}
 
 	// Insert the log
-	executeSync({
-		engine: args.engine,
-		query: internalQueryBuilder.insertInto("log").values({
-			key: args.key,
-			message: args.message ?? null,
-			payload: args.payload ?? null,
-			level: args.level,
-		}),
-	});
+	args.engine.executeSync(
+		internalQueryBuilder
+			.insertInto("log")
+			.values({
+				key: args.key,
+				message: args.message ?? null,
+				payload: args.payload ?? null,
+				level: args.level,
+			})
+			.compile()
+	);
 }
 
-export async function createLixOwnLog(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	message?: string | null;
-	payload?: JSONType;
-	level: string;
-	key: string;
-}): Promise<void> {
-	return createLixOwnLogSync(args);
-}

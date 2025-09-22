@@ -1,4 +1,4 @@
-import type { SqliteWasmDatabase } from "../database/index.js";
+import type { SqliteWasmDatabase } from "../database/sqlite/create-in-memory-database.js";
 
 export function createExecuteSync(args: { sqlite: SqliteWasmDatabase }) {
 	return (args2: {
