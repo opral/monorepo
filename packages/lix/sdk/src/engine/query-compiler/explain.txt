@@ -1,0 +1,10 @@
+SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:version_id,schema_key,file_id
+LIST SUBQUERY 8
+SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
+CREATE BLOOM FILTER
+CORRELATED SCALAR SUBQUERY 5
+COMPOUND QUERY
+LEFT-MOST SUBQUERY
+SEARCH c USING INDEX sqlite_autoindex_internal_change_1 (id=?)
+UNION ALL
+SEARCH t USING INDEX sqlite_autoindex_internal_transaction_state_1 (id=?)
