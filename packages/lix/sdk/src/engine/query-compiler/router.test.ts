@@ -123,6 +123,34 @@ test("handles join queries where a state view participates with other tables", a
 	expect(compiled.sql).toContain('"c"."id" = "s"."change_id"');
 });
 
+test("does not rewrite insert queries targeting state", async () => {
+	const { engine } = await createTestDb();
+	const db = new Kysely<LixDatabaseSchema>({
+		dialect: createEngineDialect({ database: engine.sqlite }),
+		plugins: [
+			...createDefaultPlugins(),
+			createCachePopulator({ engine }),
+			createQueryRouter(),
+		],
+	});
+
+	const compiled = db
+		.insertInto("state")
+		.values({
+			entity_id: "insert_test",
+			schema_key: "lix_key_value",
+			file_id: "bench",
+			schema_version: "1.0",
+			plugin_key: "lix_own_entity",
+			snapshot_content: sql`jsonb('{}')`,
+			writer_key: null,
+		})
+		.compile();
+
+	expect(compiled.sql).toMatch(/insert into "state"/i);
+	expect(compiled.sql).not.toContain("internal_state_cache_lix_key_value");
+});
+
 test("routes multiple state aliases to their respective cache tables", async () => {
 	const { db } = await createTestDb();
 
