@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 import {
 	createEngineDialect,
 	createInMemoryDatabase,
-} from "../sqlite/index.js";
+} from "../../sqlite/index.js";
 import { JSONColumnPlugin } from "./json-column-plugin.js";
 
 test("properly serializes string values for any-json columns", async () => {

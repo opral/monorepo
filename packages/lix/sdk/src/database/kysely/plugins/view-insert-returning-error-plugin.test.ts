@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLix } from "../../lix/open-lix.js";
+import { openLix } from "../../../lix/open-lix.js";
 
 test("should throw error when using returningAll() on view insert", async () => {
 	const lix = await openLix({});
