@@ -1,6 +1,6 @@
-import { serializeToHtml } from "@opral/markdown-wc/html";
 import { renderHtmlDiff } from "@lix-js/html-diff";
 import { AstSchemas, type MarkdownNode, type Ast } from "@opral/markdown-wc";
+import { serializeToHtml } from "@opral/markdown-wc/html";
 import type { RenderDiffArgs } from "@lix-js/sdk";
 
 async function buildAstFromDiffs(
@@ -34,14 +34,9 @@ export async function renderDiff(args: RenderDiffArgs): Promise<string> {
 	const beforeAst = await buildAstFromDiffs(args.diffs, "before");
 	const afterAst = await buildAstFromDiffs(args.diffs, "after");
 
-	const serialize = serializeToHtml as unknown as (
-		ast: Ast,
-		options?: { diffHints?: boolean },
-	) => Promise<string>;
-
 	const [beforeHtml, afterHtml] = await Promise.all([
-		serialize(beforeAst, { diffHints: true }),
-		serialize(afterAst, { diffHints: true }),
+		serializeToHtml(beforeAst, { diffHints: true }),
+		serializeToHtml(afterAst, { diffHints: true }),
 	]);
 
 	return renderHtmlDiff({

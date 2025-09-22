@@ -27,8 +27,8 @@ export async function serializeToHtml(
 			if (!node || typeof node !== "object") return
 			// loose lists
 			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
-			// diff hints: set data-diff-mode="words" for paragraphs (non-destructive: don't override if present)
-			if (options.diffHints && node.type === "paragraph") {
+			// diff hints: set data-diff-mode="words" for text-centric blocks (non-destructive: don't override if present)
+			if (options.diffHints && (node.type === "paragraph" || node.type === "heading")) {
 				const d = ((node as any).data ||= {}) as Record<string, any>
 				if (d["diff-mode"] == null) d["diff-mode"] = "words"
 			}
