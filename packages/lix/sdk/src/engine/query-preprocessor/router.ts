@@ -259,9 +259,7 @@ function buildStateSubquery(args: {
 		sql`metadata`,
 	];
 	const columns =
-		viewName === "state"
-			? baseColumns
-			: [sql`version_id`, ...baseColumns];
+		viewName === "state" ? baseColumns : [sql`version_id`, ...baseColumns];
 	const selectList = sql.join(columns, sql`, `);
 
 	const subquery = sql`

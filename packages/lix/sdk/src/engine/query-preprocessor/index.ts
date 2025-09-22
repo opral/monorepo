@@ -6,9 +6,9 @@ import {
 
 import type { LixEngine } from "../boot.js";
 import { createCachePopulator } from "./cache-populator.js";
-import { createQueryRouter } from "./router.js";
+// import { createQueryRouter } from "./router.js";
 
-export function createQueryCompiler(args: {
+export function createQueryPreprocessor(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
@@ -16,7 +16,7 @@ export function createQueryCompiler(args: {
 }): (input: { query: CompiledQuery<unknown> }) => CompiledQuery<unknown> {
 	const plugins: KyselyPlugin[] = [
 		createCachePopulator(args),
-		createQueryRouter(),
+		// createQueryRouter(),
 	];
 
 	return ({ query }) => {

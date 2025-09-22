@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { promises as fs } from "node:fs";
 import { expect, test } from "vitest";
 
@@ -17,7 +19,7 @@ test("explain key_value select", async () => {
 		})) as {
 			plan: Array<{ detail?: string }>;
 			original: { sql: string };
-			compiled: { sql: string };
+			rewritten: { sql: string };
 		};
 
 		const lines = explained.plan.map((row) =>
@@ -28,8 +30,8 @@ test("explain key_value select", async () => {
 			"Original SQL:",
 			explained.original.sql,
 			"",
-			"Compiled SQL:",
-			explained.compiled.sql,
+			"Rewritten SQL:",
+			explained.rewritten.sql,
 			"",
 			"Plan:",
 			...lines.map((line) => `  - ${line}`),

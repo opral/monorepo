@@ -1,6 +1,6 @@
 import type { CompiledQuery } from "kysely";
 import type { LixEngine } from "./boot.js";
-import { createQueryCompiler } from "./query-processor/index.js";
+import { createQueryPreprocessor } from "./query-preprocessor/index.js";
 
 export function createExecuteQuerySync(args: {
 	engine: Pick<
@@ -9,10 +9,10 @@ export function createExecuteQuerySync(args: {
 	>;
 }) {
 	const { engine } = args;
-	const compile = createQueryCompiler({ engine });
+	const preprocessQuery = createQueryPreprocessor({ engine });
 
 	return ({ query }: { query: CompiledQuery<unknown> }): { rows: any[] } => {
-		const compiled = compile({ query });
+		const compiled = preprocessQuery({ query });
 
 		const columnNames: string[] = [];
 		const rows = engine.sqlite.exec({

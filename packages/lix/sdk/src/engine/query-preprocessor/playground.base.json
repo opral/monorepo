@@ -1,0 +1,69 @@
+{
+	"files": [
+		{
+			"filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-compiler/playground.bench.ts",
+			"groups": [
+				{
+					"fullName": "src/engine/query-compiler/playground.bench.ts",
+					"benchmarks": [
+						{
+							"id": "1198490185_1",
+							"name": "insert 10 then read specific key",
+							"rank": 2,
+							"rme": 4.500095271077996,
+							"samples": [],
+							"totalTime": 3022.898752,
+							"min": 278.92633300000034,
+							"max": 340.67404199999874,
+							"hz": 3.3080830091923636,
+							"period": 302.2898752,
+							"mean": 302.2898752,
+							"variance": 361.6641138385396,
+							"sd": 19.017468649600545,
+							"sem": 6.013851626358432,
+							"df": 9,
+							"critical": 2.262,
+							"moe": 13.603332378822772,
+							"p75": 311.80754200000047,
+							"p99": 340.67404199999874,
+							"p995": 340.67404199999874,
+							"p999": 340.67404199999874,
+							"sampleCount": 10,
+							"median": 299.61312499999985
+						}
+					]
+				},
+				{
+					"fullName": "src/engine/query-compiler/playground.bench.ts > state benchmarks",
+					"benchmarks": [
+						{
+							"id": "1198490185_0_0",
+							"name": "insert 10 then read all",
+							"rank": 1,
+							"rme": 4.902296538431941,
+							"samples": [],
+							"totalTime": 2286.8747080000003,
+							"min": 206.18583400000034,
+							"max": 251.15808300000026,
+							"hz": 4.3727800062757085,
+							"period": 228.68747080000003,
+							"mean": 228.68747080000003,
+							"variance": 245.63977883129772,
+							"sd": 15.672899503005107,
+							"sem": 4.956205996841714,
+							"df": 9,
+							"critical": 2.262,
+							"moe": 11.210937964855956,
+							"p75": 237.895125,
+							"p99": 251.15808300000026,
+							"p995": 251.15808300000026,
+							"p999": 251.15808300000026,
+							"sampleCount": 10,
+							"median": 231.3133335
+						}
+					]
+				}
+			]
+		}
+	]
+}

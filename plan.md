@@ -1,4 +1,4 @@
-# Query Compiler Plan
+# Query Preprocesor Plan
 
 ## Problem
 
@@ -21,3 +21,4 @@ Implement a query processor which takes SQL and routes it to the underlying tabl
 - [ ] create entity views with optimized routes
 - [ ] verify no more vtable's on read queries
 - [ ] implement materialized cache
+- [ ] write docs that queries run through the query preprocessor (why does the preprocessor exist etc.)

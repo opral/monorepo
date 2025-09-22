@@ -1,7 +1,7 @@
 import type { CompiledQuery } from "kysely";
 
 import type { LixEngine } from "./boot.js";
-import { createQueryCompiler } from "./query-processor/index.js";
+import { createQueryPreprocessor } from "./query-preprocessor/index.js";
 
 export function createExplainQuery(args: {
 	engine: Pick<
@@ -9,7 +9,7 @@ export function createExplainQuery(args: {
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
 	>;
 }) {
-	const compileWithPlugins = createQueryCompiler({ engine: args.engine });
+	const preprocessQuery = createQueryPreprocessor({ engine: args.engine });
 
 	return ({
 		query,
@@ -20,13 +20,13 @@ export function createExplainQuery(args: {
 			sql: string;
 			parameters: unknown[];
 		};
-		compiled: {
+		rewritten: {
 			sql: string;
 			parameters: unknown[];
 		};
 		plan: any[];
 	} => {
-		const rewritten = compileWithPlugins({ query });
+		const rewritten = preprocessQuery({ query });
 		const explain = args.engine.executeSync({
 			sql: `EXPLAIN QUERY PLAN ${rewritten.sql}`,
 			parameters: rewritten.parameters,
@@ -36,7 +36,7 @@ export function createExplainQuery(args: {
 				sql: query.sql,
 				parameters: [...(query.parameters ?? [])],
 			},
-			compiled: {
+			rewritten: {
 				sql: rewritten.sql,
 				parameters: [...(rewritten.parameters ?? [])],
 			},

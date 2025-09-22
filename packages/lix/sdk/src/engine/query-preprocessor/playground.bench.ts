@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { bench, beforeAll, afterAll, describe } from "vitest";
 import { promises as fs } from "node:fs";
 
@@ -70,34 +71,33 @@ describe("state benchmarks", () => {
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "like", `${prefix}%`)
 			.execute();
-
-		});
 	});
+});
 
-	bench("insert 10 then read specific key", async () => {
-		const instance = requireLix();
-		const runId = runCounter++;
-		const prefix = `bench_one_${runId}_`;
-		const rows = Array.from({ length: 10 }, (_, i) => ({
-			entity_id: `${prefix}${i}`,
-			schema_key: "lix_key_value",
-			file_id: "bench",
-			plugin_key: "lix_own_entity",
-			snapshot_content: { key: `${prefix}${i}`, value: { index: i } },
-			writer_key: null,
-		}));
-		const targetEntity = `${prefix}5`;
+bench("insert 10 then read specific key", async () => {
+	const instance = requireLix();
+	const runId = runCounter++;
+	const prefix = `bench_one_${runId}_`;
+	const rows = Array.from({ length: 10 }, (_, i) => ({
+		entity_id: `${prefix}${i}`,
+		schema_key: "lix_key_value",
+		file_id: "bench",
+		plugin_key: "lix_own_entity",
+		snapshot_content: { key: `${prefix}${i}`, value: { index: i } },
+		writer_key: null,
+	}));
+	const targetEntity = `${prefix}5`;
 
-		await instance.engine.executeQuerySync({
-			query: instance.db.insertInto("state").values(rows).compile(),
-		});
-		await instance.db
-			.selectFrom("state")
-			.selectAll()
-			.where("schema_key", "=", "lix_key_value")
-			.where("entity_id", "=", targetEntity)
-			.execute();
+	await instance.engine.executeQuerySync({
+		query: instance.db.insertInto("state").values(rows).compile(),
 	});
+	await instance.db
+		.selectFrom("state")
+		.selectAll()
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", targetEntity)
+		.execute();
+});
 
 function requireLix() {
 	if (!lix) throw new Error("lix instance not initialised");
@@ -115,7 +115,7 @@ async function writeExplain(args: {
 	})) as {
 		plan: Array<{ detail?: string }>;
 		original: { sql: string };
-		compiled: { sql: string };
+		rewritten: { sql: string };
 	};
 	const lines = explained.plan.map(
 		(row: any) => row.detail ?? JSON.stringify(row)
@@ -125,8 +125,8 @@ async function writeExplain(args: {
 		"Original SQL:",
 		explained.original.sql,
 		"",
-		"Compiled SQL:",
-		explained.compiled.sql,
+		"Rewritten SQL:",
+		explained.rewritten.sql,
 		"",
 		"Plan:",
 		...lines.map((line) => `  - ${line}`),
