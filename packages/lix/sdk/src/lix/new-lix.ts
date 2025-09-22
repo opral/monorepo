@@ -38,7 +38,7 @@ import {
 	type LixActiveAccount,
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
-import { createExecuteSync } from "../engine/create-execute-sync.js";
+import { createExecuteSync } from "../engine/execute-sync.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.

@@ -8,7 +8,7 @@ import { switchAccount } from "../account/switch-account.js";
 import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
-import { createExecuteSync } from "./create-execute-sync.js";
+import { createExecuteSync } from "./execute-sync.js";
 
 export type EngineEvent = {
 	type: "state_commit";
