@@ -2,16 +2,31 @@ Original SQL:
 select * from "state" as "s" where "s"."schema_key" = ? and "s"."entity_id" = ?
 
 Compiled SQL:
-select * from "state" as "s" where "s"."schema_key" = ? and "s"."entity_id" = ?
+select * from 
+		(SELECT
+			c.entity_id, c.schema_key, c.file_id, c.plugin_key, json(c.snapshot_content) AS snapshot_content, c.schema_version, c.created_at, c.updated_at, c.inherited_from_version_id, c.change_id, 0 AS untracked, c.commit_id, ws.writer_key, json(ch.metadata) AS metadata
+		FROM "internal_state_cache_lix_key_value" AS c
+		LEFT JOIN change ch ON ch.id = c.change_id
+		LEFT JOIN internal_state_writer ws
+			ON ws.file_id = c.file_id
+			AND ws.version_id = c.version_id
+			AND ws.schema_key = c.schema_key
+			AND ws.entity_id = c.entity_id
+		WHERE c.schema_key = ? AND c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL AND c.version_id IN (SELECT version_id FROM active_version)
+		) AS "s"
+	 where "s"."schema_key" = ? and "s"."entity_id" = ?
 
 Plan:
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:version_id,schema_key,entity_id
-  - LIST SUBQUERY 7
-  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
-  - CREATE BLOOM FILTER
-  - CORRELATED SCALAR SUBQUERY 4
+  - MATERIALIZE change
   - COMPOUND QUERY
   - LEFT-MOST SUBQUERY
-  - SEARCH c USING INDEX sqlite_autoindex_internal_change_1 (id=?)
+  - SCAN c
+  - SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
   - UNION ALL
-  - SEARCH t USING INDEX sqlite_autoindex_internal_transaction_state_1 (id=?)
+  - SCAN t
+  - SEARCH c USING PRIMARY KEY (entity_id=?)
+  - LIST SUBQUERY 1
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
+  - CREATE BLOOM FILTER
+  - SCAN ch LEFT-JOIN
+  - SEARCH ws USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
