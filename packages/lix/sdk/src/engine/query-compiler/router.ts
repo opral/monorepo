@@ -33,7 +33,7 @@ const STATE_VIEW_NAMES = new Set<StateViewName>([
  * });
  */
 
-export function createStateRouter(): KyselyPlugin {
+export function createQueryRouter(): KyselyPlugin {
 	return {
 		transformQuery(transformArgs: PluginTransformQueryArgs): RootOperationNode {
 			const { node: rewritten, changed } = rewriteStateQueryNode(

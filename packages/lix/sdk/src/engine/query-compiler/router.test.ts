@@ -5,7 +5,7 @@ import type { LixDatabaseSchema } from "../../database/schema.js";
 import { createEngineDialect } from "../../database/sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "../../database/kysely/index.js";
 import { createCachePopulator } from "./cache-populator.js";
-import { createStateRouter } from "./router.js";
+import { createQueryRouter } from "./router.js";
 
 async function createTestDb() {
 	const lix = await openLix({});
@@ -18,7 +18,7 @@ async function createTestDb() {
 			plugins: [
 				...createDefaultPlugins(),
 				createCachePopulator({ engine }),
-				createStateRouter(),
+				createQueryRouter(),
 			],
 		}),
 	};
