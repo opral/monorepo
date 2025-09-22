@@ -1,64 +1,64 @@
 {
-	"files": [
-		{
-			"filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-compiler/playground.bench.ts",
-			"groups": [
-				{
-					"fullName": "src/engine/query-compiler/playground.bench.ts > key_value benchmarks",
-					"benchmarks": [
-						{
-							"id": "1198490185_0_0",
-							"name": "insert 10 then read all",
-							"rank": 1,
-							"rme": 8.793379599324112,
-							"samples": [],
-							"totalTime": 8387.951664999997,
-							"min": 683.2068329999993,
-							"max": 993.8937919999989,
-							"hz": 1.192186173619302,
-							"period": 838.7951664999997,
-							"mean": 838.7951664999997,
-							"variance": 10632.570726684226,
-							"sd": 103.11435751962102,
-							"sem": 32.60762292269129,
-							"df": 9,
-							"critical": 2.262,
-							"moe": 73.7584430511277,
-							"p75": 920.2874159999992,
-							"p99": 993.8937919999989,
-							"p995": 993.8937919999989,
-							"p999": 993.8937919999989,
-							"sampleCount": 10,
-							"median": 847.740875
-						},
-						{
-							"id": "1198490185_0_1",
-							"name": "insert 10 then read specific key",
-							"rank": 2,
-							"rme": 5.013241416455201,
-							"samples": [],
-							"totalTime": 13440.520582999998,
-							"min": 1215.4410410000019,
-							"max": 1478.0521249999983,
-							"hz": 0.7440188003319098,
-							"period": 1344.0520582999998,
-							"mean": 1344.0520582999998,
-							"variance": 8873.280635889469,
-							"sd": 94.19809252787165,
-							"sem": 29.788052363136245,
-							"df": 9,
-							"critical": 2.262,
-							"moe": 67.38057444541418,
-							"p75": 1429.882375000001,
-							"p99": 1478.0521249999983,
-							"p995": 1478.0521249999983,
-							"p999": 1478.0521249999983,
-							"sampleCount": 10,
-							"median": 1342.0259374999987
-						}
-					]
-				}
-			]
-		}
-	]
+  "files": [
+    {
+      "filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-compiler/playground.bench.ts",
+      "groups": [
+        {
+          "fullName": "src/engine/query-compiler/playground.bench.ts > state benchmarks",
+          "benchmarks": [
+            {
+              "id": "1198490185_0_0",
+              "name": "insert 10 then read all",
+              "rank": 1,
+              "rme": 8.682741540769463,
+              "samples": [],
+              "totalTime": 8281.056456999999,
+              "min": 675.354875,
+              "max": 986.042958,
+              "hz": 1.2075753923337853,
+              "period": 828.1056456999999,
+              "mean": 828.1056456999999,
+              "variance": 10104.155865211073,
+              "sd": 100.5194302869404,
+              "sem": 31.78703488092444,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 71.90227290065108,
+              "p75": 890.5072499999987,
+              "p99": 986.042958,
+              "p995": 986.042958,
+              "p999": 986.042958,
+              "sampleCount": 10,
+              "median": 844.8472495000001
+            },
+            {
+              "id": "1198490185_0_1",
+              "name": "insert 10 then read specific key",
+              "rank": 2,
+              "rme": 4.62065789303341,
+              "samples": [],
+              "totalTime": 13017.853789999997,
+              "min": 1178.4993749999994,
+              "max": 1440.2365839999984,
+              "hz": 0.7681757808404455,
+              "period": 1301.7853789999997,
+              "mean": 1301.7853789999997,
+              "variance": 7071.331676727675,
+              "sd": 84.09121046059258,
+              "sem": 26.59197562560494,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 60.151048865118376,
+              "p75": 1370.639916,
+              "p99": 1440.2365839999984,
+              "p995": 1440.2365839999984,
+              "p999": 1440.2365839999984,
+              "sampleCount": 10,
+              "median": 1273.7360000000008
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

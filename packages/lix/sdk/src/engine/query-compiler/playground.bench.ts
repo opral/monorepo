@@ -24,18 +24,20 @@ beforeAll(async () => {
 	await writeExplain({
 		filename: "explain.read-all.txt",
 		query: lix.db
-			.selectFrom("key_value")
+			.selectFrom("state as s")
 			.selectAll()
-			.where("key", "like", "bench_all_%")
+			.where("s.schema_key", "=", "lix_key_value")
+			.where("s.entity_id", "like", "bench_all_%")
 			.compile(),
 	});
 
 	await writeExplain({
 		filename: "explain.read-one.txt",
 		query: lix.db
-			.selectFrom("key_value")
+			.selectFrom("state as s")
 			.selectAll()
-			.where("key", "=", "bench_one_target")
+			.where("s.schema_key", "=", "lix_key_value")
+			.where("s.entity_id", "=", "bench_one_target")
 			.compile(),
 	});
 });
@@ -45,26 +47,36 @@ afterAll(async () => {
 	lix = undefined;
 });
 
-describe("key_value benchmarks", () => {
+describe("state benchmarks", () => {
 	bench("insert 10 then read all", async () => {
 		const instance = requireLix();
 		const runId = runCounter++;
 		const prefix = `bench_all_${runId}_`;
 		const rows = Array.from({ length: 10 }, (_, i) => ({
-			key: `${prefix}${i}`,
-			value: { index: i },
+			entity_id: `${prefix}${i}`,
+			schema_key: "lix_key_value",
+			file_id: "bench",
+			plugin_key: "lix_own_entity",
+			snapshot_content: { key: `${prefix}${i}`, value: { index: i } },
+			writer_key: null,
 		}));
 
-		await instance.db.insertInto("key_value").values(rows).execute();
+		await instance.engine.executeQuerySync({
+			query: instance.db.insertInto("state").values(rows).compile(),
+		});
 		await instance.db
-			.selectFrom("key_value")
+			.selectFrom("state")
 			.selectAll()
-			.where("key", "like", `${prefix}%`)
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "like", `${prefix}%`)
 			.execute();
-		await instance.db
-			.deleteFrom("key_value")
-			.where("key", "like", `${prefix}%`)
-			.execute();
+		await instance.engine.executeQuerySync({
+			query: instance.db
+				.deleteFrom("state")
+				.where("schema_key", "=", "lix_key_value")
+				.where("entity_id", "like", `${prefix}%`)
+				.compile(),
+		});
 	});
 
 	bench("insert 10 then read specific key", async () => {
@@ -72,21 +84,31 @@ describe("key_value benchmarks", () => {
 		const runId = runCounter++;
 		const prefix = `bench_one_${runId}_`;
 		const rows = Array.from({ length: 10 }, (_, i) => ({
-			key: `${prefix}${i}`,
-			value: { index: i },
+			entity_id: `${prefix}${i}`,
+			schema_key: "lix_key_value",
+			file_id: "bench",
+			plugin_key: "lix_own_entity",
+			snapshot_content: { key: `${prefix}${i}`, value: { index: i } },
+			writer_key: null,
 		}));
-		const targetKey = `${prefix}5`;
+		const targetEntity = `${prefix}5`;
 
-		await instance.db.insertInto("key_value").values(rows).execute();
+		await instance.engine.executeQuerySync({
+			query: instance.db.insertInto("state").values(rows).compile(),
+		});
 		await instance.db
-			.selectFrom("key_value")
+			.selectFrom("state")
 			.selectAll()
-			.where("key", "=", targetKey)
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "=", targetEntity)
 			.execute();
-		await instance.db
-			.deleteFrom("key_value")
-			.where("key", "like", `${prefix}%`)
-			.execute();
+		await instance.engine.executeQuerySync({
+			query: instance.db
+				.deleteFrom("state")
+				.where("schema_key", "=", "lix_key_value")
+				.where("entity_id", "like", `${prefix}%`)
+				.compile(),
+		});
 	});
 });
 
@@ -101,13 +123,27 @@ async function writeExplain(args: {
 }) {
 	const instance = requireLix();
 	const compiled = args.query;
-	const explain = instance.engine.executeSync({
-		sql: `EXPLAIN QUERY PLAN ${compiled.sql}`,
-		parameters: compiled.parameters,
-	});
-	const lines = explain.rows.map(
+	const explained = (await instance.call("lix_explain_query", {
+		query: compiled,
+	})) as {
+		plan: Array<{ detail?: string }>;
+		original: { sql: string };
+		compiled: { sql: string };
+	};
+	const lines = explained.plan.map(
 		(row: any) => row.detail ?? JSON.stringify(row)
 	);
 	const outPath = new URL(`./${args.filename}`, import.meta.url);
-	await fs.writeFile(outPath, `${lines.join("\n")}\n`, "utf8");
+	const content = [
+		"Original SQL:",
+		explained.original.sql,
+		"",
+		"Compiled SQL:",
+		explained.compiled.sql,
+		"",
+		"Plan:",
+		...lines.map((line) => `  - ${line}`),
+		"",
+	].join("\n");
+	await fs.writeFile(outPath, content, "utf8");
 }

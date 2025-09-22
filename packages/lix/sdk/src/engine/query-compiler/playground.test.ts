@@ -6,20 +6,36 @@ import { openLix } from "../../lix/open-lix.js";
 test("explain key_value select", async () => {
 	const lix = await openLix({});
 	try {
-		const compiled = lix.db.selectFrom("key_value").selectAll().compile();
+		const compiled = lix.db
+			.selectFrom("state as s")
+			.selectAll()
+			.where("s.schema_key", "=", "lix_key_value")
+			.compile();
 
-		const explainSql = `EXPLAIN QUERY PLAN ${compiled.sql}`;
-		const result = lix.engine!.executeSync({
-			sql: explainSql,
-			parameters: compiled.parameters,
-		});
+		const explained = (await lix.call("lix_explain_query", {
+			query: compiled,
+		})) as {
+			plan: Array<{ detail?: string }>;
+			original: { sql: string };
+			compiled: { sql: string };
+		};
 
-		const lines = result.rows.map((row) => {
-			const detail = (row as any)?.detail;
-			return typeof detail === "string" ? detail : JSON.stringify(row);
-		});
+		const lines = explained.plan.map((row) =>
+			typeof row.detail === "string" ? row.detail : JSON.stringify(row)
+		);
 		const explainPath = new URL("./explain.txt", import.meta.url);
-		await fs.writeFile(explainPath, `${lines.join("\n")}\n`, "utf8");
+		const content = [
+			"Original SQL:",
+			explained.original.sql,
+			"",
+			"Compiled SQL:",
+			explained.compiled.sql,
+			"",
+			"Plan:",
+			...lines.map((line) => `  - ${line}`),
+			"",
+		].join("\n");
+		await fs.writeFile(explainPath, content, "utf8");
 
 		expect(lines.length).toBeGreaterThan(0);
 	} finally {
