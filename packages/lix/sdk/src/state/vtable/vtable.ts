@@ -851,14 +851,13 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	engine: Pick<LixEngine, "sqlite" | "hooks">,
+	engine: Pick<LixEngine, "executeSync" | "hooks">,
 	primaryKey: string,
 	timestamp: string
 ): void {
 	// Query the row to delete using the resolved state view with Kysely
-	const rowToDelete = executeSync({
-		engine: engine,
-		query: internalQueryBuilder
+	const [rowToDelete] = engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.select([
 				"entity_id",
@@ -871,8 +870,9 @@ export function handleStateDelete(
 				"untracked",
 				"inherited_from_version_id",
 			])
-			.where("_pk", "=", primaryKey),
-	})[0];
+			.where("_pk", "=", primaryKey)
+			.compile()
+	).rows;
 
 	if (!rowToDelete) {
 		throw new Error(`Row not found for primary key: ${primaryKey}`);
@@ -937,15 +937,15 @@ export function handleStateDelete(
 		}
 
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
-		executeSync({
-			engine: engine,
-			query: internalQueryBuilder
+		engine.executeSync(
+			internalQueryBuilder
 				.deleteFrom("internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
 				.where("file_id", "=", String(file_id))
-				.where("version_id", "=", String(version_id)),
-		});
+				.where("version_id", "=", String(version_id))
+				.compile()
+		);
 		return;
 	}
 
@@ -981,13 +981,12 @@ export function handleStateDelete(
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	engine: Pick<LixEngine, "sqlite" | "hooks">,
+	engine: Pick<LixEngine, "executeSync" | "hooks">,
 	schemaKey: any
 ): string | null {
 	// Query directly from internal_resolved_state_all to avoid vtable recursion
-	const result = executeSync({
-		engine: engine,
-		query: internalQueryBuilder
+	const result = engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")
@@ -997,8 +996,9 @@ function getStoredSchema(
 				String(schemaKey)
 			)
 			.where("snapshot_content", "is not", null)
-			.limit(1),
-	});
+			.limit(1)
+			.compile()
+	).rows;
 
 	return result && result.length > 0 ? result[0]!.value : null;
 }

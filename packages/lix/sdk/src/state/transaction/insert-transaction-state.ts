@@ -1,5 +1,4 @@
 import { sql } from "kysely";
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
@@ -55,7 +54,7 @@ export type TransactionStateRow = Omit<
  * @example
  * // Delete an entity (null snapshot_content)
  * insertTransactionState({
- *   engine: { sqlite, db, hooks },
+ *   engine,
  *   data: {
  *     entity_id: "user-123",
  *     schema_key: "user",
@@ -69,7 +68,7 @@ export type TransactionStateRow = Omit<
  * });
  */
 export function insertTransactionState(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 	data: NewTransactionStateRow[];
 	timestamp: string;
 	createChangeAuthors?: boolean;
@@ -105,9 +104,8 @@ export function insertTransactionState(args: {
 		untracked: data.untracked === true ? 1 : 0,
 	}));
 
-	executeSync({
-		engine,
-		query: internalQueryBuilder
+	args.engine.executeSync(
+		internalQueryBuilder
 			.insertInto("internal_transaction_state")
 			.values(transactionRows)
 			.onConflict((oc) =>
@@ -123,8 +121,9 @@ export function insertTransactionState(args: {
 						writer_key: eb.ref("excluded.writer_key"),
 						metadata: eb.ref("excluded.metadata"),
 					}))
-			),
-	});
+			)
+			.compile()
+	);
 
 	// Return results for all data
 	return dataWithChangeIds.map((data) => ({
