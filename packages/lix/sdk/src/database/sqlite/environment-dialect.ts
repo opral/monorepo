@@ -21,11 +21,12 @@ class EnvironmentConnection implements DatabaseConnection {
 	}
 
 	async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
-		const { sql, parameters } = compiledQuery;
+		const { sql, parameters, query } = compiledQuery;
 		let res: any;
 		try {
 			res = await this.#backend.call("lix_execute_sync", {
 				sql,
+				query,
 				parameters: (parameters ?? []) as unknown[],
 			});
 		} catch (err: any) {
