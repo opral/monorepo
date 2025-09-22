@@ -8,26 +8,24 @@ import type { DatabaseConnection, Driver, QueryResult, Dialect } from "kysely";
 import type { LixEnvironment } from "../../environment/api.js";
 
 type LixEnvironmentDriverConfig = {
-	backend: LixEnvironment;
+	environment: LixEnvironment;
 };
 
 class EnvironmentConnection implements DatabaseConnection {
-	#backend: LixEnvironment;
+	#environment: LixEnvironment;
 	// Track nested transaction depth for savepoint emulation
 	_txDepth = 0;
 	_spNames: string[] = [];
-	constructor(backend: LixEnvironment) {
-		this.#backend = backend;
+	constructor(environment: LixEnvironment) {
+		this.#environment = environment;
 	}
 
 	async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
-		const { sql, parameters, query } = compiledQuery;
+		const { sql, parameters } = compiledQuery;
 		let res: any;
 		try {
-			res = await this.#backend.call("lix_execute_sync", {
-				sql,
-				query,
-				parameters: (parameters ?? []) as unknown[],
+			res = await this.#environment.call("lix_execute_query_sync", {
+				query: compiledQuery,
 			});
 		} catch (err: any) {
 			const previewParam = (v: unknown) => {
@@ -93,7 +91,7 @@ export class EnvironmentDriver implements Driver {
 	async acquireConnection(): Promise<DatabaseConnection> {
 		// Return a lightweight connection wrapper per acquire to isolate
 		// transaction state (savepoints) across concurrent transactions.
-		return new EnvironmentConnection(this.#config.backend);
+		return new EnvironmentConnection(this.#config.environment);
 	}
 
 	async beginTransaction(connection: DatabaseConnection): Promise<void> {
@@ -170,7 +168,7 @@ export class EnvironmentDriver implements Driver {
 	}
 
 	async destroy(): Promise<void> {
-		await this.#config.backend.close();
+		await this.#config.environment.close();
 	}
 }
 
@@ -179,7 +177,8 @@ export function createEnvironmentDialect(args: {
 }): Dialect {
 	return {
 		createAdapter: () => new SqliteAdapter(),
-		createDriver: () => new EnvironmentDriver({ backend: args.environment }),
+		createDriver: () =>
+			new EnvironmentDriver({ environment: args.environment }),
 		createIntrospector: (db: any) => new SqliteIntrospector(db),
 		createQueryCompiler: () => new SqliteQueryCompiler(),
 	};

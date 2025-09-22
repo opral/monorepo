@@ -28,7 +28,10 @@ export type Call = (
 ) => Promise<unknown>;
 
 export function createCallRouter(args: {
-	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef" | "call">;
+	engine: Pick<
+		LixEngine,
+		"hooks" | "executeSync" | "executeQuerySync" | "runtimeCacheRef" | "call"
+	>;
 }): {
 	call: Call;
 } {
@@ -82,9 +85,9 @@ export function createCallRouter(args: {
 			() => markStateCacheAsFresh({ engine: args.engine }),
 		],
 		[
-			"lix_execute_sync",
+			"lix_execute_query_sync",
 			(payload) => {
-				return args.engine.executeSync(payload as any);
+				return args.engine.executeQuerySync(payload as any);
 			},
 		],
 	]);

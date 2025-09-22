@@ -1,3 +1,4 @@
+import type { CompiledQuery } from "kysely";
 import type { SqliteWasmDatabase } from "../database/sqlite/index.js";
 import { initDb } from "../database/init-db.js";
 import { createHooks, type StateCommitChange } from "../hooks/create-hooks.js";
@@ -9,6 +10,7 @@ import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
+import { createExecuteQuerySync } from "./execute-query-sync.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -67,6 +69,12 @@ export type LixEngine = {
 	executeSync: (args: { sql: string; parameters?: Readonly<unknown[]> }) => {
 		rows: any[];
 	};
+	/**
+	 * Run a compiled Kysely query through the engine’s query compiler and execute it synchronously.
+	 */
+	executeQuerySync: (args: { query: CompiledQuery<unknown> }) => {
+		rows: any[];
+	};
 	/** Invoke an engine function (router) */
 	call: Call;
 };
@@ -102,16 +110,22 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	}
 
 	// Build a local Lix-like context for schema that needs plugin/hooks
-	const engine: LixEngine = {
+	const engineBase = {
 		sqlite: env.sqlite,
 		hooks,
 		getAllPluginsSync: () => plugins,
 		runtimeCacheRef,
 		executeSync,
+		executeQuerySync: undefined as unknown as LixEngine["executeQuerySync"],
 		call: async () => {
 			throw new Error("Engine router not initialised");
 		},
 	};
+
+	const executeQuerySync = createExecuteQuerySync({ engine: engineBase });
+	engineBase.executeQuerySync = executeQuerySync;
+
+	const engine = engineBase as LixEngine;
 
 	// Install filesystem functions + views that depend on plugin + hooks
 	applyFilesystemSchema({ engine });

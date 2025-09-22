@@ -16,6 +16,11 @@ export function createQueryCompiler(args: {
 	const plugins: KyselyPlugin[] = [createCachePopulator(args)];
 
 	return ({ query }) => {
+		// guard against raw sql queries
+		if (!query.query) {
+			return query;
+		}
+
 		let operationNode = query.query;
 		for (const plugin of plugins) {
 			if (plugin.transformQuery) {
