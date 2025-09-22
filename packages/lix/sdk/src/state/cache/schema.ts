@@ -43,18 +43,18 @@ const stateCacheV2TablesMap = new WeakMap<object, Set<string>>();
 
 // Export a getter function to access the cache for a specific Lix instance
 export function getStateCacheV2Tables(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "runtimeCacheRef">;
 }): Set<string> {
-	let cache = stateCacheV2TablesMap.get(args.engine.sqlite as any);
+	let cache = stateCacheV2TablesMap.get(args.engine.runtimeCacheRef);
 	if (!cache) {
 		cache = new Set<string>();
-		stateCacheV2TablesMap.set(args.engine.sqlite as any, cache);
+		stateCacheV2TablesMap.set(args.engine.runtimeCacheRef, cache);
 	}
 	return cache;
 }
 
 export function applyStateCacheV2Schema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
 }): void {
 	const { sqlite } = args.engine;
 

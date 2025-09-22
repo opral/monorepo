@@ -18,7 +18,7 @@ export interface PopulateStateCacheV2Options {
  * @param options - Optional filters for selective population
  */
 export function populateStateCache(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
 	options?: PopulateStateCacheV2Options;
 }): void {
 	const { sqlite } = args.engine;
@@ -62,7 +62,7 @@ export function populateStateCache(args: {
 
 	// Clear existing cache entries for the versions being populated
 	const tableCache = getStateCacheV2Tables({
-		engine: { sqlite: args.engine.sqlite } as any,
+		engine: args.engine,
 	});
 	for (const tableName of tableCache) {
 		if (tableName === "internal_state_cache") continue;
@@ -131,7 +131,7 @@ export function populateStateCache(args: {
 		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 
 		// Ensure table exists (creates if needed, updates cache)
-		ensureTableExists(sqlite, tableName);
+		ensureTableExists(args.engine, tableName);
 
 		// Batch insert with prepared statement
 		const stmt = sqlite.prepare(`
@@ -197,11 +197,11 @@ export function populateStateCache(args: {
  * Duplicated from update-state-cache.ts to avoid circular dependency.
  */
 function ensureTableExists(
-	sqlite: SqliteWasmDatabase,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
 	tableName: string
 ): void {
 	// Use shared creator (idempotent) and update the cache set
-	createSchemaCacheTable({ engine: { sqlite } as any, tableName });
-	const tableCache = getStateCacheV2Tables({ engine: { sqlite } as any });
+	createSchemaCacheTable({ engine, tableName });
+	const tableCache = getStateCacheV2Tables({ engine });
 	if (!tableCache.has(tableName)) tableCache.add(tableName);
 }

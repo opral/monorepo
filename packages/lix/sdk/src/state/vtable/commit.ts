@@ -3,7 +3,6 @@ import {
 	type LixChangeSetElement,
 	LixChangeSetElementSchema,
 } from "../../change-set/schema-definition.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { type LixVersion } from "../../version/schema-definition.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 import { commitSequenceNumberSync } from "../../engine/functions/sequence.js";
@@ -30,10 +29,7 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	engine: Pick<
-		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
+	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef">;
 }): number {
 	const engine = args.engine;
 	const transactionTimestamp = getTimestampSync({ engine: engine });
@@ -43,9 +39,8 @@ export function commit(args: {
 	const versionSnapshots = new Map<string, LixVersion>();
 
 	// Query all transaction changes
-	const allTransactionChanges = executeSync({
-		engine: engine,
-		query: db
+	const allTransactionChanges = engine.executeSync(
+		db
 			.selectFrom("internal_transaction_state")
 			.select([
 				"id",
@@ -60,8 +55,9 @@ export function commit(args: {
 				sql<string | null>`json(metadata)`.as("metadata"),
 				"created_at",
 				sql`untracked`.as("untracked"),
-			]),
-	});
+			])
+			.compile()
+	).rows as any[];
 
 	// Separate tracked and untracked changes
 	const trackedChangesByVersion = new Map<string, any[]>();
@@ -107,29 +103,29 @@ export function commit(args: {
 
 	// Helper to load merged version (descriptor + tip) from resolved state
 	const loadMergedVersion = (version_id: string): LixVersion => {
-		const [desc] = executeSync({
-			engine: engine,
-			query: db
+		const [desc] = engine.executeSync(
+			db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version_descriptor")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
-				.limit(1),
-		});
+				.limit(1)
+				.compile()
+		).rows as Array<{ snapshot_content: string }>;
 		if (!desc?.snapshot_content)
 			throw new Error(`Version with id '${version_id}' not found.`);
 		const d = JSON.parse(desc.snapshot_content) as any;
-		const [tip] = executeSync({
-			engine: engine,
-			query: db
+		const [tip] = engine.executeSync(
+			db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_version_tip")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
-				.limit(1),
-		});
+				.limit(1)
+				.compile()
+		).rows as Array<{ snapshot_content: string }>;
 		if (!tip?.snapshot_content)
 			throw new Error(`Version with id '${version_id}' not found.`);
 		const t = JSON.parse(tip.snapshot_content) as any;
@@ -178,17 +174,17 @@ export function commit(args: {
 	}
 
 	// Get active accounts for change_author records
-	const activeAccounts = executeSync({
-		engine: engine,
-		query: db
+	const activeAccounts = engine.executeSync(
+		db
 			.selectFrom("internal_resolved_state_all")
 			.where("schema_key", "=", "lix_active_account")
 			.where("version_id", "=", "global")
 			.where("snapshot_content", "is not", null)
 			.select(
 				sql`json_extract(snapshot_content, '$.account_id')`.as("account_id")
-			),
-	});
+			)
+			.compile()
+	).rows as Array<{ account_id: string | null }>;
 
 	// Step 4: Handle working changeset updates for each version
 	for (const [version_id, changes] of trackedChangesByVersion) {
@@ -212,16 +208,16 @@ export function commit(args: {
 		// Get version data to access working_commit_id (from local snapshot map)
 		const versionData = versionSnapshots.get(version_id)!;
 
-		const [workingCommitRow] = executeSync({
-			engine: engine,
-			query: db
+		const [workingCommitRow] = engine.executeSync(
+			db
 				.selectFrom("internal_resolved_state_all")
 				.where("schema_key", "=", "lix_commit")
 				.where("entity_id", "=", versionData.working_commit_id)
 				.where("snapshot_content", "is not", null)
 				.select("snapshot_content")
-				.limit(1),
-		});
+				.limit(1)
+				.compile()
+		).rows as Array<{ snapshot_content: string }>;
 
 		if (workingCommitRow?.snapshot_content) {
 			const workingCommit = JSON.parse(
@@ -259,9 +255,8 @@ export function commit(args: {
 				// Check for entities at checkpoint (for deletions)
 				const entitiesAtCheckpoint = new Set<string>();
 				if (deletionChanges.length > 0) {
-					const checkpointCommitResult = executeSync({
-						engine: engine,
-						query: db
+					const checkpointCommitResult = engine.executeSync(
+						db
 							.selectFrom("commit")
 							.innerJoin("entity_label", (join) =>
 								join
@@ -277,14 +272,14 @@ export function commit(args: {
 								)
 							)
 							.select("commit.id")
-							.limit(1),
-					});
+							.limit(1)
+							.compile()
+					).rows as Array<{ id: string }>;
 
 					const checkpointCommitId = checkpointCommitResult[0]?.id;
 					if (checkpointCommitId) {
-						const checkpointEntities = executeSync({
-							engine: engine,
-							query: db
+						const checkpointEntities = engine.executeSync(
+							db
 								.selectFrom("state_history")
 								.where("depth", "=", 0)
 								.where("commit_id", "=", checkpointCommitId)
@@ -299,8 +294,13 @@ export function commit(args: {
 										)
 									)
 								)
-								.select(["entity_id", "schema_key", "file_id"]),
-						});
+								.select(["entity_id", "schema_key", "file_id"])
+								.compile()
+						).rows as Array<{
+							entity_id: string;
+							schema_key: string;
+							file_id: string;
+						}>;
 
 						for (const entity of checkpointEntities) {
 							entitiesAtCheckpoint.add(
@@ -311,9 +311,8 @@ export function commit(args: {
 				}
 
 				// Find existing working change set elements to delete
-				const existingEntities = executeSync({
-					engine: engine,
-					query: db
+				const existingEntities = engine.executeSync(
+					db
 						.selectFrom("internal_resolved_state_all")
 						.select([
 							"_pk",
@@ -354,8 +353,15 @@ export function commit(args: {
 									])
 								)
 							)
-						),
-				});
+						)
+						.compile()
+				).rows as Array<{
+					_pk: string;
+					entity_id: string;
+					element_entity_id: string;
+					element_schema_key: string;
+					element_file_id: string;
+				}>;
 
 				// Collect batched untracked updates for working CSE
 				const workingUntrackedBatch: Array<{
@@ -450,17 +456,14 @@ export function commit(args: {
 	for (const [, cs] of trackedChangesByVersion) totalTracked += cs.length;
 	if (totalTracked === 0) {
 		// Clear the transaction table after handling any untracked updates
-		executeSync({
-			engine: engine,
-			query: db.deleteFrom("internal_transaction_state"),
-		});
+		engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
 		commitSequenceNumberSync({
 			engine: engine,
 			timestamp: transactionTimestamp,
 		});
 		// Emit hook for untracked-only commit
 		args.engine.hooks._emit("state_commit", { changes: untrackedChanges });
-		return args.engine.sqlite.sqlite3.capi.SQLITE_OK;
+		return 0;
 	}
 	// Build versions map: include all versions with tracked changes + global
 	const versionsInput = new Map<
@@ -517,18 +520,16 @@ export function commit(args: {
 
 	// Single batch insert of all generated changes into the change table
 	if (genRes.changes.length > 0) {
-		executeSync({
-			engine: engine,
-			// @ts-expect-error - snapshot_content is a JSON string, not parsed object
-			query: db.insertInto("change").values(genRes.changes),
-		});
+		engine.executeSync(
+			db
+				.insertInto("change")
+				.values(genRes.changes as any)
+				.compile()
+		);
 	}
 
 	// Clear the transaction table after committing
-	executeSync({
-		engine: engine,
-		query: db.deleteFrom("internal_transaction_state"),
-	});
+	engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
 
 	// Update cache entries in a single call using materialized state with inline commit/version
 	if (genRes.materializedState.length > 0) {
@@ -548,15 +549,15 @@ export function commit(args: {
 		}
 		for (const key of untrackedToDelete) {
 			const [entity_id, schema_key, file_id, vid] = key.split("|");
-			executeSync({
-				engine: engine,
-				query: db
+			engine.executeSync(
+				db
 					.deleteFrom("internal_state_all_untracked")
 					.where("entity_id", "=", entity_id!)
 					.where("schema_key", "=", schema_key!)
 					.where("file_id", "=", file_id!)
-					.where("version_id", "=", vid!),
-			});
+					.where("version_id", "=", vid!)
+					.compile()
+			);
 		}
 	}
 
@@ -624,18 +625,17 @@ export function commit(args: {
 				}
 			}
 			if (filesToDelete.length > 0) {
-				executeSync({
-					engine: engine,
-					query: db
+				engine.executeSync(
+					db
 						.deleteFrom("internal_file_lixcol_cache")
 						.where("version_id", "=", version_id)
-						.where("file_id", "in", filesToDelete),
-				});
+						.where("file_id", "in", filesToDelete)
+						.compile()
+				);
 			}
 			if (filesToUpdate.length > 0) {
-				executeSync({
-					engine: engine,
-					query: db
+				engine.executeSync(
+					db
 						.insertInto("internal_file_lixcol_cache")
 						.values(filesToUpdate)
 						.onConflict((oc) =>
@@ -645,8 +645,9 @@ export function commit(args: {
 								updated_at: sql`excluded.updated_at`,
 								writer_key: sql`excluded.writer_key`,
 							})
-						),
-				});
+						)
+						.compile()
+				);
 			}
 		}
 	}
@@ -679,5 +680,5 @@ export function commit(args: {
 		})
 	);
 	engine.hooks._emit("state_commit", { changes: hookChanges });
-	return engine.sqlite.sqlite3.capi.SQLITE_OK;
+	return 0;
 }

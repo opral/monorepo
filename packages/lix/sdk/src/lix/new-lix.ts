@@ -331,7 +331,7 @@ export async function newLixFile(args?: {
 		engine: { executeSync, runtimeCacheRef, hooks },
 		timestamp: created_at,
 	});
-	populateStateCache({ engine: { sqlite } });
+	populateStateCache({ engine: { sqlite, runtimeCacheRef, executeSync } });
 
 	try {
 		const blob = new Blob([
