@@ -1,6 +1,12 @@
 import React, { Suspense } from "react";
 import { describe, expect, test, vi } from "vitest";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { openLix, type Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "../../../lix/plugin-md/dist";
 import { LixProvider } from "@lix-js/react-utils";
@@ -13,9 +19,7 @@ function Providers({ children, lix }: { children: React.ReactNode; lix: Lix }) {
 	return (
 		<LixProvider lix={lix}>
 			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
-				<SidebarProvider defaultOpen>
-					{children}
-				</SidebarProvider>
+				<SidebarProvider defaultOpen>{children}</SidebarProvider>
 			</KeyValueProvider>
 		</LixProvider>
 	);
@@ -76,7 +80,9 @@ describe("LeftSidebarFiles", () => {
 			);
 		});
 
-		const guidesFolder = (await screen.findByText(/^guides$/i)).closest("button");
+		const guidesFolder = (await screen.findByText(/^guides$/i)).closest(
+			"button",
+		);
 		expect(guidesFolder).toBeTruthy();
 
 		const introFile = (await screen.findByText(/intro\.md/i)).closest("button");
@@ -89,7 +95,9 @@ describe("LeftSidebarFiles", () => {
 
 		await waitFor(() => {
 			expect(guidesFolder!.getAttribute("data-selected")).toBe("true");
-			expect(introFile!.parentElement?.getAttribute("data-active")).not.toBe("true");
+			expect(introFile!.parentElement?.getAttribute("data-active")).not.toBe(
+				"true",
+			);
 		});
 	});
 
@@ -107,7 +115,9 @@ describe("LeftSidebarFiles", () => {
 			);
 		});
 
-		const overviewButton = (await screen.findByText(/overview\.md/i)).closest("button");
+		const overviewButton = (await screen.findByText(/overview\.md/i)).closest(
+			"button",
+		);
 		expect(overviewButton).toBeTruthy();
 
 		await act(async () => {
@@ -115,7 +125,9 @@ describe("LeftSidebarFiles", () => {
 		});
 
 		await waitFor(() => {
-			expect(overviewButton!.parentElement?.getAttribute("data-active")).toBe("true");
+			expect(overviewButton!.parentElement?.getAttribute("data-active")).toBe(
+				"true",
+			);
 		});
 
 		const keyRow = await lix.db
