@@ -658,25 +658,38 @@ export function applyStateVTable(
 
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit
-							const existingVersionsWithSameCommit = sqlite.exec({
-								sql: `
-									SELECT json_extract(snapshot_content, '$.id') as version_id
-									FROM internal_resolved_state_all 
-									WHERE schema_key = 'lix_version_tip' 
-									  AND version_id = 'global'
-									  AND commit_id = ?
-									  AND json_extract(snapshot_content, '$.id') != ?
-								`,
-								bind: [commitId, newVersionId],
-								returnValue: "resultRows",
-							});
+							const versionTips = internalQueryBuilder
+								.selectFrom("internal_resolved_state_all")
+								.select("commit_id")
+								.select((eb) =>
+									eb
+										.fn<string>("json_extract", [
+											eb.ref("snapshot_content"),
+											eb.val("$.id"),
+										])
+										.as("version_id")
+								)
+								.where("schema_key", "=", "lix_version_tip")
+								.where("version_id", "=", "global")
+								.as("version_tips");
+
+							const existingVersionsWithSameCommit = engine.executeSync(
+								internalQueryBuilder
+									.selectFrom(versionTips)
+									.select("version_id")
+									.where("commit_id", "=", commitId)
+									.where("version_id", "!=", newVersionId)
+									.limit(1)
+									.compile()
+							).rows as Array<{ version_id: string | null } | undefined>;
 
 							// If there are existing versions with the same commit, copy their cache entries
 							if (
 								existingVersionsWithSameCommit &&
 								existingVersionsWithSameCommit.length > 0
 							) {
-								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
+								const sourceVersionId =
+									existingVersionsWithSameCommit[0]?.version_id;
 
 								// Get all unique schema keys from the source version
 								const schemaKeys = sqlite.exec({
