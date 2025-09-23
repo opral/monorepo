@@ -313,7 +313,15 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 					AND child_unt.entity_id = txn.entity_id
 			)
 		) ) AS "internal_resolved_state_all"
-	 where "snapshot_content" is not null and "version_id" in (select "version_id" from "active_version") and "schema_key" in (?)) as "s" where "s"."schema_key" = ? and "s"."entity_id" = ?
+	 where "snapshot_content" is not null and version_id IN (
+				SELECT json_extract(snapshot_content, '$.version_id')
+				FROM internal_state_all_untracked
+				WHERE schema_key = 'lix_active_version'
+				  AND entity_id = 'active'
+				  AND version_id = 'global'
+				  AND inheritance_delete_marker = 0
+				  AND snapshot_content IS NOT NULL
+			) and "schema_key" in (?)) as "s" where "s"."schema_key" = ? and "s"."entity_id" = ?
 
 Plan:
   - CO-ROUTINE (subquery-22)
@@ -321,14 +329,14 @@ Plan:
   - LEFT-MOST SUBQUERY
   - SEARCH txn USING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=?)
   - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
   - CREATE BLOOM FILTER
   - SEARCH ws_txn USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - UNION ALL
   - SEARCH u USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)
+  - REUSE LIST SUBQUERY 24
   - CORRELATED SCALAR SUBQUERY 6
   - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - REUSE LIST SUBQUERY 24
   - SEARCH ws_untracked USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - UNION ALL
   - MATERIALIZE change
@@ -339,11 +347,11 @@ Plan:
   - UNION ALL
   - SCAN t
   - SEARCH c USING PRIMARY KEY (entity_id=?)
+  - REUSE LIST SUBQUERY 24
   - CORRELATED SCALAR SUBQUERY 8
   - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
   - CORRELATED SCALAR SUBQUERY 9
   - SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - REUSE LIST SUBQUERY 24
   - SCAN ch LEFT-JOIN
   - SEARCH ws_cache USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - UNION ALL
@@ -362,28 +370,28 @@ Plan:
   - SCAN t
   - SEARCH isc USING PRIMARY KEY (entity_id=?)
   - SCAN vi
+  - LIST SUBQUERY 24
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
+  - CREATE BLOOM FILTER
   - CORRELATED SCALAR SUBQUERY 11
   - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
   - CORRELATED SCALAR SUBQUERY 12
   - SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
   - CORRELATED SCALAR SUBQUERY 13
   - SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
-  - CREATE BLOOM FILTER
   - SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
   - SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - UNION ALL
   - SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)
   - SCAN vi
+  - REUSE LIST SUBQUERY 24
   - CORRELATED SCALAR SUBQUERY 15
   - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
   - CORRELATED SCALAR SUBQUERY 16
   - SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
   - CORRELATED SCALAR SUBQUERY 17
   - SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - REUSE LIST SUBQUERY 24
   - SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - UNION ALL
@@ -400,5 +408,5 @@ Plan:
   - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
   - SCAN (subquery-22)
   - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
+  - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
   - CREATE BLOOM FILTER

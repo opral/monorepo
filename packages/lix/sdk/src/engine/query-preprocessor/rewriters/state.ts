@@ -6,6 +6,7 @@ import {
 } from "../operation-node-utils.js";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 import { rewriteInternalResolvedStateAll } from "./internal-resolved-state-all.js";
+import { rewriteStateAllView } from "./state-all.js";
 
 const STATE_VIEW = "state";
 
@@ -71,8 +72,14 @@ export function buildStateSelect(args: {
 	alias: string;
 	schemaKeys: string[];
 	restrictToActiveVersion: boolean;
+	rewriteStateAll?: boolean;
 }): OperationNode {
-	const { alias, schemaKeys, restrictToActiveVersion } = args;
+	const {
+		alias,
+		schemaKeys,
+		restrictToActiveVersion,
+		rewriteStateAll = true,
+	} = args;
 
 	let builder = internalQueryBuilder
 		.selectFrom("internal_resolved_state_all")
@@ -96,8 +103,16 @@ export function buildStateSelect(args: {
 		.where((qb) => qb("snapshot_content", "is not", null));
 
 	if (restrictToActiveVersion) {
-		builder = builder.where("version_id", "in", (qb) =>
-			qb.selectFrom("active_version").select("version_id")
+		builder = builder.where(() =>
+			sql`version_id IN (
+				SELECT json_extract(snapshot_content, '$.version_id')
+				FROM internal_state_all_untracked
+				WHERE schema_key = 'lix_active_version'
+				  AND entity_id = 'active'
+				  AND version_id = 'global'
+				  AND inheritance_delete_marker = 0
+				  AND snapshot_content IS NOT NULL
+			)`
 		);
 	}
 
@@ -106,11 +121,15 @@ export function buildStateSelect(args: {
 	}
 
 	const compiled = builder.compile();
-	const resolvedNode = rewriteInternalResolvedStateAll(compiled.query);
+	let subqueryNode = compiled.query;
+	if (rewriteStateAll) {
+		subqueryNode = rewriteStateAllView(subqueryNode);
+	}
+	subqueryNode = rewriteInternalResolvedStateAll(subqueryNode);
 
 	return {
 		kind: "AliasNode",
-		node: resolvedNode,
+		node: subqueryNode,
 		alias: {
 			kind: "IdentifierNode",
 			name: alias,

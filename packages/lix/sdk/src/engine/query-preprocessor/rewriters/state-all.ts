@@ -30,6 +30,7 @@ export function rewriteStateAllView(
 			alias: aliasInfo.alias,
 			schemaKeys,
 			restrictToActiveVersion: false,
+			rewriteStateAll: false,
 		});
 	};
 

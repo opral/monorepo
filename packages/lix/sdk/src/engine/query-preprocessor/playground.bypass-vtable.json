@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-preprocessor/playground.bench.ts",
+      "groups": [
+        {
+          "fullName": "src/engine/query-preprocessor/playground.bench.ts",
+          "benchmarks": [
+            {
+              "id": "-1662182535_1",
+              "name": "insert 10 then read specific key",
+              "rank": 2,
+              "rme": 4.2416334647403,
+              "samples": [],
+              "totalTime": 3134.257709000003,
+              "min": 281.5266670000001,
+              "max": 337.6959999999999,
+              "hz": 3.190548106904246,
+              "period": 313.4257709000003,
+              "mean": 313.4257709000003,
+              "variance": 345.422384530552,
+              "sd": 18.585542352338067,
+              "sem": 5.877264538291193,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 13.294372385614679,
+              "p75": 327.0218330000007,
+              "p99": 337.6959999999999,
+              "p995": 337.6959999999999,
+              "p999": 337.6959999999999,
+              "sampleCount": 10,
+              "median": 319.0795205000004
+            }
+          ]
+        },
+        {
+          "fullName": "src/engine/query-preprocessor/playground.bench.ts > state benchmarks",
+          "benchmarks": [
+            {
+              "id": "-1662182535_0_0",
+              "name": "insert 10 then read all",
+              "rank": 1,
+              "rme": 4.739657088559418,
+              "samples": [],
+              "totalTime": 2356.025126000001,
+              "min": 212.92575000000033,
+              "max": 257.4206670000003,
+              "hz": 4.244436907588394,
+              "period": 235.6025126000001,
+              "mean": 235.6025126000001,
+              "variance": 243.70726617498298,
+              "sd": 15.611126358305572,
+              "sem": 4.936671613293545,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 11.16675118927,
+              "p75": 251.04025000000001,
+              "p99": 257.4206670000003,
+              "p995": 257.4206670000003,
+              "p999": 257.4206670000003,
+              "sampleCount": 10,
+              "median": 235.67904199999998
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

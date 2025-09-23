@@ -20,8 +20,9 @@ test("rewrites state view to resolved state with active version filter", () => {
 
 	expect(sqlText).toMatch(/internal_state_cache_lix_key_value/i);
 	expect(sqlText).toMatch(/internal_state_cache_lix_version_descriptor/i);
-	expect(sqlText).toMatch(/select\s+"version_id"\s+from\s+"active_version"/i);
 	expect(sqlText).not.toMatch(/FROM\s+"?state(?!_)/i);
+	expect(sqlText).not.toMatch(/FROM\s+"?active_version"?/i);
+	expect(sqlText).not.toMatch(/internal_state_vtable/i);
 });
 
 test("returns original node when source is not state", () => {
