@@ -29,7 +29,7 @@ export type ChatMessage = {
  * The real implementation will land behind this API.
  *
  * @example
- * import { createLixAgent } from "@lix-js/agent";
+ * import { createLixAgent } from "@lix-js/agent-sdk";
  * const agent = createLixAgent({ lix });
  * // Throws: not implemented yet
  */
