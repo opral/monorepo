@@ -6,7 +6,9 @@ import {
 
 import type { LixEngine } from "../boot.js";
 import { createCachePopulator } from "./cache-populator.js";
-// import { createQueryRouter } from "./router.js";
+import { rewriteInternalStateCache } from "./rewriters/internal-state-cache.js";
+
+const REWRITERS = [rewriteInternalStateCache];
 
 export function createQueryPreprocessor(args: {
 	engine: Pick<
@@ -14,10 +16,7 @@ export function createQueryPreprocessor(args: {
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
 	>;
 }): (input: { query: CompiledQuery<unknown> }) => CompiledQuery<unknown> {
-	const plugins: KyselyPlugin[] = [
-		createCachePopulator(args),
-		// createQueryRouter(),
-	];
+	const plugins: KyselyPlugin[] = [createCachePopulator(args)];
 
 	return ({ query }) => {
 		// guard against raw sql queries
@@ -33,6 +32,10 @@ export function createQueryPreprocessor(args: {
 					queryId: query.queryId,
 				});
 			}
+		}
+
+		for (const rewrite of REWRITERS) {
+			operationNode = rewrite(operationNode);
 		}
 
 		return new SqliteQueryCompiler().compileQuery(operationNode, query.queryId);
