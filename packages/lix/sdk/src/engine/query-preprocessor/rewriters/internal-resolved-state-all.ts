@@ -1,15 +1,193 @@
-Original SQL:
-select * from "state" as "s" where "s"."schema_key" = ?
+import { sql, type OperationNode, type RootOperationNode } from "kysely";
+import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
+import {
+	extractColumnName,
+	extractTableName,
+	extractValues,
+} from "../operation-node-utils.js";
 
-Rewritten SQL:
-select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugin_key", "snapshot_content", "schema_version", "created_at", "updated_at", "inherited_from_version_id", "change_id", "untracked", "commit_id", "writer_key", "metadata" from 
+const TARGET_VIEW = "internal_resolved_state_all";
+
+export function rewriteInternalResolvedStateAll(
+	node: RootOperationNode
+): RootOperationNode {
+	if (node.kind !== "SelectQueryNode") {
+		return node;
+	}
+
+	let changed = false;
+
+	const rewriteFromItem = (fromItem: OperationNode): OperationNode => {
+		const analysis = analyzeFromItem(fromItem);
+		if (!analysis) {
+			return fromItem;
+		}
+
+		const schemaKeys = collectSchemaFilters(
+			node.where?.where,
+			analysis.alias
+		);
+
+		if (schemaKeys.length !== 1) {
+			return fromItem;
+		}
+
+		changed = true;
+		return buildResolvedSubquery({
+			schemaKey: schemaKeys[0]!,
+			alias: analysis.alias,
+		});
+	};
+
+	const rewrittenFroms = node.from?.froms?.map(rewriteFromItem);
+
+	const rewrittenJoins = node.joins?.map((joinNode: any) => {
+		const rewritten = rewriteFromItem(joinNode.table);
+		if (rewritten !== joinNode.table) {
+			changed = true;
+			return {
+				...joinNode,
+				table: rewritten,
+			};
+		}
+		return joinNode;
+	});
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		from:
+			rewrittenFroms && node.from
+				? {
+					kind: "FromNode",
+					froms: rewrittenFroms,
+				}
+				: node.from,
+		joins: rewrittenJoins ?? node.joins,
+	};
+}
+
+function analyzeFromItem(
+	node: OperationNode
+): { alias: string } | undefined {
+	if (node.kind === "AliasNode") {
+		const baseTable = (node as any).node as OperationNode | undefined;
+		const aliasNode = (node as any).alias as OperationNode | undefined;
+		const tableName = extractTableName(baseTable);
+		if (tableName !== TARGET_VIEW) {
+			return undefined;
+		}
+		return { alias: extractIdentifier(aliasNode) ?? TARGET_VIEW };
+	}
+
+	if (node.kind === "TableNode") {
+		const tableName = extractTableName(node);
+		if (tableName !== TARGET_VIEW) {
+			return undefined;
+		}
+		return { alias: TARGET_VIEW };
+	}
+
+	return undefined;
+}
+
+function extractIdentifier(
+	node: OperationNode | undefined
+): string | undefined {
+	if (!node) return undefined;
+
+	switch (node.kind) {
+		case "IdentifierNode":
+			return (node as any).name;
+		case "SchemableIdentifierNode":
+			return (node as any).identifier?.name;
+		default:
+			return undefined;
+	}
+}
+
+function collectSchemaFilters(
+	node: OperationNode | undefined,
+	alias: string
+): string[] {
+	const values = new Set<string>();
+	collectSchemaFiltersRecursive(node, alias, values);
+	return Array.from(values);
+}
+
+function collectSchemaFiltersRecursive(
+	node: OperationNode | undefined,
+	alias: string,
+	output: Set<string>
+): void {
+	if (!node) return;
+
+	switch (node.kind) {
+		case "BinaryOperationNode": {
+			const leftOperand = (node as any).leftOperand as OperationNode | undefined;
+			if (!leftOperand || leftOperand.kind !== "ReferenceNode") {
+				return;
+			}
+
+			const tableName = extractTableName((leftOperand as any).table);
+			const matchesAlias =
+				tableName === alias ||
+				(tableName === undefined && alias === TARGET_VIEW);
+			if (!matchesAlias) {
+				return;
+			}
+
+			const columnName = extractColumnName((leftOperand as any).column);
+			if (columnName !== "schema_key") {
+				return;
+			}
+
+			for (const value of extractValues((node as any).rightOperand)) {
+				if (typeof value === "string" && value.length > 0) {
+					output.add(value);
+				}
+			}
+			return;
+		}
+		case "AndNode":
+		case "OrNode": {
+			collectSchemaFiltersRecursive((node as any).left, alias, output);
+			collectSchemaFiltersRecursive((node as any).right, alias, output);
+			return;
+		}
+		case "ParensNode": {
+			collectSchemaFiltersRecursive((node as any).node, alias, output);
+			return;
+		}
+		default:
+			return;
+	}
+}
+
+function buildResolvedSubquery(args: {
+	schemaKey: string;
+	alias: string;
+}): OperationNode {
+	const { schemaKey, alias } = args;
+	const schemaTableName = schemaKeyToCacheTableName(schemaKey);
+	const descriptorTableName = schemaKeyToCacheTableName(
+		"lix_version_descriptor"
+	);
+
+	const cacheTable = sql.id(schemaTableName);
+	const descriptorTable = sql.id(descriptorTableName);
+
+	const subquery = sql`
 		(
 		WITH RECURSIVE
 			version_descriptor_base AS (
 				SELECT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-				FROM "internal_state_cache_lix_version_descriptor" AS isc_v
+				FROM ${descriptorTable} AS isc_v
 				WHERE isc_v.inheritance_delete_marker = 0
 			),
 			version_inheritance(version_id, ancestor_version_id) AS (
@@ -89,7 +267,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				(u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
 				(u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
 			)
-			AND u.schema_key = ?
+			AND u.schema_key = ${schemaKey}
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state t
 				WHERE t.version_id = u.version_id
@@ -117,7 +295,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				c.commit_id,
 				ch.metadata AS metadata,
 				ws_cache.writer_key
-			FROM "internal_state_cache_lix_key_value" AS c
+			FROM ${cacheTable} AS c
 			LEFT JOIN change ch ON ch.id = c.change_id
 			LEFT JOIN internal_state_writer ws_cache ON
 				ws_cache.file_id = c.file_id AND
@@ -128,7 +306,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
 				(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
 			)
-			AND c.schema_key = ?
+			AND c.schema_key = ${schemaKey}
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state t
 				WHERE t.version_id = c.version_id
@@ -164,7 +342,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				ch.metadata AS metadata,
 				COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 			FROM version_inheritance vi
-			JOIN "internal_state_cache_lix_key_value" AS isc ON isc.version_id = vi.ancestor_version_id
+			JOIN ${cacheTable} AS isc ON isc.version_id = vi.ancestor_version_id
 			LEFT JOIN change ch ON ch.id = isc.change_id
 			LEFT JOIN internal_state_writer ws_child ON
 				ws_child.file_id = isc.file_id AND
@@ -178,7 +356,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				ws_parent.version_id = isc.version_id
 			WHERE isc.inheritance_delete_marker = 0
 				AND isc.snapshot_content IS NOT NULL
-				AND isc.schema_key = ?
+				AND isc.schema_key = ${schemaKey}
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state t
 				WHERE t.version_id = vi.version_id
@@ -187,7 +365,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 					AND t.entity_id = isc.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM "internal_state_cache_lix_key_value" child_isc
+				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
 					AND child_isc.file_id = isc.file_id
 					AND child_isc.schema_key = isc.schema_key
@@ -234,7 +412,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				ws_parent.version_id = unt.version_id
 			WHERE unt.inheritance_delete_marker = 0
 				AND unt.snapshot_content IS NOT NULL
-				AND unt.schema_key = ?
+				AND unt.schema_key = ${schemaKey}
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state t
 				WHERE t.version_id = vi.version_id
@@ -243,7 +421,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 					AND t.entity_id = unt.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM "internal_state_cache_lix_key_value" child_isc
+				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
 					AND child_isc.file_id = unt.file_id
 					AND child_isc.schema_key = unt.schema_key
@@ -290,7 +468,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 				ws_parent.version_id = vi.parent_version_id
 			WHERE vi.parent_version_id IS NOT NULL
 				AND txn.snapshot_content IS NOT NULL
-				AND txn.schema_key = ?
+				AND txn.schema_key = ${schemaKey}
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_transaction_state child_txn
 				WHERE child_txn.version_id = vi.version_id
@@ -299,7 +477,7 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 					AND child_txn.entity_id = txn.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM "internal_state_cache_lix_key_value" child_isc
+				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
 					AND child_isc.file_id = txn.file_id
 					AND child_isc.schema_key = txn.schema_key
@@ -312,97 +490,8 @@ select * from (select "entity_id", "schema_key", "file_id", "version_id", "plugi
 					AND child_unt.schema_key = txn.schema_key
 					AND child_unt.entity_id = txn.entity_id
 			)
-		) ) AS "internal_resolved_state_all"
-	 where "snapshot_content" is not null and "version_id" in (select "version_id" from "active_version") and "schema_key" in (?)) as "s" where "s"."schema_key" = ?
+		) ) AS ${sql.id(alias)}
+	`;
 
-Plan:
-  - CO-ROUTINE (subquery-22)
-  - COMPOUND QUERY
-  - LEFT-MOST SUBQUERY
-  - SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
-  - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
-  - CREATE BLOOM FILTER
-  - SEARCH ws_txn USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - UNION ALL
-  - SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
-  - REUSE LIST SUBQUERY 24
-  - CORRELATED SCALAR SUBQUERY 6
-  - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - SEARCH ws_untracked USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - UNION ALL
-  - MATERIALIZE change
-  - COMPOUND QUERY
-  - LEFT-MOST SUBQUERY
-  - SCAN c
-  - SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
-  - UNION ALL
-  - SCAN t
-  - MULTI-INDEX OR
-  - INDEX 1
-  - SCAN c USING INDEX idx_internal_state_cache_lix_key_value_live_vfe
-  - INDEX 2
-  - SCAN c USING INDEX idx_internal_state_cache_lix_key_value_tomb_vfe
-  - CORRELATED SCALAR SUBQUERY 8
-  - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 9
-  - SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - REUSE LIST SUBQUERY 24
-  - SCAN ch LEFT-JOIN
-  - SEARCH ws_cache USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - UNION ALL
-  - MATERIALIZE version_inheritance
-  - SETUP
-  - SCAN isc_v
-  - RECURSIVE STEP
-  - SCAN vir
-  - SEARCH isc_v USING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
-  - MATERIALIZE change
-  - COMPOUND QUERY
-  - LEFT-MOST SUBQUERY
-  - SCAN c
-  - SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
-  - UNION ALL
-  - SCAN t
-  - SCAN isc USING INDEX idx_internal_state_cache_lix_key_value_live_vfe
-  - SCAN vi
-  - CORRELATED SCALAR SUBQUERY 11
-  - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 12
-  - SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 13
-  - SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
-  - CREATE BLOOM FILTER
-  - SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
-  - SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - UNION ALL
-  - SCAN vi
-  - REUSE LIST SUBQUERY 24
-  - SEARCH unt USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
-  - CORRELATED SCALAR SUBQUERY 15
-  - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 16
-  - SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 17
-  - SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - UNION ALL
-  - SEARCH isc_v USING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
-  - REUSE LIST SUBQUERY 24
-  - SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
-  - CORRELATED SCALAR SUBQUERY 19
-  - SEARCH child_txn USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 20
-  - SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-  - CORRELATED SCALAR SUBQUERY 21
-  - SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-  - SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-  - SCAN (subquery-22)
-  - LIST SUBQUERY 24
-  - SCAN internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id
-  - CREATE BLOOM FILTER
+	return subquery.toOperationNode();
+}
