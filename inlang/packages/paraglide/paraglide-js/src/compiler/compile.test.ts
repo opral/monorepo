@@ -309,7 +309,7 @@ test("includes eslint-disable comment", async () => {
 
 	const messages = await fs.promises.readFile("/output/messages.js", "utf8");
 
-	expect(messages).toContain("// eslint-disable");
+	expect(messages).toContain("/* eslint-disable */");
 
 	await compile({
 		project: "/project.inlang",
@@ -323,7 +323,7 @@ test("includes eslint-disable comment", async () => {
 		"utf8"
 	);
 
-	expect(messagesWithoutComment).not.toContain("// eslint-disable");
+	expect(messagesWithoutComment).not.toContain("/* eslint-disable */");
 });
 
 test("default compiler options should include cookied, variable and baseLocale to ensure easy try out of paraglide js, working both in server and browser environemnts", () => {
