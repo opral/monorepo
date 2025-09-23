@@ -3,12 +3,10 @@ import { clearStateCache } from "./clear-state-cache.js";
 import { isStaleStateCache } from "./is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./mark-state-cache-as-stale.js";
 import { openLix } from "../../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { Kysely } from "kysely";
+import { selectFromStateCache } from "./select-from-state-cache.js";
 
 test("clearStateCache deletes all cache entries", async () => {
 	const lix = await openLix({});
-	const internalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Insert some data to populate cache
 	await lix.db
@@ -20,10 +18,9 @@ test("clearStateCache deletes all cache entries", async () => {
 		.execute();
 
 	// Verify cache has entries
-	const cacheBeforeClear = await internalDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.execute();
+	const { rows: cacheBeforeClear } = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value").selectAll().compile()
+	);
 
 	expect(cacheBeforeClear.length).toBeGreaterThan(0);
 
@@ -35,10 +32,9 @@ test("clearStateCache deletes all cache entries", async () => {
 	clearStateCache({ engine: lix.engine! });
 
 	// Verify cache is empty
-	const cacheAfterClear = await internalDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.execute();
+	const { rows: cacheAfterClear } = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value").selectAll().compile()
+	);
 
 	expect(cacheAfterClear.length).toBe(0);
 

@@ -807,7 +807,7 @@ export function applyStateVTable(
 		entityId: string;
 		versionId: string;
 	}): string {
-		const res = engine.executeSync(
+		const [entity] = engine.executeSync(
 			internalQueryBuilder
 				.selectFrom("internal_resolved_state_all")
 				.select(["schema_key"])
@@ -817,34 +817,7 @@ export function applyStateVTable(
 				.limit(1)
 				.compile()
 		).rows;
-		let sk = (res && res[0] && (res[0] as any).schema_key) || "";
-		if (!sk) {
-			const res2 = engine.executeSync(
-				internalQueryBuilder
-					.selectFrom("state_all")
-					.select(["schema_key"])
-					.where("file_id", "=", args.fileId)
-					.where("entity_id", "=", args.entityId)
-					.where("version_id", "=", args.versionId)
-					.limit(1)
-					.compile()
-			).rows;
-			sk = (res2 && res2[0] && (res2[0] as any).schema_key) || "";
-		}
-		if (!sk) {
-			const res3 = engine.executeSync(
-				internalQueryBuilder
-					.selectFrom("internal_state_cache")
-					.select(["schema_key"])
-					.where("file_id", "=", args.fileId)
-					.where("entity_id", "=", args.entityId)
-					.where("version_id", "=", args.versionId)
-					.limit(1)
-					.compile()
-			).rows;
-			sk = (res3 && res3[0] && (res3[0] as any).schema_key) || "";
-		}
-		return sk;
+		return entity?.schema_key ?? "";
 	}
 
 	// Register the vtable under a clearer internal name

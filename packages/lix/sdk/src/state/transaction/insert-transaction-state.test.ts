@@ -5,6 +5,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import { selectFromStateCache } from "../cache/select-from-state-cache.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -73,11 +74,12 @@ test("creates tracked entity with pending change", async () => {
 	});
 
 	// Verify cache is NOT updated before commit (new behavior)
-	const cacheBeforeCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "test-insert")
-		.selectAll()
-		.execute();
+	const { rows: cacheBeforeCommit } = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value")
+			.selectAll()
+			.where("entity_id", "=", "test-insert")
+			.compile()
+	);
 
 	expect(cacheBeforeCommit).toHaveLength(0); // No cache entry before commit
 
@@ -98,15 +100,16 @@ test("creates tracked entity with pending change", async () => {
 	expect(changeAfterCommit.id).toBe(changeInTransaction.id);
 
 	// After commit, verify cache has been updated
-	const cacheAfterCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "test-insert")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.executeTakeFirstOrThrow();
+	const cacheAfterCommit = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value")
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", "test-insert")
+			.compile()
+	).rows[0]!;
 
 	expect(cacheAfterCommit).toBeDefined();
-	expect(cacheAfterCommit.snapshot_content).toEqual({
+	expect(JSON.parse(cacheAfterCommit.snapshot_content)).toEqual({
 		value: "inserted-value",
 	});
 	expect(cacheAfterCommit.change_id).toBe(changeInTransaction.id);
@@ -216,18 +219,17 @@ test("creates tombstone for inherited entity deletion", async () => {
 	});
 
 	// Verify tombstone exists in cache after commit
-	const tombstoneAfterCommit = await lixInternalDb
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "inherited-key")
-		.where("schema_key", "=", "lix_key_value")
-		.where("version_id", "=", activeVersion.version_id)
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.execute();
+	const { rows: tombstoneAfterCommit } = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value")
+			.selectAll()
+			.where("entity_id", "=", "inherited-key")
+			.where("version_id", "=", activeVersion.version_id)
+			.compile()
+	);
 
 	expect(tombstoneAfterCommit).toHaveLength(1);
-	expect(tombstoneAfterCommit[0]?.inheritance_delete_marker).toBe(1);
-	expect(tombstoneAfterCommit[0]?.snapshot_content).toBe(null);
+	expect(tombstoneAfterCommit[0]!.inheritance_delete_marker).toBe(1);
+	expect(tombstoneAfterCommit[0]!.snapshot_content).toBeNull();
 
 	// Verify entity no longer appears in active version
 	const afterDelete = await lix.db
@@ -532,13 +534,13 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 	expect(afterDelete).toHaveLength(0);
 
 	// Verify no tombstone was created in cache (direct untracked deletions don't need tombstones)
-	const cacheEntry = await lixInternalDb
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "direct-untracked-key")
-		.where("version_id", "=", activeVersion.version_id)
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.execute();
+	const { rows: cacheEntry } = lix.engine!.executeSync(
+		selectFromStateCache("lix_key_value")
+			.selectAll()
+			.where("entity_id", "=", "direct-untracked-key")
+			.where("version_id", "=", activeVersion.version_id)
+			.compile()
+	);
 
 	expect(cacheEntry).toHaveLength(0);
 

@@ -8,6 +8,7 @@ import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { selectFromStateCache } from "./select-from-state-cache.js";
 
 test("populates v2 cache from materializer", async () => {
 	const lix = await openLix({
@@ -64,25 +65,24 @@ test("populates v2 cache from materializer", async () => {
 	});
 
 	// Check lix_test table
-	const lixTestTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
+	const { rows: lixTestRows } = lix.engine!.executeSync(
+		selectFromStateCache("lix_test")
+			.selectAll()
+			.orderBy("entity_id", "asc")
+			.compile()
+	);
 
-	expect(lixTestTable).toHaveLength(2);
-	expect(lixTestTable[0].entity_id).toBe("entity-1");
-	expect(lixTestTable[1].entity_id).toBe("entity-2");
+	expect(lixTestRows).toHaveLength(2);
+	expect(lixTestRows[0].entity_id).toBe("entity-1");
+	expect(lixTestRows[1].entity_id).toBe("entity-2");
 
 	// Check lix_other table
-	const lixOtherTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_other ORDER BY entity_id`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
+	const { rows: lixOtherRows } = lix.engine!.executeSync(
+		selectFromStateCache("lix_other").selectAll().compile()
+	);
 
-	expect(lixOtherTable).toHaveLength(1);
-	expect(lixOtherTable[0].entity_id).toBe("entity-3");
+	expect(lixOtherRows).toHaveLength(1);
+	expect(lixOtherRows[0].entity_id).toBe("entity-3");
 });
 
 test("populates v2 cache with version filter", async () => {
@@ -139,11 +139,12 @@ test("populates v2 cache with version filter", async () => {
 	});
 
 	// Verify both versions exist
-	const allData = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
+	const { rows: allData } = lix.engine!.executeSync(
+		selectFromStateCache("lix_test")
+			.selectAll()
+			.orderBy("entity_id", "asc")
+			.compile()
+	);
 
 	expect(allData).toHaveLength(2);
 	expect(allData[0].version_id).toBe("version-1");
@@ -157,11 +158,12 @@ test("populates v2 cache with version filter", async () => {
 
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
-	const afterPopulate = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
-		returnValue: "resultRows",
-		rowMode: "object",
-	}) as any[];
+	const { rows: afterPopulate } = lix.engine!.executeSync(
+		selectFromStateCache("lix_test")
+			.selectAll()
+			.orderBy("entity_id", "asc")
+			.compile()
+	);
 
 	expect(afterPopulate).toHaveLength(1);
 	expect(afterPopulate[0].version_id).toBe("version-2");
@@ -222,18 +224,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	});
 
 	// Verify data exists in all tables
-	const schemaA = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_a`,
-		returnValue: "resultRows",
-	});
-	const schemaB = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_b`,
-		returnValue: "resultRows",
-	});
-	const schemaC = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_c`,
-		returnValue: "resultRows",
-	});
+	const { rows: schemaA } = lix.engine!.executeSync(
+		selectFromStateCache("schema_a").selectAll().compile()
+	);
+	const { rows: schemaB } = lix.engine!.executeSync(
+		selectFromStateCache("schema_b").selectAll().compile()
+	);
+	const { rows: schemaC } = lix.engine!.executeSync(
+		selectFromStateCache("schema_c").selectAll().compile()
+	);
 
 	expect(schemaA).toHaveLength(1);
 	expect(schemaB).toHaveLength(1);
@@ -243,18 +242,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 	populateStateCache({ engine: lix.engine! });
 
 	// All tables should be empty now (no materializer data)
-	const schemaAAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_a`,
-		returnValue: "resultRows",
-	});
-	const schemaBAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_b`,
-		returnValue: "resultRows",
-	});
-	const schemaCAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_c`,
-		returnValue: "resultRows",
-	});
+	const { rows: schemaAAfter } = lix.engine!.executeSync(
+		selectFromStateCache("schema_a").selectAll().compile()
+	);
+	const { rows: schemaBAfter } = lix.engine!.executeSync(
+		selectFromStateCache("schema_b").selectAll().compile()
+	);
+	const { rows: schemaCAfter } = lix.engine!.executeSync(
+		selectFromStateCache("schema_c").selectAll().compile()
+	);
 
 	expect(schemaAAfter).toHaveLength(0);
 	expect(schemaBAfter).toHaveLength(0);
@@ -498,22 +494,23 @@ test("global version entities are populated when populating child versions", asy
 	// Should still see the entity with the same change_id
 	expect(afterCachePopulation).toHaveLength(1);
 	expect(afterCachePopulation[0]?.change_id).toBe(originalChangeId);
-	expect((afterCachePopulation[0]?.snapshot_content as any).value).toBe(
+	expect((afterCachePopulation[0]?.snapshot_content as any)?.value).toBe(
 		"from_global"
 	);
 
 	// Check the physical cache directly: the parent/global authored entry
 	// should be materialized in its own version's cache table.
-	const cacheEntries = await db
-		.selectFrom("internal_state_cache_test_entity" as any)
-		.where("entity_id", "=", "global_entity_1")
-		.select([
-			"entity_id",
-			"change_id",
-			"version_id",
-			"inherited_from_version_id",
-		])
-		.execute();
+	const { rows: cacheEntries } = lix.engine!.executeSync(
+		selectFromStateCache("test_entity")
+			.select([
+				"entity_id",
+				"change_id",
+				"version_id",
+				"inherited_from_version_id",
+			])
+			.where("entity_id", "=", "global_entity_1")
+			.compile()
+	);
 
 	const globalEntry = cacheEntries.find((e: any) => e.version_id === "global");
 	expect(globalEntry).toBeTruthy();

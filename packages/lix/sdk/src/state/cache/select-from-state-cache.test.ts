@@ -8,24 +8,24 @@ test("routes to the physical cache table for the provided schema key", () => {
 	expect(compiled.sql).toContain("internal_state_cache_lix_change_set");
 });
 
-test("adds implicit lixcol_* projections matching entity views", () => {
+test("exposes raw cache columns including snapshot content", () => {
 	const compiled = selectFromStateCache("lix_change_set")
-		.select(["lixcol_entity_id", "lixcol_version_id"])
+		.select(["entity_id", "snapshot_content"])
 		.compile();
 
-	expect(compiled.sql).toContain('"lixcol_entity_id"');
-	expect(compiled.sql).toContain('"lixcol_version_id"');
+	expect(compiled.sql).toContain('"entity_id"');
+	expect(compiled.sql).toContain('"snapshot_content"');
 });
 
 test("uses the internal query builder so callers can chain Kysely clauses", () => {
 	const compiled = selectFromStateCache("lix_change_set")
 		.where("schema_key", "=", "lix_change_set")
-		.where("lixcol_version_id", "=", "global")
+		.where("version_id", "=", "global")
 		.select(["entity_id"])
 		.compile();
 
 	expect(compiled.sql).toMatch(/WHERE\s+"schema_key"\s*=\s*\?/i);
-	expect(compiled.sql).toMatch(/"lixcol_version_id"\s*=\s*\?/i);
+	expect(compiled.sql).toMatch(/"version_id"\s*=\s*\?/i);
 	expect(compiled.parameters).toEqual(["lix_change_set", "global"]);
 });
 
@@ -46,23 +46,18 @@ test("supports standard joins for advanced routing queries", () => {
 			sql`internal_state_cache_lix_commit`.as("commit_cache"),
 			(join) =>
 				join.onRef(
-					"internal_state_cache_routed.lixcol_entity_id",
+					"internal_state_cache_routed.entity_id",
 					"=",
 					"commit_cache.entity_id"
 				)
 		)
-		.select([
-			"internal_state_cache_routed.lixcol_entity_id",
-			"commit_cache.entity_id",
-		])
+		.select(["internal_state_cache_routed.entity_id", "commit_cache.entity_id"])
 		.compile();
 
 	expect(compiled.sql).toMatch(
 		/inner join\s+internal_state_cache_lix_commit\s+as\s+"commit_cache"/i
 	);
-	expect(compiled.sql).toMatch(
-		/"internal_state_cache_routed"\."lixcol_entity_id"/
-	);
+	expect(compiled.sql).toMatch(/"internal_state_cache_routed"\."entity_id"/);
 });
 
 test("returns an empty select when no schema key is provided", () => {

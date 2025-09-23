@@ -10,6 +10,7 @@ import {
 import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
 import { openLix } from "../../lix/open-lix.js";
 import { withWriterKey } from "../writer.js";
+import { selectFromStateCache } from "../cache/select-from-state-cache.js";
 
 test("simulation test discover", () => {});
 
@@ -2423,20 +2424,21 @@ simulationTest(
 			.execute();
 
 		// Cache should be populated immediately via write-through
-		const cacheEntry = await db
-			.selectFrom("internal_state_cache")
-			.where("entity_id", "=", "write-through-entity")
-			.where("schema_key", "=", "write-through-schema")
-			.where("file_id", "=", "write-through-file")
-			.where("version_id", "=", activeVersion.id)
-			.selectAll()
-			.select(sql`json(snapshot_content)`.as("snapshot_content"))
-			.executeTakeFirst();
+		const { rows: cacheRows } = lix.engine!.executeSync(
+			selectFromStateCache("write-through-schema")
+				.selectAll()
+				.select(sql`json(snapshot_content)`.as("snapshot_json"))
+				.where("entity_id", "=", "write-through-entity")
+				.where("file_id", "=", "write-through-file")
+				.where("version_id", "=", activeVersion.id)
+				.compile()
+		);
+		const cacheEntry = cacheRows[0];
 
 		expect(cacheEntry).toBeDefined();
 		expect(cacheEntry?.entity_id).toBe("write-through-entity");
 		expect(cacheEntry?.plugin_key).toBe("write-through-plugin");
-		expect(cacheEntry?.snapshot_content).toEqual({
+		expect(JSON.parse(cacheEntry!.snapshot_json)).toEqual({
 			test: "write-through-data",
 		});
 
@@ -2506,18 +2508,19 @@ simulationTest(
 			.execute();
 
 		// Cache should be immediately updated
-		const cacheEntry = await db
-			.selectFrom("internal_state_cache")
-			.where("entity_id", "=", "update-cache-entity")
-			.where("schema_key", "=", "update-cache-schema")
-			.where("file_id", "=", "update-cache-file")
-			.where("version_id", "=", activeVersion.id)
-			.selectAll()
-			.select(sql`json(snapshot_content)`.as("snapshot_content"))
-			.executeTakeFirst();
+		const { rows: updatedCacheRows } = lix.engine!.executeSync(
+			selectFromStateCache("update-cache-schema")
+				.selectAll()
+				.select(sql`json(snapshot_content)`.as("snapshot_json"))
+				.where("entity_id", "=", "update-cache-entity")
+				.where("file_id", "=", "update-cache-file")
+				.where("version_id", "=", activeVersion.id)
+				.compile()
+		);
+		const cacheEntry = updatedCacheRows[0];
 
 		expect(cacheEntry).toBeDefined();
-		expect(cacheEntry?.snapshot_content).toEqual({
+		expect(JSON.parse(cacheEntry!.snapshot_json as string)).toEqual({
 			updated: "value",
 		});
 		expect(cacheEntry?.plugin_key).toBe("updated-plugin");
@@ -2594,14 +2597,12 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		// Get the state cache record
-		const cacheRecord = await (
-			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-		)
-			.selectFrom("internal_state_cache")
-			.where("entity_id", "=", "timestamp-test-entity")
-			.where("schema_key", "=", "mock_schema")
-			.select(["created_at", "updated_at"])
-			.executeTakeFirstOrThrow();
+		const cacheRecord = lix.engine!.executeSync(
+			selectFromStateCache("mock_schema")
+				.select(["created_at", "updated_at"])
+				.where("entity_id", "=", "timestamp-test-entity")
+				.compile()
+		).rows[0]!;
 
 		// Verify all timestamps are identical
 		expect(changeRecord.created_at).toBe(cacheRecord.created_at);

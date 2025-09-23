@@ -1,12 +1,11 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
-import { type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { updateStateCache } from "./update-state-cache.js";
+import { selectFromStateCache } from "./select-from-state-cache.js";
 
 test("selecting from vtable queries per-schema physical tables", async () => {
 	const lix = await openLix({});
-	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const engine = lix.engine!;
 
 	// Use the direct function to insert rows into different schemas
 	updateStateCache({
@@ -48,12 +47,19 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	});
 
 	// Test 1: Select test rows from vtable (filter by our specific test data)
-	const allRows = await db
-		.selectFrom("internal_state_cache")
-		.select(["entity_id", "schema_key", "file_id"])
-		.where("schema_key", "in", ["schema_a", "schema_b"])
-		.orderBy("entity_id")
-		.execute();
+	const { rows: allRows } = engine.executeSync(
+		selectFromStateCache("schema_a")
+			.select(["entity_id", "schema_key", "file_id"])
+			.unionAll(
+				selectFromStateCache("schema_b").select([
+					"entity_id",
+					"schema_key",
+					"file_id",
+				])
+			)
+			.orderBy("entity_id", "asc")
+			.compile()
+	);
 
 	expect(allRows).toHaveLength(3);
 	expect(allRows[0]).toMatchObject({
@@ -73,23 +79,24 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	});
 
 	// Test 2: Select with schema_key filter (should query single physical table)
-	const schemaARows = await db
-		.selectFrom("internal_state_cache")
-		.select(["entity_id", "schema_key", "file_id"])
-		.where("schema_key", "=", "schema_a")
-		.orderBy("entity_id")
-		.execute();
+	const { rows: onlySchemaA } = engine.executeSync(
+		selectFromStateCache("schema_a")
+			.select(["entity_id", "schema_key", "file_id"])
+			.orderBy("entity_id")
+			.compile()
+	);
 
-	expect(schemaARows).toHaveLength(2);
-	expect(schemaARows[0]?.entity_id).toBe("entity1");
-	expect(schemaARows[1]?.entity_id).toBe("entity3");
+	expect(onlySchemaA).toHaveLength(2);
+	expect(onlySchemaA[0]?.entity_id).toBe("entity1");
+	expect(onlySchemaA[1]?.entity_id).toBe("entity3");
 
 	// Test 3: Select with entity_id filter
-	const entity2Row = await db
-		.selectFrom("internal_state_cache")
-		.select(["entity_id", "schema_key", "file_id"])
-		.where("entity_id", "=", "entity2")
-		.execute();
+	const { rows: entity2Row } = engine.executeSync(
+		selectFromStateCache("schema_b")
+			.select(["entity_id", "schema_key", "file_id"])
+			.where("entity_id", "=", "entity2")
+			.compile()
+	);
 
 	expect(entity2Row).toHaveLength(1);
 	expect(entity2Row[0]).toMatchObject({
@@ -99,12 +106,12 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	});
 
 	// Test 4: Select with multiple filters
-	const filteredRow = await db
-		.selectFrom("internal_state_cache")
-		.select(["entity_id", "schema_key", "file_id"])
-		.where("schema_key", "=", "schema_a")
-		.where("file_id", "=", "file3")
-		.execute();
+	const { rows: filteredRow } = engine.executeSync(
+		selectFromStateCache("schema_a")
+			.select(["entity_id", "schema_key", "file_id"])
+			.where("file_id", "=", "file3")
+			.compile()
+	);
 
 	expect(filteredRow).toHaveLength(1);
 	expect(filteredRow[0]?.entity_id).toBe("entity3");

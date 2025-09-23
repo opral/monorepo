@@ -2,8 +2,8 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { sql } from "kysely";
+import { selectFromStateCache } from "./select-from-state-cache.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
 import type { InternalStateCache } from "./schema.js";
 
@@ -42,28 +42,27 @@ test("inserts into cache based on change", async () => {
 	});
 
 	// Verify cache entry was created/updated
-	const cacheEntries = await (
-		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-	)
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testChange.entity_id)
-		.where("schema_key", "=", testChange.schema_key)
-		.where("file_id", "=", testChange.file_id)
-		.where("version_id", "=", versionId)
-		.execute();
+	const { rows: cacheEntries } = lix.engine!.executeSync(
+		selectFromStateCache(testChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testChange.entity_id)
+			.where("file_id", "=", testChange.file_id)
+			.where("version_id", "=", versionId)
+			.compile()
+	);
 
 	expect(cacheEntries).toHaveLength(1);
 
-	const cacheEntry = cacheEntries[0]!;
+	const cacheEntry = cacheEntries[0];
+
 	expect(cacheEntry).toEqual({
 		entity_id: testChange.entity_id,
 		schema_key: testChange.schema_key,
 		file_id: testChange.file_id,
 		version_id: versionId,
 		plugin_key: testChange.plugin_key,
-		snapshot_content: JSON.parse(testChange.snapshot_content as any),
+		snapshot_content: testChange.snapshot_content,
 		schema_version: testChange.schema_version,
 		created_at: currentTimestamp,
 		updated_at: currentTimestamp,
@@ -112,21 +111,20 @@ test("upserts cache entry on conflict", async () => {
 	});
 
 	// Verify initial entry exists
-	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-	const initialEntries = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", initialChange.entity_id)
-		.where("schema_key", "=", initialChange.schema_key)
-		.where("file_id", "=", initialChange.file_id)
-		.where("version_id", "=", versionId)
-		.execute();
+	const { rows: initialEntries } = lix.engine!.executeSync(
+		selectFromStateCache(initialChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", initialChange.entity_id)
+			.where("file_id", "=", initialChange.file_id)
+			.where("version_id", "=", versionId)
+			.compile()
+	);
 
 	expect(initialEntries).toHaveLength(1);
 	expect(initialEntries[0]!.commit_id).toBe(initialCommitId);
 	expect(initialEntries[0]!.snapshot_content).toEqual(
-		JSON.parse(initialChange.snapshot_content as any)
+		initialChange.snapshot_content
 	);
 
 	// Now update with new data (same entity, schema, file, version - should trigger upsert)
@@ -155,26 +153,27 @@ test("upserts cache entry on conflict", async () => {
 	});
 
 	// Verify only one entry exists (upserted, not inserted as new)
-	const finalEntries = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", updatedChange.entity_id)
-		.where("schema_key", "=", updatedChange.schema_key)
-		.where("file_id", "=", updatedChange.file_id)
-		.where("version_id", "=", versionId)
-		.execute();
+	const { rows: finalEntries } = lix.engine!.executeSync(
+		selectFromStateCache(updatedChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", updatedChange.entity_id)
+			.where("file_id", "=", updatedChange.file_id)
+			.where("version_id", "=", versionId)
+			.compile()
+	);
 
 	expect(finalEntries).toHaveLength(1);
 
 	const upsertedEntry = finalEntries[0]!;
+
 	expect(upsertedEntry).toEqual({
 		entity_id: updatedChange.entity_id,
 		schema_key: updatedChange.schema_key,
 		file_id: updatedChange.file_id,
 		version_id: versionId,
 		plugin_key: updatedChange.plugin_key, // Should be updated
-		snapshot_content: JSON.parse(updatedChange.snapshot_content as any), // Should be updated
+		snapshot_content: updatedChange.snapshot_content,
 		schema_version: updatedChange.schema_version, // Should be updated
 		created_at: initialTimestamp, // Should remain from initial insert (v2 now matches v1 behavior)
 		updated_at: updateTimestamp, // Should be updated
@@ -225,19 +224,18 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		changes: [createChange],
 	});
 
-	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
 	// 2. Verify entity exists in parent cache
-	const parentCache = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", parentVersion)
-		.execute();
+	const { rows: parentCache } = lix.engine!.executeSync(
+		selectFromStateCache(createChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", parentVersion)
+			.compile()
+	);
 
 	expect(parentCache).toHaveLength(1);
-	expect(parentCache[0]?.snapshot_content).toEqual({
+	expect(JSON.parse(parentCache[0]?.snapshot_content)).toEqual({
 		id: testEntity,
 		value: "parent-data",
 	});
@@ -263,78 +261,86 @@ test("handles inheritance chain deletions with tombstones", async () => {
 	});
 
 	// 4. Verify parent still has the entity in cache
-	const parentCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", parentVersion)
-		.execute();
+	const { rows: parentCacheAfterDelete } = lix.engine!.executeSync(
+		selectFromStateCache(deleteChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", parentVersion)
+			.compile()
+	);
 
 	expect(parentCacheAfterDelete).toHaveLength(1);
-	expect(parentCacheAfterDelete[0]?.snapshot_content).toEqual({
+	expect(
+		JSON.parse(parentCacheAfterDelete[0]?.snapshot_content as string)
+	).toEqual({
 		id: testEntity,
 		value: "parent-data",
 	});
 
 	// 5. Verify child version HAS a tombstone cache entry
-	const childCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", childVersion)
-		.execute();
+	const { rows: childCacheAfterDelete } = lix.engine!.executeSync(
+		selectFromStateCache(deleteChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", childVersion)
+			.compile()
+	);
 
 	expect(childCacheAfterDelete).toHaveLength(1);
 	expect(childCacheAfterDelete[0]?.snapshot_content).toBeNull();
 	expect(childCacheAfterDelete[0]?.change_id).toBe("delete-change-456");
 
 	// 6. Verify subchild version has NO direct cache entry (inherits deletion from child)
-	const subchildCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", subchildVersion)
-		.execute();
+	const { rows: subchildCacheAfterDelete } = lix.engine!.executeSync(
+		selectFromStateCache(deleteChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", subchildVersion)
+			.compile()
+	);
 
 	expect(subchildCacheAfterDelete).toHaveLength(0);
 
 	// 7. Verify cache entries are correct (tombstones filtered out)
-	const parentStateAll = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", parentVersion)
-		.where("inheritance_delete_marker", "=", 0)
-		.where("snapshot_content", "is not", null)
-		.execute();
+	const { rows: parentStateAll } = lix.engine!.executeSync(
+		selectFromStateCache(createChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", parentVersion)
+			.where("inheritance_delete_marker", "=", 0)
+			.where("snapshot_content", "is not", null)
+			.compile()
+	);
 
-	const childStateAll = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", childVersion)
-		.where("inheritance_delete_marker", "=", 0)
-		.where("snapshot_content", "is not", null)
-		.execute();
+	const { rows: childStateAll } = lix.engine!.executeSync(
+		selectFromStateCache(createChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", childVersion)
+			.where("inheritance_delete_marker", "=", 0)
+			.where("snapshot_content", "is not", null)
+			.compile()
+	);
 
-	const subchildStateAll = await intDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", testEntity)
-		.where("version_id", "=", subchildVersion)
-		.where("inheritance_delete_marker", "=", 0)
-		.where("snapshot_content", "is not", null)
-		.execute();
+	const { rows: subchildStateAll } = lix.engine!.executeSync(
+		selectFromStateCache(createChange.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", testEntity)
+			.where("version_id", "=", subchildVersion)
+			.where("inheritance_delete_marker", "=", 0)
+			.where("snapshot_content", "is not", null)
+			.compile()
+	);
 
 	// Parent should show the entity
 	expect(parentStateAll).toHaveLength(1);
-	expect(parentStateAll[0]?.snapshot_content).toEqual({
+	expect(JSON.parse(parentStateAll[0]?.snapshot_content)).toEqual({
 		id: testEntity,
 		value: "parent-data",
 	});
@@ -396,21 +402,24 @@ test("handles duplicate entity updates - last change wins", async () => {
 	});
 
 	// Query the cache to verify only the latest change is present
-	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", "test-entity")
-		.where("file_id", "=", "test-file")
-		.where("version_id", "=", "version-1")
-		.execute();
+	const { rows: result } = lix.engine!.executeSync(
+		selectFromStateCache(change2.schema_key)
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", "test-entity")
+			.where("file_id", "=", "test-file")
+			.where("version_id", "=", "version-1")
+			.compile()
+	);
 
 	// Should have exactly one row (latest change wins)
 	expect(result).toHaveLength(1);
 
 	// Should be the second change
 	expect(result[0]!.change_id).toBe("change-2");
-	expect(result[0]!.snapshot_content).toEqual({ value: "second" });
+	expect(JSON.parse(result[0]!.snapshot_content as string)).toEqual({
+		value: "second",
+	});
 	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at
 	expect(result[0]!.updated_at).toBe("2024-01-01T00:01:00Z"); // Should update updated_at
 });
@@ -472,21 +481,24 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 	});
 
 	// Query the cache to verify only the latest change is present
-	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.select(sql`json(snapshot_content)`.as("snapshot_content"))
-		.where("entity_id", "=", "test-entity")
-		.where("file_id", "=", "test-file")
-		.where("version_id", "=", "version-1")
-		.execute();
+	const { rows: result } = lix.engine!.executeSync(
+		selectFromStateCache("test-schema")
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content"))
+			.where("entity_id", "=", "test-entity")
+			.where("file_id", "=", "test-file")
+			.where("version_id", "=", "version-1")
+			.compile()
+	);
 
 	// Should have exactly one row (last change in batch wins)
 	expect(result).toHaveLength(1);
 
 	// Should be the third change (last in batch)
 	expect(result[0]!.change_id).toBe("change-3");
-	expect(result[0]!.snapshot_content).toEqual({ value: "third" });
+	expect(JSON.parse(result[0]!.snapshot_content as string)).toEqual({
+		value: "third",
+	});
 	expect(result[0]!.created_at).toBe("2024-01-01T00:00:00Z"); // Should preserve original created_at from first
 	expect(result[0]!.updated_at).toBe("2024-01-01T00:02:00Z"); // Should use updated_at from last
 });

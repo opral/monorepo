@@ -3,6 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import { selectFromStateCache } from "./select-from-state-cache.js";
 
 const ROW_NUM = 1000;
 
@@ -99,18 +100,25 @@ bench("query with json_extract from cache", async () => {
 		.execute();
 
 	// Now perform the query with json_extract
-	await db
-		.selectFrom("internal_state_cache")
-		.select([
-			"entity_id",
-			"schema_key",
-			sql`json_extract(snapshot_content, '$.data.value')`.as("value"),
-			sql`json_extract(snapshot_content, '$.data.index')`.as("index"),
-			sql`json_extract(snapshot_content, '$.data.nested.field3')`.as("field3"),
-		])
-		.where("schema_key", "=", "lix_test")
-		.where(sql`json_extract(snapshot_content, '$.data.nested.field3')`, "=", 1)
-		.execute();
+	lix.engine!.executeSync(
+		selectFromStateCache("lix_test")
+			.select([
+				"entity_id",
+				"schema_key",
+				sql`json_extract(snapshot_content, '$.data.value')`.as("value"),
+				sql`json_extract(snapshot_content, '$.data.index')`.as("index"),
+				sql`json_extract(snapshot_content, '$.data.nested.field3')`.as(
+					"field3"
+				),
+			])
+			.where("schema_key", "=", "lix_test")
+			.where(
+				sql`json_extract(snapshot_content, '$.data.nested.field3')`,
+				"=",
+				1
+			)
+			.compile()
+	);
 });
 
 bench("query through resolved_state_all view", async () => {

@@ -8,13 +8,11 @@ import type { LixEngine } from "../boot.js";
 import { createCachePopulator } from "./cache-populator.js";
 import { rewriteStateView } from "./rewriters/state.js";
 import { rewriteStateAllView } from "./rewriters/state-all.js";
-import { rewriteInternalStateCache } from "./rewriters/internal-state-cache.js";
 import { rewriteInternalResolvedStateAll } from "./rewriters/internal-resolved-state-all.js";
 
 const REWRITERS = [
 	rewriteStateView,
 	rewriteStateAllView,
-	rewriteInternalStateCache,
 	rewriteInternalResolvedStateAll,
 ];
 

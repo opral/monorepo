@@ -9,6 +9,7 @@ import { nanoId } from "../../engine/functions/nano-id.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { uuidV7 } from "../../engine/functions/uuid-v7.js";
 import { sql } from "kysely";
+import { selectFromStateCache } from "../cache/select-from-state-cache.js";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
@@ -1483,11 +1484,12 @@ test("global cache entry should be inherited by child versions in resolved view"
 	});
 
 	// Verify cache has exactly one entry for this entity (in global version)
-	const cacheEntries = await db
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.where("entity_id", "=", "mock-global-entity")
-		.execute();
+	const { rows: cacheEntries } = lix.engine!.executeSync(
+		selectFromStateCache("mock_schema")
+			.selectAll()
+			.where("entity_id", "=", "mock-global-entity")
+			.compile()
+	);
 
 	expect(cacheEntries).toHaveLength(1);
 	expect(cacheEntries[0]?.version_id).toBe("global");
