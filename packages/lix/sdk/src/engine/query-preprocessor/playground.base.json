@@ -1,65 +1,65 @@
 {
 	"files": [
 		{
-			"filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-compiler/playground.bench.ts",
+			"filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/query-preprocessor/playground.bench.ts",
 			"groups": [
 				{
-					"fullName": "src/engine/query-compiler/playground.bench.ts",
+					"fullName": "src/engine/query-preprocessor/playground.bench.ts",
 					"benchmarks": [
 						{
-							"id": "1198490185_1",
+							"id": "-1662182535_1",
 							"name": "insert 10 then read specific key",
 							"rank": 2,
-							"rme": 4.500095271077996,
+							"rme": 3.8270241589952048,
 							"samples": [],
-							"totalTime": 3022.898752,
-							"min": 278.92633300000034,
-							"max": 340.67404199999874,
-							"hz": 3.3080830091923636,
-							"period": 302.2898752,
-							"mean": 302.2898752,
-							"variance": 361.6641138385396,
-							"sd": 19.017468649600545,
-							"sem": 6.013851626358432,
+							"totalTime": 3282.0537900000045,
+							"min": 308.13187500000004,
+							"max": 364.6103750000002,
+							"hz": 3.0468726717608083,
+							"period": 328.20537900000045,
+							"mean": 328.20537900000045,
+							"variance": 308.33909645247,
+							"sd": 17.55958702397269,
+							"sem": 5.552828976769138,
 							"df": 9,
 							"critical": 2.262,
-							"moe": 13.603332378822772,
-							"p75": 311.80754200000047,
-							"p99": 340.67404199999874,
-							"p995": 340.67404199999874,
-							"p999": 340.67404199999874,
+							"moe": 12.560499145451791,
+							"p75": 341.2126250000001,
+							"p99": 364.6103750000002,
+							"p995": 364.6103750000002,
+							"p999": 364.6103750000002,
 							"sampleCount": 10,
-							"median": 299.61312499999985
+							"median": 321.3281455000006
 						}
 					]
 				},
 				{
-					"fullName": "src/engine/query-compiler/playground.bench.ts > state benchmarks",
+					"fullName": "src/engine/query-preprocessor/playground.bench.ts > state benchmarks",
 					"benchmarks": [
 						{
-							"id": "1198490185_0_0",
+							"id": "-1662182535_0_0",
 							"name": "insert 10 then read all",
 							"rank": 1,
-							"rme": 4.902296538431941,
+							"rme": 6.341058703471059,
 							"samples": [],
-							"totalTime": 2286.8747080000003,
-							"min": 206.18583400000034,
-							"max": 251.15808300000026,
-							"hz": 4.3727800062757085,
-							"period": 228.68747080000003,
-							"mean": 228.68747080000003,
-							"variance": 245.63977883129772,
-							"sd": 15.672899503005107,
-							"sem": 4.956205996841714,
+							"totalTime": 2366.174999,
+							"min": 210.57400000000007,
+							"max": 274.3356249999997,
+							"hz": 4.226230098883739,
+							"period": 236.61749989999998,
+							"mean": 236.61749989999998,
+							"variance": 439.97912221347815,
+							"sd": 20.97567930278965,
+							"sem": 6.633092206606795,
 							"df": 9,
 							"critical": 2.262,
-							"moe": 11.210937964855956,
-							"p75": 237.895125,
-							"p99": 251.15808300000026,
-							"p995": 251.15808300000026,
-							"p999": 251.15808300000026,
+							"moe": 15.004054571344572,
+							"p75": 253.0496659999999,
+							"p99": 274.3356249999997,
+							"p995": 274.3356249999997,
+							"p999": 274.3356249999997,
 							"sampleCount": 10,
-							"median": 231.3133335
+							"median": 231.54354200000012
 						}
 					]
 				}
