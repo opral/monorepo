@@ -57,17 +57,15 @@ export function rewriteStateAllView(
 		from:
 			rewrittenFroms && node.from
 				? {
-					kind: "FromNode",
-					froms: rewrittenFroms,
-				}
+						kind: "FromNode",
+						froms: rewrittenFroms,
+					}
 				: node.from,
 		joins: rewrittenJoins ?? node.joins,
 	};
 }
 
-function analyzeFromItem(
-	node: OperationNode
-): { alias: string } | undefined {
+function analyzeFromItem(node: OperationNode): { alias: string } | undefined {
 	if (node.kind === "AliasNode") {
 		const baseTable = (node as any).node as OperationNode | undefined;
 		const aliasNode = (node as any).alias as OperationNode | undefined;

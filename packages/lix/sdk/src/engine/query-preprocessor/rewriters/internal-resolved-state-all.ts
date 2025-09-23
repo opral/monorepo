@@ -23,10 +23,7 @@ export function rewriteInternalResolvedStateAll(
 			return fromItem;
 		}
 
-		const schemaKeys = collectSchemaFilters(
-			node.where?.where,
-			analysis.alias
-		);
+		const schemaKeys = collectSchemaFilters(node.where?.where, analysis.alias);
 
 		if (schemaKeys.length !== 1) {
 			return fromItem;
@@ -62,17 +59,15 @@ export function rewriteInternalResolvedStateAll(
 		from:
 			rewrittenFroms && node.from
 				? {
-					kind: "FromNode",
-					froms: rewrittenFroms,
-				}
+						kind: "FromNode",
+						froms: rewrittenFroms,
+					}
 				: node.from,
 		joins: rewrittenJoins ?? node.joins,
 	};
 }
 
-function analyzeFromItem(
-	node: OperationNode
-): { alias: string } | undefined {
+function analyzeFromItem(node: OperationNode): { alias: string } | undefined {
 	if (node.kind === "AliasNode") {
 		const baseTable = (node as any).node as OperationNode | undefined;
 		const aliasNode = (node as any).alias as OperationNode | undefined;
@@ -127,7 +122,9 @@ function collectSchemaFiltersRecursive(
 
 	switch (node.kind) {
 		case "BinaryOperationNode": {
-			const leftOperand = (node as any).leftOperand as OperationNode | undefined;
+			const leftOperand = (node as any).leftOperand as
+				| OperationNode
+				| undefined;
 			if (!leftOperand || leftOperand.kind !== "ReferenceNode") {
 				return;
 			}

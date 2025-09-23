@@ -15,9 +15,9 @@ Implement a query processor which takes SQL and routes it to the underlying tabl
 
 ### TODOs
 
-- [ ] compile internal_state_cache to optimized routes
-- [ ] compile internal_resolved_state_all to optimized routes
-- [ ] compile state, state_all, state_with_tombstones into optimized route
+- [x] compile internal_state_cache to optimized routes
+- [x] compile internal_resolved_state_all to optimized routes
+- [x] compile state, state_all, state_with_tombstones into optimized route
 - [ ] create entity views with optimized routes
 - [ ] verify no more vtable's on read queries
 - [ ] implement materialized cache

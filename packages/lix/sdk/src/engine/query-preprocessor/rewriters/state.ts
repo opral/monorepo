@@ -103,8 +103,9 @@ export function buildStateSelect(args: {
 		.where((qb) => qb("snapshot_content", "is not", null));
 
 	if (restrictToActiveVersion) {
-		builder = builder.where(() =>
-			sql`version_id IN (
+		builder = builder.where(
+			() =>
+				sql`version_id IN (
 				SELECT json_extract(snapshot_content, '$.version_id')
 				FROM internal_state_all_untracked
 				WHERE schema_key = 'lix_active_version'
