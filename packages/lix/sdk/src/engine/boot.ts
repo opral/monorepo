@@ -65,14 +65,17 @@ export type LixEngine = {
 	 * ```
 	 */
 	runtimeCacheRef: object;
-	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
+	/**
+	 * @deprecated Prefer {@link LixEngine.executeQuerySync}. Reserved for low-level
+	 * raw SQL helpers that have not migrated to Kysely queries yet.
+	 */
 	executeSync: (args: { sql: string; parameters?: Readonly<unknown[]> }) => {
 		rows: any[];
 	};
 	/**
 	 * Run a compiled Kysely query through the engine’s query compiler and execute it synchronously.
 	 */
-	executeQuerySync: (args: { query: CompiledQuery<unknown> }) => {
+	executeQuerySync: (query: CompiledQuery<unknown>) => {
 		rows: any[];
 	};
 	/** Invoke an engine function (router) */

@@ -24,9 +24,10 @@ class EnvironmentConnection implements DatabaseConnection {
 		const { sql, parameters } = compiledQuery;
 		let res: any;
 		try {
-			res = await this.#environment.call("lix_execute_query_sync", {
-				query: compiledQuery,
-			});
+			res = await this.#environment.call(
+				"lix_execute_query_sync",
+				compiledQuery
+			);
 		} catch (err: any) {
 			const previewParam = (v: unknown) => {
 				try {

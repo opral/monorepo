@@ -24,7 +24,7 @@ test("executeQuerySync executes a compiled raw query", async () => {
 		internalQueryBuilder
 	);
 
-	const { rows } = executeQuerySync({ query: compiled });
+	const { rows } = executeQuerySync(compiled);
 
 	expect(rows).toHaveLength(1);
 	expect(rows[0]).toEqual({ value: 1 });
@@ -53,7 +53,7 @@ test("executeQuerySync executes compiled builder queries", async () => {
 		.where("key", "=", "answer")
 		.compile();
 
-	const { rows } = executeQuerySync({ query: compiled });
+	const { rows } = executeQuerySync(compiled);
 
 	expect(rows).toEqual([{ value: 42 }]);
 });
@@ -79,7 +79,7 @@ test("executeQuerySync warms state cache via cache populator", async () => {
 		.selectAll()
 		.compile();
 
-	executeQuerySync({ query: compiled });
+	executeQuerySync(compiled);
 
 	expect(isStaleStateCache({ engine })).toBe(false);
 });

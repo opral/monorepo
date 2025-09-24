@@ -11,7 +11,7 @@ export function createExecuteQuerySync(args: {
 	const { engine } = args;
 	const preprocessQuery = createQueryPreprocessor({ engine });
 
-	return ({ query }: { query: CompiledQuery<unknown> }): { rows: any[] } => {
+	return (query: CompiledQuery<unknown>): { rows: any[] } => {
 		const compiled = preprocessQuery({ query });
 
 		const columnNames: string[] = [];

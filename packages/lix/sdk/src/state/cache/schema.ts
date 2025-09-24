@@ -254,6 +254,7 @@ export function applyStateCacheV2Schema(args: {
 				argc: number,
 				argv: any
 			) => {
+				// throw new Error("Unexpected read access to internal_state_cache");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 

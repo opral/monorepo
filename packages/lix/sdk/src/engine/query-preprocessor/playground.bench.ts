@@ -62,9 +62,9 @@ describe("state benchmarks", () => {
 			writer_key: null,
 		}));
 
-		await instance.engine.executeQuerySync({
-			query: instance.db.insertInto("state").values(rows).compile(),
-		});
+		await instance.engine.executeQuerySync(
+			instance.db.insertInto("state").values(rows).compile()
+		);
 		await instance.db
 			.selectFrom("state")
 			.selectAll()
@@ -88,9 +88,9 @@ bench("insert 10 then read specific key", async () => {
 	}));
 	const targetEntity = `${prefix}5`;
 
-	await instance.engine.executeQuerySync({
-		query: instance.db.insertInto("state").values(rows).compile(),
-	});
+	await instance.engine.executeQuerySync(
+		instance.db.insertInto("state").values(rows).compile()
+	);
 	await instance.db
 		.selectFrom("state")
 		.selectAll()
