@@ -5,12 +5,18 @@ import {
 	extractValues,
 } from "../operation-node-utils.js";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
-import { rewriteInternalResolvedStateAll } from "./internal-resolved-state-all.js";
+import {
+	rewriteInternalResolvedStateAll,
+	type ResolvedStateRewriteContext,
+} from "./internal-resolved-state-all.js";
 import { rewriteStateAllView } from "./state-all.js";
 
 const STATE_VIEW = "state";
 
-export function rewriteStateView(node: RootOperationNode): RootOperationNode {
+export function rewriteStateView(
+	node: RootOperationNode,
+	context?: ResolvedStateRewriteContext
+): RootOperationNode {
 	if (node.kind !== "SelectQueryNode") {
 		return node;
 	}
@@ -29,12 +35,19 @@ export function rewriteStateView(node: RootOperationNode): RootOperationNode {
 			STATE_VIEW
 		);
 
-		changed = true;
-		return buildStateSelect({
+		const rewritten = buildStateSelect({
 			alias: aliasInfo.alias,
 			schemaKeys,
 			restrictToActiveVersion: true,
+			context,
 		});
+
+		if (!rewritten) {
+			return fromItem;
+		}
+
+		changed = true;
+		return rewritten;
 	};
 
 	const rewrittenFroms = node.from?.froms?.map(rewriteFromItem);
@@ -73,12 +86,14 @@ export function buildStateSelect(args: {
 	schemaKeys: string[];
 	restrictToActiveVersion: boolean;
 	rewriteStateAll?: boolean;
-}): OperationNode {
+	context?: ResolvedStateRewriteContext;
+}): OperationNode | undefined {
 	const {
 		alias,
 		schemaKeys,
 		restrictToActiveVersion,
 		rewriteStateAll = true,
+		context,
 	} = args;
 
 	let builder = internalQueryBuilder
@@ -123,10 +138,25 @@ export function buildStateSelect(args: {
 
 	const compiled = builder.compile();
 	let subqueryNode = compiled.query;
+	let rewriteOccurred = false;
+
 	if (rewriteStateAll) {
-		subqueryNode = rewriteStateAllView(subqueryNode);
+		const maybeRewritten = rewriteStateAllView(subqueryNode, context);
+		if (maybeRewritten !== subqueryNode) {
+			rewriteOccurred = true;
+			subqueryNode = maybeRewritten;
+		}
 	}
-	subqueryNode = rewriteInternalResolvedStateAll(subqueryNode);
+
+	const resolvedNode = rewriteInternalResolvedStateAll(subqueryNode, context);
+	if (resolvedNode !== subqueryNode) {
+		rewriteOccurred = true;
+		subqueryNode = resolvedNode;
+	}
+
+	if (!rewriteOccurred) {
+		return undefined;
+	}
 
 	return {
 		kind: "AliasNode",

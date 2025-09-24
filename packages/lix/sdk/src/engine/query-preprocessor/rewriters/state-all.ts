@@ -1,11 +1,13 @@
 import { type OperationNode, type RootOperationNode } from "kysely";
 import { extractTableName } from "../operation-node-utils.js";
+import { type ResolvedStateRewriteContext } from "./internal-resolved-state-all.js";
 import { buildStateSelect, collectSchemaFilters } from "./state.js";
 
 const STATE_ALL_VIEW = "state_all";
 
 export function rewriteStateAllView(
-	node: RootOperationNode
+	node: RootOperationNode,
+	context?: ResolvedStateRewriteContext
 ): RootOperationNode {
 	if (node.kind !== "SelectQueryNode") {
 		return node;
@@ -25,13 +27,20 @@ export function rewriteStateAllView(
 			STATE_ALL_VIEW
 		);
 
-		changed = true;
-		return buildStateSelect({
+		const rewritten = buildStateSelect({
 			alias: aliasInfo.alias,
 			schemaKeys,
 			restrictToActiveVersion: false,
 			rewriteStateAll: false,
+			context,
 		});
+
+		if (!rewritten) {
+			return fromItem;
+		}
+
+		changed = true;
+		return rewritten;
 	};
 
 	const rewrittenFroms = node.from?.froms?.map(rewriteFromItem);

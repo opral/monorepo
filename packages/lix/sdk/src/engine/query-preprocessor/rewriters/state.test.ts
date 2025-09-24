@@ -3,6 +3,9 @@ import { SqliteQueryCompiler } from "kysely";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 import { rewriteStateView } from "./state.js";
 
+const STATE_TABLE = "internal_state_cache_lix_key_value";
+const DESCRIPTOR_TABLE = "internal_state_cache_lix_version_descriptor";
+
 const COMPILER = new SqliteQueryCompiler();
 
 test("rewrites state view to resolved state with active version filter", () => {
@@ -34,4 +37,35 @@ test("returns original node when source is not state", () => {
 	const rewritten = rewriteStateView(original.query);
 
 	expect(rewritten).toBe(original.query);
+});
+
+test("skips rewrite when cache table is not registered", () => {
+	const original = internalQueryBuilder
+		.selectFrom("state as s")
+		.selectAll()
+		.where("s.schema_key", "=", "lix_key_value")
+		.compile();
+
+	const rewritten = rewriteStateView(original.query, {
+		tableCache: new Set([DESCRIPTOR_TABLE]),
+	});
+
+	expect(rewritten).toBe(original.query);
+});
+
+test("rewrites when cache tables are registered", () => {
+	const original = internalQueryBuilder
+		.selectFrom("state as s")
+		.selectAll()
+		.where("s.schema_key", "=", "lix_key_value")
+		.compile();
+
+	const rewritten = rewriteStateView(original.query, {
+		tableCache: new Set([STATE_TABLE, DESCRIPTOR_TABLE]),
+	});
+
+	expect(rewritten).not.toBe(original.query);
+	const sqlText = COMPILER.compileQuery(rewritten, original.queryId).sql;
+	expect(sqlText).toContain(STATE_TABLE);
+	expect(sqlText).toContain(DESCRIPTOR_TABLE);
 });

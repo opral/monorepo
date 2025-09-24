@@ -1,5 +1,7 @@
 import { sql, type OperationNode, type RootOperationNode } from "kysely";
+import type { LixEngine } from "../../boot.js";
 import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
+import { getStateCacheV2Tables } from "../../../state/cache/schema.js";
 import {
 	extractColumnName,
 	extractTableName,
@@ -8,8 +10,44 @@ import {
 
 const TARGET_VIEW = "internal_resolved_state_all";
 
+/**
+ * Context shared between query rewriters so they can decide whether to route
+ * reads through the physical cache tables or fall back to the legacy views.
+ *
+ * @example
+ * const context = { tableCache: new Set(["internal_state_cache_lix_key_value"]) };
+ */
+export interface ResolvedStateRewriteContext {
+	tableCache?: ReadonlySet<string>;
+}
+
+/**
+ * Creates a resolver-aware rewrite function that routes `internal_resolved_state_all`
+ * reads to the materialized cache tables only when those tables already exist.
+ *
+ * @example
+ * const rewrite = createResolvedStateRewriter({ engine, tableCache });
+ * const rewrittenNode = rewrite(originalNode);
+ */
+export function createResolvedStateRewriter(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+	tableCache?: ReadonlySet<string>;
+}): (node: RootOperationNode) => RootOperationNode {
+	const hasRuntimeCache =
+		typeof args.engine.runtimeCacheRef === "object" &&
+		args.engine.runtimeCacheRef !== null;
+	const tableCache = hasRuntimeCache
+		? (args.tableCache ?? getStateCacheV2Tables({ engine: args.engine }))
+		: args.tableCache;
+	return (node) =>
+		rewriteInternalResolvedStateAll(node, {
+			tableCache,
+		});
+}
+
 export function rewriteInternalResolvedStateAll(
-	node: RootOperationNode
+	node: RootOperationNode,
+	context?: ResolvedStateRewriteContext
 ): RootOperationNode {
 	if (node.kind !== "SelectQueryNode") {
 		return node;
@@ -29,9 +67,14 @@ export function rewriteInternalResolvedStateAll(
 			return fromItem;
 		}
 
+		const schemaKey = schemaKeys[0]!;
+		if (!shouldRewriteForSchema(schemaKey, context)) {
+			return fromItem;
+		}
+
 		changed = true;
 		return buildResolvedSubquery({
-			schemaKey: schemaKeys[0]!,
+			schemaKey,
 			alias: analysis.alias,
 		});
 	};
@@ -162,6 +205,24 @@ function collectSchemaFiltersRecursive(
 		default:
 			return;
 	}
+}
+
+function shouldRewriteForSchema(
+	schemaKey: string,
+	context?: ResolvedStateRewriteContext
+): boolean {
+	const tableCache = context?.tableCache;
+	if (!tableCache) {
+		return true;
+	}
+
+	const tableName = schemaKeyToCacheTableName(schemaKey);
+	if (!tableCache.has(tableName)) {
+		return false;
+	}
+
+	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	return tableCache.has(descriptorTable);
 }
 
 function buildResolvedSubquery(args: {

@@ -3,6 +3,9 @@ import { SqliteQueryCompiler } from "kysely";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 import { rewriteStateAllView } from "./state-all.js";
 
+const STATE_TABLE = "internal_state_cache_lix_key_value";
+const DESCRIPTOR_TABLE = "internal_state_cache_lix_version_descriptor";
+
 const compiler = new SqliteQueryCompiler();
 
 test("rewrites state_all to resolved state with cache tables", () => {
@@ -31,4 +34,35 @@ test("leaves query untouched when no state_all present", () => {
 
 	const rewritten = rewriteStateAllView(original.query);
 	expect(rewritten).toBe(original.query);
+});
+
+test("skips state_all rewrite when cache table missing", () => {
+	const original = internalQueryBuilder
+		.selectFrom("state_all as sa")
+		.selectAll()
+		.where("sa.schema_key", "=", "lix_key_value")
+		.compile();
+
+	const rewritten = rewriteStateAllView(original.query, {
+		tableCache: new Set([DESCRIPTOR_TABLE]),
+	});
+
+	expect(rewritten).toBe(original.query);
+});
+
+test("rewrites state_all when cache tables registered", () => {
+	const original = internalQueryBuilder
+		.selectFrom("state_all as sa")
+		.selectAll()
+		.where("sa.schema_key", "=", "lix_key_value")
+		.compile();
+
+	const rewritten = rewriteStateAllView(original.query, {
+		tableCache: new Set([STATE_TABLE, DESCRIPTOR_TABLE]),
+	});
+
+	expect(rewritten).not.toBe(original.query);
+	const sqlText = compiler.compileQuery(rewritten, original.queryId).sql;
+	expect(sqlText).toContain(STATE_TABLE);
+	expect(sqlText).toContain(DESCRIPTOR_TABLE);
 });

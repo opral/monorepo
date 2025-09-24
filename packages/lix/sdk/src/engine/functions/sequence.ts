@@ -4,7 +4,7 @@ import {
 } from "../../key-value/schema-definition.js";
 import type { LixEngine } from "../boot.js";
 import type { Lix } from "../../lix/open-lix.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
 import { sql } from "kysely";
