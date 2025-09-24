@@ -7,11 +7,19 @@ export function createExecuteQuerySync(args: {
 		LixEngine,
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
 	>;
-}) {
+}): (query: CompiledQuery<unknown>) => { rows: any[] } {
 	const { engine } = args;
-	const preprocessQuery = createQueryPreprocessor({ engine });
+	let executeQueryImpl: (query: CompiledQuery<unknown>) => { rows: any[] };
 
-	return (query: CompiledQuery<unknown>): { rows: any[] } => {
+	const preprocessQuery = createQueryPreprocessor({
+		engine: {
+			...engine,
+			executeQuerySync: (query: CompiledQuery<unknown>) =>
+				executeQueryImpl(query),
+		},
+	});
+
+	const executeQuery = (query: CompiledQuery<unknown>): { rows: any[] } => {
 		const compiled = preprocessQuery({ query });
 
 		const columnNames: string[] = [];
@@ -24,4 +32,8 @@ export function createExecuteQuerySync(args: {
 		});
 		return { rows };
 	};
+
+	executeQueryImpl = executeQuery;
+
+	return executeQuery;
 }

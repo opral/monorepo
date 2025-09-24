@@ -71,7 +71,7 @@ const STATE_VTAB_COLUMN_NAMES = [
 export function applyStateVTable(
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>
 ): void {
 	const { sqlite } = engine;

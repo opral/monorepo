@@ -108,7 +108,7 @@ export type EntityViews<
  * ```
  */
 export function createEntityViewsIfNotExists(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] */
 	overrideName?: string;

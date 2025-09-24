@@ -1,4 +1,4 @@
-import { sql, type SelectQueryBuilder, type Sql } from "kysely";
+import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
 
@@ -55,9 +55,7 @@ export function selectFromStateAll(
 	) as unknown as SelectQueryBuilder<any, string, ResolvedStateRow>;
 }
 
-export function buildResolvedStateSelectSql(
-	schemaKey: string
-): Sql<ResolvedStateRow> {
+export function buildResolvedStateSelectSql(schemaKey: string): any {
 	const cacheTableName = schemaKeyToCacheTableName(schemaKey);
 	const descriptorTableName = schemaKeyToCacheTableName(
 		"lix_version_descriptor"
@@ -66,7 +64,7 @@ export function buildResolvedStateSelectSql(
 	const cacheTable = sql.id(cacheTableName);
 	const descriptorTable = sql.id(descriptorTableName);
 
-	return sql<ResolvedStateRow>`
+	return sql<any>`
 	WITH RECURSIVE
 		version_descriptor_base AS (
 			SELECT

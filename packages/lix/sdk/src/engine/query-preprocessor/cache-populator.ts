@@ -26,10 +26,7 @@ const STATE_TABLE_NAMES = new Set([
  * it as fresh so subsequent reads avoid redundant work.
  */
 export function createCachePopulator(args: {
-	engine: Pick<
-		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
+	engine: Omit<LixEngine, "getAllPluginsSync" | "call">;
 }): KyselyPlugin {
 	return {
 		transformQuery(transformArgs: PluginTransformQueryArgs): RootOperationNode {

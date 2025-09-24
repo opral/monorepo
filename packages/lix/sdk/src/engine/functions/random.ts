@@ -50,7 +50,10 @@ function randomUnstable(): number {
  * @see random
  */
 export function randomSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 }): number {
 	const engine = args.engine;
 	// Non-deterministic mode: use crypto.getRandomValues()
@@ -193,7 +196,10 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;

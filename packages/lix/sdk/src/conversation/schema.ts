@@ -9,7 +9,7 @@ import {
 export function applyConversationDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>;
 }): void {
 	// Create both primary and _all views for conversation with default ID generation

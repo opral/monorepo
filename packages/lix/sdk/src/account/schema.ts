@@ -6,7 +6,7 @@ import { LixAccountSchema } from "./schema-definition.js";
 export function applyAccountDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>;
 }): void {
 	const { engine } = args;

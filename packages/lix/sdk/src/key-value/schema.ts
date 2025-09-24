@@ -1,9 +1,9 @@
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { LixKeyValueSchema, type LixKeyValue } from "./schema-definition.js";
+import { LixKeyValueSchema } from "./schema-definition.js";
 
 export function applyKeyValueDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeQuerySync" | "executeSync">;
 }): void {
 	return createEntityViewsIfNotExists({
 		engine: args.engine,

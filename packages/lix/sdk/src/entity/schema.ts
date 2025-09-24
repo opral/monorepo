@@ -2,7 +2,7 @@ import type { LixEngine } from "../engine/boot.js";
 import { applyEntityLabelDatabaseSchema } from "./label/schema.js";
 
 export function applyEntityDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeQuerySync" | "executeSync">;
 }): void {
 	applyEntityLabelDatabaseSchema(args);
 }

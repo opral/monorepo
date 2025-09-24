@@ -31,16 +31,9 @@ export type Call = (
 export function createCallRouter(args: {
 	engine: Pick<
 		LixEngine,
-		| "hooks"
-		| "executeSync"
-		| "executeQuerySync"
-		| "runtimeCacheRef"
-		| "call"
-		| "sqlite"
+		"hooks" | "executeSync" | "executeQuerySync" | "runtimeCacheRef" | "sqlite"
 	>;
-}): {
-	call: Call;
-} {
+}): Call {
 	const explainQuery = createExplainQuery({ engine: args.engine });
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
 	// in a Promise by `callFn` for a unified async surface.
@@ -100,15 +93,13 @@ export function createCallRouter(args: {
 		["lix_explain_query", explainQuery as any],
 	]);
 
-	return {
-		call: async (name, payload) => {
-			const handler = routes.get(name);
-			if (!handler) {
-				const err: any = new Error(`Unknown engine function: ${name}`);
-				err.code = "LIX_RPC_UNKNOWN_ROUTE";
-				throw err;
-			}
-			return Promise.resolve(handler(payload));
-		},
+	return async (name, payload) => {
+		const handler = routes.get(name);
+		if (!handler) {
+			const err: any = new Error(`Unknown engine function: ${name}`);
+			err.code = "LIX_RPC_UNKNOWN_ROUTE";
+			throw err;
+		}
+		return Promise.resolve(handler(payload));
 	};
 }

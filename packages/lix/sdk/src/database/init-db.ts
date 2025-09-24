@@ -1,9 +1,7 @@
 import { Kysely } from "kysely";
-import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { createEngineDialect } from "./sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "./kysely/plugins.js";
-// Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/schema.js";
@@ -18,7 +16,6 @@ import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyConversationDatabaseSchema } from "../conversation/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
-import type { LixHooks } from "../hooks/create-hooks.js";
 import type { LixEngine } from "../engine/boot.js";
 import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
@@ -55,43 +52,28 @@ import { getTimestampSync } from "../engine/functions/timestamp.js";
  * }
  * ```
  */
-export function initDb(args: {
-	executeSync: LixEngine["executeSync"];
-	runtimeCacheRef: LixEngine["runtimeCacheRef"];
-	sqlite: SqliteWasmDatabase;
-	hooks: LixHooks;
-}): Kysely<LixDatabaseSchema> {
+export function initDb(
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "executeQuerySync" | "runtimeCacheRef"
+	>
+): Kysely<LixDatabaseSchema> {
 	// Lower fsync frequency for better write throughput; NORMAL still syncs at txn boundaries.
-	args.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
+	engine.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
 	// Enlarge the page cache to keep more hot pages in memory (approximately 40 MiB at 4 KiB pages).
-	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
+	engine.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
 
 	const db = new Kysely<LixDatabaseSchema>({
-		dialect: createEngineDialect({ database: args.sqlite }),
+		dialect: createEngineDialect({ database: engine.sqlite }),
 		plugins: [...createDefaultPlugins()],
 	});
 
-	const engine = {
-		sqlite: args.sqlite,
-		hooks: args.hooks,
-		executeSync: args.executeSync,
-		runtimeCacheRef: args.runtimeCacheRef,
-	} as const satisfies Pick<
-		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
-
-	initFunctions({
-		sqlite: args.sqlite,
-		executeSync: args.executeSync,
-		hooks: args.hooks,
-		runtimeCacheRef: args.runtimeCacheRef,
-	});
+	initFunctions(engine);
 
 	// Apply all database schemas first (tables, views, triggers)
 	applyTransactionStateSchema({ engine: engine });
-	applySnapshotDatabaseSchema(args.sqlite);
-	applyChangeDatabaseSchema(args.sqlite);
+	applySnapshotDatabaseSchema(engine.sqlite);
+	applyChangeDatabaseSchema(engine.sqlite);
 	applyFileLixcolCacheSchema({ engine: engine });
 	// Ensure file data cache table exists before any triggers may reference it
 	applyFileDataCacheSchema({ engine: engine });
@@ -115,42 +97,32 @@ export function initDb(args: {
 	return db;
 }
 
-function initFunctions(args: {
-	sqlite: SqliteWasmDatabase;
-	executeSync: LixEngine["executeSync"];
-	runtimeCacheRef: LixEngine["runtimeCacheRef"];
-	hooks: LixHooks;
-}) {
-	const engine = {
-		sqlite: args.sqlite,
-		hooks: args.hooks,
-		executeSync: args.executeSync,
-		runtimeCacheRef: args.runtimeCacheRef,
-	} as const satisfies Pick<
+function initFunctions(
+	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
-
-	args.sqlite.createFunction({
+		"sqlite" | "executeQuerySync" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>
+) {
+	engine.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,
 		xFunc: () => uuidV7Sync({ engine: engine }),
 	});
 
-	args.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
 		xFunc: () =>
 			humanIdSync({ engine: engine, separator: "-", capitalize: false }),
 	});
 
-	args.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
 		xFunc: () => getTimestampSync({ engine: engine }),
 	});
 
-	args.sqlite.createFunction({
+	engine.sqlite.createFunction({
 		name: "lix_nano_id",
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working

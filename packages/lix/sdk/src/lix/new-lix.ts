@@ -39,6 +39,7 @@ import {
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
+import { createExecuteQuerySync } from "../engine/execute-query-sync.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -130,9 +131,20 @@ export async function newLixFile(args?: {
 	const hooks = createHooks();
 	const executeSync = createExecuteSync({ sqlite });
 	const runtimeCacheRef = {};
+	const executeQuerySync = createExecuteQuerySync({
+		engine: { sqlite, hooks, runtimeCacheRef, executeSync },
+	});
+
+	const engine = {
+		sqlite,
+		hooks,
+		executeSync,
+		runtimeCacheRef,
+		executeQuerySync,
+	};
 
 	// applying the schema etc.
-	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
+	const db = initDb(engine);
 
 	// Check if deterministic mode is enabled
 	const deterministicModeConfig = args?.keyValues?.find(
@@ -237,7 +249,7 @@ export async function newLixFile(args?: {
 
 	// Set active version using updateUntrackedState for proper inheritance handling
 	updateUntrackedState({
-		engine: { executeSync, runtimeCacheRef },
+		engine,
 		changes: [
 			{
 				entity_id: "active",
@@ -306,7 +318,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				engine: { executeSync, runtimeCacheRef },
+				engine,
 				changes: [
 					{
 						entity_id: kv.key,
@@ -328,10 +340,10 @@ export async function newLixFile(args?: {
 
 	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
 	markStateCacheAsFresh({
-		engine: { executeSync, runtimeCacheRef, hooks },
+		engine,
 		timestamp: created_at,
 	});
-	populateStateCache({ engine: { sqlite, runtimeCacheRef, executeSync } });
+	populateStateCache({ engine });
 
 	try {
 		const blob = new Blob([

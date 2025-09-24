@@ -6,7 +6,7 @@ import { LixLabelSchema } from "./schema-definition.js";
 export function applyLabelDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>;
 }): void {
 	const { engine } = args;

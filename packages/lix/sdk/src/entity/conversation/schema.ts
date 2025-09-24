@@ -1,12 +1,9 @@
 import { createEntityViewsIfNotExists } from "../../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../../engine/boot.js";
-import {
-	LixEntityConversationSchema,
-	type LixEntityConversation,
-} from "./schema-definition.js";
+import { LixEntityConversationSchema } from "./schema-definition.js";
 
 export function applyEntityConversationDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeQuerySync" | "executeSync">;
 }): void {
 	createEntityViewsIfNotExists({
 		engine: args.engine,

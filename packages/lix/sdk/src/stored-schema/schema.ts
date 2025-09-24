@@ -11,7 +11,7 @@ export {
 } from "./schema-definition.js";
 
 export function applyStoredSchemaDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeQuerySync" | "executeSync">;
 }): void {
 	// Create both primary and _all views for stored_schema with validation
 	createEntityViewsIfNotExists({

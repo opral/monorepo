@@ -19,7 +19,7 @@ const REWRITERS = [
 export function createQueryPreprocessor(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "runtimeCacheRef" | "executeQuerySync" | "executeSync"
 	>;
 }): (input: { query: CompiledQuery<unknown> }) => CompiledQuery<unknown> {
 	const plugins: KyselyPlugin[] = [createCachePopulator(args)];

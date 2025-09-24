@@ -11,7 +11,7 @@ import { applyStateVTable } from "./vtable/vtable.js";
 export function applyStateDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>;
 }): void {
 	const { engine } = args;

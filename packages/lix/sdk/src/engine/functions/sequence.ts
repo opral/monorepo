@@ -60,7 +60,10 @@ const counterCache = new WeakMap<object, CounterState>();
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
 export function nextSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 }): number {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -132,7 +135,10 @@ export async function nextSequenceNumber(args: { lix: Lix }): Promise<number> {
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
 export function commitSequenceNumberSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 	timestamp?: string;
 }): void {
 	const engine = args.engine;

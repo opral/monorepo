@@ -6,7 +6,7 @@ import { createQueryPreprocessor } from "./query-preprocessor/index.js";
 export function createExplainQuery(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
 	>;
 }) {
 	const preprocessQuery = createQueryPreprocessor({ engine: args.engine });

@@ -15,7 +15,10 @@ import { internalQueryBuilder } from "../internal-query-builder.js";
  * @see nanoId
  */
 export function nanoIdSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 	length?: number;
 }): string {
 	const engine = args.engine;

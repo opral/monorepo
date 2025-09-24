@@ -95,12 +95,31 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
 	const executeSync = createExecuteSync({ sqlite: env.sqlite });
-	const db = initDb({
+	const executeQuerySync = createExecuteQuerySync({
+		engine: { sqlite: env.sqlite, runtimeCacheRef, hooks, executeSync },
+	});
+	const call = createCallRouter({
+		engine: {
+			executeSync,
+			runtimeCacheRef,
+			hooks,
+			executeQuerySync,
+			sqlite: env.sqlite,
+		},
+	});
+
+	// Build a local Lix-like context for schema that needs plugin/hooks
+	const engine = {
 		sqlite: env.sqlite,
 		hooks,
-		executeSync,
+		getAllPluginsSync: () => plugins,
 		runtimeCacheRef,
-	});
+		executeSync,
+		executeQuerySync,
+		call,
+	};
+
+	const db = initDb(engine);
 
 	// Load plugins from raw ESM strings and provided plugin objects
 	const plugins: LixPlugin[] = [];
@@ -111,24 +130,6 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	for (const input of env.args.providePlugins ?? []) {
 		plugins.push(input);
 	}
-
-	// Build a local Lix-like context for schema that needs plugin/hooks
-	const engineBase = {
-		sqlite: env.sqlite,
-		hooks,
-		getAllPluginsSync: () => plugins,
-		runtimeCacheRef,
-		executeSync,
-		executeQuerySync: undefined as unknown as LixEngine["executeQuerySync"],
-		call: async () => {
-			throw new Error("Engine router not initialised");
-		},
-	};
-
-	const executeQuerySync = createExecuteQuerySync({ engine: engineBase });
-	engineBase.executeQuerySync = executeQuerySync;
-
-	const engine = engineBase as LixEngine;
 
 	// Install filesystem functions + views that depend on plugin + hooks
 	applyFilesystemSchema({ engine });
@@ -209,7 +210,5 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		}
 	}
 
-	const { call } = createCallRouter({ engine });
-	engine.call = call;
 	return engine;
 }

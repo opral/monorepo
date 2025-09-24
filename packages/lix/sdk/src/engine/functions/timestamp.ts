@@ -14,7 +14,10 @@ import { internalQueryBuilder } from "../internal-query-builder.js";
  * @see getTimestamp
  */
 export function getTimestampSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled

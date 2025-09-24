@@ -29,7 +29,10 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"hooks" | "executeSync" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 }): number {
 	const engine = args.engine;
 	const transactionTimestamp = getTimestampSync({ engine: engine });
