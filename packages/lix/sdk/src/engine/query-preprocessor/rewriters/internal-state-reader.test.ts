@@ -664,4 +664,6 @@ test("prunes cache query if cache table for schema doesn't exist yet", async () 
 	const { rows } = lix.engine!.executeQuerySync(compiled);
 
 	expect(rows).toHaveLength(0);
+
+	await lix.close();
 });

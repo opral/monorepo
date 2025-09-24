@@ -24,6 +24,7 @@ import {
 } from "../operation-node-utils.js";
 
 const TARGET_VIEW = "internal_state_reader";
+type SqlFragment = ReturnType<typeof sql>;
 
 export interface InternalStateRewriteContext {
 	tableCache?: ReadonlySet<string>;
@@ -33,14 +34,18 @@ export function createInternalStateRewriter(args: {
 	engine: Pick<LixEngine, "runtimeCacheRef">;
 	tableCache?: ReadonlySet<string>;
 }): (node: RootOperationNode) => RootOperationNode {
-	const tableCache =
-		args.tableCache ?? getStateCacheV2Tables({ engine: args.engine });
+	const hasRuntimeCache =
+		typeof args.engine.runtimeCacheRef === "object" &&
+		args.engine.runtimeCacheRef !== null;
+	const tableCache = hasRuntimeCache
+		? (args.tableCache ?? getStateCacheV2Tables({ engine: args.engine }))
+		: args.tableCache;
 	return (node) => rewriteInternalStateReader(node, { tableCache });
 }
 
 function rewriteInternalStateReader(
 	node: RootOperationNode,
-	_context?: InternalStateRewriteContext
+	context?: InternalStateRewriteContext
 ): RootOperationNode {
 	if (node.kind !== "SelectQueryNode") {
 		return node;
@@ -59,10 +64,13 @@ function rewriteInternalStateReader(
 			return fromItem;
 		}
 
+		const schemaKey = schemaKeys[0]!;
+		const includeCache = shouldIncludeCacheBranch(schemaKey, context);
 		changed = true;
 		return buildInternalStateReaderSubquery({
-			schemaKey: schemaKeys[0]!,
+			schemaKey,
 			alias: analysis.alias,
+			includeCache,
 		});
 	};
 
@@ -197,15 +205,48 @@ function collectSchemaFiltersRecursive(
 function buildInternalStateReaderSubquery(args: {
 	schemaKey: string;
 	alias: string;
+	includeCache: boolean;
 }): OperationNode {
-	const { schemaKey, alias } = args;
+	const { schemaKey, alias, includeCache } = args;
 	const schemaTableName = schemaKeyToCacheTableName(schemaKey);
+	const cacheTable = sql.id(schemaTableName);
+
+	const unionSegments: SqlFragment[] = [
+		buildTransactionBranch(schemaKey),
+		buildUntrackedBranch(schemaKey),
+	];
+
+	if (includeCache) {
+		unionSegments.push(buildCacheBranch(schemaKey, cacheTable));
+		unionSegments.push(buildCacheInheritanceBranch(schemaKey, cacheTable));
+	}
+
 	const descriptorTableName = schemaKeyToCacheTableName(
 		"lix_version_descriptor"
 	);
-
-	const cacheTable = sql.id(schemaTableName);
 	const descriptorTable = sql.id(descriptorTableName);
+
+	unionSegments.push(
+		buildInheritedUntrackedBranch({
+			schemaKey,
+			cacheTable,
+			includeCache,
+		}),
+		buildInheritedTxnBranch({
+			schemaKey,
+			cacheTable,
+			includeCache,
+		})
+	);
+
+	const unionSql = sql.join(
+		unionSegments,
+		sql`
+
+			UNION ALL
+
+		`
+	);
 
 	const subquery = sql`
 		(
@@ -241,213 +282,203 @@ function buildInternalStateReaderSubquery(args: {
 				WHERE vdb.inherits_from_version_id IS NOT NULL
 			)
 		SELECT DISTINCT * FROM (
-			SELECT
-				'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
-				txn.entity_id,
-				txn.schema_key,
-				txn.file_id,
-				txn.plugin_key,
-				json(txn.snapshot_content) AS snapshot_content,
-				txn.schema_version,
-				txn.version_id,
-				txn.created_at,
-				txn.created_at AS updated_at,
-				NULL AS inherited_from_version_id,
-				txn.id AS change_id,
-				txn.untracked,
-				'pending' AS commit_id,
-				json(txn.metadata) AS metadata,
-				ws_txn.writer_key
-			FROM internal_transaction_state txn
-			LEFT JOIN internal_state_writer ws_txn ON
-				ws_txn.file_id = txn.file_id AND
-				ws_txn.entity_id = txn.entity_id AND
-				ws_txn.schema_key = txn.schema_key AND
-				ws_txn.version_id = txn.version_id
-			WHERE txn.schema_key = ${schemaKey}
+			${unionSql}
+		) ) AS ${sql.id(alias)}
+	`;
 
-			UNION ALL
+	return subquery.toOperationNode();
+}
 
-			SELECT
-				'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
-				u.entity_id,
-				u.schema_key,
-				u.file_id,
-				u.plugin_key,
-				json(u.snapshot_content) AS snapshot_content,
-				u.schema_version,
-				u.version_id,
-				u.created_at,
-				u.updated_at,
-				NULL AS inherited_from_version_id,
-				'untracked' AS change_id,
-				1 AS untracked,
-				'untracked' AS commit_id,
-				NULL AS metadata,
-				ws_untracked.writer_key
-			FROM internal_state_all_untracked u
-			LEFT JOIN internal_state_writer ws_untracked ON
-				ws_untracked.file_id = u.file_id AND
-				ws_untracked.entity_id = u.entity_id AND
-				ws_untracked.schema_key = u.schema_key AND
-				ws_untracked.version_id = u.version_id
-			WHERE (
-				(u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-				(u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
-			)
-			AND u.schema_key = ${schemaKey}
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
-				WHERE t.version_id = u.version_id
-					AND t.file_id = u.file_id
-					AND t.schema_key = u.schema_key
-					AND t.entity_id = u.entity_id
-			)
+function buildTransactionBranch(schemaKey: string): SqlFragment {
+	return sql`
+		SELECT
+			'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
+			txn.entity_id,
+			txn.schema_key,
+			txn.file_id,
+			txn.plugin_key,
+			json(txn.snapshot_content) AS snapshot_content,
+			txn.schema_version,
+			txn.version_id,
+			txn.created_at,
+			txn.created_at AS updated_at,
+			NULL AS inherited_from_version_id,
+			txn.id AS change_id,
+			txn.untracked,
+			'pending' AS commit_id,
+			json(txn.metadata) AS metadata,
+			ws_txn.writer_key
+		FROM internal_transaction_state txn
+		LEFT JOIN internal_state_writer ws_txn ON
+			ws_txn.file_id = txn.file_id AND
+			ws_txn.entity_id = txn.entity_id AND
+			ws_txn.schema_key = txn.schema_key AND
+			ws_txn.version_id = txn.version_id
+		WHERE txn.schema_key = ${schemaKey}
+	`;
+}
 
-			UNION ALL
+function buildUntrackedBranch(schemaKey: string): SqlFragment {
+	return sql`
+		SELECT
+			'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
+			u.entity_id,
+			u.schema_key,
+			u.file_id,
+			u.plugin_key,
+			json(u.snapshot_content) AS snapshot_content,
+			u.schema_version,
+			u.version_id,
+			u.created_at,
+			u.updated_at,
+			NULL AS inherited_from_version_id,
+			'untracked' AS change_id,
+			1 AS untracked,
+			'untracked' AS commit_id,
+			NULL AS metadata,
+			ws_untracked.writer_key
+		FROM internal_state_all_untracked u
+		LEFT JOIN internal_state_writer ws_untracked ON
+			ws_untracked.file_id = u.file_id AND
+			ws_untracked.entity_id = u.entity_id AND
+			ws_untracked.schema_key = u.schema_key AND
+			ws_untracked.version_id = u.version_id
+		WHERE (
+			(u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
+			(u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+		)
+		AND u.schema_key = ${schemaKey}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_transaction_state t
+			WHERE t.version_id = u.version_id
+				AND t.file_id = u.file_id
+				AND t.schema_key = u.schema_key
+				AND t.entity_id = u.entity_id
+		)
+	`;
+}
 
-			SELECT
-				'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
-				c.entity_id,
-				c.schema_key,
-				c.file_id,
-				c.plugin_key,
-				json(c.snapshot_content) AS snapshot_content,
-				c.schema_version,
-				c.version_id,
-				c.created_at,
-				c.updated_at,
-				c.inherited_from_version_id,
-				c.change_id,
-				0 AS untracked,
-				c.commit_id,
-				ch.metadata AS metadata,
-				ws_cache.writer_key
-			FROM ${cacheTable} AS c
-			LEFT JOIN change ch ON ch.id = c.change_id
-			LEFT JOIN internal_state_writer ws_cache ON
-				ws_cache.file_id = c.file_id AND
-				ws_cache.entity_id = c.entity_id AND
-				ws_cache.schema_key = c.schema_key AND
-				ws_cache.version_id = c.version_id
-			WHERE (
-				(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-				(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
-			)
-			AND c.schema_key = ${schemaKey}
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
-				WHERE t.version_id = c.version_id
-					AND t.file_id = c.file_id
-					AND t.schema_key = c.schema_key
-					AND t.entity_id = c.entity_id
-			)
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked u
-				WHERE u.version_id = c.version_id
-					AND u.file_id = c.file_id
-					AND u.schema_key = c.schema_key
-					AND u.entity_id = c.entity_id
-			)
+function buildCacheBranch(
+	schemaKey: string,
+	cacheTable: SqlFragment
+): SqlFragment {
+	return sql`
+		SELECT
+			'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
+			c.entity_id,
+			c.schema_key,
+			c.file_id,
+			c.plugin_key,
+			json(c.snapshot_content) AS snapshot_content,
+			c.schema_version,
+			c.version_id,
+			c.created_at,
+			c.updated_at,
+			c.inherited_from_version_id,
+			c.change_id,
+			0 AS untracked,
+			c.commit_id,
+			ch.metadata AS metadata,
+			ws_cache.writer_key
+		FROM ${cacheTable} AS c
+		LEFT JOIN change ch ON ch.id = c.change_id
+		LEFT JOIN internal_state_writer ws_cache ON
+			ws_cache.file_id = c.file_id AND
+			ws_cache.entity_id = c.entity_id AND
+			ws_cache.schema_key = c.schema_key AND
+			ws_cache.version_id = c.version_id
+		WHERE (
+			(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
+			(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+		)
+		AND c.schema_key = ${schemaKey}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_transaction_state t
+			WHERE t.version_id = c.version_id
+				AND t.file_id = c.file_id
+				AND t.schema_key = c.schema_key
+				AND t.entity_id = c.entity_id
+		)
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked u
+			WHERE u.version_id = c.version_id
+				AND u.file_id = c.file_id
+				AND u.schema_key = c.schema_key
+				AND u.entity_id = c.entity_id
+		)
+	`;
+}
 
-			UNION ALL
+function buildCacheInheritanceBranch(
+	schemaKey: string,
+	cacheTable: SqlFragment
+): SqlFragment {
+	return sql`
+		SELECT
+			'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+			isc.entity_id,
+			isc.schema_key,
+			isc.file_id,
+			isc.plugin_key,
+			json(isc.snapshot_content) AS snapshot_content,
+			isc.schema_version,
+			vi.version_id,
+			isc.created_at,
+			isc.updated_at,
+			isc.version_id AS inherited_from_version_id,
+			isc.change_id,
+			0 AS untracked,
+			isc.commit_id,
+			ch.metadata AS metadata,
+			COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
+		FROM version_inheritance vi
+		JOIN ${cacheTable} AS isc ON isc.version_id = vi.ancestor_version_id
+		LEFT JOIN change ch ON ch.id = isc.change_id
+		LEFT JOIN internal_state_writer ws_child ON
+			ws_child.file_id = isc.file_id AND
+			ws_child.entity_id = isc.entity_id AND
+			ws_child.schema_key = isc.schema_key AND
+			ws_child.version_id = vi.version_id
+		LEFT JOIN internal_state_writer ws_parent ON
+			ws_parent.file_id = isc.file_id AND
+			ws_parent.entity_id = isc.entity_id AND
+			ws_parent.schema_key = isc.schema_key AND
+			ws_parent.version_id = isc.version_id
+		WHERE isc.inheritance_delete_marker = 0
+			AND isc.snapshot_content IS NOT NULL
+			AND isc.schema_key = ${schemaKey}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_transaction_state t
+			WHERE t.version_id = vi.version_id
+				AND t.file_id = isc.file_id
+				AND t.schema_key = isc.schema_key
+				AND t.entity_id = isc.entity_id
+		)
+		AND NOT EXISTS (
+			SELECT 1 FROM ${cacheTable} child_isc
+			WHERE child_isc.version_id = vi.version_id
+				AND child_isc.file_id = isc.file_id
+				AND child_isc.schema_key = isc.schema_key
+				AND child_isc.entity_id = isc.entity_id
+		)
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked child_unt
+			WHERE child_unt.version_id = vi.version_id
+				AND child_unt.file_id = isc.file_id
+				AND child_unt.schema_key = isc.schema_key
+				AND child_unt.entity_id = isc.entity_id
+		)
+	`;
+}
 
-			SELECT
-				'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
-				isc.entity_id,
-				isc.schema_key,
-				isc.file_id,
-				isc.plugin_key,
-				json(isc.snapshot_content) AS snapshot_content,
-				isc.schema_version,
-				vi.version_id,
-				isc.created_at,
-				isc.updated_at,
-				isc.version_id AS inherited_from_version_id,
-				isc.change_id,
-				0 AS untracked,
-				isc.commit_id,
-				ch.metadata AS metadata,
-				COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
-			FROM version_inheritance vi
-			JOIN ${cacheTable} AS isc ON isc.version_id = vi.ancestor_version_id
-			LEFT JOIN change ch ON ch.id = isc.change_id
-			LEFT JOIN internal_state_writer ws_child ON
-				ws_child.file_id = isc.file_id AND
-				ws_child.entity_id = isc.entity_id AND
-				ws_child.schema_key = isc.schema_key AND
-				ws_child.version_id = vi.version_id
-			LEFT JOIN internal_state_writer ws_parent ON
-				ws_parent.file_id = isc.file_id AND
-				ws_parent.entity_id = isc.entity_id AND
-				ws_parent.schema_key = isc.schema_key AND
-				ws_parent.version_id = isc.version_id
-			WHERE isc.inheritance_delete_marker = 0
-				AND isc.snapshot_content IS NOT NULL
-				AND isc.schema_key = ${schemaKey}
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
-				WHERE t.version_id = vi.version_id
-					AND t.file_id = isc.file_id
-					AND t.schema_key = isc.schema_key
-					AND t.entity_id = isc.entity_id
-			)
-			AND NOT EXISTS (
-				SELECT 1 FROM ${cacheTable} child_isc
-				WHERE child_isc.version_id = vi.version_id
-					AND child_isc.file_id = isc.file_id
-					AND child_isc.schema_key = isc.schema_key
-					AND child_isc.entity_id = isc.entity_id
-			)
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked child_unt
-				WHERE child_unt.version_id = vi.version_id
-					AND child_unt.file_id = isc.file_id
-					AND child_unt.schema_key = isc.schema_key
-					AND child_unt.entity_id = isc.entity_id
-			)
-
-			UNION ALL
-
-			SELECT
-				'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
-				unt.entity_id,
-				unt.schema_key,
-				unt.file_id,
-				unt.plugin_key,
-				json(unt.snapshot_content) AS snapshot_content,
-				unt.schema_version,
-				vi.version_id,
-				unt.created_at,
-				unt.updated_at,
-				unt.version_id AS inherited_from_version_id,
-				'untracked' AS change_id,
-				1 AS untracked,
-				'untracked' AS commit_id,
-				NULL AS metadata,
-				COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
-			FROM version_inheritance vi
-			JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-			LEFT JOIN internal_state_writer ws_child ON
-				ws_child.file_id = unt.file_id AND
-				ws_child.entity_id = unt.entity_id AND
-				ws_child.schema_key = unt.schema_key AND
-				ws_child.version_id = vi.version_id
-			LEFT JOIN internal_state_writer ws_parent ON
-				ws_parent.file_id = unt.file_id AND
-				ws_parent.entity_id = unt.entity_id AND
-				ws_parent.schema_key = unt.schema_key AND
-				ws_parent.version_id = unt.version_id
-			WHERE unt.inheritance_delete_marker = 0
-				AND unt.snapshot_content IS NOT NULL
-				AND unt.schema_key = ${schemaKey}
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
-				WHERE t.version_id = vi.version_id
-					AND t.file_id = unt.file_id
-					AND t.schema_key = unt.schema_key
-					AND t.entity_id = unt.entity_id
-			)
+function buildInheritedUntrackedBranch(args: {
+	schemaKey: string;
+	cacheTable: SqlFragment;
+	includeCache: boolean;
+}): SqlFragment {
+	const { schemaKey, cacheTable, includeCache } = args;
+	const cachePrune = includeCache
+		? sql`
 			AND NOT EXISTS (
 				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
@@ -455,48 +486,68 @@ function buildInternalStateReaderSubquery(args: {
 					AND child_isc.schema_key = unt.schema_key
 					AND child_isc.entity_id = unt.entity_id
 			)
+		`
+		: sql``;
 
-			UNION ALL
+	return sql`
+		SELECT
+			'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+			unt.entity_id,
+			unt.schema_key,
+			unt.file_id,
+			unt.plugin_key,
+			json(unt.snapshot_content) AS snapshot_content,
+			unt.schema_version,
+			vi.version_id,
+			unt.created_at,
+			unt.updated_at,
+			unt.version_id AS inherited_from_version_id,
+			'untracked' AS change_id,
+			1 AS untracked,
+			'untracked' AS commit_id,
+			NULL AS metadata,
+			COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
+		FROM version_inheritance vi
+		JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+		LEFT JOIN internal_state_writer ws_child ON
+			ws_child.file_id = unt.file_id AND
+			ws_child.entity_id = unt.entity_id AND
+			ws_child.schema_key = unt.schema_key AND
+			ws_child.version_id = vi.version_id
+		LEFT JOIN internal_state_writer ws_parent ON
+			ws_parent.file_id = unt.file_id AND
+			ws_parent.entity_id = unt.entity_id AND
+			ws_parent.schema_key = unt.schema_key AND
+			ws_parent.version_id = unt.version_id
+		WHERE unt.inheritance_delete_marker = 0
+			AND unt.snapshot_content IS NOT NULL
+			AND unt.schema_key = ${schemaKey}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_transaction_state t
+			WHERE t.version_id = vi.version_id
+				AND t.file_id = unt.file_id
+				AND t.schema_key = unt.schema_key
+				AND t.entity_id = unt.entity_id
+		)
+		${cachePrune}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked child_unt
+			WHERE child_unt.version_id = vi.version_id
+				AND child_unt.file_id = unt.file_id
+				AND child_unt.schema_key = unt.schema_key
+				AND child_unt.entity_id = unt.entity_id
+		)
+	`;
+}
 
-			SELECT
-				'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
-				txn.entity_id,
-				txn.schema_key,
-				txn.file_id,
-				txn.plugin_key,
-				json(txn.snapshot_content) AS snapshot_content,
-				txn.schema_version,
-				vi.version_id,
-				txn.created_at,
-				txn.created_at AS updated_at,
-				vi.parent_version_id AS inherited_from_version_id,
-				txn.id AS change_id,
-				txn.untracked,
-				'pending' AS commit_id,
-				json(txn.metadata) AS metadata,
-				COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
-			FROM version_parent vi
-			JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
-			LEFT JOIN internal_state_writer ws_child ON
-				ws_child.file_id = txn.file_id AND
-				ws_child.entity_id = txn.entity_id AND
-				ws_child.schema_key = txn.schema_key AND
-				ws_child.version_id = vi.version_id
-			LEFT JOIN internal_state_writer ws_parent ON
-				ws_parent.file_id = txn.file_id AND
-				ws_parent.entity_id = txn.entity_id AND
-				ws_parent.schema_key = txn.schema_key AND
-				ws_parent.version_id = vi.parent_version_id
-			WHERE vi.parent_version_id IS NOT NULL
-				AND txn.snapshot_content IS NOT NULL
-				AND txn.schema_key = ${schemaKey}
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state child_txn
-				WHERE child_txn.version_id = vi.version_id
-					AND child_txn.file_id = txn.file_id
-					AND child_txn.schema_key = txn.schema_key
-					AND child_txn.entity_id = txn.entity_id
-			)
+function buildInheritedTxnBranch(args: {
+	schemaKey: string;
+	cacheTable: SqlFragment;
+	includeCache: boolean;
+}): SqlFragment {
+	const { schemaKey, cacheTable, includeCache } = args;
+	const cachePrune = includeCache
+		? sql`
 			AND NOT EXISTS (
 				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
@@ -504,15 +555,69 @@ function buildInternalStateReaderSubquery(args: {
 					AND child_isc.schema_key = txn.schema_key
 					AND child_isc.entity_id = txn.entity_id
 			)
-			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked child_unt
-				WHERE child_unt.version_id = vi.version_id
-					AND child_unt.file_id = txn.file_id
-					AND child_unt.schema_key = txn.schema_key
-					AND child_unt.entity_id = txn.entity_id
-			)
-		) ) AS ${sql.id(alias)}
-	`;
+		`
+		: sql``;
 
-	return subquery.toOperationNode();
+	return sql`
+		SELECT
+			'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+			txn.entity_id,
+			txn.schema_key,
+			txn.file_id,
+			txn.plugin_key,
+			json(txn.snapshot_content) AS snapshot_content,
+			txn.schema_version,
+			vi.version_id,
+			txn.created_at,
+			txn.created_at AS updated_at,
+			vi.parent_version_id AS inherited_from_version_id,
+			txn.id AS change_id,
+			txn.untracked,
+			'pending' AS commit_id,
+			json(txn.metadata) AS metadata,
+			COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
+		FROM version_parent vi
+		JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
+		LEFT JOIN internal_state_writer ws_child ON
+			ws_child.file_id = txn.file_id AND
+			ws_child.entity_id = txn.entity_id AND
+			ws_child.schema_key = txn.schema_key AND
+			ws_child.version_id = vi.version_id
+		LEFT JOIN internal_state_writer ws_parent ON
+			ws_parent.file_id = txn.file_id AND
+			ws_parent.entity_id = txn.entity_id AND
+			ws_parent.schema_key = txn.schema_key AND
+			ws_parent.version_id = vi.parent_version_id
+		WHERE vi.parent_version_id IS NOT NULL
+			AND txn.snapshot_content IS NOT NULL
+			AND txn.schema_key = ${schemaKey}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_transaction_state child_txn
+			WHERE child_txn.version_id = vi.version_id
+				AND child_txn.file_id = txn.file_id
+				AND child_txn.schema_key = txn.schema_key
+				AND child_txn.entity_id = txn.entity_id
+		)
+		${cachePrune}
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked child_unt
+			WHERE child_unt.version_id = vi.version_id
+				AND child_unt.file_id = txn.file_id
+				AND child_unt.schema_key = txn.schema_key
+				AND child_unt.entity_id = txn.entity_id
+		)
+	`;
+}
+
+function shouldIncludeCacheBranch(
+	schemaKey: string,
+	context?: InternalStateRewriteContext
+): boolean {
+	const tableCache = context?.tableCache;
+	if (!tableCache) {
+		return true;
+	}
+
+	const schemaTable = schemaKeyToCacheTableName(schemaKey);
+	return tableCache.has(schemaTable);
 }
