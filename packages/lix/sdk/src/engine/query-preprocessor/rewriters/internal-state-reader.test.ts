@@ -8,7 +8,7 @@ import {
 import { withWriterKey } from "../../../state/writer.js";
 import { insertTransactionState } from "../../../state/transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../../engine/functions/timestamp.js";
-import { rewriteInternalStateReader } from "./internal-state-reader.js";
+import { createInternalStateRewriter } from "./internal-state-reader.js";
 import { SqliteQueryCompiler } from "kysely";
 
 const sqliteCompiler = new SqliteQueryCompiler();
@@ -24,6 +24,8 @@ test("returns untracked entities", async () => {
 			},
 		],
 	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	// insert untracked key value
 	// TODO replace with internal_state_writer view later
@@ -54,7 +56,7 @@ test("returns untracked entities", async () => {
 		.select(["snapshot_content", "untracked", "version_id"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows: result } = lix.engine!.executeQuerySync(compiled);
@@ -81,6 +83,8 @@ test("returns tracked entities with change metadata", async () => {
 			},
 		],
 	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	lix.engine!.executeQuerySync(
 		internalQueryBuilder
@@ -109,7 +113,7 @@ test("returns tracked entities with change metadata", async () => {
 		.select(["snapshot_content", "untracked", "change_id", "commit_id"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows: result } = lix.engine!.executeQuerySync(compiled);
@@ -139,6 +143,8 @@ test("resolves inherited rows from ancestor versions", async () => {
 			},
 		],
 	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -172,7 +178,7 @@ test("resolves inherited rows from ancestor versions", async () => {
 		.select(["snapshot_content", "inherited_from_version_id", "untracked"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows: result } = lix.engine!.executeQuerySync(compiled);
@@ -201,6 +207,8 @@ test("resolves inherited untracked rows from ancestor versions", async () => {
 			},
 		],
 	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -234,7 +242,7 @@ test("resolves inherited untracked rows from ancestor versions", async () => {
 		.select(["snapshot_content", "inherited_from_version_id", "untracked"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows: result } = lix.engine!.executeQuerySync(compiled);
@@ -263,6 +271,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 			},
 		],
 	});
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -317,7 +326,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 		.select(["snapshot_content", "inherited_from_version_id", "untracked"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows: result } = lix.engine!.executeQuerySync(compiled);
@@ -346,6 +355,8 @@ test("includes change metadata for inherited and live rows", async () => {
 			},
 		],
 	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -385,7 +396,7 @@ test("includes change metadata for inherited and live rows", async () => {
 		])
 		.compile();
 
-	const rewrittenBase = rewriteInternalStateReader(baseQuery.query);
+	const rewrittenBase = rewriter(baseQuery.query);
 	const compiledBase = sqliteCompiler.compileQuery(
 		rewrittenBase,
 		baseQuery.queryId
@@ -421,7 +432,7 @@ test("includes change metadata for inherited and live rows", async () => {
 		])
 		.compile();
 
-	const rewrittenInherited = rewriteInternalStateReader(inheritedQuery.query);
+	const rewrittenInherited = rewriter(inheritedQuery.query);
 	const compiledInherited = sqliteCompiler.compileQuery(
 		rewrittenInherited,
 		inheritedQuery.queryId
@@ -459,6 +470,8 @@ test("exposes writer key", async () => {
 		],
 	});
 
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
+
 	const writerKey = "test_writer";
 
 	await withWriterKey(lix.db, writerKey, async (trx) => {
@@ -480,7 +493,7 @@ test("exposes writer key", async () => {
 		.select(["writer_key", "untracked"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows } = lix.engine!.executeQuerySync(compiled);
@@ -507,6 +520,7 @@ test("exposes rows flagged as tombstones for consumers to filter", async () => {
 	});
 
 	const engine = lix.engine!;
+	const rewriter = createInternalStateRewriter({ engine });
 
 	// Insert a live row
 	engine.executeQuerySync(
@@ -545,7 +559,7 @@ test("exposes rows flagged as tombstones for consumers to filter", async () => {
 		.select(["snapshot_content", "change_id"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows } = engine.executeQuerySync(compiled);
@@ -579,6 +593,8 @@ test("includes open transaction rows before commit with writer metadata", async 
 		],
 	});
 
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
+
 	insertTransactionState({
 		engine: lix.engine!,
 		timestamp: await getTimestamp({ lix }),
@@ -607,7 +623,7 @@ test("includes open transaction rows before commit with writer metadata", async 
 		.select(["writer_key", "untracked", "change_id", "commit_id"])
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows } = lix.engine!.executeQuerySync(compiled);
@@ -634,13 +650,15 @@ test("prunes cache query if cache table for schema doesn't exist yet", async () 
 		],
 	});
 
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
+
 	const original = internalQueryBuilder
 		.selectFrom("internal_state_reader")
 		.where("schema_key", "=", "mock_schema_without_cache")
 		.selectAll()
 		.compile();
 
-	const rewritten = rewriteInternalStateReader(original.query);
+	const rewritten = rewriter(original.query);
 	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
 
 	const { rows } = lix.engine!.executeQuerySync(compiled);

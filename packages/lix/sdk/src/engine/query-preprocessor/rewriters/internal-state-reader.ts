@@ -14,7 +14,9 @@
  */
 import { sql, type OperationNode, type RootOperationNode } from "kysely";
 
+import type { LixEngine } from "../../boot.js";
 import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
+import { getStateCacheV2Tables } from "../../../state/cache/schema.js";
 import {
 	extractColumnName,
 	extractTableName,
@@ -23,8 +25,22 @@ import {
 
 const TARGET_VIEW = "internal_state_reader";
 
-export function rewriteInternalStateReader(
-	node: RootOperationNode
+export interface InternalStateRewriteContext {
+	tableCache?: ReadonlySet<string>;
+}
+
+export function createInternalStateRewriter(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+	tableCache?: ReadonlySet<string>;
+}): (node: RootOperationNode) => RootOperationNode {
+	const tableCache =
+		args.tableCache ?? getStateCacheV2Tables({ engine: args.engine });
+	return (node) => rewriteInternalStateReader(node, { tableCache });
+}
+
+function rewriteInternalStateReader(
+	node: RootOperationNode,
+	_context?: InternalStateRewriteContext
 ): RootOperationNode {
 	if (node.kind !== "SelectQueryNode") {
 		return node;
