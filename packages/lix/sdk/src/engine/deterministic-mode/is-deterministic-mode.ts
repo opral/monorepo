@@ -21,7 +21,10 @@ const hookListenersRegistered = new WeakSet<object>();
  * @returns true if deterministic mode is enabled, false otherwise
  */
 export function isDeterministicModeSync(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
+	>;
 }): boolean {
 	const engine = args.engine;
 	// Register hook listener for cache invalidation (only once per hooks instance)

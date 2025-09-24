@@ -10,12 +10,6 @@ import { rewriteStateView } from "./rewriters/state.js";
 import { rewriteStateAllView } from "./rewriters/state-all.js";
 import { rewriteInternalResolvedStateAll } from "./rewriters/internal-resolved-state-all.js";
 
-const REWRITERS = [
-	rewriteStateView,
-	rewriteStateAllView,
-	rewriteInternalResolvedStateAll,
-];
-
 export function createQueryPreprocessor(args: {
 	engine: Pick<
 		LixEngine,
@@ -23,6 +17,11 @@ export function createQueryPreprocessor(args: {
 	>;
 }): (input: { query: CompiledQuery<unknown> }) => CompiledQuery<unknown> {
 	const plugins: KyselyPlugin[] = [createCachePopulator(args)];
+	const rewriters = [
+		rewriteStateView,
+		rewriteStateAllView,
+		rewriteInternalResolvedStateAll,
+	];
 
 	return ({ query }) => {
 		// guard against raw sql queries
@@ -40,7 +39,7 @@ export function createQueryPreprocessor(args: {
 			}
 		}
 
-		for (const rewrite of REWRITERS) {
+		for (const rewrite of rewriters) {
 			operationNode = rewrite(operationNode);
 		}
 
