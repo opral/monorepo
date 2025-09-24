@@ -7,6 +7,14 @@ import type {
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
 import { internalQueryBuilder } from "../engine/internal-query-builder.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../state/cache/create-schema-cache-table.js";
+import {
+	selectFromStateAll,
+	RESOLVED_STATE_ALIAS,
+} from "../state/resolved-state/select-from-state-all.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
@@ -305,7 +313,7 @@ export type EntityStateAllColumns = {
  * ```
  */
 export function createEntityStateAllView(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] + "_all" */
 	overrideName?: string;
@@ -338,7 +346,7 @@ export function createEntityStateAllView(args: {
 }
 
 function createSingleEntityAllView(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 	schema: LixSchemaDefinition;
 	viewName: string;
 	quotedViewName?: string;
@@ -369,6 +377,9 @@ function createSingleEntityAllView(args: {
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 	const primaryKeys = args.schema["x-lix-primary-key"];
+
+	const cacheTableName = schemaKeyToCacheTableName(schema_key);
+	createSchemaCacheTable({ engine: args.engine, tableName: cacheTableName });
 
 	const fileId = args.hardcodedFileId
 		? `'${args.hardcodedFileId}'`
@@ -502,43 +513,50 @@ function createSingleEntityAllView(args: {
 
 	const schemaProperties = Object.keys((args.schema as any).properties);
 
-	let viewSelect = internalQueryBuilder
-		.selectFrom(args.stateTable)
+	let viewSelect = selectFromStateAll(schema_key)
+		.where(`${RESOLVED_STATE_ALIAS}.schema_key`, "=", schema_key)
 		.select((eb) => {
-			const sourceSnapshot = eb.ref("snapshot_content");
-			const selections = schemaProperties
+			const snapshotRef = eb.ref(`${RESOLVED_STATE_ALIAS}.snapshot_content`);
+			const propertySelections = schemaProperties
 				.map((prop) =>
 					eb
 						.fn<
 							string | null
-						>("json_extract", [sourceSnapshot, eb.val(`$.${prop}`)])
+						>("json_extract", [snapshotRef, eb.val(`$.${prop}`)])
 						.as(prop)
 				)
 				.map((selection) => selection as AliasedExpression<unknown, string>);
 
+			const column = (name: string) =>
+				eb.ref(`${RESOLVED_STATE_ALIAS}.${name}`);
 			const operationalSelections: AliasedExpression<unknown, string>[] = [
-				eb.ref("entity_id").as("lixcol_entity_id"),
-				eb.ref("schema_key").as("lixcol_schema_key"),
-				eb.ref("file_id").as("lixcol_file_id"),
-				eb.ref("plugin_key").as("lixcol_plugin_key"),
-				eb.ref("version_id").as("lixcol_version_id"),
-				eb
-					.ref("inherited_from_version_id")
-					.as("lixcol_inherited_from_version_id"),
-				eb.ref("created_at").as("lixcol_created_at"),
-				eb.ref("updated_at").as("lixcol_updated_at"),
-				eb.ref("change_id").as("lixcol_change_id"),
-				eb.ref("untracked").as("lixcol_untracked"),
-				eb.ref("commit_id").as("lixcol_commit_id"),
-				eb.ref("metadata").as("lixcol_metadata"),
+				column("entity_id").as("lixcol_entity_id"),
+				column("schema_key").as("lixcol_schema_key"),
+				column("file_id").as("lixcol_file_id"),
+				column("plugin_key").as("lixcol_plugin_key"),
+				column("version_id").as("lixcol_version_id"),
+				column("inherited_from_version_id").as(
+					"lixcol_inherited_from_version_id"
+				),
+				column("created_at").as("lixcol_created_at"),
+				column("updated_at").as("lixcol_updated_at"),
+				column("change_id").as("lixcol_change_id"),
+				column("untracked").as("lixcol_untracked"),
+				column("commit_id").as("lixcol_commit_id"),
+				column("writer_key").as("lixcol_writer_key"),
+				column("metadata").as("lixcol_metadata"),
 			];
 
-			return [...selections, ...operationalSelections];
+			return [...propertySelections, ...operationalSelections];
 		})
-		.where("schema_key", "=", schema_key);
+		.where(`${RESOLVED_STATE_ALIAS}.snapshot_content`, "is not", null);
 
 	if (args.hardcodedFileId) {
-		viewSelect = viewSelect.where("file_id", "=", args.hardcodedFileId);
+		viewSelect = viewSelect.where(
+			`${RESOLVED_STATE_ALIAS}.file_id`,
+			"=",
+			args.hardcodedFileId
+		);
 	}
 
 	const createViewBuilder = internalQueryBuilder.schema

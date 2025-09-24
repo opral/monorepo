@@ -346,11 +346,7 @@ Plan:
   - SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
   - UNION ALL
   - SCAN t
-  - MULTI-INDEX OR
-  - INDEX 1
-  - SCAN c USING INDEX idx_internal_state_cache_lix_key_value_live_vfe
-  - INDEX 2
-  - SCAN c USING INDEX idx_internal_state_cache_lix_key_value_tomb_vfe
+  - SCAN c
   - REUSE LIST SUBQUERY 24
   - CORRELATED SCALAR SUBQUERY 8
   - SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
@@ -372,7 +368,7 @@ Plan:
   - SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
   - UNION ALL
   - SCAN t
-  - SCAN isc USING INDEX idx_internal_state_cache_lix_key_value_live_vfe
+  - SCAN isc
   - SCAN vi
   - LIST SUBQUERY 24
   - SEARCH internal_state_all_untracked USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)

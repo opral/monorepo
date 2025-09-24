@@ -375,6 +375,6 @@ export function buildResolvedStateSelectSql(
 				AND child_unt.schema_key = txn.schema_key
 				AND child_unt.entity_id = txn.entity_id
 		)
-	);
+	)
 `;
 }
