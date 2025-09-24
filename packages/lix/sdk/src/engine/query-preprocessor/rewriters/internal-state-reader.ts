@@ -32,14 +32,8 @@ export interface InternalStateRewriteContext {
 
 export function createInternalStateRewriter(args: {
 	engine: Pick<LixEngine, "runtimeCacheRef">;
-	tableCache?: ReadonlySet<string>;
 }): (node: RootOperationNode) => RootOperationNode {
-	const hasRuntimeCache =
-		typeof args.engine.runtimeCacheRef === "object" &&
-		args.engine.runtimeCacheRef !== null;
-	const tableCache = hasRuntimeCache
-		? (args.tableCache ?? getStateCacheV2Tables({ engine: args.engine }))
-		: args.tableCache;
+	const tableCache = getStateCacheV2Tables({ engine: args.engine });
 	return (node) => rewriteInternalStateReader(node, { tableCache });
 }
 
@@ -66,11 +60,13 @@ function rewriteInternalStateReader(
 
 		const schemaKey = schemaKeys[0]!;
 		const includeCache = shouldIncludeCacheBranch(schemaKey, context);
+		const includeInheritance = shouldIncludeInheritance(context);
 		changed = true;
 		return buildInternalStateReaderSubquery({
 			schemaKey,
 			alias: analysis.alias,
 			includeCache,
+			includeInheritance,
 		});
 	};
 
@@ -206,8 +202,9 @@ function buildInternalStateReaderSubquery(args: {
 	schemaKey: string;
 	alias: string;
 	includeCache: boolean;
+	includeInheritance: boolean;
 }): OperationNode {
-	const { schemaKey, alias, includeCache } = args;
+	const { schemaKey, alias, includeCache, includeInheritance } = args;
 	const schemaTableName = schemaKeyToCacheTableName(schemaKey);
 	const cacheTable = sql.id(schemaTableName);
 
@@ -218,28 +215,81 @@ function buildInternalStateReaderSubquery(args: {
 
 	if (includeCache) {
 		unionSegments.push(buildCacheBranch(schemaKey, cacheTable));
-		unionSegments.push(buildCacheInheritanceBranch(schemaKey, cacheTable));
 	}
 
-	const descriptorTableName = schemaKeyToCacheTableName(
-		"lix_version_descriptor"
-	);
-	const descriptorTable = sql.id(descriptorTableName);
+	if (includeInheritance) {
+		if (includeCache) {
+			unionSegments.push(buildCacheInheritanceBranch(schemaKey, cacheTable));
+		}
+		const descriptorTableName = schemaKeyToCacheTableName(
+			"lix_version_descriptor"
+		);
+		const descriptorTable = sql.id(descriptorTableName);
 
-	unionSegments.push(
-		buildInheritedUntrackedBranch({
-			schemaKey,
-			cacheTable,
-			includeCache,
-		}),
-		buildInheritedTxnBranch({
-			schemaKey,
-			cacheTable,
-			includeCache,
-		})
-	);
+		unionSegments.push(
+			buildInheritedUntrackedBranch({
+				schemaKey,
+				cacheTable,
+				includeCache,
+			}),
+			buildInheritedTxnBranch({
+				schemaKey,
+				cacheTable,
+				includeCache,
+			})
+		);
 
-	const unionSql = sql.join(
+		const unionSql = sql.join(
+			unionSegments,
+			sql`
+
+				UNION ALL
+
+			`
+		);
+
+		const subquery = sql`
+			(
+			WITH RECURSIVE
+				version_descriptor_base AS (
+					SELECT
+						json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+						json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+					FROM ${descriptorTable} AS isc_v
+					WHERE isc_v.inheritance_delete_marker = 0
+				),
+				version_inheritance(version_id, ancestor_version_id) AS (
+					SELECT
+						vdb.version_id,
+						vdb.inherits_from_version_id
+					FROM version_descriptor_base vdb
+					WHERE vdb.inherits_from_version_id IS NOT NULL
+
+					UNION
+
+					SELECT
+						vir.version_id,
+						vdb.inherits_from_version_id
+					FROM version_inheritance vir
+					JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
+					WHERE vdb.inherits_from_version_id IS NOT NULL
+				),
+				version_parent AS (
+					SELECT
+						vdb.version_id,
+						vdb.inherits_from_version_id AS parent_version_id
+					FROM version_descriptor_base vdb
+					WHERE vdb.inherits_from_version_id IS NOT NULL
+				)
+			SELECT DISTINCT * FROM (
+				${unionSql}
+			) ) AS ${sql.id(alias)}
+		`;
+
+		return subquery.toOperationNode();
+	}
+
+	const unionSqlWithoutInheritance = sql.join(
 		unionSegments,
 		sql`
 
@@ -248,45 +298,12 @@ function buildInternalStateReaderSubquery(args: {
 		`
 	);
 
-	const subquery = sql`
+	return sql`
 		(
-		WITH RECURSIVE
-			version_descriptor_base AS (
-				SELECT
-					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-				FROM ${descriptorTable} AS isc_v
-				WHERE isc_v.inheritance_delete_marker = 0
-			),
-			version_inheritance(version_id, ancestor_version_id) AS (
-				SELECT
-					vdb.version_id,
-					vdb.inherits_from_version_id
-				FROM version_descriptor_base vdb
-				WHERE vdb.inherits_from_version_id IS NOT NULL
-
-				UNION
-
-				SELECT
-					vir.version_id,
-					vdb.inherits_from_version_id
-				FROM version_inheritance vir
-				JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
-				WHERE vdb.inherits_from_version_id IS NOT NULL
-			),
-			version_parent AS (
-				SELECT
-					vdb.version_id,
-					vdb.inherits_from_version_id AS parent_version_id
-				FROM version_descriptor_base vdb
-				WHERE vdb.inherits_from_version_id IS NOT NULL
-			)
 		SELECT DISTINCT * FROM (
-			${unionSql}
+			${unionSqlWithoutInheritance}
 		) ) AS ${sql.id(alias)}
-	`;
-
-	return subquery.toOperationNode();
+	`.toOperationNode();
 }
 
 function buildTransactionBranch(schemaKey: string): SqlFragment {
@@ -620,4 +637,16 @@ function shouldIncludeCacheBranch(
 
 	const schemaTable = schemaKeyToCacheTableName(schemaKey);
 	return tableCache.has(schemaTable);
+}
+
+function shouldIncludeInheritance(
+	context?: InternalStateRewriteContext
+): boolean {
+	const tableCache = context?.tableCache;
+	if (!tableCache) {
+		return true;
+	}
+
+	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	return tableCache.has(descriptorTable);
 }

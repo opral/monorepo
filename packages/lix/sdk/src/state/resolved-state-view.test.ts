@@ -451,7 +451,7 @@ test("resolved state view should handle transitive inheritance (A->B->C)", async
 	expect(entityA?.entity_id).toBe("entity_a");
 	expect(entityA?.version_id).toBe(versionC.id);
 	expect(entityA?.inherited_from_version_id).toBe(versionA.id);
-	expect((entityA?.snapshot_content as any).value).toBe("from_version_a");
+	expect((entityA?.snapshot_content as any)?.value).toBe("from_version_a");
 
 	// Also verify version B sees entity_a inherited from A
 	const resolvedForB = await lixInternalDb

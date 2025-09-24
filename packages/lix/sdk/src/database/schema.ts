@@ -79,6 +79,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_file_data_cache: InternalFileDataCacheTable;
 	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
 	internal_state_writer: InternalStateWriterTable;
+	internal_state_reader: InternalResolvedStateAllView;
 };
 
 export type InternalStateWriterTable = {
