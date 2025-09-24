@@ -622,4 +622,28 @@ test("includes open transaction rows before commit with writer metadata", async 
 	await lix.close();
 });
 
-test.todo("prunes cache query if cache table for schema doesn't exist yet");
+test("prunes cache query if cache table for schema doesn't exist yet", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	const original = internalQueryBuilder
+		.selectFrom("internal_state_reader")
+		.where("schema_key", "=", "mock_schema_without_cache")
+		.selectAll()
+		.compile();
+
+	const rewritten = rewriteInternalStateReader(original.query);
+	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
+
+	const { rows } = lix.engine!.executeQuerySync(compiled);
+
+	expect(rows).toHaveLength(0);
+});
