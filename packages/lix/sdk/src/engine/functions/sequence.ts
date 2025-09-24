@@ -60,10 +60,7 @@ const counterCache = new WeakMap<object, CounterState>();
  * @throws {Error} If `lix_deterministic_mode` is not enabled
  */
 export function nextSequenceNumberSync(args: {
-	engine: Pick<
-		LixEngine,
-		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
-	>;
+	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef" | "executeQuerySync">;
 }): number {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
@@ -77,19 +74,16 @@ export function nextSequenceNumberSync(args: {
 
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
-		const compiled = internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
-			.where("entity_id", "=", "lix_deterministic_sequence_number")
-			.where("schema_key", "=", "lix_key_value")
-			.where("version_id", "=", "global")
-			.where("snapshot_content", "is not", null)
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-			.compile();
-		const { rows } = engine.executeSync({
-			sql: compiled.sql,
-			parameters: compiled.parameters,
-		});
-		const row = rows[0];
+		const [row] = engine.executeQuerySync(
+			internalQueryBuilder
+				.selectFrom("internal_state_reader")
+				.where("entity_id", "=", "lix_deterministic_sequence_number")
+				.where("schema_key", "=", "lix_key_value")
+				.where("version_id", "=", "global")
+				.where("snapshot_content", "is not", null)
+				.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+				.compile()
+		).rows;
 
 		// The persisted value is the next counter to use
 		const start = row ? Number(row.value) + 1 : 0;

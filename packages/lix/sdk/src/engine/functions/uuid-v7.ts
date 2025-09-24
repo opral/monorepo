@@ -16,29 +16,23 @@ import { internalQueryBuilder } from "../internal-query-builder.js";
  * @see uuidV7
  */
 export function uuidV7Sync(args: {
-	engine: Pick<
-		LixEngine,
-		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
-	>;
+	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef" | "executeQuerySync">;
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
 	if (isDeterministicModeSync({ engine })) {
 		// Check if uuid_v7 is disabled in the config
-		const compiled = internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
-			.where("entity_id", "=", "lix_deterministic_mode")
-			.where("schema_key", "=", "lix_key_value")
-			.where("snapshot_content", "is not", null)
-			.select(
-				sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")
-			)
-			.compile();
-		const { rows } = engine.executeSync({
-			sql: compiled.sql,
-			parameters: compiled.parameters,
-		});
-		const config = rows[0];
+		const [config] = engine.executeQuerySync(
+			internalQueryBuilder
+				.selectFrom("internal_state_reader")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.where("snapshot_content", "is not", null)
+				.select(
+					sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")
+				)
+				.compile()
+		).rows;
 
 		// If uuid_v7 is explicitly set to false, use non-deterministic
 		if (config?.uuid_v7 == false) {

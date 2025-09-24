@@ -12,14 +12,14 @@ import { createDefaultPlugins } from "../database/kysely/plugins.js";
  * Cold Kysely instance wired to the SQLite dialect for compiling queries against
  * the internal schema without holding a live database connection.
  *
- * Pair this with `engine.executeSync` when you need synchronous access to
+ * Pair this with `engine.executeQuerySync` when you need synchronous access to
  * internal views:
  *
  * @example
  * ```ts
- * const [config] = engine.executeSync(
+ * const [config] = engine.executeQuerySync(
  *   internalQueryBuilder
- *     .selectFrom("internal_resolved_state_all")
+ *     .selectFrom("internal_state_reader")
  *     .where("entity_id", "=", "lix_deterministic_mode")
  *     .where("schema_key", "=", "lix_key_value")
  *     .where("snapshot_content", "is not", null)

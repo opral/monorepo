@@ -109,12 +109,12 @@ export function randomSync(args: {
  * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
 function getRngSeed(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef" | "executeQuerySync">;
 }): string {
 	// Check for seed in the deterministic mode config
-	const [configRow] = args.engine.executeSync(
+	const [configRow] = args.engine.executeQuerySync(
 		internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_reader")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)
@@ -131,7 +131,7 @@ function getRngSeed(args: {
 	}
 
 	// Derive default seed from lix_id
-	const [idRow] = args.engine.executeSync(
+	const [idRow] = args.engine.executeQuerySync(
 		internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")

@@ -15,30 +15,24 @@ import { internalQueryBuilder } from "../internal-query-builder.js";
  * @see nanoId
  */
 export function nanoIdSync(args: {
-	engine: Pick<
-		LixEngine,
-		"executeSync" | "hooks" | "runtimeCacheRef" | "executeQuerySync"
-	>;
+	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef" | "executeQuerySync">;
 	length?: number;
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
 	if (isDeterministicModeSync({ engine: engine })) {
 		// Check if nano_id is disabled in the config
-		const compiled = internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
-			.where("entity_id", "=", "lix_deterministic_mode")
-			.where("schema_key", "=", "lix_key_value")
-			.where("snapshot_content", "is not", null)
-			.select(
-				sql`json_extract(snapshot_content, '$.value.nano_id')`.as("nano_id")
-			)
-			.compile();
-		const { rows } = engine.executeSync({
-			sql: compiled.sql,
-			parameters: compiled.parameters,
-		});
-		const config = rows[0];
+		const [config] = engine.executeQuerySync(
+			internalQueryBuilder
+				.selectFrom("internal_state_reader")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.where("snapshot_content", "is not", null)
+				.select(
+					sql`json_extract(snapshot_content, '$.value.nano_id')`.as("nano_id")
+				)
+				.compile()
+		).rows;
 
 		// If nano_id is explicitly set to false, use non-deterministic
 		if (config?.nano_id == false) {
