@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { SqliteQueryCompiler, type QueryId } from "kysely";
+import { SqliteQueryCompiler, sql, type QueryId } from "kysely";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 import { rewriteInternalResolvedStateAll } from "./internal-resolved-state-all.js";
 
@@ -60,6 +60,27 @@ test("rewrites when cache tables are registered", () => {
 		.selectFrom("internal_resolved_state_all as rs")
 		.selectAll()
 		.where("rs.schema_key", "=", "lix_key_value")
+		.compile();
+
+	const rewritten = rewriteInternalResolvedStateAll(original.query, {
+		tableCache: new Set([STATE_TABLE, DESCRIPTOR_TABLE]),
+	});
+
+	expect(rewritten).not.toBe(original.query);
+	const sqlText = compile(rewritten, original.queryId);
+	expect(sqlText).toContain(STATE_TABLE);
+	expect(sqlText).toContain(DESCRIPTOR_TABLE);
+});
+
+test("rewrites resolved state with custom projections", () => {
+	const original = internalQueryBuilder
+		.selectFrom("internal_resolved_state_all")
+		.where("entity_id", "=", "lix_deterministic_mode")
+		.where("schema_key", "=", "lix_key_value")
+		.where("snapshot_content", "is not", null)
+		.select(
+			sql`json_extract(snapshot_content, '$.value.enabled')`.as("enabled")
+		)
 		.compile();
 
 	const rewritten = rewriteInternalResolvedStateAll(original.query, {
