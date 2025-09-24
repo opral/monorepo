@@ -1,9 +1,10 @@
-import type { Generated } from "kysely";
+import type { AliasedExpression, Generated } from "kysely";
 import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 /**
  * Base type for entity history views that include historical data from the state_history table.
@@ -261,35 +262,49 @@ export function createEntityStateHistoryView(args: {
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 
-	// Generated SQL query for history view
-	// History lookups benefit from the same optimisation—restricting to the
-	// known file id lets SQLite answer with a single indexed probe instead of
-	// exploring every file's history for the schema.
-	const fileFilterClause = args.hardcodedFileId
-		? ` AND file_id = '${args.hardcodedFileId}'`
-		: "";
+	let historySelect = internalQueryBuilder
+		.selectFrom("state_history")
+		.select((eb) => {
+			const snapshotRef = eb.ref("snapshot_content");
+			const propertySelections = properties
+				.map((prop) =>
+					eb
+						.fn<
+							string | null
+						>("json_extract", [snapshotRef, eb.val(`$.${prop}`)])
+						.as(prop)
+				)
+				.map((selection) => selection as AliasedExpression<unknown, string>);
 
-	const sqlQuery = `
-    CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
-      SELECT
-        ${properties
-					.map(
-						(prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
-					)
-					.join(",\n        ")},
-        entity_id AS lixcol_entity_id,
-        schema_key AS lixcol_schema_key,
-        file_id AS lixcol_file_id,
-        plugin_key AS lixcol_plugin_key,
-        schema_version AS lixcol_schema_version,
-        change_id AS lixcol_change_id,
-        commit_id AS lixcol_commit_id,
-        root_commit_id AS lixcol_root_commit_id,
-        depth AS lixcol_depth,
-        metadata AS lixcol_metadata
-      FROM state_history
-      WHERE schema_key = '${schema_key}'${fileFilterClause};
-    `;
+			const operationalSelections: AliasedExpression<unknown, string>[] = [
+				eb.ref("entity_id").as("lixcol_entity_id"),
+				eb.ref("schema_key").as("lixcol_schema_key"),
+				eb.ref("file_id").as("lixcol_file_id"),
+				eb.ref("plugin_key").as("lixcol_plugin_key"),
+				eb.ref("schema_version").as("lixcol_schema_version"),
+				eb.ref("change_id").as("lixcol_change_id"),
+				eb.ref("commit_id").as("lixcol_commit_id"),
+				eb.ref("root_commit_id").as("lixcol_root_commit_id"),
+				eb.ref("depth").as("lixcol_depth"),
+				eb.ref("metadata").as("lixcol_metadata"),
+			];
 
-	args.engine.sqlite.exec(sqlQuery);
+			return [...propertySelections, ...operationalSelections];
+		})
+		.where("schema_key", "=", schema_key);
+
+	if (args.hardcodedFileId) {
+		historySelect = historySelect.where("file_id", "=", args.hardcodedFileId);
+	}
+
+	const compiled = internalQueryBuilder.schema
+		.createView(view_name)
+		.ifNotExists()
+		.as(historySelect)
+		.compile();
+
+	args.engine.sqlite.exec({
+		sql: compiled.sql,
+		bind: compiled.parameters as any[],
+	});
 }

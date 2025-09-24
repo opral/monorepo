@@ -4,12 +4,12 @@ import { selectFromStateAll } from "./select-from-state-all.js";
 
 describe("selectFromStateAll", () => {
 	it("routes to the schema-specific materialized tables", () => {
-		const compiled = selectFromStateAll("lix_change_set")
-			.selectAll()
-			.compile();
+		const compiled = selectFromStateAll("lix_change_set").selectAll().compile();
 
 		expect(compiled.sql).toContain("internal_state_cache_lix_change_set");
-		expect(compiled.sql).toContain("internal_state_cache_lix_version_descriptor");
+		expect(compiled.sql).toContain(
+			"internal_state_cache_lix_version_descriptor"
+		);
 		expect(compiled.sql).not.toMatch(/internal_state_cache\b(?!_)/);
 	});
 
@@ -40,8 +40,6 @@ describe("selectFromStateAll", () => {
 		expect(compiled.sql).toMatch(
 			/inner join\s+internal_state_cache_lix_commit\s+as\s+"commit_cache"/iu
 		);
-		expect(compiled.sql).toMatch(
-			/"internal_state_all_routed"\."entity_id"/u
-		);
+		expect(compiled.sql).toMatch(/"internal_state_all_routed"\."entity_id"/u);
 	});
 });

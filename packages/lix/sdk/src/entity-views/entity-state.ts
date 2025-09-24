@@ -1,10 +1,11 @@
-import type { Generated } from "kysely";
+import type { AliasedExpression, Generated } from "kysely";
 import type { LixEngine } from "../engine/boot.js";
 import type {
 	LixGenerated,
 	LixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
@@ -458,21 +459,6 @@ function createSingleEntityView(args: {
 	const hasDefaults =
 		args.defaultValues && Object.keys(args.defaultValues).length > 0;
 
-	// Operational columns for active view (no version_id exposed)
-	const operationalColumns = [
-		"entity_id AS lixcol_entity_id",
-		"schema_key AS lixcol_schema_key",
-		"file_id AS lixcol_file_id",
-		"plugin_key AS lixcol_plugin_key",
-		"inherited_from_version_id AS lixcol_inherited_from_version_id",
-		"created_at AS lixcol_created_at",
-		"updated_at AS lixcol_updated_at",
-		"change_id AS lixcol_change_id",
-		"untracked AS lixcol_untracked",
-		"commit_id AS lixcol_commit_id",
-		"metadata AS lixcol_metadata",
-	];
-
 	// Handle version_id for active view
 	const versionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
@@ -510,33 +496,61 @@ function createSingleEntityView(args: {
 	const buildJsonEntries = (refExpr: (prop: string) => string): string =>
 		buildJsonObjectEntries({ schema: args.schema, ref: refExpr });
 
-	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
-	// When a schema has a hardcoded file_id (e.g. most built-in Lix entities),
-	// we can add the file filter directly to the generated view. This keeps
-	// SQLite anchored on the `(schema_key, version_id, file_id)` index instead of
-	// scanning every file for the same version, which noticeably speeds up
-	// lookups and the generated UPDATE statements.
-	const fileFilterClause = args.hardcodedFileId
-		? ` AND file_id = '${args.hardcodedFileId}'`
-		: "";
+	let viewSelect = internalQueryBuilder
+		.selectFrom(args.stateTable)
+		.select((eb) => {
+			const snapshotRef = eb.ref("snapshot_content");
+			const propertySelections = properties
+				.map((prop) =>
+					eb
+						.fn<
+							string | null
+						>("json_extract", [snapshotRef, eb.val(`$.${prop}`)])
+						.as(prop)
+				)
+				.map((selection) => selection as AliasedExpression<unknown, string>);
 
-	const sqlQuery =
-		`
-    CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
-      SELECT
-        ${Object.keys((args.schema as any).properties)
-					.map(
-						(prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
-					)
-					.join(",\n        ")},
-        ${operationalColumns.join(",\n        ")}
-      FROM ${args.stateTable}
-      WHERE schema_key = '${schema_key}'${fileFilterClause};
+			const operationalSelections: AliasedExpression<unknown, string>[] = [
+				eb.ref("entity_id").as("lixcol_entity_id"),
+				eb.ref("schema_key").as("lixcol_schema_key"),
+				eb.ref("file_id").as("lixcol_file_id"),
+				eb.ref("plugin_key").as("lixcol_plugin_key"),
+				eb
+					.ref("inherited_from_version_id")
+					.as("lixcol_inherited_from_version_id"),
+				eb.ref("created_at").as("lixcol_created_at"),
+				eb.ref("updated_at").as("lixcol_updated_at"),
+				eb.ref("change_id").as("lixcol_change_id"),
+				eb.ref("untracked").as("lixcol_untracked"),
+				eb.ref("commit_id").as("lixcol_commit_id"),
+				eb.ref("metadata").as("lixcol_metadata"),
+			];
 
-    ` +
-		(args.readOnly
-			? ""
-			: `
+			return [...propertySelections, ...operationalSelections];
+		})
+		.where("schema_key", "=", schema_key);
+
+	if (args.hardcodedFileId) {
+		viewSelect = viewSelect.where("file_id", "=", args.hardcodedFileId);
+	}
+
+	const createViewBuilder = internalQueryBuilder.schema
+		.createView(view_name)
+		.ifNotExists()
+		.as(viewSelect);
+
+	const compiledView = createViewBuilder.compile();
+
+	args.engine.sqlite.exec({
+		sql: compiledView.sql,
+		bind: compiledView.parameters as any[],
+	});
+
+	if (args.readOnly) {
+		return;
+	}
+
+	const triggerSql = `
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_insert
       INSTEAD OF INSERT ON ${quoted_view_name}
@@ -618,7 +632,7 @@ function createSingleEntityView(args: {
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
         ${args.hardcodedVersionId ? `AND version_id = '${args.hardcodedVersionId}'` : ""};
       END;
-    `);
+    `;
 
-	args.engine.sqlite.exec(sqlQuery);
+	args.engine.sqlite.exec(triggerSql);
 }

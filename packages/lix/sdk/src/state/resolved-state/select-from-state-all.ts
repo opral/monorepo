@@ -46,7 +46,9 @@ export function selectFromStateAll(
 	schemaKey: string
 ): SelectQueryBuilder<any, string, ResolvedStateRow> {
 	const selectSql = buildResolvedStateSelectSql(schemaKey);
-	const tableExpression = sql<ResolvedStateRow>`(${selectSql})`.as(RESOLVED_ALIAS);
+	const tableExpression = sql<ResolvedStateRow>`(${selectSql})`.as(
+		RESOLVED_ALIAS
+	);
 
 	return internalQueryBuilder.selectFrom(
 		tableExpression
