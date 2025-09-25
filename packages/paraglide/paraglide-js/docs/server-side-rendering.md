@@ -60,6 +60,11 @@ await compile({
 
 <doc-video src="https://youtu.be/RO_pMjSHgpI"></doc-video>
 
+<doc-callout type="tip">
+Client routers can reuse the same redirect logic via `shouldRedirect()`. See the
+[`url` strategy guide](./strategy.md#client-side-redirects) for an example.
+</doc-callout>
+
 
 ### Disabling Async Local Storage
 

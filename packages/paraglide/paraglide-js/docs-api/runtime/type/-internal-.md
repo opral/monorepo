@@ -1,3 +1,85 @@
+## ShouldRedirectClientInput
+
+Defined in: runtime/should-redirect.js:14
+
+### Properties
+
+#### locale?
+
+> `optional` **locale**: `any`
+
+Defined in: runtime/should-redirect.js:17
+
+#### request?
+
+> `optional` **request**: `undefined`
+
+Defined in: runtime/should-redirect.js:15
+
+#### url?
+
+> `optional` **url**: `string` \| `URL`
+
+Defined in: runtime/should-redirect.js:16
+
+***
+
+## ShouldRedirectResult
+
+Defined in: runtime/should-redirect.js:21
+
+### Properties
+
+#### locale
+
+> **locale**: `any`
+
+Defined in: runtime/should-redirect.js:23
+
+#### redirectUrl
+
+> **redirectUrl**: `undefined` \| `URL`
+
+Defined in: runtime/should-redirect.js:24
+
+Destination URL when a redirect is required.
+
+#### shouldRedirect
+
+> **shouldRedirect**: `boolean`
+
+Defined in: runtime/should-redirect.js:22
+
+Indicates whether the consumer should perform a redirect.
+
+***
+
+## ShouldRedirectServerInput
+
+Defined in: runtime/should-redirect.js:9
+
+### Properties
+
+#### locale?
+
+> `optional` **locale**: `any`
+
+Defined in: runtime/should-redirect.js:12
+
+#### request
+
+> **request**: `Request`
+
+Defined in: runtime/should-redirect.js:10
+
+#### url?
+
+> `optional` **url**: `string` \| `URL`
+
+Defined in: runtime/should-redirect.js:11
+
+***
+
 ## CustomClientStrategyHandler
 
 > **CustomClientStrategyHandler**\<\> = `object`
@@ -86,7 +168,7 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 ###### locale?
 
-[`Locale`](#locale)
+[`Locale`](#locale-3)
 
 ###### messageCalls?
 
@@ -106,11 +188,11 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 #### getStore()
 
-> **getStore**(): `undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
+> **getStore**(): `undefined` \| \{ `locale?`: [`Locale`](#locale-3); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
 
 ##### Returns
 
-`undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
+`undefined` \| \{ `locale?`: [`Locale`](#locale-3); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
 
 ***
 
@@ -126,7 +208,7 @@ Defined in: [runtime/set-locale.js:34](https://github.com/opral/monorepo/tree/ma
 
 #### newLocale
 
-[`Locale`](#locale)
+[`Locale`](#locale-3)
 
 #### options?
 
@@ -137,6 +219,16 @@ Defined in: [runtime/set-locale.js:34](https://github.com/opral/monorepo/tree/ma
 ### Returns
 
 `void` \| `Promise`\<`void`\>
+
+***
+
+## ShouldRedirectInput
+
+> **ShouldRedirectInput**\<\> = [`ShouldRedirectServerInput`](#shouldredirectserverinput) \| [`ShouldRedirectClientInput`](#shouldredirectclientinput)
+
+Defined in: runtime/should-redirect.js:19
+
+### Type Parameters
 
 ***
 
@@ -1015,6 +1107,58 @@ setLocale('en');
 
 ```ts
 setLocale('en', { reload: false });
+```
+
+***
+
+## shouldRedirect()
+
+> **shouldRedirect**(`input?`): `Promise`\<[`ShouldRedirectResult`](#shouldredirectresult)\>
+
+Defined in: runtime/should-redirect.js:61
+
+Determines whether a redirect is required to align the current URL with the active locale.
+
+This helper mirrors the logic that powers `paraglideMiddleware`, but works in both server
+and client environments. It evaluates the configured strategies in order, computes the
+canonical localized URL, and reports when the current URL does not match.
+
+When called in the browser without arguments, the current `window.location.href` is used.
+
+### Parameters
+
+#### input?
+
+[`ShouldRedirectInput`](#shouldredirectinput) = `{}`
+
+### Returns
+
+`Promise`\<[`ShouldRedirectResult`](#shouldredirectresult)\>
+
+### Examples
+
+```ts
+// Client side usage (e.g. TanStack Router beforeLoad hook)
+async function beforeLoad({ location }) {
+  const decision = await shouldRedirect({ url: location.href });
+
+  if (decision.shouldRedirect) {
+    throw redirect({ to: decision.redirectUrl.href });
+  }
+}
+```
+
+```ts
+// Server side usage with a Request
+export async function handle(request) {
+  const decision = await shouldRedirect({ request });
+
+  if (decision.shouldRedirect) {
+    return Response.redirect(decision.redirectUrl, 307);
+  }
+
+  return render(request, decision.locale);
+}
 ```
 
 ***
