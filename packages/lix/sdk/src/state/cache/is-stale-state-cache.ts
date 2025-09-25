@@ -12,25 +12,27 @@ const hookListeners = new WeakSet<object>();
  * Memoize the stale flag for a given SQLite connection.
  */
 export function setStaleStateCacheMemo(args: {
-	engine: Pick<LixEngine, "executeSync">;
+	engine: Pick<LixEngine, "runtimeCacheRef">;
 	value: boolean;
 }): void {
-	staleStateCache.set(args.engine.executeSync, args.value);
+	staleStateCache.set(args.engine.runtimeCacheRef as object, args.value);
 }
 
 /**
  * Remove the cached stale flag so the next read re-queries SQLite.
  */
 export function invalidateStaleStateCacheMemo(args: {
-	engine: Pick<LixEngine, "executeSync">;
+	engine: Pick<LixEngine, "runtimeCacheRef">;
 }): void {
-	staleStateCache.delete(args.engine.executeSync);
+	staleStateCache.delete(args.engine.runtimeCacheRef as object);
 }
 
-function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
-	const res = engine.executeSync(
+function readStaleFlag(
+	engine: Pick<LixEngine, "executeQuerySync" | "runtimeCacheRef">
+): boolean {
+	const [row] = engine.executeQuerySync(
 		internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_reader")
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", CACHE_SCHEMA_KEY)
 			.where("version_id", "=", "global")
@@ -39,11 +41,11 @@ function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
 			.compile()
 	).rows;
 
-	if (!res || res.length === 0) {
+	if (!row) {
 		return true;
 	}
 
-	return res[0]?.value == true;
+	return row.value == true;
 }
 
 /**
@@ -56,7 +58,7 @@ function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
  * const stale = isStaleStateCache({ engine: lix.engine! });
  */
 export function isStaleStateCache(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks">;
+	engine: Pick<LixEngine, "executeQuerySync" | "hooks" | "runtimeCacheRef">;
 }): boolean {
 	const { engine } = args;
 
@@ -75,8 +77,9 @@ export function isStaleStateCache(args: {
 		});
 	}
 
-	if (staleStateCache.has(args.engine.executeSync)) {
-		return staleStateCache.get(args.engine.executeSync)!;
+	const cacheTarget = args.engine.runtimeCacheRef as object;
+	if (staleStateCache.has(cacheTarget)) {
+		return staleStateCache.get(cacheTarget)!;
 	}
 
 	const result = readStaleFlag(args.engine);

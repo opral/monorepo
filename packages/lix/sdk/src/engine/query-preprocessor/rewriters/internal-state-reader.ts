@@ -55,6 +55,15 @@ function rewriteInternalStateReader(
 
 		const schemaKeys = collectSchemaFilters(node.where?.where, analysis.alias);
 		if (schemaKeys.length !== 1) {
+			if (schemaKeys.length === 0) {
+				const includeInheritance = shouldIncludeInheritance(context);
+				changed = true;
+				return buildInternalStateReaderAllSchemasSubquery({
+					alias: analysis.alias,
+					tableCache: context?.tableCache,
+					includeInheritance,
+				});
+			}
 			return fromItem;
 		}
 
@@ -209,17 +218,19 @@ function buildInternalStateReaderSubquery(args: {
 	const cacheTable = sql.id(schemaTableName);
 
 	const unionSegments: SqlFragment[] = [
-		buildTransactionBranch(schemaKey),
-		buildUntrackedBranch(schemaKey),
+		buildTransactionBranch({ schemaKey }),
+		buildUntrackedBranch({ schemaKey }),
 	];
 
 	if (includeCache) {
-		unionSegments.push(buildCacheBranch(schemaKey, cacheTable));
+		unionSegments.push(buildCacheBranch({ schemaKey, cacheTable }));
 	}
 
 	if (includeInheritance) {
 		if (includeCache) {
-			unionSegments.push(buildCacheInheritanceBranch(schemaKey, cacheTable));
+			unionSegments.push(
+				buildCacheInheritanceBranch({ schemaKey, cacheTable })
+			);
 		}
 		const descriptorTableName = schemaKeyToCacheTableName(
 			"lix_version_descriptor"
@@ -306,7 +317,182 @@ function buildInternalStateReaderSubquery(args: {
 	`.toOperationNode();
 }
 
-function buildTransactionBranch(schemaKey: string): SqlFragment {
+function buildInternalStateReaderAllSchemasSubquery(args: {
+	alias: string;
+	tableCache?: ReadonlySet<string>;
+	includeInheritance: boolean;
+}): OperationNode {
+	const { alias, tableCache, includeInheritance } = args;
+	const descriptorTableName = schemaKeyToCacheTableName(
+		"lix_version_descriptor"
+	);
+	const cacheTables = tableCache ? Array.from(tableCache) : [];
+	const dataCacheTables = cacheTables.filter(
+		(tableName) => tableName !== descriptorTableName
+	);
+	const includeCache = dataCacheTables.length > 0;
+	const hasDescriptorTable = cacheTables.includes(descriptorTableName);
+	const useInheritance = includeInheritance && hasDescriptorTable;
+
+	const unionSegments: SqlFragment[] = [
+		buildTransactionBranch({}),
+		buildUntrackedBranch({}),
+	];
+
+	if (includeCache) {
+		unionSegments.push(buildCacheBranch({ cacheTable: sql.id("cache_union") }));
+	}
+
+	if (useInheritance) {
+		if (includeCache) {
+			unionSegments.push(
+				buildCacheInheritanceBranch({
+					cacheTable: sql.id("cache_union"),
+				})
+			);
+		}
+		unionSegments.push(
+			buildInheritedUntrackedBranch({
+				includeCache,
+				cacheTable: includeCache ? sql.id("cache_union") : undefined,
+			}),
+			buildInheritedTxnBranch({
+				includeCache,
+				cacheTable: includeCache ? sql.id("cache_union") : undefined,
+			})
+		);
+	}
+
+	const unionSql = sql.join(
+		unionSegments,
+		sql`
+
+			UNION ALL
+
+		`
+	);
+
+	const cacheUnionSql = includeCache
+		? sql.join(
+				dataCacheTables.map(
+					(tableName) => sql`SELECT * FROM ${sql.id(tableName)}`
+				),
+				sql`
+UNION ALL
+`
+			)
+		: undefined;
+
+	const descriptorTable = sql.id(descriptorTableName);
+
+	let querySql: SqlFragment;
+	if (useInheritance) {
+		if (includeCache && cacheUnionSql) {
+			querySql = sql`
+				WITH RECURSIVE
+					cache_union AS (
+						${cacheUnionSql}
+					),
+					version_descriptor_base AS (
+						SELECT
+							json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+							json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+						FROM ${descriptorTable} AS isc_v
+						WHERE isc_v.inheritance_delete_marker = 0
+					),
+					version_inheritance(version_id, ancestor_version_id) AS (
+						SELECT
+							vdb.version_id,
+							vdb.inherits_from_version_id
+						FROM version_descriptor_base vdb
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+
+						UNION
+
+						SELECT
+							vir.version_id,
+							vdb.inherits_from_version_id
+						FROM version_inheritance vir
+						JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+					),
+					version_parent AS (
+						SELECT
+							vdb.version_id,
+							vdb.inherits_from_version_id AS parent_version_id
+						FROM version_descriptor_base vdb
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+					)
+				SELECT DISTINCT * FROM (
+					${unionSql}
+				)
+			`;
+		} else {
+			querySql = sql`
+				WITH RECURSIVE
+					version_descriptor_base AS (
+						SELECT
+							json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+							json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+						FROM ${descriptorTable} AS isc_v
+						WHERE isc_v.inheritance_delete_marker = 0
+					),
+					version_inheritance(version_id, ancestor_version_id) AS (
+						SELECT
+							vdb.version_id,
+							vdb.inherits_from_version_id
+						FROM version_descriptor_base vdb
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+
+						UNION
+
+						SELECT
+							vir.version_id,
+							vdb.inherits_from_version_id
+						FROM version_inheritance vir
+						JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+					),
+					version_parent AS (
+						SELECT
+							vdb.version_id,
+							vdb.inherits_from_version_id AS parent_version_id
+						FROM version_descriptor_base vdb
+						WHERE vdb.inherits_from_version_id IS NOT NULL
+					)
+				SELECT DISTINCT * FROM (
+					${unionSql}
+				)
+			`;
+		}
+	} else if (includeCache && cacheUnionSql) {
+		querySql = sql`
+			WITH cache_union AS (
+				${cacheUnionSql}
+			)
+			SELECT DISTINCT * FROM (
+				${unionSql}
+			)
+		`;
+	} else {
+		querySql = sql`
+			SELECT DISTINCT * FROM (
+				${unionSql}
+			)
+		`;
+	}
+
+	return sql`
+		(
+		${querySql}
+		) AS ${sql.id(alias)}
+	`.toOperationNode();
+}
+
+function buildTransactionBranch(args: { schemaKey?: string }): SqlFragment {
+	const schemaFilter = args.schemaKey
+		? sql`WHERE txn.schema_key = ${args.schemaKey}`
+		: sql``;
 	return sql`
 		SELECT
 			'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
@@ -331,11 +517,14 @@ function buildTransactionBranch(schemaKey: string): SqlFragment {
 			ws_txn.entity_id = txn.entity_id AND
 			ws_txn.schema_key = txn.schema_key AND
 			ws_txn.version_id = txn.version_id
-		WHERE txn.schema_key = ${schemaKey}
+		${schemaFilter}
 	`;
 }
 
-function buildUntrackedBranch(schemaKey: string): SqlFragment {
+function buildUntrackedBranch(args: { schemaKey?: string }): SqlFragment {
+	const schemaFilter = args.schemaKey
+		? sql`AND u.schema_key = ${args.schemaKey}`
+		: sql``;
 	return sql`
 		SELECT
 			'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
@@ -364,7 +553,7 @@ function buildUntrackedBranch(schemaKey: string): SqlFragment {
 			(u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
 			(u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
 		)
-		AND u.schema_key = ${schemaKey}
+		${schemaFilter}
 		AND NOT EXISTS (
 			SELECT 1 FROM internal_transaction_state t
 			WHERE t.version_id = u.version_id
@@ -375,10 +564,12 @@ function buildUntrackedBranch(schemaKey: string): SqlFragment {
 	`;
 }
 
-function buildCacheBranch(
-	schemaKey: string,
-	cacheTable: SqlFragment
-): SqlFragment {
+function buildCacheBranch(args: {
+	schemaKey?: string;
+	cacheTable: SqlFragment;
+}): SqlFragment {
+	const { schemaKey, cacheTable } = args;
+	const schemaFilter = schemaKey ? sql`AND c.schema_key = ${schemaKey}` : sql``;
 	return sql`
 		SELECT
 			'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
@@ -408,7 +599,7 @@ function buildCacheBranch(
 			(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
 			(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
 		)
-		AND c.schema_key = ${schemaKey}
+		${schemaFilter}
 		AND NOT EXISTS (
 			SELECT 1 FROM internal_transaction_state t
 			WHERE t.version_id = c.version_id
@@ -426,10 +617,14 @@ function buildCacheBranch(
 	`;
 }
 
-function buildCacheInheritanceBranch(
-	schemaKey: string,
-	cacheTable: SqlFragment
-): SqlFragment {
+function buildCacheInheritanceBranch(args: {
+	schemaKey?: string;
+	cacheTable: SqlFragment;
+}): SqlFragment {
+	const { schemaKey, cacheTable } = args;
+	const schemaFilter = schemaKey
+		? sql`AND isc.schema_key = ${schemaKey}`
+		: sql``;
 	return sql`
 		SELECT
 			'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
@@ -456,17 +651,17 @@ function buildCacheInheritanceBranch(
 			ws_child.entity_id = isc.entity_id AND
 			ws_child.schema_key = isc.schema_key AND
 			ws_child.version_id = vi.version_id
-		LEFT JOIN internal_state_writer ws_parent ON
-			ws_parent.file_id = isc.file_id AND
-			ws_parent.entity_id = isc.entity_id AND
-			ws_parent.schema_key = isc.schema_key AND
-			ws_parent.version_id = isc.version_id
-		WHERE isc.inheritance_delete_marker = 0
-			AND isc.snapshot_content IS NOT NULL
-			AND isc.schema_key = ${schemaKey}
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_transaction_state t
-			WHERE t.version_id = vi.version_id
+			LEFT JOIN internal_state_writer ws_parent ON
+				ws_parent.file_id = isc.file_id AND
+				ws_parent.entity_id = isc.entity_id AND
+				ws_parent.schema_key = isc.schema_key AND
+				ws_parent.version_id = isc.version_id
+			WHERE isc.inheritance_delete_marker = 0
+				AND isc.snapshot_content IS NOT NULL
+				${schemaFilter}
+			AND NOT EXISTS (
+				SELECT 1 FROM internal_transaction_state t
+				WHERE t.version_id = vi.version_id
 				AND t.file_id = isc.file_id
 				AND t.schema_key = isc.schema_key
 				AND t.entity_id = isc.entity_id
@@ -489,13 +684,17 @@ function buildCacheInheritanceBranch(
 }
 
 function buildInheritedUntrackedBranch(args: {
-	schemaKey: string;
-	cacheTable: SqlFragment;
+	schemaKey?: string;
+	cacheTable?: SqlFragment;
 	includeCache: boolean;
 }): SqlFragment {
 	const { schemaKey, cacheTable, includeCache } = args;
-	const cachePrune = includeCache
-		? sql`
+	const schemaFilter = schemaKey
+		? sql`AND unt.schema_key = ${schemaKey}`
+		: sql``;
+	const cachePrune =
+		includeCache && cacheTable
+			? sql`
 			AND NOT EXISTS (
 				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
@@ -504,7 +703,7 @@ function buildInheritedUntrackedBranch(args: {
 					AND child_isc.entity_id = unt.entity_id
 			)
 		`
-		: sql``;
+			: sql``;
 
 	return sql`
 		SELECT
@@ -538,7 +737,7 @@ function buildInheritedUntrackedBranch(args: {
 			ws_parent.version_id = unt.version_id
 		WHERE unt.inheritance_delete_marker = 0
 			AND unt.snapshot_content IS NOT NULL
-			AND unt.schema_key = ${schemaKey}
+			${schemaFilter}
 		AND NOT EXISTS (
 			SELECT 1 FROM internal_transaction_state t
 			WHERE t.version_id = vi.version_id
@@ -558,13 +757,17 @@ function buildInheritedUntrackedBranch(args: {
 }
 
 function buildInheritedTxnBranch(args: {
-	schemaKey: string;
-	cacheTable: SqlFragment;
+	schemaKey?: string;
+	cacheTable?: SqlFragment;
 	includeCache: boolean;
 }): SqlFragment {
 	const { schemaKey, cacheTable, includeCache } = args;
-	const cachePrune = includeCache
-		? sql`
+	const schemaFilter = schemaKey
+		? sql`AND txn.schema_key = ${schemaKey}`
+		: sql``;
+	const cachePrune =
+		includeCache && cacheTable
+			? sql`
 			AND NOT EXISTS (
 				SELECT 1 FROM ${cacheTable} child_isc
 				WHERE child_isc.version_id = vi.version_id
@@ -573,7 +776,7 @@ function buildInheritedTxnBranch(args: {
 					AND child_isc.entity_id = txn.entity_id
 			)
 		`
-		: sql``;
+			: sql``;
 
 	return sql`
 		SELECT
@@ -607,7 +810,7 @@ function buildInheritedTxnBranch(args: {
 			ws_parent.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
 			AND txn.snapshot_content IS NOT NULL
-			AND txn.schema_key = ${schemaKey}
+			${schemaFilter}
 		AND NOT EXISTS (
 			SELECT 1 FROM internal_transaction_state child_txn
 			WHERE child_txn.version_id = vi.version_id

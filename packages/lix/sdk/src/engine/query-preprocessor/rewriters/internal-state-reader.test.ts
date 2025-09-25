@@ -8,6 +8,7 @@ import {
 import { withWriterKey } from "../../../state/writer.js";
 import { insertTransactionState } from "../../../state/transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../../engine/functions/timestamp.js";
+import { updateStateCache } from "../../../state/cache/update-state-cache.js";
 import { createInternalStateRewriter } from "./internal-state-reader.js";
 import { SqliteQueryCompiler } from "kysely";
 
@@ -664,6 +665,69 @@ test("prunes cache query if cache table for schema doesn't exist yet", async () 
 	const { rows } = lix.engine!.executeQuerySync(compiled);
 
 	expect(rows).toHaveLength(0);
+
+	await lix.close();
+});
+
+test("unions cache tables if no schema key is provided", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	const rewriter = createInternalStateRewriter({ engine: lix.engine! });
+
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [
+			{
+				id: "cache-change-a",
+				entity_id: "cache-entity-a",
+				schema_key: "cache_schema_a",
+				schema_version: "1.0",
+				file_id: "file_a",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ value: "a" }),
+				created_at: "1970-01-01T00:00:00.000Z",
+			},
+			{
+				id: "cache-change-b",
+				entity_id: "cache-entity-b",
+				schema_key: "cache_schema_b",
+				schema_version: "1.0",
+				file_id: "file_b",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify({ value: "b" }),
+				created_at: "1970-01-01T00:00:00.000Z",
+			},
+		],
+		commit_id: "test-commit",
+		version_id: "global",
+	});
+
+	const original = internalQueryBuilder
+		.selectFrom("internal_state_reader")
+		.selectAll()
+		.compile();
+
+	const rewritten = rewriter(original.query);
+	const compiled = sqliteCompiler.compileQuery(rewritten, original.queryId);
+
+	const { rows } = lix.engine!.executeQuerySync(compiled);
+
+	const cacheEntities = rows.filter(
+		(row: any) =>
+			row.entity_id === "cache-entity-a" || row.entity_id === "cache-entity-b"
+	);
+	const entityIdSet = new Set(cacheEntities.map((row: any) => row.entity_id));
+	expect(entityIdSet.has("cache-entity-a")).toBe(true);
+	expect(entityIdSet.has("cache-entity-b")).toBe(true);
 
 	await lix.close();
 });
