@@ -30,6 +30,7 @@ export declare const {
 	deLocalizeHref,
 	localizeUrl,
 	deLocalizeUrl,
+	shouldRedirect,
 	extractLocaleFromUrl,
 	extractLocaleFromRequest,
 	extractLocaleFromRequestAsync,
