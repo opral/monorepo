@@ -1,0 +1,8 @@
+{
+  "name": "@lix-js/sdk-sqlparser",
+  "private": true,
+  "scripts": {
+    "build": "wasm-pack build --target web --release --out-dir pkg",
+    "test": "wasm-pack test --headless --chrome"
+  }
+}
