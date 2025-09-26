@@ -43,7 +43,7 @@ test("creates tracked entity with pending change", async () => {
 	});
 
 	const results = await lixInternalDb
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.where("entity_id", "=", "test-insert")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
@@ -126,7 +126,7 @@ test("creates tracked entity with pending change", async () => {
 		.execute();
 
 	const resultingUnderlyingStateRaw = await lixInternalDb
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.selectAll()
 		.execute();
 
@@ -1130,7 +1130,7 @@ test("inheritance works with resolved view before committing", async () => {
 
 	// Query resolved view for the active version - should inherit the global entity
 	const resolvedEntitiesForActiveVersion = await lixInternalDb
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test-global-key")

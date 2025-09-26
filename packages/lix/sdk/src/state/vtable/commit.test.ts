@@ -1494,7 +1494,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.select(["version_id", "entity_id", "schema_key"])
 		.where("entity_id", "=", "mock-global-entity")
 		.orderBy("version_id", "asc")

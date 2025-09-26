@@ -183,7 +183,7 @@ simulationTest(
 
 		// Internal query SHOULD trigger clear
 		await (lix.db as any)
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.selectAll()
 			.limit(1)
 			.execute();

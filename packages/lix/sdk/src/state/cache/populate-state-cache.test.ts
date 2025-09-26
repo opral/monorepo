@@ -369,7 +369,7 @@ test("inheritance is queryable from the resolved view after population", async (
 	const resolvedContents = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.select([
 			"entity_id",
 			"schema_key",
@@ -399,21 +399,21 @@ test("inheritance is queryable from the resolved view after population", async (
 	expect(entityA?.version_id).toBe(versionC.id); // Stored under version_c
 	expect(entityA?.inherited_from_version_id).toBe(versionA.id); // But inherited from version_a
 	// snapshot_content is already a parsed object from the sql`json()` function
-	expect((entityA?.snapshot_content as any).value).toBe("from_version_a");
+	expect((entityA?.snapshot_content as any)?.value).toBe("from_version_a");
 
 	// Verify entity_b is cached (inherited from version_b)
 	const entityB = resolvedContents.find((r: any) => r.entity_id === "entity_b");
 	expect(entityB).toBeTruthy();
 	expect(entityB?.version_id).toBe(versionC.id); // Stored under version_c
 	expect(entityB?.inherited_from_version_id).toBe(versionB.id); // But inherited from version_b
-	expect((entityB?.snapshot_content as any).value).toBe("from_version_b");
+	expect((entityB?.snapshot_content as any)?.value).toBe("from_version_b");
 
 	// Verify entity_c is cached (direct from version_c)
 	const entityC = resolvedContents.find((r: any) => r.entity_id === "entity_c");
 	expect(entityC).toBeTruthy();
 	expect(entityC?.version_id).toBe(versionC.id); // Stored under version_c
 	expect(entityC?.inherited_from_version_id).toBeNull(); // Direct, not inherited
-	expect((entityC?.snapshot_content as any).value).toBe("from_version_c");
+	expect((entityC?.snapshot_content as any)?.value).toBe("from_version_c");
 });
 
 test("global version entities are populated when populating child versions", async () => {
@@ -469,7 +469,7 @@ test("global version entities are populated when populating child versions", asy
 
 	expect(beforeCacheMiss).toHaveLength(1);
 	const originalChangeId = beforeCacheMiss[0]?.change_id;
-	expect((beforeCacheMiss[0]?.snapshot_content as any).value).toBe(
+	expect((beforeCacheMiss[0]?.snapshot_content as any)?.value).toBe(
 		"from_global"
 	);
 
@@ -498,7 +498,7 @@ test("global version entities are populated when populating child versions", asy
 	// Should still see the entity with the same change_id
 	expect(afterCachePopulation).toHaveLength(1);
 	expect(afterCachePopulation[0]?.change_id).toBe(originalChangeId);
-	expect((afterCachePopulation[0]?.snapshot_content as any).value).toBe(
+	expect((afterCachePopulation[0]?.snapshot_content as any)?.value).toBe(
 		"from_global"
 	);
 
@@ -522,7 +522,7 @@ test("global version entities are populated when populating child versions", asy
 	// Inheritance is resolved at read time via the resolved view.
 	// Verify the child version sees the inherited row from global.
 	const resolvedInherited = await db
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
@@ -539,7 +539,7 @@ test("global version entities are populated when populating child versions", asy
 	expect(resolvedInherited[0]?.version_id).toBe(testVersion.id);
 	expect(resolvedInherited[0]?.inherited_from_version_id).toBe("global");
 	expect(resolvedInherited[0]?.change_id).toBe(originalChangeId);
-	expect((resolvedInherited[0]?.snapshot_content as any).value).toBe(
+	expect((resolvedInherited[0]?.snapshot_content as any)?.value).toBe(
 		"from_global"
 	);
 });

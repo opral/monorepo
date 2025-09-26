@@ -30,7 +30,7 @@ export function invalidateStaleStateCacheMemo(args: {
 function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
 	const res = engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", CACHE_SCHEMA_KEY)
 			.where("version_id", "=", "global")

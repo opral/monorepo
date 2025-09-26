@@ -160,7 +160,7 @@ bench("query through resolved_state_all view", async () => {
 
 	// Query through the resolved state view which has json() conversion
 	await db
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.select([
 			"entity_id",
 			"schema_key",
@@ -226,7 +226,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 
 	// This mimics the query from deletionReconciliation
 	await db
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.select([
 			"_pk",
 			sql`json_extract(snapshot_content, '$.entity_id')`.as("entity_id"),

@@ -75,7 +75,7 @@ export function nextSequenceNumberSync(args: {
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_sequence_number")
 			.where("schema_key", "=", "lix_key_value")
 			.where("version_id", "=", "global")

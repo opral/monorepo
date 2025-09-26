@@ -23,7 +23,7 @@ export function uuidV7Sync(args: {
 	if (isDeterministicModeSync({ engine })) {
 		// Check if uuid_v7 is disabled in the config
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)

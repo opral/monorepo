@@ -105,7 +105,7 @@ export function commit(args: {
 	const loadMergedVersion = (version_id: string): LixVersion => {
 		const [desc] = engine.executeSync(
 			db
-				.selectFrom("internal_resolved_state_all")
+				.selectFrom("internal_state_vtable")
 				.where("schema_key", "=", "lix_version_descriptor")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
@@ -118,7 +118,7 @@ export function commit(args: {
 		const d = JSON.parse(desc.snapshot_content) as any;
 		const [tip] = engine.executeSync(
 			db
-				.selectFrom("internal_resolved_state_all")
+				.selectFrom("internal_state_vtable")
 				.where("schema_key", "=", "lix_version_tip")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
@@ -176,7 +176,7 @@ export function commit(args: {
 	// Get active accounts for change_author records
 	const activeAccounts = engine.executeSync(
 		db
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "lix_active_account")
 			.where("version_id", "=", "global")
 			.where("snapshot_content", "is not", null)
@@ -210,7 +210,7 @@ export function commit(args: {
 
 		const [workingCommitRow] = engine.executeSync(
 			db
-				.selectFrom("internal_resolved_state_all")
+				.selectFrom("internal_state_vtable")
 				.where("schema_key", "=", "lix_commit")
 				.where("entity_id", "=", versionData.working_commit_id)
 				.where("snapshot_content", "is not", null)
@@ -313,7 +313,7 @@ export function commit(args: {
 				// Find existing working change set elements to delete
 				const existingEntities = engine.executeSync(
 					db
-						.selectFrom("internal_resolved_state_all")
+						.selectFrom("internal_state_vtable")
 						.select([
 							"_pk",
 							"entity_id",
