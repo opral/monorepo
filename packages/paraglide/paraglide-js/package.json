@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.3.2",
+	"version": "2.4.0",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -39,7 +39,7 @@
 	},
 	"dependencies": {
 		"@inlang/recommend-sherlock": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "2.4.9",
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
