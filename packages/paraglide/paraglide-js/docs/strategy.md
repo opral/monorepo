@@ -26,21 +26,27 @@ compile({
 Here are some common strategy patterns and when to use them:
 
 ### URL as source of truth (default behavior)
+
 ```js
-strategy: ["url", "baseLocale"]
+strategy: ["url", "baseLocale"];
 ```
+
 Use this when the URL should always determine the locale. The URL pattern (with wildcards) will always resolve, making `baseLocale` a safety fallback only.
 
 ### Prioritize user preferences
+
 ```js
-strategy: ["localStorage", "cookie", "url", "baseLocale"]
+strategy: ["localStorage", "cookie", "url", "baseLocale"];
 ```
+
 Use this when you want returning visitors to see content in their previously selected language, regardless of the URL they land on. The URL only determines locale if no preference is stored.
 
 ### Automatic language detection with persistent override
+
 ```js
-strategy: ["localStorage", "preferredLanguage", "url", "baseLocale"]
+strategy: ["localStorage", "preferredLanguage", "url", "baseLocale"];
 ```
+
 Use this when you want first-time visitors to see content in their browser's language but still allow manual language changes to persist via `localStorage`.
 
 The fallback chain flows left to right: `localStorage → preferredLanguage → url → baseLocale`.
@@ -109,6 +115,7 @@ The strategy attempts to match locale in order of user preference:
 2. Falls back to base language codes (e.g., "en")
 
 For example:
+
 - If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
 - If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
 
@@ -153,16 +160,40 @@ If you want to prioritize user preferences (from localStorage, cookies, etc.) ov
 
 ```js
 // ✅ User preference is checked first
-strategy: ["localStorage", "preferredLanguage", "url"]
+strategy: ["localStorage", "preferredLanguage", "url"];
 
 // ❌ localStorage will never be checked because URL always resolves
-strategy: ["url", "localStorage", "preferredLanguage"]
+strategy: ["url", "localStorage", "preferredLanguage"];
 ```
+
 </doc-callout>
+
+#### Client-side redirects
+
+The server-side `paraglideMiddleware()` uses the `shouldRedirect()` helper to
+keep URLs and locales in sync. Single-page apps can call the same helper on the
+client to mirror that behaviour.
+
+```ts
+import { redirect } from "@tanstack/router";
+import { shouldRedirect } from "./paraglide/runtime.js";
+
+export const beforeLoad = async ({ location }) => {
+	const decision = await shouldRedirect({ url: location.href });
+
+	if (decision.shouldRedirect) {
+		throw redirect({ to: decision.redirectUrl.href });
+	}
+};
+```
+
+`shouldRedirect()` accepts either a `Request` (server) or a URL (client). It
+evaluates your configured strategies in order, returning both the winning locale
+and the canonical URL so you never have to duplicate redirect logic.
 
 #### URL Patterns Configuration
 
-The `urlPatterns` configuration determines how the `url` strategy matches and resolves locales from URLs. 
+The `urlPatterns` configuration determines how the `url` strategy matches and resolves locales from URLs.
 
 #### Locale prefixing
 
@@ -181,7 +212,7 @@ compile({
 			pattern: "/:path(.*)?",
 			localized: [
 				["de", "/de/:path(.*)?"],
-                                // ✅ make sure to match the least specific path last
+				// ✅ make sure to match the least specific path last
 				["en", "/:path(.*)?"],
 			],
 		},
@@ -238,7 +269,6 @@ compile({
 });
 ```
 
-
 #### Domain-based localization
 
 ```
@@ -255,10 +285,10 @@ compile({
 		// Include the localhost domain as otherwise the pattern will
 		// always match and the path won't be localized
 		{
-			pattern: 'http://localhost::port?/:path(.*)?',
+			pattern: "http://localhost::port?/:path(.*)?",
 			localized: [
-				["en", 'http://localhost::port?/en/:path(.*)?'],
-				["de", 'http://localhost::port?/de/:path(.*)?']
+				["en", "http://localhost::port?/en/:path(.*)?"],
+				["de", "http://localhost::port?/de/:path(.*)?"],
 			],
 		},
 		// production pattern which uses subdomains like de.example.com
@@ -303,10 +333,10 @@ compile({
 
 This configuration enables:
 
-| Original URL | Localized URL (EN) | Localized URL (DE) | Notes |
-|-------------------|-------------------|-------------------|-------|
-| `/about` | `/shop/en/about` | `/shop/de/about` | Path without base path gets base path added |
-| `/shop/about` | `/shop/en/about` | `/shop/de/about` | Path with base path gets properly localized |
+| Original URL  | Localized URL (EN) | Localized URL (DE) | Notes                                       |
+| ------------- | ------------------ | ------------------ | ------------------------------------------- |
+| `/about`      | `/shop/en/about`   | `/shop/de/about`   | Path without base path gets base path added |
+| `/shop/about` | `/shop/en/about`   | `/shop/de/about`   | Path with base path gets properly localized |
 
 The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
 
@@ -344,15 +374,15 @@ compile({
 				// this will be matched first and the catch all
 				// pattern will not be triggered and a redirect
 				// from /de/unavailable to /de/404 will be triggered
-				["de", "/de/unavailable"]
+				["de", "/de/unavailable"],
 			],
 		},
 		// Path that's only available in English
 		{
 			pattern: "/specific-path",
 			localized: [
-				["en", "/specific-path"],     // Normal path in English
-				["de", "/de/404"],            // Redirects to 404 in German
+				["en", "/specific-path"], // Normal path in English
+				["de", "/de/404"], // Redirects to 404 in German
 			],
 		},
 		// Catch-all pattern for other routes
@@ -392,41 +422,41 @@ URL patterns are evaluated in the order they appear in the `urlPatterns` array. 
 
 ```js
 urlPatterns: [
-  // ❌ INCORRECT ORDER: The wildcard pattern will match everything,
-  // so the specific pattern will never be reached
-  {
-    pattern: "https://example.com/:path(.*)?", // This will match ANY path
-    localized: [
-      ["en", "https://example.com/:path(.*)?"],
-      ["de", "https://example.com/de/:path(.*)?"],
-    ],
-  },
-  {
-    pattern: "https://example.com/blog/:id", // This will never be reached
-    localized: [
-      ["en", "https://example.com/blog/:id"],
-      ["de", "https://example.com/de/blog/:id"],
-    ],
-  },
-]
+	// ❌ INCORRECT ORDER: The wildcard pattern will match everything,
+	// so the specific pattern will never be reached
+	{
+		pattern: "https://example.com/:path(.*)?", // This will match ANY path
+		localized: [
+			["en", "https://example.com/:path(.*)?"],
+			["de", "https://example.com/de/:path(.*)?"],
+		],
+	},
+	{
+		pattern: "https://example.com/blog/:id", // This will never be reached
+		localized: [
+			["en", "https://example.com/blog/:id"],
+			["de", "https://example.com/de/blog/:id"],
+		],
+	},
+];
 
 // ✅ CORRECT ORDER: Specific patterns first, then more general patterns
 urlPatterns: [
-  {
-    pattern: "https://example.com/blog/:id", // Specific pattern first
-    localized: [
-      ["en", "https://example.com/blog/:id"],
-      ["de", "https://example.com/de/blog/:id"],
-    ],
-  },
-  {
-    pattern: "https://example.com/:path(.*)?", // General pattern last
-    localized: [
-      ["en", "https://example.com/:path(.*)?"],
-      ["de", "https://example.com/de/:path(.*)?"],
-    ],
-  },
-]
+	{
+		pattern: "https://example.com/blog/:id", // Specific pattern first
+		localized: [
+			["en", "https://example.com/blog/:id"],
+			["de", "https://example.com/de/blog/:id"],
+		],
+	},
+	{
+		pattern: "https://example.com/:path(.*)?", // General pattern last
+		localized: [
+			["en", "https://example.com/:path(.*)?"],
+			["de", "https://example.com/de/:path(.*)?"],
+		],
+	},
+];
 ```
 
 ##### Localized pattern order matters too
@@ -479,42 +509,43 @@ For a multi-tenant application with specific routes, proper pattern ordering is 
 
 ```js
 compile({
-  project: "./project.inlang",
-  outdir: "./src/paraglide",
-  strategy: ["url", "cookie"],
-  urlPatterns: [
-    // Specific product routes first
-    {
-      pattern: "https://:tenant.example.com/products/:id",
-      localized: [
-        ["en", "https://:tenant.example.com/products/:id"],
-        ["de", "https://:tenant.example.com/produkte/:id"],
-        ["fr", "https://:tenant.example.com/produits/:id"],
-      ],
-    },
-    // Specific category routes next
-    {
-      pattern: "https://:tenant.example.com/categories/:name",
-      localized: [
-        ["en", "https://:tenant.example.com/categories/:name"],
-        ["de", "https://:tenant.example.com/kategorien/:name"],
-        ["fr", "https://:tenant.example.com/categories/:name"],
-      ],
-    },
-    // General wildcard pattern last
-    {
-      pattern: "https://:tenant.example.com/:path(.*)?",
-      localized: [
-        ["en", "https://:tenant.example.com/:path(.*)?"],
-        ["de", "https://:tenant.example.com/de/:path(.*)?"],
-        ["fr", "https://:tenant.example.com/fr/:path(.*)?"],
-      ],
-    },
-  ],
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		// Specific product routes first
+		{
+			pattern: "https://:tenant.example.com/products/:id",
+			localized: [
+				["en", "https://:tenant.example.com/products/:id"],
+				["de", "https://:tenant.example.com/produkte/:id"],
+				["fr", "https://:tenant.example.com/produits/:id"],
+			],
+		},
+		// Specific category routes next
+		{
+			pattern: "https://:tenant.example.com/categories/:name",
+			localized: [
+				["en", "https://:tenant.example.com/categories/:name"],
+				["de", "https://:tenant.example.com/kategorien/:name"],
+				["fr", "https://:tenant.example.com/categories/:name"],
+			],
+		},
+		// General wildcard pattern last
+		{
+			pattern: "https://:tenant.example.com/:path(.*)?",
+			localized: [
+				["en", "https://:tenant.example.com/:path(.*)?"],
+				["de", "https://:tenant.example.com/de/:path(.*)?"],
+				["fr", "https://:tenant.example.com/fr/:path(.*)?"],
+			],
+		},
+	],
 });
 ```
 
 With this configuration:
+
 1. Product URLs like `https://acme.example.com/products/123` will use the specific product pattern
 2. Category URLs like `https://acme.example.com/categories/electronics` will use the specific category pattern
 3. All other URLs will fall back to the general pattern
@@ -556,21 +587,21 @@ To avoid this, use `AsyncLocaleStorage` in Node, or its equivalent for other ser
 
 ```js
 import { m } from "./paraglide/messages.js";
-import {overwriteGetLocale, baseLocale } from "./paraglide/runtime.js";
+import { overwriteGetLocale, baseLocale } from "./paraglide/runtime.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 const localeStorage = new AsyncLocalStorage();
 
 overwriteGetLocale(() => {
-  //any calls to getLocale() in the async local storage context will return the stored locale
-  return localeStorage.getStore() ?? baseLocale;
+	//any calls to getLocale() in the async local storage context will return the stored locale
+	return localeStorage.getStore() ?? baseLocale;
 });
 
 export function onRequest(request, next) {
-  const locale = detectLocale(request); //parse the locale from headers, cookies, etc.
-  // set the async locale storage for the current request
-  // to the detected locale and let the request continue
-  // in that context
-  return localeStorage.run(locale, async () => await next());
+	const locale = detectLocale(request); //parse the locale from headers, cookies, etc.
+	// set the async locale storage for the current request
+	// to the detected locale and let the request continue
+	// in that context
+	return localeStorage.run(locale, async () => await next());
 }
 ```
 
@@ -605,36 +636,36 @@ import { defineCustomClientStrategy } from "./paraglide/runtime.js";
 
 // Example 1: sessionStorage strategy
 defineCustomClientStrategy("custom-sessionStorage", {
-  getLocale: () => {
-    return sessionStorage.getItem("user-locale") ?? undefined;
-  },
-  setLocale: (locale) => {
-    sessionStorage.setItem("user-locale", locale);
-  }
+	getLocale: () => {
+		return sessionStorage.getItem("user-locale") ?? undefined;
+	},
+	setLocale: (locale) => {
+		sessionStorage.setItem("user-locale", locale);
+	},
 });
 
 // Example 2: Query parameter strategy (answers the original question!)
 defineCustomClientStrategy("custom-queryParam", {
-  getLocale: () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('locale') ?? undefined;
-  },
-  setLocale: (locale) => {
-    const url = new URL(window.location);
-    url.searchParams.set('locale', locale);
-    window.history.replaceState({}, '', url.toString());
-  }
+	getLocale: () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get("locale") ?? undefined;
+	},
+	setLocale: (locale) => {
+		const url = new URL(window.location);
+		url.searchParams.set("locale", locale);
+		window.history.replaceState({}, "", url.toString());
+	},
 });
 
 // Example 3: URL hash strategy
 defineCustomClientStrategy("custom-hash", {
-  getLocale: () => {
-    const hash = window.location.hash.slice(1); // Remove #
-    return hash.startsWith('lang=') ? hash.replace('lang=', '') : undefined;
-  },
-  setLocale: (locale) => {
-    window.location.hash = `lang=${locale}`;
-  }
+	getLocale: () => {
+		const hash = window.location.hash.slice(1); // Remove #
+		return hash.startsWith("lang=") ? hash.replace("lang=", "") : undefined;
+	},
+	setLocale: (locale) => {
+		window.location.hash = `lang=${locale}`;
+	},
 });
 ```
 
@@ -653,34 +684,34 @@ import { defineCustomServerStrategy } from "./paraglide/runtime.js";
 
 // Example 1: Custom header strategy
 defineCustomServerStrategy("custom-header", {
-  getLocale: (request) => {
-    const locale = request?.headers.get("X-Custom-Locale");
-    return locale ?? undefined;
-  }
+	getLocale: (request) => {
+		const locale = request?.headers.get("X-Custom-Locale");
+		return locale ?? undefined;
+	},
 });
 
 // Example 2: Async database strategy
 defineCustomServerStrategy("custom-database", {
-  getLocale: async (request) => {
-    const userId = extractUserIdFromRequest(request);
-    if (!userId) return undefined;
+	getLocale: async (request) => {
+		const userId = extractUserIdFromRequest(request);
+		if (!userId) return undefined;
 
-    try {
-      // This async call is supported!
-      return await getUserLocaleFromDatabase(userId);
-    } catch (error) {
-      console.warn("Failed to fetch user locale:", error);
-      return undefined;
-    }
-  }
+		try {
+			// This async call is supported!
+			return await getUserLocaleFromDatabase(userId);
+		} catch (error) {
+			console.warn("Failed to fetch user locale:", error);
+			return undefined;
+		}
+	},
 });
 
 // Example 3: Query parameter on server (for SSR)
 defineCustomServerStrategy("custom-serverQuery", {
-  getLocale: (request) => {
-    const url = new URL(request.url);
-    return url.searchParams.get('locale') ?? undefined;
-  }
+	getLocale: (request) => {
+		const url = new URL(request.url);
+		return url.searchParams.get("locale") ?? undefined;
+	},
 });
 ```
 
@@ -690,46 +721,53 @@ Here's a complete example showing how to implement user preference strategies on
 
 ```js
 // File: src/locale-strategies.js
-import { defineCustomClientStrategy, defineCustomServerStrategy } from "./paraglide/runtime.js";
-import { getUserLocale, setUserLocale, extractUserIdFromRequest } from "./services/userService.js";
+import {
+	defineCustomClientStrategy,
+	defineCustomServerStrategy,
+} from "./paraglide/runtime.js";
+import {
+	getUserLocale,
+	setUserLocale,
+	extractUserIdFromRequest,
+} from "./services/userService.js";
 
 // Client-side strategy - works with user preferences in browser
 defineCustomClientStrategy("custom-userPreference", {
-  getLocale: () => {
-    // Get from memory cache, framework state store, or return undefined to fall back
-    return window.__userLocale ?? undefined;
-  },
-  setLocale: async (locale) => {
-    try {
-      // Update user preference in database via API
-      await setUserLocale(locale);
-      window.__userLocale = locale;
-      
-      // Optional: Also update URL query param for immediate reflection
-      const url = new URL(window.location);
-      url.searchParams.set('locale', locale);
-      window.history.replaceState({}, '', url.toString());
-    } catch (error) {
-      console.warn("Failed to save user locale preference:", error);
-      // Strategy can still succeed even if save fails
-    }
-  }
+	getLocale: () => {
+		// Get from memory cache, framework state store, or return undefined to fall back
+		return window.__userLocale ?? undefined;
+	},
+	setLocale: async (locale) => {
+		try {
+			// Update user preference in database via API
+			await setUserLocale(locale);
+			window.__userLocale = locale;
+
+			// Optional: Also update URL query param for immediate reflection
+			const url = new URL(window.location);
+			url.searchParams.set("locale", locale);
+			window.history.replaceState({}, "", url.toString());
+		} catch (error) {
+			console.warn("Failed to save user locale preference:", error);
+			// Strategy can still succeed even if save fails
+		}
+	},
 });
 
 // Server-side strategy - async database lookup
 defineCustomServerStrategy("custom-userPreference", {
-  getLocale: async (request) => {
-    const userId = extractUserIdFromRequest(request);
-    if (!userId) return undefined;
+	getLocale: async (request) => {
+		const userId = extractUserIdFromRequest(request);
+		if (!userId) return undefined;
 
-    try {
-      // Async database call - this is now fully supported!
-      return await getUserLocale(userId);
-    } catch (error) {
-      console.warn("Failed to fetch user locale from database:", error);
-      return undefined; // Fallback to next strategy
-    }
-  }
+		try {
+			// Async database call - this is now fully supported!
+			return await getUserLocale(userId);
+		} catch (error) {
+			console.warn("Failed to fetch user locale from database:", error);
+			return undefined; // Fallback to next strategy
+		}
+	},
 });
 ```
 
@@ -738,7 +776,7 @@ defineCustomServerStrategy("custom-userPreference", {
 Custom strategies offer several advantages over the traditional `overwriteGetLocale()` approach:
 
 - **Composability**: They can be combined with built-in strategies in a single strategy array
-- **Priority handling**: They respect the strategy order, allowing fallbacks to other strategies  
+- **Priority handling**: They respect the strategy order, allowing fallbacks to other strategies
 - **Framework integration**: Easier to package and distribute with framework adapters
 - **Type safety**: Better TypeScript support for custom strategy handlers
 - **Error isolation**: If a custom strategy fails, execution continues with the next strategy
@@ -747,28 +785,32 @@ Custom strategies offer several advantages over the traditional `overwriteGetLoc
 
 #### Important Notes
 
-**Async Support**: 
+**Async Support**:
+
 - ✅ Server-side strategies support async `getLocale` methods
 - ❌ Client-side strategies must have synchronous `getLocale` methods (but `setLocale` can be async)
 - ✅ When any custom strategy uses async `setLocale`, the main `setLocale()` function becomes async and page reloads wait for all async operations to complete
 - If you need async client-side locale detection, use the `overwriteGetLocale()` approach instead
 
-**Strategy Priority**: 
+**Strategy Priority**:
+
 - Custom strategies are processed in the order they appear in your `strategy` array
 - If a custom strategy returns `undefined`, the system falls back to the next strategy
 - Server-side: Custom strategies are checked first, then built-in strategies
 - Client-side: All strategies (custom and built-in) are processed in your defined order
 
-**Validation**: 
+**Validation**:
 Custom strategy names must start with `custom-` followed by at least one character. The name part after `custom-` can contain any characters including hyphens, underscores, etc.
 
 Valid examples:
+
 - `custom-sessionStorage`
-- `custom-user-preference` 
+- `custom-user-preference`
 - `custom-query_param`
 - `custom-database`
 
 Invalid examples:
+
 - `custom-` (no name after prefix)
 - `my-custom-strategy` (doesn't start with `custom-`)
 - `sessionStorage` (missing `custom-` prefix)
