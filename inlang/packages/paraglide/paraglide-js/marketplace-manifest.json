@@ -28,8 +28,9 @@
 			"/sveltekit": "./examples/sveltekit/README.md",
 			"/astro": "./examples/astro/README.md",
 			"/react-router": "./examples/react-router/README.md",
-			"/next-js": "./docs/getting-started/next-js.md",
-			"/other-frameworks": "./docs/getting-started/other-frameworks.md"
+			"/tanstack-router": "./examples/tanstack-router/README.md",
+			"/tanstack-start": "./examples/tanstack-start/README.md",
+			"/next-js": "./docs/getting-started/next-js.md"
 		},
 		"Usage": {
 			"/basics": "./docs/basics.md",
