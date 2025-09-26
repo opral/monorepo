@@ -24,6 +24,7 @@ export function isDeterministicModeSync(args: {
 	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): boolean {
 	const engine = args.engine;
+	const cacheRef = engine.runtimeCacheRef;
 	// Register hook listener for cache invalidation (only once per hooks instance)
 	const key = engine.hooks as unknown as object;
 	if (!hookListenersRegistered.has(key) && engine.hooks) {
@@ -37,7 +38,7 @@ export function isDeterministicModeSync(args: {
 					change.schema_key === "lix_key_value"
 				) {
 					// Invalidate cache when deterministic mode changes
-					deterministicModeCache.delete(engine.runtimeCacheRef);
+					deterministicModeCache.delete(cacheRef);
 					break;
 				}
 			}
@@ -45,13 +46,13 @@ export function isDeterministicModeSync(args: {
 	}
 
 	// Check cache first
-	if (deterministicModeCache.has(engine.runtimeCacheRef)) {
-		return deterministicModeCache.get(engine.runtimeCacheRef)!;
+	if (deterministicModeCache.has(cacheRef)) {
+		return deterministicModeCache.get(cacheRef)!;
 	}
 
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion
-	const [row] = args.engine.executeSync(
+	const [row] = engine.executeSync(
 		internalQueryBuilder
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
@@ -66,7 +67,7 @@ export function isDeterministicModeSync(args: {
 	const result = row?.enabled == true;
 
 	// Cache the result
-	deterministicModeCache.set(engine.runtimeCacheRef, result);
+	deterministicModeCache.set(cacheRef, result);
 
 	return result;
 }

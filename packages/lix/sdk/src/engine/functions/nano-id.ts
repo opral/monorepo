@@ -1,6 +1,6 @@
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixEngine } from "../boot.js";
-import { isDeterministicModeSync } from "./is-deterministic-mode.js";
+import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { sql } from "kysely";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { internalQueryBuilder } from "../internal-query-builder.js";
