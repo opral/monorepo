@@ -7,6 +7,8 @@ const require = createRequire(import.meta.url);
 
 const cliArgs = process.argv.slice(2);
 
+const pnpmBin = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+
 function consumeFlag(flag) {
 	const index = cliArgs.indexOf(flag);
 	if (index !== -1) {
@@ -28,8 +30,25 @@ async function runStep(label, action) {
 	await action();
 }
 
+function runCommand(command, args) {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, { stdio: "inherit" });
+		child.on("error", reject);
+		child.on("exit", (code) => {
+			if (code === 0) {
+				resolve();
+			} else {
+				reject(new Error(`${command} exited with code ${code ?? 1}`));
+			}
+		});
+	});
+}
+
 async function run() {
 	try {
+		await runStep("Building sql parser wasm", () =>
+			runCommand(pnpmBin, ["--filter", "@lix-js/sdk-sqlparser", "build"])
+		);
 		await runStep(
 			"Embedding sqlite.wasm",
 			() => import("./embed-sqlite-wasm.js")
