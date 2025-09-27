@@ -23,13 +23,14 @@
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
-			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md",
-			"/vite": "./examples/vite/README.md",
 			"/sveltekit": "./examples/sveltekit/README.md",
-			"/astro": "./examples/astro/README.md",
+			"/tanstack-router": "https://github.com/juliomuhlbauer/tanstack-router-i18n-paraglide",
+			"/tanstack-start": "https://github.com/juliomuhlbauer/tanstack-start-i18n-paraglide",
 			"/react-router": "./examples/react-router/README.md",
 			"/next-js": "./docs/getting-started/next-js.md",
-			"/other-frameworks": "./docs/getting-started/other-frameworks.md"
+			"/astro": "./examples/astro/README.md",
+			"/vite": "./examples/vite/README.md",
+			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md"
 		},
 		"Usage": {
 			"/basics": "./docs/basics.md",

@@ -1,6 +1,6 @@
 ## ShouldRedirectClientInput
 
-Defined in: runtime/should-redirect.js:14
+Defined in: [runtime/should-redirect.js:14](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ### Properties
 
@@ -8,25 +8,25 @@ Defined in: runtime/should-redirect.js:14
 
 > `optional` **locale**: `any`
 
-Defined in: runtime/should-redirect.js:17
+Defined in: [runtime/should-redirect.js:17](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 #### request?
 
 > `optional` **request**: `undefined`
 
-Defined in: runtime/should-redirect.js:15
+Defined in: [runtime/should-redirect.js:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 #### url?
 
 > `optional` **url**: `string` \| `URL`
 
-Defined in: runtime/should-redirect.js:16
+Defined in: [runtime/should-redirect.js:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ***
 
 ## ShouldRedirectResult
 
-Defined in: runtime/should-redirect.js:21
+Defined in: [runtime/should-redirect.js:21](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ### Properties
 
@@ -34,13 +34,13 @@ Defined in: runtime/should-redirect.js:21
 
 > **locale**: `any`
 
-Defined in: runtime/should-redirect.js:23
+Defined in: [runtime/should-redirect.js:23](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 #### redirectUrl
 
 > **redirectUrl**: `undefined` \| `URL`
 
-Defined in: runtime/should-redirect.js:24
+Defined in: [runtime/should-redirect.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 Destination URL when a redirect is required.
 
@@ -48,7 +48,7 @@ Destination URL when a redirect is required.
 
 > **shouldRedirect**: `boolean`
 
-Defined in: runtime/should-redirect.js:22
+Defined in: [runtime/should-redirect.js:22](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 Indicates whether the consumer should perform a redirect.
 
@@ -56,7 +56,7 @@ Indicates whether the consumer should perform a redirect.
 
 ## ShouldRedirectServerInput
 
-Defined in: runtime/should-redirect.js:9
+Defined in: [runtime/should-redirect.js:9](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ### Properties
 
@@ -64,19 +64,19 @@ Defined in: runtime/should-redirect.js:9
 
 > `optional` **locale**: `any`
 
-Defined in: runtime/should-redirect.js:12
+Defined in: [runtime/should-redirect.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 #### request
 
 > **request**: `Request`
 
-Defined in: runtime/should-redirect.js:10
+Defined in: [runtime/should-redirect.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 #### url?
 
 > `optional` **url**: `string` \| `URL`
 
-Defined in: runtime/should-redirect.js:11
+Defined in: [runtime/should-redirect.js:11](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ***
 
@@ -226,7 +226,7 @@ Defined in: [runtime/set-locale.js:34](https://github.com/opral/monorepo/tree/ma
 
 > **ShouldRedirectInput**\<\> = [`ShouldRedirectServerInput`](#shouldredirectserverinput) \| [`ShouldRedirectClientInput`](#shouldredirectclientinput)
 
-Defined in: runtime/should-redirect.js:19
+Defined in: [runtime/should-redirect.js:19](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 ### Type Parameters
 
@@ -1115,7 +1115,7 @@ setLocale('en', { reload: false });
 
 > **shouldRedirect**(`input?`): `Promise`\<[`ShouldRedirectResult`](#shouldredirectresult)\>
 
-Defined in: runtime/should-redirect.js:61
+Defined in: [runtime/should-redirect.js:61](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/should-redirect.js)
 
 Determines whether a redirect is required to align the current URL with the active locale.
 
