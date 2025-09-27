@@ -11,7 +11,6 @@ import { insertTransactionState } from "../../state/transaction/insert-transacti
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
 
-
 test("returns untracked entities", async () => {
 	const lix = await openLix({
 		keyValues: [

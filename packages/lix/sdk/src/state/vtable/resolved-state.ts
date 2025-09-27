@@ -1,7 +1,7 @@
 import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { selectFromStateCache } from "../cache/select-from-state-cache.js";
-import type { InternalResolvedStateAllView } from "../resolved-state-view.js";
+import type { StateAllView } from "../views/state-all.js";
 
 export interface ResolvedStateQueryOptions {
 	cacheRouting?: {
@@ -410,7 +410,15 @@ function stripIndent(value: string): string {
 
 const RESOLVED_ALIAS = "internal_resolved_state_all";
 
-export type ResolvedStateRow = InternalResolvedStateAllView;
+export type ResolvedStateRow = Omit<StateAllView, "snapshot_content"> & {
+	/**
+	 * Primary key in format: tag~file_id~entity_id~version_id
+	 * where tag is T (transaction), U (untracked), UI (untracked inherited), C (cached), CI (cached inherited), or TI (transaction inherited)
+	 */
+	_pk: string;
+	// needs to manually stringify snapshot_content
+	snapshot_content: string | null;
+};
 
 /**
  * Returns a `SelectQueryBuilder` that mirrors the legacy `internal_resolved_state_all`

@@ -56,7 +56,6 @@ import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
-import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
@@ -74,7 +73,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_resolved_state_all: InternalResolvedStateAllView;
 	internal_state_vtable: InternalStateVTable;
 	internal_file_data_cache: InternalFileDataCacheTable;
 	internal_file_lixcol_cache: InternalFileLixcolCacheTable;

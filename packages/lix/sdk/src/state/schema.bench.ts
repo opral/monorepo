@@ -33,7 +33,6 @@ bench("select entities from single version", async () => {
 		.execute();
 });
 
-
 bench.todo("select single entity by entity_id");
 
 bench.todo("select entities by schema_key filter");

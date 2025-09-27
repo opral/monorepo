@@ -3,7 +3,11 @@ import { sql } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { parseStatePk, serializeStatePk } from "./primary-key.js";
+import {
+	encodeStatePkPart,
+	parseStatePk,
+	serializeStatePk,
+} from "./primary-key.js";
 import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
@@ -79,6 +83,18 @@ export function applyStateVTable(
 
 	// Statement/transaction-scoped writer value set via withWriterKey helper.
 	let currentWriterKey: string | null = null;
+
+	// Register a custom SQLite function for encoding primary key parts
+	engine.sqlite.createFunction({
+		name: "lix_encode_pk_part",
+		deterministic: true,
+		arity: 1,
+		xFunc: (_ctxPtr: number, ...args: any[]) => {
+			const part = args[0];
+			if (part === null || part === undefined) return "";
+			return encodeStatePkPart(String(part));
+		},
+	});
 
 	// Register a setter UDF that stores the writer for the current statement.
 	sqlite.createFunction({

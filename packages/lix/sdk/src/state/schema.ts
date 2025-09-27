@@ -1,6 +1,5 @@
 import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
-import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
 import { applyStateCacheV2Schema } from "./cache/schema.js";
 import { applyStateAllView } from "./views/state-all.js";
@@ -18,7 +17,6 @@ export function applyStateDatabaseSchema(args: {
 	applyMaterializeStateSchema({ engine });
 	applyStateCacheV2Schema({ engine });
 	applyUntrackedStateSchema({ engine });
-	applyResolvedStateView({ engine });
 
 	// Writer metadata table: stores last writer per (file, version, entity, schema).
 	// No NULL storage policy: absence of row = unknown writer.
