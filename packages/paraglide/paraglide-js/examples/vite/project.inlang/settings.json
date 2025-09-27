@@ -3,7 +3,8 @@
 	"baseLocale": "en",
 	"locales": ["en", "de"],
 	"modules": [
-		"../../../../plugins/inlang-message-format/dist/index.js"
+		"../../../../plugins/inlang-message-format/dist/index.js",
+		"../../../../plugins/m-function-matcher/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
 		"pathPattern": "./messages/{languageTag}.json"
