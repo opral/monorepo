@@ -346,9 +346,7 @@ export function applyStateVTable(
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
 						// Query directly from resolved state (now includes tombstones)
-						let query = internalQueryBuilder
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
+						let query = buildResolvedStateQuery().selectAll();
 
 						// Apply filters
 						for (const [column, value] of Object.entries(filters)) {
@@ -362,15 +360,7 @@ export function applyStateVTable(
 						return capi.SQLITE_OK;
 					}
 
-					/*
-					 * Legacy cache-miss handling (populateStateCache + markStateCacheAsFresh) lived here.
-					 * The query preprocessor warms caches before execution, so we simply read from the
-					 * resolved state view each time.
-					 */
-
-					let query = internalQueryBuilder
-						.selectFrom("internal_resolved_state_all")
-						.selectAll();
+					let query = buildResolvedStateQuery().selectAll();
 
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
