@@ -586,6 +586,12 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../..
+      '@inlang/plugin-m-function-matcher':
+        specifier: workspace:*
+        version: link:../../../../plugins/m-function-matcher
+      '@inlang/plugin-message-format':
+        specifier: workspace:*
+        version: link:../../../../plugins/inlang-message-format
       typescript:
         specifier: ^5.7.2
         version: 5.8.3
