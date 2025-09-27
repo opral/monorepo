@@ -8,6 +8,7 @@ import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { buildResolvedStateQuery } from "./resolved-state.js";
 
 // Type definition for the internal state virtual table
 export type InternalStateVTable = {
@@ -853,10 +854,9 @@ export function handleStateDelete(
 	primaryKey: string,
 	timestamp: string
 ): void {
-	// Query the row to delete using the resolved state view with Kysely
+	// Look up the resolved row via the dynamic builder to avoid the legacy view
 	const [rowToDelete] = engine.executeSync(
-		internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+		buildResolvedStateQuery()
 			.select([
 				"entity_id",
 				"schema_key",
@@ -982,10 +982,9 @@ function getStoredSchema(
 	engine: Pick<LixEngine, "executeSync" | "hooks">,
 	schemaKey: any
 ): string | null {
-	// Query directly from internal_resolved_state_all to avoid vtable recursion
+	// Query the resolved-state builder directly to avoid vtable recursion
 	const result = engine.executeSync(
-		internalQueryBuilder
-			.selectFrom("internal_resolved_state_all")
+		buildResolvedStateQuery()
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")
 			.where(

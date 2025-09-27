@@ -33,7 +33,7 @@ function buildCacheRoutingSql(schemaKeys: readonly string[]): string {
 		return statements[0]!;
 	}
 
-	return statements.map((statement) => `(${statement})`).join("\nUNION ALL\n");
+	return statements.join("\nUNION ALL\n");
 }
 
 function compileCacheSelectStatement(schemaKey: string): string {
@@ -43,7 +43,10 @@ function compileCacheSelectStatement(schemaKey: string): string {
 			"selectFromStateCache generated parameterised SQL which is not supported"
 		);
 	}
-	return compiled.sql;
+	const match = compiled.sql.match(
+		/^select\s+\*\s+from\s*\((?<inner>select[\s\S]+)\)\s+as\s+"internal_state_cache_routed"$/i
+	);
+	return match?.groups?.inner?.trim() ?? compiled.sql;
 }
 
 function buildBaseResolvedStateSql(): string {

@@ -652,7 +652,9 @@ test("unions cache tables when multiple schema keys are routed", async () => {
 		version_id: "global",
 	});
 
-	const compiled = buildResolvedStateQuery()
+	const compiled = buildResolvedStateQuery({
+		cacheRouting: { schemaKeys: ["cache_schema_a", "cache_schema_b"] },
+	})
 		.select(["entity_id", "schema_key"])
 		.compile();
 
