@@ -1,8 +1,6 @@
 import type { CompiledQuery } from "kysely";
-
 import type { LixEngine } from "./boot.js";
-import { createQueryPreprocessor } from "./query-middleware/index.js";
-import { rewriteSql } from "./query-middleware/sql-rewriter/index.js";
+import { rewriteSql } from "./query-preprocessor/sql-rewriter.js";
 
 export async function createExplainQuery(args: {
 	engine: Pick<
@@ -23,9 +21,9 @@ export async function createExplainQuery(args: {
 	}
 > {
 	return ({ query }) => {
-		const rewritten = rewriteSql(query.sql);
+		const { sql: rewrittenSql } = rewriteSql(query.sql);
 		const explain = args.engine.executeSync({
-			sql: `EXPLAIN QUERY PLAN ${rewritten}`,
+			sql: `EXPLAIN QUERY PLAN ${rewrittenSql}`,
 		});
 		return {
 			original: {
@@ -33,7 +31,7 @@ export async function createExplainQuery(args: {
 				parameters: [...(query.parameters ?? [])],
 			},
 			rewritten: {
-				sql: rewritten,
+				sql: rewrittenSql,
 				parameters: [...(query.parameters ?? [])],
 			},
 			plan: explain.rows,

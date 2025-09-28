@@ -1,7 +1,8 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value as JsonValue;
 use sqlparser::ast::{
     BinaryOperator, Expr, Ident, Query, Select, SetExpr, Statement, TableAlias, TableFactor,
     TableWithJoins,
@@ -34,6 +35,42 @@ impl std::error::Error for RewriteError {}
 struct RewriteContext {
     table_cache: Option<HashSet<String>>,
     views: HashMap<String, String>,
+    parameters: Vec<JsonValue>,
+}
+
+#[derive(Default)]
+struct RewriteAccumulator {
+    internal_state_reader: Option<InternalStateReaderHint>,
+}
+
+#[derive(Default)]
+struct InternalStateReaderHint {
+    schema_keys: HashSet<String>,
+    include_inheritance: bool,
+}
+
+#[derive(Serialize)]
+pub struct RewriteOutput {
+    pub sql: String,
+    #[serde(rename = "cacheHints", skip_serializing_if = "Option::is_none")]
+    pub cache_hints: Option<CacheHints>,
+}
+
+#[derive(Serialize)]
+pub struct CacheHints {
+    #[serde(
+        rename = "internalStateReader",
+        skip_serializing_if = "Option::is_none"
+    )]
+    internal_state_reader: Option<InternalStateReaderHintPayload>,
+}
+
+#[derive(Serialize)]
+pub struct InternalStateReaderHintPayload {
+    #[serde(rename = "schemaKeys")]
+    schema_keys: Vec<String>,
+    #[serde(rename = "includeInheritance")]
+    include_inheritance: bool,
 }
 
 #[derive(Deserialize)]
@@ -41,6 +78,7 @@ struct ContextPayload {
     #[serde(rename = "tableCache")]
     table_cache: Option<Vec<String>>,
     views: Option<HashMap<String, String>>,
+    parameters: Option<Vec<JsonValue>>,
 }
 
 impl RewriteContext {
@@ -65,7 +103,13 @@ impl RewriteContext {
             .filter(|(_, sql)| !sql.is_empty())
             .collect();
 
-        Ok(Self { table_cache, views })
+        let parameters = payload.parameters.unwrap_or_default();
+
+        Ok(Self {
+            table_cache,
+            views,
+            parameters,
+        })
     }
 
     fn should_include_cache(&self, schema_key: &str) -> bool {
@@ -88,9 +132,51 @@ impl RewriteContext {
         }
     }
 
+    fn cache_tables(&self) -> Vec<String> {
+        self.table_cache
+            .as_ref()
+            .map(|set| {
+                let mut tables: Vec<String> = set.iter().cloned().collect();
+                tables.sort();
+                tables
+            })
+            .unwrap_or_default()
+    }
+
     fn view_sql(&self, table_name: &str) -> Option<&str> {
         let key = table_name.to_ascii_lowercase();
         self.views.get(&key).map(|sql| sql.as_str())
+    }
+}
+
+#[derive(Default)]
+struct PlaceholderResolver {
+    parameters: Vec<JsonValue>,
+    position: usize,
+}
+
+impl PlaceholderResolver {
+    fn new(parameters: &[JsonValue]) -> Self {
+        Self {
+            parameters: parameters.to_vec(),
+            position: 0,
+        }
+    }
+
+    fn resolve_next_string(&mut self) -> Option<String> {
+        if self.position >= self.parameters.len() {
+            return None;
+        }
+
+        let value = self.parameters[self.position].clone();
+        self.position += 1;
+
+        match value {
+            JsonValue::String(text) => Some(text),
+            JsonValue::Number(number) => Some(number.to_string()),
+            JsonValue::Bool(boolean) => Some(boolean.to_string()),
+            _ => None,
+        }
     }
 }
 
@@ -106,12 +192,15 @@ pub fn set_rewrite_context(context_json: Option<&str>) -> Result<(), RewriteErro
     Ok(())
 }
 
-pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<String, RewriteError> {
+pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<RewriteOutput, RewriteError> {
     let context = if let Some(json) = context_json {
         RewriteContext::from_json(Some(json))?
     } else {
         CACHED_CONTEXT.with(|cached| cached.borrow().clone())
     };
+
+    let mut accumulator = RewriteAccumulator::default();
+    let mut resolver = PlaceholderResolver::new(&context.parameters);
 
     let dialect = SQLiteDialect {};
     let mut statements = Parser::parse_sql(&dialect, sql)
@@ -119,44 +208,56 @@ pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<String, Rewr
 
     let mut changed = false;
     for statement in &mut statements {
-        if rewrite_statement(statement, &context)? {
+        if rewrite_statement(statement, &context, &mut accumulator, &mut resolver)? {
             changed = true;
         }
     }
 
-    if !changed {
-        return Ok(sql.to_string());
-    }
+    let output_sql = if changed {
+        statements
+            .into_iter()
+            .map(|statement| statement.to_string())
+            .collect::<Vec<_>>()
+            .join("; ")
+    } else {
+        sql.to_string()
+    };
 
-    Ok(statements
-        .into_iter()
-        .map(|statement| statement.to_string())
-        .collect::<Vec<_>>()
-        .join("; "))
+    Ok(RewriteOutput {
+        sql: output_sql,
+        cache_hints: accumulator.into_cache_hints(),
+    })
 }
 
 fn rewrite_statement(
     statement: &mut Statement,
     context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
 ) -> Result<bool, RewriteError> {
     match statement {
-        Statement::Query(query) => rewrite_query(query, context),
+        Statement::Query(query) => rewrite_query(query, context, accumulator, resolver),
         _ => Ok(false),
     }
 }
 
-fn rewrite_query(query: &mut Query, context: &RewriteContext) -> Result<bool, RewriteError> {
+fn rewrite_query(
+    query: &mut Query,
+    context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
+) -> Result<bool, RewriteError> {
     let mut changed = false;
 
     if let Some(with) = &mut query.with {
         for cte in &mut with.cte_tables {
-            if rewrite_query(&mut cte.query, context)? {
+            if rewrite_query(&mut cte.query, context, accumulator, resolver)? {
                 changed = true;
             }
         }
     }
 
-    changed |= rewrite_set_expr(query.body.as_mut(), context)?;
+    changed |= rewrite_set_expr(query.body.as_mut(), context, accumulator, resolver)?;
 
     Ok(changed)
 }
@@ -164,13 +265,15 @@ fn rewrite_query(query: &mut Query, context: &RewriteContext) -> Result<bool, Re
 fn rewrite_set_expr(
     set_expr: &mut SetExpr,
     context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
 ) -> Result<bool, RewriteError> {
     match set_expr {
-        SetExpr::Select(select) => rewrite_select(select.as_mut(), context),
-        SetExpr::Query(query) => rewrite_query(query.as_mut(), context),
+        SetExpr::Select(select) => rewrite_select(select.as_mut(), context, accumulator, resolver),
+        SetExpr::Query(query) => rewrite_query(query.as_mut(), context, accumulator, resolver),
         SetExpr::SetOperation { left, right, .. } => {
-            let left_changed = rewrite_set_expr(left.as_mut(), context)?;
-            let right_changed = rewrite_set_expr(right.as_mut(), context)?;
+            let left_changed = rewrite_set_expr(left.as_mut(), context, accumulator, resolver)?;
+            let right_changed = rewrite_set_expr(right.as_mut(), context, accumulator, resolver)?;
             Ok(left_changed || right_changed)
         }
         SetExpr::Values(_) => Ok(false),
@@ -178,11 +281,22 @@ fn rewrite_set_expr(
     }
 }
 
-fn rewrite_select(select: &mut Select, context: &RewriteContext) -> Result<bool, RewriteError> {
+fn rewrite_select(
+    select: &mut Select,
+    context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
+) -> Result<bool, RewriteError> {
     let mut changed = false;
 
     for table_with_joins in &mut select.from {
-        if rewrite_table_with_joins(table_with_joins, select.selection.as_ref(), context)? {
+        if rewrite_table_with_joins(
+            table_with_joins,
+            select.selection.as_ref(),
+            context,
+            accumulator,
+            resolver,
+        )? {
             changed = true;
         }
     }
@@ -194,18 +308,26 @@ fn rewrite_table_with_joins(
     table_with_joins: &mut TableWithJoins,
     selection: Option<&Expr>,
     context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
 ) -> Result<bool, RewriteError> {
     let mut changed = false;
 
-    if let Some(new_relation) =
-        rewrite_table_factor(&table_with_joins.relation, selection, context)?
-    {
+    if let Some(new_relation) = rewrite_table_factor(
+        &table_with_joins.relation,
+        selection,
+        context,
+        accumulator,
+        resolver,
+    )? {
         table_with_joins.relation = new_relation;
         changed = true;
     }
 
     for join in &mut table_with_joins.joins {
-        if let Some(new_relation) = rewrite_table_factor(&join.relation, selection, context)? {
+        if let Some(new_relation) =
+            rewrite_table_factor(&join.relation, selection, context, accumulator, resolver)?
+        {
             join.relation = new_relation;
             changed = true;
         }
@@ -218,6 +340,8 @@ fn rewrite_table_factor(
     factor: &TableFactor,
     selection: Option<&Expr>,
     context: &RewriteContext,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
 ) -> Result<Option<TableFactor>, RewriteError> {
     let Some(target) = analyze_table_factor(factor) else {
         return Ok(None);
@@ -227,24 +351,39 @@ fn rewrite_table_factor(
 
     if table_name_lower == TARGET_VIEW {
         let schema_filters = selection
-            .map(|expr| collect_schema_filters(expr, &target.alias))
+            .map(|expr| collect_schema_filters(expr, &target.alias, resolver))
             .unwrap_or_default();
 
-        if schema_filters.len() != 1 {
-            return Ok(None);
-        }
-
-        let schema_key = &schema_filters[0];
-        if !context.should_include_cache(schema_key) {
-            return Ok(None);
-        }
-
-        let include_cache = context.should_include_cache(schema_key);
         let include_inheritance = context.should_include_inheritance();
 
+        let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
+            match schema_filters.len() {
+                0 => {
+                    let tables = context
+                        .cache_tables()
+                        .into_iter()
+                        .filter(|name| {
+                            name != &schema_key_to_cache_table_name("lix_version_descriptor")
+                        })
+                        .collect();
+                    (None, tables)
+                }
+                1 => {
+                    let schema_key = schema_filters[0].clone();
+                    let include_cache = context.should_include_cache(&schema_key);
+                    let tables = if include_cache {
+                        vec![schema_key_to_cache_table_name(&schema_key)]
+                    } else {
+                        Vec::new()
+                    };
+                    (Some(schema_key), tables)
+                }
+                _ => return Ok(None),
+            };
+
         let subquery_sql = build_internal_state_reader_subquery(
-            schema_key,
-            include_cache,
+            schema_key_opt.as_deref(),
+            &cache_tables,
             include_inheritance,
         );
 
@@ -259,6 +398,12 @@ fn rewrite_table_factor(
             name: alias_ident,
             columns: vec![],
         };
+
+        if let Some(schema_key) = schema_key_opt.clone() {
+            accumulator.touch_internal_state_reader(schema_key, include_inheritance);
+        } else {
+            accumulator.touch_internal_state_reader_any(include_inheritance);
+        }
 
         return Ok(Some(TableFactor::Derived {
             lateral: false,
@@ -315,8 +460,10 @@ fn expand_view_table_factor(
     subquery.limit = None;
     subquery.offset = None;
 
-    let alias_ident =
-        target.alias_ident.clone().unwrap_or_else(|| ident_from_str(&target.alias));
+    let alias_ident = target
+        .alias_ident
+        .clone()
+        .unwrap_or_else(|| ident_from_str(&target.alias));
     let alias = TableAlias {
         name: alias_ident,
         columns: vec![],
@@ -353,47 +500,56 @@ fn parse_select_query(sql: &str) -> Result<Query, RewriteError> {
     }
 }
 
-fn collect_schema_filters(expr: &Expr, alias: &str) -> Vec<String> {
+fn collect_schema_filters(
+    expr: &Expr,
+    alias: &str,
+    resolver: &mut PlaceholderResolver,
+) -> Vec<String> {
     let mut values = HashSet::new();
-    collect_schema_filters_recursive(expr, alias, &mut values);
+    collect_schema_filters_recursive(expr, alias, resolver, &mut values);
     values.into_iter().collect()
 }
 
-fn collect_schema_filters_recursive(expr: &Expr, alias: &str, output: &mut HashSet<String>) {
+fn collect_schema_filters_recursive(
+    expr: &Expr,
+    alias: &str,
+    resolver: &mut PlaceholderResolver,
+    output: &mut HashSet<String>,
+) {
     match expr {
         Expr::BinaryOp { left, op, right } => {
             if matches_schema_column(left, alias) && matches_eq_operator(op) {
-                for value in extract_literal_values(right) {
+                for value in extract_literal_values(right, resolver) {
                     if !value.is_empty() {
                         output.insert(value);
                     }
                 }
             } else if matches_schema_column(right, alias) && matches_eq_operator(op) {
-                for value in extract_literal_values(left) {
+                for value in extract_literal_values(left, resolver) {
                     if !value.is_empty() {
                         output.insert(value);
                     }
                 }
             } else if matches_logical_operator(op) {
-                collect_schema_filters_recursive(left, alias, output);
-                collect_schema_filters_recursive(right, alias, output);
+                collect_schema_filters_recursive(left, alias, resolver, output);
+                collect_schema_filters_recursive(right, alias, resolver, output);
             }
         }
-        Expr::Nested(expr) => collect_schema_filters_recursive(expr, alias, output),
+        Expr::Nested(expr) => collect_schema_filters_recursive(expr, alias, resolver, output),
         Expr::Between {
             low,
             high,
             expr: inner,
             ..
         } => {
-            collect_schema_filters_recursive(inner, alias, output);
-            collect_schema_filters_recursive(low, alias, output);
-            collect_schema_filters_recursive(high, alias, output);
+            collect_schema_filters_recursive(inner, alias, resolver, output);
+            collect_schema_filters_recursive(low, alias, resolver, output);
+            collect_schema_filters_recursive(high, alias, resolver, output);
         }
         Expr::InList { expr, list, .. } => {
             if matches_schema_column(expr, alias) {
                 for item in list {
-                    for value in extract_literal_values(item) {
+                    for value in extract_literal_values(item, resolver) {
                         if !value.is_empty() {
                             output.insert(value);
                         }
@@ -429,51 +585,126 @@ fn matches_schema_column(expr: &Expr, alias: &str) -> bool {
     }
 }
 
-fn extract_literal_values(expr: &Expr) -> Vec<String> {
+fn extract_literal_values(expr: &Expr, resolver: &mut PlaceholderResolver) -> Vec<String> {
     match expr {
         Expr::Value(sqlparser::ast::Value::SingleQuotedString(value)) => vec![value.clone()],
         Expr::Value(sqlparser::ast::Value::DoubleQuotedString(value)) => vec![value.clone()],
         Expr::Value(sqlparser::ast::Value::NationalStringLiteral(value)) => vec![value.clone()],
         Expr::Value(sqlparser::ast::Value::Number(value, _)) => vec![value.clone()],
-        Expr::InList { list, .. } => list.iter().flat_map(extract_literal_values).collect(),
-        Expr::Nested(expr) => extract_literal_values(expr),
+        Expr::Value(sqlparser::ast::Value::Placeholder(_)) => {
+            resolver.resolve_next_string().into_iter().collect()
+        }
+        Expr::InList { list, .. } => list
+            .iter()
+            .flat_map(|item| extract_literal_values(item, resolver))
+            .collect(),
+        Expr::Nested(expr) => extract_literal_values(expr, resolver),
         _ => vec![],
     }
 }
 
+impl RewriteAccumulator {
+    fn touch_internal_state_reader(&mut self, schema_key: String, include_inheritance: bool) {
+        let hint = self
+            .internal_state_reader
+            .get_or_insert_with(InternalStateReaderHint::default);
+        hint.schema_keys.insert(schema_key);
+        if include_inheritance {
+            hint.include_inheritance = true;
+        }
+    }
+
+    fn touch_internal_state_reader_any(&mut self, include_inheritance: bool) {
+        let hint = self
+            .internal_state_reader
+            .get_or_insert_with(InternalStateReaderHint::default);
+        if include_inheritance {
+            hint.include_inheritance = true;
+        }
+    }
+
+    fn into_cache_hints(self) -> Option<CacheHints> {
+        self.internal_state_reader.map(|hint| {
+            let mut schema_keys: Vec<String> = hint.schema_keys.into_iter().collect();
+            schema_keys.sort();
+            CacheHints {
+                internal_state_reader: Some(InternalStateReaderHintPayload {
+                    schema_keys,
+                    include_inheritance: hint.include_inheritance,
+                }),
+            }
+        })
+    }
+}
+
+impl CacheHints {
+    pub fn internal_state_reader(&self) -> Option<&InternalStateReaderHintPayload> {
+        self.internal_state_reader.as_ref()
+    }
+}
+
+impl InternalStateReaderHintPayload {
+    pub fn schema_keys(&self) -> &[String] {
+        &self.schema_keys
+    }
+
+    pub fn include_inheritance(&self) -> bool {
+        self.include_inheritance
+    }
+}
+
 fn build_internal_state_reader_subquery(
-    schema_key: &str,
-    include_cache: bool,
+    schema_key: Option<&str>,
+    cache_tables: &[String],
     include_inheritance: bool,
 ) -> String {
-    let cache_table_name = schema_key_to_cache_table_name(schema_key);
-    let cache_table = format_identifier(&cache_table_name);
+    let include_cache = !cache_tables.is_empty();
 
     let mut segments = vec![
-        build_transaction_branch(Some(schema_key)),
-        build_untracked_branch(Some(schema_key)),
+        build_transaction_branch(schema_key),
+        build_untracked_branch(schema_key),
     ];
 
+    let mut cache_alias: Option<String> = None;
+    let mut cache_union_cte: Option<String> = None;
+    let mut cache_table_name_for_cte: Option<String> = None;
+
     if include_cache {
-        segments.push(build_cache_branch(Some(schema_key), &cache_table));
+        if let Some(key) = schema_key {
+            let table_name = cache_tables[0].clone();
+            let cache_identifier = format_identifier(&table_name);
+            segments.push(build_cache_branch(Some(key), &cache_identifier));
+            if include_inheritance {
+                segments.push(build_cache_inheritance_branch(Some(key), &cache_identifier));
+            }
+            cache_alias = Some(cache_identifier);
+            cache_table_name_for_cte = Some(table_name);
+        } else {
+            let cache_identifier = "cache_union".to_string();
+            let union_body = cache_tables
+                .iter()
+                .map(|name| build_cache_union(name))
+                .collect::<Vec<_>>()
+                .join("\nUNION ALL\n");
+            segments.push(build_cache_branch(None, &cache_identifier));
+            if include_inheritance {
+                segments.push(build_cache_inheritance_branch(None, &cache_identifier));
+            }
+            cache_union_cte = Some(format!("cache_union AS ({})", union_body));
+            cache_alias = Some(cache_identifier);
+        }
     }
 
     if include_inheritance {
-        if include_cache {
-            segments.push(build_cache_inheritance_branch(
-                Some(schema_key),
-                &cache_table,
-            ));
-        }
         segments.push(build_inherited_untracked_branch(
-            Some(schema_key),
+            schema_key,
             include_cache,
-            Some(&cache_table),
+            cache_alias.as_deref(),
         ));
         segments.push(build_inherited_txn_branch(
-            Some(schema_key),
+            schema_key,
             include_cache,
-            Some(&cache_table),
+            cache_alias.as_deref(),
         ));
     }
 
@@ -482,44 +713,47 @@ fn build_internal_state_reader_subquery(
     let descriptor_table = schema_key_to_cache_table_name("lix_version_descriptor");
     let descriptor = format_identifier(&descriptor_table);
 
-    let query_sql = if include_inheritance {
-        let inheritance_cte = build_inheritance_cte(
+    if include_inheritance {
+        build_inheritance_cte(
             include_cache,
-            include_cache.then(|| cache_table.clone()),
+            cache_table_name_for_cte.as_deref(),
+            cache_union_cte.as_deref(),
             &descriptor,
             &union,
-        );
-        inheritance_cte
-    } else {
-        if include_cache {
+        )
+    } else if include_cache {
+        if let Some(cte) = cache_union_cte {
+            format!("WITH {} SELECT DISTINCT * FROM ({})", cte, union)
+        } else if let Some(table_name) = cache_table_name_for_cte {
             format!(
                 "WITH cache_union AS ({}) SELECT DISTINCT * FROM ({})",
-                build_cache_union(&cache_table_name),
+                build_cache_union(&table_name),
                 union
             )
         } else {
             format!("SELECT DISTINCT * FROM ({})", union)
         }
-    };
-
-    query_sql
+    } else {
+        format!("SELECT DISTINCT * FROM ({})", union)
+    }
 }
 
 fn build_inheritance_cte(
     include_cache: bool,
-    cache_table: Option<String>,
+    cache_table: Option<&str>,
+    cache_union_cte: Option<&str>,
     descriptor_table: &str,
     union_sql: &str,
 ) -> String {
-    let cache_cte = if include_cache {
-        some_cache_union(cache_table.as_deref())
-    } else {
-        None
-    };
-
     let mut segments = Vec::new();
-    if let Some(cache_union) = cache_cte {
-        segments.push(cache_union);
+    if include_cache {
+        if let Some(cte) = cache_union_cte {
+            segments.push(cte.to_string());
+        } else if let Some(table) = cache_table {
+            if let Some(cache_union) = some_cache_union(Some(table)) {
+                segments.push(cache_union);
+            }
+        }
     }
     segments.push(format!(
 		"version_descriptor_base AS (\n\tSELECT\n\t\tjson_extract(isc_v.snapshot_content, '$.id') AS version_id,\n\t\tjson_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id\n\tFROM {} AS isc_v\n\tWHERE isc_v.inheritance_delete_marker = 0\n)",
@@ -569,7 +803,7 @@ fn build_untracked_branch(schema_key: Option<&str>) -> String {
         .unwrap_or_default();
 
     format!(
-		"SELECT\n\t'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,\n\tu.entity_id,\n\tu.schema_key,\n\tu.file_id,\n\tu.plugin_key,\n\tjson(u.snapshot_content) AS snapshot_content,\n\tu.schema_version,\n\tu.version_id,\n\tu.created_at,\n\tu.updated_at,\n\tNULL AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tws_untracked.writer_key\nFROM internal_state_all_untracked u\nLEFT JOIN internal_state_writer ws_untracked ON\n\tws_untracked.file_id = u.file_id AND\n\tws_untracked.entity_id = u.entity_id AND\n\tws_untracked.schema_key = u.schema_key AND\n\tws_untracked.version_id = u.version_id\nWHERE u.inheritance_delete_marker = 0\n\tAND u.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = u.version_id\n\t\tAND t.file_id = u.file_id\n\t\tAND t.schema_key = u.schema_key\n\t\tAND t.entity_id = u.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = u.version_id\n\t\tAND child_unt.file_id = u.file_id\n\t\tAND child_unt.schema_key = u.schema_key\n\t\tAND child_unt.entity_id = u.entity_id\n)",
+		"SELECT\n\t'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,\n\tu.entity_id,\n\tu.schema_key,\n\tu.file_id,\n\tu.plugin_key,\n\tjson(u.snapshot_content) AS snapshot_content,\n\tu.schema_version,\n\tu.version_id,\n\tu.created_at,\n\tu.updated_at,\n\tNULL AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tws_untracked.writer_key\nFROM internal_state_all_untracked u\nLEFT JOIN internal_state_writer ws_untracked ON\n\tws_untracked.file_id = u.file_id AND\n\tws_untracked.entity_id = u.entity_id AND\n\tws_untracked.schema_key = u.schema_key AND\n\tws_untracked.version_id = u.version_id\nWHERE u.inheritance_delete_marker = 0\n\tAND u.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = u.version_id\n\t\tAND t.file_id = u.file_id\n\t\tAND t.schema_key = u.schema_key\n\t\tAND t.entity_id = u.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = u.version_id\n\t\tAND child_unt.file_id = u.file_id\n\t\tAND child_unt.schema_key = u.schema_key\n\t\tAND child_unt.entity_id = u.entity_id\n		AND child_unt.rowid != u.rowid\n)",
 		filter
 	)
 }
@@ -621,7 +855,7 @@ fn build_inherited_untracked_branch(
     let cache_clause = cache_prune.unwrap_or_default();
 
     format!(
-		"SELECT\n\t'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tunt.entity_id,\n\tunt.schema_key,\n\tunt.file_id,\n\tunt.plugin_key,\n\tjson(unt.snapshot_content) AS snapshot_content,\n\tunt.schema_version,\n\tvi.version_id,\n\tunt.created_at,\n\tunt.updated_at,\n\tunt.version_id AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tCOALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key\nFROM version_inheritance vi\nJOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id\nLEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = unt.file_id AND\n\tws_child.entity_id = unt.entity_id AND\n\tws_child.schema_key = unt.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = unt.file_id AND\n\tws_parent.entity_id = unt.entity_id AND\n\tws_parent.schema_key = unt.schema_key AND\n\tws_parent.version_id = unt.version_id\nWHERE unt.inheritance_delete_marker = 0\n\tAND unt.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = unt.file_id\n\t\tAND t.schema_key = unt.schema_key\n\t\tAND t.entity_id = unt.entity_id\n)\n{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = unt.file_id\n\t\tAND child_unt.schema_key = unt.schema_key\n\t\tAND child_unt.entity_id = unt.entity_id\n)",
+		"SELECT\n\t'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tunt.entity_id,\n\tunt.schema_key,\n\tunt.file_id,\n\tunt.plugin_key,\n\tjson(unt.snapshot_content) AS snapshot_content,\n\tunt.schema_version,\n\tvi.version_id,\n\tunt.created_at,\n\tunt.updated_at,\n\tunt.version_id AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tCOALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key\nFROM version_inheritance vi\nJOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id\nLEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = unt.file_id AND\n\tws_child.entity_id = unt.entity_id AND\n\tws_child.schema_key = unt.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = unt.file_id AND\n\tws_parent.entity_id = unt.entity_id AND\n\tws_parent.schema_key = unt.schema_key AND\n\tws_parent.version_id = unt.version_id\nWHERE unt.inheritance_delete_marker = 0\n\tAND unt.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = unt.file_id\n\t\tAND t.schema_key = unt.schema_key\n\t\tAND t.entity_id = unt.entity_id\n)\n{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = unt.file_id\n\t\tAND child_unt.schema_key = unt.schema_key\n\t\tAND child_unt.entity_id = unt.entity_id\n		AND child_unt.rowid != unt.rowid\n)",
 		filter,
 		cache_clause
 	)

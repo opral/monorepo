@@ -1,20 +1,36 @@
-import type { SqliteWasmDatabase } from "../database/sqlite/create-in-memory-database.js";
+import type { LixEngine } from "./boot.js";
+import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
+import { createInternalStateReaderPreprocessor } from "./query-preprocessor/internal-state-reader.js";
 
-export function createExecuteSync(args: { sqlite: SqliteWasmDatabase }) {
-	return (args2: {
+type ExecuteSyncFn = (args: {
+	sql: string;
+	parameters?: Readonly<unknown[]>;
+}) => { rows: any[] };
+
+export async function createExecuteSync(args: {
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
+}): Promise<ExecuteSyncFn> {
+	const preprocess = await createQueryPreprocessor(args.engine, [
+		createInternalStateReaderPreprocessor,
+	]);
+
+	const executeSyncFn: ExecuteSyncFn = (args2: {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
-	}): {
-		rows: any[];
-	} => {
-		const columnNames: string[] = [];
-		const rows = args.sqlite.exec({
+	}) => {
+		const preprocessed = preprocess({
 			sql: args2.sql,
-			bind: (args2.parameters ?? []) as any[],
+			parameters: args2.parameters ?? [],
+		});
+		const columnNames: string[] = [];
+		const rows = args.engine.sqlite.exec({
+			sql: preprocessed.sql,
+			bind: preprocessed.parameters as any[],
 			returnValue: "resultRows",
 			rowMode: "object",
 			columnNames,
 		});
 		return { rows };
 	};
+	return executeSyncFn;
 }

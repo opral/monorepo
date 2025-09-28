@@ -5,7 +5,7 @@ import {
 	initializeSqlRewriter,
 	rewriteSql,
 	setSqlRewriterContext,
-} from "./query-middleware/sql-rewriter/index.js";
+} from "./query-preprocessor/sql-rewriter.js";
 
 describe("createExecuteSync", () => {
 	beforeAll(async () => {
@@ -33,7 +33,7 @@ describe("createExecuteSync", () => {
 		const originalSql = "SELECT value FROM cache_lookup";
 		const result = executeSync({ sql: originalSql });
 
-		const rewrittenSql = rewriteSql(originalSql);
+		const { sql: rewrittenSql } = rewriteSql(originalSql);
 
 		expect(exec).toHaveBeenCalledTimes(1);
 		expect(exec).toHaveBeenCalledWith(

@@ -5,6 +5,20 @@ import initSqlParserWasm, {
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import type { LixEngine } from "../boot.js";
 
+export interface InternalStateReaderCacheHints {
+	schemaKeys: string[];
+	includeInheritance: boolean;
+}
+
+export interface SqlRewriteCacheHints {
+	internalStateReader?: InternalStateReaderCacheHints;
+}
+
+export interface SqlRewriteResult {
+	sql: string;
+	cacheHints?: SqlRewriteCacheHints;
+}
+
 const isNodeRuntime =
 	typeof globalThis === "object" &&
 	typeof (globalThis as any).process !== "undefined" &&
@@ -81,9 +95,14 @@ export async function initializeSqlRewriter(): Promise<void> {
 	await ensureInitialized();
 }
 
-export function rewriteSql(sql: string, contextJson?: string): string {
+export function rewriteSql(sql: string, contextJson?: string): SqlRewriteResult {
 	assertInitialized();
-	return rewrite_sql_wasm(sql, contextJson ?? null);
+	const result = rewrite_sql_wasm(sql, contextJson ?? null) as unknown;
+	const { sql: rewrittenSql, cacheHints } = normalizeRewriteResult(result, sql);
+	return {
+		sql: rewrittenSql,
+		cacheHints,
+	};
 }
 
 export function setSqlRewriterContext(contextJson?: string): void {
@@ -168,3 +187,46 @@ function getViewSelectMap(
 }
 
 export type ViewSelectMap = ReturnType<typeof getViewSelectMap>;
+
+function normalizeRewriteResult(
+	value: unknown,
+	originalSql: string
+): { sql: string; cacheHints?: SqlRewriteCacheHints } {
+	if (!value || typeof value !== "object") {
+		return { sql: originalSql };
+	}
+	const maybeSql = Reflect.get(value, "sql");
+	const sql = typeof maybeSql === "string" ? maybeSql : originalSql;
+	const rawHints = Reflect.get(value, "cacheHints");
+	const cacheHints = normalizeCacheHints(rawHints);
+	return { sql, cacheHints };
+}
+
+function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
+	if (!value || typeof value !== "object") {
+		return undefined;
+	}
+	const rawInternal = Reflect.get(value, "internalStateReader");
+	if (!rawInternal || typeof rawInternal !== "object") {
+		return undefined;
+	}
+	const schemaKeysValue = Reflect.get(rawInternal, "schemaKeys");
+	if (!Array.isArray(schemaKeysValue)) {
+		return undefined;
+	}
+	const schemaKeys = schemaKeysValue.filter(
+		(key): key is string => typeof key === "string"
+	);
+	if (schemaKeys.length === 0) {
+		return undefined;
+	}
+	const includeInheritance = Boolean(
+		Reflect.get(rawInternal, "includeInheritance")
+	);
+	return {
+		internalStateReader: {
+			schemaKeys,
+			includeInheritance,
+		},
+	};
+}

@@ -83,7 +83,13 @@ export type LixEngine = {
 export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
-	const executeSync = createExecuteSync({ sqlite: env.sqlite });
+	const executeSync = await createExecuteSync({
+		engine: {
+			sqlite: env.sqlite,
+			hooks,
+			runtimeCacheRef,
+		},
+	});
 	const db = initDb({
 		sqlite: env.sqlite,
 		hooks,

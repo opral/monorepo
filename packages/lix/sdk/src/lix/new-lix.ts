@@ -128,8 +128,14 @@ export async function newLixFile(args?: {
 	sqlite.exec({ sql: "PRAGMA page_size = 8192;" });
 
 	const hooks = createHooks();
-	const executeSync = createExecuteSync({ sqlite });
 	const runtimeCacheRef = {};
+	const executeSync = await createExecuteSync({
+		engine: {
+			sqlite,
+			hooks,
+			runtimeCacheRef,
+		},
+	});
 
 	// applying the schema etc.
 	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
