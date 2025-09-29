@@ -456,6 +456,7 @@ fn rewrite_table_factor(
             .unwrap_or_default();
 
         let include_inheritance = context.should_include_inheritance();
+        let mut schema_keys_used: Vec<String> = Vec::new();
 
         let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
             match schema_filters.len() {
@@ -472,6 +473,9 @@ fn rewrite_table_factor(
                 1 => {
                     let schema_key = schema_filters[0].clone();
                     let include_cache = context.should_include_cache(&schema_key);
+                    if include_cache {
+                        schema_keys_used.push(schema_key.clone());
+                    }
                     let tables = if include_cache {
                         vec![schema_key_to_cache_table_name(&schema_key)]
                     } else {
@@ -479,7 +483,16 @@ fn rewrite_table_factor(
                     };
                     (Some(schema_key), tables)
                 }
-                _ => return Ok(None),
+                _ => {
+                    let mut tables = Vec::new();
+                    for schema_key in &schema_filters {
+                        if context.should_include_cache(schema_key) {
+                            tables.push(schema_key_to_cache_table_name(schema_key));
+                            schema_keys_used.push(schema_key.clone());
+                        }
+                    }
+                    (None, tables)
+                }
             };
 
         let subquery_sql = build_internal_state_reader_subquery(
@@ -515,6 +528,7 @@ fn rewrite_table_factor(
             .unwrap_or_default();
 
         let include_inheritance = context.should_include_inheritance();
+        let mut schema_keys_used: Vec<String> = Vec::new();
 
         let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
             match schema_filters.len() {
@@ -531,6 +545,9 @@ fn rewrite_table_factor(
                 1 => {
                     let schema_key = schema_filters[0].clone();
                     let include_cache = context.should_include_cache(&schema_key);
+                    if include_cache {
+                        schema_keys_used.push(schema_key.clone());
+                    }
                     let tables = if include_cache {
                         vec![schema_key_to_cache_table_name(&schema_key)]
                     } else {
@@ -538,7 +555,16 @@ fn rewrite_table_factor(
                     };
                     (Some(schema_key), tables)
                 }
-                _ => return Ok(None),
+                _ => {
+                    let mut tables = Vec::new();
+                    for schema_key in &schema_filters {
+                        if context.should_include_cache(schema_key) {
+                            tables.push(schema_key_to_cache_table_name(schema_key));
+                            schema_keys_used.push(schema_key.clone());
+                        }
+                    }
+                    (None, tables)
+                }
             };
 
         let subquery_sql = build_internal_state_reader_subquery(
@@ -559,10 +585,16 @@ fn rewrite_table_factor(
             columns: vec![],
         };
 
-        if let Some(schema_key) = schema_key_opt.clone() {
-            accumulator.touch_internal_state_reader(schema_key, include_inheritance);
-        } else {
-            accumulator.touch_internal_state_reader_any(include_inheritance);
+        if !cache_tables.is_empty() {
+            if let Some(schema_key) = schema_key_opt.clone() {
+                accumulator.touch_internal_state_reader(schema_key, include_inheritance);
+            } else if schema_keys_used.is_empty() {
+                accumulator.touch_internal_state_reader_any(include_inheritance);
+            } else {
+                for schema_key in &schema_keys_used {
+                    accumulator.touch_internal_state_reader(schema_key.clone(), include_inheritance);
+                }
+            }
         }
 
         return Ok(Some(TableFactor::Derived {
@@ -1021,18 +1053,18 @@ fn build_internal_state_reader_subquery(
         )
     } else if include_cache {
         if let Some(cte) = cache_union_cte {
-            format!("WITH {} SELECT DISTINCT * FROM ({})", cte, union)
+            format!("WITH {} SELECT * FROM ({})", cte, union)
         } else if let Some(table_name) = cache_table_name_for_cte {
             format!(
-                "WITH cache_union AS ({}) SELECT DISTINCT * FROM ({})",
+                "WITH cache_union AS ({}) SELECT * FROM ({})",
                 build_cache_union(&table_name),
                 union
             )
         } else {
-            format!("SELECT DISTINCT * FROM ({})", union)
+            format!("SELECT * FROM ({})", union)
         }
     } else {
-        format!("SELECT DISTINCT * FROM ({})", union)
+        format!("SELECT * FROM ({})", union)
     }
 }
 
@@ -1065,7 +1097,7 @@ fn build_inheritance_cte(
 	);
 
     let with_clause = format!("WITH RECURSIVE {}", segments.join(",\n\n"));
-    format!("{}\nSELECT DISTINCT * FROM ({})", with_clause, union_sql)
+    format!("{}\nSELECT * FROM ({})", with_clause, union_sql)
 }
 
 fn build_cache_union(cache_table_name: &str) -> String {

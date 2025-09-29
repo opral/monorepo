@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/engine/functions/nano-id.bench.ts",
+      "groups": [
+        {
+          "fullName": "src/engine/functions/nano-id.bench.ts > nanoId deterministic mode",
+          "benchmarks": [
+            {
+              "id": "379983567_0_0",
+              "name": "nanoId - async deterministic generation",
+              "rank": 1,
+              "rme": 1.4920869838263993,
+              "samples": [],
+              "totalTime": 1559.6197900000006,
+              "min": 151.07758300000023,
+              "max": 160.47833300000002,
+              "hz": 6.411819126762937,
+              "period": 155.96197900000007,
+              "mean": 155.96197900000007,
+              "variance": 10.583773988026836,
+              "sd": 3.2532712748903734,
+              "sem": 1.028774707505333,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 2.327088388377063,
+              "p75": 159.37462499999992,
+              "p99": 160.47833300000002,
+              "p995": 160.47833300000002,
+              "p999": 160.47833300000002,
+              "sampleCount": 10,
+              "median": 155.73133350000012
+            },
+            {
+              "id": "379983567_0_1",
+              "name": "nanoIdSync - engine deterministic generation",
+              "rank": 2,
+              "rme": 2.920811337631867,
+              "samples": [],
+              "totalTime": 1703.412958,
+              "min": 163.2995409999994,
+              "max": 184.49833300000046,
+              "hz": 5.870567059523332,
+              "period": 170.34129579999998,
+              "mean": 170.34129579999998,
+              "variance": 48.37953653010714,
+              "sd": 6.955539988391062,
+              "sem": 2.1995348719696883,
+              "df": 9,
+              "critical": 2.262,
+              "moe": 4.975347880395435,
+              "p75": 175.77079200000026,
+              "p99": 184.49833300000046,
+              "p995": 184.49833300000046,
+              "p999": 184.49833300000046,
+              "sampleCount": 10,
+              "median": 167.8822295
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+- [ ] Detect point queries (schema/entity/version equality + LIMIT) in the rewriter
+- [ ] Record projected columns and enable a narrow (no writer/change joins) rewrite template
+- [ ] Limit inheritance handling to a targeted ancestor CTE rooted at the requested version
+- [ ] Implement ordered ancestor lookup (txn > untracked > cache) with early LIMIT
+- [ ] Directly target schema-specific cache tables when available; skip inheritance CTE when unused
+- [ ] Verify/create partial indexes on (version_id, entity_id) for txn/untracked/cache tables and descriptor id lookup
+- [ ] Add rewriter unit tests covering the narrow path precedence cases (txn vs cache, untracked vs cache, txn vs untracked, inheritance)
+- [ ] Assert EXPLAIN output for nano-id query lacks global scans/materialized joins; run nano-id bench after each change

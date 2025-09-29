@@ -54,7 +54,7 @@ export function isDeterministicModeSync(args: {
 	// Need to query from underlying state to avoid recursion
 	const [row] = engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("internal_state_vtable")
+			.selectFrom("internal_state_reader")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)

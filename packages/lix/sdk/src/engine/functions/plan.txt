@@ -1,0 +1,460 @@
+{
+  "original": {
+    "sql": "select json_extract(snapshot_content, '$.value.nano_id') as \"nano_id\" from \"internal_state_reader\" where \"entity_id\" = ? and \"schema_key\" = ? and \"snapshot_content\" is not null limit ?",
+    "parameters": [
+      "lix_deterministic_mode",
+      "lix_key_value",
+      1
+    ]
+  },
+  "expanded": {
+    "sql": "SELECT json_extract(snapshot_content, '$.value.nano_id') AS \"nano_id\" FROM (WITH RECURSIVE cache_union AS (SELECT * FROM internal_state_cache_lix_key_value), version_descriptor_base AS (SELECT json_extract(isc_v.snapshot_content, '$.id') AS version_id, json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id FROM internal_state_cache_lix_version_descriptor AS isc_v WHERE isc_v.inheritance_delete_marker = 0), version_inheritance (version_id, ancestor_version_id) AS (SELECT vdb.version_id, vdb.inherits_from_version_id FROM version_descriptor_base AS vdb WHERE vdb.inherits_from_version_id IS NOT NULL UNION SELECT vir.version_id, vdb.inherits_from_version_id FROM version_inheritance AS vir JOIN version_descriptor_base AS vdb ON vdb.version_id = vir.ancestor_version_id WHERE vdb.inherits_from_version_id IS NOT NULL), version_parent AS (SELECT vdb.version_id, vdb.inherits_from_version_id AS parent_version_id FROM version_descriptor_base AS vdb WHERE vdb.inherits_from_version_id IS NOT NULL) SELECT * FROM (SELECT 'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk, txn.entity_id, txn.schema_key, txn.file_id, txn.plugin_key, json(txn.snapshot_content) AS snapshot_content, txn.schema_version, txn.version_id, txn.created_at, txn.created_at AS updated_at, NULL AS inherited_from_version_id, txn.id AS change_id, txn.untracked, 'pending' AS commit_id, json(txn.metadata) AS metadata, ws_txn.writer_key FROM internal_transaction_state AS txn LEFT JOIN internal_state_writer AS ws_txn ON ws_txn.file_id = txn.file_id AND ws_txn.entity_id = txn.entity_id AND ws_txn.schema_key = txn.schema_key AND ws_txn.version_id = txn.version_id WHERE txn.schema_key = 'lix_key_value' UNION ALL SELECT 'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk, u.entity_id, u.schema_key, u.file_id, u.plugin_key, json(u.snapshot_content) AS snapshot_content, u.schema_version, u.version_id, u.created_at, u.updated_at, NULL AS inherited_from_version_id, 'untracked' AS change_id, 1 AS untracked, 'untracked' AS commit_id, NULL AS metadata, ws_untracked.writer_key FROM internal_state_all_untracked AS u LEFT JOIN internal_state_writer AS ws_untracked ON ws_untracked.file_id = u.file_id AND ws_untracked.entity_id = u.entity_id AND ws_untracked.schema_key = u.schema_key AND ws_untracked.version_id = u.version_id WHERE u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL AND u.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = u.version_id AND t.file_id = u.file_id AND t.schema_key = u.schema_key AND t.entity_id = u.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = u.version_id AND child_unt.file_id = u.file_id AND child_unt.schema_key = u.schema_key AND child_unt.entity_id = u.entity_id AND child_unt.rowid <> u.rowid) UNION ALL SELECT 'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk, c.entity_id, c.schema_key, c.file_id, c.plugin_key, json(c.snapshot_content) AS snapshot_content, c.schema_version, c.version_id, c.created_at, c.updated_at, c.inherited_from_version_id, c.change_id, 0 AS untracked, c.commit_id, ch.metadata AS metadata, ws_cache.writer_key FROM internal_state_cache_lix_key_value AS c LEFT JOIN change AS ch ON ch.id = c.change_id LEFT JOIN internal_state_writer AS ws_cache ON ws_cache.file_id = c.file_id AND ws_cache.entity_id = c.entity_id AND ws_cache.schema_key = c.schema_key AND ws_cache.version_id = c.version_id WHERE ((c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)) AND c.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = c.version_id AND t.file_id = c.file_id AND t.schema_key = c.schema_key AND t.entity_id = c.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS u WHERE u.version_id = c.version_id AND u.file_id = c.file_id AND u.schema_key = c.schema_key AND u.entity_id = c.entity_id) UNION ALL SELECT 'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, isc.entity_id, isc.schema_key, isc.file_id, isc.plugin_key, json(isc.snapshot_content) AS snapshot_content, isc.schema_version, vi.version_id, isc.created_at, isc.updated_at, isc.version_id AS inherited_from_version_id, isc.change_id, 0 AS untracked, isc.commit_id, ch.metadata AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_inheritance AS vi JOIN internal_state_cache_lix_key_value AS isc ON isc.version_id = vi.ancestor_version_id LEFT JOIN change AS ch ON ch.id = isc.change_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = isc.file_id AND ws_child.entity_id = isc.entity_id AND ws_child.schema_key = isc.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = isc.file_id AND ws_parent.entity_id = isc.entity_id AND ws_parent.schema_key = isc.schema_key AND ws_parent.version_id = isc.version_id WHERE isc.inheritance_delete_marker = 0 AND isc.snapshot_content IS NOT NULL AND isc.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = vi.version_id AND t.file_id = isc.file_id AND t.schema_key = isc.schema_key AND t.entity_id = isc.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = isc.file_id AND child_isc.schema_key = isc.schema_key AND child_isc.entity_id = isc.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = isc.file_id AND child_unt.schema_key = isc.schema_key AND child_unt.entity_id = isc.entity_id) UNION ALL SELECT 'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key, json(unt.snapshot_content) AS snapshot_content, unt.schema_version, vi.version_id, unt.created_at, unt.updated_at, unt.version_id AS inherited_from_version_id, 'untracked' AS change_id, 1 AS untracked, 'untracked' AS commit_id, NULL AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_inheritance AS vi JOIN internal_state_all_untracked AS unt ON unt.version_id = vi.ancestor_version_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = unt.file_id AND ws_child.entity_id = unt.entity_id AND ws_child.schema_key = unt.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = unt.file_id AND ws_parent.entity_id = unt.entity_id AND ws_parent.schema_key = unt.schema_key AND ws_parent.version_id = unt.version_id WHERE unt.inheritance_delete_marker = 0 AND unt.snapshot_content IS NOT NULL AND unt.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = vi.version_id AND t.file_id = unt.file_id AND t.schema_key = unt.schema_key AND t.entity_id = unt.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = unt.file_id AND child_isc.schema_key = unt.schema_key AND child_isc.entity_id = unt.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = unt.file_id AND child_unt.schema_key = unt.schema_key AND child_unt.entity_id = unt.entity_id AND child_unt.rowid <> unt.rowid) UNION ALL SELECT 'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, txn.entity_id, txn.schema_key, txn.file_id, txn.plugin_key, json(txn.snapshot_content) AS snapshot_content, txn.schema_version, vi.version_id, txn.created_at, txn.created_at AS updated_at, vi.parent_version_id AS inherited_from_version_id, txn.id AS change_id, txn.untracked, 'pending' AS commit_id, json(txn.metadata) AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_parent AS vi JOIN internal_transaction_state AS txn ON txn.version_id = vi.parent_version_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = txn.file_id AND ws_child.entity_id = txn.entity_id AND ws_child.schema_key = txn.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = txn.file_id AND ws_parent.entity_id = txn.entity_id AND ws_parent.schema_key = txn.schema_key AND ws_parent.version_id = vi.parent_version_id WHERE vi.parent_version_id IS NOT NULL AND txn.snapshot_content IS NOT NULL AND txn.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS child_txn WHERE child_txn.version_id = vi.version_id AND child_txn.file_id = txn.file_id AND child_txn.schema_key = txn.schema_key AND child_txn.entity_id = txn.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = txn.file_id AND child_isc.schema_key = txn.schema_key AND child_isc.entity_id = txn.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = txn.file_id AND child_unt.schema_key = txn.schema_key AND child_unt.entity_id = txn.entity_id))) AS internal_state_reader WHERE \"entity_id\" = ? AND \"schema_key\" = ? AND \"snapshot_content\" IS NOT NULL LIMIT ?",
+    "parameters": [
+      "lix_deterministic_mode",
+      "lix_key_value",
+      1
+    ]
+  },
+  "rewritten": {
+    "sql": "SELECT json_extract(snapshot_content, '$.value.nano_id') AS \"nano_id\" FROM (WITH RECURSIVE cache_union AS (SELECT * FROM internal_state_cache_lix_key_value), version_descriptor_base AS (SELECT json_extract(isc_v.snapshot_content, '$.id') AS version_id, json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id FROM internal_state_cache_lix_version_descriptor AS isc_v WHERE isc_v.inheritance_delete_marker = 0), version_inheritance (version_id, ancestor_version_id) AS (SELECT vdb.version_id, vdb.inherits_from_version_id FROM version_descriptor_base AS vdb WHERE vdb.inherits_from_version_id IS NOT NULL UNION SELECT vir.version_id, vdb.inherits_from_version_id FROM version_inheritance AS vir JOIN version_descriptor_base AS vdb ON vdb.version_id = vir.ancestor_version_id WHERE vdb.inherits_from_version_id IS NOT NULL), version_parent AS (SELECT vdb.version_id, vdb.inherits_from_version_id AS parent_version_id FROM version_descriptor_base AS vdb WHERE vdb.inherits_from_version_id IS NOT NULL) SELECT * FROM (SELECT 'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk, txn.entity_id, txn.schema_key, txn.file_id, txn.plugin_key, json(txn.snapshot_content) AS snapshot_content, txn.schema_version, txn.version_id, txn.created_at, txn.created_at AS updated_at, NULL AS inherited_from_version_id, txn.id AS change_id, txn.untracked, 'pending' AS commit_id, json(txn.metadata) AS metadata, ws_txn.writer_key FROM internal_transaction_state AS txn LEFT JOIN internal_state_writer AS ws_txn ON ws_txn.file_id = txn.file_id AND ws_txn.entity_id = txn.entity_id AND ws_txn.schema_key = txn.schema_key AND ws_txn.version_id = txn.version_id WHERE txn.schema_key = 'lix_key_value' UNION ALL SELECT 'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk, u.entity_id, u.schema_key, u.file_id, u.plugin_key, json(u.snapshot_content) AS snapshot_content, u.schema_version, u.version_id, u.created_at, u.updated_at, NULL AS inherited_from_version_id, 'untracked' AS change_id, 1 AS untracked, 'untracked' AS commit_id, NULL AS metadata, ws_untracked.writer_key FROM internal_state_all_untracked AS u LEFT JOIN internal_state_writer AS ws_untracked ON ws_untracked.file_id = u.file_id AND ws_untracked.entity_id = u.entity_id AND ws_untracked.schema_key = u.schema_key AND ws_untracked.version_id = u.version_id WHERE u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL AND u.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = u.version_id AND t.file_id = u.file_id AND t.schema_key = u.schema_key AND t.entity_id = u.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = u.version_id AND child_unt.file_id = u.file_id AND child_unt.schema_key = u.schema_key AND child_unt.entity_id = u.entity_id AND child_unt.rowid <> u.rowid) UNION ALL SELECT 'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk, c.entity_id, c.schema_key, c.file_id, c.plugin_key, json(c.snapshot_content) AS snapshot_content, c.schema_version, c.version_id, c.created_at, c.updated_at, c.inherited_from_version_id, c.change_id, 0 AS untracked, c.commit_id, ch.metadata AS metadata, ws_cache.writer_key FROM internal_state_cache_lix_key_value AS c LEFT JOIN change AS ch ON ch.id = c.change_id LEFT JOIN internal_state_writer AS ws_cache ON ws_cache.file_id = c.file_id AND ws_cache.entity_id = c.entity_id AND ws_cache.schema_key = c.schema_key AND ws_cache.version_id = c.version_id WHERE ((c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)) AND c.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = c.version_id AND t.file_id = c.file_id AND t.schema_key = c.schema_key AND t.entity_id = c.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS u WHERE u.version_id = c.version_id AND u.file_id = c.file_id AND u.schema_key = c.schema_key AND u.entity_id = c.entity_id) UNION ALL SELECT 'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, isc.entity_id, isc.schema_key, isc.file_id, isc.plugin_key, json(isc.snapshot_content) AS snapshot_content, isc.schema_version, vi.version_id, isc.created_at, isc.updated_at, isc.version_id AS inherited_from_version_id, isc.change_id, 0 AS untracked, isc.commit_id, ch.metadata AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_inheritance AS vi JOIN internal_state_cache_lix_key_value AS isc ON isc.version_id = vi.ancestor_version_id LEFT JOIN change AS ch ON ch.id = isc.change_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = isc.file_id AND ws_child.entity_id = isc.entity_id AND ws_child.schema_key = isc.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = isc.file_id AND ws_parent.entity_id = isc.entity_id AND ws_parent.schema_key = isc.schema_key AND ws_parent.version_id = isc.version_id WHERE isc.inheritance_delete_marker = 0 AND isc.snapshot_content IS NOT NULL AND isc.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = vi.version_id AND t.file_id = isc.file_id AND t.schema_key = isc.schema_key AND t.entity_id = isc.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = isc.file_id AND child_isc.schema_key = isc.schema_key AND child_isc.entity_id = isc.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = isc.file_id AND child_unt.schema_key = isc.schema_key AND child_unt.entity_id = isc.entity_id) UNION ALL SELECT 'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key, json(unt.snapshot_content) AS snapshot_content, unt.schema_version, vi.version_id, unt.created_at, unt.updated_at, unt.version_id AS inherited_from_version_id, 'untracked' AS change_id, 1 AS untracked, 'untracked' AS commit_id, NULL AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_inheritance AS vi JOIN internal_state_all_untracked AS unt ON unt.version_id = vi.ancestor_version_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = unt.file_id AND ws_child.entity_id = unt.entity_id AND ws_child.schema_key = unt.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = unt.file_id AND ws_parent.entity_id = unt.entity_id AND ws_parent.schema_key = unt.schema_key AND ws_parent.version_id = unt.version_id WHERE unt.inheritance_delete_marker = 0 AND unt.snapshot_content IS NOT NULL AND unt.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS t WHERE t.version_id = vi.version_id AND t.file_id = unt.file_id AND t.schema_key = unt.schema_key AND t.entity_id = unt.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = unt.file_id AND child_isc.schema_key = unt.schema_key AND child_isc.entity_id = unt.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = unt.file_id AND child_unt.schema_key = unt.schema_key AND child_unt.entity_id = unt.entity_id AND child_unt.rowid <> unt.rowid) UNION ALL SELECT 'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk, txn.entity_id, txn.schema_key, txn.file_id, txn.plugin_key, json(txn.snapshot_content) AS snapshot_content, txn.schema_version, vi.version_id, txn.created_at, txn.created_at AS updated_at, vi.parent_version_id AS inherited_from_version_id, txn.id AS change_id, txn.untracked, 'pending' AS commit_id, json(txn.metadata) AS metadata, COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key FROM version_parent AS vi JOIN internal_transaction_state AS txn ON txn.version_id = vi.parent_version_id LEFT JOIN internal_state_writer AS ws_child ON ws_child.file_id = txn.file_id AND ws_child.entity_id = txn.entity_id AND ws_child.schema_key = txn.schema_key AND ws_child.version_id = vi.version_id LEFT JOIN internal_state_writer AS ws_parent ON ws_parent.file_id = txn.file_id AND ws_parent.entity_id = txn.entity_id AND ws_parent.schema_key = txn.schema_key AND ws_parent.version_id = vi.parent_version_id WHERE vi.parent_version_id IS NOT NULL AND txn.snapshot_content IS NOT NULL AND txn.schema_key = 'lix_key_value' AND NOT EXISTS (SELECT 1 FROM internal_transaction_state AS child_txn WHERE child_txn.version_id = vi.version_id AND child_txn.file_id = txn.file_id AND child_txn.schema_key = txn.schema_key AND child_txn.entity_id = txn.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_cache_lix_key_value AS child_isc WHERE child_isc.version_id = vi.version_id AND child_isc.file_id = txn.file_id AND child_isc.schema_key = txn.schema_key AND child_isc.entity_id = txn.entity_id) AND NOT EXISTS (SELECT 1 FROM internal_state_all_untracked AS child_unt WHERE child_unt.version_id = vi.version_id AND child_unt.file_id = txn.file_id AND child_unt.schema_key = txn.schema_key AND child_unt.entity_id = txn.entity_id))) AS internal_state_reader WHERE \"entity_id\" = ? AND \"schema_key\" = ? AND \"snapshot_content\" IS NOT NULL LIMIT ?",
+    "parameters": [
+      "lix_deterministic_mode",
+      "lix_key_value",
+      1
+    ]
+  },
+  "plan": [
+    {
+      "id": 2,
+      "parent": 0,
+      "notused": 0,
+      "detail": "CO-ROUTINE (subquery-24)"
+    },
+    {
+      "id": 3,
+      "parent": 2,
+      "notused": 0,
+      "detail": "COMPOUND QUERY"
+    },
+    {
+      "id": 4,
+      "parent": 3,
+      "notused": 0,
+      "detail": "LEFT-MOST SUBQUERY"
+    },
+    {
+      "id": 10,
+      "parent": 4,
+      "notused": 62,
+      "detail": "SEARCH txn USING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=?)"
+    },
+    {
+      "id": 41,
+      "parent": 3,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 47,
+      "parent": 41,
+      "notused": 61,
+      "detail": "SEARCH u USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+    },
+    {
+      "id": 65,
+      "parent": 41,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 7"
+    },
+    {
+      "id": 69,
+      "parent": 65,
+      "notused": 45,
+      "detail": "SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)"
+    },
+    {
+      "id": 83,
+      "parent": 41,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 8"
+    },
+    {
+      "id": 87,
+      "parent": 83,
+      "notused": 45,
+      "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 122,
+      "parent": 3,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 125,
+      "parent": 122,
+      "notused": 0,
+      "detail": "MATERIALIZE change"
+    },
+    {
+      "id": 127,
+      "parent": 125,
+      "notused": 0,
+      "detail": "COMPOUND QUERY"
+    },
+    {
+      "id": 128,
+      "parent": 127,
+      "notused": 0,
+      "detail": "LEFT-MOST SUBQUERY"
+    },
+    {
+      "id": 132,
+      "parent": 128,
+      "notused": 216,
+      "detail": "SCAN c"
+    },
+    {
+      "id": 134,
+      "parent": 128,
+      "notused": 47,
+      "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+    },
+    {
+      "id": 159,
+      "parent": 127,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 161,
+      "parent": 159,
+      "notused": 216,
+      "detail": "SCAN t"
+    },
+    {
+      "id": 184,
+      "parent": 122,
+      "notused": 22,
+      "detail": "SEARCH c USING PRIMARY KEY (entity_id=?)"
+    },
+    {
+      "id": 204,
+      "parent": 122,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 10"
+    },
+    {
+      "id": 208,
+      "parent": 204,
+      "notused": 45,
+      "detail": "SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)"
+    },
+    {
+      "id": 222,
+      "parent": 122,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 11"
+    },
+    {
+      "id": 226,
+      "parent": 222,
+      "notused": 45,
+      "detail": "SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 241,
+      "parent": 122,
+      "notused": 222,
+      "detail": "SCAN ch LEFT-JOIN"
+    },
+    {
+      "id": 271,
+      "parent": 3,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 274,
+      "parent": 271,
+      "notused": 0,
+      "detail": "MATERIALIZE version_inheritance"
+    },
+    {
+      "id": 279,
+      "parent": 274,
+      "notused": 0,
+      "detail": "SETUP"
+    },
+    {
+      "id": 281,
+      "parent": 279,
+      "notused": 216,
+      "detail": "SCAN isc_v"
+    },
+    {
+      "id": 309,
+      "parent": 274,
+      "notused": 0,
+      "detail": "RECURSIVE STEP"
+    },
+    {
+      "id": 312,
+      "parent": 309,
+      "notused": 216,
+      "detail": "SCAN vir"
+    },
+    {
+      "id": 313,
+      "parent": 309,
+      "notused": 62,
+      "detail": "SEARCH isc_v USING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
+    },
+    {
+      "id": 339,
+      "parent": 271,
+      "notused": 0,
+      "detail": "MATERIALIZE change"
+    },
+    {
+      "id": 341,
+      "parent": 339,
+      "notused": 0,
+      "detail": "COMPOUND QUERY"
+    },
+    {
+      "id": 342,
+      "parent": 341,
+      "notused": 0,
+      "detail": "LEFT-MOST SUBQUERY"
+    },
+    {
+      "id": 346,
+      "parent": 342,
+      "notused": 216,
+      "detail": "SCAN c"
+    },
+    {
+      "id": 348,
+      "parent": 342,
+      "notused": 47,
+      "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+    },
+    {
+      "id": 373,
+      "parent": 341,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 375,
+      "parent": 373,
+      "notused": 216,
+      "detail": "SCAN t"
+    },
+    {
+      "id": 400,
+      "parent": 271,
+      "notused": 22,
+      "detail": "SEARCH isc USING PRIMARY KEY (entity_id=?)"
+    },
+    {
+      "id": 417,
+      "parent": 271,
+      "notused": 217,
+      "detail": "SCAN vi"
+    },
+    {
+      "id": 423,
+      "parent": 271,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 13"
+    },
+    {
+      "id": 427,
+      "parent": 423,
+      "notused": 45,
+      "detail": "SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)"
+    },
+    {
+      "id": 443,
+      "parent": 271,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 14"
+    },
+    {
+      "id": 447,
+      "parent": 443,
+      "notused": 39,
+      "detail": "SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 465,
+      "parent": 271,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 15"
+    },
+    {
+      "id": 469,
+      "parent": 465,
+      "notused": 45,
+      "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 502,
+      "parent": 271,
+      "notused": 53,
+      "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
+    },
+    {
+      "id": 509,
+      "parent": 271,
+      "notused": 45,
+      "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 520,
+      "parent": 271,
+      "notused": 45,
+      "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 559,
+      "parent": 3,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 569,
+      "parent": 559,
+      "notused": 61,
+      "detail": "SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+    },
+    {
+      "id": 586,
+      "parent": 559,
+      "notused": 216,
+      "detail": "SCAN vi"
+    },
+    {
+      "id": 592,
+      "parent": 559,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 17"
+    },
+    {
+      "id": 596,
+      "parent": 592,
+      "notused": 45,
+      "detail": "SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)"
+    },
+    {
+      "id": 612,
+      "parent": 559,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 18"
+    },
+    {
+      "id": 616,
+      "parent": 612,
+      "notused": 39,
+      "detail": "SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 634,
+      "parent": 559,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 19"
+    },
+    {
+      "id": 638,
+      "parent": 634,
+      "notused": 45,
+      "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 656,
+      "parent": 559,
+      "notused": 45,
+      "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 667,
+      "parent": 559,
+      "notused": 45,
+      "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 702,
+      "parent": 3,
+      "notused": 0,
+      "detail": "UNION ALL"
+    },
+    {
+      "id": 712,
+      "parent": 702,
+      "notused": 24,
+      "detail": "SCAN isc_v USING INDEX idx_internal_state_cache_lix_version_descriptor_inherits_from"
+    },
+    {
+      "id": 724,
+      "parent": 702,
+      "notused": 62,
+      "detail": "SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)"
+    },
+    {
+      "id": 742,
+      "parent": 702,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 21"
+    },
+    {
+      "id": 746,
+      "parent": 742,
+      "notused": 45,
+      "detail": "SEARCH child_txn USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)"
+    },
+    {
+      "id": 764,
+      "parent": 702,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 22"
+    },
+    {
+      "id": 768,
+      "parent": 764,
+      "notused": 39,
+      "detail": "SEARCH child_isc USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 788,
+      "parent": 702,
+      "notused": 0,
+      "detail": "CORRELATED SCALAR SUBQUERY 23"
+    },
+    {
+      "id": 792,
+      "parent": 788,
+      "notused": 45,
+      "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    },
+    {
+      "id": 809,
+      "parent": 702,
+      "notused": 45,
+      "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 823,
+      "parent": 702,
+      "notused": 45,
+      "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    },
+    {
+      "id": 865,
+      "parent": 0,
+      "notused": 261,
+      "detail": "SCAN (subquery-24)"
+    }
+  ]
+}
