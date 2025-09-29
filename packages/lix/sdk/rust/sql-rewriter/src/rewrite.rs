@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use sqlparser::ast::{
-    BinaryOperator, Expr, Ident, Query, Select, SetExpr, Statement, TableAlias, TableFactor,
-    TableWithJoins,
+    BinaryOperator, Expr, Ident, Query, Select, SelectItem, SetExpr, Statement, TableAlias,
+    TableFactor, TableWithJoins,
 };
 use sqlparser::dialect::SQLiteDialect;
 use sqlparser::parser::Parser;
@@ -374,10 +374,28 @@ fn rewrite_select(
 ) -> Result<bool, RewriteError> {
     let mut changed = false;
 
+    let block_writer_pruning = select.distinct.is_some()
+        || select.top.is_some()
+        || !select.lateral_views.is_empty()
+        || matches!(&select.group_by, sqlparser::ast::GroupByExpr::All)
+        || matches!(
+            &select.group_by,
+            sqlparser::ast::GroupByExpr::Expressions(exprs) if !exprs.is_empty()
+        )
+        || !select.cluster_by.is_empty()
+        || !select.distribute_by.is_empty()
+        || !select.sort_by.is_empty()
+        || select.having.is_some()
+        || !select.named_window.is_empty()
+        || select.qualify.is_some()
+        || select.value_table_mode.is_some();
+
     for table_with_joins in &mut select.from {
         if rewrite_table_with_joins(
             table_with_joins,
+            &select.projection,
             select.selection.as_ref(),
+            block_writer_pruning,
             context,
             phase,
             accumulator,
@@ -393,7 +411,9 @@ fn rewrite_select(
 
 fn rewrite_table_with_joins(
     table_with_joins: &mut TableWithJoins,
+    projection: &[SelectItem],
     selection: Option<&Expr>,
+    block_writer_pruning: bool,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -404,7 +424,9 @@ fn rewrite_table_with_joins(
 
     if let Some(new_relation) = rewrite_table_factor(
         &table_with_joins.relation,
+        projection,
         selection,
+        block_writer_pruning,
         context,
         phase,
         accumulator,
@@ -419,7 +441,9 @@ fn rewrite_table_with_joins(
         if let Some(new_relation) =
             rewrite_table_factor(
                 &join.relation,
+                projection,
                 selection,
+                block_writer_pruning,
                 context,
                 phase,
                 accumulator,
@@ -437,7 +461,9 @@ fn rewrite_table_with_joins(
 
 fn rewrite_table_factor(
     factor: &TableFactor,
+    projection: &[SelectItem],
     selection: Option<&Expr>,
+    block_writer_pruning: bool,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -457,6 +483,8 @@ fn rewrite_table_factor(
 
         let include_inheritance = context.should_include_inheritance();
         let mut schema_keys_used: Vec<String> = Vec::new();
+
+        let include_writer = should_include_writer(projection, selection, block_writer_pruning);
 
         let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
             match schema_filters.len() {
@@ -499,6 +527,7 @@ fn rewrite_table_factor(
             schema_key_opt.as_deref(),
             &cache_tables,
             include_inheritance,
+            include_writer,
         );
 
         let mut subquery = parse_select_query(&subquery_sql)?;
@@ -530,6 +559,8 @@ fn rewrite_table_factor(
         let include_inheritance = context.should_include_inheritance();
         let mut schema_keys_used: Vec<String> = Vec::new();
 
+        let include_writer = should_include_writer(projection, selection, block_writer_pruning);
+
         let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
             match schema_filters.len() {
                 0 => {
@@ -571,6 +602,7 @@ fn rewrite_table_factor(
             schema_key_opt.as_deref(),
             &cache_tables,
             include_inheritance,
+            include_writer,
         );
 
         let mut subquery = parse_select_query(&subquery_sql)?;
@@ -860,6 +892,49 @@ fn collect_schema_filters_recursive(
     }
 }
 
+fn should_include_writer(
+    projection: &[SelectItem],
+    selection: Option<&Expr>,
+    block_writer_pruning: bool,
+) -> bool {
+    if block_writer_pruning {
+        return true;
+    }
+
+    if projection_mentions_column(projection, "writer_key") {
+        return true;
+    }
+
+    if selection_mentions_column(selection, "writer_key") {
+        return true;
+    }
+
+    false
+}
+
+fn projection_mentions_column(projection: &[SelectItem], column: &str) -> bool {
+    let needle = column.to_ascii_lowercase();
+
+    projection.iter().any(|item| match item {
+        SelectItem::Wildcard(_) | SelectItem::QualifiedWildcard(_, _) => true,
+        SelectItem::UnnamedExpr(expr) => expr_mentions_column(expr, &needle),
+        SelectItem::ExprWithAlias { expr, .. } => expr_mentions_column(expr, &needle),
+    })
+}
+
+fn selection_mentions_column(selection: Option<&Expr>, column: &str) -> bool {
+    let needle = column.to_ascii_lowercase();
+    selection
+        .map(|expr| expr_mentions_column(expr, &needle))
+        .unwrap_or(false)
+}
+
+fn expr_mentions_column(expr: &Expr, needle: &str) -> bool {
+    expr.to_string()
+        .to_ascii_lowercase()
+        .contains(needle)
+}
+
 fn consume_placeholders(expr: &Expr, resolver: &mut PlaceholderResolver) {
     match expr {
         Expr::Value(sqlparser::ast::Value::Placeholder(_)) => {
@@ -987,12 +1062,13 @@ fn build_internal_state_reader_subquery(
     schema_key: Option<&str>,
     cache_tables: &[String],
     include_inheritance: bool,
+    include_writer: bool,
 ) -> String {
     let include_cache = !cache_tables.is_empty();
 
     let mut segments = vec![
-        build_transaction_branch(schema_key),
-        build_untracked_branch(schema_key),
+        build_transaction_branch(schema_key, include_writer),
+        build_untracked_branch(schema_key, include_writer),
     ];
 
     let mut cache_alias: Option<String> = None;
@@ -1003,9 +1079,17 @@ fn build_internal_state_reader_subquery(
         if let Some(key) = schema_key {
             let table_name = cache_tables[0].clone();
             let cache_identifier = format_identifier(&table_name);
-            segments.push(build_cache_branch(Some(key), &cache_identifier));
+            segments.push(build_cache_branch(
+                Some(key),
+                &cache_identifier,
+                include_writer,
+            ));
             if include_inheritance {
-                segments.push(build_cache_inheritance_branch(Some(key), &cache_identifier));
+                segments.push(build_cache_inheritance_branch(
+                    Some(key),
+                    &cache_identifier,
+                    include_writer,
+                ));
             }
             cache_alias = Some(cache_identifier);
             cache_table_name_for_cte = Some(table_name);
@@ -1016,9 +1100,17 @@ fn build_internal_state_reader_subquery(
                 .map(|name| build_cache_union(name))
                 .collect::<Vec<_>>()
                 .join("\nUNION ALL\n");
-            segments.push(build_cache_branch(None, &cache_identifier));
+            segments.push(build_cache_branch(
+                None,
+                &cache_identifier,
+                include_writer,
+            ));
             if include_inheritance {
-                segments.push(build_cache_inheritance_branch(None, &cache_identifier));
+                segments.push(build_cache_inheritance_branch(
+                    None,
+                    &cache_identifier,
+                    include_writer,
+                ));
             }
             cache_union_cte = Some(format!("cache_union AS ({})", union_body));
             cache_alias = Some(cache_identifier);
@@ -1030,11 +1122,13 @@ fn build_internal_state_reader_subquery(
             schema_key,
             include_cache,
             cache_alias.as_deref(),
+            include_writer,
         ));
         segments.push(build_inherited_txn_branch(
             schema_key,
             include_cache,
             cache_alias.as_deref(),
+            include_writer,
         ));
     }
 
@@ -1116,57 +1210,125 @@ fn join_with_union(segments: &[String]) -> String {
         .join("\n\nUNION ALL\n\n")
 }
 
-fn build_transaction_branch(schema_key: Option<&str>) -> String {
+fn build_transaction_branch(schema_key: Option<&str>, include_writer: bool) -> String {
     let filter = schema_key
         .map(|key| format!("WHERE txn.schema_key = '{}'", escape_single_quotes(key)))
         .unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "ws_txn.writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_txn ON\n\tws_txn.file_id = txn.file_id AND\n\tws_txn.entity_id = txn.entity_id AND\n\tws_txn.schema_key = txn.schema_key AND\n\tws_txn.version_id = txn.version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,\n\ttxn.entity_id,\n\ttxn.schema_key,\n\ttxn.file_id,\n\ttxn.plugin_key,\n\tjson(txn.snapshot_content) AS snapshot_content,\n\ttxn.schema_version,\n\ttxn.version_id,\n\ttxn.created_at,\n\ttxn.created_at AS updated_at,\n\tNULL AS inherited_from_version_id,\n\ttxn.id AS change_id,\n\ttxn.untracked,\n\t'pending' AS commit_id,\n\tjson(txn.metadata) AS metadata,\n\tws_txn.writer_key\nFROM internal_transaction_state txn\nLEFT JOIN internal_state_writer ws_txn ON\n\tws_txn.file_id = txn.file_id AND\n\tws_txn.entity_id = txn.entity_id AND\n\tws_txn.schema_key = txn.schema_key AND\n\tws_txn.version_id = txn.version_id\n{}",
-		filter
-	)
+        "SELECT\n\t'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,\n\ttxn.entity_id,\n\ttxn.schema_key,\n\ttxn.file_id,\n\ttxn.plugin_key,\n\tjson(txn.snapshot_content) AS snapshot_content,\n\ttxn.schema_version,\n\ttxn.version_id,\n\ttxn.created_at,\n\ttxn.created_at AS updated_at,\n\tNULL AS inherited_from_version_id,\n\ttxn.id AS change_id,\n\ttxn.untracked,\n\t'pending' AS commit_id,\n\tjson(txn.metadata) AS metadata,\n\t{writer_select}\nFROM internal_transaction_state txn\n{writer_join}{filter}",
+        writer_select = writer_select,
+        writer_join = writer_join,
+        filter = filter
+    )
 }
 
-fn build_untracked_branch(schema_key: Option<&str>) -> String {
+fn build_untracked_branch(schema_key: Option<&str>, include_writer: bool) -> String {
     let filter = schema_key
         .map(|key| format!("AND u.schema_key = '{}'", escape_single_quotes(key)))
         .unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "ws_untracked.writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_untracked ON\n\tws_untracked.file_id = u.file_id AND\n\tws_untracked.entity_id = u.entity_id AND\n\tws_untracked.schema_key = u.schema_key AND\n\tws_untracked.version_id = u.version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,\n\tu.entity_id,\n\tu.schema_key,\n\tu.file_id,\n\tu.plugin_key,\n\tjson(u.snapshot_content) AS snapshot_content,\n\tu.schema_version,\n\tu.version_id,\n\tu.created_at,\n\tu.updated_at,\n\tNULL AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tws_untracked.writer_key\nFROM internal_state_all_untracked u\nLEFT JOIN internal_state_writer ws_untracked ON\n\tws_untracked.file_id = u.file_id AND\n\tws_untracked.entity_id = u.entity_id AND\n\tws_untracked.schema_key = u.schema_key AND\n\tws_untracked.version_id = u.version_id\nWHERE u.inheritance_delete_marker = 0\n\tAND u.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = u.version_id\n\t\tAND t.file_id = u.file_id\n\t\tAND t.schema_key = u.schema_key\n\t\tAND t.entity_id = u.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = u.version_id\n\t\tAND child_unt.file_id = u.file_id\n\t\tAND child_unt.schema_key = u.schema_key\n\t\tAND child_unt.entity_id = u.entity_id\n		AND child_unt.rowid != u.rowid\n)",
-		filter
-	)
+        "SELECT\n\t'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,\n\tu.entity_id,\n\tu.schema_key,\n\tu.file_id,\n\tu.plugin_key,\n\tjson(u.snapshot_content) AS snapshot_content,\n\tu.schema_version,\n\tu.version_id,\n\tu.created_at,\n\tu.updated_at,\n\tNULL AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\t{writer_select}\nFROM internal_state_all_untracked u\n{writer_join}WHERE u.inheritance_delete_marker = 0\n\tAND u.snapshot_content IS NOT NULL\n\t{filter}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = u.version_id\n\t\tAND t.file_id = u.file_id\n\t\tAND t.schema_key = u.schema_key\n\t\tAND t.entity_id = u.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = u.version_id\n\t\tAND child_unt.file_id = u.file_id\n\t\tAND child_unt.schema_key = u.schema_key\n\t\tAND child_unt.entity_id = u.entity_id\n		AND child_unt.rowid != u.rowid\n)",
+        writer_select = writer_select,
+        writer_join = writer_join,
+        filter = filter
+    )
 }
 
-fn build_cache_branch(schema_key: Option<&str>, cache_table: &str) -> String {
+fn build_cache_branch(
+    schema_key: Option<&str>,
+    cache_table: &str,
+    include_writer: bool,
+) -> String {
     let filter = schema_key
         .map(|key| format!("AND c.schema_key = '{}'", escape_single_quotes(key)))
         .unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "ws_cache.writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_cache ON\n\tws_cache.file_id = c.file_id AND\n\tws_cache.entity_id = c.entity_id AND\n\tws_cache.schema_key = c.schema_key AND\n\tws_cache.version_id = c.version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,\n\tc.entity_id,\n\tc.schema_key,\n\tc.file_id,\n\tc.plugin_key,\n\tjson(c.snapshot_content) AS snapshot_content,\n\tc.schema_version,\n\tc.version_id,\n\tc.created_at,\n\tc.updated_at,\n\tc.inherited_from_version_id,\n\tc.change_id,\n\t0 AS untracked,\n\tc.commit_id,\n\tch.metadata AS metadata,\n\tws_cache.writer_key\nFROM {} AS c\nLEFT JOIN change ch ON ch.id = c.change_id\nLEFT JOIN internal_state_writer ws_cache ON\n\tws_cache.file_id = c.file_id AND\n\tws_cache.entity_id = c.entity_id AND\n\tws_cache.schema_key = c.schema_key AND\n\tws_cache.version_id = c.version_id\nWHERE (\n\t(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR\n\t(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)\n)\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = c.version_id\n\t\tAND t.file_id = c.file_id\n\t\tAND t.schema_key = c.schema_key\n\t\tAND t.entity_id = c.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked u\n\tWHERE u.version_id = c.version_id\n\t\tAND u.file_id = c.file_id\n\t\tAND u.schema_key = c.schema_key\n\t\tAND u.entity_id = c.entity_id\n)",
-		cache_table,
-		filter
-	)
+        "SELECT\n\t'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,\n\tc.entity_id,\n\tc.schema_key,\n\tc.file_id,\n\tc.plugin_key,\n\tjson(c.snapshot_content) AS snapshot_content,\n\tc.schema_version,\n\tc.version_id,\n\tc.created_at,\n\tc.updated_at,\n\tc.inherited_from_version_id,\n\tc.change_id,\n\t0 AS untracked,\n\tc.commit_id,\n\tch.metadata AS metadata,\n\t{writer_select}\nFROM {cache_table} AS c\nLEFT JOIN change ch ON ch.id = c.change_id\n{writer_join}WHERE (\n\t(c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR\n\t(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)\n)\n\t{filter}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = c.version_id\n\t\tAND t.file_id = c.file_id\n\t\tAND t.schema_key = c.schema_key\n\t\tAND t.entity_id = c.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked u\n\tWHERE u.version_id = c.version_id\n\t\tAND u.file_id = c.file_id\n\t\tAND u.schema_key = c.schema_key\n\t\tAND u.entity_id = c.entity_id\n)",
+        cache_table = cache_table,
+        writer_select = writer_select,
+        writer_join = writer_join,
+        filter = filter
+    )
 }
 
-fn build_cache_inheritance_branch(schema_key: Option<&str>, cache_table: &str) -> String {
+fn build_cache_inheritance_branch(
+    schema_key: Option<&str>,
+    cache_table: &str,
+    include_writer: bool,
+) -> String {
     let filter = schema_key
         .map(|key| format!("AND isc.schema_key = '{}'", escape_single_quotes(key)))
         .unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = isc.file_id AND\n\tws_child.entity_id = isc.entity_id AND\n\tws_child.schema_key = isc.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = isc.file_id AND\n\tws_parent.entity_id = isc.entity_id AND\n\tws_parent.schema_key = isc.schema_key AND\n\tws_parent.version_id = isc.version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tisc.entity_id,\n\tisc.schema_key,\n\tisc.file_id,\n\tisc.plugin_key,\n\tjson(isc.snapshot_content) AS snapshot_content,\n\tisc.schema_version,\n\tvi.version_id,\n\tisc.created_at,\n\tisc.updated_at,\n\tisc.version_id AS inherited_from_version_id,\n\tisc.change_id,\n\t0 AS untracked,\n\tisc.commit_id,\n\tch.metadata AS metadata,\n\tCOALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key\nFROM version_inheritance vi\nJOIN {} AS isc ON isc.version_id = vi.ancestor_version_id\nLEFT JOIN change ch ON ch.id = isc.change_id\nLEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = isc.file_id AND\n\tws_child.entity_id = isc.entity_id AND\n\tws_child.schema_key = isc.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = isc.file_id AND\n\tws_parent.entity_id = isc.entity_id AND\n\tws_parent.schema_key = isc.schema_key AND\n\tws_parent.version_id = isc.version_id\nWHERE isc.inheritance_delete_marker = 0\n\tAND isc.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = isc.file_id\n\t\tAND t.schema_key = isc.schema_key\n\t\tAND t.entity_id = isc.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM {} child_isc\n\tWHERE child_isc.version_id = vi.version_id\n\t\tAND child_isc.file_id = isc.file_id\n\t\tAND child_isc.schema_key = isc.schema_key\n\t\tAND child_isc.entity_id = isc.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = isc.file_id\n\t\tAND child_unt.schema_key = isc.schema_key\n\t\tAND child_unt.entity_id = isc.entity_id\n)",
-		cache_table,
-		filter,
-		cache_table
-	)
+        "SELECT\n\t'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tisc.entity_id,\n\tisc.schema_key,\n\tisc.file_id,\n\tisc.plugin_key,\n\tjson(isc.snapshot_content) AS snapshot_content,\n\tisc.schema_version,\n\tvi.version_id,\n\tisc.created_at,\n\tisc.updated_at,\n\tisc.version_id AS inherited_from_version_id,\n\tisc.change_id,\n\t0 AS untracked,\n\tisc.commit_id,\n\tch.metadata AS metadata,\n\t{writer_select}\nFROM version_inheritance vi\nJOIN {cache_table} AS isc ON isc.version_id = vi.ancestor_version_id\nLEFT JOIN change ch ON ch.id = isc.change_id\n{writer_join}WHERE isc.inheritance_delete_marker = 0\n\tAND isc.snapshot_content IS NOT NULL\n\t{filter}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = isc.file_id\n\t\tAND t.schema_key = isc.schema_key\n\t\tAND t.entity_id = isc.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM {cache_table} child_isc\n\tWHERE child_isc.version_id = vi.version_id\n\t\tAND child_isc.file_id = isc.file_id\n\t\tAND child_isc.schema_key = isc.schema_key\n\t\tAND child_isc.entity_id = isc.entity_id\n)\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = isc.file_id\n\t\tAND child_unt.schema_key = isc.schema_key\n\t\tAND child_unt.entity_id = isc.entity_id\n)",
+        cache_table = cache_table,
+        writer_select = writer_select,
+        writer_join = writer_join,
+        filter = filter
+    )
 }
 
 fn build_inherited_untracked_branch(
     schema_key: Option<&str>,
     include_cache: bool,
     cache_table: Option<&str>,
+    include_writer: bool,
 ) -> String {
     let filter = schema_key
         .map(|key| format!("AND unt.schema_key = '{}'", escape_single_quotes(key)))
@@ -1184,10 +1346,25 @@ fn build_inherited_untracked_branch(
 
     let cache_clause = cache_prune.unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = unt.file_id AND\n\tws_child.entity_id = unt.entity_id AND\n\tws_child.schema_key = unt.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = unt.file_id AND\n\tws_parent.entity_id = unt.entity_id AND\n\tws_parent.schema_key = unt.schema_key AND\n\tws_parent.version_id = unt.version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tunt.entity_id,\n\tunt.schema_key,\n\tunt.file_id,\n\tunt.plugin_key,\n\tjson(unt.snapshot_content) AS snapshot_content,\n\tunt.schema_version,\n\tvi.version_id,\n\tunt.created_at,\n\tunt.updated_at,\n\tunt.version_id AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\tCOALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key\nFROM version_inheritance vi\nJOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id\nLEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = unt.file_id AND\n\tws_child.entity_id = unt.entity_id AND\n\tws_child.schema_key = unt.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = unt.file_id AND\n\tws_parent.entity_id = unt.entity_id AND\n\tws_parent.schema_key = unt.schema_key AND\n\tws_parent.version_id = unt.version_id\nWHERE unt.inheritance_delete_marker = 0\n\tAND unt.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = unt.file_id\n\t\tAND t.schema_key = unt.schema_key\n\t\tAND t.entity_id = unt.entity_id\n)\n{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = unt.file_id\n\t\tAND child_unt.schema_key = unt.schema_key\n\t\tAND child_unt.entity_id = unt.entity_id\n		AND child_unt.rowid != unt.rowid\n)",
-		filter,
-		cache_clause
+		"SELECT\n\t'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\tunt.entity_id,\n\tunt.schema_key,\n\tunt.file_id,\n\tunt.plugin_key,\n\tjson(unt.snapshot_content) AS snapshot_content,\n\tunt.schema_version,\n\tvi.version_id,\n\tunt.created_at,\n\tunt.updated_at,\n\tunt.version_id AS inherited_from_version_id,\n\t'untracked' AS change_id,\n\t1 AS untracked,\n\t'untracked' AS commit_id,\n\tNULL AS metadata,\n\t{writer_select}\nFROM version_inheritance vi\nJOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id\n{writer_join}WHERE unt.inheritance_delete_marker = 0\n\tAND unt.snapshot_content IS NOT NULL\n\t{filter}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state t\n\tWHERE t.version_id = vi.version_id\n\t\tAND t.file_id = unt.file_id\n\t\tAND t.schema_key = unt.schema_key\n\t\tAND t.entity_id = unt.entity_id\n)\n{cache_clause}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = unt.file_id\n\t\tAND child_unt.schema_key = unt.schema_key\n\t\tAND child_unt.entity_id = unt.entity_id\n		AND child_unt.rowid != unt.rowid\n)",
+		writer_select = writer_select,
+		writer_join = writer_join,
+		filter = filter,
+		cache_clause = cache_clause
 	)
 }
 
@@ -1195,6 +1372,7 @@ fn build_inherited_txn_branch(
     schema_key: Option<&str>,
     include_cache: bool,
     cache_table: Option<&str>,
+    include_writer: bool,
 ) -> String {
     let filter = schema_key
         .map(|key| format!("AND txn.schema_key = '{}'", escape_single_quotes(key)))
@@ -1211,10 +1389,25 @@ fn build_inherited_txn_branch(
     };
     let cache_clause = cache_prune.unwrap_or_default();
 
+    let writer_select = if include_writer {
+        "COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key".to_string()
+    } else {
+        "NULL AS writer_key".to_string()
+    };
+
+    let writer_join = if include_writer {
+        "LEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = txn.file_id AND\n\tws_child.entity_id = txn.entity_id AND\n\tws_child.schema_key = txn.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = txn.file_id AND\n\tws_parent.entity_id = txn.entity_id AND\n\tws_parent.schema_key = txn.schema_key AND\n\tws_parent.version_id = vi.parent_version_id\n"
+            .to_string()
+    } else {
+        String::new()
+    };
+
     format!(
-		"SELECT\n\t'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\ttxn.entity_id,\n\ttxn.schema_key,\n\ttxn.file_id,\n\ttxn.plugin_key,\n\tjson(txn.snapshot_content) AS snapshot_content,\n\ttxn.schema_version,\n\tvi.version_id,\n\ttxn.created_at,\n\ttxn.created_at AS updated_at,\n\tvi.parent_version_id AS inherited_from_version_id,\n\ttxn.id AS change_id,\n\ttxn.untracked,\n\t'pending' AS commit_id,\n\tjson(txn.metadata) AS metadata,\n\tCOALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key\nFROM version_parent vi\nJOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id\nLEFT JOIN internal_state_writer ws_child ON\n\tws_child.file_id = txn.file_id AND\n\tws_child.entity_id = txn.entity_id AND\n\tws_child.schema_key = txn.schema_key AND\n\tws_child.version_id = vi.version_id\nLEFT JOIN internal_state_writer ws_parent ON\n\tws_parent.file_id = txn.file_id AND\n\tws_parent.entity_id = txn.entity_id AND\n\tws_parent.schema_key = txn.schema_key AND\n\tws_parent.version_id = vi.parent_version_id\nWHERE vi.parent_version_id IS NOT NULL\n\tAND txn.snapshot_content IS NOT NULL\n\t{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state child_txn\n\tWHERE child_txn.version_id = vi.version_id\n\t\tAND child_txn.file_id = txn.file_id\n\t\tAND child_txn.schema_key = txn.schema_key\n\t\tAND child_txn.entity_id = txn.entity_id\n)\n{}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = txn.file_id\n\t\tAND child_unt.schema_key = txn.schema_key\n\t\tAND child_unt.entity_id = txn.entity_id\n)",
-		filter,
-		cache_clause
+		"SELECT\n\t'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,\n\ttxn.entity_id,\n\ttxn.schema_key,\n\ttxn.file_id,\n\ttxn.plugin_key,\n\tjson(txn.snapshot_content) AS snapshot_content,\n\ttxn.schema_version,\n\tvi.version_id,\n\ttxn.created_at,\n\ttxn.created_at AS updated_at,\n\tvi.parent_version_id AS inherited_from_version_id,\n\ttxn.id AS change_id,\n\ttxn.untracked,\n\t'pending' AS commit_id,\n\tjson(txn.metadata) AS metadata,\n\t{writer_select}\nFROM version_parent vi\nJOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id\n{writer_join}WHERE vi.parent_version_id IS NOT NULL\n\tAND txn.snapshot_content IS NOT NULL\n\t{filter}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_transaction_state child_txn\n\tWHERE child_txn.version_id = vi.version_id\n\t\tAND child_txn.file_id = txn.file_id\n\t\tAND child_txn.schema_key = txn.schema_key\n\t\tAND child_txn.entity_id = txn.entity_id\n)\n{cache_clause}\nAND NOT EXISTS (\n\tSELECT 1 FROM internal_state_all_untracked child_unt\n\tWHERE child_unt.version_id = vi.version_id\n\t\tAND child_unt.file_id = txn.file_id\n\t\tAND child_unt.schema_key = txn.schema_key\n\t\tAND child_unt.entity_id = txn.entity_id\n)",
+		writer_select = writer_select,
+		writer_join = writer_join,
+		filter = filter,
+		cache_clause = cache_clause
 	)
 }
 

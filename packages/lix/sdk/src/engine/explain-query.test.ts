@@ -39,8 +39,6 @@ test("createExplainQuery omits rewritten when query is unchanged", async () => {
 
 		const report = explain({ query });
 
-		console.log(report);
-
 		expect(report.rewritten).toBeUndefined();
 		expect(report.expanded?.sql).toContain("state_all");
 	} finally {

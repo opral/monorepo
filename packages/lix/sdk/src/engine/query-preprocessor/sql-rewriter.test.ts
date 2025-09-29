@@ -91,14 +91,14 @@ describe("rewriteSql", () => {
 			],
 			parameters: ["mock_schema", "other_schema"],
 		});
-	const result = rewriteSql(query, contextualParameters);
+		const result = rewriteSql(query, contextualParameters);
 
-	expect(result.sql).toContain("internal_state_cache_mock_schema");
-	expect(result.sql).toContain("internal_state_cache_other_schema");
-	expect(result.cacheHints?.internalStateReader?.schemaKeys).toEqual([
-		"mock_schema",
-		"other_schema",
-	]);
+		expect(result.sql).toContain("internal_state_cache_mock_schema");
+		expect(result.sql).toContain("internal_state_cache_other_schema");
+		expect(result.cacheHints?.internalStateReader?.schemaKeys).toEqual([
+			"mock_schema",
+			"other_schema",
+		]);
 	});
 
 	test("internal_state_reader rewrite avoids SELECT DISTINCT for targeted schema", () => {

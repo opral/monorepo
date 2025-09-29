@@ -150,8 +150,8 @@ mod tests {
         assert!(output.sql.contains("42 AS value"));
     }
 
-	#[test]
-	fn rewrites_internal_state_reader_with_parameterised_schema_key() {
+    #[test]
+    fn rewrites_internal_state_reader_with_parameterised_schema_key() {
         let base_context = serde_json::json!({
             "tableCache": ["internal_state_cache_mock_schema"],
         })

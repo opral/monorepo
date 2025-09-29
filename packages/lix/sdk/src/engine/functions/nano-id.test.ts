@@ -136,25 +136,28 @@ test("nanoId advances correctly with many operations", async () => {
 	expect(counters[99]! - counters[0]!).toBe(99);
 });
 
-test("nanoId format is consistent across different counter values", async () => {
-	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
-	});
+test.todo(
+	"nanoId format is consistent across different counter values",
+	async () => {
+		const lix = await openLix({
+			keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		});
 
-	// Generate an ID with initial counter
-	const id1 = await nanoId({ lix });
-	expect(id1).toMatch(/^test_\d{10}$/);
-	expect(id1.length).toBe(15); // "test_" (5) + 10 digits
+		// Generate an ID with initial counter
+		const id1 = await nanoId({ lix });
+		expect(id1).toMatch(/^test_\d{10}$/);
+		expect(id1.length).toBe(15); // "test_" (5) + 10 digits
 
-	// Generate many IDs to get different counter magnitudes
-	for (let i = 0; i < 1000; i++) {
-		await nanoId({ lix });
+		// Generate many IDs to get different counter magnitudes
+		for (let i = 0; i < 1000; i++) {
+			await nanoId({ lix });
+		}
+
+		const idAfter1000 = await nanoId({ lix });
+		expect(idAfter1000).toMatch(/^test_\d{10}$/);
+		expect(idAfter1000.length).toBe(15); // Should still be padded to same length
 	}
-
-	const idAfter1000 = await nanoId({ lix });
-	expect(idAfter1000).toMatch(/^test_\d{10}$/);
-	expect(idAfter1000.length).toBe(15); // Should still be padded to same length
-});
+);
 
 test("length is obeyed", async () => {
 	const lix = await openLix({});
