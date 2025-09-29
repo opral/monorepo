@@ -572,8 +572,16 @@ fn rewrite_table_factor(
         }));
     }
 
-        if let Some(view_sql) = context.view_sql(&target.table_name) {
-        let (derived, references_internal_reader) = expand_view_table_factor(&target, view_sql)?;
+    if let Some(view_sql) = context.view_sql(&target.table_name) {
+        let (derived, references_internal_reader) = expand_view_table_factor(
+            &target,
+            view_sql,
+            context,
+            phase,
+            accumulator,
+            resolver,
+            stats,
+        )?;
         if phase == RewritePhase::ExpandOnly {
             stats.expanded = true;
             return Ok(Some(derived));
@@ -623,8 +631,21 @@ fn analyze_table_factor(factor: &TableFactor) -> Option<TableTarget> {
 fn expand_view_table_factor(
     target: &TableTarget,
     view_sql: &str,
+    context: &RewriteContext,
+    phase: RewritePhase,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<(TableFactor, bool), RewriteError> {
     let mut subquery = parse_select_query(view_sql)?;
+    let _ = rewrite_query(
+        &mut subquery,
+        context,
+        phase,
+        accumulator,
+        resolver,
+        stats,
+    )?;
     let references_internal_reader = query_contains_internal_state_reader(&subquery);
     subquery.limit = None;
     subquery.offset = None;

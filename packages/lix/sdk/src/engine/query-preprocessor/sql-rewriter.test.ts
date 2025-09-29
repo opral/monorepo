@@ -65,9 +65,9 @@ describe("rewriteSql", () => {
 
 		const result = rewriteSql(query);
 
-		expect(result.sql).toContain("internal_state_reader");
+		expect(result.sql).toBe(query);
 		expect(result.expandedSql).toBeDefined();
-		expect(result.expandedSql).toContain("FROM internal_state_reader");
+		expect(result.expandedSql).toContain("internal_transaction_state");
 		expect(result.expandedSql).not.toBe(query);
 	});
 
@@ -84,6 +84,23 @@ describe("rewriteSql", () => {
 
 		expect(result.sql).toBe("SELECT value FROM example_view");
 		expect(result.expandedSql).toContain("other_view");
+	});
+
+	test("recursively expands nested views", () => {
+		setSqlRewriterContext(
+			JSON.stringify({
+				views: {
+					outer_view: "SELECT * FROM middle_view",
+					middle_view: "SELECT value FROM inner_view",
+					inner_view: "SELECT 42 AS value",
+				},
+			})
+		);
+
+		const result = rewriteSql("SELECT * FROM outer_view");
+
+		expect(result.expandedSql).toBeDefined();
+		expect(result.expandedSql ?? "").toContain("42 AS value");
 	});
 
 	test("expands view definitions when provided", () => {
