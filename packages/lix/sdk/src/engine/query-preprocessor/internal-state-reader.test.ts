@@ -767,6 +767,231 @@ test("includes open transaction rows before commit with writer metadata", async 
 	await lix.close();
 });
 
+test("transaction rows override cached rows", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	try {
+		const engine = lix.engine!;
+		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+
+		updateStateCache({
+			engine,
+			changes: [
+				{
+					id: "cache-txn",
+					entity_id: "priority_entry",
+					schema_key: LixKeyValueSchema["x-lix-key"],
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						key: "priority_entry",
+						value: "cached_value",
+					}),
+					created_at: "1970-01-01T00:00:00.000Z",
+				},
+			],
+			commit_id: "cache-commit",
+			version_id: "global",
+		});
+
+		insertTransactionState({
+			engine,
+			timestamp: await getTimestamp({ lix }),
+			data: [
+				{
+					entity_id: "priority_entry",
+					schema_key: LixKeyValueSchema["x-lix-key"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					version_id: "global",
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					snapshot_content: JSON.stringify({
+						key: "priority_entry",
+						value: "txn_value",
+					}),
+					untracked: false,
+				},
+			],
+		});
+
+		const original = internalQueryBuilder
+			.selectFrom("internal_state_reader")
+			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+			.where("entity_id", "=", "priority_entry")
+			.where("version_id", "=", "global")
+			.select(["snapshot_content", "commit_id", "untracked"])
+			.compile();
+
+		const rewritten = preprocess(original);
+		const { rows } = engine.executeSync(rewritten);
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({ commit_id: "pending", untracked: 0 });
+		expect(JSON.parse(rows[0].snapshot_content as string)).toMatchObject({
+			value: "txn_value",
+		});
+	} finally {
+		await lix.close();
+	}
+});
+
+test("untracked rows override cached rows", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	try {
+		const engine = lix.engine!;
+		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+
+		updateStateCache({
+			engine,
+			changes: [
+				{
+					id: "cache-untracked",
+					entity_id: "untracked_priority",
+					schema_key: LixKeyValueSchema["x-lix-key"],
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						key: "untracked_priority",
+						value: "cached_value",
+					}),
+					created_at: "1970-01-01T00:00:00.000Z",
+				},
+			],
+			commit_id: "cache-commit",
+			version_id: "global",
+		});
+
+		engine.executeSync(
+			internalQueryBuilder
+				.updateTable("state_all")
+				.set({
+					untracked: true,
+					snapshot_content: {
+						key: "untracked_priority",
+						value: "untracked_value",
+					},
+				})
+				.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+				.where("entity_id", "=", "untracked_priority")
+				.where("version_id", "=", "global")
+				.compile()
+		);
+
+		const original = internalQueryBuilder
+			.selectFrom("internal_state_reader")
+			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+			.where("entity_id", "=", "untracked_priority")
+			.where("version_id", "=", "global")
+			.select(["snapshot_content", "commit_id", "untracked"])
+			.compile();
+
+		const rewritten = preprocess(original);
+		const { rows } = engine.executeSync(rewritten);
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({ commit_id: "untracked", untracked: 1 });
+		expect(JSON.parse(rows[0].snapshot_content as string)).toMatchObject({
+			value: "untracked_value",
+		});
+	} finally {
+		await lix.close();
+	}
+});
+
+test("transaction rows override untracked rows", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	try {
+		const engine = lix.engine!;
+		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("state_all")
+				.values({
+					schema_key: LixKeyValueSchema["x-lix-key"],
+					entity_id: "txn_over_untracked",
+					plugin_key: "lix_own_entity",
+					file_id: "lix",
+					version_id: "global",
+					untracked: true,
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					snapshot_content: {
+						key: "txn_over_untracked",
+						value: "untracked_value",
+					},
+				})
+				.compile()
+		);
+
+		insertTransactionState({
+			engine,
+			timestamp: await getTimestamp({ lix }),
+			data: [
+				{
+					entity_id: "txn_over_untracked",
+					schema_key: LixKeyValueSchema["x-lix-key"],
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					version_id: "global",
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					snapshot_content: JSON.stringify({
+						key: "txn_over_untracked",
+						value: "txn_value",
+					}),
+					untracked: false,
+				},
+			],
+		});
+
+		const original = internalQueryBuilder
+			.selectFrom("internal_state_reader")
+			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+			.where("entity_id", "=", "txn_over_untracked")
+			.where("version_id", "=", "global")
+			.select(["snapshot_content", "commit_id", "untracked"])
+			.compile();
+
+		const rewritten = preprocess(original);
+		const { rows } = engine.executeSync(rewritten);
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({ commit_id: "pending", untracked: 0 });
+		expect(JSON.parse(rows[0].snapshot_content as string)).toMatchObject({
+			value: "txn_value",
+		});
+	} finally {
+		await lix.close();
+	}
+});
+
 test("prunes cache query if cache table for schema doesn't exist yet", async () => {
 	const lix = await openLix({
 		keyValues: [
