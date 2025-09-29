@@ -10,6 +10,8 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/plugin-message-format": "workspace:*",
+		"@inlang/plugin-m-function-matcher": "workspace:*",
 		"typescript": "^5.7.2",
 		"vite": "^6.0.7"
 	}
