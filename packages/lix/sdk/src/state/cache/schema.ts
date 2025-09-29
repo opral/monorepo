@@ -1,5 +1,9 @@
 import type { LixEngine } from "../../engine/boot.js";
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "./create-schema-cache-table.js";
 
 export type InternalStateCache = InternalStateCacheTable;
 
@@ -54,7 +58,7 @@ export function getStateCacheV2Tables(args: {
 }
 
 export function applyStateCacheV2Schema(args: {
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
 }): void {
 	const { sqlite } = args.engine;
 
@@ -71,6 +75,16 @@ export function applyStateCacheV2Schema(args: {
 		for (const row of existingTables) {
 			tableCache.add(row[0] as string);
 		}
+	}
+
+	// Ensure descriptor cache table exists for inheritance rewrites
+	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	if (!tableCache.has(descriptorTable)) {
+		createSchemaCacheTable({
+			engine: args.engine,
+			tableName: descriptorTable,
+		});
+		tableCache.add(descriptorTable);
 	}
 
 	// Note: INSERT/UPDATE/DELETE operations are now handled by updateStateCacheV2()
