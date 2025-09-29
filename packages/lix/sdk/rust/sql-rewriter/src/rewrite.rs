@@ -51,6 +51,8 @@ struct InternalStateReaderHint {
 #[derive(Serialize)]
 pub struct RewriteOutput {
     pub sql: String,
+    #[serde(rename = "expandedSql", skip_serializing_if = "Option::is_none")]
+    pub expanded_sql: Option<String>,
     #[serde(rename = "cacheHints", skip_serializing_if = "Option::is_none")]
     pub cache_hints: Option<CacheHints>,
 }
@@ -179,6 +181,17 @@ impl PlaceholderResolver {
     }
 }
 
+#[derive(Default)]
+struct RewriteStats {
+    expanded: bool,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RewritePhase {
+    ExpandOnly,
+    Full,
+}
+
 thread_local! {
     static CACHED_CONTEXT: RefCell<RewriteContext> = RefCell::new(RewriteContext::default());
 }
@@ -198,24 +211,42 @@ pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<RewriteOutpu
         CACHED_CONTEXT.with(|cached| cached.borrow().clone())
     };
 
-    let mut accumulator = RewriteAccumulator::default();
-    let mut resolver = PlaceholderResolver::new(&context.parameters);
-
     let dialect = SQLiteDialect {};
     let mut statements = Parser::parse_sql(&dialect, sql)
         .map_err(|error| RewriteError::SqlParse(format!("SQL parse error: {}", error)))?;
-    let mut changed = false;
-    for statement in &mut statements {
-        if rewrite_statement(statement, &context, &mut accumulator, &mut resolver)? {
-            changed = true;
-        }
-    }
-    let output_sql = if changed {
-        statements
-            .into_iter()
-            .map(|statement| statement.to_string())
-            .collect::<Vec<_>>()
-            .join("; ")
+    let mut expanded_statements = statements.clone();
+
+    let mut stats = RewriteStats::default();
+    let mut noop_accumulator = RewriteAccumulator::default();
+    let mut expand_resolver = PlaceholderResolver::new(&context.parameters);
+    let expanded_changed = rewrite_statements(
+        &mut expanded_statements,
+        &context,
+        RewritePhase::ExpandOnly,
+        &mut noop_accumulator,
+        &mut expand_resolver,
+        &mut stats,
+    )?;
+
+    let expanded_sql = if expanded_changed && stats.expanded {
+        Some(statements_to_string(&expanded_statements))
+    } else {
+        None
+    };
+
+    let mut accumulator = RewriteAccumulator::default();
+    let mut resolver = PlaceholderResolver::new(&context.parameters);
+    let final_changed = rewrite_statements(
+        &mut statements,
+        &context,
+        RewritePhase::Full,
+        &mut accumulator,
+        &mut resolver,
+        &mut stats,
+    )?;
+
+    let output_sql = if final_changed {
+        statements_to_string(&statements)
     } else {
         sql.to_string()
     };
@@ -224,18 +255,46 @@ pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<RewriteOutpu
 
     Ok(RewriteOutput {
         sql: output_sql,
+        expanded_sql,
         cache_hints,
     })
+}
+
+fn statements_to_string(statements: &[Statement]) -> String {
+    statements
+        .iter()
+        .map(|statement| statement.to_string())
+        .collect::<Vec<_>>()
+        .join("; ")
+}
+
+fn rewrite_statements(
+    statements: &mut [Statement],
+    context: &RewriteContext,
+    phase: RewritePhase,
+    accumulator: &mut RewriteAccumulator,
+    resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
+) -> Result<bool, RewriteError> {
+    let mut changed = false;
+    for statement in statements {
+        if rewrite_statement(statement, context, phase, accumulator, resolver, stats)? {
+            changed = true;
+        }
+    }
+    Ok(changed)
 }
 
 fn rewrite_statement(
     statement: &mut Statement,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     match statement {
-        Statement::Query(query) => rewrite_query(query, context, accumulator, resolver),
+        Statement::Query(query) => rewrite_query(query, context, phase, accumulator, resolver, stats),
         _ => Ok(false),
     }
 }
@@ -243,20 +302,29 @@ fn rewrite_statement(
 fn rewrite_query(
     query: &mut Query,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     let mut changed = false;
 
     if let Some(with) = &mut query.with {
         for cte in &mut with.cte_tables {
-            if rewrite_query(&mut cte.query, context, accumulator, resolver)? {
+            if rewrite_query(&mut cte.query, context, phase, accumulator, resolver, stats)? {
                 changed = true;
             }
         }
     }
 
-    changed |= rewrite_set_expr(query.body.as_mut(), context, accumulator, resolver)?;
+    changed |= rewrite_set_expr(
+        query.body.as_mut(),
+        context,
+        phase,
+        accumulator,
+        resolver,
+        stats,
+    )?;
 
     Ok(changed)
 }
@@ -264,15 +332,31 @@ fn rewrite_query(
 fn rewrite_set_expr(
     set_expr: &mut SetExpr,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     match set_expr {
-        SetExpr::Select(select) => rewrite_select(select.as_mut(), context, accumulator, resolver),
-        SetExpr::Query(query) => rewrite_query(query.as_mut(), context, accumulator, resolver),
+        SetExpr::Select(select) => rewrite_select(select.as_mut(), context, phase, accumulator, resolver, stats),
+        SetExpr::Query(query) => rewrite_query(query.as_mut(), context, phase, accumulator, resolver, stats),
         SetExpr::SetOperation { left, right, .. } => {
-            let left_changed = rewrite_set_expr(left.as_mut(), context, accumulator, resolver)?;
-            let right_changed = rewrite_set_expr(right.as_mut(), context, accumulator, resolver)?;
+            let left_changed = rewrite_set_expr(
+                left.as_mut(),
+                context,
+                phase,
+                accumulator,
+                resolver,
+                stats,
+            )?;
+            let right_changed = rewrite_set_expr(
+                right.as_mut(),
+                context,
+                phase,
+                accumulator,
+                resolver,
+                stats,
+            )?;
             Ok(left_changed || right_changed)
         }
         SetExpr::Values(_) => Ok(false),
@@ -283,8 +367,10 @@ fn rewrite_set_expr(
 fn rewrite_select(
     select: &mut Select,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     let mut changed = false;
 
@@ -293,8 +379,10 @@ fn rewrite_select(
             table_with_joins,
             select.selection.as_ref(),
             context,
+            phase,
             accumulator,
             resolver,
+            stats,
         )? {
             changed = true;
         }
@@ -307,8 +395,10 @@ fn rewrite_table_with_joins(
     table_with_joins: &mut TableWithJoins,
     selection: Option<&Expr>,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     let mut changed = false;
 
@@ -316,8 +406,10 @@ fn rewrite_table_with_joins(
         &table_with_joins.relation,
         selection,
         context,
+        phase,
         accumulator,
         resolver,
+        stats,
     )? {
         table_with_joins.relation = new_relation;
         changed = true;
@@ -325,7 +417,15 @@ fn rewrite_table_with_joins(
 
     for join in &mut table_with_joins.joins {
         if let Some(new_relation) =
-            rewrite_table_factor(&join.relation, selection, context, accumulator, resolver)?
+            rewrite_table_factor(
+                &join.relation,
+                selection,
+                context,
+                phase,
+                accumulator,
+                resolver,
+                stats,
+            )?
         {
             join.relation = new_relation;
             changed = true;
@@ -339,8 +439,10 @@ fn rewrite_table_factor(
     factor: &TableFactor,
     selection: Option<&Expr>,
     context: &RewriteContext,
+    phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
+    stats: &mut RewriteStats,
 ) -> Result<Option<TableFactor>, RewriteError> {
     let Some(target) = analyze_table_factor(factor) else {
         return Ok(None);
@@ -348,7 +450,66 @@ fn rewrite_table_factor(
 
     let table_name_lower = target.table_name.to_ascii_lowercase();
 
-    if table_name_lower == TARGET_VIEW {
+    if phase == RewritePhase::ExpandOnly && table_name_lower == TARGET_VIEW {
+        let schema_filters = selection
+            .map(|expr| collect_schema_filters(expr, &target.alias, resolver))
+            .unwrap_or_default();
+
+        let include_inheritance = context.should_include_inheritance();
+
+        let (schema_key_opt, cache_tables): (Option<String>, Vec<String>) =
+            match schema_filters.len() {
+                0 => {
+                    let tables = context
+                        .cache_tables()
+                        .into_iter()
+                        .filter(|name| {
+                            name != &schema_key_to_cache_table_name("lix_version_descriptor")
+                        })
+                        .collect();
+                    (None, tables)
+                }
+                1 => {
+                    let schema_key = schema_filters[0].clone();
+                    let include_cache = context.should_include_cache(&schema_key);
+                    let tables = if include_cache {
+                        vec![schema_key_to_cache_table_name(&schema_key)]
+                    } else {
+                        Vec::new()
+                    };
+                    (Some(schema_key), tables)
+                }
+                _ => return Ok(None),
+            };
+
+        let subquery_sql = build_internal_state_reader_subquery(
+            schema_key_opt.as_deref(),
+            &cache_tables,
+            include_inheritance,
+        );
+
+        let mut subquery = parse_select_query(&subquery_sql)?;
+        subquery.limit = None;
+        subquery.offset = None;
+
+        let alias_ident = target
+            .alias_ident
+            .unwrap_or_else(|| ident_from_str(&target.alias));
+        let alias = TableAlias {
+            name: alias_ident,
+            columns: vec![],
+        };
+
+        stats.expanded = true;
+
+        return Ok(Some(TableFactor::Derived {
+            lateral: false,
+            subquery: Box::new(subquery),
+            alias: Some(alias),
+        }));
+    }
+
+    if phase == RewritePhase::Full && table_name_lower == TARGET_VIEW {
         let schema_filters = selection
             .map(|expr| collect_schema_filters(expr, &target.alias, resolver))
             .unwrap_or_default();
@@ -411,9 +572,17 @@ fn rewrite_table_factor(
         }));
     }
 
-    if let Some(view_sql) = context.view_sql(&target.table_name) {
-        let derived = expand_view_table_factor(&target, view_sql)?;
-        return Ok(Some(derived));
+        if let Some(view_sql) = context.view_sql(&target.table_name) {
+        let (derived, references_internal_reader) = expand_view_table_factor(&target, view_sql)?;
+        if phase == RewritePhase::ExpandOnly {
+            stats.expanded = true;
+            return Ok(Some(derived));
+        } else if references_internal_reader {
+            stats.expanded = true;
+            return Ok(Some(derived));
+        } else {
+            return Ok(None);
+        }
     }
 
     Ok(None)
@@ -454,8 +623,9 @@ fn analyze_table_factor(factor: &TableFactor) -> Option<TableTarget> {
 fn expand_view_table_factor(
     target: &TableTarget,
     view_sql: &str,
-) -> Result<TableFactor, RewriteError> {
+) -> Result<(TableFactor, bool), RewriteError> {
     let mut subquery = parse_select_query(view_sql)?;
+    let references_internal_reader = query_contains_internal_state_reader(&subquery);
     subquery.limit = None;
     subquery.offset = None;
 
@@ -468,11 +638,80 @@ fn expand_view_table_factor(
         columns: vec![],
     };
 
-    Ok(TableFactor::Derived {
-        lateral: false,
-        subquery: Box::new(subquery),
-        alias: Some(alias),
-    })
+    Ok((
+        TableFactor::Derived {
+            lateral: false,
+            subquery: Box::new(subquery),
+            alias: Some(alias),
+        },
+        references_internal_reader,
+    ))
+}
+
+fn query_contains_internal_state_reader(query: &Query) -> bool {
+    if let Some(with) = &query.with {
+        for cte in &with.cte_tables {
+            if query_contains_internal_state_reader(&cte.query) {
+                return true;
+            }
+        }
+    }
+
+    set_expr_contains_internal_state_reader(query.body.as_ref())
+}
+
+fn set_expr_contains_internal_state_reader(set_expr: &SetExpr) -> bool {
+    match set_expr {
+        SetExpr::Select(select) => select_contains_internal_state_reader(select.as_ref()),
+        SetExpr::Query(query) => query_contains_internal_state_reader(query.as_ref()),
+        SetExpr::SetOperation { left, right, .. } => {
+            set_expr_contains_internal_state_reader(left.as_ref())
+                || set_expr_contains_internal_state_reader(right.as_ref())
+        }
+        SetExpr::Values(_) => false,
+        _ => false,
+    }
+}
+
+fn select_contains_internal_state_reader(select: &Select) -> bool {
+    for table_with_joins in &select.from {
+        if table_with_joins_contains_internal_state_reader(table_with_joins) {
+            return true;
+        }
+    }
+    false
+}
+
+fn table_with_joins_contains_internal_state_reader(table: &TableWithJoins) -> bool {
+    if table_factor_contains_internal_state_reader(&table.relation) {
+        return true;
+    }
+
+    for join in &table.joins {
+        if table_factor_contains_internal_state_reader(&join.relation) {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn table_factor_contains_internal_state_reader(factor: &TableFactor) -> bool {
+    match factor {
+        TableFactor::Table { name, .. } => name
+            .0
+            .last()
+            .map(|ident| ident.value.eq_ignore_ascii_case(TARGET_VIEW))
+            .unwrap_or(false),
+        TableFactor::Derived { subquery, .. } => query_contains_internal_state_reader(subquery),
+        TableFactor::TableFunction { .. }
+        | TableFactor::Function { .. }
+        | TableFactor::JsonTable { .. }
+        | TableFactor::UNNEST { .. }
+        | TableFactor::NestedJoin { .. }
+        | TableFactor::Pivot { .. }
+        | TableFactor::Unpivot { .. } => false,
+    }
 }
 
 fn parse_select_query(sql: &str) -> Result<Query, RewriteError> {

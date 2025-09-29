@@ -17,6 +17,7 @@ export interface SqlRewriteCacheHints {
 export interface SqlRewriteResult {
 	sql: string;
 	cacheHints?: SqlRewriteCacheHints;
+	expandedSql?: string;
 }
 
 const isNodeRuntime =
@@ -142,15 +143,48 @@ export async function initializeSqlRewriter(args?: {
 	}
 }
 
+function toSerialisableParameters(
+	parameters: ReadonlyArray<unknown>
+): unknown[] {
+	return parameters.map((value) =>
+		typeof value === "bigint" ? value.toString() : value
+	);
+}
+
+export function buildSqlRewriteContext(args: {
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	parameters: ReadonlyArray<unknown>;
+}): string | undefined {
+	const baseContextJson = updateSqlRewriterContext(args.engine);
+	const baseContext = baseContextJson
+		? (JSON.parse(baseContextJson) as Record<string, unknown>)
+		: {};
+
+	if (args.parameters.length > 0) {
+		baseContext.parameters = toSerialisableParameters(args.parameters);
+	} else {
+		delete baseContext.parameters;
+	}
+
+	return Object.keys(baseContext).length > 0
+		? JSON.stringify(baseContext)
+		: undefined;
+}
+
 export function rewriteSql(
 	sql: string,
 	contextJson?: string
 ): SqlRewriteResult {
 	assertInitialized();
 	const result = rewrite_sql_wasm(sql, contextJson ?? null) as unknown;
-	const { sql: rewrittenSql, cacheHints } = normalizeRewriteResult(result, sql);
+	const {
+		sql: rewrittenSql,
+		cacheHints,
+		expandedSql,
+	} = normalizeRewriteResult(result, sql);
 	return {
 		sql: rewrittenSql,
+		expandedSql,
 		cacheHints,
 	};
 }
@@ -223,15 +257,18 @@ export type ViewSelectMap = ReturnType<typeof getViewSelectMap>;
 function normalizeRewriteResult(
 	value: unknown,
 	originalSql: string
-): { sql: string; cacheHints?: SqlRewriteCacheHints } {
+): { sql: string; cacheHints?: SqlRewriteCacheHints; expandedSql?: string } {
 	if (!value || typeof value !== "object") {
 		return { sql: originalSql };
 	}
 	const maybeSql = Reflect.get(value, "sql");
 	const sql = typeof maybeSql === "string" ? maybeSql : originalSql;
+	const maybeExpanded = Reflect.get(value, "expandedSql");
+	const expandedSql =
+		typeof maybeExpanded === "string" ? maybeExpanded : undefined;
 	const rawHints = Reflect.get(value, "cacheHints");
 	const cacheHints = normalizeCacheHints(rawHints);
-	return { sql, cacheHints };
+	return { sql, cacheHints, expandedSql };
 }
 
 function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
@@ -259,7 +296,6 @@ function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
 			}
 		}
 	}
-
 
 	return Object.keys(result).length > 0 ? result : undefined;
 }

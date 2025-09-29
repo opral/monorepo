@@ -2,6 +2,7 @@ import {
 	initializeSqlRewriter,
 	rewriteSql,
 	updateSqlRewriterContext,
+	buildSqlRewriteContext,
 	type InternalStateReaderCacheHints,
 } from "./sql-rewriter.js";
 import type {
@@ -31,26 +32,6 @@ export const createInternalStateReaderPreprocessor: QueryPreprocessor =
 	}) => {
 		await initializeSqlRewriter({ engine: args.engine });
 
-		const buildRewriteContext = (
-			parameters: ReadonlyArray<unknown>
-		): string | undefined => {
-			const baseContextJson = updateSqlRewriterContext(args.engine);
-			const baseContext = baseContextJson
-				? (JSON.parse(baseContextJson) as Record<string, unknown>)
-				: {};
-			if (parameters.length > 0) {
-				const serialisableParameters = parameters.map((value) =>
-					typeof value === "bigint" ? value.toString() : value
-				);
-				baseContext.parameters = serialisableParameters;
-			} else {
-				delete baseContext.parameters;
-			}
-			return Object.keys(baseContext).length > 0
-				? JSON.stringify(baseContext)
-				: undefined;
-		};
-
 		const ensureCacheFresh = (cacheHints: InternalStateReaderCacheHints) => {
 			if (!isStaleStateCache({ engine: args.engine })) {
 				return;
@@ -67,7 +48,10 @@ export const createInternalStateReaderPreprocessor: QueryPreprocessor =
 			if (!/\binternal_state_reader\b/i.test(context.sql)) {
 				return context;
 			}
-			const rewriteContext = buildRewriteContext(context.parameters);
+			const rewriteContext = buildSqlRewriteContext({
+				engine: args.engine,
+				parameters: context.parameters,
+			});
 			const rewritten = rewriteSql(context.sql, rewriteContext);
 
 			const sql = rewritten?.sql ?? context.sql;

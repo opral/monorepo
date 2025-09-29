@@ -1,6 +1,25 @@
-import type { CompiledQuery } from "kysely";
 import type { LixEngine } from "./boot.js";
-import { rewriteSql } from "./query-preprocessor/sql-rewriter.js";
+import {
+	rewriteSql,
+	initializeSqlRewriter,
+	buildSqlRewriteContext,
+} from "./query-preprocessor/sql-rewriter.js";
+
+type ExplainQueryStage = {
+	original: {
+		sql: string;
+		parameters: unknown[];
+	};
+	expanded?: {
+		sql: string;
+		parameters: unknown[];
+	};
+	rewritten?: {
+		sql: string;
+		parameters: unknown[];
+	};
+	plan: any[];
+};
 
 export async function createExplainQuery(args: {
 	engine: Pick<
@@ -8,33 +27,47 @@ export async function createExplainQuery(args: {
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
 	>;
 }): Promise<
-	({ query }: { query: CompiledQuery<unknown> }) => {
-		original: {
-			sql: string;
-			parameters: unknown[];
-		};
-		rewritten: {
-			sql: string;
-			parameters: unknown[];
-		};
-		plan: any[];
-	}
+	(args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage
 > {
+	await initializeSqlRewriter({ engine: args.engine });
+
 	return ({ query }) => {
-		const { sql: rewrittenSql } = rewriteSql(query.sql);
-		const explain = args.engine.executeSync({
-			sql: `EXPLAIN QUERY PLAN ${rewrittenSql}`,
+		const parameters = [...(query.parameters ?? [])];
+		const contextJson = buildSqlRewriteContext({
+			engine: args.engine,
+			parameters,
 		});
+		const { sql: rewrittenSql, expandedSql } = rewriteSql(
+			query.sql,
+			contextJson
+		);
+		const explainRows = args.engine.sqlite.exec({
+			sql: `EXPLAIN QUERY PLAN ${rewrittenSql}`,
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		}) as any[];
+
+		const wasRewritten = rewrittenSql !== query.sql;
+
 		return {
 			original: {
 				sql: query.sql,
-				parameters: [...(query.parameters ?? [])],
+				parameters,
 			},
-			rewritten: {
-				sql: rewrittenSql,
-				parameters: [...(query.parameters ?? [])],
-			},
-			plan: explain.rows,
+			expanded: expandedSql
+				? {
+						sql: expandedSql,
+						parameters,
+					}
+				: undefined,
+			rewritten: wasRewritten
+				? {
+						sql: rewrittenSql,
+						parameters,
+					}
+				: undefined,
+			plan: explainRows,
 		};
 	};
 }

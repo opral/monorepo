@@ -52,6 +52,40 @@ describe("rewriteSql", () => {
 		]);
 	});
 
+	test("exposes expandedSql when view references internal_state_reader", () => {
+		const query = "SELECT entity_id FROM state_reader_view";
+		setSqlRewriterContext(
+			JSON.stringify({
+				views: {
+					state_reader_view:
+						"SELECT entity_id FROM internal_state_reader WHERE schema_key = 'mock_schema'",
+				},
+			})
+		);
+
+		const result = rewriteSql(query);
+
+		expect(result.sql).toContain("internal_state_reader");
+		expect(result.expandedSql).toBeDefined();
+		expect(result.expandedSql).toContain("FROM internal_state_reader");
+		expect(result.expandedSql).not.toBe(query);
+	});
+
+	test("does not rewrite views that do not touch internal_state_reader", () => {
+		setSqlRewriterContext(
+			JSON.stringify({
+				views: {
+					example_view: "SELECT value FROM other_view",
+				},
+			})
+		);
+
+		const result = rewriteSql("SELECT value FROM example_view");
+
+		expect(result.sql).toBe("SELECT value FROM example_view");
+		expect(result.expandedSql).toContain("other_view");
+	});
+
 	test("expands view definitions when provided", () => {
 		const query = "SELECT value FROM example_view";
 		setSqlRewriterContext(
@@ -61,7 +95,8 @@ describe("rewriteSql", () => {
 		);
 		const result = rewriteSql(query);
 
-		expect(result.sql).toContain("42 AS value");
+		expect(result.sql).toBe(query);
+		expect(result.expandedSql).toContain("42 AS value");
 		expect(result.cacheHints).toBeUndefined();
 	});
 });

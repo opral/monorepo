@@ -34,6 +34,14 @@ fn serialize_rewrite_output(output: &rewrite::RewriteOutput) -> Result<JsValue, 
         &JsValue::from_str(&output.sql),
     )?;
 
+    if let Some(expanded_sql) = output.expanded_sql.as_ref() {
+        Reflect::set(
+            &object,
+            &JsValue::from_str("expandedSql"),
+            &JsValue::from_str(expanded_sql),
+        )?;
+    }
+
     if let Some(cache_hints) = output.cache_hints.as_ref() {
         let hints = serialize_cache_hints(cache_hints)?;
         Reflect::set(&object, &JsValue::from_str("cacheHints"), &hints)?;
@@ -142,9 +150,8 @@ mod tests {
         assert!(output.sql.contains("42 AS value"));
     }
 
-    #[test]
-    #[test]
-    fn rewrites_internal_state_reader_with_parameterised_schema_key() {
+	#[test]
+	fn rewrites_internal_state_reader_with_parameterised_schema_key() {
         let base_context = serde_json::json!({
             "tableCache": ["internal_state_cache_mock_schema"],
         })
@@ -166,5 +173,24 @@ mod tests {
             .internal_state_reader()
             .expect("expected internal_state_reader hints");
         assert_eq!(reader.schema_keys(), ["mock_schema"]);
+    }
+
+    #[test]
+    fn records_expanded_sql_when_view_targets_internal_state_reader() {
+        let context = serde_json::json!({
+            "views": {
+                "state_reader_view":
+                    "SELECT entity_id FROM internal_state_reader WHERE schema_key = 'mock_schema'"
+            }
+        })
+        .to_string();
+        rewrite::set_rewrite_context(Some(&context)).unwrap();
+
+        let input = "SELECT entity_id FROM state_reader_view";
+        let output = rewrite::rewrite_sql(input, None).unwrap();
+
+        assert!(output.expanded_sql.is_some());
+        let expanded = output.expanded_sql.unwrap();
+        assert!(expanded.contains("internal_state_reader"));
     }
 }
