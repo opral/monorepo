@@ -62,6 +62,9 @@
       "name": "debug vs-code-extension",
       "type": "extensionHost",
       "request": "launch",
+      "env": {
+        "DEV": "true"
+      },
       "args": [
         // uncomment if you have the problem that breakpoints don't bind, because the code is lazy loaded
         //"--noLazy",
