@@ -792,6 +792,9 @@ fn collect_schema_filters_recursive(
             } else if matches_logical_operator(op) {
                 collect_schema_filters_recursive(left, alias, resolver, output);
                 collect_schema_filters_recursive(right, alias, resolver, output);
+            } else {
+                consume_placeholders(left, resolver);
+                consume_placeholders(right, resolver);
             }
         }
         Expr::Nested(expr) => collect_schema_filters_recursive(expr, alias, resolver, output),
@@ -814,6 +817,41 @@ fn collect_schema_filters_recursive(
                         }
                     }
                 }
+            } else {
+                consume_placeholders(expr, resolver);
+                for item in list {
+                    consume_placeholders(item, resolver);
+                }
+            }
+        }
+        _ => consume_placeholders(expr, resolver),
+    }
+}
+
+fn consume_placeholders(expr: &Expr, resolver: &mut PlaceholderResolver) {
+    match expr {
+        Expr::Value(sqlparser::ast::Value::Placeholder(_)) => {
+            let _ = resolver.resolve_next_string();
+        }
+        Expr::BinaryOp { left, right, .. } => {
+            consume_placeholders(left, resolver);
+            consume_placeholders(right, resolver);
+        }
+        Expr::Nested(inner) => consume_placeholders(inner, resolver),
+        Expr::Between { expr, low, high, .. } => {
+            consume_placeholders(expr, resolver);
+            consume_placeholders(low, resolver);
+            consume_placeholders(high, resolver);
+        }
+        Expr::InList { expr, list, .. } => {
+            consume_placeholders(expr, resolver);
+            for item in list {
+                consume_placeholders(item, resolver);
+            }
+        }
+        Expr::Tuple(items) => {
+            for item in items {
+                consume_placeholders(item, resolver);
             }
         }
         _ => {}
