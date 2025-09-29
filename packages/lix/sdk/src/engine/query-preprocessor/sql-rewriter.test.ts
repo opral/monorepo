@@ -103,6 +103,23 @@ describe("rewriteSql", () => {
 		expect(result.expandedSql ?? "").toContain("42 AS value");
 	});
 
+	test("expandedSql descends to internal_state_reader through nested views", () => {
+		setSqlRewriterContext(
+			JSON.stringify({
+				views: {
+					state_view: "SELECT * FROM state_all_view",
+					state_all_view:
+						"SELECT entity_id FROM internal_state_reader WHERE schema_key = 'mock_schema'",
+				},
+			})
+		);
+
+		const result = rewriteSql("SELECT * FROM state_view");
+
+		expect(result.expandedSql).toBeDefined();
+		expect(result.expandedSql ?? "").toContain("internal_transaction_state");
+	});
+
 	test("expands view definitions when provided", () => {
 		const query = "SELECT value FROM example_view";
 		setSqlRewriterContext(

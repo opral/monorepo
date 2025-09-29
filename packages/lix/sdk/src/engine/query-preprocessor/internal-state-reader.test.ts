@@ -219,6 +219,51 @@ test("populate marks cache fresh to avoid subsequent repopulates", async () => {
 	await lix.close();
 });
 
+test("rewritten reader queries avoid scanning internal_state_vtable", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	try {
+		const preprocess = await createInternalStateReaderPreprocessor({
+			engine: lix.engine!,
+		});
+
+		const original = internalQueryBuilder
+			.selectFrom("internal_state_reader")
+			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+			.selectAll()
+			.compile();
+
+		const rewritten = preprocess(original);
+
+		const plan = lix.engine!.sqlite.exec({
+			sql: `EXPLAIN QUERY PLAN ${rewritten.sql}`,
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		}) as Array<Record<string, unknown>>;
+
+		const details = plan.map((row) => String(row.detail ?? ""));
+
+		expect(
+			details.some((detail) => /internal_state_vtable/i.test(detail))
+		).toBe(false);
+		expect(
+			details.some((detail) => /internal_transaction_state/i.test(detail))
+		).toBe(true);
+	} finally {
+		await lix.close();
+	}
+});
+
 test("resolves inherited rows from ancestor versions", async () => {
 	const lix = await openLix({
 		keyValues: [
