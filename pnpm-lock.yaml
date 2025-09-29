@@ -2972,6 +2972,10 @@ importers:
         specifier: ^5.7.2
         version: 5.9.2
 
+  packages/lix/sdk/rust/sql-rewriter: {}
+
+  packages/lix/sdk/rust/sql-rewriter/pkg: {}
+
   packages/lix/server-protocol-schema:
     devDependencies:
       '@opral/tsconfig':

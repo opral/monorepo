@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { internalQueryBuilder } from "../internal-query-builder.js";
 import { openLix } from "../../lix/index.js";
 import {
@@ -10,6 +10,15 @@ import { insertTransactionState } from "../../state/transaction/insert-transacti
 import { getTimestamp } from "../functions/timestamp.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
 import { createInternalStateReaderPreprocessor } from "./internal-state-reader.js";
+import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
+import {
+	markStateCacheAsFresh,
+	markStateCacheAsStale,
+} from "../../state/cache/mark-state-cache-as-stale.js";
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 test("returns untracked entities", async () => {
 	const lix = await openLix({
@@ -82,7 +91,6 @@ test("returns tracked entities with change metadata", async () => {
 			},
 		],
 	});
-
 	const preprocess = await createInternalStateReaderPreprocessor({
 		engine: lix.engine!,
 	});
@@ -115,7 +123,6 @@ test("returns tracked entities with change metadata", async () => {
 		.compile();
 
 	const rewritten = preprocess(original);
-
 	const { rows: result } = lix.engine!.executeSync(rewritten);
 
 	expect(result).toHaveLength(1);
@@ -128,7 +135,87 @@ test("returns tracked entities with change metadata", async () => {
 			value: "tracked_value",
 		}),
 	});
+	await lix.close();
+});
 
+test("populates cache when stale and skips when fresh", async () => {
+	const populateSpy = vi.spyOn(populateStateCacheModule, "populateStateCache");
+
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	const preprocess = await createInternalStateReaderPreprocessor({
+		engine: lix.engine!,
+	});
+
+	// ensure cache is marked fresh so the first run proves we populate when skipped
+	markStateCacheAsFresh({ engine: lix.engine! });
+
+	const original = internalQueryBuilder
+		.selectFrom("internal_state_reader")
+		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+		.selectAll()
+		.compile();
+
+	// First call with fresh cache should not repopulate
+	populateSpy.mockClear();
+	preprocess(original);
+	expect(populateSpy).not.toHaveBeenCalled();
+
+	// Mark stale and ensure populate is called
+	markStateCacheAsStale({ engine: lix.engine! });
+	populateSpy.mockClear();
+	preprocess(original);
+	expect(populateSpy).toHaveBeenCalled();
+
+	await lix.close();
+	populateSpy.mockRestore();
+});
+
+test("populate marks cache fresh to avoid subsequent repopulates", async () => {
+	const populateSpy = vi.spyOn(populateStateCacheModule, "populateStateCache");
+
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	const preprocess = await createInternalStateReaderPreprocessor({
+		engine: lix.engine!,
+	});
+
+	const original = internalQueryBuilder
+		.selectFrom("internal_state_reader")
+		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
+		.selectAll()
+		.compile();
+
+	// Force stale, first call should repopulate and mark fresh.
+	markStateCacheAsStale({ engine: lix.engine! });
+	populateSpy.mockClear();
+	preprocess(original);
+	expect(populateSpy).toHaveBeenCalledTimes(1);
+
+	// Second call with fresh cache should not repopulate.
+	populateSpy.mockClear();
+	preprocess(original);
+	expect(populateSpy).not.toHaveBeenCalled();
+
+	populateSpy.mockRestore();
 	await lix.close();
 });
 

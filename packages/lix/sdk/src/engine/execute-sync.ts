@@ -10,7 +10,28 @@ type ExecuteSyncFn = (args: {
 export async function createExecuteSync(args: {
 	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
 }): Promise<ExecuteSyncFn> {
-	const preprocess = await createQueryPreprocessor(args.engine, [
+	const preprocessorEngine = {
+		...args.engine,
+		executeSync: ({
+			sql,
+			parameters,
+		}: {
+			sql: string;
+			parameters?: Readonly<unknown[]>;
+		}) => {
+			const columnNames: string[] = [];
+			const rows = args.engine.sqlite.exec({
+				sql,
+				bind: (parameters as any[]) ?? [],
+				returnValue: "resultRows",
+				rowMode: "object",
+				columnNames,
+			});
+			return { rows };
+		},
+	} as const;
+
+	const preprocess = await createQueryPreprocessor(preprocessorEngine, [
 		createInternalStateReaderPreprocessor,
 	]);
 

@@ -35,7 +35,7 @@ import { createSchemaCacheTable } from "./create-schema-cache-table.js";
  * });
  */
 export function updateStateCache(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "sqlite">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
 	// Accepts standard changes or materialized changes which include inline
 	// lixcol_version_id and lixcol_commit_id. When inline values are present,
 	// they take precedence over top-level commit/version arguments.
@@ -203,7 +203,7 @@ export function updateStateCache(args: {
  * Single source of truth for table creation and cache management.
  */
 function ensureTableExists(args: {
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
 	tableName: string;
 }): void {
 	const { engine, tableName } = args;

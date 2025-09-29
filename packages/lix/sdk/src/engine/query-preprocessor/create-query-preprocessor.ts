@@ -11,7 +11,10 @@ export type QueryPreprocessorStage = (args: {
 }) => QueryPreprocessorResult;
 
 export type QueryPreprocessor = (args: {
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "runtimeCacheRef" | "hooks" | "executeSync"
+	>;
 }) => Promise<QueryPreprocessorStage>;
 
 /**
@@ -26,7 +29,10 @@ export type QueryPreprocessor = (args: {
  * console.log(result.sql);
  */
 export async function createQueryPreprocessor(
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">,
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
+	>,
 	preprocessors: QueryPreprocessor[]
 ): Promise<QueryPreprocessorStage> {
 	const stages: QueryPreprocessorStage[] = [];

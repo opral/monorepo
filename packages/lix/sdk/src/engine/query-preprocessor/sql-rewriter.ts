@@ -91,11 +91,61 @@ function assertInitialized(): void {
 	}
 }
 
-export async function initializeSqlRewriter(): Promise<void> {
-	await ensureInitialized();
+const viewSelectCache = new WeakMap<object, Map<string, string>>();
+
+function loadViewSelectMap(
+	sqlite: Pick<LixEngine, "sqlite">["sqlite"]
+): Map<string, string> {
+	const result = sqlite.exec({
+		sql: "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND sql IS NOT NULL",
+		returnValue: "resultRows",
+		rowMode: "object",
+		columnNames: [],
+	});
+
+	const viewMap = new Map<string, string>();
+
+	for (const row of result as Array<Record<string, unknown>>) {
+		const nameValue = row.name;
+		const sqlValue = row.sql;
+		if (typeof nameValue !== "string") {
+			continue;
+		}
+		const selectSql = extractSelectFromCreateView(
+			typeof sqlValue === "string" ? sqlValue : undefined
+		);
+		if (!selectSql) {
+			continue;
+		}
+		viewMap.set(nameValue, selectSql);
+	}
+
+	return viewMap;
 }
 
-export function rewriteSql(sql: string, contextJson?: string): SqlRewriteResult {
+function primeViewSelectCache(
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
+): void {
+	if (viewSelectCache.has(engine.runtimeCacheRef)) {
+		return;
+	}
+	const map = loadViewSelectMap(engine.sqlite);
+	viewSelectCache.set(engine.runtimeCacheRef, map);
+}
+
+export async function initializeSqlRewriter(args?: {
+	engine?: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+}): Promise<void> {
+	await ensureInitialized();
+	if (args?.engine) {
+		primeViewSelectCache(args.engine);
+	}
+}
+
+export function rewriteSql(
+	sql: string,
+	contextJson?: string
+): SqlRewriteResult {
 	assertInitialized();
 	const result = rewrite_sql_wasm(sql, contextJson ?? null) as unknown;
 	const { sql: rewrittenSql, cacheHints } = normalizeRewriteResult(result, sql);
@@ -157,33 +207,15 @@ function extractSelectFromCreateView(
 }
 
 function getViewSelectMap(
-	engine: Pick<LixEngine, "sqlite">
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
 ): Map<string, string> {
-	const result = engine.sqlite.exec({
-		sql: "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND sql IS NOT NULL",
-		returnValue: "resultRows",
-		rowMode: "object",
-		columnNames: [],
-	});
-
-	const viewMap = new Map<string, string>();
-
-	for (const row of result as Array<Record<string, unknown>>) {
-		const nameValue = row.name;
-		const sqlValue = row.sql;
-		if (typeof nameValue !== "string") {
-			continue;
-		}
-		const selectSql = extractSelectFromCreateView(
-			typeof sqlValue === "string" ? sqlValue : undefined
-		);
-		if (!selectSql) {
-			continue;
-		}
-		viewMap.set(nameValue, selectSql);
+	const cached = viewSelectCache.get(engine.runtimeCacheRef);
+	if (cached) {
+		return cached;
 	}
-
-	return viewMap;
+	const map = loadViewSelectMap(engine.sqlite);
+	viewSelectCache.set(engine.runtimeCacheRef, map);
+	return map;
 }
 
 export type ViewSelectMap = ReturnType<typeof getViewSelectMap>;
@@ -206,27 +238,28 @@ function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
 	if (!value || typeof value !== "object") {
 		return undefined;
 	}
+
+	const result: SqlRewriteCacheHints = {};
+
 	const rawInternal = Reflect.get(value, "internalStateReader");
-	if (!rawInternal || typeof rawInternal !== "object") {
-		return undefined;
+	if (rawInternal && typeof rawInternal === "object") {
+		const schemaKeysValue = Reflect.get(rawInternal, "schemaKeys");
+		if (Array.isArray(schemaKeysValue)) {
+			const schemaKeys = schemaKeysValue.filter(
+				(key): key is string => typeof key === "string"
+			);
+			if (schemaKeys.length > 0) {
+				const includeInheritance = Boolean(
+					Reflect.get(rawInternal, "includeInheritance")
+				);
+				result.internalStateReader = {
+					schemaKeys,
+					includeInheritance,
+				};
+			}
+		}
 	}
-	const schemaKeysValue = Reflect.get(rawInternal, "schemaKeys");
-	if (!Array.isArray(schemaKeysValue)) {
-		return undefined;
-	}
-	const schemaKeys = schemaKeysValue.filter(
-		(key): key is string => typeof key === "string"
-	);
-	if (schemaKeys.length === 0) {
-		return undefined;
-	}
-	const includeInheritance = Boolean(
-		Reflect.get(rawInternal, "includeInheritance")
-	);
-	return {
-		internalStateReader: {
-			schemaKeys,
-			includeInheritance,
-		},
-	};
+
+
+	return Object.keys(result).length > 0 ? result : undefined;
 }

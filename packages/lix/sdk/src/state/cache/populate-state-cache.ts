@@ -17,7 +17,7 @@ export interface PopulateStateCacheV2Options {
  * @param options - Optional filters for selective population
  */
 export function populateStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
 	options?: PopulateStateCacheV2Options;
 }): void {
 	const { sqlite } = args.engine;
@@ -194,7 +194,7 @@ export function populateStateCache(args: {
  * Duplicated from update-state-cache.ts to avoid circular dependency.
  */
 function ensureTableExists(
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
 	tableName: string
 ): void {
 	createSchemaCacheTable({ engine, tableName });

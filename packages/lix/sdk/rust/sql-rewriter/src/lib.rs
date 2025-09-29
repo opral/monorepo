@@ -107,26 +107,24 @@ mod tests {
         assert_eq!(reader.schema_keys(), ["mock_schema"]);
     }
 
-	#[test]
-	fn rewrites_internal_state_reader_when_schema_cache_missing() {
-		let context = context_json(&[]);
-		rewrite::set_rewrite_context(Some(&context)).unwrap();
-		let input = "SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'";
-		let output = rewrite::rewrite_sql(input, None).unwrap();
-		assert_ne!(
-			output.sql,
-			"SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'"
-		);
-		assert!(output.sql.contains("internal_state_all_untracked"));
-		assert!(!output
-			.sql
-			.contains("internal_state_cache_missing_schema"));
-		let hints = output.cache_hints.expect("expected cache hints");
-		let reader = hints
-			.internal_state_reader()
-			.expect("expected internal_state_reader hints");
-		assert_eq!(reader.schema_keys(), ["missing_schema"]);
-	}
+    #[test]
+    fn rewrites_internal_state_reader_when_schema_cache_missing() {
+        let context = context_json(&[]);
+        rewrite::set_rewrite_context(Some(&context)).unwrap();
+        let input = "SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'";
+        let output = rewrite::rewrite_sql(input, None).unwrap();
+        assert_ne!(
+            output.sql,
+            "SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'"
+        );
+        assert!(output.sql.contains("internal_state_all_untracked"));
+        assert!(!output.sql.contains("internal_state_cache_missing_schema"));
+        let hints = output.cache_hints.expect("expected cache hints");
+        let reader = hints
+            .internal_state_reader()
+            .expect("expected internal_state_reader hints");
+        assert_eq!(reader.schema_keys(), ["missing_schema"]);
+    }
 
     #[test]
     fn expands_view_definitions_when_provided() {
@@ -144,6 +142,7 @@ mod tests {
         assert!(output.sql.contains("42 AS value"));
     }
 
+    #[test]
     #[test]
     fn rewrites_internal_state_reader_with_parameterised_schema_key() {
         let base_context = serde_json::json!({

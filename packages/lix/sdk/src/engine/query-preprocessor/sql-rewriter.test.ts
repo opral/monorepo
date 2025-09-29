@@ -35,8 +35,7 @@ describe("rewriteSql", () => {
 	});
 
 	test("rewrites internal_state_reader when schema key is parameterised", () => {
-		const query =
-			"SELECT * FROM internal_state_reader WHERE schema_key = ?";
+		const query = "SELECT * FROM internal_state_reader WHERE schema_key = ?";
 		const baseContext = JSON.stringify({
 			tableCache: ["internal_state_cache_mock_schema"],
 		});

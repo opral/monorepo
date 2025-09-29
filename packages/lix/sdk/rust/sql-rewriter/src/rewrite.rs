@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use sqlparser::ast::{
@@ -56,7 +55,7 @@ pub struct RewriteOutput {
     pub cache_hints: Option<CacheHints>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default)]
 pub struct CacheHints {
     #[serde(
         rename = "internalStateReader",
@@ -205,14 +204,12 @@ pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<RewriteOutpu
     let dialect = SQLiteDialect {};
     let mut statements = Parser::parse_sql(&dialect, sql)
         .map_err(|error| RewriteError::SqlParse(format!("SQL parse error: {}", error)))?;
-
     let mut changed = false;
     for statement in &mut statements {
         if rewrite_statement(statement, &context, &mut accumulator, &mut resolver)? {
             changed = true;
         }
     }
-
     let output_sql = if changed {
         statements
             .into_iter()
@@ -223,9 +220,11 @@ pub fn rewrite_sql(sql: &str, context_json: Option<&str>) -> Result<RewriteOutpu
         sql.to_string()
     };
 
+    let cache_hints = accumulator.into_cache_hints();
+
     Ok(RewriteOutput {
         sql: output_sql,
-        cache_hints: accumulator.into_cache_hints(),
+        cache_hints,
     })
 }
 
@@ -632,6 +631,7 @@ impl RewriteAccumulator {
                     schema_keys,
                     include_inheritance: hint.include_inheritance,
                 }),
+
             }
         })
     }
