@@ -1,4 +1,4 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";
@@ -119,6 +119,14 @@ function LeftSidebarArea() {
 }
 
 function Root() {
+	const routerState = useRouterState();
+	const isV2Layout = routerState.location.pathname.startsWith("/v2-layout");
+
+	// If v2-layout, render without the old layout
+	if (isV2Layout) {
+		return <Outlet />;
+	}
+
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 	const activeFile = useQueryTakeFirst(({ lix }) =>
 		lix.db

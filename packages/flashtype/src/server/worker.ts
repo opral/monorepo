@@ -32,7 +32,17 @@ export async function handleFetch(
 	}
 
 	try {
-		return await env.ASSETS.fetch(request);
+		const response = await env.ASSETS.fetch(request);
+
+		// If asset not found and it's a navigation request (not an asset),
+		// return index.html for client-side routing
+		if (response.status === 404 && !url.pathname.match(/\.[a-zA-Z]+$/)) {
+			const indexUrl = new URL(request.url);
+			indexUrl.pathname = "/index.html";
+			return await env.ASSETS.fetch(new Request(indexUrl, request));
+		}
+
+		return response;
 	} catch (error) {
 		console.error("Asset fetch failed", error);
 		return new Response("Not Found", {
