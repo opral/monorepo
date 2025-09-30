@@ -129,21 +129,21 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 
 	// Optional: ensure account exists and set as active
 	if (env.args.account) {
-		const existing = await db
+		const accountExistsQuery = db
 			.selectFrom("account_all")
 			.where("id", "=", env.args.account.id)
 			.where("lixcol_version_id", "=", "global")
 			.select("id")
-			.executeTakeFirst();
-		if (!existing) {
-			await db
-				.insertInto("account_all")
-				.values({
-					id: env.args.account.id,
-					name: env.args.account.name,
-					lixcol_version_id: "global",
-				})
-				.execute();
+			.limit(1);
+		const accountExists =
+			engine.executeSync(accountExistsQuery.compile()).rows.length > 0;
+		if (!accountExists) {
+			const insertAccount = db.insertInto("account_all").values({
+				id: env.args.account.id,
+				name: env.args.account.name,
+				lixcol_version_id: "global",
+			});
+			engine.executeSync(insertAccount.compile());
 		}
 		await switchAccount({ lix: { db }, to: [env.args.account] });
 	}
@@ -153,46 +153,48 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		for (const kv of env.args.keyValues) {
 			const explicitVid = kv.lixcol_version_id;
 			if (explicitVid) {
-				const exists = await db
+				const existsQuery = db
 					.selectFrom("key_value_all")
 					.select("key")
 					.where("key", "=", kv.key)
 					.where("lixcol_version_id", "=", explicitVid)
-					.executeTakeFirst();
+					.limit(1);
+				const exists =
+					engine.executeSync(existsQuery.compile()).rows.length > 0;
 				if (exists) {
-					await db
+					const update = db
 						.updateTable("key_value_all")
 						.set({ value: kv.value as any })
 						.where("key", "=", kv.key)
-						.where("lixcol_version_id", "=", explicitVid)
-						.execute();
+						.where("lixcol_version_id", "=", explicitVid);
+					engine.executeSync(update.compile());
 				} else {
-					await db
-						.insertInto("key_value_all")
-						.values({
-							key: kv.key,
-							value: kv.value as any,
-							lixcol_version_id: explicitVid,
-						})
-						.execute();
+					const insert = db.insertInto("key_value_all").values({
+						key: kv.key,
+						value: kv.value as any,
+						lixcol_version_id: explicitVid,
+					});
+					engine.executeSync(insert.compile());
 				}
 			} else {
-				const exists = await db
+				const existsQuery = db
 					.selectFrom("key_value")
 					.select("key")
 					.where("key", "=", kv.key)
-					.executeTakeFirst();
+					.limit(1);
+				const exists =
+					engine.executeSync(existsQuery.compile()).rows.length > 0;
 				if (exists) {
-					await db
+					const update = db
 						.updateTable("key_value")
 						.set({ value: kv.value as any })
-						.where("key", "=", kv.key)
-						.execute();
+						.where("key", "=", kv.key);
+					engine.executeSync(update.compile());
 				} else {
-					await db
+					const insert = db
 						.insertInto("key_value")
-						.values({ key: kv.key, value: kv.value as any })
-						.execute();
+						.values({ key: kv.key, value: kv.value as any });
+					engine.executeSync(insert.compile());
 				}
 			}
 		}
