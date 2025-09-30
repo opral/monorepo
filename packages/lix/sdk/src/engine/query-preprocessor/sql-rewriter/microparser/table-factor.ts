@@ -20,6 +20,8 @@ export interface TableFactorMatch {
 	alias: string;
 	/** Whether the alias was explicitly provided in the SQL. */
 	explicitAlias: boolean;
+	/** Alias text exactly as it appeared in SQL (quoted if applicable). */
+	aliasSql: string;
 }
 
 const leadingTokens = new Set([FROM, JOIN, Comma]);
@@ -35,19 +37,28 @@ const normalizeName = (image: string): string => {
 };
 
 const deriveAlias = (
-	token: Token | undefined,
+	tableToken: Token,
+	aliasToken: Token | undefined,
 	tableName: string
-): { alias: string; explicit: boolean } => {
-	if (!token || !isIdentifier(token)) {
-		return { alias: tableName, explicit: false };
+): { alias: string; explicit: boolean; aliasSql: string } => {
+	if (!aliasToken || !isIdentifier(aliasToken)) {
+		return {
+			alias: tableName,
+			explicit: false,
+			aliasSql: tableToken.image,
+		};
 	}
 
-	if (token.image.startsWith('"') && token.image.endsWith('"')) {
-		const dequoted = token.image.slice(1, -1).replace(/""/g, "");
-		return { alias: dequoted, explicit: true };
+	if (aliasToken.image.startsWith('"') && aliasToken.image.endsWith('"')) {
+		const dequoted = aliasToken.image.slice(1, -1).replace(/""/g, "");
+		return { alias: dequoted, explicit: true, aliasSql: aliasToken.image };
 	}
 
-	return { alias: token.image, explicit: true };
+	return {
+		alias: aliasToken.image,
+		explicit: true,
+		aliasSql: aliasToken.image,
+	};
 };
 
 const offsetOrThrow = (value: number | undefined, label: string): number => {
@@ -89,7 +100,11 @@ export function findTableFactor(
 		}
 
 		const aliasToken = tokens[cursor];
-		const { alias, explicit } = deriveAlias(aliasToken, tableName);
+		const { alias, explicit, aliasSql } = deriveAlias(
+			current,
+			aliasToken,
+			tableName
+		);
 
 		const endToken = explicit ? (aliasToken ?? current) : current;
 		const end = offsetOrThrow(
@@ -102,6 +117,7 @@ export function findTableFactor(
 			end,
 			alias,
 			explicitAlias: explicit,
+			aliasSql,
 		};
 	}
 
