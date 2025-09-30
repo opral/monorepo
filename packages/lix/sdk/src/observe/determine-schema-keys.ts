@@ -112,40 +112,192 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 }
 
 /**
- * Extracts literal filters from a compiled Kysely query.
- * Currently detects:
- * - schema_key equality against a single placeholder
- * - version_id equality against a single placeholder
+ * Extracts literal `schema_key`, `entity_id`, and `version_id` filters from a compiled query AST.
  */
 export function extractLiteralFilters(compiledQuery: any): {
 	schemaKeys: string[];
 	versionIds: string[];
+	entityIds: string[];
 } {
-	const result = { schemaKeys: [] as string[], versionIds: [] as string[] };
-	const sqlText: string | undefined = (compiledQuery?.sql ??
-		compiledQuery?.query?.sql) as any;
-	const params: any[] = (compiledQuery?.parameters ??
-		compiledQuery?.query?.parameters) as any[];
-	if (typeof sqlText !== "string" || !Array.isArray(params)) return result;
-	const lower = sqlText.toLowerCase();
+	const schemaKeys = new Set<string>();
+	const versionIds = new Set<string>();
+	const entityIds = new Set<string>();
 
-	const pushParamAfterKey = (key: string, sink: string[]) => {
-		const idx = lower.indexOf(key);
-		if (idx < 0) return;
-		const before = lower.slice(0, idx);
-		const qCount = (before.match(/\?/g) || []).length;
-		const after = lower.slice(idx);
-		const aheadQIndex = after.indexOf("?");
-		if (aheadQIndex >= 0) {
-			const paramIndex = qCount; // first '?' after key occurrence
-			const val = params[paramIndex];
-			if (typeof val === "string" && !sink.includes(val)) sink.push(val);
+	const root = compiledQuery?.query ?? compiledQuery;
+	if (!root) {
+		return { schemaKeys: [], versionIds: [], entityIds: [] };
+	}
+
+	const record = (column: string | undefined, values: string[] | undefined) => {
+		if (!column || !values || values.length === 0) return;
+		const target =
+			column === "schema_key"
+				? schemaKeys
+				: column === "version_id"
+					? versionIds
+					: column === "entity_id"
+						? entityIds
+						: undefined;
+		if (!target) return;
+		for (const value of values) {
+			if (typeof value === "string") {
+				target.add(value);
+			}
 		}
 	};
 
-	pushParamAfterKey("schema_key", result.schemaKeys);
-	pushParamAfterKey("version_id", result.versionIds);
-	return result;
+	const visitFilterNode = (node: any): void => {
+		if (!node) return;
+		switch (node.kind) {
+			case "WhereNode":
+				visitFilterNode(node.where);
+				return;
+			case "HavingNode":
+				visitFilterNode(node.having);
+				return;
+			case "OnNode":
+				visitFilterNode(node.on);
+				return;
+			case "ParensNode":
+				visitFilterNode(node.node);
+				return;
+			case "AndNode":
+			case "OrNode":
+				visitFilterNode(node.left);
+				visitFilterNode(node.right);
+				return;
+			case "UnaryOperationNode":
+				visitFilterNode(node.operand);
+				return;
+			case "BinaryOperationNode": {
+				const operator = node.operator?.operator ?? node.operator;
+				const leftColumn = extractColumnName(node.leftOperand);
+				const rightColumn = extractColumnName(node.rightOperand);
+				const leftValues = extractLiteralValues(node.leftOperand);
+				const rightValues = extractLiteralValues(node.rightOperand);
+
+				if (
+					leftColumn === "schema_key" ||
+					leftColumn === "version_id" ||
+					leftColumn === "entity_id"
+				) {
+					record(leftColumn, rightValues);
+				}
+				if (
+					rightColumn === "schema_key" ||
+					rightColumn === "version_id" ||
+					rightColumn === "entity_id"
+				) {
+					record(rightColumn, leftValues);
+				}
+
+				// For IN/NOT IN operators, both sides can carry literals. Already handled above.
+
+				// Dive deeper in case operands contain additional filters (e.g. nested expressions)
+				if (operator === "in" || operator === "not in") {
+					// Operands already processed.
+				}
+				visitFilterNode(node.leftOperand);
+				visitFilterNode(node.rightOperand);
+				return;
+			}
+			case "ValueListNode":
+			case "TupleNode":
+			case "ListNode":
+				for (const value of node.values ?? node.items ?? []) {
+					visitFilterNode(value);
+				}
+				return;
+			default:
+				if (Array.isArray(node)) {
+					for (const child of node) visitFilterNode(child);
+					return;
+				}
+		}
+	};
+
+	const extractLiteralValues = (node: any): string[] | undefined => {
+		if (!node) return undefined;
+		switch (node.kind) {
+			case "ValueNode": {
+				const value = unwrapValue(node.value);
+				return value !== undefined ? [value] : undefined;
+			}
+			case "PrimitiveValueListNode": {
+				const values: string[] = [];
+				for (const v of node.values ?? []) {
+					if (typeof v === "string") values.push(v);
+				}
+				return values.length > 0 ? values : undefined;
+			}
+			case "ValueListNode": {
+				const values: string[] = [];
+				for (const child of node.values ?? []) {
+					const nested = extractLiteralValues(child);
+					if (nested) values.push(...nested);
+				}
+				return values.length > 0 ? values : undefined;
+			}
+			case "TupleNode": {
+				const values: string[] = [];
+				for (const child of node.values ?? []) {
+					const nested = extractLiteralValues(child);
+					if (nested) values.push(...nested);
+				}
+				return values.length > 0 ? values : undefined;
+			}
+			case "ParensNode":
+				return extractLiteralValues(node.node);
+			default:
+				return undefined;
+		}
+	};
+
+	const unwrapValue = (value: unknown): string | undefined => {
+		if (typeof value === "string") return value;
+		if (
+			value &&
+			typeof value === "object" &&
+			"value" in (value as any) &&
+			typeof (value as any).value === "string"
+		) {
+			return (value as any).value as string;
+		}
+		return undefined;
+	};
+
+	const extractColumnName = (node: any): string | undefined => {
+		if (!node) return undefined;
+		switch (node.kind) {
+			case "ReferenceNode":
+				return extractColumnName(node.column);
+			case "ColumnNode":
+				return extractColumnName(node.column);
+			case "IdentifierNode":
+				return typeof node.name === "string" ? node.name : undefined;
+			case "AliasNode":
+				return extractColumnName(node.node);
+			case "ParensNode":
+				return extractColumnName(node.node);
+			default:
+				return undefined;
+		}
+	};
+
+	const queryNode = root?.query ?? root;
+	if (queryNode?.where) visitFilterNode(queryNode.where);
+	if (queryNode?.having) visitFilterNode(queryNode.having);
+	if (queryNode?.joins) {
+		for (const join of queryNode.joins) {
+			if (join?.on) visitFilterNode(join.on);
+		}
+	}
+
+	return {
+		schemaKeys: Array.from(schemaKeys),
+		versionIds: Array.from(versionIds),
+		entityIds: Array.from(entityIds),
+	};
 }
 
 /**

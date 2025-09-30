@@ -147,6 +147,7 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			const schemaKeys = determineSchemaKeys(recompiled);
 			const filters = extractLiteralFilters(recompiled);
 			const watchedVersions = new Set(filters.versionIds);
+			const watchedEntityIds = new Set(filters.entityIds);
 
 			// If no schema keys extracted, always re-execute for safety
 			if (!schemaKeys.length) {
@@ -173,6 +174,14 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 				// re-exec only when they match. If the change has no version id info, be conservative.
 				if (watchedVersions.size > 0) {
 					if (changeVid && !watchedVersions.has(changeVid)) return false;
+				}
+
+				if (watchedEntityIds.size > 0) {
+					if (change.entity_id) {
+						if (!watchedEntityIds.has(change.entity_id)) return false;
+					} else {
+						return true; // missing entity info → be conservative
+					}
 				}
 				return true;
 			});

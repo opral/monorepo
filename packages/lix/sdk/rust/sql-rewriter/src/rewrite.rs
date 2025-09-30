@@ -150,7 +150,7 @@ impl RewriteContext {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct PlaceholderResolver {
     parameters: Vec<JsonValue>,
     position: usize,
@@ -317,8 +317,11 @@ fn rewrite_query(
         }
     }
 
+    let limit_expr = query.limit.as_ref();
+
     changed |= rewrite_set_expr(
         query.body.as_mut(),
+        limit_expr,
         context,
         phase,
         accumulator,
@@ -331,6 +334,7 @@ fn rewrite_query(
 
 fn rewrite_set_expr(
     set_expr: &mut SetExpr,
+    limit: Option<&Expr>,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -338,11 +342,12 @@ fn rewrite_set_expr(
     stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     match set_expr {
-        SetExpr::Select(select) => rewrite_select(select.as_mut(), context, phase, accumulator, resolver, stats),
+        SetExpr::Select(select) => rewrite_select(select.as_mut(), limit, context, phase, accumulator, resolver, stats),
         SetExpr::Query(query) => rewrite_query(query.as_mut(), context, phase, accumulator, resolver, stats),
         SetExpr::SetOperation { left, right, .. } => {
             let left_changed = rewrite_set_expr(
                 left.as_mut(),
+                limit,
                 context,
                 phase,
                 accumulator,
@@ -351,6 +356,7 @@ fn rewrite_set_expr(
             )?;
             let right_changed = rewrite_set_expr(
                 right.as_mut(),
+                limit,
                 context,
                 phase,
                 accumulator,
@@ -366,6 +372,7 @@ fn rewrite_set_expr(
 
 fn rewrite_select(
     select: &mut Select,
+    limit: Option<&Expr>,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -396,6 +403,7 @@ fn rewrite_select(
             &select.projection,
             select.selection.as_ref(),
             block_writer_pruning,
+            limit,
             context,
             phase,
             accumulator,
@@ -414,6 +422,7 @@ fn rewrite_table_with_joins(
     projection: &[SelectItem],
     selection: Option<&Expr>,
     block_writer_pruning: bool,
+    limit: Option<&Expr>,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -427,6 +436,7 @@ fn rewrite_table_with_joins(
         projection,
         selection,
         block_writer_pruning,
+        limit,
         context,
         phase,
         accumulator,
@@ -444,6 +454,7 @@ fn rewrite_table_with_joins(
                 projection,
                 selection,
                 block_writer_pruning,
+                limit,
                 context,
                 phase,
                 accumulator,
@@ -464,6 +475,7 @@ fn rewrite_table_factor(
     projection: &[SelectItem],
     selection: Option<&Expr>,
     block_writer_pruning: bool,
+    limit: Option<&Expr>,
     context: &RewriteContext,
     phase: RewritePhase,
     accumulator: &mut RewriteAccumulator,
@@ -552,6 +564,14 @@ fn rewrite_table_factor(
     }
 
     if phase == RewritePhase::Full && table_name_lower == TARGET_VIEW {
+        let mut entity_resolver = resolver.clone();
+        let entity_filters = selection
+            .map(|expr| collect_entity_filters(expr, &target.alias, &mut entity_resolver))
+            .unwrap_or_default();
+        let requires_snapshot_non_null = selection
+            .map(|expr| selection_contains_snapshot_not_null(expr, &target.alias))
+            .unwrap_or(false);
+
         let schema_filters = selection
             .map(|expr| collect_schema_filters(expr, &target.alias, resolver))
             .unwrap_or_default();
@@ -597,6 +617,40 @@ fn rewrite_table_factor(
                     (None, tables)
                 }
             };
+
+        if let Some(schema_key) = schema_key_opt.as_deref() {
+            if !include_writer
+                && cache_tables.len() == 1
+                && entity_filters.len() == 1
+                && projection_is_snapshot_only(projection, &target.alias)
+                && requires_snapshot_non_null
+                && limit_allows_single_row(limit)
+            {
+                if let Some(fast_sql) = build_fast_single_schema_subquery(schema_key, &entity_filters[0]) {
+                    let mut subquery = parse_select_query(&fast_sql)?;
+                    subquery.limit = None;
+                    subquery.offset = None;
+
+                    let alias_ident = target
+                        .alias_ident
+                        .unwrap_or_else(|| ident_from_str(&target.alias));
+                    let alias = TableAlias {
+                        name: alias_ident,
+                        columns: vec![],
+                    };
+
+                    if !cache_tables.is_empty() {
+                        accumulator.touch_internal_state_reader(schema_key.to_string(), include_inheritance);
+                    }
+
+                    return Ok(Some(TableFactor::Derived {
+                        lateral: false,
+                        subquery: Box::new(subquery),
+                        alias: Some(alias),
+                    }));
+                }
+            }
+        }
 
         let subquery_sql = build_internal_state_reader_subquery(
             schema_key_opt.as_deref(),
@@ -833,6 +887,16 @@ fn collect_schema_filters(
     values.into_iter().collect()
 }
 
+fn collect_entity_filters(
+    expr: &Expr,
+    alias: &str,
+    resolver: &mut PlaceholderResolver,
+) -> Vec<String> {
+    let mut values = HashSet::new();
+    collect_entity_filters_recursive(expr, alias, resolver, &mut values);
+    values.into_iter().collect()
+}
+
 fn collect_schema_filters_recursive(
     expr: &Expr,
     alias: &str,
@@ -989,6 +1053,22 @@ fn matches_schema_column(expr: &Expr, alias: &str) -> bool {
     }
 }
 
+fn matches_entity_column(expr: &Expr, alias: &str) -> bool {
+    match expr {
+        Expr::Identifier(ident) => ident.value.eq_ignore_ascii_case("entity_id"),
+        Expr::CompoundIdentifier(idents) => {
+            if idents.len() == 2 {
+                let table = &idents[0].value;
+                let column = &idents[1].value;
+                return column.eq_ignore_ascii_case("entity_id")
+                    && table.eq_ignore_ascii_case(alias);
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
 fn extract_literal_values(expr: &Expr, resolver: &mut PlaceholderResolver) -> Vec<String> {
     match expr {
         Expr::Value(sqlparser::ast::Value::SingleQuotedString(value)) => vec![value.clone()],
@@ -1004,6 +1084,135 @@ fn extract_literal_values(expr: &Expr, resolver: &mut PlaceholderResolver) -> Ve
             .collect(),
         Expr::Nested(expr) => extract_literal_values(expr, resolver),
         _ => vec![],
+    }
+}
+
+fn collect_entity_filters_recursive(
+    expr: &Expr,
+    alias: &str,
+    resolver: &mut PlaceholderResolver,
+    output: &mut HashSet<String>,
+) {
+    match expr {
+        Expr::BinaryOp { left, op, right } => {
+            if matches_entity_column(left, alias) && matches_eq_operator(op) {
+                for value in extract_literal_values(right, resolver) {
+                    if !value.is_empty() {
+                        output.insert(value);
+                    }
+                }
+            } else if matches_entity_column(right, alias) && matches_eq_operator(op) {
+                for value in extract_literal_values(left, resolver) {
+                    if !value.is_empty() {
+                        output.insert(value);
+                    }
+                }
+            } else {
+                collect_entity_filters_recursive(left, alias, resolver, output);
+                collect_entity_filters_recursive(right, alias, resolver, output);
+            }
+        }
+        Expr::Nested(inner) => collect_entity_filters_recursive(inner, alias, resolver, output),
+        Expr::Between { expr, low, high, .. } => {
+            collect_entity_filters_recursive(expr, alias, resolver, output);
+            collect_entity_filters_recursive(low, alias, resolver, output);
+            collect_entity_filters_recursive(high, alias, resolver, output);
+        }
+        Expr::InList { expr, list, .. } => {
+            if matches_entity_column(expr, alias) {
+                for item in list {
+                    for value in extract_literal_values(item, resolver) {
+                        if !value.is_empty() {
+                            output.insert(value);
+                        }
+                    }
+                }
+            } else {
+                collect_entity_filters_recursive(expr, alias, resolver, output);
+            }
+        }
+        Expr::Cast { expr, .. } | Expr::UnaryOp { expr, .. } => {
+            collect_entity_filters_recursive(expr, alias, resolver, output);
+        }
+        _ => {}
+    }
+}
+
+fn matches_snapshot_column(expr: &Expr, alias: &str) -> bool {
+    match expr {
+        Expr::Identifier(ident) => ident.value.eq_ignore_ascii_case("snapshot_content"),
+        Expr::CompoundIdentifier(idents) => {
+            if idents.len() == 2 {
+                let table = &idents[0].value;
+                let column = &idents[1].value;
+                return column.eq_ignore_ascii_case("snapshot_content")
+                    && table.eq_ignore_ascii_case(alias);
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
+fn selection_contains_snapshot_not_null(expr: &Expr, alias: &str) -> bool {
+    match expr {
+        Expr::IsNotNull(inner) => matches_snapshot_column(inner, alias),
+        Expr::BinaryOp { left, op, right } => {
+            if matches_logical_operator(op) {
+                selection_contains_snapshot_not_null(left, alias)
+                    || selection_contains_snapshot_not_null(right, alias)
+            } else {
+                selection_contains_snapshot_not_null(left, alias)
+                    || selection_contains_snapshot_not_null(right, alias)
+            }
+        }
+        Expr::Nested(inner) => selection_contains_snapshot_not_null(inner, alias),
+        Expr::Cast { expr: inner, .. } => selection_contains_snapshot_not_null(inner, alias),
+        _ => false,
+    }
+}
+
+fn projection_is_snapshot_only(projection: &[SelectItem], alias: &str) -> bool {
+    use SelectItem::*;
+    projection.iter().all(|item| match item {
+        UnnamedExpr(expr) => is_snapshot_expr(expr, alias),
+        ExprWithAlias { expr, .. } => is_snapshot_expr(expr, alias),
+        _ => false,
+    })
+}
+
+fn is_snapshot_expr(expr: &Expr, alias: &str) -> bool {
+    match expr {
+        Expr::Identifier(_) | Expr::CompoundIdentifier(_) => matches_snapshot_column(expr, alias),
+        Expr::Function(func) => {
+            let name = func.name.to_string().to_ascii_lowercase();
+            if name == "json_extract" || name == "json_extract_scalar" {
+                if let Some(first_arg) = func.args.first() {
+                    match first_arg {
+                        sqlparser::ast::FunctionArg::Unnamed(sqlparser::ast::FunctionArgExpr::Expr(inner))
+                        | sqlparser::ast::FunctionArg::Named { arg: sqlparser::ast::FunctionArgExpr::Expr(inner), .. } =>
+                        {
+                            return is_snapshot_expr(inner, alias);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            false
+        }
+        Expr::Cast { expr: inner, .. }
+        | Expr::Nested(inner)
+        | Expr::UnaryOp { expr: inner, .. } => is_snapshot_expr(inner, alias),
+        _ => false,
+    }
+}
+
+fn limit_allows_single_row(limit: Option<&Expr>) -> bool {
+    match limit {
+        Some(Expr::Value(sqlparser::ast::Value::Number(value, _))) => value == "1",
+        Some(Expr::Value(sqlparser::ast::Value::SingleQuotedString(value))) => value == "1",
+        Some(Expr::Value(sqlparser::ast::Value::DoubleQuotedString(value))) => value == "1",
+        _ => false,
     }
 }
 
@@ -1056,6 +1265,146 @@ impl InternalStateReaderHintPayload {
     pub fn include_inheritance(&self) -> bool {
         self.include_inheritance
     }
+}
+
+fn build_fast_single_schema_subquery(schema_key: &str, entity_id: &str) -> Option<String> {
+    if schema_key.is_empty() || entity_id.is_empty() {
+        return None;
+    }
+
+    let descriptor_table = schema_key_to_cache_table_name("lix_version_descriptor");
+    let descriptor_ident = format_identifier(&descriptor_table);
+    let cache_table = schema_key_to_cache_table_name(schema_key);
+    let cache_ident = format_identifier(&cache_table);
+    let schema_literal = escape_single_quotes(schema_key);
+    let entity_literal = escape_single_quotes(entity_id);
+
+    let sql = format!(
+        r#"
+WITH RECURSIVE anc(depth, version_id) AS (
+  SELECT 0 AS depth, version_id FROM active_version
+  UNION ALL
+  SELECT depth + 1,
+         json_extract(descriptor.snapshot_content, '$.inherits_from_version_id')
+  FROM {descriptor} AS descriptor
+  JOIN anc ON descriptor.version_id = anc.version_id
+  WHERE descriptor.inheritance_delete_marker = 0
+    AND json_extract(descriptor.snapshot_content, '$.inherits_from_version_id') IS NOT NULL
+),
+ranked AS (
+  SELECT
+    anc.depth AS depth,
+    1 AS priority,
+    'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
+    txn.entity_id,
+    txn.schema_key,
+    txn.file_id,
+    txn.version_id,
+    txn.plugin_key,
+    json(txn.snapshot_content) AS snapshot_content,
+    txn.schema_version,
+    txn.created_at,
+    txn.created_at AS updated_at,
+    NULL AS inherited_from_version_id,
+    txn.id AS change_id,
+    txn.untracked,
+    'pending' AS commit_id,
+    json(txn.metadata) AS metadata,
+    NULL AS writer_key
+  FROM anc
+  JOIN internal_transaction_state txn
+    ON txn.version_id = anc.version_id
+   AND txn.schema_key = '{schema}'
+   AND txn.entity_id = '{entity}'
+   AND txn.snapshot_content IS NOT NULL
+
+  UNION ALL
+
+  SELECT
+    anc.depth AS depth,
+    2 AS priority,
+    'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk,
+    unt.entity_id,
+    unt.schema_key,
+    unt.file_id,
+    anc.version_id AS version_id,
+    unt.plugin_key,
+    json(unt.snapshot_content) AS snapshot_content,
+    unt.schema_version,
+    unt.created_at,
+    unt.updated_at,
+    NULL AS inherited_from_version_id,
+    'untracked' AS change_id,
+    1 AS untracked,
+    'untracked' AS commit_id,
+    NULL AS metadata,
+    NULL AS writer_key
+  FROM anc
+  JOIN internal_state_all_untracked unt
+    ON unt.version_id = anc.version_id
+   AND unt.schema_key = '{schema}'
+   AND unt.entity_id = '{entity}'
+   AND unt.inheritance_delete_marker = 0
+   AND unt.snapshot_content IS NOT NULL
+
+  UNION ALL
+
+  SELECT
+    anc.depth AS depth,
+    3 AS priority,
+    'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk,
+    cache.entity_id,
+    cache.schema_key,
+    cache.file_id,
+    cache.version_id,
+    cache.plugin_key,
+    json(cache.snapshot_content) AS snapshot_content,
+    cache.schema_version,
+    cache.created_at,
+    cache.updated_at,
+    cache.inherited_from_version_id,
+    cache.change_id,
+    0 AS untracked,
+    cache.commit_id,
+    change.metadata AS metadata,
+    NULL AS writer_key
+  FROM anc
+  JOIN {cache} AS cache
+    ON cache.version_id = anc.version_id
+   AND cache.schema_key = '{schema}'
+   AND cache.entity_id = '{entity}'
+   AND cache.inheritance_delete_marker = 0
+   AND cache.snapshot_content IS NOT NULL
+  LEFT JOIN change ON change.id = cache.change_id
+)
+SELECT
+  _pk,
+  entity_id,
+  schema_key,
+  file_id,
+  version_id,
+  plugin_key,
+  snapshot_content,
+  schema_version,
+  created_at,
+  updated_at,
+  inherited_from_version_id,
+  change_id,
+  untracked,
+  commit_id,
+  metadata,
+  writer_key
+FROM ranked
+ORDER BY depth, priority, version_id
+LIMIT 1
+"#,
+        descriptor = descriptor_ident,
+        cache = cache_ident,
+        schema = schema_literal,
+        entity = entity_literal,
+    );
+
+    Some(sql)
 }
 
 fn build_internal_state_reader_subquery(

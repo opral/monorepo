@@ -9,6 +9,7 @@ import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-
 import { getTimestampSync } from "./timestamp.js";
 import { updateUntrackedState } from "../../state/untracked/update-untracked-state.js";
 import { internalQueryBuilder } from "../internal-query-builder.js";
+import { withRuntimeCache } from "../with-runtime-cache.js";
 
 /** State kept per SQLite connection - 16 bytes for xorshift128+ */
 type RngState = {
@@ -109,7 +110,8 @@ function getRngSeed(args: {
 	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): string {
 	// Check for seed in the deterministic mode config
-	const [configRow] = args.engine.executeSync(
+	const [configRow] = withRuntimeCache(
+		args.engine,
 		internalQueryBuilder
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
@@ -128,7 +130,8 @@ function getRngSeed(args: {
 	}
 
 	// Derive default seed from lix_id
-	const [idRow] = args.engine.executeSync(
+	const [idRow] = withRuntimeCache(
+		args.engine,
 		internalQueryBuilder
 			.selectFrom("key_value")
 			.where("key", "=", "lix_id")

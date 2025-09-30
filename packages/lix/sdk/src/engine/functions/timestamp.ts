@@ -3,6 +3,7 @@ import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
 import { sql } from "kysely";
 import { internalQueryBuilder } from "../internal-query-builder.js";
+import { withRuntimeCache } from "../with-runtime-cache.js";
 
 /**
  * Sync variant of {@link getTimestamp}. See {@link getTimestamp} for behavior and examples.
@@ -20,20 +21,20 @@ export function getTimestampSync(args: {
 	// Check if deterministic mode is enabled
 	if (isDeterministicModeSync({ engine: engine })) {
 		// Check if timestamps are disabled in the config
-		const compiled = internalQueryBuilder
-			.selectFrom("internal_state_vtable")
-			.where("entity_id", "=", "lix_deterministic_mode")
-			.where("schema_key", "=", "lix_key_value")
-			.where("snapshot_content", "is not", null)
-			.select(
-				sql`json_extract(snapshot_content, '$.value.timestamp')`.as("timestamp")
-			)
-			.compile();
-		const { rows } = engine.executeSync({
-			sql: compiled.sql,
-			parameters: compiled.parameters,
-		});
-		const config = rows[0];
+		const [config] = withRuntimeCache(
+			engine,
+			internalQueryBuilder
+				.selectFrom("internal_state_vtable")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.where("snapshot_content", "is not", null)
+				.select(
+					sql`json_extract(snapshot_content, '$.value.timestamp')`.as(
+						"timestamp"
+					)
+				)
+				.compile()
+		).rows;
 
 		// If timestamp is explicitly set to false, use real time
 		if (config?.timestamp == false) {

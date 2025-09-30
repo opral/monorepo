@@ -72,6 +72,25 @@ describe("rewriteSql", () => {
 		]);
 	});
 
+	test("emits fast single-schema plan for entity lookup", () => {
+		const query =
+			"SELECT json_extract(snapshot_content, '$.value.nano_id') AS nano_id FROM internal_state_reader WHERE schema_key = 'lix_key_value' AND entity_id = 'lix_deterministic_mode' AND snapshot_content IS NOT NULL LIMIT 1";
+		setSqlRewriterContext(
+			JSON.stringify({
+				tableCache: [
+					"internal_state_cache_lix_key_value",
+					"internal_state_cache_lix_version_descriptor",
+				],
+			})
+		);
+
+		const result = rewriteSql(query);
+
+		expect(result.sql).toContain("WITH RECURSIVE anc");
+		expect(result.sql).toContain("ORDER BY depth, priority");
+		expect(result.sql).not.toMatch(/NOT EXISTS/);
+	});
+
 	test("schema key filters inside IN clause are respected", () => {
 		const query =
 			"SELECT * FROM internal_state_reader WHERE schema_key IN (?, ?)";
