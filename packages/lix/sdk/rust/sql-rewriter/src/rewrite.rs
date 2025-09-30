@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use sqlparser::ast::{
@@ -8,8 +6,19 @@ use sqlparser::ast::{
 };
 use sqlparser::dialect::SQLiteDialect;
 use sqlparser::parser::Parser;
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
 
-const TARGET_VIEW: &str = "internal_state_reader";
+const TARGET_VIEW: &str = "internal_state_vtable";
+const VIEW_NAMES_TARGETING_VTABLE: &[&str] = &[
+    "internal_state_vtable",
+    "internal_state_reader",
+    "state_all",
+    "state",
+    "state_all_untracked",
+    "state_with_tombstones",
+    "key_value_all",
+];
 
 #[derive(Debug)]
 pub enum RewriteError {
@@ -39,13 +48,18 @@ struct RewriteContext {
 
 #[derive(Default)]
 struct RewriteAccumulator {
-    internal_state_reader: Option<InternalStateReaderHint>,
+    internal_state_vtable: Option<InternalStateVtableHint>,
 }
 
 #[derive(Default)]
-struct InternalStateReaderHint {
+struct InternalStateVtableHint {
     schema_keys: HashSet<String>,
     include_inheritance: bool,
+}
+
+struct ViewExpansionInfo {
+    references_internal_reader: bool,
+    rewrote_subquery: bool,
 }
 
 #[derive(Serialize)]
@@ -60,14 +74,14 @@ pub struct RewriteOutput {
 #[derive(Serialize, Default)]
 pub struct CacheHints {
     #[serde(
-        rename = "internalStateReader",
+        rename = "internalStateVtable",
         skip_serializing_if = "Option::is_none"
     )]
-    internal_state_reader: Option<InternalStateReaderHintPayload>,
+    internal_state_vtable: Option<InternalStateVtableHintPayload>,
 }
 
 #[derive(Serialize)]
-pub struct InternalStateReaderHintPayload {
+pub struct InternalStateVtableHintPayload {
     #[serde(rename = "schemaKeys")]
     schema_keys: Vec<String>,
     #[serde(rename = "includeInheritance")]
@@ -147,6 +161,10 @@ impl RewriteContext {
     fn view_sql(&self, table_name: &str) -> Option<&str> {
         let key = table_name.to_ascii_lowercase();
         self.views.get(&key).map(|sql| sql.as_str())
+    }
+
+    fn view_names(&self) -> impl Iterator<Item = &String> {
+        self.views.keys()
     }
 }
 
@@ -294,7 +312,9 @@ fn rewrite_statement(
     stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     match statement {
-        Statement::Query(query) => rewrite_query(query, context, phase, accumulator, resolver, stats),
+        Statement::Query(query) => {
+            rewrite_query(query, context, phase, accumulator, resolver, stats)
+        }
         _ => Ok(false),
     }
 }
@@ -307,6 +327,10 @@ fn rewrite_query(
     resolver: &mut PlaceholderResolver,
     stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
+    if !query_targets_internal_state_vtable(query, context) {
+        return Ok(false);
+    }
+
     let mut changed = false;
 
     if let Some(with) = &mut query.with {
@@ -332,6 +356,165 @@ fn rewrite_query(
     Ok(changed)
 }
 
+fn query_targets_internal_state_vtable(query: &Query, context: &RewriteContext) -> bool {
+    let mut visited_views = HashSet::new();
+    query_targets_internal_state_vtable_impl(query, context, &mut visited_views)
+}
+
+fn query_targets_internal_state_vtable_impl(
+    query: &Query,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+) -> bool {
+    if let Some(with) = &query.with {
+        for cte in &with.cte_tables {
+            if query_targets_internal_state_vtable_impl(&cte.query, context, visited_views) {
+                return true;
+            }
+        }
+    }
+
+    set_expr_targets_internal_state_vtable(query.body.as_ref(), context, visited_views)
+}
+
+fn set_expr_targets_internal_state_vtable(
+    set_expr: &SetExpr,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+) -> bool {
+    match set_expr {
+        SetExpr::Select(select) => {
+            select_targets_internal_state_vtable(select.as_ref(), context, visited_views)
+        }
+        SetExpr::Query(query) => {
+            query_targets_internal_state_vtable_impl(query.as_ref(), context, visited_views)
+        }
+        SetExpr::SetOperation { left, right, .. } => {
+            set_expr_targets_internal_state_vtable(left.as_ref(), context, visited_views)
+                || set_expr_targets_internal_state_vtable(right.as_ref(), context, visited_views)
+        }
+        SetExpr::Values(_) => false,
+        _ => false,
+    }
+}
+
+fn select_targets_internal_state_vtable(
+    select: &Select,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+) -> bool {
+    for table_with_joins in &select.from {
+        if table_with_joins_targets_internal_state_vtable(table_with_joins, context, visited_views)
+        {
+            return true;
+        }
+    }
+    false
+}
+
+fn table_with_joins_targets_internal_state_vtable(
+    table: &TableWithJoins,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+) -> bool {
+    if table_factor_targets_internal_state_vtable(&table.relation, context, visited_views) {
+        return true;
+    }
+
+    for join in &table.joins {
+        if table_factor_targets_internal_state_vtable(&join.relation, context, visited_views) {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn table_factor_targets_internal_state_vtable(
+    factor: &TableFactor,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+) -> bool {
+    match factor {
+        TableFactor::Table { name, .. } => {
+            let base = name
+                .0
+                .last()
+                .map(|ident| ident.value.to_ascii_lowercase())
+                .unwrap_or_default();
+            if VIEW_NAMES_TARGETING_VTABLE
+                .iter()
+                .any(|candidate| base == *candidate)
+            {
+                return true;
+            }
+
+            if let Some(view_sql) = context.view_sql(&base) {
+                return view_targets_internal_state_vtable(&base, context, visited_views, view_sql);
+            }
+
+            false
+        }
+        TableFactor::Derived { subquery, .. } => {
+            query_targets_internal_state_vtable_impl(subquery.as_ref(), context, visited_views)
+        }
+        TableFactor::NestedJoin { .. } => false,
+        TableFactor::TableFunction { .. }
+        | TableFactor::Function { .. }
+        | TableFactor::JsonTable { .. }
+        | TableFactor::UNNEST { .. }
+        | TableFactor::Pivot { .. }
+        | TableFactor::Unpivot { .. } => false,
+    }
+}
+
+fn view_targets_internal_state_vtable(
+    view_name: &str,
+    context: &RewriteContext,
+    visited_views: &mut HashSet<String>,
+    view_sql: &str,
+) -> bool {
+    if !visited_views.insert(view_name.to_string()) {
+        return false;
+    }
+
+    let lowered_target = TARGET_VIEW.to_ascii_lowercase();
+    let lowered_sql = view_sql.to_ascii_lowercase();
+
+    if lowered_sql.contains(&lowered_target) {
+        return true;
+    }
+
+    if let Ok(parsed) = parse_select_query(view_sql) {
+        if query_targets_internal_state_vtable_impl(&parsed, context, visited_views) {
+            return true;
+        }
+    }
+
+    let candidate_names: Vec<String> = context
+        .view_names()
+        .filter(|name| name.as_str() != view_name)
+        .cloned()
+        .collect();
+
+    for candidate in candidate_names {
+        if lowered_sql.contains(&candidate) {
+            if let Some(candidate_sql) = context.view_sql(&candidate) {
+                if view_targets_internal_state_vtable(
+                    &candidate,
+                    context,
+                    visited_views,
+                    candidate_sql,
+                ) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
+}
+
 fn rewrite_set_expr(
     set_expr: &mut SetExpr,
     limit: Option<&Expr>,
@@ -342,8 +525,18 @@ fn rewrite_set_expr(
     stats: &mut RewriteStats,
 ) -> Result<bool, RewriteError> {
     match set_expr {
-        SetExpr::Select(select) => rewrite_select(select.as_mut(), limit, context, phase, accumulator, resolver, stats),
-        SetExpr::Query(query) => rewrite_query(query.as_mut(), context, phase, accumulator, resolver, stats),
+        SetExpr::Select(select) => rewrite_select(
+            select.as_mut(),
+            limit,
+            context,
+            phase,
+            accumulator,
+            resolver,
+            stats,
+        ),
+        SetExpr::Query(query) => {
+            rewrite_query(query.as_mut(), context, phase, accumulator, resolver, stats)
+        }
         SetExpr::SetOperation { left, right, .. } => {
             let left_changed = rewrite_set_expr(
                 left.as_mut(),
@@ -448,20 +641,18 @@ fn rewrite_table_with_joins(
     }
 
     for join in &mut table_with_joins.joins {
-        if let Some(new_relation) =
-            rewrite_table_factor(
-                &join.relation,
-                projection,
-                selection,
-                block_writer_pruning,
-                limit,
-                context,
-                phase,
-                accumulator,
-                resolver,
-                stats,
-            )?
-        {
+        if let Some(new_relation) = rewrite_table_factor(
+            &join.relation,
+            projection,
+            selection,
+            block_writer_pruning,
+            limit,
+            context,
+            phase,
+            accumulator,
+            resolver,
+            stats,
+        )? {
             join.relation = new_relation;
             changed = true;
         }
@@ -535,7 +726,7 @@ fn rewrite_table_factor(
                 }
             };
 
-        let subquery_sql = build_internal_state_reader_subquery(
+        let subquery_sql = build_internal_state_vtable_subquery(
             schema_key_opt.as_deref(),
             &cache_tables,
             include_inheritance,
@@ -626,7 +817,9 @@ fn rewrite_table_factor(
                 && requires_snapshot_non_null
                 && limit_allows_single_row(limit)
             {
-                if let Some(fast_sql) = build_fast_single_schema_subquery(schema_key, &entity_filters[0]) {
+                if let Some(fast_sql) =
+                    build_fast_single_schema_subquery(schema_key, &entity_filters[0])
+                {
                     let mut subquery = parse_select_query(&fast_sql)?;
                     subquery.limit = None;
                     subquery.offset = None;
@@ -640,7 +833,10 @@ fn rewrite_table_factor(
                     };
 
                     if !cache_tables.is_empty() {
-                        accumulator.touch_internal_state_reader(schema_key.to_string(), include_inheritance);
+                        accumulator.touch_internal_state_vtable(
+                            schema_key.to_string(),
+                            include_inheritance,
+                        );
                     }
 
                     return Ok(Some(TableFactor::Derived {
@@ -652,7 +848,7 @@ fn rewrite_table_factor(
             }
         }
 
-        let subquery_sql = build_internal_state_reader_subquery(
+        let subquery_sql = build_internal_state_vtable_subquery(
             schema_key_opt.as_deref(),
             &cache_tables,
             include_inheritance,
@@ -673,12 +869,13 @@ fn rewrite_table_factor(
 
         if !cache_tables.is_empty() {
             if let Some(schema_key) = schema_key_opt.clone() {
-                accumulator.touch_internal_state_reader(schema_key, include_inheritance);
+                accumulator.touch_internal_state_vtable(schema_key, include_inheritance);
             } else if schema_keys_used.is_empty() {
-                accumulator.touch_internal_state_reader_any(include_inheritance);
+                accumulator.touch_internal_state_vtable_any(include_inheritance);
             } else {
                 for schema_key in &schema_keys_used {
-                    accumulator.touch_internal_state_reader(schema_key.clone(), include_inheritance);
+                    accumulator
+                        .touch_internal_state_vtable(schema_key.clone(), include_inheritance);
                 }
             }
         }
@@ -691,7 +888,11 @@ fn rewrite_table_factor(
     }
 
     if let Some(view_sql) = context.view_sql(&target.table_name) {
-        let (derived, references_internal_reader) = expand_view_table_factor(
+        let view_references_target = view_sql
+            .to_ascii_lowercase()
+            .contains(&TARGET_VIEW.to_ascii_lowercase());
+
+        let (derived, expansion_info) = expand_view_table_factor(
             &target,
             view_sql,
             context,
@@ -703,7 +904,10 @@ fn rewrite_table_factor(
         if phase == RewritePhase::ExpandOnly {
             stats.expanded = true;
             return Ok(Some(derived));
-        } else if references_internal_reader {
+        } else if expansion_info.references_internal_reader
+            || view_references_target
+            || expansion_info.rewrote_subquery
+        {
             stats.expanded = true;
             return Ok(Some(derived));
         } else {
@@ -754,17 +958,11 @@ fn expand_view_table_factor(
     accumulator: &mut RewriteAccumulator,
     resolver: &mut PlaceholderResolver,
     stats: &mut RewriteStats,
-) -> Result<(TableFactor, bool), RewriteError> {
+) -> Result<(TableFactor, ViewExpansionInfo), RewriteError> {
     let mut subquery = parse_select_query(view_sql)?;
-    let _ = rewrite_query(
-        &mut subquery,
-        context,
-        phase,
-        accumulator,
-        resolver,
-        stats,
-    )?;
-    let references_internal_reader = query_contains_internal_state_reader(&subquery);
+    let rewrote_subquery =
+        rewrite_query(&mut subquery, context, phase, accumulator, resolver, stats)?;
+    let references_internal_reader = query_contains_internal_state_vtable(&subquery);
     subquery.limit = None;
     subquery.offset = None;
 
@@ -783,51 +981,54 @@ fn expand_view_table_factor(
             subquery: Box::new(subquery),
             alias: Some(alias),
         },
-        references_internal_reader,
+        ViewExpansionInfo {
+            references_internal_reader,
+            rewrote_subquery,
+        },
     ))
 }
 
-fn query_contains_internal_state_reader(query: &Query) -> bool {
+fn query_contains_internal_state_vtable(query: &Query) -> bool {
     if let Some(with) = &query.with {
         for cte in &with.cte_tables {
-            if query_contains_internal_state_reader(&cte.query) {
+            if query_contains_internal_state_vtable(&cte.query) {
                 return true;
             }
         }
     }
 
-    set_expr_contains_internal_state_reader(query.body.as_ref())
+    set_expr_contains_internal_state_vtable(query.body.as_ref())
 }
 
-fn set_expr_contains_internal_state_reader(set_expr: &SetExpr) -> bool {
+fn set_expr_contains_internal_state_vtable(set_expr: &SetExpr) -> bool {
     match set_expr {
-        SetExpr::Select(select) => select_contains_internal_state_reader(select.as_ref()),
-        SetExpr::Query(query) => query_contains_internal_state_reader(query.as_ref()),
+        SetExpr::Select(select) => select_contains_internal_state_vtable(select.as_ref()),
+        SetExpr::Query(query) => query_contains_internal_state_vtable(query.as_ref()),
         SetExpr::SetOperation { left, right, .. } => {
-            set_expr_contains_internal_state_reader(left.as_ref())
-                || set_expr_contains_internal_state_reader(right.as_ref())
+            set_expr_contains_internal_state_vtable(left.as_ref())
+                || set_expr_contains_internal_state_vtable(right.as_ref())
         }
         SetExpr::Values(_) => false,
         _ => false,
     }
 }
 
-fn select_contains_internal_state_reader(select: &Select) -> bool {
+fn select_contains_internal_state_vtable(select: &Select) -> bool {
     for table_with_joins in &select.from {
-        if table_with_joins_contains_internal_state_reader(table_with_joins) {
+        if table_with_joins_contains_internal_state_vtable(table_with_joins) {
             return true;
         }
     }
     false
 }
 
-fn table_with_joins_contains_internal_state_reader(table: &TableWithJoins) -> bool {
-    if table_factor_contains_internal_state_reader(&table.relation) {
+fn table_with_joins_contains_internal_state_vtable(table: &TableWithJoins) -> bool {
+    if table_factor_contains_internal_state_vtable(&table.relation) {
         return true;
     }
 
     for join in &table.joins {
-        if table_factor_contains_internal_state_reader(&join.relation) {
+        if table_factor_contains_internal_state_vtable(&join.relation) {
             return true;
         }
     }
@@ -835,14 +1036,14 @@ fn table_with_joins_contains_internal_state_reader(table: &TableWithJoins) -> bo
     false
 }
 
-fn table_factor_contains_internal_state_reader(factor: &TableFactor) -> bool {
+fn table_factor_contains_internal_state_vtable(factor: &TableFactor) -> bool {
     match factor {
         TableFactor::Table { name, .. } => name
             .0
             .last()
             .map(|ident| ident.value.eq_ignore_ascii_case(TARGET_VIEW))
             .unwrap_or(false),
-        TableFactor::Derived { subquery, .. } => query_contains_internal_state_reader(subquery),
+        TableFactor::Derived { subquery, .. } => query_contains_internal_state_vtable(subquery),
         TableFactor::TableFunction { .. }
         | TableFactor::Function { .. }
         | TableFactor::JsonTable { .. }
@@ -994,9 +1195,7 @@ fn selection_mentions_column(selection: Option<&Expr>, column: &str) -> bool {
 }
 
 fn expr_mentions_column(expr: &Expr, needle: &str) -> bool {
-    expr.to_string()
-        .to_ascii_lowercase()
-        .contains(needle)
+    expr.to_string().to_ascii_lowercase().contains(needle)
 }
 
 fn consume_placeholders(expr: &Expr, resolver: &mut PlaceholderResolver) {
@@ -1009,7 +1208,9 @@ fn consume_placeholders(expr: &Expr, resolver: &mut PlaceholderResolver) {
             consume_placeholders(right, resolver);
         }
         Expr::Nested(inner) => consume_placeholders(inner, resolver),
-        Expr::Between { expr, low, high, .. } => {
+        Expr::Between {
+            expr, low, high, ..
+        } => {
             consume_placeholders(expr, resolver);
             consume_placeholders(low, resolver);
             consume_placeholders(high, resolver);
@@ -1113,7 +1314,9 @@ fn collect_entity_filters_recursive(
             }
         }
         Expr::Nested(inner) => collect_entity_filters_recursive(inner, alias, resolver, output),
-        Expr::Between { expr, low, high, .. } => {
+        Expr::Between {
+            expr, low, high, ..
+        } => {
             collect_entity_filters_recursive(expr, alias, resolver, output);
             collect_entity_filters_recursive(low, alias, resolver, output);
             collect_entity_filters_recursive(high, alias, resolver, output);
@@ -1189,9 +1392,13 @@ fn is_snapshot_expr(expr: &Expr, alias: &str) -> bool {
             if name == "json_extract" || name == "json_extract_scalar" {
                 if let Some(first_arg) = func.args.first() {
                     match first_arg {
-                        sqlparser::ast::FunctionArg::Unnamed(sqlparser::ast::FunctionArgExpr::Expr(inner))
-                        | sqlparser::ast::FunctionArg::Named { arg: sqlparser::ast::FunctionArgExpr::Expr(inner), .. } =>
-                        {
+                        sqlparser::ast::FunctionArg::Unnamed(
+                            sqlparser::ast::FunctionArgExpr::Expr(inner),
+                        )
+                        | sqlparser::ast::FunctionArg::Named {
+                            arg: sqlparser::ast::FunctionArgExpr::Expr(inner),
+                            ..
+                        } => {
                             return is_snapshot_expr(inner, alias);
                         }
                         _ => {}
@@ -1217,47 +1424,46 @@ fn limit_allows_single_row(limit: Option<&Expr>) -> bool {
 }
 
 impl RewriteAccumulator {
-    fn touch_internal_state_reader(&mut self, schema_key: String, include_inheritance: bool) {
+    fn touch_internal_state_vtable(&mut self, schema_key: String, include_inheritance: bool) {
         let hint = self
-            .internal_state_reader
-            .get_or_insert_with(InternalStateReaderHint::default);
+            .internal_state_vtable
+            .get_or_insert_with(InternalStateVtableHint::default);
         hint.schema_keys.insert(schema_key);
         if include_inheritance {
             hint.include_inheritance = true;
         }
     }
 
-    fn touch_internal_state_reader_any(&mut self, include_inheritance: bool) {
+    fn touch_internal_state_vtable_any(&mut self, include_inheritance: bool) {
         let hint = self
-            .internal_state_reader
-            .get_or_insert_with(InternalStateReaderHint::default);
+            .internal_state_vtable
+            .get_or_insert_with(InternalStateVtableHint::default);
         if include_inheritance {
             hint.include_inheritance = true;
         }
     }
 
     fn into_cache_hints(self) -> Option<CacheHints> {
-        self.internal_state_reader.map(|hint| {
+        self.internal_state_vtable.map(|hint| {
             let mut schema_keys: Vec<String> = hint.schema_keys.into_iter().collect();
             schema_keys.sort();
             CacheHints {
-                internal_state_reader: Some(InternalStateReaderHintPayload {
+                internal_state_vtable: Some(InternalStateVtableHintPayload {
                     schema_keys,
                     include_inheritance: hint.include_inheritance,
                 }),
-
             }
         })
     }
 }
 
 impl CacheHints {
-    pub fn internal_state_reader(&self) -> Option<&InternalStateReaderHintPayload> {
-        self.internal_state_reader.as_ref()
+    pub fn internal_state_vtable(&self) -> Option<&InternalStateVtableHintPayload> {
+        self.internal_state_vtable.as_ref()
     }
 }
 
-impl InternalStateReaderHintPayload {
+impl InternalStateVtableHintPayload {
     pub fn schema_keys(&self) -> &[String] {
         &self.schema_keys
     }
@@ -1407,7 +1613,7 @@ LIMIT 1
     Some(sql)
 }
 
-fn build_internal_state_reader_subquery(
+fn build_internal_state_vtable_subquery(
     schema_key: Option<&str>,
     cache_tables: &[String],
     include_inheritance: bool,
@@ -1449,11 +1655,7 @@ fn build_internal_state_reader_subquery(
                 .map(|name| build_cache_union(name))
                 .collect::<Vec<_>>()
                 .join("\nUNION ALL\n");
-            segments.push(build_cache_branch(
-                None,
-                &cache_identifier,
-                include_writer,
-            ));
+            segments.push(build_cache_branch(None, &cache_identifier, include_writer));
             if include_inheritance {
                 segments.push(build_cache_inheritance_branch(
                     None,
@@ -1611,11 +1813,7 @@ fn build_untracked_branch(schema_key: Option<&str>, include_writer: bool) -> Str
     )
 }
 
-fn build_cache_branch(
-    schema_key: Option<&str>,
-    cache_table: &str,
-    include_writer: bool,
-) -> String {
+fn build_cache_branch(schema_key: Option<&str>, cache_table: &str, include_writer: bool) -> String {
     let filter = schema_key
         .map(|key| format!("AND c.schema_key = '{}'", escape_single_quotes(key)))
         .unwrap_or_default();

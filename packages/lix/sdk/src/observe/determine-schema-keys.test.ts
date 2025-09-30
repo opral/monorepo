@@ -226,7 +226,7 @@ test("should handle complex working changes query", async () => {
 
 test("extractLiteralFilters captures schema_key, entity_id, and version_id filters", () => {
 	const compiled = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", "lix_key_value")
 		.where("entity_id", "=", "lix_deterministic_mode")
 		.where("version_id", "=", "global")
@@ -241,7 +241,7 @@ test("extractLiteralFilters captures schema_key, entity_id, and version_id filte
 
 test("extractLiteralFilters handles IN lists", () => {
 	const compiled = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("entity_id", "in", ["lix_deterministic_mode", "other_entity"])
 		.compile();
 

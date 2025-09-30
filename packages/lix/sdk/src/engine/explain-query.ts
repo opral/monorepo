@@ -37,7 +37,7 @@ export async function createExplainQuery(args: {
 			engine: args.engine,
 			parameters,
 		});
-		const { sql: rewrittenSql, expandedSql } = rewriteSql(
+		const { rewrittenSql: rewrittenSql, expandedSql } = rewriteSql(
 			query.sql,
 			contextJson
 		);

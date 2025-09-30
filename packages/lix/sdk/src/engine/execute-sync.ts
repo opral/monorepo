@@ -1,6 +1,6 @@
 import type { LixEngine } from "./boot.js";
 import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
-import { createInternalStateReaderPreprocessor } from "./query-preprocessor/internal-state-reader.js";
+import { createInternalStateVtablePreprocessor } from "./query-preprocessor/internal-state-vtable.js";
 
 type ExecuteSyncFn = (args: {
 	sql: string;
@@ -32,7 +32,7 @@ export async function createExecuteSync(args: {
 	} as const;
 
 	const preprocess = await createQueryPreprocessor(preprocessorEngine, [
-		createInternalStateReaderPreprocessor,
+		// createInternalStateVtablePreprocessor,
 	]);
 
 	const executeSyncFn: ExecuteSyncFn = (args2: {

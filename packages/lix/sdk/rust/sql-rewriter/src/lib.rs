@@ -9,7 +9,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// Rewrites SQL statements using the embedded Rust sqlparser.
 ///
-/// For now this focuses on handling the `internal_state_reader` view so that
+/// For now this focuses on handling the `internal_state_vtable` view so that
 /// raw SQL queries are routed through the materialized cache tables. The
 /// behaviour will expand as more rewriters are ported from the TypeScript
 /// implementation.
@@ -53,7 +53,7 @@ fn serialize_rewrite_output(output: &rewrite::RewriteOutput) -> Result<JsValue, 
 fn serialize_cache_hints(hints: &rewrite::CacheHints) -> Result<JsValue, JsValue> {
     let cache_obj = Object::new();
 
-    if let Some(reader) = hints.internal_state_reader() {
+    if let Some(reader) = hints.internal_state_vtable() {
         let reader_obj = Object::new();
         let schema_keys = Array::new();
         for key in reader.schema_keys() {
@@ -71,7 +71,7 @@ fn serialize_cache_hints(hints: &rewrite::CacheHints) -> Result<JsValue, JsValue
         )?;
         Reflect::set(
             &cache_obj,
-            &JsValue::from_str("internalStateReader"),
+            &JsValue::from_str("internalStateVtable"),
             &reader_obj.into(),
         )?;
     }
@@ -99,38 +99,38 @@ mod tests {
     }
 
     #[test]
-    fn rewrites_internal_state_reader_with_schema_filter() {
+    fn rewrites_internal_state_vtable_with_schema_filter() {
         let context = context_json(&["internal_state_cache_mock_schema"]);
         rewrite::set_rewrite_context(Some(&context)).unwrap();
 
-        let input = "SELECT * FROM internal_state_reader WHERE schema_key = 'mock_schema'";
+        let input = "SELECT * FROM internal_state_vtable WHERE schema_key = 'mock_schema'";
         let output = rewrite::rewrite_sql(input, None).unwrap();
 
         assert!(output.sql.contains("internal_state_cache_mock_schema"));
         assert!(output.sql.contains("UNION ALL"));
         let hints = output.cache_hints.expect("expected cache hints");
         let reader = hints
-            .internal_state_reader()
-            .expect("expected internal_state_reader hints");
+            .internal_state_vtable()
+            .expect("expected internal_state_vtable hints");
         assert_eq!(reader.schema_keys(), ["mock_schema"]);
     }
 
     #[test]
-    fn rewrites_internal_state_reader_when_schema_cache_missing() {
+    fn rewrites_internal_state_vtable_when_schema_cache_missing() {
         let context = context_json(&[]);
         rewrite::set_rewrite_context(Some(&context)).unwrap();
-        let input = "SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'";
+        let input = "SELECT * FROM internal_state_vtable WHERE schema_key = 'missing_schema'";
         let output = rewrite::rewrite_sql(input, None).unwrap();
         assert_ne!(
             output.sql,
-            "SELECT * FROM internal_state_reader WHERE schema_key = 'missing_schema'"
+            "SELECT * FROM internal_state_vtable WHERE schema_key = 'missing_schema'"
         );
         assert!(output.sql.contains("internal_state_all_untracked"));
         assert!(!output.sql.contains("internal_state_cache_missing_schema"));
         let hints = output.cache_hints.expect("expected cache hints");
         let reader = hints
-            .internal_state_reader()
-            .expect("expected internal_state_reader hints");
+            .internal_state_vtable()
+            .expect("expected internal_state_vtable hints");
         assert_eq!(reader.schema_keys(), ["missing_schema"]);
     }
 
@@ -151,7 +151,7 @@ mod tests {
     }
 
     #[test]
-    fn rewrites_internal_state_reader_with_parameterised_schema_key() {
+    fn rewrites_internal_state_vtable_with_parameterised_schema_key() {
         let base_context = serde_json::json!({
             "tableCache": ["internal_state_cache_mock_schema"],
         })
@@ -164,23 +164,23 @@ mod tests {
         })
         .to_string();
 
-        let input = "SELECT * FROM internal_state_reader WHERE schema_key = ?";
+        let input = "SELECT * FROM internal_state_vtable WHERE schema_key = ?";
         let output = rewrite::rewrite_sql(input, Some(&contextual_parameters)).unwrap();
 
         assert!(output.sql.contains("internal_state_cache_mock_schema"));
         let hints = output.cache_hints.expect("expected cache hints");
         let reader = hints
-            .internal_state_reader()
-            .expect("expected internal_state_reader hints");
+            .internal_state_vtable()
+            .expect("expected internal_state_vtable hints");
         assert_eq!(reader.schema_keys(), ["mock_schema"]);
     }
 
     #[test]
-    fn records_expanded_sql_when_view_targets_internal_state_reader() {
+    fn records_expanded_sql_when_view_targets_internal_state_vtable() {
         let context = serde_json::json!({
             "views": {
                 "state_reader_view":
-                    "SELECT entity_id FROM internal_state_reader WHERE schema_key = 'mock_schema'"
+                    "SELECT entity_id FROM internal_state_vtable WHERE schema_key = 'mock_schema'"
             }
         })
         .to_string();
@@ -191,6 +191,6 @@ mod tests {
 
         assert!(output.expanded_sql.is_some());
         let expanded = output.expanded_sql.unwrap();
-        assert!(expanded.contains("internal_state_reader"));
+        assert!(expanded.contains("internal_state_vtable"));
     }
 }

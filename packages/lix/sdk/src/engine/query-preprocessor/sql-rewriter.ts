@@ -5,17 +5,17 @@ import initSqlParserWasm, {
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import type { LixEngine } from "../boot.js";
 
-export interface InternalStateReaderCacheHints {
+export interface InternalStateVtableCacheHints {
 	schemaKeys: string[];
 	includeInheritance: boolean;
 }
 
 export interface SqlRewriteCacheHints {
-	internalStateReader?: InternalStateReaderCacheHints;
+	internalStateVtable?: InternalStateVtableCacheHints;
 }
 
 export interface SqlRewriteResult {
-	sql: string;
+	rewrittenSql: string;
 	cacheHints?: SqlRewriteCacheHints;
 	expandedSql?: string;
 }
@@ -92,7 +92,36 @@ function assertInitialized(): void {
 	}
 }
 
-const viewSelectCache = new WeakMap<object, Map<string, string>>();
+type ViewSelectCacheEntry = {
+	schemaVersion: number;
+	map: Map<string, string>;
+};
+
+const viewSelectCache = new WeakMap<object, ViewSelectCacheEntry>();
+
+function getSchemaVersion(
+	sqlite: Pick<LixEngine, "sqlite">["sqlite"]
+): number {
+	const result = sqlite.exec({
+		sql: "PRAGMA schema_version;",
+		returnValue: "resultRows",
+		rowMode: "object",
+		columnNames: [],
+	});
+	const rows = result as Array<Record<string, unknown>>;
+	const value = rows[0]?.schema_version;
+	if (typeof value === "number") {
+		return value;
+	}
+	if (typeof value === "bigint") {
+		return Number(value);
+	}
+	if (typeof value === "string") {
+		const parsed = Number(value);
+		return Number.isNaN(parsed) ? 0 : parsed;
+	}
+	return 0;
+}
 
 function loadViewSelectMap(
 	sqlite: Pick<LixEngine, "sqlite">["sqlite"]
@@ -127,11 +156,7 @@ function loadViewSelectMap(
 function primeViewSelectCache(
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
 ): void {
-	if (viewSelectCache.has(engine.runtimeCacheRef)) {
-		return;
-	}
-	const map = loadViewSelectMap(engine.sqlite);
-	viewSelectCache.set(engine.runtimeCacheRef, map);
+	getViewSelectMap(engine);
 }
 
 export async function initializeSqlRewriter(args?: {
@@ -183,7 +208,7 @@ export function rewriteSql(
 		expandedSql,
 	} = normalizeRewriteResult(result, sql);
 	return {
-		sql: rewrittenSql,
+		rewrittenSql: rewrittenSql,
 		expandedSql,
 		cacheHints,
 	};
@@ -237,18 +262,27 @@ function extractSelectFromCreateView(
 	if (withoutPrefix === trimmed) {
 		return undefined;
 	}
-	return withoutPrefix.replace(/;\s*$/g, "").trim();
+	let firstStatement = withoutPrefix.trim();
+	const semicolonIndex = firstStatement.indexOf(';');
+	if (semicolonIndex !== -1) {
+		firstStatement = firstStatement.slice(0, semicolonIndex);
+	}
+	return firstStatement.trim();
 }
 
 function getViewSelectMap(
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
 ): Map<string, string> {
+	const currentVersion = getSchemaVersion(engine.sqlite);
 	const cached = viewSelectCache.get(engine.runtimeCacheRef);
-	if (cached) {
-		return cached;
+	if (cached && cached.schemaVersion === currentVersion) {
+		return cached.map;
 	}
 	const map = loadViewSelectMap(engine.sqlite);
-	viewSelectCache.set(engine.runtimeCacheRef, map);
+	viewSelectCache.set(engine.runtimeCacheRef, {
+		schemaVersion: currentVersion,
+		map,
+	});
 	return map;
 }
 
@@ -278,7 +312,7 @@ function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
 
 	const result: SqlRewriteCacheHints = {};
 
-	const rawInternal = Reflect.get(value, "internalStateReader");
+	const rawInternal = Reflect.get(value, "internalStateVtable");
 	if (rawInternal && typeof rawInternal === "object") {
 		const schemaKeysValue = Reflect.get(rawInternal, "schemaKeys");
 		if (Array.isArray(schemaKeysValue)) {
@@ -289,7 +323,7 @@ function normalizeCacheHints(value: unknown): SqlRewriteCacheHints | undefined {
 				const includeInheritance = Boolean(
 					Reflect.get(rawInternal, "includeInheritance")
 				);
-				result.internalStateReader = {
+				result.internalStateVtable = {
 					schemaKeys,
 					includeInheritance,
 				};

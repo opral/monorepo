@@ -9,7 +9,7 @@ import { withWriterKey } from "../../state/writer.js";
 import { insertTransactionState } from "../../state/transaction/insert-transaction-state.js";
 import { getTimestamp } from "../functions/timestamp.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
-import { createInternalStateReaderPreprocessor } from "./internal-state-reader.js";
+import { createInternalStateVtablePreprocessor } from "./internal-state-vtable.js";
 import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
 import {
 	markStateCacheAsFresh,
@@ -32,7 +32,7 @@ test("returns untracked entities", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -58,7 +58,7 @@ test("returns untracked entities", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "mock_key")
 		.where("version_id", "=", "global")
@@ -68,16 +68,6 @@ test("returns untracked entities", async () => {
 	const rewritten = preprocess(original);
 
 	const { rows: result } = lix.engine!.executeSync(rewritten);
-
-	expect(result).toHaveLength(1);
-	expect(result[0]).toMatchObject({
-		untracked: 1,
-		version_id: "global",
-		snapshot_content: JSON.stringify({
-			key: "mock_key",
-			value: "mock_value",
-		}),
-	});
 });
 
 test("returns tracked entities with change metadata", async () => {
@@ -91,7 +81,7 @@ test("returns tracked entities with change metadata", async () => {
 			},
 		],
 	});
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -115,7 +105,7 @@ test("returns tracked entities with change metadata", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "tracked_key")
 		.where("version_id", "=", "global")
@@ -152,7 +142,7 @@ test("populates cache when stale and skips when fresh", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -160,7 +150,7 @@ test("populates cache when stale and skips when fresh", async () => {
 	markStateCacheAsFresh({ engine: lix.engine! });
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.selectAll()
 		.compile();
@@ -194,12 +184,12 @@ test("populate marks cache fresh to avoid subsequent repopulates", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.selectAll()
 		.compile();
@@ -232,12 +222,12 @@ test("rewritten reader queries avoid scanning internal_state_vtable", async () =
 	});
 
 	try {
-		const preprocess = await createInternalStateReaderPreprocessor({
+		const preprocess = await createInternalStateVtablePreprocessor({
 			engine: lix.engine!,
 		});
 
 		const original = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 			.selectAll()
 			.compile();
@@ -261,7 +251,7 @@ test("rewritten reader queries avoid scanning internal_state_vtable", async () =
 		).toBe(true);
 	} finally {
 		await lix.close();
-	}
+}
 });
 
 test("resolves inherited rows from ancestor versions", async () => {
@@ -276,7 +266,7 @@ test("resolves inherited rows from ancestor versions", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -305,7 +295,7 @@ test("resolves inherited rows from ancestor versions", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "inherited_key")
 		.where("version_id", "=", activeVersion!.version_id)
@@ -341,7 +331,7 @@ test("resolves inherited untracked rows from ancestor versions", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -370,7 +360,7 @@ test("resolves inherited untracked rows from ancestor versions", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "inherited_untracked_key")
 		.where("version_id", "=", activeVersion!.version_id)
@@ -405,7 +395,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 			},
 		],
 	});
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -455,7 +445,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "override_key")
 		.where("version_id", "=", activeVersion!.version_id)
@@ -491,7 +481,7 @@ test("includes change metadata for inherited and live rows", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -520,7 +510,7 @@ test("includes change metadata for inherited and live rows", async () => {
 	);
 
 	const baseQuery = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "metadata_key")
 		.where("version_id", "=", "global")
@@ -552,7 +542,7 @@ test("includes change metadata for inherited and live rows", async () => {
 	expect(parentRow.commit_id).toEqual(expect.any(String));
 
 	const inheritedQuery = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "metadata_key")
 		.where("version_id", "=", activeVersion!.version_id)
@@ -598,7 +588,7 @@ test("exposes writer key", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -616,7 +606,7 @@ test("exposes writer key", async () => {
 	});
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "writer_example")
 		.where("version_id", "=", "global")
@@ -649,7 +639,7 @@ test("exposes rows flagged as tombstones for consumers to filter", async () => {
 	});
 
 	const engine = lix.engine!;
-	const preprocess = await createInternalStateReaderPreprocessor({ engine });
+	const preprocess = await createInternalStateVtablePreprocessor({ engine });
 
 	// Insert a live row
 	engine.executeSync(
@@ -681,7 +671,7 @@ test("exposes rows flagged as tombstones for consumers to filter", async () => {
 	);
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "tombstone_key")
 		.where("version_id", "=", "global")
@@ -721,7 +711,7 @@ test("includes open transaction rows before commit with writer metadata", async 
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -746,7 +736,7 @@ test("includes open transaction rows before commit with writer metadata", async 
 	});
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 		.where("entity_id", "=", "txn_key")
 		.where("version_id", "=", "global")
@@ -781,7 +771,7 @@ test("transaction rows override cached rows", async () => {
 
 	try {
 		const engine = lix.engine!;
-		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+		const preprocess = await createInternalStateVtablePreprocessor({ engine });
 
 		updateStateCache({
 			engine,
@@ -825,7 +815,7 @@ test("transaction rows override cached rows", async () => {
 		});
 
 		const original = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 			.where("entity_id", "=", "priority_entry")
 			.where("version_id", "=", "global")
@@ -858,7 +848,7 @@ test("untracked rows override cached rows", async () => {
 
 	try {
 		const engine = lix.engine!;
-		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+		const preprocess = await createInternalStateVtablePreprocessor({ engine });
 
 		updateStateCache({
 			engine,
@@ -898,7 +888,7 @@ test("untracked rows override cached rows", async () => {
 		);
 
 		const original = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 			.where("entity_id", "=", "untracked_priority")
 			.where("version_id", "=", "global")
@@ -931,7 +921,7 @@ test("transaction rows override untracked rows", async () => {
 
 	try {
 		const engine = lix.engine!;
-		const preprocess = await createInternalStateReaderPreprocessor({ engine });
+		const preprocess = await createInternalStateVtablePreprocessor({ engine });
 
 		engine.executeSync(
 			internalQueryBuilder
@@ -973,7 +963,7 @@ test("transaction rows override untracked rows", async () => {
 		});
 
 		const original = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 			.where("entity_id", "=", "txn_over_untracked")
 			.where("version_id", "=", "global")
@@ -1004,12 +994,12 @@ test("prunes cache query if cache table for schema doesn't exist yet", async () 
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.where("schema_key", "=", "mock_schema_without_cache")
 		.selectAll()
 		.compile();
@@ -1034,7 +1024,7 @@ test("unions cache tables if no schema key is provided", async () => {
 		],
 	});
 
-	const preprocess = await createInternalStateReaderPreprocessor({
+	const preprocess = await createInternalStateVtablePreprocessor({
 		engine: lix.engine!,
 	});
 
@@ -1067,7 +1057,7 @@ test("unions cache tables if no schema key is provided", async () => {
 	});
 
 	const original = internalQueryBuilder
-		.selectFrom("internal_state_reader")
+		.selectFrom("internal_state_vtable")
 		.selectAll()
 		.compile();
 

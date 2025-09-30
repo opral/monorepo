@@ -4,7 +4,7 @@ import { nanoId, nanoIdSync } from "./nano-id.js";
 
 /**
  * Benchmarks deterministic nano ID generation to guard against regressions when routing
- * reads through the internal_state_reader rewrite path.
+ * reads through the internal_state_vtable rewrite path.
  *
  * @example
  * pnpm exec vitest bench packages/lix/sdk/src/engine/functions/nano-id.bench.ts

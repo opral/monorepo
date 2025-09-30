@@ -10,7 +10,7 @@ describe("withRuntimeCache", () => {
 		const lix = await openLix({ blob: await newLixFile() });
 		const engine = lix.engine!;
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.select(
@@ -35,7 +35,7 @@ describe("withRuntimeCache", () => {
 		const lix = await openLix({ blob: await newLixFile() });
 		const engine = lix.engine!;
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.select(
@@ -79,7 +79,7 @@ describe("withRuntimeCache", () => {
 		const lix = await openLix({ blob: await newLixFile() });
 		const engine = lix.engine!;
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.select(
@@ -125,7 +125,7 @@ describe("withRuntimeCache", () => {
 		const engineA = lixA.engine!;
 		const engineB = lixB.engine!;
 		const compiled = internalQueryBuilder
-			.selectFrom("internal_state_reader")
+			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.select(

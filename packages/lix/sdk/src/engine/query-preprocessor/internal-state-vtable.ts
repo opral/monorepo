@@ -3,7 +3,7 @@ import {
 	rewriteSql,
 	updateSqlRewriterContext,
 	buildSqlRewriteContext,
-	type InternalStateReaderCacheHints,
+	type InternalStateVtableCacheHints,
 } from "./sql-rewriter.js";
 import type {
 	QueryPreprocessor,
@@ -15,15 +15,15 @@ import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
 
 /**
- * Builds the internal state reader preprocessor that delegates SQL rewriting to the
+ * Builds the internal state vtable preprocessor that delegates SQL rewriting to the
  * Rust-powered module and keeps the underlying cache tables in sync.
  *
  * @example
- * const preprocess = await createInternalStateReaderPreprocessor({ engine });
+ * const preprocess = await createInternalStateVtablePreprocessor({ engine });
  * const result = preprocess({ sql, parameters });
  * const rows = engine.executeSync(result);
  */
-export const createInternalStateReaderPreprocessor: QueryPreprocessor =
+export const createInternalStateVtablePreprocessor: QueryPreprocessor =
 	async (args: {
 		engine: Pick<
 			LixEngine,
@@ -32,7 +32,7 @@ export const createInternalStateReaderPreprocessor: QueryPreprocessor =
 	}) => {
 		await initializeSqlRewriter({ engine: args.engine });
 
-		const ensureCacheFresh = (cacheHints: InternalStateReaderCacheHints) => {
+		const ensureCacheFresh = (cacheHints: InternalStateVtableCacheHints) => {
 			if (!isStaleStateCache({ engine: args.engine })) {
 				return;
 			}
@@ -45,7 +45,10 @@ export const createInternalStateReaderPreprocessor: QueryPreprocessor =
 		};
 
 		return (context: QueryPreprocessorResult): QueryPreprocessorResult => {
-			if (!/\binternal_state_reader\b/i.test(context.sql)) {
+			const trimmedSql = context.sql.trimStart();
+			const lowerSql = trimmedSql.toLowerCase();
+			const isSelect = lowerSql.startsWith("select") || lowerSql.startsWith("with");
+			if (!isSelect) {
 				return context;
 			}
 			const rewriteContext = buildSqlRewriteContext({
@@ -54,16 +57,16 @@ export const createInternalStateReaderPreprocessor: QueryPreprocessor =
 			});
 			const rewritten = rewriteSql(context.sql, rewriteContext);
 
-			const sql = rewritten?.sql ?? context.sql;
+			const sql = rewritten?.rewrittenSql ?? context.sql;
 			const cacheHints = rewritten?.cacheHints;
 
-			if (cacheHints?.internalStateReader) {
-				ensureCacheFresh(cacheHints.internalStateReader);
+			if (cacheHints?.internalStateVtable) {
+				ensureCacheFresh(cacheHints.internalStateVtable);
 			}
 
 			return {
 				sql,
 				parameters: context.parameters,
-			};
+		};
 		};
 	};
