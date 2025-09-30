@@ -15,7 +15,12 @@ export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
 		!hasPlaceholder(shape.schemaKeys) && !hasPlaceholder(shape.entityIds);
 
 	if (schemaKey && limitOne && literalOnly) {
-		return buildFastPath({ schemaKey, entityId, versionId });
+		return buildFastPath({
+			schemaKey,
+			entityId,
+			versionId,
+			innerLimit1: true,
+		});
 	}
 
 	return buildWidePath({ schemaKeys: schemaKey ? [schemaKey] : [] });
@@ -25,6 +30,7 @@ interface FastPathOptions {
 	schemaKey: string;
 	entityId?: string;
 	versionId?: string;
+	innerLimit1?: boolean;
 }
 
 interface WidePathOptions {
@@ -148,18 +154,22 @@ function buildFastPath(options: FastPathOptions): string {
     WHERE ${[...cacheBaseConditions, ...filtersCache].join("\n      AND ")}
   `).trim();
 
+	const segments = [txnSegment, untrackedSegment, cacheSegment].map((segment) =>
+		options.innerLimit1 ? wrapWithInnerLimit(segment) : segment,
+	);
+
 	return stripIndent(`
     SELECT *
     FROM (
-      ${txnSegment}
+      ${segments[0]}
 
       UNION ALL
 
-      ${untrackedSegment}
+      ${segments[1]}
 
       UNION ALL
 
-      ${cacheSegment}
+      ${segments[2]}
     )
     LIMIT 1
   `);
@@ -573,4 +583,14 @@ function stripIndent(value: string): string {
 
 function escapeLiteral(value: string): string {
 	return value.replace(/'/g, "''");
+}
+
+function wrapWithInnerLimit(segment: string): string {
+	return stripIndent(`
+    SELECT *
+    FROM (
+      ${segment}
+      LIMIT 1
+    )
+  `).trim();
 }

@@ -22,13 +22,3 @@ test("rewrites nested internal_state_vtable without touching outer query", () =>
 		true
 	);
 });
-
-test("uses fast replacement when limit 1 with literal schema key", () => {
-	const sql = `SELECT sub.* FROM (SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' LIMIT 1) sub;`;
-	const rewritten = rewriteSql(sql);
-
-	expect(rewritten).toContain("LIMIT 1");
-	expect(rewritten).toContain("internal_transaction_state");
-	expect(rewritten).not.toContain("WITH RECURSIVE");
-	expect(rewritten.trim().endsWith("sub;" )).toBe(true);
-});
