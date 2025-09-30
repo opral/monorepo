@@ -20,6 +20,7 @@ export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
 			entityId,
 			versionId,
 			innerLimit1: true,
+			includeWriter: shape.selectsWriterKey,
 		});
 	}
 
@@ -31,6 +32,7 @@ interface FastPathOptions {
 	entityId?: string;
 	versionId?: string;
 	innerLimit1?: boolean;
+	includeWriter?: boolean;
 }
 
 interface WidePathOptions {
@@ -40,6 +42,7 @@ interface WidePathOptions {
 const CACHE_SOURCE_TOKEN = "__CACHE_SOURCE__";
 
 function buildFastPath(options: FastPathOptions): string {
+	const includeWriter = options.includeWriter === true;
 	const filtersTxn = buildFilters("txn", options);
 	const filtersUnt = buildFilters("u", options);
 	const filtersCache = buildFilters("c", options);
@@ -61,13 +64,13 @@ function buildFastPath(options: FastPathOptions): string {
       txn.untracked,
       'pending' AS commit_id,
       json(txn.metadata) AS metadata,
-      ws_txn.writer_key
+      ${includeWriter ? "ws_txn.writer_key" : "NULL AS writer_key"}
     FROM internal_transaction_state txn
-    LEFT JOIN internal_state_writer ws_txn ON
-      ws_txn.file_id = txn.file_id AND
-      ws_txn.entity_id = txn.entity_id AND
-      ws_txn.schema_key = txn.schema_key AND
-      ws_txn.version_id = txn.version_id
+    ${
+			includeWriter
+				? `LEFT JOIN internal_state_writer ws_txn ON\n      ws_txn.file_id = txn.file_id AND\n      ws_txn.entity_id = txn.entity_id AND\n      ws_txn.schema_key = txn.schema_key AND\n      ws_txn.version_id = txn.version_id`
+				: ""
+		}
     ${filtersTxn.length ? `WHERE ${filtersTxn.join("\n      AND ")}` : ""}
   `).trim();
 
@@ -98,13 +101,13 @@ function buildFastPath(options: FastPathOptions): string {
       1 AS untracked,
       'untracked' AS commit_id,
       NULL AS metadata,
-      ws_untracked.writer_key
+      ${includeWriter ? "ws_untracked.writer_key" : "NULL AS writer_key"}
     FROM internal_state_all_untracked u
-    LEFT JOIN internal_state_writer ws_untracked ON
-      ws_untracked.file_id = u.file_id AND
-      ws_untracked.entity_id = u.entity_id AND
-      ws_untracked.schema_key = u.schema_key AND
-      ws_untracked.version_id = u.version_id
+    ${
+			includeWriter
+				? `LEFT JOIN internal_state_writer ws_untracked ON\n      ws_untracked.file_id = u.file_id AND\n      ws_untracked.entity_id = u.entity_id AND\n      ws_untracked.schema_key = u.schema_key AND\n      ws_untracked.version_id = u.version_id`
+				: ""
+		}
     WHERE ${[...untrackedBaseConditions, ...filtersUnt].join("\n      AND ")}
   `).trim();
 
@@ -143,19 +146,19 @@ function buildFastPath(options: FastPathOptions): string {
       0 AS untracked,
       c.commit_id,
       ch.metadata AS metadata,
-      ws_cache.writer_key
+      ${includeWriter ? "ws_cache.writer_key" : "NULL AS writer_key"}
     FROM internal_state_cache c
     LEFT JOIN change ch ON ch.id = c.change_id
-    LEFT JOIN internal_state_writer ws_cache ON
-      ws_cache.file_id = c.file_id AND
-      ws_cache.entity_id = c.entity_id AND
-      ws_cache.schema_key = c.schema_key AND
-      ws_cache.version_id = c.version_id
+    ${
+			includeWriter
+				? `LEFT JOIN internal_state_writer ws_cache ON\n      ws_cache.file_id = c.file_id AND\n      ws_cache.entity_id = c.entity_id AND\n      ws_cache.schema_key = c.schema_key AND\n      ws_cache.version_id = c.version_id`
+				: ""
+		}
     WHERE ${[...cacheBaseConditions, ...filtersCache].join("\n      AND ")}
   `).trim();
 
-	const segments = [txnSegment, untrackedSegment, cacheSegment].map((segment) =>
-		options.innerLimit1 ? wrapWithInnerLimit(segment) : segment,
+	const segments = [txnSegment, untrackedSegment, cacheSegment].map(
+		(segment) => (options.innerLimit1 ? wrapWithInnerLimit(segment) : segment)
 	);
 
 	return stripIndent(`

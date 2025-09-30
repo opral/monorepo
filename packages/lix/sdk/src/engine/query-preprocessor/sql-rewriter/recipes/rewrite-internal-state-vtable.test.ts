@@ -10,6 +10,19 @@ import { internalQueryBuilder } from "../../../../engine/internal-query-builder.
 import { rewriteSql } from "../rewrite-sql.js";
 import { sql } from "kysely";
 
+test("fast path includes writer join when writer_key selected", () => {
+	const sql = `SELECT v.writer_key FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' LIMIT 1;`;
+	const shape = analyzeShape(tokenize(sql));
+	expect(shape).not.toBeNull();
+	expect(shape?.selectsWriterKey).toBe(true);
+
+	const rewritten = rewriteInternalStateVtableQuery(shape!);
+	expect(rewritten).toBeTruthy();
+	const limitCount = (rewritten!.match(/LIMIT 1/g) ?? []).length;
+	expect(limitCount).toBe(4);
+	expect(rewritten).toContain("internal_state_writer");
+});
+
 test("rewrites a simple internal_state_vtable select", () => {
 	const sql = `SELECT * FROM internal_state_vtable;`;
 	const tokens = tokenize(sql);
@@ -46,6 +59,7 @@ test("uses fast path for limit 1 queries", async () => {
 	expect(limitCount).toBe(4);
 	expect(rewritten).toContain("internal_transaction_state");
 	expect(rewritten).not.toContain("WITH RECURSIVE");
+	expect(rewritten).not.toContain("internal_state_writer");
 
 	const rewrittenQuery = `SELECT * FROM (${rewritten}) AS v;`;
 	const plan = await explainQueryPlan(rewrittenQuery);
