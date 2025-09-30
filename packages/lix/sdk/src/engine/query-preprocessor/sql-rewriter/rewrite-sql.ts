@@ -1,9 +1,13 @@
 import { analyzeShape } from "./microparser/analyze-shape.js";
 import { rewriteInternalStateVtableQuery } from "./recipes/rewrite-internal-state-vtable.js";
-import { tokenize } from "./tokenizer.js";
+import { tokenize, type Token } from "./tokenizer.js";
 
-export function rewriteSql(sql: string): string {
-	const tokens = tokenize(sql);
+export interface RewriteSqlOptions {
+	tokens?: Token[];
+}
+
+export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
+	const tokens = options?.tokens ?? tokenize(sql);
 	const shape = analyzeShape(tokens);
 	if (!shape) {
 		return sql;
