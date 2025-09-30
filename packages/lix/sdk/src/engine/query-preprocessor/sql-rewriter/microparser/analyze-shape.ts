@@ -56,6 +56,7 @@ export type Shape = {
 		| { kind: "literal"; value: string }
 		| { kind: "placeholder"; token: PlaceholderToken }
 		| { kind: "unknown" };
+	selectsWriterKey: boolean;
 };
 
 const placeholderTypes = new Set([
@@ -128,6 +129,9 @@ export function analyzeShape(tokens: Token[]): Shape | null {
 	const schemaKeys = pluckValues(filters, "schema_key");
 	const entityIds = pluckValues(filters, "entity_id");
 	const versionId = determineVersionId(filters, tokens);
+	const selectsWriterKey = tokens.some(
+		(token) => isIdent(token) && normalize(token.image) === "writer_key"
+	);
 
 	return {
 		table,
@@ -136,6 +140,7 @@ export function analyzeShape(tokens: Token[]): Shape | null {
 		schemaKeys,
 		entityIds,
 		versionId,
+		selectsWriterKey,
 	};
 }
 

@@ -41,4 +41,18 @@ describe("analyzeShape", () => {
 		const shape = analyzeShape(tokenize(sql));
 		expect(shape?.filters.length).toBe(0);
 	});
+
+	test("detects writer_key selection", () => {
+		const sql = `SELECT v.writer_key FROM internal_state_vtable v WHERE v.schema_key = 'abc'`;
+		const shape = analyzeShape(tokenize(sql));
+		expect(shape).not.toBeNull();
+		expect(shape?.selectsWriterKey).toBe(true);
+	});
+
+	test("selectsWriterKey defaults to false", () => {
+		const sql = `SELECT v.entity_id FROM internal_state_vtable v`;
+		const shape = analyzeShape(tokenize(sql));
+		expect(shape).not.toBeNull();
+		expect(shape?.selectsWriterKey).toBe(false);
+	});
 });
