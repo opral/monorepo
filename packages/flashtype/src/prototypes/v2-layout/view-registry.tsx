@@ -1,6 +1,6 @@
 import {
 	CalendarDays,
-	Command,
+	Files,
 	GitCommit,
 	MessageSquare,
 	Search,
@@ -25,7 +25,7 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		id: "files",
 		label: "Files",
 		description: "Browse and pin project documents.",
-		icon: Command,
+		icon: Files,
 		render: () => <FilesView />,
 	},
 	{
