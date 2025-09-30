@@ -25,6 +25,7 @@ interface PanelColumnProps {
  * @example
  * <PanelColumn side="left" title="Left" panel={panelState} ... />
  */
+
 export function PanelColumn({
 	side,
 	title,
@@ -40,58 +41,60 @@ export function PanelColumn({
 	const activeTool = activeInstance ? TOOL_MAP.get(activeInstance.toolId) ?? null : null;
 
 	return (
-		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col gap-3.5 text-[#3d4251]">
-			<header className="rounded-[18px] border border-[#d9dce3] bg-[#f8f9fb] px-3.5 py-3">
-				<div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-[#7a7f8f]">
-					<span>{title}</span>
-					<ToolPicker onAddTool={onAddTool} />
-				</div>
-				<nav className="mt-3 flex flex-wrap gap-2">
-					{panel.instances.map((instance) => {
-						const tool = TOOL_MAP.get(instance.toolId);
-						if (!tool) return null;
-						const isActive = activeInstance?.instanceId === instance.instanceId;
-						return (
-							<div key={instance.instanceId} className="group relative">
-								<button
-									type="button"
-									onClick={() => onSelectTool(instance.instanceId)}
-									title={`${tool.label} (${side})`}
-									className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[13px] transition-colors ${
-										isActive
-											? "border-[#c9ceda] bg-[#edeff5] text-[#212430]"
-											: "border-transparent bg-[#fdfdff] text-[#4d5361] hover:border-[#d9dce3] hover:bg-[#f3f4f8]"
-									}`}
-								>
-									<tool.icon className="h-3.5 w-3.5" />
-									<span>{tool.label}</span>
-								</button>
-								<button
-									type="button"
-									onClick={() => onRemoveTool(instance.instanceId)}
-									title={`Close ${tool.label}`}
-									className="absolute -right-2 -top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-[#ced2df] text-[#f6f7fb] shadow-sm group-hover:flex"
-								>
-									<X className="h-3 w-3" />
-								</button>
-							</div>
-						);
-					})}
-					{panel.instances.length === 0 ? (
-						<div className="rounded-xl border border-dashed border-[#d9dce3] bg-[#fdfdff] px-3 py-2 text-[12px] text-[#7a7f8f]">
-							No tools yet
-						</div>
-					) : null}
-				</nav>
-			</header>
-			<div className="flex-1">
-				{activeInstance && activeTool ? (
-					<ToolPanel tool={activeTool} />
-				) : (
-					<div className="flex h-full items-center justify-center rounded-[18px] border border-dashed border-[#d9dce3] bg-[#fdfdff] text-sm text-[#7a7f8f]">
-						Add a tool to the {side} panel.
+		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-[#3d4251]">
+			<div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-[#d9dce3] bg-[#fdfdff]">
+				<header className="rounded-t-[18px] border-b border-[#e3e6ef] bg-[#f8f9fb] px-3.5 py-3">
+					<div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-[#7a7f8f]">
+						<span>{title}</span>
+						<ToolPicker onAddTool={onAddTool} />
 					</div>
-				)}
+					<nav className="mt-3 flex flex-wrap gap-2">
+						{panel.instances.map((instance) => {
+							const tool = TOOL_MAP.get(instance.toolId);
+							if (!tool) return null;
+							const isActive = activeInstance?.instanceId === instance.instanceId;
+							return (
+								<div key={instance.instanceId} className="group relative">
+									<button
+										type="button"
+										onClick={() => onSelectTool(instance.instanceId)}
+										title={`${tool.label} (${side})`}
+										className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[13px] transition-colors ${
+											isActive
+												? "border-[#c9ceda] bg-[#edeff5] text-[#212430]"
+												: "border-transparent bg-[#fdfdff] text-[#4d5361] hover:border-[#d9dce3] hover:bg-[#f3f4f8]"
+										}`}
+									>
+										<tool.icon className="h-3.5 w-3.5" />
+										<span>{tool.label}</span>
+									</button>
+									<button
+										type="button"
+										onClick={() => onRemoveTool(instance.instanceId)}
+										title={`Close ${tool.label}`}
+										className="absolute -right-2 -top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-[#ced2df] text-[#f6f7fb] shadow-sm group-hover:flex"
+									>
+										<X className="h-3 w-3" />
+									</button>
+								</div>
+							);
+						})}
+						{panel.instances.length === 0 ? (
+							<div className="rounded-xl border border-dashed border-[#d9dce3] bg-[#fdfdff] px-3 py-2 text-[12px] text-[#7a7f8f]">
+								No tools yet
+							</div>
+						) : null}
+					</nav>
+				</header>
+				<div className="flex min-h-0 flex-1 flex-col px-3.5 py-3">
+					{activeInstance && activeTool ? (
+						<ToolPanel tool={activeTool} />
+					) : (
+						<div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#d9dce3] bg-[#fcfdff] text-sm text-[#7a7f8f]">
+							Add a tool to the {side} panel.
+						</div>
+					)}
+				</div>
 			</div>
 		</aside>
 	);

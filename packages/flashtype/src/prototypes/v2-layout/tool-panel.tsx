@@ -12,10 +12,11 @@ interface ToolPanelProps {
  * @example
  * <ToolPanel tool={tool} />
  */
+
 export function ToolPanel({ tool }: ToolPanelProps) {
 	return (
-		<div className="flex h-full flex-col gap-3 rounded-[18px] border border-[#d9dce3] bg-[#fdfdff] px-4 py-4">
-			<header className="flex items-center justify-between">
+		<div className="flex min-h-0 flex-1 flex-col gap-3">
+			<header className="flex items-center justify-between rounded-xl border border-[#d9dce3] bg-[#f8f9fb] px-4 py-3">
 				<div className="flex items-center gap-3">
 					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#edeff5] text-[#33384a]">
 						<tool.icon className="h-4 w-4" />
@@ -34,7 +35,7 @@ export function ToolPanel({ tool }: ToolPanelProps) {
 					Command
 				</Button>
 			</header>
-			<div className="flex-1 overflow-auto text-sm text-[#3f4454]">
+			<div className="flex-1 overflow-auto rounded-xl border border-[#e3e6ef] bg-[#ffffff] px-4 py-3 text-sm text-[#3f4454]">
 				{tool.render()}
 			</div>
 		</div>

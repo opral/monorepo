@@ -13,19 +13,12 @@ export function TopBar() {
 
 	return (
 		<header className="flex h-12 items-center border-b border-[#d9dce3] bg-[#f8f9fb] px-5">
-			<div className="flex flex-1 items-center gap-4">
-				<div className="flex items-center gap-1.5">
-					<span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-					<span className="h-3 w-3 rounded-full bg-[#febc2e]" />
-					<span className="h-3 w-3 rounded-full bg-[#28c940]" />
-				</div>
-				<div className="flex items-center gap-3 text-sm text-[#5a6070]">
-					<span className="font-medium text-[#212430]">flashtype-mock</span>
-					<span className="flex items-center gap-1 rounded-md bg-[#e8eaf2] px-2 py-1 text-xs font-medium text-[#33384a]">
-						<GitBranch className="h-3.5 w-3.5" />
-						main
-					</span>
-				</div>
+			<div className="flex flex-1 items-center gap-3 text-sm text-[#5a6070]">
+				<span className="font-medium text-[#212430]">flashtype-mock</span>
+				<span className="flex items-center gap-1 rounded-md bg-[#e8eaf2] px-2 py-1 text-xs font-medium text-[#33384a]">
+					<GitBranch className="h-3.5 w-3.5" />
+					main
+				</span>
 			</div>
 			<div className="flex items-center gap-1.5 text-[#5a6070]">
 				<Button variant="ghost" size="icon" className="h-8 w-8 rounded-md hover:bg-[#edeff5] hover:text-[#212430]">
