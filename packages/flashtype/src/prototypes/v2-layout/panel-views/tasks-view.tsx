@@ -1,7 +1,7 @@
 /**
- * Tasks tool - Track the current sprint notes
+ * Tasks view - Track the current sprint notes
  */
-export function TasksTool() {
+export function TasksView() {
 	return (
 		<div className="space-y-2 text-[13px] text-[#33384a]">
 			<ul className="space-y-2">

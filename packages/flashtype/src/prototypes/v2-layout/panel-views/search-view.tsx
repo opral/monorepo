@@ -1,7 +1,7 @@
 /**
- * Search tool - Quickly locate files, symbols, or commands
+ * Search view - Quickly locate files, symbols, or commands
  */
-export function SearchTool() {
+export function SearchView() {
 	return (
 		<div className="space-y-3 text-[13px] text-[#33384a]">
 			<label className="grid gap-1 text-xs font-medium text-[#6f7586]">

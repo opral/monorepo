@@ -2,32 +2,32 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 /**
- * Union of the prototype tool identifiers that can mount inside a panel.
+ * Union of the prototype view identifiers that can mount inside a panel.
  *
  * @example
- * const activeTool: ToolId = "files";
+ * const activeView: ViewId = "files";
  */
-export type ToolId = "files" | "search" | "git" | "assistant" | "terminal" | "tasks";
+export type ViewId = "files" | "search" | "git" | "assistant" | "terminal" | "tasks";
 
 /**
- * Per-panel instance metadata used to track which tools are open.
+ * Per-panel instance metadata used to track which views are open.
  *
  * @example
- * const instance: ToolInstance = { instanceId: "files-1", toolId: "files" };
+ * const instance: ViewInstance = { instanceId: "files-1", viewId: "files" };
  */
-export interface ToolInstance {
+export interface ViewInstance {
 	readonly instanceId: string;
-	readonly toolId: ToolId;
+	readonly viewId: ViewId;
 }
 
 /**
- * Shape of the static metadata that powers the tool switcher UI.
+ * Shape of the static metadata that powers the view switcher UI.
  *
  * @example
- * const filesTool: ToolDefinition = TOOL_DEFINITIONS[0];
+ * const filesView: ViewDefinition = VIEW_DEFINITIONS[0];
  */
-export interface ToolDefinition {
-	readonly id: ToolId;
+export interface ViewDefinition {
+	readonly id: ViewId;
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
@@ -41,7 +41,7 @@ export interface ToolDefinition {
  * const leftPanel: PanelState = { instances: [], activeInstanceId: null };
  */
 export interface PanelState {
-	readonly instances: ToolInstance[];
+	readonly instances: ViewInstance[];
 	readonly activeInstanceId: string | null;
 }
 

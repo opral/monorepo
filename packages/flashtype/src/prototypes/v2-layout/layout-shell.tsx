@@ -3,8 +3,8 @@ import { PanelColumn } from "./panel-column";
 import { Workspace } from "./workspace";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
-import type { PanelSide, PanelState, ToolId } from "./types";
-import { createToolInstanceId } from "./tool-registry";
+import type { PanelSide, PanelState, ViewId } from "./types";
+import { createViewInstanceId } from "./view-registry";
 
 /**
  * Fleet-style layout shell with independent left and right islands.
@@ -15,8 +15,8 @@ import { createToolInstanceId } from "./tool-registry";
 export function V2LayoutShell() {
 	const [leftPanel, setLeftPanel] = useState<PanelState>(() => ({
 		instances: [
-			{ instanceId: createToolInstanceId("files"), toolId: "files" },
-			{ instanceId: createToolInstanceId("search"), toolId: "search" },
+			{ instanceId: createViewInstanceId("files"), viewId: "files" },
+			{ instanceId: createViewInstanceId("search"), viewId: "search" },
 		],
 		activeInstanceId: null,
 	}));
@@ -57,17 +57,17 @@ export function V2LayoutShell() {
 					side="left"
 					title="Navigator"
 					panel={hydratedLeft}
-					onSelectTool={(instanceId) =>
+					onSelectView={(instanceId) =>
 						setPanelState("left", (panel) => ({
 							instances: panel.instances,
 							activeInstanceId: instanceId,
 						}))
 					}
-					onAddTool={(toolId) =>
+					onAddView={(viewId) =>
 						setPanelState("left", (panel) => {
 							const next = {
-								instanceId: createToolInstanceId(toolId),
-								toolId,
+								instanceId: createViewInstanceId(viewId),
+								viewId,
 							};
 							return {
 								instances: [...panel.instances, next],
@@ -75,7 +75,7 @@ export function V2LayoutShell() {
 							};
 						})
 					}
-					onRemoveTool={(instanceId) =>
+					onRemoveView={(instanceId) =>
 						setPanelState("left", (panel) => {
 							const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
 							const nextActive = panel.activeInstanceId === instanceId
@@ -90,17 +90,17 @@ export function V2LayoutShell() {
 					side="right"
 					title="Secondary"
 					panel={hydratedRight}
-					onSelectTool={(instanceId) =>
+					onSelectView={(instanceId) =>
 						setPanelState("right", (panel) => ({
 							instances: panel.instances,
 							activeInstanceId: instanceId,
 						}))
 					}
-					onAddTool={(toolId) =>
+					onAddView={(viewId) =>
 						setPanelState("right", (panel) => {
 							const next = {
-								instanceId: createToolInstanceId(toolId),
-								toolId,
+								instanceId: createViewInstanceId(viewId),
+								viewId,
 							};
 							return {
 								instances: [...panel.instances, next],
@@ -108,7 +108,7 @@ export function V2LayoutShell() {
 							};
 						})
 					}
-					onRemoveTool={(instanceId) =>
+					onRemoveView={(instanceId) =>
 						setPanelState("right", (panel) => {
 							const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
 							const nextActive = panel.activeInstanceId === instanceId

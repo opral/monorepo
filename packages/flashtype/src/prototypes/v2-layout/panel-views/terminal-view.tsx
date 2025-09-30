@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 
 /**
- * Terminal tool - Run quick project commands
+ * Terminal view - Run quick project commands
  */
-export function TerminalTool() {
+export function TerminalView() {
 	return (
 		<div className="space-y-2 text-[13px] text-[#33384a]">
 			<div className="rounded-[10px] border border-[#171b23] bg-[#171b23] p-3 font-mono text-xs text-[#f4f7ff]">

@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 
 /**
- * Assistant tool - Chat with the embedded helper
+ * Assistant view - Chat with the embedded helper
  */
-export function AssistantTool() {
+export function AssistantView() {
 	return (
 		<div className="flex h-full flex-col gap-2 text-[13px] text-[#33384a]">
 			<div className="space-y-1 rounded-lg border border-[#d9dce3] bg-[#fdfdff] p-3">

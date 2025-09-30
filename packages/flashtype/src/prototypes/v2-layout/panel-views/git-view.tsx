@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 
 /**
- * Git tool - Review progress and staging status
+ * Git view - Review progress and staging status
  */
-export function GitTool() {
+export function GitView() {
 	return (
 		<div className="space-y-3 text-[13px] text-[#33384a]">
 			<div>
