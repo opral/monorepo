@@ -1,5 +1,40 @@
 # inlang-vs-code-extension
 
+## 2.1.0
+
+### Minor Changes
+
+- 170472c: https://github.com/opral/monorepo/pull/3674
+
+  adds a new sherlock.extract.generator config key, and deprecates sherlock.extract.autoHumanId.enabled
+
+- 7791be7: Upgraded the [inlang SDK](https://github.com/opral/inlang-sdk) to [Lix](https://lix.dev/) v0.5 🎉
+
+  ## Highlights
+
+  ### Writing directly to Lix state
+
+  State is now written straight into Lix instead of the SDK’s private in-memory SQLite snapshot. Every bundle, message, and variant change becomes a first-class Lix commit, unlocking:
+  - history and branching,
+  - writer-key aware workflows,
+  - change proposals and subscriptions, and
+  - a single source of truth for downstream tools.
+
+  ### Per-file filesystem sync
+
+  Any inlang-based tooling that opens a project from disk (IDE extensions, CLIs, custom apps) used to patch the entire locale tree whenever a single message changed. That behaviour is at the heart of [opral/inlang-sherlock#173](https://github.com/opral/inlang-sherlock/issues/173) where editing one key in `en.json` would re-export every other locale file, destroying manual formatting or reintroducing stale content.
+
+  Thanks to Lix v0.5’s observable state and writer-key APIs we can now react to per-commit metadata and suppress our own writes. When `happy_elephant` in `en.json` is updated, the SDK marks only `en.json` as dirty, leaving `de.json` and friends untouched. Drift is still possible if another tool rewrites `en.json`, yet the blast radius falls from “the whole project just changed” to “only the file you touched,” making reviews and merges manageable across all inlang integrations.
+
+### Patch Changes
+
+- 7b46e1f: Stop reading and persisting Lix account snapshots so Sherlock can load projects without triggering the `/name must be string` schema error. Should close https://github.com/opral/inlang-sherlock/issues/188
+- Updated dependencies [7791be7]
+  - @inlang/sdk@3.0.0
+  - @inlang/rpc@0.3.52
+  - @inlang/editor-component@5.0.0
+  - @inlang/settings-component@6.0.0
+
 ## 2.0.17
 
 ### Patch Changes
@@ -152,7 +187,6 @@
 - 8a9a8c9: # Sherlock v2 🎉
 
   🎸 Features:
-
   - improved editing experience overall
   - new variant editor to support variants
   - support for Cursor (AI editor)
@@ -169,7 +203,6 @@
   If you still want to use Sherlock v1, please use the previous major version of the plugin. For Sherlock itself, [please pin the version to `1.x.x`](https://github.com/microsoft/vscode-docs/blob/vnext/release-notes/v1_91.md#extension-install-options) in the VS Code extension settings.
 
   ### Breaking changes
-
   - Lint rules are now polyfilled (and therefore may work different), as we are currently reworking how lint rules are working with [Lix Validation Rules](https://lix.opral.com). If you experience different behavior with lint rules, please reach out to us.
   - The `messageId` parameter in the `extractMessages` function has been renamed to `bundleId`. This change is due to the new API in Sherlock v2. If you are using the `extractMessages` function, please update the parameter name to `bundleId`.
 
@@ -886,7 +919,6 @@
 ### Minor Changes
 
 - 7037bc8b3: remove outdated "configure replacement options" prompt.
-
   - https://github.com/opral/monorepo/discussions/2159#discussioncomment-8325600
 
 ## 1.29.4
@@ -1141,7 +1173,6 @@
 ### Minor Changes
 
 - a1f3f064b: improve: tryAutoGenProjectSettings
-
   - Only prompts the user if the settings can actually be generated.
 
   refactor: remove unused code
