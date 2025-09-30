@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`uses fast path for limit 1 queries 1`] = `
+"2|0|0|CO-ROUTINE (subquery-6)
+3|2|0|COMPOUND QUERY
+4|3|0|LEFT-MOST SUBQUERY
+7|4|216|SCAN txn
+11|4|45|SEARCH ws_txn USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
+53|3|0|UNION ALL
+56|53|216|SCAN u
+69|53|0|CORRELATED SCALAR SUBQUERY 2
+73|69|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
+85|53|45|SEARCH ws_untracked USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
+126|3|0|UNION ALL
+129|126|0|MATERIALIZE change
+131|129|0|COMPOUND QUERY
+132|131|0|LEFT-MOST SUBQUERY
+136|132|216|SCAN c
+138|132|47|SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
+163|131|0|UNION ALL
+165|163|216|SCAN t
+186|126|99|SCAN c VIRTUAL TABLE INDEX 0:schema_key
+200|126|0|CORRELATED SCALAR SUBQUERY 4
+204|200|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
+217|126|0|CORRELATED SCALAR SUBQUERY 5
+221|217|45|SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
+251|126|53|SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
+258|126|45|SEARCH ws_cache USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
+305|0|207|SCAN (subquery-6)"
+`;

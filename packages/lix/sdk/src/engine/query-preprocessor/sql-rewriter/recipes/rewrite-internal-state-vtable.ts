@@ -160,7 +160,7 @@ function buildFastPath(options: FastPathOptions): string {
       UNION ALL
 
       ${cacheSegment}
-    ) AS internal_resolved_state_all
+    )
     LIMIT 1
   `);
 }
