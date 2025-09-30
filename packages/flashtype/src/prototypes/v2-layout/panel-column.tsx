@@ -57,9 +57,9 @@ export function PanelColumn({
 										type="button"
 										onClick={() => onSelectTool(instance.instanceId)}
 										title={`${tool.label} (${side})`}
-										className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] transition-colors ${
+										className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] transition-colors ${
 											isActive
-												? "bg-[#f0f0f0] text-[#212430]"
+												? "bg-[#f0f0f0] font-semibold text-[#212430]"
 												: "bg-transparent text-[#4d5361] hover:bg-[#f8f8f8]"
 										}`}
 									>
@@ -82,7 +82,7 @@ export function PanelColumn({
 								<button
 									type="button"
 									title="Add tool"
-									className="flex h-7 w-7 items-center justify-center text-[#4d5361] hover:bg-[#f0f0f0]"
+									className="flex h-7 w-7 items-center justify-center rounded-md text-[#4d5361] hover:bg-[#f0f0f0]"
 								>
 									<Plus className="h-4 w-4" />
 								</button>
