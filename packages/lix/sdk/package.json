@@ -35,14 +35,14 @@
 		"dist",
 		"src"
 	],
-  "scripts": {
-    "build": "node ./scripts/build.js",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "pretest": "playwright install --with-deps",
-    "test": "node ./scripts/build.js --setup-only && vitest run --typecheck",
-    "test:watch": "node ./scripts/build.js --setup-only && vitest --typecheck",
-    "bench": "vitest bench",
-    "lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
+	"scripts": {
+		"build": "node ./scripts/build.js",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"pretest": "playwright install --with-deps",
+		"test": "node ./scripts/build.js --setup-only && vitest run --typecheck",
+		"test:watch": "node ./scripts/build.js --setup-only && vitest --typecheck",
+		"bench": "vitest bench",
+		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
 		"dev": "node ./scripts/build.js --watch",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -55,10 +55,11 @@
 	"dependencies": {
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"@opral/zettel-ast": "workspace:*",
+		"@sqlite.org/sqlite-wasm": "^3.50.4-build1",
 		"ajv": "^8.17.1",
+		"chevrotain": "^11.0.3",
 		"human-id": "^4.1.1",
 		"kysely": "^0.28.7",
-		"@sqlite.org/sqlite-wasm": "^3.50.4-build1",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {

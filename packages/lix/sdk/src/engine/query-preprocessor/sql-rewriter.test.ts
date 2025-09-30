@@ -221,8 +221,12 @@ describe("rewriteSql", () => {
 		const result = rewriteSql(query, contextJson);
 
 		expect(result.rewrittenSql).not.toBe(query);
-		expect(result.rewrittenSql).not.toMatch(/FROM\s+"?internal_state_vtable"?/i);
-		expect(result.rewrittenSql).not.toMatch(/JOIN\s+"?internal_state_vtable"?/i);
+		expect(result.rewrittenSql).not.toMatch(
+			/FROM\s+"?internal_state_vtable"?/i
+		);
+		expect(result.rewrittenSql).not.toMatch(
+			/JOIN\s+"?internal_state_vtable"?/i
+		);
 		expect(result.rewrittenSql).toContain("internal_state_cache_lix_key_value");
 		await lix.close();
 	});

@@ -251,7 +251,7 @@ test("rewritten reader queries avoid scanning internal_state_vtable", async () =
 		).toBe(true);
 	} finally {
 		await lix.close();
-}
+	}
 });
 
 test("resolves inherited rows from ancestor versions", async () => {

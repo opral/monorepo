@@ -99,9 +99,7 @@ type ViewSelectCacheEntry = {
 
 const viewSelectCache = new WeakMap<object, ViewSelectCacheEntry>();
 
-function getSchemaVersion(
-	sqlite: Pick<LixEngine, "sqlite">["sqlite"]
-): number {
+function getSchemaVersion(sqlite: Pick<LixEngine, "sqlite">["sqlite"]): number {
 	const result = sqlite.exec({
 		sql: "PRAGMA schema_version;",
 		returnValue: "resultRows",
@@ -263,7 +261,7 @@ function extractSelectFromCreateView(
 		return undefined;
 	}
 	let firstStatement = withoutPrefix.trim();
-	const semicolonIndex = firstStatement.indexOf(';');
+	const semicolonIndex = firstStatement.indexOf(";");
 	if (semicolonIndex !== -1) {
 		firstStatement = firstStatement.slice(0, semicolonIndex);
 	}

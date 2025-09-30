@@ -47,7 +47,8 @@ export const createInternalStateVtablePreprocessor: QueryPreprocessor =
 		return (context: QueryPreprocessorResult): QueryPreprocessorResult => {
 			const trimmedSql = context.sql.trimStart();
 			const lowerSql = trimmedSql.toLowerCase();
-			const isSelect = lowerSql.startsWith("select") || lowerSql.startsWith("with");
+			const isSelect =
+				lowerSql.startsWith("select") || lowerSql.startsWith("with");
 			if (!isSelect) {
 				return context;
 			}
@@ -67,6 +68,6 @@ export const createInternalStateVtablePreprocessor: QueryPreprocessor =
 			return {
 				sql,
 				parameters: context.parameters,
-		};
+			};
 		};
 	};
