@@ -50,9 +50,9 @@ export function V2LayoutShell() {
 	const hydratedRight = hydrate(panels.right);
 
 	return (
-		<div className="flex min-h-screen flex-col bg-[#f6f7fb] text-[#212430]">
+		<div className="flex min-h-screen flex-col bg-[#eff0f4] text-[#212430]">
 			<TopBar />
-			<div className="flex min-h-0 flex-1 gap-2 px-2 pb-2">
+			<div className="flex min-h-0 flex-1 gap-2 px-2">
 				<PanelColumn
 					side="left"
 					title="Navigator"
