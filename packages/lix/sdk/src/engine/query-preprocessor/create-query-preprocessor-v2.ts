@@ -54,7 +54,9 @@ type ViewCacheEntry = {
 
 const viewCache = new WeakMap<object, ViewCacheEntry>();
 
-function getViewSelectMap(engine: EngineContext): Map<string, string> {
+function getViewSelectMap(
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
+): Map<string, string> {
 	const currentVersion = getSchemaVersion(engine.sqlite);
 	const cached = viewCache.get(engine.runtimeCacheRef);
 	if (cached && cached.schemaVersion === currentVersion) {
@@ -69,7 +71,7 @@ function getViewSelectMap(engine: EngineContext): Map<string, string> {
 	return map;
 }
 
-function getSchemaVersion(sqlite: EngineContext["sqlite"]): number {
+function getSchemaVersion(sqlite: Pick<LixEngine, "sqlite">["sqlite"]): number {
 	const result = sqlite.exec({
 		sql: "PRAGMA schema_version;",
 		returnValue: "resultRows",
@@ -88,7 +90,7 @@ function getSchemaVersion(sqlite: EngineContext["sqlite"]): number {
 }
 
 function loadViewSelectMap(
-	sqlite: EngineContext["sqlite"]
+	sqlite: Pick<LixEngine, "sqlite">["sqlite"]
 ): Map<string, string> {
 	const result = sqlite.exec({
 		sql: "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND sql IS NOT NULL",

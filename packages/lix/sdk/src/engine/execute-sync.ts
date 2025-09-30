@@ -31,22 +31,22 @@ export async function createExecuteSync(args: {
 		},
 	} as const;
 
-	const preprocess = await createQueryPreprocessor(preprocessorEngine, [
-		// createInternalStateVtablePreprocessor,
-	]);
+	// const preprocess = await createQueryPreprocessor(preprocessorEngine, [
+	// 	// createInternalStateVtablePreprocessor,
+	// ]);
 
 	const executeSyncFn: ExecuteSyncFn = (args2: {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
 	}) => {
-		const preprocessed = preprocess({
-			sql: args2.sql,
-			parameters: args2.parameters ?? [],
-		});
+		// const preprocessed = preprocess({
+		// 	sql: args2.sql,
+		// 	parameters: args2.parameters ?? [],
+		// });
 		const columnNames: string[] = [];
 		const rows = args.engine.sqlite.exec({
-			sql: preprocessed.sql,
-			bind: preprocessed.parameters as any[],
+			sql: args2.sql,
+			bind: args2.parameters as any[],
 			returnValue: "resultRows",
 			rowMode: "object",
 			columnNames,
