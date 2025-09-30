@@ -1,4 +1,5 @@
 import type { LixEngine } from "../boot.js";
+import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -42,7 +43,10 @@ export async function createQueryPreprocessor(
 	}
 
 	return (initialContext: QueryPreprocessorResult): QueryPreprocessorResult => {
-		let context = initialContext;
+		let context: QueryPreprocessorResult = {
+			sql: rewriteSql(initialContext.sql),
+			parameters: initialContext.parameters,
+		};
 		for (const stage of stages) {
 			context = stage(context);
 		}
