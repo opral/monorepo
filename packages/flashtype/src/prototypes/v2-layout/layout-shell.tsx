@@ -52,7 +52,7 @@ export function V2LayoutShell() {
 	return (
 		<div className="flex min-h-screen flex-col bg-[#f6f7fb] text-[#212430]">
 			<TopBar />
-			<div className="flex min-h-0 flex-1 gap-5 px-6 py-5">
+			<div className="flex min-h-0 flex-1 gap-2 px-2 py-2">
 				<PanelColumn
 					side="left"
 					title="Navigator"

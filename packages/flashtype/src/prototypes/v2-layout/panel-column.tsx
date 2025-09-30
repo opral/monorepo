@@ -42,8 +42,8 @@ export function PanelColumn({
 
 	return (
 		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-[#3d4251]">
-			<div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-[#d9dce3] bg-[#fdfdff]">
-				<header className="rounded-t-[18px] border-b border-[#e3e6ef] bg-[#f8f9fb] px-3.5 py-3">
+			<div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white">
+				<header className="rounded-t-lg border-b border-[#e3e6ef] bg-white px-3.5 py-3">
 					<div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-[#7a7f8f]">
 						<span>{title}</span>
 						<ToolPicker onAddTool={onAddTool} />
@@ -59,10 +59,10 @@ export function PanelColumn({
 										type="button"
 										onClick={() => onSelectTool(instance.instanceId)}
 										title={`${tool.label} (${side})`}
-										className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[13px] transition-colors ${
+										className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] transition-colors ${
 											isActive
-												? "border-[#c9ceda] bg-[#edeff5] text-[#212430]"
-												: "border-transparent bg-[#fdfdff] text-[#4d5361] hover:border-[#d9dce3] hover:bg-[#f3f4f8]"
+												? "bg-[#f0f0f0] text-[#212430]"
+												: "bg-transparent text-[#4d5361] hover:bg-[#f8f8f8]"
 										}`}
 									>
 										<tool.icon className="h-3.5 w-3.5" />
@@ -80,7 +80,7 @@ export function PanelColumn({
 							);
 						})}
 						{panel.instances.length === 0 ? (
-							<div className="rounded-xl border border-dashed border-[#d9dce3] bg-[#fdfdff] px-3 py-2 text-[12px] text-[#7a7f8f]">
+							<div className="bg-transparent px-3 py-2 text-[12px] text-[#7a7f8f]">
 								No tools yet
 							</div>
 						) : null}
@@ -90,7 +90,7 @@ export function PanelColumn({
 					{activeInstance && activeTool ? (
 						<ToolPanel tool={activeTool} />
 					) : (
-						<div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#d9dce3] bg-[#fcfdff] text-sm text-[#7a7f8f]">
+						<div className="flex flex-1 items-center justify-center text-sm text-[#7a7f8f]">
 							Add a tool to the {side} panel.
 						</div>
 					)}
@@ -117,19 +117,19 @@ function ToolPicker({ onAddTool }: ToolPickerProps) {
 				<Button
 					variant="ghost"
 					size="sm"
-					className="h-7 gap-1 rounded-md border border-[#d9dce3] px-2.5 text-xs font-medium text-[#4d5361] hover:border-[#c0c5d2] hover:bg-[#edeff5]"
+					className="h-7 gap-1 px-2.5 text-xs font-medium text-[#4d5361] hover:bg-[#f0f0f0]"
 				>
 					<Plus className="h-3.5 w-3.5" />
 					Add
 					<ChevronDown className="h-3 w-3" />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-48 rounded-xl border border-[#d9dce3] bg-[#fdfdff] p-1 shadow-lg">
+			<DropdownMenuContent align="end" className="w-48 border border-[#e0e0e0] bg-white p-1 shadow-lg">
 				{TOOL_DEFINITIONS.map((tool) => (
 					<DropdownMenuItem
 						key={tool.id}
 						onSelect={() => onAddTool(tool.id)}
-						className="flex items-start gap-2 rounded-lg px-2 py-2 text-sm text-[#2d3140] focus:bg-[#edeff5]"
+						className="flex items-start gap-2 px-2 py-2 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
 					>
 						<tool.icon className="mt-[2px] h-4 w-4" />
 						<div>

@@ -10,10 +10,10 @@ import { FileText } from "lucide-react";
 export function Workspace() {
 	return (
 		<section className="flex min-h-0 flex-1 flex-col text-[#3f4454]">
-			<div className="flex min-h-0 flex-1 flex-col rounded-[26px] border border-[#d9dce3] bg-[#fdfdff]">
+			<div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white">
 				<div className="flex items-center justify-between px-6 pt-6">
 					<div className="flex items-center gap-3">
-						<div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edeff5] text-[#33384a]">
+						<div className="flex h-11 w-11 items-center justify-center bg-[#f0f0f0] text-[#33384a]">
 							<FileText className="h-5 w-5" />
 						</div>
 						<div className="leading-tight">
@@ -22,23 +22,23 @@ export function Workspace() {
 						</div>
 					</div>
 					<div className="flex items-center gap-2 text-xs">
-						<Button variant="ghost" size="sm" className="h-8 rounded-md px-3 text-[#4d5361] hover:bg-[#edeff5] hover:text-[#212430]">
+						<Button variant="ghost" size="sm" className="h-8 px-3 text-[#4d5361] hover:bg-[#f0f0f0] hover:text-[#212430]">
 							Git History
 						</Button>
-						<Button variant="ghost" size="sm" className="h-8 rounded-md px-3 text-[#4d5361] hover:bg-[#edeff5] hover:text-[#212430]">
+						<Button variant="ghost" size="sm" className="h-8 px-3 text-[#4d5361] hover:bg-[#f0f0f0] hover:text-[#212430]">
 							Share
 						</Button>
 					<Button
 						variant="ghost"
 						size="sm"
-						className="h-8 rounded-md border border-[#d9dce3] bg-[#f8f9fb] px-4 text-[#212430] hover:bg-[#edeff5]"
+						className="h-8 bg-[#f0f0f0] px-4 text-[#212430] hover:bg-[#e8e8e8]"
 					>
 						Save Draft
 					</Button>
 					</div>
 				</div>
-				<div className="mt-4 flex items-center gap-2 border-b border-[#d9dce3] px-6 pb-3 text-xs text-[#6f7586]">
-					<button className="flex items-center gap-2 rounded-xl bg-[#edeff5] px-3 py-1.5 text-sm font-medium text-[#2d3140]">
+				<div className="mt-4 flex items-center gap-2 border-b border-[#e0e0e0] px-6 pb-3 text-xs text-[#6f7586]">
+					<button className="flex items-center gap-2 bg-[#f0f0f0] px-3 py-1.5 text-sm font-medium text-[#2d3140]">
 						<FileText className="h-4 w-4" />
 						<span>writing-style.md</span>
 					</button>
@@ -47,10 +47,10 @@ export function Workspace() {
 					<span className="text-[#c5c9d8]">•</span>
 					<span>Line 42, Col 7</span>
 					<div className="ml-auto flex items-center gap-2">
-						<Button variant="ghost" size="sm" className="h-7 rounded-md px-3 text-[11px] text-[#4d5361] hover:bg-[#edeff5] hover:text-[#212430]">
+						<Button variant="ghost" size="sm" className="h-7 px-3 text-[11px] text-[#4d5361] hover:bg-[#f0f0f0] hover:text-[#212430]">
 							Preview
 						</Button>
-						<Button variant="ghost" size="sm" className="h-7 rounded-md px-3 text-[11px] text-[#4d5361] hover:bg-[#edeff5] hover:text-[#212430]">
+						<Button variant="ghost" size="sm" className="h-7 px-3 text-[11px] text-[#4d5361] hover:bg-[#f0f0f0] hover:text-[#212430]">
 							Diff
 						</Button>
 					</div>
