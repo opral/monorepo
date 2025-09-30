@@ -21,7 +21,7 @@ export function V2LayoutShell() {
 		activeInstanceId: null,
 	}));
 	const [rightPanel, setRightPanel] = useState<PanelState>(() => ({
-		instances: [{ instanceId: createToolInstanceId("assistant"), toolId: "assistant" }],
+		instances: [],
 		activeInstanceId: null,
 	}));
 

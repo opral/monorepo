@@ -5,7 +5,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Plus, X } from "lucide-react";
+import { ChevronDown, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import type { PanelSide, PanelState, ToolId } from "./types";
 import { TOOL_DEFINITIONS, TOOL_MAP } from "./tool-registry";
 import { ToolPanel } from "./tool-panel";
@@ -40,15 +40,13 @@ export function PanelColumn({
 
 	const activeTool = activeInstance ? TOOL_MAP.get(activeInstance.toolId) ?? null : null;
 
+	const hasTools = panel.instances.length > 0;
+
 	return (
 		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-[#3d4251]">
 			<div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white">
-				<header className="rounded-t-lg border-b border-[#e3e6ef] bg-white px-3.5 py-3">
-					<div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-[#7a7f8f]">
-						<span>{title}</span>
-						<ToolPicker onAddTool={onAddTool} />
-					</div>
-					<nav className="mt-3 flex flex-wrap gap-2">
+				{hasTools && (
+					<header className="flex items-center gap-1 rounded-t-lg bg-white px-2 py-2">
 						{panel.instances.map((instance) => {
 							const tool = TOOL_MAP.get(instance.toolId);
 							if (!tool) return null;
@@ -72,31 +70,102 @@ export function PanelColumn({
 										type="button"
 										onClick={() => onRemoveTool(instance.instanceId)}
 										title={`Close ${tool.label}`}
-										className="absolute -right-2 -top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-[#ced2df] text-[#f6f7fb] shadow-sm group-hover:flex"
+										className="absolute -right-1 -top-1 hidden h-3.5 w-3.5 items-center justify-center rounded-full bg-[#ced2df] text-[#f6f7fb] shadow-sm group-hover:flex"
 									>
-										<X className="h-3 w-3" />
+										<X className="h-2.5 w-2.5" />
 									</button>
 								</div>
 							);
 						})}
-						{panel.instances.length === 0 ? (
-							<div className="bg-transparent px-3 py-2 text-[12px] text-[#7a7f8f]">
-								No tools yet
-							</div>
-						) : null}
-					</nav>
-				</header>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<button
+									type="button"
+									title="Add tool"
+									className="flex h-7 w-7 items-center justify-center text-[#4d5361] hover:bg-[#f0f0f0]"
+								>
+									<Plus className="h-4 w-4" />
+								</button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-48 border border-[#e0e0e0] bg-white p-1 shadow-lg">
+								{TOOL_DEFINITIONS.map((tool) => (
+									<DropdownMenuItem
+										key={tool.id}
+										onSelect={() => onAddTool(tool.id)}
+										className="flex items-start gap-2 px-2 py-2 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
+									>
+										<tool.icon className="mt-[2px] h-4 w-4" />
+										<div>
+											<div className="text-sm font-medium text-[#212430]">{tool.label}</div>
+											<div className="text-xs text-[#7a7f8f]">{tool.description}</div>
+										</div>
+									</DropdownMenuItem>
+								))}
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</header>
+				)}
 				<div className="flex min-h-0 flex-1 flex-col px-3.5 py-3">
 					{activeInstance && activeTool ? (
 						<ToolPanel tool={activeTool} />
 					) : (
-						<div className="flex flex-1 items-center justify-center text-sm text-[#7a7f8f]">
-							Add a tool to the {side} panel.
-						</div>
+						<EmptyPanelState side={side} onAddTool={onAddTool} />
 					)}
 				</div>
 			</div>
 		</aside>
+	);
+}
+
+interface EmptyPanelStateProps {
+	side: PanelSide;
+	onAddTool: (toolId: ToolId) => void;
+}
+
+/**
+ * Fleet-style empty state for panels with no active tools
+ */
+function EmptyPanelState({ side, onAddTool }: EmptyPanelStateProps) {
+	const Icon = side === "left" ? PanelLeft : PanelRight;
+	const panelName = side === "left" ? "Left" : "Right";
+
+	return (
+		<div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+			<Icon className="h-12 w-12 text-[#d0d0d0]" strokeWidth={1.5} />
+			<div className="space-y-1">
+				<div className="text-base font-medium text-[#2d3140]">{panelName} Panel</div>
+				<div className="text-sm text-[#7a7f8f] max-w-[200px]">
+					Add a new tool or drag-n-drop a tool from the other panels
+				</div>
+			</div>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						variant="outline"
+						size="sm"
+						className="gap-1 border-[#d0d0d0] text-xs text-[#4d5361] hover:bg-[#f0f0f0]"
+					>
+						Add Tool
+						<ChevronDown className="h-3 w-3" />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="center" className="w-40 border border-[#e0e0e0] bg-white p-1 shadow-lg">
+					{TOOL_DEFINITIONS.map((tool) => (
+						<DropdownMenuItem
+							key={tool.id}
+							onSelect={() => onAddTool(tool.id)}
+							className="flex items-start gap-2 px-2 py-2 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
+						>
+							<tool.icon className="mt-[2px] h-4 w-4" />
+							<div>
+								<div className="text-sm font-medium text-[#212430]">{tool.label}</div>
+								<div className="text-xs text-[#7a7f8f]">{tool.description}</div>
+							</div>
+						</DropdownMenuItem>
+					))}
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	);
 }
 
