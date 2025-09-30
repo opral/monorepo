@@ -36,10 +36,7 @@ export function expandQuery(args: ExpandQueryArgs): ExpandQueryResult {
 		return findTableFactor(tokens, viewKey) !== null;
 	};
 
-	const resolveView = (
-		viewKey: string,
-		stack: Set<string>
-	): string | null => {
+	const resolveView = (viewKey: string, stack: Set<string>): string | null => {
 		if (blocked.has(viewKey)) {
 			return null;
 		}
@@ -97,10 +94,7 @@ export function expandQuery(args: ExpandQueryArgs): ExpandQueryResult {
 				if (!match) {
 					continue;
 				}
-				if (
-					!bestMatch ||
-					match.start < bestMatch.start
-				) {
+				if (!bestMatch || match.start < bestMatch.start) {
 					bestMatch = {
 						viewKey,
 						start: match.start,

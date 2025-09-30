@@ -10,7 +10,10 @@ import type {
 import type { LixEngine } from "../boot.js";
 
 export async function createQueryPreprocessorV2(
-engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef" | "executeSync">
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
+	>
 ): Promise<QueryPreprocessorStage> {
 	return (initial: QueryPreprocessorResult): QueryPreprocessorResult => {
 		const trimmed = initial.sql.trimStart();
@@ -84,7 +87,9 @@ function getSchemaVersion(sqlite: EngineContext["sqlite"]): number {
 	return 0;
 }
 
-function loadViewSelectMap(sqlite: EngineContext["sqlite"]): Map<string, string> {
+function loadViewSelectMap(
+	sqlite: EngineContext["sqlite"]
+): Map<string, string> {
 	const result = sqlite.exec({
 		sql: "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND sql IS NOT NULL",
 		returnValue: "resultRows",
