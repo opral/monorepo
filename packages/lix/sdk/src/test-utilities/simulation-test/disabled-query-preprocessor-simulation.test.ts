@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { disabledQueryPreprocessorSimulation } from "./disabled-query-preprocessor-simulation.js";
-import * as createQueryPreprocessorModule from "../../engine/query-preprocessor/create-query-preprocessor.js";
+import * as createQueryPreprocessorV2Module from "../../engine/query-preprocessor/create-query-preprocessor-v2.js";
 
 describe("disabledQueryPreprocessorSimulation", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
 
-	test.skip("skips the query preprocessor while forwarding SQL + parameters to sqlite.exec", async () => {
+	test("skips the query preprocessor while forwarding SQL + parameters to sqlite.exec", async () => {
 		const preprocessSpy = vi.fn(
 			({ sql, parameters }: { sql: string; parameters: unknown[] }) => ({
 				sql,
@@ -16,8 +16,8 @@ describe("disabledQueryPreprocessorSimulation", () => {
 			})
 		);
 		vi.spyOn(
-			createQueryPreprocessorModule,
-			"createQueryPreprocessor"
+			createQueryPreprocessorV2Module,
+			"createQueryPreprocessorV2"
 		).mockResolvedValue(preprocessSpy as any);
 
 		const lix = await openLix({});

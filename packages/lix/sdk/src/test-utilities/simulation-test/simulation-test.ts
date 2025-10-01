@@ -31,7 +31,7 @@ type SimulationTestOptions = {
 // Default simulations available
 export const defaultSimulations: SimulationTestDef[] = [
 	normalSimulation,
-	// disabledQueryPreprocessorSimulation,
+	disabledQueryPreprocessorSimulation,
 	cacheMissSimulation,
 	engineBoundarySimulation,
 ];
