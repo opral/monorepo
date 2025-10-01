@@ -47,6 +47,43 @@ test("passes literal schema key into cache routing", () => {
 	expect(rewritten).toContain("lix_key_value");
 });
 
+test("state_all metadata projection rewrites away internal_state_vtable", () => {
+	const sql = `
+		SELECT
+			(
+				SELECT json(metadata)
+				FROM change
+				WHERE change.id = internal_state_vtable.change_id
+			) AS metadata
+		FROM internal_state_vtable
+		WHERE schema_key = 'lix_directory_descriptor';
+	`;
+
+	const rewritten = rewriteSql(sql);
+
+	// Expected rewrite: the expanded query should no longer reference the raw view name.
+	expect(/\binternal_state_vtable\b/i.test(rewritten)).toBe(false);
+});
+
+test("correlated metadata subquery honours alias after rewrite", () => {
+	const sql = `
+		SELECT
+			(
+				SELECT json(metadata)
+				FROM change
+				WHERE change.id = internal_state_vtable.change_id
+			) AS metadata
+		FROM internal_state_vtable AS state
+		WHERE state.schema_key = 'lix_directory_descriptor';
+	`;
+
+	const rewritten = rewriteSql(sql);
+
+	// Alias should replace correlated reference too.
+	expect(/\binternal_state_vtable\b/i.test(rewritten)).toBe(false);
+	expect(rewritten).toContain("state.change_id");
+});
+
 test("uses fast path for limit 1 queries", async () => {
 	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' LIMIT 1;`;
 	const tokens = tokenize(sql);
