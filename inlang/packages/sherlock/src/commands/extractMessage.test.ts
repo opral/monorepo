@@ -8,9 +8,6 @@ import { state } from "../utilities/state.js"
 import { upsertBundleNested } from "@inlang/sdk"
 
 // Mocking the necessary modules
-vi.mock("../utilities/state", () => ({
-	state: vi.fn(),
-}))
 
 vi.mock("vscode", async () => {
 	return {
@@ -76,9 +73,13 @@ vi.mock("../utilities/messages/isQuoted", () => ({
 	stripQuotes: vi.fn(),
 }))
 
-vi.mock("../utilities/state.js", () => ({
-	state: vi.fn(),
-}))
+vi.mock("../utilities/state.js", () => {
+	const stateFn = vi.fn()
+	return {
+		state: stateFn,
+		safeState: stateFn,
+	}
+})
 
 describe("extractMessageCommand", () => {
 	beforeEach(() => {

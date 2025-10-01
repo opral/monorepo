@@ -9,6 +9,7 @@ vi.mock("vscode", () => ({
 		registerCommand: vi.fn(),
 	},
 	window: {
+		createOutputChannel: vi.fn(),
 		showTextDocument: vi.fn(() => {
 			// Simulate document opening by setting the 'documentOpened' flag
 			documentOpened = true

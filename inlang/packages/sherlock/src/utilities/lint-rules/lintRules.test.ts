@@ -9,8 +9,8 @@ import {
 import { selectBundleNested } from "@inlang/sdk"
 
 // Mocking state and selectBundleNested
-vi.mock("../state.js", () => ({
-	state: () => ({
+vi.mock("../state.js", () => {
+	const mockStateValue = {
 		project: {
 			db: {},
 			settings: {
@@ -22,14 +22,23 @@ vi.mock("../state.js", () => ({
 				),
 			},
 		},
-	}),
-}))
+	}
+
+	const stateFn = vi.fn(() => mockStateValue)
+	return {
+		state: stateFn,
+		safeState: stateFn,
+	}
+})
 
 vi.mock("@inlang/sdk", () => ({
 	selectBundleNested: vi.fn(),
 }))
 
 vi.mock("vscode", () => ({
+	window: {
+		createOutputChannel: vi.fn(),
+	},
 	DiagnosticSeverity: {
 		Error: 1,
 		Warning: 2,

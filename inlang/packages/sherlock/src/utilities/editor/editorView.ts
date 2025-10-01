@@ -12,8 +12,9 @@ import { deleteVariant } from "./helper/deleteVariant.js"
 import { deleteBundleNested } from "./helper/deleteBundleNested.js"
 import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
 import { createMessage } from "./helper/createMessage.js"
-import { saveProject } from "../../main.js"
 import { rpc } from "@inlang/rpc"
+import { logger } from "../logger.js"
+import { saveProject } from "../../main.js"
 
 // Same interface as before
 export interface UpdateBundleMessage {
@@ -40,6 +41,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	let panel: WebviewPanel | undefined
 	let disposables: Disposable[] = []
 	let bundleId = initialBundleId
+	let suppressEditorRefreshUntil = 0
 
 	/**
 	 * Opens a new panel if none is open, otherwise reveals the existing one.
@@ -139,6 +141,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 					updateView()
 					return
 				case "change":
+					suppressEditorRefreshUntil = Date.now() + 500
 					await handleUpdateBundle({
 						db: state().project?.db,
 						message,
@@ -242,8 +245,20 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	 * Update view
 	 */
 	async function updateView() {
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "editorView" })
 		CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
+
+		const shouldSkipRefresh = suppressEditorRefreshUntil > Date.now()
+		try {
+			await saveProject()
+		} catch (error) {
+			logger.error("Failed to save project", error)
+		}
+
+		if (shouldSkipRefresh) {
+			logger.debug("Skipping editor webview refresh due to recent local edit")
+			return
+		}
 
 		panel?.webview.postMessage({
 			command: "change",
@@ -252,16 +267,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 				settings: await state().project?.settings.get(),
 			},
 		})
-
-		const workspaceFolder = vscode.workspace.workspaceFolders![0]
-		if (workspaceFolder) {
-			try {
-				await saveProject()
-			} catch (error) {
-				console.error("Failed to save project", error)
-				msg(`Failed to save project. ${String(error)}`, "error")
-			}
-		}
 	}
 
 	/**
@@ -269,10 +274,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	 * including dev vs. prod, React Refresh, etc.
 	 */
 	function getHtmlForWebview(webview: vscode.Webview) {
-		const file = "src/main.tsx"
-		const localPort = "5173"
-		const localServerUrl = `localhost:${localPort}`
-
 		const stylesUri = getUri(webview, extensionUri, [
 			"assets",
 			"sherlock-editor-app",
@@ -280,61 +281,23 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			"index.css",
 		])
 
-		let scriptUri: string | vscode.Uri
-		const isDev = process.env.DEV === "true"
-		const isProd = !isDev && context.extensionMode === vscode.ExtensionMode.Production
-
-		if (isProd) {
-			scriptUri = getUri(webview, extensionUri, [
-				"assets",
-				"sherlock-editor-app",
-				"assets",
-				"index.js",
-			])
-		} else {
-			scriptUri = `http://${localServerUrl}/${file}`
-		}
+		const scriptUri = getUri(webview, extensionUri, [
+			"assets",
+			"sherlock-editor-app",
+			"assets",
+			"index.js",
+		])
 
 		const nonce = getNonce()
 
-		// The dev-time React Refresh snippet
-		const reactRefresh = /*html*/ `
-      <script type="module">
-        import RefreshRuntime from "http://localhost:5173/@react-refresh"
-        RefreshRuntime.injectIntoGlobalHook(window)
-        window.$RefreshReg$ = () => {}
-        window.$RefreshSig$ = () => (type) => type
-        window.__vite_plugin_react_preamble_installed__ = true
-      </script>`
-
-		const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
-
 		const csp = [
 			`default-src 'none';`,
-
-			// Allow scripts from safe sources
-			`script-src 'self' https://* ${isProd ? `'nonce-${nonce}'` : `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}' 'unsafe-eval'`};`,
-
-			// Allow inline styles for better compatibility
+			`script-src 'self' https://* 'nonce-${nonce}';`,
 			`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*;`,
-
-			// Allow fonts from safe sources
 			`font-src ${webview.cspSource} https://*;`,
-
-			// Allow images from trusted sources and `data:` URLs
 			`img-src ${webview.cspSource} https://* data:;`,
-
-			// Allow media from safe sources (if needed)
 			`media-src ${webview.cspSource} https://* data:;`,
-
-			// Allow connections to APIs, WebSockets, and data URIs - include http://localhost:3000 for RPC
-			`connect-src https://* http://localhost:3000 data: ${
-				isProd
-					? ``
-					: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
-			};`,
-
-			// Allow iframes only from trusted sources
+			`connect-src https://* http://localhost:3000 data: ;`,
 			`frame-src 'self' https://*;`,
 		].join(" ")
 
@@ -349,8 +312,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
       </head>
       <body>
         <div id="root"></div>
-        ${isProd ? "" : reactRefresh}
-        <script type="module" src="${scriptUri}"></script>
+        <script type="module" src="${scriptUri}" nonce="${nonce}"></script>
       </body>
     </html>`
 	}

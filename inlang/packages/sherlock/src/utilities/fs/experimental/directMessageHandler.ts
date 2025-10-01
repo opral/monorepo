@@ -13,7 +13,6 @@ import { state } from "../../state.js"
 import { CONFIGURATION } from "../../../configuration.js"
 import { handleError } from "../../utils.js"
 import * as crypto from "crypto"
-import { saveProject } from "../../../main.js"
 import type { InlangDatabaseSchema } from "@inlang/sdk"
 import type { Kysely } from "kysely"
 
@@ -21,7 +20,6 @@ import type { Kysely } from "kysely"
 const fileHashes = new Map<string, string>()
 // Store message keys by file path to track deleted keys
 const fileMessageKeys = new Map<string, Set<string>>()
-const selfModifiedFiles = new Set<string>() // Tracks files modified by the extension
 const DEBOUNCE_MS = 150 // Reduced debounce time for faster updates
 const processingFiles = new Set<string>() // Prevent concurrent processing of the same file
 const lastFileUpdateTime = new Map<string, number>() // Track when files were last processed
@@ -29,7 +27,6 @@ const FILE_UPDATE_COOLDOWN_MS = 1000 // Reduced cooldown to make the editor more
 let isInEventLoop = false // Global flag to detect event loops
 let lastUIUpdateTime = 0 // Track when we last fired UI update events
 const MIN_UI_UPDATE_INTERVAL_MS = 300 // Minimum time between UI updates to prevent UI lag
-let lastSaveTime = 0 // Track when we last saved the project
 
 // Optimized file hash function that avoids full content hashing for large files
 async function getFileHash(uri: vscode.Uri): Promise<string> {
@@ -70,7 +67,6 @@ function throttledUIUpdate() {
 	isInEventLoop = true
 
 	// Fire the event
-	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 
 	// Reset the flag after a short delay
 	setTimeout(() => {
@@ -78,24 +74,6 @@ function throttledUIUpdate() {
 	}, 500) // Shorter timeout for better responsiveness
 
 	return true
-}
-
-// Throttled save function to prevent excessive saves
-async function throttledSaveProject() {
-	const now = Date.now()
-	if (now - lastSaveTime < 1000) {
-		// Limit to once per second
-		return false
-	}
-
-	lastSaveTime = now
-	try {
-		await saveProject()
-		return true
-	} catch (error) {
-		console.error("Error saving project:", error)
-		return false
-	}
 }
 
 // Optimized debounce function to prevent rapid-fire events
@@ -208,15 +186,6 @@ export async function setupDirectMessageWatcher(args: {
 				return
 			}
 
-			// Note if this file was self-modified, but always process it
-			// We clear it from the tracking set but still remember this info
-			const wasModifiedBySelf = selfModifiedFiles.has(filePath)
-			if (wasModifiedBySelf) {
-				console.log(`File was self-modified, but still processing: ${filePath}`)
-				// Remove from tracking to prevent future issues
-				selfModifiedFiles.delete(filePath)
-			}
-
 			// Track that we're processing this file
 			processingFiles.add(filePath)
 
@@ -225,9 +194,8 @@ export async function setupDirectMessageWatcher(args: {
 				const newHash = await getFileHash(uri)
 				const oldHash = fileHashes.get(filePath)
 
-				// Skip only if content is identical AND not a delete event AND not previously self-modified
-				// This ensures we always process user edits properly
-				if (newHash === oldHash && eventType !== "Deleted" && !wasModifiedBySelf) {
+				// Skip only if content is identical AND not a delete event
+				if (newHash === oldHash && eventType !== "Deleted") {
 					console.log(`Skipping unchanged ${eventType}: ${filePath}`)
 					processingFiles.delete(filePath)
 					return
@@ -328,34 +296,15 @@ export async function setupDirectMessageWatcher(args: {
 							// If we made changes, make sure to update UI and save
 							if (madeChanges) {
 								console.log(`Made changes due to deleted keys, refreshing UI...`)
-
-								// Save the project after removing variants
-								await throttledSaveProject()
-
-								// Update UI with throttling for better performance
 								throttledUIUpdate()
 							}
 						}
 
-						// Mark as self-modified to prevent loops with automatic cleanup
-						selfModifiedFiles.add(filePath)
-						setTimeout(() => {
-							selfModifiedFiles.delete(filePath)
-						}, 3000) // 3 second auto-cleanup
-
-						// Only update UI if this wasn't a self-triggered change or if the file has changed
-						if (!wasModifiedBySelf) {
-							console.log(`External change detected, updating UI for locale: ${locale}`)
-							throttledUIUpdate()
-						} else {
-							console.log(`Self-triggered change, not updating UI for locale: ${locale}`)
-						}
+						console.log(`External change detected, updating UI for locale: ${locale}`)
+						throttledUIUpdate()
 
 						// Record this update time
 						lastFileUpdateTime.set(filePath, Date.now())
-
-						// Save project with throttling for better performance
-						await throttledSaveProject()
 					} catch (error) {
 						console.error(`Error importing message file:`, error)
 						handleError(error)
@@ -386,17 +335,13 @@ export async function setupDirectMessageWatcher(args: {
 						// If we made changes, make sure to update UI and save
 						if (madeChanges) {
 							// Save project
-							await throttledSaveProject()
-
 							// Force update UI with throttling
 							throttledUIUpdate()
 						}
 					}
 
-					// Only update UI for genuine deletions with throttling
-					if (!wasModifiedBySelf) {
-						throttledUIUpdate()
-					}
+					// Always update UI for genuine deletions with throttling
+					throttledUIUpdate()
 
 					// Record this update
 					lastFileUpdateTime.set(filePath, Date.now())
@@ -420,5 +365,4 @@ export async function setupDirectMessageWatcher(args: {
 		console.error("Error setting up direct message watcher:", error)
 		handleError(error)
 	}
-
 }

@@ -5,6 +5,9 @@ import { copyErrorCommand } from "./copyError.js"
 import { msg } from "../utilities/messages/msg.js"
 
 vi.mock("vscode", () => ({
+	window: {
+		createOutputChannel: vi.fn(),
+	},
 	env: {
 		clipboard: {
 			writeText: vi.fn(),

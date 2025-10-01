@@ -47,9 +47,13 @@ vi.mock("@inlang/sdk", () => ({
 	upsertBundleNested: vi.fn(),
 }))
 
-vi.mock("../utilities/state", () => ({
-	state: vi.fn(),
-}))
+vi.mock("../utilities/state", () => {
+	const stateFn = vi.fn()
+	return {
+		state: stateFn,
+		safeState: stateFn,
+	}
+})
 
 vi.mock("uuid", () => ({
 	v4: vi.fn().mockReturnValue("mocked-uuid-123"),
