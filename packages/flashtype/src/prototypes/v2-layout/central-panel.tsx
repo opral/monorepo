@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { FileText, X } from "lucide-react";
+import { FileText } from "lucide-react";
+import { Panel } from "./panel";
 
 /**
  * Central panel - the main content area between left and right panels.
@@ -10,23 +11,25 @@ import { FileText, X } from "lucide-react";
 export function CentralPanel() {
 	return (
 		<section className="flex min-h-0 flex-1 flex-col text-[#3f4454]">
-			<div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white">
-				{/* Tab Bar */}
-				<div className="flex items-center gap-1 px-6 pt-4">
-					<button className="group flex items-center gap-1.5 rounded-md bg-[#e3f2ff] px-3 py-1.5 text-xs font-medium text-[#3b82f6]">
-						<FileText className="h-3.5 w-3.5" />
-						<span>writing-style.md</span>
-						<X className="h-3 w-3 opacity-60 hover:opacity-100" />
-					</button>
-					<button className="group flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[#6f7586] hover:bg-[#f5f5f5]">
-						<FileText className="h-3.5 w-3.5" />
-						<span>AGENTS.md</span>
-						<X className="h-3 w-3 opacity-0 group-hover:opacity-60 hover:opacity-100" />
-					</button>
-				</div>
+			<Panel>
+				<Panel.TabBar>
+					<Panel.Tab
+						icon={FileText}
+						label="writing-style.md"
+						isActive={true}
+						variant="primary"
+						onClose={() => {}}
+					/>
+					<Panel.Tab
+						icon={FileText}
+						label="AGENTS.md"
+						isActive={false}
+						variant="primary"
+						onClose={() => {}}
+					/>
+				</Panel.TabBar>
 
-				{/* Content Area */}
-				<div className="flex-1 overflow-auto px-8 pb-8 pt-6 text-sm leading-7">
+				<Panel.Content className="px-6 pt-4 text-sm leading-7">
 					<h1 className="mb-5 text-base font-normal text-[#212430]">
 						Welcome to Opral's repository.
 					</h1>
@@ -144,8 +147,8 @@ export function CentralPanel() {
 						</code>
 						.
 					</p>
-				</div>
-			</div>
+				</Panel.Content>
+			</Panel>
 		</section>
 	);
 }

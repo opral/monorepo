@@ -5,10 +5,11 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, PanelLeft, PanelRight, Plus, X } from "lucide-react";
+import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
 import type { PanelSide, PanelState, ViewId } from "./types";
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
+import { Panel } from "./panel";
 
 interface SidePanelProps {
 	readonly side: PanelSide;
@@ -33,7 +34,7 @@ export function SidePanel({
 	onSelectView,
 	onAddView,
 	onRemoveView,
-}: PanelColumnProps) {
+}: SidePanelProps) {
 	const activeInstance = panel.activeInstanceId
 		? panel.instances.find((instance) => instance.instanceId === panel.activeInstanceId) ?? null
 		: panel.instances[0] ?? null;
@@ -44,37 +45,23 @@ export function SidePanel({
 
 	return (
 		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-[#3d4251]">
-			<div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white">
+			<Panel>
 				{hasViews && (
-					<header className="flex items-center gap-1 rounded-t-lg bg-white px-2 py-2">
+					<Panel.TabBar>
 						{panel.instances.map((instance) => {
 							const view = VIEW_MAP.get(instance.viewId);
 							if (!view) return null;
 							const isActive = activeInstance?.instanceId === instance.instanceId;
 							return (
-								<div key={instance.instanceId} className="group relative">
-									<button
-										type="button"
-										onClick={() => onSelectView(instance.instanceId)}
-										title={`${view.label} (${side})`}
-										className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] transition-colors ${
-											isActive
-												? "bg-[#f0f0f0] font-semibold text-[#212430]"
-												: "bg-transparent text-[#4d5361] hover:bg-[#f8f8f8]"
-										}`}
-									>
-										<view.icon className="h-3.5 w-3.5" />
-										<span>{view.label}</span>
-									</button>
-									<button
-										type="button"
-										onClick={() => onRemoveView(instance.instanceId)}
-										title={`Close ${view.label}`}
-										className="absolute -right-1 -top-1 hidden h-3.5 w-3.5 items-center justify-center rounded-full bg-[#ced2df] text-[#f6f7fb] shadow-sm group-hover:flex"
-									>
-										<X className="h-2.5 w-2.5" />
-									</button>
-								</div>
+								<Panel.Tab
+									key={instance.instanceId}
+									icon={view.icon}
+									label={view.label}
+									isActive={isActive}
+									variant="default"
+									onClick={() => onSelectView(instance.instanceId)}
+									onClose={() => onRemoveView(instance.instanceId)}
+								/>
 							);
 						})}
 						<DropdownMenu>
@@ -100,16 +87,16 @@ export function SidePanel({
 								))}
 							</DropdownMenuContent>
 						</DropdownMenu>
-					</header>
+					</Panel.TabBar>
 				)}
-				<div className="flex min-h-0 flex-1 flex-col px-3.5 py-3">
+				<Panel.Content className={activeInstance && activeView ? "px-1.5 py-1" : "flex items-center justify-center"}>
 					{activeInstance && activeView ? (
 						<ViewPanel view={activeView} />
 					) : (
 						<EmptyPanelState side={side} onAddView={onAddView} />
 					)}
-				</div>
-			</div>
+				</Panel.Content>
+			</Panel>
 		</aside>
 	);
 }
@@ -163,45 +150,3 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 	);
 }
 
-interface ViewPickerProps {
-	onAddView: (toolId: ViewId) => void;
-}
-
-/**
- * Dropdown menu that exposes the available tools for the panel.
- *
- * @example
- * <ViewPicker onAddView={handleAdd} />
- */
-function ViewPicker({ onAddView }: ViewPickerProps) {
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-7 gap-1 px-2.5 text-xs font-medium text-[#4d5361] hover:bg-[#f0f0f0]"
-				>
-					<Plus className="h-3.5 w-3.5" />
-					Add
-					<ChevronDown className="h-3 w-3" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-48 border border-[#e0e0e0] bg-white p-1 shadow-lg">
-				{VIEW_DEFINITIONS.map((tool) => (
-					<DropdownMenuItem
-						key={tool.id}
-						onSelect={() => onAddView(tool.id)}
-						className="flex items-start gap-2 px-2 py-2 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
-					>
-						<view.icon className="mt-[2px] h-4 w-4" />
-						<div>
-							<div className="text-sm font-medium text-[#212430]">{view.label}</div>
-							<div className="text-xs text-[#7a7f8f]">{view.description}</div>
-						</div>
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
-}
