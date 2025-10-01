@@ -56,6 +56,20 @@ describe("analyzeShape", () => {
 		expect(shape?.selectsWriterKey).toBe(false);
 	});
 
+	test("marks _pk references", () => {
+		const sql = `SELECT v._pk FROM internal_state_vtable v WHERE v.schema_key = 'abc'`;
+		const shape = analyzeShape(tokenize(sql));
+		expect(shape).not.toBeNull();
+		expect(shape?.referencesPrimaryKey).toBe(true);
+	});
+
+	test("does not mark _pk when absent", () => {
+		const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'abc'`;
+		const shape = analyzeShape(tokenize(sql));
+		expect(shape).not.toBeNull();
+		expect(shape?.referencesPrimaryKey).toBe(false);
+	});
+
 	test("analyzes filters nested inside subqueries", () => {
 		const sql = `SELECT * FROM (
 		SELECT * FROM internal_state_vtable v

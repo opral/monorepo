@@ -58,6 +58,7 @@ export type Shape = {
 		| { kind: "placeholder"; token: PlaceholderToken }
 		| { kind: "unknown" };
 	selectsWriterKey: boolean;
+	referencesPrimaryKey: boolean;
 };
 
 const placeholderTypes = new Set([
@@ -147,6 +148,8 @@ function analyzeShapeInternal(
 		allowedAliases.add("internal_state_vtable");
 	}
 
+	let referencesPrimaryKey = false;
+
 	for (let i = rangeStart; i <= rangeEnd; i++) {
 		const token = tokens[i];
 		if (!token) continue;
@@ -177,6 +180,9 @@ function analyzeShapeInternal(
 		}
 
 		const columnName = normalize(columnToken.image);
+		if (columnName === "_pk") {
+			referencesPrimaryKey = true;
+		}
 		if (!isSchemaColumn(columnName)) continue;
 
 		const result = parseFilter(tokens, i, alias, columnName, rangeEnd);
@@ -204,6 +210,7 @@ function analyzeShapeInternal(
 		entityIds,
 		versionId,
 		selectsWriterKey,
+		referencesPrimaryKey,
 	};
 }
 

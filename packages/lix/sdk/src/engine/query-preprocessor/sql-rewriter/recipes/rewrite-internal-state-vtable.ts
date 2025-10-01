@@ -14,17 +14,21 @@ export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
 	const literalOnly =
 		!hasPlaceholder(shape.schemaKeys) && !hasPlaceholder(shape.entityIds);
 
+	const includePrimaryKey = shape.referencesPrimaryKey;
+
 	if (schemaKey && limitOne && literalOnly) {
-		return buildFastPath({
+		const fastPath = buildFastPath({
 			schemaKey,
 			entityId,
 			versionId,
 			innerLimit1: true,
 			includeWriter: shape.selectsWriterKey,
 		});
+		return maybeStripHiddenPrimaryKey(fastPath, includePrimaryKey);
 	}
 
-	return buildWidePath({ schemaKeys: schemaKey ? [schemaKey] : [] });
+	const widePath = buildWidePath({ schemaKeys: schemaKey ? [schemaKey] : [] });
+	return maybeStripHiddenPrimaryKey(widePath, includePrimaryKey);
 }
 
 interface FastPathOptions {
@@ -596,4 +600,38 @@ function wrapWithInnerLimit(segment: string): string {
       LIMIT 1
     )
   `).trim();
+}
+const VISIBLE_STATE_COLUMNS = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
+	"version_id",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"metadata",
+	"writer_key",
+];
+
+function maybeStripHiddenPrimaryKey(
+	sql: string,
+	includePrimaryKey: boolean
+): string {
+	if (includePrimaryKey) {
+		return sql;
+	}
+
+	const projection = VISIBLE_STATE_COLUMNS.join(", ");
+	return stripIndent(`
+    SELECT ${projection}
+    FROM (
+      ${sql}
+    )
+  `);
 }
