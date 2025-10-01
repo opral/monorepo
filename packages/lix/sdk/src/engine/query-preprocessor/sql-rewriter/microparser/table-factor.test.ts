@@ -47,6 +47,24 @@ describe("findInternalStateVtable", () => {
 		expect(segment).toBe("internal_state_vtable v");
 	});
 
+	test.each([
+		"inner",
+		"left",
+		"right",
+		"full",
+		"cross",
+		"outer",
+		"natural",
+		"join",
+	])("falls back when alias token is reserved keyword '%s'", (keyword) => {
+		const sql = `SELECT * FROM internal_state_vtable ${keyword} JOIN other_table o ON o.id = 1`;
+		const tokens = tokenize(sql);
+		const match = findTableFactor(tokens, "internal_state_vtable");
+		expect(match).toBeTruthy();
+		expect(match?.alias).toBe("internal_state_vtable");
+		expect(match?.explicitAlias).toBe(false);
+	});
+
 	test("ignores column references", () => {
 		const sql = "SELECT internal_state_vtable.schema_key FROM mock_other_table";
 		const tokens = tokenize(sql);

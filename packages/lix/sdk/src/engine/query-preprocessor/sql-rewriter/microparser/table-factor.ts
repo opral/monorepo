@@ -49,6 +49,24 @@ const deriveAlias = (
 		};
 	}
 
+	const aliasLower = aliasToken.image.toLowerCase();
+	const forbiddenAlias =
+		aliasLower === "inner" ||
+		aliasLower === "left" ||
+		aliasLower === "right" ||
+		aliasLower === "full" ||
+		aliasLower === "cross" ||
+		aliasLower === "outer" ||
+		aliasLower === "natural" ||
+		aliasLower === "join";
+	if (forbiddenAlias) {
+		return {
+			alias: tableName,
+			explicit: false,
+			aliasSql: tableToken.image,
+		};
+	}
+
 	if (aliasToken.image.startsWith('"') && aliasToken.image.endsWith('"')) {
 		const dequoted = aliasToken.image.slice(1, -1).replace(/""/g, "");
 		return { alias: dequoted, explicit: true, aliasSql: aliasToken.image };
