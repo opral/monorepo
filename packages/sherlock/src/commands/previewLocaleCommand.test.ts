@@ -63,7 +63,9 @@ describe("previewLocaleCommand", () => {
 			placeHolder: "Select a language",
 		})
 		expect(settings.updateSetting).toHaveBeenCalledWith("previewLanguageTag", "en")
-		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalledTimes(1)
+		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalledWith({
+			origin: "command:previewLocale",
+		})
 		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).toHaveBeenCalledTimes(1)
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).toHaveBeenCalledTimes(1)
 		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.fire).toHaveBeenCalledTimes(1)

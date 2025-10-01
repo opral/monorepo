@@ -135,10 +135,10 @@ export async function handleTreeSelection(args: {
 		})
 		logger.debug("Project stored in state", {
 			selectedProjectPath: newSelectedProject,
-	})
+		})
 
 		// Update decorations
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire(undefined)
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "project-view" })
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire(undefined)
 		// Refresh the entire tree to reflect selection changes

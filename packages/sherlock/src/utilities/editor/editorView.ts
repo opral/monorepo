@@ -12,8 +12,9 @@ import { deleteVariant } from "./helper/deleteVariant.js"
 import { deleteBundleNested } from "./helper/deleteBundleNested.js"
 import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
 import { createMessage } from "./helper/createMessage.js"
-import { saveProject } from "../../main.js"
 import { rpc } from "@inlang/rpc"
+import { logger } from "../logger.js"
+import { saveProject } from "../../main.js"
 
 // Same interface as before
 export interface UpdateBundleMessage {
@@ -40,6 +41,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	let panel: WebviewPanel | undefined
 	let disposables: Disposable[] = []
 	let bundleId = initialBundleId
+	let suppressEditorRefreshUntil = 0
 
 	/**
 	 * Opens a new panel if none is open, otherwise reveals the existing one.
@@ -139,6 +141,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 					updateView()
 					return
 				case "change":
+					suppressEditorRefreshUntil = Date.now() + 500
 					await handleUpdateBundle({
 						db: state().project?.db,
 						message,
@@ -242,8 +245,20 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	 * Update view
 	 */
 	async function updateView() {
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "editorView" })
 		CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
+
+		const shouldSkipRefresh = suppressEditorRefreshUntil > Date.now()
+		try {
+			await saveProject()
+		} catch (error) {
+			logger.error("Failed to save project", error)
+		}
+
+		if (shouldSkipRefresh) {
+			logger.debug("Skipping editor webview refresh due to recent local edit")
+			return
+		}
 
 		panel?.webview.postMessage({
 			command: "change",
@@ -252,16 +267,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 				settings: await state().project?.settings.get(),
 			},
 		})
-
-		const workspaceFolder = vscode.workspace.workspaceFolders![0]
-		if (workspaceFolder) {
-			try {
-				await saveProject()
-			} catch (error) {
-				console.error("Failed to save project", error)
-				msg(`Failed to save project. ${String(error)}`, "error")
-			}
-		}
 	}
 
 	/**

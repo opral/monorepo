@@ -15,9 +15,10 @@ export const logger = {
 	error: (message: string, ...details: unknown[]) => write("ERROR", message, details),
 }
 
-const outputChannel = typeof vscode.window?.createOutputChannel === "function"
-	? vscode.window.createOutputChannel("Sherlock")
-	: undefined
+const outputChannel =
+	typeof vscode.window?.createOutputChannel === "function"
+		? vscode.window.createOutputChannel("Sherlock")
+		: undefined
 
 const isTestEnvironment = (() => {
 	try {
@@ -35,7 +36,11 @@ const isTestEnvironment = (() => {
 	}
 })()
 
-function write(level: "DEBUG" | "INFO" | "WARN" | "ERROR", message: string, details: unknown[]): void {
+function write(
+	level: "DEBUG" | "INFO" | "WARN" | "ERROR",
+	message: string,
+	details: unknown[]
+): void {
 	const timestamp = new Date().toISOString()
 	const serializedDetails = serialize(details)
 	const entry = `[${timestamp}] [${level}] ${message}${serializedDetails ? ` ${serializedDetails}` : ""}`
