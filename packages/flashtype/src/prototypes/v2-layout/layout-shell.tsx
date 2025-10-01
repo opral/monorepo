@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { PanelColumn } from "./panel-column";
-import { Workspace } from "./workspace";
+import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
 import type { PanelSide, PanelState, ViewId } from "./types";
@@ -85,7 +85,7 @@ export function V2LayoutShell() {
 						})
 					}
 				/>
-				<Workspace />
+				<CentralPanel />
 				<PanelColumn
 					side="right"
 					title="Secondary"
