@@ -66,7 +66,7 @@ const tabBaseClasses =
 	"group flex items-center gap-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors";
 
 const tabStateClasses = {
-	focused: "bg-brand-secondary text-onsurface-primary border-brand-secondary",
+	focused: "bg-brand-secondary text-onsurface-primary border-brand-primary",
 	active: "bg-surface-200 text-onsurface-primary border-stroke-100",
 	idle: "bg-transparent text-onsurface-secondary border-transparent hover:bg-surface-300 hover:border-stroke-200",
 } as const;
