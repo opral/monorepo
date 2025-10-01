@@ -6,7 +6,7 @@ const normalize = (sql: string) => sql.replace(/\s+/g, " ").trim();
 describe("expandQuery", () => {
 	test("returns original SQL when no matching views exist", () => {
 		const sql = "SELECT * FROM internal_state_vtable";
-		const result = expandQuery({ sql, views: new Map() });
+		const result = expandQuery({ sql, views: new Map(), runtimeCacheRef: {} });
 		expect(result.sql).toBe(sql);
 		expect(result.expanded).toBe(false);
 	});
@@ -17,7 +17,7 @@ describe("expandQuery", () => {
 			["state_reader_view", "SELECT entity_id FROM internal_state_vtable"],
 		]);
 
-		const result = expandQuery({ sql, views });
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
 
 		expect(result.expanded).toBe(true);
 		const normalized = normalize(result.sql);
@@ -35,7 +35,7 @@ describe("expandQuery", () => {
 			],
 		]);
 
-		const result = expandQuery({ sql, views });
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
 		expect(result.expanded).toBe(true);
 		const normalized = normalize(result.sql);
 		expect(normalized).toContain(
@@ -50,7 +50,7 @@ describe("expandQuery", () => {
 			["inner_view", "SELECT entity_id FROM internal_state_vtable"],
 		]);
 
-		const result = expandQuery({ sql, views });
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
 		expect(result.expanded).toBe(true);
 		const normalized = normalize(result.sql);
 		expect(normalized).toContain(
@@ -65,7 +65,7 @@ describe("expandQuery", () => {
 			["commit_state", "SELECT entity_id AS id FROM internal_state_vtable"],
 		]);
 
-		const result = expandQuery({ sql, views });
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
 		expect(result.expanded).toBe(true);
 		const normalized = normalize(result.sql);
 		expect(normalized).toContain(
@@ -80,7 +80,7 @@ describe("expandQuery", () => {
 			["b_view", "SELECT * FROM a_view"],
 		]);
 
-		const result = expandQuery({ sql, views });
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
 		expect(result.expanded).toBe(false);
 		expect(result.sql).toBe(sql);
 	});

@@ -38,7 +38,11 @@ export async function createQueryPreprocessorV2(
 
 		{
 			const views = getViewSelectMap(engine);
-			const expansion = expandQuery({ sql: currentSql, views });
+			const expansion = expandQuery({
+				sql: currentSql,
+				views,
+				runtimeCacheRef: engine.runtimeCacheRef,
+			});
 			currentSql = expansion.sql;
 
 			tokens = tokenize(currentSql);

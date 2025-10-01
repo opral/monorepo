@@ -99,7 +99,7 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessorV2(lix.engine!);
 		const sql =
-			"SELECT \"key\", \"version\", \"value\" FROM \"stored_schema\" WHERE \"key\" = ? AND \"version\" = ? LIMIT ?";
+			'SELECT "key", "version", "value" FROM "stored_schema" WHERE "key" = ? AND "version" = ? LIMIT ?';
 
 		const result = preprocess({
 			sql,
@@ -146,8 +146,8 @@ describe("createQueryPreprocessorV2", () => {
 		const result = preprocess({ sql, parameters });
 
 		const { rows } = lix.engine!.executeSync({
-		sql: result.sql,
-		parameters: result.parameters,
+			sql: result.sql,
+			parameters: result.parameters,
 		});
 
 		expect(rows).toBeInstanceOf(Array);
