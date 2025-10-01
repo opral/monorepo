@@ -1,6 +1,6 @@
 import { BundleNested, Message, ProjectSettings } from "@inlang/sdk"
 import { vscode } from "../utils/vscode.js"
-import React from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import {
 	InlangMessage,
 	InlangPatternEditor,
@@ -65,9 +65,44 @@ const Editor: React.FC<{
 	bundle: BundleNested
 	settings: ProjectSettings
 }> = ({ bundle, settings }) => {
+	const changeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+	const pendingChangeRef = useRef<ChangeEventDetail | undefined>(undefined)
+
+	const flushPendingChange = useCallback(() => {
+		if (!pendingChangeRef.current) {
+			return
+		}
+		vscode.postMessage({
+			command: "change",
+			change: pendingChangeRef.current,
+		})
+		pendingChangeRef.current = undefined
+	}, [])
+
+	const scheduleChange = useCallback(
+		(detail: ChangeEventDetail) => {
+			pendingChangeRef.current = detail
+			if (changeTimeoutRef.current) {
+				clearTimeout(changeTimeoutRef.current)
+			}
+			changeTimeoutRef.current = setTimeout(() => {
+				flushPendingChange()
+			}, 250)
+		},
+		[flushPendingChange]
+	)
+
+	useEffect(() => {
+		return () => {
+			if (changeTimeoutRef.current) {
+				clearTimeout(changeTimeoutRef.current)
+			}
+		}
+	}, [])
+
 	const handleChangeEvent = (e: Event) => {
 		const change = (e as CustomEvent).detail as ChangeEventDetail
-		vscode.postMessage({ command: "change", change })
+		scheduleChange(change)
 	}
 
 	const handleDelete = ({

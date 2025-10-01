@@ -12,7 +12,7 @@ export const reloadProjectCommand = {
 	callback: async () => {
 		try {
 			console.log("Reloading project...")
-			
+
 			// Get current workspace
 			const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 			if (!workspaceFolder) {
@@ -22,13 +22,13 @@ export const reloadProjectCommand = {
 
 			// Create file system mapper
 			const mappedFs = createFileSystemMapper(workspaceFolder.uri.fsPath, fs)
-			
+
 			// Get context from extension
 			const extension = vscode.extensions.getExtension("inlang.vs-code-extension")
 			if (!extension) {
 				throw new Error("Could not find Sherlock extension")
 			}
-			
+
 			// Get API from extension (returns context)
 			const api = await extension.activate()
 			if (!api?.context) {
@@ -46,5 +46,5 @@ export const reloadProjectCommand = {
 			console.error("Failed to reload project:", error)
 			handleError(error)
 		}
-	}
+	},
 }
