@@ -4,6 +4,13 @@ import {
 	FROM,
 	WHERE,
 	LIMIT,
+	ORDER,
+	BY,
+	GROUP,
+	HAVING,
+	WINDOW,
+	OFFSET,
+	FETCH,
 	AS,
 	JOIN,
 	Ident,
@@ -65,6 +72,71 @@ test("tokenizes FROM internal_state_vtable with alias and LIMIT 1", () => {
 	const limitValue = requireToken(tokens[iLimit + 1], "limit value");
 	expect(limitValue.tokenType).toBe(Num);
 	expect(limitValue.image).toBe("1");
+});
+
+test("tokenizes ORDER BY clause without turning ORDER into an identifier", () => {
+	const sql = `SELECT path FROM file ORDER BY path DESC`;
+	const tokens = tokenize(sql);
+
+	const orderIx = tokens.findIndex((t) => t.tokenType === ORDER);
+	const byIx = tokens.findIndex((t) => t.tokenType === BY);
+
+	expect(orderIx).toBeGreaterThanOrEqual(0);
+	expect(byIx).toBe(orderIx + 1);
+
+	const orderColumn = requireToken(tokens[orderIx + 2], "order by column");
+	expect(orderColumn.tokenType).toBe(Ident);
+	expect(orderColumn.image).toBe("path");
+
+	const identHits = tokens.filter((t) => t.tokenType === Ident);
+	expect(identHits.map((t) => t.image.toLowerCase())).not.toContain("order");
+});
+
+test("tokenizes GROUP BY / HAVING with dedicated keyword tokens", () => {
+	const sql = `SELECT key, COUNT(*) FROM stored_schema GROUP BY key HAVING COUNT(*) > 1`;
+	const tokens = tokenize(sql);
+
+	const groupIx = tokens.findIndex((t) => t.tokenType === GROUP);
+	const byIx = tokens.findIndex((t) => t.tokenType === BY);
+	const havingIx = tokens.findIndex((t) => t.tokenType === HAVING);
+
+	expect(groupIx).toBeGreaterThanOrEqual(0);
+	expect(byIx).toBe(groupIx + 1);
+	expect(havingIx).toBeGreaterThan(groupIx);
+
+	const groupedColumn = requireToken(tokens[groupIx + 2], "group by column");
+	expect(groupedColumn.tokenType).toBe(Ident);
+	expect(groupedColumn.image).toBe("key");
+
+	const identImages = tokens
+		.filter((t) => t.tokenType === Ident)
+		.map((t) => t.image.toLowerCase());
+	expect(identImages).not.toContain("group");
+	expect(identImages).not.toContain("having");
+});
+
+test("tokenizes WINDOW clause and OFFSET/FETCH keywords", () => {
+	const sql = `SELECT * FROM file WINDOW w AS (PARTITION BY path ORDER BY updated_at) OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY`;
+	const tokens = tokenize(sql);
+
+	const windowIx = tokens.findIndex((t) => t.tokenType === WINDOW);
+	const offsetIx = tokens.findIndex((t) => t.tokenType === OFFSET);
+	const fetchIx = tokens.findIndex((t) => t.tokenType === FETCH);
+
+	expect(windowIx).toBeGreaterThanOrEqual(0);
+	expect(offsetIx).toBeGreaterThan(windowIx);
+	expect(fetchIx).toBeGreaterThan(offsetIx);
+
+	const windowAlias = requireToken(tokens[windowIx + 1], "window alias");
+	expect(windowAlias.tokenType).toBe(Ident);
+	expect(windowAlias.image).toBe("w");
+
+	const identImages = tokens
+		.filter((t) => t.tokenType === Ident)
+		.map((t) => t.image.toLowerCase());
+	expect(identImages).not.toContain("window");
+	expect(identImages).not.toContain("offset");
+	expect(identImages).not.toContain("fetch");
 });
 
 test("handles quoted table and alias", () => {

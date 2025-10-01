@@ -1,10 +1,12 @@
 import {
 	AS,
 	Comma,
+	Dot,
 	FROM,
 	Ident,
 	JOIN,
 	QIdent,
+	SELECT,
 	type Token,
 } from "../tokenizer.js";
 
@@ -102,7 +104,37 @@ export function findTableFactor(
 
 		if (normalizeName(current.image) !== tableName.toLowerCase()) continue;
 
+		const next = tokens[index + 1];
+		const afterNext = tokens[index + 2];
+		if (next?.tokenType === Dot && isIdentifier(afterNext)) {
+			// Column reference like alias.column; not a table factor.
+			continue;
+		}
+
 		const prev = tokens[index - 1];
+		if (prev && prev.tokenType === Comma) {
+			let lookback = index - 2;
+			let hasFromContext = false;
+			while (lookback >= 0) {
+				const candidate = tokens[lookback];
+				if (!candidate) {
+					lookback -= 1;
+					continue;
+				}
+				if (candidate.tokenType === FROM || candidate.tokenType === JOIN) {
+					hasFromContext = true;
+					break;
+				}
+				if (candidate.tokenType === SELECT) {
+					break;
+				}
+				lookback -= 1;
+			}
+			if (!hasFromContext) {
+				continue;
+			}
+		}
+
 		if (prev && !leadingTokens.has(prev.tokenType)) {
 			// Not a table factor (likely qualified column reference).
 			continue;

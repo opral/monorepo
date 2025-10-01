@@ -94,4 +94,65 @@ describe("createQueryPreprocessorV2", () => {
 		expect(result.sql).toBe(sql);
 		await lix.close();
 	});
+
+	test("rewrites stored_schema view via state pipeline", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		const sql =
+			"SELECT \"key\", \"version\", \"value\" FROM \"stored_schema\" WHERE \"key\" = ? AND \"version\" = ? LIMIT ?";
+
+		const result = preprocess({
+			sql,
+			parameters: ["schema", "1.0", 1],
+		});
+
+		expect(result.sql).not.toMatch(/FROM\s+"stored_schema"/i);
+		expect(result.sql).toContain("WITH RECURSIVE");
+
+		const { rows } = lix.engine!.executeSync({
+			sql: result.sql,
+			parameters: result.parameters,
+		});
+
+		expect(rows).toBeInstanceOf(Array);
+		await lix.close();
+	});
+
+	test("does not rewrite change history query without vtable references", async () => {
+		const lix = await openLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+
+		const sql = `select 
+			"change"."schema_key", 
+			"change"."entity_id", 
+			"change_set_element"."change_id", 
+			"change"."snapshot_content" 
+		from "change_set_element" 
+		inner join "change" 
+		on "change_set_element"."change_id" = "change"."id" 
+		where "change_set_id" = ?`;
+
+		const parameters = ["some-id"];
+
+		const result = preprocess({ sql, parameters });
+
+		const { rows } = lix.engine!.executeSync({
+		sql: result.sql,
+		parameters: result.parameters,
+		});
+
+		expect(rows).toBeInstanceOf(Array);
+		expect(rows.length).toBe(0);
+
+		await lix.close();
+	});
 });

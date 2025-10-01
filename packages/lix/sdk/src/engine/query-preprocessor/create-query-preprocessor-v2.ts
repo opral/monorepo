@@ -139,7 +139,28 @@ function extractSelectFromCreateView(sql: string): string | undefined {
 
 type StatementKind = "select" | "insert" | "update" | "delete" | "other";
 
+const ddlGuards = new Set([
+	"CREATE",
+	"ALTER",
+	"DROP",
+	"PRAGMA",
+	"EXPLAIN",
+	"ATTACH",
+	"DETACH",
+	"VACUUM",
+	"ANALYZE",
+	"REINDEX",
+]);
+
 function detectStatementKind(tokens: Token[]): StatementKind {
+	const firstToken = tokens[0];
+	if (firstToken) {
+		const firstImage = firstToken.image?.toUpperCase();
+		if (firstImage && ddlGuards.has(firstImage)) {
+			return "other";
+		}
+	}
+
 	let inCte = false;
 	let depth = 0;
 

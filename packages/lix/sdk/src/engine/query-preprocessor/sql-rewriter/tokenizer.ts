@@ -107,6 +107,13 @@ export const JOIN: TokenType = keyword("JOIN");
 export const AS: TokenType = keyword("AS");
 export const WHERE: TokenType = keyword("WHERE");
 export const LIMIT: TokenType = keyword("LIMIT");
+export const ORDER: TokenType = keyword("ORDER");
+export const BY: TokenType = keyword("BY");
+export const GROUP: TokenType = keyword("GROUP");
+export const HAVING: TokenType = keyword("HAVING");
+export const WINDOW: TokenType = keyword("WINDOW");
+export const OFFSET: TokenType = keyword("OFFSET");
+export const FETCH: TokenType = keyword("FETCH");
 export const ON: TokenType = keyword("ON");
 export const AND: TokenType = keyword("AND");
 export const OR: TokenType = keyword("OR");
@@ -147,6 +154,13 @@ const allTokens: TokenType[] = [
 	AS,
 	WHERE,
 	LIMIT,
+	ORDER,
+	BY,
+	GROUP,
+	HAVING,
+	WINDOW,
+	OFFSET,
+	FETCH,
 	ON,
 	AND,
 	OR,
