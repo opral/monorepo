@@ -57,12 +57,20 @@
 	--color-success-700: rgb(21, 128, 61);
 	--color-success-800: rgb(22, 101, 52);
 	--color-success-900: rgb(20, 83, 45);
+
+	/* Semantic tokens following [type]-[role]-[prominence]-[interaction] */
 	--color-brand-primary: rgb(234, 88, 12);
-	--color-default-font: rgb(24, 24, 27);
-	--color-subtext-color: rgb(113, 113, 122);
-	--color-neutral-border: rgb(228, 228, 231);
-	--color-white: rgb(255, 255, 255);
-	--color-default-background: rgb(255, 255, 255);
+	--color-brand-secondary: rgb(255, 247, 237);
+	--color-surface-100: rgb(255, 255, 255);
+	--color-surface-200: rgb(250, 250, 250);
+	--color-surface-300: rgb(244, 244, 245);
+	--color-onsurface-primary: rgb(24, 24, 27);
+	--color-onsurface-secondary: rgb(94, 94, 104);
+	--color-onsurface-tertiary: rgb(161, 161, 170);
+	--color-stroke-100: rgb(228, 228, 231);
+	--color-stroke-200: rgb(244, 244, 245);
+	--color-link-primary: rgb(59, 130, 246);
+	--color-link-primary-hover: rgb(37, 99, 235);
 
 	/* Fonts */
 	--text-caption: 12px;

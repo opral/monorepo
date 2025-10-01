@@ -8,13 +8,13 @@ import { FileText } from "lucide-react";
  */
 export function StatusBar() {
 	return (
-		<footer className="flex h-8 items-center px-3 text-xs text-[#6f7586]">
+		<footer className="flex h-8 items-center px-3 text-xs text-onsurface-secondary">
 			<div className="flex items-center gap-2">
-				<span className="flex items-center gap-1 font-medium text-[#2d3140]">
+				<span className="flex items-center gap-1 font-medium text-onsurface-primary">
 					<FileText className="h-3.5 w-3.5" />
 					writing-style.md
 				</span>
-				<span className="text-[#c5c9d8]">•</span>
+				<span className="text-stroke-200">•</span>
 				<span>main</span>
 			</div>
 			<div className="ml-auto flex items-center gap-3">

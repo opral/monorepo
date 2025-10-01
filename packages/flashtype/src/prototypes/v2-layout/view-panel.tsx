@@ -12,7 +12,7 @@ interface ViewPanelProps {
  */
 export function ViewPanel({ view }: ViewPanelProps) {
 	return (
-		<div className="flex-1 overflow-auto text-sm text-[#3f4454]">
+		<div className="flex-1 overflow-auto text-sm text-onsurface-primary">
 			{view.render()}
 		</div>
 	);

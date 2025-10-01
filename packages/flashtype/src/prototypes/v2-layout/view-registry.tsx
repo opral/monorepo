@@ -1,17 +1,7 @@
-import {
-	CalendarDays,
-	Files,
-	GitCommit,
-	MessageSquare,
-	Search,
-	Terminal,
-} from "lucide-react";
+import { CalendarDays, Files, Search } from "lucide-react";
 import type { ViewDefinition, ViewId } from "./types";
 import { FilesView } from "./panel-views/files-view";
 import { SearchView } from "./panel-views/search-view";
-import { GitView } from "./panel-views/git-view";
-import { AssistantView } from "./panel-views/assistant-view";
-import { TerminalView } from "./panel-views/terminal-view";
 import { TasksView } from "./panel-views/tasks-view";
 
 /**
@@ -34,27 +24,6 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		description: "Quickly locate files, symbols, or commands.",
 		icon: Search,
 		render: () => <SearchView />,
-	},
-	{
-		id: "git",
-		label: "Git",
-		description: "Review progress and staging status.",
-		icon: GitCommit,
-		render: () => <GitView />,
-	},
-	{
-		id: "assistant",
-		label: "Assistant",
-		description: "Chat with the embedded helper.",
-		icon: MessageSquare,
-		render: () => <AssistantView />,
-	},
-	{
-		id: "terminal",
-		label: "Terminal",
-		description: "Run quick project commands.",
-		icon: Terminal,
-		render: () => <TerminalView />,
 	},
 	{
 		id: "tasks",

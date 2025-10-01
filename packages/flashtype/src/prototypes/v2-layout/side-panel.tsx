@@ -44,7 +44,7 @@ export function SidePanel({
 	const hasViews = panel.instances.length > 0;
 
 	return (
-		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-[#3d4251]">
+		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-onsurface-secondary">
 			<Panel>
 				{hasViews && (
 					<Panel.TabBar>
@@ -69,17 +69,17 @@ export function SidePanel({
 								<button
 									type="button"
 									title="Add view"
-									className="flex h-7 w-7 items-center justify-center rounded-md text-[#4d5361] hover:bg-[#f0f0f0]"
+									className="flex h-7 w-7 items-center justify-center rounded-md text-onsurface-secondary hover:bg-surface-300"
 								>
 									<Plus className="h-4 w-4" />
 								</button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent align={side === "left" ? "start" : "end"} className="w-40 border border-[#e0e0e0] bg-white p-1 shadow-lg">
+							<DropdownMenuContent align={side === "left" ? "start" : "end"} className="w-40 border border-stroke-100 bg-surface-100 p-1 shadow-lg">
 								{VIEW_DEFINITIONS.map((ext) => (
 									<DropdownMenuItem
 										key={ext.id}
 										onSelect={() => onAddView(ext.id)}
-										className="flex items-center gap-2 px-3 py-1.5 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
+									className="flex items-center gap-2 px-3 py-1.5 text-sm text-onsurface-primary focus:bg-surface-300"
 									>
 										<ext.icon className="h-4 w-4" />
 										<span>{ext.label}</span>
@@ -93,7 +93,7 @@ export function SidePanel({
 					{activeInstance && activeView ? (
 						<ViewPanel view={activeView} />
 					) : (
-						<EmptyPanelState side={side} onAddView={onAddView} />
+		<EmptyPanelState side={side} onAddView={onAddView} />
 					)}
 				</Panel.Content>
 			</Panel>
@@ -115,10 +115,10 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-			<Icon className="h-12 w-12 text-[#d0d0d0]" strokeWidth={1.5} />
+			<Icon className="h-12 w-12 text-stroke-200" strokeWidth={1.5} />
 			<div className="space-y-1">
-				<div className="text-base font-medium text-[#2d3140]">{panelName} Panel</div>
-				<div className="text-sm text-[#7a7f8f] max-w-[200px]">
+				<div className="text-base font-medium text-onsurface-primary">{panelName} Panel</div>
+				<div className="text-sm text-onsurface-tertiary max-w-[200px]">
 					Add a new view or drag-n-drop a view from the other panels
 				</div>
 			</div>
@@ -127,18 +127,18 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 					<Button
 						variant="outline"
 						size="sm"
-						className="gap-1 border-[#d0d0d0] text-xs text-[#4d5361] hover:bg-[#f0f0f0]"
+						className="gap-1 border-stroke-200 text-xs text-onsurface-secondary hover:bg-surface-300"
 					>
 						Open View
 						<ChevronDown className="h-3 w-3" />
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="center" className="w-40 border border-[#e0e0e0] bg-white p-1 shadow-lg">
+				<DropdownMenuContent align="center" className="w-40 border border-stroke-100 bg-surface-100 p-1 shadow-lg">
 					{VIEW_DEFINITIONS.map((ext) => (
 						<DropdownMenuItem
 							key={ext.id}
 							onSelect={() => onAddView(ext.id)}
-							className="flex items-center gap-2 px-3 py-1.5 text-sm text-[#2d3140] focus:bg-[#f0f0f0]"
+							className="flex items-center gap-2 px-3 py-1.5 text-sm text-onsurface-primary focus:bg-surface-300"
 						>
 							<ext.icon className="h-4 w-4" />
 							<span>{ext.label}</span>
@@ -149,4 +149,3 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 		</div>
 	);
 }
-

@@ -7,7 +7,7 @@ import type { LucideIcon } from "lucide-react";
  * @example
  * const activeView: ViewId = "files";
  */
-export type ViewId = "files" | "search" | "git" | "assistant" | "terminal" | "tasks";
+export type ViewId = "files" | "search" | "tasks";
 
 /**
  * Per-panel instance metadata used to track which views are open.

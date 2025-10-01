@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { type ReactNode } from "react";
 import { X, type LucideIcon } from "lucide-react";
 
@@ -19,7 +20,7 @@ interface PanelProps {
 export function Panel({ children, className = "" }: PanelProps) {
 	return (
 		<div
-			className={`flex min-h-0 flex-1 flex-col rounded-lg bg-white ${className}`}
+			className={`flex min-h-0 flex-1 flex-col rounded-lg bg-surface-100 ${className}`}
 		>
 			{children}
 		</div>
@@ -61,6 +62,15 @@ interface TabProps {
 	readonly onClick?: () => void;
 }
 
+const tabBaseClasses =
+	"group flex items-center gap-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors";
+
+const tabStateClasses = {
+	focused: "bg-brand-secondary text-onsurface-primary border-brand-secondary",
+	active: "bg-surface-200 text-onsurface-primary border-stroke-100",
+	idle: "bg-transparent text-onsurface-secondary border-transparent hover:bg-surface-300 hover:border-stroke-200",
+} as const;
+
 Panel.Tab = function Tab({
 	icon: Icon,
 	label,
@@ -69,27 +79,19 @@ Panel.Tab = function Tab({
 	onClose,
 	onClick,
 }: TabProps) {
-	const baseClasses =
-		"group flex items-center gap-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors";
-
-	const stateClasses =
-		isActive && isFocused
-			? "bg-brand-50 text-neutral-950 border-brand-primary"
-			: isActive
-				? "bg-neutral-100 text-neutral-950 border-neutral-300"
-				: "bg-transparent text-neutral-600 border-transparent hover:bg-neutral-100 hover:border-neutral-200";
+const state = isActive ? (isFocused ? "focused" : "active") : "idle";
 
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className={`${baseClasses} ${stateClasses}`}
+			className={clsx(tabBaseClasses, tabStateClasses[state])}
 		>
 			<Icon className="h-3.5 w-3.5" />
 			<span>{label}</span>
 			{onClose && isActive && (
 				<X
-					className="h-3 w-3 text-neutral-400 hover:text-neutral-600"
+					className="h-3 w-3 text-onsurface-tertiary hover:text-onsurface-secondary"
 					onClick={(e) => {
 						e.stopPropagation();
 						onClose();
@@ -98,7 +100,7 @@ Panel.Tab = function Tab({
 			)}
 			{onClose && !isActive && (
 				<X
-					className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-600"
+					className="h-3 w-3 text-onsurface-tertiary opacity-0 group-hover:opacity-100 hover:text-onsurface-secondary"
 					onClick={(e) => {
 						e.stopPropagation();
 						onClose();
