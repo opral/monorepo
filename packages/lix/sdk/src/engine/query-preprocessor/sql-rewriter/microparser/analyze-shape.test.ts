@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { tokenize } from "../tokenizer.js";
-import { analyzeShape } from "./analyze-shape.js";
+import { analyzeShape, analyzeShapes } from "./analyze-shape.js";
 
 describe("analyzeShape", () => {
 	test("collects filters and limit", () => {
@@ -54,5 +54,33 @@ describe("analyzeShape", () => {
 		const shape = analyzeShape(tokenize(sql));
 		expect(shape).not.toBeNull();
 		expect(shape?.selectsWriterKey).toBe(false);
+	});
+
+	test("analyzes filters nested inside subqueries", () => {
+		const sql = `SELECT * FROM (
+		SELECT * FROM internal_state_vtable v
+		WHERE v.schema_key = 'lix_active_version'
+		  AND v.version_id = 'global'
+	) derived
+	WHERE derived.entity_id = ?`;
+		const shapes = analyzeShapes(tokenize(sql));
+		expect(shapes.length).toBe(1);
+		const [shape] = shapes;
+		expect(shape.schemaKeys).toEqual([
+			{ kind: "literal", value: "lix_active_version" },
+		]);
+		expect(shape.versionId).toEqual({
+			kind: "literal",
+			value: "global",
+		});
+	});
+
+	test("analyzeShape returns the first shape", () => {
+		const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'one';
+	SELECT * FROM internal_state_vtable w WHERE w.schema_key = 'two';`;
+		const shapes = analyzeShapes(tokenize(sql));
+		expect(shapes.length).toBe(2);
+		const first = analyzeShape(tokenize(sql));
+		expect(first?.schemaKeys).toEqual([{ kind: "literal", value: "one" }]);
 	});
 });

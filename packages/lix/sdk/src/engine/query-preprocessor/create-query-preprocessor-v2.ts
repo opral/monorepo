@@ -1,6 +1,6 @@
 import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
-import { analyzeShape } from "./sql-rewriter/microparser/analyze-shape.js";
+import { analyzeShapes } from "./sql-rewriter/microparser/analyze-shape.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
 import {
 	DELETE,
@@ -49,8 +49,8 @@ export async function createQueryPreprocessorV2(
 			tokens = tokenize(currentSql);
 		}
 
-		const shape = analyzeShape(tokens);
-		if (shape) {
+		const shapes = analyzeShapes(tokens);
+		for (const shape of shapes) {
 			ensureFreshStateCache({ engine, shape });
 		}
 

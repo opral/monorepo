@@ -35,3 +35,15 @@ test("reuses provided tokens when supplied", () => {
 	expect(rewritten).toContain("LIMIT 1");
 	spy.mockRestore();
 });
+
+test("rewrites every internal_state_vtable reference", () => {
+	const sql = `SELECT * FROM internal_state_vtable v
+	UNION ALL
+	SELECT * FROM internal_state_vtable w WHERE w.schema_key = 'lix_key_value';`;
+
+	const rewritten = rewriteSql(sql);
+
+	expect(rewritten).not.toMatch(/FROM\s+internal_state_vtable\b/i);
+	expect(rewritten).toContain("AS v");
+	expect(rewritten).toContain("AS w");
+});

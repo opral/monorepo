@@ -24,6 +24,8 @@ export interface TableFactorMatch {
 	explicitAlias: boolean;
 	/** Alias text exactly as it appeared in SQL (quoted if applicable). */
 	aliasSql: string;
+	/** Index of the table identifier token inside the token array. */
+	tokenIndex: number;
 }
 
 const leadingTokens = new Set([FROM, JOIN, Comma]);
@@ -94,11 +96,38 @@ const offsetOrThrow = (value: number | undefined, label: string): number => {
  * The matcher is case-insensitive, supports quoted identifiers, optional `AS`, and aliases.
  * Returns `null` when the identifier is not used as a table factor (e.g. qualified column references).
  */
-export function findTableFactor(
+
+/**
+ * Collects every table-factor match for the provided table name in a token stream.
+ *
+ * @example
+ * ```ts
+ * const tokens = tokenize("SELECT * FROM internal_state_vtable v");
+ * const [match] = findTableFactors(tokens, "internal_state_vtable");
+ * console.log(match.alias); // "v"
+ * ```
+ */
+export function findTableFactors(
 	tokens: Token[],
 	tableName: string
+): TableFactorMatch[] {
+	const matches: TableFactorMatch[] = [];
+	let startIndex = 0;
+	while (startIndex < tokens.length) {
+		const match = findTableFactor(tokens, tableName, startIndex);
+		if (!match) break;
+		matches.push(match);
+		startIndex = match.tokenIndex + 1;
+	}
+	return matches;
+}
+
+export function findTableFactor(
+	tokens: Token[],
+	tableName: string,
+	startIndex = 0
 ): TableFactorMatch | null {
-	for (let index = 0; index < tokens.length; index++) {
+	for (let index = startIndex; index < tokens.length; index++) {
 		const current = tokens[index];
 		if (!isIdentifier(current)) continue;
 
@@ -168,6 +197,7 @@ export function findTableFactor(
 			alias,
 			explicitAlias: explicit,
 			aliasSql,
+			tokenIndex: index,
 		};
 	}
 

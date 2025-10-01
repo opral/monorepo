@@ -60,7 +60,7 @@ describe("createQueryPreprocessor benchmarks", () => {
 	const original = {
 		tokenize: tokenizerModule.tokenize,
 		expandQuery: expandQueryModule.expandQuery,
-		analyzeShape: analyzeShapeModule.analyzeShape,
+		analyzeShapes: analyzeShapeModule.analyzeShapes,
 		rewriteSql: rewriteSqlModule.rewriteSql,
 	};
 
@@ -89,13 +89,13 @@ describe("createQueryPreprocessor benchmarks", () => {
 		}) as typeof expandQueryModule.expandQuery);
 
 		analyzeSpy = vi
-			.spyOn(analyzeShapeModule, "analyzeShape")
+			.spyOn(analyzeShapeModule, "analyzeShapes")
 			.mockImplementation(((tokens) => {
 				const start = performance.now();
-				const result = original.analyzeShape(tokens);
+				const result = original.analyzeShapes(tokens);
 				metrics.analyze += performance.now() - start;
 				return result;
-			}) as typeof analyzeShapeModule.analyzeShape);
+			}) as typeof analyzeShapeModule.analyzeShapes);
 
 		rewriteSpy = vi.spyOn(rewriteSqlModule, "rewriteSql").mockImplementation(((
 			sql,
