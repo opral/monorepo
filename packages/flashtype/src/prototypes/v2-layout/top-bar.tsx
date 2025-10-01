@@ -17,31 +17,31 @@ export function TopBar() {
 				<div className="flex h-7 w-7 items-center justify-center">
 					<Zap className="h-4 w-4 text-amber-500" />
 				</div>
-				<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-surface-300 hover:text-onsurface-primary">
+				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-surface-400 hover:text-onsurface-primary">
 					<PanelLeft className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-surface-300 hover:text-onsurface-primary">
+				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-surface-400 hover:text-onsurface-primary">
 					<PanelRight className="h-4 w-4" />
 				</Button>
-				<span className="flex items-center gap-1 rounded-md bg-surface-200 px-1.5 py-0.5 text-xs font-medium text-onsurface-primary">
+				<span className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-onsurface-primary">
 					<GitBranch className="h-3.5 w-3.5" />
 					main
 				</span>
 			</div>
 			<div className="flex items-center gap-0.5">
-				<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-surface-300 hover:text-onsurface-primary">
+				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-surface-400 hover:text-onsurface-primary">
 					<Search className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-surface-300 hover:text-onsurface-primary">
+				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-surface-400 hover:text-onsurface-primary">
 					<Command className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-surface-300 hover:text-onsurface-primary">
+				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-surface-400 hover:text-onsurface-primary">
 					<Bell className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					className="h-7 px-2 text-xs hover:bg-surface-300 hover:text-onsurface-primary"
+					className="h-7 px-2 text-xs hover:bg-surface-400 hover:text-onsurface-primary"
 					onClick={() => void navigate({ to: "/" })}
 				>
 					Back to main UI

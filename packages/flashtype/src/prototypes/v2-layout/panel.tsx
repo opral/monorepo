@@ -67,8 +67,8 @@ const tabBaseClasses =
 
 const tabStateClasses = {
 	focused: "bg-brand-secondary text-onsurface-primary border-brand-primary",
-	active: "bg-surface-200 text-onsurface-primary border-stroke-100",
-	idle: "bg-transparent text-onsurface-secondary border-transparent hover:bg-surface-300 hover:border-stroke-200",
+	active: "bg-surface-300 text-onsurface-primary border-stroke-200",
+	idle: "bg-transparent text-onsurface-secondary border-transparent hover:bg-surface-300 hover:border-stroke-200 hover:text-onsurface-primary",
 } as const;
 
 Panel.Tab = function Tab({

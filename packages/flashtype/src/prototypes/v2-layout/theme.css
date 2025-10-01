@@ -64,6 +64,8 @@
 	--color-surface-100: rgb(255, 255, 255);
 	--color-surface-200: rgb(250, 250, 250);
 	--color-surface-300: rgb(244, 244, 245);
+	--color-surface-400: rgb(228, 228, 231);
+	--color-surface-500: rgb(212, 212, 216);
 	--color-onsurface-primary: rgb(24, 24, 27);
 	--color-onsurface-secondary: rgb(94, 94, 104);
 	--color-onsurface-tertiary: rgb(161, 161, 170);
