@@ -63,5 +63,6 @@ exports[`uses fast path for limit 1 queries 1`] = `
 249|245|45|SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
 279|154|53|SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
 321|152|16|SCAN (subquery-8)
-344|0|32|SCAN (subquery-9)"
+345|0|32|SCAN (subquery-9)
+372|0|0|USE TEMP B-TREE FOR ORDER BY"
 `;

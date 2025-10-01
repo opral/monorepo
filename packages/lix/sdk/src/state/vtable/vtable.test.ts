@@ -1232,6 +1232,7 @@ simulationTest(
 			.where("version_id", "=", childVersion.id)
 			.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
 			.where("untracked", "=", 1)
+			.orderBy("_pk")
 			.select(["entity_id", "change_id"])
 			.execute();
 
