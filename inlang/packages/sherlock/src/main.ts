@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
-import { setState, state } from "./utilities/state.js"
+import { safeState, setState, state } from "./utilities/state.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
@@ -20,6 +20,7 @@ import { saveProjectToDirectory, type IdeExtensionConfig } from "@inlang/sdk"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { setupDirectMessageWatcher } from "./utilities/fs/experimental/directMessageHandler.js"
+import { logger } from "./utilities/logger.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -30,20 +31,26 @@ export async function activate(
 	//initErrorMonitoring()
 
 	try {
+		logger.info("Activating Sherlock extension")
 		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", false)
 		vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", false)
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 		if (!workspaceFolder) {
-			console.warn("No workspace folder found.")
+			logger.warn("No workspace folder found during activation")
 			return
 		}
+
+		logger.debug("Workspace folder detected", {
+			workspace: workspaceFolder.uri.fsPath,
+		})
 
 		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
 
 		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
 
+		logger.info("Sherlock extension activated")
 		capture({
 			event: "IDE-EXTENSION activated",
 			properties: {
@@ -55,6 +62,7 @@ export async function activate(
 
 		return { context }
 	} catch (error) {
+		logger.error("Activation failed", error)
 		handleError(error)
 		return
 	}
@@ -66,20 +74,47 @@ export async function main(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	fs: FileSystem
 }): Promise<void> {
-	if (state().projectsInWorkspace.length > 0) {
+	logger.info("Starting Sherlock main flow", {
+		workspace: args.workspaceFolder.uri.fsPath,
+	})
+
+	const currentState = safeState()
+
+	if (!currentState) {
+		logger.warn("State unavailable when main() executed; showing getting started view")
+		await gettingStartedView(args)
+		return
+	}
+
+	const projectsInWorkspace = currentState.projectsInWorkspace || []
+
+	logger.debug("Projects discovered", {
+		count: projectsInWorkspace.length,
+	})
+
+	if (projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
 		const closestProjectToWorkspace = await closestInlangProject({
 			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
-			projects: state().projectsInWorkspace,
+			projects: projectsInWorkspace,
+		})
+
+		const selectedProjectPath =
+			closestProjectToWorkspace?.projectPath || projectsInWorkspace[0]?.projectPath || ""
+
+		logger.info("Selecting project", {
+			selectedProjectPath,
+			closestMatchFound: Boolean(closestProjectToWorkspace),
+			availableProjects: projectsInWorkspace.map((project) => project.projectPath),
 		})
 
 		setState({
 			...state(),
-			selectedProjectPath:
-				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
+			selectedProjectPath,
 		})
 
 		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", true)
+		logger.debug("VS Code context updated for project availability")
 
 		// Recommendation Banner
 		await recommendationBannerView(args)
@@ -100,13 +135,17 @@ export async function main(args: {
 		// setupFileSystemWatcher(args)
 
 		// Set up direct message watcher as a fallback
+		logger.debug("Initializing direct message watcher")
 		setupDirectMessageWatcher({
 			context: args.context,
 			workspaceFolder: args.workspaceFolder,
 		})
 
+		logger.info("Sherlock main flow initialized")
+
 		return
 	} else {
+		logger.info("No projects in workspace; showing getting started view")
 		await gettingStartedView(args)
 	}
 }
@@ -116,11 +155,17 @@ async function registerExtensionComponents(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	fs: FileSystem
 }) {
+	const currentState = safeState()
+	if (!currentState?.project) {
+		logger.warn("registerExtensionComponents invoked before project loaded")
+		return
+	}
+
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
-	const ideExtension = (await state().project.plugins.get()).find(
+	const ideExtension = (await currentState.project.plugins.get()).find(
 		(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
 	)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
@@ -138,12 +183,19 @@ async function registerExtensionComponents(args: {
 	messagePreview(args)
 	// TODO: Replace by lix validation rules
 	linterDiagnostics(args)
+	logger.debug("Extension components registered")
 }
 
 async function handleInlangErrors() {
-	const inlangErrors = (await state().project.errors.get()) || []
+	const currentState = safeState()
+	if (!currentState?.project) {
+		logger.warn("handleInlangErrors invoked without a loaded project")
+		return
+	}
+
+	const inlangErrors = (await currentState.project.errors.get()) || []
 	if (inlangErrors.length > 0) {
-		console.error("Extension errors (Sherlock):", inlangErrors)
+		logger.error("Extension errors (Sherlock)", inlangErrors)
 	}
 }
 
@@ -161,25 +213,35 @@ async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 			projectPath: project,
 		}))
 
+		logger.info("Discovered inlang projects", {
+			workspace: args.workspaceFolder.uri.fsPath,
+			count: projectsList.length,
+		})
+
 		setState({
 			...state(),
 			projectsInWorkspace: projectsList,
 		})
 	} catch (error) {
+		logger.error("Failed to enumerate projects", error)
 		handleError(error)
 	}
 }
 
 export async function saveProject() {
 	try {
-		if (state().selectedProjectPath && state().project) {
+		const currentState = safeState()
+		if (currentState?.selectedProjectPath && currentState?.project) {
 			await saveProjectToDirectory({
-				fs: createFileSystemMapper(state().selectedProjectPath, fs),
-				project: state().project,
-				path: state().selectedProjectPath,
+				fs: createFileSystemMapper(currentState.selectedProjectPath, fs),
+				project: currentState.project,
+				path: currentState.selectedProjectPath,
 			})
+		} else {
+			logger.warn("saveProject invoked without an active project")
 		}
 	} catch (error) {
+		logger.error("Failed to save project", error)
 		handleError(error)
 	}
 }

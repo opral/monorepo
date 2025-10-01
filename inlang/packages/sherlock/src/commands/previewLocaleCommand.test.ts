@@ -13,9 +13,13 @@ vi.mock("../utilities/settings/index.js", () => ({ updateSetting: vi.fn() }))
 vi.mock("../utilities/settings/statusBar.js", () => ({
 	showStatusBar: vi.fn(),
 }))
-vi.mock("../utilities/state.js", () => ({
-	state: vi.fn(),
-}))
+vi.mock("../utilities/state.js", () => {
+	const stateFn = vi.fn()
+	return {
+		state: stateFn,
+		safeState: stateFn,
+	}
+})
 vi.mock("../configuration.js", () => ({
 	CONFIGURATION: {
 		EVENTS: {

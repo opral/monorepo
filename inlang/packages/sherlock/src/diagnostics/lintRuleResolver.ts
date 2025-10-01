@@ -6,8 +6,9 @@ import {
 	type LintResult,
 	identicalPattern,
 } from "../utilities/lint-rules/lintRules.js"
-import { state } from "../utilities/state.js"
+import { safeState } from "../utilities/state.js"
 import * as vscode from "vscode"
+import { logger } from "../utilities/logger.js"
 
 export interface LintRule {
 	name: string // The name of the lint rule (e.g., "missingMessage", "bundleWithoutMessageWithBaseLocale")
@@ -39,7 +40,13 @@ const customLintRules: Record<string, LintRule> = {
 }
 
 export async function resolveLintRules() {
-	const settings = await state().project.settings.get()
+	const currentState = safeState()
+	if (!currentState?.project) {
+		logger.warn("resolveLintRules invoked without a loaded project")
+		return []
+	}
+
+	const settings = await currentState.project.settings.get()
 	const lintRuleLevels = settings.messageLintRuleLevels || {}
 	const activeRules: LintRule[] = []
 
