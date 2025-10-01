@@ -17,14 +17,14 @@ export function CentralPanel() {
 						icon={FileText}
 						label="writing-style.md"
 						isActive={true}
-						variant="primary"
+						isFocused={true}
 						onClose={() => {}}
 					/>
 					<Panel.Tab
 						icon={FileText}
 						label="AGENTS.md"
 						isActive={false}
-						variant="primary"
+						isFocused={true}
 						onClose={() => {}}
 					/>
 				</Panel.TabBar>

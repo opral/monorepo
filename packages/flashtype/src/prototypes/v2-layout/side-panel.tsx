@@ -58,7 +58,7 @@ export function SidePanel({
 									icon={view.icon}
 									label={view.label}
 									isActive={isActive}
-									variant="default"
+									isFocused={false}
 									onClick={() => onSelectView(instance.instanceId)}
 									onClose={() => onRemoveView(instance.instanceId)}
 								/>

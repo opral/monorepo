@@ -1,0 +1,167 @@
+/**
+ * Based on the semantic color guidance from Subframe:
+ * https://www.subframe.com/blog/how-to-setup-semantic-tailwind-colors
+*/
+
+@theme {
+	/* Colors */
+	--color-brand-50: rgb(255, 247, 237);
+	--color-brand-100: rgb(255, 237, 213);
+	--color-brand-200: rgb(254, 215, 170);
+	--color-brand-300: rgb(253, 186, 116);
+	--color-brand-400: rgb(251, 146, 60);
+	--color-brand-500: rgb(249, 115, 22);
+	--color-brand-600: rgb(234, 88, 12);
+	--color-brand-700: rgb(194, 65, 12);
+	--color-brand-800: rgb(154, 52, 18);
+	--color-brand-900: rgb(124, 45, 18);
+	--color-neutral-0: rgb(255, 255, 255);
+	--color-neutral-50: rgb(250, 250, 250);
+	--color-neutral-100: rgb(244, 244, 245);
+	--color-neutral-200: rgb(228, 228, 231);
+	--color-neutral-300: rgb(212, 212, 216);
+	--color-neutral-400: rgb(161, 161, 170);
+	--color-neutral-500: rgb(113, 113, 122);
+	--color-neutral-600: rgb(82, 82, 91);
+	--color-neutral-700: rgb(63, 63, 70);
+	--color-neutral-800: rgb(39, 39, 42);
+	--color-neutral-900: rgb(24, 24, 27);
+	--color-neutral-950: rgb(9, 9, 11);
+	--color-error-50: rgb(254, 242, 242);
+	--color-error-100: rgb(254, 226, 226);
+	--color-error-200: rgb(254, 202, 202);
+	--color-error-300: rgb(252, 165, 165);
+	--color-error-400: rgb(248, 113, 113);
+	--color-error-500: rgb(239, 68, 68);
+	--color-error-600: rgb(220, 38, 38);
+	--color-error-700: rgb(185, 28, 28);
+	--color-error-800: rgb(153, 27, 27);
+	--color-error-900: rgb(127, 29, 29);
+	--color-warning-50: rgb(254, 252, 232);
+	--color-warning-100: rgb(254, 249, 195);
+	--color-warning-200: rgb(254, 240, 138);
+	--color-warning-300: rgb(253, 224, 71);
+	--color-warning-400: rgb(250, 204, 21);
+	--color-warning-500: rgb(234, 179, 8);
+	--color-warning-600: rgb(202, 138, 4);
+	--color-warning-700: rgb(161, 98, 7);
+	--color-warning-800: rgb(133, 77, 14);
+	--color-warning-900: rgb(113, 63, 18);
+	--color-success-50: rgb(240, 253, 244);
+	--color-success-100: rgb(220, 252, 231);
+	--color-success-200: rgb(187, 247, 208);
+	--color-success-300: rgb(134, 239, 172);
+	--color-success-400: rgb(74, 222, 128);
+	--color-success-500: rgb(34, 197, 94);
+	--color-success-600: rgb(22, 163, 74);
+	--color-success-700: rgb(21, 128, 61);
+	--color-success-800: rgb(22, 101, 52);
+	--color-success-900: rgb(20, 83, 45);
+	--color-brand-primary: rgb(234, 88, 12);
+	--color-default-font: rgb(24, 24, 27);
+	--color-subtext-color: rgb(113, 113, 122);
+	--color-neutral-border: rgb(228, 228, 231);
+	--color-white: rgb(255, 255, 255);
+	--color-default-background: rgb(255, 255, 255);
+
+	/* Fonts */
+	--text-caption: 12px;
+	--text-caption--font-weight: 400;
+	--text-caption--letter-spacing: 0em;
+	--text-caption--line-height: 16px;
+	--text-caption-bold: 12px;
+	--text-caption-bold--font-weight: 500;
+	--text-caption-bold--letter-spacing: 0em;
+	--text-caption-bold--line-height: 16px;
+	--text-body: 14px;
+	--text-body--font-weight: 400;
+	--text-body--letter-spacing: 0em;
+	--text-body--line-height: 20px;
+	--text-body-bold: 14px;
+	--text-body-bold--font-weight: 500;
+	--text-body-bold--letter-spacing: 0em;
+	--text-body-bold--line-height: 20px;
+	--text-heading-3: 16px;
+	--text-heading-3--font-weight: 500;
+	--text-heading-3--letter-spacing: 0em;
+	--text-heading-3--line-height: 20px;
+	--text-heading-2: 20px;
+	--text-heading-2--font-weight: 500;
+	--text-heading-2--letter-spacing: 0em;
+	--text-heading-2--line-height: 24px;
+	--text-heading-1: 30px;
+	--text-heading-1--font-weight: 500;
+	--text-heading-1--letter-spacing: 0em;
+	--text-heading-1--line-height: 36px;
+	--text-monospace-body: 14px;
+	--text-monospace-body--font-weight: 400;
+	--text-monospace-body--letter-spacing: 0em;
+	--text-monospace-body--line-height: 20px;
+
+	/* Font families */
+	--font-caption: Inter;
+	--font-caption-bold: Inter;
+	--font-body: Inter;
+	--font-body-bold: Inter;
+	--font-heading-3: Inter;
+	--font-heading-2: Inter;
+	--font-heading-1: Inter;
+	--font-monospace-body: monospace;
+
+	/* Box shadows */
+	--shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+	--shadow-default: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+	--shadow-md:
+		0px 4px 16px -2px rgba(0, 0, 0, 0.08), 0px 2px 4px -1px rgba(0, 0, 0, 0.08);
+	--shadow-lg:
+		0px 12px 32px -4px rgba(0, 0, 0, 0.08), 0px 4px 8px -2px rgba(0, 0, 0, 0.08);
+	--shadow-overlay:
+		0px 12px 32px -4px rgba(0, 0, 0, 0.08), 0px 4px 8px -2px rgba(0, 0, 0, 0.08);
+
+	/* Border radiuses */
+	--radius-sm: 2px;
+	--radius-md: 4px;
+	--radius-DEFAULT: 4px;
+	--radius-lg: 8px;
+	--radius-full: 9999px;
+
+	/* Spacing */
+	--spacing-112: 28rem;
+	--spacing-144: 36rem;
+	--spacing-192: 48rem;
+	--spacing-256: 64rem;
+	--spacing-320: 80rem;
+}
+
+/* Container */
+@utility container {
+	padding-left: 16px;
+	padding-right: 16px;
+
+	@media (width >= theme(--breakpoint-sm)) {
+		padding-left: calc((100vw + 16px - 640px) / 2);
+		padding-right: calc((100vw + 16px - 640px) / 2);
+	}
+
+	@media (width >= theme(--breakpoint-md)) {
+		padding-left: calc((100vw + 16px - 768px) / 2);
+		padding-right: calc((100vw + 16px - 768px) / 2);
+	}
+
+	@media (width >= theme(--breakpoint-lg)) {
+		padding-left: calc((100vw + 16px - 1024px) / 2);
+		padding-right: calc((100vw + 16px - 1024px) / 2);
+	}
+
+	@media (width >= theme(--breakpoint-xl)) {
+		padding-left: calc((100vw + 16px - 1280px) / 2);
+		padding-right: calc((100vw + 16px - 1280px) / 2);
+	}
+
+	@media (width >= theme(--breakpoint-2xl)) {
+		padding-left: calc((100vw + 16px - 1536px) / 2);
+		padding-right: calc((100vw + 16px - 1536px) / 2);
+	}
+}
+
+@custom-variant mobile (@media (max-width: 767px));

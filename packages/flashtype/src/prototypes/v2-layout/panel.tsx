@@ -18,7 +18,9 @@ interface PanelProps {
  */
 export function Panel({ children, className = "" }: PanelProps) {
 	return (
-		<div className={`flex min-h-0 flex-1 flex-col rounded-lg bg-white ${className}`}>
+		<div
+			className={`flex min-h-0 flex-1 flex-col rounded-lg bg-white ${className}`}
+		>
 			{children}
 		</div>
 	);
@@ -54,41 +56,40 @@ interface TabProps {
 	readonly icon: LucideIcon;
 	readonly label: string;
 	readonly isActive?: boolean;
+	readonly isFocused?: boolean;
 	readonly onClose?: () => void;
 	readonly onClick?: () => void;
-	readonly variant?: "default" | "primary";
 }
 
 Panel.Tab = function Tab({
 	icon: Icon,
 	label,
 	isActive = false,
+	isFocused = false,
 	onClose,
 	onClick,
-	variant = "default",
 }: TabProps) {
-	const isPrimary = variant === "primary";
+	const baseClasses =
+		"group flex items-center gap-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors";
 
-	const baseClasses = "group flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors";
-	const variantClasses = isPrimary
-		? isActive
-			? "bg-[#e3f2ff] text-[#3b82f6]"
-			: "text-[#6f7586] hover:bg-[#f5f5f5]"
-		: isActive
-			? "bg-[#f0f0f0] font-semibold text-[#212430]"
-			: "bg-transparent text-[#4d5361] hover:bg-[#f8f8f8]";
+	const stateClasses =
+		isActive && isFocused
+			? "bg-brand-50 text-neutral-950 border-brand-primary"
+			: isActive
+				? "bg-neutral-100 text-neutral-950 border-neutral-300"
+				: "bg-transparent text-neutral-600 border-transparent hover:bg-neutral-100 hover:border-neutral-200";
 
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className={`${baseClasses} ${variantClasses}`}
+			className={`${baseClasses} ${stateClasses}`}
 		>
 			<Icon className="h-3.5 w-3.5" />
 			<span>{label}</span>
 			{onClose && isActive && (
 				<X
-					className="h-3 w-3 opacity-60 hover:opacity-100"
+					className="h-3 w-3 text-neutral-400 hover:text-neutral-600"
 					onClick={(e) => {
 						e.stopPropagation();
 						onClose();
@@ -97,7 +98,7 @@ Panel.Tab = function Tab({
 			)}
 			{onClose && !isActive && (
 				<X
-					className="h-3 w-3 opacity-0 group-hover:opacity-60 hover:opacity-100"
+					className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-600"
 					onClick={(e) => {
 						e.stopPropagation();
 						onClose();
