@@ -67,44 +67,10 @@
 	--color-onsurface-primary: rgb(24, 24, 27);
 	--color-onsurface-secondary: rgb(94, 94, 104);
 	--color-onsurface-tertiary: rgb(161, 161, 170);
-	--color-stroke-100: rgb(228, 228, 231);
-	--color-stroke-200: rgb(244, 244, 245);
+	--color-stroke-100: rgb(244, 244, 245);
+	--color-stroke-200: rgb(228, 228, 231);
 	--color-link-primary: rgb(59, 130, 246);
 	--color-link-primary-hover: rgb(37, 99, 235);
-
-	/* Fonts */
-	--text-caption: 12px;
-	--text-caption--font-weight: 400;
-	--text-caption--letter-spacing: 0em;
-	--text-caption--line-height: 16px;
-	--text-caption-bold: 12px;
-	--text-caption-bold--font-weight: 500;
-	--text-caption-bold--letter-spacing: 0em;
-	--text-caption-bold--line-height: 16px;
-	--text-body: 14px;
-	--text-body--font-weight: 400;
-	--text-body--letter-spacing: 0em;
-	--text-body--line-height: 20px;
-	--text-body-bold: 14px;
-	--text-body-bold--font-weight: 500;
-	--text-body-bold--letter-spacing: 0em;
-	--text-body-bold--line-height: 20px;
-	--text-heading-3: 16px;
-	--text-heading-3--font-weight: 500;
-	--text-heading-3--letter-spacing: 0em;
-	--text-heading-3--line-height: 20px;
-	--text-heading-2: 20px;
-	--text-heading-2--font-weight: 500;
-	--text-heading-2--letter-spacing: 0em;
-	--text-heading-2--line-height: 24px;
-	--text-heading-1: 30px;
-	--text-heading-1--font-weight: 500;
-	--text-heading-1--letter-spacing: 0em;
-	--text-heading-1--line-height: 36px;
-	--text-monospace-body: 14px;
-	--text-monospace-body--font-weight: 400;
-	--text-monospace-body--letter-spacing: 0em;
-	--text-monospace-body--line-height: 20px;
 
 	/* Font families */
 	--font-caption: Inter;

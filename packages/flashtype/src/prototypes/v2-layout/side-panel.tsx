@@ -115,10 +115,10 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-			<Icon className="h-12 w-12 text-stroke-200" strokeWidth={1.5} />
+			<Icon className="h-12 w-12 text-onsurface-secondary" strokeWidth={1.5} />
 			<div className="space-y-1">
-				<div className="text-base font-medium text-onsurface-primary">{panelName} Panel</div>
-				<div className="text-sm text-onsurface-tertiary max-w-[200px]">
+				<div className="text-sm font-medium text-onsurface-primary">{panelName} Panel</div>
+				<div className="text-xs text-onsurface-secondary max-w-[200px]">
 					Add a new view or drag-n-drop a view from the other panels
 				</div>
 			</div>
