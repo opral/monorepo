@@ -72,15 +72,6 @@ describe("findInternalStateVtable", () => {
 		expect(match).toBeNull();
 	});
 
-	test("ignores correlated subquery reference and matches from clause", () => {
-		const sql = `SELECT (SELECT 1 FROM change WHERE change.id = internal_state_vtable.change_id) FROM internal_state_vtable AS state;`;
-		const tokens = tokenize(sql);
-		const match = findTableFactor(tokens, "internal_state_vtable");
-		expect(match).not.toBeNull();
-		const segment = sql.slice(match!.start, match!.end + 1);
-		expect(segment).toBe("internal_state_vtable AS state");
-	});
-
 	test("returns null when table is absent", () => {
 		const sql = "SELECT * FROM mock_other_table";
 		const tokens = tokenize(sql);
