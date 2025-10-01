@@ -1,5 +1,9 @@
 # inlang-vs-code-extension
 
+## 2.1.1
+
+Re-release of 2.0.17 with a hotfix for https://github.com/opral/inlang-sherlock/issues/188
+
 ## 2.0.17
 
 ### Patch Changes
