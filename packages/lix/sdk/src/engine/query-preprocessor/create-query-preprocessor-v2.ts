@@ -27,13 +27,11 @@ export async function createQueryPreprocessorV2(
 ): Promise<QueryPreprocessorStage> {
 	return (initial: QueryPreprocessorResult): QueryPreprocessorResult => {
 		let currentSql = initial.sql;
+		let expandedSql = initial.expandedSql;
 		let tokens = tokenize(currentSql);
 		const kind = detectStatementKind(tokens);
 		if (kind !== "select") {
-			return {
-				sql: currentSql,
-				parameters: initial.parameters,
-			};
+			return initial;
 		}
 
 		{
@@ -44,6 +42,9 @@ export async function createQueryPreprocessorV2(
 				runtimeCacheRef: engine.runtimeCacheRef,
 			});
 			currentSql = expansion.sql;
+			if (expansion.expanded) {
+				expandedSql = currentSql;
+			}
 
 			tokens = tokenize(currentSql);
 		}
@@ -55,12 +56,11 @@ export async function createQueryPreprocessorV2(
 
 		currentSql = rewriteSql(currentSql, { tokens });
 
-		const context: QueryPreprocessorResult = {
+		return {
 			sql: currentSql,
 			parameters: initial.parameters,
+			expandedSql,
 		};
-
-		return context;
 	};
 }
 

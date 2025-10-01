@@ -68,6 +68,7 @@ export const createInternalStateVtablePreprocessor: QueryPreprocessor =
 			return {
 				sql,
 				parameters: context.parameters,
+				expandedSql: context.expandedSql,
 			};
 		};
 	};

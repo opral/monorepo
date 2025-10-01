@@ -4,12 +4,12 @@ import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
 export type QueryPreprocessorResult = {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
+	expandedSql?: string;
 };
 
-export type QueryPreprocessorStage = (args: {
-	sql: string;
-	parameters: ReadonlyArray<unknown>;
-}) => QueryPreprocessorResult;
+export type QueryPreprocessorStage = (
+	args: QueryPreprocessorResult
+) => QueryPreprocessorResult;
 
 export type QueryPreprocessor = (args: {
 	engine: Pick<
@@ -46,6 +46,7 @@ export async function createQueryPreprocessor(
 		let context: QueryPreprocessorResult = {
 			sql: rewriteSql(initialContext.sql),
 			parameters: initialContext.parameters,
+			expandedSql: initialContext.expandedSql,
 		};
 		for (const stage of stages) {
 			context = stage(context);

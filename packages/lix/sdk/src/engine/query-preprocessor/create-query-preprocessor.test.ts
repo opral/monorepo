@@ -27,6 +27,7 @@ describe("createQueryPreprocessor", () => {
 		const stageBuilder: QueryPreprocessor = async () => (context) => ({
 			sql: `${context.sql} /* stage */`,
 			parameters: context.parameters,
+			expandedSql: context.expandedSql,
 		});
 
 		const stage = await createQueryPreprocessor(createEngineStub(), [

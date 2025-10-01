@@ -62,9 +62,10 @@ describe("createQueryPreprocessorV2", () => {
 			parameters: [],
 		});
 
-		expect(result.sql).not.toMatch(/FROM\s+internal_state_view\b/i);
-		expect(result.sql).toContain("WITH RECURSIVE");
+		expect(result.expandedSql).toBeDefined();
+		expect(result.expandedSql).not.toMatch(/FROM\s+internal_state_view\b/i);
 		expect(result.sql).toContain("internal_transaction_state");
+		expect(result.sql).not.toMatch(/FROM\s+internal_state_view\b/i);
 
 		await lix.close();
 	});
@@ -106,8 +107,8 @@ describe("createQueryPreprocessorV2", () => {
 			parameters: ["schema", "1.0", 1],
 		});
 
-		expect(result.sql).not.toMatch(/FROM\s+"stored_schema"/i);
 		expect(result.sql).toContain("WITH RECURSIVE");
+		expect(result.sql).not.toMatch(/FROM\s+"stored_schema"/i);
 
 		const { rows } = lix.engine!.executeSync({
 			sql: result.sql,

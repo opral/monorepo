@@ -24,7 +24,15 @@ interface NormalizedView {
 
 const lower = (value: string): string => value.toLowerCase();
 
+const normalizeIdentifier = (value: string): string => {
+	if (value.startsWith('"') && value.endsWith('"')) {
+		return value.slice(1, -1).replace(/""/g, "").toLowerCase();
+	}
+	return value.toLowerCase();
+};
+
 type CacheEntry = {
+	source: Map<string, string>;
 	views: Map<string, NormalizedView>;
 	expandedViews: Map<string, string>;
 	statementCache: Map<string, ExpandQueryResult>;
@@ -71,9 +79,9 @@ function getOrCreateCacheEntry(
 	runtimeCacheRef: object,
 	views: Map<string, string>
 ): CacheEntry {
-	let entry = globalViewCache.get(runtimeCacheRef);
-	if (entry) {
-		return entry;
+	const cached = globalViewCache.get(runtimeCacheRef);
+	if (cached && cached.source === views) {
+		return cached;
 	}
 
 	const normalized = new Map<string, NormalizedView>();
@@ -81,7 +89,8 @@ function getOrCreateCacheEntry(
 		normalized.set(lower(name), { name, sql });
 	}
 
-	entry = {
+	const entry: CacheEntry = {
+		source: views,
 		views: normalized,
 		expandedViews: new Map(),
 		statementCache: new Map(),
@@ -207,7 +216,7 @@ function collectCandidateViewKeys(
 	for (const token of tokens) {
 		if (!token) continue;
 		if (token.tokenType === Ident || token.tokenType === QIdent) {
-			const key = lower(token.image);
+			const key = normalizeIdentifier(token.image);
 			if (normalizedViews.has(key)) {
 				keys.add(key);
 			}
