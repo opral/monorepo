@@ -31,6 +31,7 @@ export function createMessageWebviewProvider(args: {
 	let isLoading = true
 	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
+	let lastDocumentUri: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
 	// Add a flag to track subscription status
 	let isSubscribing = false
@@ -193,13 +194,17 @@ export function createMessageWebviewProvider(args: {
 	const debounceUpdate = () => {
 		const activeEditor = vscode.window.activeTextEditor
 		const fileContent = activeEditor ? activeEditor.document.getText() : ""
+		const documentUri = activeEditor?.document.uri.toString()
 		if (debounceTimer) {
 			clearTimeout(debounceTimer)
 		}
 		debounceTimer = setTimeout(() => {
 			if (activeFileContent !== fileContent) {
-				logger.debug("File content changed in editor, updating view")
+				if (documentUri && documentUri === lastDocumentUri) {
+					logger.debug("File content changed in editor, updating view")
+				}
 				activeFileContent = fileContent
+				lastDocumentUri = documentUri
 				
 				// First update the webview content to reflect current file
 				updateWebviewContent()
