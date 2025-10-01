@@ -12,8 +12,6 @@ import {
 	type InlangProject,
 } from "@inlang/sdk"
 import { pollQuery } from "../polling/pollQuery.js"
-import { saveProject } from "../../main.js"
-import { msg } from "./msg.js"
 import { logger } from "../logger.js"
 
 // Store previous subscription state
@@ -114,7 +112,7 @@ export function createMessageWebviewProvider(args: {
 			logger.debug("Forcing message view refresh")
 			try {
 				const result = await selectBundleNested(project.db).execute()
-				
+
 				// Only update if bundles actually changed
 				if (!isEqual(previousBundles, result)) {
 					logger.debug("Bundles refreshed", {
@@ -131,18 +129,6 @@ export function createMessageWebviewProvider(args: {
 		}
 	}
 
-	const persistMessages = async () => {
-		const workspaceFolder = vscode.workspace.workspaceFolders![0]
-		if (workspaceFolder) {
-			try {
-				await saveProject()
-			} catch (error) {
-				logger.error("Failed to save project", error)
-				msg(`Failed to save project. ${String(error)}`, "error")
-			}
-		}
-	}
-	
 	// Forcefully refresh message data
 	const forceMessageRefresh = async () => {
 		// Prevent recursive calls
@@ -150,7 +136,7 @@ export function createMessageWebviewProvider(args: {
 			logger.debug("Already processing an update, skipping")
 			return
 		}
-		
+
 		isProcessingUpdate = true
 		logger.debug("Forcing immediate message refresh")
 		const project = safeState()?.project as InlangProject | undefined
@@ -159,26 +145,26 @@ export function createMessageWebviewProvider(args: {
 			isProcessingUpdate = false
 			return
 		}
-		
+
 		try {
 			// Reset isSubscribing flag to ensure we can process the request
 			isSubscribing = false
-			
+
 			// Bypass throttling for this critical update
 			lastUpdateTime = 0
-			
+
 			// Force a fresh query
 			const result = await selectBundleNested(project.db).execute()
-			
+
 			// Always update regardless of whether it appears changed
 			logger.debug("Forced refresh completed", {
 				count: result.length,
 			})
 			// Force a complete refresh by explicitly changing the reference
-			previousBundles = JSON.parse(JSON.stringify(result)) 
+			previousBundles = JSON.parse(JSON.stringify(result))
 			bundles = [...result]
 			isLoading = false
-			
+
 			// Update the view immediately without throttling
 			updateWebviewContent()
 		} catch (error) {
@@ -205,10 +191,10 @@ export function createMessageWebviewProvider(args: {
 				}
 				activeFileContent = fileContent
 				lastDocumentUri = documentUri
-				
+
 				// First update the webview content to reflect current file
 				updateWebviewContent()
-				
+
 				// Then trigger a data refresh to ensure latest translations are shown
 				// This is important when editing translation files directly
 				updateMessages()
@@ -353,7 +339,6 @@ export function createMessageWebviewProvider(args: {
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
 					logger.debug("ON_DID_CREATE_MESSAGE event triggered")
 					updateMessages()
-					persistMessages()
 				})
 			)
 
@@ -361,22 +346,21 @@ export function createMessageWebviewProvider(args: {
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
 					logger.debug("ON_DID_EXTRACT_MESSAGE event triggered")
 					updateMessages()
-					persistMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
-				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
-					logger.debug("ON_DID_EDIT_MESSAGE event triggered - forcing immediate refresh")
+				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event((payload) => {
+					if (payload?.origin && payload.origin.startsWith("editor")) {
+						logger.debug(
+							"ON_DID_EDIT_MESSAGE event originated from editor; skipping immediate refresh",
+							payload
+						)
+						return
+					}
+					logger.debug("ON_DID_EDIT_MESSAGE event triggered - forcing immediate refresh", payload)
 					// Use our special forced refresh that bypasses throttling and always updates
 					forceMessageRefresh()
-					
-					// Don't automatically update the editor view anymore
-					// to prevent overriding user edits
-					logger.debug("Not automatically updating editor view")
-					
-					// Don't save here as this might have been triggered by a file system watcher
-					// preventing update loops
 				})
 			)
 
@@ -634,7 +618,7 @@ export async function getTranslationsTableHtml(args: {
 	const activeProject = safeState()?.project
 	if (!activeProject) {
 		logger.warn("Unable to render translations table because project is undefined")
-		return "<div class=\"section\"><span class=\"message\">Project is still loading...</span></div>"
+		return '<div class="section"><span class="message">Project is still loading...</span></div>'
 	}
 
 	const settings = await activeProject.settings.get()

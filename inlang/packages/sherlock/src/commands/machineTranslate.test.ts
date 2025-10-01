@@ -184,6 +184,8 @@ describe("machineTranslateMessageCommand", () => {
 			targetLocales: ["es"],
 		})
 
-		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
+		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalledWith({
+			origin: "command:machineTranslate",
+		})
 	})
 })

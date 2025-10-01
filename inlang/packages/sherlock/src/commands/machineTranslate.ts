@@ -66,7 +66,7 @@ export const machineTranslateMessageCommand = {
 		}
 
 		// Emit event to notify that messages were edited
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "command:machineTranslate" })
 
 		// Return success message
 		return msg("Messages translated.")

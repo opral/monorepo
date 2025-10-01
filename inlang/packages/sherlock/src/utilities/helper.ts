@@ -3,10 +3,9 @@ import { safeState } from "./state.js"
 import { logger } from "./logger.js"
 
 export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined> =>
-	(
-		await (safeState()?.project?.plugins.get() ?? Promise.resolve([]))
-	).find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])
-		?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
+	(await (safeState()?.project?.plugins.get() ?? Promise.resolve([]))).find(
+		(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
+	)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 /**
  *
