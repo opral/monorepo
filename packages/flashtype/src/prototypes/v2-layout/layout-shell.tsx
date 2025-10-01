@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { PanelColumn } from "./panel-column";
+import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
@@ -53,7 +53,7 @@ export function V2LayoutShell() {
 		<div className="flex min-h-screen flex-col bg-[#eff0f4] text-[#212430]">
 			<TopBar />
 			<div className="flex min-h-0 flex-1 gap-2 px-2">
-				<PanelColumn
+				<SidePanel
 					side="left"
 					title="Navigator"
 					panel={hydratedLeft}
@@ -86,7 +86,7 @@ export function V2LayoutShell() {
 					}
 				/>
 				<CentralPanel />
-				<PanelColumn
+				<SidePanel
 					side="right"
 					title="Secondary"
 					panel={hydratedRight}

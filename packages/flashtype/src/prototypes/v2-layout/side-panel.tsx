@@ -10,7 +10,7 @@ import type { PanelSide, PanelState, ViewId } from "./types";
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
 
-interface PanelColumnProps {
+interface SidePanelProps {
 	readonly side: PanelSide;
 	readonly title: string;
 	readonly panel: PanelState;
@@ -20,13 +20,13 @@ interface PanelColumnProps {
 }
 
 /**
- * Renders a single tool island with its nav and active content.
+ * Renders a side panel with its nav and active content.
  *
  * @example
- * <PanelColumn side="left" title="Left" panel={panelState} ... />
+ * <SidePanel side="left" title="Left" panel={panelState} ... />
  */
 
-export function PanelColumn({
+export function SidePanel({
 	side,
 	title,
 	panel,
