@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { state } from "../utilities/state.js"
+import { safeState } from "../utilities/state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
@@ -7,6 +7,7 @@ import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCh
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
 import { getExtensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
+import { logger } from "../utilities/logger.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -29,7 +30,12 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const baseLocale = (await state().project.settings.get()).baseLocale
+		const currentState = safeState()
+		if (!currentState?.project) {
+			logger.warn("Skipping message preview update because no project is loaded")
+			return
+		}
+		const baseLocale = (await currentState.project.settings.get()).baseLocale
 		const extensionApi = await getExtensionApi()
 
 		if (!extensionApi) return

@@ -28,18 +28,21 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../state.js", () => ({
-	state: () => ({
-		selectedProjectPath: "Users/username/happy-elephant.inlang",
-		project: {
-			settings: {
-				get: async () => vi.fn().mockReturnValue({}),
-			},
-			plugins: {
-				get: async () => vi.fn().mockReturnValue({}),
-			},
+const mockStateValue = {
+	selectedProjectPath: "Users/username/happy-elephant.inlang",
+	project: {
+		settings: {
+			get: async () => vi.fn().mockReturnValue({}),
 		},
-	}),
+		plugins: {
+			get: async () => vi.fn().mockReturnValue({}),
+		},
+	},
+}
+
+vi.mock("../state.js", () => ({
+	state: () => mockStateValue,
+	safeState: () => mockStateValue,
 }))
 
 describe("settingsPanel", () => {

@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { isEqual } from "lodash-es"
-import { state } from "../state.js"
+import { safeState } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
@@ -14,6 +14,7 @@ import {
 import { pollQuery } from "../polling/pollQuery.js"
 import { saveProject } from "../../main.js"
 import { msg } from "./msg.js"
+import { logger } from "../logger.js"
 
 // Store previous subscription state
 let subscription: { unsubscribe: () => void } | undefined
@@ -37,9 +38,11 @@ export function createMessageWebviewProvider(args: {
 	let isProcessingUpdate = false
 
 	const updateMessages = async () => {
-		console.log("Message view update requested")
-		const project = state().project as InlangProject | undefined
+		logger.debug("Message view update requested")
+		const currentState = safeState()
+		const project = currentState?.project as InlangProject | undefined
 		if (!project) {
+			logger.warn("Skipping message update because no project is loaded")
 			isLoading = true
 			bundles = undefined
 			updateWebviewContent()
@@ -49,20 +52,23 @@ export function createMessageWebviewProvider(args: {
 		// Prevent updates that are too frequent
 		const now = Date.now()
 		if (now - lastUpdateTime < UPDATE_THROTTLE_MS) {
-			console.log("Throttling message view update - too frequent")
+			logger.debug("Throttling message view update - too frequent")
 			return
 		}
 		lastUpdateTime = now
 
 		// Prevent multiple subscriptions from running simultaneously
 		if (isSubscribing) {
-			console.log("Skipping message view update - already subscribing")
+			logger.debug("Skipping message view update - already subscribing")
 			return
 		}
 
 		// Ensure we are only subscribing when the project actually changes
-		if (subscribedToProjectPath !== state().selectedProjectPath) {
-			console.log(`Subscribing to new project: ${state().selectedProjectPath}`)
+		const selectedProjectPath = currentState?.selectedProjectPath
+		if (subscribedToProjectPath !== selectedProjectPath) {
+			logger.debug("Subscribing to new project", {
+				selectedProjectPath,
+			})
 			isSubscribing = true
 
 			// Clear existing subscription safely
@@ -77,12 +83,12 @@ export function createMessageWebviewProvider(args: {
 			isLoading = true
 			updateWebviewContent()
 
-			subscribedToProjectPath = state().selectedProjectPath
+			subscribedToProjectPath = selectedProjectPath ?? ""
 
 			subscription = pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe(
 				(result) => {
 					if (result instanceof Error) {
-						console.error("Error in subscription:", result)
+						logger.error("Error in subscription", result)
 						isSubscribing = false
 						return
 					}
@@ -91,7 +97,9 @@ export function createMessageWebviewProvider(args: {
 
 					// Only update if bundles actually changed
 					if (!isEqual(previousBundles, newBundles)) {
-						console.log(`Bundles updated: ${newBundles.length} messages`)
+						logger.debug("Bundles updated", {
+							count: newBundles.length,
+						})
 						previousBundles = [...newBundles]
 						bundles = newBundles
 						isLoading = false
@@ -102,20 +110,22 @@ export function createMessageWebviewProvider(args: {
 			)
 		} else {
 			// Force a one-time refresh of data if the project is the same
-			console.log("Forcing message view refresh")
+			logger.debug("Forcing message view refresh")
 			try {
 				const result = await selectBundleNested(project.db).execute()
 				
 				// Only update if bundles actually changed
 				if (!isEqual(previousBundles, result)) {
-					console.log(`Bundles refreshed: ${result.length} messages`)
+					logger.debug("Bundles refreshed", {
+						count: result.length,
+					})
 					previousBundles = [...result]
 					bundles = result
 					isLoading = false
 					throttledUpdateWebviewContent()
 				}
 			} catch (error) {
-				console.error("Error refreshing messages:", error)
+				logger.error("Error refreshing messages", error)
 			}
 		}
 	}
@@ -126,7 +136,7 @@ export function createMessageWebviewProvider(args: {
 			try {
 				await saveProject()
 			} catch (error) {
-				console.error("Failed to save project", error)
+				logger.error("Failed to save project", error)
 				msg(`Failed to save project. ${String(error)}`, "error")
 			}
 		}
@@ -136,14 +146,15 @@ export function createMessageWebviewProvider(args: {
 	const forceMessageRefresh = async () => {
 		// Prevent recursive calls
 		if (isProcessingUpdate) {
-			console.log("Already processing an update, skipping")
+			logger.debug("Already processing an update, skipping")
 			return
 		}
 		
 		isProcessingUpdate = true
-		console.log("Forcing immediate message refresh")
-		const project = state().project as InlangProject | undefined
+		logger.debug("Forcing immediate message refresh")
+		const project = safeState()?.project as InlangProject | undefined
 		if (!project) {
+			logger.warn("Cannot force refresh when no project is loaded")
 			isProcessingUpdate = false
 			return
 		}
@@ -159,7 +170,9 @@ export function createMessageWebviewProvider(args: {
 			const result = await selectBundleNested(project.db).execute()
 			
 			// Always update regardless of whether it appears changed
-			console.log(`Forced refresh: ${result.length} messages loaded`)
+			logger.debug("Forced refresh completed", {
+				count: result.length,
+			})
 			// Force a complete refresh by explicitly changing the reference
 			previousBundles = JSON.parse(JSON.stringify(result)) 
 			bundles = [...result]
@@ -168,7 +181,7 @@ export function createMessageWebviewProvider(args: {
 			// Update the view immediately without throttling
 			updateWebviewContent()
 		} catch (error) {
-			console.error("Error during forced message refresh:", error)
+			logger.error("Error during forced message refresh", error)
 		} finally {
 			// Allow future updates again
 			setTimeout(() => {
@@ -185,7 +198,7 @@ export function createMessageWebviewProvider(args: {
 		}
 		debounceTimer = setTimeout(() => {
 			if (activeFileContent !== fileContent) {
-				console.log("File content changed in editor, updating view")
+				logger.debug("File content changed in editor, updating view")
 				activeFileContent = fileContent
 				
 				// First update the webview content to reflect current file
@@ -201,7 +214,15 @@ export function createMessageWebviewProvider(args: {
 	const updateWebviewContent = async () => {
 		const activeEditor = vscode.window.activeTextEditor
 		const fileContent = activeEditor ? activeEditor.document.getText() : ""
-		const ideExtension = (await state().project.plugins.get()).find(
+		const activeProject = safeState()?.project
+		if (!activeProject) {
+			logger.warn("Cannot update webview because project is undefined")
+			bundles = undefined
+			isLoading = true
+			return
+		}
+
+		const ideExtension = (await activeProject.plugins.get()).find(
 			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
 		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
@@ -218,7 +239,7 @@ export function createMessageWebviewProvider(args: {
 			matchedBundles.map(async (bundle) => {
 				// @ts-ignore TODO: Introduce deprecation message for messageId
 				bundle.bundleId = bundle.bundleId || bundle.messageId
-				const bundleData = await selectBundleNested(state().project.db)
+				const bundleData = await selectBundleNested(activeProject.db)
 					.where("id", "=", bundle.bundleId)
 					.executeTakeFirst()
 				return bundleData
@@ -325,7 +346,7 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
-					console.log("ON_DID_CREATE_MESSAGE event triggered")
+					logger.debug("ON_DID_CREATE_MESSAGE event triggered")
 					updateMessages()
 					persistMessages()
 				})
@@ -333,7 +354,7 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
-					console.log("ON_DID_EXTRACT_MESSAGE event triggered")
+					logger.debug("ON_DID_EXTRACT_MESSAGE event triggered")
 					updateMessages()
 					persistMessages()
 				})
@@ -341,13 +362,13 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
-					console.log("ON_DID_EDIT_MESSAGE event triggered - forcing immediate refresh")
+					logger.debug("ON_DID_EDIT_MESSAGE event triggered - forcing immediate refresh")
 					// Use our special forced refresh that bypasses throttling and always updates
 					forceMessageRefresh()
 					
 					// Don't automatically update the editor view anymore
 					// to prevent overriding user edits
-					console.log("Not automatically updating editor view")
+					logger.debug("Not automatically updating editor view")
 					
 					// Don't save here as this might have been triggered by a file system watcher
 					// preventing update loops
@@ -356,14 +377,14 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event(() => {
-					console.log("ON_DID_PROJECT_TREE_VIEW_CHANGE event triggered")
+					logger.debug("ON_DID_PROJECT_TREE_VIEW_CHANGE event triggered")
 					updateMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.event(() => {
-					console.log("ON_DID_SETTINGS_VIEW_CHANGE event triggered")
+					logger.debug("ON_DID_SETTINGS_VIEW_CHANGE event triggered")
 					updateMessages()
 				})
 			)
@@ -394,7 +415,12 @@ export async function createMessageHtml(args: {
 	})
 
 	// Find the relative path from the workspace/git root
-	const relativeProjectPathFromWorkspace = state().selectedProjectPath.replace(
+	const activeState = safeState()
+	const selectedProjectPath = activeState?.selectedProjectPath ?? ""
+	if (!selectedProjectPath) {
+		logger.warn("Unable to determine selected project path when rendering message HTML")
+	}
+	const relativeProjectPathFromWorkspace = selectedProjectPath.replace(
 		args.workspaceFolder.uri.fsPath,
 		""
 	)
@@ -443,7 +469,7 @@ export function createMessagesLoadingHtml(): string {
 export function getHtml(args: { mainContent: string; webview: vscode.Webview }): string {
 	const context = vscode.extensions.getExtension("inlang.vs-code-extension")?.exports.context
 	if (!context) {
-		console.error("Extension context is not available.")
+		logger.error("Extension context is not available.")
 		return ""
 	}
 
@@ -600,7 +626,13 @@ export async function getTranslationsTableHtml(args: {
 	bundle: BundleNested
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<string> {
-	const settings = await state().project.settings.get()
+	const activeProject = safeState()?.project
+	if (!activeProject) {
+		logger.warn("Unable to render translations table because project is undefined")
+		return "<div class=\"section\"><span class=\"message\">Project is still loading...</span></div>"
+	}
+
+	const settings = await activeProject.settings.get()
 	const configuredLocales = settings.locales
 	const contextTableRows = configuredLocales.flatMap((locale) => {
 		const message = args.bundle.messages.find((m) => m.locale === locale)

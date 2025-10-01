@@ -1,8 +1,11 @@
 import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk"
-import { state } from "./state.js"
+import { safeState } from "./state.js"
+import { logger } from "./logger.js"
 
 export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined> =>
-	(await state().project.plugins.get()).find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])
+	(
+		await (safeState()?.project?.plugins.get() ?? Promise.resolve([]))
+	).find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])
 		?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 /**
@@ -11,7 +14,12 @@ export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined>
  * Not needed anymore but left in to reduce refactoring https://github.com/opral/monorepo/pull/3137
  */
 export const getSelectedBundleByBundleIdOrAlias = async (bundleIdOrAlias: string) => {
-	return await selectBundleNested(state().project.db)
+	const activeProject = safeState()?.project
+	if (!activeProject) {
+		logger.warn("getSelectedBundleByBundleIdOrAlias called without an active project")
+		return undefined
+	}
+	return await selectBundleNested(activeProject.db)
 		.where("bundle.id", "=", bundleIdOrAlias)
 		.executeTakeFirst()
 }
