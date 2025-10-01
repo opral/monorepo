@@ -9,6 +9,7 @@ type ExecuteSyncFn = (args: {
 export async function createExecuteSync(args: {
 	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
 }): Promise<ExecuteSyncFn> {
+	let executeSyncImpl: ExecuteSyncFn | null = null;
 	const preprocessorEngine = {
 		...args.engine,
 		executeSync: ({
@@ -18,15 +19,10 @@ export async function createExecuteSync(args: {
 			sql: string;
 			parameters?: Readonly<unknown[]>;
 		}) => {
-			const columnNames: string[] = [];
-			const rows = args.engine.sqlite.exec({
-				sql,
-				bind: (parameters as any[]) ?? [],
-				returnValue: "resultRows",
-				rowMode: "object",
-				columnNames,
-			});
-			return { rows };
+			if (!executeSyncImpl) {
+				throw new Error("executeSync called before initialisation");
+			}
+			return executeSyncImpl({ sql, parameters });
 		},
 	} as const;
 
@@ -62,5 +58,7 @@ export async function createExecuteSync(args: {
 			throw enriched;
 		}
 	};
+
+	executeSyncImpl = executeSyncFn;
 	return executeSyncFn;
 }

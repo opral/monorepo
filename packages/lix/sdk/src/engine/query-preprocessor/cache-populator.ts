@@ -12,6 +12,29 @@ export interface CachePopulationArgs {
 	shape: Shape;
 }
 
+// Prevent re-entrancy when the stale-flag probe performs its own state_all read.
+// Without this guard, ensureFreshStateCache → isStaleStateCache → SELECT state_all
+// would recurse into ensureFreshStateCache again and loop forever.
+const guardDepth = new WeakMap<object, number>();
+
+function enterGuard(token: object): boolean {
+	const depth = guardDepth.get(token) ?? 0;
+	guardDepth.set(token, depth + 1);
+	return depth === 0;
+}
+
+function exitGuard(token: object): void {
+	const depth = guardDepth.get(token);
+	if (depth === undefined) {
+		return;
+	}
+	if (depth <= 1) {
+		guardDepth.delete(token);
+		return;
+	}
+	guardDepth.set(token, depth - 1);
+}
+
 /**
  * Ensures the state cache remains fresh before executing a rewritten query.
  *
@@ -23,21 +46,30 @@ export interface CachePopulationArgs {
  * ensureStateCacheFresh({ engine, hints: { versionId: "global" } });
  */
 export function ensureFreshStateCache(args: CachePopulationArgs): void {
-	if (!hasInternalStateVtable(args.engine)) {
+	const token = args.engine.runtimeCacheRef;
+	if (!enterGuard(token)) {
+		exitGuard(token);
 		return;
 	}
+	try {
+		if (!hasInternalStateVtable(args.engine)) {
+			return;
+		}
 
-	const needsRefresh = safeIsStaleStateCache(args.engine);
-	if (!needsRefresh) {
-		return;
+		const needsRefresh = safeIsStaleStateCache(args.engine);
+		if (!needsRefresh) {
+			return;
+		}
+
+		const versionId =
+			args.shape.versionId.kind === "literal"
+				? args.shape.versionId.value
+				: undefined;
+
+		safePopulateStateCache(args.engine, versionId);
+	} finally {
+		exitGuard(token);
 	}
-
-	const versionId =
-		args.shape.versionId.kind === "literal"
-			? args.shape.versionId.value
-			: undefined;
-
-	safePopulateStateCache(args.engine, versionId);
 }
 
 function hasInternalStateVtable(
