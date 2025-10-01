@@ -1,6 +1,5 @@
 import type { LixEngine } from "./boot.js";
-import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
-import { createInternalStateVtablePreprocessor } from "./query-preprocessor/internal-state-vtable.js";
+import { createQueryPreprocessorV2 } from "./query-preprocessor/create-query-preprocessor-v2.js";
 
 type ExecuteSyncFn = (args: {
 	sql: string;
@@ -31,22 +30,20 @@ export async function createExecuteSync(args: {
 		},
 	} as const;
 
-	// const preprocess = await createQueryPreprocessor(preprocessorEngine, [
-	// 	// createInternalStateVtablePreprocessor,
-	// ]);
+	const preprocess = await createQueryPreprocessorV2(preprocessorEngine);
 
 	const executeSyncFn: ExecuteSyncFn = (args2: {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
 	}) => {
-		// const preprocessed = preprocess({
-		// 	sql: args2.sql,
-		// 	parameters: args2.parameters ?? [],
-		// });
+		const preprocessed = preprocess({
+			sql: args2.sql,
+			parameters: args2.parameters ?? [],
+		});
 		const columnNames: string[] = [];
 		const rows = args.engine.sqlite.exec({
-			sql: args2.sql,
-			bind: args2.parameters as any[],
+			sql: preprocessed.sql,
+			bind: preprocessed.parameters as any[],
 			returnValue: "resultRows",
 			rowMode: "object",
 			columnNames,

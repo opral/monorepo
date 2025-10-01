@@ -11,9 +11,9 @@ describe("createQueryPreprocessorV2", () => {
 
 	test("rewrites internal_state_vtable queries using Chevrotain pipeline", async () => {
 		const lix = await openLix({});
-		const stage = await createQueryPreprocessorV2(lix.engine!);
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
 
-		const result = stage({
+		const result = preprocess({
 			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
 			parameters: [],
 		});
@@ -33,9 +33,9 @@ describe("createQueryPreprocessorV2", () => {
 
 		markStateCacheAsStale({ engine: lix.engine! });
 
-		const stage = await createQueryPreprocessorV2(lix.engine!);
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
 
-		stage({
+		preprocess({
 			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
 			parameters: [],
 		});
@@ -55,9 +55,9 @@ describe("createQueryPreprocessorV2", () => {
 			returnValue: "resultRows",
 		});
 
-		const stage = await createQueryPreprocessorV2(lix.engine!);
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
 
-		const result = stage({
+		const result = preprocess({
 			sql: "SELECT * FROM internal_state_view",
 			parameters: [],
 		});
@@ -66,6 +66,32 @@ describe("createQueryPreprocessorV2", () => {
 		expect(result.sql).toContain("WITH RECURSIVE");
 		expect(result.sql).toContain("internal_transaction_state");
 
+		await lix.close();
+	});
+
+	test("leaves non-select statements untouched", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		const sql =
+			"DELETE FROM internal_state_vtable WHERE entity_id = 'mock' AND schema_key = 'mock_schema'";
+
+		const result = preprocess({ sql, parameters: [] });
+
+		expect(result.sql).toBe(sql);
+		await lix.close();
+	});
+
+	test("skips WITH ... DELETE statements", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		const sql = `WITH target AS (
+			SELECT entity_id FROM internal_state_vtable
+		)
+		DELETE FROM internal_state_vtable WHERE entity_id IN (SELECT entity_id FROM target)`;
+
+		const result = preprocess({ sql, parameters: [] });
+
+		expect(result.sql).toBe(sql);
 		await lix.close();
 	});
 });

@@ -115,6 +115,9 @@ export const NOT: TokenType = keyword("NOT");
 export const NULL: TokenType = keyword("NULL");
 export const CAST: TokenType = keyword("CAST");
 export const WITH: TokenType = keyword("WITH");
+export const INSERT: TokenType = keyword("INSERT");
+export const UPDATE: TokenType = keyword("UPDATE");
+export const DELETE: TokenType = keyword("DELETE");
 
 const allTokens: TokenType[] = [
 	WhiteSpace,
@@ -152,6 +155,9 @@ const allTokens: TokenType[] = [
 	NULL,
 	CAST,
 	WITH,
+	INSERT,
+	UPDATE,
+	DELETE,
 	Ident,
 ];
 

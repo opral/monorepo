@@ -2,7 +2,17 @@ import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import { analyzeShape } from "./sql-rewriter/microparser/analyze-shape.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
-import { tokenize, type Token } from "./sql-rewriter/tokenizer.js";
+import {
+	DELETE,
+	INSERT,
+	LParen,
+	RParen,
+	SELECT,
+	UPDATE,
+	WITH,
+	tokenize,
+	type Token,
+} from "./sql-rewriter/tokenizer.js";
 import type {
 	QueryPreprocessorResult,
 	QueryPreprocessorStage,
@@ -16,27 +26,30 @@ export async function createQueryPreprocessorV2(
 	>
 ): Promise<QueryPreprocessorStage> {
 	return (initial: QueryPreprocessorResult): QueryPreprocessorResult => {
-		const trimmed = initial.sql.trimStart();
-		const lower = trimmed.toLowerCase();
-		const shouldProcess =
-			lower.startsWith("select") || lower.startsWith("with");
-
 		let currentSql = initial.sql;
-		let tokens: Token[] | undefined;
+		let tokens = tokenize(currentSql);
+		const kind = detectStatementKind(tokens);
+		if (kind !== "select") {
+			return {
+				sql: currentSql,
+				parameters: initial.parameters,
+			};
+		}
 
-		if (shouldProcess) {
+		{
 			const views = getViewSelectMap(engine);
 			const expansion = expandQuery({ sql: currentSql, views });
 			currentSql = expansion.sql;
 
 			tokens = tokenize(currentSql);
-			const shape = analyzeShape(tokens);
-			if (shape) {
-				ensureFreshStateCache({ engine, shape });
-			}
-
-			currentSql = rewriteSql(currentSql, { tokens });
 		}
+
+		const shape = analyzeShape(tokens);
+		if (shape) {
+			ensureFreshStateCache({ engine, shape });
+		}
+
+		currentSql = rewriteSql(currentSql, { tokens });
 
 		const context: QueryPreprocessorResult = {
 			sql: currentSql,
@@ -122,4 +135,56 @@ function extractSelectFromCreateView(sql: string): string | undefined {
 		statement = statement.slice(0, semicolon);
 	}
 	return statement.trim() || undefined;
+}
+
+type StatementKind = "select" | "insert" | "update" | "delete" | "other";
+
+function detectStatementKind(tokens: Token[]): StatementKind {
+	let inCte = false;
+	let depth = 0;
+
+	for (const token of tokens) {
+		if (!token) continue;
+
+		if (inCte) {
+			if (token.tokenType === LParen) {
+				depth += 1;
+				continue;
+			}
+			if (token.tokenType === RParen) {
+				if (depth > 0) depth -= 1;
+				continue;
+			}
+			const kind = classifyKeyword(token);
+			if (kind && kind !== "with" && depth === 0) {
+				return kind as StatementKind;
+			}
+			continue;
+		}
+
+		const kind = classifyKeyword(token);
+		if (!kind) {
+			continue;
+		}
+		if (kind === "with") {
+			inCte = true;
+			depth = 0;
+			continue;
+		}
+		return kind as StatementKind;
+	}
+
+	return "other";
+}
+
+function classifyKeyword(
+	token: Token | undefined
+): StatementKind | "with" | null {
+	if (!token) return null;
+	if (token.tokenType === SELECT) return "select";
+	if (token.tokenType === INSERT) return "insert";
+	if (token.tokenType === UPDATE) return "update";
+	if (token.tokenType === DELETE) return "delete";
+	if (token.tokenType === WITH) return "with";
+	return null;
 }

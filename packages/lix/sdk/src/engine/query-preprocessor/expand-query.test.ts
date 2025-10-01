@@ -58,6 +58,21 @@ describe("expandQuery", () => {
 		);
 	});
 
+	test("expands multi-level views defined over state", () => {
+		const sql = "SELECT c.id FROM commit c";
+		const views = new Map([
+			["commit", "SELECT id FROM commit_state"],
+			["commit_state", "SELECT entity_id AS id FROM internal_state_vtable"],
+		]);
+
+		const result = expandQuery({ sql, views });
+		expect(result.expanded).toBe(true);
+		const normalized = normalize(result.sql);
+		expect(normalized).toContain(
+			"FROM ( SELECT entity_id AS id FROM internal_state_vtable ) AS c"
+		);
+	});
+
 	test("avoids infinite recursion on cyclic view definitions", () => {
 		const sql = "SELECT * FROM a_view";
 		const views = new Map([
