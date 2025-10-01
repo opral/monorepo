@@ -49,7 +49,7 @@ export async function createExecuteSync(args: {
 				rowMode: "object",
 				columnNames,
 			});
-		return { rows };
+			return { rows };
 		} catch (error) {
 			const enriched =
 				error instanceof Error ? error : new Error(String(error));

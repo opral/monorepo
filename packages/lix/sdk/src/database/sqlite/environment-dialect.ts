@@ -54,7 +54,11 @@ class EnvironmentConnection implements DatabaseConnection {
 			lines.push(`  - cause: "${String(err?.message ?? err)}"`);
 			lines.push(`  - sql:   ${sql}`);
 			const rewrittenSql = err?.rewrittenSql;
-			if (typeof rewrittenSql === "string" && rewrittenSql && rewrittenSql !== sql) {
+			if (
+				typeof rewrittenSql === "string" &&
+				rewrittenSql &&
+				rewrittenSql !== sql
+			) {
 				lines.push(`  - rewrittenSql: ${rewrittenSql}`);
 			}
 			lines.push("  - params:");

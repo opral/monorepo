@@ -84,4 +84,40 @@ describe("expandQuery", () => {
 		expect(result.expanded).toBe(false);
 		expect(result.sql).toBe(sql);
 	});
+
+	test("does not expand views with no internal_state_vtable reference", () => {
+		const sql = "SELECT * FROM external_view";
+		const views = new Map([["external_view", "SELECT 42 AS answer"]]);
+
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
+		expect(result.expanded).toBe(false);
+		expect(result.sql).toBe(sql);
+	});
+
+	test("still expands after view map changes to include vtable", () => {
+		const runtimeCacheRef = {};
+		const sql = "SELECT * FROM maybe_state";
+		const viewsWithoutState = new Map([["maybe_state", "SELECT 1"]]);
+		const viewsWithState = new Map([
+			["maybe_state", "SELECT * FROM internal_state_vtable"],
+		]);
+
+		const first = expandQuery({
+			sql,
+			views: viewsWithoutState,
+			runtimeCacheRef,
+		});
+		expect(first.expanded).toBe(false);
+		expect(first.sql).toBe(sql);
+
+		const second = expandQuery({
+			sql,
+			views: viewsWithState,
+			runtimeCacheRef,
+		});
+		expect(second.expanded).toBe(true);
+		expect(normalize(second.sql)).toContain(
+			"FROM ( SELECT * FROM internal_state_vtable ) AS maybe_state"
+		);
+	});
 });

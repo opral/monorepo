@@ -147,6 +147,10 @@ function expandSqlBody(
 			context.blocked.add(bestMatch.viewKey);
 			continue;
 		}
+		if (!/\binternal_state_vtable\b/i.test(resolved)) {
+			context.blocked.add(bestMatch.viewKey);
+			continue;
+		}
 
 		const inner = resolved.trim();
 		const replacement = `( ${inner} ) AS ${bestMatch.aliasSql}`;

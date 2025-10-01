@@ -96,6 +96,23 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
+	test("leaves internal_state_materializer select untouched", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		const sql =
+			'select * from "internal_state_materializer" where "version_id" = ? and "entity_id" = ?';
+
+		const result = preprocess({
+			sql,
+			parameters: ["base-version", "base-entity"],
+		});
+
+		expect(result.sql).toBe(sql);
+		expect(result.expandedSql).toBeUndefined();
+
+		await lix.close();
+	});
+
 	test("rewrites stored_schema view via state pipeline", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessorV2(lix.engine!);
