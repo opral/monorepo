@@ -2,6 +2,7 @@ import type { LixEngine } from "../boot.js";
 import { sql } from "kysely";
 import { internalQueryBuilder } from "../internal-query-builder.js";
 import { withRuntimeCache } from "../with-runtime-cache.js";
+import { isDeterministicBootPending } from "./bootstrap-pending.js";
 
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
@@ -19,6 +20,9 @@ export function isDeterministicModeSync(args: {
 	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): boolean {
 	const engine = args.engine;
+	if (isDeterministicBootPending()) {
+		return true;
+	}
 
 	// TODO account for active version
 	// Need to query from underlying state to avoid recursion

@@ -39,6 +39,7 @@ import {
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
+import { setDeterministicBoot } from "../engine/deterministic-mode/bootstrap-pending.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -137,10 +138,6 @@ export async function newLixFile(args?: {
 		},
 	});
 
-	// applying the schema etc.
-	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
-
-	// Check if deterministic mode is enabled
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
@@ -158,6 +155,11 @@ export async function newLixFile(args?: {
 		// Check randomLixId flag (defaults to false)
 		useRandomLixId = config.randomLixId === true;
 	}
+
+	setDeterministicBoot(isDeterministicBootstrap);
+
+	// applying the schema etc.
+	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
 
 	// Counter for deterministic IDs
 	let deterministicIdCounter = 0;
@@ -354,6 +356,7 @@ export async function newLixFile(args?: {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
+		setDeterministicBoot(false);
 		await db.destroy();
 	}
 }
