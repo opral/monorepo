@@ -44,7 +44,7 @@ export function SidePanel({
 	const hasViews = panel.instances.length > 0;
 
 	return (
-		<aside className="flex w-[260px] min-w-[232px] max-w-[288px] flex-col text-onsurface-secondary">
+		<aside className="flex h-full w-full flex-col text-onsurface-secondary">
 			<Panel>
 				{hasViews && (
 					<Panel.TabBar>

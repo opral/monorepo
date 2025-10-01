@@ -10,7 +10,7 @@ import { Panel } from "./panel";
  */
 export function CentralPanel() {
 	return (
-		<section className="flex min-h-0 flex-1 flex-col text-onsurface-primary">
+		<section className="flex h-full w-full flex-col text-onsurface-primary">
 			<Panel>
 				<Panel.TabBar>
 					<Panel.Tab

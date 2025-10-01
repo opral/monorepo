@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
@@ -50,74 +51,88 @@ export function V2LayoutShell() {
 	const hydratedRight = hydrate(panels.right);
 
 	return (
-		<div className="flex min-h-screen flex-col bg-surface-300 text-onsurface-primary">
+		<div className="flex h-screen flex-col bg-surface-300 text-onsurface-primary">
 			<TopBar />
-			<div className="flex min-h-0 flex-1 gap-2 px-2">
-				<SidePanel
-					side="left"
-					title="Navigator"
-					panel={hydratedLeft}
-					onSelectView={(instanceId) =>
-						setPanelState("left", (panel) => ({
-							instances: panel.instances,
-							activeInstanceId: instanceId,
-						}))
-					}
-					onAddView={(viewId) =>
-						setPanelState("left", (panel) => {
-							const next = {
-								instanceId: createViewInstanceId(viewId),
-								viewId,
-							};
-							return {
-								instances: [...panel.instances, next],
-								activeInstanceId: next.instanceId,
-							};
-						})
-					}
-					onRemoveView={(instanceId) =>
-						setPanelState("left", (panel) => {
-							const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
-							const nextActive = panel.activeInstanceId === instanceId
-								? instances[instances.length - 1]?.instanceId ?? null
-								: panel.activeInstanceId;
-							return { instances, activeInstanceId: nextActive };
-						})
-					}
-				/>
-				<CentralPanel />
-				<SidePanel
-					side="right"
-					title="Secondary"
-					panel={hydratedRight}
-					onSelectView={(instanceId) =>
-						setPanelState("right", (panel) => ({
-							instances: panel.instances,
-							activeInstanceId: instanceId,
-						}))
-					}
-					onAddView={(viewId) =>
-						setPanelState("right", (panel) => {
-							const next = {
-								instanceId: createViewInstanceId(viewId),
-								viewId,
-							};
-							return {
-								instances: [...panel.instances, next],
-								activeInstanceId: next.instanceId,
-							};
-						})
-					}
-					onRemoveView={(instanceId) =>
-						setPanelState("right", (panel) => {
-							const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
-							const nextActive = panel.activeInstanceId === instanceId
-								? instances[instances.length - 1]?.instanceId ?? null
-								: panel.activeInstanceId;
-							return { instances, activeInstanceId: nextActive };
-						})
-					}
-				/>
+			<div className="flex flex-1 overflow-hidden px-2 gap-4">
+				<PanelGroup direction="horizontal">
+					<Panel defaultSize={20} minSize={10} maxSize={40}>
+						<SidePanel
+						side="left"
+						title="Navigator"
+						panel={hydratedLeft}
+						onSelectView={(instanceId) =>
+							setPanelState("left", (panel) => ({
+								instances: panel.instances,
+								activeInstanceId: instanceId,
+							}))
+						}
+						onAddView={(viewId) =>
+							setPanelState("left", (panel) => {
+								const next = {
+									instanceId: createViewInstanceId(viewId),
+									viewId,
+								};
+								return {
+									instances: [...panel.instances, next],
+									activeInstanceId: next.instanceId,
+								};
+							})
+						}
+						onRemoveView={(instanceId) =>
+							setPanelState("left", (panel) => {
+								const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
+								const nextActive = panel.activeInstanceId === instanceId
+									? instances[instances.length - 1]?.instanceId ?? null
+									: panel.activeInstanceId;
+								return { instances, activeInstanceId: nextActive };
+							})
+						}
+						/>
+					</Panel>
+					<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
+						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+					</PanelResizeHandle>
+					<Panel defaultSize={60} minSize={30}>
+						<CentralPanel />
+					</Panel>
+					<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
+						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+					</PanelResizeHandle>
+					<Panel defaultSize={20} minSize={10} maxSize={40}>
+						<SidePanel
+						side="right"
+						title="Secondary"
+						panel={hydratedRight}
+						onSelectView={(instanceId) =>
+							setPanelState("right", (panel) => ({
+								instances: panel.instances,
+								activeInstanceId: instanceId,
+							}))
+						}
+						onAddView={(viewId) =>
+							setPanelState("right", (panel) => {
+								const next = {
+									instanceId: createViewInstanceId(viewId),
+									viewId,
+								};
+								return {
+									instances: [...panel.instances, next],
+									activeInstanceId: next.instanceId,
+								};
+							})
+						}
+						onRemoveView={(instanceId) =>
+							setPanelState("right", (panel) => {
+								const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
+								const nextActive = panel.activeInstanceId === instanceId
+									? instances[instances.length - 1]?.instanceId ?? null
+									: panel.activeInstanceId;
+								return { instances, activeInstanceId: nextActive };
+							})
+						}
+					/>
+					</Panel>
+				</PanelGroup>
 			</div>
 			<StatusBar />
 		</div>
