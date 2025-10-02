@@ -8,6 +8,7 @@ test("rewrites top-level internal_state_vtable reference", () => {
 
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
 	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_cache_lix_version_descriptor");
 	expect(rewritten).toContain(
 		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS internal_state_vtable"
 	);

@@ -293,10 +293,9 @@ function buildVersionCtes(): string {
     WITH RECURSIVE
       version_descriptor_base AS (
         SELECT
-          json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-          json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-        FROM ${CACHE_SOURCE_TOKEN} isc_v
-        WHERE isc_v.schema_key = 'lix_version_descriptor'
+          json_extract(desc.snapshot_content, '$.id') AS version_id,
+          json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+        FROM internal_state_cache_lix_version_descriptor desc
       ),
       version_inheritance(version_id, ancestor_version_id) AS (
         SELECT
