@@ -16,9 +16,7 @@ describe("query preprocessor reproduction", () => {
 				.where("schema_key", "=", "lix_key_value")
 				.where("version_id", "=", "global")
 				.where("snapshot_content", "is not", null)
-				.select(
-					sql`json_extract(snapshot_content, '$.value')`.as("value")
-				)
+				.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 				.compile();
 
 			const result = preprocess({
@@ -26,7 +24,7 @@ describe("query preprocessor reproduction", () => {
 				parameters: compiled.parameters as Readonly<unknown[]>,
 			});
 
-			expect(result.sql).not.toMatch(/FROM\s+internal_state_vtable\b/i);
+			expect(result.sql).toContain("-- hoisted_internal_state_vtable_rewrite");
 		} finally {
 			await lix.close();
 		}

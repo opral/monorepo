@@ -14,6 +14,7 @@ import {
 	type Token,
 } from "./sql-rewriter/tokenizer.js";
 import type { LixEngine } from "../boot.js";
+import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -73,7 +74,11 @@ export async function createQueryPreprocessorV2(
 			}
 		}
 
-		currentSql = rewriteSql(currentSql, { tokens });
+		const includeTransaction = hasOpenTransaction(engine);
+		currentSql = rewriteSql(currentSql, {
+			tokens,
+			hasOpenTransaction: includeTransaction,
+		});
 
 		return {
 			sql: currentSql,

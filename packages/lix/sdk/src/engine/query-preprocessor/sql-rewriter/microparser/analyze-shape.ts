@@ -410,7 +410,10 @@ function computeSelectContexts(tokens: Token[]): {
 
 		if (token.image === ")") {
 			const afterDepth = (depthBefore[i] ?? 0) - 1;
-			while (stack.length && (stack[stack.length - 1]?.depth ?? -1) > afterDepth) {
+			while (
+				stack.length &&
+				(stack[stack.length - 1]?.depth ?? -1) > afterDepth
+			) {
 				const popped = stack.pop();
 				if (!popped) {
 					continue;

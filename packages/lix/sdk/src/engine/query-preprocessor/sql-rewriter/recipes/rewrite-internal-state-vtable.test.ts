@@ -61,8 +61,7 @@ test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
 	const sql = `SELECT * FROM internal_state_vtable;`;
 	const rewritten = rewriteSql(sql);
 
-	expect(rewritten.trim().startsWith("WITH"))
-		.toBe(true);
+	expect(rewritten.trim().startsWith("WITH")).toBe(true);
 	expect(rewritten).toContain("internal_state_vtable AS (");
 	expect(rewritten).toContain(
 		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable) AS internal_state_vtable`

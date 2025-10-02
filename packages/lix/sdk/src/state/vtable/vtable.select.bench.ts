@@ -1,3 +1,4 @@
+import { promises as fs } from "fs";
 import { afterAll, bench } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
@@ -15,6 +16,9 @@ const ENTITY_TXN = "bench_priority_transaction";
 const ENTITY_UNTRACKED = "bench_priority_untracked";
 const ENTITY_CACHE = "bench_priority_cache";
 const EXTRA_ENTITIES_PER_TIER = 100;
+const BENCH_OUTPUT_DIR = decodeURIComponent(
+	new URL("./__bench__", import.meta.url).pathname
+);
 
 type QueryShape = { sql: string; parameters: ReadonlyArray<unknown> };
 
@@ -134,6 +138,8 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 			);
 		}
 	}
+
+	await exportExplainPlans({ lix, queries });
 
 	return { lix, queries } satisfies BenchCtx;
 })();
@@ -361,7 +367,7 @@ function buildQuery(
 ): QueryShape {
 	const clauses = [`schema_key = '${TEST_SCHEMA}'`, ...filter.clauses];
 	const baseSql = `SELECT * FROM internal_state_vtable
-        WHERE ${clauses.join("\n          AND ")}`;
+	        WHERE ${clauses.join("\n          AND ")}`;
 	const sql =
 		params.includeLimit === false ? baseSql : `${baseSql}\n        LIMIT 1`;
 	const parameters = [
@@ -371,4 +377,45 @@ function buildQuery(
 		}),
 	];
 	return { sql, parameters };
+}
+
+async function exportExplainPlans(args: {
+	lix: Awaited<ReturnType<typeof openLix>>;
+	queries: Record<string, QueryShape>;
+}) {
+	await fs.mkdir(BENCH_OUTPUT_DIR, { recursive: true });
+
+	for (const [label, query] of Object.entries(args.queries)) {
+		const slug = label
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "");
+		const outputPath = `${BENCH_OUTPUT_DIR}/${slug}.explain.txt`;
+
+		const report = (await args.lix.call("lix_explain_query", {
+			sql: query.sql,
+			parameters: [...query.parameters],
+		})) as {
+			original: { sql: string };
+			expanded?: { sql: string };
+			rewritten?: { sql: string };
+			plan: unknown;
+		};
+
+		const payload = [
+			"-- label --",
+			label,
+			"\n-- original SQL --",
+			report.original.sql,
+			"\n-- expanded SQL --",
+			report.expanded?.sql ?? "<unchanged>",
+			"\n-- rewritten SQL --",
+			report.rewritten?.sql ?? "<unchanged>",
+			"\n-- plan --",
+			JSON.stringify(report.plan, null, 2),
+			"",
+		].join("\n");
+
+		await fs.writeFile(outputPath, payload, "utf8");
+	}
 }

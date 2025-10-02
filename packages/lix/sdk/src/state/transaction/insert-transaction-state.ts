@@ -3,6 +3,7 @@ import type { LixEngine } from "../../engine/boot.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { setHasOpenTransaction } from "../vtable/vtable.js";
 
 type NewTransactionStateRow = Omit<
 	NewStateAllRow,
@@ -68,7 +69,7 @@ export type TransactionStateRow = Omit<
  * });
  */
 export function insertTransactionState(args: {
-	engine: Pick<LixEngine, "executeSync" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 	data: NewTransactionStateRow[];
 	timestamp: string;
 	createChangeAuthors?: boolean;
@@ -124,6 +125,8 @@ export function insertTransactionState(args: {
 			)
 			.compile()
 	);
+
+	setHasOpenTransaction(args.engine, true);
 
 	// Return results for all data
 	return dataWithChangeIds.map((data) => ({

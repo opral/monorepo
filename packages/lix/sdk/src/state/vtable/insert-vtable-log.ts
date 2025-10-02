@@ -18,7 +18,7 @@ const loggingInProgressMap = new WeakMap<
  * This is a minimal wrapper that can be mocked in tests to control timestamps.
  */
 export function insertVTableLog(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks">;
+	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
 	id?: string;
 	key: string;
 	message?: string | null;

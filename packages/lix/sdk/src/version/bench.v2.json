@@ -1,64 +1,64 @@
 {
-  "files": [
-    {
-      "filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/version/select-version-diff.bench.ts",
-      "groups": [
-        {
-          "fullName": "src/version/select-version-diff.bench.ts",
-          "benchmarks": [
-            {
-              "id": "-1862905692_0",
-              "name": "selectVersionDiff (exclude unchanged)",
-              "rank": 1,
-              "rme": 1.06231370770211,
-              "samples": [],
-              "totalTime": 1172.909291,
-              "min": 114.65899999999965,
-              "max": 121.23574999999983,
-              "hz": 8.525808497496163,
-              "period": 117.2909291,
-              "mean": 117.2909291,
-              "variance": 3.03423506377436,
-              "sd": 1.7419055840585504,
-              "sem": 0.5508389114590907,
-              "df": 9,
-              "critical": 2.262,
-              "moe": 1.2459976177204632,
-              "p75": 118.10333300000002,
-              "p99": 121.23574999999983,
-              "p995": 121.23574999999983,
-              "p999": 121.23574999999983,
-              "sampleCount": 10,
-              "median": 116.9511665
-            },
-            {
-              "id": "-1862905692_1",
-              "name": "selectVersionDiff (full document diff)",
-              "rank": 2,
-              "rme": 1.3142669527229058,
-              "samples": [],
-              "totalTime": 1203.8947900000012,
-              "min": 117.542958,
-              "max": 124.72233299999971,
-              "hz": 8.306373682371355,
-              "period": 120.38947900000012,
-              "mean": 120.38947900000012,
-              "variance": 4.892817805616254,
-              "sd": 2.2119714748649573,
-              "sem": 0.6994867979895155,
-              "df": 9,
-              "critical": 2.262,
-              "moe": 1.5822391370522841,
-              "p75": 121.57616700000017,
-              "p99": 124.72233299999971,
-              "p995": 124.72233299999971,
-              "p999": 124.72233299999971,
-              "sampleCount": 10,
-              "median": 119.9672085000002
-            }
-          ]
-        }
-      ]
-    }
-  ]
+	"files": [
+		{
+			"filepath": "/Users/samuel/git-repos/monorepo-2/packages/lix/sdk/src/version/select-version-diff.bench.ts",
+			"groups": [
+				{
+					"fullName": "src/version/select-version-diff.bench.ts",
+					"benchmarks": [
+						{
+							"id": "-1862905692_0",
+							"name": "selectVersionDiff (exclude unchanged)",
+							"rank": 1,
+							"rme": 1.06231370770211,
+							"samples": [],
+							"totalTime": 1172.909291,
+							"min": 114.65899999999965,
+							"max": 121.23574999999983,
+							"hz": 8.525808497496163,
+							"period": 117.2909291,
+							"mean": 117.2909291,
+							"variance": 3.03423506377436,
+							"sd": 1.7419055840585504,
+							"sem": 0.5508389114590907,
+							"df": 9,
+							"critical": 2.262,
+							"moe": 1.2459976177204632,
+							"p75": 118.10333300000002,
+							"p99": 121.23574999999983,
+							"p995": 121.23574999999983,
+							"p999": 121.23574999999983,
+							"sampleCount": 10,
+							"median": 116.9511665
+						},
+						{
+							"id": "-1862905692_1",
+							"name": "selectVersionDiff (full document diff)",
+							"rank": 2,
+							"rme": 1.3142669527229058,
+							"samples": [],
+							"totalTime": 1203.8947900000012,
+							"min": 117.542958,
+							"max": 124.72233299999971,
+							"hz": 8.306373682371355,
+							"period": 120.38947900000012,
+							"mean": 120.38947900000012,
+							"variance": 4.892817805616254,
+							"sd": 2.2119714748649573,
+							"sem": 0.6994867979895155,
+							"df": 9,
+							"critical": 2.262,
+							"moe": 1.5822391370522841,
+							"p75": 121.57616700000017,
+							"p99": 124.72233299999971,
+							"p995": 124.72233299999971,
+							"p999": 124.72233299999971,
+							"sampleCount": 10,
+							"median": 119.9672085000002
+						}
+					]
+				}
+			]
+		}
+	]
 }

@@ -24,13 +24,12 @@ describe("createQueryPreprocessor", () => {
 			.spyOn(rewriteModule, "rewriteSql")
 			.mockReturnValue("rewritten sql");
 
-		const stageBuilder: QueryPreprocessor = async () => ({
-			sql,
-			parameters,
-		}) => ({
-			sql: `${sql} /* stage */`,
-			parameters,
-		});
+		const stageBuilder: QueryPreprocessor =
+			async () =>
+			({ sql, parameters }) => ({
+				sql: `${sql} /* stage */`,
+				parameters,
+			});
 
 		const stage = await createQueryPreprocessor(createEngineStub(), [
 			stageBuilder,

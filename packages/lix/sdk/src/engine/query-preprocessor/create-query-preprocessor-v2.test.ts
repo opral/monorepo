@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { openLix } from "../../lix/index.js";
 import { createQueryPreprocessorV2 } from "./create-query-preprocessor-v2.js";
+import { setHasOpenTransaction } from "../../state/vtable/vtable.js";
 import { markStateCacheAsStale } from "../../state/cache/mark-state-cache-as-stale.js";
 import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
 
@@ -12,14 +13,14 @@ describe("createQueryPreprocessorV2", () => {
 	test("rewrites internal_state_vtable queries using Chevrotain pipeline", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		setHasOpenTransaction(lix.engine!, true);
 
 		const result = preprocess({
 			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
 			parameters: [],
 		});
 
-		expect(result.sql.trim().startsWith("WITH"))
-			.toBe(true);
+		expect(result.sql.trim().startsWith("WITH")).toBe(true);
 		expect(result.sql).toContain("internal_state_vtable AS (");
 		expect(result.sql).toContain(
 			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS internal_state_vtable"
@@ -84,6 +85,7 @@ describe("createQueryPreprocessorV2", () => {
 		});
 
 		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+		setHasOpenTransaction(lix.engine!, true);
 
 		const result = preprocess({
 			sql: "SELECT * FROM internal_state_view",
@@ -95,6 +97,27 @@ describe("createQueryPreprocessorV2", () => {
 		expect(result.sql).toContain("internal_transaction_state");
 		expect(result.sql).not.toMatch(/FROM\s+internal_state_view\b/i);
 
+		await lix.close();
+	});
+
+	test("skips transaction segments when none pending", async () => {
+		const lix = await openLix({});
+		lix.engine!.sqlite.exec({
+			sql: `
+				CREATE VIEW internal_state_view AS
+				SELECT schema_key FROM internal_state_vtable WHERE schema_key = 'lix_key_value'
+			`,
+			returnValue: "resultRows",
+		});
+
+		const preprocess = await createQueryPreprocessorV2(lix.engine!);
+
+		const result = preprocess({
+			sql: "SELECT * FROM internal_state_view",
+			parameters: [],
+		});
+
+		expect(result.sql).not.toContain("internal_transaction_state");
 		await lix.close();
 	});
 

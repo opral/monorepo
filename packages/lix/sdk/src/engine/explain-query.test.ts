@@ -19,7 +19,9 @@ test("createExplainQuery returns rewritten when query is mutated", async () => {
 
 		expect(report.rewritten).toBeDefined();
 		expect(report.rewritten?.sql).not.toBe(report.original.sql);
-		expect(report.rewritten?.sql ?? "").toContain("internal_transaction_state");
+		expect(report.rewritten?.sql ?? "").toContain(
+			"hoisted_internal_state_vtable_rewrite"
+		);
 	} finally {
 		await lix.close();
 	}

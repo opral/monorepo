@@ -13,6 +13,7 @@ import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js"
 import { updateStateCache } from "../cache/update-state-cache.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { generateCommit } from "./generate-commit.js";
+import { setHasOpenTransaction } from "./vtable.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
@@ -457,6 +458,7 @@ export function commit(args: {
 	if (totalTracked === 0) {
 		// Clear the transaction table after handling any untracked updates
 		engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
+		setHasOpenTransaction(engine, false);
 		commitSequenceNumberSync({
 			engine: engine,
 			timestamp: transactionTimestamp,
@@ -530,6 +532,7 @@ export function commit(args: {
 
 	// Clear the transaction table after committing
 	engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
+	setHasOpenTransaction(engine, false);
 
 	// Update cache entries in a single call using materialized state with inline commit/version
 	if (genRes.materializedState.length > 0) {

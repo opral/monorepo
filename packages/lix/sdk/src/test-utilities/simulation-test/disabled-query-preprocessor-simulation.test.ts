@@ -13,7 +13,7 @@ describe("disabledQueryPreprocessorSimulation", () => {
 			({
 				sql,
 				parameters,
-		}: {
+			}: {
 				sql: string;
 				parameters: unknown[];
 				sideEffects?: boolean;

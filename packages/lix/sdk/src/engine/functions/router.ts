@@ -31,7 +31,12 @@ export type Call = (
 export function createCallRouter(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "call" | "preprocessQuery"
+		| "sqlite"
+		| "hooks"
+		| "executeSync"
+		| "runtimeCacheRef"
+		| "call"
+		| "preprocessQuery"
 	>;
 }): {
 	call: Call;

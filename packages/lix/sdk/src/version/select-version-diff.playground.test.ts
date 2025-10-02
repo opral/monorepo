@@ -5,8 +5,7 @@ import { createVersion } from "./create-version.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 
 const OUTPUT_PATH = decodeURIComponent(
-	new URL("./select-version-diff.playground-plan.txt", import.meta.url)
-		.pathname
+	new URL("./select-version-diff.playground-plan.txt", import.meta.url).pathname
 );
 
 describe("selectVersionDiff playground", () => {

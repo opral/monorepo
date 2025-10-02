@@ -14,6 +14,35 @@ import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { buildResolvedStateQuery } from "./resolved-state.js";
 
+const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
+
+export function setHasOpenTransaction(
+	engine: Pick<LixEngine, "runtimeCacheRef">,
+	value: boolean
+): void {
+	(engine.runtimeCacheRef as any)[LIX_OPEN_TRANSACTION] = value;
+}
+
+export function hasOpenTransaction(
+	engine: Pick<LixEngine, "runtimeCacheRef" | "sqlite">
+): boolean {
+	const cache = engine.runtimeCacheRef as Record<symbol, boolean | undefined>;
+	const current = cache[LIX_OPEN_TRANSACTION];
+	if (current === true) {
+		return true;
+	}
+	if (current === false) {
+		return false;
+	}
+	// fall through on initial
+	const rows = engine.sqlite.exec({
+		sql: "SELECT 1 FROM internal_transaction_state LIMIT 1",
+		returnValue: "resultRows",
+	});
+	setHasOpenTransaction(engine, Array.isArray(rows) && rows.length > 0);
+	return (engine.runtimeCacheRef as any)[LIX_OPEN_TRANSACTION] === true;
+}
+
 // Type definition for the internal state virtual table
 export type InternalStateVTable = {
 	_pk: Generated<string>; // HIDDEN PRIMARY KEY
@@ -192,6 +221,7 @@ export function applyStateVTable(
 			},
 
 			xBegin: () => {
+				setHasOpenTransaction(engine, true);
 				// TODO comment in after all internal v-table logic uses underlying state view
 				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
 				// const existingChangesInTransaction = executeSync({
@@ -215,6 +245,7 @@ export function applyStateVTable(
 			xCommit: () => {
 				const rc = commit({ engine: engine });
 				currentWriterKey = null; // clear after statement/txn
+				setHasOpenTransaction(engine, false);
 				return rc;
 			},
 
@@ -224,6 +255,7 @@ export function applyStateVTable(
 					returnValue: "resultRows",
 				});
 				currentWriterKey = null;
+				setHasOpenTransaction(engine, false);
 			},
 
 			xBestIndex: (pVTab: any, pIdxInfo: any) => {
@@ -833,7 +865,7 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	engine: Pick<LixEngine, "executeSync" | "hooks">,
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">,
 	primaryKey: string,
 	timestamp: string
 ): void {

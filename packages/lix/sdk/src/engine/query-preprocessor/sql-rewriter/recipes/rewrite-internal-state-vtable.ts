@@ -1,9 +1,18 @@
 import type { Shape } from "../microparser/analyze-shape.js";
 
-export function buildHoistedInternalStateVtableCte(shapes: Shape[]): string | null {
+type TransactionOption = {
+	includeTransaction?: boolean;
+};
+
+export function buildHoistedInternalStateVtableCte(
+	shapes: Shape[],
+	options?: TransactionOption
+): string | null {
 	if (shapes.length === 0) {
 		return null;
 	}
+
+	const includeTransaction = options?.includeTransaction !== false;
 
 	const schemaKeys = new Set<string>();
 	for (const shape of shapes) {
@@ -14,10 +23,15 @@ export function buildHoistedInternalStateVtableCte(shapes: Shape[]): string | nu
 		}
 	}
 
-	const widePath = buildWidePath({ schemaKeys: [...schemaKeys] });
-	const projectionColumns = ["_pk", ...VISIBLE_STATE_COLUMNS].join(",\n        ");
+	const widePath = buildWidePath({
+		schemaKeys: [...schemaKeys],
+		includeTransaction,
+	});
+	const projectionColumns = ["_pk", ...VISIBLE_STATE_COLUMNS].join(
+		",\n        "
+	);
 	const cteBody = stripIndent(`
-		-- Chevrotain rewrite hoist
+		-- hoisted_internal_state_vtable_rewrite
 		internal_state_vtable AS (
 		  SELECT ${projectionColumns}
 		  FROM (
@@ -45,7 +59,10 @@ export function buildInternalStateVtableProjection(
  * Build a replacement subquery for `internal_state_vtable`.
  * Returns `null` when the query shape is outside the supported surface.
  */
-export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
+export function rewriteInternalStateVtableQuery(
+	shape: Shape,
+	options?: TransactionOption
+): string | null {
 	const schemaKey = pickSingleLiteral(shape.schemaKeys);
 	const entityId = pickSingleLiteral(shape.entityIds);
 	const versionId =
@@ -56,6 +73,7 @@ export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
 		!hasPlaceholder(shape.schemaKeys) && !hasPlaceholder(shape.entityIds);
 
 	const includePrimaryKey = shape.referencesPrimaryKey;
+	const includeTransaction = options?.includeTransaction !== false;
 
 	if (schemaKey && limitOne && literalOnly) {
 		const fastPath = buildFastPath({
@@ -64,11 +82,15 @@ export function rewriteInternalStateVtableQuery(shape: Shape): string | null {
 			versionId,
 			innerLimit1: true,
 			includeWriter: shape.selectsWriterKey,
+			includeTransaction,
 		});
 		return maybeStripHiddenPrimaryKey(fastPath, includePrimaryKey);
 	}
 
-	const widePath = buildWidePath({ schemaKeys: schemaKey ? [schemaKey] : [] });
+	const widePath = buildWidePath({
+		schemaKeys: schemaKey ? [schemaKey] : [],
+		includeTransaction,
+	});
 	return maybeStripHiddenPrimaryKey(widePath, includePrimaryKey);
 }
 
@@ -78,16 +100,19 @@ interface FastPathOptions {
 	versionId?: string;
 	innerLimit1?: boolean;
 	includeWriter?: boolean;
+	includeTransaction?: boolean;
 }
 
 interface WidePathOptions {
 	schemaKeys: string[];
+	includeTransaction: boolean;
 }
 
 const CACHE_SOURCE_TOKEN = "__CACHE_SOURCE__";
 
 function buildFastPath(options: FastPathOptions): string {
 	const includeWriter = options.includeWriter === true;
+	const includeTransaction = options.includeTransaction !== false;
 	const filtersTxn = buildFilters("txn", options);
 	const filtersUnt = buildFilters("u", options);
 	const filtersCache = buildFilters("c", options);
@@ -121,14 +146,16 @@ function buildFastPath(options: FastPathOptions): string {
 
 	const untrackedBaseConditions = [
 		"( (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR\n      (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL) )",
-		`NOT EXISTS (
+	];
+	if (includeTransaction) {
+		untrackedBaseConditions.push(`NOT EXISTS (
         SELECT 1 FROM internal_transaction_state t
         WHERE t.version_id = u.version_id
           AND t.file_id = u.file_id
           AND t.schema_key = u.schema_key
           AND t.entity_id = u.entity_id
-      )`,
-	];
+      )`);
+	}
 	const untrackedSegment = stripIndent(`
     SELECT
       'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
@@ -158,21 +185,23 @@ function buildFastPath(options: FastPathOptions): string {
 
 	const cacheBaseConditions = [
 		"( (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR\n      (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL) )",
-		`NOT EXISTS (
+	];
+	if (includeTransaction) {
+		cacheBaseConditions.push(`NOT EXISTS (
         SELECT 1 FROM internal_transaction_state t
         WHERE t.version_id = c.version_id
           AND t.file_id = c.file_id
           AND t.schema_key = c.schema_key
           AND t.entity_id = c.entity_id
-      )`,
-		`NOT EXISTS (
+      )`);
+	}
+	cacheBaseConditions.push(`NOT EXISTS (
         SELECT 1 FROM internal_state_all_untracked u
         WHERE u.version_id = c.version_id
           AND u.file_id = c.file_id
           AND u.schema_key = c.schema_key
           AND u.entity_id = c.entity_id
-      )`,
-	];
+      )`);
 
 	const cacheSegment = stripIndent(`
     SELECT
@@ -202,22 +231,21 @@ function buildFastPath(options: FastPathOptions): string {
     WHERE ${[...cacheBaseConditions, ...filtersCache].join("\n      AND ")}
   `).trim();
 
-	const segments = [txnSegment, untrackedSegment, cacheSegment].map(
-		(segment) => (options.innerLimit1 ? wrapWithInnerLimit(segment) : segment)
+	const segments: string[] = [];
+	if (includeTransaction) {
+		segments.push(txnSegment);
+	}
+	segments.push(untrackedSegment, cacheSegment);
+
+	const unionSegments = segments.map((segment) =>
+		options.innerLimit1 ? wrapWithInnerLimit(segment) : segment
 	);
+	const unionBody = unionSegments.join("\n\n      UNION ALL\n\n      ");
 
 	return stripIndent(`
     SELECT *
     FROM (
-      ${segments[0]}
-
-      UNION ALL
-
-      ${segments[1]}
-
-      UNION ALL
-
-      ${segments[2]}
+      ${unionBody}
     )
     LIMIT 1
   `);
@@ -228,7 +256,10 @@ function buildWidePath(options: WidePathOptions): string {
 		? `(${buildCacheRoutingSql(options.schemaKeys)})`
 		: "internal_state_cache";
 
-	const base = [buildVersionCtes(), buildResolvedSelectBody()].join("\n");
+	const base = [
+		buildVersionCtes(),
+		buildResolvedSelectBody({ includeTransaction: options.includeTransaction }),
+	].join("\n");
 	return base.replaceAll(CACHE_SOURCE_TOKEN, cacheSource);
 }
 
@@ -293,15 +324,22 @@ function buildVersionCtes(): string {
   `);
 }
 
-function buildResolvedSelectBody(): string {
-	const segments = [
-		buildTransactionSegment(),
-		buildUntrackedSegment(),
-		buildCachedSegment(),
-		buildInheritedCacheSegment(),
-		buildInheritedUntrackedSegment(),
-		buildInheritedTransactionSegment(),
-	];
+function buildResolvedSelectBody(options: {
+	includeTransaction: boolean;
+}): string {
+	const segments: string[] = [];
+	if (options.includeTransaction) {
+		segments.push(buildTransactionSegment());
+	}
+	segments.push(
+		buildUntrackedSegment(options.includeTransaction),
+		buildCachedSegment(options.includeTransaction),
+		buildInheritedCacheSegment(options.includeTransaction),
+		buildInheritedUntrackedSegment(options.includeTransaction)
+	);
+	if (options.includeTransaction) {
+		segments.push(buildInheritedTransactionSegment());
+	}
 
 	return [
 		"      SELECT * FROM (",
@@ -339,7 +377,7 @@ function buildTransactionSegment(): string {
   `);
 }
 
-function buildUntrackedSegment(): string {
+function buildUntrackedSegment(includeTransaction: boolean): string {
 	return stripIndent(`
       -- 2. Untracked state (second priority) - only if no transaction exists
       SELECT 
@@ -369,17 +407,21 @@ function buildUntrackedSegment(): string {
         (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
         (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
       )
-        AND NOT EXISTS (
+        ${
+					includeTransaction
+						? `AND NOT EXISTS (
           SELECT 1 FROM internal_transaction_state t
           WHERE t.version_id = u.version_id
             AND t.file_id = u.file_id
             AND t.schema_key = u.schema_key
             AND t.entity_id = u.entity_id
-        )
+        )`
+						: ""
+				}
   `);
 }
 
-function buildCachedSegment(): string {
+function buildCachedSegment(includeTransaction: boolean): string {
 	return stripIndent(`
       -- 3. Tracked state from cache (third priority) - only if no transaction or untracked exists
       SELECT 
@@ -410,13 +452,17 @@ function buildCachedSegment(): string {
         (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
         (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
       )
-        AND NOT EXISTS (
+        ${
+					includeTransaction
+						? `AND NOT EXISTS (
           SELECT 1 FROM internal_transaction_state t
           WHERE t.version_id = c.version_id
             AND t.file_id = c.file_id
             AND t.schema_key = c.schema_key
             AND t.entity_id = c.entity_id
-        )
+        )`
+						: ""
+				}
         AND NOT EXISTS (
           SELECT 1 FROM internal_state_all_untracked u
           WHERE u.version_id = c.version_id
@@ -427,7 +473,7 @@ function buildCachedSegment(): string {
   `);
 }
 
-function buildInheritedCacheSegment(): string {
+function buildInheritedCacheSegment(includeTransaction: boolean): string {
 	return stripIndent(`
       -- 4. Inherited tracked state (fourth priority)
       SELECT 
@@ -462,13 +508,17 @@ function buildInheritedCacheSegment(): string {
         ws_parent.version_id = isc.version_id
       WHERE isc.inheritance_delete_marker = 0
         AND isc.snapshot_content IS NOT NULL
-        AND NOT EXISTS (
+        ${
+					includeTransaction
+						? `AND NOT EXISTS (
           SELECT 1 FROM internal_transaction_state t
           WHERE t.version_id = vi.version_id
             AND t.file_id = isc.file_id
             AND t.schema_key = isc.schema_key
             AND t.entity_id = isc.entity_id
-        )
+        )`
+						: ""
+				}
         AND NOT EXISTS (
           SELECT 1 FROM ${CACHE_SOURCE_TOKEN} child_isc
           WHERE child_isc.version_id = vi.version_id
@@ -486,7 +536,7 @@ function buildInheritedCacheSegment(): string {
   `);
 }
 
-function buildInheritedUntrackedSegment(): string {
+function buildInheritedUntrackedSegment(includeTransaction: boolean): string {
 	return stripIndent(`
       -- 5. Inherited untracked state (lowest priority)
       SELECT 
@@ -520,13 +570,17 @@ function buildInheritedUntrackedSegment(): string {
         ws_parent.version_id = unt.version_id
       WHERE unt.inheritance_delete_marker = 0
         AND unt.snapshot_content IS NOT NULL
-        AND NOT EXISTS (
+        ${
+					includeTransaction
+						? `AND NOT EXISTS (
           SELECT 1 FROM internal_transaction_state t
           WHERE t.version_id = vi.version_id
             AND t.file_id = unt.file_id
             AND t.schema_key = unt.schema_key
             AND t.entity_id = unt.entity_id
-        )
+        )`
+						: ""
+				}
         AND NOT EXISTS (
           SELECT 1 FROM ${CACHE_SOURCE_TOKEN} child_isc
           WHERE child_isc.version_id = vi.version_id

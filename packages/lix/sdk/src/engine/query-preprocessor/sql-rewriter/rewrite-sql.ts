@@ -7,6 +7,7 @@ import { tokenize, type Token } from "./tokenizer.js";
 
 export interface RewriteSqlOptions {
 	tokens?: Token[];
+	hasOpenTransaction?: boolean;
 }
 
 export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
@@ -15,6 +16,8 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 	if (shapes.length === 0) {
 		return sql;
 	}
+
+	const includeTransaction = options?.hasOpenTransaction !== false;
 
 	const replacements = shapes
 		.map((shape) => {
@@ -42,7 +45,9 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 		}
 	}
 
-	const cteClause = buildHoistedInternalStateVtableCte(shapes);
+	const cteClause = buildHoistedInternalStateVtableCte(shapes, {
+		includeTransaction,
+	});
 	if (!cteClause) {
 		return current;
 	}
@@ -52,7 +57,9 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 
 function hoistCte(sql: string, cteClause: string): string {
 	const leadingWhitespaceMatch = sql.match(/^\s*/);
-	const leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[0] ?? "" : "";
+	const leadingWhitespace = leadingWhitespaceMatch
+		? (leadingWhitespaceMatch[0] ?? "")
+		: "";
 	const body = sql.slice(leadingWhitespace.length);
 	const withMatch = body.match(/^(with\s+(recursive\s+)?)?/i);
 	if (withMatch && withMatch[0]) {
