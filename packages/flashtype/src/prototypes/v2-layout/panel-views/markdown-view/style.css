@@ -1,0 +1,179 @@
+/* Markdown view scoped styles */
+
+/* Remove focus outline */
+.markdown-view .ProseMirror:focus,
+.markdown-view .ProseMirror:focus-visible {
+	outline: none;
+}
+
+/* Base markdown view container */
+.markdown-view .ProseMirror {
+	padding-left: 1rem;
+	padding-right: 1rem;
+	padding-top: 1rem;
+	padding-bottom: 1.5rem;
+	font-size: 15px;
+	line-height: 1.625;
+	min-height: auto;
+	cursor: auto;
+	width: 100%;
+}
+
+/* Headings */
+.markdown-view .ProseMirror h1 {
+	font-size: 24px;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 1rem;
+}
+
+.markdown-view .ProseMirror h2 {
+	font-size: 20px;
+	font-weight: 700;
+	margin-top: 1.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.markdown-view .ProseMirror h3 {
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 1.375;
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+}
+
+.markdown-view .ProseMirror h4 {
+	font-size: 16px;
+	font-weight: 700;
+	margin-top: 1.25rem;
+	margin-bottom: 0.75rem;
+}
+
+/* Paragraphs */
+.markdown-view .ProseMirror p {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
+/* Links */
+.markdown-view .ProseMirror a {
+	color: #2563eb;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.markdown-view .ProseMirror a:hover {
+	text-decoration: underline;
+}
+
+/* Lists */
+.markdown-view .ProseMirror ul,
+.markdown-view .ProseMirror ol {
+	padding-left: 1.5rem;
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
+	list-style-position: outside;
+}
+
+.markdown-view .ProseMirror ul {
+	list-style-type: disc;
+}
+
+.markdown-view .ProseMirror ol {
+	list-style-type: decimal;
+}
+
+.markdown-view .ProseMirror li {
+	margin-top: 0.25rem;
+	margin-bottom: 0.25rem;
+}
+
+/* Tables */
+.markdown-view .ProseMirror table {
+	border-collapse: collapse;
+	width: 100%;
+	margin-top: 1.25rem;
+	margin-bottom: 1.25rem;
+}
+
+.markdown-view .ProseMirror table thead tr {
+	background-color: var(--muted);
+}
+
+.markdown-view .ProseMirror table th,
+.markdown-view .ProseMirror table td {
+	border: 1px solid var(--border);
+	padding: 0.5rem 1rem;
+	text-align: left;
+}
+
+.markdown-view .ProseMirror table th {
+	font-weight: 600;
+}
+
+/* Blockquote */
+.markdown-view .ProseMirror blockquote {
+	border-left: 2px solid var(--border);
+	padding-left: 0.75rem;
+	font-style: italic;
+	color: var(--muted-foreground);
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.markdown-view .ProseMirror blockquote p {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* Inline code */
+.markdown-view .ProseMirror :not(pre) > code {
+	background-color: var(--muted);
+	color: var(--foreground);
+	font-family:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
+	font-size: 0.9em;
+	border-radius: 0.25rem;
+	padding: 0.125rem 0.375rem;
+}
+
+/* Code blocks */
+.markdown-view .ProseMirror pre {
+	background-color: var(--muted);
+	border: 1px solid var(--border);
+	border-radius: 0.375rem;
+	padding: 0.75rem;
+	overflow-x: auto;
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.markdown-view .ProseMirror pre code {
+	background-color: transparent;
+	padding: 0;
+	font-family:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
+	font-size: 14px;
+	line-height: 1.625;
+}
+
+/* Task lists */
+.markdown-view .ProseMirror li[data-task] {
+	display: flex;
+	align-items: flex-start;
+}
+
+.markdown-view .ProseMirror li[data-task] > input[type="checkbox"] {
+	margin-top: 0.2em;
+}
+
+.markdown-view .ProseMirror li[data-task] > div {
+	flex: 1 1 auto;
+}
+
+.markdown-view .ProseMirror li[data-task] p {
+	margin-top: 0;
+	margin-bottom: 0;
+}

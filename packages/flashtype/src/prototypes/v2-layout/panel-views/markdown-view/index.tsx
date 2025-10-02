@@ -3,6 +3,7 @@ import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { EditorProvider } from "@/editor/editor-context";
 import { TipTapEditor } from "@/components/editor/tip-tap-editor";
+import "./style.css";
 
 type MarkdownViewProps = {
 	readonly filePath?: string;
@@ -53,7 +54,9 @@ export function MarkdownView({ filePath }: MarkdownViewProps) {
 
 	return (
 		<EditorProvider>
-			<TipTapEditor className="h-full" />
+			<div className="markdown-view h-full">
+				<TipTapEditor className="h-full" />
+			</div>
 		</EditorProvider>
 	);
 }
