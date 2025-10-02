@@ -1,7 +1,10 @@
 import { expect, test } from "vitest";
 import { tokenize } from "../tokenizer.js";
 import { analyzeShape } from "../microparser/analyze-shape.js";
-import { rewriteInternalStateVtableQuery } from "./rewrite-internal-state-vtable.js";
+import {
+	buildHoistedInternalStateVtableCte,
+	buildInternalStateVtableProjection,
+} from "./rewrite-internal-state-vtable.js";
 import { openLix } from "../../../../lix/open-lix.js";
 import { insertTransactionState } from "../../../../state/transaction/insert-transaction-state.js";
 import { updateStateCache } from "../../../../state/cache/update-state-cache.js";
@@ -10,62 +13,70 @@ import { internalQueryBuilder } from "../../../../engine/internal-query-builder.
 import { rewriteSql } from "../rewrite-sql.js";
 import { sql } from "kysely";
 
-test("fast path includes writer join when writer_key selected", () => {
-	const sql = `SELECT v.writer_key FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' LIMIT 1;`;
-	const shape = analyzeShape(tokenize(sql));
-	expect(shape).not.toBeNull();
-	expect(shape?.selectsWriterKey).toBe(true);
+const EXPECTED_VISIBLE_COLUMNS = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
+	"version_id",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"metadata",
+	"writer_key",
+];
 
-	const rewritten = rewriteInternalStateVtableQuery(shape!);
-	expect(rewritten).toBeTruthy();
-	const limitCount = (rewritten!.match(/LIMIT 1/g) ?? []).length;
-	expect(limitCount).toBe(4);
-	expect(rewritten).toContain("internal_state_writer");
-});
-
-test("rewrites a simple internal_state_vtable select", () => {
-	const sql = `SELECT * FROM internal_state_vtable;`;
-	const tokens = tokenize(sql);
-	const shape = analyzeShape(tokens);
-	expect(shape).not.toBeNull();
-
-	const rewritten = rewriteInternalStateVtableQuery(shape!);
-	expect(rewritten).toBeTruthy();
-	expect(rewritten).toContain("WITH RECURSIVE");
-	expect(rewritten).toContain("internal_state_cache");
-});
-
-test("passes literal schema key into cache routing", () => {
+test("buildHoistedInternalStateVtableCte hoists wide path with schema filters", () => {
 	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
-
 	expect(shape).not.toBeNull();
 
-	const rewritten = rewriteInternalStateVtableQuery(shape!);
-	expect(rewritten).toBeTruthy();
-	expect(rewritten).toContain("lix_key_value");
+	const cte = buildHoistedInternalStateVtableCte([shape!]);
+	expect(cte).toBeTruthy();
+	expect(cte).toContain("internal_state_vtable AS");
+	expect(cte).toContain("internal_state_cache");
+	expect(cte).toContain("lix_key_value");
 });
 
-test("uses fast path for limit 1 queries", async () => {
-	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' LIMIT 1;`;
+test("buildInternalStateVtableProjection strips hidden primary key when unused", () => {
+	const sql = `SELECT * FROM internal_state_vtable;`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
+
 	expect(shape).not.toBeNull();
 
-	const rewritten = rewriteInternalStateVtableQuery(shape!);
-	expect(rewritten).toBeTruthy();
-	const limitCount = (rewritten!.match(/LIMIT 1/g) ?? []).length;
-	expect(limitCount).toBe(4);
-	expect(rewritten).toContain("internal_transaction_state");
-	expect(rewritten).not.toContain("WITH RECURSIVE");
-	expect(rewritten).not.toContain("internal_state_writer");
+	const projection = buildInternalStateVtableProjection(shape!);
+	expect(projection).toBe(
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable) AS internal_state_vtable`
+	);
+});
 
-	const rewrittenQuery = `SELECT * FROM (${rewritten}) AS v;`;
-	const plan = await explainQueryPlan(rewrittenQuery);
+test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
+	const sql = `SELECT * FROM internal_state_vtable;`;
+	const rewritten = rewriteSql(sql);
 
-	expect(plan).not.toContain("internal_state_vtable");
-	expect(plan).toMatchSnapshot();
+	expect(rewritten.trim().startsWith("WITH"))
+		.toBe(true);
+	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain(
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable) AS internal_state_vtable`
+	);
+});
+
+test("queries selecting _pk keep the raw CTE projection", () => {
+	const sql = `SELECT v._pk FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
+	const rewritten = rewriteSql(sql);
+
+	// Hoisted CTE present
+	expect(rewritten).toContain("internal_state_vtable AS (");
+	// _pk selection is unmodified
+	expect(rewritten).toContain("SELECT v._pk FROM internal_state_vtable v");
 });
 
 test("matrix of queries preserves precedence across rewrites", async () => {
@@ -78,7 +89,6 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 			originalSql: string;
 			rewrite: boolean;
 			planSnapshot?: string;
-			expectLimitCount?: number;
 		}> = [
 			{
 				name: "wide",
@@ -90,7 +100,6 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 				originalSql: limitSql,
 				rewrite: true,
 				planSnapshot: "matrix fast limit plan",
-				expectLimitCount: 4,
 			},
 		];
 
@@ -101,12 +110,6 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 			const rewrittenRows = await executeQuery(ctx, variant.originalSql, {
 				rewrite: variant.rewrite,
 			});
-
-			if (variant.expectLimitCount !== undefined && variant.rewrite) {
-				const rewrittenSql = rewriteSql(variant.originalSql);
-				const limitCount = (rewrittenSql.match(/LIMIT 1/g) ?? []).length;
-				expect(limitCount).toBeGreaterThanOrEqual(variant.expectLimitCount);
-			}
 
 			expect(rewrittenRows).toEqual(baselineRows);
 			assertPrecedence(baselineRows);
@@ -241,6 +244,17 @@ async function executeQuery(
 	options: { rewrite: boolean }
 ) {
 	const sql = options.rewrite ? rewriteSql(originalSql) : originalSql;
+	if (options.rewrite) {
+		const rows = ctx.lix.engine!.sqlite.exec({
+			sql,
+			bind: [],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		});
+		return normalizeRows(rows as Array<Record<string, unknown>>);
+	}
+
 	const { rows } = ctx.lix.engine!.executeSync({ sql, parameters: [] });
 	return normalizeRows(rows as Array<Record<string, unknown>>);
 }

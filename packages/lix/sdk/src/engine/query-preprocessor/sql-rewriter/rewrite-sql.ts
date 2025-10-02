@@ -1,5 +1,8 @@
 import { analyzeShapes } from "./microparser/analyze-shape.js";
-import { rewriteInternalStateVtableQuery } from "./recipes/rewrite-internal-state-vtable.js";
+import {
+	buildHoistedInternalStateVtableCte,
+	buildInternalStateVtableProjection,
+} from "./recipes/rewrite-internal-state-vtable.js";
 import { tokenize, type Token } from "./tokenizer.js";
 
 export interface RewriteSqlOptions {
@@ -15,10 +18,8 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 
 	const replacements = shapes
 		.map((shape) => {
-			const replacementSql = rewriteInternalStateVtableQuery(shape);
-			if (!replacementSql) return null;
-			const aliasSql = shape.table.aliasSql ?? shape.table.alias;
-			const wrapped = `(${replacementSql}) AS ${aliasSql}`;
+			const wrapped = buildInternalStateVtableProjection(shape);
+			if (!wrapped) return null;
 			return {
 				start: shape.table.start,
 				end: shape.table.end,
@@ -30,17 +31,37 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 				value !== null
 		);
 
-	if (replacements.length === 0) {
-		return sql;
+	let current = sql;
+	if (replacements.length > 0) {
+		replacements.sort((a, b) => b.start - a.start);
+		for (const replacement of replacements) {
+			current =
+				current.slice(0, replacement.start) +
+				replacement.wrapped +
+				current.slice(replacement.end + 1);
+		}
 	}
 
-	replacements.sort((a, b) => b.start - a.start);
-	let current = sql;
-	for (const replacement of replacements) {
-		current =
-			current.slice(0, replacement.start) +
-			replacement.wrapped +
-			current.slice(replacement.end + 1);
+	const cteClause = buildHoistedInternalStateVtableCte(shapes);
+	if (!cteClause) {
+		return current;
 	}
-	return current;
+
+	return hoistCte(current, cteClause);
+}
+
+function hoistCte(sql: string, cteClause: string): string {
+	const leadingWhitespaceMatch = sql.match(/^\s*/);
+	const leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[0] ?? "" : "";
+	const body = sql.slice(leadingWhitespace.length);
+	const withMatch = body.match(/^(with\s+(recursive\s+)?)?/i);
+	if (withMatch && withMatch[0]) {
+		const header = `${leadingWhitespace}${withMatch[0]}`;
+		const remainder = body.slice(withMatch[0].length);
+		const needsNewline = !remainder.startsWith("\n");
+		const separator = needsNewline ? "\n" : "";
+		return `${header}${cteClause},${separator}${remainder}`;
+	}
+
+	return `${leadingWhitespace}WITH\n${cteClause}\n${body}`;
 }

@@ -18,8 +18,12 @@ describe("createQueryPreprocessorV2", () => {
 			parameters: [],
 		});
 
-		expect(result.sql).toContain("WITH RECURSIVE");
-		expect(result.sql).not.toMatch(/FROM\s+internal_state_vtable/i);
+		expect(result.sql.trim().startsWith("WITH"))
+			.toBe(true);
+		expect(result.sql).toContain("internal_state_vtable AS (");
+		expect(result.sql).toContain(
+			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS internal_state_vtable"
+		);
 
 		await lix.close();
 	});
@@ -151,12 +155,15 @@ describe("createQueryPreprocessorV2", () => {
 		expect(result.sql).toContain("WITH RECURSIVE");
 		expect(result.sql).not.toMatch(/FROM\s+"stored_schema"/i);
 
-		const { rows } = lix.engine!.executeSync({
+		const rows = lix.engine!.sqlite.exec({
 			sql: result.sql,
-			parameters: result.parameters,
+			bind: result.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
 		});
 
-		expect(rows).toBeInstanceOf(Array);
+		expect(Array.isArray(rows)).toBe(true);
 		await lix.close();
 	});
 
@@ -187,13 +194,16 @@ describe("createQueryPreprocessorV2", () => {
 
 		const result = preprocess({ sql, parameters });
 
-		const { rows } = lix.engine!.executeSync({
+		const rows = lix.engine!.sqlite.exec({
 			sql: result.sql,
-			parameters: result.parameters,
+			bind: result.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
 		});
 
-		expect(rows).toBeInstanceOf(Array);
-		expect(rows.length).toBe(0);
+		expect(Array.isArray(rows)).toBe(true);
+		expect((rows as unknown[]).length).toBe(0);
 
 		await lix.close();
 	});

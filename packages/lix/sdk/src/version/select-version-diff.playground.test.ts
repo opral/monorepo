@@ -4,7 +4,10 @@ import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 import { selectVersionDiff } from "./select-version-diff.js";
 
-const OUTPUT_PATH = "packages/lix/sdk/src/version/select-version-diff.playground-plan.txt";
+const OUTPUT_PATH = decodeURIComponent(
+	new URL("./select-version-diff.playground-plan.txt", import.meta.url)
+		.pathname
+);
 
 describe("selectVersionDiff playground", () => {
 	test("captures explain output", async () => {
@@ -87,6 +90,7 @@ describe("selectVersionDiff playground", () => {
 				parameters: compiled.parameters ?? [],
 			})) as {
 				original: { sql: string };
+				expanded?: { sql: string };
 				rewritten?: { sql: string };
 				plan: unknown;
 			};
@@ -94,6 +98,8 @@ describe("selectVersionDiff playground", () => {
 			const payload = [
 				"-- original SQL --",
 				report.original.sql,
+				"\n-- expanded SQL --",
+				report.expanded?.sql ?? "<unchanged>",
 				"\n-- rewritten SQL --",
 				report.rewritten?.sql ?? "<unchanged>",
 				"\n-- plan --",

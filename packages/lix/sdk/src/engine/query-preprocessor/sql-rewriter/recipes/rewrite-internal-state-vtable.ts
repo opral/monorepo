@@ -1,5 +1,46 @@
 import type { Shape } from "../microparser/analyze-shape.js";
 
+export function buildHoistedInternalStateVtableCte(shapes: Shape[]): string | null {
+	if (shapes.length === 0) {
+		return null;
+	}
+
+	const schemaKeys = new Set<string>();
+	for (const shape of shapes) {
+		for (const entry of shape.schemaKeys) {
+			if (entry.kind === "literal") {
+				schemaKeys.add(entry.value);
+			}
+		}
+	}
+
+	const widePath = buildWidePath({ schemaKeys: [...schemaKeys] });
+	const projectionColumns = ["_pk", ...VISIBLE_STATE_COLUMNS].join(",\n        ");
+	const cteBody = stripIndent(`
+		-- Chevrotain rewrite hoist
+		internal_state_vtable AS (
+		  SELECT ${projectionColumns}
+		  FROM (
+${indent(widePath, 6)}
+		  )
+		)
+	`);
+
+	return cteBody.trim();
+}
+
+export function buildInternalStateVtableProjection(
+	shape: Shape
+): string | null {
+	if (shape.referencesPrimaryKey) {
+		return null;
+	}
+
+	const projection = VISIBLE_STATE_COLUMNS.join(", ");
+	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
+	return `(SELECT ${projection} FROM internal_state_vtable) AS ${aliasSql}`;
+}
+
 /**
  * Build a replacement subquery for `internal_state_vtable`.
  * Returns `null` when the query shape is outside the supported surface.
@@ -586,6 +627,14 @@ function stripIndent(value: string): string {
 		.map((line) => line.match(/^\s*/)?.[0]?.length ?? 0);
 	const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
 	return lines.map((line) => line.slice(minIndent)).join("\n");
+}
+
+function indent(value: string, spaces: number): string {
+	const pad = " ".repeat(Math.max(spaces, 0));
+	return value
+		.split("\n")
+		.map((line) => (line.trim().length === 0 ? line : `${pad}${line}`))
+		.join("\n");
 }
 
 function escapeLiteral(value: string): string {
