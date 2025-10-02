@@ -24,7 +24,7 @@
 		},
 		"Getting Started": {
 			"/sveltekit": "./examples/sveltekit/README.md",
-			"/tanstack-router": "https://github.com/juliomuhlbauer/tanstack-router-i18n-paraglide",
+			"/tanstack-router": "https://github.com/TanStack/router/tree/main/examples/react/i18n-paraglide",
 			"/tanstack-start": "https://github.com/juliomuhlbauer/tanstack-start-i18n-paraglide",
 			"/react-router": "./examples/react-router/README.md",
 			"/next-js": "./docs/getting-started/next-js.md",
