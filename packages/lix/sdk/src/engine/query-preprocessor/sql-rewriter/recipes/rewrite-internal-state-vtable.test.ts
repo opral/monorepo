@@ -12,6 +12,10 @@ import { getTimestamp } from "../../../../engine/functions/timestamp.js";
 import { internalQueryBuilder } from "../../../../engine/internal-query-builder.js";
 import { rewriteSql } from "../rewrite-sql.js";
 import { sql } from "kysely";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../../../../state/cache/create-schema-cache-table.js";
 
 const EXPECTED_VISIBLE_COLUMNS = [
 	"entity_id",
@@ -40,7 +44,7 @@ test("buildHoistedInternalStateVtableCte hoists wide path with schema filters", 
 	const cte = buildHoistedInternalStateVtableCte([shape!]);
 	expect(cte).toBeTruthy();
 	expect(cte).toContain("internal_state_vtable AS");
-	expect(cte).toContain("internal_state_cache");
+	expect(cte).toContain("internal_state_cache_lix_key_value");
 	expect(cte).toContain("lix_key_value");
 });
 
@@ -316,6 +320,10 @@ function assertPrecedence(rows: Array<{ _pk: string; entity_id: string }>) {
 
 async function explainQueryPlan(sql: string): Promise<string> {
 	const lix = await openLix({});
+	createSchemaCacheTable({
+		engine: lix.engine!,
+		tableName: schemaKeyToCacheTableName(TEST_SCHEMA),
+	});
 	const sanitized = sql.trim().replace(/;$/, "");
 	try {
 		const { rows } = lix.engine!.executeSync({

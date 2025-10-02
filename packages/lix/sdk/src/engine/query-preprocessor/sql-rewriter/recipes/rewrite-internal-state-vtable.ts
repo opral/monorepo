@@ -278,14 +278,19 @@ function buildFilters(alias: string, options: FastPathOptions): string[] {
 
 function buildCacheRoutingSql(schemaKeys: string[]): string {
 	return schemaKeys
-		.map((key) =>
-			stripIndent(`
+		.map((key) => {
+			const sanitized = sanitizeSchemaKey(key);
+			const tableName = `internal_state_cache_${sanitized}`;
+			return stripIndent(`
         SELECT *
-        FROM internal_state_cache
-        WHERE schema_key = '${escapeLiteral(key)}'
-      `)
-		)
+        FROM ${tableName}
+      `);
+		})
 		.join("\nUNION ALL\n");
+}
+
+function sanitizeSchemaKey(key: string): string {
+	return key.replace(/[^a-zA-Z0-9]/g, "_");
 }
 
 function buildVersionCtes(): string {

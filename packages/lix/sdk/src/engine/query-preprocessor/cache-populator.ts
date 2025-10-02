@@ -1,6 +1,11 @@
 import { populateStateCache } from "../../state/cache/populate-state-cache.js";
 import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../../state/cache/create-schema-cache-table.js";
+import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import type { LixEngine } from "../boot.js";
 import type { Shape } from "./sql-rewriter/microparser/analyze-shape.js";
 
@@ -55,6 +60,8 @@ export function ensureFreshStateCache(args: CachePopulationArgs): void {
 		if (!hasInternalStateVtable(args.engine)) {
 			return;
 		}
+
+		ensureCacheTablesForShape(args.engine, args.shape);
 
 		const needsRefresh = safeIsStaleStateCache(args.engine);
 		if (!needsRefresh) {
@@ -130,4 +137,27 @@ function isMissingInternalStateVtableError(error: unknown): boolean {
 		message.includes("no such table: internal_state_vtable") ||
 		message.includes("no such module: internal_state_vtable")
 	);
+}
+
+function ensureCacheTablesForShape(
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
+	shape: Shape
+): void {
+	const literalSchemaKeys = shape.schemaKeys
+		.filter((entry) => entry.kind === "literal")
+		.map((entry) => entry.value);
+
+	if (literalSchemaKeys.length === 0) {
+		return;
+	}
+
+	const tableCache = getStateCacheV2Tables({ engine });
+	for (const schemaKey of literalSchemaKeys) {
+		const tableName = schemaKeyToCacheTableName(schemaKey);
+		if (tableCache.has(tableName)) {
+			continue;
+		}
+		createSchemaCacheTable({ engine, tableName });
+		tableCache.add(tableName);
+	}
 }
