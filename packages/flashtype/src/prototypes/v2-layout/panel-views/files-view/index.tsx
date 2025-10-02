@@ -1,8 +1,8 @@
-import type { ViewContext } from "../types";
+import type { ViewContext } from "../../types";
 
-interface FilesViewProps {
+type FilesViewProps = {
 	readonly context?: ViewContext;
-}
+};
 
 /**
  * Files view - Browse and pin project documents

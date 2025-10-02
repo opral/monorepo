@@ -1,6 +1,6 @@
-interface FileContentViewProps {
+type FileContentViewProps = {
 	readonly fileName: string;
-}
+};
 
 /**
  * File content view - Display file contents like Fleet
