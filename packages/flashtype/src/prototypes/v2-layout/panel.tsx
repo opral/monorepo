@@ -1,7 +1,14 @@
 import clsx from "clsx";
-import { type ReactNode } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { X, type LucideIcon } from "lucide-react";
+import styles from "./panel.module.css";
 
 interface PanelProps {
 	readonly children: ReactNode;
@@ -34,9 +41,73 @@ interface TabBarProps {
 }
 
 Panel.TabBar = function TabBar({ children, className = "" }: TabBarProps) {
+	const scrollRef = useRef<HTMLDivElement | null>(null);
+	const [thumb, setThumb] = useState({ width: "0%", left: "0%" });
+	const [thumbVisible, setThumbVisible] = useState(false);
+	const hideTimeoutRef = useRef<number | null>(null);
+
+	const updateThumb = useCallback(() => {
+		const el = scrollRef.current;
+		if (!el) return;
+		const { scrollWidth, clientWidth, scrollLeft } = el;
+		if (scrollWidth <= clientWidth) {
+			setThumb({ width: "0%", left: "0%" });
+			setThumbVisible(false);
+			return;
+		}
+		const ratio = clientWidth / scrollWidth;
+		const widthPercent = Math.max(ratio * 100, 10);
+		const maxLeft = 100 - widthPercent;
+		const leftPercent = Math.min(
+			maxLeft,
+			(scrollLeft / (scrollWidth - clientWidth)) * maxLeft,
+		);
+		setThumb({ width: `${widthPercent}%`, left: `${leftPercent}%` });
+		setThumbVisible(true);
+		if (hideTimeoutRef.current !== null) {
+			window.clearTimeout(hideTimeoutRef.current);
+		}
+		hideTimeoutRef.current = window.setTimeout(
+			() => setThumbVisible(false),
+			250,
+		);
+	}, []);
+
+	useLayoutEffect(() => {
+		const el = scrollRef.current;
+		if (!el) return;
+		updateThumb();
+		el.addEventListener("scroll", updateThumb);
+		let resizeObserver: ResizeObserver | undefined;
+		if (typeof ResizeObserver !== "undefined") {
+			resizeObserver = new ResizeObserver(updateThumb);
+			resizeObserver.observe(el);
+		}
+		return () => {
+			el.removeEventListener("scroll", updateThumb);
+			resizeObserver?.disconnect();
+			if (hideTimeoutRef.current !== null) {
+				window.clearTimeout(hideTimeoutRef.current);
+				hideTimeoutRef.current = null;
+			}
+		};
+	}, [updateThumb]);
+
 	return (
-		<div className={`flex items-center gap-1 px-2 pt-2 ${className}`}>
-			{children}
+		<div className={clsx(styles.tabBar, className)}>
+			<div className={styles.indicatorTrack}>
+				<div
+					className={styles.indicatorThumb}
+					style={{
+						...thumb,
+						opacity: thumbVisible ? 1 : 0,
+						transition: "width 0.12s ease, left 0.12s ease, opacity 0.18s ease",
+					}}
+				/>
+			</div>
+			<div ref={scrollRef} className={styles.scrollContainer}>
+				{children}
+			</div>
 		</div>
 	);
 };
@@ -48,7 +119,9 @@ interface ContentProps {
 
 Panel.Content = function Content({ children, className = "" }: ContentProps) {
 	return (
-		<div className={`flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2 ${className}`}>
+		<div
+			className={`flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2 ${className}`}
+		>
 			{children}
 		</div>
 	);

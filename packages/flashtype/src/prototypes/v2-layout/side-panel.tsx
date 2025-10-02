@@ -59,6 +59,10 @@ export function SidePanel({
 		data: { panel: side },
 	});
 
+	const availableViews = VIEW_DEFINITIONS.filter((view) =>
+		!panel.instances.some((instance) => instance.viewId === view.id),
+	);
+
 	return (
 		<aside
 			ref={setNodeRef}
@@ -104,7 +108,7 @@ export function SidePanel({
 								align={side === "left" ? "start" : "end"}
 								className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
 							>
-								{VIEW_DEFINITIONS.map((ext) => (
+								{availableViews.map((ext) => (
 									<DropdownMenuItem
 										key={ext.id}
 										onSelect={() => onAddView(ext.id)}
@@ -132,7 +136,7 @@ export function SidePanel({
 							instance={activeInstance}
 						/>
 					) : (
-						<EmptyPanelState side={side} onAddView={onAddView} />
+						<EmptyPanelState side={side} onAddView={onAddView} availableViews={availableViews} />
 					)}
 				</Panel.Content>
 			</Panel>
@@ -143,14 +147,16 @@ export function SidePanel({
 interface EmptyPanelStateProps {
 	side: PanelSide;
 	onAddView: (viewId: ViewId) => void;
+ 	availableViews?: ViewDefinition[];
 }
 
 /**
  * Fleet-style empty state for panels with no active views
  */
-function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
+function EmptyPanelState({ side, onAddView, availableViews }: EmptyPanelStateProps) {
 	const Icon = side === "left" ? PanelLeft : PanelRight;
 	const panelName = side === "left" ? "Left" : "Right";
+	const menuViews = availableViews ?? VIEW_DEFINITIONS;
 
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
@@ -178,7 +184,7 @@ function EmptyPanelState({ side, onAddView }: EmptyPanelStateProps) {
 					align="center"
 					className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
 				>
-					{VIEW_DEFINITIONS.map((ext) => (
+					{menuViews.map((ext) => (
 						<DropdownMenuItem
 							key={ext.id}
 							onSelect={() => onAddView(ext.id)}

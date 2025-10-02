@@ -12,7 +12,7 @@ import { CheckpointView } from "./panel-views/checkpoint-view/index";
  * @example
  * const filesView = VIEW_DEFINITIONS.find((ext) => ext.id === "files");
  */
-export const VIEW_DEFINITIONS: ViewDefinition[] = [
+const VISIBLE_VIEWS: ViewDefinition[] = [
 	{
 		id: "files",
 		label: "Files",
@@ -41,6 +41,9 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		icon: Flag,
 		render: (context) => <CheckpointView context={context} />,
 	},
+];
+
+const HIDDEN_VIEWS: ViewDefinition[] = [
 	{
 		id: "file-content",
 		label: "File",
@@ -52,8 +55,10 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 	},
 ];
 
+export const VIEW_DEFINITIONS: ViewDefinition[] = VISIBLE_VIEWS;
+
 export const VIEW_MAP = new Map<ViewId, ViewDefinition>(
-	VIEW_DEFINITIONS.map((ext) => [ext.id, ext]),
+	[...VISIBLE_VIEWS, ...HIDDEN_VIEWS].map((ext) => [ext.id, ext]),
 );
 
 let viewCounter = 0;
