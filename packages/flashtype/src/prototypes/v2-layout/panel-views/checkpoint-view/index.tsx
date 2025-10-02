@@ -1,38 +1,41 @@
 import { useState } from "react";
 import { useQuery } from "@lix-js/react-utils";
-import { selectWorkingDiffCount, selectCheckpoints } from "@/queries";
 import type { ViewContext } from "../../types";
+import { selectWorkingDiffFiles } from "./queries";
 import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
 import { LatestCheckpoint } from "./latest-checkpoint";
 
+/**
+ * Checkpoint view - Shows working changes and allows creating checkpoints
+ */
 type CheckpointViewProps = {
 	readonly context?: ViewContext;
 };
 
-/**
- * Checkpoint view - Shows working changes and allows creating checkpoints
- */
-export function CheckpointView({ context }: CheckpointViewProps) {
+export function CheckpointView(_props: CheckpointViewProps) {
 	const [message, setMessage] = useState("");
 	const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
-	// Query working changes count (commented out for now)
-	// const diffCount = useQuery(({ lix }) => selectWorkingDiffCount(lix));
+	const changedFiles = useQuery(({ lix }) => selectWorkingDiffFiles(lix)) ?? [];
+	const validFileIds = new Set(changedFiles.map((file) => file.id));
+	const visibleSelection = new Set<string>();
+	for (const id of selectedFiles) {
+		if (validFileIds.has(id)) {
+			visibleSelection.add(id);
+		}
+	}
 
-	// Query changed files (placeholder - we'll implement this query)
-	const changedFiles = [
-		{ id: "1", path: "AGENTS.md" },
-		{ id: "2", path: "writing-style.md" },
-	]; // TODO: implement real query
-
-	// Query latest checkpoint (commented out for now)
-	// const latestCheckpoint = useQuery(({ lix }) => selectCheckpoints({ lix }).limit(1));
 	const latestCheckpoint = null;
 
 	const handleToggleFile = (fileId: string) => {
 		setSelectedFiles((prev) => {
-			const next = new Set(prev);
+			const next = new Set<string>();
+			for (const id of prev) {
+				if (validFileIds.has(id)) {
+					next.add(id);
+				}
+			}
 			if (next.has(fileId)) {
 				next.delete(fileId);
 			} else {
@@ -43,7 +46,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 	};
 
 	const handleToggleAll = () => {
-		if (selectedFiles.size === changedFiles.length) {
+		if (visibleSelection.size === changedFiles.length) {
 			setSelectedFiles(new Set());
 		} else {
 			setSelectedFiles(new Set(changedFiles.map((f) => f.id)));
@@ -61,7 +64,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 			<div className="flex-1 overflow-y-auto">
 				<ChangedFilesList
 					files={changedFiles}
-					selectedFiles={selectedFiles}
+					selectedFiles={visibleSelection}
 					onToggleFile={handleToggleFile}
 					onToggleAll={handleToggleAll}
 				/>
