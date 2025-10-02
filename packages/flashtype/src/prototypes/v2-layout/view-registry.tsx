@@ -1,8 +1,9 @@
-import { CalendarDays, Files, Search } from "lucide-react";
+import { CalendarDays, FileText, Files, Search } from "lucide-react";
 import type { ViewDefinition, ViewId } from "./types";
 import { FilesView } from "./panel-views/files-view";
 import { SearchView } from "./panel-views/search-view";
 import { TasksView } from "./panel-views/tasks-view";
+import { FileContentView } from "./panel-views/file-content-view";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -16,7 +17,7 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		label: "Files",
 		description: "Browse and pin project documents.",
 		icon: Files,
-		render: () => <FilesView />,
+		render: (context) => <FilesView context={context} />,
 	},
 	{
 		id: "search",
@@ -31,6 +32,15 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		description: "Track the current sprint notes.",
 		icon: CalendarDays,
 		render: () => <TasksView />,
+	},
+	{
+		id: "file-content",
+		label: "File",
+		description: "Display file contents.",
+		icon: FileText,
+		render: (_context, instance) => (
+			<FileContentView fileName={instance?.metadata?.fileName ?? "untitled"} />
+		),
 	},
 ];
 

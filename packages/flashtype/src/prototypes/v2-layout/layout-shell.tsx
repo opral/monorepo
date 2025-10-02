@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
 import type { PanelSide, PanelState, ViewId } from "./types";
-import { createViewInstanceId } from "./view-registry";
+import { createViewInstanceId, VIEW_MAP } from "./view-registry";
+import { Panel as PanelComponent } from "./panel";
 
 /**
  * Fleet-style layout shell with independent left and right islands.
@@ -21,14 +23,18 @@ export function V2LayoutShell() {
 		],
 		activeInstanceId: null,
 	}));
+	const [centralPanel, setCentralPanel] = useState<PanelState>(() => ({
+		instances: [],
+		activeInstanceId: null,
+	}));
 	const [rightPanel, setRightPanel] = useState<PanelState>(() => ({
 		instances: [],
 		activeInstanceId: null,
 	}));
 
 	const panels = useMemo(
-		() => ({ left: leftPanel, right: rightPanel }),
-		[leftPanel, rightPanel],
+		() => ({ left: leftPanel, central: centralPanel, right: rightPanel }),
+		[leftPanel, centralPanel, rightPanel],
 	);
 
 	const hydrate = (panel: PanelState): PanelState => ({
@@ -42,19 +48,101 @@ export function V2LayoutShell() {
 	const setPanelState = (side: PanelSide, reducer: (state: PanelState) => PanelState) => {
 		if (side === "left") {
 			setLeftPanel((prev) => reducer(hydrate(prev)));
+		} else if (side === "central") {
+			setCentralPanel((prev) => reducer(hydrate(prev)));
 		} else {
 			setRightPanel((prev) => reducer(hydrate(prev)));
 		}
 	};
 
 	const hydratedLeft = hydrate(panels.left);
+	const hydratedCentral = hydrate(panels.central);
 	const hydratedRight = hydrate(panels.right);
 
+	const [activeId, setActiveId] = useState<string | null>(null);
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+	);
+
+	const handleDragStart = (event: DragStartEvent) => {
+		setActiveId(event.active.id as string);
+	};
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		setActiveId(null);
+		const { active, over } = event;
+
+		if (!over || active.id === over.id) return;
+
+		// Parse drag data
+		const dragData = active.data.current as { instanceId: string; viewId: ViewId; fromPanel: PanelSide } | undefined;
+		const dropData = over.data.current as { panel: PanelSide } | undefined;
+
+		if (!dragData || !dropData) return;
+
+		const { instanceId, viewId, fromPanel } = dragData;
+		const { panel: toPanel } = dropData;
+
+		// Remove from source panel
+		setPanelState(fromPanel, (panel) => ({
+			instances: panel.instances.filter((i) => i.instanceId !== instanceId),
+			activeInstanceId: panel.activeInstanceId === instanceId ? null : panel.activeInstanceId,
+		}));
+
+		// Add to target panel
+		setPanelState(toPanel, (panel) => {
+			const newInstance = { instanceId, viewId };
+			return {
+				instances: [...panel.instances, newInstance],
+				activeInstanceId: newInstance.instanceId,
+			};
+		});
+	};
+
+	const activeDragData = activeId ?
+		[...hydratedLeft.instances, ...hydratedCentral.instances, ...hydratedRight.instances].find(i => i.instanceId === activeId) : null;
+	const activeDragView = activeDragData ? VIEW_MAP.get(activeDragData.viewId) : null;
+
+	const handleOpenFile = (fileName: string) => {
+		// Check if file is already open in central panel
+		const existingFileInstance = hydratedCentral.instances.find(
+			(instance) => instance.metadata?.fileName === fileName
+		);
+
+		if (existingFileInstance) {
+			// Focus existing tab
+			setPanelState("central", (panel) => ({
+				instances: panel.instances,
+				activeInstanceId: existingFileInstance.instanceId,
+			}));
+		} else {
+			// Create new file tab
+			const newInstance = {
+				instanceId: `file-${fileName}-${Date.now()}`,
+				viewId: "file-content" as ViewId,
+				metadata: {
+					fileName,
+					label: fileName.split("/").pop() || fileName,
+				},
+			};
+			setPanelState("central", (panel) => ({
+				instances: [...panel.instances, newInstance],
+				activeInstanceId: newInstance.instanceId,
+			}));
+		}
+	};
+
 	return (
-		<div className="flex h-screen flex-col bg-surface-300 text-onsurface-primary">
-			<TopBar />
-			<div className="flex flex-1 overflow-hidden px-2 gap-4">
-				<PanelGroup direction="horizontal">
+		<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+			<div className="flex h-screen flex-col bg-neutral-100 text-neutral-900">
+				<TopBar />
+				<div className="flex flex-1 overflow-hidden px-2 gap-4">
+					<PanelGroup direction="horizontal">
 					<Panel defaultSize={20} minSize={10} maxSize={40}>
 						<SidePanel
 						side="left"
@@ -87,16 +175,35 @@ export function V2LayoutShell() {
 								return { instances, activeInstanceId: nextActive };
 							})
 						}
+						viewContext={{ onOpenFile: handleOpenFile }}
 						/>
 					</Panel>
 					<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
-						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 					</PanelResizeHandle>
 					<Panel defaultSize={60} minSize={30}>
-						<CentralPanel />
+						<CentralPanel
+							panel={hydratedCentral}
+							onSelectView={(instanceId) =>
+								setPanelState("central", (panel) => ({
+									instances: panel.instances,
+									activeInstanceId: instanceId,
+								}))
+							}
+							onRemoveView={(instanceId) =>
+								setPanelState("central", (panel) => {
+									const instances = panel.instances.filter((entry) => entry.instanceId !== instanceId);
+									const nextActive = panel.activeInstanceId === instanceId
+										? instances[instances.length - 1]?.instanceId ?? null
+										: panel.activeInstanceId;
+									return { instances, activeInstanceId: nextActive };
+								})
+							}
+							viewContext={{ onOpenFile: handleOpenFile }}
+						/>
 					</Panel>
 					<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
-						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+						<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 					</PanelResizeHandle>
 					<Panel defaultSize={20} minSize={10} maxSize={40}>
 						<SidePanel
@@ -130,11 +237,25 @@ export function V2LayoutShell() {
 								return { instances, activeInstanceId: nextActive };
 							})
 						}
+						viewContext={{ onOpenFile: handleOpenFile }}
 					/>
 					</Panel>
-				</PanelGroup>
+					</PanelGroup>
+				</div>
+				<StatusBar />
 			</div>
-			<StatusBar />
-		</div>
+			<DragOverlay>
+				{activeId && activeDragView ? (
+					<div className="cursor-grabbing">
+						<PanelComponent.Tab
+							icon={activeDragView.icon}
+							label={activeDragView.label}
+							isActive={true}
+							isFocused={true}
+						/>
+					</div>
+				) : null}
+			</DragOverlay>
+		</DndContext>
 	);
 }

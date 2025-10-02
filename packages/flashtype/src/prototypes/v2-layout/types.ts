@@ -7,7 +7,7 @@ import type { LucideIcon } from "lucide-react";
  * @example
  * const activeView: ViewId = "files";
  */
-export type ViewId = "files" | "search" | "tasks";
+export type ViewId = "files" | "search" | "tasks" | "file-content";
 
 /**
  * Per-panel instance metadata used to track which views are open.
@@ -18,6 +18,10 @@ export type ViewId = "files" | "search" | "tasks";
 export interface ViewInstance {
 	readonly instanceId: string;
 	readonly viewId: ViewId;
+	readonly metadata?: {
+		readonly fileName?: string;
+		readonly label?: string;
+	};
 }
 
 /**
@@ -31,7 +35,14 @@ export interface ViewDefinition {
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
-	readonly render: () => ReactNode;
+	readonly render: (context?: ViewContext, instance?: ViewInstance) => ReactNode;
+}
+
+/**
+ * Context passed to views for interacting with the layout
+ */
+export interface ViewContext {
+	readonly onOpenFile?: (fileName: string) => void;
 }
 
 /**
@@ -51,4 +62,4 @@ export interface PanelState {
  * @example
  * const side: PanelSide = "left";
  */
-export type PanelSide = "left" | "right";
+export type PanelSide = "left" | "right" | "central";

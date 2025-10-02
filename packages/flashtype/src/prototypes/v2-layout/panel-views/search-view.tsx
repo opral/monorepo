@@ -3,26 +3,26 @@
  */
 export function SearchView() {
 	return (
-		<div className="space-y-3 text-[13px] text-onsurface-primary">
-			<label className="grid gap-1 text-xs font-medium text-onsurface-secondary">
+		<div className="space-y-3 text-[13px] text-neutral-900">
+			<label className="grid gap-1 text-xs font-medium text-neutral-600">
 				Query
 				<input
 					placeholder="Search project..."
-					className="rounded-md border border-stroke-200 bg-surface-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+					className="rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-50"
 				/>
 			</label>
 			<div className="space-y-1">
-				<div className="text-xs uppercase tracking-[0.08em] text-onsurface-tertiary">
+				<div className="text-xs uppercase tracking-[0.08em] text-neutral-400">
 					Suggestions
 				</div>
 				<ul className="space-y-1">
-					<li className="rounded-md px-2 py-1 hover:bg-surface-300">
+					<li className="rounded-md px-2 py-1 hover:bg-neutral-100">
 						Show recently edited files
 					</li>
-					<li className="rounded-md px-2 py-1 hover:bg-surface-300">
+					<li className="rounded-md px-2 py-1 hover:bg-neutral-100">
 						Find TODO annotations
 					</li>
-					<li className="rounded-md px-2 py-1 hover:bg-surface-300">
+					<li className="rounded-md px-2 py-1 hover:bg-neutral-100">
 						Open flashtype config
 					</li>
 				</ul>

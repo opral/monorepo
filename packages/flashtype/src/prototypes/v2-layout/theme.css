@@ -58,21 +58,17 @@
 	--color-success-800: rgb(22, 101, 52);
 	--color-success-900: rgb(20, 83, 45);
 
-	/* Semantic tokens following [type]-[role]-[prominence]-[interaction] */
-	--color-brand-primary: rgb(234, 88, 12);
-	--color-brand-secondary: rgb(255, 247, 237);
-	--color-surface-100: rgb(255, 255, 255);
-	--color-surface-200: rgb(250, 250, 250);
-	--color-surface-300: rgb(244, 244, 245);
-	--color-surface-400: rgb(228, 228, 231);
-	--color-surface-500: rgb(212, 212, 216);
-	--color-onsurface-primary: rgb(24, 24, 27);
-	--color-onsurface-secondary: rgb(94, 94, 104);
-	--color-onsurface-tertiary: rgb(161, 161, 170);
-	--color-stroke-100: rgb(244, 244, 245);
-	--color-stroke-200: rgb(228, 228, 231);
-	--color-link-primary: rgb(59, 130, 246);
-	--color-link-primary-hover: rgb(37, 99, 235);
+	/* Semantic tokens - clearer naming */
+	--color-text-primary: var(--color-neutral-900);
+	--color-text-secondary: var(--color-neutral-600);
+	--color-text-tertiary: var(--color-neutral-400);
+	--color-surface-primary: var(--color-neutral-0);
+	--color-surface-secondary: var(--color-neutral-50);
+	--color-surface-tertiary: var(--color-neutral-100);
+	--color-border-primary: var(--color-neutral-200);
+	--color-border-secondary: var(--color-neutral-100);
+	--color-brand-primary: var(--color-brand-600);
+	--color-brand-subtle: var(--color-brand-200);
 
 	/* Font families */
 	--font-caption: Inter;
