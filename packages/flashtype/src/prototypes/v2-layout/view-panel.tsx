@@ -14,7 +14,7 @@ interface ViewPanelProps {
  */
 export function ViewPanel({ view, context, instance }: ViewPanelProps) {
 	return (
-		<div className="flex-1 overflow-auto text-sm text-neutral-900">
+		<div className="flex min-h-0 flex-1 flex-col overflow-auto text-sm text-neutral-900">
 			{view.render(context, instance)}
 		</div>
 	);
