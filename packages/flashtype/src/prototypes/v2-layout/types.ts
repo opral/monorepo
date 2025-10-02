@@ -19,7 +19,7 @@ export interface ViewInstance {
 	readonly instanceId: string;
 	readonly viewId: ViewId;
 	readonly metadata?: {
-		readonly fileName?: string;
+		readonly filePath?: string;
 		readonly label?: string;
 	};
 }
@@ -35,14 +35,20 @@ export interface ViewDefinition {
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
-	readonly render: (context?: ViewContext, instance?: ViewInstance) => ReactNode;
+	readonly render: (
+		context?: ViewContext,
+		instance?: ViewInstance,
+	) => ReactNode;
 }
 
 /**
- * Context passed to views for interacting with the layout
+ * Context passed to views for interacting with the layout.
+ *
+ * @example
+ * context.onOpenFile?.("/docs/guide.md");
  */
 export interface ViewContext {
-	readonly onOpenFile?: (fileName: string) => void;
+	readonly onOpenFile?: (filePath: string) => void;
 }
 
 /**

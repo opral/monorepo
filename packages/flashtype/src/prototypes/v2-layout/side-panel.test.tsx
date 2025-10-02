@@ -71,6 +71,8 @@ describe("SidePanel", () => {
 					onSelectView={() => {}}
 					onAddView={() => {}}
 					onRemoveView={() => {}}
+					isFocused={false}
+					onFocusPanel={vi.fn()}
 				/>
 			</DndContext>,
 		);
@@ -101,6 +103,8 @@ describe("SidePanel", () => {
 					onAddView={handleAdd}
 					onRemoveView={handleRemove}
 					viewContext={viewContext}
+					isFocused={true}
+					onFocusPanel={vi.fn()}
 				/>
 			</DndContext>,
 		);
@@ -108,9 +112,37 @@ describe("SidePanel", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Files" }));
 		expect(handleSelect).toHaveBeenCalledWith("files-1");
 
+		const filesTab = screen.getByRole("button", { name: "Files" });
+		expect(filesTab.getAttribute("data-focused")).toBe("true");
+
 		fireEvent.click(screen.getByText("writing-style.md"));
 		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
 			"/docs/guides/writing-style.md",
 		);
+	});
+
+	test("removes focus flag when panel not focused", () => {
+		const panelState: PanelState = {
+			instances: [{ instanceId: "files-1", viewId: "files" }],
+			activeInstanceId: "files-1",
+		};
+
+		render(
+			<DndContext>
+				<SidePanel
+					side="left"
+					title="Navigator"
+					panel={panelState}
+					onSelectView={() => {}}
+					onAddView={() => {}}
+					onRemoveView={() => {}}
+					isFocused={false}
+					onFocusPanel={vi.fn()}
+				/>
+			</DndContext>,
+		);
+
+		const filesTab = screen.getByRole("button", { name: "Files" });
+		expect(filesTab.getAttribute("data-focused")).toBeNull();
 	});
 });

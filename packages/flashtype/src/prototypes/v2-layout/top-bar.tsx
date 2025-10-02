@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, Command, GitBranch, PanelLeft, PanelRight, Search, Zap } from "lucide-react";
+import {
+	Bell,
+	Command,
+	GitBranch,
+	PanelLeft,
+	PanelRight,
+	Search,
+	Zap,
+} from "lucide-react";
 
 /**
  * Fleet-inspired top chrome with window controls and quick actions.
@@ -17,10 +25,18 @@ export function TopBar() {
 				<div className="flex h-7 w-7 items-center justify-center">
 					<Zap className="h-4 w-4 text-amber-500" />
 				</div>
-				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+				>
 					<PanelLeft className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+				>
 					<PanelRight className="h-4 w-4" />
 				</Button>
 				<span className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-neutral-900">
@@ -29,13 +45,25 @@ export function TopBar() {
 				</span>
 			</div>
 			<div className="flex items-center gap-0.5">
-				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+				>
 					<Search className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+				>
 					<Command className="h-4 w-4" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+				>
 					<Bell className="h-4 w-4" />
 				</Button>
 				<Button

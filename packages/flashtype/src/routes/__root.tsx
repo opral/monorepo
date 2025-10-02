@@ -1,4 +1,8 @@
-import { Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
+import {
+	Outlet,
+	createRootRoute,
+	useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { useKeyValue } from "@/key-value/use-key-value";

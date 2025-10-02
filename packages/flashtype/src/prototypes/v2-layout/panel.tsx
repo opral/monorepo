@@ -99,7 +99,12 @@ Panel.Tab = function Tab({
 			ref={setNodeRef}
 			type="button"
 			onClick={onClick}
-			className={clsx(tabBaseClasses, tabStateClasses[state], isDragging && "opacity-50 cursor-grabbing")}
+			data-focused={isFocused ? "true" : undefined}
+			className={clsx(
+				tabBaseClasses,
+				tabStateClasses[state],
+				isDragging && "opacity-50 cursor-grabbing",
+			)}
 			{...attributes}
 			{...listeners}
 		>

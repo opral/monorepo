@@ -3,7 +3,7 @@ import type { ViewDefinition, ViewId } from "./types";
 import { FilesView } from "./panel-views/files-view/index";
 import { SearchView } from "./panel-views/search-view/index";
 import { TasksView } from "./panel-views/tasks-view/index";
-import { FileContentView } from "./panel-views/file-content-view/index";
+import { MarkdownView } from "./panel-views/markdown-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -39,7 +39,7 @@ export const VIEW_DEFINITIONS: ViewDefinition[] = [
 		description: "Display file contents.",
 		icon: FileText,
 		render: (_context, instance) => (
-			<FileContentView fileName={instance?.metadata?.fileName ?? "untitled"} />
+			<MarkdownView filePath={instance?.metadata?.filePath} />
 		),
 	},
 ];

@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Bug, Folders, GitCommitVertical, Github, LayoutDashboard, Zap } from "lucide-react";
+import {
+	Bug,
+	Folders,
+	GitCommitVertical,
+	Github,
+	LayoutDashboard,
+	Zap,
+} from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { NavMain } from "@/components/nav-main";
@@ -64,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<NavMain
 					items={data.navMain}
 					active={active}
-						onSelect={(key) => {
+					onSelect={(key) => {
 						if (key === "v2-layout") {
 							void navigate({ to: "/v2-layout" });
 							setActive(null);

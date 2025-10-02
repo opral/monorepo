@@ -7,6 +7,8 @@ import whatIsLix from "./what-is-lix.md?raw";
 import meetingNotes from "./meeting-notes.md?raw";
 // eslint-disable-next-line import/no-unresolved
 import changelog from "./changelog.md?raw";
+// eslint-disable-next-line import/no-unresolved
+import welcome from "./welcome.md?raw";
 
 const encoder = new TextEncoder();
 
@@ -16,6 +18,7 @@ const SEED_DOCS: SeedDoc[] = [
 	{ path: "/what-is-lix.md", content: whatIsLix },
 	{ path: "/notes/meeting-notes.md", content: meetingNotes },
 	{ path: "/docs/changelog.md", content: changelog },
+	{ path: "/welcome.md", content: welcome },
 ];
 
 export async function seedMarkdownFiles(lix: Lix): Promise<void> {
