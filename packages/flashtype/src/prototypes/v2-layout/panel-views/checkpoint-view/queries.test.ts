@@ -44,11 +44,11 @@ describe("selectWorkingDiffFiles", () => {
 			.where("id", "=", fileB)
 			.execute();
 
-		const rows = await selectWorkingDiffFiles(lix).execute();
-		expect(rows).toEqual([
-			{ id: fileA, path: "/docs/alpha.md" },
-			{ id: fileB, path: "/docs/beta.md" },
-		]);
+	const rows = await selectWorkingDiffFiles(lix).execute();
+	expect(rows).toEqual([
+		{ id: fileA, path: "/docs/alpha.md", status: "modified" },
+		{ id: fileB, path: "/docs/beta.md", status: "modified" },
+	]);
 
 		// Another edit to the same file should not duplicate entries
 		await lix.db
@@ -57,12 +57,39 @@ describe("selectWorkingDiffFiles", () => {
 			.where("id", "=", fileA)
 			.execute();
 
-		const deduped = await selectWorkingDiffFiles(lix).execute();
-		expect(deduped).toHaveLength(2);
+	const deduped = await selectWorkingDiffFiles(lix).execute();
+	expect(deduped).toEqual([
+		{ id: fileA, path: "/docs/alpha.md", status: "modified" },
+		{ id: fileB, path: "/docs/beta.md", status: "modified" },
+	]);
 
-		// Checkpointing clears the working diff
-		await createCheckpoint({ lix });
-		const cleared = await selectWorkingDiffFiles(lix).execute();
-		expect(cleared).toHaveLength(0);
+		// New file appears as added
+		const fileC = "checkpoint_view_c";
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: fileC,
+				path: "/docs/gamma.md",
+				data: new TextEncoder().encode("Gamma"),
+			})
+			.execute();
+
+	const withAdded = await selectWorkingDiffFiles(lix).execute();
+	expect(withAdded).toEqual([
+		{ id: fileA, path: "/docs/alpha.md", status: "modified" },
+		{ id: fileB, path: "/docs/beta.md", status: "modified" },
+		{ id: fileC, path: "/docs/gamma.md", status: "added" },
+	]);
+
+	// TODO: add a regression test for deletions once file history joins are re-introduced
+
+	// Checkpointing clears the working diff
+	await createCheckpoint({ lix });
+	const cleared = await selectWorkingDiffFiles(lix).execute();
+	expect(cleared).toHaveLength(0);
+	});
+
+	test.skip("annotates removed files with their last known path", async () => {
+		// TODO: Implement when path reconstruction for deletions is reinstated
 	});
 });

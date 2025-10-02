@@ -4,6 +4,7 @@ type CheckpointFormProps = {
 	message: string;
 	onMessageChange: (message: string) => void;
 	onCreateCheckpoint: () => void;
+	isSubmitting?: boolean;
 };
 
 /**
@@ -16,6 +17,7 @@ export function CheckpointForm({
 	message,
 	onMessageChange,
 	onCreateCheckpoint,
+	isSubmitting = false,
 }: CheckpointFormProps) {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -31,15 +33,21 @@ export function CheckpointForm({
 					onChange={(e) => onMessageChange(e.target.value)}
 					rows={4}
 					className="w-full resize-none rounded-md border border-input bg-transparent pl-3 pr-28 pt-3 pb-3 text-[11px] leading-4 text-foreground shadow-none outline-none"
+					disabled={isSubmitting}
+					data-testid="checkpoint-message"
 				/>
 				<button
 					type="submit"
-					disabled={!message.trim()}
+					disabled={isSubmitting || !message.trim()}
 					className={cn(
 						"absolute bottom-3 right-3 z-10 inline-flex items-center rounded-md border px-3 py-1.5 text-[11px] font-medium transition-colors",
 						"border-input bg-transparent text-neutral-500",
-						message.trim() && "bg-neutral-200 text-neutral-900",
-					)}
+						message.trim() &&
+							!isSubmitting &&
+							"bg-neutral-200 text-neutral-900",
+						isSubmitting && "opacity-60 cursor-not-allowed",
+				)}
+					data-testid="checkpoint-submit"
 				>
 					Create
 				</button>

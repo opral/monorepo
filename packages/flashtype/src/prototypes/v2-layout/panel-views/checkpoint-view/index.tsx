@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useQuery } from "@lix-js/react-utils";
-import type { ViewContext } from "../../types";
+import { useMemo, useState } from "react";
+import { useLix, useQuery } from "@lix-js/react-utils";
+import { createCheckpoint } from "@lix-js/sdk";
 import { selectWorkingDiffFiles } from "./queries";
 import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
@@ -9,22 +9,26 @@ import { LatestCheckpoint } from "./latest-checkpoint";
 /**
  * Checkpoint view - Shows working changes and allows creating checkpoints
  */
-type CheckpointViewProps = {
-	readonly context?: ViewContext;
-};
-
-export function CheckpointView(_props: CheckpointViewProps) {
+export function CheckpointView() {
 	const [message, setMessage] = useState("");
 	const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+	const [isCreating, setIsCreating] = useState(false);
+	const lix = useLix();
 
-	const changedFiles = useQuery(({ lix }) => selectWorkingDiffFiles(lix)) ?? [];
-	const validFileIds = new Set(changedFiles.map((file) => file.id));
-	const visibleSelection = new Set<string>();
-	for (const id of selectedFiles) {
-		if (validFileIds.has(id)) {
-			visibleSelection.add(id);
+	const files = useQuery(({ lix }) => selectWorkingDiffFiles(lix)) ?? [];
+	const validFileIds = useMemo(
+		() => new Set(files.map((file) => file.id)),
+		[files],
+	);
+	const visibleSelection = useMemo(() => {
+		const filtered = new Set<string>();
+		for (const id of selectedFiles) {
+			if (validFileIds.has(id)) {
+				filtered.add(id);
+			}
 		}
-	}
+		return filtered;
+	}, [selectedFiles, validFileIds]);
 
 	const latestCheckpoint = null;
 
@@ -46,24 +50,35 @@ export function CheckpointView(_props: CheckpointViewProps) {
 	};
 
 	const handleToggleAll = () => {
-		if (visibleSelection.size === changedFiles.length) {
+		if (visibleSelection.size === files.length) {
 			setSelectedFiles(new Set());
 		} else {
-			setSelectedFiles(new Set(changedFiles.map((f) => f.id)));
+			setSelectedFiles(new Set(files.map((f) => f.id)));
 		}
 	};
 
 	const handleCreateCheckpoint = async () => {
-		// TODO: Implement checkpoint creation
-		console.log("Creating checkpoint with message:", message);
-		setMessage("");
+		const trimmed = message.trim();
+		if (!trimmed || isCreating) {
+			return;
+		}
+		setIsCreating(true);
+		try {
+			await createCheckpoint({ lix });
+			setMessage("");
+			setSelectedFiles(new Set());
+		} catch (error) {
+			console.error("Failed to create checkpoint", error);
+		} finally {
+			setIsCreating(false);
+		}
 	};
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<div className="flex-1 overflow-y-auto">
 				<ChangedFilesList
-					files={changedFiles}
+					files={files}
 					selectedFiles={visibleSelection}
 					onToggleFile={handleToggleFile}
 					onToggleAll={handleToggleAll}
@@ -75,6 +90,7 @@ export function CheckpointView(_props: CheckpointViewProps) {
 					message={message}
 					onMessageChange={setMessage}
 					onCreateCheckpoint={handleCreateCheckpoint}
+					isSubmitting={isCreating}
 				/>
 
 				<div className="border-t border-border" />

@@ -20,9 +20,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *
  * | Status      | Description                                  | Before | After  |
  * |-------------|----------------------------------------------|--------|--------|
- * | `created`   | Entity added since checkpoint                | null   | exists |
- * | `updated`   | Entity modified since checkpoint             | exists | exists |
- * | `deleted`   | Entity removed since checkpoint (tombstone)  | exists | null   |
+ * | `added`     | Entity added since checkpoint                | null   | exists |
+ * | `modified`  | Entity edited since checkpoint               | exists | exists |
+ * | `removed`   | Entity removed since checkpoint (tombstone)  | exists | null   |
  * | `unchanged` | Entity not modified in working state         | same   | same   |
  *
  * ## Performance

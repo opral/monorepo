@@ -1,10 +1,7 @@
-type ChangedFile = {
-	id: string;
-	path: string;
-};
+import type { WorkingFileSummary } from "./queries";
 
 type ChangedFilesListProps = {
-	files: ChangedFile[];
+	files: WorkingFileSummary[];
 	selectedFiles: Set<string>;
 	onToggleFile: (fileId: string) => void;
 	onToggleAll: () => void;
@@ -16,25 +13,24 @@ export function ChangedFilesList({
 	onToggleFile,
 	onToggleAll,
 }: ChangedFilesListProps) {
-	const allSelected = files.length > 0 && selectedFiles.size === files.length;
+	const showHeader = files.length > 0;
+	const allSelected = showHeader && selectedFiles.size === files.length;
 
 	return (
 		<div className="flex flex-col gap-1 px-3 py-2">
-			{/* Header with count and select all */}
-			<div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-				<span>
-					Changed files {files.length}
-				</span>
-				<input
-					type="checkbox"
-					checked={allSelected}
-					onChange={onToggleAll}
-					aria-label="Select all files"
-					className="h-3.5 w-3.5 cursor-pointer"
-				/>
-			</div>
+			{showHeader ? (
+				<div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+					<span>Changed files {files.length}</span>
+					<input
+						type="checkbox"
+						checked={allSelected}
+						onChange={onToggleAll}
+						aria-label="Select all files"
+						className="h-3.5 w-3.5 cursor-pointer"
+					/>
+				</div>
+			) : null}
 
-			{/* File list */}
 			<div className="flex flex-col">
 				{files.map((file) => (
 					<div
@@ -42,8 +38,10 @@ export function ChangedFilesList({
 						className="flex items-center justify-between rounded px-2 py-1 text-xs hover:bg-muted/50"
 					>
 						<div className="flex items-center gap-2">
-							<div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-							<span className="text-foreground">{file.path}</span>
+							<div className={`h-1.5 w-1.5 rounded-full ${statusDotClass(file.status)}`} />
+							<span className={`text-foreground ${statusTextClass(file.status)}`}>
+								{file.path}
+							</span>
 						</div>
 						<input
 							type="checkbox"
@@ -63,4 +61,28 @@ export function ChangedFilesList({
 			)}
 		</div>
 	);
+}
+
+function statusDotClass(status: WorkingFileSummary["status"]) {
+	switch (status) {
+		case "added":
+			return "bg-emerald-500";
+		case "removed":
+			return "bg-red-500";
+		case "modified":
+		default:
+			return "bg-blue-500";
+	}
+}
+
+function statusTextClass(status: WorkingFileSummary["status"]) {
+	switch (status) {
+		case "added":
+			return "text-emerald-600";
+		case "removed":
+			return "text-red-600";
+		case "modified":
+		default:
+			return "";
+	}
 }
