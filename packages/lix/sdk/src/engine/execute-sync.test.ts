@@ -1,76 +1,35 @@
-import { beforeAll, afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import type { SqliteWasmDatabase } from "../database/sqlite/create-in-memory-database.js";
 import { createExecuteSync } from "./execute-sync.js";
-import * as sqlRewriterModule from "./query-preprocessor/sql-rewriter.js";
-
-const { initializeSqlRewriter, rewriteSql, setSqlRewriterContext } =
-	sqlRewriterModule;
+import type { QueryPreprocessorResult } from "./query-preprocessor/create-query-preprocessor-v2.js";
 
 describe("createExecuteSync", () => {
-	beforeAll(async () => {
-		await initializeSqlRewriter();
-	});
-
-	afterEach(() => {
-		setSqlRewriterContext(undefined);
-	});
-
-	test.skip("rewrites internal_state_vtable queries before hitting sqlite", async () => {
-		const rewriteSpy = vi
-			.spyOn(sqlRewriterModule, "rewriteSql")
-			.mockReturnValue({
-				rewrittenSql: "SELECT 1 AS value",
-				cacheHints: undefined,
-			});
-
-		const exec = vi.fn().mockReturnValue([{ value: 1 }]);
-		const sqlite = { exec } as unknown as SqliteWasmDatabase;
-
-		const executeSync = await createExecuteSync({
-			engine: {
-				sqlite,
-				hooks: {} as any,
-				runtimeCacheRef: {} as any,
-			},
-		});
-
-		exec.mockClear();
-
-		const originalSql =
-			"SELECT snapshot_content FROM internal_state_vtable WHERE schema_key = 'example'";
-		const result = executeSync({ sql: originalSql });
-
-		expect(rewriteSpy).toHaveBeenCalledWith(originalSql, undefined);
-		expect(exec).toHaveBeenCalledTimes(1);
-		expect(exec).toHaveBeenCalledWith(
-			expect.objectContaining({
-				sql: "SELECT 1 AS value",
-				returnValue: "resultRows",
-				rowMode: "object",
-			})
-		);
-		expect(result.rows).toEqual([{ value: 1 }]);
-		rewriteSpy.mockRestore();
-	});
-
 	test("passes through bound parameters unchanged", async () => {
 		const exec = vi.fn().mockReturnValue([]);
 		const sqlite = { exec } as unknown as SqliteWasmDatabase;
+		const preprocess = vi.fn(
+			({ sql, parameters }: QueryPreprocessorResult) => ({
+				sql,
+				parameters,
+			})
+		);
+
 		const executeSync = await createExecuteSync({
 			engine: {
 				sqlite,
 				hooks: {} as any,
 				runtimeCacheRef: {} as any,
 			},
+			preprocess: preprocess as any,
 		});
 
 		const parameters = [1, "two", { three: 3 }];
 
-		executeSync({
-			sql: "SELECT ?",
-			parameters,
-		});
+		executeSync({ sql: "SELECT ?", parameters });
 
+		expect(preprocess).toHaveBeenCalledWith(
+			expect.objectContaining({ sql: "SELECT ?", parameters })
+		);
 		expect(exec).toHaveBeenCalledWith(
 			expect.objectContaining({ bind: parameters })
 		);

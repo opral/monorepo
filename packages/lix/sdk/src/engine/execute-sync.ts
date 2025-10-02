@@ -1,5 +1,5 @@
 import type { LixEngine } from "./boot.js";
-import { createQueryPreprocessorV2 } from "./query-preprocessor/create-query-preprocessor-v2.js";
+import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor-v2.js";
 
 type ExecuteSyncFn = (args: {
 	sql: string;
@@ -8,25 +8,9 @@ type ExecuteSyncFn = (args: {
 
 export async function createExecuteSync(args: {
 	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
+	preprocess: QueryPreprocessorFn;
 }): Promise<ExecuteSyncFn> {
-	let executeSyncImpl: ExecuteSyncFn | null = null;
-	const preprocessorEngine = {
-		...args.engine,
-		executeSync: ({
-			sql,
-			parameters,
-		}: {
-			sql: string;
-			parameters?: Readonly<unknown[]>;
-		}) => {
-			if (!executeSyncImpl) {
-				throw new Error("executeSync called before initialisation");
-			}
-			return executeSyncImpl({ sql, parameters });
-		},
-	} as const;
-
-	const preprocess = await createQueryPreprocessorV2(preprocessorEngine);
+	const preprocess = args.preprocess;
 
 	const executeSyncFn: ExecuteSyncFn = (args2: {
 		sql: string;
@@ -34,7 +18,7 @@ export async function createExecuteSync(args: {
 	}) => {
 		const preprocessed = preprocess({
 			sql: args2.sql,
-			parameters: args2.parameters ?? [],
+			parameters: (args2.parameters as ReadonlyArray<unknown>) ?? [],
 		});
 		const columnNames: string[] = [];
 		try {
@@ -59,6 +43,5 @@ export async function createExecuteSync(args: {
 		}
 	};
 
-	executeSyncImpl = executeSyncFn;
 	return executeSyncFn;
 }

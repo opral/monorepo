@@ -1,33 +1,19 @@
 import type { LixEngine } from "../boot.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
-
-export type QueryPreprocessorResult = {
-	sql: string;
-	parameters: ReadonlyArray<unknown>;
-	expandedSql?: string;
-};
-
-export type QueryPreprocessorStage = (
-	args: QueryPreprocessorResult
-) => QueryPreprocessorResult;
+import type {
+	QueryPreprocessorFn,
+	QueryPreprocessorResult,
+} from "./create-query-preprocessor-v2.js";
 
 export type QueryPreprocessor = (args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "runtimeCacheRef" | "hooks" | "executeSync"
 	>;
-}) => Promise<QueryPreprocessorStage>;
+}) => Promise<QueryPreprocessorFn>;
 
 /**
- * Creates a composed query preprocessor that applies each stage in order.
- *
- * Every preprocessor is built asynchronously exactly once and later executed
- * sequentially whenever the returned function is invoked.
- *
- * @example
- * const preprocess = await createQueryPreprocessor(engine, [builder]);
- * const result = preprocess({ sql: "SELECT 1", parameters: [] });
- * console.log(result.sql);
+ * Legacy helper that composes multiple preprocessor stages.
  */
 export async function createQueryPreprocessor(
 	engine: Pick<
@@ -35,22 +21,40 @@ export async function createQueryPreprocessor(
 		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
 	>,
 	preprocessors: QueryPreprocessor[]
-): Promise<QueryPreprocessorStage> {
-	const stages: QueryPreprocessorStage[] = [];
+): Promise<QueryPreprocessorFn> {
+	const stages: QueryPreprocessorFn[] = [];
 	for (const buildPreprocessor of preprocessors) {
 		const stage = await buildPreprocessor({ engine });
 		stages.push(stage);
 	}
 
-	return (initialContext: QueryPreprocessorResult): QueryPreprocessorResult => {
+	return ({
+		sql,
+		parameters,
+		sideEffects,
+	}: {
+		sql: string;
+		parameters: ReadonlyArray<unknown>;
+		sideEffects?: boolean;
+	}): QueryPreprocessorResult => {
 		let context: QueryPreprocessorResult = {
-			sql: rewriteSql(initialContext.sql),
-			parameters: initialContext.parameters,
-			expandedSql: initialContext.expandedSql,
+			sql: rewriteSql(sql),
+			parameters,
 		};
+
 		for (const stage of stages) {
-			context = stage(context);
+			const next = stage({
+				sql: context.sql,
+				parameters: context.parameters,
+				sideEffects,
+			});
+			context = {
+				sql: next.sql,
+				parameters: next.parameters,
+				expandedSql: next.expandedSql ?? context.expandedSql,
+			};
 		}
+
 		return context;
 	};
 }

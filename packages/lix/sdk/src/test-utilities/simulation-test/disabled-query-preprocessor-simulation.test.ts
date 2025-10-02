@@ -10,7 +10,14 @@ describe("disabledQueryPreprocessorSimulation", () => {
 
 	test("skips the query preprocessor while forwarding SQL + parameters to sqlite.exec", async () => {
 		const preprocessSpy = vi.fn(
-			({ sql, parameters }: { sql: string; parameters: unknown[] }) => ({
+			({
+				sql,
+				parameters,
+		}: {
+				sql: string;
+				parameters: unknown[];
+				sideEffects?: boolean;
+			}) => ({
 				sql,
 				parameters,
 			})

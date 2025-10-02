@@ -324,6 +324,7 @@ export function applyStateVTable(
 				argc: number,
 				argv: any
 			) => {
+				// throw new Error("xFilter read. Query preprocessor failed at rewrite.");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 

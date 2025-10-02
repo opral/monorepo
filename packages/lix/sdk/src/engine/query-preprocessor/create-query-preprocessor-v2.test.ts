@@ -45,6 +45,30 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
+	test("skips cache population when sideEffects=false", async () => {
+		const lix = await openLix({});
+		try {
+			const populateSpy = vi.spyOn(
+				populateStateCacheModule,
+				"populateStateCache"
+			);
+
+			markStateCacheAsStale({ engine: lix.engine! });
+
+			const preprocess = await createQueryPreprocessorV2(lix.engine!);
+
+			preprocess({
+				sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
+				parameters: [],
+				sideEffects: false,
+			});
+
+			expect(populateSpy).not.toHaveBeenCalled();
+		} finally {
+			await lix.close();
+		}
+	});
+
 	test("expands view references before rewriting", async () => {
 		const lix = await openLix({});
 		lix.engine!.sqlite.exec({

@@ -10,6 +10,7 @@ import { uuidV7Sync } from "./uuid-v7.js";
 import { nanoIdSync } from "./nano-id.js";
 import { getTimestampSync } from "./timestamp.js";
 import { humanIdSync } from "./generate-human-id.js";
+import { createExplainQuery } from "../explain-query.js";
 
 /**
  * Creates an engine function router bound to a specific Lix context.
@@ -28,10 +29,23 @@ export type Call = (
 ) => Promise<unknown>;
 
 export function createCallRouter(args: {
-	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef" | "call">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "call" | "preprocessQuery"
+	>;
 }): {
 	call: Call;
 } {
+	type ExplainFn = Awaited<ReturnType<typeof createExplainQuery>>;
+	let explainFnPromise: Promise<ExplainFn> | null = null;
+
+	const getExplainFn = async () => {
+		if (!explainFnPromise) {
+			explainFnPromise = createExplainQuery({ engine: args.engine });
+		}
+		return explainFnPromise;
+	};
+
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
 	// in a Promise by `callFn` for a unified async surface.
 	const routes = new Map<
@@ -85,6 +99,13 @@ export function createCallRouter(args: {
 			"lix_execute_sync",
 			(payload) => {
 				return args.engine.executeSync(payload as any);
+			},
+		],
+		[
+			"lix_explain_query",
+			async (payload) => {
+				const explainFn = await getExplainFn();
+				return explainFn({ query: (payload ?? {}) as any });
 			},
 		],
 	]);

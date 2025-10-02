@@ -79,7 +79,7 @@ describe("analyzeShape", () => {
 	WHERE derived.entity_id = ?`;
 		const shapes = analyzeShapes(tokenize(sql));
 		expect(shapes.length).toBe(1);
-		const [shape] = shapes;
+		const shape = shapes[0]!;
 		expect(shape.schemaKeys).toEqual([
 			{ kind: "literal", value: "lix_active_version" },
 		]);

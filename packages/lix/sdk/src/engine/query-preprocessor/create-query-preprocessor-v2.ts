@@ -13,25 +13,41 @@ import {
 	tokenize,
 	type Token,
 } from "./sql-rewriter/tokenizer.js";
-import type {
-	QueryPreprocessorResult,
-	QueryPreprocessorStage,
-} from "./create-query-preprocessor.js";
 import type { LixEngine } from "../boot.js";
+
+export type QueryPreprocessorResult = {
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	expandedSql?: string;
+};
+
+export type QueryPreprocessorFn = (args: {
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	sideEffects?: boolean;
+}) => QueryPreprocessorResult;
 
 export async function createQueryPreprocessorV2(
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
 	>
-): Promise<QueryPreprocessorStage> {
-	return (initial: QueryPreprocessorResult): QueryPreprocessorResult => {
-		let currentSql = initial.sql;
-		let expandedSql = initial.expandedSql;
+): Promise<QueryPreprocessorFn> {
+	return ({
+		sql,
+		parameters,
+		sideEffects,
+	}: {
+		sql: string;
+		parameters: ReadonlyArray<unknown>;
+		sideEffects?: boolean;
+	}): QueryPreprocessorResult => {
+		let currentSql = sql;
+		let expandedSql: string | undefined;
 		let tokens = tokenize(currentSql);
 		const kind = detectStatementKind(tokens);
 		if (kind !== "select") {
-			return initial;
+			return { sql: currentSql, parameters };
 		}
 
 		{
@@ -50,15 +66,18 @@ export async function createQueryPreprocessorV2(
 		}
 
 		const shapes = analyzeShapes(tokens);
-		for (const shape of shapes) {
-			ensureFreshStateCache({ engine, shape });
+		const allowSideEffects = sideEffects !== false;
+		if (allowSideEffects) {
+			for (const shape of shapes) {
+				ensureFreshStateCache({ engine, shape });
+			}
 		}
 
 		currentSql = rewriteSql(currentSql, { tokens });
 
 		return {
 			sql: currentSql,
-			parameters: initial.parameters,
+			parameters,
 			expandedSql,
 		};
 	};

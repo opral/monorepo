@@ -39,6 +39,8 @@ import {
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
+import { createQueryPreprocessorV2 } from "../engine/query-preprocessor/create-query-preprocessor-v2.js";
+import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/bootstrap-pending.js";
 
 /**
@@ -130,13 +132,32 @@ export async function newLixFile(args?: {
 
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
+
+	let executeSyncImpl: LixEngine["executeSync"] | null = null;
+
+	const preprocessorEngine = {
+		sqlite,
+		hooks,
+		runtimeCacheRef,
+		executeSync: ((args) => {
+			if (!executeSyncImpl) {
+				throw new Error("executeSync not initialised");
+			}
+			return executeSyncImpl(args);
+		}) as LixEngine["executeSync"],
+	} as const;
+
+	const preprocessQuery = await createQueryPreprocessorV2(preprocessorEngine);
+
 	const executeSync = await createExecuteSync({
 		engine: {
 			sqlite,
 			hooks,
 			runtimeCacheRef,
 		},
+		preprocess: preprocessQuery,
 	});
+	executeSyncImpl = executeSync;
 
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"

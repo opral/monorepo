@@ -9,6 +9,8 @@ import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
+import { createQueryPreprocessorV2 } from "./query-preprocessor/create-query-preprocessor-v2.js";
+import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor-v2.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -41,6 +43,8 @@ export type LixEngine = {
 	hooks: LixHooks;
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
+	/** Query preprocessor shared across executeSync + explain flows */
+	preprocessQuery: QueryPreprocessorFn;
 	/**
 	 * Stable runtime-only cache token.
 	 *
@@ -83,13 +87,32 @@ export type LixEngine = {
 export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
+
+	let executeSyncImpl: LixEngine["executeSync"] | null = null;
+
+	const preprocessorEngine = {
+		sqlite: env.sqlite,
+		hooks,
+		runtimeCacheRef,
+		executeSync: ((args) => {
+			if (!executeSyncImpl) {
+				throw new Error("executeSync not initialised");
+			}
+			return executeSyncImpl(args);
+		}) as LixEngine["executeSync"],
+	} as const;
+
+	const preprocessQuery = await createQueryPreprocessorV2(preprocessorEngine);
+
 	const executeSync = await createExecuteSync({
 		engine: {
 			sqlite: env.sqlite,
 			hooks,
 			runtimeCacheRef,
 		},
+		preprocess: preprocessQuery,
 	});
+	executeSyncImpl = executeSync;
 	const db = initDb({
 		sqlite: env.sqlite,
 		hooks,
@@ -113,6 +136,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		hooks,
 		getAllPluginsSync: () => plugins,
 		runtimeCacheRef,
+		preprocessQuery,
 		executeSync,
 		call: async () => {
 			throw new Error("Engine router not initialised");

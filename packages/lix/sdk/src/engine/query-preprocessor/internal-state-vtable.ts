@@ -5,10 +5,11 @@ import {
 	buildSqlRewriteContext,
 	type InternalStateVtableCacheHints,
 } from "./sql-rewriter.js";
+import type { QueryPreprocessor } from "./create-query-preprocessor.js";
 import type {
-	QueryPreprocessor,
 	QueryPreprocessorResult,
-} from "./create-query-preprocessor.js";
+	QueryPreprocessorFn,
+} from "./create-query-preprocessor-v2.js";
 import type { LixEngine } from "../boot.js";
 import { populateStateCache } from "../../state/cache/populate-state-cache.js";
 import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
@@ -44,31 +45,34 @@ export const createInternalStateVtablePreprocessor: QueryPreprocessor =
 			updateSqlRewriterContext(args.engine);
 		};
 
-		return (context: QueryPreprocessorResult): QueryPreprocessorResult => {
-			const trimmedSql = context.sql.trimStart();
+		return ({
+			sql,
+			parameters,
+			sideEffects,
+		}: Parameters<QueryPreprocessorFn>[0]): QueryPreprocessorResult => {
+			const trimmedSql = sql.trimStart();
 			const lowerSql = trimmedSql.toLowerCase();
 			const isSelect =
 				lowerSql.startsWith("select") || lowerSql.startsWith("with");
 			if (!isSelect) {
-				return context;
+				return { sql, parameters };
 			}
 			const rewriteContext = buildSqlRewriteContext({
 				engine: args.engine,
-				parameters: context.parameters,
+				parameters,
 			});
-			const rewritten = rewriteSql(context.sql, rewriteContext);
+			const rewritten = rewriteSql(sql, rewriteContext);
 
-			const sql = rewritten?.rewrittenSql ?? context.sql;
+			const nextSql = rewritten?.rewrittenSql ?? sql;
 			const cacheHints = rewritten?.cacheHints;
 
-			if (cacheHints?.internalStateVtable) {
+			if (cacheHints?.internalStateVtable && sideEffects !== false) {
 				ensureCacheFresh(cacheHints.internalStateVtable);
 			}
 
 			return {
-				sql,
-				parameters: context.parameters,
-				expandedSql: context.expandedSql,
+				sql: nextSql,
+				parameters,
 			};
 		};
 	};

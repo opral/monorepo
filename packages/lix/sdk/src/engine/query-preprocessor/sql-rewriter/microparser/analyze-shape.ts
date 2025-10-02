@@ -403,22 +403,29 @@ function computeSelectContexts(tokens: Token[]): {
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
 		if (!token) {
-			indexToContext[i] = stack[stack.length - 1];
+			const top = stack[stack.length - 1];
+			indexToContext[i] = top;
 			continue;
 		}
 
 		if (token.image === ")") {
-			const afterDepth = depthBefore[i] - 1;
-			while (stack.length && stack[stack.length - 1].depth > afterDepth) {
-				const popped = stack.pop()!;
+			const afterDepth = (depthBefore[i] ?? 0) - 1;
+			while (stack.length && (stack[stack.length - 1]?.depth ?? -1) > afterDepth) {
+				const popped = stack.pop();
+				if (!popped) {
+					continue;
+				}
 				popped.endIndex = Math.max(i - 1, popped.startIndex);
 			}
 		}
 
 		if (token.tokenType === SELECT) {
-			const depth = depthBefore[i];
-			while (stack.length && stack[stack.length - 1].depth === depth) {
-				const previous = stack.pop()!;
+			const depth = depthBefore[i] ?? 0;
+			while (stack.length && (stack[stack.length - 1]?.depth ?? -1) === depth) {
+				const previous = stack.pop();
+				if (!previous) {
+					continue;
+				}
 				previous.endIndex = Math.max(i - 1, previous.startIndex);
 			}
 			const context: SelectContext = {
@@ -430,11 +437,17 @@ function computeSelectContexts(tokens: Token[]): {
 			contexts.push(context);
 		}
 
-		indexToContext[i] = stack[stack.length - 1];
+		const top = stack[stack.length - 1];
+		if (top) {
+			indexToContext[i] = top;
+		}
 	}
 
 	while (stack.length) {
-		const popped = stack.pop()!;
+		const popped = stack.pop();
+		if (!popped) {
+			continue;
+		}
 		if (popped.endIndex < popped.startIndex) {
 			popped.endIndex = tokens.length - 1;
 		}
