@@ -1,9 +1,9 @@
 import { CalendarDays, FileText, Files, Search } from "lucide-react";
 import type { ViewDefinition, ViewId } from "./types";
-import { FilesView } from "./panel-views/files-view";
-import { SearchView } from "./panel-views/search-view";
-import { TasksView } from "./panel-views/tasks-view";
-import { FileContentView } from "./panel-views/file-content-view";
+import { FilesView } from "./panel-views/files-view/index";
+import { SearchView } from "./panel-views/search-view/index";
+import { TasksView } from "./panel-views/tasks-view/index";
+import { FileContentView } from "./panel-views/file-content-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.

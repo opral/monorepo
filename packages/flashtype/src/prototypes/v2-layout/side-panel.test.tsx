@@ -1,8 +1,62 @@
 import { DndContext } from "@dnd-kit/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
+import type { FilesystemEntryRow } from "@/queries";
 import { SidePanel } from "./side-panel";
 import type { PanelState, ViewContext } from "./types";
+
+const mockEntries: FilesystemEntryRow[] = [
+	{
+		id: "dir_root",
+		parent_id: null,
+		path: "/",
+		display_name: "/",
+		kind: "directory",
+		hidden: 0,
+	},
+	{
+		id: "dir_docs",
+		parent_id: "dir_root",
+		path: "/docs/",
+		display_name: "docs",
+		kind: "directory",
+		hidden: 0,
+	},
+	{
+		id: "dir_guides",
+		parent_id: "dir_docs",
+		path: "/docs/guides/",
+		display_name: "guides",
+		kind: "directory",
+		hidden: 0,
+	},
+	{
+		id: "file_writing",
+		parent_id: "dir_guides",
+		path: "/docs/guides/writing-style.md",
+		display_name: "writing-style.md",
+		kind: "file",
+		hidden: 0,
+	},
+	{
+		id: "file_readme",
+		parent_id: "dir_docs",
+		path: "/docs/README.md",
+		display_name: "README.md",
+		kind: "file",
+		hidden: 0,
+	},
+];
+
+vi.mock("@lix-js/react-utils", async () => {
+	const actual = await vi.importActual<typeof import("@lix-js/react-utils")>(
+		"@lix-js/react-utils",
+	);
+	return {
+		...actual,
+		useQuery: () => mockEntries,
+	};
+});
 
 describe("SidePanel", () => {
 	test("renders the empty state helper when nothing is open", () => {
@@ -55,6 +109,8 @@ describe("SidePanel", () => {
 		expect(handleSelect).toHaveBeenCalledWith("files-1");
 
 		fireEvent.click(screen.getByText("writing-style.md"));
-		expect(viewContext.onOpenFile).toHaveBeenCalledWith("writing-style.md");
+		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
+			"/docs/guides/writing-style.md",
+		);
 	});
 });
