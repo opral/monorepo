@@ -175,6 +175,7 @@ simulationTest(
 			.selectFrom("state")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "like", "test-key-%")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -193,6 +194,7 @@ simulationTest(
 			.selectFrom("state")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "like", "test-key-%")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 

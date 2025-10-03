@@ -32,6 +32,7 @@ test("createChangeProposal creates a global, open proposal with correct refs", a
 	const rowAll = await lix.db
 		.selectFrom("change_proposal_all")
 		.where("id", "=", cp.id)
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 	expect(rowAll.lixcol_version_id).toBe("global");
