@@ -66,6 +66,7 @@ export function SidePanel({
 	const availableViews = VIEW_DEFINITIONS.filter(
 		(view) => !panel.views.some((entry) => entry.viewId === view.id),
 	);
+	const canAddMoreViews = availableViews.length > 0;
 
 	const contextWithFocus: ViewContext | undefined = viewContext
 		? { ...viewContext, isPanelFocused: isFocused }
@@ -83,8 +84,7 @@ export function SidePanel({
 						{panel.views.map((entry) => {
 							const view = VIEW_MAP.get(entry.viewId);
 							if (!view) return null;
-							const isActive =
-								activeEntry?.viewKey === entry.viewKey;
+							const isActive = activeEntry?.viewKey === entry.viewKey;
 							return (
 								<Panel.Tab
 									key={entry.viewKey}
@@ -102,32 +102,34 @@ export function SidePanel({
 								/>
 							);
 						})}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<button
-									type="button"
-									title="Add view"
-									className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100"
-								>
-									<Plus className="h-4 w-4" />
-								</button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								align={side === "left" ? "start" : "end"}
-								className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
-							>
-								{availableViews.map((ext) => (
-									<DropdownMenuItem
-										key={ext.id}
-										onSelect={() => onAddView(ext.id)}
-										className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
+						{canAddMoreViews && (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<button
+										type="button"
+										title="Add view"
+										className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100"
 									>
-										<ext.icon className="h-4 w-4" />
-										<span>{ext.label}</span>
-									</DropdownMenuItem>
-								))}
-							</DropdownMenuContent>
-						</DropdownMenu>
+										<Plus className="h-4 w-4" />
+									</button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent
+									align={side === "left" ? "start" : "end"}
+									className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
+								>
+									{availableViews.map((ext) => (
+										<DropdownMenuItem
+											key={ext.id}
+											onSelect={() => onAddView(ext.id)}
+											className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
+										>
+											<ext.icon className="h-4 w-4" />
+											<span>{ext.label}</span>
+										</DropdownMenuItem>
+									))}
+								</DropdownMenuContent>
+							</DropdownMenu>
+						)}
 					</Panel.TabBar>
 				)}
 				<Panel.Content
