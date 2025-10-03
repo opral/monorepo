@@ -147,7 +147,7 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
-	test("leaves internal_state_materializer select untouched", async () => {
+	test("leaves internal_state_materializer select semantically equal", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessorV2(lix.engine!);
 		const sql =
@@ -158,7 +158,9 @@ describe("createQueryPreprocessorV2", () => {
 			parameters: ["base-version", "base-entity"],
 		});
 
-		expect(result.sql).toBe(sql);
+		expect(result.sql).toBe(
+			`select * from "internal_state_materializer" where "version_id" = ?1 and "entity_id" = ?2`
+		);
 		expect(result.expandedSql).toBeUndefined();
 
 		await lix.close();
