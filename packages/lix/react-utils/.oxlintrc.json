@@ -1,0 +1,15 @@
+{
+	"plugins": ["typescript"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"env": {
+		"es2022": true,
+		"node": true
+	},
+	"ignorePatterns": ["dist", "coverage", "**/*.d.ts"],
+	"rules": {
+		"typescript/no-explicit-any": "off"
+	}
+}

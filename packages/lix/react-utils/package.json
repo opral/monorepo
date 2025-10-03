@@ -14,7 +14,7 @@
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
-		"lint": "eslint src/**/* --fix",
+		"lint": "oxlint --config .oxlintrc.json --tsconfig ./tsconfig.json --format stylish src",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
@@ -25,21 +25,19 @@
 		"react": ">=19.0.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.12.0",
 		"@lix-js/sdk": "workspace:*",
 		"@opral/tsconfig": "workspace:*",
 		"@testing-library/react": "^16.3.0",
 		"@types/react": "^19.1.8",
 		"@vitest/coverage-v8": "^3.2.4",
-		"eslint": "^9.12.0",
 		"https-proxy-agent": "7.0.2",
 		"jsdom": "^26.1.0",
 		"kysely": "^0.27.6",
+		"oxlint": "^1.14.0",
 		"prettier": "^3.3.3",
 		"react": "19.1.1",
 		"react-dom": "19.1.1",
 		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.9.0",
 		"vitest": "^3.2.4"
 	}
 }
