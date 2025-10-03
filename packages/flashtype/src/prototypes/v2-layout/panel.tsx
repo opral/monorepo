@@ -142,7 +142,7 @@ interface TabProps {
 }
 
 const tabBaseClasses =
-	"group flex items-center gap-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors";
+	"group flex flex-none max-w-[20rem] items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap";
 
 const tabStateClasses = {
 	focused: "bg-brand-200 text-neutral-900 border-brand-600",
@@ -182,7 +182,9 @@ Panel.Tab = function Tab({
 			{...listeners}
 		>
 			<Icon className="h-3.5 w-3.5" />
-			<span>{label}</span>
+			<span className="max-w-[10rem] truncate" title={label}>
+				{label}
+			</span>
 			{onClose && isActive && (
 				<X
 					className="h-3 w-3 text-neutral-400 hover:text-neutral-600"
