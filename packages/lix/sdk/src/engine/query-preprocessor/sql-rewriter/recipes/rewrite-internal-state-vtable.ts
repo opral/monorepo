@@ -367,34 +367,41 @@ function sanitizeSchemaKey(key: string): string {
 }
 
 function buildVersionCtes(shapes: Shape[]): string {
-	const versionSeeds = collectLiteralVersionSeeds(shapes);
-	if (!versionSeeds) {
-		return buildUnseededVersionCtes();
+	const literalSeeds = collectLiteralVersionSeeds(shapes);
+	if (literalSeeds) {
+		return buildSeededVersionCtesFromLiterals(literalSeeds);
 	}
 
-	const seedSelects = versionSeeds
-		.map(
-			(version) => `SELECT '${escapeLiteral(version)}' AS version_id`
-		)
+	const placeholderToken = collectVersionPlaceholderToken(shapes);
+	if (placeholderToken) {
+		return buildSeededVersionCtesFromToken(placeholderToken);
+	}
+
+	return buildUnseededVersionCtes();
+}
+
+function buildSeededVersionCtesFromLiterals(seeds: string[]): string {
+	const seedSelects = seeds
+		.map((version) => `SELECT '${escapeLiteral(version)}' AS version_id`)
 		.join("\n        UNION\n        ");
 
 	return stripIndent(`
 		WITH RECURSIVE
+		  params(version_id) AS (
+		    ${seedSelects}
+		  ),
 		  version_descriptor_base AS (
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
 		    FROM internal_state_cache_lix_version_descriptor desc
 		  ),
-		  seed_versions(version_id) AS (
-		    ${seedSelects}
-		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
-		      sv.version_id,
+		      p.version_id,
 		      vdb.inherits_from_version_id
-		    FROM seed_versions sv
-		    JOIN version_descriptor_base vdb ON vdb.version_id = sv.version_id
+		    FROM params p
+		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
 		    WHERE vdb.inherits_from_version_id IS NOT NULL
 
 		    UNION ALL
@@ -408,10 +415,50 @@ function buildVersionCtes(shapes: Shape[]): string {
 		  ),
 		  version_parent AS (
 		    SELECT
-		      sv.version_id,
+		      p.version_id,
 		      vdb.inherits_from_version_id AS parent_version_id
-		    FROM seed_versions sv
-		    JOIN version_descriptor_base vdb ON vdb.version_id = sv.version_id
+		    FROM params p
+		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
+		    WHERE vdb.inherits_from_version_id IS NOT NULL
+		  )
+	`);
+}
+
+function buildSeededVersionCtesFromToken(token: string): string {
+	return stripIndent(`
+		WITH RECURSIVE
+		  params(version_id) AS (
+		    SELECT ${token}
+		  ),
+		  version_descriptor_base AS (
+		    SELECT
+		      json_extract(desc.snapshot_content, '$.id') AS version_id,
+		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+		    FROM internal_state_cache_lix_version_descriptor desc
+		  ),
+		  version_inheritance(version_id, ancestor_version_id) AS (
+		    SELECT
+		      p.version_id,
+		      vdb.inherits_from_version_id
+		    FROM params p
+		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
+		    WHERE vdb.inherits_from_version_id IS NOT NULL
+
+		    UNION ALL
+
+		    SELECT
+		      vi.version_id,
+		      vdb.inherits_from_version_id
+		    FROM version_inheritance vi
+		    JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
+		    WHERE vdb.inherits_from_version_id IS NOT NULL
+		  ),
+		  version_parent AS (
+		    SELECT
+		      p.version_id,
+		      vdb.inherits_from_version_id AS parent_version_id
+		    FROM params p
+		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
 		    WHERE vdb.inherits_from_version_id IS NOT NULL
 		  )
 	`);
@@ -436,6 +483,31 @@ function collectLiteralVersionSeeds(shapes: Shape[]): string[] | null {
 	return [...literals];
 }
 
+function collectVersionPlaceholderToken(shapes: Shape[]): string | null {
+	let token: string | null = null;
+	for (const shape of shapes) {
+		switch (shape.versionId.kind) {
+			case "placeholder":
+				if (!shape.versionId.token) return null;
+				const image = shape.versionId.token.image;
+				if (!image || image === "?") {
+					return null;
+				}
+				if (token && token !== image) {
+					return null;
+				}
+				token = image;
+				break;
+			case "literal":
+				// literals handled separately
+				break;
+			default:
+				return null;
+		}
+	}
+	return token;
+}
+
 function buildUnseededVersionCtes(): string {
 	return stripIndent(`
     WITH RECURSIVE
@@ -452,7 +524,7 @@ function buildUnseededVersionCtes(): string {
         FROM version_descriptor_base vdb
         WHERE vdb.inherits_from_version_id IS NOT NULL
 
-        UNION
+        UNION ALL
 
         SELECT
           vir.version_id,

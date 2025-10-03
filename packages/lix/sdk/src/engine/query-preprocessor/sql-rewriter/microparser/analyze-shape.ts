@@ -10,6 +10,7 @@ import {
 	Num,
 	QIdent,
 	QMark,
+	QMarkNumber,
 	SQStr,
 	SELECT,
 	type Token,
@@ -63,6 +64,7 @@ export type Shape = {
 
 const placeholderTypes = new Set([
 	QMark,
+	QMarkNumber,
 	ColonName,
 	DollarName,
 	DollarNumber,

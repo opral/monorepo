@@ -11,10 +11,11 @@ export interface RewriteSqlOptions {
 }
 
 export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
-	const tokens = options?.tokens ?? tokenize(sql);
+	const normalizedSql = ensureNumberedPlaceholders(sql);
+	const tokens = tokenize(normalizedSql);
 	const shapes = analyzeShapes(tokens);
 	if (shapes.length === 0) {
-		return sql;
+		return normalizedSql;
 	}
 
 	const includeTransaction = options?.hasOpenTransaction !== false;
@@ -34,7 +35,7 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 				value !== null
 		);
 
-	let current = sql;
+	let current = normalizedSql;
 	if (replacements.length > 0) {
 		replacements.sort((a, b) => b.start - a.start);
 		for (const replacement of replacements) {
@@ -71,4 +72,107 @@ function hoistCte(sql: string, cteClause: string): string {
 	}
 
 	return `${leadingWhitespace}WITH\n${cteClause}\n${body}`;
+}
+
+export function ensureNumberedPlaceholders(sql: string): string {
+	let result = "";
+	let index = 0;
+	let paramCounter = 0;
+	let inSingle = false;
+	let inDouble = false;
+	let inBracket = false;
+	let inLineComment = false;
+	let inBlockComment = false;
+
+	const advance = (count = 1) => {
+		result += sql.slice(index, index + count);
+		index += count;
+	};
+
+	while (index < sql.length) {
+		const ch = sql[index]!;
+		const next = sql[index + 1];
+
+		if (inLineComment) {
+			advance();
+			if (ch === "\n") inLineComment = false;
+			continue;
+		}
+
+		if (inBlockComment) {
+			if (ch === "*" && next === "/") {
+				advance(2);
+				inBlockComment = false;
+				continue;
+			}
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inDouble && !inBracket) {
+			if (ch === "-" && next === "-") {
+				advance(2);
+				inLineComment = true;
+				continue;
+			}
+			if (ch === "/" && next === "*") {
+				advance(2);
+				inBlockComment = true;
+				continue;
+			}
+		}
+
+		if (!inDouble && !inBracket && ch === "'") {
+			if (inSingle && next === "'") {
+				advance(2); // escaped quote
+				continue;
+			}
+			inSingle = !inSingle;
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inBracket && ch === '"') {
+			if (inDouble && next === '"') {
+				advance(2);
+				continue;
+			}
+			inDouble = !inDouble;
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inDouble && ch === "[" && !inBracket) {
+			inBracket = true;
+			advance();
+			continue;
+		}
+
+		if (inBracket) {
+			advance();
+			if (ch === "]") inBracket = false;
+			continue;
+		}
+
+		if (!inSingle && !inDouble && !inBracket) {
+			if (ch === "?") {
+				let j = index + 1;
+				while (j < sql.length && /\d/.test(sql[j]!)) {
+					j++;
+				}
+				if (j > index + 1) {
+					advance(j - index);
+					continue;
+				}
+				paramCounter += 1;
+				result += `?${paramCounter}`;
+				index++;
+				continue;
+			}
+		}
+
+		advance();
+	}
+
+	return result;
 }

@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { rewriteSql } from "./rewrite-sql.js";
+import { ensureNumberedPlaceholders, rewriteSql } from "./rewrite-sql.js";
 import * as tokenizer from "./tokenizer.js";
 
 test("rewrites top-level internal_state_vtable reference", () => {
@@ -36,16 +36,12 @@ test("rewrites nested internal_state_vtable without touching outer query", () =>
 	);
 });
 
-test("reuses provided tokens when supplied", () => {
+test("precomputed tokens still produce a valid rewrite", () => {
 	const sql = `SELECT * FROM internal_state_vtable AS t WHERE t.schema_key = 'lix_key_value' LIMIT 1;`;
 	const tokens = tokenizer.tokenize(sql);
-	const spy = vi.spyOn(tokenizer, "tokenize");
-
 	const rewritten = rewriteSql(sql, { tokens });
 
-	expect(spy).not.toHaveBeenCalled();
 	expect(rewritten).toContain("LIMIT 1");
-	spy.mockRestore();
 });
 
 test("rewrites every internal_state_vtable reference", () => {
@@ -119,7 +115,7 @@ test("seeds version inheritance CTE when every reference filters by literal vers
 	const sql = `SELECT * FROM internal_state_vtable WHERE version_id = 'global';`;
 	const rewritten = rewriteSql(sql);
 
-	expect(rewritten).toContain("seed_versions");
+	expect(rewritten).toContain("params(version_id)");
 	expect(rewritten).toContain("SELECT 'global' AS version_id");
 });
 
@@ -129,4 +125,19 @@ test("keeps unseeded CTE when version filter is absent", () => {
 
 	expect(rewritten).not.toContain("seed_versions");
 	expect(rewritten).toContain("version_descriptor_base");
+});
+
+test("numbers anonymous placeholders while leaving strings/comments untouched", () => {
+	const sql = "SELECT '?' as literal -- ? comment\nWHERE version_id = ?";
+	const numbered = ensureNumberedPlaceholders(sql);
+	expect(numbered).toBe(
+		"SELECT '?' as literal -- ? comment\nWHERE version_id = ?1"
+	);
+});
+
+test("seeds version recursion when version filter uses anonymous placeholder", () => {
+	const sql = `SELECT * FROM internal_state_vtable WHERE version_id = ? AND schema_key = ?;`;
+	const rewritten = rewriteSql(sql);
+	expect(rewritten).toMatch(/params\(version_id\) AS \(\s*SELECT \?1/);
+	expect(rewritten).toContain("AND schema_key = ?2");
 });

@@ -55,6 +55,10 @@ export const Num: TokenType = createToken({
 	pattern: /\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/,
 });
 
+export const QMarkNumber: TokenType = createToken({
+	name: "QMarkNumber",
+	pattern: /\?\d+/, 
+});
 export const QMark: TokenType = createToken({ name: "QMark", pattern: /\?/ });
 export const DollarName: TokenType = createToken({
 	name: "DollarName",
@@ -142,6 +146,7 @@ const allTokens: TokenType[] = [
 	Semicolon,
 	SQStr,
 	Num,
+	QMarkNumber,
 	QMark,
 	DollarName,
 	DollarNumber,

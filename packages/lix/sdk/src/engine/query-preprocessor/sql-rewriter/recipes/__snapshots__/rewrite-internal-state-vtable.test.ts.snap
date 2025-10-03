@@ -14,9 +14,9 @@ exports[`matrix of queries preserves precedence across rewrites > matrix fast li
 154|8|0|UNION ALL
 157|154|0|MATERIALIZE version_inheritance
 161|157|0|SETUP
-164|161|0|MATERIALIZE seed_versions
+164|161|0|MATERIALIZE params
 166|164|0|SCAN CONSTANT ROW
-176|161|16|SCAN sv
+176|161|16|SCAN p
 178|161|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
 206|157|0|RECURSIVE STEP
 209|206|216|SCAN vi
@@ -29,8 +29,8 @@ exports[`matrix of queries preserves precedence across rewrites > matrix fast li
 310|281|53|SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
 349|8|0|UNION ALL
 356|349|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
-371|349|0|BLOOM FILTER ON sv (version_id=?)
-382|349|53|SEARCH sv USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
+371|349|0|BLOOM FILTER ON p (version_id=?)
+382|349|53|SEARCH p USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
 387|349|62|SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
 438|5|0|MATERIALIZE change
 440|438|0|COMPOUND QUERY
