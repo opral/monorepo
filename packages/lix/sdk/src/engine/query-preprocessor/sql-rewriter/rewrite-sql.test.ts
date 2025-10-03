@@ -117,7 +117,7 @@ test("seeds version inheritance CTE when every reference filters by literal vers
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten).toContain("params(version_id)");
-	expect(rewritten).toContain("SELECT 'global' AS version_id");
+	expect(rewritten).toContain("'global' AS version_id");
 });
 
 test("keeps unseeded CTE when version filter is absent", () => {
@@ -139,6 +139,7 @@ test("numbers anonymous placeholders while leaving strings/comments untouched", 
 test("seeds version recursion when version filter uses anonymous placeholder", () => {
 	const sql = `SELECT * FROM internal_state_vtable WHERE version_id = ? AND schema_key = ?;`;
 	const rewritten = rewriteSql(sql);
-	expect(rewritten).toMatch(/params\(version_id\) AS \(\s*SELECT \?1/);
+	expect(rewritten).toMatch(/params\(version_id/);
+	expect(rewritten).toContain("?1 AS version_id");
 	expect(rewritten).toContain("WHERE txn.schema_key = ?2");
 });

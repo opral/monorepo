@@ -51,6 +51,8 @@ export type Shape = {
 	limit: Limit;
 	schemaKeys: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
 	entityIds: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
+	fileIds: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
+	pluginKeys: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
 	versionId:
 		| { kind: "current" }
 		| { kind: "literal"; value: string }
@@ -82,8 +84,12 @@ const normalize = (image: string): string => dequote(image).toLowerCase();
 const unquoteString = (image: string): string =>
 	image.slice(1, -1).replace(/''/g, "'");
 
-const isSchemaColumn = (name: string) =>
-	name === "schema_key" || name === "entity_id" || name === "version_id";
+const isTrackedColumn = (name: string) =>
+	name === "schema_key" ||
+	name === "entity_id" ||
+	name === "version_id" ||
+	name === "file_id" ||
+	name === "plugin_key";
 
 type SelectContext = {
 	startIndex: number;
@@ -183,7 +189,7 @@ function analyzeShapeInternal(
 		if (columnName === "_pk") {
 			referencesPrimaryKey = true;
 		}
-		if (!isSchemaColumn(columnName)) continue;
+		if (!isTrackedColumn(columnName)) continue;
 
 		const result = parseFilter(tokens, i, alias, columnName, rangeEnd);
 		if (!result) {
@@ -197,6 +203,8 @@ function analyzeShapeInternal(
 	const limit = readLimit(tokens, rangeStart, rangeEnd);
 	const schemaKeys = pluckValues(filters, "schema_key");
 	const entityIds = pluckValues(filters, "entity_id");
+	const fileIds = pluckValues(filters, "file_id");
+	const pluginKeys = pluckValues(filters, "plugin_key");
 	const versionId = determineVersionId(filters);
 	const selectsWriterKey = tokens
 		.slice(rangeStart, rangeEnd + 1)
@@ -208,6 +216,8 @@ function analyzeShapeInternal(
 		limit,
 		schemaKeys,
 		entityIds,
+		fileIds,
+		pluginKeys,
 		versionId,
 		selectsWriterKey,
 		referencesPrimaryKey,
@@ -340,9 +350,11 @@ function readLimit(
 	return { kind: "none" };
 }
 
+type TrackedColumn = "schema_key" | "entity_id" | "file_id" | "plugin_key";
+
 function pluckValues(
 	filters: Filter[],
-	column: "schema_key" | "entity_id"
+	column: TrackedColumn
 ): Array<{ kind: "literal"; value: string } | PlaceholderValue> {
 	const results: Array<{ kind: "literal"; value: string } | PlaceholderValue> =
 		[];

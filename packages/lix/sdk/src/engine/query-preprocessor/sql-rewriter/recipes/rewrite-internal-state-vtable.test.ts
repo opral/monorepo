@@ -72,6 +72,24 @@ test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
 	);
 });
 
+test("version placeholder seeds recursion with numbered parameter", () => {
+	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = ?`;
+	const rewritten = rewriteSql(sql);
+
+	expect(rewritten).toMatch(/params\(version_id/);
+	expect(rewritten).toContain("?1 AS version_id");
+	expect(rewritten).toContain("'lix_key_value' AS schema_key");
+});
+
+test("version placeholder seeds recursion with named parameter", () => {
+	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = :version_id`;
+	const rewritten = rewriteSql(sql);
+
+	expect(rewritten).toMatch(/params\(version_id/);
+	expect(rewritten).toContain(":version_id AS version_id");
+	expect(rewritten).toContain("'lix_key_value' AS schema_key");
+});
+
 test("queries selecting _pk keep the raw CTE projection", () => {
 	const sql = `SELECT v._pk FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const rewritten = rewriteSql(sql);
