@@ -1,75 +1,50 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`matrix of queries preserves precedence across rewrites > matrix fast limit plan 1`] = `
-"2|0|0|CO-ROUTINE (subquery-27)
-3|2|0|COMPOUND QUERY
-4|3|0|LEFT-MOST SUBQUERY
-7|4|62|SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
-44|3|0|UNION ALL
-47|44|61|SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
-65|44|0|CORRELATED SCALAR SUBQUERY 6
-69|65|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-111|3|0|UNION ALL
-114|111|0|MATERIALIZE change
-116|114|0|COMPOUND QUERY
-117|116|0|LEFT-MOST SUBQUERY
-121|117|216|SCAN c
-123|117|47|SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
-148|116|0|UNION ALL
-150|148|216|SCAN t
-171|111|47|SEARCH internal_state_cache_rewrite_matrix_schema USING INDEX idx_internal_state_cache_rewrite_matrix_schema_version_id (version_id=? AND entity_id=?)
-191|111|0|CORRELATED SCALAR SUBQUERY 9
-195|191|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-210|111|0|CORRELATED SCALAR SUBQUERY 10
-214|210|45|SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-230|111|222|SCAN ch LEFT-JOIN
-269|3|0|UNION ALL
-272|269|0|MATERIALIZE version_inheritance
-277|272|0|SETUP
-280|277|212|SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent
-307|272|0|RECURSIVE STEP
-310|307|216|SCAN vir
-311|307|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
-335|269|0|MATERIALIZE change
-337|335|0|COMPOUND QUERY
-338|337|0|LEFT-MOST SUBQUERY
-342|338|216|SCAN c
-344|338|47|SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
-369|337|0|UNION ALL
-371|369|216|SCAN t
-393|269|24|SEARCH internal_state_cache_rewrite_matrix_schema USING PRIMARY KEY (entity_id=?)
-405|269|218|SCAN vi
-413|269|0|CORRELATED SCALAR SUBQUERY 13
-417|413|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-433|269|0|CORRELATED SCALAR SUBQUERY 15
-437|433|39|SEARCH internal_state_cache_rewrite_matrix_schema USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-455|269|0|CORRELATED SCALAR SUBQUERY 16
-459|455|45|SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-492|269|53|SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
-499|269|45|SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-510|269|45|SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-558|3|0|UNION ALL
-565|558|61|SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)
-577|558|0|BLOOM FILTER ON vi (version_id=?)
-589|558|53|SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
-598|558|0|CORRELATED SCALAR SUBQUERY 18
-602|598|45|SEARCH t USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-618|558|0|CORRELATED SCALAR SUBQUERY 20
-622|618|39|SEARCH internal_state_cache_rewrite_matrix_schema USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-640|558|0|CORRELATED SCALAR SUBQUERY 21
-644|640|45|SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-659|558|45|SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-670|558|45|SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-714|3|0|UNION ALL
-721|714|62|SEARCH txn USING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=?)
-730|714|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
-746|714|0|CORRELATED SCALAR SUBQUERY 23
-750|746|45|SEARCH child_txn USING COVERING INDEX sqlite_autoindex_internal_transaction_state_2 (entity_id=? AND file_id=? AND schema_key=? AND version_id=?)
-767|714|0|CORRELATED SCALAR SUBQUERY 25
-771|767|39|SEARCH internal_state_cache_rewrite_matrix_schema USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)
-790|714|0|CORRELATED SCALAR SUBQUERY 26
-794|790|45|SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)
-810|714|45|SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-822|714|45|SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
-873|0|223|SCAN (subquery-27)"
+"2|0|0|CO-ROUTINE ranked
+5|2|0|CO-ROUTINE (subquery-19)
+7|5|0|CO-ROUTINE candidates
+8|7|0|COMPOUND QUERY
+9|8|0|LEFT-MOST SUBQUERY
+12|9|62|SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
+52|8|0|UNION ALL
+55|52|61|SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)
+102|8|0|UNION ALL
+105|102|47|SEARCH internal_state_cache_rewrite_matrix_schema USING INDEX idx_internal_state_cache_rewrite_matrix_schema_version_id (version_id=? AND entity_id=?)
+154|8|0|UNION ALL
+157|154|0|MATERIALIZE version_inheritance
+161|157|0|SETUP
+164|161|0|MATERIALIZE seed_versions
+166|164|0|SCAN CONSTANT ROW
+176|161|16|SCAN sv
+178|161|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
+206|157|0|RECURSIVE STEP
+209|206|216|SCAN vi
+210|206|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
+231|154|24|SEARCH internal_state_cache_rewrite_matrix_schema USING PRIMARY KEY (entity_id=?)
+243|154|248|SCAN vi
+281|8|0|UNION ALL
+286|281|61|SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)
+298|281|0|BLOOM FILTER ON vi (version_id=?)
+310|281|53|SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
+349|8|0|UNION ALL
+356|349|54|SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)
+371|349|0|BLOOM FILTER ON sv (version_id=?)
+382|349|53|SEARCH sv USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)
+387|349|62|SEARCH txn USING INDEX ix_txn_v_f_s_e (version_id=?)
+438|5|0|MATERIALIZE change
+440|438|0|COMPOUND QUERY
+441|440|0|LEFT-MOST SUBQUERY
+445|441|216|SCAN c
+447|441|47|SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN
+472|440|0|UNION ALL
+474|472|216|SCAN t
+496|5|207|SCAN c
+523|5|53|SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN
+530|5|45|SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
+543|5|45|SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN
+598|5|0|USE TEMP B-TREE FOR ORDER BY
+637|2|230|SCAN (subquery-19)
+725|0|230|SCAN ranked
+749|0|0|USE TEMP B-TREE FOR ORDER BY"
 `;

@@ -173,231 +173,197 @@ FROM joined
 WITH
 -- hoisted_internal_state_vtable_rewrite
 internal_state_vtable AS (
-  SELECT _pk,
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id,
-      created_at,
-      updated_at,
-      inherited_from_version_id,
-      change_id,
-      untracked,
-      commit_id,
-      metadata,
-      writer_key
-  FROM (
-    WITH RECURSIVE
-      version_descriptor_base AS (
-        SELECT
-          json_extract(desc.snapshot_content, '$.id') AS version_id,
-          json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-        FROM internal_state_cache_lix_version_descriptor desc
-      ),
-      version_inheritance(version_id, ancestor_version_id) AS (
-        SELECT
-          vdb.version_id,
-          vdb.inherits_from_version_id
-        FROM version_descriptor_base vdb
-        WHERE vdb.inherits_from_version_id IS NOT NULL
+  WITH RECURSIVE
+    version_descriptor_base AS (
+      SELECT
+        json_extract(desc.snapshot_content, '$.id') AS version_id,
+        json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+      FROM internal_state_cache_lix_version_descriptor desc
+    ),
+    version_inheritance(version_id, ancestor_version_id) AS (
+      SELECT
+        vdb.version_id,
+        vdb.inherits_from_version_id
+      FROM version_descriptor_base vdb
+      WHERE vdb.inherits_from_version_id IS NOT NULL
 
-        UNION
+      UNION
 
-        SELECT
-          vir.version_id,
-          vdb.inherits_from_version_id
-        FROM version_inheritance vir
-        JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
-        WHERE vdb.inherits_from_version_id IS NOT NULL
-      ),
-      version_parent AS (
-        SELECT
-          vdb.version_id,
-          vdb.inherits_from_version_id AS parent_version_id
-        FROM version_descriptor_base vdb
-        WHERE vdb.inherits_from_version_id IS NOT NULL
-      )
-
-          SELECT * FROM (
-    -- 2. Untracked state (second priority) - only if no transaction exists
-    SELECT 
-      'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
-      u.entity_id,
-      u.schema_key,
-      u.file_id,
-      u.plugin_key,
-      json(u.snapshot_content) AS snapshot_content,
-      u.schema_version,
-      u.version_id,
-      u.created_at,
-      u.updated_at,
-      NULL AS inherited_from_version_id,
-      'untracked' AS change_id,
-      1 AS untracked,
-      'untracked' AS commit_id,
-      NULL AS metadata,
-      ws_untracked.writer_key
-    FROM internal_state_all_untracked u
-    LEFT JOIN internal_state_writer ws_untracked ON
-      ws_untracked.file_id = u.file_id AND
-      ws_untracked.entity_id = u.entity_id AND
-      ws_untracked.schema_key = u.schema_key AND
-      ws_untracked.version_id = u.version_id
-    WHERE (
-      (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-      (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+      SELECT
+        vir.version_id,
+        vdb.inherits_from_version_id
+      FROM version_inheritance vir
+      JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
+      WHERE vdb.inherits_from_version_id IS NOT NULL
+    ),
+    version_parent AS (
+      SELECT
+        vdb.version_id,
+        vdb.inherits_from_version_id AS parent_version_id
+      FROM version_descriptor_base vdb
+      WHERE vdb.inherits_from_version_id IS NOT NULL
     )
+  ,
+    candidates AS (
+      SELECT
+        'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
+        u.entity_id,
+        u.schema_key,
+        u.file_id,
+        u.plugin_key,
+        json(u.snapshot_content) AS snapshot_content,
+        u.schema_version,
+        u.version_id AS src_version_id,
+        u.version_id AS dst_version_id,
+        u.created_at,
+        u.updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        2 AS priority
+      FROM internal_state_all_untracked u
+      WHERE (
+        (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
+        (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+      )
 
+      UNION ALL
 
+      SELECT
+        'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        json(c.snapshot_content) AS snapshot_content,
+        c.schema_version,
+        c.version_id AS src_version_id,
+        c.version_id AS dst_version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        0 AS untracked,
+        c.commit_id,
+        NULL AS metadata,
+        3 AS priority
+      FROM internal_state_cache c
+      WHERE (
+        (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
+        (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+      )
 
-    		UNION ALL
+      UNION ALL
 
-    -- 3. Tracked state from cache (third priority) - only if no transaction or untracked exists
-    SELECT 
-      'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
-      c.entity_id,
-      c.schema_key,
-      c.file_id,
-      c.plugin_key,
-      json(c.snapshot_content) AS snapshot_content,
-      c.schema_version,
-      c.version_id,
-      c.created_at,
-      c.updated_at,
-      c.inherited_from_version_id,
-      c.change_id,
-      0 AS untracked,
-      c.commit_id,
-      ch.metadata AS metadata,
-      ws_cache.writer_key
-    FROM internal_state_cache c
-    LEFT JOIN change ch ON ch.id = c.change_id
-    LEFT JOIN internal_state_writer ws_cache ON
-      ws_cache.file_id = c.file_id AND
-      ws_cache.entity_id = c.entity_id AND
-      ws_cache.schema_key = c.schema_key AND
-      ws_cache.version_id = c.version_id
-    WHERE (
-      (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-      (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+      SELECT
+        'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        isc.entity_id,
+        isc.schema_key,
+        isc.file_id,
+        isc.plugin_key,
+        json(isc.snapshot_content) AS snapshot_content,
+        isc.schema_version,
+        isc.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        isc.created_at,
+        isc.updated_at,
+        isc.version_id AS inherited_from_version_id,
+        isc.change_id,
+        0 AS untracked,
+        isc.commit_id,
+        NULL AS metadata,
+        4 AS priority
+      FROM version_inheritance vi
+      JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
+      WHERE isc.inheritance_delete_marker = 0
+        AND isc.snapshot_content IS NOT NULL
+
+      UNION ALL
+
+      SELECT
+        'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        unt.entity_id,
+        unt.schema_key,
+        unt.file_id,
+        unt.plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version,
+        unt.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        unt.created_at,
+        unt.updated_at,
+        unt.version_id AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        5 AS priority
+      FROM version_inheritance vi
+      JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+      WHERE unt.inheritance_delete_marker = 0
+        AND unt.snapshot_content IS NOT NULL
+    ),
+    ranked AS (
+      SELECT
+        c._pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        c.snapshot_content,
+        c.schema_version,
+        c.dst_version_id AS version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        c.untracked,
+        c.commit_id,
+        COALESCE(c.metadata, ch.metadata) AS metadata,
+        COALESCE(ws_dst.writer_key, ws_src.writer_key) AS writer_key,
+        c.priority,
+        ROW_NUMBER() OVER (
+          PARTITION BY c.file_id, c.schema_key, c.entity_id, c.dst_version_id
+          ORDER BY c.priority,
+                   c.created_at DESC,
+                   c._pk
+        ) AS rn
+      FROM candidates c
+      LEFT JOIN change ch ON ch.id = c.change_id
+      LEFT JOIN internal_state_writer ws_dst ON
+        ws_dst.file_id = c.file_id AND
+        ws_dst.entity_id = c.entity_id AND
+        ws_dst.schema_key = c.schema_key AND
+        ws_dst.version_id = c.dst_version_id
+      LEFT JOIN internal_state_writer ws_src ON
+        ws_src.file_id = c.file_id AND
+        ws_src.entity_id = c.entity_id AND
+        ws_src.schema_key = c.schema_key AND
+        ws_src.version_id = COALESCE(c.inherited_from_version_id, c.dst_version_id)
+
     )
-
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_state_all_untracked u
-        WHERE u.version_id = c.version_id
-          AND u.file_id = c.file_id
-          AND u.schema_key = c.schema_key
-          AND u.entity_id = c.entity_id
-      )
-
-
-    		UNION ALL
-
-    -- 4. Inherited tracked state (fourth priority)
-    SELECT 
-      'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
-      isc.entity_id,
-      isc.schema_key,
-      isc.file_id,
-      isc.plugin_key,
-      json(isc.snapshot_content) AS snapshot_content,
-      isc.schema_version,
-      vi.version_id,
-      isc.created_at,
-      isc.updated_at,
-      isc.version_id AS inherited_from_version_id,
-      isc.change_id,
-      0 AS untracked,
-      isc.commit_id,
-      ch.metadata AS metadata,
-      COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
-    FROM version_inheritance vi
-    JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
-    LEFT JOIN change ch ON ch.id = isc.change_id
-    LEFT JOIN internal_state_writer ws_child ON
-      ws_child.file_id = isc.file_id AND
-      ws_child.entity_id = isc.entity_id AND
-      ws_child.schema_key = isc.schema_key AND
-      ws_child.version_id = vi.version_id
-    LEFT JOIN internal_state_writer ws_parent ON
-      ws_parent.file_id = isc.file_id AND
-      ws_parent.entity_id = isc.entity_id AND
-      ws_parent.schema_key = isc.schema_key AND
-      ws_parent.version_id = isc.version_id
-    WHERE isc.inheritance_delete_marker = 0
-      AND isc.snapshot_content IS NOT NULL
-
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_state_cache child_isc
-        WHERE child_isc.version_id = vi.version_id
-          AND child_isc.file_id = isc.file_id
-          AND child_isc.schema_key = isc.schema_key
-          AND child_isc.entity_id = isc.entity_id
-      )
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_state_all_untracked child_unt
-        WHERE child_unt.version_id = vi.version_id
-          AND child_unt.file_id = isc.file_id
-          AND child_unt.schema_key = isc.schema_key
-          AND child_unt.entity_id = isc.entity_id
-      )
-
-
-    		UNION ALL
-
-    -- 5. Inherited untracked state (lowest priority)
-    SELECT 
-      'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
-      unt.entity_id,
-      unt.schema_key,
-      unt.file_id,
-      unt.plugin_key,
-      json(unt.snapshot_content) AS snapshot_content,
-      unt.schema_version,
-      vi.version_id,
-      unt.created_at,
-      unt.updated_at,
-      unt.version_id AS inherited_from_version_id,
-      'untracked' AS change_id,
-      1 AS untracked,
-      'untracked' AS commit_id,
-      NULL AS metadata,
-      COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
-    FROM version_inheritance vi
-    JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-    LEFT JOIN internal_state_writer ws_child ON
-      ws_child.file_id = unt.file_id AND
-      ws_child.entity_id = unt.entity_id AND
-      ws_child.schema_key = unt.schema_key AND
-      ws_child.version_id = vi.version_id
-    LEFT JOIN internal_state_writer ws_parent ON
-      ws_parent.file_id = unt.file_id AND
-      ws_parent.entity_id = unt.entity_id AND
-      ws_parent.schema_key = unt.schema_key AND
-      ws_parent.version_id = unt.version_id
-    WHERE unt.inheritance_delete_marker = 0
-      AND unt.snapshot_content IS NOT NULL
-
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_state_cache child_isc
-        WHERE child_isc.version_id = vi.version_id
-          AND child_isc.file_id = unt.file_id
-          AND child_isc.schema_key = unt.schema_key
-          AND child_isc.entity_id = unt.entity_id
-      )
-      AND NOT EXISTS (
-        SELECT 1 FROM internal_state_all_untracked child_unt
-        WHERE child_unt.version_id = vi.version_id
-          AND child_unt.file_id = unt.file_id
-          AND child_unt.schema_key = unt.schema_key
-          AND child_unt.entity_id = unt.entity_id
-      )
-
-    		)
-  )
+  SELECT
+    _pk,
+    entity_id,
+    schema_key,
+    file_id,
+    plugin_key,
+    snapshot_content,
+    schema_version,
+    version_id,
+    created_at,
+    updated_at,
+    inherited_from_version_id,
+    change_id,
+    untracked,
+    commit_id,
+    metadata,
+    writer_key
+  FROM ranked
+  WHERE rn = 1
+  ORDER BY priority, _pk
 )
 select * from (
 WITH
@@ -522,1218 +488,858 @@ FROM joined
     "id": 4,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-13)"
+    "detail": "CO-ROUTINE ranked"
   },
   {
-    "id": 5,
+    "id": 7,
     "parent": 4,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-40)"
+  },
+  {
+    "id": 9,
+    "parent": 7,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 10,
+    "parent": 9,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 6,
-    "parent": 5,
+    "id": 11,
+    "parent": 10,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 9,
-    "parent": 6,
+    "id": 14,
+    "parent": 11,
     "notused": 61,
     "detail": "SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 41,
-    "parent": 5,
+    "id": 57,
+    "parent": 10,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 44,
-    "parent": 41,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 46,
-    "parent": 44,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 47,
-    "parent": 46,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 51,
-    "parent": 47,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 53,
-    "parent": 47,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 78,
-    "parent": 46,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 80,
-    "parent": 78,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 100,
-    "parent": 41,
+    "id": 59,
+    "parent": 57,
     "notused": 189,
     "detail": "SCAN c VIRTUAL TABLE INDEX 0:version_id"
   },
   {
-    "id": 116,
-    "parent": 41,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 6"
-  },
-  {
-    "id": 120,
-    "parent": 116,
-    "notused": 45,
-    "detail": "SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 150,
-    "parent": 41,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 180,
-    "parent": 5,
+    "id": 104,
+    "parent": 10,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 183,
-    "parent": 180,
+    "id": 107,
+    "parent": 104,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 188,
-    "parent": 183,
+    "id": 112,
+    "parent": 107,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 191,
-    "parent": 188,
+    "id": 115,
+    "parent": 112,
     "notused": 28,
     "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
-    "id": 218,
-    "parent": 183,
+    "id": 142,
+    "parent": 107,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 221,
-    "parent": 218,
+    "id": 145,
+    "parent": 142,
     "notused": 216,
     "detail": "SCAN vir"
   },
   {
-    "id": 222,
-    "parent": 218,
+    "id": 146,
+    "parent": 142,
     "notused": 20,
     "detail": "SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
-    "id": 246,
-    "parent": 180,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 248,
-    "parent": 246,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 249,
-    "parent": 248,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 253,
-    "parent": 249,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 255,
-    "parent": 249,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 280,
-    "parent": 248,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 282,
-    "parent": 280,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 304,
-    "parent": 180,
+    "id": 169,
+    "parent": 104,
     "notused": 189,
     "detail": "SCAN isc VIRTUAL TABLE INDEX 0:inheritance_delete_marker"
   },
   {
-    "id": 317,
-    "parent": 180,
+    "id": 182,
+    "parent": 104,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 329,
-    "parent": 180,
+    "id": 194,
+    "parent": 104,
     "notused": 52,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 338,
-    "parent": 180,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 8"
-  },
-  {
-    "id": 342,
-    "parent": 338,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 365,
-    "parent": 180,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 9"
-  },
-  {
-    "id": 369,
-    "parent": 365,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 400,
-    "parent": 180,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 407,
-    "parent": 180,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 418,
-    "parent": 180,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 457,
-    "parent": 5,
+    "id": 233,
+    "parent": 10,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 464,
-    "parent": 457,
+    "id": 238,
+    "parent": 233,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 468,
-    "parent": 457,
+    "id": 242,
+    "parent": 233,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 480,
-    "parent": 457,
+    "id": 287,
+    "parent": 7,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 11"
+    "detail": "MATERIALIZE change"
   },
   {
-    "id": 484,
-    "parent": 480,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 507,
-    "parent": 457,
+    "id": 289,
+    "parent": 287,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 12"
+    "detail": "COMPOUND QUERY"
   },
   {
-    "id": 511,
-    "parent": 507,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    "id": 290,
+    "parent": 289,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 524,
-    "parent": 457,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    "id": 294,
+    "parent": 290,
+    "notused": 216,
+    "detail": "SCAN c"
   },
   {
-    "id": 535,
-    "parent": 457,
+    "id": 296,
+    "parent": 290,
+    "notused": 47,
+    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 321,
+    "parent": 289,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 323,
+    "parent": 321,
+    "notused": 216,
+    "detail": "SCAN t"
+  },
+  {
+    "id": 345,
+    "parent": 7,
+    "notused": 282,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 368,
+    "parent": 7,
+    "notused": 53,
+    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 375,
+    "parent": 7,
     "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 388,
+    "parent": 7,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 443,
+    "parent": 7,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 482,
+    "parent": 4,
+    "notused": 305,
+    "detail": "SCAN (subquery-40)"
+  },
+  {
+    "id": 570,
+    "parent": 2,
+    "notused": 0,
+    "detail": "MATERIALIZE ranked"
   },
   {
     "id": 573,
-    "parent": 2,
+    "parent": 570,
     "notused": 0,
-    "detail": "MATERIALIZE (subquery-13)"
+    "detail": "CO-ROUTINE (subquery-41)"
   },
   {
     "id": 575,
     "parent": 573,
     "notused": 0,
-    "detail": "COMPOUND QUERY"
+    "detail": "CO-ROUTINE candidates"
   },
   {
     "id": 576,
     "parent": 575,
     "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 577,
+    "parent": 576,
+    "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 579,
-    "parent": 576,
+    "id": 580,
+    "parent": 577,
     "notused": 61,
     "detail": "SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 616,
-    "parent": 575,
+    "id": 623,
+    "parent": 576,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 619,
-    "parent": 616,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 621,
-    "parent": 619,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 622,
-    "parent": 621,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 626,
-    "parent": 622,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 628,
-    "parent": 622,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 653,
-    "parent": 621,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 655,
-    "parent": 653,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 675,
-    "parent": 616,
+    "id": 625,
+    "parent": 623,
     "notused": 189,
     "detail": "SCAN c VIRTUAL TABLE INDEX 0:version_id"
   },
   {
-    "id": 694,
-    "parent": 616,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 6"
-  },
-  {
-    "id": 698,
-    "parent": 694,
-    "notused": 45,
-    "detail": "SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 728,
-    "parent": 616,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 760,
-    "parent": 575,
+    "id": 670,
+    "parent": 576,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 763,
-    "parent": 760,
+    "id": 673,
+    "parent": 670,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 768,
-    "parent": 763,
+    "id": 678,
+    "parent": 673,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 771,
-    "parent": 768,
+    "id": 681,
+    "parent": 678,
     "notused": 28,
     "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
-    "id": 798,
-    "parent": 763,
+    "id": 708,
+    "parent": 673,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 801,
-    "parent": 798,
+    "id": 711,
+    "parent": 708,
     "notused": 216,
     "detail": "SCAN vir"
   },
   {
-    "id": 802,
-    "parent": 798,
+    "id": 712,
+    "parent": 708,
     "notused": 20,
     "detail": "SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
-    "id": 826,
-    "parent": 760,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 828,
-    "parent": 826,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 829,
-    "parent": 828,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 833,
-    "parent": 829,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 835,
-    "parent": 829,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 860,
-    "parent": 828,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 862,
-    "parent": 860,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 884,
-    "parent": 760,
+    "id": 735,
+    "parent": 670,
     "notused": 189,
     "detail": "SCAN isc VIRTUAL TABLE INDEX 0:inheritance_delete_marker"
   },
   {
-    "id": 900,
-    "parent": 760,
+    "id": 748,
+    "parent": 670,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 912,
-    "parent": 760,
+    "id": 760,
+    "parent": 670,
     "notused": 52,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 921,
-    "parent": 760,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 8"
-  },
-  {
-    "id": 925,
-    "parent": 921,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 948,
-    "parent": 760,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 9"
-  },
-  {
-    "id": 952,
-    "parent": 948,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 983,
-    "parent": 760,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 990,
-    "parent": 760,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1001,
-    "parent": 760,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1042,
-    "parent": 575,
+    "id": 799,
+    "parent": 576,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1049,
-    "parent": 1042,
+    "id": 804,
+    "parent": 799,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 1053,
-    "parent": 1042,
+    "id": 808,
+    "parent": 799,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1068,
-    "parent": 1042,
+    "id": 853,
+    "parent": 573,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 11"
+    "detail": "MATERIALIZE change"
   },
   {
-    "id": 1072,
-    "parent": 1068,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 1095,
-    "parent": 1042,
+    "id": 855,
+    "parent": 853,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 12"
+    "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1099,
-    "parent": 1095,
+    "id": 856,
+    "parent": 855,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 860,
+    "parent": 856,
+    "notused": 216,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 862,
+    "parent": 856,
+    "notused": 47,
+    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 887,
+    "parent": 855,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 889,
+    "parent": 887,
+    "notused": 216,
+    "detail": "SCAN t"
+  },
+  {
+    "id": 911,
+    "parent": 573,
+    "notused": 282,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 934,
+    "parent": 573,
+    "notused": 53,
+    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 941,
+    "parent": 573,
     "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 1112,
-    "parent": 1042,
+    "id": 954,
+    "parent": 573,
     "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 1123,
-    "parent": 1042,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+    "id": 1009,
+    "parent": 573,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 1161,
+    "id": 1049,
+    "parent": 570,
+    "notused": 305,
+    "detail": "SCAN (subquery-41)"
+  },
+  {
+    "id": 1137,
     "parent": 2,
-    "notused": 325,
-    "detail": "SCAN (subquery-13)"
+    "notused": 305,
+    "detail": "SCAN ranked"
   },
   {
-    "id": 1170,
+    "id": 1148,
     "parent": 2,
     "notused": 0,
-    "detail": "BLOOM FILTER ON (subquery-13) (version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
+    "detail": "BLOOM FILTER ON ranked (rn=? AND version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
   },
   {
-    "id": 1199,
+    "id": 1172,
     "parent": 2,
     "notused": 56,
-    "detail": "SEARCH (subquery-13) USING AUTOMATIC PARTIAL COVERING INDEX (version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
+    "detail": "SEARCH ranked USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
   },
   {
-    "id": 1280,
+    "id": 1254,
     "parent": 1,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1282,
-    "parent": 1280,
+    "id": 1256,
+    "parent": 1254,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-13)"
+    "detail": "CO-ROUTINE ranked"
   },
   {
-    "id": 1283,
-    "parent": 1282,
+    "id": 1259,
+    "parent": 1256,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-42)"
+  },
+  {
+    "id": 1261,
+    "parent": 1259,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 1262,
+    "parent": 1261,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1284,
-    "parent": 1283,
+    "id": 1263,
+    "parent": 1262,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1287,
-    "parent": 1284,
+    "id": 1266,
+    "parent": 1263,
     "notused": 61,
     "detail": "SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1322,
-    "parent": 1283,
+    "id": 1309,
+    "parent": 1262,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1325,
-    "parent": 1322,
+    "id": 1311,
+    "parent": 1309,
+    "notused": 189,
+    "detail": "SCAN c VIRTUAL TABLE INDEX 0:version_id"
+  },
+  {
+    "id": 1356,
+    "parent": 1262,
     "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 1327,
-    "parent": 1325,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 1328,
-    "parent": 1327,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 1332,
-    "parent": 1328,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 1334,
-    "parent": 1328,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+    "detail": "UNION ALL"
   },
   {
     "id": 1359,
-    "parent": 1327,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1361,
-    "parent": 1359,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 1381,
-    "parent": 1322,
-    "notused": 189,
-    "detail": "SCAN c VIRTUAL TABLE INDEX 0:version_id"
-  },
-  {
-    "id": 1400,
-    "parent": 1322,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 6"
-  },
-  {
-    "id": 1404,
-    "parent": 1400,
-    "notused": 45,
-    "detail": "SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 1434,
-    "parent": 1322,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 1464,
-    "parent": 1283,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1467,
-    "parent": 1464,
+    "parent": 1356,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 1472,
-    "parent": 1467,
+    "id": 1364,
+    "parent": 1359,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 1475,
-    "parent": 1472,
+    "id": 1367,
+    "parent": 1364,
     "notused": 28,
     "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
-    "id": 1502,
-    "parent": 1467,
+    "id": 1394,
+    "parent": 1359,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 1505,
-    "parent": 1502,
+    "id": 1397,
+    "parent": 1394,
     "notused": 216,
     "detail": "SCAN vir"
   },
   {
-    "id": 1506,
-    "parent": 1502,
+    "id": 1398,
+    "parent": 1394,
     "notused": 20,
     "detail": "SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
-    "id": 1530,
-    "parent": 1464,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 1532,
-    "parent": 1530,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 1533,
-    "parent": 1532,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 1537,
-    "parent": 1533,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 1539,
-    "parent": 1533,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 1564,
-    "parent": 1532,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1566,
-    "parent": 1564,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 1588,
-    "parent": 1464,
+    "id": 1421,
+    "parent": 1356,
     "notused": 189,
     "detail": "SCAN isc VIRTUAL TABLE INDEX 0:inheritance_delete_marker"
   },
   {
-    "id": 1604,
-    "parent": 1464,
+    "id": 1434,
+    "parent": 1356,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1616,
-    "parent": 1464,
+    "id": 1446,
+    "parent": 1356,
     "notused": 52,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1625,
-    "parent": 1464,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 8"
-  },
-  {
-    "id": 1629,
-    "parent": 1625,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 1652,
-    "parent": 1464,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 9"
-  },
-  {
-    "id": 1656,
-    "parent": 1652,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 1687,
-    "parent": 1464,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 1694,
-    "parent": 1464,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1705,
-    "parent": 1464,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1744,
-    "parent": 1283,
+    "id": 1485,
+    "parent": 1262,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1751,
-    "parent": 1744,
+    "id": 1490,
+    "parent": 1485,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 1755,
-    "parent": 1744,
+    "id": 1494,
+    "parent": 1485,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1770,
-    "parent": 1744,
+    "id": 1539,
+    "parent": 1259,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 11"
+    "detail": "MATERIALIZE change"
   },
   {
-    "id": 1774,
-    "parent": 1770,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 1797,
-    "parent": 1744,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 12"
-  },
-  {
-    "id": 1801,
-    "parent": 1797,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 1814,
-    "parent": 1744,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1825,
-    "parent": 1744,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 1863,
-    "parent": 1280,
-    "notused": 0,
-    "detail": "MATERIALIZE (subquery-13)"
-  },
-  {
-    "id": 1865,
-    "parent": 1863,
+    "id": 1541,
+    "parent": 1539,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1866,
-    "parent": 1865,
+    "id": 1542,
+    "parent": 1541,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1869,
-    "parent": 1866,
+    "id": 1546,
+    "parent": 1542,
+    "notused": 216,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 1548,
+    "parent": 1542,
+    "notused": 47,
+    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 1573,
+    "parent": 1541,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1575,
+    "parent": 1573,
+    "notused": 216,
+    "detail": "SCAN t"
+  },
+  {
+    "id": 1597,
+    "parent": 1259,
+    "notused": 282,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 1620,
+    "parent": 1259,
+    "notused": 53,
+    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 1627,
+    "parent": 1259,
+    "notused": 45,
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 1640,
+    "parent": 1259,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 1695,
+    "parent": 1259,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 1734,
+    "parent": 1256,
+    "notused": 305,
+    "detail": "SCAN (subquery-42)"
+  },
+  {
+    "id": 1822,
+    "parent": 1254,
+    "notused": 0,
+    "detail": "MATERIALIZE ranked"
+  },
+  {
+    "id": 1825,
+    "parent": 1822,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-43)"
+  },
+  {
+    "id": 1827,
+    "parent": 1825,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 1828,
+    "parent": 1827,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 1829,
+    "parent": 1828,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 1832,
+    "parent": 1829,
     "notused": 61,
     "detail": "SEARCH u USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1902,
-    "parent": 1865,
+    "id": 1875,
+    "parent": 1828,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1905,
-    "parent": 1902,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 1907,
-    "parent": 1905,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 1908,
-    "parent": 1907,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 1912,
-    "parent": 1908,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 1914,
-    "parent": 1908,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 1939,
-    "parent": 1907,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1941,
-    "parent": 1939,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 1961,
-    "parent": 1902,
+    "id": 1877,
+    "parent": 1875,
     "notused": 189,
     "detail": "SCAN c VIRTUAL TABLE INDEX 0:version_id"
   },
   {
-    "id": 1977,
-    "parent": 1902,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 6"
-  },
-  {
-    "id": 1981,
-    "parent": 1977,
-    "notused": 45,
-    "detail": "SEARCH u USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 2011,
-    "parent": 1902,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 2042,
-    "parent": 1865,
+    "id": 1922,
+    "parent": 1828,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2045,
-    "parent": 2042,
+    "id": 1925,
+    "parent": 1922,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 2050,
-    "parent": 2045,
+    "id": 1930,
+    "parent": 1925,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 2053,
-    "parent": 2050,
+    "id": 1933,
+    "parent": 1930,
     "notused": 28,
     "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
-    "id": 2080,
-    "parent": 2045,
+    "id": 1960,
+    "parent": 1925,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 2083,
-    "parent": 2080,
+    "id": 1963,
+    "parent": 1960,
     "notused": 216,
     "detail": "SCAN vir"
   },
   {
-    "id": 2084,
-    "parent": 2080,
+    "id": 1964,
+    "parent": 1960,
     "notused": 20,
     "detail": "SEARCH desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
-    "id": 2108,
-    "parent": 2042,
-    "notused": 0,
-    "detail": "MATERIALIZE change"
-  },
-  {
-    "id": 2110,
-    "parent": 2108,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 2111,
-    "parent": 2110,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 2115,
-    "parent": 2111,
-    "notused": 216,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 2117,
-    "parent": 2111,
-    "notused": 47,
-    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 2142,
-    "parent": 2110,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 2144,
-    "parent": 2142,
-    "notused": 216,
-    "detail": "SCAN t"
-  },
-  {
-    "id": 2166,
-    "parent": 2042,
+    "id": 1987,
+    "parent": 1922,
     "notused": 189,
     "detail": "SCAN isc VIRTUAL TABLE INDEX 0:inheritance_delete_marker"
   },
   {
-    "id": 2179,
-    "parent": 2042,
+    "id": 2000,
+    "parent": 1922,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 2191,
-    "parent": 2042,
+    "id": 2012,
+    "parent": 1922,
     "notused": 52,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2200,
-    "parent": 2042,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 8"
-  },
-  {
-    "id": 2204,
-    "parent": 2200,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 2227,
-    "parent": 2042,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 9"
-  },
-  {
-    "id": 2231,
-    "parent": 2227,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 2262,
-    "parent": 2042,
-    "notused": 53,
-    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
-  },
-  {
-    "id": 2269,
-    "parent": 2042,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 2280,
-    "parent": 2042,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 2320,
-    "parent": 1865,
+    "id": 2051,
+    "parent": 1828,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2327,
-    "parent": 2320,
+    "id": 2056,
+    "parent": 2051,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 2331,
-    "parent": 2320,
+    "id": 2060,
+    "parent": 2051,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 2343,
-    "parent": 2320,
+    "id": 2105,
+    "parent": 1825,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 11"
+    "detail": "MATERIALIZE change"
   },
   {
-    "id": 2347,
-    "parent": 2343,
-    "notused": 99,
-    "detail": "SCAN child_isc VIRTUAL TABLE INDEX 0:version_id,file_id,schema_key,entity_id"
-  },
-  {
-    "id": 2370,
-    "parent": 2320,
+    "id": 2107,
+    "parent": 2105,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 12"
+    "detail": "COMPOUND QUERY"
   },
   {
-    "id": 2374,
-    "parent": 2370,
-    "notused": 45,
-    "detail": "SEARCH child_unt USING COVERING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
-  },
-  {
-    "id": 2387,
-    "parent": 2320,
-    "notused": 45,
-    "detail": "SEARCH ws_child USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 2398,
-    "parent": 2320,
-    "notused": 45,
-    "detail": "SEARCH ws_parent USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
-  },
-  {
-    "id": 2435,
-    "parent": 1280,
-    "notused": 325,
-    "detail": "SCAN (subquery-13)"
-  },
-  {
-    "id": 2446,
-    "parent": 1280,
+    "id": 2108,
+    "parent": 2107,
     "notused": 0,
-    "detail": "BLOOM FILTER ON (subquery-13) (version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
+    "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 2473,
-    "parent": 1280,
+    "id": 2112,
+    "parent": 2108,
+    "notused": 216,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 2114,
+    "parent": 2108,
+    "notused": 47,
+    "detail": "SEARCH s USING INDEX sqlite_autoindex_internal_snapshot_1 (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 2139,
+    "parent": 2107,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 2141,
+    "parent": 2139,
+    "notused": 216,
+    "detail": "SCAN t"
+  },
+  {
+    "id": 2163,
+    "parent": 1825,
+    "notused": 282,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 2186,
+    "parent": 1825,
+    "notused": 53,
+    "detail": "SEARCH ch USING AUTOMATIC COVERING INDEX (id=?) LEFT-JOIN"
+  },
+  {
+    "id": 2193,
+    "parent": 1825,
+    "notused": 45,
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 2206,
+    "parent": 1825,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 2261,
+    "parent": 1825,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 2301,
+    "parent": 1822,
+    "notused": 305,
+    "detail": "SCAN (subquery-43)"
+  },
+  {
+    "id": 2389,
+    "parent": 1254,
+    "notused": 305,
+    "detail": "SCAN ranked"
+  },
+  {
+    "id": 2402,
+    "parent": 1254,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON ranked (rn=? AND version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
+  },
+  {
+    "id": 2422,
+    "parent": 1254,
     "notused": 56,
-    "detail": "SEARCH (subquery-13) USING AUTOMATIC PARTIAL COVERING INDEX (version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
+    "detail": "SEARCH ranked USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
   }
 ]

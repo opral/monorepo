@@ -114,3 +114,19 @@ WHERE schema_key = 'lix_active_version'
 	expect(rewritten).toContain("internal_state_vtable AS (");
 	expect(rewritten).toContain("WHERE schema_key = 'lix_active_version'");
 });
+
+test("seeds version inheritance CTE when every reference filters by literal version", () => {
+	const sql = `SELECT * FROM internal_state_vtable WHERE version_id = 'global';`;
+	const rewritten = rewriteSql(sql);
+
+	expect(rewritten).toContain("seed_versions");
+	expect(rewritten).toContain("SELECT 'global' AS version_id");
+});
+
+test("keeps unseeded CTE when version filter is absent", () => {
+	const sql = `SELECT * FROM internal_state_vtable;`;
+	const rewritten = rewriteSql(sql);
+
+	expect(rewritten).not.toContain("seed_versions");
+	expect(rewritten).toContain("version_descriptor_base");
+});
