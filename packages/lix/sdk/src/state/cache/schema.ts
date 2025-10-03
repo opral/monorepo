@@ -268,6 +268,7 @@ export function applyStateCacheV2Schema(args: {
 				argc: number,
 				argv: any
 			) => {
+				// throw new Error("Read should happen via internal_state_vtable");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 

@@ -106,9 +106,7 @@ internal_state_vtable_rewritten AS (
         c.commit_id,
         NULL AS metadata,
         3 AS priority
-      FROM (SELECT *
-  FROM internal_state_cache_bench_vtable_schema
-  ) c
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) c
         JOIN params p ON
           p.entity_id = c.entity_id
           AND p.version_id = c.version_id
@@ -142,9 +140,7 @@ internal_state_vtable_rewritten AS (
         NULL AS metadata,
         4 AS priority
       FROM version_inheritance vi
-      JOIN (SELECT *
-  FROM internal_state_cache_bench_vtable_schema
-  ) isc ON isc.version_id = vi.ancestor_version_id
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
         JOIN params p ON
           p.version_id = vi.version_id
           AND p.entity_id = isc.entity_id
