@@ -15,6 +15,13 @@ import { matchesGlob } from "../util/glob.js";
 import { normalizeFilePath } from "../path.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 
+/**
+ * Common fields shared by insert/update file mutations.
+ *
+ * Paths must be percent-encoded (`encodeURIComponent`) before invoking the
+ * handlers below; decode them (`decodeURIComponent`) on the caller side when
+ * displaying to users.
+ */
 type FileMutationInput = {
 	id: string;
 	path: string;

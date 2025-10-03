@@ -17,6 +17,22 @@ import type { PanelSide, PanelState, ViewId } from "./types";
 import { createViewInstanceId, VIEW_MAP } from "./view-registry";
 import { Panel as PanelComponent } from "./panel";
 
+const hydratePanel = (panel: PanelState): PanelState => ({
+	instances: panel.instances,
+	activeInstanceId:
+		panel.instances.length === 0
+			? null
+			: (panel.activeInstanceId ?? panel.instances[0]?.instanceId ?? null),
+});
+
+const decodeURIComponentSafe = (value: string): string => {
+	try {
+		return decodeURIComponent(value);
+	} catch {
+		return value;
+	}
+};
+
 /**
  * Fleet-style layout shell with independent left and right islands.
  *
@@ -46,25 +62,17 @@ export function V2LayoutShell() {
 		[leftPanel, centralPanel, rightPanel],
 	);
 
-	const hydrate = (panel: PanelState): PanelState => ({
-		instances: panel.instances,
-		activeInstanceId:
-			panel.instances.length === 0
-				? null
-				: (panel.activeInstanceId ?? panel.instances[0]?.instanceId ?? null),
-	});
-
 	const setPanelState = (
 		side: PanelSide,
 		reducer: (state: PanelState) => PanelState,
 		options: { focus?: boolean } = {},
 	) => {
 		if (side === "left") {
-			setLeftPanel((prev) => reducer(hydrate(prev)));
+			setLeftPanel((prev) => reducer(hydratePanel(prev)));
 		} else if (side === "central") {
-			setCentralPanel((prev) => reducer(hydrate(prev)));
+			setCentralPanel((prev) => reducer(hydratePanel(prev)));
 		} else {
-			setRightPanel((prev) => reducer(hydrate(prev)));
+			setRightPanel((prev) => reducer(hydratePanel(prev)));
 		}
 		if (options.focus) {
 			setFocusedPanel(side);
@@ -73,9 +81,9 @@ export function V2LayoutShell() {
 
 	const focusPanel = (side: PanelSide) => setFocusedPanel(side);
 
-	const hydratedLeft = hydrate(panels.left);
-	const hydratedCentral = hydrate(panels.central);
-	const hydratedRight = hydrate(panels.right);
+	const hydratedLeft = hydratePanel(panels.left);
+	const hydratedCentral = hydratePanel(panels.central);
+	const hydratedRight = hydratePanel(panels.right);
 
 	const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -156,7 +164,9 @@ export function V2LayoutShell() {
 				{ focus: true },
 			);
 		} else {
-			const label = filePath.split("/").filter(Boolean).pop() ?? filePath;
+			const encodedLabel =
+				filePath.split("/").filter(Boolean).pop() ?? filePath;
+			const label = decodeURIComponentSafe(encodedLabel);
 			const newInstance = {
 				instanceId: `file-${filePath}-${Date.now()}`,
 				viewId: "file-content" as ViewId,

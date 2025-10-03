@@ -38,16 +38,20 @@ export function ChangedFilesList({
 						className="flex items-center justify-between rounded px-2 py-1 text-xs hover:bg-muted/50"
 					>
 						<div className="flex items-center gap-2">
-							<div className={`h-1.5 w-1.5 rounded-full ${statusDotClass(file.status)}`} />
-							<span className={`text-foreground ${statusTextClass(file.status)}`}>
-								{file.path}
+							<div
+								className={`h-1.5 w-1.5 rounded-full ${statusDotClass(file.status)}`}
+							/>
+							<span
+								className={`text-foreground ${statusTextClass(file.status)}`}
+							>
+								{decodeURIComponent(file.path)}
 							</span>
 						</div>
 						<input
 							type="checkbox"
 							checked={selectedFiles.has(file.id)}
 							onChange={() => onToggleFile(file.id)}
-							aria-label={`Select ${file.path}`}
+							aria-label={`Select ${decodeURIComponent(file.path)}`}
 							className="h-3.5 w-3.5 cursor-pointer"
 						/>
 					</div>

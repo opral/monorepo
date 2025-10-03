@@ -7,7 +7,12 @@ import type { LucideIcon } from "lucide-react";
  * @example
  * const activeView: ViewId = "files";
  */
-export type ViewId = "files" | "search" | "tasks" | "checkpoint" | "file-content";
+export type ViewId =
+	| "files"
+	| "search"
+	| "tasks"
+	| "checkpoint"
+	| "file-content";
 
 /**
  * Per-panel instance metadata used to track which views are open.
@@ -49,6 +54,7 @@ export interface ViewDefinition {
  */
 export interface ViewContext {
 	readonly onOpenFile?: (filePath: string) => void;
+	readonly isPanelFocused?: boolean;
 }
 
 /**

@@ -46,7 +46,7 @@ export function CheckpointForm({
 							!isSubmitting &&
 							"bg-neutral-200 text-neutral-900",
 						isSubmitting && "opacity-60 cursor-not-allowed",
-				)}
+					)}
 					data-testid="checkpoint-submit"
 				>
 					Create

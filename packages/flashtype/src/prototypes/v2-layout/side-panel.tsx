@@ -7,7 +7,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDroppable } from "@dnd-kit/core";
 import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
-import type { PanelSide, PanelState, ViewId, ViewContext } from "./types";
+import type {
+	PanelSide,
+	PanelState,
+	ViewId,
+	ViewContext,
+	ViewDefinition,
+} from "./types";
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
 import { Panel } from "./panel";
@@ -33,7 +39,7 @@ interface SidePanelProps {
 
 export function SidePanel({
 	side,
-	title,
+	title: _unusedTitle,
 	panel,
 	onSelectView,
 	onAddView,
@@ -59,9 +65,13 @@ export function SidePanel({
 		data: { panel: side },
 	});
 
-	const availableViews = VIEW_DEFINITIONS.filter((view) =>
-		!panel.instances.some((instance) => instance.viewId === view.id),
+	const availableViews = VIEW_DEFINITIONS.filter(
+		(view) => !panel.instances.some((instance) => instance.viewId === view.id),
 	);
+
+	const contextWithFocus: ViewContext | undefined = viewContext
+		? { ...viewContext, isPanelFocused: isFocused }
+		: { isPanelFocused: isFocused };
 
 	return (
 		<aside
@@ -132,11 +142,15 @@ export function SidePanel({
 					{activeInstance && activeView ? (
 						<ViewPanel
 							view={activeView}
-							context={viewContext}
+							context={contextWithFocus}
 							instance={activeInstance}
 						/>
 					) : (
-						<EmptyPanelState side={side} onAddView={onAddView} availableViews={availableViews} />
+						<EmptyPanelState
+							side={side}
+							onAddView={onAddView}
+							availableViews={availableViews}
+						/>
 					)}
 				</Panel.Content>
 			</Panel>
@@ -147,13 +161,17 @@ export function SidePanel({
 interface EmptyPanelStateProps {
 	side: PanelSide;
 	onAddView: (viewId: ViewId) => void;
- 	availableViews?: ViewDefinition[];
+	availableViews?: ViewDefinition[];
 }
 
 /**
  * Fleet-style empty state for panels with no active views
  */
-function EmptyPanelState({ side, onAddView, availableViews }: EmptyPanelStateProps) {
+function EmptyPanelState({
+	side,
+	onAddView,
+	availableViews,
+}: EmptyPanelStateProps) {
 	const Icon = side === "left" ? PanelLeft : PanelRight;
 	const panelName = side === "left" ? "Left" : "Right";
 	const menuViews = availableViews ?? VIEW_DEFINITIONS;

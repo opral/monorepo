@@ -44,6 +44,10 @@ export function CentralPanel({
 
 	const hasViews = panel.instances.length > 0;
 
+	const contextWithFocus: ViewContext | undefined = viewContext
+		? { ...viewContext, isPanelFocused: isFocused }
+		: { isPanelFocused: isFocused };
+
 	return (
 		<section
 			ref={setNodeRef}
@@ -83,7 +87,7 @@ export function CentralPanel({
 						{activeView && activeInstance && (
 							<ViewPanel
 								view={activeView}
-								context={viewContext}
+								context={contextWithFocus}
 								instance={activeInstance}
 							/>
 						)}
@@ -97,7 +101,9 @@ export function CentralPanel({
 						<div className="mb-8 space-y-1 text-[15px]">
 							<div className="flex items-baseline gap-2">
 								<a
-									href="#"
+									href="https://lix.dev"
+									target="_blank"
+									rel="noreferrer"
 									className="text-blue-600 hover:text-blue-700 hover:underline"
 								>
 									./lix ↗
@@ -110,7 +116,9 @@ export function CentralPanel({
 							</div>
 							<div className="flex items-baseline gap-2">
 								<a
-									href="#"
+									href="https://inlang.com"
+									target="_blank"
+									rel="noreferrer"
 									className="text-blue-600 hover:text-blue-700 hover:underline"
 								>
 									./inlang ↗
@@ -142,7 +150,9 @@ export function CentralPanel({
 								<tr>
 									<td className="border border-neutral-100 px-4 py-2.5">
 										<a
-											href="#"
+											href="https://opral.com/careers"
+											target="_blank"
+											rel="noreferrer"
 											className="text-blue-600 hover:text-blue-700 hover:underline"
 										>
 											./careers ↗
@@ -155,7 +165,9 @@ export function CentralPanel({
 								<tr>
 									<td className="border border-neutral-100 px-4 py-2.5">
 										<a
-											href="#"
+											href="https://github.com/opral/monorepo"
+											target="_blank"
+											rel="noreferrer"
 											className="text-blue-600 hover:text-blue-700 hover:underline"
 										>
 											./contributing ↗
@@ -168,7 +180,9 @@ export function CentralPanel({
 								<tr>
 									<td className="border border-neutral-100 px-4 py-2.5">
 										<a
-											href="#"
+											href="https://discord.gg/inlang"
+											target="_blank"
+											rel="noreferrer"
 											className="text-blue-600 hover:text-blue-700 hover:underline"
 										>
 											Official Discord ↗
@@ -181,7 +195,9 @@ export function CentralPanel({
 								<tr>
 									<td className="border border-neutral-100 px-4 py-2.5">
 										<a
-											href="#"
+											href="https://github.com/opral/monorepo/discussions"
+											target="_blank"
+											rel="noreferrer"
 											className="text-blue-600 hover:text-blue-700 hover:underline"
 										>
 											Discussions ↗
@@ -194,7 +210,9 @@ export function CentralPanel({
 								<tr>
 									<td className="border border-neutral-100 px-4 py-2.5">
 										<a
-											href="#"
+											href="https://inlang.com"
+											target="_blank"
+											rel="noreferrer"
 											className="text-blue-600 hover:text-blue-700 hover:underline"
 										>
 											inlang.com ↗
@@ -214,7 +232,9 @@ export function CentralPanel({
 							If you need support for inlang, one of inlang's products or lix,
 							we encourage you to join our{" "}
 							<a
-								href="#"
+								href="https://discord.gg/inlang"
+								target="_blank"
+								rel="noreferrer"
 								className="text-blue-600 hover:text-blue-700 hover:underline"
 							>
 								Discord ↗
@@ -225,7 +245,9 @@ export function CentralPanel({
 							Do you have a request that has to do with security,
 							privacy-related, or other non-related issues? Find our{" "}
 							<a
-								href="#"
+								href="https://opral.com/security"
+								target="_blank"
+								rel="noreferrer"
 								className="text-blue-600 hover:text-blue-700 hover:underline"
 							>
 								security policy here ↗

@@ -28,7 +28,7 @@ const data = {
 	user: {
 		name: "flashtype",
 		email: "local@flashtype.app",
-		avatar: null,
+		avatar: "https://avatars.githubusercontent.com/u/145112800?s=200&v=4",
 	},
 	teams: [
 		{

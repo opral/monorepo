@@ -13,6 +13,14 @@ import {
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
 
+/**
+ * Applies all SQL UDFs required for file operations.
+ *
+ * Paths passed into these functions must already be percent-encoded to satisfy
+ * the filesystem validators. Call `encodeURIComponent` before inserting or
+ * updating, and decode the path again with `decodeURIComponent` when you render
+ * it in a UI.
+ */
 export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	const engine = args.engine;
 	// applied in databse itself before state because commit

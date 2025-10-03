@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLix, useQuery } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
 import { selectWorkingDiffFiles } from "./queries";
+import type { ViewContext } from "../../types";
 import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
 import { LatestCheckpoint } from "./latest-checkpoint";
@@ -9,18 +10,19 @@ import { LatestCheckpoint } from "./latest-checkpoint";
 /**
  * Checkpoint view - Shows working changes and allows creating checkpoints
  */
-export function CheckpointView() {
+type CheckpointViewProps = {
+	readonly context?: ViewContext;
+};
+
+export function CheckpointView(_props: CheckpointViewProps) {
 	const [message, setMessage] = useState("");
 	const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 	const [isCreating, setIsCreating] = useState(false);
 	const lix = useLix();
 
 	const files = useQuery(({ lix }) => selectWorkingDiffFiles(lix)) ?? [];
-	const validFileIds = useMemo(
-		() => new Set(files.map((file) => file.id)),
-		[files],
-	);
-	const visibleSelection = useMemo(() => {
+	const validFileIds = new Set(files.map((file) => file.id));
+	const visibleSelection = (() => {
 		const filtered = new Set<string>();
 		for (const id of selectedFiles) {
 			if (validFileIds.has(id)) {
@@ -28,7 +30,7 @@ export function CheckpointView() {
 			}
 		}
 		return filtered;
-	}, [selectedFiles, validFileIds]);
+	})();
 
 	const latestCheckpoint = null;
 

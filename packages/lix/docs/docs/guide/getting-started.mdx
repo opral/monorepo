@@ -51,6 +51,7 @@ Key points:
 
 - Files are stored as `Uint8Array` (binary data), making Lix format-agnostic
 - The `path` acts as the unique identifier for the file
+- Paths must be URI-encoded (`encodeURIComponent()`) before inserting and decoded (`decodeURIComponent()`) when you display them again
 - Once inserted, the file becomes part of Lix's change control system
 
 ## Updating Files

@@ -55,6 +55,7 @@ vi.mock("@lix-js/react-utils", async () => {
 	return {
 		...actual,
 		useQuery: () => mockEntries,
+		useLix: () => ({}) as any,
 	};
 });
 

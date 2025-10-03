@@ -126,11 +126,6 @@ function Root() {
 	const routerState = useRouterState();
 	const isV2Layout = routerState.location.pathname.startsWith("/v2-layout");
 
-	// If v2-layout, render without the old layout
-	if (isV2Layout) {
-		return <Outlet />;
-	}
-
 	const [activeFileId] = useKeyValue("flashtype_active_file_id");
 	const activeFile = useQueryTakeFirst(({ lix }) =>
 		lix.db
@@ -168,6 +163,10 @@ function Root() {
 		defaultVersionId: "global",
 		untracked: true,
 	});
+
+	if (isV2Layout) {
+		return <Outlet />;
+	}
 
 	/**
 	 * Start drag-resizing the agent panel via a vertical separator.
