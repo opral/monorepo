@@ -1,10 +1,11 @@
-import { CalendarDays, FileText, Files, Flag, Search } from "lucide-react";
+import { CalendarDays, FileText, Files, Flag, GitCommitVertical, Search } from "lucide-react";
 import type { ViewDefinition, ViewId } from "./types";
 import { FilesView } from "./panel-views/files-view/index";
 import { SearchView } from "./panel-views/search-view/index";
 import { TasksView } from "./panel-views/tasks-view/index";
 import { MarkdownView } from "./panel-views/markdown-view/index";
 import { CheckpointView } from "./panel-views/checkpoint-view/index";
+import { HistoryView } from "./panel-views/history-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -40,6 +41,13 @@ const VISIBLE_VIEWS: ViewDefinition[] = [
 		description: "View working changes and create checkpoints.",
 		icon: Flag,
 		render: (context) => <CheckpointView context={context} />,
+	},
+	{
+		id: "history",
+		label: "History",
+		description: "Browse saved checkpoints in chronological order.",
+		icon: GitCommitVertical,
+		render: (context) => <HistoryView context={context} />,
 	},
 ];
 

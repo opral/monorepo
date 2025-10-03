@@ -12,6 +12,7 @@ export type ViewId =
 	| "search"
 	| "tasks"
 	| "checkpoint"
+	| "history"
 	| "file-content";
 
 /**
