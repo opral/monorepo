@@ -1,5 +1,5 @@
 import type { LixEngine } from "./boot.js";
-import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor-v2.js";
+import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
 
 type ExecuteSyncFn = (args: {
 	sql: string;

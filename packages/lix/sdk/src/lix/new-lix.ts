@@ -39,7 +39,7 @@ import {
 } from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
-import { createQueryPreprocessorV2 } from "../engine/query-preprocessor/create-query-preprocessor-v2.js";
+import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/bootstrap-pending.js";
 
@@ -147,7 +147,7 @@ export async function newLixFile(args?: {
 		}) as LixEngine["executeSync"],
 	} as const;
 
-	const preprocessQuery = await createQueryPreprocessorV2(preprocessorEngine);
+	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
 
 	const executeSync = await createExecuteSync({
 		engine: {

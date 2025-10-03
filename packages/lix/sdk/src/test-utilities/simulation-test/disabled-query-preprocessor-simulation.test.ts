@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { disabledQueryPreprocessorSimulation } from "./disabled-query-preprocessor-simulation.js";
-import * as createQueryPreprocessorV2Module from "../../engine/query-preprocessor/create-query-preprocessor-v2.js";
+import * as createQueryPreprocessorModule from "../../engine/query-preprocessor/create-query-preprocessor.js";
 
 describe("disabledQueryPreprocessorSimulation", () => {
 	afterEach(() => {
@@ -23,8 +23,8 @@ describe("disabledQueryPreprocessorSimulation", () => {
 			})
 		);
 		vi.spyOn(
-			createQueryPreprocessorV2Module,
-			"createQueryPreprocessorV2"
+			createQueryPreprocessorModule,
+			"createQueryPreprocessor"
 		).mockResolvedValue(preprocessSpy as any);
 
 		const lix = await openLix({});

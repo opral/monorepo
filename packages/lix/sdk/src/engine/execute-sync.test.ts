@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import type { SqliteWasmDatabase } from "../database/sqlite/create-in-memory-database.js";
 import { createExecuteSync } from "./execute-sync.js";
-import type { QueryPreprocessorResult } from "./query-preprocessor/create-query-preprocessor-v2.js";
+import type { QueryPreprocessorResult } from "./query-preprocessor/create-query-preprocessor.js";
 
 describe("createExecuteSync", () => {
 	test("passes through bound parameters unchanged", async () => {

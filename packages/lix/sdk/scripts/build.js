@@ -46,9 +46,6 @@ function runCommand(command, args) {
 
 async function run() {
 	try {
-		await runStep("Building sql parser wasm", () =>
-			runCommand(pnpmBin, ["--filter", "@lix-js/sdk-sqlparser", "build"])
-		);
 		await runStep(
 			"Embedding sqlite.wasm",
 			() => import("./embed-sqlite-wasm.js")
