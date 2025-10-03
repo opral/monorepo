@@ -21,9 +21,9 @@ describe("createQueryPreprocessorV2", () => {
 		});
 
 		expect(result.sql.trim().startsWith("WITH")).toBe(true);
-		expect(result.sql).toContain("internal_state_vtable AS (");
+		expect(result.sql).toContain("internal_state_vtable_rewritten AS (");
 		expect(result.sql).toContain(
-			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS internal_state_vtable"
+			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS internal_state_vtable"
 		);
 
 		await lix.close();

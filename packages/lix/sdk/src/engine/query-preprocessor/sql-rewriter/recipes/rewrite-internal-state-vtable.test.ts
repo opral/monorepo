@@ -43,7 +43,7 @@ test("buildHoistedInternalStateVtableCte hoists wide path with schema filters", 
 
 	const cte = buildHoistedInternalStateVtableCte([shape!]);
 	expect(cte).toBeTruthy();
-	expect(cte).toContain("internal_state_vtable AS");
+	expect(cte).toContain("internal_state_vtable_rewritten AS");
 	expect(cte).toContain("internal_state_cache_lix_key_value");
 	expect(cte).toContain("lix_key_value");
 });
@@ -57,7 +57,7 @@ test("buildInternalStateVtableProjection strips hidden primary key when unused",
 
 	const projection = buildInternalStateVtableProjection(shape!);
 	expect(projection).toBe(
-		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable) AS internal_state_vtable`
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable_rewritten) AS internal_state_vtable`
 	);
 });
 
@@ -66,9 +66,9 @@ test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
-	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain(
-		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable) AS internal_state_vtable`
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable_rewritten) AS internal_state_vtable`
 	);
 });
 
@@ -77,7 +77,7 @@ test("queries selecting _pk keep the raw CTE projection", () => {
 	const rewritten = rewriteSql(sql);
 
 	// Hoisted CTE present
-	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
 	// _pk selection is unmodified
 	expect(rewritten).toContain("SELECT v._pk FROM internal_state_vtable v");
 });

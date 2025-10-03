@@ -57,7 +57,7 @@ export const Num: TokenType = createToken({
 
 export const QMarkNumber: TokenType = createToken({
 	name: "QMarkNumber",
-	pattern: /\?\d+/, 
+	pattern: /\?\d+/,
 });
 export const QMark: TokenType = createToken({ name: "QMark", pattern: /\?/ });
 export const DollarName: TokenType = createToken({

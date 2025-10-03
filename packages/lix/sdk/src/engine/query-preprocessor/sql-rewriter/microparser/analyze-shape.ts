@@ -23,7 +23,9 @@ export type ValueLit =
 	| { kind: "string"; value: string; token: Token }
 	| { kind: "number"; value: number; token: Token };
 
-export type Value = ValueLit | { kind: "placeholder"; token: PlaceholderToken };
+export type PlaceholderValue = { kind: "placeholder"; token: PlaceholderToken };
+
+export type Value = ValueLit | PlaceholderValue;
 
 export type ColumnRef = {
 	alias?: string;
@@ -47,16 +49,12 @@ export type Shape = {
 	table: TableFactorMatch;
 	filters: Filter[];
 	limit: Limit;
-	schemaKeys: Array<
-		{ kind: "literal"; value: string } | { kind: "placeholder" }
-	>;
-	entityIds: Array<
-		{ kind: "literal"; value: string } | { kind: "placeholder" }
-	>;
+	schemaKeys: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
+	entityIds: Array<{ kind: "literal"; value: string } | PlaceholderValue>;
 	versionId:
 		| { kind: "current" }
 		| { kind: "literal"; value: string }
-		| { kind: "placeholder"; token: PlaceholderToken }
+		| PlaceholderValue
 		| { kind: "unknown" };
 	selectsWriterKey: boolean;
 	referencesPrimaryKey: boolean;
@@ -345,10 +343,9 @@ function readLimit(
 function pluckValues(
 	filters: Filter[],
 	column: "schema_key" | "entity_id"
-): Array<{ kind: "literal"; value: string } | { kind: "placeholder" }> {
-	const results: Array<
-		{ kind: "literal"; value: string } | { kind: "placeholder" }
-	> = [];
+): Array<{ kind: "literal"; value: string } | PlaceholderValue> {
+	const results: Array<{ kind: "literal"; value: string } | PlaceholderValue> =
+		[];
 
 	for (const filter of filters) {
 		if (filter.lhs.column !== column) continue;
@@ -360,13 +357,13 @@ function pluckValues(
 				if (value.kind === "string") {
 					results.push({ kind: "literal", value: value.value });
 				} else if (value.kind === "placeholder") {
-					results.push({ kind: "placeholder" });
+					results.push({ kind: "placeholder", token: value.token });
 				}
 			}
 		} else if (rhs.kind === "string") {
 			results.push({ kind: "literal", value: rhs.value });
 		} else if (rhs.kind === "placeholder") {
-			results.push({ kind: "placeholder" });
+			results.push({ kind: "placeholder", token: rhs.token });
 		}
 	}
 

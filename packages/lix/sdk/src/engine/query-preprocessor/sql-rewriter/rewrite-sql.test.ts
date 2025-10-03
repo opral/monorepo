@@ -7,10 +7,10 @@ test("rewrites top-level internal_state_vtable reference", () => {
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
-	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain("internal_state_cache_lix_version_descriptor");
 	expect(rewritten).toContain(
-		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS internal_state_vtable"
+		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS internal_state_vtable"
 	);
 });
 
@@ -29,7 +29,7 @@ test("rewrites nested internal_state_vtable without touching outer query", () =>
 
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
 	expect(rewritten).toContain(
-		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable) AS v"
+		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS v"
 	);
 	expect(rewritten.trim().endsWith("WHERE sub.schema_key IS NOT NULL;")).toBe(
 		true
@@ -41,6 +41,7 @@ test("precomputed tokens still produce a valid rewrite", () => {
 	const tokens = tokenizer.tokenize(sql);
 	const rewritten = rewriteSql(sql, { tokens });
 
+	expect(rewritten).toContain("internal_state_vtable_rewritten");
 	expect(rewritten).toContain("LIMIT 1");
 });
 
@@ -54,7 +55,7 @@ test("rewrites every internal_state_vtable reference", () => {
 	expect(rewritten).toContain("AS v");
 	expect(rewritten).toContain("AS w");
 	const projectionMatches = rewritten.match(
-		/\(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable\) AS [vw]/g
+		/\(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten\) AS [vw]/g
 	);
 	expect(projectionMatches?.length).toBe(2);
 });
@@ -86,7 +87,7 @@ WHERE snapshot_content IS NOT NULL;`;
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten).toContain("AS internal_state_vtable");
-	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain("SELECT json(metadata)");
 	expect(rewritten).toContain("FROM change");
 });
@@ -107,7 +108,7 @@ WHERE schema_key = 'lix_active_version'
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten).toContain("AS internal_state_vtable");
-	expect(rewritten).toContain("internal_state_vtable AS (");
+	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain("WHERE schema_key = 'lix_active_version'");
 });
 
@@ -139,5 +140,5 @@ test("seeds version recursion when version filter uses anonymous placeholder", (
 	const sql = `SELECT * FROM internal_state_vtable WHERE version_id = ? AND schema_key = ?;`;
 	const rewritten = rewriteSql(sql);
 	expect(rewritten).toMatch(/params\(version_id\) AS \(\s*SELECT \?1/);
-	expect(rewritten).toContain("AND schema_key = ?2");
+	expect(rewritten).toContain("WHERE txn.schema_key = ?2");
 });

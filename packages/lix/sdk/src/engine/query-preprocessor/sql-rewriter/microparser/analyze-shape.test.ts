@@ -31,8 +31,8 @@ describe("analyzeShape", () => {
 		const sql = `SELECT * FROM internal_state_vtable v WHERE v.entity_id IN (?, :named)`;
 		const shape = analyzeShape(tokenize(sql));
 		expect(shape?.entityIds).toEqual([
-			{ kind: "placeholder" },
-			{ kind: "placeholder" },
+			expect.objectContaining({ kind: "placeholder" }),
+			expect.objectContaining({ kind: "placeholder" }),
 		]);
 	});
 
