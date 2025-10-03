@@ -155,7 +155,9 @@ export function createEditor(args: CreateEditorArgs): Editor {
 				showOnlyWhenEditable: true,
 				includeChildren: true,
 				shouldShow: ({ editor, node }) =>
-					editor.isFocused && node.type.name === "paragraph" && node.childCount === 0,
+					editor.isFocused &&
+					node.type.name === "paragraph" &&
+					node.childCount === 0,
 			}),
 		],
 		content: astToTiptapDoc(ast) as any,

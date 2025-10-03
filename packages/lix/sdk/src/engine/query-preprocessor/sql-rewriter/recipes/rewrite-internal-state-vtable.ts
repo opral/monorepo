@@ -1,7 +1,4 @@
-import type {
-	PlaceholderValue,
-	Shape,
-} from "../microparser/analyze-shape.js";
+import type { PlaceholderValue, Shape } from "../microparser/analyze-shape.js";
 
 type TransactionOption = {
 	includeTransaction?: boolean;
@@ -124,7 +121,11 @@ function buildInternalStateVtableQuery(
 
 	const versionBinding = collectVersionBinding(options.shapes);
 	let paramBindings = buildParamBindings(options.shapes, versionBinding);
-	const versionCtes = buildVersionCtes(options.shapes, versionBinding, paramBindings);
+	const versionCtes = buildVersionCtes(
+		options.shapes,
+		versionBinding,
+		paramBindings
+	);
 	const schemaFilter = collectColumnFilter(options.shapes, "schema_key");
 	const entityFilter = collectColumnFilter(options.shapes, "entity_id");
 	const fileFilter = collectColumnFilter(options.shapes, "file_id");
@@ -262,7 +263,7 @@ function buildCandidatesBody(options: {
 			entityFilter: options.entityFilter,
 			fileFilter: options.fileFilter,
 			pluginFilter: options.pluginFilter,
-		}),
+		})
 	);
 
 	if (options.includeCache) {
@@ -601,9 +602,7 @@ function buildCacheRouting(
 	const uniqueCandidates = new Set<string>();
 	if (schemaKeys.length > 0) {
 		for (const key of schemaKeys) {
-			uniqueCandidates.add(
-				`internal_state_cache_${sanitizeSchemaKey(key)}`
-			);
+			uniqueCandidates.add(`internal_state_cache_${sanitizeSchemaKey(key)}`);
 		}
 	} else if (!existingCacheTables) {
 		uniqueCandidates.add("internal_state_cache");
@@ -769,10 +768,16 @@ function buildParamBindings(
 		bindings.set("version_id", versionBinding);
 	}
 
-	const entityBinding = collectColumnBinding(shapes, (shape) => shape.entityIds);
+	const entityBinding = collectColumnBinding(
+		shapes,
+		(shape) => shape.entityIds
+	);
 	if (entityBinding) bindings.set("entity_id", entityBinding);
 
-	const schemaBinding = collectColumnBinding(shapes, (shape) => shape.schemaKeys);
+	const schemaBinding = collectColumnBinding(
+		shapes,
+		(shape) => shape.schemaKeys
+	);
 	if (schemaBinding) bindings.set("schema_key", schemaBinding);
 
 	const fileBinding = collectColumnBinding(shapes, (shape) => shape.fileIds);
@@ -846,7 +851,9 @@ function deriveVersionBinding(shape: Shape): ParamBinding | null {
 
 function collectColumnBinding(
 	shapes: Shape[],
-	extractor: (shape: Shape) => Array<{ kind: "literal"; value: string } | PlaceholderValue>
+	extractor: (
+		shape: Shape
+	) => Array<{ kind: "literal"; value: string } | PlaceholderValue>
 ): ParamBinding | null {
 	let binding: ParamBinding | null = null;
 	for (const shape of shapes) {
@@ -924,9 +931,10 @@ function buildParamsCteClause(paramBindings: ParamBindings): string {
 		const binding = paramBindings.get(column);
 		if (!binding) continue;
 		columns.push(column);
-		const expr = binding.kind === "literal"
-			? `'${escapeLiteral(binding.value)}'`
-			: binding.token;
+		const expr =
+			binding.kind === "literal"
+				? `'${escapeLiteral(binding.value)}'`
+				: binding.token;
 		expressions.push(`${expr} AS ${column}`);
 	}
 	const selectBody = expressions
@@ -1167,8 +1175,8 @@ function buildParamsJoinClause(
 	const indent = " ".repeat(indentLevel * 2);
 	const clauseIndent = " ".repeat((indentLevel + 1) * 2);
 
-	const lines = clauses.map((clause, index) =>
-		`${clauseIndent}${index === 0 ? "" : "AND "}${clause}`
+	const lines = clauses.map(
+		(clause, index) => `${clauseIndent}${index === 0 ? "" : "AND "}${clause}`
 	);
 
 	return `\n${indent}JOIN params p ON\n${lines.join("\n")}`;

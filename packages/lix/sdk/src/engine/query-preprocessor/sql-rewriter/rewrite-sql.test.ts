@@ -39,9 +39,7 @@ test("omits cache arms when no cache tables exist", () => {
 test("includes only known cache tables", () => {
 	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key IN ('lix_key_value', 'missing_schema')`;
 	const rewritten = rewriteSql(sql, {
-		existingCacheTables: new Set([
-			"internal_state_cache_lix_key_value",
-		]),
+		existingCacheTables: new Set(["internal_state_cache_lix_key_value"]),
 	});
 
 	expect(rewritten).toContain("internal_state_cache_lix_key_value");
