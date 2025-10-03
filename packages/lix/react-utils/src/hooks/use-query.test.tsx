@@ -1,10 +1,18 @@
-import { test, expect, vi } from "vitest";
+import { test, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
+import type { RenderHookResult } from "@testing-library/react";
 import React, { Suspense } from "react";
 import {
 	useQuery,
 	useQueryTakeFirst,
 	useQueryTakeFirstOrThrow,
+	clearQueryCache,
+	invalidateQuery,
+	computeQueryCacheKey,
+	isQueryCached,
+	getQueryCacheSize,
+	__USE_QUERY_CACHE_LIMIT,
+	__setQueryCacheLimitForTests,
 } from "./use-query.js";
 import { LixProvider } from "../provider.js";
 import { openLix, type LixKeyValue, type State, type Lix } from "@lix-js/sdk";
@@ -33,6 +41,11 @@ class MockErrorBoundary extends React.Component<
 		);
 	}
 }
+
+beforeEach(() => {
+	__setQueryCacheLimitForTests(8);
+	clearQueryCache();
+});
 
 test("useQuery throws error when used outside LixProvider", () => {
 	// We need to catch the error since it's thrown during render
@@ -291,6 +304,145 @@ test("useQuery equalityFn can suppress updates", async () => {
 	await lix.close();
 });
 
+test("useQuery promise cache evicts least recently used entry", async () => {
+	const limit = 8;
+	__setQueryCacheLimitForTests(limit);
+	clearQueryCache();
+
+	const lix = await openLix({});
+	const makeKey = (index: number) => `react_lru_key_${index}`;
+	const makeFactory =
+		(index: number) =>
+		({ lix }: { lix: Lix }) =>
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "=", makeKey(index));
+
+	const total = limit + 1;
+	await lix.db
+		.insertInto("key_value")
+		.values(
+			Array.from({ length: total }, (_, index) => ({
+				key: makeKey(index),
+				value: `value_${index}`,
+			})),
+		)
+		.execute();
+
+	const firstCacheKey = computeQueryCacheKey(lix, makeFactory(0), {
+		subscribe: false,
+	});
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	const renderOne = async (index: number) => {
+		let hook!: RenderHookResult<State<LixKeyValue>[], void>;
+		await act(async () => {
+			hook = renderHook(
+				() => useQuery(makeFactory(index), { subscribe: false }),
+				{ wrapper },
+			);
+		});
+		await waitFor(() => {
+			const rows = hook.result.current;
+			expect(rows).toHaveLength(1);
+			expect(rows?.[0]?.key).toBe(makeKey(index));
+		});
+		hook.unmount();
+	};
+
+	for (let index = 0; index < limit; index++) {
+		await renderOne(index);
+	}
+
+	expect(getQueryCacheSize()).toBeLessThanOrEqual(__USE_QUERY_CACHE_LIMIT);
+	expect(isQueryCached(firstCacheKey)).toBe(true);
+
+	const extraIndex = limit;
+	await renderOne(extraIndex);
+
+	const extraCacheKey = computeQueryCacheKey(lix, makeFactory(extraIndex), {
+		subscribe: false,
+	});
+
+	expect(getQueryCacheSize()).toBeLessThanOrEqual(__USE_QUERY_CACHE_LIMIT);
+	expect(isQueryCached(firstCacheKey)).toBe(false);
+	expect(isQueryCached(extraCacheKey)).toBe(true);
+
+	await lix.close();
+}, 20000);
+
+test("invalidateQuery removes cached entry and forces refetch", async () => {
+	const lix = await openLix({});
+	const key = "react_invalidate_key";
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key, value: "initial" })
+		.execute();
+
+	const factory = ({ lix }: { lix: Lix }) =>
+		lix.db.selectFrom("key_value").selectAll().where("key", "=", key);
+	const cacheKey = computeQueryCacheKey(lix, factory, { subscribe: false });
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let initialHook!: RenderHookResult<State<LixKeyValue>[], void>;
+	await act(async () => {
+		initialHook = renderHook(() => useQuery(factory, { subscribe: false }), {
+			wrapper,
+		});
+	});
+	await waitFor(() => {
+		const rows = initialHook.result.current;
+		expect(rows).toHaveLength(1);
+		expect(rows?.[0]?.value).toBe("initial");
+	});
+	initialHook.unmount();
+
+	expect(isQueryCached(cacheKey)).toBe(true);
+
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "updated" })
+		.where("key", "=", key)
+		.execute();
+
+	invalidateQuery(cacheKey);
+
+	expect(isQueryCached(cacheKey)).toBe(false);
+
+	let refetchHook!: RenderHookResult<State<LixKeyValue>[], void>;
+	await act(async () => {
+		refetchHook = renderHook(() => useQuery(factory, { subscribe: false }), {
+			wrapper,
+		});
+	});
+	await waitFor(() => {
+		const rows = refetchHook.result.current;
+		expect(rows).toHaveLength(1);
+		expect(rows?.[0]?.value).toBe("updated");
+	});
+	refetchHook.unmount();
+
+	expect(isQueryCached(cacheKey)).toBe(true);
+
+	await lix.close();
+});
+
 test("useQuery cache key isolates by lix instance", async () => {
 	const lix1 = await openLix({});
 	const lix2 = await openLix({});
@@ -374,7 +526,9 @@ test("useQuery surfaces subscription errors via render", async () => {
 		} as any;
 	});
 
-	const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+	const consoleErrorSpy = vi
+		.spyOn(console, "error")
+		.mockImplementation(() => {});
 
 	const onError = vi.fn();
 
@@ -403,7 +557,7 @@ test("useQuery surfaces subscription errors via render", async () => {
 		expect(onError).toHaveBeenCalledTimes(1);
 	});
 
-	const [[caughtError]] = onError.mock.calls as [ [Error] ];
+	const [[caughtError]] = onError.mock.calls as [[Error]];
 	expect(caughtError).toBe(error);
 
 	observeSpy.mockRestore();

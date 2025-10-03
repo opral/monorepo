@@ -8,8 +8,60 @@ import type { Lix } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
 import type { SelectQueryBuilder } from "kysely";
 
-// Map to cache promises by query key
-const queryPromiseCache = new Map<string, Promise<any>>();
+// Map to cache promises by query key (bounded LRU)
+const QUERY_CACHE_MAX_ENTRIES = 256;
+
+class PromiseLruCache<V> {
+	private readonly map = new Map<string, V>();
+
+	constructor(private readonly limit: number) {}
+
+	get(key: string): V | undefined {
+		const value = this.map.get(key);
+		if (value !== undefined) {
+			this.map.delete(key);
+			this.map.set(key, value);
+		}
+		return value;
+	}
+
+	set(key: string, value: V): void {
+		if (this.map.has(key)) {
+			this.map.delete(key);
+		}
+		this.map.set(key, value);
+		if (this.map.size > this.limit) {
+			const oldestKey = this.map.keys().next().value as string | undefined;
+			if (oldestKey !== undefined) {
+				this.map.delete(oldestKey);
+			}
+		}
+	}
+
+	delete(key: string): void {
+		this.map.delete(key);
+	}
+
+	clear(): void {
+		this.map.clear();
+	}
+
+	has(key: string): boolean {
+		return this.map.has(key);
+	}
+
+	get size(): number {
+		return this.map.size;
+	}
+
+	keys(): string[] {
+		return Array.from(this.map.keys());
+	}
+}
+
+let queryPromiseCache = new PromiseLruCache<Promise<any>>(
+	QUERY_CACHE_MAX_ENTRIES,
+);
 const lixInstanceIds = new WeakMap<Lix, number>();
 let nextLixInstanceId = 1;
 
@@ -93,19 +145,15 @@ export function useQuery<TRow>(
 		queryRef.current = query;
 	}, [query]);
 
-	// Create stable cache key that includes the compiled SQL to capture closure variables
-	const cacheKey = useMemo(() => {
-		// Compile the query to get the actual SQL with parameters
-		const builder = query({ lix });
-		const compiled = builder.compile();
-		return `${lixInstanceId}:${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
-	}, [query, lix, subscribe, lixInstanceId]);
+	const { cacheKey, builder: initialBuilder } = useMemo(
+		() => resolveCacheDescriptor(lix, query, subscribe, lixInstanceId),
+		[query, lix, subscribe, lixInstanceId],
+	);
 
 	// Get or create promise
 	let promise = queryPromiseCache.get(cacheKey);
 	if (!promise) {
-		const builder = query({ lix });
-		promise = builder.execute() as Promise<TRow[]>;
+		promise = initialBuilder.execute() as Promise<TRow[]>;
 		queryPromiseCache.set(cacheKey, promise);
 	}
 
@@ -151,7 +199,8 @@ export function useQuery<TRow>(
 				setRows(nextRows);
 			},
 			error: (err) => {
-				const errorInstance = err instanceof Error ? err : new Error(String(err));
+				const errorInstance =
+					err instanceof Error ? err : new Error(String(err));
 				queryPromiseCache.delete(cacheKey);
 				setError(errorInstance);
 			},
@@ -163,6 +212,46 @@ export function useQuery<TRow>(
 		throw error;
 	}
 	return rows;
+}
+
+export function invalidateQuery(cacheKey: string): void {
+	queryPromiseCache.delete(cacheKey);
+}
+
+export function clearQueryCache(): void {
+	queryPromiseCache.clear();
+}
+
+export function isQueryCached(cacheKey: string): boolean {
+	return queryPromiseCache.has(cacheKey);
+}
+
+export function getQueryCacheSize(): number {
+	return queryPromiseCache.size;
+}
+
+export function computeQueryCacheKey<TRow>(
+	lix: Lix,
+	query: QueryFactory<TRow>,
+	options: { subscribe?: boolean } = {},
+): string {
+	const subscribe = options.subscribe ?? true;
+	const { cacheKey } = resolveCacheDescriptor(
+		lix,
+		query,
+		subscribe,
+		getLixInstanceId(lix),
+	);
+	return cacheKey;
+}
+
+export const __USE_QUERY_CACHE_LIMIT = QUERY_CACHE_MAX_ENTRIES;
+
+export function __setQueryCacheLimitForTests(limit: number): void {
+	if (process.env.NODE_ENV !== "test") {
+		throw new Error("__setQueryCacheLimitForTests is only available in tests");
+	}
+	queryPromiseCache = new PromiseLruCache<Promise<any>>(limit);
 }
 
 function defaultEquality(a: unknown, b: unknown): boolean {
@@ -199,6 +288,34 @@ function stableStringify(value: unknown): string {
 		return out;
 	};
 	return JSON.stringify(encode(value));
+}
+
+function resolveCacheDescriptor<TRow>(
+	lix: Lix,
+	query: QueryFactory<TRow>,
+	subscribe: boolean,
+	lixInstanceId: number,
+) {
+	const builder = query({ lix });
+	const compiled = builder.compile();
+	return {
+		cacheKey: makeCacheKey(
+			lixInstanceId,
+			subscribe,
+			compiled.sql,
+			compiled.parameters,
+		),
+		builder,
+	} as const;
+}
+
+function makeCacheKey(
+	lixInstanceId: number,
+	subscribe: boolean,
+	sql: string,
+	parameters: readonly unknown[],
+): string {
+	return `${lixInstanceId}:${subscribe ? "sub" : "once"}:${sql}:${JSON.stringify(parameters)}`;
 }
 
 function getLixInstanceId(lix: Lix): number {
