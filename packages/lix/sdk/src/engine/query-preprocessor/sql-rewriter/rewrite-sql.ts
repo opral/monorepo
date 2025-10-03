@@ -8,6 +8,7 @@ import { tokenize, type Token } from "./tokenizer.js";
 export interface RewriteSqlOptions {
 	tokens?: Token[];
 	hasOpenTransaction?: boolean;
+	existingCacheTables?: Set<string>;
 }
 
 export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
@@ -48,6 +49,7 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 
 	const cteClause = buildHoistedInternalStateVtableCte(shapes, {
 		includeTransaction,
+		existingCacheTables: options?.existingCacheTables,
 	});
 	if (!cteClause) {
 		return current;

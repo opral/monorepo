@@ -15,6 +15,7 @@ import {
 } from "./sql-rewriter/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
+import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -67,6 +68,7 @@ export async function createQueryPreprocessorV2(
 		}
 
 		const shapes = analyzeShapes(tokens);
+		const existingCacheTables = getStateCacheV2Tables({ engine });
 		const allowSideEffects = sideEffects !== false;
 		if (allowSideEffects) {
 			for (const shape of shapes) {
@@ -78,6 +80,7 @@ export async function createQueryPreprocessorV2(
 		currentSql = rewriteSql(currentSql, {
 			tokens,
 			hasOpenTransaction: includeTransaction,
+			existingCacheTables,
 		});
 
 		return {

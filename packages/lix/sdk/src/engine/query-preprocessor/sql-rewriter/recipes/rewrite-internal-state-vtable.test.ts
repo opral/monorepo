@@ -35,7 +35,7 @@ const EXPECTED_VISIBLE_COLUMNS = [
 	"writer_key",
 ];
 
-test("buildHoistedInternalStateVtableCte hoists wide path with schema filters", () => {
+test("hoists wide path with schema filters", () => {
 	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
@@ -46,6 +46,22 @@ test("buildHoistedInternalStateVtableCte hoists wide path with schema filters", 
 	expect(cte).toContain("internal_state_vtable_rewritten AS");
 	expect(cte).toContain("internal_state_cache_lix_key_value");
 	expect(cte).toContain("lix_key_value");
+});
+
+test("prunes cache branches without physical tables", () => {
+	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
+	const tokens = tokenize(sql);
+	const shape = analyzeShape(tokens);
+
+	expect(shape).not.toBeNull();
+
+	const cte = buildHoistedInternalStateVtableCte([shape!], {
+		existingCacheTables: new Set(),
+	});
+	expect(cte).toBeTruthy();
+	expect(cte).not.toContain("internal_state_cache_lix_key_value");
+	expect(cte).not.toContain("'CI' ||");
+	expect(cte).toContain("internal_state_all_untracked");
 });
 
 test("buildInternalStateVtableProjection strips hidden primary key when unused", () => {

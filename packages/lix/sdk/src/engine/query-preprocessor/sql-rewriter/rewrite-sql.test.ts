@@ -22,6 +22,32 @@ test("skips transaction segment when transaction flag false", () => {
 	expect(rewritten).toContain("internal_state_cache");
 });
 
+test("omits cache arms when no cache tables exist", () => {
+	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value'`; // no trailing semicolon for ease of matching
+	const rewritten = rewriteSql(sql, {
+		existingCacheTables: new Set(),
+	});
+
+	expect(rewritten).not.toContain("internal_state_cache_lix_key_value");
+	// Should still include other sources like untracked rows
+	expect(rewritten).toContain("internal_state_all_untracked");
+	// Ensure cache-specific priorities are absent
+	expect(rewritten).not.toContain("'CI' ||");
+	expect(rewritten).not.toContain("'C' ||");
+});
+
+test("includes only known cache tables", () => {
+	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key IN ('lix_key_value', 'missing_schema')`;
+	const rewritten = rewriteSql(sql, {
+		existingCacheTables: new Set([
+			"internal_state_cache_lix_key_value",
+		]),
+	});
+
+	expect(rewritten).toContain("internal_state_cache_lix_key_value");
+	expect(rewritten).not.toContain("internal_state_cache_missing_schema");
+});
+
 test("rewrites nested internal_state_vtable without touching outer query", () => {
 	const sql = `SELECT sub.schema_key FROM (SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value') sub WHERE sub.schema_key IS NOT NULL;`;
 

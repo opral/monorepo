@@ -5,6 +5,7 @@ import type {
 
 type TransactionOption = {
 	includeTransaction?: boolean;
+	existingCacheTables?: Set<string>;
 };
 
 export function buildHoistedInternalStateVtableCte(
@@ -30,6 +31,7 @@ export function buildHoistedInternalStateVtableCte(
 		shapes,
 		schemaKeys: [...schemaKeys],
 		includeTransaction,
+		existingCacheTables: options?.existingCacheTables,
 	});
 	const cteBody = stripIndent(`
 		-- hoisted_internal_state_vtable_rewrite
@@ -70,6 +72,7 @@ export function rewriteInternalStateVtableQuery(
 		shapes: [shape],
 		schemaKeys: schemaKey ? [schemaKey] : [],
 		includeTransaction,
+		existingCacheTables: options?.existingCacheTables,
 	});
 	return maybeStripHiddenPrimaryKey(canonicalQuery, includePrimaryKey);
 }
@@ -78,6 +81,7 @@ interface InternalStateVtableQueryOptions {
 	shapes: Shape[];
 	schemaKeys: string[];
 	includeTransaction: boolean;
+	existingCacheTables?: Set<string>;
 }
 
 interface VersionCteResult {
@@ -86,6 +90,8 @@ interface VersionCteResult {
 }
 
 const CACHE_SOURCE_TOKEN = "__CACHE_SOURCE__";
+const CACHE_PROJECTION =
+	"entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id";
 
 const PARAM_COLUMN_ORDER: ParamColumn[] = [
 	"version_id",
@@ -111,9 +117,10 @@ type ParamBindings = Map<ParamColumn, ParamBinding>;
 function buildInternalStateVtableQuery(
 	options: InternalStateVtableQueryOptions
 ): string {
-	const cacheSource = options.schemaKeys.length
-		? `(${buildCacheRoutingSql(options.schemaKeys)})`
-		: "internal_state_cache";
+	const { sql: cacheSource, includeCache } = buildCacheRouting(
+		options.schemaKeys,
+		options.existingCacheTables
+	);
 
 	const versionBinding = collectVersionBinding(options.shapes);
 	let paramBindings = buildParamBindings(options.shapes, versionBinding);
@@ -144,6 +151,7 @@ function buildInternalStateVtableQuery(
 		entityFilter,
 		fileFilter,
 		pluginFilter,
+		includeCache,
 	});
 	const rankedBody = buildRankedBody();
 	const metadataExpression = options.includeTransaction
@@ -231,6 +239,7 @@ function buildCandidatesBody(options: {
 	entityFilter: ColumnFilter | null;
 	fileFilter: ColumnFilter | null;
 	pluginFilter: ColumnFilter | null;
+	includeCache: boolean;
 }): string {
 	const segments: string[] = [];
 	if (options.includeTransaction) {
@@ -254,22 +263,30 @@ function buildCandidatesBody(options: {
 			fileFilter: options.fileFilter,
 			pluginFilter: options.pluginFilter,
 		}),
-		buildCandidateCacheSegment({
-			paramsAvailable: options.paramsAvailable,
-			paramColumns: options.paramColumns,
-			schemaFilter: options.schemaFilter,
-			entityFilter: options.entityFilter,
-			fileFilter: options.fileFilter,
-			pluginFilter: options.pluginFilter,
-		}),
-		buildCandidateInheritedCacheSegment({
-			paramsAvailable: options.paramsAvailable,
-			paramColumns: options.paramColumns,
-			schemaFilter: options.schemaFilter,
-			entityFilter: options.entityFilter,
-			fileFilter: options.fileFilter,
-			pluginFilter: options.pluginFilter,
-		}),
+	);
+
+	if (options.includeCache) {
+		segments.push(
+			buildCandidateCacheSegment({
+				paramsAvailable: options.paramsAvailable,
+				paramColumns: options.paramColumns,
+				schemaFilter: options.schemaFilter,
+				entityFilter: options.entityFilter,
+				fileFilter: options.fileFilter,
+				pluginFilter: options.pluginFilter,
+			}),
+			buildCandidateInheritedCacheSegment({
+				paramsAvailable: options.paramsAvailable,
+				paramColumns: options.paramColumns,
+				schemaFilter: options.schemaFilter,
+				entityFilter: options.entityFilter,
+				fileFilter: options.fileFilter,
+				pluginFilter: options.pluginFilter,
+			})
+		);
+	}
+
+	segments.push(
 		buildCandidateInheritedUntrackedSegment({
 			paramsAvailable: options.paramsAvailable,
 			paramColumns: options.paramColumns,
@@ -572,17 +589,63 @@ function buildCandidateInheritedTransactionSegment(
 	`).trim();
 }
 
-function buildCacheRoutingSql(schemaKeys: string[]): string {
-	return schemaKeys
-		.map((key) => {
-			const sanitized = sanitizeSchemaKey(key);
-			const tableName = `internal_state_cache_${sanitized}`;
-			return stripIndent(`
-        SELECT *
-        FROM ${tableName}
-      `);
-		})
+function buildCacheRouting(
+	schemaKeys: string[],
+	existingCacheTables?: Set<string>
+): { sql: string; includeCache: boolean } {
+	const tableExists = (name: string): boolean => {
+		if (!existingCacheTables) return true;
+		return existingCacheTables.has(name);
+	};
+
+	const uniqueCandidates = new Set<string>();
+	if (schemaKeys.length > 0) {
+		for (const key of schemaKeys) {
+			uniqueCandidates.add(
+				`internal_state_cache_${sanitizeSchemaKey(key)}`
+			);
+		}
+	} else if (!existingCacheTables) {
+		uniqueCandidates.add("internal_state_cache");
+	} else if (existingCacheTables.has("internal_state_cache")) {
+		uniqueCandidates.add("internal_state_cache");
+	} else {
+		for (const name of existingCacheTables) {
+			if (name.startsWith("internal_state_cache_")) {
+				uniqueCandidates.add(name);
+			}
+		}
+	}
+
+	const existing = [...uniqueCandidates].filter((name) => tableExists(name));
+	if (existing.length === 0) {
+		return { sql: buildEmptyCacheSourceSql(), includeCache: false };
+	}
+
+	const unionBody = existing
+		.map((name) => `SELECT ${CACHE_PROJECTION} FROM ${name}`)
 		.join("\nUNION ALL\n");
+	return { sql: `(${unionBody})`, includeCache: true };
+}
+
+function buildEmptyCacheSourceSql(): string {
+	return stripIndent(`
+		(SELECT
+		  CAST(NULL AS TEXT)    AS entity_id,
+		  CAST(NULL AS TEXT)    AS schema_key,
+		  CAST(NULL AS TEXT)    AS file_id,
+		  CAST(NULL AS TEXT)    AS plugin_key,
+		  CAST(NULL AS TEXT)    AS snapshot_content,
+		  CAST(NULL AS TEXT)    AS schema_version,
+		  CAST(NULL AS TEXT)    AS version_id,
+		  CAST(NULL AS TEXT)    AS created_at,
+		  CAST(NULL AS TEXT)    AS updated_at,
+		  CAST(NULL AS TEXT)    AS inherited_from_version_id,
+		  CAST(NULL AS INTEGER) AS inheritance_delete_marker,
+		  CAST(NULL AS TEXT)    AS change_id,
+		  CAST(NULL AS TEXT)    AS commit_id
+		  WHERE 0)
+	`).trim();
 }
 
 function sanitizeSchemaKey(key: string): string {

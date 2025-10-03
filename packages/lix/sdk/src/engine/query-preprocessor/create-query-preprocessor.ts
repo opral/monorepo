@@ -1,5 +1,6 @@
 import type { LixEngine } from "../boot.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
+import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import type {
 	QueryPreprocessorFn,
 	QueryPreprocessorResult,
@@ -28,6 +29,8 @@ export async function createQueryPreprocessor(
 		stages.push(stage);
 	}
 
+	const existingCacheTables = getStateCacheV2Tables({ engine });
+
 	return ({
 		sql,
 		parameters,
@@ -38,7 +41,7 @@ export async function createQueryPreprocessor(
 		sideEffects?: boolean;
 	}): QueryPreprocessorResult => {
 		let context: QueryPreprocessorResult = {
-			sql: rewriteSql(sql),
+			sql: rewriteSql(sql, { existingCacheTables }),
 			parameters,
 		};
 
