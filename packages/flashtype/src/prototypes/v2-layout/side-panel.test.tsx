@@ -119,6 +119,7 @@ describe("SidePanel", () => {
 		fireEvent.click(screen.getByText("writing-style.md"));
 		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
 			"/docs/guides/writing-style.md",
+			{ focus: false },
 		);
 	});
 

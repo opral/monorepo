@@ -73,7 +73,7 @@ describe("FilesView", () => {
 			const rows = await lix.db.selectFrom("file").select(["path"]).execute();
 			expect(rows).toHaveLength(1);
 			expect(rows[0]?.path).toBe("/notes.md");
-			expect(onOpenFile).toHaveBeenCalledWith("/notes.md");
+			expect(onOpenFile).toHaveBeenCalledWith("/notes.md", { focus: false });
 		});
 
 		utils!.unmount();

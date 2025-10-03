@@ -122,7 +122,7 @@ export function FilesView({ context }: FilesViewProps) {
 					.execute();
 				setPendingPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
-				context?.onOpenFile?.(path);
+				context?.onOpenFile?.(path, { focus: false });
 			} catch (error) {
 				console.error("Failed to create file", error);
 			} finally {
@@ -166,7 +166,7 @@ export function FilesView({ context }: FilesViewProps) {
 	const handleOpenFile = useCallback(
 		(path: string) => {
 			setSelectedPath(path);
-			context?.onOpenFile?.(path);
+			context?.onOpenFile?.(path, { focus: false });
 		},
 		[context],
 	);

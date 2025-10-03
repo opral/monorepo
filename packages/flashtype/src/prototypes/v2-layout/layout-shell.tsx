@@ -148,7 +148,13 @@ export function V2LayoutShell() {
 		? VIEW_MAP.get(activeDragData.viewId)
 		: null;
 
-	const handleOpenFile = (filePath: string) => {
+	const handleOpenFile = (
+		filePath: string,
+		options?: {
+			readonly focus?: boolean;
+		},
+	) => {
+		const shouldFocus = options?.focus ?? true;
 		const existingFileInstance = hydratedCentral.instances.find(
 			(instance) => instance.metadata?.filePath === filePath,
 		);
@@ -161,7 +167,7 @@ export function V2LayoutShell() {
 					instances: panel.instances,
 					activeInstanceId: existingFileInstance.instanceId,
 				}),
-				{ focus: true },
+				{ focus: shouldFocus },
 			);
 		} else {
 			const encodedLabel =
@@ -181,7 +187,7 @@ export function V2LayoutShell() {
 					instances: [...panel.instances, newInstance],
 					activeInstanceId: newInstance.instanceId,
 				}),
-				{ focus: true },
+				{ focus: shouldFocus },
 			);
 		}
 	};

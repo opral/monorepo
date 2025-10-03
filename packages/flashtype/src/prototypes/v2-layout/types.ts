@@ -50,10 +50,19 @@ export interface ViewDefinition {
  * Context passed to views for interacting with the layout.
  *
  * @example
- * context.onOpenFile?.("/docs/guide.md");
+ * context.onOpenFile?.("/docs/guide.md", { focus: false });
  */
 export interface ViewContext {
-	readonly onOpenFile?: (filePath: string) => void;
+	readonly onOpenFile?: (
+		filePath: string,
+		options?: {
+			/**
+			 * Whether the central panel should receive focus when the file opens.
+			 * Defaults to `true` for backwards compatibility.
+			 */
+			readonly focus?: boolean;
+		},
+	) => void;
 	readonly isPanelFocused?: boolean;
 }
 
