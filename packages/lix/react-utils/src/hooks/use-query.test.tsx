@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import React, { Suspense } from "react";
 import {
@@ -7,7 +7,7 @@ import {
 	useQueryTakeFirstOrThrow,
 } from "./use-query.js";
 import { LixProvider } from "../provider.js";
-import { openLix, type LixKeyValue, type State } from "@lix-js/sdk";
+import { openLix, type LixKeyValue, type State, type Lix } from "@lix-js/sdk";
 
 // React Error Boundaries require class components - no functional equivalent exists
 class MockErrorBoundary extends React.Component<
@@ -215,6 +215,199 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 		expect(hookResult.current).toBeUndefined();
 	});
 
+	await lix.close();
+});
+
+test("useQuery equalityFn can suppress updates", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "react_eq_key", value: "initial" })
+		.execute();
+
+	const equalitySpy = vi.fn(() => true);
+	let renderCount = 0;
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult!: { current: State<LixKeyValue>[] };
+
+	await act(async () => {
+		const { result } = renderHook(
+			() => {
+				const rows = useQuery(
+					({ lix }) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", "react_eq_key"),
+					{ equalityFn: equalitySpy },
+				);
+				renderCount++;
+				return rows;
+			},
+			{ wrapper },
+		);
+		hookResult = result;
+	});
+
+	await waitFor(() => {
+		const rows = hookResult.current;
+		expect(rows).toHaveLength(1);
+		expect(rows?.[0]).toBeDefined();
+		expect(rows?.[0]?.value).toBe("initial");
+	});
+
+	const rendersAfterInitial = renderCount;
+	const equalityCallsAfterInitial = equalitySpy.mock.calls.length;
+
+	await act(async () => {
+		await lix.db
+			.updateTable("key_value")
+			.set({ value: "updated" })
+			.where("key", "=", "react_eq_key")
+			.execute();
+	});
+
+	await waitFor(() => {
+		expect(equalitySpy.mock.calls.length).toBeGreaterThan(
+			equalityCallsAfterInitial,
+		);
+	});
+
+	// Because equalityFn always returns true, the hook should ignore the update.
+	const rowsAfterUpdate = hookResult.current;
+	expect(rowsAfterUpdate?.[0]).toBeDefined();
+	expect(rowsAfterUpdate?.[0]?.value).toBe("initial");
+	expect(renderCount).toBe(rendersAfterInitial);
+
+	await lix.close();
+});
+
+test("useQuery cache key isolates by lix instance", async () => {
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
+
+	const cacheKey = "cache_isolation_key";
+	await lix1.db
+		.insertInto("key_value")
+		.values({ key: cacheKey, value: "one" })
+		.execute();
+	await lix2.db
+		.insertInto("key_value")
+		.values({ key: cacheKey, value: "two" })
+		.execute();
+
+	let currentLix: Lix = lix1;
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={currentLix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult!: { current: State<LixKeyValue>[] };
+	let rerender!: () => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(
+			() =>
+				useQuery(
+					({ lix }) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", cacheKey),
+					{ subscribe: false },
+				),
+			{ wrapper },
+		);
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	await waitFor(() => {
+		const rows = hookResult.current;
+		expect(rows).toHaveLength(1);
+		expect(rows?.[0]?.value).toBe("one");
+	});
+
+	await act(async () => {
+		currentLix = lix2;
+		rerender();
+	});
+
+	await waitFor(() => {
+		const rows = hookResult.current;
+		expect(rows).toHaveLength(1);
+		expect(rows?.[0]?.value).toBe("two");
+	});
+
+	await lix1.close();
+	await lix2.close();
+});
+
+test("useQuery surfaces subscription errors via render", async () => {
+	const lix = await openLix({});
+	const error = new Error("subscription failed");
+	// React logs caught errors to the console unless this flag is set.
+	(error as any).suppressReactErrorLogging = true;
+	const originalObserve = lix.observe.bind(lix);
+
+	const observeSpy = vi.spyOn(lix, "observe").mockImplementation((builder) => {
+		const observable = originalObserve(builder);
+		return {
+			subscribe: (observer: any) => {
+				const subscription = observable.subscribe(observer);
+				observer?.error?.(error);
+				return subscription;
+			},
+		} as any;
+	});
+
+	const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+	const onError = vi.fn();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary onError={onError}>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	await act(async () => {
+		renderHook(
+			() =>
+				useQuery(({ lix }) =>
+					lix.db
+						.selectFrom("key_value")
+						.selectAll()
+						.where("key", "=", "lix_id"),
+				),
+			{ wrapper },
+		);
+	});
+
+	await waitFor(() => {
+		expect(onError).toHaveBeenCalledTimes(1);
+	});
+
+	const [[caughtError]] = onError.mock.calls as [ [Error] ];
+	expect(caughtError).toBe(error);
+
+	observeSpy.mockRestore();
+	consoleErrorSpy.mockRestore();
 	await lix.close();
 });
 

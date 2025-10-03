@@ -3,16 +3,23 @@
  *  React 19 Suspense-based hooks for live database queries
  * ------------------------------------------------------------------------- */
 
-import { useMemo, useContext, useEffect, useState, use } from "react";
+import { useMemo, useContext, useEffect, useRef, useState, use } from "react";
 import type { Lix } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
 import type { SelectQueryBuilder } from "kysely";
 
 // Map to cache promises by query key
 const queryPromiseCache = new Map<string, Promise<any>>();
+const lixInstanceIds = new WeakMap<Lix, number>();
+let nextLixInstanceId = 1;
 
-interface UseQueryOptions {
+interface UseQueryOptions<TRow = unknown> {
 	subscribe?: boolean;
+	/**
+	 * Optional equality check that runs before committing incoming rows. Defaults
+	 * to a deep structural equality suitable for JSON-like payloads.
+	 */
+	equalityFn?: (next: TRow[], prev: TRow[]) => boolean;
 }
 
 // New API: the query factory receives an object to allow future extensibility.
@@ -71,20 +78,28 @@ type QueryFactory<TRow> = (args: {
  */
 export function useQuery<TRow>(
 	query: QueryFactory<TRow>,
-	options: UseQueryOptions = {},
+	options: UseQueryOptions<TRow> = {},
 ): TRow[] {
 	const lix = useContext(LixContext);
 	if (!lix) throw new Error("useQuery must be used inside <LixProvider>.");
 
-	const { subscribe = true } = options;
+	const { subscribe = true, equalityFn = defaultEquality } = options;
+	const lixInstanceId = getLixInstanceId(lix);
+
+	// Track the latest query factory without forcing downstream effects to depend
+	// on the function identity (callers often inline arrow functions).
+	const queryRef = useRef(query);
+	useEffect(() => {
+		queryRef.current = query;
+	}, [query]);
 
 	// Create stable cache key that includes the compiled SQL to capture closure variables
 	const cacheKey = useMemo(() => {
 		// Compile the query to get the actual SQL with parameters
 		const builder = query({ lix });
 		const compiled = builder.compile();
-		return `${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
-	}, [query, lix, subscribe]);
+		return `${lixInstanceId}:${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+	}, [query, lix, subscribe, lixInstanceId]);
 
 	// Get or create promise
 	let promise = queryPromiseCache.get(cacheKey);
@@ -99,31 +114,100 @@ export function useQuery<TRow>(
 
 	// Local state for updates
 	const [rows, setRows] = useState(initialRows);
+	const [error, setError] = useState<Error | null>(null);
+	const lastRowsRef = useRef(initialRows);
+	const lastCacheKeyRef = useRef(cacheKey);
+
+	useEffect(() => {
+		if (lastCacheKeyRef.current !== cacheKey) {
+			lastCacheKeyRef.current = cacheKey;
+			setError(null);
+		}
+	}, [cacheKey]);
+
+	// Keep state aligned with the initial suspense payload when the query key
+	// changes. Skip updates when structurally equal to avoid render loops.
+	useEffect(() => {
+		if (!equalityFn(initialRows, lastRowsRef.current)) {
+			lastRowsRef.current = initialRows;
+			setRows(initialRows);
+		}
+	}, [initialRows, equalityFn]);
 
 	// Subscribe for ongoing updates (only if subscribe is true)
 	useEffect(() => {
 		if (!subscribe) {
-			// For one-time queries, just use the initial data
-			setRows(initialRows);
 			return;
 		}
 
-		const builder = query({ lix });
+		const builder = queryRef.current({ lix });
 		const sub = lix.observe(builder).subscribe({
-			next: (value) => setRows(value as TRow[]),
+			next: (value) => {
+				const nextRows = value as TRow[];
+				if (equalityFn(nextRows, lastRowsRef.current)) {
+					return;
+				}
+				lastRowsRef.current = nextRows;
+				setRows(nextRows);
+			},
 			error: (err) => {
-				// Clear promise to allow retry
+				const errorInstance = err instanceof Error ? err : new Error(String(err));
 				queryPromiseCache.delete(cacheKey);
-				// Surface error to ErrorBoundary
-				setRows(() => {
-					throw err instanceof Error ? err : new Error(String(err));
-				});
+				setError(errorInstance);
 			},
 		});
 		return () => sub.unsubscribe();
-	}, [cacheKey, subscribe, initialRows, lix]); // Re-subscribe when query changes
+	}, [cacheKey, subscribe, lix, equalityFn]);
 
+	if (error) {
+		throw error;
+	}
 	return rows;
+}
+
+function defaultEquality(a: unknown, b: unknown): boolean {
+	if (Object.is(a, b)) return true;
+	const ta = typeof a;
+	const tb = typeof b;
+	if ((a === null || ta !== "object") && (b === null || tb !== "object")) {
+		return Object.is(a, b);
+	}
+	try {
+		return stableStringify(a) === stableStringify(b);
+	} catch {
+		return false;
+	}
+}
+
+function stableStringify(value: unknown): string {
+	const seen = new WeakSet();
+	const encode = (input: any): any => {
+		if (input === null || typeof input !== "object") {
+			return input;
+		}
+		if (seen.has(input)) {
+			return "__cycle__";
+		}
+		seen.add(input);
+		if (Array.isArray(input)) {
+			return input.map(encode);
+		}
+		const out: Record<string, unknown> = {};
+		for (const key of Object.keys(input).sort()) {
+			out[key] = encode((input as Record<string, unknown>)[key]);
+		}
+		return out;
+	};
+	return JSON.stringify(encode(value));
+}
+
+function getLixInstanceId(lix: Lix): number {
+	let id = lixInstanceIds.get(lix);
+	if (id === undefined) {
+		id = nextLixInstanceId++;
+		lixInstanceIds.set(lix, id);
+	}
+	return id;
 }
 
 /* ------------------------------------------------------------------------- */
