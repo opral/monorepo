@@ -120,7 +120,7 @@ interface ContentProps {
 Panel.Content = function Content({ children, className = "" }: ContentProps) {
 	return (
 		<div
-			className={`flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2 ${className}`}
+			className={`flex min-h-0 flex-1 flex-col overflow-hidden ${className}`}
 		>
 			{children}
 		</div>

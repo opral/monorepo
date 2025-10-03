@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import { SquareDot, SquareMinus, SquarePlus } from "lucide-react";
 import type { WorkingFileSummary } from "./queries";
 
 type ChangedFilesListProps = {
@@ -7,6 +9,12 @@ type ChangedFilesListProps = {
 	onToggleAll: () => void;
 };
 
+/**
+ * Displays the list of working tree files with selection controls for checkpoint creation.
+ *
+ * @example
+ * <ChangedFilesList files={files} selectedFiles={selected} onToggleFile={toggle} onToggleAll={toggleAll} />
+ */
 export function ChangedFilesList({
 	files,
 	selectedFiles,
@@ -17,45 +25,57 @@ export function ChangedFilesList({
 	const allSelected = showHeader && selectedFiles.size === files.length;
 
 	return (
-		<div className="flex flex-col gap-1 px-3 py-2">
+		<div className="flex flex-col py-2">
 			{showHeader ? (
-				<div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-					<span>Changed files {files.length}</span>
+				<div className="flex w-full items-center justify-between px-2 py-1">
+					<span className="text-xs font-medium text-muted-foreground">
+						Changed files {files.length}
+					</span>
 					<input
 						type="checkbox"
 						checked={allSelected}
 						onChange={onToggleAll}
 						aria-label="Select all files"
-						className="h-3.5 w-3.5 cursor-pointer"
+						className={checkboxClasses}
 					/>
 				</div>
 			) : null}
 
 			<div className="flex flex-col">
-				{files.map((file) => (
-					<div
-						key={file.id}
-						className="flex items-center justify-between rounded px-2 py-1 text-xs hover:bg-muted/50"
-					>
-						<div className="flex items-center gap-2">
-							<div
-								className={`h-1.5 w-1.5 rounded-full ${statusDotClass(file.status)}`}
+				{files.map((file) => {
+					const isSelected = selectedFiles.has(file.id);
+					return (
+						<div
+							key={file.id}
+							className={clsx(
+								rowContainerClasses,
+								isSelected && "border-brand-200 bg-brand-50",
+							)}
+						>
+							<div className="flex items-center gap-2">
+								<StatusIcon status={file.status} />
+								<span
+									className={clsx(
+										"max-w-[16rem] truncate text-left text-xs",
+										file.status === "removed" &&
+											"line-through text-muted-foreground",
+										file.status !== "removed" && "text-foreground",
+									)}
+									title={decodeURIComponent(file.path)}
+								>
+									{decodeURIComponent(file.path)}
+								</span>
+							</div>
+							<input
+								type="checkbox"
+								checked={isSelected}
+								onChange={() => onToggleFile(file.id)}
+								aria-label={`Select ${decodeURIComponent(file.path)}`}
+								className={checkboxClasses}
 							/>
-							<span
-								className={`text-foreground ${statusTextClass(file.status)}`}
-							>
-								{decodeURIComponent(file.path)}
-							</span>
 						</div>
-						<input
-							type="checkbox"
-							checked={selectedFiles.has(file.id)}
-							onChange={() => onToggleFile(file.id)}
-							aria-label={`Select ${decodeURIComponent(file.path)}`}
-							className="h-3.5 w-3.5 cursor-pointer"
-						/>
-					</div>
-				))}
+					);
+				})}
 			</div>
 
 			{files.length === 0 && (
@@ -67,26 +87,41 @@ export function ChangedFilesList({
 	);
 }
 
-function statusDotClass(status: WorkingFileSummary["status"]) {
+const rowContainerClasses =
+	"flex w-full items-center justify-between rounded-sm border border-transparent bg-transparent px-2 py-1 text-xs transition-colors hover:border-border hover:bg-muted";
+
+const checkboxClasses = "h-3.5 w-3.5 cursor-pointer";
+
+function StatusIcon({ status }: { status: WorkingFileSummary["status"] }) {
+	const Icon = statusIconComponent(status);
+	return (
+		<Icon
+			className={clsx("h-4 w-4 shrink-0", statusIconClass(status))}
+			strokeWidth={2}
+		/>
+	);
+}
+
+function statusIconComponent(status: WorkingFileSummary["status"]) {
 	switch (status) {
 		case "added":
-			return "bg-emerald-500";
+			return SquarePlus;
 		case "removed":
-			return "bg-red-500";
+			return SquareMinus;
 		case "modified":
 		default:
-			return "bg-blue-500";
+			return SquareDot;
 	}
 }
 
-function statusTextClass(status: WorkingFileSummary["status"]) {
+function statusIconClass(status: WorkingFileSummary["status"]) {
 	switch (status) {
 		case "added":
-			return "text-emerald-600";
+			return "text-green-600";
 		case "removed":
 			return "text-red-600";
 		case "modified":
 		default:
-			return "";
+			return "text-amber-500";
 	}
 }
