@@ -49,8 +49,8 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		label: "File",
 		description: "Display file contents.",
 		icon: FileText,
-		render: (_context, instance) => (
-			<MarkdownView filePath={instance?.metadata?.filePath} />
+		render: (_context, panelView) => (
+			<MarkdownView filePath={panelView?.metadata?.filePath} />
 		),
 	},
 ];
@@ -64,12 +64,12 @@ export const VIEW_MAP = new Map<ViewId, ViewDefinition>(
 let viewCounter = 0;
 
 /**
- * Generates a stable identifier for each opened view instance.
+ * Generates a stable identifier for each opened view inside a panel.
  *
  * @example
- * const id = createViewInstanceId("files");
+ * const key = createViewKey("files");
  */
-export function createViewInstanceId(viewId: ViewId): string {
+export function createViewKey(viewId: ViewId): string {
 	viewCounter += 1;
 	return `${viewId}-${viewCounter}`;
 }

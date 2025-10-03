@@ -135,7 +135,7 @@ interface TabProps {
 	readonly onClose?: () => void;
 	readonly onClick?: () => void;
 	readonly dragData?: {
-		instanceId: string;
+		viewKey: string;
 		viewId: string;
 		fromPanel: string;
 	};
@@ -162,7 +162,7 @@ Panel.Tab = function Tab({
 	const state = isActive ? (isFocused ? "focused" : "active") : "idle";
 
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: dragData?.instanceId || `tab-${label}`,
+		id: dragData?.viewKey || `tab-${label}`,
 		data: dragData,
 		disabled: !dragData,
 	});

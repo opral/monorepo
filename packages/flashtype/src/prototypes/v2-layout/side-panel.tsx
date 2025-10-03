@@ -22,9 +22,9 @@ interface SidePanelProps {
 	readonly side: PanelSide;
 	readonly title: string;
 	readonly panel: PanelState;
-	readonly onSelectView: (instanceId: string) => void;
+	readonly onSelectView: (viewKey: string) => void;
 	readonly onAddView: (toolId: ViewId) => void;
-	readonly onRemoveView: (instanceId: string) => void;
+	readonly onRemoveView: (viewKey: string) => void;
 	readonly viewContext?: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
@@ -48,17 +48,15 @@ export function SidePanel({
 	isFocused,
 	onFocusPanel,
 }: SidePanelProps) {
-	const activeInstance = panel.activeInstanceId
-		? (panel.instances.find(
-				(instance) => instance.instanceId === panel.activeInstanceId,
-			) ?? null)
-		: (panel.instances[0] ?? null);
+	const activeEntry = panel.activeViewKey
+		? (panel.views.find((view) => view.viewKey === panel.activeViewKey) ?? null)
+		: (panel.views[0] ?? null);
 
-	const activeView = activeInstance
-		? (VIEW_MAP.get(activeInstance.viewId) ?? null)
+	const activeView = activeEntry
+		? (VIEW_MAP.get(activeEntry.viewId) ?? null)
 		: null;
 
-	const hasViews = panel.instances.length > 0;
+	const hasViews = panel.views.length > 0;
 
 	const { setNodeRef, isOver } = useDroppable({
 		id: `${side}-panel`,
@@ -66,7 +64,7 @@ export function SidePanel({
 	});
 
 	const availableViews = VIEW_DEFINITIONS.filter(
-		(view) => !panel.instances.some((instance) => instance.viewId === view.id),
+		(view) => !panel.views.some((entry) => entry.viewId === view.id),
 	);
 
 	const contextWithFocus: ViewContext | undefined = viewContext
@@ -82,23 +80,23 @@ export function SidePanel({
 			<Panel className={isOver ? "ring-2 ring-brand-600 ring-inset" : ""}>
 				{hasViews && (
 					<Panel.TabBar>
-						{panel.instances.map((instance) => {
-							const view = VIEW_MAP.get(instance.viewId);
+						{panel.views.map((entry) => {
+							const view = VIEW_MAP.get(entry.viewId);
 							if (!view) return null;
 							const isActive =
-								activeInstance?.instanceId === instance.instanceId;
+								activeEntry?.viewKey === entry.viewKey;
 							return (
 								<Panel.Tab
-									key={instance.instanceId}
+									key={entry.viewKey}
 									icon={view.icon}
 									label={view.label}
 									isActive={isActive}
 									isFocused={isFocused && isActive}
-									onClick={() => onSelectView(instance.instanceId)}
-									onClose={() => onRemoveView(instance.instanceId)}
+									onClick={() => onSelectView(entry.viewKey)}
+									onClose={() => onRemoveView(entry.viewKey)}
 									dragData={{
-										instanceId: instance.instanceId,
-										viewId: instance.viewId,
+										viewKey: entry.viewKey,
+										viewId: entry.viewId,
 										fromPanel: side,
 									}}
 								/>
@@ -134,16 +132,16 @@ export function SidePanel({
 				)}
 				<Panel.Content
 					className={
-						activeInstance && activeView
+						activeEntry && activeView
 							? "px-1.5 py-1"
 							: "flex items-center justify-center"
 					}
 				>
-					{activeInstance && activeView ? (
+					{activeEntry && activeView ? (
 						<ViewPanel
 							view={activeView}
 							context={contextWithFocus}
-							instance={activeInstance}
+							panelView={activeEntry}
 						/>
 					) : (
 						<EmptyPanelState

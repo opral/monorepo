@@ -18,10 +18,10 @@ export type ViewId =
  * Per-panel instance metadata used to track which views are open.
  *
  * @example
- * const instance: ViewInstance = { instanceId: "files-1", viewId: "files" };
+ * const view: PanelView = { viewKey: "files-1", viewId: "files" };
  */
-export interface ViewInstance {
-	readonly instanceId: string;
+export interface PanelView {
+	readonly viewKey: string;
 	readonly viewId: ViewId;
 	readonly metadata?: {
 		readonly filePath?: string;
@@ -42,7 +42,7 @@ export interface ViewDefinition {
 	readonly icon: LucideIcon;
 	readonly render: (
 		context?: ViewContext,
-		instance?: ViewInstance,
+		view?: PanelView,
 	) => ReactNode;
 }
 
@@ -70,11 +70,11 @@ export interface ViewContext {
  * Lightweight state container that represents one panel island.
  *
  * @example
- * const leftPanel: PanelState = { instances: [], activeInstanceId: null };
+ * const leftPanel: PanelState = { views: [], activeViewKey: null };
  */
 export interface PanelState {
-	readonly instances: ViewInstance[];
-	readonly activeInstanceId: string | null;
+	readonly views: PanelView[];
+	readonly activeViewKey: string | null;
 }
 
 /**

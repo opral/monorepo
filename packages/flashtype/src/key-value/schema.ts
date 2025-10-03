@@ -1,3 +1,8 @@
+import {
+	DEFAULT_FLASHTYPE_UI_STATE,
+	type FlashtypeUiState,
+} from "@/prototypes/v2-layout/ui-state";
+
 export type KeyValueVersionId = "active" | "global" | string;
 
 export type KeyDef<V> = {
@@ -68,6 +73,15 @@ export const KEY_VALUE_DEFINITIONS = {
 		untracked: true,
 		defaultValue: null,
 	} as KeyDef<string | null>,
+
+	/**
+	 * Serialized layout snapshot for the v2 prototype (panels, tabs, focus).
+	 */
+	flashtype_ui_state: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: DEFAULT_FLASHTYPE_UI_STATE,
+	} as KeyDef<FlashtypeUiState>,
 
 	// Test-only keys used in unit tests to exercise tracked behavior
 	flashtype_test_tracked: {
