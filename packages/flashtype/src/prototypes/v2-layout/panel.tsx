@@ -142,7 +142,7 @@ interface TabProps {
 }
 
 const tabBaseClasses =
-	"group flex flex-none max-w-[20rem] items-center gap-0.5 rounded-md border px-1 py-1.5 text-xs font-medium transition-colors whitespace-nowrap";
+	"group flex flex-none max-w-[20rem] items-center gap-0.5 rounded-md border px-1.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap";
 
 const tabStateClasses = {
 	focused: "bg-brand-200 text-neutral-900 border-brand-600",
