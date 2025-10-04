@@ -101,7 +101,7 @@ describe("expandQuery", () => {
 		expect(result.expanded).toBe(true);
 		const normalized = normalize(result.sql);
 		expect(normalized).toContain(
-			'( SELECT entity_id FROM internal_state_vtable ) AS d UNION ALL'
+			"( SELECT entity_id FROM internal_state_vtable ) AS d UNION ALL"
 		);
 	});
 
