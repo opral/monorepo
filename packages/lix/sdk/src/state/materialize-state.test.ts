@@ -2,13 +2,16 @@ import { describe, expect } from "vitest";
 import { sql } from "kysely";
 import { selectActiveVersion } from "../version/select-active-version.js";
 import { createVersion } from "../version/create-version.js";
-import { getTimestamp } from "../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../engine/functions/timestamp.js";
 import {
 	simulationTest,
 	normalSimulation,
 	outOfOrderSequenceSimulation,
 } from "../test-utilities/simulation-test/simulation-test.js";
-import { LixVersionTipSchema, type LixVersionTip } from "../version/schema.js";
+import {
+	LixVersionTipSchema,
+	type LixVersionTip,
+} from "../version/schema-definition.js";
 
 function stripWriterKey<T extends Record<string, any> | null | undefined>(
 	row: T

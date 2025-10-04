@@ -1,7 +1,6 @@
 import type {
 	EnvironmentActorHandle,
 	LixEnvironment,
-	LixEnvironmentResult,
 	SpawnActorOptions,
 } from "./api.js";
 
@@ -102,12 +101,6 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		};
 		await this.send("create", payload, [createOpts.blob]);
 	}
-
-	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
-		return this.send("exec", { sql, params });
-	}
-
-	// execBatch intentionally omitted; loop over exec() instead.
 
 	/**
 	 * Export the SQLite database image as raw bytes.

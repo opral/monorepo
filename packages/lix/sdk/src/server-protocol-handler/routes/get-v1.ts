@@ -2,7 +2,7 @@ import {
 	contentFromDatabase,
 	createInMemoryDatabase,
 	importDatabase,
-} from "../../database/sqlite-wasm/index.js";
+} from "../../database/sqlite/index.js";
 import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 
 export const route: LixServerProtocolHandlerRoute = async (context) => {

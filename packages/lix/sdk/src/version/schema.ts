@@ -1,8 +1,23 @@
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
 import type { LixEngine } from "../engine/boot.js";
+import {
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	LixActiveVersionSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+	type LixActiveVersion,
+	type LixVersion,
+} from "./schema-definition.js";
+
+export {
+	LixVersionDescriptorSchema,
+	LixVersionTipSchema,
+	LixActiveVersionSchema,
+	type LixVersionDescriptor,
+	type LixVersionTip,
+	type LixActiveVersion,
+	type LixVersion,
+} from "./schema-definition.js";
 
 export function applyVersionDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -426,83 +441,7 @@ export function applyVersionDatabaseSchema(args: {
 	`);
 }
 
-export type LixVersionDescriptor = FromLixSchemaDefinition<
-	typeof LixVersionDescriptorSchema
->;
-export const LixVersionDescriptorSchema = {
-	"x-lix-key": "lix_version_descriptor",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-foreign-keys": [],
-	type: "object",
-	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		name: { type: "string", "x-lix-generated": true },
-		inherits_from_version_id: { type: ["string", "null"] },
-		hidden: { type: "boolean", "x-lix-generated": true },
-	},
-	required: ["id", "name"],
-	additionalProperties: false,
-} as const;
-LixVersionDescriptorSchema satisfies LixSchemaDefinition;
-
-export const LixVersionTipSchema = {
-	"x-lix-key": "lix_version_tip",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["working_commit_id"]],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["commit_id"],
-			references: { schemaKey: "lix_commit", properties: ["id"] },
-			mode: "materialized",
-		},
-		{
-			properties: ["working_commit_id"],
-			references: { schemaKey: "lix_commit", properties: ["id"] },
-			mode: "materialized",
-		},
-	],
-	type: "object",
-	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		commit_id: { type: "string", "x-lix-generated": true },
-		working_commit_id: { type: "string", "x-lix-generated": true },
-	},
-	required: ["id", "commit_id", "working_commit_id"],
-	additionalProperties: false,
-} as const;
-LixVersionTipSchema satisfies LixSchemaDefinition;
-export type LixVersionTip = FromLixSchemaDefinition<typeof LixVersionTipSchema>;
-
-export const LixActiveVersionSchema = {
-	"x-lix-key": "lix_active_version",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["version_id"],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["version_id"],
-			references: {
-				schemaKey: "lix_version_descriptor",
-				properties: ["id"],
-			},
-		},
-	],
-	type: "object",
-	properties: {
-		version_id: { type: "string" },
-	},
-	required: ["version_id"],
-	additionalProperties: false,
-} as const;
-LixActiveVersionSchema satisfies LixSchemaDefinition;
-
 // Logical schema for merged version view (typing + JSON column mapping)
 // Note: merged 'version' is a view, not a writable schema entity
 
 // Pure business logic type for merged version view
-export type LixVersion = LixVersionTip & LixVersionDescriptor;
-
-export type LixActiveVersion = FromLixSchemaDefinition<
-	typeof LixActiveVersionSchema
->;

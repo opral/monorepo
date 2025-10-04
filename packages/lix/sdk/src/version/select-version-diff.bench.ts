@@ -1,7 +1,7 @@
 import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
-import { selectVersionDiff as selectVersionDiff } from "./select-version-diff.js";
+import { selectVersionDiff } from "./select-version-diff.js";
 
 const COUNTS = {
 	created: 10,

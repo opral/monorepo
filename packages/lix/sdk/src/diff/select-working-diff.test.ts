@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "../state/create-checkpoint.js";
 import { selectWorkingDiff } from "./select-working-diff.js";
-import { LixKeyValueSchema } from "../key-value/schema.js";
+import { LixKeyValueSchema } from "../key-value/schema-definition.js";
 
 const FILE_ID = "lix"; // key_value is stored under hardcoded file_id 'lix'
 const KV_SCHEMA = LixKeyValueSchema["x-lix-key"];

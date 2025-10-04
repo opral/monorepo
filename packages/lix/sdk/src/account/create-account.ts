@@ -1,6 +1,6 @@
-import { nanoId } from "../engine/deterministic/nano-id.js";
+import { nanoId } from "../engine/functions/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixAccount } from "./schema.js";
+import type { LixAccount } from "./schema-definition.js";
 
 /**
  * Inserts a new account into the Lix database.

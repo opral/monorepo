@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import CustomLink from "./CustomLink.tsx";
 import { LixConversationMessage } from "@lix-js/sdk";
-import { toPlainText } from "@lix-js/sdk/zettel-ast";
+import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
   const [lix] = useAtom(lixAtom);

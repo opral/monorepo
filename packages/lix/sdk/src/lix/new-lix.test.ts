@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import { openLix } from "./open-lix.js";
-import { LixSchemaViewMap } from "../database/schema.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
 
 test("newLixFile creates a valid lix that can be reopened", async () => {
 	// Create a new lix file
@@ -21,7 +21,12 @@ test("newLixFile creates a global and main version", async () => {
 	const lix = await openLix({ blob });
 
 	// Check that both global and main versions exist
-	const versions = await lix.db.selectFrom("version").selectAll().execute();
+	const versions = await lix.db
+		.selectFrom("version")
+		.where("name", "in", ["global", "main"])
+		.orderBy("name")
+		.selectAll()
+		.execute();
 
 	expect(versions).toHaveLength(2);
 
@@ -42,7 +47,9 @@ test("newLixFile creates required bootstrap change sets", async () => {
 
 	// Check that change sets exist (should be 4: 2 for global, 2 for main)
 	const changeSets = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
+		.where("lixcol_version_id", "in", ["global", "main"])
+		.orderBy("lixcol_version_id")
 		.selectAll()
 		.execute();
 
@@ -54,7 +61,11 @@ test("newLixFile creates checkpoint label", async () => {
 	const lix = await openLix({ blob });
 
 	// Check that checkpoint label exists
-	const labels = await lix.db.selectFrom("label").selectAll().execute();
+	const labels = await lix.db
+		.selectFrom("label")
+		.where("name", "=", "checkpoint")
+		.selectAll()
+		.execute();
 
 	expect(labels).toHaveLength(1);
 	expect(labels[0]?.name).toBe("checkpoint");
@@ -67,6 +78,7 @@ test("newLixFile creates all schema definitions", async () => {
 	// Check that all schemas from LixSchemaViewMap are created
 	const storedSchemas = await lix.db
 		.selectFrom("stored_schema")
+		.orderBy("key")
 		.selectAll()
 		.execute();
 
@@ -94,7 +106,9 @@ test("newLixFile creates change set elements for all changes", async () => {
 
 	// Check that change set elements exist
 	const changeSetElements = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("change_set_element_all")
+		.where("lixcol_version_id", "in", ["global", "main"])
+		.orderBy("lixcol_version_id")
 		.selectAll()
 		.execute();
 
@@ -196,6 +210,7 @@ test("newLixFile can use provided key values", async () => {
 	const nameKv = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "lix_name")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 	expect(nameKv?.value).toBe("Test Lix Name");
@@ -203,6 +218,7 @@ test("newLixFile can use provided key values", async () => {
 	const idKv = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "lix_id")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 	expect(idKv?.value).toBe("test-lix-id");
@@ -210,6 +226,7 @@ test("newLixFile can use provided key values", async () => {
 	const customKv = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "custom_key")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 	expect(customKv?.value).toBe("custom_value");
@@ -230,6 +247,7 @@ test("provided key values default to the active version if lixcol_version_id is 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
+		.orderBy("version_id")
 		.executeTakeFirst();
 
 	expect(activeVersion).toBeDefined();
@@ -239,6 +257,7 @@ test("provided key values default to the active version if lixcol_version_id is 
 	const kv1 = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "test_key_1")
+		.where("lixcol_version_id", "=", activeVersion!.version_id)
 		.selectAll()
 		.executeTakeFirst();
 
@@ -248,6 +267,7 @@ test("provided key values default to the active version if lixcol_version_id is 
 	const kv2 = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "test_key_2")
+		.where("lixcol_version_id", "=", activeVersion!.version_id)
 		.selectAll()
 		.executeTakeFirst();
 

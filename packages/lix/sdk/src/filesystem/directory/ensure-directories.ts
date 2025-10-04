@@ -1,5 +1,5 @@
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import {
 	normalizeDirectoryPath,
 	normalizeFilePath,
@@ -7,12 +7,14 @@ import {
 } from "../path.js";
 
 export function getActiveVersionId(
-	engine: Pick<LixEngine, "sqlite" | "db">
+	engine: Pick<LixEngine, "executeSync">
 ): string {
-	const result = executeSync({
-		engine,
-		query: engine.db.selectFrom("active_version").select("version_id"),
-	});
+	const result = engine.executeSync(
+		internalQueryBuilder
+			.selectFrom("active_version")
+			.select("version_id")
+			.compile()
+	).rows;
 	const versionId = result[0]?.version_id;
 	if (!versionId) {
 		throw new Error("No active version present");
@@ -21,7 +23,7 @@ export function getActiveVersionId(
 }
 
 export function readDirectoryByPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	path: string;
 }): { id: string; parent_id: string | null; path: string } | undefined {
@@ -33,7 +35,7 @@ export function readDirectoryByPath(args: {
 	let parentId: string | null = null;
 	let lastRow: { id: string; parent_id: string | null } | undefined;
 	for (const segment of segments) {
-		const result = args.engine.sqlite.exec({
+		const result = args.engine.executeSync({
 			sql: `
 				SELECT
 					json_extract(snapshot_content, '$.id') AS id,
@@ -45,19 +47,18 @@ export function readDirectoryByPath(args: {
 					AND ${parentId === null ? "json_extract(snapshot_content, '$.parent_id') IS NULL" : "json_extract(snapshot_content, '$.parent_id') = ?"}
 				LIMIT 1;
 			`,
-			bind:
+			parameters:
 				parentId === null
 					? [args.versionId, segment]
 					: [args.versionId, segment, parentId],
-			returnValue: "resultRows",
-		}) as Array<Array<string>>;
+		}).rows as Array<{ id: string; parent_id: string | null }>;
 		const row = result[0];
 		if (!row) {
 			return undefined;
 		}
 		lastRow = {
-			id: row[0] as string,
-			parent_id: (row[1] as string | null) ?? null,
+			id: row.id,
+			parent_id: row.parent_id ?? null,
 		};
 		parentId = lastRow.id;
 	}
@@ -70,19 +71,19 @@ export function readDirectoryByPath(args: {
 }
 
 function readDirectoryDescriptorById(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	directoryId: string;
 }): { id: string; parent_id: string | null; name: string } | undefined {
-	const rows = executeSync({
-		engine: args.engine,
-		query: args.engine.db
+	const rows = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_directory_descriptor")
 			.where("version_id", "=", args.versionId)
 			.where("entity_id", "=", args.directoryId)
-			.select(["snapshot_content"]),
-	});
+			.select(["snapshot_content"])
+			.compile()
+	).rows;
 	const raw = rows[0]?.snapshot_content as
 		| { id: string; parent_id: string | null; name: string }
 		| string
@@ -95,7 +96,7 @@ function readDirectoryDescriptorById(args: {
 }
 
 export function readDirectoryPathById(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	directoryId: string;
 }): string | undefined {
@@ -107,18 +108,18 @@ export function readDirectoryPathById(args: {
 }
 
 export function assertNoFileAtPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	filePath: string;
 }): void {
-	const rows = executeSync({
-		engine: args.engine,
-		query: args.engine.db
+	const rows = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("file_all")
 			.where("path", "=", args.filePath)
 			.where("lixcol_version_id", "=", args.versionId)
-			.select(["id"]),
-	});
+			.select(["id"])
+			.compile()
+	).rows;
 	if (rows.length > 0) {
 		throw new Error(
 			`Directory path collides with existing file path: ${args.filePath}`
@@ -127,19 +128,19 @@ export function assertNoFileAtPath(args: {
 }
 
 export function assertNoDirectoryAtFilePath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	filePath: string;
 }): void {
 	const directoryPath = `${args.filePath}/`;
-	const rows = executeSync({
-		engine: args.engine,
-		query: args.engine.db
+	const rows = args.engine.executeSync(
+		internalQueryBuilder
 			.selectFrom("directory_all")
 			.where("path", "=", directoryPath)
 			.where("lixcol_version_id", "=", args.versionId)
-			.select(["id"]),
-	});
+			.select(["id"])
+			.compile()
+	).rows;
 	if (rows.length > 0) {
 		throw new Error(
 			`File path collides with existing directory path: ${directoryPath}`
@@ -148,7 +149,7 @@ export function assertNoDirectoryAtFilePath(args: {
 }
 
 export function computeDirectoryPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	parentId: string | null;
 	name: string;
@@ -197,7 +198,7 @@ function listAncestorDirectories(filePath: string): string[] {
 }
 
 export function ensureDirectoryAncestors(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 	versionId?: string;
 	filePath: string;
 }): void {
@@ -220,12 +221,11 @@ export function ensureDirectoryAncestors(args: {
 		const name = normalizePathSegment(
 			dirPath.slice(1, -1).split("/").pop() ?? ""
 		);
-		const result = args.engine.sqlite.exec({
-			sql: `SELECT handle_directory_upsert(NULL, ?, ?, ?, 0, ?);`,
-			bind: [parentId, name, dirPath, versionId],
-			returnValue: "resultRows",
-		}) as Array<Array<string>>;
-		const insertedId = result[0]?.[0] as string | undefined;
+		const result = args.engine.executeSync({
+			sql: `SELECT handle_directory_upsert(NULL, ?, ?, ?, 0, ?) AS id;`,
+			parameters: [parentId, name, dirPath, versionId],
+		}).rows as Array<{ id: string }>;
+		const insertedId = result[0]?.id;
 		if (typeof insertedId !== "string") {
 			throw new Error(`Failed to create directory for path ${dirPath}`);
 		}
@@ -234,7 +234,7 @@ export function ensureDirectoryAncestors(args: {
 }
 
 export function ensureDirectoryPathExists(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 	versionId: string;
 	path: string;
 }): string | null {
@@ -261,12 +261,11 @@ export function ensureDirectoryPathExists(args: {
 			continue;
 		}
 
-		const result = args.engine.sqlite.exec({
-			sql: `SELECT handle_directory_upsert(NULL, ?, ?, NULL, 0, ?);`,
-			bind: [parentId, normalizedSegment, args.versionId],
-			returnValue: "resultRows",
-		}) as Array<Array<string>>;
-		const insertedId = result[0]?.[0] as string | undefined;
+		const result = args.engine.executeSync({
+			sql: `SELECT handle_directory_upsert(NULL, ?, ?, NULL, 0, ?) AS id;`,
+			parameters: [parentId, normalizedSegment, args.versionId],
+		}).rows as Array<{ id: string }>;
+		const insertedId = result[0]?.id;
 		if (typeof insertedId !== "string") {
 			throw new Error(`Failed to create directory for path ${fullPath}`);
 		}
@@ -277,7 +276,7 @@ export function ensureDirectoryPathExists(args: {
 }
 
 export function composeDirectoryPath(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	directoryId: string | null;
 }): string | undefined {

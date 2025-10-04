@@ -5,6 +5,6 @@ export {
 	type LixChangeSet,
 	type LixChangeSetElement,
 	type LixChangeSetLabel,
-} from "./schema.js";
+} from "./schema-definition.js";
 export { createChangeSet } from "./create-change-set.js";
 export { applyChangeSet } from "./apply-change-set.js";

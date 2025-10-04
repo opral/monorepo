@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixVersion } from "./schema.js";
+import type { LixVersion } from "./schema-definition.js";
 
 /**
  * Switches the current Version to the given Version.

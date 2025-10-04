@@ -167,12 +167,14 @@ test("account operations are version specific and isolated", async () => {
 	const updatedAccountsA = await lix.db
 		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionA.id)
+		.where("id", "=", "accountA")
 		.selectAll()
 		.execute();
 
 	const unchangedAccountsB = await lix.db
 		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionB.id)
+		.where("id", "=", "accountB")
 		.selectAll()
 		.execute();
 

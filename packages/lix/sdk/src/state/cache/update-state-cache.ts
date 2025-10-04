@@ -1,8 +1,6 @@
 import type { LixEngine } from "../../engine/boot.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
-import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getStateCacheV2Tables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
@@ -37,7 +35,7 @@ import { createSchemaCacheTable } from "./create-schema-cache-table.js";
  * });
  */
 export function updateStateCache(args: {
-	engine: Pick<LixEngine, "db" | "sqlite">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
 	// Accepts standard changes or materialized changes which include inline
 	// lixcol_version_id and lixcol_commit_id. When inline values are present,
 	// they take precedence over top-level commit/version arguments.
@@ -47,7 +45,6 @@ export function updateStateCache(args: {
 }): void {
 	const engine = args.engine;
 	const changes = args.changes;
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Group changes by schema_key for efficient batch processing
 	const changesBySchema = new Map<
@@ -81,12 +78,12 @@ export function updateStateCache(args: {
 		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
 
 		// Ensure table exists (creates if needed, updates cache)
-		ensureTableExists(engine, tableName);
+		ensureTableExists({ engine, tableName });
 
 		// Process inserts/updates for this schema
 		if (schemaChanges.inserts.length > 0) {
 			batchInsertDirectToTable({
-				engine: engine,
+				engine,
 				tableName,
 				changes: schemaChanges.inserts,
 				default_commit_id: args.commit_id,
@@ -113,10 +110,11 @@ export function updateStateCache(args: {
 
 					// Clear existing cached edges for this child in global scope
 					const edgeTable = "internal_state_cache_lix_commit_edge";
-					ensureTableExists(engine, edgeTable);
-					engine.sqlite.exec(
-						`DELETE FROM ${edgeTable} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = '${childId.replace(/'/g, "''")}'`
-					);
+					ensureTableExists({ engine, tableName: edgeTable });
+					engine.executeSync({
+						sql: `DELETE FROM ${edgeTable} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = ?`,
+						parameters: [childId],
+					});
 
 					// Insert derived edges for parents
 					for (const parentId of parents) {
@@ -162,7 +160,7 @@ export function updateStateCache(args: {
 
 				if (edgeRows.length > 0) {
 					batchInsertDirectToTable({
-						engine: engine,
+						engine,
 						tableName: "internal_state_cache_lix_commit_edge",
 						changes: edgeRows,
 						default_commit_id: args.commit_id,
@@ -172,9 +170,12 @@ export function updateStateCache(args: {
 
 				if (changeSetRows.length > 0) {
 					// Ensure the change_set cache table exists before inserting
-					ensureTableExists(engine, "internal_state_cache_lix_change_set");
+					ensureTableExists({
+						engine,
+						tableName: "internal_state_cache_lix_change_set",
+					});
 					batchInsertDirectToTable({
-						engine: engine,
+						engine,
 						tableName: "internal_state_cache_lix_change_set",
 						changes: changeSetRows,
 						default_commit_id: args.commit_id,
@@ -187,8 +188,7 @@ export function updateStateCache(args: {
 		// Process deletions for this schema
 		if (schemaChanges.deletes.length > 0) {
 			batchDeleteDirectFromTable({
-				db,
-				engine: engine,
+				engine,
 				tableName,
 				changes: schemaChanges.deletes,
 				default_commit_id: args.commit_id,
@@ -202,15 +202,16 @@ export function updateStateCache(args: {
  * Ensures a table exists and updates the cache.
  * Single source of truth for table creation and cache management.
  */
-function ensureTableExists(
-	engine: Pick<LixEngine, "sqlite">,
-	tableName: string
-): void {
-	// Get cache for this Lix instance
-	const tableCache = getStateCacheV2Tables({ engine: engine });
-
-	// Always run idempotent creator to ensure indexes exist
-	createSchemaCacheTable({ engine: engine as any, tableName });
+function ensureTableExists(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
+	tableName: string;
+}): void {
+	const { engine, tableName } = args;
+	const tableCache = getStateCacheV2Tables({ engine });
+	createSchemaCacheTable({
+		engine: args.engine,
+		tableName,
+	});
 
 	// Update cache set if newly seen
 	if (!tableCache.has(tableName)) {
@@ -219,7 +220,7 @@ function ensureTableExists(
 }
 
 function batchInsertDirectToTable(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
 	tableName: string;
 	changes: Array<LixChangeRaw | MaterializedChange>;
 	default_commit_id?: string;
@@ -228,11 +229,27 @@ function batchInsertDirectToTable(args: {
 	const { engine, tableName, changes, default_commit_id, default_version_id } =
 		args;
 
-	// Prepare statement once for all inserts
-	// Use proper UPSERT with ON CONFLICT instead of INSERT OR REPLACE
-	// jsonb() conversion is handled directly in the SQL
-	const stmt = engine.sqlite.prepare(`
-		INSERT INTO ${tableName} (
+	for (const change of changes) {
+		const change_any = change as any;
+		const resolvedVersionId =
+			change_any.lixcol_version_id ??
+			change_any.version_id ??
+			default_version_id;
+		const resolvedCommitId = change_any.lixcol_commit_id ?? default_commit_id;
+
+		if (!resolvedVersionId) {
+			throw new Error(
+				"updateStateCache: version_id missing; provide inline lixcol_version_id or top-level version_id"
+			);
+		}
+		if (!resolvedCommitId) {
+			throw new Error(
+				"updateStateCache: commit_id missing; provide inline lixcol_commit_id or top-level commit_id"
+			);
+		}
+
+		engine.executeSync({
+			sql: `INSERT INTO ${tableName} (
 			entity_id,
 			schema_key,
 			file_id,
@@ -252,73 +269,39 @@ function batchInsertDirectToTable(args: {
 			plugin_key = excluded.plugin_key,
 			snapshot_content = excluded.snapshot_content,
 			schema_version = excluded.schema_version,
-			-- Preserve original created_at, don't overwrite it
 			updated_at = excluded.updated_at,
 			inherited_from_version_id = excluded.inherited_from_version_id,
 			inheritance_delete_marker = excluded.inheritance_delete_marker,
 			change_id = excluded.change_id,
-			commit_id = excluded.commit_id
-	`);
-
-	try {
-		for (const change of changes) {
-			// Resolve version/commit per-change, supporting inline values from materialized rows
-			const change_any = change as any;
-			const resolvedVersionId =
-				change_any.lixcol_version_id ??
-				change_any.version_id ??
-				default_version_id;
-			const resolvedCommitId = change_any.lixcol_commit_id ?? default_commit_id;
-
-			if (!resolvedVersionId) {
-				throw new Error(
-					"updateStateCache: version_id missing; provide inline lixcol_version_id or top-level version_id"
-				);
-			}
-			if (!resolvedCommitId) {
-				throw new Error(
-					"updateStateCache: commit_id missing; provide inline lixcol_commit_id or top-level commit_id"
-				);
-			}
-
-			stmt.bind([
+			commit_id = excluded.commit_id`,
+			parameters: [
 				change.entity_id,
-				change.schema_key, // Add the original schema_key
+				change.schema_key,
 				change.file_id,
 				resolvedVersionId,
 				change.plugin_key,
-				change.snapshot_content, // jsonb() conversion happens in SQL
+				change.snapshot_content,
 				change.schema_version,
 				change.created_at,
-				change.created_at, // updated_at
-				null, // inherited_from_version_id
-				0, // inheritance_delete_marker
+				change.created_at,
+				null,
+				0,
 				change.id,
 				resolvedCommitId,
-			]);
-			stmt.step();
-			stmt.reset();
-		}
-	} finally {
-		stmt.finalize();
+			],
+		});
 	}
 }
 
 function batchDeleteDirectFromTable(args: {
-	db: Kysely<LixInternalDatabaseSchema>;
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 	tableName: string;
 	changes: Array<LixChangeRaw | MaterializedChange>;
 	default_commit_id?: string;
 	default_version_id?: string;
 }): void {
-	const {
-		engine: engine,
-		tableName,
-		changes,
-		default_commit_id,
-		default_version_id,
-	} = args;
+	const { engine, tableName, changes, default_commit_id, default_version_id } =
+		args;
 
 	for (const change of changes) {
 		const change_any = change as any;
@@ -340,27 +323,26 @@ function batchDeleteDirectFromTable(args: {
 		}
 
 		// Get existing entry to check if it exists before deletion
-		const result = engine.sqlite.exec({
+		const result = engine.executeSync({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
 			      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
-			bind: [change.entity_id, change.file_id, resolvedVersionId],
-			returnValue: "resultRows",
-		}) as any[];
+			parameters: [change.entity_id, change.file_id, resolvedVersionId],
+		}).rows;
 
 		const existingEntry = result?.[0];
 
 		// Delete the entry
 		if (existingEntry) {
-			engine.sqlite.exec({
+			engine.executeSync({
 				sql: `DELETE FROM ${tableName} 
 				      WHERE entity_id = ? AND file_id = ? AND version_id = ?`,
-				bind: [change.entity_id, change.file_id, resolvedVersionId],
+				parameters: [change.entity_id, change.file_id, resolvedVersionId],
 			});
 		}
 
 		// Insert tombstone with UPSERT to handle existing entries
-		engine.sqlite.exec({
+		engine.executeSync({
 			sql: `INSERT INTO ${tableName} (
 				entity_id,
 				schema_key,
@@ -386,7 +368,7 @@ function batchDeleteDirectFromTable(args: {
 				inheritance_delete_marker = 1,
 				change_id = excluded.change_id,
 				commit_id = excluded.commit_id`,
-			bind: [
+			parameters: [
 				change.entity_id,
 				change.schema_key,
 				change.file_id,

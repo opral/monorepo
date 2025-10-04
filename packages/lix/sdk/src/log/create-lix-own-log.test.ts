@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { Lix } from "../lix/open-lix.js";
-import { createLixOwnLog } from "./create-lix-own-log.js";
-import type { LixLog } from "./schema.js";
+import type { LixLog } from "./schema-definition.js";
+import { createLixOwnLogSync } from "./create-lix-own-log.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
 	const lix = await openLix({
@@ -109,27 +109,27 @@ test("should insert all levels contain wildcard '*'", async () => {
 });
 
 async function createLogs(lix: Lix) {
-	await createLixOwnLog({
+	createLixOwnLogSync({
 		engine: lix.engine!,
 		key: "log_test_debug",
 		level: "debug",
 		payload: { reason: "verbose", details: { retries: 0 } },
 	});
-	await createLixOwnLog({
+	createLixOwnLogSync({
 		engine: lix.engine!,
 		key: "log_test_info",
 		level: "info",
 		message: "info message",
 		payload: null,
 	});
-	await createLixOwnLog({
+	createLixOwnLogSync({
 		engine: lix.engine!,
 		key: "log_test_warn",
 		level: "warn",
 		message: "warn message",
 		payload: { reason: "detected", path: "/tmp/example.txt" },
 	});
-	await createLixOwnLog({
+	createLixOwnLogSync({
 		engine: lix.engine!,
 		key: "log_test_error",
 		level: "error",

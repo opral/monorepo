@@ -1,15 +1,16 @@
-import { executeSync } from "../../database/execute-sync.js";
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixFile } from "./schema.js";
+import type { LixChange } from "../../change/schema-definition.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 import {
 	readFileDescriptorAtCommit,
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
 import { matchesGlob } from "../util/glob.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 export function materializeFileDataAtCommit(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "getAllPluginsSync" | "executeSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	rootCommitId: string;
@@ -69,25 +70,16 @@ export function materializeFileDataAtCommit(args: {
 		}
 
 		// Get plugin changes from state_history table
-		const changes = executeSync({
-			engine: args.engine,
-			query: selectFileChanges({
-				engine: args.engine,
+		const rows = args.engine.executeSync(
+			selectFileChanges({
 				pluginKey: plugin.key,
 				fileId: descriptor.id,
 				rootCommitId: args.rootCommitId,
 				depth: args.depth,
-			}),
-		});
+			}).compile()
+		).rows;
 
-		// Format changes for plugin
-		const formattedChanges = changes.map((change) => ({
-			...change,
-			snapshot_content:
-				typeof change.snapshot_content === "string"
-					? JSON.parse(change.snapshot_content)
-					: change.snapshot_content,
-		}));
+		const formattedChanges = mapHistoryRowsToLixChanges(rows);
 
 		const file = plugin.applyChanges({
 			file: descriptor,
@@ -98,25 +90,16 @@ export function materializeFileDataAtCommit(args: {
 	}
 
 	// If no specific plugin matched, use the fallback plugin
-	const changes = executeSync({
-		engine: args.engine,
-		query: selectFileChanges({
-			engine: args.engine,
+	const fallbackRows = args.engine.executeSync(
+		selectFileChanges({
 			pluginKey: lixUnknownFileFallbackPlugin.key,
 			fileId: descriptor.id,
 			rootCommitId: args.rootCommitId,
 			depth: args.depth,
-		}),
-	});
+		}).compile()
+	).rows;
 
-	// Format changes for plugin
-	const formattedChanges = changes.map((change) => ({
-		...change,
-		snapshot_content:
-			typeof change.snapshot_content === "string"
-				? JSON.parse(change.snapshot_content)
-				: change.snapshot_content,
-	}));
+	const formattedChanges = mapHistoryRowsToLixChanges(fallbackRows);
 
 	if (formattedChanges.length === 0) {
 		throw new Error(
@@ -133,19 +116,18 @@ export function materializeFileDataAtCommit(args: {
 }
 
 function selectFileChanges(args: {
-	engine: Pick<LixEngine, "db">;
 	pluginKey: string;
 	fileId: string;
 	rootCommitId: string;
 	depth: number;
 }) {
-	return args.engine.db
+	return internalQueryBuilder
 		.selectFrom("state_history as sh1")
 		.where("sh1.plugin_key", "=", args.pluginKey)
 		.where("sh1.file_id", "=", args.fileId)
 		.where("sh1.root_commit_id", "=", args.rootCommitId)
 		.where("sh1.depth", ">=", args.depth)
-		.where("sh1.depth", "=", (eb) =>
+		.where("sh1.depth", "=", (eb: any) =>
 			// This subquery finds the "leaf state" for each entity at the requested depth in history.
 			//
 			// What this does: "For each entity in the file, find its most recent state that existed
@@ -164,7 +146,7 @@ function selectFileChanges(args: {
 			// min(depth): For each entity, get its most recent state (leaf) at or after the requested depth
 			eb
 				.selectFrom("state_history as sh2")
-				.select((eb) => eb.fn.min("sh2.depth").as("min_depth"))
+				.select((eb: any) => eb.fn.min("sh2.depth").as("min_depth"))
 				.whereRef("sh2.entity_id", "=", "sh1.entity_id")
 				.whereRef("sh2.file_id", "=", "sh1.file_id")
 				.whereRef("sh2.plugin_key", "=", "sh1.plugin_key")
@@ -174,8 +156,48 @@ function selectFileChanges(args: {
 		.select([
 			"sh1.entity_id",
 			"sh1.schema_key",
+			"sh1.schema_version",
 			"sh1.file_id",
 			"sh1.plugin_key",
 			"sh1.snapshot_content",
+			"sh1.metadata",
+			"sh1.change_id",
 		]);
+}
+
+function mapHistoryRowsToLixChanges(rows: any[]): LixChange[] {
+	return rows.map((row) => {
+		const snapshotValue = row.snapshot_content;
+		const snapshot =
+			typeof snapshotValue === "string"
+				? JSON.parse(snapshotValue)
+				: (snapshotValue ?? null);
+
+		const metadataValue = row.metadata;
+		let metadata: Record<string, any> | null = null;
+		if (metadataValue != null) {
+			if (typeof metadataValue === "string") {
+				try {
+					metadata = JSON.parse(metadataValue);
+				} catch {
+					metadata = null;
+				}
+			} else if (typeof metadataValue === "object") {
+				metadata = metadataValue as Record<string, any>;
+			}
+		}
+
+		return {
+			id: (row.change_id as string | undefined) ?? (row.entity_id as string),
+			entity_id: row.entity_id as string,
+			schema_key: row.schema_key as string,
+			schema_version: row.schema_version as string,
+			file_id: row.file_id as string,
+			plugin_key: row.plugin_key as string,
+			metadata,
+			created_at:
+				(row.created_at as string | undefined) ?? new Date(0).toISOString(),
+			snapshot_content: snapshot as Record<string, any> | null,
+		};
+	});
 }

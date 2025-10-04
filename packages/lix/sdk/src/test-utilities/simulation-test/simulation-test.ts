@@ -1,6 +1,7 @@
 import { test, expect, type Assertion, vi } from "vitest";
 import { type Lix, openLix } from "../../lix/open-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
+import { disabledQueryPreprocessorSimulation } from "./disabled-query-preprocessor-simulation.js";
 import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
 import { engineBoundarySimulation } from "./engine-boundary-simulation.js";
 
@@ -30,6 +31,7 @@ type SimulationTestOptions = {
 // Default simulations available
 export const defaultSimulations: SimulationTestDef[] = [
 	normalSimulation,
+	disabledQueryPreprocessorSimulation,
 	cacheMissSimulation,
 	engineBoundarySimulation,
 ];
@@ -39,6 +41,7 @@ export {
 	engineBoundarySimulation,
 	normalSimulation,
 	cacheMissSimulation,
+	disabledQueryPreprocessorSimulation,
 	outOfOrderSequenceSimulation,
 };
 

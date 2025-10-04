@@ -68,6 +68,7 @@ simulationTest(
 		const viewAfterInsert = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -105,6 +106,7 @@ simulationTest(
 		const viewAfterUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -142,6 +144,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -197,6 +200,7 @@ simulationTest(
 		const afterInsert = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "w1")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				sql`writer_key`.as("writer_key"),
@@ -220,6 +224,7 @@ simulationTest(
 		const afterUpdateWithWriter = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "w1")
+			.orderBy("entity_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -242,6 +247,7 @@ simulationTest(
 		const afterUpdateNoWriter = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "w1")
+			.orderBy("entity_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -317,6 +323,7 @@ simulationTest(
 			.where("entity_id", "=", "wd1")
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
+			.orderBy("entity_id")
 			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
 			.executeTakeFirstOrThrow();
 		expectDeterministic(tombstoneWithWriter.snapshot_content).toBeNull();
@@ -353,6 +360,7 @@ simulationTest(
 			.where("entity_id", "=", "wd1")
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
+			.orderBy("entity_id")
 			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
 			.executeTakeFirstOrThrow();
 		expectDeterministic(tombstoneNoWriter.snapshot_content).toBeNull();
@@ -412,6 +420,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
+			.orderBy("entity_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -445,6 +454,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
+			.orderBy("entity_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -592,6 +602,7 @@ simulationTest(
 			.where("entity_id", "=", "e_tomb")
 			.where("schema_key", "=", "mock_schema_tombstone")
 			.where("file_id", "=", "f_tomb")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				"schema_key",
@@ -658,6 +669,7 @@ simulationTest(
 		const beforeDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
+			.orderBy("entity_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(beforeDelete).toHaveLength(2);
@@ -678,6 +690,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -734,6 +747,7 @@ simulationTest(
 		const beforeDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
+			.orderBy("entity_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(beforeDelete).toHaveLength(2);
@@ -753,6 +767,7 @@ simulationTest(
 		const afterDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
+			.orderBy("entity_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(afterDelete).toHaveLength(1);
@@ -763,6 +778,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.where("schema_key", "=", "mock_test_schema")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		expectDeterministic(stateAfterDelete).toHaveLength(0);
@@ -831,6 +847,7 @@ simulationTest(
 		const stateAfterInsert = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
+			.orderBy("entity_id")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
 
@@ -866,6 +883,7 @@ simulationTest(
 		const stateAfterUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
+			.orderBy("entity_id")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
 
@@ -1029,6 +1047,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1058,6 +1077,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1119,6 +1139,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"untracked",
@@ -1155,6 +1176,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1232,6 +1254,7 @@ simulationTest(
 			.where("version_id", "=", childVersion.id)
 			.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
 			.where("untracked", "=", 1)
+			.orderBy("_pk")
 			.select(["entity_id", "change_id"])
 			.execute();
 
@@ -1315,6 +1338,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", "global")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.executeTakeFirstOrThrow();
 
@@ -1325,6 +1349,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", activeVersion.id)
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1394,6 +1419,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1428,6 +1454,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1447,6 +1474,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", "global")
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1521,6 +1549,7 @@ simulationTest(
 		const afterInit = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "entity0")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1545,6 +1574,7 @@ simulationTest(
 		const afterUntrackedUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "entity0")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1569,6 +1599,7 @@ simulationTest(
 		const afterTrackedUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "entity0")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1632,6 +1663,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				"version_id",
@@ -1667,6 +1699,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -1731,6 +1764,7 @@ simulationTest(
 		const persistedState = await db2
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "persistent-entity")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2299,6 +2333,7 @@ simulationTest(
 		const viewAfterFailedUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -2362,6 +2397,7 @@ simulationTest(
 		const beforeDelete = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		expect(beforeDelete).toHaveLength(1);
@@ -2380,6 +2416,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		expect(afterDelete).toHaveLength(0);
@@ -2444,6 +2481,7 @@ simulationTest(
 		const stateResults = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "write-through-entity")
+			.orderBy("entity_id")
 			.select(["entity_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2526,6 +2564,7 @@ simulationTest(
 		const stateResults = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "update-cache-entity")
+			.orderBy("entity_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"plugin_key",
@@ -2663,6 +2702,7 @@ simulationTest(
 			.where("entity_id", "=", "change-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
+			.orderBy("entity_id")
 			.select(["change_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2701,6 +2741,7 @@ simulationTest(
 			.where("entity_id", "=", "change-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
+			.orderBy("entity_id")
 			.select(["change_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2783,6 +2824,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "change-set-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -2897,6 +2939,7 @@ simulationTest(
 		await db
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema_txn")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		await expectTxnEmpty();
@@ -3003,6 +3046,7 @@ simulationTest(
 		const untrackedState = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
+			.orderBy("entity_id")
 			.select([
 				"entity_id",
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -3106,6 +3150,7 @@ simulationTest(
 		const untrackedState = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -3131,6 +3176,7 @@ simulationTest(
 		const finalState = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
+			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -3203,6 +3249,7 @@ simulationTest(
 		const stateAfterInsert = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3228,6 +3275,7 @@ simulationTest(
 		const stateAfterUpdate = await db
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3321,6 +3369,7 @@ simulationTest(
 				(active as any).version_id ?? (active as any).id
 			)
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3381,6 +3430,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3420,6 +3470,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3446,6 +3497,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3533,6 +3585,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3540,6 +3593,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3570,6 +3624,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3577,6 +3632,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3644,6 +3700,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3728,6 +3785,7 @@ simulationTest(
 			.selectFrom("internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
@@ -3852,6 +3910,7 @@ simulationTest(
 				(active as any).version_id ?? (active as any).id
 			)
 			.where("snapshot_content", "is not", null)
+			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 

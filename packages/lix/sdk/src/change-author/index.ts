@@ -1,4 +1,4 @@
 export {
 	LixChangeAuthorSchema,
 	type LixChangeAuthor as ChangeAuthor,
-} from "./schema.js";
+} from "./schema-definition.js";

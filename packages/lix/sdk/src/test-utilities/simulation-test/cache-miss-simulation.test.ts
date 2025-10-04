@@ -4,7 +4,7 @@ import {
 	normalSimulation,
 	cacheMissSimulation,
 } from "./simulation-test.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
 
 test("cache miss simulation test discovery", () => {});
@@ -183,7 +183,7 @@ simulationTest(
 
 		// Internal query SHOULD trigger clear
 		await (lix.db as any)
-			.selectFrom("internal_resolved_state_all")
+			.selectFrom("internal_state_vtable")
 			.selectAll()
 			.limit(1)
 			.execute();

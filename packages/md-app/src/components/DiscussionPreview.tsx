@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toPlainText } from "@lix-js/sdk/zettel-ast";
+import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { State, LixConversationMessage } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
 

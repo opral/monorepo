@@ -12,15 +12,20 @@ import type { LixEngine } from "../../engine/boot.js";
  * ```
  */
 export function matchesGlob(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "executeSync">;
 	pattern: string;
 	path: string;
 }): boolean {
-	const result = args.engine.sqlite.exec({
+	const rows = args.engine.executeSync({
 		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
-		bind: [args.path, args.pattern],
-		returnValue: "resultRows",
-	});
+		parameters: [args.path, args.pattern],
+	}).rows;
 
-	return result[0]?.[0] === 1;
+	const first = rows?.[0];
+	if (first == null) return false;
+	if (typeof first === "object" && first !== null) {
+		const value = (first as Record<string, unknown>).matches;
+		return value === 1 || value === "1";
+	}
+	return first === 1 || first === "1";
 }

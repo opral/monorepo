@@ -6,7 +6,7 @@
 import { useMemo, useContext, useEffect, useState, use } from "react";
 import type { Lix } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
-import type { SelectQueryBuilder } from "kysely";
+import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
 
 // Map to cache promises by query key
 const queryPromiseCache = new Map<string, Promise<any>>();

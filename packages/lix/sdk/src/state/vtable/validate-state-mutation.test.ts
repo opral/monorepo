@@ -4,7 +4,7 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../../version/create-version.js";
-import type { LixChangeSetElement } from "../../change-set/schema.js";
+import type { LixChangeSetElement } from "../../change-set/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {

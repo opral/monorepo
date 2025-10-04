@@ -7,7 +7,6 @@ import {
 	createLspInMemoryEnvironment,
 	createServerProtocolHandler,
 } from "../server-protocol-handler/index.js";
-import { executeSync } from "../database/execute-sync.js";
 
 // commented out for lix v0.5
 // sync needs overhaul after change set graph introduction
@@ -133,8 +132,6 @@ test.skip("switching synced versions should work", async () => {
 	const lspHandler = await createServerProtocolHandler({ environment });
 
 	vi.stubGlobal("fetch", vi.fn((request) => lspHandler(request)) as any);
-	// @ts-expect-error - eases debugging
-	(globalThis as any).executeSync = executeSync;
 
 	const lix0 = await openLix({
 		keyValues: [{ key: "lix_sync", value: "true" }],

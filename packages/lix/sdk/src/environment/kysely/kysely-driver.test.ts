@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { Kysely } from "kysely";
-import { createDialect } from "./kysely-driver.js";
+import { createEnvironmentDialect } from "../../database/sqlite/environment-dialect.js";
 import { InMemoryEnvironment } from "../in-memory.js";
 
 test("EngineDriver runs basic Kysely queries", async () => {
@@ -11,7 +11,7 @@ test("EngineDriver runs basic Kysely queries", async () => {
 	});
 
 	const db = new Kysely<any>({
-		dialect: createDialect({ environment: backend }),
+		dialect: createEnvironmentDialect({ environment: backend }),
 	});
 
 	await db.executeQuery({ sql: "CREATE TABLE t(a)", parameters: [] } as any);

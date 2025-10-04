@@ -6,8 +6,8 @@ import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
 } from "../plugin/mock-json-plugin.js";
-import type { LixChange } from "../change/schema.js";
-import type { LixKeyValue } from "../key-value/schema.js";
+import type { LixChange } from "../change/schema-definition.js";
+import type { LixKeyValue } from "../key-value/schema-definition.js";
 import { createCheckpoint } from "../state/create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {

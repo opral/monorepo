@@ -3,7 +3,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { updateUntrackedState } from "./update-untracked-state.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 
 test("updateUntrackedState creates direct untracked entity", async () => {
 	const lix = await openLix({
