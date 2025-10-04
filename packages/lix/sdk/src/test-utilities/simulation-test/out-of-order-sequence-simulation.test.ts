@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { simulationTest } from "./simulation-test.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
 
 test("out-of-order sequence simulation test discovery", () => {});

@@ -1,1 +1,1 @@
-export { LixKeyValueSchema, type LixKeyValue as KeyValue } from "./schema.js";
+export { LixKeyValueSchema, type LixKeyValue } from "./schema-definition.js";

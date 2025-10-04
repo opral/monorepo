@@ -22,7 +22,12 @@ test("ebEntity.hasLabel filters entities by label name", async () => {
 		.execute();
 
 	// Get entries from view to get the full entity info
-	const entries = await lix.db.selectFrom("key_value").selectAll().execute();
+	const entries = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["item1", "item2", "item3"])
+		.orderBy("key")
+		.selectAll()
+		.execute();
 
 	// Label some entries
 	await attachLabel({
@@ -94,6 +99,7 @@ test("ebEntity.hasLabel filters entities by label id", async () => {
 	// Get files from view
 	const files = await lix.db
 		.selectFrom("file")
+		.where("id", "in", ["file0", "file1", "file2"])
 		.orderBy("id")
 		.selectAll()
 		.execute();
@@ -134,7 +140,12 @@ test("ebEntity.hasLabel with negation", async () => {
 		.execute();
 
 	// Get conversations from view
-	const threads = await lix.db.selectFrom("conversation").selectAll().execute();
+	const threads = await lix.db
+		.selectFrom("conversation")
+		.where("id", "in", ["c1", "c2", "c3"])
+		.orderBy("id")
+		.selectAll()
+		.execute();
 
 	// Label first thread as draft
 	await attachLabel({
@@ -168,7 +179,12 @@ test("ebEntity.equals matches entities by composite key", async () => {
 		.execute();
 
 	// Get entries from view
-	const entries = await lix.db.selectFrom("key_value").selectAll().execute();
+	const entries = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["config1", "config2", "config3"])
+		.orderBy("key")
+		.selectAll()
+		.execute();
 
 	const targetEntry = entries[1]!; // config2
 
@@ -214,11 +230,12 @@ test("ebEntity.in filters entities by multiple entities", async () => {
 		])
 		.execute();
 
-	// Get all entries
-	const allEntries = await lix.db.selectFrom("key_value").selectAll().execute();
-
-	// Select the first 2 entries to filter by
-	const targetEntries = allEntries.slice(0, 2);
+	const targetEntries = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["item1", "item2"])
+		.orderBy("key")
+		.selectAll()
+		.execute();
 
 	// Query for entries matching the target list
 	const matchingEntries = await lix.db
@@ -321,7 +338,12 @@ test("ebEntity with multiple labels and complex conditions", async () => {
 		.execute();
 
 	// Get entities from view
-	const issues = await lix.db.selectFrom("key_value").selectAll().execute();
+	const issues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["issue1", "issue2", "issue3", "issue4"])
+		.orderBy("key")
+		.selectAll()
+		.execute();
 
 	// Label issues
 	// issue1: urgent + bug
@@ -394,7 +416,12 @@ test("ebEntity works with state table using canonical columns", async () => {
 		.execute();
 
 	// Get key-value entities from view
-	const keyValues = await lix.db.selectFrom("key_value").selectAll().execute();
+	const keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "in", ["user1", "user2", "user3"])
+		.orderBy("key")
+		.selectAll()
+		.execute();
 
 	// Create entities in state table directly
 	await lix.db
@@ -489,6 +516,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 	const firstTwoDocs = await lix.db
 		.selectFrom("state")
 		.where("schema_key", "=", "document")
+		.orderBy("entity_id")
 		.limit(2)
 		.selectAll()
 		.execute();
@@ -567,7 +595,8 @@ test("ebEntity works without table parameter when context is unambiguous", async
 
 	const entries = await lix.db
 		.selectFrom("key_value")
-		.limit(2)
+		.where("key", "in", ["pref1", "pref2"])
+		.orderBy("key")
 		.selectAll()
 		.execute();
 

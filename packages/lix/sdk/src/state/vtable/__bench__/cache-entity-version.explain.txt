@@ -1,0 +1,488 @@
+-- label --
+cache • entity+version
+
+-- original SQL --
+SELECT * FROM internal_state_vtable
+	        WHERE schema_key = 'bench_vtable_schema'
+          AND entity_id = ?
+          AND version_id = ?
+        LIMIT 1
+
+-- expanded SQL --
+<unchanged>
+
+-- rewritten SQL --
+WITH
+-- hoisted_internal_state_vtable_rewrite
+internal_state_vtable_rewritten AS (
+  		WITH RECURSIVE
+  		  params(version_id, entity_id, schema_key) AS (
+    SELECT
+         ?2 AS version_id,
+        ?1 AS entity_id,
+        'bench_vtable_schema' AS schema_key
+  ),
+  		  version_descriptor_base AS (
+  		    SELECT
+  		      json_extract(desc.snapshot_content, '$.id') AS version_id,
+  		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+  		    FROM internal_state_cache_lix_version_descriptor desc
+  		  ),
+  		  version_inheritance(version_id, ancestor_version_id) AS (
+  		    SELECT
+  		      p.version_id,
+  		      vdb.inherits_from_version_id
+  		    FROM params p
+  		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
+  		    WHERE vdb.inherits_from_version_id IS NOT NULL
+
+  		    UNION ALL
+
+  		    SELECT
+  		      vi.version_id,
+  		      vdb.inherits_from_version_id
+  		    FROM version_inheritance vi
+  		    JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
+  		    WHERE vdb.inherits_from_version_id IS NOT NULL
+  		  ),
+  		  version_parent AS (
+  		    SELECT
+  		      p.version_id,
+  		      vdb.inherits_from_version_id AS parent_version_id
+  		    FROM params p
+  		    JOIN version_descriptor_base vdb ON vdb.version_id = p.version_id
+  		    WHERE vdb.inherits_from_version_id IS NOT NULL
+  		  )
+  	,
+    candidates AS (
+      SELECT
+        'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
+        u.entity_id,
+        u.schema_key,
+        u.file_id,
+        u.plugin_key,
+        json(u.snapshot_content) AS snapshot_content,
+        u.schema_version,
+        u.version_id AS src_version_id,
+        u.version_id AS dst_version_id,
+        u.created_at,
+        u.updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        2 AS priority
+      FROM internal_state_all_untracked u
+        JOIN params p ON
+          p.entity_id = u.entity_id
+          AND p.version_id = u.version_id
+          AND p.schema_key = u.schema_key
+      WHERE (
+        (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
+        (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+      )
+
+          AND u.schema_key = 'bench_vtable_schema'
+          AND u.entity_id = ?1
+
+      UNION ALL
+
+      SELECT
+        'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        json(c.snapshot_content) AS snapshot_content,
+        c.schema_version,
+        c.version_id AS src_version_id,
+        c.version_id AS dst_version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        0 AS untracked,
+        c.commit_id,
+        NULL AS metadata,
+        3 AS priority
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) c
+        JOIN params p ON
+          p.entity_id = c.entity_id
+          AND p.version_id = c.version_id
+          AND p.schema_key = c.schema_key
+      WHERE (
+        (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
+        (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+      )
+
+          AND c.schema_key = 'bench_vtable_schema'
+          AND c.entity_id = ?1
+
+      UNION ALL
+
+      SELECT
+        'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        isc.entity_id,
+        isc.schema_key,
+        isc.file_id,
+        isc.plugin_key,
+        json(isc.snapshot_content) AS snapshot_content,
+        isc.schema_version,
+        isc.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        isc.created_at,
+        isc.updated_at,
+        isc.version_id AS inherited_from_version_id,
+        isc.change_id,
+        0 AS untracked,
+        isc.commit_id,
+        NULL AS metadata,
+        4 AS priority
+      FROM version_inheritance vi
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
+        JOIN params p ON
+          p.version_id = vi.version_id
+          AND p.entity_id = isc.entity_id
+          AND p.schema_key = isc.schema_key
+      WHERE isc.inheritance_delete_marker = 0
+        AND isc.snapshot_content IS NOT NULL
+
+        AND isc.schema_key = 'bench_vtable_schema'
+        AND isc.entity_id = ?1
+
+      UNION ALL
+
+      SELECT
+        'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        unt.entity_id,
+        unt.schema_key,
+        unt.file_id,
+        unt.plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version,
+        unt.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        unt.created_at,
+        unt.updated_at,
+        unt.version_id AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        5 AS priority
+      FROM version_inheritance vi
+      JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+        JOIN params p ON
+          p.version_id = vi.version_id
+          AND p.entity_id = unt.entity_id
+          AND p.schema_key = unt.schema_key
+      WHERE unt.inheritance_delete_marker = 0
+        AND unt.snapshot_content IS NOT NULL
+
+        AND unt.schema_key = 'bench_vtable_schema'
+        AND unt.entity_id = ?1
+    ),
+    ranked AS (
+      SELECT
+        c._pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        c.snapshot_content,
+        c.schema_version,
+        c.dst_version_id AS version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        c.untracked,
+        c.commit_id,
+        c.metadata,
+        c.priority,
+        ROW_NUMBER() OVER (
+          PARTITION BY c.file_id, c.schema_key, c.entity_id, c.dst_version_id
+          ORDER BY c.priority,
+                   c.created_at DESC,
+                   c._pk
+        ) AS rn
+      FROM candidates c
+
+    )
+  SELECT
+    w._pk,
+    w.entity_id,
+    w.schema_key,
+    w.file_id,
+    w.plugin_key,
+    w.snapshot_content,
+    w.schema_version,
+    w.version_id,
+    w.created_at,
+    w.updated_at,
+    w.inherited_from_version_id,
+    w.change_id,
+    w.untracked,
+    w.commit_id,
+    COALESCE(w.metadata, json(chc.metadata)) AS metadata,
+    COALESCE(ws_dst.writer_key, ws_src.writer_key) AS writer_key
+  FROM ranked w
+  LEFT JOIN internal_state_writer ws_dst ON
+    ws_dst.file_id = w.file_id AND
+    ws_dst.entity_id = w.entity_id AND
+    ws_dst.schema_key = w.schema_key AND
+    ws_dst.version_id = w.version_id
+  LEFT JOIN internal_state_writer ws_src ON
+    ws_src.file_id = w.file_id AND
+    ws_src.entity_id = w.entity_id AND
+    ws_src.schema_key = w.schema_key AND
+    ws_src.version_id = COALESCE(w.inherited_from_version_id, w.version_id)
+  LEFT JOIN internal_change chc ON chc.id = w.change_id
+
+  WHERE w.rn = 1
+
+)
+SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS internal_state_vtable
+	        WHERE schema_key = 'bench_vtable_schema'
+          AND entity_id = ?1
+          AND version_id = ?2
+        LIMIT 1
+
+-- plan --
+[
+  {
+    "id": 2,
+    "parent": 0,
+    "notused": 0,
+    "detail": "CO-ROUTINE ranked"
+  },
+  {
+    "id": 5,
+    "parent": 2,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-16)"
+  },
+  {
+    "id": 7,
+    "parent": 5,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 8,
+    "parent": 7,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 9,
+    "parent": 8,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 12,
+    "parent": 9,
+    "notused": 0,
+    "detail": "MATERIALIZE params"
+  },
+  {
+    "id": 14,
+    "parent": 12,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 32,
+    "parent": 9,
+    "notused": 16,
+    "detail": "SCAN p"
+  },
+  {
+    "id": 46,
+    "parent": 9,
+    "notused": 61,
+    "detail": "SEARCH u USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+  },
+  {
+    "id": 99,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 110,
+    "parent": 99,
+    "notused": 38,
+    "detail": "SEARCH internal_state_cache_bench_vtable_schema USING INDEX idx_internal_state_cache_bench_vtable_schema_version_id (version_id=? AND entity_id=?)"
+  },
+  {
+    "id": 134,
+    "parent": 99,
+    "notused": 216,
+    "detail": "SCAN p"
+  },
+  {
+    "id": 179,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 182,
+    "parent": 179,
+    "notused": 0,
+    "detail": "MATERIALIZE version_inheritance"
+  },
+  {
+    "id": 186,
+    "parent": 182,
+    "notused": 0,
+    "detail": "SETUP"
+  },
+  {
+    "id": 191,
+    "parent": 186,
+    "notused": 22,
+    "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
+  },
+  {
+    "id": 201,
+    "parent": 186,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON p (version_id=?)"
+  },
+  {
+    "id": 210,
+    "parent": 186,
+    "notused": 53,
+    "detail": "SEARCH p USING AUTOMATIC COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 234,
+    "parent": 182,
+    "notused": 0,
+    "detail": "RECURSIVE STEP"
+  },
+  {
+    "id": 237,
+    "parent": 234,
+    "notused": 22,
+    "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
+  },
+  {
+    "id": 245,
+    "parent": 234,
+    "notused": 216,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 267,
+    "parent": 179,
+    "notused": 38,
+    "detail": "SEARCH internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=?)"
+  },
+  {
+    "id": 285,
+    "parent": 179,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 303,
+    "parent": 179,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 314,
+    "parent": 179,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON p (version_id=?)"
+  },
+  {
+    "id": 342,
+    "parent": 179,
+    "notused": 53,
+    "detail": "SEARCH p USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 388,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 401,
+    "parent": 388,
+    "notused": 61,
+    "detail": "SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+  },
+  {
+    "id": 419,
+    "parent": 388,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 437,
+    "parent": 388,
+    "notused": 53,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 448,
+    "parent": 388,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON p (version_id=?)"
+  },
+  {
+    "id": 476,
+    "parent": 388,
+    "notused": 53,
+    "detail": "SEARCH p USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 524,
+    "parent": 5,
+    "notused": 193,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 559,
+    "parent": 5,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 595,
+    "parent": 2,
+    "notused": 173,
+    "detail": "SCAN (subquery-16)"
+  },
+  {
+    "id": 678,
+    "parent": 0,
+    "notused": 173,
+    "detail": "SCAN w"
+  },
+  {
+    "id": 689,
+    "parent": 0,
+    "notused": 45,
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 702,
+    "parent": 0,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 718,
+    "parent": 0,
+    "notused": 46,
+    "detail": "SEARCH chc USING INDEX sqlite_autoindex_internal_change_1 (id=?) LEFT-JOIN"
+  }
+]

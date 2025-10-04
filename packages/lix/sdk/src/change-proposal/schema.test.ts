@@ -26,9 +26,10 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 
 	const inserted = await lix.db
 		.selectFrom("change_proposal")
-		.selectAll()
+		.where("source_version_id", "=", src.id)
+		.where("target_version_id", "=", tgt.id)
 		.orderBy("lixcol_created_at", "desc")
-		.limit(1)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(inserted.status).toBe("open");
@@ -39,6 +40,7 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 	const insertedAll = await lix.db
 		.selectFrom("change_proposal_all")
 		.where("id", "=", inserted.id)
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 	expect(insertedAll.lixcol_untracked).toBe(0);
@@ -106,6 +108,7 @@ test("deleting a version referenced by a change proposal should fail (FK)", asyn
 	const cp = await lix.db
 		.selectFrom("change_proposal")
 		.where("source_version_id", "=", src.id)
+		.where("target_version_id", "=", main.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

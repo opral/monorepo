@@ -1,8 +1,7 @@
-import { sql, type Kysely } from "kysely";
-import { executeSync } from "../../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { LixChangeRaw } from "../../change/schema.js";
+import { sql } from "kysely";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { LixEngine } from "../../engine/boot.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Change data for untracked state updates with optional ID.
@@ -35,14 +34,12 @@ export type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * @param args.version_id - Version ID to update
  */
 export function updateUntrackedState(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
 	changes: UntrackedChangeData[];
 }): void {
 	const engine = args.engine;
 	const changes = args.changes;
 	if (!changes || changes.length === 0) return;
-
-	const intDb = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Split into deletions and non-deletions
 	const deletions = changes.filter((c) => c.snapshot_content == null);
@@ -71,7 +68,7 @@ export function updateUntrackedState(args: {
 				fil.add(c.file_id);
 			}
 
-			let sel = intDb
+			let sel = internalQueryBuilder
 				.selectFrom("internal_state_all_untracked")
 				.where("version_id", "=", versionId);
 			const entArr = Array.from(ent);
@@ -81,10 +78,10 @@ export function updateUntrackedState(args: {
 			if (schArr.length > 0) sel = sel.where("schema_key", "in", schArr);
 			if (filArr.length > 0) sel = sel.where("file_id", "in", filArr);
 
-			const existing = executeSync({
-				engine: engine,
-				query: sel.select(["entity_id", "schema_key", "file_id"]),
-			});
+			const existing = engine.executeSync(
+				sel.select(["entity_id", "schema_key", "file_id"]).compile()
+			).rows;
+
 			const existingSet = new Set<string>(
 				existing.map((r) => `${r.entity_id}|${r.schema_key}|${r.file_id}`)
 			);
@@ -93,15 +90,15 @@ export function updateUntrackedState(args: {
 			for (const c of list) {
 				const key = `${c.entity_id}|${c.schema_key}|${c.file_id}`;
 				if (existingSet.has(key)) {
-					executeSync({
-						engine: engine,
-						query: intDb
+					engine.executeSync(
+						internalQueryBuilder
 							.deleteFrom("internal_state_all_untracked")
 							.where("entity_id", "=", c.entity_id)
 							.where("schema_key", "=", c.schema_key)
 							.where("file_id", "=", c.file_id)
-							.where("version_id", "=", versionId),
-					});
+							.where("version_id", "=", versionId)
+							.compile()
+					);
 				}
 			}
 
@@ -125,9 +122,8 @@ export function updateUntrackedState(args: {
 				}));
 
 			if (tombstoneValues.length > 0) {
-				executeSync({
-					engine: engine,
-					query: intDb
+				engine.executeSync(
+					internalQueryBuilder
 						.insertInto("internal_state_all_untracked")
 						.values(tombstoneValues)
 						.onConflict((oc) =>
@@ -140,8 +136,9 @@ export function updateUntrackedState(args: {
 									plugin_key: eb.ref("excluded.plugin_key"),
 									schema_version: eb.ref("excluded.schema_version"),
 								}))
-						),
-				});
+						)
+						.compile()
+				);
 			}
 		}
 	}
@@ -150,9 +147,8 @@ export function updateUntrackedState(args: {
 	if (inserts.length > 0) {
 		for (const c of inserts) {
 			const content: any = c.snapshot_content as any;
-			executeSync({
-				engine: engine,
-				query: intDb
+			engine.executeSync(
+				internalQueryBuilder
 					.insertInto("internal_state_all_untracked")
 					.values({
 						entity_id: c.entity_id,
@@ -177,8 +173,9 @@ export function updateUntrackedState(args: {
 								updated_at: c.created_at,
 								inheritance_delete_marker: 0,
 							})
-					),
-			});
+					)
+					.compile()
+			);
 		}
 	}
 }

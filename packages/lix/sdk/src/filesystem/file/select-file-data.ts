@@ -17,7 +17,7 @@ import { updateFileDataCache } from "./cache/update-file-data-cache.js";
  * });
  */
 export function selectFileData(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "getAllPluginsSync">;
+	engine: Pick<LixEngine, "sqlite" | "getAllPluginsSync" | "executeSync">;
 	file: Pick<LixFile, "id" | "path"> &
 		Partial<Omit<LixFile, "id" | "path" | "data">>;
 	versionId: string;

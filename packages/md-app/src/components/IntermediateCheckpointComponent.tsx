@@ -6,7 +6,7 @@ import { selectCheckpoints, selectWorkingChanges, selectWorkingChangeSet } from 
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown, Zap, Loader2 } from "lucide-react";
-import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText, ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { useChat } from "@/components/editor/use-chat";
 import { toast } from "sonner";
 import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";

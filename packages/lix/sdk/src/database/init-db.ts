@@ -1,10 +1,8 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
-import { createDialect, type SqliteWasmDatabase } from "./sqlite-wasm/index.js";
-import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
-import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
-import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
-import { LixSchemaViewMap } from "./schema.js";
-import { buildJsonColumnConfig } from "../lix/json-column-config.js";
+import { Kysely } from "kysely";
+import type { SqliteWasmDatabase } from "./sqlite/create-in-memory-database.js";
+import type { LixDatabaseSchema } from "./schema.js";
+import { createEngineDialect } from "./sqlite/engine-dialect.js";
+import { createDefaultPlugins } from "./kysely/plugins.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -22,16 +20,16 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/deterministic/nano-id.js";
+import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
 import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
 import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
-import { uuidV7Sync } from "../engine/deterministic/uuid-v7.js";
-import { humanIdSync } from "../engine/deterministic/generate-human-id.js";
-import { getTimestampSync } from "../engine/deterministic/timestamp.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
+import { humanIdSync } from "../engine/functions/generate-human-id.js";
+import { getTimestampSync } from "../engine/functions/timestamp.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -57,9 +55,9 @@ import { getTimestampSync } from "../engine/deterministic/timestamp.js";
  * }
  * ```
  */
-const ViewsWithJsonColumns = buildJsonColumnConfig({ includeChangeView: true });
-
 export function initDb(args: {
+	executeSync: LixEngine["executeSync"];
+	runtimeCacheRef: LixEngine["runtimeCacheRef"];
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;
 }): Kysely<LixDatabaseSchema> {
@@ -69,28 +67,25 @@ export function initDb(args: {
 	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
 
 	const db = new Kysely<LixDatabaseSchema>({
-		// log: ["error", "query"],
-		dialect: createDialect({
-			database: args.sqlite,
-		}),
-		plugins: [
-			// needed for things like `jsonArrayFrom()`
-			new ParseJSONResultsPlugin(),
-			JSONColumnPlugin(ViewsWithJsonColumns),
-			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
-		],
+		dialect: createEngineDialect({ database: args.sqlite }),
+		plugins: [...createDefaultPlugins()],
 	});
 
-	const engine: LixEngine = {
+	const engine = {
 		sqlite: args.sqlite,
-		db: db as any,
 		hooks: args.hooks,
-	} as any;
+		executeSync: args.executeSync,
+		runtimeCacheRef: args.runtimeCacheRef,
+	} as const satisfies Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 
 	initFunctions({
 		sqlite: args.sqlite,
-		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+		executeSync: args.executeSync,
 		hooks: args.hooks,
+		runtimeCacheRef: args.runtimeCacheRef,
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
@@ -122,14 +117,19 @@ export function initDb(args: {
 
 function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	executeSync: LixEngine["executeSync"];
+	runtimeCacheRef: LixEngine["runtimeCacheRef"];
 	hooks: LixHooks;
 }) {
 	const engine = {
 		sqlite: args.sqlite,
-		db: args.db as any,
 		hooks: args.hooks,
-	} as const;
+		executeSync: args.executeSync,
+		runtimeCacheRef: args.runtimeCacheRef,
+	} as const satisfies Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",

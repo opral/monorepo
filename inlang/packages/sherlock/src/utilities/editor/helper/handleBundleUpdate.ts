@@ -1,7 +1,5 @@
 import type { InlangDatabaseSchema } from "@inlang/sdk"
-import { getSelectedBundleByBundleIdOrAlias } from "../../helper.js"
 import { msg } from "../../messages/msg.js"
-import { state } from "../../state.js"
 import type { UpdateBundleMessage } from "../editorView.js"
 import type { Kysely } from "kysely"
 
@@ -25,24 +23,87 @@ export async function handleUpdateBundle({
 			throw new Error("No entity or entityId provided")
 		}
 
-		if (change.newData) {
-			db.insertInto(change.entity)
-				.values({
-					...change.newData,
-					// @ts-expect-error - we need to remove the nesting
-					messages: undefined,
-					variants: undefined,
-				})
-				.onConflict((oc) =>
-					oc.column("id").doUpdateSet({
-						...change.newData,
-						// @ts-expect-error - we need to remove the nesting
-						messages: undefined,
-						variants: undefined,
-					})
-				)
-				.execute()
-		}
+		await db.transaction().execute(async (trx) => {
+			const newData = change.newData as Record<string, any> | undefined
+
+			switch (change.entity) {
+				case "bundle": {
+					if (newData) {
+						await trx
+							.updateTable("bundle")
+							.set({
+								id: newData.id,
+								declarations: newData.declarations ?? [],
+							})
+							.where("id", "=", change.entityId)
+							.execute()
+					} else {
+						await trx.deleteFrom("bundle").where("id", "=", change.entityId).execute()
+					}
+					break
+				}
+				case "message": {
+					if (newData) {
+						const updateResult = await trx
+							.updateTable("message")
+							.set({
+								id: newData.id,
+								bundleId: newData.bundleId,
+								locale: newData.locale,
+								selectors: newData.selectors ?? [],
+							})
+							.where("id", "=", change.entityId)
+							.execute()
+
+						if (Number(updateResult.numUpdatedRows ?? 0) === 0) {
+							await trx
+								.insertInto("message")
+								.values({
+									id: newData.id,
+									bundleId: newData.bundleId,
+									locale: newData.locale,
+									selectors: newData.selectors ?? [],
+								})
+								.execute()
+						}
+					} else {
+						await trx.deleteFrom("message").where("id", "=", change.entityId).execute()
+					}
+					break
+				}
+				case "variant": {
+					if (newData) {
+						const updateResult = await trx
+							.updateTable("variant")
+							.set({
+								id: newData.id,
+								messageId: newData.messageId,
+								matches: newData.matches ?? [],
+								pattern: newData.pattern ?? [],
+							})
+							.where("id", "=", change.entityId)
+							.execute()
+
+						if (Number(updateResult.numUpdatedRows ?? 0) === 0) {
+							await trx
+								.insertInto("variant")
+								.values({
+									id: newData.id ?? change.entityId,
+									messageId: newData.messageId,
+									matches: newData.matches ?? [],
+									pattern: newData.pattern ?? [],
+								})
+								.execute()
+						}
+					} else {
+						await trx.deleteFrom("variant").where("id", "=", change.entityId).execute()
+					}
+					break
+				}
+				default:
+					console.warn(`Unhandled change entity: ${change.entity}`)
+			}
+		})
 	} catch (e) {
 		console.error(`Couldn't update ${change.entity}: ${e}`)
 		msg(`Couldn't update ${change.entity}. ${String(e)}`, "error")

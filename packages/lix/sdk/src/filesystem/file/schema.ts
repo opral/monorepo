@@ -1,9 +1,5 @@
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { materializeFileDataAtCommit } from "./materialize-file-data-at-commit.js";
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../../schema-definition/definition.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { selectFileData } from "./select-file-data.js";
@@ -12,6 +8,10 @@ import {
 	composeFilePathFromDescriptor,
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
+import {
+	LixFileDescriptorSchema,
+	type LixFileDescriptor,
+} from "./schema-definition.js";
 
 /**
  * Applies all SQL UDFs required for file operations.
@@ -479,85 +479,6 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	// internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.
 	// History queries can be optimized later with dedicated cache tables if necessary.
 }
-
-export const LixFileDescriptorSchema = {
-	"x-lix-key": "lix_file_descriptor",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["directory_id", "name", "extension"]],
-	type: "object",
-	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		directory_id: {
-			type: "string",
-			nullable: true,
-			description:
-				"Identifier of the directory containing the file. Null indicates the virtual root directory.",
-		},
-		name: {
-			type: "string",
-			pattern: "^[^/\\\\]+$",
-			description: "File name without directory segments.",
-		},
-		extension: {
-			type: "string",
-			nullable: true,
-			pattern: "^[^./\\\\]+$",
-			description:
-				"File extension without the leading dot. Null when no extension is present.",
-		},
-		metadata: {
-			type: "object",
-			nullable: true,
-		},
-		hidden: { type: "boolean", "x-lix-generated": true },
-	},
-	required: ["id", "directory_id", "name", "extension"],
-	additionalProperties: false,
-} as const;
-LixFileDescriptorSchema satisfies LixSchemaDefinition;
-
-/**
- * The file descriptor type representing the stored metadata for a file.
- *
- * This is the underlying entity stored in the database with schema_key 'lix_file_descriptor'.
- * It contains only the file's identity and metadata - NOT the actual file content.
- *
- * ```
- * ┌─────────────────────────────────────────┐
- * │         LixFileDescriptor               │
- * │    (schema_key: 'lix_file_descriptor')  │
- * ├─────────────────────────────────────────┤
- * │ • id: string (file identifier)          │
- * │ • directory_id: string | null           │
- * │ • name: string                          │
- * │ • extension: string | null              │
- * │ • metadata: object | null               │
- * │ • hidden: boolean                       │
- * └─────────────────────────────────────────┘
- *               ↓
- *     Stored in state/state_all table
- *               ↓
- * ┌─────────────────────────────────────────┐
- * │ File content entities are stored        │
- * │ separately with file_id = descriptor.id │
- * │                                         │
- * │ • JSON properties (mock_json_property)  │
- * │ • Markdown blocks (markdown_block)      │
- * │ • CSV rows (csv_row)                    │
- * │ • etc...                                │
- * └─────────────────────────────────────────┘
- * ```
- *
- * Key points:
- * - File descriptors are just metadata - they don't contain file data
- * - The actual file content is stored as separate entities linked by file_id
- * - File views aggregate the descriptor + content entities into a complete file
- * - Changes to file content don't update the descriptor (and vice versa)
- */
-export type LixFileDescriptor = FromLixSchemaDefinition<
-	typeof LixFileDescriptorSchema
->;
 
 /**
  * Complete file type combining the descriptor with materialized data.

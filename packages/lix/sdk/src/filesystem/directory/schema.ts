@@ -1,10 +1,6 @@
-import type {
-	FromLixSchemaDefinition,
-	LixSchemaDefinition,
-} from "../../schema-definition/definition.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { normalizeDirectoryPath, normalizePathSegment } from "../path.js";
-import { nanoIdSync } from "../../engine/deterministic/nano-id.js";
+import { nanoIdSync } from "../../engine/functions/nano-id.js";
 import {
 	getActiveVersionId,
 	readDirectoryByPath,
@@ -13,48 +9,8 @@ import {
 	ensureDirectoryPathExists,
 	computeDirectoryPath,
 } from "./ensure-directories.js";
-import { executeSync } from "../../database/execute-sync.js";
-
-export const LixDirectoryDescriptorSchema = {
-	"x-lix-key": "lix_directory_descriptor",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["parent_id", "name"]],
-	type: "object",
-	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		parent_id: {
-			type: "string",
-			nullable: true,
-			description:
-				"Identifier of the parent directory. Null indicates the virtual root directory.",
-		},
-		name: {
-			type: "string",
-			pattern: "^[^/\\\\]+$",
-			description: "Directory segment without slashes.",
-		},
-		hidden: { type: "boolean", "x-lix-generated": true },
-	},
-	required: ["id", "parent_id", "name"],
-	additionalProperties: false,
-} as const;
-LixDirectoryDescriptorSchema satisfies LixSchemaDefinition;
-
-/**
- * Directory descriptor stored in the database.
- *
- * @example
- * const dir: LixDirectoryDescriptor = {
- *   id: "dir_123",
- *   parent_id: null,
- *   name: "docs",
- *   hidden: false
- * };
- */
-export type LixDirectoryDescriptor = FromLixSchemaDefinition<
-	typeof LixDirectoryDescriptorSchema
->;
+import { LixDirectoryDescriptorSchema } from "./schema-definition.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * Installs directory descriptors into the database via generated views/triggers.
@@ -63,7 +19,7 @@ export type LixDirectoryDescriptor = FromLixSchemaDefinition<
  * applyDirectoryDatabaseSchema({ engine });
  */
 export function applyDirectoryDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: LixEngine;
 }): void {
 	const { engine } = args;
 	const schemaKey = LixDirectoryDescriptorSchema["x-lix-key"];
@@ -122,33 +78,35 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		const hidden = hiddenArg ? Number(hiddenArg) : 0;
 
-		executeSync({
-			engine,
-			query: engine.db
+		engine.executeSync(
+			internalQueryBuilder
 				.deleteFrom("state_all")
 				.where("entity_id", "=", id)
 				.where("schema_key", "=", schemaKey)
-				.where("version_id", "=", versionId),
-		});
+				.where("version_id", "=", versionId)
+				.compile()
+		);
 
-		executeSync({
-			engine,
-			query: engine.db.insertInto("state_all").values({
-				entity_id: id,
-				schema_key: schemaKey,
-				file_id: fileId,
-				plugin_key: pluginKey,
-				snapshot_content: {
-					id,
-					parent_id: parentId,
-					name,
-					hidden: Boolean(hidden),
-				},
-				schema_version: schemaVersion,
-				version_id: versionId,
-				untracked: false,
-			}),
-		});
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("state_all")
+				.values({
+					entity_id: id,
+					schema_key: schemaKey,
+					file_id: fileId,
+					plugin_key: pluginKey,
+					snapshot_content: {
+						id,
+						parent_id: parentId,
+						name,
+						hidden: Boolean(hidden),
+					},
+					schema_version: schemaVersion,
+					version_id: versionId,
+					untracked: false,
+				})
+				.compile()
+		);
 
 		return id;
 	};
@@ -363,7 +321,7 @@ export function applyDirectoryDatabaseSchema(args: {
 }
 
 function computeUpsertInputs(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks">;
 	versionId: string;
 	parentIdArg: unknown;
 	nameArg: unknown;
@@ -409,6 +367,13 @@ function computeUpsertInputs(args: {
 			);
 		}
 		if (rawParentId && !parentId) {
+			console.error("upsertDirectory parent mismatch", {
+				rawParentId,
+				computedParent: parentId,
+				normalizedPath,
+				versionId: args.versionId,
+				name,
+			});
 			throw new Error("Provided parent_id does not match root directory");
 		}
 		computedPath = normalizeDirectoryPath(
@@ -463,7 +428,7 @@ function computeUpsertInputs(args: {
 }
 
 function assertNoDirectoryCycle(args: {
-	engine: Pick<LixEngine, "sqlite" | "db">;
+	engine: Pick<LixEngine, "executeSync">;
 	versionId: string;
 	directoryId: string;
 	newParentId: string | null;
@@ -484,15 +449,15 @@ function assertNoDirectoryCycle(args: {
 		if (safety++ > 1024) {
 			throw new Error("Directory hierarchy appears to be cyclic");
 		}
-		const rows = executeSync({
-			engine: args.engine,
-			query: args.engine.db
+		const rows = args.engine.executeSync(
+			internalQueryBuilder
 				.selectFrom("state_all")
 				.where("schema_key", "=", "lix_directory_descriptor")
 				.where("version_id", "=", args.versionId)
 				.where("entity_id", "=", current)
-				.select(["snapshot_content"]),
-		});
+				.select(["snapshot_content"])
+				.compile()
+		).rows;
 		if (rows.length === 0) {
 			throw new Error(`Parent directory does not exist for id ${current}`);
 		}

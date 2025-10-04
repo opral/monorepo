@@ -17,7 +17,7 @@ import { useKeyValue } from "../hooks/useKeyValue";
 import { selectActiveAccount, selectConversations } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Composer, Thread } from "./Thread";
-import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import { toPlainText, ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export interface ChangeSetHandle {

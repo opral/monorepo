@@ -1,9 +1,9 @@
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
+import {
+	LixChangeAuthorSchema,
+	type LixChangeAuthor,
+} from "./schema-definition.js";
 
 export function applyChangeAuthorDatabaseSchema(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -18,38 +18,3 @@ export function applyChangeAuthorDatabaseSchema(args: {
 		hardcodedFileId: "lix",
 	});
 }
-
-export const LixChangeAuthorSchema = {
-	"x-lix-key": "lix_change_author",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_id", "account_id"],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["change_id"],
-			references: {
-				schemaKey: "lix_change",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["account_id"],
-			references: {
-				schemaKey: "lix_account",
-				properties: ["id"],
-			},
-		},
-	],
-	type: "object",
-	properties: {
-		change_id: { type: "string" },
-		account_id: { type: "string" },
-	},
-	required: ["change_id", "account_id"],
-	additionalProperties: false,
-} as const;
-LixChangeAuthorSchema satisfies LixSchemaDefinition;
-
-// Pure business logic type (inferred from schema)
-export type LixChangeAuthor = FromLixSchemaDefinition<
-	typeof LixChangeAuthorSchema
->;

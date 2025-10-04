@@ -8,7 +8,11 @@ import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import RowDiff from "./RowDiff.tsx";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
-import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import {
+	fromPlainText,
+	toPlainText,
+	ZettelDoc,
+} from "@lix-js/sdk/dependency/zettel-ast";
 
 export default function Component(props: {
 	changeSetid: string;

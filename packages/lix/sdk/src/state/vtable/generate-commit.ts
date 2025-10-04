@@ -1,9 +1,9 @@
-import type { LixChangeRaw } from "../../change/schema.js";
+import type { LixChangeRaw } from "../../change/schema-definition.js";
 import {
 	LixVersionTipSchema,
 	type LixVersion,
 	type LixVersionTip,
-} from "../../version/schema.js";
+} from "../../version/schema-definition.js";
 
 export type MaterializedState = LixChangeRaw & {
 	lixcol_version_id: string;

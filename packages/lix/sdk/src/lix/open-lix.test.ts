@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { openLix, usedFileExtensions } from "./open-lix.js";
-import type { LixAccount } from "../account/schema.js";
+import type { LixAccount } from "../account/schema-definition.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -40,6 +40,7 @@ test("providing key values should be possible", async () => {
 		.selectFrom("key_value")
 		.selectAll()
 		.where("key", "=", "mock_key")
+		.orderBy("key")
 		.executeTakeFirstOrThrow();
 
 	expect(value).toMatchObject({ key: "mock_key", value: "value" });
@@ -54,6 +55,7 @@ test("providing key values should be possible", async () => {
 		.selectFrom("key_value")
 		.selectAll()
 		.where("key", "=", "mock_key")
+		.orderBy("key")
 
 		.executeTakeFirstOrThrow();
 	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
@@ -72,6 +74,7 @@ test("provided key values in openLix should default to the active version if lix
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
+		.orderBy("version_id")
 		.executeTakeFirst();
 
 	expect(activeVersion).toBeDefined();
@@ -81,6 +84,7 @@ test("provided key values in openLix should default to the active version if lix
 	const kv1 = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "test_key_1")
+		.orderBy("key")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -91,6 +95,7 @@ test("provided key values in openLix should default to the active version if lix
 	const kv2 = await lix.db
 		.selectFrom("key_value_all")
 		.where("key", "=", "test_key_2")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -101,6 +106,7 @@ test("provided key values in openLix should default to the active version if lix
 	const mainVersion = await lix.db
 		.selectFrom("version")
 		.where("id", "=", activeVersion!.version_id)
+		.orderBy("id")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -123,6 +129,7 @@ test("providing an account should be possible", async () => {
 
 	const activeAccounts = await lix.db
 		.selectFrom("active_account")
+		.orderBy("account_id")
 		.selectAll()
 		.execute();
 
@@ -134,6 +141,7 @@ test("providing an account should be possible", async () => {
 		.selectFrom("active_account as aa")
 		.innerJoin("account_all as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
+		.orderBy("aa.account_id")
 		.select(["a.id", "a.name"])
 		.executeTakeFirst();
 
@@ -196,12 +204,17 @@ test("it should open a lix in memory from a blob", async () => {
 
 	const lix2 = await openLix({ blob: await lix1.toBlob() });
 
-	const files = await lix2.db.selectFrom("file").selectAll().execute();
+	const files = await lix2.db
+		.selectFrom("file")
+		.where("id", "=", "1")
+		.selectAll()
+		.execute();
 
 	const kv = await lix2.db
 		.selectFrom("key_value")
 		.select(["key", "value"])
 		.where("key", "=", "test_key")
+		.orderBy("key")
 		.executeTakeFirst();
 
 	expect(kv).toEqual({
@@ -226,6 +239,7 @@ test("should default to InMemoryStorage when no storage is provided", async () =
 		.selectFrom("key_value")
 		.select("value")
 		.where("key", "=", "lix_id")
+		.orderBy("key")
 		.executeTakeFirstOrThrow();
 
 	expect(lixId.value).toBeDefined();
@@ -241,7 +255,11 @@ test("should default to InMemoryStorage when no storage is provided", async () =
 		})
 		.execute();
 
-	const files = await lix.db.selectFrom("file").selectAll().execute();
+	const files = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "test-file")
+		.selectAll()
+		.execute();
 	expect(files).toHaveLength(1);
 	expect(files[0]).toMatchObject({
 		id: "test-file",
@@ -287,9 +305,17 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		})
 		.execute();
 
-	const lix1State = await lix1.db.selectFrom("state").selectAll().execute();
+	const lix1State = await lix1.db
+		.selectFrom("state")
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
 
-	const lix2State = await lix2.db.selectFrom("state").selectAll().execute();
+	const lix2State = await lix2.db
+		.selectFrom("state")
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
 
 	expect(lix1State).toEqual(lix2State);
 });
@@ -323,9 +349,17 @@ test("deterministic mode can be turned on and off", async () => {
 		})
 	);
 
-	const lix1State = await lix1.db.selectFrom("state").selectAll().execute();
+	const lix1State = await lix1.db
+		.selectFrom("state")
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
 
-	const lix2State = await lix2.db.selectFrom("state").selectAll().execute();
+	const lix2State = await lix2.db
+		.selectFrom("state")
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
 
 	expect(lix1State).toEqual(lix2State);
 
@@ -359,6 +393,7 @@ test("deterministic mode can be turned on and off", async () => {
 			lix.db
 				.selectFrom("key_value")
 				.where("key", "=", "test_key_2")
+				.orderBy("key")
 				.selectAll()
 				.execute()
 		)
@@ -397,6 +432,7 @@ test("deterministic mode can be turned on and off", async () => {
 			lix.db
 				.selectFrom("key_value")
 				.where("key", "=", "test_key_3")
+				.orderBy("key")
 				.selectAll()
 				.executeTakeFirst()
 		)
@@ -422,6 +458,7 @@ test("providing deterministic mode with kv false should still insert it", async 
 		.selectFrom("key_value_all")
 		.where("key", "=", "lix_deterministic_mode")
 		.where("lixcol_inherited_from_version_id", "is", null)
+		.orderBy("key")
 		.selectAll()
 		.execute();
 
@@ -466,6 +503,7 @@ test("provided key values respect lixcol_untracked setting", async () => {
 		.selectFrom("key_value_all")
 		.where("key", "=", "tracked_key")
 		.where("lixcol_version_id", "=", "global")
+		.orderBy("key")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -481,6 +519,7 @@ test("provided key values respect lixcol_untracked setting", async () => {
 		.selectFrom("key_value_all")
 		.where("key", "=", "untracked_key")
 		.where("lixcol_version_id", "=", "global")
+		.orderBy("key")
 		.selectAll()
 		.executeTakeFirst();
 

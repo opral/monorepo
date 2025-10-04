@@ -2,7 +2,6 @@
 "@inlang/sdk": major
 "@inlang/paraglide-js": minor
 "@inlang/cli": minor
-"vs-code-extension": minor
 ---
 
 Upgraded the [inlang SDK](https://github.com/opral/inlang-sdk) to [Lix](https://lix.dev/) v0.5 🎉 

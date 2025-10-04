@@ -69,7 +69,7 @@ export const editMessageCommand = {
 						.execute()
 				})
 
-			CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+			CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "command:editMessage" })
 
 			return msg("Message updated.")
 		} catch (e) {

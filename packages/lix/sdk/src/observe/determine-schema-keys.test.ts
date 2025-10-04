@@ -1,6 +1,10 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { determineSchemaKeys } from "./determine-schema-keys.js";
+import {
+	determineSchemaKeys,
+	extractLiteralFilters,
+} from "./determine-schema-keys.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 /**
  * Tests for the determineSchemaKeys function using real queries from md-app.
@@ -218,6 +222,34 @@ test("should handle complex working changes query", async () => {
 	expect(schemaKeys).toContain("lix_key_value");
 
 	await lix.close();
+});
+
+test("extractLiteralFilters captures schema_key, entity_id, and version_id filters", () => {
+	const compiled = internalQueryBuilder
+		.selectFrom("internal_state_vtable")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "lix_deterministic_mode")
+		.where("version_id", "=", "global")
+		.compile();
+
+	const filters = extractLiteralFilters(compiled);
+
+	expect(filters.schemaKeys).toContain("lix_key_value");
+	expect(filters.entityIds).toContain("lix_deterministic_mode");
+	expect(filters.versionIds).toContain("global");
+});
+
+test("extractLiteralFilters handles IN lists", () => {
+	const compiled = internalQueryBuilder
+		.selectFrom("internal_state_vtable")
+		.where("entity_id", "in", ["lix_deterministic_mode", "other_entity"])
+		.compile();
+
+	const filters = extractLiteralFilters(compiled);
+
+	expect(filters.entityIds).toEqual(
+		expect.arrayContaining(["lix_deterministic_mode", "other_entity"])
+	);
 });
 
 test("should handle conversation queries with json aggregation", async () => {

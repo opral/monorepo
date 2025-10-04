@@ -1,9 +1,9 @@
-import { sql, type Kysely } from "kysely";
-import { executeSync } from "../../database/execute-sync.js";
+import { sql } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "../index.js";
-import { uuidV7Sync } from "../../engine/deterministic/uuid-v7.js";
+import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { setHasOpenTransaction } from "../vtable/vtable.js";
 
 type NewTransactionStateRow = Omit<
 	NewStateAllRow,
@@ -55,7 +55,7 @@ export type TransactionStateRow = Omit<
  * @example
  * // Delete an entity (null snapshot_content)
  * insertTransactionState({
- *   engine: { sqlite, db, hooks },
+ *   engine,
  *   data: {
  *     entity_id: "user-123",
  *     schema_key: "user",
@@ -69,7 +69,7 @@ export type TransactionStateRow = Omit<
  * });
  */
 export function insertTransactionState(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 	data: NewTransactionStateRow[];
 	timestamp: string;
 	createChangeAuthors?: boolean;
@@ -105,9 +105,8 @@ export function insertTransactionState(args: {
 		untracked: data.untracked === true ? 1 : 0,
 	}));
 
-	executeSync({
-		engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+	args.engine.executeSync(
+		internalQueryBuilder
 			.insertInto("internal_transaction_state")
 			.values(transactionRows)
 			.onConflict((oc) =>
@@ -123,8 +122,11 @@ export function insertTransactionState(args: {
 						writer_key: eb.ref("excluded.writer_key"),
 						metadata: eb.ref("excluded.metadata"),
 					}))
-			),
-	});
+			)
+			.compile()
+	);
+
+	setHasOpenTransaction(args.engine, true);
 
 	// Return results for all data
 	return dataWithChangeIds.map((data) => ({

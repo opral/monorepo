@@ -1,5 +1,9 @@
 import type { LixEngine } from "../../engine/boot.js";
-import type { SqliteWasmDatabase } from "../../database/sqlite-wasm/index.js";
+import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "./create-schema-cache-table.js";
 
 export type InternalStateCache = InternalStateCacheTable;
 
@@ -43,18 +47,18 @@ const stateCacheV2TablesMap = new WeakMap<object, Set<string>>();
 
 // Export a getter function to access the cache for a specific Lix instance
 export function getStateCacheV2Tables(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "runtimeCacheRef">;
 }): Set<string> {
-	let cache = stateCacheV2TablesMap.get(args.engine.sqlite as any);
+	let cache = stateCacheV2TablesMap.get(args.engine.runtimeCacheRef);
 	if (!cache) {
 		cache = new Set<string>();
-		stateCacheV2TablesMap.set(args.engine.sqlite as any, cache);
+		stateCacheV2TablesMap.set(args.engine.runtimeCacheRef, cache);
 	}
 	return cache;
 }
 
 export function applyStateCacheV2Schema(args: {
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
 }): void {
 	const { sqlite } = args.engine;
 
@@ -71,6 +75,16 @@ export function applyStateCacheV2Schema(args: {
 		for (const row of existingTables) {
 			tableCache.add(row[0] as string);
 		}
+	}
+
+	// Ensure descriptor cache table exists for inheritance rewrites
+	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	if (!tableCache.has(descriptorTable)) {
+		createSchemaCacheTable({
+			engine: args.engine,
+			tableName: descriptorTable,
+		});
+		tableCache.add(descriptorTable);
 	}
 
 	// Note: INSERT/UPDATE/DELETE operations are now handled by updateStateCacheV2()
@@ -254,6 +268,7 @@ export function applyStateCacheV2Schema(args: {
 				argc: number,
 				argv: any
 			) => {
+				// throw new Error("Read should happen via internal_state_vtable");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 

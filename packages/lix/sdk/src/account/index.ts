@@ -3,5 +3,6 @@ export { switchAccount } from "./switch-account.js";
 export {
 	LixAccountSchema,
 	type LixAccount as Account,
+	LixActiveAccountSchema,
 	type LixActiveAccount as ActiveAccount,
-} from "./schema.js";
+} from "./schema-definition.js";

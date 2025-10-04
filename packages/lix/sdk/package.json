@@ -28,24 +28,24 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
-		"./zettel-ast": "./dist/zettel-ast/index.js"
+		"./dependency/kysely": "./dist/dependency/kysely/index.js",
+		"./dependency/kysely/helpers/sqlite": "./dist/dependency/kysely/helpers/sqlite.js",
+		"./dependency/zettel-ast": "./dist/dependency/zettel-ast/index.js"
 	},
 	"_filesComment": "Shipping src for better debugging experience",
 	"files": [
 		"dist",
 		"src"
 	],
-  "scripts": {
-    "prebuild": "npm run env-variables",
-    "build": "tsc --build",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "pretest": "playwright install --with-deps",
-    "test": "vitest run --typecheck",
-    "test:watch": "vitest --typecheck",
-    "env-variables": "node ./src/services/env-variables/create-index-file.js",
-    "bench": "vitest bench",
-    "lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
-		"dev": "tsc --watch",
+	"scripts": {
+		"build": "node ./scripts/build.js",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"pretest": "playwright install --with-deps",
+		"test": "node ./scripts/build.js --setup-only && vitest run --typecheck",
+		"test:watch": "node ./scripts/build.js --setup-only && vitest --typecheck",
+		"bench": "vitest bench",
+		"lint": "oxlint --config .oxlintrc.json \"src/**/*.{js,ts}\" --fix",
+		"dev": "node ./scripts/build.js --watch",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
@@ -57,10 +57,11 @@
 	"dependencies": {
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"@opral/zettel-ast": "workspace:*",
+		"@sqlite.org/sqlite-wasm": "^3.50.4-build1",
 		"ajv": "^8.17.1",
+		"chevrotain": "^11.0.3",
 		"human-id": "^4.1.1",
-		"kysely": "^0.27.4",
-		"@sqlite.org/sqlite-wasm": "^3.48.0-build2",
+		"kysely": "^0.28.7",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {

@@ -1,13 +1,17 @@
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { LixEngine } from "../engine/boot.js";
-import { nanoIdSync } from "../engine/deterministic/nano-id.js";
+import {
+	LixChangeSetSchema,
+	LixChangeSetElementSchema,
+	LixChangeSetLabelSchema,
+} from "./schema-definition.js";
+import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 
 export function applyChangeSetDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>;
 }): void {
 	const { engine } = args;
 	// Create change_set view using the generalized entity view builder
@@ -18,7 +22,7 @@ export function applyChangeSetDatabaseSchema(args: {
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoIdSync({ engine: engine }),
+			id: () => uuidV7Sync({ engine: engine }),
 		},
 	});
 
@@ -40,105 +44,3 @@ export function applyChangeSetDatabaseSchema(args: {
 		hardcodedFileId: "lix",
 	});
 }
-
-export const LixChangeSetSchema = {
-	"x-lix-key": "lix_change_set",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	type: "object",
-	properties: {
-		id: { type: "string", "x-lix-generated": true },
-	},
-	required: ["id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetSchema satisfies LixSchemaDefinition;
-
-// Pure business logic type (inferred from schema)
-export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
-
-export const LixChangeSetElementSchema = {
-	"x-lix-key": "lix_change_set_element",
-	"x-lix-version": "1.0",
-	"x-lix-foreign-keys": [
-		{
-			properties: ["change_set_id"],
-			references: {
-				schemaKey: "lix_change_set",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["change_id"],
-			references: {
-				schemaKey: "lix_change",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["schema_key"],
-			references: {
-				schemaKey: "lix_stored_schema",
-				properties: ["key"],
-			},
-		},
-	],
-	"x-lix-primary-key": ["change_set_id", "change_id"],
-	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
-	type: "object",
-	properties: {
-		change_set_id: { type: "string" },
-		change_id: { type: "string" },
-		entity_id: { type: "string" },
-		schema_key: { type: "string" },
-		file_id: { type: "string" },
-	},
-	required: [
-		"change_set_id",
-		"change_id",
-		"entity_id",
-		"schema_key",
-		"file_id",
-	],
-	additionalProperties: false,
-} as const;
-LixChangeSetElementSchema satisfies LixSchemaDefinition;
-
-export type LixChangeSetElement = FromLixSchemaDefinition<
-	typeof LixChangeSetElementSchema
->;
-
-export const LixChangeSetLabelSchema = {
-	"x-lix-key": "lix_change_set_label",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_set_id", "label_id"],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["change_set_id"],
-			references: {
-				schemaKey: "lix_change_set",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["label_id"],
-			references: {
-				schemaKey: "lix_label",
-				properties: ["id"],
-			},
-		},
-	],
-	type: "object",
-	properties: {
-		change_set_id: { type: "string" },
-		label_id: { type: "string" },
-	},
-	required: ["change_set_id", "label_id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetLabelSchema satisfies LixSchemaDefinition;
-
-// Pure business logic type (inferred from schema)
-export type LixChangeSetLabel = FromLixSchemaDefinition<
-	typeof LixChangeSetLabelSchema
->;

@@ -171,7 +171,7 @@ describe("editMessageCommand (integration)", () => {
 		})
 
 		expect(patternString).toBe("Hello universe")
-		expect(fireSpy).toHaveBeenCalledTimes(1)
+		expect(fireSpy).toHaveBeenCalledWith({ origin: "command:editMessage" })
 		expect(msgSpy).toHaveBeenCalledWith("Message updated.")
 	})
 

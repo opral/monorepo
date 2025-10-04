@@ -20,7 +20,7 @@ export const previewLocaleCommand = {
 		// TODO: Update key for locale
 		await updateSetting("previewLanguageTag", selectedLocale)
 
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "command:previewLocale" })
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.fire(selectedLocale)

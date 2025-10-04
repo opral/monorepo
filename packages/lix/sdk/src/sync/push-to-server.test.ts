@@ -5,8 +5,8 @@ import { pushToServer } from "./push-to-server.js";
 import { newLixFile } from "../lix/new-lix.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
-import type { LixKeyValue } from "../key-value/schema.js";
-import type { LixAccount } from "../account/schema.js";
+import type { LixKeyValue } from "../key-value/schema-definition.js";
+import type { LixAccount } from "../account/schema-definition.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();

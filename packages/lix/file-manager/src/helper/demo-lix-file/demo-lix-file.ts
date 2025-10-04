@@ -9,7 +9,7 @@ import {
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
 import { getConversations, getWorkingChangeSet } from "@/state-active-file.ts";
-import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { createConversationMessage } from "@lix-js/sdk";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {

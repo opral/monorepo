@@ -1,7 +1,7 @@
 import {
 	createInMemoryDatabase,
 	contentFromDatabase,
-} from "../database/sqlite-wasm/index.js";
+} from "../database/sqlite/index.js";
 import { initDb } from "../database/init-db.js";
 import {
 	LixActiveVersionSchema,
@@ -9,22 +9,26 @@ import {
 	LixVersionTipSchema,
 	type LixVersionDescriptor,
 	type LixVersionTip,
-} from "../version/schema.js";
+} from "../version/schema-definition.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
 	type LixChangeSet,
 	type LixChangeSetElement,
-} from "../change-set/schema.js";
-import { LixLabelSchema, type LixLabel } from "../label/schema.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
-import { LixSchemaViewMap } from "../database/schema.js";
-import type { LixChange } from "../change/schema.js";
-import type { LixStoredSchema } from "../stored-schema/schema.js";
+} from "../change-set/schema-definition.js";
+import { LixLabelSchema, type LixLabel } from "../label/schema-definition.js";
+import {
+	LixKeyValueSchema,
+	type LixKeyValue,
+} from "../key-value/schema-definition.js";
+import type { LixChange } from "../change/schema-definition.js";
+import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
+import { populateStateCache } from "../state/cache/populate-state-cache.js";
+import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import {
@@ -32,7 +36,12 @@ import {
 	LixActiveAccountSchema,
 	type LixAccount,
 	type LixActiveAccount,
-} from "../account/schema.js";
+} from "../account/schema-definition.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
+import { createExecuteSync } from "../engine/execute-sync.js";
+import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
+import type { LixEngine } from "../engine/boot.js";
+import { setDeterministicBoot } from "../engine/deterministic-mode/bootstrap-pending.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -122,11 +131,34 @@ export async function newLixFile(args?: {
 	sqlite.exec({ sql: "PRAGMA page_size = 8192;" });
 
 	const hooks = createHooks();
+	const runtimeCacheRef = {};
 
-	// applying the schema etc.
-	const db = initDb({ sqlite, hooks });
+	let executeSyncImpl: LixEngine["executeSync"] | null = null;
 
-	// Check if deterministic mode is enabled
+	const preprocessorEngine = {
+		sqlite,
+		hooks,
+		runtimeCacheRef,
+		executeSync: ((args) => {
+			if (!executeSyncImpl) {
+				throw new Error("executeSync not initialised");
+			}
+			return executeSyncImpl(args);
+		}) as LixEngine["executeSync"],
+	} as const;
+
+	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
+
+	const executeSync = await createExecuteSync({
+		engine: {
+			sqlite,
+			hooks,
+			runtimeCacheRef,
+		},
+		preprocess: preprocessQuery,
+	});
+	executeSyncImpl = executeSync;
+
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
@@ -144,6 +176,11 @@ export async function newLixFile(args?: {
 		// Check randomLixId flag (defaults to false)
 		useRandomLixId = config.randomLixId === true;
 	}
+
+	setDeterministicBoot(isDeterministicBootstrap);
+
+	// applying the schema etc.
+	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
 
 	// Counter for deterministic IDs
 	let deterministicIdCounter = 0;
@@ -206,7 +243,7 @@ export async function newLixFile(args?: {
 		// Insert the change record
 		sqlite.exec({
 			sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
-				   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			bind: [
 				change.id,
 				change.entity_id,
@@ -229,7 +266,7 @@ export async function newLixFile(args?: {
 
 	// Set active version using updateUntrackedState for proper inheritance handling
 	updateUntrackedState({
-		engine: { sqlite, db },
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: "active",
@@ -253,7 +290,7 @@ export async function newLixFile(args?: {
 
 	// Create the anonymous account as untracked
 	updateUntrackedState({
-		engine: { sqlite, db } as any,
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: activeAccountId,
@@ -273,7 +310,7 @@ export async function newLixFile(args?: {
 
 	// Set it as the active account
 	updateUntrackedState({
-		engine: { sqlite, db } as any,
+		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
 				entity_id: `active_${activeAccountId}`,
@@ -298,7 +335,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				engine: { sqlite, db } as any,
+				engine: { executeSync, runtimeCacheRef },
 				changes: [
 					{
 						entity_id: kv.key,
@@ -318,6 +355,13 @@ export async function newLixFile(args?: {
 		}
 	}
 
+	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
+	markStateCacheAsFresh({
+		engine: { executeSync, runtimeCacheRef, hooks },
+		timestamp: created_at,
+	});
+	populateStateCache({ engine: { sqlite, runtimeCacheRef, executeSync } });
+
 	try {
 		const blob = new Blob([
 			contentFromDatabase(sqlite) as Uint8Array<ArrayBuffer>,
@@ -333,6 +377,7 @@ export async function newLixFile(args?: {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
+		setDeterministicBoot(false);
 		await db.destroy();
 	}
 }

@@ -1,17 +1,47 @@
-import type { Kysely, Generated } from "kysely";
+import type { Generated } from "kysely";
 import { sql } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixEngine } from "../../engine/boot.js";
-import { executeSync } from "../../database/execute-sync.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
-import { isStaleStateCache } from "../cache/is-stale-state-cache.js";
-import { markStateCacheAsFresh } from "../cache/mark-state-cache-as-stale.js";
-import { populateStateCache } from "../cache/populate-state-cache.js";
-import { parseStatePk, serializeStatePk } from "./primary-key.js";
-import { getTimestampSync } from "../../engine/deterministic/timestamp.js";
+import {
+	encodeStatePkPart,
+	parseStatePk,
+	serializeStatePk,
+} from "./primary-key.js";
+import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { buildResolvedStateQuery } from "./resolved-state.js";
+
+const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
+
+export function setHasOpenTransaction(
+	engine: Pick<LixEngine, "runtimeCacheRef">,
+	value: boolean
+): void {
+	(engine.runtimeCacheRef as any)[LIX_OPEN_TRANSACTION] = value;
+}
+
+export function hasOpenTransaction(
+	engine: Pick<LixEngine, "runtimeCacheRef" | "sqlite">
+): boolean {
+	const cache = engine.runtimeCacheRef as Record<symbol, boolean | undefined>;
+	const current = cache[LIX_OPEN_TRANSACTION];
+	if (current === true) {
+		return true;
+	}
+	if (current === false) {
+		return false;
+	}
+	// fall through on initial
+	const rows = engine.sqlite.exec({
+		sql: "SELECT 1 FROM internal_transaction_state LIMIT 1",
+		returnValue: "resultRows",
+	});
+	setHasOpenTransaction(engine, Array.isArray(rows) && rows.length > 0);
+	return (engine.runtimeCacheRef as any)[LIX_OPEN_TRANSACTION] === true;
+}
 
 // Type definition for the internal state virtual table
 export type InternalStateVTable = {
@@ -73,13 +103,27 @@ const STATE_VTAB_COLUMN_NAMES = [
 ];
 
 export function applyStateVTable(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+	>
 ): void {
-	const { sqlite, hooks } = engine;
-	const db = engine.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const { sqlite } = engine;
 
 	// Statement/transaction-scoped writer value set via withWriterKey helper.
 	let currentWriterKey: string | null = null;
+
+	// Register a custom SQLite function for encoding primary key parts
+	engine.sqlite.createFunction({
+		name: "lix_encode_pk_part",
+		deterministic: true,
+		arity: 1,
+		xFunc: (_ctxPtr: number, ...args: any[]) => {
+			const part = args[0];
+			if (part === null || part === undefined) return "";
+			return encodeStatePkPart(String(part));
+		},
+	});
 
 	// Register a setter UDF that stores the writer for the current statement.
 	sqlite.createFunction({
@@ -177,6 +221,7 @@ export function applyStateVTable(
 			},
 
 			xBegin: () => {
+				setHasOpenTransaction(engine, true);
 				// TODO comment in after all internal v-table logic uses underlying state view
 				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
 				// const existingChangesInTransaction = executeSync({
@@ -200,6 +245,7 @@ export function applyStateVTable(
 			xCommit: () => {
 				const rc = commit({ engine: engine });
 				currentWriterKey = null; // clear after statement/txn
+				setHasOpenTransaction(engine, false);
 				return rc;
 			},
 
@@ -209,6 +255,7 @@ export function applyStateVTable(
 					returnValue: "resultRows",
 				});
 				currentWriterKey = null;
+				setHasOpenTransaction(engine, false);
 			},
 
 			xBestIndex: (pVTab: any, pIdxInfo: any) => {
@@ -309,6 +356,7 @@ export function applyStateVTable(
 				argc: number,
 				argv: any
 			) => {
+				// throw new Error("xFilter read. Query preprocessor failed at rewrite.");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
@@ -347,84 +395,30 @@ export function applyStateVTable(
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
 						// Query directly from resolved state (now includes tombstones)
-						let query = db
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
+						let query = buildResolvedStateQuery().selectAll();
 
 						// Apply filters
 						for (const [column, value] of Object.entries(filters)) {
 							query = query.where(column as any, "=", value);
 						}
 
-						const stateResults = executeSync({
-							engine,
-							query,
-						});
+						const stateResults = engine.executeSync(query.compile()).rows;
 
-						cursorState.results = stateResults || [];
+						cursorState.results = stateResults ?? [];
 						cursorState.rowIndex = 0;
 						return capi.SQLITE_OK;
 					}
 
-					// Normal path: check cache staleness
-					const cacheIsStale = isStaleStateCache({
-						engine,
-					});
+					let query = buildResolvedStateQuery().selectAll();
 
-					// Try cache first - but only if it's not stale
-					let cacheResults: any[] | null = null;
-					if (!cacheIsStale) {
-						// Select directly from resolved state using Kysely (includes tombstones)
-						let query = db
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
-
-						// Apply filters
-						for (const [column, value] of Object.entries(filters)) {
-							query = query.where(column as any, "=", value);
-						}
-
-						cacheResults = executeSync({
-							engine: engine,
-							query,
-						});
+					for (const [column, value] of Object.entries(filters)) {
+						query = query.where(column as any, "=", value);
 					}
 
-					cursorState.results = cacheResults || [];
+					const results = engine.executeSync(query.compile()).rows;
+
+					cursorState.results = results ?? [];
 					cursorState.rowIndex = 0;
-
-					if (cacheIsStale) {
-						// Populate cache directly with materialized state
-						populateStateCache({ engine: { sqlite, db: db as any } as any });
-
-						// Do not log here: xFilter can be invoked during SELECT-only paths
-						// and should avoid writing to the transaction state/logs.
-
-						// Mark cache as fresh after population
-						isUpdatingCacheState = true;
-						try {
-							markStateCacheAsFresh({
-								engine: { sqlite, db: db as any, hooks } as any,
-							});
-						} finally {
-							isUpdatingCacheState = false;
-						}
-
-						let query = db
-							.selectFrom("internal_resolved_state_all")
-							.selectAll();
-
-						// Apply filters
-						for (const [column, value] of Object.entries(filters)) {
-							query = query.where(column as any, "=", value);
-						}
-
-						const newResults = executeSync({
-							engine: engine,
-							query,
-						});
-						cursorState.results = newResults || [];
-					}
 
 					return capi.SQLITE_OK;
 				} finally {
@@ -486,38 +480,39 @@ export function applyStateVTable(
 					if (columnName === "writer_key") {
 						// Compute writer on demand from internal_state_writer with inheritance fallback
 						try {
-							const key = executeSync({
-								engine,
-								query: (
-									engine.db as unknown as Kysely<LixInternalDatabaseSchema>
-								)
+							const keyRows = engine.executeSync(
+								internalQueryBuilder
 									.selectFrom("internal_state_writer")
 									.select(["writer_key"])
 									.where("file_id", "=", String(row.file_id))
 									.where("version_id", "=", String(row.version_id))
 									.where("entity_id", "=", String(row.entity_id))
 									.where("schema_key", "=", String(row.schema_key))
-									.limit(1),
-							});
+									.limit(1)
+									.compile()
+							).rows;
 							let w: string | null =
-								(key && key[0] && (key[0] as any).writer_key) || null;
+								(keyRows && keyRows[0] && (keyRows[0] as any).writer_key) ||
+								null;
 							if (!w) {
 								const parent = row.inherited_from_version_id;
 								if (parent) {
-									const p = executeSync({
-										engine,
-										query: (
-											engine.db as unknown as Kysely<LixInternalDatabaseSchema>
-										)
+									const parentRows = engine.executeSync(
+										internalQueryBuilder
 											.selectFrom("internal_state_writer")
 											.select(["writer_key"])
 											.where("file_id", "=", String(row.file_id))
 											.where("version_id", "=", String(parent))
 											.where("entity_id", "=", String(row.entity_id))
 											.where("schema_key", "=", String(row.schema_key))
-											.limit(1),
-									});
-									w = (p && p[0] && (p[0] as any).writer_key) || null;
+											.limit(1)
+											.compile()
+									).rows;
+									w =
+										(parentRows &&
+											parentRows[0] &&
+											(parentRows[0] as any).writer_key) ||
+										null;
 								}
 							}
 							if (w === null || w === undefined) {
@@ -560,9 +555,7 @@ export function applyStateVTable(
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
 				try {
-					const _timestamp = getTimestampSync({
-						engine: { sqlite, db: db as any, hooks },
-					});
+					const _timestamp = getTimestampSync({ engine });
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 
@@ -705,25 +698,29 @@ export function applyStateVTable(
 
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit
-							const existingVersionsWithSameCommit = sqlite.exec({
-								sql: `
-									SELECT json_extract(snapshot_content, '$.id') as version_id
-									FROM internal_resolved_state_all 
-									WHERE schema_key = 'lix_version_tip' 
-									  AND version_id = 'global'
-									  AND commit_id = ?
-									  AND json_extract(snapshot_content, '$.id') != ?
-								`,
-								bind: [commitId, newVersionId],
-								returnValue: "resultRows",
-							});
+							const existingVersionsWithSameCommit = engine.executeSync(
+								buildResolvedStateQuery()
+									.select(
+										sql`json_extract(snapshot_content, '$.id')`.as("version_id")
+									)
+									.where("schema_key", "=", "lix_version_tip")
+									.where("version_id", "=", "global")
+									.where("commit_id", "=", commitId)
+									.where(
+										sql`json_extract(snapshot_content, '$.id')`,
+										"!=",
+										newVersionId
+									)
+									.compile()
+							).rows;
 
 							// If there are existing versions with the same commit, copy their cache entries
 							if (
 								existingVersionsWithSameCommit &&
 								existingVersionsWithSameCommit.length > 0
 							) {
-								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
+								const sourceVersionId =
+									existingVersionsWithSameCommit[0]!.version_id; // Take first existing version
 
 								// Get all unique schema keys from the source version
 								const schemaKeys = sqlite.exec({
@@ -805,9 +802,8 @@ export function applyStateVTable(
 	}): void {
 		if (args.writer && args.writer.length > 0) {
 			// UPSERT writer
-			executeSync({
-				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			engine.executeSync(
+				internalQueryBuilder
 					.insertInto("internal_state_writer")
 					.values({
 						file_id: args.fileId,
@@ -820,65 +816,38 @@ export function applyStateVTable(
 						oc
 							.columns(["file_id", "version_id", "entity_id", "schema_key"])
 							.doUpdateSet({ writer_key: args.writer as any })
-					),
-			});
+					)
+					.compile()
+			);
 		} else {
 			// DELETE writer row (no NULL storage)
-			executeSync({
-				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			engine.executeSync(
+				internalQueryBuilder
 					.deleteFrom("internal_state_writer")
 					.where("file_id", "=", args.fileId)
 					.where("version_id", "=", args.versionId)
 					.where("entity_id", "=", args.entityId)
-					.where("schema_key", "=", args.schemaKey),
-			});
+					.where("schema_key", "=", args.schemaKey)
+					.compile()
+			);
 		}
 	}
-
 	function resolveSchemaKey(args: {
 		fileId: string;
 		entityId: string;
 		versionId: string;
 	}): string {
-		const res = executeSync({
-			engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
-				.selectFrom("internal_resolved_state_all")
+		const [entity] = engine.executeSync(
+			buildResolvedStateQuery()
 				.select(["schema_key"])
 				.where("file_id", "=", args.fileId)
 				.where("entity_id", "=", args.entityId)
 				.where("version_id", "=", args.versionId)
-				.limit(1),
-		});
-		let sk = (res && res[0] && (res[0] as any).schema_key) || "";
-		if (!sk) {
-			const res2 = executeSync({
-				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.selectFrom("state_all")
-					.select(["schema_key"])
-					.where("file_id", "=", args.fileId)
-					.where("entity_id", "=", args.entityId)
-					.where("version_id", "=", args.versionId)
-					.limit(1),
-			});
-			sk = (res2 && res2[0] && (res2[0] as any).schema_key) || "";
-		}
-		if (!sk) {
-			const res3 = executeSync({
-				engine,
-				query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.selectFrom("internal_state_cache")
-					.select(["schema_key"])
-					.where("file_id", "=", args.fileId)
-					.where("entity_id", "=", args.entityId)
-					.where("version_id", "=", args.versionId)
-					.limit(1),
-			});
-			sk = (res3 && res3[0] && (res3[0] as any).schema_key) || "";
-		}
-		return sk;
+				.limit(1)
+				.compile()
+		).rows;
+
+		return entity?.schema_key ?? "";
 	}
 
 	// Register the vtable under a clearer internal name
@@ -896,15 +865,13 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">,
 	primaryKey: string,
 	timestamp: string
 ): void {
-	// Query the row to delete using the resolved state view with Kysely
-	const rowToDelete = executeSync({
-		engine: engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.selectFrom("internal_resolved_state_all")
+	// Look up the resolved row via the dynamic builder to avoid the legacy view
+	const [rowToDelete] = engine.executeSync(
+		buildResolvedStateQuery()
 			.select([
 				"entity_id",
 				"schema_key",
@@ -916,8 +883,9 @@ export function handleStateDelete(
 				"untracked",
 				"inherited_from_version_id",
 			])
-			.where("_pk", "=", primaryKey),
-	})[0];
+			.where("_pk", "=", primaryKey)
+			.compile()
+	).rows;
 
 	if (!rowToDelete) {
 		throw new Error(`Row not found for primary key: ${primaryKey}`);
@@ -982,15 +950,15 @@ export function handleStateDelete(
 		}
 
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
-		executeSync({
-			engine: engine,
-			query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		engine.executeSync(
+			internalQueryBuilder
 				.deleteFrom("internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
 				.where("file_id", "=", String(file_id))
-				.where("version_id", "=", String(version_id)),
-		});
+				.where("version_id", "=", String(version_id))
+				.compile()
+		);
 		return;
 	}
 
@@ -1026,14 +994,12 @@ export function handleStateDelete(
 // Helper functions for the virtual table
 
 function getStoredSchema(
-	engine: Pick<LixEngine, "sqlite" | "db" | "hooks">,
+	engine: Pick<LixEngine, "executeSync" | "hooks">,
 	schemaKey: any
 ): string | null {
-	// Query directly from internal_resolved_state_all to avoid vtable recursion
-	const result = executeSync({
-		engine: engine,
-		query: (engine.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.selectFrom("internal_resolved_state_all")
+	// Query the resolved-state builder directly to avoid vtable recursion
+	const result = engine.executeSync(
+		buildResolvedStateQuery()
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")
 			.where(
@@ -1042,8 +1008,9 @@ function getStoredSchema(
 				String(schemaKey)
 			)
 			.where("snapshot_content", "is not", null)
-			.limit(1),
-	});
+			.limit(1)
+			.compile()
+	).rows;
 
 	return result && result.length > 0 ? result[0]!.value : null;
 }

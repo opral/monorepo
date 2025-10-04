@@ -6,7 +6,7 @@ import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import { Checkbox } from "./ui/checkbox.tsx";
 import { lixAtom } from "@/state.ts";
 import { createConversation } from "@lix-js/sdk";
-import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
 import { FormField, FormControl, FormItem, Form } from "./ui/form.tsx";
 import { FormProvider, useForm } from "react-hook-form";

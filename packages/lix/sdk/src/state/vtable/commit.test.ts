@@ -1,13 +1,13 @@
 import { test, expect, describe } from "vitest";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { LixCommitEdge } from "../../commit/schema.js";
+import type { LixCommitEdge } from "../../commit/schema-definition.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { commit } from "./commit.js";
 import { openLix } from "../../lix/open-lix.js";
-import { nanoId } from "../../engine/deterministic/nano-id.js";
-import { getTimestamp } from "../../engine/deterministic/timestamp.js";
-import { uuidV7 } from "../../engine/deterministic/uuid-v7.js";
+import { nanoId } from "../../engine/functions/nano-id.js";
+import { getTimestamp } from "../../engine/functions/timestamp.js";
+import { uuidV7 } from "../../engine/functions/uuid-v7.js";
 import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
@@ -1494,7 +1494,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db
-		.selectFrom("internal_resolved_state_all")
+		.selectFrom("internal_state_vtable")
 		.select(["version_id", "entity_id", "schema_key"])
 		.where("entity_id", "=", "mock-global-entity")
 		.orderBy("version_id", "asc")

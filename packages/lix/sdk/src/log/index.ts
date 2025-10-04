@@ -1,2 +1,2 @@
-export { LixLogSchema, type LixLog as Log } from "./schema.js";
+export { LixLogSchema, type LixLog } from "./schema-definition.js";
 export { createLog } from "./create-log.js";

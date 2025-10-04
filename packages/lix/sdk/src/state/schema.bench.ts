@@ -33,37 +33,6 @@ bench("select entities from single version", async () => {
 		.execute();
 });
 
-// This test ensures that xBestIndex does not have a regression
-bench("select all entities from single version - bypass vtable", async () => {
-	const lix = await openLix({});
-
-	await lix.db
-		.insertInto("state_all")
-		.values(
-			Array.from({ length: NUM_ROWS }, (_, i) => ({
-				entity_id: `entity_${i}`,
-				version_id: "global",
-				snapshot_content: {
-					id: `entity_${i}`,
-					value: `test_data_${i}`,
-					metadata: { index: i, type: "benchmark" },
-				},
-				schema_key: "benchmark_entity",
-				file_id: `mock_file`,
-				plugin_key: "benchmark_plugin",
-				schema_version: "1.0",
-			}))
-		)
-		.execute();
-
-	// Benchmark: Select directly from internal_resolved_state_all (bypasses vtable)
-	await lix.db
-		.selectFrom("internal_resolved_state_all" as any)
-		.where("version_id", "=", "global")
-		.selectAll()
-		.execute();
-});
-
 bench.todo("select single entity by entity_id");
 
 bench.todo("select entities by schema_key filter");

@@ -1,9 +1,6 @@
 import type { SimulationTestDef } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
-import type {
-	LixEnvironment,
-	LixEnvironmentResult,
-} from "../../environment/api.js";
+import type { LixEnvironment } from "../../environment/api.js";
 import { InMemoryEnvironment } from "../../environment/in-memory.js";
 
 export const engineBoundarySimulation: SimulationTestDef = {
@@ -32,7 +29,6 @@ export const engineBoundarySimulation: SimulationTestDef = {
 // Inline, isomorphic environment wrapper that hides the engine from openLix()
 class EngineBoundaryEnvironment implements LixEnvironment {
 	private inner: InMemoryEnvironment;
-	private eventHandler: ((ev: any) => void) | undefined;
 
 	constructor() {
 		this.inner = new InMemoryEnvironment();
@@ -41,7 +37,6 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 	async open(
 		initOpts: Parameters<LixEnvironment["open"]>[0]
 	): Promise<{ engine?: import("../../engine/boot.js").LixEngine }> {
-		this.eventHandler = initOpts.emit;
 		await this.inner.open(initOpts);
 		return {};
 	}
@@ -50,10 +45,6 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 		createOpts: Parameters<LixEnvironment["create"]>[0]
 	): Promise<void> {
 		await this.inner.create(createOpts);
-	}
-
-	async exec(sql: string, params?: unknown[]): Promise<LixEnvironmentResult> {
-		return this.inner.exec(sql, params);
 	}
 
 	async export(): Promise<ArrayBuffer> {

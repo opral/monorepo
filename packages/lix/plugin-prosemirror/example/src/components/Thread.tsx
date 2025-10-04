@@ -6,7 +6,11 @@ import {
 	type LixConversation,
 	type LixConversationMessage,
 } from "@lix-js/sdk";
-import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import {
+	fromPlainText,
+	toPlainText,
+	ZettelDoc,
+} from "@lix-js/sdk/dependency/zettel-ast";
 import { toRelativeTime } from "../utilities/timeUtils";
 import { getInitials } from "../utilities/nameUtils";
 
