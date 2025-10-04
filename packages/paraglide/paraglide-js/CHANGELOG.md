@@ -1,5 +1,29 @@
 # @inlang/paraglide-js
 
+## 2.4.0
+
+### Minor Changes
+
+- 4111ee6: Add an isomorphic `shouldRedirect()` helper shared by the middleware and client routers, improve redirect typing, and document the new API in the URL strategy guide.
+
+### Patch Changes
+
+- 4a48c07: fix: fix eslint incorrectly linting generated files
+
+  closes https://github.com/opral/inlang-paraglide-js/issues/558
+
+  eslint ignores single-line 'eslint-disable' comments at the start of a file.
+  Using a block comment without a closing one instead will prompt eslint to ignore it.
+
+  ```diff
+  -	output[filename] = `// eslint-disable\n${content}`;
+  +	output[filename] = `/* eslint-disable */\n${content}`;
+  ```
+
+- 4c8921f: Fixes `overwriteSetLocale` to keep the full `(locale, options?)` signature when overriding `setLocale`, preventing TypeScript from rejecting calls that pass `{ reload: false }`. Adds a regression test ensuring custom handlers receive the options object.
+- Updated dependencies [7791be7]
+  - @inlang/sdk@3.0.0
+
 ## 2.3.2
 
 ### Patch Changes

@@ -1,6 +1,7 @@
-import { state } from "../state.js"
+import { safeState } from "../state.js"
 import * as vscode from "vscode"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
+import { logger } from "../logger.js"
 
 export interface LintResult {
 	bundleId: string
@@ -15,7 +16,12 @@ export interface LintResult {
  * Lint rule: Checks if any message in a bundle is missing a translation (empty variants).
  */
 export const missingMessage = async (bundleId: string): Promise<LintResult[]> => {
-	const locales = (await state().project.settings.get()).locales
+	const activeProject = safeState()?.project
+	if (!activeProject) {
+		logger.warn("missingMessage rule executed without an active project")
+		return []
+	}
+	const locales = (await activeProject.settings.get()).locales
 
 	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
@@ -42,7 +48,12 @@ export const missingMessage = async (bundleId: string): Promise<LintResult[]> =>
 export const bundleWithoutMessageWithBaseLocale = async (
 	bundleId: string
 ): Promise<LintResult[]> => {
-	const baseLocale = (await state().project.settings.get()).baseLocale
+	const activeProject = safeState()?.project
+	if (!activeProject) {
+		logger.warn("bundleWithoutMessageWithBaseLocale rule executed without an active project")
+		return []
+	}
+	const baseLocale = (await activeProject.settings.get()).baseLocale
 
 	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 

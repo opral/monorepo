@@ -35,14 +35,17 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../state", () => ({
-	state: vi.fn().mockImplementation(() => ({
-		project: {
-			settings: {
-				get: vi.fn().mockResolvedValueOnce({ baseLocale: "en", locales: ["en", "de"] }),
-			},
+const mockStateValue = {
+	project: {
+		settings: {
+			get: vi.fn().mockResolvedValue({ baseLocale: "en", locales: ["en", "de"] }),
 		},
-	})),
+	},
+}
+
+vi.mock("../state", () => ({
+	state: vi.fn().mockImplementation(() => mockStateValue),
+	safeState: vi.fn().mockImplementation(() => mockStateValue),
 }))
 
 vi.mock("./index", () => ({

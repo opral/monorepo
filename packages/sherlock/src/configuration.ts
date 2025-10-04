@@ -16,10 +16,14 @@ import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotatio
 import { openEditorViewCommand } from "./commands/openEditorView.js"
 import { reloadProjectCommand } from "./commands/reloadProject.js"
 
+export type EditMessageEvent = {
+	origin?: string
+}
+
 export const CONFIGURATION = {
 	EVENTS: {
 		ON_DID_CREATE_MESSAGE: new EventEmitter<void>(),
-		ON_DID_EDIT_MESSAGE: new EventEmitter<void>(),
+		ON_DID_EDIT_MESSAGE: new EventEmitter<EditMessageEvent | undefined>(),
 		ON_DID_EXTRACT_MESSAGE: new EventEmitter<void>(),
 		ON_DID_PROJECT_TREE_VIEW_CHANGE: new EventEmitter<ProjectViewNode | undefined>(),
 		ON_DID_ERROR_TREE_VIEW_CHANGE: new EventEmitter<ErrorNode | undefined>(),
