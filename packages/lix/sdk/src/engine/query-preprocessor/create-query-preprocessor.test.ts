@@ -192,6 +192,40 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
+	test("expands stored schema entity view without sqlite view", async () => {
+		const lix = await openLix({});
+		const customSchema = {
+			"x-lix-key": "my_cool_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["id"],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id"],
+			additionalProperties: false,
+		} as const;
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: customSchema })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const result = preprocess({
+			sql: "SELECT name FROM my_cool_schema WHERE id = ?",
+			parameters: ["demo"],
+		});
+
+		expect(result.expandedSql).toBeDefined();
+		expect(result.sql).toContain("schema_key = 'my_cool_schema'");
+		expect(result.sql).not.toMatch(/FROM\s+my_cool_schema\b/i);
+		expect(result.sql).toContain("internal_state_vtable_rewritten");
+
+		await lix.close();
+	});
+
 	test("does not rewrite change history query without vtable references", async () => {
 		const lix = await openLix({
 			keyValues: [

@@ -16,6 +16,7 @@ import {
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
+import { getEntityViewSelects } from "./entity-views/selects.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -93,6 +94,7 @@ export async function createQueryPreprocessor(
 
 type ViewCacheEntry = {
 	schemaVersion: number;
+	entitySignature: string;
 	map: Map<string, string>;
 };
 
@@ -102,14 +104,27 @@ function getViewSelectMap(
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
 ): Map<string, string> {
 	const currentVersion = getSchemaVersion(engine.sqlite);
+	const { map: entityViews, signature: entitySignature } = getEntityViewSelects(
+		{
+			engine,
+		}
+	);
 	const cached = viewCache.get(engine.runtimeCacheRef);
-	if (cached && cached.schemaVersion === currentVersion) {
+	if (
+		cached &&
+		cached.schemaVersion === currentVersion &&
+		cached.entitySignature === entitySignature
+	) {
 		return cached.map;
 	}
 
 	const map = loadViewSelectMap(engine.sqlite);
+	for (const [name, sql] of entityViews) {
+		map.set(name, sql);
+	}
 	viewCache.set(engine.runtimeCacheRef, {
 		schemaVersion: currentVersion,
+		entitySignature,
 		map,
 	});
 	return map;
