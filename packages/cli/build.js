@@ -15,8 +15,8 @@ const ctx = await context({
   // https://github.com/evanw/esbuild/issues/1921#issuecomment-1403107887
   banner: {
     js: `
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
+import { createRequire as __createRequire } from 'node:module';
+const require = __createRequire(import.meta.url);
 
 // ----- polyfilling for module build command -----
 
