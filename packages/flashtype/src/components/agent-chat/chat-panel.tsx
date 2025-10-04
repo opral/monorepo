@@ -17,7 +17,7 @@ import { ToolRunList } from "./tool-run-list";
 import { ProposalDecisionBar } from "./proposal-decision-bar";
 import { PromptStack } from "./prompt-stack";
 import type { ToolRun } from "./types";
-import type { ToolEvent } from "@lix-js/agent";
+import type { ToolEvent } from "@lix-js/agent-sdk";
 
 /**
  * The main terminal-like chat surface for the Lix Agent (mock).

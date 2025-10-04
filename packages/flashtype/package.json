@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/google": "^2.0.12",
-		"@lix-js/agent": "workspace:*",
+		"@lix-js/agent-sdk": "workspace:*",
 		"@lix-js/inspector": "workspace:*",
 		"@lix-js/plugin-md": "workspace:*",
 		"@lix-js/react-utils": "workspace:*",

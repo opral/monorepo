@@ -7,7 +7,7 @@ import {
 	createLixAgent,
 	type LixAgent,
 	type ChatMessage as AgentMessage,
-} from "@lix-js/agent";
+} from "@lix-js/agent-sdk";
 
 export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const { lix, system } = args;
@@ -113,7 +113,9 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const send = useCallback(
 		async (
 			text: string,
-			opts?: { onToolEvent?: (e: import("@lix-js/agent").ToolEvent) => void },
+			opts?: {
+				onToolEvent?: (e: import("@lix-js/agent-sdk").ToolEvent) => void;
+			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
 			if (!text.trim()) return;

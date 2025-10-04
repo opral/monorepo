@@ -24,6 +24,6 @@ export const deleteVariant = async ({
 		msg(`Failed to delete variant. ${String(error)}`, "error")
 	}
 
-	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "editor-helper" })
 	CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
 }

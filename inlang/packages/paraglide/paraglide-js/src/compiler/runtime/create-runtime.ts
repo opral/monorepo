@@ -136,6 +136,8 @@ ${injectCode("./extract-locale-from-url.js")}
 
 ${injectCode("./localize-url.js")}
 
+${injectCode("./should-redirect.js")}
+
 ${injectCode("./localize-href.js")}
 
 ${injectCode("./track-message-call.js")}

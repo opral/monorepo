@@ -7,7 +7,7 @@ import * as Sherlock from "@inlang/recommend-sherlock"
 import * as fs from "node:fs"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 import path from "node:path"
-import { getLocalAccount, saveLocalAccount } from "../../services/account/index.js"
+import { logger } from "../logger.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -27,9 +27,13 @@ export function createProjectViewNodes(args: {
 	const projectsInWorkspace = state().projectsInWorkspace
 
 	if (!projectsInWorkspace) {
-		console.error("state().projectsInWorkspace is undefined")
+		logger.warn("Project view requested before projects were discovered")
 		return []
 	}
+
+	logger.debug("Creating project view nodes", {
+		projectCount: projectsInWorkspace.length,
+	})
 
 	projectViewNodes = projectsInWorkspace.map((project) => {
 		// Ensure projectPath is a string
@@ -99,6 +103,9 @@ export async function handleTreeSelection(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> {
 	const selectedProject = path.normalize(args.selectedNode.path)
+	logger.info("Project selected", {
+		selectedProject,
+	})
 
 	projectViewNodes = projectViewNodes.map((node) => ({
 		...node,
@@ -106,16 +113,19 @@ export async function handleTreeSelection(args: {
 	}))
 
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
-	console.log(newSelectedProject)
+	logger.debug("Project selection updated", {
+		selectedProject: newSelectedProject,
+	})
 
 	try {
-		const localAccount = getLocalAccount({ fs })
-
 		const inlangProject = await loadProjectFromDirectory({
 			path: newSelectedProject,
 			fs,
-			account: localAccount,
 			appId: CONFIGURATION.STRINGS.APP_ID,
+		})
+		logger.info("Project loaded", {
+			projectPath: newSelectedProject,
+			workspace: args.workspaceFolder.uri.fsPath,
 		})
 
 		setState({
@@ -123,18 +133,12 @@ export async function handleTreeSelection(args: {
 			project: inlangProject,
 			selectedProjectPath: newSelectedProject,
 		})
-
-		if (!localAccount) {
-			const activeAccount = await state()
-				.project.lix.db.selectFrom("active_account")
-				.selectAll()
-				.executeTakeFirstOrThrow()
-
-			saveLocalAccount({ fs, account: activeAccount })
-		}
+		logger.debug("Project stored in state", {
+			selectedProjectPath: newSelectedProject,
+		})
 
 		// Update decorations
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire(undefined)
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire({ origin: "project-view" })
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire(undefined)
 		// Refresh the entire tree to reflect selection changes
@@ -145,6 +149,9 @@ export async function handleTreeSelection(args: {
 			fs: args.fs,
 			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 		})
+		logger.debug("Recommendation check completed", {
+			isInWorkspaceRecommendation,
+		})
 
 		capture({
 			event: "IDE-EXTENSION loaded project",
@@ -154,6 +161,10 @@ export async function handleTreeSelection(args: {
 			},
 		})
 	} catch (error) {
+		logger.error("Failed to load selected project", {
+			selectedProject,
+			error,
+		})
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
@@ -191,6 +202,7 @@ export const projectView = async (args: {
 	})
 
 	treeDataProvider.getChildren()
+	logger.debug("Project tree data provider initialized")
 
 	args.context.subscriptions.push(
 		vscode.window.registerTreeDataProvider("projectView", treeDataProvider)
@@ -199,6 +211,9 @@ export const projectView = async (args: {
 	// Trigger handleTreeSelection for the selected project after initializing the tree view
 	const selectedProjectPath = state().selectedProjectPath
 	if (selectedProjectPath) {
+		logger.debug("Restoring previously selected project", {
+			selectedProjectPath,
+		})
 		const selectedNode = projectViewNodes.find((node) => node.path === selectedProjectPath)
 		if (selectedNode) {
 			await handleTreeSelection({
