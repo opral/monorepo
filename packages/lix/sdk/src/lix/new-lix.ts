@@ -24,7 +24,7 @@ import {
 import type { LixChange } from "../change/schema-definition.js";
 import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import { humanId } from "human-id";
+import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
@@ -217,6 +217,7 @@ export async function newLixFile(args?: {
 		generateNanoid,
 		isDeterministicBootstrap,
 		useRandomLixId,
+		engineForRandom: { executeSync, hooks, runtimeCacheRef },
 	});
 
 	// Extract the lix_id from bootstrap changes
@@ -285,7 +286,11 @@ export async function newLixFile(args?: {
 	const activeAccountId = generateNanoid();
 	const humanName = isDeterministicBootstrap
 		? "Deterministic"
-		: humanId({ separator: "", capitalize: true });
+		: randomHumanIdWord({
+				capitalize: true,
+				engine: { executeSync, hooks, runtimeCacheRef },
+				separator: "",
+			});
 	const anonymousAccountName = `Anonymous ${humanName}`;
 
 	// Create the anonymous account as untracked
@@ -399,6 +404,7 @@ function createBootstrapChanges(args: {
 	generateNanoid: () => string;
 	isDeterministicBootstrap: boolean;
 	useRandomLixId: boolean;
+	engineForRandom: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 
@@ -651,7 +657,11 @@ function createBootstrapChanges(args: {
 				lixName ??
 				(args.isDeterministicBootstrap
 					? "deterministic-lix-name"
-					: humanId({ separator: "-", capitalize: false })),
+					: randomHumanIdWord({
+							capitalize: false,
+							engine: args.engineForRandom,
+							separator: "-",
+						})),
 		} satisfies LixKeyValue,
 		created_at: args.created_at,
 	});
