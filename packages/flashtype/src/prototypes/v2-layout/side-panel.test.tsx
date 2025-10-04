@@ -61,7 +61,7 @@ vi.mock("@lix-js/react-utils", async () => {
 
 describe("SidePanel", () => {
 	test("renders the empty state helper when nothing is open", () => {
-		const emptyPanel: PanelState = { views: [], activeViewKey: null };
+		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 
 		render(
 			<DndContext>
@@ -86,8 +86,8 @@ describe("SidePanel", () => {
 
 	test("renders the active view and forwards interactions", () => {
 		const panelState: PanelState = {
-			views: [{ viewKey: "files-1", viewId: "files" }],
-			activeViewKey: "files-1",
+			views: [{ instanceKey: "files-1", viewKey: "files" }],
+			activeInstanceKey: "files-1",
 		};
 		const handleSelect = vi.fn();
 		const handleAdd = vi.fn();
@@ -125,8 +125,8 @@ describe("SidePanel", () => {
 
 	test("removes focus flag when panel not focused", () => {
 		const panelState: PanelState = {
-			views: [{ viewKey: "files-1", viewId: "files" }],
-			activeViewKey: "files-1",
+			views: [{ instanceKey: "files-1", viewKey: "files" }],
+			activeInstanceKey: "files-1",
 		};
 
 		render(

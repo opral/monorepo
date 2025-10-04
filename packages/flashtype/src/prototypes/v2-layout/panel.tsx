@@ -117,7 +117,11 @@ interface ContentProps extends HTMLAttributes<HTMLDivElement> {
 	readonly children: ReactNode;
 }
 
-Panel.Content = function Content({ children, className = "", ...rest }: ContentProps) {
+Panel.Content = function Content({
+	children,
+	className = "",
+	...rest
+}: ContentProps) {
 	return (
 		<div
 			className={`flex min-h-0 flex-1 flex-col overflow-hidden ${className}`}
@@ -137,8 +141,8 @@ interface TabProps {
 	readonly onClose?: () => void;
 	readonly onClick?: () => void;
 	readonly dragData?: {
+		instanceKey: string;
 		viewKey: string;
-		viewId: string;
 		fromPanel: string;
 	};
 }
@@ -165,7 +169,7 @@ Panel.Tab = function Tab({
 	const state = isActive ? (isFocused ? "focused" : "active") : "idle";
 
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: dragData?.viewKey || `tab-${label}`,
+		id: dragData?.instanceKey || `tab-${label}`,
 		data: dragData,
 		disabled: !dragData,
 	});
@@ -185,7 +189,10 @@ Panel.Tab = function Tab({
 			{...listeners}
 		>
 			<Icon className="h-3.5 w-3.5" />
-			<span className={clsx("max-w-[10rem] truncate", isPending && "italic")} title={label}>
+			<span
+				className={clsx("max-w-[10rem] truncate", isPending && "italic")}
+				title={label}
+			>
 				{label}
 			</span>
 			{onClose && isActive && (

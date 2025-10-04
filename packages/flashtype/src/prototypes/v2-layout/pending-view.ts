@@ -1,4 +1,4 @@
-import type { PanelState, PanelView } from "./types";
+import type { PanelState, ViewInstance } from "./types";
 
 /**
  * Options for configuring how a pending view is inserted into a panel.
@@ -19,37 +19,42 @@ export interface UpsertPendingViewOptions {
  *
  * @example
  * const next = upsertPendingView(panel, {
- *   viewKey: "file-content-1",
- *   viewId: "file-content",
+ *   instanceKey: "file-content-1",
+ *   viewKey: "file-content",
  *   isPending: true,
  * });
  */
 export function upsertPendingView(
 	panel: PanelState,
-	view: PanelView,
+	view: ViewInstance,
 	options: UpsertPendingViewOptions = {},
 ): PanelState {
 	const activate = options.activate ?? true;
-	const pendingView: PanelView = view.isPending
+	const pendingView: ViewInstance = view.isPending
 		? view
 		: { ...view, isPending: true };
 
 	const viewsWithoutPending = panel.views.filter((entry) => !entry.isPending);
 	const nextViews = [
-		...viewsWithoutPending.filter((entry) => entry.viewKey !== pendingView.viewKey),
+		...viewsWithoutPending.filter(
+			(entry) => entry.instanceKey !== pendingView.instanceKey,
+		),
 		pendingView,
 	];
 
-	const desiredActiveKey = activate ? pendingView.viewKey : panel.activeViewKey;
-	const fallbackActive = nextViews[nextViews.length - 1]?.viewKey ?? null;
-	const activeViewKey =
-		desiredActiveKey && nextViews.some((entry) => entry.viewKey === desiredActiveKey)
+	const desiredActiveKey = activate
+		? pendingView.instanceKey
+		: panel.activeInstanceKey;
+	const fallbackActive = nextViews[nextViews.length - 1]?.instanceKey ?? null;
+	const activeInstanceKey =
+		desiredActiveKey &&
+		nextViews.some((entry) => entry.instanceKey === desiredActiveKey)
 			? desiredActiveKey
 			: fallbackActive;
 
 	return {
 		views: nextViews,
-		activeViewKey,
+		activeInstanceKey,
 	};
 }
 
@@ -74,14 +79,14 @@ export interface ActivatePanelViewOptions {
  */
 export function activatePanelView(
 	panel: PanelState,
-	viewKey: string,
+	instanceKey: string,
 	options: ActivatePanelViewOptions = {},
 ): PanelState {
 	const finalizePending = options.finalizePending ?? true;
 	let found = false;
 
 	const views = panel.views.map((view) => {
-		if (view.viewKey !== viewKey) return view;
+		if (view.instanceKey !== instanceKey) return view;
 		found = true;
 		if (!finalizePending || !view.isPending) {
 			return { ...view };
@@ -93,6 +98,6 @@ export function activatePanelView(
 
 	return {
 		views,
-		activeViewKey: viewKey,
+		activeInstanceKey: instanceKey,
 	};
 }

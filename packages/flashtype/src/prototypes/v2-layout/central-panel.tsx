@@ -6,12 +6,12 @@ import { ViewPanel } from "./view-panel";
 
 interface CentralPanelProps {
 	readonly panel: PanelState;
-	readonly onSelectView: (viewKey: string) => void;
-	readonly onRemoveView: (viewKey: string) => void;
+	readonly onSelectView: (instanceKey: string) => void;
+	readonly onRemoveView: (instanceKey: string) => void;
 	readonly viewContext?: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
-	readonly onFinalizePendingView?: (viewKey: string) => void;
+	readonly onFinalizePendingView?: (instanceKey: string) => void;
 }
 
 /**
@@ -34,12 +34,14 @@ export function CentralPanel({
 		data: { panel: "central" },
 	});
 
-	const activeEntry = panel.activeViewKey
-		? (panel.views.find((view) => view.viewKey === panel.activeViewKey) ?? null)
+	const activeEntry = panel.activeInstanceKey
+		? (panel.views.find(
+				(view) => view.instanceKey === panel.activeInstanceKey,
+			) ?? null)
 		: (panel.views[0] ?? null);
 
 	const activeView = activeEntry
-		? (VIEW_MAP.get(activeEntry.viewId) ?? null)
+		? (VIEW_MAP.get(activeEntry.viewKey) ?? null)
 		: null;
 
 	const hasViews = panel.views.length > 0;
@@ -50,7 +52,7 @@ export function CentralPanel({
 
 	const finalizePendingIfNeeded = () => {
 		if (activeEntry?.isPending && onFinalizePendingView) {
-			onFinalizePendingView(activeEntry.viewKey);
+			onFinalizePendingView(activeEntry.instanceKey);
 		}
 	};
 
@@ -64,23 +66,22 @@ export function CentralPanel({
 				{hasViews && (
 					<Panel.TabBar>
 						{panel.views.map((entry) => {
-							const view = VIEW_MAP.get(entry.viewId);
+							const view = VIEW_MAP.get(entry.viewKey);
 							if (!view) return null;
-							const isActive =
-								activeEntry?.viewKey === entry.viewKey;
+							const isActive = activeEntry?.instanceKey === entry.instanceKey;
 							return (
 								<Panel.Tab
-									key={entry.viewKey}
+									key={entry.instanceKey}
 									icon={view.icon}
 									label={entry.metadata?.label || view.label}
 									isActive={isActive}
 									isFocused={isFocused && isActive}
 									isPending={entry.isPending}
-									onClick={() => onSelectView(entry.viewKey)}
-									onClose={() => onRemoveView(entry.viewKey)}
+									onClick={() => onSelectView(entry.instanceKey)}
+									onClose={() => onRemoveView(entry.instanceKey)}
 									dragData={{
+										instanceKey: entry.instanceKey,
 										viewKey: entry.viewKey,
-										viewId: entry.viewId,
 										fromPanel: "central",
 									}}
 								/>
@@ -98,7 +99,7 @@ export function CentralPanel({
 							<ViewPanel
 								view={activeView}
 								context={contextWithFocus}
-								panelView={activeEntry}
+								viewInstance={activeEntry}
 							/>
 						)}
 					</Panel.Content>

@@ -13,9 +13,9 @@ export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
  * const uiState: FlashtypeUiState = {
  *   focusedPanel: "left",
  *   panels: {
- *     left: { views: [...], activeViewKey: "files-1" },
- *     central: { views: [], activeViewKey: null },
- *     right: { views: [], activeViewKey: null },
+ *     left: { views: [...], activeInstanceKey: "files-1" },
+ *     central: { views: [], activeInstanceKey: null },
+ *     right: { views: [], activeInstanceKey: null },
  *   },
  *   layout: { sizes: { left: 20, central: 60, right: 20 } },
  * };
@@ -45,9 +45,9 @@ const DEFAULT_LAYOUT_SIZES: PanelLayoutSizes = {
 export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
 	focusedPanel: "left",
 	panels: {
-		left: { views: [], activeViewKey: null },
-		central: { views: [], activeViewKey: null },
-		right: { views: [], activeViewKey: null },
+		left: { views: [], activeInstanceKey: null },
+		central: { views: [], activeInstanceKey: null },
+		right: { views: [], activeInstanceKey: null },
 	},
 	layout: { sizes: { ...DEFAULT_LAYOUT_SIZES } },
 };
