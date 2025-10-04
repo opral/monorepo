@@ -6,6 +6,7 @@ import { TasksView } from "./panel-views/tasks-view/index";
 import { MarkdownView } from "./panel-views/markdown-view/index";
 import { CheckpointView } from "./panel-views/checkpoint-view/index";
 import { HistoryView } from "./panel-views/history-view/index";
+import { CommitView } from "./panel-views/commit-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -59,6 +60,15 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		icon: FileText,
 		render: (_context, panelView) => (
 			<MarkdownView filePath={panelView?.metadata?.filePath} />
+		),
+	},
+	{
+		id: "commit",
+		label: "Commit",
+		description: "View commit details and changes.",
+		icon: GitCommitVertical,
+		render: (context, panelView) => (
+			<CommitView context={context} view={panelView} />
 		),
 	},
 ];

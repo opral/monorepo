@@ -11,6 +11,7 @@ interface CentralPanelProps {
 	readonly viewContext?: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
+	readonly onFinalizePendingView?: (viewKey: string) => void;
 }
 
 /**
@@ -26,6 +27,7 @@ export function CentralPanel({
 	viewContext,
 	isFocused,
 	onFocusPanel,
+	onFinalizePendingView,
 }: CentralPanelProps) {
 	const { setNodeRef, isOver } = useDroppable({
 		id: "central-panel",
@@ -45,6 +47,12 @@ export function CentralPanel({
 	const contextWithFocus: ViewContext | undefined = viewContext
 		? { ...viewContext, isPanelFocused: isFocused }
 		: { isPanelFocused: isFocused };
+
+	const finalizePendingIfNeeded = () => {
+		if (activeEntry?.isPending && onFinalizePendingView) {
+			onFinalizePendingView(activeEntry.viewKey);
+		}
+	};
 
 	return (
 		<section
@@ -67,6 +75,7 @@ export function CentralPanel({
 									label={entry.metadata?.label || view.label}
 									isActive={isActive}
 									isFocused={isFocused && isActive}
+									isPending={entry.isPending}
 									onClick={() => onSelectView(entry.viewKey)}
 									onClose={() => onRemoveView(entry.viewKey)}
 									dragData={{
@@ -81,7 +90,10 @@ export function CentralPanel({
 				)}
 
 				{hasViews ? (
-					<Panel.Content>
+					<Panel.Content
+						onPointerDownCapture={finalizePendingIfNeeded}
+						onFocusCapture={finalizePendingIfNeeded}
+					>
 						{activeView && activeEntry && (
 							<ViewPanel
 								view={activeView}

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import {
+	type HTMLAttributes,
 	type ReactNode,
 	useCallback,
 	useLayoutEffect,
@@ -112,15 +113,15 @@ Panel.TabBar = function TabBar({ children, className = "" }: TabBarProps) {
 	);
 };
 
-interface ContentProps {
+interface ContentProps extends HTMLAttributes<HTMLDivElement> {
 	readonly children: ReactNode;
-	readonly className?: string;
 }
 
-Panel.Content = function Content({ children, className = "" }: ContentProps) {
+Panel.Content = function Content({ children, className = "", ...rest }: ContentProps) {
 	return (
 		<div
 			className={`flex min-h-0 flex-1 flex-col overflow-hidden ${className}`}
+			{...rest}
 		>
 			{children}
 		</div>
@@ -132,6 +133,7 @@ interface TabProps {
 	readonly label: string;
 	readonly isActive?: boolean;
 	readonly isFocused?: boolean;
+	readonly isPending?: boolean;
 	readonly onClose?: () => void;
 	readonly onClick?: () => void;
 	readonly dragData?: {
@@ -155,6 +157,7 @@ Panel.Tab = function Tab({
 	label,
 	isActive = false,
 	isFocused = false,
+	isPending = false,
 	onClose,
 	onClick,
 	dragData,
@@ -182,7 +185,7 @@ Panel.Tab = function Tab({
 			{...listeners}
 		>
 			<Icon className="h-3.5 w-3.5" />
-			<span className="max-w-[10rem] truncate" title={label}>
+			<span className={clsx("max-w-[10rem] truncate", isPending && "italic")} title={label}>
 				{label}
 			</span>
 			{onClose && isActive && (

@@ -13,7 +13,8 @@ export type ViewId =
 	| "tasks"
 	| "checkpoint"
 	| "history"
-	| "file-content";
+	| "file-content"
+	| "commit";
 
 /**
  * Per-panel instance metadata used to track which views are open.
@@ -24,9 +25,11 @@ export type ViewId =
 export interface PanelView {
 	readonly viewKey: string;
 	readonly viewId: ViewId;
+	readonly isPending?: boolean;
 	readonly metadata?: {
 		readonly filePath?: string;
 		readonly label?: string;
+		readonly checkpointId?: string;
 	};
 }
 
@@ -59,6 +62,17 @@ export interface ViewContext {
 		options?: {
 			/**
 			 * Whether the central panel should receive focus when the file opens.
+			 * Defaults to `true` for backwards compatibility.
+			 */
+			readonly focus?: boolean;
+		},
+	) => void;
+	readonly onOpenCommit?: (
+		checkpointId: string,
+		label: string,
+		options?: {
+			/**
+			 * Whether the central panel should receive focus when the commit opens.
 			 * Defaults to `true` for backwards compatibility.
 			 */
 			readonly focus?: boolean;

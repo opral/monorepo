@@ -76,4 +76,32 @@ describe("CentralPanel", () => {
 		const tabButton = screen.getByRole("button", { name: "Search" });
 		expect(tabButton.getAttribute("data-focused")).toBeNull();
 	});
+
+	test("finalizes pending view when interacting with content", () => {
+		const panelState: PanelState = {
+			views: [
+				{ viewKey: "search-1", viewId: "search", isPending: true },
+			],
+			activeViewKey: "search-1",
+		};
+		const handleFinalize = vi.fn();
+
+		render(
+			<DndContext>
+				<CentralPanel
+					panel={panelState}
+					onSelectView={() => {}}
+					onRemoveView={() => {}}
+					isFocused={true}
+					onFocusPanel={vi.fn()}
+					onFinalizePendingView={handleFinalize}
+				/>
+			</DndContext>,
+		);
+
+		const input = screen.getByPlaceholderText("Search project...");
+		fireEvent.pointerDown(input);
+
+		expect(handleFinalize).toHaveBeenCalledWith("search-1");
+	});
 });

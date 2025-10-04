@@ -40,7 +40,7 @@ type HistoryViewProps = {
 	readonly context?: ViewContext;
 };
 
-export function HistoryView({ context: _context }: HistoryViewProps) {
+export function HistoryView({ context }: HistoryViewProps) {
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
 	const items = useMemo<HistoryCheckpoint[]>(
@@ -88,7 +88,14 @@ export function HistoryView({ context: _context }: HistoryViewProps) {
 								</div>
 								<button
 									type="button"
-									onClick={() => setSelectedId(item.id)}
+									onClick={() => {
+										setSelectedId(item.id);
+										context?.onOpenCommit?.(
+											item.id,
+											`${item.title} • ${item.timestampLabel}`,
+											context?.isPanelFocused ? { focus: false } : undefined,
+										);
+									}}
 									className={clsx(
 										"group relative flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
 										isSelected

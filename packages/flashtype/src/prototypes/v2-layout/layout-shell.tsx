@@ -24,6 +24,7 @@ import {
 	type PanelLayoutSizes,
 	type FlashtypeUiState,
 } from "./ui-state";
+import { activatePanelView, upsertPendingView } from "./pending-view";
 
 const hydratePanel = (panel: PanelState): PanelState => ({
 	views: panel.views,
@@ -244,13 +245,9 @@ export function V2LayoutShell() {
 		);
 
 		if (existingFileView) {
-			// Focus existing tab
 			setPanelState(
 				"central",
-				(panel) => ({
-					views: panel.views,
-					activeViewKey: existingFileView.viewKey,
-				}),
+				(panel) => activatePanelView(panel, existingFileView.viewKey),
 				{ focus: shouldFocus },
 			);
 		} else {
@@ -260,17 +257,53 @@ export function V2LayoutShell() {
 			const newView = {
 				viewKey: createViewKey("file-content"),
 				viewId: "file-content" as ViewId,
+				isPending: true,
 				metadata: {
 					filePath,
 					label,
 				},
 			};
+
 			setPanelState(
 				"central",
-				(panel) => ({
-					views: [...panel.views, newView],
-					activeViewKey: newView.viewKey,
-				}),
+				(panel) => upsertPendingView(panel, newView),
+				{ focus: shouldFocus },
+			);
+		}
+	};
+
+	const handleOpenCommit = (
+		checkpointId: string,
+		label: string,
+		options?: {
+			readonly focus?: boolean;
+		},
+	) => {
+		const shouldFocus = options?.focus ?? true;
+		const existingCommitView = hydratedCentral.views.find(
+			(view) => view.metadata?.checkpointId === checkpointId,
+		);
+
+		if (existingCommitView) {
+			setPanelState(
+				"central",
+				(panel) => activatePanelView(panel, existingCommitView.viewKey),
+				{ focus: shouldFocus },
+			);
+		} else {
+			const newView = {
+				viewKey: createViewKey("commit"),
+				viewId: "commit" as ViewId,
+				isPending: true,
+				metadata: {
+					checkpointId,
+					label,
+				},
+			};
+
+			setPanelState(
+				"central",
+				(panel) => upsertPendingView(panel, newView),
 				{ focus: shouldFocus },
 			);
 		}
@@ -339,46 +372,50 @@ export function V2LayoutShell() {
 										{ focus: true },
 									)
 								}
-								viewContext={{ onOpenFile: handleOpenFile }}
+								viewContext={{ onOpenFile: handleOpenFile, onOpenCommit: handleOpenCommit }}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
 						<Panel defaultSize={panelSizes.central} minSize={30}>
-							<CentralPanel
-								panel={hydratedCentral}
-								isFocused={focusedPanel === "central"}
-								onFocusPanel={focusPanel}
-								onSelectView={(viewKey) =>
+								<CentralPanel
+									panel={hydratedCentral}
+									isFocused={focusedPanel === "central"}
+									onFocusPanel={focusPanel}
+									onSelectView={(viewKey) =>
+										setPanelState(
+											"central",
+											(panel) => activatePanelView(panel, viewKey),
+											{ focus: true },
+										)
+									}
+									onRemoveView={(viewKey) =>
+										setPanelState(
+											"central",
+											(panel) => {
+												const views = panel.views.filter(
+													(entry) => entry.viewKey !== viewKey,
+												);
+												const nextActive =
+													panel.activeViewKey === viewKey
+														? (views[views.length - 1]?.viewKey ?? null)
+														: panel.activeViewKey;
+												return { views, activeViewKey: nextActive };
+											},
+											{ focus: true },
+										)
+									}
+									onFinalizePendingView={(viewKey) =>
 									setPanelState(
 										"central",
-										(panel) => ({
-											views: panel.views,
-											activeViewKey: viewKey,
-										}),
+										(panel) => activatePanelView(panel, viewKey),
 										{ focus: true },
 									)
 								}
-								onRemoveView={(viewKey) =>
-									setPanelState(
-										"central",
-										(panel) => {
-											const views = panel.views.filter(
-												(entry) => entry.viewKey !== viewKey,
-											);
-											const nextActive =
-												panel.activeViewKey === viewKey
-													? (views[views.length - 1]?.viewKey ?? null)
-													: panel.activeViewKey;
-											return { views, activeViewKey: nextActive };
-										},
-										{ focus: true },
-									)
-								}
-								viewContext={{ onOpenFile: handleOpenFile }}
-							/>
-						</Panel>
+									viewContext={{ onOpenFile: handleOpenFile, onOpenCommit: handleOpenCommit }}
+								/>
+							</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
@@ -435,7 +472,7 @@ export function V2LayoutShell() {
 										{ focus: true },
 									)
 								}
-								viewContext={{ onOpenFile: handleOpenFile }}
+								viewContext={{ onOpenFile: handleOpenFile, onOpenCommit: handleOpenCommit }}
 							/>
 						</Panel>
 					</PanelGroup>
