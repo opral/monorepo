@@ -6,7 +6,7 @@ import type { PanelState } from "./types";
 
 describe("CentralPanel", () => {
 	test("shows the empty repository welcome when no views are open", () => {
-		const emptyPanel: PanelState = { views: [], activeViewKey: null };
+		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 
 		render(
 			<DndContext>
@@ -27,8 +27,8 @@ describe("CentralPanel", () => {
 
 	test("renders the active view and wires tab selection", () => {
 		const panelState: PanelState = {
-			views: [{ viewKey: "search-1", viewId: "search" }],
-			activeViewKey: "search-1",
+			views: [{ instanceKey: "search-1", viewKey: "search" }],
+			activeInstanceKey: "search-1",
 		};
 		const handleSelect = vi.fn();
 
@@ -57,8 +57,8 @@ describe("CentralPanel", () => {
 
 	test("active tab is not focused when panel loses focus", () => {
 		const panelState: PanelState = {
-			views: [{ viewKey: "search-1", viewId: "search" }],
-			activeViewKey: "search-1",
+			views: [{ instanceKey: "search-1", viewKey: "search" }],
+			activeInstanceKey: "search-1",
 		};
 
 		render(
@@ -79,10 +79,8 @@ describe("CentralPanel", () => {
 
 	test("finalizes pending view when interacting with content", () => {
 		const panelState: PanelState = {
-			views: [
-				{ viewKey: "search-1", viewId: "search", isPending: true },
-			],
-			activeViewKey: "search-1",
+			views: [{ instanceKey: "search-1", viewKey: "search", isPending: true }],
+			activeInstanceKey: "search-1",
 		};
 		const handleFinalize = vi.fn();
 

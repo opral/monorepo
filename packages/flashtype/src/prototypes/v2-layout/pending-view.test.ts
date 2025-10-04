@@ -6,74 +6,85 @@ describe("pending view helpers", () => {
 	test("upsertPendingView replaces the existing pending slot", () => {
 		const panel: PanelState = {
 			views: [
-				{ viewKey: "files-1", viewId: "files" },
-				{ viewKey: "preview-1", viewId: "file-content", isPending: true },
+				{ instanceKey: "files-1", viewKey: "files" },
+				{ instanceKey: "preview-1", viewKey: "file-content", isPending: true },
 			],
-			activeViewKey: "files-1",
+			activeInstanceKey: "files-1",
 		};
 
 		const next = upsertPendingView(panel, {
-			viewKey: "preview-2",
-			viewId: "file-content",
+			instanceKey: "preview-2",
+			viewKey: "file-content",
 			isPending: true,
 		});
 
 		expect(next.views).toHaveLength(2);
-		expect(next.views[0]).toMatchObject({ viewKey: "files-1" });
+		expect(next.views[0]).toMatchObject({ instanceKey: "files-1" });
 		expect(next.views[0].isPending).toBeUndefined();
-		expect(next.views[1]).toMatchObject({ viewKey: "preview-2", isPending: true });
-		expect(next.activeViewKey).toBe("preview-2");
+		expect(next.views[1]).toMatchObject({
+			instanceKey: "preview-2",
+			isPending: true,
+		});
+		expect(next.activeInstanceKey).toBe("preview-2");
 	});
 
 	test("upsertPendingView can preserve the current active tab", () => {
 		const panel: PanelState = {
-			views: [{ viewKey: "files-1", viewId: "files" }],
-			activeViewKey: "files-1",
+			views: [{ instanceKey: "files-1", viewKey: "files" }],
+			activeInstanceKey: "files-1",
 		};
 
 		const next = upsertPendingView(
 			panel,
-			{ viewKey: "preview-1", viewId: "file-content", isPending: true },
+			{ instanceKey: "preview-1", viewKey: "file-content", isPending: true },
 			{ activate: false },
 		);
 
-		expect(next.activeViewKey).toBe("files-1");
+		expect(next.activeInstanceKey).toBe("files-1");
 	});
 
 	test("activatePanelView finalizes pending status and focuses the tab", () => {
 		const panel: PanelState = {
 			views: [
-				{ viewKey: "files-1", viewId: "files" },
-				{ viewKey: "preview-1", viewId: "file-content", isPending: true },
+				{ instanceKey: "files-1", viewKey: "files" },
+				{ instanceKey: "preview-1", viewKey: "file-content", isPending: true },
 			],
-			activeViewKey: "files-1",
+			activeInstanceKey: "files-1",
 		};
 
 		const next = activatePanelView(panel, "preview-1");
 
-		expect(next.activeViewKey).toBe("preview-1");
-		expect(next.views[1]).toMatchObject({ viewKey: "preview-1", isPending: false });
+		expect(next.activeInstanceKey).toBe("preview-1");
+		expect(next.views[1]).toMatchObject({
+			instanceKey: "preview-1",
+			isPending: false,
+		});
 	});
 
 	test("activatePanelView can skip finalizing pending", () => {
 		const panel: PanelState = {
 			views: [
-				{ viewKey: "files-1", viewId: "files" },
-				{ viewKey: "preview-1", viewId: "file-content", isPending: true },
+				{ instanceKey: "files-1", viewKey: "files" },
+				{ instanceKey: "preview-1", viewKey: "file-content", isPending: true },
 			],
-			activeViewKey: "files-1",
+			activeInstanceKey: "files-1",
 		};
 
-		const next = activatePanelView(panel, "preview-1", { finalizePending: false });
+		const next = activatePanelView(panel, "preview-1", {
+			finalizePending: false,
+		});
 
-		expect(next.activeViewKey).toBe("preview-1");
-		expect(next.views[1]).toMatchObject({ viewKey: "preview-1", isPending: true });
+		expect(next.activeInstanceKey).toBe("preview-1");
+		expect(next.views[1]).toMatchObject({
+			instanceKey: "preview-1",
+			isPending: true,
+		});
 	});
 
 	test("activatePanelView returns the original panel when the view is missing", () => {
 		const panel: PanelState = {
-			views: [{ viewKey: "files-1", viewId: "files" }],
-			activeViewKey: "files-1",
+			views: [{ instanceKey: "files-1", viewKey: "files" }],
+			activeInstanceKey: "files-1",
 		};
 
 		const next = activatePanelView(panel, "missing");

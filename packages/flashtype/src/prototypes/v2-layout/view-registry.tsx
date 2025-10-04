@@ -1,5 +1,13 @@
-import { CalendarDays, FileText, Files, Flag, GitCommitVertical, Search } from "lucide-react";
-import type { ViewDefinition, ViewId } from "./types";
+import {
+	Bot,
+	CalendarDays,
+	FileText,
+	Files,
+	Flag,
+	GitCommitVertical,
+	Search,
+} from "lucide-react";
+import type { ViewDefinition, ViewKey } from "./types";
 import { FilesView } from "./panel-views/files-view/index";
 import { SearchView } from "./panel-views/search-view/index";
 import { TasksView } from "./panel-views/tasks-view/index";
@@ -7,44 +15,52 @@ import { MarkdownView } from "./panel-views/markdown-view/index";
 import { CheckpointView } from "./panel-views/checkpoint-view/index";
 import { HistoryView } from "./panel-views/history-view/index";
 import { CommitView } from "./panel-views/commit-view/index";
+import { AgentView } from "./panel-views/agent-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
  *
  * @example
- * const filesView = VIEW_DEFINITIONS.find((ext) => ext.id === "files");
+ * const filesView = VIEW_DEFINITIONS.find((ext) => ext.key === "files");
  */
 const VISIBLE_VIEWS: ViewDefinition[] = [
 	{
-		id: "files",
+		key: "agent",
+		label: "Lix Agent",
+		description: "Chat with the project assistant.",
+		icon: Bot,
+		render: (context) => <AgentView context={context} />,
+	},
+	{
+		key: "files",
 		label: "Files",
 		description: "Browse and pin project documents.",
 		icon: Files,
 		render: (context) => <FilesView context={context} />,
 	},
 	{
-		id: "search",
+		key: "search",
 		label: "Search",
 		description: "Quickly locate files, symbols, or commands.",
 		icon: Search,
 		render: () => <SearchView />,
 	},
 	{
-		id: "tasks",
+		key: "tasks",
 		label: "Tasks",
 		description: "Track the current sprint notes.",
 		icon: CalendarDays,
 		render: () => <TasksView />,
 	},
 	{
-		id: "checkpoint",
+		key: "checkpoint",
 		label: "Checkpoint",
 		description: "View working changes and create checkpoints.",
 		icon: Flag,
 		render: (context) => <CheckpointView context={context} />,
 	},
 	{
-		id: "history",
+		key: "history",
 		label: "History",
 		description: "Browse saved checkpoints in chronological order.",
 		icon: GitCommitVertical,
@@ -54,7 +70,7 @@ const VISIBLE_VIEWS: ViewDefinition[] = [
 
 const HIDDEN_VIEWS: ViewDefinition[] = [
 	{
-		id: "file-content",
+		key: "file-content",
 		label: "File",
 		description: "Display file contents.",
 		icon: FileText,
@@ -63,7 +79,7 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		),
 	},
 	{
-		id: "commit",
+		key: "commit",
 		label: "Commit",
 		description: "View commit details and changes.",
 		icon: GitCommitVertical,
@@ -75,8 +91,8 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 
 export const VIEW_DEFINITIONS: ViewDefinition[] = VISIBLE_VIEWS;
 
-export const VIEW_MAP = new Map<ViewId, ViewDefinition>(
-	[...VISIBLE_VIEWS, ...HIDDEN_VIEWS].map((ext) => [ext.id, ext]),
+export const VIEW_MAP = new Map<ViewKey, ViewDefinition>(
+	[...VISIBLE_VIEWS, ...HIDDEN_VIEWS].map((ext) => [ext.key, ext]),
 );
 
 let viewCounter = 0;
@@ -85,9 +101,9 @@ let viewCounter = 0;
  * Generates a stable identifier for each opened view inside a panel.
  *
  * @example
- * const key = createViewKey("files");
+ * const key = createViewInstanceKey("files");
  */
-export function createViewKey(viewId: ViewId): string {
+export function createViewInstanceKey(viewKey: ViewKey): string {
 	viewCounter += 1;
-	return `${viewId}-${viewCounter}`;
+	return `${viewKey}-${viewCounter}`;
 }

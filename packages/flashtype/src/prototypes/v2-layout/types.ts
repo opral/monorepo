@@ -2,12 +2,13 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 /**
- * Union of the prototype view identifiers that can mount inside a panel.
+ * Union of registry keys for views available in the layout.
  *
  * @example
- * const activeView: ViewId = "files";
+ * const activeView: ViewKey = "files";
  */
-export type ViewId =
+export type ViewKey =
+	| "agent"
 	| "files"
 	| "search"
 	| "tasks"
@@ -20,11 +21,11 @@ export type ViewId =
  * Per-panel instance metadata used to track which views are open.
  *
  * @example
- * const view: PanelView = { viewKey: "files-1", viewId: "files" };
+ * const instance: ViewInstance = { instanceKey: "files-1", viewKey: "files" };
  */
-export interface PanelView {
-	readonly viewKey: string;
-	readonly viewId: ViewId;
+export interface ViewInstance {
+	readonly instanceKey: string;
+	readonly viewKey: ViewKey;
 	readonly isPending?: boolean;
 	readonly metadata?: {
 		readonly filePath?: string;
@@ -40,14 +41,11 @@ export interface PanelView {
  * const filesView: ViewDefinition = VIEW_DEFINITIONS[0];
  */
 export interface ViewDefinition {
-	readonly id: ViewId;
+	readonly key: ViewKey;
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
-	readonly render: (
-		context?: ViewContext,
-		view?: PanelView,
-	) => ReactNode;
+	readonly render: (context?: ViewContext, view?: ViewInstance) => ReactNode;
 }
 
 /**
@@ -85,11 +83,11 @@ export interface ViewContext {
  * Lightweight state container that represents one panel island.
  *
  * @example
- * const leftPanel: PanelState = { views: [], activeViewKey: null };
+ * const leftPanel: PanelState = { views: [], activeInstanceKey: null };
  */
 export interface PanelState {
-	readonly views: PanelView[];
-	readonly activeViewKey: string | null;
+	readonly views: ViewInstance[];
+	readonly activeInstanceKey: string | null;
 }
 
 /**
