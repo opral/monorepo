@@ -26,7 +26,7 @@ import { AgentView } from "./panel-views/agent-view/index";
 const VISIBLE_VIEWS: ViewDefinition[] = [
 	{
 		key: "agent",
-		label: "Agent",
+		label: "Lix Agent",
 		description: "Chat with the project assistant.",
 		icon: Bot,
 		render: (context) => <AgentView context={context} />,
