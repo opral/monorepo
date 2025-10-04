@@ -2873,9 +2873,6 @@ importers:
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0
-      kysely:
-        specifier: ^0.27.6
-        version: 0.27.6
       prettier:
         specifier: ^3.3.3
         version: 3.6.2
@@ -25043,21 +25040,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@21.4.1)(typescript@5.4.5)':
-    dependencies:
-      '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@21.4.1)(typescript@5.4.5)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-
   '@nrwl/nx-cloud@19.1.0':
     dependencies:
       nx-cloud: 19.1.0
@@ -25322,7 +25304,7 @@ snapshots:
       '@babel/preset-env': 7.26.0(@babel/core@7.28.3)
       '@babel/preset-typescript': 7.26.0(@babel/core@7.28.3)
       '@babel/runtime': 7.28.3
-      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@21.4.1)(typescript@5.4.5)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.3.0)(nx@18.3.5)(typescript@5.8.3)
       '@nx/devkit': 18.3.5(nx@21.4.1)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.4.5)

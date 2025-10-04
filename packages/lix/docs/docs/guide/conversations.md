@@ -14,7 +14,7 @@ Lix has a universal commenting system. You can attach conversations to any entit
 
 ```ts
 import { openLix, createConversation, createConversationMessage } from "@lix-js/sdk";
-import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 const lix = await openLix({});
 

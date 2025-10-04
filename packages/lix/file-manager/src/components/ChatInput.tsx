@@ -11,7 +11,7 @@ import {
 } from "@/state.ts";
 import IconArrow from "./icons/IconArrow.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 const ChatInput = () => {
 	const [activeAccount] = useAtom(activeAccountAtom);

@@ -13,7 +13,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { createCheckpoint, createConversation, type RenderDiffArgs } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
-import { fromPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 export const IntermediateCheckpointComponent = () => {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(true);

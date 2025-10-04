@@ -1,6 +1,6 @@
 import type { Lix } from "@lix-js/sdk";
 import { createConversation, createConversationMessage } from "@lix-js/sdk";
-import { fromPlainText, toPlainText } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ChatMessage } from "./send-message.js";
 
 const POINTER_KEY = "lix_agent_conversation_id";

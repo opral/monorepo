@@ -6,7 +6,7 @@ import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
 import { UiDiffComponentProps, jsonArrayFrom } from "@lix-js/sdk";
-import { toPlainText } from "@lix-js/sdk/zettel-ast";
+import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import { selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";

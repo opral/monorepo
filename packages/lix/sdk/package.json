@@ -28,7 +28,9 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
-		"./zettel-ast": "./dist/zettel-ast/index.js"
+		"./dependency/kysely": "./dist/dependency/kysely/index.js",
+		"./dependency/kysely/helpers/sqlite": "./dist/dependency/kysely/helpers/sqlite.js",
+		"./dependency/zettel-ast": "./dist/dependency/zettel-ast/index.js"
 	},
 	"_filesComment": "Shipping src for better debugging experience",
 	"files": [
