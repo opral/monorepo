@@ -40,6 +40,27 @@ const normalizeName = (image: string): string => {
 	return image.toLowerCase();
 };
 
+const reservedAlias = new Set([
+	"inner",
+	"left",
+	"right",
+	"full",
+	"cross",
+	"outer",
+	"natural",
+	"join",
+	"union",
+	"intersect",
+	"except",
+	"where",
+	"group",
+	"order",
+	"having",
+	"limit",
+	"offset",
+	"returning",
+]);
+
 const deriveAlias = (
 	tableToken: Token,
 	aliasToken: Token | undefined,
@@ -54,16 +75,7 @@ const deriveAlias = (
 	}
 
 	const aliasLower = aliasToken.image.toLowerCase();
-	const forbiddenAlias =
-		aliasLower === "inner" ||
-		aliasLower === "left" ||
-		aliasLower === "right" ||
-		aliasLower === "full" ||
-		aliasLower === "cross" ||
-		aliasLower === "outer" ||
-		aliasLower === "natural" ||
-		aliasLower === "join";
-	if (forbiddenAlias) {
+	if (reservedAlias.has(aliasLower)) {
 		return {
 			alias: tableName,
 			explicit: false,

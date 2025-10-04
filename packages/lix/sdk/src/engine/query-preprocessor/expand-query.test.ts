@@ -73,6 +73,70 @@ describe("expandQuery", () => {
 		);
 	});
 
+	test("retains auto alias when followed by UNION ALL", () => {
+		const sql =
+			'SELECT "directory"."entity_id" FROM "directory" UNION ALL SELECT "file"."entity_id" FROM "file"';
+		const views = new Map([
+			["directory", "SELECT entity_id FROM internal_state_vtable"],
+			["file", "SELECT entity_id FROM internal_state_vtable"],
+		]);
+
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
+		expect(result.expanded).toBe(true);
+		const normalized = normalize(result.sql);
+		expect(normalized).toContain(
+			'( SELECT entity_id FROM internal_state_vtable ) AS "directory" UNION ALL'
+		);
+	});
+
+	test("retains explicit alias before UNION ALL", () => {
+		const sql =
+			'SELECT d."entity_id" FROM "directory" AS d UNION ALL SELECT f."entity_id" FROM "file" AS f';
+		const views = new Map([
+			["directory", "SELECT entity_id FROM internal_state_vtable"],
+			["file", "SELECT entity_id FROM internal_state_vtable"],
+		]);
+
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
+		expect(result.expanded).toBe(true);
+		const normalized = normalize(result.sql);
+		expect(normalized).toContain(
+			'( SELECT entity_id FROM internal_state_vtable ) AS d UNION ALL'
+		);
+	});
+
+	test("auto alias when view followed by JOIN", () => {
+		const sql =
+			'SELECT d."entity_id" FROM "directory" JOIN "file" ON "directory"."entity_id" = "file"."entity_id"';
+		const views = new Map([
+			["directory", "SELECT entity_id FROM internal_state_vtable"],
+			["file", "SELECT entity_id FROM internal_state_vtable"],
+		]);
+
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
+		expect(result.expanded).toBe(true);
+		const normalized = normalize(result.sql);
+		expect(normalized).toContain(
+			'( SELECT entity_id FROM internal_state_vtable ) AS "directory" JOIN ( SELECT entity_id FROM internal_state_vtable ) AS "file"'
+		);
+	});
+
+	test("quoted explicit alias survives UNION ALL", () => {
+		const sql =
+			'SELECT "Dir"."entity_id" FROM "directory" AS "Dir" UNION ALL SELECT "File"."entity_id" FROM "file" AS "File"';
+		const views = new Map([
+			["directory", "SELECT entity_id FROM internal_state_vtable"],
+			["file", "SELECT entity_id FROM internal_state_vtable"],
+		]);
+
+		const result = expandQuery({ sql, views, runtimeCacheRef: {} });
+		expect(result.expanded).toBe(true);
+		const normalized = normalize(result.sql);
+		expect(normalized).toContain(
+			'( SELECT entity_id FROM internal_state_vtable ) AS "Dir" UNION ALL'
+		);
+	});
+
 	test("avoids infinite recursion on cyclic view definitions", () => {
 		const sql = "SELECT * FROM a_view";
 		const views = new Map([
