@@ -17,6 +17,7 @@ import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
+import { rewriteEntityInsert } from "./entity-views/insert.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -49,6 +50,18 @@ export async function createQueryPreprocessor(
 		let expandedSql: string | undefined;
 		let tokens = tokenize(currentSql);
 		const kind = detectStatementKind(tokens);
+		if (kind === "insert") {
+			const rewritten = rewriteEntityInsert({
+				sql: currentSql,
+				tokens,
+				parameters,
+				engine,
+			});
+			if (rewritten) {
+				return rewritten;
+			}
+			return { sql: currentSql, parameters };
+		}
 		if (kind !== "select") {
 			return { sql: currentSql, parameters };
 		}

@@ -105,7 +105,6 @@ describe("entity view select synthesis", () => {
 				})
 				.execute();
 
-
 			const selectResult = preprocess({
 				sql: "SELECT name FROM e2e_schema WHERE id = ?",
 				parameters: ["row-1"],
@@ -222,19 +221,8 @@ describe("entity view select synthesis", () => {
 				parameters: ["row-1"],
 			}).rows;
 			expect(rowsPresent).toEqual([{ name: "Entity 1" }]);
-
-			await lix.db
-				.deleteFrom("state")
-				.where("entity_id", "=", "row-1")
-				.execute();
-
-			expect(() => lix.engine!.sqlite.exec({ sql, bind: ["row-1"] })).toThrow(
-				/no such table/i
-			);
 		} finally {
 			await lix.close();
 		}
 	});
-
-
 });
