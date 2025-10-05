@@ -12,20 +12,19 @@ import {
 import { useKeyValue } from "@/key-value/use-key-value";
 import { selectWorkingDiff } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
-import { sql } from "kysely";
 import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
 import type {
-	DiffViewConfig,
 	PanelSide,
 	PanelState,
-	PanelView,
+	ViewInstance,
+	ViewKey,
+	DiffViewConfig,
 	RenderableDiff,
-	ViewId,
 } from "./types";
-import { createViewKey, VIEW_MAP } from "./view-registry";
+import { createViewInstanceKey, VIEW_MAP } from "./view-registry";
 import { Panel as PanelComponent } from "./panel";
 import {
 	DEFAULT_FLASHTYPE_UI_STATE,
@@ -36,16 +35,25 @@ import {
 } from "./ui-state";
 import { activatePanelView, upsertPendingView } from "./pending-view";
 
-const hydratePanel = (panel: PanelState): PanelState => ({
-	views: panel.views.map(upgradeDiffMetadata),
-	activeViewKey:
-		panel.views.length === 0
-			? null
-			: (panel.activeViewKey ?? panel.views[0]?.viewKey ?? null),
-});
+const hydratePanel = (panel: PanelState): PanelState => {
+	const views = panel.views.map(upgradeDiffMetadata);
+	if (views.length === 0) {
+		return { views, activeInstanceKey: null };
+	}
+	const fallbackActive = views[0]?.instanceKey ?? null;
+	const hasDesiredActive = panel.activeInstanceKey
+		? views.some((view) => view.instanceKey === panel.activeInstanceKey)
+		: false;
+	return {
+		views,
+		activeInstanceKey: hasDesiredActive
+			? panel.activeInstanceKey
+			: fallbackActive,
+	};
+};
 
-const upgradeDiffMetadata = (view: PanelView): PanelView => {
-	if (view.viewId !== "diff") return view;
+const upgradeDiffMetadata = (view: ViewInstance): ViewInstance => {
+	if (view.viewKey !== "diff") return view;
 	const fileId = view.metadata?.fileId;
 	if (!fileId) return view;
 	const existing = view.metadata?.diff;
@@ -74,9 +82,6 @@ const diffLabelFromPath = (filePath?: string): string | undefined => {
 	return encodedLabel ? decodeURIComponentSafe(encodedLabel) : undefined;
 };
 
-const formatDiffLabel = (base: string): string =>
-	base.startsWith("Diff ") ? base : `Diff ${base}`;
-
 const decodeURIComponentSafe = (value: string): string => {
 	try {
 		return decodeURIComponent(value);
@@ -102,14 +107,13 @@ const createWorkingVsCheckpointDiffConfig = (
 				eb.ref("diff.status").as("status"),
 				eb.ref("before.snapshot_content").as("before_snapshot_content"),
 				eb.ref("after.snapshot_content").as("after_snapshot_content"),
-				eb
-					.fn
+				eb.fn
 					.coalesce(
 						eb.ref("after.plugin_key"),
 						eb.ref("before.plugin_key"),
 						eb.val(mdPlugin.key),
 					)
-				.as("plugin_key"),
+					.as("plugin_key"),
 			])
 			.$castTo<RenderableDiff>(),
 });
@@ -125,22 +129,26 @@ export function V2LayoutShell() {
 	const persistedState = uiStateKV ?? DEFAULT_FLASHTYPE_UI_STATE;
 	const initialLayoutSizes = normalizeLayoutSizes(persistedState.layout?.sizes);
 
-	const [leftPanel, setLeftPanel] = useState<PanelState>(() =>
-		persistedState.panels.left.views.length > 0
-			? persistedState.panels.left
-			: {
-				views: [
-					{ viewKey: createViewKey("files"), viewId: "files" },
-					{ viewKey: createViewKey("search"), viewId: "search" },
-				],
-				activeViewKey: persistedState.panels.left.activeViewKey,
-			},
+	const [leftPanel, setLeftPanel] = useState<PanelState>(() => {
+		const existing = persistedState.panels.left;
+		if (existing.views.length > 0) {
+			return hydratePanel(existing);
+		}
+		const defaultViews: ViewInstance[] = [
+			{ instanceKey: createViewInstanceKey("files"), viewKey: "files" },
+			{ instanceKey: createViewInstanceKey("search"), viewKey: "search" },
+		];
+		return hydratePanel({
+			views: defaultViews,
+			activeInstanceKey:
+				existing.activeInstanceKey ?? defaultViews[0]?.instanceKey ?? null,
+		});
+	});
+	const [centralPanel, setCentralPanel] = useState<PanelState>(() =>
+		hydratePanel(persistedState.panels.central),
 	);
-	const [centralPanel, setCentralPanel] = useState<PanelState>(
-		() => persistedState.panels.central,
-	);
-	const [rightPanel, setRightPanel] = useState<PanelState>(
-		() => persistedState.panels.right,
+	const [rightPanel, setRightPanel] = useState<PanelState>(() =>
+		hydratePanel(persistedState.panels.right),
 	);
 	const [focusedPanel, setFocusedPanel] = useState<PanelSide>(
 		() => persistedState.focusedPanel,
@@ -149,11 +157,13 @@ export function V2LayoutShell() {
 		() => initialLayoutSizes,
 	);
 
-	const lastPersistedRef = useRef<string>(JSON.stringify({
-		focusedPanel: persistedState.focusedPanel,
-		panels: persistedState.panels,
-		layout: { sizes: initialLayoutSizes },
-	} satisfies FlashtypeUiState));
+	const lastPersistedRef = useRef<string>(
+		JSON.stringify({
+			focusedPanel: persistedState.focusedPanel,
+			panels: persistedState.panels,
+			layout: { sizes: initialLayoutSizes },
+		} satisfies FlashtypeUiState),
+	);
 	const pendingPersistRef = useRef<string | null>(null);
 
 	useEffect(() => {
@@ -167,9 +177,9 @@ export function V2LayoutShell() {
 		}
 		lastPersistedRef.current = serialized;
 		pendingPersistRef.current = null;
-		setLeftPanel(uiStateKV.panels.left);
-		setCentralPanel(uiStateKV.panels.central);
-		setRightPanel(uiStateKV.panels.right);
+		setLeftPanel(hydratePanel(uiStateKV.panels.left));
+		setCentralPanel(hydratePanel(uiStateKV.panels.central));
+		setRightPanel(hydratePanel(uiStateKV.panels.right));
 		setFocusedPanel(uiStateKV.focusedPanel);
 		setPanelSizes(normalizeLayoutSizes(uiStateKV.layout?.sizes));
 	}, [uiStateKV]);
@@ -193,7 +203,14 @@ export function V2LayoutShell() {
 		}
 		pendingPersistRef.current = serialized;
 		void setUiStateKV(nextState);
-	}, [leftPanel, centralPanel, rightPanel, focusedPanel, panelSizes, setUiStateKV]);
+	}, [
+		leftPanel,
+		centralPanel,
+		rightPanel,
+		focusedPanel,
+		panelSizes,
+		setUiStateKV,
+	]);
 
 	const panels = useMemo(
 		() => ({ left: leftPanel, central: centralPanel, right: rightPanel }),
@@ -205,12 +222,14 @@ export function V2LayoutShell() {
 		reducer: (state: PanelState) => PanelState,
 		options: { focus?: boolean } = {},
 	) => {
+		const applyReducer = (prev: PanelState) =>
+			hydratePanel(reducer(hydratePanel(prev)));
 		if (side === "left") {
-			setLeftPanel((prev) => reducer(hydratePanel(prev)));
+			setLeftPanel(applyReducer);
 		} else if (side === "central") {
-			setCentralPanel((prev) => reducer(hydratePanel(prev)));
+			setCentralPanel(applyReducer);
 		} else {
-			setRightPanel((prev) => reducer(hydratePanel(prev)));
+			setRightPanel(applyReducer);
 		}
 		if (options.focus) {
 			setFocusedPanel(side);
@@ -264,45 +283,52 @@ export function V2LayoutShell() {
 
 		// Parse drag data
 		const dragData = active.data.current as
-		| { viewKey: string; viewId: ViewId; fromPanel: PanelSide }
+			| { instanceKey: string; viewKey: ViewKey; fromPanel: PanelSide }
 			| undefined;
 		const dropData = over.data.current as { panel: PanelSide } | undefined;
 
 		if (!dragData || !dropData) return;
 
-	const { viewKey, viewId, fromPanel } = dragData;
-	const { panel: toPanel } = dropData;
+		const { instanceKey, viewKey, fromPanel } = dragData;
+		const { panel: toPanel } = dropData;
+		const sourcePanel = panels[fromPanel];
+		const movedView = sourcePanel.views.find(
+			(entry) => entry.instanceKey === instanceKey,
+		);
+		if (!movedView) return;
 
-	// Remove from source panel
-	setPanelState(fromPanel, (panel) => ({
-		views: panel.views.filter((entry) => entry.viewKey !== viewKey),
-		activeViewKey:
-			panel.activeViewKey === viewKey ? null : panel.activeViewKey,
-	}));
+		// Remove from source panel
+		setPanelState(fromPanel, (panel) => ({
+			views: panel.views.filter((entry) => entry.instanceKey !== instanceKey),
+			activeInstanceKey:
+				panel.activeInstanceKey === instanceKey
+					? null
+					: panel.activeInstanceKey,
+		}));
 
-	// Add to target panel
-	setPanelState(
-		toPanel,
-		(panel) => {
-			const newView = { viewKey, viewId };
-			return {
-				views: [...panel.views, newView],
-				activeViewKey: newView.viewKey,
-			};
-		},
-		{ focus: true },
-	);
+		// Add to target panel
+		setPanelState(
+			toPanel,
+			(panel) => {
+				const newView = movedView;
+				return {
+					views: [...panel.views, newView],
+					activeInstanceKey: newView.instanceKey,
+				};
+			},
+			{ focus: true },
+		);
 	};
 
 	const activeDragData = activeId
 		? [
-			...hydratedLeft.views,
-			...hydratedCentral.views,
-			...hydratedRight.views,
-		].find((view) => view.viewKey === activeId)
+				...hydratedLeft.views,
+				...hydratedCentral.views,
+				...hydratedRight.views,
+			].find((view) => view.instanceKey === activeId)
 		: null;
 	const activeDragView = activeDragData
-		? VIEW_MAP.get(activeDragData.viewId)
+		? VIEW_MAP.get(activeDragData.viewKey)
 		: null;
 
 	const handleOpenFile = (
@@ -319,16 +345,16 @@ export function V2LayoutShell() {
 		if (existingFileView) {
 			setPanelState(
 				"central",
-				(panel) => activatePanelView(panel, existingFileView.viewKey),
+				(panel) => activatePanelView(panel, existingFileView.instanceKey),
 				{ focus: shouldFocus },
 			);
 		} else {
 			const encodedLabel =
 				filePath.split("/").filter(Boolean).pop() ?? filePath;
 			const label = decodeURIComponentSafe(encodedLabel);
-			const newView = {
-				viewKey: createViewKey("file-content"),
-				viewId: "file-content" as ViewId,
+			const newView: ViewInstance = {
+				instanceKey: createViewInstanceKey("file-content"),
+				viewKey: "file-content" as ViewKey,
 				isPending: true,
 				metadata: {
 					filePath,
@@ -336,11 +362,9 @@ export function V2LayoutShell() {
 				},
 			};
 
-			setPanelState(
-				"central",
-				(panel) => upsertPendingView(panel, newView),
-				{ focus: shouldFocus },
-			);
+			setPanelState("central", (panel) => upsertPendingView(panel, newView), {
+				focus: shouldFocus,
+			});
 		}
 	};
 
@@ -359,13 +383,13 @@ export function V2LayoutShell() {
 		if (existingCommitView) {
 			setPanelState(
 				"central",
-				(panel) => activatePanelView(panel, existingCommitView.viewKey),
+				(panel) => activatePanelView(panel, existingCommitView.instanceKey),
 				{ focus: shouldFocus },
 			);
 		} else {
-			const newView = {
-				viewKey: createViewKey("commit"),
-				viewId: "commit" as ViewId,
+			const newView: ViewInstance = {
+				instanceKey: createViewInstanceKey("commit"),
+				viewKey: "commit" as ViewKey,
 				isPending: true,
 				metadata: {
 					checkpointId,
@@ -373,11 +397,9 @@ export function V2LayoutShell() {
 				},
 			};
 
-			setPanelState(
-				"central",
-				(panel) => upsertPendingView(panel, newView),
-				{ focus: shouldFocus },
-			);
+			setPanelState("central", (panel) => upsertPendingView(panel, newView), {
+				focus: shouldFocus,
+			});
 		}
 	};
 
@@ -390,34 +412,32 @@ export function V2LayoutShell() {
 	) => {
 		const shouldFocus = options?.focus ?? true;
 		const existingDiffView = hydratedCentral.views.find(
-			(view) => view.viewId === "diff" && view.metadata?.fileId === fileId,
+			(view) => view.viewKey === "diff" && view.metadata?.fileId === fileId,
 		);
-
-		const encodedLabel = filePath.split("/").filter(Boolean).pop() ?? filePath;
-	const diffLabel = decodeURIComponentSafe(encodedLabel);
-	const diffConfig = createWorkingVsCheckpointDiffConfig(fileId, diffLabel);
+		const diffLabel = diffLabelFromPath(filePath) ?? filePath;
+		const diffConfig = createWorkingVsCheckpointDiffConfig(fileId, diffLabel);
 
 		if (existingDiffView) {
 			setPanelState(
 				"central",
 				(panel) => {
 					const nextViews = panel.views.map((entry) =>
-						entry.viewKey === existingDiffView.viewKey
+						entry.instanceKey === existingDiffView.instanceKey
 							? {
-								...entry,
-								isPending: false,
-								metadata: {
-									fileId,
-									filePath,
-									label: diffLabel,
-									diff: diffConfig,
-								},
-							}
+									...entry,
+									isPending: false,
+									metadata: {
+										fileId,
+										filePath,
+										label: diffLabel,
+										diff: diffConfig,
+									},
+								}
 							: entry,
-						);
+					);
 					return {
 						views: nextViews,
-						activeViewKey: existingDiffView.viewKey,
+						activeInstanceKey: existingDiffView.instanceKey,
 					};
 				},
 				{ focus: shouldFocus },
@@ -425,9 +445,9 @@ export function V2LayoutShell() {
 			return;
 		}
 
-		const newView = {
-			viewKey: createViewKey("diff"),
-			viewId: "diff" as ViewId,
+		const newView: ViewInstance = {
+			instanceKey: createViewInstanceKey("diff"),
+			viewKey: "diff",
 			isPending: true,
 			metadata: {
 				fileId,
@@ -437,11 +457,9 @@ export function V2LayoutShell() {
 			},
 		};
 
-		setPanelState(
-			"central",
-			(panel) => upsertPendingView(panel, newView),
-			{ focus: shouldFocus },
-		);
+		setPanelState("central", (panel) => upsertPendingView(panel, newView), {
+			focus: shouldFocus,
+		});
 	};
 
 	return (
@@ -454,172 +472,164 @@ export function V2LayoutShell() {
 				<TopBar />
 				<div className="flex flex-1 overflow-hidden px-2 gap-4">
 					<PanelGroup direction="horizontal" onLayout={handleLayoutChange}>
-						<Panel
-							defaultSize={panelSizes.left}
-							minSize={10}
-							maxSize={40}
-						>
+						<Panel defaultSize={panelSizes.left} minSize={10} maxSize={40}>
 							<SidePanel
 								side="left"
 								title="Navigator"
 								panel={hydratedLeft}
 								isFocused={focusedPanel === "left"}
 								onFocusPanel={focusPanel}
-								onSelectView={(viewKey) =>
+								onSelectView={(instanceKey) =>
 									setPanelState(
 										"left",
 										(panel) => ({
 											views: panel.views,
-											activeViewKey: viewKey,
+											activeInstanceKey: instanceKey,
 										}),
 										{ focus: true },
 									)
 								}
-								onAddView={(viewId) =>
+								onAddView={(viewKey) =>
 									setPanelState(
 										"left",
 										(panel) => {
-											const next = {
-												viewKey: createViewKey(viewId),
-												viewId,
+											const next: ViewInstance = {
+												instanceKey: createViewInstanceKey(viewKey),
+												viewKey,
 											};
 											return {
 												views: [...panel.views, next],
-												activeViewKey: next.viewKey,
+												activeInstanceKey: next.instanceKey,
 											};
 										},
 										{ focus: true },
 									)
 								}
-								onRemoveView={(viewKey) =>
+								onRemoveView={(instanceKey) =>
 									setPanelState(
 										"left",
 										(panel) => {
 											const views = panel.views.filter(
-												(entry) => entry.viewKey !== viewKey,
+												(entry) => entry.instanceKey !== instanceKey,
 											);
 											const nextActive =
-												panel.activeViewKey === viewKey
-													? (views[views.length - 1]?.viewKey ?? null)
-													: panel.activeViewKey;
-											return { views, activeViewKey: nextActive };
+												panel.activeInstanceKey === instanceKey
+													? (views[views.length - 1]?.instanceKey ?? null)
+													: panel.activeInstanceKey;
+											return { views, activeInstanceKey: nextActive };
 										},
 										{ focus: true },
 									)
 								}
-									viewContext={{
-										onOpenFile: handleOpenFile,
-										onOpenCommit: handleOpenCommit,
-										onOpenDiff: handleOpenDiff,
-									}}
+								viewContext={{
+									onOpenFile: handleOpenFile,
+									onOpenCommit: handleOpenCommit,
+									onOpenDiff: handleOpenDiff,
+								}}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
 						<Panel defaultSize={panelSizes.central} minSize={30}>
-								<CentralPanel
-									panel={hydratedCentral}
-									isFocused={focusedPanel === "central"}
-									onFocusPanel={focusPanel}
-									onSelectView={(viewKey) =>
-										setPanelState(
-											"central",
-											(panel) => activatePanelView(panel, viewKey),
-											{ focus: true },
-										)
-									}
-									onRemoveView={(viewKey) =>
-										setPanelState(
-											"central",
-											(panel) => {
-												const views = panel.views.filter(
-													(entry) => entry.viewKey !== viewKey,
-												);
-												const nextActive =
-													panel.activeViewKey === viewKey
-														? (views[views.length - 1]?.viewKey ?? null)
-														: panel.activeViewKey;
-												return { views, activeViewKey: nextActive };
-											},
-											{ focus: true },
-										)
-									}
-									onFinalizePendingView={(viewKey) =>
+							<CentralPanel
+								panel={hydratedCentral}
+								isFocused={focusedPanel === "central"}
+								onFocusPanel={focusPanel}
+								onSelectView={(instanceKey) =>
 									setPanelState(
 										"central",
-										(panel) => activatePanelView(panel, viewKey),
+										(panel) => activatePanelView(panel, instanceKey),
 										{ focus: true },
 									)
 								}
-									viewContext={{
-										onOpenFile: handleOpenFile,
-										onOpenCommit: handleOpenCommit,
-										onOpenDiff: handleOpenDiff,
-									}}
+								onRemoveView={(instanceKey) =>
+									setPanelState(
+										"central",
+										(panel) => {
+											const views = panel.views.filter(
+												(entry) => entry.instanceKey !== instanceKey,
+											);
+											const nextActive =
+												panel.activeInstanceKey === instanceKey
+													? (views[views.length - 1]?.instanceKey ?? null)
+													: panel.activeInstanceKey;
+											return { views, activeInstanceKey: nextActive };
+										},
+										{ focus: true },
+									)
+								}
+								onFinalizePendingView={(instanceKey) =>
+									setPanelState(
+										"central",
+										(panel) => activatePanelView(panel, instanceKey),
+										{ focus: true },
+									)
+								}
+								viewContext={{
+									onOpenFile: handleOpenFile,
+									onOpenCommit: handleOpenCommit,
+									onOpenDiff: handleOpenDiff,
+								}}
 							/>
-							</Panel>
+						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
-						<Panel
-							defaultSize={panelSizes.right}
-							minSize={10}
-							maxSize={40}
-						>
+						<Panel defaultSize={panelSizes.right} minSize={10} maxSize={40}>
 							<SidePanel
 								side="right"
 								title="Secondary"
 								panel={hydratedRight}
 								isFocused={focusedPanel === "right"}
 								onFocusPanel={focusPanel}
-								onSelectView={(viewKey) =>
+								onSelectView={(instanceKey) =>
 									setPanelState(
 										"right",
 										(panel) => ({
 											views: panel.views,
-											activeViewKey: viewKey,
+											activeInstanceKey: instanceKey,
 										}),
 										{ focus: true },
 									)
 								}
-								onAddView={(viewId) =>
+								onAddView={(viewKey) =>
 									setPanelState(
 										"right",
 										(panel) => {
-											const next = {
-												viewKey: createViewKey(viewId),
-												viewId,
+											const next: ViewInstance = {
+												instanceKey: createViewInstanceKey(viewKey),
+												viewKey,
 											};
 											return {
 												views: [...panel.views, next],
-												activeViewKey: next.viewKey,
+												activeInstanceKey: next.instanceKey,
 											};
 										},
 										{ focus: true },
 									)
 								}
-								onRemoveView={(viewKey) =>
+								onRemoveView={(instanceKey) =>
 									setPanelState(
 										"right",
 										(panel) => {
 											const views = panel.views.filter(
-												(entry) => entry.viewKey !== viewKey,
+												(entry) => entry.instanceKey !== instanceKey,
 											);
 											const nextActive =
-												panel.activeViewKey === viewKey
-													? (views[views.length - 1]?.viewKey ?? null)
-													: panel.activeViewKey;
-											return { views, activeViewKey: nextActive };
+												panel.activeInstanceKey === instanceKey
+													? (views[views.length - 1]?.instanceKey ?? null)
+													: panel.activeInstanceKey;
+											return { views, activeInstanceKey: nextActive };
 										},
 										{ focus: true },
 									)
 								}
-									viewContext={{
-										onOpenFile: handleOpenFile,
-										onOpenCommit: handleOpenCommit,
-										onOpenDiff: handleOpenDiff,
-									}}
+								viewContext={{
+									onOpenFile: handleOpenFile,
+									onOpenCommit: handleOpenCommit,
+									onOpenDiff: handleOpenDiff,
+								}}
 							/>
 						</Panel>
 					</PanelGroup>

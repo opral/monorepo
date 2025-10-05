@@ -10,9 +10,10 @@ import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
 import type {
 	PanelSide,
 	PanelState,
-	ViewId,
+	ViewKey,
 	ViewContext,
 	ViewDefinition,
+	ViewInstance,
 } from "./types";
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
@@ -22,9 +23,9 @@ interface SidePanelProps {
 	readonly side: PanelSide;
 	readonly title: string;
 	readonly panel: PanelState;
-	readonly onSelectView: (viewKey: string) => void;
-	readonly onAddView: (toolId: ViewId) => void;
-	readonly onRemoveView: (viewKey: string) => void;
+	readonly onSelectView: (instanceKey: string) => void;
+	readonly onAddView: (toolId: ViewKey) => void;
+	readonly onRemoveView: (instanceKey: string) => void;
 	readonly viewContext?: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
@@ -48,12 +49,14 @@ export function SidePanel({
 	isFocused,
 	onFocusPanel,
 }: SidePanelProps) {
-	const activeEntry = panel.activeViewKey
-		? (panel.views.find((view) => view.viewKey === panel.activeViewKey) ?? null)
+	const activeEntry = panel.activeInstanceKey
+		? (panel.views.find(
+				(view) => view.instanceKey === panel.activeInstanceKey,
+			) ?? null)
 		: (panel.views[0] ?? null);
 
 	const activeView = activeEntry
-		? (VIEW_MAP.get(activeEntry.viewId) ?? null)
+		? (VIEW_MAP.get(activeEntry.viewKey) ?? null)
 		: null;
 
 	const hasViews = panel.views.length > 0;
@@ -64,7 +67,7 @@ export function SidePanel({
 	});
 
 	const availableViews = VIEW_DEFINITIONS.filter(
-		(view) => !panel.views.some((entry) => entry.viewId === view.id),
+		(view) => !panel.views.some((entry) => entry.viewKey === view.key),
 	);
 	const canAddMoreViews = availableViews.length > 0;
 
@@ -82,21 +85,21 @@ export function SidePanel({
 				{hasViews && (
 					<Panel.TabBar>
 						{panel.views.map((entry) => {
-							const view = VIEW_MAP.get(entry.viewId);
+							const view = VIEW_MAP.get(entry.viewKey);
 							if (!view) return null;
-							const isActive = activeEntry?.viewKey === entry.viewKey;
+							const isActive = activeEntry?.instanceKey === entry.instanceKey;
 							return (
 								<Panel.Tab
-									key={entry.viewKey}
+									key={entry.instanceKey}
 									icon={view.icon}
 									label={view.label}
 									isActive={isActive}
 									isFocused={isFocused && isActive}
-									onClick={() => onSelectView(entry.viewKey)}
-									onClose={() => onRemoveView(entry.viewKey)}
+									onClick={() => onSelectView(entry.instanceKey)}
+									onClose={() => onRemoveView(entry.instanceKey)}
 									dragData={{
+										instanceKey: entry.instanceKey,
 										viewKey: entry.viewKey,
-										viewId: entry.viewId,
 										fromPanel: side,
 									}}
 								/>
@@ -119,8 +122,8 @@ export function SidePanel({
 								>
 									{availableViews.map((ext) => (
 										<DropdownMenuItem
-											key={ext.id}
-											onSelect={() => onAddView(ext.id)}
+											key={ext.key}
+											onSelect={() => onAddView(ext.key)}
 											className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
 										>
 											<ext.icon className="h-4 w-4" />
@@ -143,7 +146,7 @@ export function SidePanel({
 						<ViewPanel
 							view={activeView}
 							context={contextWithFocus}
-							panelView={activeEntry}
+							viewInstance={activeEntry}
 						/>
 					) : (
 						<EmptyPanelState
@@ -160,7 +163,7 @@ export function SidePanel({
 
 interface EmptyPanelStateProps {
 	side: PanelSide;
-	onAddView: (viewId: ViewId) => void;
+	onAddView: (viewKey: ViewKey) => void;
 	availableViews?: ViewDefinition[];
 }
 
@@ -204,8 +207,8 @@ function EmptyPanelState({
 				>
 					{menuViews.map((ext) => (
 						<DropdownMenuItem
-							key={ext.id}
-							onSelect={() => onAddView(ext.id)}
+							key={ext.key}
+							onSelect={() => onAddView(ext.key)}
 							className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
 						>
 							<ext.icon className="h-4 w-4" />

@@ -79,13 +79,13 @@ export function ChangedFilesList({
 									{decodedPath}
 								</span>
 							</button>
-								<input
-									type="checkbox"
-									checked={isSelected}
-									onChange={() => onToggleFile(file.id)}
-									aria-label={`Select ${decodedPath}`}
-									className={checkboxClasses}
-								/>
+							<input
+								type="checkbox"
+								checked={isSelected}
+								onChange={() => onToggleFile(file.id)}
+								aria-label={`Select ${decodedPath}`}
+								className={checkboxClasses}
+							/>
 						</div>
 					);
 				})}

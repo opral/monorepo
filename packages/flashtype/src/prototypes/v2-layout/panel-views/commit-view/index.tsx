@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
-import type { ViewContext, PanelView } from "../../types";
+import type { ViewContext, ViewInstance } from "../../types";
 import { File } from "lucide-react";
 
 type CommitFile = {
@@ -12,7 +12,7 @@ type CommitFile = {
 
 type CommitViewProps = {
 	readonly context?: ViewContext;
-	readonly view?: PanelView;
+	readonly view?: ViewInstance;
 };
 
 const timestampFormatter = new Intl.DateTimeFormat(undefined, {
