@@ -1,0 +1,149 @@
+import { expect, test } from "vitest";
+import { openLix } from "../../../lix/open-lix.js";
+import { createQueryPreprocessor } from "../create-query-preprocessor.js";
+
+if (typeof globalThis.CustomEvent === "undefined") {
+	class NodeCustomEvent<T = unknown> extends Event {
+		readonly detail: T;
+		constructor(type: string, params?: CustomEventInit<T>) {
+			super(type, params);
+			this.detail = params?.detail as T;
+		}
+	}
+	(globalThis as unknown as { CustomEvent: typeof CustomEvent }).CustomEvent =
+		NodeCustomEvent as unknown as typeof CustomEvent;
+}
+
+const DELETE_SCHEMA = {
+	"x-lix-key": "delete_schema",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["id"],
+	"x-lix-defaults": {
+		lixcol_file_id: "lix",
+		lixcol_plugin_key: "lix_own_entity",
+	},
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+	},
+	required: ["id"],
+	additionalProperties: false,
+} as const;
+
+test("rewrites deletes for stored schema views", async () => {
+	const lix = await openLix({});
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: DELETE_SCHEMA })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO delete_schema (id, name) VALUES (?, ?)",
+			parameters: ["row-1", "Original"],
+		});
+
+		lix.engine!.sqlite.exec({
+			sql: insertResult.sql,
+			bind: insertResult.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const deleteResult = preprocess({
+			sql: "DELETE FROM delete_schema WHERE id = ?",
+			parameters: ["row-1"],
+		});
+
+		expect(deleteResult.sql).toContain("DELETE FROM state_all");
+		expect(deleteResult.parameters).toEqual(["delete_schema", "row-1"]);
+
+		lix.engine!.sqlite.exec({
+			sql: deleteResult.sql,
+			bind: deleteResult.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT name FROM delete_schema WHERE id = ?",
+			parameters: ["row-1"],
+		});
+
+		const rows = lix.engine!.sqlite.exec({
+			sql: selectResult.sql,
+			bind: selectResult.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		});
+
+		expect(rows).toEqual([]);
+	} finally {
+		await lix.close();
+	}
+});
+
+test("rewrites deletes for _all views", async () => {
+	const lix = await openLix({});
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: DELETE_SCHEMA })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO delete_schema_all (id, name, lixcol_version_id) VALUES (?, ?, ?)",
+			parameters: ["row-2", "Original All", activeVersion.version_id],
+		});
+
+		lix.engine!.sqlite.exec({
+			sql: insertResult.sql,
+			bind: insertResult.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const deleteResult = preprocess({
+			sql: "DELETE FROM delete_schema_all WHERE id = ? AND lixcol_version_id = ?",
+			parameters: ["row-2", activeVersion.version_id],
+		});
+
+		expect(deleteResult.sql).toContain("DELETE FROM state_all");
+		expect(deleteResult.parameters).toEqual([
+			"delete_schema",
+			"row-2",
+			activeVersion.version_id,
+		]);
+
+		lix.engine!.sqlite.exec({
+			sql: deleteResult.sql,
+			bind: deleteResult.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT name FROM delete_schema_all WHERE id = ? AND lixcol_version_id = ?",
+			parameters: ["row-2", activeVersion.version_id],
+		});
+
+		const rows = lix.engine!.sqlite.exec({
+			sql: selectResult.sql,
+			bind: selectResult.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		});
+
+		expect(rows).toEqual([]);
+	} finally {
+		await lix.close();
+	}
+});

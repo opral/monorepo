@@ -19,6 +19,7 @@ import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
 import { rewriteEntityInsert } from "./entity-views/insert.js";
 import { rewriteEntityUpdate } from "./entity-views/update.js";
+import { rewriteEntityDelete } from "./entity-views/delete.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -65,6 +66,18 @@ export async function createQueryPreprocessor(
 		}
 		if (kind === "update") {
 			const rewritten = rewriteEntityUpdate({
+				sql: currentSql,
+				tokens,
+				parameters,
+				engine,
+			});
+			if (rewritten) {
+				return rewritten;
+			}
+			return { sql: currentSql, parameters };
+		}
+		if (kind === "delete") {
+			const rewritten = rewriteEntityDelete({
 				sql: currentSql,
 				tokens,
 				parameters,
