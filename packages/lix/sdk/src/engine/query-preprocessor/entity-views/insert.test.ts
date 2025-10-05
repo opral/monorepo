@@ -47,10 +47,9 @@ test("rewrites inserts for stored schema views", async () => {
 			0,
 		]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: rewritten.sql,
-			bind: rewritten.parameters as any[],
-			returnValue: "resultRows",
+			parameters: rewritten.parameters as any[],
 		});
 
 		const selectResult = preprocess({
@@ -58,13 +57,10 @@ test("rewrites inserts for stored schema views", async () => {
 			parameters: ["row-1"],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([
 			{
@@ -110,10 +106,9 @@ test("rewrites inserts for _all view", async () => {
 			0,
 		]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: rewritten.sql,
-			bind: rewritten.parameters as any[],
-			returnValue: "resultRows",
+			parameters: rewritten.parameters as any[],
 		});
 
 		const selectResult = preprocess({
@@ -121,13 +116,10 @@ test("rewrites inserts for _all view", async () => {
 			parameters: ["row-2", activeVersion.version_id],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([
 			{
@@ -211,10 +203,9 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 		expect(rewritten.parameters).toContain('{"items":["foo","bar"]}');
 		expect(rewritten.parameters).toContain('{"nested":{"value":"primitive"}}');
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: rewritten.sql,
-			bind: rewritten.parameters as any[],
-			returnValue: "resultRows",
+			parameters: rewritten.parameters as any[],
 		});
 
 		const selectResult = preprocess({
@@ -222,13 +213,10 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 			parameters: ["row-1", "row-2", "row-3"],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([
 			{ id: "row-1", payload: '{"foo":"bar"}' },

@@ -48,10 +48,9 @@ test("rewrites deletes for stored schema views", async () => {
 		expect(deleteResult.sql).toContain("DELETE FROM state_all");
 		expect(deleteResult.parameters).toEqual(["delete_schema", "row-1"]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: deleteResult.sql,
-			bind: deleteResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: deleteResult.parameters as any[],
 		});
 
 		const selectResult = preprocess({
@@ -59,13 +58,10 @@ test("rewrites deletes for stored schema views", async () => {
 			parameters: ["row-1"],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([]);
 	} finally {
@@ -111,10 +107,9 @@ test("rewrites deletes for _all views", async () => {
 			activeVersion.version_id,
 		]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: deleteResult.sql,
-			bind: deleteResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: deleteResult.parameters as any[],
 		});
 
 		const selectResult = preprocess({
@@ -122,13 +117,10 @@ test("rewrites deletes for _all views", async () => {
 			parameters: ["row-2", activeVersion.version_id],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([]);
 	} finally {

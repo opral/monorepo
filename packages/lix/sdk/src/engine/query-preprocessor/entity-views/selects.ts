@@ -6,6 +6,7 @@ type CachedSelects = {
 };
 
 const cache = new WeakMap<object, CachedSelects>();
+const subscriptions = new WeakMap<object, () => void>();
 const loading = new WeakSet<object>();
 
 const STORED_SCHEMA_KEY = "lix_stored_schema";
@@ -16,24 +17,25 @@ const STORED_SCHEMA_KEY = "lix_stored_schema";
  * that used to be implemented via SQLite views.
  */
 export function getEntityViewSelects(args: {
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "runtimeCacheRef" | "hooks" | "executeSync">;
 }): { map: Map<string, string>; signature: string } {
 	const { engine } = args;
+	ensureSubscription(engine);
+
 	const cached = cache.get(engine.runtimeCacheRef);
+	if (cached) {
+		return { map: cached.map, signature: cached.signature };
+	}
 	if (loading.has(engine.runtimeCacheRef)) {
 		return {
-			map: cached?.map ?? new Map<string, string>(),
-			signature: cached?.signature ?? "loading",
+			map: new Map<string, string>(),
+			signature: "loading",
 		};
 	}
 
 	loading.add(engine.runtimeCacheRef);
 	try {
 		const { schemas, signature } = loadStoredSchemas(engine);
-		if (cached && cached.signature === signature) {
-			return { map: cached.map, signature: cached.signature };
-		}
-
 		const map = new Map<string, string>();
 		for (const entry of schemas) {
 			const schema = entry.definition;
@@ -70,19 +72,18 @@ type LoadedSchema = {
 	updatedAt: string;
 };
 
-function loadStoredSchemas(engine: Pick<LixEngine, "sqlite">): {
+function loadStoredSchemas(engine: Pick<LixEngine, "executeSync">): {
 	schemas: LoadedSchema[];
 	signature: string;
 } {
-	const rows = engine.sqlite.exec({
+	const result = engine.executeSync({
 		sql: `SELECT snapshot_content, updated_at
 			FROM internal_state_vtable
 			WHERE schema_key = ? AND snapshot_content IS NOT NULL`,
-		bind: [STORED_SCHEMA_KEY],
-		returnValue: "resultRows",
-		rowMode: "object",
-		columnNames: [],
-	}) as Array<Record<string, unknown>>;
+		parameters: [STORED_SCHEMA_KEY],
+	});
+
+	const rows = (result.rows ?? []) as Array<Record<string, unknown>>;
 
 	const schemas: LoadedSchema[] = [];
 	let maxUpdated = "";
@@ -105,6 +106,25 @@ function loadStoredSchemas(engine: Pick<LixEngine, "sqlite">): {
 
 	const signature = `${schemas.length}:${maxUpdated}`;
 	return { schemas, signature };
+}
+
+function ensureSubscription(
+	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef">
+): void {
+	if (!engine.hooks) return;
+	if (subscriptions.has(engine.runtimeCacheRef)) return;
+
+	const unsubscribe = engine.hooks.onStateCommit(({ changes }) => {
+		if (!changes || changes.length === 0) return;
+		for (const change of changes) {
+			if (change.schema_key === STORED_SCHEMA_KEY) {
+				cache.delete(engine.runtimeCacheRef);
+				break;
+			}
+		}
+	});
+
+	subscriptions.set(engine.runtimeCacheRef, unsubscribe);
 }
 
 function extractSchemaValue(snapshot: unknown): unknown {

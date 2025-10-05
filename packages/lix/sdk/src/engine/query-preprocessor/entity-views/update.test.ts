@@ -69,13 +69,10 @@ test("rewrites updates for stored schema views", async () => {
 			parameters: ["row-1"],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([
 			{
@@ -140,13 +137,10 @@ test("rewrites updates for _all views", async () => {
 			parameters: ["row-2", activeVersion.version_id],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
 		expect(rows).toEqual([
 			{
@@ -214,17 +208,12 @@ test("rewrites updates with JSON payloads", async () => {
 			parameters: ["row-1"],
 		});
 
-		const rows = lix.engine!.sqlite.exec({
+		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			bind: selectResult.parameters as any[],
-			returnValue: "resultRows",
-			rowMode: "object",
-			columnNames: [],
-		});
+			parameters: selectResult.parameters as any[],
+		}).rows;
 
-		expect(rows).toEqual([
-			{ payload: '{"items":["foo","bar"]}' },
-		]);
+		expect(rows).toEqual([{ payload: '{"items":["foo","bar"]}' }]);
 
 		const stateRows = await lix.db
 			.selectFrom("state_all")

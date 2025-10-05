@@ -140,7 +140,10 @@ type ViewCacheEntry = {
 const viewCache = new WeakMap<object, ViewCacheEntry>();
 
 function getViewSelectMap(
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "runtimeCacheRef" | "hooks" | "executeSync"
+	>
 ): Map<string, string> {
 	const currentVersion = getSchemaVersion(engine.sqlite);
 	const { map: entityViews, signature: entitySignature } = getEntityViewSelects(
