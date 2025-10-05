@@ -13,14 +13,17 @@ import {
 } from "../sql-rewriter/tokenizer.js";
 import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
 
-interface StoredSchemaDefinition {
-	readonly [key: string]: any;
-}
-
-export interface RewriteResult {
-	sql: string;
-	parameters: ReadonlyArray<unknown>;
-}
+import {
+	baseSchemaKey,
+	classifyViewVariant,
+	extractIdentifier,
+	extractPrimaryKeys,
+	findKeyword,
+	getColumnOrDefault,
+	loadStoredSchemaDefinition,
+	type RewriteResult,
+	type StoredSchemaDefinition,
+} from "./shared.js";
 
 export function rewriteEntityInsert(args: {
 	sql: string;
@@ -165,43 +168,6 @@ export function rewriteEntityInsert(args: {
 	};
 }
 
-function findKeyword(tokens: IToken[], start: number, keyword: string): number {
-	const target = keyword.toUpperCase();
-	for (let i = start; i < tokens.length; i++) {
-		const image = tokens[i]?.image;
-		if (!image) continue;
-		if (image.toUpperCase() === target) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-function extractIdentifier(token: IToken | undefined): string | null {
-	if (!token?.image) return null;
-	if (token.tokenType === QIdent) {
-		return token.image.slice(1, -1).replace(/""/g, '"');
-	}
-	if (token.tokenType === Ident) {
-		return token.image;
-	}
-	return null;
-}
-
-function classifyViewVariant(name: string): "base" | "all" | "history" {
-	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return "all";
-	if (lower.endsWith("_history")) return "history";
-	return "base";
-}
-
-function baseSchemaKey(name: string): string | null {
-	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return name.slice(0, -4);
-	if (lower.endsWith("_history")) return name.slice(0, -8);
-	return name;
-}
-
 function parseColumnList(
 	tokens: IToken[],
 	index: number
@@ -287,69 +253,4 @@ function buildColumnValueMap(
 		map.set(columnName, values[i]);
 	}
 	return map;
-}
-
-function loadStoredSchemaDefinition(
-	sqlite: Pick<LixEngine, "sqlite">["sqlite"],
-	schemaKey: string
-): StoredSchemaDefinition | null {
-	const rows = sqlite.exec({
-		sql: `SELECT json_extract(snapshot_content, '$.value') AS value
-			FROM internal_state_vtable
-			WHERE schema_key = 'lix_stored_schema'
-			AND json_extract(snapshot_content, '$.key') = ?
-			AND snapshot_content IS NOT NULL
-			ORDER BY json_extract(snapshot_content, '$.version') DESC
-			LIMIT 1`,
-		bind: [schemaKey],
-		returnValue: "resultRows",
-		rowMode: "object",
-		columnNames: [],
-	}) as Array<Record<string, unknown>>;
-
-	const first = rows[0];
-	if (!first) return null;
-	const raw = first.value;
-	if (typeof raw === "string") {
-		try {
-			return JSON.parse(raw) as StoredSchemaDefinition;
-		} catch {
-			return null;
-		}
-	}
-	if (typeof raw === "object" && raw !== null) {
-		return raw as StoredSchemaDefinition;
-	}
-	return null;
-}
-
-function extractPrimaryKeys(schema: StoredSchemaDefinition): string[] | null {
-	const pk = schema["x-lix-primary-key"];
-	if (Array.isArray(pk) && pk.length > 0) {
-		return pk.map((key) => key.toLowerCase());
-	}
-	return null;
-}
-
-function resolveVersionSource(source: unknown): string | null {
-	if (typeof source !== "string") return null;
-	switch (source) {
-		case "active":
-		case "active_version":
-			return "(SELECT version_id FROM active_version)";
-		default:
-			return null;
-	}
-}
-
-function getColumnOrDefault(
-	columnMap: Map<string, unknown>,
-	column: string,
-	defaultValue: unknown
-): unknown {
-	const value = columnMap.get(column.toLowerCase());
-	if (value !== undefined) {
-		return value;
-	}
-	return defaultValue;
 }
