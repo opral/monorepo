@@ -7,19 +7,27 @@ type ChangedFilesListProps = {
 	selectedFiles: Set<string>;
 	onToggleFile: (fileId: string) => void;
 	onToggleAll: () => void;
+	onOpenDiff?: (fileId: string, filePath: string) => void;
 };
 
 /**
  * Displays the list of working tree files with selection controls for checkpoint creation.
  *
  * @example
- * <ChangedFilesList files={files} selectedFiles={selected} onToggleFile={toggle} onToggleAll={toggleAll} />
+ * <ChangedFilesList
+ *   files={files}
+ *   selectedFiles={selected}
+ *   onToggleFile={toggle}
+ *   onToggleAll={toggleAll}
+ *   onOpenDiff={(fileId, path) => console.log(fileId, path)}
+ * />
  */
 export function ChangedFilesList({
 	files,
 	selectedFiles,
 	onToggleFile,
 	onToggleAll,
+	onOpenDiff,
 }: ChangedFilesListProps) {
 	const showHeader = files.length > 0;
 	const allSelected = showHeader && selectedFiles.size === files.length;
@@ -43,6 +51,7 @@ export function ChangedFilesList({
 
 			<div className="flex flex-col">
 				{files.map((file) => {
+					const decodedPath = decodeURIComponent(file.path);
 					const isSelected = selectedFiles.has(file.id);
 					return (
 						<div
@@ -52,27 +61,31 @@ export function ChangedFilesList({
 								isSelected && "border-brand-200 bg-brand-50",
 							)}
 						>
-							<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => onOpenDiff?.(file.id, file.path)}
+								className="flex flex-1 items-center gap-2 rounded-sm bg-transparent px-0 text-left text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+							>
 								<StatusIcon status={file.status} />
 								<span
 									className={clsx(
-										"max-w-[16rem] truncate text-left text-xs",
+										"max-w-[16rem] truncate",
 										file.status === "removed" &&
 											"line-through text-muted-foreground",
 										file.status !== "removed" && "text-foreground",
 									)}
-									title={decodeURIComponent(file.path)}
+									title={decodedPath}
 								>
-									{decodeURIComponent(file.path)}
+									{decodedPath}
 								</span>
-							</div>
-							<input
-								type="checkbox"
-								checked={isSelected}
-								onChange={() => onToggleFile(file.id)}
-								aria-label={`Select ${decodeURIComponent(file.path)}`}
-								className={checkboxClasses}
-							/>
+							</button>
+								<input
+									type="checkbox"
+									checked={isSelected}
+									onChange={() => onToggleFile(file.id)}
+									aria-label={`Select ${decodedPath}`}
+									className={checkboxClasses}
+								/>
 						</div>
 					);
 				})}

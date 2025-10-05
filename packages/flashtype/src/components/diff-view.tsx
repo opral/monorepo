@@ -73,6 +73,9 @@ export function DiffView() {
 	const diffArray = Array.isArray(diffs) ? (diffs as any[]) : [];
 	const hasChanges = diffArray.some((d) => d.status !== "unchanged");
 	const renderDiffs = diffArray as unknown as RenderDiffArgs["diffs"];
+	if (import.meta.env.DEV && renderDiffs.length > 0) {
+		console.debug("DiffView row", renderDiffs[0]);
+	}
 
 	return (
 		<div data-diff-view-mode={mode}>

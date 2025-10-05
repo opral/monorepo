@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import type { Lix } from "@lix-js/sdk";
+import type { SelectQueryBuilder } from "kysely";
 
 /**
  * Union of the prototype view identifiers that can mount inside a panel.
@@ -14,13 +16,39 @@ export type ViewId =
 	| "checkpoint"
 	| "history"
 	| "file-content"
-	| "commit";
+	| "commit"
+	| "diff";
+
+/**
+ * Declares how a diff view should source its data.
+ *
+ * @example
+ * const source: DiffSource = { kind: "working-vs-checkpoint", fileId: "file-123" };
+ */
+export type RenderableDiff = {
+	readonly entity_id: string;
+	readonly schema_key: string;
+	readonly status: "added" | "modified" | "removed" | "unchanged";
+	readonly plugin_key: string;
+	readonly before_snapshot_content: unknown;
+	readonly after_snapshot_content: unknown;
+};
+
+export type DiffViewConfig = {
+	readonly title?: string;
+	readonly subtitle?: string;
+	readonly query: (ctx: { lix: Lix }) => SelectQueryBuilder<any, any, RenderableDiff>;
+};
 
 /**
  * Per-panel instance metadata used to track which views are open.
  *
  * @example
- * const view: PanelView = { viewKey: "files-1", viewId: "files" };
+ * const view: PanelView = {
+ *   viewKey: "files-1",
+ *   viewId: "files",
+ *   metadata: { fileId: "file-123" },
+ * };
  */
 export interface PanelView {
 	readonly viewKey: string;
@@ -30,6 +58,8 @@ export interface PanelView {
 		readonly filePath?: string;
 		readonly label?: string;
 		readonly checkpointId?: string;
+		readonly fileId?: string;
+		readonly diff?: DiffViewConfig;
 	};
 }
 
@@ -55,6 +85,7 @@ export interface ViewDefinition {
  *
  * @example
  * context.onOpenFile?.("/docs/guide.md", { focus: false });
+ * context.onOpenDiff?.("file-123", "/docs/guide.md");
  */
 export interface ViewContext {
 	readonly onOpenFile?: (
@@ -74,6 +105,16 @@ export interface ViewContext {
 			/**
 			 * Whether the central panel should receive focus when the commit opens.
 			 * Defaults to `true` for backwards compatibility.
+			 */
+			readonly focus?: boolean;
+		},
+	) => void;
+	readonly onOpenDiff?: (
+		fileId: string,
+		filePath: string,
+		options?: {
+			/**
+			 * Whether the central panel should receive focus when the diff opens.
 			 */
 			readonly focus?: boolean;
 		},

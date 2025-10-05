@@ -14,7 +14,7 @@ type CheckpointViewProps = {
 	readonly context?: ViewContext;
 };
 
-export function CheckpointView(_props: CheckpointViewProps) {
+export function CheckpointView({ context }: CheckpointViewProps) {
 	const [message, setMessage] = useState("");
 	const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 	const [isCreating, setIsCreating] = useState(false);
@@ -76,6 +76,11 @@ export function CheckpointView(_props: CheckpointViewProps) {
 		}
 	};
 
+	const handleOpenDiff = context?.onOpenDiff
+		? (fileId: string, filePath: string) =>
+				context.onOpenDiff?.(fileId, decodeURIComponent(filePath))
+		: undefined;
+
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<div className="flex-1 overflow-y-auto">
@@ -84,6 +89,7 @@ export function CheckpointView(_props: CheckpointViewProps) {
 					selectedFiles={visibleSelection}
 					onToggleFile={handleToggleFile}
 					onToggleAll={handleToggleAll}
+					onOpenDiff={handleOpenDiff}
 				/>
 			</div>
 

@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Files, Flag, GitCommitVertical, Search } from "lucide-react";
+import { CalendarDays, FileText, Files, Flag, GitCommitVertical, Diff, Search } from "lucide-react";
 import type { ViewDefinition, ViewId } from "./types";
 import { FilesView } from "./panel-views/files-view/index";
 import { SearchView } from "./panel-views/search-view/index";
@@ -7,6 +7,7 @@ import { MarkdownView } from "./panel-views/markdown-view/index";
 import { CheckpointView } from "./panel-views/checkpoint-view/index";
 import { HistoryView } from "./panel-views/history-view/index";
 import { CommitView } from "./panel-views/commit-view/index";
+import { DiffPanelView } from "./panel-views/diff-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -70,6 +71,13 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		render: (context, panelView) => (
 			<CommitView context={context} view={panelView} />
 		),
+	},
+	{
+		id: "diff",
+		label: "Diff",
+		description: "Inspect changes for a file.",
+		icon: Diff,
+		render: (_context, panelView) => <DiffPanelView config={panelView?.metadata?.diff} />,
 	},
 ];
 
