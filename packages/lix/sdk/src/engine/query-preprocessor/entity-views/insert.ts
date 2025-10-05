@@ -12,6 +12,7 @@ import {
 	NULL as NULL_TOKEN,
 } from "../sql-rewriter/tokenizer.js";
 import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
+import { isJsonType } from "../../../schema-definition/json-type.js";
 
 import {
 	baseSchemaKey,
@@ -54,6 +55,10 @@ export function rewriteEntityInsert(args: {
 	const schema = loadStoredSchemaDefinition(engine.sqlite, baseKey);
 	if (!schema) return null;
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const propertyDefinitions = ((schema as StoredSchemaDefinition).properties ?? {}) as Record<
+		string,
+		unknown
+	>;
 
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;
@@ -148,9 +153,13 @@ export function rewriteEntityInsert(args: {
 		const snapshotEntries = buildJsonObjectEntries({
 			schema: schema as any,
 			ref(prop) {
-				const value = columnMap.get(prop.toLowerCase());
-				if (value === undefined) return "NULL";
-				return addParam(value);
+				const lower = prop.toLowerCase();
+				if (!columnMap.has(lower)) return "NULL";
+				const rawValue = columnMap.get(lower);
+				if (rawValue === undefined) return "NULL";
+				const propDef = propertyDefinitions[prop];
+				const prepared = normalizeSnapshotValue(propDef, rawValue);
+				return addParam(prepared);
 			},
 		});
 		const schemaVersionExpr = addParam(schemaVersionValue);
@@ -276,6 +285,50 @@ function buildColumnValueMap(
 		map.set(columnName, values[i]);
 	}
 	return map;
+}
+
+function normalizeSnapshotValue(def: unknown, value: unknown): unknown {
+	if (value === undefined || value === null) return null;
+	if (shouldSerializeAsJsonText(def)) {
+		return jsonStringifyOrNull(value);
+	}
+	return value;
+}
+
+function shouldSerializeAsJsonText(def: unknown): boolean {
+	if (!def || typeof def !== "object") return false;
+	if (isJsonType(def)) return true;
+	const types = extractSchemaTypes(def as Record<string, unknown>);
+	if (types.includes("boolean")) return true;
+	return false;
+}
+
+function extractSchemaTypes(def: Record<string, unknown>): string[] {
+	const direct = def.type;
+	let types: string[] = [];
+	if (typeof direct === "string") {
+		types.push(direct);
+	} else if (Array.isArray(direct)) {
+		types = types.concat(
+			direct.filter((item): item is string => typeof item === "string")
+		);
+	}
+	if (Array.isArray(def.anyOf)) {
+		for (const candidate of def.anyOf) {
+			if (candidate && typeof candidate === "object") {
+				types = types.concat(extractSchemaTypes(candidate as any));
+			}
+		}
+	}
+	return Array.from(new Set(types));
+}
+
+function jsonStringifyOrNull(value: unknown): unknown {
+	try {
+		return JSON.stringify(value);
+	} catch {
+		return null;
+	}
 }
 
 function serializeParameter(value: unknown): unknown {

@@ -19,6 +19,23 @@ const UPDATE_SCHEMA = {
 	additionalProperties: false,
 } as const;
 
+const EXPRESSION_SCHEMA = {
+	"x-lix-key": "expression_update_schema",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["id"],
+	"x-lix-defaults": {
+		lixcol_file_id: "lix",
+		lixcol_plugin_key: "lix_own_entity",
+	},
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		value: { type: "object" },
+	},
+	required: ["id", "value"],
+	additionalProperties: false,
+} as const;
+
 test("rewrites updates for stored schema views", async () => {
 	const lix = await openLix({});
 	try {
@@ -34,10 +51,9 @@ test("rewrites updates for stored schema views", async () => {
 			parameters: ["row-1", "Original"],
 		});
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: insertResult.sql,
-			bind: insertResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: insertResult.parameters,
 		});
 
 		const updateResult = preprocess({
@@ -58,10 +74,9 @@ test("rewrites updates for stored schema views", async () => {
 			"update_schema",
 		]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: updateResult.sql,
-			bind: updateResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: updateResult.parameters,
 		});
 
 		const selectResult = preprocess({
@@ -71,7 +86,7 @@ test("rewrites updates for stored schema views", async () => {
 
 		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			parameters: selectResult.parameters as any[],
+			parameters: selectResult.parameters,
 		}).rows;
 
 		expect(rows).toEqual([
@@ -104,10 +119,9 @@ test("rewrites updates for _all views", async () => {
 			parameters: ["row-2", "Original All", activeVersion.version_id],
 		});
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: insertResult.sql,
-			bind: insertResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: insertResult.parameters,
 		});
 
 		const updateResult = preprocess({
@@ -126,10 +140,9 @@ test("rewrites updates for _all views", async () => {
 			"update_schema",
 		]);
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: updateResult.sql,
-			bind: updateResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: updateResult.parameters,
 		});
 
 		const selectResult = preprocess({
@@ -139,7 +152,7 @@ test("rewrites updates for _all views", async () => {
 
 		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			parameters: selectResult.parameters as any[],
+			parameters: selectResult.parameters,
 		}).rows;
 
 		expect(rows).toEqual([
@@ -184,10 +197,9 @@ test("rewrites updates with JSON payloads", async () => {
 			parameters: ["row-1", { foo: "bar" }],
 		});
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: insertResult.sql,
-			bind: insertResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: insertResult.parameters,
 		});
 
 		const updateResult = preprocess({
@@ -197,10 +209,9 @@ test("rewrites updates with JSON payloads", async () => {
 
 		expect(updateResult.parameters).toContain('{"items":["foo","bar"]}');
 
-		lix.engine!.sqlite.exec({
+		lix.engine!.executeSync({
 			sql: updateResult.sql,
-			bind: updateResult.parameters as any[],
-			returnValue: "resultRows",
+			parameters: updateResult.parameters,
 		});
 
 		const selectResult = preprocess({
@@ -210,7 +221,7 @@ test("rewrites updates with JSON payloads", async () => {
 
 		const rows = lix.engine!.executeSync({
 			sql: selectResult.sql,
-			parameters: selectResult.parameters as any[],
+			parameters: selectResult.parameters,
 		}).rows;
 
 		expect(rows).toEqual([{ payload: '{"items":["foo","bar"]}' }]);
@@ -223,6 +234,73 @@ test("rewrites updates with JSON payloads", async () => {
 
 		expect(stateRows.map((row) => row.snapshot_content)).toEqual([
 			{ id: "row-1", payload: { items: ["foo", "bar"] } },
+		]);
+	} finally {
+		await lix.close();
+	}
+});
+
+test("rewrites updates that use SQL expressions referencing entity properties", async () => {
+	const lix = await openLix({});
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: EXPRESSION_SCHEMA })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO expression_update_schema (id, value) VALUES (?, ?)",
+			parameters: ["row-1", { theme: "light", counter: 1 }],
+		});
+
+		lix.engine!.executeSync({
+			sql: insertResult.sql,
+			parameters: insertResult.parameters,
+		});
+
+		const updateResult = preprocess({
+			sql: "UPDATE expression_update_schema SET value = json_set(value, '$.counter', json_extract(value, '$.counter') + 1, '$.theme', ?) WHERE id = ?",
+			parameters: ["dark", "row-1"],
+		});
+
+		expect(updateResult.sql).toContain("json_set");
+		expect(updateResult.sql).toContain(
+			"json_extract(snapshot_content, '$.value')"
+		);
+
+		lix.engine!.executeSync({
+			sql: updateResult.sql,
+			parameters: updateResult.parameters,
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT value FROM expression_update_schema WHERE id = ?",
+			parameters: ["row-1"],
+		});
+
+		const rows = lix.engine!.executeSync({
+			sql: selectResult.sql,
+			parameters: selectResult.parameters,
+		}).rows as Array<{ value: string }>;
+
+		const parsed = rows?.[0]?.value ? JSON.parse(rows[0].value) : null;
+		expect(parsed).toEqual({ counter: 2, theme: "dark" });
+
+		const stateRows = await lix.db
+			.selectFrom("state_all")
+			.select(["snapshot_content"] as const)
+			.where("schema_key", "=", "expression_update_schema")
+			.execute();
+
+		expect(stateRows).toEqual([
+			{
+				snapshot_content: {
+					id: "row-1",
+					value: { counter: 2, theme: "dark" },
+				},
+			},
 		]);
 	} finally {
 		await lix.close();

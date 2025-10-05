@@ -39,6 +39,7 @@ interface ColumnAssignment {
 	value: ValueSource;
 }
 
+
 interface Condition {
 	name: string;
 	original: string;
@@ -48,7 +49,8 @@ interface Condition {
 type ValueSource =
 	| { kind: "param"; value: unknown }
 	| { kind: "null" }
-	| { kind: "literal"; sql: string };
+	| { kind: "literal"; sql: string }
+	| { kind: "expression"; tokens: IToken[]; params: unknown[] };
 
 const paramSource = (value: unknown): ValueSource => ({
 	kind: "param",
@@ -82,7 +84,7 @@ export function rewriteEntityUpdate(args: {
 	parameters: ReadonlyArray<unknown>;
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
 }): RewriteResult | null {
-	const { tokens, parameters, engine } = args;
+	const { sql, tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== UPDATE) {
 		return null;
 	}
@@ -140,7 +142,8 @@ export function rewriteEntityUpdate(args: {
 		tokens,
 		setIndex,
 		boundaryIndex,
-		parameterState
+		parameterState,
+		sql
 	);
 	if (!assignments) return null;
 
@@ -150,7 +153,8 @@ export function rewriteEntityUpdate(args: {
 					tokens,
 					whereIndex,
 					returningIndex !== -1 ? returningIndex : tokens.length,
-					parameterState
+					parameterState,
+					sql
 				)
 			: [];
 	if (whereIndex !== -1 && !whereConditions) {
@@ -170,7 +174,16 @@ export function rewriteEntityUpdate(args: {
 		if (source.kind === "null") {
 			return "NULL";
 		}
-		return source.sql;
+		if (source.kind === "literal") {
+			return source.sql;
+		}
+		for (const value of source.params) {
+			params.push(serializeParameter(value));
+		}
+		return renderExpressionTokens({
+			tokens: source.tokens,
+			propertyLowerToActual,
+		});
 	};
 
 	const propertyExpressions = new Map<string, () => string>();
@@ -325,7 +338,8 @@ function parseAssignments(
 	tokens: IToken[],
 	setIndex: number,
 	endIndex: number,
-	state: ParameterState
+	state: ParameterState,
+	sql: string
 ): Map<string, ColumnAssignment> | null {
 	if (!isKeyword(tokens[setIndex], "SET")) return null;
 	let index = setIndex + 1;
@@ -346,7 +360,7 @@ function parseAssignments(
 		if (tokens[index]?.tokenType !== Equals) return null;
 		index += 1;
 
-		const value = parseValue(tokens, index, state);
+		const value = parseValue(tokens, index, endIndex, state);
 		if (!value) return null;
 		index = value.nextIndex;
 
@@ -364,7 +378,8 @@ function parseWhere(
 	tokens: IToken[],
 	whereIndex: number,
 	endIndex: number,
-	state: ParameterState
+	state: ParameterState,
+	sql: string
 ): Condition[] | null {
 	if (!isKeyword(tokens[whereIndex], "WHERE")) return null;
 	let index = whereIndex + 1;
@@ -392,7 +407,7 @@ function parseWhere(
 		if (tokens[index]?.tokenType !== Equals) return null;
 		index += 1;
 
-		const value = parseValue(tokens, index, state);
+		const value = parseValue(tokens, index, endIndex, state);
 		if (!value) return null;
 		index = value.nextIndex;
 
@@ -433,9 +448,10 @@ function readColumnName(
 function parseValue(
 	tokens: IToken[],
 	index: number,
+	endIndex: number,
 	state: ParameterState
 ): { source: ValueSource; nextIndex: number } | null {
-	let token = tokens[index];
+	const token = tokens[index];
 	if (!token) return null;
 
 	if (token.tokenType === QMark) {
@@ -467,7 +483,6 @@ function parseValue(
 				nextIndex: index + 2,
 			};
 		}
-		return null;
 	}
 
 	if (token.tokenType === SQStr || token.tokenType === Num) {
@@ -477,12 +492,155 @@ function parseValue(
 		};
 	}
 
-	const ident = extractIdentifier(token);
-	if (ident) {
-		return { source: { kind: "literal", sql: ident }, nextIndex: index + 1 };
+	return parseExpression(tokens, index, endIndex, state);
+}
+
+function parseExpression(
+	tokens: IToken[],
+	index: number,
+	endIndex: number,
+	state: ParameterState
+): { source: ValueSource; nextIndex: number } | null {
+	const startToken = tokens[index];
+	if (!startToken) return null;
+
+	let i = index;
+	let depth = 0;
+	const params: unknown[] = [];
+	const captured: IToken[] = [];
+
+	while (i < endIndex) {
+		const token = tokens[i];
+		if (!token) break;
+
+		if (depth === 0) {
+			if (token.tokenType === Comma || token.tokenType === Semicolon) {
+				break;
+			}
+			if (isKeyword(token, "WHERE") || isKeyword(token, "RETURNING")) {
+				break;
+			}
+		}
+
+		captured.push(token);
+
+		if (token.tokenType === LParen) {
+			depth += 1;
+		}
+		if (token.tokenType === RParen) {
+			if (depth > 0) {
+				depth -= 1;
+			} else {
+				break;
+			}
+		}
+
+		if (token.tokenType === QMark) {
+			if (state.positional >= state.parameters.length) return null;
+			params.push(state.parameters[state.positional]);
+			state.positional += 1;
+		}
+
+		if (token.tokenType === QMarkNumber) {
+			const idx = Number(token.image.slice(1)) - 1;
+			if (!Number.isInteger(idx) || idx < 0 || idx >= state.parameters.length)
+				return null;
+			params.push(state.parameters[idx]);
+		}
+
+		i += 1;
 	}
 
-	return null;
+	if (captured.length === 0) return null;
+
+	return {
+		source: { kind: "expression", tokens: captured, params },
+		nextIndex: i,
+	};
+}
+
+function renderExpressionTokens(args: {
+	tokens: IToken[];
+	propertyLowerToActual: Map<string, string>;
+}): string {
+	const { tokens, propertyLowerToActual } = args;
+	const rendered: string[] = [];
+
+	for (const token of tokens) {
+		const ident = extractIdentifier(token);
+		if (ident) {
+			const lower = ident.toLowerCase();
+			if (propertyLowerToActual.has(lower)) {
+				const actual = propertyLowerToActual.get(lower) ?? ident;
+				rendered.push(`json_extract(snapshot_content, '$.${actual}')`);
+				continue;
+			}
+			switch (lower) {
+				case "lixcol_entity_id":
+					rendered.push("state_all.entity_id");
+					continue;
+				case "lixcol_schema_key":
+					rendered.push("state_all.schema_key");
+					continue;
+				case "lixcol_file_id":
+					rendered.push("state_all.file_id");
+					continue;
+				case "lixcol_plugin_key":
+					rendered.push("state_all.plugin_key");
+					continue;
+				case "lixcol_inherited_from_version_id":
+					rendered.push("state_all.inherited_from_version_id");
+					continue;
+				case "lixcol_created_at":
+					rendered.push("state_all.created_at");
+					continue;
+				case "lixcol_updated_at":
+					rendered.push("state_all.updated_at");
+					continue;
+				case "lixcol_change_id":
+					rendered.push("state_all.change_id");
+					continue;
+				case "lixcol_untracked":
+					rendered.push("state_all.untracked");
+					continue;
+				case "lixcol_commit_id":
+					rendered.push("state_all.commit_id");
+					continue;
+				case "lixcol_version_id":
+					rendered.push("state_all.version_id");
+					continue;
+				case "lixcol_metadata":
+					rendered.push("state_all.metadata");
+					continue;
+				case "lixcol_writer_key":
+					rendered.push("state_all.writer_key");
+					continue;
+			}
+			rendered.push(token.image);
+			continue;
+		}
+
+		rendered.push(token.image);
+	}
+
+	let sqlExpr = "";
+	for (const fragment of rendered) {
+		if (sqlExpr.length === 0) {
+			sqlExpr = fragment;
+			continue;
+		}
+		const prev = sqlExpr[sqlExpr.length - 1] ?? "";
+		const needsSpace =
+			!(/[\s(,]/.test(prev)) &&
+			!/(?:[,.)])/u.test(fragment[0] ?? "") &&
+			fragment !== ".";
+		if (needsSpace) {
+			sqlExpr += " ";
+		}
+		sqlExpr += fragment;
+	}
+
+	return sqlExpr.trim();
 }
 
 function isKeyword(token: IToken | undefined, keyword: string): boolean {
