@@ -24,13 +24,17 @@ export interface KeyHint {
 	label: string;
 }
 
-export type ToolRunStatus = "queued" | "running" | "success" | "error";
+export type ToolRunStatus = "queued" | "running" | "success" | "error" | "thinking";
 
 export interface ToolRun {
 	id: string;
-	title: string; // e.g., Read(README.md)
-	detail?: string; // e.g., Read 32 lines
+	title: string; // e.g., "Bash", "Read", "Glob", or "Thinking"
+	detail?: string; // e.g., "List contents of directory"
 	status: ToolRunStatus;
-	/** Optional expandable output. */
+	/** Optional input parameters shown in IN section. */
+	input?: string;
+	/** Optional expandable output shown in OUT section. */
 	output?: string;
+	/** Optional reasoning/thinking content shown inline (for thinking status). */
+	content?: string;
 }

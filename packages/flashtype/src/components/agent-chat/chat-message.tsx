@@ -3,8 +3,8 @@ import type { ChatMessage as Msg } from "./types";
 import { ToolRunList } from "./tool-run-list";
 
 /**
- * Renders a single chat message in a terminal‑like block. User messages have a
- * right-aligned prompt vibe; assistant messages are left-aligned.
+ * Claude Code-inspired message component with clean typography and spacing.
+ * User messages are shown in a subtle card, assistant messages are plain text.
  *
  * @example
  * <ChatMessage message={{ id: '1', role: 'user', content: 'hello' }} />
@@ -13,59 +13,62 @@ export function ChatMessage({ message }: { message: Msg }) {
 	const isUser = message.role === "user";
 	const isSystem = message.role === "system";
 
-	const chrome = isSystem
-		? "text-xs text-muted-foreground"
-		: isUser
-			? "bg-secondary/60 border border-border text-foreground"
-			: ""; // assistant: no box/border for a terminal-like feel
+	if (isSystem) {
+		return (
+			<div className="px-3 py-1">
+				<div className="text-xs text-muted-foreground">{message.content}</div>
+			</div>
+		);
+	}
 
 	return (
-		<div className="w-full py-1">
-			<div
-				className={[
-					"max-w-full rounded-md px-3 py-2 font-mono leading-relaxed whitespace-pre-wrap break-words",
-					chrome,
-					isUser ? "ml-auto" : "mr-auto",
-				].join(" ")}
-			>
-				{isSystem ? (
-					<span>{message.content}</span>
-				) : message.toolRuns && message.toolRuns.length ? (
-					<>
-						<ToolRunList runs={message.toolRuns} />
-						{message.content ? <MessageBody content={message.content} /> : null}
-					</>
-				) : (
-					<MessageBody content={message.content} />
-				)}
-			</div>
+		<div className="w-full py-2 px-3">
+			{message.toolRuns && message.toolRuns.length > 0 && (
+				<ToolRunList runs={message.toolRuns} />
+			)}
+			{message.content && (
+				<div
+					className={[
+						"max-w-full leading-relaxed break-words",
+						isUser
+							? "rounded-lg border border-border/60 bg-secondary/40 px-4 py-3"
+							: "text-foreground",
+					].join(" ")}
+				>
+					<MessageBody content={message.content} isUser={isUser} />
+				</div>
+			)}
 		</div>
 	);
 }
 
 /**
- * Very light inline renderer that treats triple‑backtick blocks as styled panels.
- * Keeps everything monospace to preserve a terminal feel.
+ * Renders message content with code blocks styled like Claude Code.
+ * Plain text uses sans-serif, code blocks use monospace.
  */
-function MessageBody({ content }: { content: string }) {
+function MessageBody({ content, isUser }: { content: string; isUser: boolean }) {
 	const parts = React.useMemo(() => splitFences(content), [content]);
 	return (
-		<div className="space-y-2">
+		<div className="space-y-3">
 			{parts.map((p, i) =>
 				p.type === "fence" ? (
 					<div
 						key={i}
-						className="rounded-sm border border-border/60 bg-muted/40 px-3 py-2"
+						className="rounded-md border border-border/50 bg-muted/30 overflow-hidden"
 					>
-						<div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-							{p.lang || "block"}
+						<div className="border-b border-border/40 bg-muted/50 px-3 py-1.5">
+							<span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+								{p.lang || "code"}
+							</span>
 						</div>
-						<pre className="mt-1 text-[12px] leading-snug whitespace-pre-wrap">
+						<pre className="px-3 py-2.5 text-[13px] font-mono leading-relaxed text-foreground overflow-x-auto">
 							{p.body}
 						</pre>
 					</div>
 				) : (
-					<span key={i}>{p.body}</span>
+					<div key={i} className="text-sm leading-relaxed whitespace-pre-wrap">
+						{p.body}
+					</div>
 				),
 			)}
 		</div>
