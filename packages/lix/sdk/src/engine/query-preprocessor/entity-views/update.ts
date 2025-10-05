@@ -159,11 +159,10 @@ export function rewriteEntityUpdate(args: {
 
 	const params: unknown[] = [];
 	const addParam = (value: unknown): string => {
-		params.push(value);
+		params.push(serializeParameter(value));
 		return "?";
 	};
 
-	const valueRenderCache = new Map<ValueSource, string>();
 	const renderValueSource = (source: ValueSource): string => {
 		if (source.kind === "param") {
 			return addParam(source.value);
@@ -174,28 +173,21 @@ export function rewriteEntityUpdate(args: {
 		return source.sql;
 	};
 
-	const renderCachedValue = (source: ValueSource): string => {
-		let existing = valueRenderCache.get(source);
-		if (existing) return existing;
-		existing = renderValueSource(source);
-		valueRenderCache.set(source, existing);
-		return existing;
-	};
-
-	const propertyExpressions = new Map<string, string>();
+	const propertyExpressions = new Map<string, () => string>();
 	const getPropertyExpression = (prop: string): string => {
 		const lower = prop.toLowerCase();
-		const cached = propertyExpressions.get(lower);
-		if (cached) return cached;
-		const assignment = assignments.get(lower);
-		let expr: string;
-		if (assignment) {
-			expr = renderCachedValue(assignment.value);
-		} else {
-			expr = `json_extract(snapshot_content, '$.${prop}')`;
+		let factory = propertyExpressions.get(lower);
+		if (!factory) {
+			const assignment = assignments.get(lower);
+			if (assignment) {
+				factory = () => renderValueSource(assignment.value);
+			} else {
+				const expression = `json_extract(snapshot_content, '$.${prop}')`;
+				factory = () => expression;
+			}
+			propertyExpressions.set(lower, factory);
 		}
-		propertyExpressions.set(lower, expr);
-		return expr;
+		return factory();
 	};
 
 	const entityIdParts = primaryKeys.map((key) => {
@@ -249,24 +241,24 @@ export function rewriteEntityUpdate(args: {
 		`entity_id = ${entityIdExpr}`,
 		`schema_key = ${schemaKeyExpr}`,
 		`file_id = ${
-			fileIdAssignment ? renderCachedValue(fileIdAssignment.value) : "file_id"
+			fileIdAssignment ? renderValueSource(fileIdAssignment.value) : "file_id"
 		}`,
 		`plugin_key = ${pluginKeyExpr}`,
 		`snapshot_content = json_object(${snapshotEntries})`,
-		`schema_version = ${renderCachedValue(schemaVersionSource)}`,
+		`schema_version = ${renderValueSource(schemaVersionSource)}`,
 		`version_id = ${
 			versionSource
-				? renderCachedValue(versionSource)
+				? renderValueSource(versionSource)
 				: (versionFallbackExpr ?? "version_id")
 		}`,
 		`metadata = ${
 			metadataAssignment
-				? renderCachedValue(metadataAssignment.value)
+				? renderValueSource(metadataAssignment.value)
 				: "metadata"
 		}`,
 		`untracked = ${
 			untrackedAssignment
-				? renderCachedValue(untrackedAssignment.value)
+				? renderValueSource(untrackedAssignment.value)
 				: "untracked"
 		}`,
 	];
@@ -278,7 +270,7 @@ export function rewriteEntityUpdate(args: {
 	let hasVersionCondition = false;
 	for (const condition of whereConditions ?? []) {
 		const column = condition.name;
-		const valueSql = renderCachedValue(condition.value);
+		const valueSql = renderValueSource(condition.value);
 		if (propertyLowerSet.has(column)) {
 			const actual = propertyLowerToActual.get(column) ?? condition.original;
 			whereClauses.push(
@@ -496,4 +488,19 @@ function parseValue(
 function isKeyword(token: IToken | undefined, keyword: string): boolean {
 	if (!token?.image) return false;
 	return token.image.toUpperCase() === keyword.toUpperCase();
+}
+
+function serializeParameter(value: unknown): unknown {
+	if (value === undefined) return null;
+	if (value === null) return null;
+	if (typeof value === "object") {
+		if (value instanceof Uint8Array) return value;
+		if (value instanceof Date) return value.toISOString();
+		try {
+			return JSON.stringify(value);
+		} catch {
+			return null;
+		}
+	}
+	return value;
 }

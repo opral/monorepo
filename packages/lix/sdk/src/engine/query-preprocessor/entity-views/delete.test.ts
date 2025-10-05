@@ -2,18 +2,6 @@ import { expect, test } from "vitest";
 import { openLix } from "../../../lix/open-lix.js";
 import { createQueryPreprocessor } from "../create-query-preprocessor.js";
 
-if (typeof globalThis.CustomEvent === "undefined") {
-	class NodeCustomEvent<T = unknown> extends Event {
-		readonly detail: T;
-		constructor(type: string, params?: CustomEventInit<T>) {
-			super(type, params);
-			this.detail = params?.detail as T;
-		}
-	}
-	(globalThis as unknown as { CustomEvent: typeof CustomEvent }).CustomEvent =
-		NodeCustomEvent as unknown as typeof CustomEvent;
-}
-
 const DELETE_SCHEMA = {
 	"x-lix-key": "delete_schema",
 	"x-lix-version": "1.0",

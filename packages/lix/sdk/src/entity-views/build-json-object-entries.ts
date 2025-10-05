@@ -16,7 +16,7 @@ export function buildJsonObjectEntries(args: {
 	return properties
 		.map((prop) => {
 			const def: any = (args.schema as any).properties[prop];
-			const ref = args.ref(prop);
+			const ref = () => args.ref(prop);
 			const jsonLike = isJsonType(def);
 			const types = def?.type
 				? Array.isArray(def.type)
@@ -26,12 +26,18 @@ export function buildJsonObjectEntries(args: {
 			const isString = !jsonLike && types.includes("string");
 
 			if (jsonLike) {
-				return `'${prop}', CASE WHEN json_valid(${ref}) THEN json(${ref}) ELSE json_quote(${ref}) END`;
+				const first = ref();
+				const second = ref();
+				const third = ref();
+				return `'${prop}', CASE WHEN json_valid(${first}) THEN json(${second}) ELSE json_quote(${third}) END`;
 			}
 			if (isString) {
-				return `'${prop}', json_quote(${ref})`;
+				return `'${prop}', json_quote(${ref()})`;
 			}
-			return `'${prop}', CASE WHEN json_valid(${ref}) THEN json(${ref}) ELSE json_quote(${ref}) END`;
+			const first = ref();
+			const second = ref();
+			const third = ref();
+			return `'${prop}', CASE WHEN json_valid(${first}) THEN json(${second}) ELSE json_quote(${third}) END`;
 		})
 		.join(", ");
 }

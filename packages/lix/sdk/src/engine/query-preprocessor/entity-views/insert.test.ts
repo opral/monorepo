@@ -162,3 +162,93 @@ test("does not rewrite history view inserts", async () => {
 		await lix.close();
 	}
 });
+
+test("rewrites multi-row inserts with JSON payloads", async () => {
+	const lix = await openLix({});
+	try {
+		const schema = {
+			"x-lix-key": "multi_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["id"],
+			"x-lix-defaults": {
+				lixcol_file_id: "lix",
+				lixcol_plugin_key: "lix_own_entity",
+			},
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				payload: { type: "object" },
+			},
+			required: ["id", "payload"],
+			additionalProperties: false,
+		} as const;
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const rewritten = preprocess({
+			sql: "INSERT INTO multi_schema (id, payload) VALUES (?, ?), (?, ?), (?, ?)",
+			parameters: [
+				"row-1",
+				{ foo: "bar" },
+				"row-2",
+				{ items: ["foo", "bar"] },
+				"row-3",
+				{ nested: { value: "primitive" } },
+			],
+		});
+
+		expect(rewritten.sql).toContain("VALUES (");
+		expect(rewritten.sql).toContain("), (");
+		expect(rewritten.parameters).toContain("multi_schema");
+		expect(rewritten.parameters).toContain("row-1");
+		expect(rewritten.parameters).toContain("row-3");
+		expect(rewritten.parameters).toContain('{"foo":"bar"}');
+		expect(rewritten.parameters).toContain('{"items":["foo","bar"]}');
+		expect(rewritten.parameters).toContain('{"nested":{"value":"primitive"}}');
+
+		lix.engine!.sqlite.exec({
+			sql: rewritten.sql,
+			bind: rewritten.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT id, payload FROM multi_schema_all WHERE id IN (?, ?, ?)",
+			parameters: ["row-1", "row-2", "row-3"],
+		});
+
+		const rows = lix.engine!.sqlite.exec({
+			sql: selectResult.sql,
+			bind: selectResult.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+			columnNames: [],
+		});
+
+		expect(rows).toEqual([
+			{ id: "row-1", payload: '{"foo":"bar"}' },
+			{ id: "row-2", payload: '{"items":["foo","bar"]}' },
+			{ id: "row-3", payload: '{"nested":{"value":"primitive"}}' },
+		]);
+
+		const stateRows = await lix.db
+			.selectFrom("state_all")
+			.select(["snapshot_content"] as const)
+			.where("schema_key", "=", "multi_schema")
+			.orderBy("entity_id")
+			.execute();
+
+		expect(stateRows.map((row) => row.snapshot_content)).toEqual([
+			{ id: "row-1", payload: { foo: "bar" } },
+			{ id: "row-2", payload: { items: ["foo", "bar"] } },
+			{ id: "row-3", payload: { nested: { value: "primitive" } } },
+		]);
+	} finally {
+		await lix.close();
+	}
+});
