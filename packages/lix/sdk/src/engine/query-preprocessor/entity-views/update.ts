@@ -212,9 +212,7 @@ export function rewriteEntityUpdate(args: {
 			return getPropertyExpression(actual);
 		});
 		const sql =
-			parts.length === 1
-				? parts[0]!
-				: `(${parts.join(" || '~' || ")})`;
+			parts.length === 1 ? parts[0]! : `(${parts.join(" || '~' || ")})`;
 		const addedParams = params.splice(startLen);
 		return { sql, params: addedParams };
 	};
@@ -225,7 +223,8 @@ export function rewriteEntityUpdate(args: {
 	const untrackedAssignment = assignments.get("lixcol_untracked");
 	const versionAssignment =
 		assignments.get("lixcol_version_id") ??
-		(variant === "base" && (defaults.lixcol_version_id !== undefined || isActiveVersionSchema)
+		(variant === "base" &&
+		(defaults.lixcol_version_id !== undefined || isActiveVersionSchema)
 			? undefined
 			: assignments.get("version_id"));
 
@@ -289,7 +288,9 @@ export function rewriteEntityUpdate(args: {
 		}`,
 	];
 	if (touchesPrimaryKey) {
-		const renderWithOrdering = (source: ValueSource): { sql: string; params: unknown[] } => {
+		const renderWithOrdering = (
+			source: ValueSource
+		): { sql: string; params: unknown[] } => {
 			const startLen = params.length;
 			const sql = renderValueSource(source);
 			const added = params.splice(startLen);

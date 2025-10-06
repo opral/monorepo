@@ -118,7 +118,8 @@ function extractTriggerBody(sql: string, tokens: Token[]): string {
 		}
 	}
 
-	const startOffset = (beginToken.endOffset ?? beginToken.startOffset ?? -1) + 1;
+	const startOffset =
+		(beginToken.endOffset ?? beginToken.startOffset ?? -1) + 1;
 	const endOffset = endToken?.startOffset ?? sql.length;
 	if (startOffset >= endOffset) {
 		return "";

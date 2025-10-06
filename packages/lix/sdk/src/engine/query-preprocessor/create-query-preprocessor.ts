@@ -2,6 +2,10 @@ import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import { analyzeShapes } from "./sql-rewriter/microparser/analyze-shape.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
+import { maybeRewriteInsteadOfTrigger } from "./dml-trigger/rewrite.js";
+import { rewriteEntityInsert } from "./entity-views/insert.js";
+import { rewriteEntityUpdate } from "./entity-views/update.js";
+import { rewriteEntityDelete } from "./entity-views/delete.js";
 import { getSchemaVersion } from "./shared/schema-version.js";
 import {
 	DELETE,
@@ -18,9 +22,6 @@ import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
-import { rewriteEntityInsert } from "./entity-views/insert.js";
-import { rewriteEntityUpdate } from "./entity-views/update.js";
-import { rewriteEntityDelete } from "./entity-views/delete.js";
 
 export type QueryPreprocessorResult = {
 	sql: string;
@@ -53,39 +54,42 @@ export async function createQueryPreprocessor(
 		let expandedSql: string | undefined;
 		let tokens = tokenize(currentSql);
 		const kind = detectStatementKind(tokens);
-		if (kind === "insert") {
-			const rewritten = rewriteEntityInsert({
+		if (kind === "insert" || kind === "update" || kind === "delete") {
+			const triggerRewrite = maybeRewriteInsteadOfTrigger({
+				engine,
 				sql: currentSql,
 				tokens,
 				parameters,
-				engine,
+				op: kind,
 			});
-			if (rewritten) {
-				return rewritten;
+			if (triggerRewrite) {
+				return triggerRewrite;
 			}
-			return { sql: currentSql, parameters };
-		}
-		if (kind === "update") {
-			const rewritten = rewriteEntityUpdate({
-				sql: currentSql,
-				tokens,
-				parameters,
-				engine,
-			});
-			if (rewritten) {
-				return rewritten;
+			let entityRewrite: ReturnType<typeof rewriteEntityInsert> | null;
+			if (kind === "insert") {
+				entityRewrite = rewriteEntityInsert({
+					sql: currentSql,
+					tokens,
+					parameters,
+					engine,
+				});
+			} else if (kind === "update") {
+				entityRewrite = rewriteEntityUpdate({
+					sql: currentSql,
+					tokens,
+					parameters,
+					engine,
+				});
+			} else {
+				entityRewrite = rewriteEntityDelete({
+					sql: currentSql,
+					tokens,
+					parameters,
+					engine,
+				});
 			}
-			return { sql: currentSql, parameters };
-		}
-		if (kind === "delete") {
-			const rewritten = rewriteEntityDelete({
-				sql: currentSql,
-				tokens,
-				parameters,
-				engine,
-			});
-			if (rewritten) {
-				return rewritten;
+			if (entityRewrite) {
+				return entityRewrite;
 			}
 			return { sql: currentSql, parameters };
 		}

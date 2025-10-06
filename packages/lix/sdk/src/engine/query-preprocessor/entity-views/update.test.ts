@@ -217,12 +217,10 @@ test("active_version updates keep global routing version", async () => {
 			.select("version_id")
 			.executeTakeFirstOrThrow();
 
-		const versions = await lix.db
-			.selectFrom("version")
-			.select("id")
-			.execute();
+		const versions = await lix.db.selectFrom("version").select("id").execute();
 		const targetVersionId =
-			versions.find((row) => row.id !== before.version_id)?.id ?? before.version_id;
+			versions.find((row) => row.id !== before.version_id)?.id ??
+			before.version_id;
 		expect(targetVersionId).not.toBe(before.version_id);
 
 		const updateResult = preprocess({

@@ -25,7 +25,10 @@ export async function createChangeProposal(args: {
 		if (args.id) values.id = args.id;
 		if (args.status) values.status = args.status;
 
-		await trx.insertInto("change_proposal").values(values as any).execute();
+		await trx
+			.insertInto("change_proposal")
+			.values(values as any)
+			.execute();
 
 		const created = await trx
 			.selectFrom("change_proposal")
