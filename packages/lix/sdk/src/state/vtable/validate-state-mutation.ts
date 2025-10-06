@@ -60,6 +60,16 @@ export function validateStateMutation(args: {
 		);
 	}
 
+	const isImmutable = args.schema["x-lix-immutable"] === true;
+	const schemaKey = args.schema["x-lix-key"];
+
+	if (isImmutable) {
+		const immutableMessage = `Schema "${schemaKey}" is immutable and cannot be updated.`;
+		if (args.operation === "update") {
+			throw new Error(immutableMessage);
+		}
+	}
+
 	// Skip snapshot content validation for delete operations
 	if (args.operation !== "delete") {
 		// Parse JSON strings back to objects for properties defined as objects in the schema

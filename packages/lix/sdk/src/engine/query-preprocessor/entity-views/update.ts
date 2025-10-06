@@ -39,7 +39,6 @@ interface ColumnAssignment {
 	value: ValueSource;
 }
 
-
 interface Condition {
 	name: string;
 	original: string;
@@ -631,7 +630,7 @@ function renderExpressionTokens(args: {
 		}
 		const prev = sqlExpr[sqlExpr.length - 1] ?? "";
 		const needsSpace =
-			!(/[\s(,]/.test(prev)) &&
+			!/[\s(,]/.test(prev) &&
 			!/(?:[,.)])/u.test(fragment[0] ?? "") &&
 			fragment !== ".";
 		if (needsSpace) {

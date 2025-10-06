@@ -55,10 +55,8 @@ export function rewriteEntityInsert(args: {
 	const schema = loadStoredSchemaDefinition(engine.sqlite, baseKey);
 	if (!schema) return null;
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
-	const propertyDefinitions = ((schema as StoredSchemaDefinition).properties ?? {}) as Record<
-		string,
-		unknown
-	>;
+	const propertyDefinitions = ((schema as StoredSchemaDefinition).properties ??
+		{}) as Record<string, unknown>;
 
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;

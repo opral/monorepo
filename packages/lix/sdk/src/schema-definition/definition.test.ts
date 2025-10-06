@@ -9,6 +9,7 @@ test("valid schema", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
+		"x-lix-immutable": true,
 		properties: {
 			name: { type: "string" },
 		},
@@ -23,6 +24,24 @@ test("valid schema", () => {
 
 	expect(valid).toBe(true);
 	expect(valid2).toBe(true);
+});
+
+test("x-lix-immutable accepts boolean values", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-immutable": false,
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
 });
 
 test("x-key is required", () => {

@@ -224,6 +224,7 @@ test("FromLixSchemaDefinition transforms empty object types to Record<string, an
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["id"],
+		"x-lix-immutable": true,
 		type: "object",
 		properties: {
 			id: { type: "string" },

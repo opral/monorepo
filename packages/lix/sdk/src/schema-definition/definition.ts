@@ -128,6 +128,11 @@ export const LixSchemaDefinition = {
 						"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema.",
 					examples: ["csv_plugin_cell"],
 				},
+				"x-lix-immutable": {
+					type: "boolean",
+					description:
+						"When true, entities for this schema cannot be updated after creation.",
+				},
 				"x-lix-version": {
 					type: "string",
 					description:
@@ -185,6 +190,10 @@ export type LixSchemaDefinition = JSONSchema & {
 	 *   "csv_plugin_cell"
 	 */
 	"x-lix-key": string;
+	/**
+	 * Marks the schema as immutable. Immutable entities may be inserted but cannot be updated.
+	 */
+	"x-lix-immutable"?: boolean;
 	/**
 	 * The version of the schema.
 	 *

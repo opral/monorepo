@@ -230,6 +230,65 @@ test("throws when primary key violates uniqueness constraint", async () => {
 	).toThrowError("Primary key constraint violation");
 });
 
+test("immutable schemas reject repeated inserts", async () => {
+	const lix = await openLix({});
+
+	const schema: LixSchemaDefinition = {
+		"x-lix-key": "immutable_schema_test",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-immutable": true,
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1", name: "first" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrow();
+
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "1",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "1", name: "first" },
+			schema_version: schema["x-lix-version"],
+			untracked: 0,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1", name: "second" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/Primary key constraint violation/);
+
+	await lix.close();
+});
+
 test("state_all: inserting same PK twice in one transaction overwrites without PK error", async () => {
 	const lix = await openLix({});
 

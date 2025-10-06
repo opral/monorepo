@@ -36,6 +36,24 @@ const EXPRESSION_SCHEMA = {
 	additionalProperties: false,
 } as const;
 
+const IMMUTABLE_SCHEMA = {
+	"x-lix-key": "immutable_update_schema",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["id"],
+	"x-lix-defaults": {
+		lixcol_file_id: "lix",
+		lixcol_plugin_key: "lix_own_entity",
+	},
+	"x-lix-immutable": true,
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+	},
+	required: ["id"],
+	additionalProperties: false,
+} as const;
+
 test("rewrites updates for stored schema views", async () => {
 	const lix = await openLix({});
 	try {
@@ -94,6 +112,42 @@ test("rewrites updates for stored schema views", async () => {
 				name: "Updated",
 			},
 		]);
+	} finally {
+		await lix.close();
+	}
+});
+
+test("updates to immutable schemas are rejected", async () => {
+	const lix = await openLix({});
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: IMMUTABLE_SCHEMA })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO immutable_update_schema (id, name) VALUES (?, ?)",
+			parameters: ["row-1", "first"],
+		});
+
+		lix.engine!.executeSync({
+			sql: insertResult.sql,
+			parameters: insertResult.parameters as any[],
+		});
+
+		const updateResult = preprocess({
+			sql: "UPDATE immutable_update_schema SET name = ? WHERE id = ?",
+			parameters: ["updated", "row-1"],
+		});
+
+		expect(() =>
+			lix.engine!.executeSync({
+				sql: updateResult.sql,
+				parameters: updateResult.parameters as any[],
+			})
+		).toThrow(/immutable/i);
 	} finally {
 		await lix.close();
 	}
