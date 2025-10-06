@@ -19,7 +19,8 @@ export function getTimestampSync(args: {
 }): string {
 	const engine = args.engine;
 	// Check if deterministic mode is enabled
-	if (isDeterministicModeSync({ engine: engine })) {
+	const deterministic = isDeterministicModeSync({ engine: engine });
+	if (deterministic) {
 		// Check if timestamps are disabled in the config
 		const [config] = withRuntimeCache(
 			engine,
