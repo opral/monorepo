@@ -69,6 +69,50 @@ test("rewrites deletes for stored schema views", async () => {
 	}
 });
 
+test("prefixless alias deletes target stored schema key", async () => {
+	const lix = await openLix({});
+	try {
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
+			parameters: ["alias", { foo: "bar" }],
+		});
+
+		lix.engine!.sqlite.exec({
+			sql: insertResult.sql,
+			bind: insertResult.parameters as any[],
+			returnValue: "resultRows",
+		});
+
+		const deleteResult = preprocess({
+			sql: "DELETE FROM key_value WHERE key = ?",
+			parameters: ["alias"],
+		});
+
+		expect(deleteResult.parameters[0]).toBe("lix_key_value");
+
+		lix.engine!.executeSync({
+			sql: deleteResult.sql,
+			parameters: deleteResult.parameters as any[],
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT value FROM key_value WHERE key = ?",
+			parameters: ["alias"],
+		});
+
+		const rows = lix.engine!.executeSync({
+			sql: selectResult.sql,
+			parameters: selectResult.parameters as any[],
+		}).rows;
+
+		expect(rows).toEqual([]);
+	} finally {
+		await lix.close();
+	}
+});
+
 test("rewrites deletes for _all views", async () => {
 	const lix = await openLix({});
 	try {

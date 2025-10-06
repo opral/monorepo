@@ -131,6 +131,49 @@ test("rewrites inserts for _all view", async () => {
 	}
 });
 
+test("uses stored schema key when inserting via prefixless alias", async () => {
+	const lix = await openLix({});
+	try {
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const rewritten = preprocess({
+			sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
+			parameters: ["alias", { foo: "bar" }],
+		});
+
+		expect(rewritten.sql).toContain("INSERT INTO state_all");
+		expect(rewritten.parameters[0]).toBe("alias");
+		expect(rewritten.parameters[1]).toBe("lix_key_value");
+
+		lix.engine!.executeSync({
+			sql: rewritten.sql,
+			parameters: rewritten.parameters as any[],
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT value FROM key_value WHERE key = ?",
+			parameters: ["alias"],
+		});
+
+		const rows = lix.engine!.executeSync({
+			sql: selectResult.sql,
+			parameters: selectResult.parameters as any[],
+		}).rows;
+
+		expect(rows).toHaveLength(1);
+		const parsed = (() => {
+			const raw = rows[0]?.value;
+			if (typeof raw === "string") {
+				return JSON.parse(raw);
+			}
+			return raw;
+		})();
+		expect(parsed).toEqual({ foo: "bar" });
+	} finally {
+		await lix.close();
+	}
+});
+
 test("does not rewrite history view inserts", async () => {
 	const lix = await openLix({});
 	try {

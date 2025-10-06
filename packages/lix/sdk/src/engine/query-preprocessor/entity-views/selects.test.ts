@@ -11,6 +11,44 @@ describe("entity view select synthesis", () => {
 			expect(result.map.size).toBeGreaterThan(0);
 			expect(result.map.has("lix_key_value")).toBe(true);
 			expect(result.map.has("lix_key_value_all")).toBe(true);
+			expect(result.map.has("key_value")).toBe(true);
+			expect(result.map.has("key_value_all")).toBe(true);
+		} finally {
+			await lix.close();
+		}
+	});
+
+	test("registers prefixless aliases for lix_* stored schemas", async () => {
+		const lix = await openLix({});
+		try {
+			const schema = {
+				"x-lix-key": "lix_alias_test",
+				"x-lix-version": "1.0",
+				"x-lix-primary-key": ["id"],
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					label: { type: "string" },
+				},
+				additionalProperties: false,
+			} as const;
+
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: schema })
+				.execute();
+
+			const { map } = getEntityViewSelects({ engine: lix.engine! });
+			expect(map.has("lix_alias_test")).toBe(true);
+			expect(map.has("alias_test")).toBe(true);
+			expect(map.get("alias_test")).toBe(map.get("lix_alias_test"));
+			expect(map.has("lix_alias_test_all")).toBe(true);
+			expect(map.has("alias_test_all")).toBe(true);
+			expect(map.get("alias_test_all")).toBe(map.get("lix_alias_test_all"));
+			expect(map.has("alias_test_history")).toBe(true);
+			expect(map.get("alias_test_history")).toBe(
+				map.get("lix_alias_test_history")
+			);
 		} finally {
 			await lix.close();
 		}

@@ -24,6 +24,7 @@ import {
 	extractPrimaryKeys,
 	findKeyword,
 	loadStoredSchemaDefinition,
+	resolveStoredSchemaKey,
 	type RewriteResult,
 	type StoredSchemaDefinition,
 } from "./shared.js";
@@ -104,10 +105,11 @@ export function rewriteEntityUpdate(args: {
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
 
-	const schema = loadStoredSchemaDefinition(engine.sqlite, baseKey);
+	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	if (typeof propertiesObject !== "object" || propertiesObject === null) {
 		return null;
@@ -211,7 +213,7 @@ export function rewriteEntityUpdate(args: {
 			? entityIdParts[0]!
 			: `(${entityIdParts.join(" || '~' || ")})`;
 
-	const schemaKeyExpr = addParam(baseKey);
+	const schemaKeyExpr = addParam(storedSchemaKey);
 	const fileIdAssignment = assignments.get("lixcol_file_id");
 	const metadataAssignment = assignments.get("lixcol_metadata");
 	const untrackedAssignment = assignments.get("lixcol_untracked");
@@ -238,7 +240,7 @@ export function rewriteEntityUpdate(args: {
 	const pluginKeyExpr =
 		defaults.lixcol_plugin_key !== undefined
 			? addParam(defaults.lixcol_plugin_key)
-			: addParam("lix_own_entity");
+			: "plugin_key";
 	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
 	const schemaVersionSource = paramSource(schemaVersionValue);
 
@@ -318,7 +320,7 @@ export function rewriteEntityUpdate(args: {
 		}
 	}
 
-	whereClauses.push(`state_all.schema_key = ${addParam(baseKey)}`);
+	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
 	if (variant === "base" && !hasVersionCondition) {
 		whereClauses.push(
 			`state_all.version_id = (SELECT version_id FROM active_version)`

@@ -22,6 +22,7 @@ import {
 	extractPrimaryKeys,
 	findKeyword,
 	loadStoredSchemaDefinition,
+	resolveStoredSchemaKey,
 	type RewriteResult,
 } from "./shared.js";
 
@@ -84,7 +85,7 @@ export function rewriteEntityDelete(args: {
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
 
-	const schema = loadStoredSchemaDefinition(engine.sqlite, baseKey);
+	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
 	const propertiesObject = (schema as Record<string, unknown>).properties ?? {};
@@ -98,6 +99,8 @@ export function rewriteEntityDelete(args: {
 	}
 
 	if (!extractPrimaryKeys(schema)) return null;
+
+	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 
 	const whereIndex = findKeyword(tokens, index, "WHERE");
 	const returningIndex = findKeyword(tokens, index, "RETURNING");
@@ -142,7 +145,7 @@ export function rewriteEntityDelete(args: {
 	const whereClauses: string[] = [];
 	let hasVersionCondition = false;
 
-	whereClauses.push(`state_all.schema_key = ${addParam(baseKey)}`);
+	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
 
 	for (const condition of whereConditions ?? []) {
 		const column = condition.name;

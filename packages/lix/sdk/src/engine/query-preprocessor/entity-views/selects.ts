@@ -45,15 +45,26 @@ export function getEntityViewSelects(args: {
 			if ((schema as any).type !== "object") continue;
 
 			const props = extractPropertyKeys(schema);
-			map.set(baseName, createActiveSelect({ schema, properties: props }));
-			map.set(
-				`${baseName}_all`,
-				createAllSelect({ schema, properties: props })
-			);
-			map.set(
-				`${baseName}_history`,
-				createHistorySelect({ schema, properties: props })
-			);
+			const baseSql = createActiveSelect({ schema, properties: props });
+			const allSql = createAllSelect({ schema, properties: props });
+			const historySql = createHistorySelect({ schema, properties: props });
+
+			const aliasBaseName = dropLixPrefix(baseName);
+			registerView(map, {
+				primary: baseName,
+				alias: aliasBaseName,
+				sql: baseSql,
+			});
+			registerView(map, {
+				primary: `${baseName}_all`,
+				alias: aliasBaseName ? `${aliasBaseName}_all` : null,
+				sql: allSql,
+			});
+			registerView(map, {
+				primary: `${baseName}_history`,
+				alias: aliasBaseName ? `${aliasBaseName}_history` : null,
+				sql: historySql,
+			});
 		}
 
 		cache.set(engine.runtimeCacheRef, { signature, map });
@@ -232,4 +243,25 @@ function escapeIdentifier(identifier: string): string {
 	}
 	const escaped = identifier.replace(/"/g, '""');
 	return `"${escaped}"`;
+}
+
+function dropLixPrefix(name: string): string | null {
+	if (!name.startsWith("lix_")) {
+		return null;
+	}
+	const alias = name.slice(4);
+	return alias.length > 0 ? alias : null;
+}
+
+function registerView(
+	map: Map<string, string>,
+	args: { primary: string; alias: string | null; sql: string }
+): void {
+	map.set(args.primary, args.sql);
+	if (!args.alias || args.alias === args.primary) {
+		return;
+	}
+	if (!map.has(args.alias)) {
+		map.set(args.alias, args.sql);
+	}
 }

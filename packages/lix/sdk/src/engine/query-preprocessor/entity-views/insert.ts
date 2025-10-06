@@ -11,7 +11,6 @@ import {
 	QMarkNumber,
 	NULL as NULL_TOKEN,
 } from "../sql-rewriter/tokenizer.js";
-import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
 import { isJsonType } from "../../../schema-definition/json-type.js";
 
 import {
@@ -22,6 +21,7 @@ import {
 	findKeyword,
 	getColumnOrDefault,
 	loadStoredSchemaDefinition,
+	resolveStoredSchemaKey,
 	type RewriteResult,
 	type StoredSchemaDefinition,
 } from "./shared.js";
@@ -52,12 +52,10 @@ export function rewriteEntityInsert(args: {
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
 
-	const schema = loadStoredSchemaDefinition(engine.sqlite, baseKey);
+	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
-	const propertyDefinitions = ((schema as StoredSchemaDefinition).properties ??
-		{}) as Record<string, unknown>;
-
+	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;
 	const columns = columnParse.columns;
@@ -110,19 +108,27 @@ export function rewriteEntityInsert(args: {
 	for (const columnMap of columnMaps) {
 		const entityIdValue = columnMap.get(primaryKey);
 		if (entityIdValue === undefined) return null;
-		const schemaKeyValue = baseKey;
+		const schemaKeyValue = storedSchemaKey;
 		const fileIdValue = getColumnOrDefault(
 			columnMap,
 			"lixcol_file_id",
-			defaults.lixcol_file_id ?? "lix"
+			defaults.lixcol_file_id
 		);
-		if (fileIdValue === undefined) return null;
+		if (fileIdValue === undefined) {
+			throw new Error(
+				`Schema ${storedSchemaKey} requires lixcol_file_id via column or x-lix-defaults`
+			);
+		}
 		const pluginKeyValue = getColumnOrDefault(
 			columnMap,
 			"lixcol_plugin_key",
-			defaults.lixcol_plugin_key ?? "lix_own_entity"
+			defaults.lixcol_plugin_key
 		);
-		if (pluginKeyValue === undefined) return null;
+		if (pluginKeyValue === undefined) {
+			throw new Error(
+				`Schema ${storedSchemaKey} requires lixcol_plugin_key via column or x-lix-defaults`
+			);
+		}
 		const metadataValue = columnMap.get("lixcol_metadata") ?? null;
 		const untrackedValue = columnMap.get("lixcol_untracked") ?? 0;
 
@@ -148,17 +154,10 @@ export function rewriteEntityInsert(args: {
 
 		const pluginKeyExpr = addParam(pluginKeyValue);
 
-		const snapshotEntries = buildJsonObjectEntries({
-			schema: schema as any,
-			ref(prop) {
-				const lower = prop.toLowerCase();
-				if (!columnMap.has(lower)) return "NULL";
-				const rawValue = columnMap.get(lower);
-				if (rawValue === undefined) return "NULL";
-				const propDef = propertyDefinitions[prop];
-				const prepared = normalizeSnapshotValue(propDef, rawValue);
-				return addParam(prepared);
-			},
+		const snapshotContentExpr = buildSnapshotObjectExpression({
+			schema,
+			columnMap,
+			addParam,
 		});
 		const schemaVersionExpr = addParam(schemaVersionValue);
 		const metadataExpr = addParam(metadataValue);
@@ -171,7 +170,7 @@ export function rewriteEntityInsert(args: {
 				fileIdExpr,
 				versionExpr,
 				pluginKeyExpr,
-				`json_object(${snapshotEntries})`,
+				snapshotContentExpr,
 				schemaVersionExpr,
 				metadataExpr,
 				untrackedExpr,
@@ -244,20 +243,16 @@ function parseValuesList(
 				continue;
 			}
 			if (!expectValue) return null;
-			if (token.tokenType === QMark) {
-				if (positionalIndex >= parameters.length) return null;
-				row.push(parameters[positionalIndex]);
-				positionalIndex += 1;
-			} else if (token.tokenType === QMarkNumber) {
-				const idx = Number(token.image.slice(1)) - 1;
-				if (!Number.isInteger(idx) || idx < 0 || idx >= parameters.length)
-					return null;
-				row.push(parameters[idx]);
-			} else if (token.tokenType === NULL_TOKEN) {
-				row.push(null);
-			} else {
-				return null;
-			}
+			const parsed = parseValueToken({
+				tokens,
+				cursor: i,
+				positionalIndex,
+				parameters,
+			});
+			if (!parsed) return null;
+			row.push(parsed.value);
+			positionalIndex = parsed.nextPositionalIndex;
+			i = parsed.nextTokenIndex - 1;
 			expectValue = false;
 		}
 		rows.push(row);
@@ -269,6 +264,96 @@ function parseValuesList(
 	}
 
 	return { rows, nextIndex: i };
+}
+
+function parseValueToken(args: {
+	tokens: IToken[];
+	cursor: number;
+	positionalIndex: number;
+	parameters: ReadonlyArray<unknown>;
+}): {
+	value: unknown;
+	nextTokenIndex: number;
+	nextPositionalIndex: number;
+} | null {
+	const { tokens, cursor, positionalIndex, parameters } = args;
+	const token = tokens[cursor];
+	if (!token) return null;
+	if (token.tokenType === QMark) {
+		if (positionalIndex >= parameters.length) return null;
+		return {
+			value: parameters[positionalIndex],
+			nextTokenIndex: cursor + 1,
+			nextPositionalIndex: positionalIndex + 1,
+		};
+	}
+	if (token.tokenType === QMarkNumber) {
+		const idx = Number(token.image.slice(1)) - 1;
+		if (!Number.isInteger(idx) || idx < 0 || idx >= parameters.length)
+			return null;
+		return {
+			value: parameters[idx],
+			nextTokenIndex: cursor + 1,
+			nextPositionalIndex: positionalIndex,
+		};
+	}
+	if (token.tokenType === NULL_TOKEN) {
+		return {
+			value: null,
+			nextTokenIndex: cursor + 1,
+			nextPositionalIndex: positionalIndex,
+		};
+	}
+	if (
+		token.tokenType === Ident &&
+		token.image?.toLowerCase() === "json" &&
+		tokens[cursor + 1]?.tokenType === LParen
+	) {
+		const innerToken = tokens[cursor + 2];
+		const closing = tokens[cursor + 3];
+		if (!closing || closing.tokenType !== RParen) {
+			return null;
+		}
+		if (!innerToken) return null;
+		if (innerToken.tokenType === QMark) {
+			if (positionalIndex >= parameters.length) return null;
+			return {
+				value: deserializeJsonParameter(parameters[positionalIndex]),
+				nextTokenIndex: cursor + 4,
+				nextPositionalIndex: positionalIndex + 1,
+			};
+		}
+		if (innerToken.tokenType === QMarkNumber) {
+			const idx = Number(innerToken.image.slice(1)) - 1;
+			if (!Number.isInteger(idx) || idx < 0 || idx >= parameters.length)
+				return null;
+			return {
+				value: deserializeJsonParameter(parameters[idx]),
+				nextTokenIndex: cursor + 4,
+				nextPositionalIndex: positionalIndex,
+			};
+		}
+		if (innerToken.tokenType === NULL_TOKEN) {
+			return {
+				value: null,
+				nextTokenIndex: cursor + 4,
+				nextPositionalIndex: positionalIndex,
+			};
+		}
+	}
+	return null;
+}
+
+function deserializeJsonParameter(value: unknown): unknown {
+	if (value == null) return null;
+	if (typeof value !== "string") {
+		return value;
+	}
+	try {
+		return JSON.parse(value);
+	} catch {
+		return value;
+	}
 }
 
 function buildColumnValueMap(
@@ -285,40 +370,58 @@ function buildColumnValueMap(
 	return map;
 }
 
-function normalizeSnapshotValue(def: unknown, value: unknown): unknown {
-	if (value === undefined || value === null) return null;
-	if (shouldSerializeAsJsonText(def)) {
-		return jsonStringifyOrNull(value);
+function buildSnapshotObjectExpression(args: {
+	schema: StoredSchemaDefinition;
+	columnMap: Map<string, unknown>;
+	addParam: (value: unknown) => string;
+}): string {
+	const properties = Object.keys(args.schema.properties ?? {});
+	if (properties.length === 0) {
+		return "json_object()";
 	}
-	return value;
-}
-
-function shouldSerializeAsJsonText(def: unknown): boolean {
-	if (!def || typeof def !== "object") return false;
-	if (isJsonType(def)) return true;
-	const types = extractSchemaTypes(def as Record<string, unknown>);
-	if (types.includes("boolean")) return true;
-	return false;
-}
-
-function extractSchemaTypes(def: Record<string, unknown>): string[] {
-	const direct = def.type;
-	let types: string[] = [];
-	if (typeof direct === "string") {
-		types.push(direct);
-	} else if (Array.isArray(direct)) {
-		types = types.concat(
-			direct.filter((item): item is string => typeof item === "string")
-		);
-	}
-	if (Array.isArray(def.anyOf)) {
-		for (const candidate of def.anyOf) {
-			if (candidate && typeof candidate === "object") {
-				types = types.concat(extractSchemaTypes(candidate as any));
-			}
+	const entries: string[] = [];
+	for (const prop of properties) {
+		const def = (args.schema.properties ?? {})[prop];
+		const lower = prop.toLowerCase();
+		if (!args.columnMap.has(lower)) {
+			entries.push(`'${prop}', NULL`);
+			continue;
 		}
+		const rawValue = args.columnMap.get(lower);
+		if (rawValue === undefined) {
+			entries.push(`'${prop}', NULL`);
+			continue;
+		}
+		const expression = renderSnapshotValue({
+			definition: def,
+			value: rawValue,
+			addParam: args.addParam,
+		});
+		entries.push(`'${prop}', ${expression}`);
 	}
-	return Array.from(new Set(types));
+	return `json_object(${entries.join(", ")})`;
+}
+
+function renderSnapshotValue(args: {
+	definition: unknown;
+	value: unknown;
+	addParam: (value: unknown) => string;
+}): string {
+	const { definition, value, addParam } = args;
+	if (value === undefined || value === null) {
+		return "NULL";
+	}
+	if (definition && typeof definition === "object" && isJsonType(definition)) {
+		if (typeof value === "object") {
+			const serialized = jsonStringifyOrNull(value);
+			if (serialized === null) {
+				return "NULL";
+			}
+			return `json(${addParam(serialized)})`;
+		}
+		return addParam(value);
+	}
+	return addParam(value);
 }
 
 function jsonStringifyOrNull(value: unknown): unknown {

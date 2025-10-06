@@ -133,6 +133,19 @@ export const LixSchemaDefinition = {
 					description:
 						"When true, entities for this schema cannot be updated after creation.",
 				},
+				"x-lix-defaults": {
+					type: "object",
+					description:
+						"Default column values injected during entity view rewrites (e.g. lixcol_file_id).",
+					additionalProperties: {
+						anyOf: [
+							{ type: "string" },
+							{ type: "number" },
+							{ type: "boolean" },
+							{ type: "null" },
+						],
+					},
+				},
 				"x-lix-version": {
 					type: "string",
 					description:
@@ -204,6 +217,10 @@ export type LixSchemaDefinition = JSONSchema & {
 	 *   "1.0"
 	 */
 	"x-lix-version": string;
+	/**
+	 * Default column values injected when entity views rewrite operations.
+	 */
+	"x-lix-defaults"?: Record<string, string | number | boolean | null>;
 	"x-lix-primary-key"?: string[] | readonly string[];
 	/**
 	 * Properties that must be unique per version.

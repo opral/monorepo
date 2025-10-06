@@ -117,6 +117,58 @@ test("rewrites updates for stored schema views", async () => {
 	}
 });
 
+test("prefixless alias updates target stored schema key", async () => {
+	const lix = await openLix({});
+	try {
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const insertResult = preprocess({
+			sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
+			parameters: ["alias", { foo: "bar" }],
+		});
+
+		lix.engine!.executeSync({
+			sql: insertResult.sql,
+			parameters: insertResult.parameters as any[],
+		});
+
+		const updateResult = preprocess({
+			sql: "UPDATE key_value SET value = json_set(value, '$.foo', ?) WHERE key = ?",
+			parameters: ["baz", "alias"],
+		});
+
+		expect(updateResult.parameters[0]).toBe("lix_key_value");
+		expect(updateResult.sql).toContain("UPDATE state_all");
+
+		lix.engine!.executeSync({
+			sql: updateResult.sql,
+			parameters: updateResult.parameters as any[],
+		});
+
+		const selectResult = preprocess({
+			sql: "SELECT value FROM key_value WHERE key = ?",
+			parameters: ["alias"],
+		});
+
+		const rows = lix.engine!.executeSync({
+			sql: selectResult.sql,
+			parameters: selectResult.parameters as any[],
+		}).rows;
+
+		expect(rows).toHaveLength(1);
+		const parsed = (() => {
+			const raw = rows[0]?.value;
+			if (typeof raw === "string") {
+				return JSON.parse(raw);
+			}
+			return raw;
+		})();
+		expect(parsed).toEqual({ foo: "baz" });
+	} finally {
+		await lix.close();
+	}
+});
+
 test("updates to immutable schemas are rejected", async () => {
 	const lix = await openLix({});
 	try {

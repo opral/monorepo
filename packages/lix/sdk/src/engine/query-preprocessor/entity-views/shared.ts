@@ -75,10 +75,45 @@ export function baseSchemaKey(name: string): string | null {
  * Loads the latest stored schema definition for a given schema key.
  */
 export function loadStoredSchemaDefinition(
-	sqlite: Pick<LixEngine, "sqlite">["sqlite"],
+	engine: Pick<LixEngine, "executeSync">,
 	schemaKey: string
 ): StoredSchemaDefinition | null {
-	const rows = sqlite.exec({
+	for (const candidate of candidateStoredSchemaKeys(schemaKey)) {
+		const definition = loadStoredSchemaDefinitionForKey(engine, candidate);
+		if (definition) {
+			return definition;
+		}
+	}
+	return null;
+}
+
+export function resolveStoredSchemaKey(
+	schema: StoredSchemaDefinition,
+	fallbackKey: string
+): string {
+	const key = schema?.["x-lix-key"];
+	if (typeof key === "string" && key.length > 0) {
+		return key;
+	}
+	return fallbackKey;
+}
+
+function candidateStoredSchemaKeys(schemaKey: string): string[] {
+	if (!schemaKey) {
+		return [];
+	}
+	const candidates = [schemaKey];
+	if (!schemaKey.startsWith("lix_")) {
+		candidates.push(`lix_${schemaKey}`);
+	}
+	return candidates;
+}
+
+function loadStoredSchemaDefinitionForKey(
+	engine: Pick<LixEngine, "executeSync">,
+	schemaKey: string
+): StoredSchemaDefinition | null {
+	const { rows } = engine.executeSync({
 		sql: `SELECT json_extract(snapshot_content, '$.value') AS value
 			FROM internal_state_vtable
 			WHERE schema_key = 'lix_stored_schema'
@@ -86,13 +121,10 @@ export function loadStoredSchemaDefinition(
 			AND snapshot_content IS NOT NULL
 			ORDER BY json_extract(snapshot_content, '$.version') DESC
 			LIMIT 1`,
-		bind: [schemaKey],
-		returnValue: "resultRows",
-		rowMode: "object",
-		columnNames: [],
-	}) as Array<Record<string, unknown>>;
+		parameters: [schemaKey],
+	});
 
-	const first = rows[0];
+	const first = rows?.[0];
 	if (!first) return null;
 	const raw = first.value;
 	if (typeof raw === "string") {

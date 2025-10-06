@@ -14,6 +14,10 @@ export const LixStoredSchemaSchema = {
 	"x-lix-key": "lix_stored_schema",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["key", "version"],
+	"x-lix-defaults": {
+		lixcol_file_id: "lix",
+		lixcol_plugin_key: "lix_own_entity",
+	},
 	type: "object",
 	properties: {
 		key: { type: "string", "x-lix-generated": true },

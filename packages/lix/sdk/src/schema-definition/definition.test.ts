@@ -118,6 +118,50 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 	expect(valid).toBe(false);
 });
 
+test("x-lix-defaults accepts primitive values", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			attempts: 3,
+			enabled: true,
+			nullable: null,
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-defaults rejects complex values", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-defaults": {
+			// @ts-expect-error - objects are not allowed
+			options: { nested: true },
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(false);
+});
+
 test("x-lix-primary-key is optional", () => {
 	const schema = {
 		type: "object",

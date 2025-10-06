@@ -102,7 +102,7 @@ export function initDb(args: {
 	applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
 	applyAccountDatabaseSchema({ engine: engine });
-	applyKeyValueDatabaseSchema({ engine: engine });
+	// applyKeyValueDatabaseSchema({ engine: engine });
 	applyChangeAuthorDatabaseSchema({ engine: engine });
 	applyLabelDatabaseSchema({ engine: engine });
 	applyStateHistoryDatabaseSchema({ engine: engine });

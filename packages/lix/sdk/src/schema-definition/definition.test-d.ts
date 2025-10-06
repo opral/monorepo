@@ -41,6 +41,27 @@ test("a json change schema should be infer the properties", () => {
 	}>(snapshot);
 });
 
+test("x-lix-defaults typing", () => {
+	const schema = {
+		"x-lix-key": "defaults",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			attempts: 3,
+		},
+	} as const satisfies LixSchemaDefinition;
+
+	assertType<Record<string, string | number | boolean | null> | undefined>(
+		schema["x-lix-defaults"]
+	);
+});
+
 test("LixInsertable combined with LixGenerated makes columns optional", () => {
 	type MockType = {
 		id: LixGenerated<string>;
