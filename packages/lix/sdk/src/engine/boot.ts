@@ -1,16 +1,17 @@
 import type { SqliteWasmDatabase } from "../database/sqlite/index.js";
-import { initDb } from "../database/init-db.js";
+import { prepareEngineDatabase } from "../database/init-db.js";
 import { createHooks, type StateCommitChange } from "../hooks/create-hooks.js";
 import { applyFilesystemSchema } from "../filesystem/schema.js";
 import { loadPluginFromString } from "../environment/load-from-string.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { switchAccount } from "../account/switch-account.js";
 import { createCallRouter, type Call } from "./functions/router.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
 import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
 import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
+import { internalQueryBuilder } from "./internal-query-builder.js";
+import { setDeterministicBoot } from "./deterministic-mode/is-deterministic-mode.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -75,18 +76,21 @@ export type LixEngine = {
 	call: Call;
 };
 
-/**
- * Boot the Lix engine next to a live SQLite connection.
- *
- * - Applies schema, vtable, UDFs via initDb
- * - Installs file handlers and views
- * - Loads plugins from stringified ESM modules
- * - Optionally seeds account and key-values
- * - Bridges state_commit events to the host via emit
- */
 export async function boot(env: BootEnv): Promise<LixEngine> {
+	const deterministicBoot = env.args.keyValues?.some(
+		(kv) =>
+			kv.key === "lix_deterministic_mode" &&
+			kv.value !== undefined &&
+			typeof kv.value === "object" &&
+			(kv.value as any)?.enabled == true
+	);
+
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
+
+	if (deterministicBoot) {
+		setDeterministicBoot({ runtimeCacheRef, value: true });
+	}
 
 	let executeSyncImpl: LixEngine["executeSync"] | null = null;
 
@@ -113,14 +117,14 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		preprocess: preprocessQuery,
 	});
 	executeSyncImpl = executeSync;
-	const db = initDb({
+
+	prepareEngineDatabase({
 		sqlite: env.sqlite,
 		hooks,
 		executeSync,
 		runtimeCacheRef,
 	});
 
-	// Load plugins from raw ESM strings and provided plugin objects
 	const plugins: LixPlugin[] = [];
 	for (const code of env.args.providePluginsRaw ?? []) {
 		const plugin = await loadPluginFromString(code);
@@ -130,7 +134,6 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		plugins.push(input);
 	}
 
-	// Build a local Lix-like context for schema that needs plugin/hooks
 	const engine: LixEngine = {
 		sqlite: env.sqlite,
 		hooks,
@@ -143,82 +146,109 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		},
 	};
 
-	// Install filesystem functions + views that depend on plugin + hooks
 	applyFilesystemSchema({ engine });
 
-	// Event bridge: forward state_commit to host
 	hooks.onStateCommit(({ changes }) => {
 		env.emit({ type: "state_commit", payload: { changes } });
 	});
 
-	// Optional: ensure account exists and set as active
 	if (env.args.account) {
-		const accountExistsQuery = db
-			.selectFrom("account_all")
-			.where("id", "=", env.args.account.id)
-			.where("lixcol_version_id", "=", "global")
-			.select("id")
-			.limit(1);
 		const accountExists =
-			engine.executeSync(accountExistsQuery.compile()).rows.length > 0;
+			engine.executeSync(
+				internalQueryBuilder
+					.selectFrom("account_all")
+					.select("id")
+					.where("id", "=", env.args.account.id)
+					.where("lixcol_version_id", "=", "global")
+					.limit(1)
+					.compile()
+			).rows.length > 0;
 		if (!accountExists) {
-			const insertAccount = db.insertInto("account_all").values({
-				id: env.args.account.id,
-				name: env.args.account.name,
-				lixcol_version_id: "global",
-			});
-			engine.executeSync(insertAccount.compile());
+			engine.executeSync(
+				internalQueryBuilder
+					.insertInto("account_all")
+					.values({
+						id: env.args.account.id,
+						name: env.args.account.name,
+						lixcol_version_id: "global",
+					})
+					.compile()
+			);
 		}
-		await switchAccount({ lix: { db }, to: [env.args.account] });
+		engine.executeSync(
+			internalQueryBuilder.deleteFrom("active_account").compile()
+		);
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("active_account")
+				.values({ account_id: env.args.account.id })
+				.compile()
+		);
 	}
 
-	// Optional: seed/override key values
 	if (env.args.keyValues && env.args.keyValues.length > 0) {
 		for (const kv of env.args.keyValues) {
 			const explicitVid = kv.lixcol_version_id;
 			if (explicitVid) {
-				const existsQuery = db
-					.selectFrom("key_value_all")
-					.select("key")
-					.where("key", "=", kv.key)
-					.where("lixcol_version_id", "=", explicitVid)
-					.limit(1);
 				const exists =
-					engine.executeSync(existsQuery.compile()).rows.length > 0;
+					engine.executeSync(
+						internalQueryBuilder
+							.selectFrom("key_value_all")
+							.select("key")
+							.where("key", "=", kv.key)
+							.where("lixcol_version_id", "=", explicitVid)
+							.limit(1)
+							.compile()
+					).rows.length > 0;
 				if (exists) {
-					const update = db
-						.updateTable("key_value_all")
-						.set({ value: kv.value as any })
-						.where("key", "=", kv.key)
-						.where("lixcol_version_id", "=", explicitVid);
-					engine.executeSync(update.compile());
+					engine.executeSync(
+						internalQueryBuilder
+							.updateTable("key_value_all")
+							.set({ value: kv.value as any })
+							.where("key", "=", kv.key)
+							.where("lixcol_version_id", "=", explicitVid)
+							.compile()
+					);
 				} else {
-					const insert = db.insertInto("key_value_all").values({
-						key: kv.key,
-						value: kv.value as any,
-						lixcol_version_id: explicitVid,
-					});
-					engine.executeSync(insert.compile());
+					engine.executeSync(
+						internalQueryBuilder
+							.insertInto("key_value_all")
+							.values({
+								key: kv.key,
+								value: kv.value as any,
+								lixcol_version_id: explicitVid,
+							})
+							.compile()
+					);
 				}
 			} else {
-				const existsQuery = db
-					.selectFrom("key_value")
-					.select("key")
-					.where("key", "=", kv.key)
-					.limit(1);
 				const exists =
-					engine.executeSync(existsQuery.compile()).rows.length > 0;
+					engine.executeSync(
+						internalQueryBuilder
+							.selectFrom("key_value")
+							.select("key")
+							.where("key", "=", kv.key)
+							.limit(1)
+							.compile()
+					).rows.length > 0;
 				if (exists) {
-					const update = db
-						.updateTable("key_value")
-						.set({ value: kv.value as any })
-						.where("key", "=", kv.key);
-					engine.executeSync(update.compile());
+					engine.executeSync(
+						internalQueryBuilder
+							.updateTable("key_value")
+							.set({ value: kv.value as any })
+							.where("key", "=", kv.key)
+							.compile()
+					);
 				} else {
-					const insert = db
-						.insertInto("key_value")
-						.values({ key: kv.key, value: kv.value as any });
-					engine.executeSync(insert.compile());
+					engine.executeSync(
+						internalQueryBuilder
+							.insertInto("key_value")
+							.values({
+								key: kv.key,
+								value: kv.value as any,
+							})
+							.compile()
+					);
 				}
 			}
 		}
@@ -226,5 +256,9 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 
 	const { call } = createCallRouter({ engine });
 	engine.call = call;
+
+	if (deterministicBoot) {
+		setDeterministicBoot({ runtimeCacheRef, value: false });
+	}
 	return engine;
 }

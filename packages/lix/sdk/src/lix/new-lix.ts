@@ -2,7 +2,7 @@ import {
 	createInMemoryDatabase,
 	contentFromDatabase,
 } from "../database/sqlite/index.js";
-import { initDb } from "../database/init-db.js";
+import { initDb, prepareEngineDatabase } from "../database/init-db.js";
 import {
 	LixActiveVersionSchema,
 	LixVersionDescriptorSchema,
@@ -24,7 +24,7 @@ import {
 import type { LixChange } from "../change/schema-definition.js";
 import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import { humanId } from "human-id";
+import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
@@ -41,7 +41,8 @@ import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
 import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import type { LixEngine } from "../engine/boot.js";
-import { setDeterministicBoot } from "../engine/deterministic-mode/bootstrap-pending.js";
+import { setDeterministicBoot } from "../engine/deterministic-mode/is-deterministic-mode.js";
+import { getTimestampSync } from "../engine/functions/timestamp.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -133,6 +134,28 @@ export async function newLixFile(args?: {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
 
+	const deterministicModeConfig = args?.keyValues?.find(
+		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
+	);
+
+	let isDeterministicBootstrap = false;
+	let useRandomLixId = false;
+
+	if (
+		deterministicModeConfig?.value &&
+		typeof deterministicModeConfig.value === "object"
+	) {
+		const config = deterministicModeConfig.value as any;
+		// If deterministic mode is enabled, bootstrap is automatically deterministic
+		isDeterministicBootstrap = config.enabled === true;
+		// Check randomLixId flag (defaults to false)
+		useRandomLixId = config.randomLixId === true;
+	}
+
+	if (isDeterministicBootstrap) {
+		setDeterministicBoot({ runtimeCacheRef, value: true });
+	}
+
 	let executeSyncImpl: LixEngine["executeSync"] | null = null;
 
 	const preprocessorEngine = {
@@ -159,25 +182,13 @@ export async function newLixFile(args?: {
 	});
 	executeSyncImpl = executeSync;
 
-	const deterministicModeConfig = args?.keyValues?.find(
-		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
-	);
+	prepareEngineDatabase({ sqlite, hooks, executeSync, runtimeCacheRef });
 
-	let isDeterministicBootstrap = false;
-	let useRandomLixId = false;
-
-	if (
-		deterministicModeConfig?.value &&
-		typeof deterministicModeConfig.value === "object"
-	) {
-		const config = deterministicModeConfig.value as any;
-		// If deterministic mode is enabled, bootstrap is automatically deterministic
-		isDeterministicBootstrap = config.enabled === true;
-		// Check randomLixId flag (defaults to false)
-		useRandomLixId = config.randomLixId === true;
-	}
-
-	setDeterministicBoot(isDeterministicBootstrap);
+	const bootstrapEngine = {
+		executeSync,
+		hooks,
+		runtimeCacheRef,
+	} as const;
 
 	// applying the schema etc.
 	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
@@ -204,10 +215,9 @@ export async function newLixFile(args?: {
 		return randomNanoId();
 	};
 
-	// Hardcode timestamp to epoch 0 for deterministic bootstrap
 	const created_at = isDeterministicBootstrap
 		? new Date(0).toISOString()
-		: new Date().toISOString();
+		: getTimestampSync({ engine: bootstrapEngine });
 
 	// Create bootstrap changes for initial data
 	const bootstrapChanges = createBootstrapChanges({
@@ -217,6 +227,7 @@ export async function newLixFile(args?: {
 		generateNanoid,
 		isDeterministicBootstrap,
 		useRandomLixId,
+		engineForRandom: bootstrapEngine,
 	});
 
 	// Extract the lix_id from bootstrap changes
@@ -285,7 +296,11 @@ export async function newLixFile(args?: {
 	const activeAccountId = generateNanoid();
 	const humanName = isDeterministicBootstrap
 		? "Deterministic"
-		: humanId({ separator: "", capitalize: true });
+		: randomHumanIdWord({
+				capitalize: true,
+				engine: { executeSync, hooks, runtimeCacheRef },
+				separator: "",
+			});
 	const anonymousAccountName = `Anonymous ${humanName}`;
 
 	// Create the anonymous account as untracked
@@ -357,7 +372,7 @@ export async function newLixFile(args?: {
 
 	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
 	markStateCacheAsFresh({
-		engine: { executeSync, runtimeCacheRef, hooks },
+		engine: bootstrapEngine,
 		timestamp: created_at,
 	});
 	populateStateCache({ engine: { sqlite, runtimeCacheRef, executeSync } });
@@ -377,7 +392,7 @@ export async function newLixFile(args?: {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
-		setDeterministicBoot(false);
+		setDeterministicBoot({ runtimeCacheRef, value: false });
 		await db.destroy();
 	}
 }
@@ -399,6 +414,7 @@ function createBootstrapChanges(args: {
 	generateNanoid: () => string;
 	isDeterministicBootstrap: boolean;
 	useRandomLixId: boolean;
+	engineForRandom: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 
@@ -651,7 +667,11 @@ function createBootstrapChanges(args: {
 				lixName ??
 				(args.isDeterministicBootstrap
 					? "deterministic-lix-name"
-					: humanId({ separator: "-", capitalize: false })),
+					: randomHumanIdWord({
+							capitalize: false,
+							engine: args.engineForRandom,
+							separator: "-",
+						})),
 		} satisfies LixKeyValue,
 		created_at: args.created_at,
 	});

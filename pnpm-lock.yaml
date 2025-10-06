@@ -1854,8 +1854,6 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(happy-dom@18.0.1)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@20.5.9)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)
 
-  inlang/packages/website/dist/server: {}
-
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -2921,9 +2919,6 @@ importers:
       chevrotain:
         specifier: ^11.0.3
         version: 11.0.3
-      human-id:
-        specifier: ^4.1.1
-        version: 4.1.1
       kysely:
         specifier: ^0.28.7
         version: 0.28.7

@@ -79,6 +79,24 @@ test("returns non-deterministic names in normal mode", async () => {
 	// Names should be capitalized
 	expect(id1[0]).toBe(id1[0]?.toUpperCase());
 	expect(id2[0]).toBe(id2[0]?.toUpperCase());
+
+	// Default separator should yield multi-word identifiers
+	const parts = id1.split("_");
+	expect(parts.length).toBeGreaterThanOrEqual(2);
+	for (const part of parts) {
+		expect(part.length).toBeGreaterThan(0);
+	}
+});
+
+test("respects lowercase option in non-deterministic mode", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
+	});
+
+	const id = await humanId({ lix, capitalize: false });
+
+	expect(id).toBe(id.toLowerCase());
+	expect(id.length).toBeGreaterThan(0);
 });
 
 test("uses custom separator when provided", async () => {
@@ -95,10 +113,33 @@ test("uses custom separator when provided", async () => {
 	expect(typeof idWithSpace).toBe("string");
 	expect(typeof idWithUnderscore).toBe("string");
 
-	// Should not contain separators (since we extract only first word)
-	expect(idWithDash).not.toContain("-");
-	expect(idWithSpace).not.toContain(" ");
-	expect(idWithUnderscore).not.toContain("_");
+	// Non-empty separators should appear between components
+	const dashParts = idWithDash.split("-");
+	expect(dashParts.length).toBeGreaterThanOrEqual(2);
+	expect(idWithDash.startsWith("-")).toBe(false);
+	expect(idWithDash.endsWith("-")).toBe(false);
+
+	const spaceParts = idWithSpace.trim().split(" ");
+	expect(spaceParts.length).toBeGreaterThanOrEqual(2);
+	expect(idWithSpace.startsWith(" ")).toBe(false);
+	expect(idWithSpace.endsWith(" ")).toBe(false);
+
+	const underscoreParts = idWithUnderscore.split("_");
+	expect(underscoreParts.length).toBeGreaterThanOrEqual(2);
+	expect(idWithUnderscore.startsWith("_")).toBe(false);
+	expect(idWithUnderscore.endsWith("_")).toBe(false);
+});
+
+test("supports empty separator for compact identifiers", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
+	});
+
+	const id = await humanId({ lix, separator: "" });
+
+	expect(id.length).toBeGreaterThan(0);
+	expect(id).toMatch(/^[A-Za-z0-9]+$/);
+	expect(id[0]).toBe(id[0]?.toUpperCase());
 });
 
 test("persists sequence across lix instances", async () => {

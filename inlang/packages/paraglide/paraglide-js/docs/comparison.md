@@ -17,7 +17,6 @@ If you are looking for a benchmark, check out the [interactive benchmark](/m/ger
 | **Pluralization**                                          | [✅ Yes](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants#pluralization) | [✅ Yes](https://www.i18next.com/translation-function/plurals)             | [✅ Yes](https://formatjs.github.io/docs/core-concepts/icu-syntax#plural-format)                                  |
 | **Framework agnostic (React, Svelte, Vue, ...)**           | ✅ Yes                                                                                    | [🟠 Wrappers needed](https://github.com/i18next/react-i18next)             | [🟠 Wrappers needed](https://formatjs.github.io/docs/react-intl/#the-react-intl-package)                          |
 | **Metaframework agnostic (NextJS, SvelteKit, Astro, ...)** | ✅ Yes                                                                                    | [🟠 Wrappers needed](https://github.com/i18next/next-i18next)              | ❌ Only supports plain JS or React ([source](https://formatjs.github.io/docs/react-intl/#the-react-intl-package)) |
-| **Ecosystem**                                              | [🌱 Growing based on open inlang file format](https://github.com/opral/inlang-sdk)        | [🟠 Cloud TMS service](https://www.i18next.com/#localization-as-a-service) | ❌ Only an i18n library                                                                                           |
 
 ## Advanced Features
 
