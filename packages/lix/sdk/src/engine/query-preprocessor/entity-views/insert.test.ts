@@ -198,6 +198,58 @@ test("does not rewrite history view inserts", async () => {
 	}
 });
 
+test("applies JSON defaults when column is omitted", async () => {
+	const lix = await openLix({});
+	const schemaWithDefaults = {
+		"x-lix-key": "mock_default_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			status: { type: "string", default: "pending" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schemaWithDefaults })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const rewritten = preprocess({
+			sql: "INSERT INTO mock_default_schema (id) VALUES (?)",
+			parameters: ["row-default"],
+		});
+
+		expect(rewritten.sql).toContain("INSERT INTO state_all");
+		lix.engine!.executeSync({
+			sql: rewritten.sql,
+			parameters: rewritten.parameters as any[],
+		});
+
+		const select = await lix.db
+			// @ts-expect-error- dynamic schema
+			.selectFrom("mock_default_schema")
+			// @ts-expect-error - dynamic schema
+			.where("id", "=", "row-default")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(select.status).toBe("pending");
+	} finally {
+		await lix.close();
+	}
+});
+
 test("rewrites multi-row inserts with JSON payloads", async () => {
 	const lix = await openLix({});
 	try {

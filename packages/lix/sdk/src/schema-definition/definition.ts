@@ -136,7 +136,7 @@ export const LixSchemaDefinition = {
 				"x-lix-defaults": {
 					type: "object",
 					description:
-						"Default column values injected during entity view rewrites (e.g. lixcol_file_id).",
+						"Default metadata column values (such as lixcol_file_id). Does not affect JSON property defaults.",
 					additionalProperties: {
 						anyOf: [
 							{ type: "string" },
@@ -218,7 +218,8 @@ export type LixSchemaDefinition = JSONSchema & {
 	 */
 	"x-lix-version": string;
 	/**
-	 * Default column values injected when entity views rewrite operations.
+	 * Default metadata column values applied by entity-view rewrites (e.g. `lixcol_file_id`).
+	 * Does not provide defaults for JSON properties inside `properties`.
 	 */
 	"x-lix-defaults"?: Record<string, string | number | boolean | null>;
 	"x-lix-primary-key"?: string[] | readonly string[];

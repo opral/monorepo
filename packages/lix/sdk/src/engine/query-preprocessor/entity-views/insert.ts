@@ -384,7 +384,8 @@ function buildSnapshotObjectExpression(args: {
 		const def = (args.schema.properties ?? {})[prop];
 		const lower = prop.toLowerCase();
 		if (!args.columnMap.has(lower)) {
-			entries.push(`'${prop}', NULL`);
+			const defaultExpr = renderDefaultSnapshotValue({ definition: def, addParam: args.addParam });
+			entries.push(`'${prop}', ${defaultExpr}`);
 			continue;
 		}
 		const rawValue = args.columnMap.get(lower);
@@ -422,6 +423,29 @@ function renderSnapshotValue(args: {
 		return addParam(value);
 	}
 	return addParam(value);
+}
+
+function renderDefaultSnapshotValue(args: {
+	definition: unknown;
+	addParam: (value: unknown) => string;
+}): string {
+	const { definition, addParam } = args;
+	if (!definition || typeof definition !== "object") {
+		return "NULL";
+	}
+	const defaultValue = (definition as Record<string, unknown>).default;
+	if (defaultValue === undefined) {
+		return "NULL";
+	}
+	if (defaultValue === null) {
+		return "NULL";
+	}
+	if (typeof defaultValue === "object") {
+		const serialized = jsonStringifyOrNull(defaultValue);
+		if (serialized === null) return "NULL";
+		return `json(${addParam(serialized)})`;
+	}
+	return addParam(defaultValue);
 }
 
 function jsonStringifyOrNull(value: unknown): unknown {
