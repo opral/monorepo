@@ -1,6 +1,6 @@
 import type { IToken } from "chevrotain";
 import type { LixEngine } from "../../boot.js";
-import { Ident, QIdent } from "../sql-rewriter/tokenizer.js";
+import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.

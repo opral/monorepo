@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
 import { ensureNumberedPlaceholders, rewriteSql } from "./rewrite-sql.js";
-import * as tokenizer from "./tokenizer.js";
+import * as tokenizer from "../../sql-parser/tokenizer.js";
 
 test("rewrites top-level internal_state_vtable reference", () => {
 	const sql = `SELECT * FROM internal_state_vtable;`;

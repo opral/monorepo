@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { tokenize } from "../tokenizer.js";
+import { tokenize } from "../../../sql-parser/tokenizer.js";
 import { findTableFactor } from "./table-factor.js";
 
 describe("findInternalStateVtable", () => {

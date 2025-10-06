@@ -10,7 +10,7 @@ import {
 	QMark,
 	QMarkNumber,
 	NULL as NULL_TOKEN,
-} from "../sql-rewriter/tokenizer.js";
+} from "../../sql-parser/tokenizer.js";
 import { isJsonType } from "../../../schema-definition/json-type.js";
 
 import {

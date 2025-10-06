@@ -8,7 +8,7 @@ import {
 	QIdent,
 	SELECT,
 	type Token,
-} from "../tokenizer.js";
+} from "../../../sql-parser/tokenizer.js";
 
 /**
  * Result returned when the lexer encounters an internal_state_vtable table factor.

@@ -4,7 +4,7 @@ import {
 	Ident,
 	QIdent,
 	type Token,
-} from "./sql-rewriter/tokenizer.js";
+} from "../sql-parser/tokenizer.js";
 
 export interface ExpandQueryArgs {
 	sql: string;

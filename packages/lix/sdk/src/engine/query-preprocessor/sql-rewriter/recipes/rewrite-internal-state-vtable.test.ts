@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { tokenize } from "../tokenizer.js";
+import { tokenize } from "../../../sql-parser/tokenizer.js";
 import { analyzeShape } from "../microparser/analyze-shape.js";
 import {
 	buildHoistedInternalStateVtableCte,

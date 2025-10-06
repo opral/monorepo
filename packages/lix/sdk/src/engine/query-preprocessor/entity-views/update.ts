@@ -15,7 +15,7 @@ import {
 	Semicolon,
 	LParen,
 	RParen,
-} from "../sql-rewriter/tokenizer.js";
+} from "../../sql-parser/tokenizer.js";
 import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
 import {
 	baseSchemaKey,

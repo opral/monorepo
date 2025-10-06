@@ -7,7 +7,7 @@ import {
 } from "../../state/cache/mark-state-cache-as-stale.js";
 import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
 import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
-import { tokenize } from "./sql-rewriter/tokenizer.js";
+import { tokenize } from "../sql-parser/tokenizer.js";
 import { analyzeShape } from "./sql-rewriter/microparser/analyze-shape.js";
 
 const shapeFrom = (sql: string) => {

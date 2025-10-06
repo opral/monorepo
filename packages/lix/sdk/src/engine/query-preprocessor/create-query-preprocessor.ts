@@ -12,7 +12,7 @@ import {
 	WITH,
 	tokenize,
 	type Token,
-} from "./sql-rewriter/tokenizer.js";
+} from "../sql-parser/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";

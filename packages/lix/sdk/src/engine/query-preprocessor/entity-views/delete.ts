@@ -14,7 +14,7 @@ import {
 	Semicolon,
 	LParen,
 	RParen,
-} from "../sql-rewriter/tokenizer.js";
+} from "../../sql-parser/tokenizer.js";
 import {
 	baseSchemaKey,
 	classifyViewVariant,

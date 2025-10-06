@@ -14,7 +14,7 @@ import {
 	SQStr,
 	SELECT,
 	type Token,
-} from "../tokenizer.js";
+} from "../../../sql-parser/tokenizer.js";
 import { findTableFactors, type TableFactorMatch } from "./table-factor.js";
 
 export type PlaceholderToken = Token;
