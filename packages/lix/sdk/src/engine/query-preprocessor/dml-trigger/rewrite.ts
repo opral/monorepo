@@ -2,7 +2,6 @@ import type { LixEngine } from "../../boot.js";
 import type { Token } from "../../sql-parser/tokenizer.js";
 import type { RewriteResult } from "../entity-views/shared.js";
 import { findInsteadOfTrigger } from "./trigger-registry.js";
-import { getTriggerHandler } from "./handlers.js";
 import { readDmlTarget, type DmlOperation } from "./read-dml-target.js";
 
 /**
@@ -15,7 +14,7 @@ export function maybeRewriteInsteadOfTrigger(args: {
 	parameters: ReadonlyArray<unknown>;
 	op: DmlOperation;
 }): RewriteResult | null {
-	const { engine, tokens, parameters, op } = args;
+	const { engine, sql, tokens, parameters, op } = args;
 	const resolvedTarget = readDmlTarget(tokens, op);
 	if (!resolvedTarget) {
 		return null;
@@ -30,10 +29,16 @@ export function maybeRewriteInsteadOfTrigger(args: {
 		return null;
 	}
 
-	const handler = getTriggerHandler(resolvedTarget, op);
-	if (!handler) {
+	const body = trigger.bodySql.trim();
+	if (body.length === 0) {
+		return null;
+	}
+	if (/\bNEW\b|\bOLD\b/i.test(body)) {
 		return null;
 	}
 
-	return handler({ engine, tokens, parameters, trigger });
+	return {
+		sql: body,
+		parameters,
+	};
 }
