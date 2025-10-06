@@ -55,16 +55,16 @@ export async function createQueryPreprocessor(
 		let tokens = tokenize(currentSql);
 		const kind = detectStatementKind(tokens);
 		if (kind === "insert" || kind === "update" || kind === "delete") {
-			const triggerRewrite = maybeRewriteInsteadOfTrigger({
-				engine,
-				sql: currentSql,
-				tokens,
-				parameters,
-				op: kind,
-			});
-			if (triggerRewrite) {
-				return triggerRewrite;
-			}
+			// const triggerRewrite = maybeRewriteInsteadOfTrigger({
+			// 	engine,
+			// 	sql: currentSql,
+			// 	tokens,
+			// 	parameters,
+			// 	op: kind,
+			// });
+			// if (triggerRewrite) {
+			// 	return triggerRewrite;
+			// }
 			let entityRewrite: ReturnType<typeof rewriteEntityInsert> | null;
 			if (kind === "insert") {
 				entityRewrite = rewriteEntityInsert({

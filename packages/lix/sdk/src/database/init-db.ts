@@ -156,4 +156,20 @@ function initFunctions(args: {
 			return nanoIdSync({ engine, length });
 		},
 	});
+
+	args.sqlite.createFunction({
+		name: "lix_trigger_raise",
+		arity: -1,
+		xFunc: (_ctx: number, kind?: unknown, message?: unknown) => {
+			const action = typeof kind === "string" ? kind.toUpperCase() : "FAIL";
+			if (action === "IGNORE") {
+				return null;
+			}
+			const text =
+				typeof message === "string" && message.length > 0
+					? message
+					: `Trigger ${action}`;
+			throw new Error(text);
+		},
+	});
 }
