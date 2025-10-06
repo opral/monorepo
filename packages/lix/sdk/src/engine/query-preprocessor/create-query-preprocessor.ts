@@ -2,6 +2,7 @@ import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import { analyzeShapes } from "./sql-rewriter/microparser/analyze-shape.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
+import { getSchemaVersion } from "./shared/schema-version.js";
 import {
 	DELETE,
 	INSERT,
@@ -170,24 +171,6 @@ function getViewSelectMap(
 		map,
 	});
 	return map;
-}
-
-function getSchemaVersion(sqlite: Pick<LixEngine, "sqlite">["sqlite"]): number {
-	const result = sqlite.exec({
-		sql: "PRAGMA schema_version;",
-		returnValue: "resultRows",
-		rowMode: "object",
-		columnNames: [],
-	});
-	const rows = result as Array<Record<string, unknown>>;
-	const value = rows[0]?.schema_version;
-	if (typeof value === "number") return value;
-	if (typeof value === "bigint") return Number(value);
-	if (typeof value === "string") {
-		const parsed = Number(value);
-		return Number.isNaN(parsed) ? 0 : parsed;
-	}
-	return 0;
 }
 
 function loadViewSelectMap(

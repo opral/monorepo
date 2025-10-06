@@ -5,6 +5,7 @@ import {
 	QIdent,
 	type Token,
 } from "../sql-parser/tokenizer.js";
+import { normalizeIdentifier } from "./shared/schema-version.js";
 
 export interface ExpandQueryArgs {
 	sql: string;
@@ -23,13 +24,6 @@ interface NormalizedView {
 }
 
 const lower = (value: string): string => value.toLowerCase();
-
-const normalizeIdentifier = (value: string): string => {
-	if (value.startsWith('"') && value.endsWith('"')) {
-		return value.slice(1, -1).replace(/""/g, "").toLowerCase();
-	}
-	return value.toLowerCase();
-};
 
 type CacheEntry = {
 	source: Map<string, string>;
