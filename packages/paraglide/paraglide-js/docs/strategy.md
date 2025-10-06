@@ -224,6 +224,42 @@ compile({
 
 This is also the default behavior if you don't specify `urlPatterns` at all.
 
+> [!NOTE]
+> Frameworks such as SvelteKit often model locale aware routes with a required
+> `[locale]` segment. If you also want to prefix your default locale (similar to
+> the `prefixDefaultLanguage: "always"` option from the legacy Paraglide v1
+> adapter), you need to add an explicit pattern for the root path **before** the
+> wildcard. Otherwise `/` will first match `/:path(.*)?`, redirect to `/en/`, and
+> then get redirected again to `/en/en` once the trailing slash is normalized.
+
+```js
+compile({
+        project: "./project.inlang",
+        outdir: "./src/paraglide",
+        strategy: ["url", "cookie"],
+        urlPatterns: [
+                {
+                        pattern: "/",
+                        localized: [
+                                ["en", "/en"],
+                                ["fr", "/fr"],
+                        ],
+                },
+                {
+                        pattern: "/:path(.*)?",
+                        localized: [
+                                ["en", "/en/:path(.*)?"],
+                                ["fr", "/fr/:path(.*)?"],
+                        ],
+                },
+        ],
+});
+```
+
+Adding the dedicated root pattern ensures the homepage resolves directly to the
+correct locale prefix without an extra redirect loop, while the wildcard keeps
+handling every other route.
+
 #### Translated pathnames
 
 For pathnames where you want to localize the structure and path segments of the URL, you can use different patterns for each locale. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
