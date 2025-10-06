@@ -162,6 +162,45 @@ test("x-lix-defaults rejects complex values", () => {
 	expect(valid).toBe(false);
 });
 
+test("x-lix-default-call accepts function descriptors", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+			generated: {
+				type: "string",
+				"x-lix-default-call": { name: "lix_uuid_v7" },
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-default-call requires name", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+			generated: { type: "string", "x-lix-default-call": { args: {} } },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	};
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(false);
+});
+
 test("x-lix-primary-key is optional", () => {
 	const schema = {
 		type: "object",

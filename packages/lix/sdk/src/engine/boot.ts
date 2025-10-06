@@ -224,7 +224,22 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		}
 	}
 
-	const { call } = createCallRouter({ engine });
+	const call = createCallRouter({ engine });
 	engine.call = call;
+
+	// Register synchronous UDFs now that we have the engine context
+	env.sqlite.createFunction({
+		name: "lix_call",
+		arity: 1,
+		// @ts-expect-error - not sure why this is not working
+		xFunc: (_ctx: number, descriptorJson: string) => {
+			const { name, args } = JSON.parse(descriptorJson) as {
+				name: string;
+				args?: Record<string, unknown>;
+			};
+			return call(name, args ?? {});
+		},
+	});
+
 	return engine;
 }

@@ -26,7 +26,7 @@ export type Call = (
 	name: string,
 	payload?: unknown,
 	opts?: { signal?: AbortSignal }
-) => Promise<unknown>;
+) => any;
 
 export function createCallRouter(args: {
 	engine: Pick<
@@ -38,18 +38,8 @@ export function createCallRouter(args: {
 		| "call"
 		| "preprocessQuery"
 	>;
-}): {
-	call: Call;
-} {
-	type ExplainFn = Awaited<ReturnType<typeof createExplainQuery>>;
-	let explainFnPromise: Promise<ExplainFn> | null = null;
-
-	const getExplainFn = async () => {
-		if (!explainFnPromise) {
-			explainFnPromise = createExplainQuery({ engine: args.engine });
-		}
-		return explainFnPromise;
-	};
+}): Call {
+	const explain = createExplainQuery({ engine: args.engine });
 
 	// Local table of built‑ins. Handlers may be synchronous; results are wrapped
 	// in a Promise by `callFn` for a unified async surface.
@@ -108,22 +98,21 @@ export function createCallRouter(args: {
 		],
 		[
 			"lix_explain_query",
-			async (payload) => {
-				const explainFn = await getExplainFn();
-				return explainFn({ query: (payload ?? {}) as any });
+			(payload) => {
+				return explain({ query: (payload ?? {}) as any });
 			},
 		],
 	]);
 
-	return {
-		call: async (name, payload) => {
-			const handler = routes.get(name);
-			if (!handler) {
-				const err: any = new Error(`Unknown engine function: ${name}`);
-				err.code = "LIX_RPC_UNKNOWN_ROUTE";
-				throw err;
-			}
-			return Promise.resolve(handler(payload));
-		},
+	const invoke = (name: string, payload?: unknown) => {
+		const handler = routes.get(name);
+		if (!handler) {
+			const err: any = new Error(`Unknown engine function: ${name}`);
+			err.code = "LIX_CALL_UNKNOWN";
+			throw err;
+		}
+		return handler(payload);
 	};
+
+	return invoke;
 }

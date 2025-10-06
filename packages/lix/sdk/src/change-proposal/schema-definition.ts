@@ -14,6 +14,7 @@ export const LixChangeProposalSchema = {
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
+		lixcol_version_id: "global",
 	},
 	"x-lix-foreign-keys": [
 		{
@@ -27,10 +28,14 @@ export const LixChangeProposalSchema = {
 	],
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-generated": true,
+			"x-lix-default-call": { name: "lix_uuid_v7" },
+		},
 		source_version_id: { type: "string" },
 		target_version_id: { type: "string" },
-		status: { type: "string", "x-lix-generated": true },
+		status: { type: "string", "x-lix-generated": true, default: "open" },
 	},
 	required: ["id", "source_version_id", "target_version_id", "status"],
 	additionalProperties: false,

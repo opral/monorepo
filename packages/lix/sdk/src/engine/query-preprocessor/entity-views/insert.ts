@@ -30,7 +30,7 @@ export function rewriteEntityInsert(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== INSERT) {
@@ -55,6 +55,11 @@ export function rewriteEntityInsert(args: {
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
+	const propertyLowerToActual = new Map<string, string>();
+	for (const key of Object.keys(propertiesObject ?? {})) {
+		propertyLowerToActual.set(key.toLowerCase(), key);
+	}
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;
@@ -107,7 +112,21 @@ export function rewriteEntityInsert(args: {
 
 	for (const columnMap of columnMaps) {
 		const entityIdValue = columnMap.get(primaryKey);
-		if (entityIdValue === undefined) return null;
+		let entityIdExpr: string;
+		if (entityIdValue === undefined) {
+			const actualPk = propertyLowerToActual.get(primaryKey) ?? primaryKey;
+			const pkDefinition = (schema.properties ?? {})[actualPk];
+			const defaultExpr = renderDefaultSnapshotValue({
+				definition: pkDefinition,
+				addParam,
+			});
+			if (!defaultExpr || defaultExpr === "NULL") {
+				return null;
+			}
+			entityIdExpr = defaultExpr;
+		} else {
+			entityIdExpr = addParam(entityIdValue);
+		}
 		const schemaKeyValue = storedSchemaKey;
 		const fileIdValue = getColumnOrDefault(
 			columnMap,
@@ -132,7 +151,6 @@ export function rewriteEntityInsert(args: {
 		const metadataValue = columnMap.get("lixcol_metadata") ?? null;
 		const untrackedValue = columnMap.get("lixcol_untracked") ?? 0;
 
-		const entityIdExpr = addParam(entityIdValue);
 		const schemaKeyExpr = addParam(schemaKeyValue);
 		const fileIdExpr = addParam(fileIdValue);
 
@@ -384,7 +402,10 @@ function buildSnapshotObjectExpression(args: {
 		const def = (args.schema.properties ?? {})[prop];
 		const lower = prop.toLowerCase();
 		if (!args.columnMap.has(lower)) {
-			const defaultExpr = renderDefaultSnapshotValue({ definition: def, addParam: args.addParam });
+			const defaultExpr = renderDefaultSnapshotValue({
+				definition: def,
+				addParam: args.addParam,
+			});
 			entries.push(`'${prop}', ${defaultExpr}`);
 			continue;
 		}
@@ -433,19 +454,68 @@ function renderDefaultSnapshotValue(args: {
 	if (!definition || typeof definition !== "object") {
 		return "NULL";
 	}
+	const defaultCall = (definition as Record<string, unknown>)[
+		"x-lix-default-call"
+	] as
+		| {
+				name: string;
+				args?: Record<
+					string,
+					string | number | boolean | null | Record<string, unknown>
+				>;
+		  }
+		| undefined;
+	if (defaultCall) {
+		return renderDefaultFunctionCall({ call: defaultCall });
+	}
 	const defaultValue = (definition as Record<string, unknown>).default;
-	if (defaultValue === undefined) {
-		return "NULL";
+	if (defaultValue !== undefined) {
+		if (defaultValue === null) {
+			return "NULL";
+		}
+		if (typeof defaultValue === "object") {
+			const serialized = jsonStringifyOrNull(defaultValue);
+			if (serialized === null) return "NULL";
+			return `json(${addParam(serialized)})`;
+		}
+		return addParam(defaultValue);
 	}
-	if (defaultValue === null) {
-		return "NULL";
+	return "NULL";
+}
+
+/**
+ * Serializes an `x-lix-default-call` descriptor into a SQL invocation of the `lix_call` UDF.
+ *
+ * The descriptor is encoded as JSON and inlined directly into the SQL statement, enabling the
+ * runtime engine to dispatch the call without requiring per-function rewrites.
+ *
+ * @example
+ * const sql = renderDefaultFunctionCall({ call: { name: "lix_timestamp" } });
+ * // sql === "lix_call('{\"name\":\"lix_timestamp\"}')"
+ */
+function renderDefaultFunctionCall(args: {
+	call: {
+		name: string;
+		args?: Record<
+			string,
+			string | number | boolean | null | Record<string, unknown>
+		>;
+	};
+}): string {
+	const { call } = args;
+	const payload: {
+		name: string;
+		args?: Record<
+			string,
+			string | number | boolean | null | Record<string, unknown>
+		>;
+	} = { name: call.name };
+	if (call.args && Object.keys(call.args).length > 0) {
+		payload.args = call.args;
 	}
-	if (typeof defaultValue === "object") {
-		const serialized = jsonStringifyOrNull(defaultValue);
-		if (serialized === null) return "NULL";
-		return `json(${addParam(serialized)})`;
-	}
-	return addParam(defaultValue);
+	const json = JSON.stringify(payload);
+	const escaped = json.replace(/'/g, "''");
+	return `lix_call('${escaped}')`;
 }
 
 function jsonStringifyOrNull(value: unknown): unknown {

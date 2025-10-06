@@ -250,6 +250,101 @@ test("applies JSON defaults when column is omitted", async () => {
 	}
 });
 
+test("applies function defaults when column is omitted", async () => {
+	const lix = await openLix({});
+	const schemaWithFnDefault = {
+		"x-lix-key": "mock_fn_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			token: {
+				type: "string",
+				"x-lix-default-call": { name: "lix_uuid_v7" },
+			},
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const;
+
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schemaWithFnDefault })
+			.execute();
+
+		await (lix.db as any)
+			.insertInto("mock_fn_schema")
+			.values({ id: "row-fn", name: "Function default" })
+			.execute();
+
+		const row = await (lix.db as any)
+			.selectFrom("mock_fn_schema")
+			.where("id", "=", "row-fn")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(row.token).toBeDefined();
+		expect(typeof row.token).toBe("string");
+		expect((row.token as string).length).toBeGreaterThan(0);
+	} finally {
+		await lix.close();
+	}
+});
+
+test("function defaults override literal defaults", async () => {
+	const lix = await openLix({});
+	const schemaWithBoth = {
+		"x-lix-key": "mock_fn_override",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			stamp: {
+				type: "string",
+				default: "literal",
+				"x-lix-default-call": { name: "lix_timestamp" },
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+
+	try {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schemaWithBoth })
+			.execute();
+
+		await (lix.db as any)
+			.insertInto("mock_fn_override")
+			.values({ id: "row-override" })
+			.execute();
+
+		const row = await (lix.db as any)
+			.selectFrom("mock_fn_override")
+			.where("id", "=", "row-override")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(row.stamp).not.toBe("literal");
+		expect(typeof row.stamp).toBe("string");
+	} finally {
+		await lix.close();
+	}
+});
+
 test("rewrites multi-row inserts with JSON payloads", async () => {
 	const lix = await openLix({});
 	try {

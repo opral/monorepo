@@ -11,7 +11,6 @@ import { applyCommitDatabaseSchema } from "../commit/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
-import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
@@ -23,7 +22,6 @@ import type { LixEngine } from "../engine/boot.js";
 import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
-import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
 import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
@@ -108,7 +106,7 @@ export function initDb(args: {
 	applyStateHistoryDatabaseSchema({ engine: engine });
 	applyConversationDatabaseSchema({ engine });
 	applyEntityConversationDatabaseSchema({ engine });
-	applyChangeProposalDatabaseSchema({ engine });
+	// applyChangeProposalDatabaseSchema({ engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema({ engine: engine });
 
@@ -154,8 +152,8 @@ function initFunctions(args: {
 		name: "lix_nano_id",
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
-		xFunc: (_ctx: number, length: number) => {
-			return nanoIdSync({ engine: engine, length });
+		xFunc: (_ctx: number, length?: number) => {
+			return nanoIdSync({ engine, length });
 		},
 	});
 }

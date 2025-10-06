@@ -272,7 +272,7 @@ test("immutable schemas reject repeated inserts", async () => {
 			version_id: activeVersion.version_id,
 			snapshot_content: { id: "1", name: "first" },
 			schema_version: schema["x-lix-version"],
-			untracked: 0,
+			untracked: false,
 		})
 		.execute();
 

@@ -82,7 +82,7 @@ export function rewriteEntityUpdate(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
 }): RewriteResult | null {
 	const { sql, tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== UPDATE) {
@@ -110,6 +110,7 @@ export function rewriteEntityUpdate(args: {
 
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
+	const isActiveVersionSchema = storedSchemaKey === "lix_active_version";
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	if (typeof propertiesObject !== "object" || propertiesObject === null) {
 		return null;
@@ -204,20 +205,29 @@ export function rewriteEntityUpdate(args: {
 		return factory();
 	};
 
-	const entityIdParts = primaryKeys.map((key) => {
-		const actual = propertyLowerToActual.get(key) ?? key;
-		return getPropertyExpression(actual);
-	});
-	const entityIdExpr =
-		entityIdParts.length === 1
-			? entityIdParts[0]!
-			: `(${entityIdParts.join(" || '~' || ")})`;
+	const buildEntityIdExpr = (): { sql: string; params: unknown[] } => {
+		const startLen = params.length;
+		const parts = primaryKeys.map((key) => {
+			const actual = propertyLowerToActual.get(key) ?? key;
+			return getPropertyExpression(actual);
+		});
+		const sql =
+			parts.length === 1
+				? parts[0]!
+				: `(${parts.join(" || '~' || ")})`;
+		const addedParams = params.splice(startLen);
+		return { sql, params: addedParams };
+	};
 
 	const schemaKeyExpr = addParam(storedSchemaKey);
 	const fileIdAssignment = assignments.get("lixcol_file_id");
 	const metadataAssignment = assignments.get("lixcol_metadata");
 	const untrackedAssignment = assignments.get("lixcol_untracked");
-	const versionAssignment = assignments.get("lixcol_version_id");
+	const versionAssignment =
+		assignments.get("lixcol_version_id") ??
+		(variant === "base" && (defaults.lixcol_version_id !== undefined || isActiveVersionSchema)
+			? undefined
+			: assignments.get("version_id"));
 
 	let versionFallbackExpr: string | null = null;
 	let versionSource: ValueSource | null = null;
@@ -230,6 +240,8 @@ export function rewriteEntityUpdate(args: {
 	} else {
 		if (versionAssignment) {
 			versionSource = versionAssignment.value;
+		} else if (isActiveVersionSchema) {
+			versionSource = paramSource("global");
 		} else if (defaults.lixcol_version_id !== undefined) {
 			versionSource = paramSource(defaults.lixcol_version_id);
 		} else {
@@ -251,8 +263,8 @@ export function rewriteEntityUpdate(args: {
 		},
 	});
 
+	const touchesPrimaryKey = primaryKeys.some((key) => assignments.has(key));
 	const assignmentClauses = [
-		`entity_id = ${entityIdExpr}`,
 		`schema_key = ${schemaKeyExpr}`,
 		`file_id = ${
 			fileIdAssignment ? renderValueSource(fileIdAssignment.value) : "file_id"
@@ -276,6 +288,21 @@ export function rewriteEntityUpdate(args: {
 				: "untracked"
 		}`,
 	];
+	if (touchesPrimaryKey) {
+		const renderWithOrdering = (source: ValueSource): { sql: string; params: unknown[] } => {
+			const startLen = params.length;
+			const sql = renderValueSource(source);
+			const added = params.splice(startLen);
+			return { sql, params: added };
+		};
+		const entityIdRendered = isActiveVersionSchema
+			? renderWithOrdering(paramSource("active"))
+			: defaults.lixcol_entity_id !== undefined
+				? renderWithOrdering(paramSource(defaults.lixcol_entity_id))
+				: buildEntityIdExpr();
+		params.unshift(...entityIdRendered.params);
+		assignmentClauses.unshift(`entity_id = ${entityIdRendered.sql}`);
+	}
 
 	const propertyLowerSet = new Set(
 		propertyKeys.map((key) => key.toLowerCase())
@@ -322,9 +349,13 @@ export function rewriteEntityUpdate(args: {
 
 	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
 	if (variant === "base" && !hasVersionCondition) {
-		whereClauses.push(
-			`state_all.version_id = (SELECT version_id FROM active_version)`
-		);
+		if (isActiveVersionSchema) {
+			whereClauses.push(`state_all.version_id = ${addParam("global")}`);
+		} else {
+			whereClauses.push(
+				`state_all.version_id = (SELECT version_id FROM active_version)`
+			);
+		}
 	}
 
 	const rewrittenSql = `UPDATE state_all\nSET\n  ${assignmentClauses.join(",\n  ")}\nWHERE\n  ${whereClauses.join("\n  AND ")}`;

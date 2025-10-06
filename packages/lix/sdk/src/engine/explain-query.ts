@@ -18,14 +18,12 @@ type ExplainQueryStage = {
 	plan: any[];
 };
 
-export async function createExplainQuery(args: {
+export function createExplainQuery(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery" | "executeSync"
 	>;
-}): Promise<
-	(args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage
-> {
+}): (args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage {
 	const preprocess = args.engine.preprocessQuery;
 
 	return ({ query }) => {

@@ -80,8 +80,11 @@ export const LixActiveVersionSchema = {
 		},
 	],
 	"x-lix-defaults": {
+		lixcol_entity_id: "active",
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
+		lixcol_untracked: 1,
+		lixcol_version_id: "global",
 	},
 	type: "object",
 	properties: {

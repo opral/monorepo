@@ -92,10 +92,12 @@ test("rewrites updates for stored schema views", async () => {
 			"update_schema",
 		]);
 
-		lix.engine!.executeSync({
+		const execResult = lix.engine!.executeSync({
 			sql: updateResult.sql,
 			parameters: updateResult.parameters,
 		});
+		// eslint-disable-next-line no-console
+		console.log(execResult);
 
 		const selectResult = preprocess({
 			sql: "SELECT name FROM update_schema WHERE id = ?",
@@ -200,6 +202,49 @@ test("updates to immutable schemas are rejected", async () => {
 				parameters: updateResult.parameters as any[],
 			})
 		).toThrow(/immutable/i);
+	} finally {
+		await lix.close();
+	}
+});
+
+test("active_version updates keep global routing version", async () => {
+	const lix = await openLix({});
+	try {
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+
+		const before = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		const versions = await lix.db
+			.selectFrom("version")
+			.select("id")
+			.execute();
+		const targetVersionId =
+			versions.find((row) => row.id !== before.version_id)?.id ?? before.version_id;
+		expect(targetVersionId).not.toBe(before.version_id);
+
+		const updateResult = preprocess({
+			sql: "UPDATE active_version SET version_id = ?",
+			parameters: [targetVersionId],
+		});
+
+		expect(updateResult.parameters).toContain("global");
+		expect(updateResult.parameters).toContain("active");
+
+		lix.engine!.executeSync({
+			sql: updateResult.sql,
+			parameters: updateResult.parameters,
+		});
+
+		const after = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		expect(after.version_id).not.toBe(before.version_id);
+		expect(after.version_id).toBe(targetVersionId);
 	} finally {
 		await lix.close();
 	}

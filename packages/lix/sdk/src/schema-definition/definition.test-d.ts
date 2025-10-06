@@ -62,6 +62,34 @@ test("x-lix-defaults typing", () => {
 	);
 });
 
+test("x-lix-default-call typing", () => {
+	const schema = {
+		"x-lix-key": "fn_default",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			created_at: {
+				type: "string",
+				"x-lix-default-call": { name: "lix_timestamp" },
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	assertType<
+		| {
+				name: string;
+				args?: Record<
+					string,
+					string | number | boolean | null | Record<string, unknown>
+				>;
+		  }
+		| undefined
+	>(schema.properties.created_at?.["x-lix-default-call"]);
+});
+
 test("LixInsertable combined with LixGenerated makes columns optional", () => {
 	type MockType = {
 		id: LixGenerated<string>;
