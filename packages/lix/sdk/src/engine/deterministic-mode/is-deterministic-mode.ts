@@ -2,7 +2,39 @@ import type { LixEngine } from "../boot.js";
 import { sql } from "kysely";
 import { internalQueryBuilder } from "../internal-query-builder.js";
 import { withRuntimeCache } from "../with-runtime-cache.js";
-import { isDeterministicBootPending } from "./bootstrap-pending.js";
+
+const deterministicBootRefs = new WeakSet<object>();
+
+/**
+ * Flag a runtime as being within deterministic engine boot.
+ *
+ * During boot of the Lix engine we seed key values before the
+ * `lix_deterministic_mode` row exists. This flag lets helpers (for example the
+ * timestamp UDF) behave deterministically during that window instead of relying
+ * on the not-yet-written key.
+ */
+export function setDeterministicBoot(args: {
+	runtimeCacheRef: object;
+	value: boolean;
+}): void {
+	if (args.value) {
+		deterministicBootRefs.add(args.runtimeCacheRef);
+	} else {
+		deterministicBootRefs.delete(args.runtimeCacheRef);
+	}
+}
+
+/**
+ * Return whether deterministic boot has been requested for the current runtime.
+ *
+ * Used by helpers that must preserve deterministic behaviour before the
+ * `lix_deterministic_mode` key is present in the database.
+ */
+export function isDeterministicBootPending(
+	engine: Pick<LixEngine, "runtimeCacheRef">
+): boolean {
+	return deterministicBootRefs.has(engine.runtimeCacheRef);
+}
 
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
@@ -20,12 +52,10 @@ export function isDeterministicModeSync(args: {
 	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">;
 }): boolean {
 	const engine = args.engine;
-	if (isDeterministicBootPending()) {
+	if (isDeterministicBootPending(engine)) {
 		return true;
 	}
 
-	// TODO account for active version
-	// Need to query from underlying state to avoid recursion
 	const [row] = withRuntimeCache(
 		engine,
 		internalQueryBuilder
