@@ -80,6 +80,99 @@ describe("FilesView", () => {
 		await lix.close();
 	});
 
+	test("Cmd+Backspace deletes the selected file", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "file_1",
+				path: "/hello.md",
+				data: new Uint8Array(),
+			})
+			.execute();
+
+		let utils: ReturnType<typeof render>;
+		await act(async () => {
+			utils = render(
+				<LixProvider lix={lix}>
+					<Suspense fallback={null}>
+						<FilesView />
+					</Suspense>
+				</LixProvider>,
+			);
+		});
+
+		await waitFor(() => {
+			expect(utils!.getByText("hello.md")).toBeInTheDocument();
+		});
+
+		await act(async () => {
+			fireEvent.click(utils!.getByText("hello.md"));
+		});
+
+		await act(async () => {
+			fireEvent.keyDown(document, { key: "Backspace", metaKey: true });
+		});
+
+		await waitFor(async () => {
+			const rows = await lix.db.selectFrom("file").select(["path"]).execute();
+			expect(rows).toHaveLength(0);
+		});
+
+		await waitFor(() => {
+			expect(utils!.queryByText("hello.md")).toBeNull();
+		});
+
+		utils!.unmount();
+		await lix.close();
+	});
+
+	test("Cmd+Backspace deletes the selected directory", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+		await lix.db
+			.insertInto("directory")
+			.values({ path: "/docs/" } as any)
+			.execute();
+
+		let utils: ReturnType<typeof render>;
+		await act(async () => {
+			utils = render(
+				<LixProvider lix={lix}>
+					<Suspense fallback={null}>
+						<FilesView />
+					</Suspense>
+				</LixProvider>,
+			);
+		});
+
+		await waitFor(() => {
+			expect(utils!.getByText("docs")).toBeInTheDocument();
+		});
+
+		await act(async () => {
+			fireEvent.click(utils!.getByText("docs"));
+		});
+
+		await act(async () => {
+			fireEvent.keyDown(document, { key: "Backspace", metaKey: true });
+		});
+
+		await waitFor(async () => {
+			const rows = await lix.db
+				.selectFrom("directory")
+				.select(["path"])
+				.execute();
+			expect(rows.some((row) => row.path === "/docs/")).toBe(false);
+		});
+
+		await waitFor(() => {
+			expect(utils!.queryByText("docs")).toBeNull();
+		});
+
+		utils!.unmount();
+		await lix.close();
+	});
+
 	test("replaces whitespace with dashes when creating files", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
 		const onOpenFile = vi.fn();

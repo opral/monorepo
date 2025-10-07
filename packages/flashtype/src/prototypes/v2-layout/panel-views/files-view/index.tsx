@@ -36,6 +36,9 @@ export function FilesView({ context }: FilesViewProps) {
 	);
 	const [draft, setDraft] = useState<DraftState>(null);
 	const [selectedPath, setSelectedPath] = useState<string | null>(null);
+	const [selectedKind, setSelectedKind] = useState<"file" | "directory" | null>(
+		null,
+	);
 	const entryPathSet = useMemo(() => {
 		return new Set(
 			(entries ?? [])
@@ -122,6 +125,7 @@ export function FilesView({ context }: FilesViewProps) {
 					.execute();
 				setPendingPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
+				setSelectedKind("file");
 				context?.onOpenFile?.(path, { focus: false });
 			} catch (error) {
 				console.error("Failed to create file", error);
@@ -149,6 +153,7 @@ export function FilesView({ context }: FilesViewProps) {
 					.execute();
 				setPendingDirectoryPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
+				setSelectedKind("directory");
 			} catch (error) {
 				console.error("Failed to create directory", error);
 			} finally {
@@ -166,14 +171,62 @@ export function FilesView({ context }: FilesViewProps) {
 	const handleOpenFile = useCallback(
 		(path: string) => {
 			setSelectedPath(path);
+			setSelectedKind("file");
 			context?.onOpenFile?.(path, { focus: false });
 		},
 		[context],
 	);
 
-	const handleSelectItem = useCallback((path: string) => {
-		setSelectedPath(path);
-	}, []);
+	const handleSelectItem = useCallback(
+		(path: string, kind: "file" | "directory") => {
+			setSelectedPath(path);
+			setSelectedKind(kind);
+		},
+		[],
+	);
+
+	const handleDeleteSelection = useCallback(async () => {
+		if (!selectedPath || !selectedKind) return;
+		const normalizedPath =
+			selectedKind === "file"
+				? normalizeFilePath(selectedPath)
+				: normalizeDirectoryPath(selectedPath);
+		try {
+			if (selectedKind === "file") {
+				const record = await lix.db
+					.selectFrom("file")
+					.select(["id"])
+					.where("path", "=", normalizedPath)
+					.executeTakeFirst();
+				if (record?.id) {
+					await lix.db
+						.deleteFrom("state")
+						.where("file_id", "=", record.id as any)
+						.execute();
+				}
+				await lix.db
+					.deleteFrom("file")
+					.where("path", "=", normalizedPath)
+					.execute();
+				setPendingPaths((prev) =>
+					prev.filter((path) => path !== normalizedPath),
+				);
+			} else {
+				await lix.db
+					.deleteFrom("directory")
+					.where("path", "=", normalizedPath)
+					.execute();
+				setPendingDirectoryPaths((prev) =>
+					prev.filter((path) => path !== normalizedPath),
+				);
+			}
+		} catch (error) {
+			console.error("Failed to delete entry", error);
+		} finally {
+			setSelectedPath(null);
+			setSelectedKind(null);
+		}
+	}, [lix.db, selectedKind, selectedPath]);
 
 	useEffect(() => {
 		const listener = (event: KeyboardEvent) => {
@@ -181,6 +234,26 @@ export function FilesView({ context }: FilesViewProps) {
 				? event.metaKey && !event.ctrlKey
 				: event.ctrlKey && !event.metaKey;
 			if (!usesPrimaryModifier || event.altKey) return;
+			const isDeleteKey =
+				event.key === "Backspace" ||
+				event.code?.toLowerCase() === "backspace" ||
+				event.key === "Delete" ||
+				event.code?.toLowerCase() === "delete";
+			if (isDeleteKey) {
+				event.preventDefault();
+				event.stopPropagation();
+				event.stopImmediatePropagation?.();
+				event.returnValue = false;
+				if (
+					event.type === "keydown" &&
+					!event.repeat &&
+					!event.shiftKey &&
+					!isInteractiveTarget(event.target)
+				) {
+					void handleDeleteSelection();
+				}
+				return;
+			}
 			const isTrigger =
 				event.key === "." || event.code?.toLowerCase() === "period";
 			if (!isTrigger) return;
@@ -200,6 +273,7 @@ export function FilesView({ context }: FilesViewProps) {
 				setDraft((prev) => {
 					if (prev) return prev;
 					setSelectedPath(null);
+					setSelectedKind(null);
 					return {
 						kind,
 						directoryPath,
@@ -231,7 +305,7 @@ export function FilesView({ context }: FilesViewProps) {
 				}
 			}
 		};
-	}, [isMacPlatform, resolveDraftDirectory]);
+	}, [handleDeleteSelection, isMacPlatform, resolveDraftDirectory]);
 
 	return (
 		<FileTree

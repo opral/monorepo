@@ -134,6 +134,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	const fileRows =
 		useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 })) ?? [];
 	const filePaths = fileRows.map((row: any) => String(row.path));
+	const hasFiles = filePaths.length > 0;
 
 	const {
 		value,
@@ -357,8 +358,15 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	);
 
 	const menuFragment = useMemo(() => {
-		if (mentionOpen && mentionItems.length > 0) {
-			return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
+		if (mentionOpen) {
+			if (mentionItems.length > 0) {
+				return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
+			}
+			return (
+				<div className="pointer-events-none rounded-md border border-border/50 bg-white px-3 py-2 text-[13px] text-zinc-500 shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+					{hasFiles ? "Type to search files…" : "No files available"}
+				</div>
+			);
 		}
 		if (slashOpen) {
 			return (
@@ -370,6 +378,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		mentionOpen,
 		mentionItems,
 		mentionIdx,
+		hasFiles,
 		slashOpen,
 		filteredCommands,
 		slashIdx,
@@ -411,16 +420,18 @@ export function AgentView({ context: _context }: AgentViewProps) {
 						id={textAreaId}
 						data-testid="agent-composer-input"
 						placeholder="Ask Lix Agent…"
-						value={value}
-						onChange={(event) => {
-							const next = event.target.value;
-							const token = extractSlashToken(next);
-							setValue(next);
-							setSlashOpen(token !== null);
-							setSlashIdx(0);
+					value={value}
+					onChange={(event) => {
+						const next = event.target.value;
+						const token = extractSlashToken(next);
+						setValue(next);
+						setSlashOpen(token !== null);
+						setSlashIdx(0);
+						if (token !== null) {
 							setMentionOpen(false);
 							mentionCtx.current = null;
-						}}
+						}
+					}}
 						onKeyDown={onKeyDown}
 						onClick={updateMention}
 						onSelect={updateMention}
