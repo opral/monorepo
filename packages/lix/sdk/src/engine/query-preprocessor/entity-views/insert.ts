@@ -24,8 +24,16 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	type RewriteResult,
-	type StoredSchemaDefinition,
+type StoredSchemaDefinition,
 } from "./shared.js";
+
+type ExpressionValue = { kind: "expression"; sql: string };
+
+const isExpressionValue = (value: unknown): value is ExpressionValue =>
+	typeof value === "object" &&
+	value !== null &&
+	(value as Partial<ExpressionValue>).kind === "expression" &&
+	typeof (value as Partial<ExpressionValue>).sql === "string";
 
 export function rewriteEntityInsert(args: {
 	sql: string;
@@ -131,6 +139,9 @@ export function rewriteEntityInsert(args: {
 				}
 				return defaultExpr;
 			}
+			if (isExpressionValue(pkValue)) {
+				return pkValue.sql;
+			}
 			return addParam(pkValue);
 		};
 
@@ -181,11 +192,15 @@ export function rewriteEntityInsert(args: {
 		if (variant === "all") {
 			const explicitVersion = columnMap.get("lixcol_version_id");
 			if (explicitVersion === undefined) return null;
-			versionExpr = addParam(explicitVersion);
+			versionExpr = isExpressionValue(explicitVersion)
+				? explicitVersion.sql
+				: addParam(explicitVersion);
 		} else {
 			const explicitVersion = columnMap.get("lixcol_version_id");
 			if (explicitVersion !== undefined) {
-				versionExpr = addParam(explicitVersion);
+				versionExpr = isExpressionValue(explicitVersion)
+					? explicitVersion.sql
+					: addParam(explicitVersion);
 			} else if (defaults.lixcol_version_id !== undefined) {
 				versionExpr = addParam(defaults.lixcol_version_id);
 			} else {
@@ -381,6 +396,32 @@ function parseValueToken(args: {
 				nextPositionalIndex: positionalIndex,
 			};
 		}
+	}
+	if (token.tokenType === LParen) {
+		const fragments = [token.image ?? "("];
+		let next = cursor + 1;
+		let depth = 1;
+		while (next < tokens.length && depth > 0) {
+			const current = tokens[next];
+			if (!current?.image) {
+				return null;
+			}
+			fragments.push(current.image);
+			if (current.tokenType === LParen) {
+				depth += 1;
+			} else if (current.tokenType === RParen) {
+				depth -= 1;
+			}
+			next += 1;
+		}
+		if (depth !== 0) {
+			return null;
+		}
+		return {
+			value: { kind: "expression", sql: fragments.join(" ") },
+			nextTokenIndex: next,
+			nextPositionalIndex: positionalIndex,
+		};
 	}
 	return null;
 }

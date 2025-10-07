@@ -94,15 +94,15 @@ export function initDb(args: {
 	// Ensure file data cache table exists before any triggers may reference it
 	applyFileDataCacheSchema({ engine: engine });
 	applyStateDatabaseSchema({ engine: engine });
-	applyEntityDatabaseSchema({ engine: engine });
+	// applyEntityDatabaseSchema({ engine: engine });
 	// applyChangeSetDatabaseSchema({ engine: engine });
-	applyCommitDatabaseSchema({ engine: engine });
+	// applyCommitDatabaseSchema({ engine: engine });
 	applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
 	applyAccountDatabaseSchema({ engine: engine });
 	// applyKeyValueDatabaseSchema({ engine: engine });
 	// applyChangeAuthorDatabaseSchema({ engine: engine });
-	applyLabelDatabaseSchema({ engine: engine });
+	// applyLabelDatabaseSchema({ engine: engine });
 	applyStateHistoryDatabaseSchema({ engine: engine });
 	applyConversationDatabaseSchema({ engine });
 	applyEntityConversationDatabaseSchema({ engine });

@@ -199,6 +199,50 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	await lix.close();
 });
 
+test("preserves SQL expression parameters during insert rewrite", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "expression_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const rewritten = preprocess({
+		sql: `INSERT INTO expression_schema (id, name, lixcol_version_id) VALUES (?, ?, (SELECT version_id FROM active_version))`,
+		parameters: ["exp-1", "Expression"],
+	});
+
+	lix.engine!.executeSync({
+		sql: rewritten.sql,
+		parameters: rewritten.parameters,
+	});
+
+	const rows = await lix.db
+		.selectFrom("expression_schema" as any)
+		.select(["id", "name"])
+		.where("id", "=", "exp-1")
+		.execute();
+
+	expect(rows).toEqual([{ id: "exp-1", name: "Expression" }]);
+	expect(rewritten.sql).toContain("SELECT version_id FROM active_version");
+
+	await lix.close();
+});
+
 test("uses stored schema key when inserting via prefixless alias", async () => {
 	const lix = await openLix({});
 	const preprocess = await createQueryPreprocessor(lix.engine!);
