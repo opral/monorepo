@@ -508,6 +508,54 @@ test("useQuery cache key isolates by lix instance", async () => {
 	await lix2.close();
 });
 
+test("useQuery reuses a single live subscription for identical queries", async () => {
+	const lix = await openLix({});
+	const observeSpy = vi.spyOn(lix, "observe");
+
+	const queryFactory = ({ lix }: { lix: Lix }) =>
+		lix.db.selectFrom("key_value").selectAll();
+
+	let hookResult!: RenderHookResult<
+		{ first: State<LixKeyValue>[]; second: State<LixKeyValue>[] },
+		void
+	>["result"];
+	let unmount!: () => void;
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	await act(async () => {
+		const rendered = renderHook(
+			() => {
+				const first = useQuery(queryFactory);
+				const second = useQuery(queryFactory);
+				return { first, second };
+			},
+			{ wrapper },
+		);
+		hookResult = rendered.result;
+		unmount = rendered.unmount;
+	});
+
+	await waitFor(() => {
+		expect(Array.isArray(hookResult.current.first)).toBe(true);
+		expect(Array.isArray(hookResult.current.second)).toBe(true);
+	});
+
+	await waitFor(() => {
+		expect(observeSpy).toHaveBeenCalledTimes(1);
+	});
+
+	unmount();
+	observeSpy.mockRestore();
+	await lix.close();
+});
+
 test("useQuery surfaces subscription errors via render", async () => {
 	const lix = await openLix({});
 	const error = new Error("subscription failed");

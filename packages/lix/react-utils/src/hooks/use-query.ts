@@ -3,7 +3,15 @@
  *  React 19 Suspense-based hooks for live database queries
  * ------------------------------------------------------------------------- */
 
-import { useMemo, useContext, useEffect, useRef, useState, use } from "react";
+import {
+	useMemo,
+	useContext,
+	useEffect,
+	useRef,
+	use,
+	useCallback,
+	useSyncExternalStore,
+} from "react";
 import type { Lix } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
 import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
@@ -64,6 +72,13 @@ let queryPromiseCache = new PromiseLruCache<Promise<any>>(
 );
 const lixInstanceIds = new WeakMap<Lix, number>();
 let nextLixInstanceId = 1;
+const queryStores = new Map<string, QueryStoreEntry>();
+const scheduleMicrotask: (cb: () => void) => void =
+	typeof queueMicrotask === "function"
+		? queueMicrotask
+		: (cb) => {
+				Promise.resolve().then(cb);
+			};
 
 interface UseQueryOptions<TRow = unknown> {
 	subscribe?: boolean;
@@ -78,6 +93,224 @@ interface UseQueryOptions<TRow = unknown> {
 type QueryFactory<TRow> = (args: {
 	lix: Lix;
 }) => SelectQueryBuilder<any, any, TRow>;
+
+type ObserverArgs = {
+	cacheKey: string;
+	lix: Lix;
+	queryFactory: QueryFactory<unknown>;
+};
+
+type EqualityFn = (next: unknown[], prev: unknown[]) => boolean;
+
+type QuerySnapshot = {
+	rows: unknown[];
+	error: Error | null;
+	version: number;
+};
+
+type MutableRef<T> = { current: T };
+
+type QueryStoreListener = {
+	callback: () => void;
+	getEquality: () => EqualityFn;
+	lastRows: unknown[];
+	lastError: Error | null;
+};
+
+interface QueryStoreEntry {
+	cacheKey: string;
+	snapshot: QuerySnapshot;
+	listeners: Set<QueryStoreListener>;
+	retainCount: number;
+	unsubscribeFromLix?: () => void;
+	latestArgs?: ObserverArgs;
+	hasPendingError: boolean;
+	subscribe(
+		listener: () => void,
+		getEquality: () => EqualityFn,
+		renderedVersionRef: MutableRef<number>,
+		renderedSnapshotRef: MutableRef<QuerySnapshot>,
+	): () => void;
+	getSnapshot(): QuerySnapshot;
+	getServerSnapshot(): QuerySnapshot;
+	resetInitialRows(rows: unknown[]): void;
+	commitRows(rows: unknown[]): void;
+	commitError(error: Error | null): void;
+	ensureObserver(args: ObserverArgs): void;
+	releaseObserver(): void;
+	teardown(): void;
+}
+
+function notifyListeners(entry: QueryStoreEntry): void {
+	for (const listener of entry.listeners) {
+		const equality = listener.getEquality();
+		const rowsChanged = !equality(entry.snapshot.rows, listener.lastRows);
+		const errorChanged = !Object.is(entry.snapshot.error, listener.lastError);
+		listener.lastRows = entry.snapshot.rows;
+		listener.lastError = entry.snapshot.error;
+		if (rowsChanged || errorChanged) {
+			listener.callback();
+		}
+	}
+}
+
+function startObservation(
+	entry: QueryStoreEntry,
+	args: ObserverArgs,
+): () => void {
+	const builder = args.queryFactory({ lix: args.lix });
+	const subscription = args.lix.observe(builder).subscribe({
+		next: (value) => {
+			entry.commitRows(value as unknown[]);
+		},
+		error: (err) => {
+			const errorInstance = err instanceof Error ? err : new Error(String(err));
+			queryPromiseCache.delete(args.cacheKey);
+			entry.commitError(errorInstance);
+		},
+	});
+	return () => subscription.unsubscribe();
+}
+
+function createQueryStoreEntry(
+	cacheKey: string,
+	initialRows: unknown[],
+): QueryStoreEntry {
+	const listeners = new Set<QueryStoreListener>();
+	const entry: QueryStoreEntry = {
+		cacheKey,
+		snapshot: {
+			rows: initialRows,
+			error: null,
+			version: 0,
+		},
+		listeners,
+		retainCount: 0,
+		hasPendingError: false,
+		subscribe(
+			listener: () => void,
+			getEquality: () => EqualityFn,
+			renderedVersionRef: MutableRef<number>,
+			renderedSnapshotRef: MutableRef<QuerySnapshot>,
+		) {
+			const listenerContext: QueryStoreListener = {
+				callback: listener,
+				getEquality,
+				lastRows: renderedSnapshotRef.current.rows,
+				lastError: renderedSnapshotRef.current.error,
+			};
+			listeners.add(listenerContext);
+			if (entry.snapshot.version !== renderedVersionRef.current) {
+				listenerContext.lastRows = entry.snapshot.rows;
+				listenerContext.lastError = entry.snapshot.error;
+				scheduleMicrotask(() => {
+					listenerContext.callback();
+				});
+			}
+			return () => {
+				listeners.delete(listenerContext);
+				maybeCleanupEntry(entry);
+			};
+		},
+		getSnapshot() {
+			return entry.snapshot;
+		},
+		getServerSnapshot() {
+			return entry.snapshot;
+		},
+		resetInitialRows(rows: unknown[]) {
+			const prev = entry.snapshot;
+			const rowsChanged = !defaultEquality(rows, prev.rows);
+			if (!rowsChanged) {
+				return;
+			}
+			entry.hasPendingError = false;
+			entry.snapshot = {
+				rows,
+				error: null,
+				version: prev.version + 1,
+			};
+			notifyListeners(entry);
+		},
+		commitRows(rows: unknown[]) {
+			const prev = entry.snapshot;
+			const unchangedRows = defaultEquality(rows, prev.rows);
+			const shouldClearError = !entry.hasPendingError;
+			entry.hasPendingError = false;
+			if (unchangedRows && (prev.error === null || !shouldClearError)) {
+				return;
+			}
+			entry.snapshot = {
+				rows,
+				error: shouldClearError ? null : prev.error,
+				version: prev.version + 1,
+			};
+			notifyListeners(entry);
+		},
+		commitError(error: Error | null) {
+			const prev = entry.snapshot;
+			if (prev.error === error) {
+				return;
+			}
+			entry.hasPendingError = true;
+			entry.snapshot = {
+				rows: prev.rows,
+				error,
+				version: prev.version + 1,
+			};
+			notifyListeners(entry);
+		},
+		ensureObserver(args: ObserverArgs) {
+			entry.latestArgs = args;
+			entry.retainCount += 1;
+			if (entry.retainCount === 1) {
+				entry.unsubscribeFromLix = startObservation(entry, args);
+			}
+		},
+		releaseObserver() {
+			if (entry.retainCount === 0) {
+				return;
+			}
+			entry.retainCount -= 1;
+			if (entry.retainCount === 0 && entry.unsubscribeFromLix) {
+				entry.unsubscribeFromLix();
+				entry.unsubscribeFromLix = undefined;
+			}
+			maybeCleanupEntry(entry);
+		},
+		teardown() {
+			if (entry.unsubscribeFromLix) {
+				entry.unsubscribeFromLix();
+				entry.unsubscribeFromLix = undefined;
+			}
+			entry.hasPendingError = false;
+			entry.retainCount = 0;
+			entry.latestArgs = undefined;
+			listeners.clear();
+		},
+	};
+	return entry;
+}
+
+function getOrCreateQueryStore(
+	cacheKey: string,
+	initialRows: unknown[],
+): QueryStoreEntry {
+	let entry = queryStores.get(cacheKey);
+	if (!entry) {
+		entry = createQueryStoreEntry(cacheKey, initialRows);
+		queryStores.set(cacheKey, entry);
+	}
+	return entry;
+}
+
+function destroyQueryStore(cacheKey: string): void {
+	const entry = queryStores.get(cacheKey);
+	if (entry) {
+		entry.teardown();
+		queryStores.delete(cacheKey);
+	}
+}
 
 /**
  * Subscribe to a live query using React 19 Suspense.
@@ -160,66 +393,72 @@ export function useQuery<TRow>(
 	// Use the promise (suspends on first render)
 	const initialRows = use(promise);
 
-	// Local state for updates
-	const [rows, setRows] = useState(initialRows);
-	const [error, setError] = useState<Error | null>(null);
-	const lastRowsRef = useRef(initialRows);
-	const lastCacheKeyRef = useRef(cacheKey);
+	const equalityRef = useRef(equalityFn);
+	useEffect(() => {
+		equalityRef.current = equalityFn;
+	}, [equalityFn]);
+
+	const store = getOrCreateQueryStore(cacheKey, initialRows);
+	const renderedSnapshotRef = useRef<QuerySnapshot>(store.getSnapshot());
+	const renderedVersionRef = useRef<number>(store.getSnapshot().version);
+
+	const subscribeWithEquality = useCallback(
+		(listener: () => void) =>
+			store.subscribe(
+				listener,
+				() => equalityRef.current as EqualityFn,
+				renderedVersionRef,
+				renderedSnapshotRef,
+			),
+		[store, renderedVersionRef, renderedSnapshotRef],
+	);
+
+	const snapshot = useSyncExternalStore(
+		subscribeWithEquality,
+		store.getSnapshot,
+		store.getServerSnapshot,
+	);
+	renderedSnapshotRef.current = snapshot;
+	renderedVersionRef.current = snapshot.version;
 
 	useEffect(() => {
-		if (lastCacheKeyRef.current !== cacheKey) {
-			lastCacheKeyRef.current = cacheKey;
-			setError(null);
-		}
-	}, [cacheKey]);
+		store.resetInitialRows(initialRows);
+	}, [store, initialRows]);
 
-	// Keep state aligned with the initial suspense payload when the query key
-	// changes. Skip updates when structurally equal to avoid render loops.
-	useEffect(() => {
-		if (!equalityFn(initialRows, lastRowsRef.current)) {
-			lastRowsRef.current = initialRows;
-			setRows(initialRows);
-		}
-	}, [initialRows, equalityFn]);
-
-	// Subscribe for ongoing updates (only if subscribe is true)
 	useEffect(() => {
 		if (!subscribe) {
 			return;
 		}
 
-		const builder = queryRef.current({ lix });
-		const sub = lix.observe(builder).subscribe({
-			next: (value) => {
-				const nextRows = value as TRow[];
-				if (equalityFn(nextRows, lastRowsRef.current)) {
-					return;
-				}
-				lastRowsRef.current = nextRows;
-				setRows(nextRows);
-			},
-			error: (err) => {
-				const errorInstance =
-					err instanceof Error ? err : new Error(String(err));
-				queryPromiseCache.delete(cacheKey);
-				setError(errorInstance);
-			},
-		});
-		return () => sub.unsubscribe();
-	}, [cacheKey, subscribe, lix, equalityFn]);
+		const args: ObserverArgs = {
+			cacheKey,
+			lix,
+			queryFactory: ({ lix }) => queryRef.current({ lix }),
+		};
 
-	if (error) {
-		throw error;
+		store.ensureObserver(args);
+		return () => {
+			store.releaseObserver();
+		};
+	}, [cacheKey, subscribe, lix, store]);
+
+	if (snapshot.error) {
+		throw snapshot.error;
 	}
-	return rows;
+
+	return (subscribe ? snapshot.rows : initialRows) as TRow[];
 }
 
 export function invalidateQuery(cacheKey: string): void {
 	queryPromiseCache.delete(cacheKey);
+	destroyQueryStore(cacheKey);
 }
 
 export function clearQueryCache(): void {
 	queryPromiseCache.clear();
+	for (const key of Array.from(queryStores.keys())) {
+		destroyQueryStore(key);
+	}
 }
 
 export function isQueryCached(cacheKey: string): boolean {
@@ -423,3 +662,8 @@ export const useSuspenseQueryTakeFirst = useQueryTakeFirst;
  * This will be removed in a future version.
  */
 export const useSuspenseQueryTakeFirstOrThrow = useQueryTakeFirstOrThrow;
+function maybeCleanupEntry(entry: QueryStoreEntry): void {
+	if (entry.retainCount === 0 && entry.listeners.size === 0) {
+		queryStores.delete(entry.cacheKey);
+	}
+}
