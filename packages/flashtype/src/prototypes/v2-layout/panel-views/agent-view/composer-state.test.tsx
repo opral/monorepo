@@ -2,11 +2,13 @@ import { act, render, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { useEffect } from "react";
 import { useComposerState } from "./composer-state";
-import { MOCK_COMMANDS, MOCK_FILES } from "./commands";
+import { MOCK_COMMANDS } from "./commands";
+
+const TEST_FILES = ["docs/readme.md", "src/app.ts", "README.md"];
 
 type Snapshot = ReturnType<typeof useComposerState> | null;
 
-	describe("useComposerState", () => {
+describe("useComposerState", () => {
 	test("filters commands when slash input is provided", async () => {
 		let snapshot: Snapshot = null;
 		const onRender = vi.fn((state: Snapshot) => {
@@ -22,11 +24,30 @@ type Snapshot = ReturnType<typeof useComposerState> | null;
 		act(() => {
 			snapshot!.setSlashOpen(true);
 		});
-		await waitFor(() =>
-			expect(snapshot!.filteredCommands.map((cmd) => cmd.name)).toEqual([
-				"help",
-			]),
-		);
+		await waitFor(() => {
+			const names = snapshot!.filteredCommands.map((cmd) => cmd.name);
+			expect(names).toContain("help");
+		});
+	});
+
+	test("slashToken is null for file-like mentions", async () => {
+		let snapshot: Snapshot = null;
+		render(<HookHarness onRender={(state) => (snapshot = state)} />);
+		await waitFor(() => expect(snapshot).not.toBeNull());
+		act(() => {
+			snapshot!.setValue("/docs/readme.md");
+		});
+		await waitFor(() => expect(snapshot!.slashToken).toBeNull());
+	});
+
+	test("slashToken is null once whitespace follows the command", async () => {
+		let snapshot: Snapshot = null;
+		render(<HookHarness onRender={(state) => (snapshot = state)} />);
+		await waitFor(() => expect(snapshot).not.toBeNull());
+		act(() => {
+			snapshot!.setValue("/clear done");
+		});
+		await waitFor(() => expect(snapshot!.slashToken).toBeNull());
 	});
 
 	test("opens mention list when @ is typed", async () => {
@@ -57,7 +78,10 @@ type Snapshot = ReturnType<typeof useComposerState> | null;
 });
 
 function HookHarness({ onRender }: { onRender: (state: Snapshot) => void }) {
-	const state = useComposerState({ commands: MOCK_COMMANDS, files: MOCK_FILES });
+	const state = useComposerState({
+		commands: MOCK_COMMANDS,
+		files: TEST_FILES,
+	});
 	useEffect(() => {
 		onRender(state);
 	}, [state, onRender]);

@@ -1,11 +1,20 @@
-import { useState, useId, useRef, useCallback, useEffect, useMemo } from "react";
+import {
+	useState,
+	useId,
+	useRef,
+	useCallback,
+	useMemo,
+	useEffect,
+} from "react";
 import { ArrowUp, ChevronDown, Plus } from "lucide-react";
 import { ChatMessageList } from "@/components/agent-chat/chat-message-list";
 import type { ViewContext } from "../../types";
 import type { ChatMessage } from "@/components/agent-chat/types";
-import { MOCK_COMMANDS, MOCK_FILES } from "./commands";
+import { MOCK_COMMANDS } from "./commands";
 import { MentionMenu, CommandMenu } from "./menu";
-import { useComposerState } from "./composer-state";
+import { extractSlashToken, useComposerState } from "./composer-state";
+import { useQuery } from "@lix-js/react-utils";
+import { selectFilePaths } from "./select-file-paths";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -118,16 +127,19 @@ drwxr-xr-x   5 samuel  staff     160 Oct  3 09:19 webview`,
  * Agent chat view (UI-only mock for now).
  * Demonstrates the tool visualization design with collapsible sections.
  */
-export function AgentView({ context }: AgentViewProps) {
+export function AgentView({ context: _context }: AgentViewProps) {
 	const [messages] = useState<ChatMessage[]>(MOCK_MESSAGES);
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+	const fileRows =
+		useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 })) ?? [];
+	const filePaths = fileRows.map((row: any) => String(row.path));
 
 	const {
 		value,
 		setValue,
 		history,
-		historyIdx,
+		historyIdx: _historyIdx,
 		setHistoryIdx,
 		slashOpen,
 		setSlashOpen,
@@ -142,7 +154,7 @@ export function AgentView({ context }: AgentViewProps) {
 		filteredCommands,
 		updateMentions,
 		pushHistory,
-	} = useComposerState({ commands: MOCK_COMMANDS, files: MOCK_FILES });
+	} = useComposerState({ commands: MOCK_COMMANDS, files: filePaths });
 
 	const hasConversations = false;
 	const conversationLabel = hasConversations
@@ -151,7 +163,7 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const updateMention = useCallback(() => {
 		updateMentions(textAreaRef.current);
-	}, [updateMentions]);
+	}, [textAreaRef, updateMentions]);
 
 	const insertMention = useCallback(
 		(path: string) => {
@@ -159,33 +171,48 @@ export function AgentView({ context }: AgentViewProps) {
 			if (!ctx) return;
 			const before = value.slice(0, ctx.start);
 			const after = value.slice(ctx.end);
-			const next = `${before}${path}${after}`;
+			const needsSpace = after.startsWith(" ") ? "" : " ";
+			const next = `${before}${path}${needsSpace}${after}`;
 			setValue(next);
 			setMentionOpen(false);
+			setSlashOpen(false);
+			setSlashIdx(0);
 			mentionCtx.current = null;
 			queueMicrotask(() => {
 				const el = textAreaRef.current;
 				if (el) {
-					const pos = before.length + path.length;
+					const pos = before.length + path.length + needsSpace.length;
 					el.setSelectionRange(pos, pos);
 					el.focus();
 				}
 			});
 		},
-		[value],
+		[
+			value,
+			setValue,
+			setMentionOpen,
+			setSlashOpen,
+			setSlashIdx,
+			mentionCtx,
+			textAreaRef,
+		],
 	);
 
 	const commit = useCallback(() => {
-		const next = value.trimEnd();
-		if (!next) return;
-		if (next.startsWith("/")) {
-			const token = next.slice(1).trim().split(/\s+/)[0] ?? "";
-			const cmd =
-				filteredCommands.find((c) => c.name.startsWith(token))?.name ?? token;
-			console.info(`[mock] slash command: /${cmd}`);
+		const trimmedEnd = value.trimEnd();
+		if (!trimmedEnd) return;
+		const trimmedStart = trimmedEnd.trimStart();
+		if (trimmedStart.startsWith("/")) {
+			const rawToken = trimmedStart.slice(1).split(/\s+/)[0] ?? "";
+			const lower = rawToken.toLowerCase();
+			const matched =
+				filteredCommands.find((c) => c.name.toLowerCase().startsWith(lower)) ??
+				MOCK_COMMANDS.find((c) => c.name.toLowerCase().startsWith(lower));
+			const commandName = (matched?.name ?? rawToken).trim();
+			console.info(`[mock] slash command: /${commandName}`);
 		} else {
-			console.info(`[mock] send message: ${next}`);
-			pushHistory(next);
+			console.info(`[mock] send message: ${trimmedEnd}`);
+			pushHistory(trimmedEnd);
 		}
 		setHistoryIdx(-1);
 		setValue("");
@@ -193,7 +220,17 @@ export function AgentView({ context }: AgentViewProps) {
 		setMentionOpen(false);
 		mentionCtx.current = null;
 		lastActionFocus(textAreaRef.current);
-	}, [value, filteredCommands]);
+	}, [
+		value,
+		filteredCommands,
+		pushHistory,
+		setHistoryIdx,
+		setValue,
+		setSlashOpen,
+		setMentionOpen,
+		mentionCtx,
+		textAreaRef,
+	]);
 
 	useEffect(() => {
 		updateMention();
@@ -281,7 +318,7 @@ export function AgentView({ context }: AgentViewProps) {
 						return nextIdx;
 					}
 					const nextIdx = Math.max(idx - 1, -1);
-					const entry = nextIdx === -1 ? "" : history[nextIdx] ?? "";
+					const entry = nextIdx === -1 ? "" : (history[nextIdx] ?? "");
 					setValue(entry);
 					queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
 					return nextIdx;
@@ -308,6 +345,14 @@ export function AgentView({ context }: AgentViewProps) {
 			filteredCommands,
 			slashIdx,
 			history,
+			setMentionIdx,
+			setSlashIdx,
+			setSlashOpen,
+			setValue,
+			setHistoryIdx,
+			setMentionOpen,
+			mentionCtx,
+			textAreaRef,
 		],
 	);
 
@@ -316,10 +361,19 @@ export function AgentView({ context }: AgentViewProps) {
 			return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
 		}
 		if (slashOpen) {
-			return <CommandMenu commands={filteredCommands} selectedIndex={slashIdx} />;
+			return (
+				<CommandMenu commands={filteredCommands} selectedIndex={slashIdx} />
+			);
 		}
 		return null;
-	}, [mentionOpen, mentionItems, mentionIdx, slashOpen, filteredCommands, slashIdx]);
+	}, [
+		mentionOpen,
+		mentionItems,
+		mentionIdx,
+		slashOpen,
+		filteredCommands,
+		slashIdx,
+	]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
@@ -347,45 +401,47 @@ export function AgentView({ context }: AgentViewProps) {
 			</div>
 
 			{/* Input area */}
-		<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
-			<div className="relative w-full max-w-3xl overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
-				<label htmlFor={textAreaId} className="sr-only">
-					Ask the assistant
-				</label>
+			<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
+				<div className="relative w-full max-w-3xl overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
+					<label htmlFor={textAreaId} className="sr-only">
+						Ask the assistant
+					</label>
 					<textarea
 						ref={textAreaRef}
 						id={textAreaId}
+						data-testid="agent-composer-input"
 						placeholder="Ask Lix Agent…"
 						value={value}
-					onChange={(event) => {
-						const next = event.target.value;
-						setValue(next);
-						setSlashOpen(next.startsWith("/"));
-						setSlashIdx(0);
-						setMentionOpen(false);
-						mentionCtx.current = null;
-					}}
-					onKeyDown={onKeyDown}
-					onClick={updateMention}
-					onSelect={updateMention}
+						onChange={(event) => {
+							const next = event.target.value;
+							const token = extractSlashToken(next);
+							setValue(next);
+							setSlashOpen(token !== null);
+							setSlashIdx(0);
+							setMentionOpen(false);
+							mentionCtx.current = null;
+						}}
+						onKeyDown={onKeyDown}
+						onClick={updateMention}
+						onSelect={updateMention}
 						className="h-28 w-full resize-none border-0 bg-transparent pl-3 pr-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
-				/>
-				{menuFragment ? (
-					<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
-						{menuFragment}
+					/>
+					{menuFragment ? (
+						<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
+							{menuFragment}
+						</div>
+					) : null}
+					<div className="flex justify-end bg-muted/40 pr-3 py-1 text-[11px] text-muted-foreground">
+						<button
+							type="button"
+							onClick={() => commit()}
+							className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted"
+						>
+							<ArrowUp className="h-3.5 w-3.5" />
+						</button>
 					</div>
-				) : null}
-				<div className="flex justify-end bg-muted/40 pr-3 py-1 text-[11px] text-muted-foreground">
-					<button
-						type="button"
-						onClick={() => commit()}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted"
-					>
-						<ArrowUp className="h-3.5 w-3.5" />
-					</button>
 				</div>
 			</div>
-		</div>
 		</div>
 	);
 }

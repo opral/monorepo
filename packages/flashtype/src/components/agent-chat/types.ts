@@ -24,7 +24,12 @@ export interface KeyHint {
 	label: string;
 }
 
-export type ToolRunStatus = "queued" | "running" | "success" | "error" | "thinking";
+export type ToolRunStatus =
+	| "queued"
+	| "running"
+	| "success"
+	| "error"
+	| "thinking";
 
 export interface ToolRun {
 	id: string;

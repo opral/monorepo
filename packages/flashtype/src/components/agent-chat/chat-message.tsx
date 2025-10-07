@@ -46,7 +46,13 @@ export function ChatMessage({ message }: { message: Msg }) {
  * Renders message content with lightweight code block styling.
  * Plain text uses sans-serif, code blocks use monospace.
  */
-function MessageBody({ content, isUser }: { content: string; isUser: boolean }) {
+function MessageBody({
+	content,
+	isUser: _isUser,
+}: {
+	content: string;
+	isUser: boolean;
+}) {
 	const parts = React.useMemo(() => splitFences(content), [content]);
 	return (
 		<div className="space-y-3">

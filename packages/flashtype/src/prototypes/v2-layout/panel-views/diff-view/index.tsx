@@ -61,21 +61,18 @@ function emptyDiffQuery(lix: Lix) {
 			eb.ref("diff.status").as("status"),
 			eb.ref("before.snapshot_content").as("before_snapshot_content"),
 			eb.ref("after.snapshot_content").as("after_snapshot_content"),
-			eb
-				.fn
+			eb.fn
 				.coalesce(
 					eb.ref("after.plugin_key"),
 					eb.ref("before.plugin_key"),
 					eb.val(mdPlugin.key),
 				)
-			.as("plugin_key"),
+				.as("plugin_key"),
 		])
 		.$castTo<RenderableDiff>();
 }
 
-function normalizeSnapshot(
-	snapshot: unknown,
-): Record<string, any> | null {
+function normalizeSnapshot(snapshot: unknown): Record<string, any> | null {
 	if (snapshot === null || snapshot === undefined) return null;
 	if (typeof snapshot === "string") {
 		try {
@@ -86,10 +83,7 @@ function normalizeSnapshot(
 			return null;
 		}
 	}
-	if (
-		typeof Uint8Array !== "undefined" &&
-		snapshot instanceof Uint8Array
-	) {
+	if (typeof Uint8Array !== "undefined" && snapshot instanceof Uint8Array) {
 		try {
 			const parsed = JSON.parse(new TextDecoder().decode(snapshot));
 			return isRecord(parsed) ? parsed : null;

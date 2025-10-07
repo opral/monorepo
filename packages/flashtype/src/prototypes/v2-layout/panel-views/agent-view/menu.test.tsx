@@ -9,7 +9,9 @@ const COMMANDS = [
 
 describe("MentionMenu", () => {
 	test("highlights the selected item", () => {
-		render(<MentionMenu items={["config.json", "README.md"]} selectedIndex={1} />);
+		render(
+			<MentionMenu items={["config.json", "README.md"]} selectedIndex={1} />,
+		);
 		expect(screen.getByText("README.md")).toHaveClass("bg-zinc-100");
 	});
 

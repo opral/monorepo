@@ -289,7 +289,7 @@ export function V2LayoutShell() {
 
 		if (!dragData || !dropData) return;
 
-		const { instanceKey, viewKey, fromPanel } = dragData;
+		const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
 		const { panel: toPanel } = dropData;
 		const sourcePanel = panels[fromPanel];
 		const movedView = sourcePanel.views.find(

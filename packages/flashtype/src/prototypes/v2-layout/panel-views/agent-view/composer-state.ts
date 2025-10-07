@@ -10,6 +10,26 @@ export interface ComposerStateOptions {
 }
 
 /**
+ * Derives the active slash command token if the input currently forms a command.
+ * Returns `null` when the input should not trigger the slash menu (e.g. mentions).
+ *
+ * @example
+ * extractSlashToken("/he") // "he"
+ * extractSlashToken("/clear arg") // null
+ * extractSlashToken("hello") // null
+ */
+export function extractSlashToken(input: string): string | null {
+	if (!input.includes("/")) return null;
+	const trimmedLeft = input.trimStart();
+	if (!trimmedLeft.startsWith("/")) return null;
+	const afterSlash = trimmedLeft.slice(1);
+	if (afterSlash.length === 0) return "";
+	if (/\s/.test(afterSlash)) return null;
+	if (afterSlash.includes("/") || afterSlash.includes(".")) return null;
+	return afterSlash;
+}
+
+/**
  * React hook that powers the Claude-like composer, handling history, slash commands,
  * and mention list state in a testable way.
  */
@@ -22,24 +42,25 @@ export function useComposerState({ commands, files }: ComposerStateOptions) {
 	const [mentionOpen, setMentionOpen] = useState(false);
 	const [mentionIdx, setMentionIdx] = useState(0);
 	const [mentionItems, setMentionItems] = useState<string[]>([]);
-	const mentionCtx = useRef<{ start: number; end: number; query: string } | null>(
-		null,
-	);
+	const mentionCtx = useRef<{
+		start: number;
+		end: number;
+		query: string;
+	} | null>(null);
+	const slashToken = useMemo(() => extractSlashToken(value), [value]);
 
 	const filteredCommands = useMemo(() => {
-		if (!value.startsWith("/")) return commands;
-		const token = value.slice(1).trim().toLowerCase();
-		if (!token) return commands;
-		return commands.filter(
-			(cmd) =>
-				cmd.name.toLowerCase().startsWith(token) ||
-				cmd.description.toLowerCase().includes(token),
-		);
-	}, [commands, value]);
+		if (slashToken === null) return [] as SlashCommand[];
+		if (slashToken === "") return commands;
+		const token = slashToken.toLowerCase();
+		return commands.filter((cmd) => cmd.name.toLowerCase().startsWith(token));
+	}, [commands, slashToken]);
 
 	const updateMentions = useCallback(
 		(textarea: HTMLTextAreaElement | null) => {
-			const caret = textarea ? textarea.selectionStart ?? value.length : value.length;
+			const caret = textarea
+				? (textarea.selectionStart ?? value.length)
+				: value.length;
 			const mention = calculateMentionRange(value, caret);
 			if (!mention) {
 				setMentionOpen(false);
@@ -79,6 +100,7 @@ export function useComposerState({ commands, files }: ComposerStateOptions) {
 		setMentionOpen,
 		mentionCtx,
 		filteredCommands,
+		slashToken,
 		updateMentions,
 		pushHistory,
 	};

@@ -13,7 +13,6 @@ import type {
 	ViewKey,
 	ViewContext,
 	ViewDefinition,
-	ViewInstance,
 } from "./types";
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
