@@ -95,7 +95,7 @@ export function initDb(args: {
 	applyFileDataCacheSchema({ engine: engine });
 	applyStateDatabaseSchema({ engine: engine });
 	applyEntityDatabaseSchema({ engine: engine });
-	applyChangeSetDatabaseSchema({ engine: engine });
+	// applyChangeSetDatabaseSchema({ engine: engine });
 	applyCommitDatabaseSchema({ engine: engine });
 	applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
