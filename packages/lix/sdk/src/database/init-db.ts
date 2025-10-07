@@ -12,7 +12,6 @@ import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
-import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyConversationDatabaseSchema } from "../conversation/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
@@ -102,7 +101,7 @@ export function initDb(args: {
 	applyVersionDatabaseSchema({ engine: engine });
 	applyAccountDatabaseSchema({ engine: engine });
 	// applyKeyValueDatabaseSchema({ engine: engine });
-	applyChangeAuthorDatabaseSchema({ engine: engine });
+	// applyChangeAuthorDatabaseSchema({ engine: engine });
 	applyLabelDatabaseSchema({ engine: engine });
 	applyStateHistoryDatabaseSchema({ engine: engine });
 	applyConversationDatabaseSchema({ engine });

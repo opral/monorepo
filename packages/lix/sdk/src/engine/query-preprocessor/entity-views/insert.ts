@@ -93,7 +93,7 @@ export function rewriteEntityInsert(args: {
 	}
 
 	const primaryKeys = extractPrimaryKeys(schema);
-	if (!primaryKeys || primaryKeys.length !== 1) return null;
+	if (!primaryKeys || primaryKeys.length === 0) return null;
 
 	const params: unknown[] = [];
 	const addParam = (value: unknown): string => {
@@ -101,7 +101,6 @@ export function rewriteEntityInsert(args: {
 		return "?";
 	};
 
-	const primaryKey = primaryKeys[0]!;
 	const insertColumns = [
 		"entity_id",
 		"schema_key",
@@ -118,21 +117,38 @@ export function rewriteEntityInsert(args: {
 	const rowsSql: string[] = [];
 
 	for (const columnMap of columnMaps) {
-		const entityIdValue = columnMap.get(primaryKey);
-		let entityIdExpr: string;
-		if (entityIdValue === undefined) {
-			const actualPk = propertyLowerToActual.get(primaryKey) ?? primaryKey;
-			const pkDefinition = (schema.properties ?? {})[actualPk];
-			const defaultExpr = renderDefaultSnapshotValue({
-				definition: pkDefinition,
-				addParam,
-			});
-			if (!defaultExpr || defaultExpr === "NULL") {
-				return null;
+		const renderPrimaryKeyExpr = (primaryKey: string): string | null => {
+			const pkValue = columnMap.get(primaryKey);
+			if (pkValue === undefined) {
+				const actualPk = propertyLowerToActual.get(primaryKey) ?? primaryKey;
+				const pkDefinition = (schema.properties ?? {})[actualPk];
+				const defaultExpr = renderDefaultSnapshotValue({
+					definition: pkDefinition,
+					addParam,
+				});
+				if (!defaultExpr || defaultExpr === "NULL") {
+					return null;
+				}
+				return defaultExpr;
 			}
-			entityIdExpr = defaultExpr;
+			return addParam(pkValue);
+		};
+
+		let entityIdExpr: string;
+		if (primaryKeys.length === 1) {
+			const expr = renderPrimaryKeyExpr(primaryKeys[0]!);
+			if (!expr) return null;
+			entityIdExpr = expr;
 		} else {
-			entityIdExpr = addParam(entityIdValue);
+			const parts: string[] = [];
+			for (const primaryKey of primaryKeys) {
+				const expr = renderPrimaryKeyExpr(primaryKey);
+				if (!expr) {
+					return null;
+				}
+				parts.push(expr);
+			}
+			entityIdExpr = `(${parts.join(" || '~' || ")})`;
 		}
 		const schemaKeyValue = storedSchemaKey;
 		const fileIdValue = getColumnOrDefault(
