@@ -14,7 +14,11 @@ export const LixAccountSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-generated": true,
+			"x-lix-default-call": { name: "lix_uuid_v7" },
+		},
 		name: { type: "string" },
 	},
 	required: ["id", "name"],

@@ -11,16 +11,16 @@ export function applyAccountDatabaseSchema(args: {
 }): void {
 	const { engine } = args;
 	// Create account view using the generalized entity view builder
-	createEntityViewsIfNotExists({
-		engine,
-		schema: LixAccountSchema,
-		overrideName: "account",
-		pluginKey: "lix_own_entity",
-		hardcodedFileId: "lix",
-		defaultValues: {
-			id: () => nanoIdSync({ engine: engine }),
-		},
-	});
+	// createEntityViewsIfNotExists({
+	// 	engine,
+	// 	schema: LixAccountSchema,
+	// 	overrideName: "account",
+	// 	pluginKey: "lix_own_entity",
+	// 	hardcodedFileId: "lix",
+	// 	defaultValues: {
+	// 		id: () => nanoIdSync({ engine: engine }),
+	// 	},
+	// });
 
 	// Create active_account as an entity view (similar to active_version)
 	// Stores references to account IDs, joining with account table for details
