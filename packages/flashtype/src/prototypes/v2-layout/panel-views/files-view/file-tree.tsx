@@ -112,11 +112,11 @@ function FileTreeNode({
 }) {
 	if (node.type === "file") {
 		const isSelected = selectedPath === node.path;
-		const buttonClass = clsx(
-			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-[13px] transition-colors",
-			"hover:bg-neutral-100",
-			isSelected ? selectedClasses : "text-neutral-700",
-		);
+	const buttonClass = clsx(
+		"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-[13px] transition-colors",
+		!isSelected && "hover:bg-neutral-100",
+		isSelected ? selectedClasses : "text-neutral-700",
+	);
 		return (
 			<li>
 				<button
@@ -142,8 +142,8 @@ function FileTreeNode({
 	const isSelected = !suppressSelection && selectedPath === node.path;
 	const buttonClass = clsx(
 		"flex items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-[13px] font-medium transition-colors",
-		"hover:bg-neutral-100 text-neutral-700",
-		isSelected && selectedClasses,
+		!isSelected && "hover:bg-neutral-100",
+		isSelected ? selectedClasses : "text-neutral-700",
 	);
 
 	return (
