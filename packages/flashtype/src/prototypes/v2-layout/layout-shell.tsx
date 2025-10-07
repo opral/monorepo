@@ -165,6 +165,7 @@ export function V2LayoutShell() {
 		} satisfies FlashtypeUiState),
 	);
 	const pendingPersistRef = useRef<string | null>(null);
+	const hydratingRef = useRef(false);
 
 	useEffect(() => {
 		if (!uiStateKV) return;
@@ -175,16 +176,23 @@ export function V2LayoutShell() {
 			}
 			return;
 		}
+		hydratingRef.current = true;
 		lastPersistedRef.current = serialized;
-		pendingPersistRef.current = null;
 		setLeftPanel(hydratePanel(uiStateKV.panels.left));
 		setCentralPanel(hydratePanel(uiStateKV.panels.central));
 		setRightPanel(hydratePanel(uiStateKV.panels.right));
 		setFocusedPanel(uiStateKV.focusedPanel);
 		setPanelSizes(normalizeLayoutSizes(uiStateKV.layout?.sizes));
+		queueMicrotask(() => {
+			hydratingRef.current = false;
+			if (pendingPersistRef.current === serialized) {
+				pendingPersistRef.current = null;
+			}
+		});
 	}, [uiStateKV]);
 
 	useEffect(() => {
+		if (hydratingRef.current) return;
 		const nextState: FlashtypeUiState = {
 			focusedPanel,
 			panels: {

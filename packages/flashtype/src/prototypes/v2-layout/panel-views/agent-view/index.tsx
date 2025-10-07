@@ -131,9 +131,11 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	const [messages] = useState<ChatMessage[]>(MOCK_MESSAGES);
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
-	const fileRows =
-		useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 })) ?? [];
-	const filePaths = fileRows.map((row: any) => String(row.path));
+	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
+	const filePaths = useMemo(
+		() => (fileRows ?? []).map((row: any) => String(row.path)),
+		[fileRows],
+	);
 	const hasFiles = filePaths.length > 0;
 
 	const {
@@ -420,18 +422,18 @@ export function AgentView({ context: _context }: AgentViewProps) {
 						id={textAreaId}
 						data-testid="agent-composer-input"
 						placeholder="Ask Lix Agent…"
-					value={value}
-					onChange={(event) => {
-						const next = event.target.value;
-						const token = extractSlashToken(next);
-						setValue(next);
-						setSlashOpen(token !== null);
-						setSlashIdx(0);
-						if (token !== null) {
-							setMentionOpen(false);
-							mentionCtx.current = null;
-						}
-					}}
+						value={value}
+						onChange={(event) => {
+							const next = event.target.value;
+							const token = extractSlashToken(next);
+							setValue(next);
+							setSlashOpen(token !== null);
+							setSlashIdx(0);
+							if (token !== null) {
+								setMentionOpen(false);
+								mentionCtx.current = null;
+							}
+						}}
 						onKeyDown={onKeyDown}
 						onClick={updateMention}
 						onSelect={updateMention}

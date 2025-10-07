@@ -18,11 +18,7 @@ function Index() {
 	return (
 		<main style={{ padding: "0 16px" }}>
 			{activeFileId ? (
-				<Suspense
-					fallback={
-						<div style={{ padding: 12, opacity: 0.7 }}>Loading editor…</div>
-					}
-				>
+				<Suspense fallback={null}>
 					{diffOpen ? <DiffView /> : <TipTapEditor />}
 				</Suspense>
 			) : (

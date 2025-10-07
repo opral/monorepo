@@ -199,6 +199,39 @@ test("re-renders when key value changes externally", async () => {
 	await waitFor(() => expect((resultRef.current as any)[0]).toBe("external"));
 });
 
+test("returns optimistic value immediately when setter is called", async () => {
+	const lix = await openLix({});
+	const TEST_KEY = "flashtype_test_optimistic";
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+				<React.Suspense fallback={null}>{children}</React.Suspense>
+			</KeyValueProvider>
+		</LixProvider>
+	);
+
+	let hookResult: { current: unknown } = { current: null };
+	await act(async () => {
+		const { result } = renderHook(() => useKeyValue(TEST_KEY), { wrapper });
+		hookResult = result as unknown as { current: unknown };
+	});
+
+	await waitFor(() => Array.isArray(hookResult.current as any));
+
+	let pending: Promise<unknown> | undefined;
+	await act(async () => {
+		pending = (hookResult.current as any)[1]("value-1");
+	});
+
+	expect((hookResult.current as any)[0]).toBe("value-1");
+
+	await act(async () => {
+		await pending;
+	});
+
+	await waitFor(() => expect((hookResult.current as any)[0]).toBe("value-1"));
+});
+
 test("memoized children should not re-render when parent state changes", async () => {
 	const lix = await openLix({});
 	await lix.db

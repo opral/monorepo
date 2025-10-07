@@ -12,6 +12,8 @@ import {
 	createElement,
 	useCallback,
 	useMemo,
+	useState,
+	useEffect,
 } from "react";
 import type React from "react";
 
@@ -111,8 +113,20 @@ export function useKeyValue<K extends string>(
 		rows && rows[0]?.value !== undefined ? rows[0]?.value : defVal
 	) as ValueOf<K> | null;
 
+	const [optimistic, setOptimistic] = useState<{ value: ValueOf<K> | null } | null>(
+		null,
+	);
+
+	useEffect(() => {
+		if (!optimistic) return;
+		if (valuesEqual(value, optimistic.value)) {
+			setOptimistic(null);
+		}
+	}, [value, optimistic]);
+
 	const setValue = useCallback(
 		async (newValue: ValueOf<K>) => {
+			setOptimistic({ value: newValue as ValueOf<K> | null });
 			await upsertValue(lix, key as string, newValue as unknown, {
 				defaultVersionId: String(defaultVersionId),
 				untracked,
@@ -121,7 +135,9 @@ export function useKeyValue<K extends string>(
 		[lix, key, defaultVersionId, untracked],
 	);
 
-	return useMemo(() => [value, setValue] as const, [value, setValue]);
+	const resolvedValue = optimistic?.value ?? value;
+
+	return useMemo(() => [resolvedValue, setValue] as const, [resolvedValue, setValue]);
 }
 
 function selectValue(
@@ -207,5 +223,15 @@ async function upsertValue<T>(
 			.execute();
 	} else {
 		await lix.db.insertInto("key_value").values({ key, value }).execute();
+	}
+}
+
+function valuesEqual(a: unknown, b: unknown): boolean {
+	if (Object.is(a, b)) return true;
+	if (a === undefined || b === undefined) return a === b;
+	try {
+		return JSON.stringify(a) === JSON.stringify(b);
+	} catch {
+		return false;
 	}
 }
