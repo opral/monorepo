@@ -6,7 +6,13 @@ import {
 	type KnownKey,
 	KEY_VALUE_DEFINITIONS,
 } from "./schema";
-import { createContext, useContext, createElement, useCallback } from "react";
+import {
+	createContext,
+	useContext,
+	createElement,
+	useCallback,
+	useMemo,
+} from "react";
 import type React from "react";
 
 type KVDefs = Record<string, KeyDef<any>>;
@@ -115,7 +121,7 @@ export function useKeyValue<K extends string>(
 		[lix, key, defaultVersionId, untracked],
 	);
 
-	return [value, setValue] as const;
+	return useMemo(() => [value, setValue] as const, [value, setValue]);
 }
 
 function selectValue(

@@ -198,3 +198,69 @@ test("re-renders when key value changes externally", async () => {
 	// observe re-render with new value
 	await waitFor(() => expect((resultRef.current as any)[0]).toBe("external"));
 });
+
+test("memoized children should not re-render when parent state changes", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "flashtype_left_sidebar_active_tab",
+			value: "files",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+				<React.Suspense fallback={null}>{children}</React.Suspense>
+			</KeyValueProvider>
+		</LixProvider>
+	);
+
+	let childRenders = 0;
+
+	const MemoChild = React.memo(function MemoChild({
+		pair,
+	}: {
+		pair: ReturnType<typeof useKeyValue>;
+	}) {
+		childRenders++;
+		return <div data-testid="current-tab">{String(pair[0] ?? "unknown")}</div>;
+	});
+
+	function Parent() {
+		const pair = useKeyValue("flashtype_left_sidebar_active_tab", {
+			defaultVersionId: "global",
+			untracked: true,
+		});
+		const [, forceRender] = React.useState(0);
+		return (
+			<>
+				<MemoChild pair={pair} />
+				<button
+					type="button"
+					onClick={() => forceRender((n) => n + 1)}
+					data-testid="rerender-trigger"
+				>
+					Rerender
+				</button>
+			</>
+		);
+	}
+
+	await act(async () => {
+		render(<Parent />, { wrapper });
+	});
+
+	await screen.findByTestId("current-tab");
+	await waitFor(() => expect(childRenders).toBeGreaterThan(0));
+	const baseline = childRenders;
+
+	const button = screen.getByTestId("rerender-trigger");
+	await act(async () => {
+		button.click();
+	});
+
+	await waitFor(() => expect(childRenders).toBe(baseline));
+});
