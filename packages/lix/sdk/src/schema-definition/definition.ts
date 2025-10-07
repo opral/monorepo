@@ -62,6 +62,12 @@ export const LixSchemaDefinition = {
 						},
 					},
 				},
+				additionalProperties: {
+					type: "boolean",
+					const: false,
+					description:
+						"Objects describing Lix schemas must not allow arbitrary additional properties; set this explicitly to false.",
+				},
 				"x-primary-key": {
 					type: "array",
 					items: {
@@ -302,6 +308,10 @@ export type LixSchemaDefinition = JSONSchema & {
 	 */
 	"x-lix-foreign-keys"?: LixForeignKey[] | readonly LixForeignKey[];
 	type: "object";
+	/**
+	 * Has to be false to know the schema beforehand.
+	 */
+	additionalProperties: false;
 	properties?: {
 		[key: string]: LixPropertySchema;
 	};

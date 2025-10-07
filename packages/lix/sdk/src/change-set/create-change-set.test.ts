@@ -17,6 +17,7 @@ test("creating a change set should succeed", async () => {
 					id: { type: "string" },
 				},
 				required: ["id"],
+				additionalProperties: false,
 			} satisfies LixSchemaDefinition,
 		})
 		.execute();

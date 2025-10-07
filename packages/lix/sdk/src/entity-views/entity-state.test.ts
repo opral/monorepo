@@ -9,6 +9,7 @@ describe("createEntityViewIfNotExists", () => {
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["id"],
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -21,6 +22,7 @@ describe("createEntityViewIfNotExists", () => {
 		"x-lix-key": "composite_entity",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["category", "id"],
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			category: { type: "string" },
@@ -37,6 +39,7 @@ describe("createEntityViewIfNotExists", () => {
 			"x-lix-key": "invalid_schema",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				name: { type: "string" },
 			},

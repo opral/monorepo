@@ -13,6 +13,7 @@ test("storeDetectedChangeSchema stores new schema on first use", async () => {
 		properties: {
 			value: { type: "string" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Store schema for the first time
@@ -43,6 +44,7 @@ test("storeDetectedChangeSchema allows identical schema to be used again", async
 		properties: {
 			value: { type: "string" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Store schema first time
@@ -79,6 +81,7 @@ test("storeDetectedChangeSchema throws error when schema differs for same versio
 		properties: {
 			value: { type: "string" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	const differentSchema = {
@@ -88,6 +91,7 @@ test("storeDetectedChangeSchema throws error when schema differs for same versio
 		properties: {
 			value: { type: "number" }, // Different property type!
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Store original schema
@@ -117,6 +121,7 @@ test("storeDetectedChangeSchema allows different schemas with different versions
 		properties: {
 			value: { type: "string" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	const schemaV2 = {
@@ -126,6 +131,7 @@ test("storeDetectedChangeSchema allows different schemas with different versions
 		properties: {
 			value: { type: "number" }, // Different property type is OK with different version
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Store v1 schema
@@ -164,6 +170,7 @@ test("storeDetectedChangeSchema enforces strict JSON determinism", async () => {
 			a: { type: "string" },
 			b: { type: "number" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Same schema but different property order
@@ -175,6 +182,7 @@ test("storeDetectedChangeSchema enforces strict JSON determinism", async () => {
 			b: { type: "number" }, // Reordered properties
 			a: { type: "string" },
 		},
+		additionalProperties: false,
 	} as const;
 
 	// Store original schema
@@ -205,6 +213,7 @@ test("integration with plugin detectChanges", async () => {
 					"x-lix-key": "integration_test_schema",
 					"x-lix-version": "1.0",
 					type: "object",
+					additionalProperties: false,
 					properties: {
 						value: { type: "string" },
 					},
@@ -240,6 +249,7 @@ test("integration with plugin detectChanges", async () => {
 	expect(storedSchema[0]?.value).toEqual({
 		"x-lix-key": "integration_test_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },

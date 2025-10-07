@@ -10,6 +10,7 @@ export const LixUnknownFileSchema = {
 			description: "Base64-encoded binary file data",
 		},
 	},
+	additionalProperties: false,
 	"x-lix-key": "lix_unknown_file",
 	"x-lix-version": "1.0",
 } as const;

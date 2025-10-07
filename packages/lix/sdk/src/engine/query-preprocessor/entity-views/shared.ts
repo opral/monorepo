@@ -63,6 +63,8 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"lix_log",
 	"account",
 	"lix_account",
+	"active_account",
+	"lix_active_account",
 ]);
 
 /**

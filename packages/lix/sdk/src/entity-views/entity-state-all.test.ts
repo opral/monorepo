@@ -9,6 +9,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["id"],
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -24,6 +25,7 @@ describe("createEntityAllViewIfNotExists", () => {
 			"x-lix-key": "invalid_schema",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				name: { type: "string" },
 			},
