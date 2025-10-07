@@ -2,11 +2,21 @@ import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import { analyzeShapes } from "./sql-rewriter/microparser/analyze-shape.js";
 import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
-import { maybeRewriteInsteadOfTrigger } from "./dml-trigger/rewrite.js";
 import { rewriteEntityInsert } from "./entity-views/insert.js";
 import { rewriteEntityUpdate } from "./entity-views/update.js";
 import { rewriteEntityDelete } from "./entity-views/delete.js";
 import { getSchemaVersion } from "./shared/schema-version.js";
+import type {
+	QueryPreprocessorArgs,
+	QueryPreprocessorFn,
+	QueryPreprocessorResult,
+	StatementKind,
+} from "./types.js";
+export type {
+	QueryPreprocessorArgs,
+	QueryPreprocessorFn,
+	QueryPreprocessorResult,
+} from "./types.js";
 import {
 	DELETE,
 	INSERT,
@@ -23,18 +33,6 @@ import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
 
-export type QueryPreprocessorResult = {
-	sql: string;
-	parameters: ReadonlyArray<unknown>;
-	expandedSql?: string;
-};
-
-export type QueryPreprocessorFn = (args: {
-	sql: string;
-	parameters: ReadonlyArray<unknown>;
-	sideEffects?: boolean;
-}) => QueryPreprocessorResult;
-
 export async function createQueryPreprocessor(
 	engine: Pick<
 		LixEngine,
@@ -45,94 +43,165 @@ export async function createQueryPreprocessor(
 		sql,
 		parameters,
 		sideEffects,
-	}: {
-		sql: string;
-		parameters: ReadonlyArray<unknown>;
-		sideEffects?: boolean;
-	}): QueryPreprocessorResult => {
-		let currentSql = sql;
-		let expandedSql: string | undefined;
-		let tokens = tokenize(currentSql);
+	}: QueryPreprocessorArgs): QueryPreprocessorResult => {
+		const tokens = tokenize(sql);
 		const kind = detectStatementKind(tokens);
-		if (kind === "insert" || kind === "update" || kind === "delete") {
-			// const triggerRewrite = maybeRewriteInsteadOfTrigger({
-			// 	engine,
-			// 	sql: currentSql,
-			// 	tokens,
-			// 	parameters,
-			// 	op: kind,
-			// });
-			// if (triggerRewrite) {
-			// 	return triggerRewrite;
-			// }
-			let entityRewrite: ReturnType<typeof rewriteEntityInsert> | null;
-			if (kind === "insert") {
-				entityRewrite = rewriteEntityInsert({
-					sql: currentSql,
-					tokens,
-					parameters,
-					engine,
-				});
-			} else if (kind === "update") {
-				entityRewrite = rewriteEntityUpdate({
-					sql: currentSql,
-					tokens,
-					parameters,
-					engine,
-				});
-			} else {
-				entityRewrite = rewriteEntityDelete({
-					sql: currentSql,
-					tokens,
-					parameters,
-					engine,
-				});
-			}
-			if (entityRewrite) {
-				return entityRewrite;
-			}
-			return { sql: currentSql, parameters };
-		}
-		if (kind !== "select") {
-			return { sql: currentSql, parameters };
-		}
 
-		{
-			const views = getViewSelectMap(engine);
-			const expansion = expandQuery({
-				sql: currentSql,
-				views,
-				runtimeCacheRef: engine.runtimeCacheRef,
-			});
-			currentSql = expansion.sql;
-			if (expansion.expanded) {
-				expandedSql = currentSql;
-			}
-
-			tokens = tokenize(currentSql);
-		}
-
-		const shapes = analyzeShapes(tokens);
-		const existingCacheTables = getStateCacheV2Tables({ engine });
-		const allowSideEffects = sideEffects !== false;
-		if (allowSideEffects) {
-			for (const shape of shapes) {
-				ensureFreshStateCache({ engine, shape });
-			}
-		}
-
-		const includeTransaction = hasOpenTransaction(engine);
-		currentSql = rewriteSql(currentSql, {
-			tokens,
-			hasOpenTransaction: includeTransaction,
-			existingCacheTables,
-		});
-
-		return {
-			sql: currentSql,
+		const triggerRewrite = maybeRewriteTrigger({
+			engine,
+			sql,
 			parameters,
-			expandedSql,
-		};
+			tokens,
+			kind,
+		});
+		if (triggerRewrite) {
+			return triggerRewrite;
+		}
+
+		const entityViewRewrite = maybeRewriteEntityView({
+			engine,
+			sql,
+			parameters,
+			tokens,
+			kind,
+		});
+		if (entityViewRewrite) {
+			return entityViewRewrite;
+		}
+
+		const vtableRewrite = maybeRewriteVtable({
+			engine,
+			sql,
+			parameters,
+			tokens,
+			kind,
+			sideEffects,
+		});
+		if (vtableRewrite) {
+			return vtableRewrite;
+		}
+
+		return { sql, parameters };
+	};
+}
+
+/**
+ * Routes DML statements through registered INSTEAD OF trigger handlers when available.
+ */
+function maybeRewriteTrigger(args: {
+	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	tokens: Token[];
+	kind: StatementKind;
+}): QueryPreprocessorResult | null {
+	if (args.kind !== "insert" && args.kind !== "update" && args.kind !== "delete") {
+		return null;
+	}
+
+	// Trigger rewriting is still experimental; fall back to SQLite's own triggers for now.
+	return null;
+}
+
+/**
+ * Rewrites entity view mutations to operate directly on the state views.
+ */
+function maybeRewriteEntityView(args: {
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	tokens: Token[];
+	kind: StatementKind;
+}): QueryPreprocessorResult | null {
+	if (args.kind !== "insert" && args.kind !== "update" && args.kind !== "delete") {
+		return null;
+	}
+
+	if (args.kind === "insert") {
+		return (
+			rewriteEntityInsert({
+				sql: args.sql,
+				tokens: args.tokens,
+				parameters: args.parameters,
+				engine: args.engine,
+			}) ?? null
+		);
+	}
+
+	if (args.kind === "update") {
+		return (
+			rewriteEntityUpdate({
+				sql: args.sql,
+				tokens: args.tokens,
+				parameters: args.parameters,
+				engine: args.engine,
+			}) ?? null
+		);
+	}
+
+	return (
+		rewriteEntityDelete({
+			sql: args.sql,
+			tokens: args.tokens,
+			parameters: args.parameters,
+			engine: args.engine,
+		}) ?? null
+	);
+}
+
+/**
+ * Expands view references, refreshes caches, and applies internal vtable rewrites for SELECTs.
+ */
+function maybeRewriteVtable(args: {
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
+	>;
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	tokens: Token[];
+	kind: StatementKind;
+	sideEffects?: boolean;
+}): QueryPreprocessorResult | null {
+	if (args.kind !== "select") {
+		return null;
+	}
+
+	let currentSql = args.sql;
+	let expandedSql: string | undefined;
+	let tokens = args.tokens;
+
+	const views = getViewSelectMap(args.engine);
+	const expansion = expandQuery({
+		sql: currentSql,
+		views,
+		runtimeCacheRef: args.engine.runtimeCacheRef,
+	});
+	if (expansion.expanded) {
+		currentSql = expansion.sql;
+		expandedSql = currentSql;
+		tokens = tokenize(currentSql);
+	}
+
+	const shapes = analyzeShapes(tokens);
+	const existingCacheTables = getStateCacheV2Tables({ engine: args.engine });
+	if (args.sideEffects !== false) {
+		for (const shape of shapes) {
+			ensureFreshStateCache({ engine: args.engine, shape });
+		}
+	}
+
+	const includeTransaction = hasOpenTransaction(args.engine);
+	const rewrittenSql = rewriteSql(currentSql, {
+		tokens,
+		hasOpenTransaction: includeTransaction,
+		existingCacheTables,
+	});
+
+	return {
+		sql: rewrittenSql,
+		parameters: args.parameters,
+		expandedSql,
 	};
 }
 
@@ -211,8 +280,6 @@ function extractSelectFromCreateView(sql: string): string | undefined {
 	}
 	return statement.trim() || undefined;
 }
-
-type StatementKind = "select" | "insert" | "update" | "delete" | "other";
 
 const ddlGuards = new Set([
 	"CREATE",

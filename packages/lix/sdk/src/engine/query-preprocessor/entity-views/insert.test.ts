@@ -279,6 +279,7 @@ test("applies function defaults when column is omitted", async () => {
 			.values({ value: schemaWithFnDefault })
 			.execute();
 
+
 		await (lix.db as any)
 			.insertInto("mock_fn_schema")
 			.values({ id: "row-fn", name: "Function default" })
@@ -326,6 +327,7 @@ test("function defaults override literal defaults", async () => {
 			.insertInto("stored_schema")
 			.values({ value: schemaWithBoth })
 			.execute();
+
 
 		await (lix.db as any)
 			.insertInto("mock_fn_override")

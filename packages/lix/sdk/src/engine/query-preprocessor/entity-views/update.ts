@@ -25,6 +25,7 @@ import {
 	findKeyword,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
+	isEntityRewriteAllowed,
 	type RewriteResult,
 	type StoredSchemaDefinition,
 } from "./shared.js";
@@ -82,7 +83,7 @@ export function rewriteEntityUpdate(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 }): RewriteResult | null {
 	const { sql, tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== UPDATE) {
@@ -104,12 +105,18 @@ export function rewriteEntityUpdate(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
+ 	if (!isEntityRewriteAllowed(baseKey)) {
+ 		return null;
+ 	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
 	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
+	if (!isEntityRewriteAllowed(storedSchemaKey)) {
+		return null;
+	}
 	const isActiveVersionSchema = storedSchemaKey === "lix_active_version";
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	if (typeof propertiesObject !== "object" || propertiesObject === null) {

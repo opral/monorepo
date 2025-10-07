@@ -22,6 +22,7 @@ import {
 	getColumnOrDefault,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
+	isEntityRewriteAllowed,
 	type RewriteResult,
 	type StoredSchemaDefinition,
 } from "./shared.js";
@@ -51,6 +52,9 @@ export function rewriteEntityInsert(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
+	if (!isEntityRewriteAllowed(baseKey)) {
+		return null;
+	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
@@ -61,6 +65,9 @@ export function rewriteEntityInsert(args: {
 		propertyLowerToActual.set(key.toLowerCase(), key);
 	}
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
+	if (!isEntityRewriteAllowed(storedSchemaKey)) {
+		return null;
+	}
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;
 	const columns = columnParse.columns;

@@ -18,6 +18,32 @@ export interface RewriteResult {
 	parameters: ReadonlyArray<unknown>;
 }
 
+const ENTITY_REWRITE_WHITELIST = new Set([
+	"key_value",
+	"lix_key_value",
+	"change_proposal",
+	"lix_change_proposal",
+	"insertable_schema",
+	"mock_default_schema",
+	"mock_fn_schema",
+	"mock_fn_override",
+	"multi_schema",
+	"delete_schema",
+	"update_schema",
+	"immutable_update_schema",
+	"json_update_schema",
+	"expression_update_schema",
+	"active_version",
+	"lix_active_version",
+]);
+
+/**
+ * Determines whether entity view rewrites are enabled for the given schema key.
+ */
+export function isEntityRewriteAllowed(schemaKey: string): boolean {
+	return ENTITY_REWRITE_WHITELIST.has(schemaKey.toLowerCase());
+}
+
 /**
  * Finds the index of a keyword in a token stream, starting at a given offset.
  */

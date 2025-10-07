@@ -28,6 +28,7 @@ import { applyTransactionStateSchema } from "../state/transaction/schema.js";
 import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 import { humanIdSync } from "../engine/functions/generate-human-id.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
+// import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 
 /**
  * Configuration for JSON columns in database views.

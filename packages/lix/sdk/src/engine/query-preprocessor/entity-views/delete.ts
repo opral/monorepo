@@ -23,6 +23,7 @@ import {
 	findKeyword,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
+	isEntityRewriteAllowed,
 	type RewriteResult,
 } from "./shared.js";
 
@@ -62,7 +63,7 @@ export function rewriteEntityDelete(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== DELETE) {
@@ -84,6 +85,9 @@ export function rewriteEntityDelete(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
+	if (!isEntityRewriteAllowed(baseKey)) {
+		return null;
+	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
@@ -101,6 +105,9 @@ export function rewriteEntityDelete(args: {
 	if (!extractPrimaryKeys(schema)) return null;
 
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
+	if (!isEntityRewriteAllowed(storedSchemaKey)) {
+		return null;
+	}
 
 	const whereIndex = findKeyword(tokens, index, "WHERE");
 	const returningIndex = findKeyword(tokens, index, "RETURNING");
