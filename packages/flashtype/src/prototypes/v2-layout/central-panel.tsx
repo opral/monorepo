@@ -3,6 +3,7 @@ import { Panel } from "./panel";
 import type { PanelState, PanelSide, ViewContext } from "./types";
 import { VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
+import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
 
 interface CentralPanelProps {
 	readonly panel: PanelState;
@@ -96,11 +97,13 @@ export function CentralPanel({
 						onFocusCapture={finalizePendingIfNeeded}
 					>
 						{activeView && activeEntry && (
-							<ViewPanel
-								view={activeView}
-								context={contextWithFocus}
-								viewInstance={activeEntry}
-							/>
+							<KeepPreviousSuspense>
+								<ViewPanel
+									view={activeView}
+									context={contextWithFocus}
+									viewInstance={activeEntry}
+								/>
+							</KeepPreviousSuspense>
 						)}
 					</Panel.Content>
 				) : (

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import React, { Suspense } from "react";
 import { TipTapEditor } from "@/components/editor/tip-tap-editor";
 import { useKeyValue } from "@/key-value/use-key-value";
 import { DiffView } from "@/components/diff-view";
+import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
 
 export const Route = createFileRoute("/")({
 	component: Index,
@@ -18,9 +18,9 @@ function Index() {
 	return (
 		<main style={{ padding: "0 16px" }}>
 			{activeFileId ? (
-				<Suspense fallback={null}>
+				<KeepPreviousSuspense>
 					{diffOpen ? <DiffView /> : <TipTapEditor />}
-				</Suspense>
+				</KeepPreviousSuspense>
 			) : (
 				<div style={{ padding: 12, opacity: 0.7 }}>
 					<div>Select a file to start editing.</div>

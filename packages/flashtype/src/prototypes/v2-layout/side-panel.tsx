@@ -17,6 +17,7 @@ import type {
 import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
 import { ViewPanel } from "./view-panel";
 import { Panel } from "./panel";
+import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
 
 interface SidePanelProps {
 	readonly side: PanelSide;
@@ -142,11 +143,13 @@ export function SidePanel({
 					}
 				>
 					{activeEntry && activeView ? (
-						<ViewPanel
-							view={activeView}
-							context={contextWithFocus}
-							viewInstance={activeEntry}
-						/>
+						<KeepPreviousSuspense>
+							<ViewPanel
+								view={activeView}
+								context={contextWithFocus}
+								viewInstance={activeEntry}
+							/>
+						</KeepPreviousSuspense>
 					) : (
 						<EmptyPanelState
 							side={side}
