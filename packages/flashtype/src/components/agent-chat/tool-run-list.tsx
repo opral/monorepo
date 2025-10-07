@@ -3,131 +3,136 @@ import type { ToolRun, ToolRunStatus } from "./types";
 import { ChevronRight } from "lucide-react";
 
 /**
- * Claude Code–inspired tool calling list with collapsible IN/OUT sections.
- * Matches the design aesthetic with green dots, monospace text, and smooth animations.
- * Tool items are visually connected with a vertical line to show they're part of a reasoning series.
+ * Tool call timeline with subtle connectors and compact status dots.
  */
 export function ToolRunList({ runs }: { runs: ToolRun[] }) {
 	return (
-		<div className="mb-2 relative">
-			{runs.map((r, index) => (
-				<ToolRunItem
-					key={r.id}
-					run={r}
-					isFirst={index === 0}
-					isLast={index === runs.length - 1}
+		<div className="space-y-1.5">
+			{runs.map((run, index) => (
+				<ToolRunRow
+					key={run.id}
+					run={run}
+					connectAbove={index > 0}
+					connectBelow={index < runs.length - 1}
 				/>
 			))}
 		</div>
 	);
 }
 
-function ToolRunItem({
+function ToolRunRow({
 	run,
-	isFirst,
-	isLast,
+	connectAbove,
+	connectBelow,
 }: {
 	run: ToolRun;
-	isFirst: boolean;
-	isLast: boolean;
+	connectAbove: boolean;
+	connectBelow: boolean;
 }) {
 	const [isExpanded, setIsExpanded] = React.useState(false);
-	const hasContent = run.input || run.output;
+	const hasContent = Boolean(run.input || run.output);
 	const isThinking = run.status === "thinking";
 
 	return (
-		<div className="group relative">
-			{/* Connecting line between tools */}
-			{!isLast && (
-				<div className="absolute left-1 top-[13px] bottom-[-2px] w-[1px] bg-border/60" />
-			)}
-
-			{/* For thinking/reasoning steps, show content inline without collapsing */}
-			{isThinking && run.content ? (
-				<div className="relative flex w-full items-start gap-2 px-1 py-0.5">
+		<div className="group flex min-w-0 gap-3">
+			<div className="relative flex w-4 justify-center">
+				{connectAbove ? (
+					<span className="absolute left-1/2 top-0 bottom-1/2 w-px -translate-x-1/2 bg-border/60" />
+				) : null}
+				{connectBelow ? (
+					<span className="absolute left-1/2 top-1/2 bottom-0 w-px -translate-x-1/2 bg-border/60" />
+				) : null}
+				<div className="mt-1">
 					<StatusDot status={run.status} />
-					<div className="flex-1 min-w-0 text-sm leading-relaxed text-foreground">
-						{run.content}
-					</div>
+				</div>
+			</div>
+
+			{isThinking && run.content ? (
+				<div className="flex-1 text-sm leading-relaxed text-foreground">
+					{run.content}
 				</div>
 			) : (
-				<>
-					{/* Tool header */}
+				<div className="flex-1">
 					<button
 						type="button"
 						onClick={() => hasContent && setIsExpanded(!isExpanded)}
 						disabled={!hasContent}
-						className="relative flex w-full items-start gap-2 px-1 py-0.5 text-left transition-colors hover:bg-muted/30 disabled:cursor-default disabled:hover:bg-transparent"
+						className="flex w-full items-start justify-between rounded-md py-1 pr-1 text-left transition hover:bg-muted/20 disabled:cursor-default disabled:hover:bg-transparent"
 					>
-						<StatusDot status={run.status} />
-						<div className="flex-1 min-w-0">
+						<div className="min-w-0 flex-1">
 							<div className="flex items-center gap-2">
-								<span className="font-semibold text-sm text-foreground">
+								<span className="text-sm font-medium text-foreground">
 									{run.title}
 								</span>
-								{hasContent && (
+								{hasContent ? (
 									<ChevronRight
 										className={`h-3 w-3 text-muted-foreground transition-transform ${
 											isExpanded ? "rotate-90" : ""
 										}`}
 									/>
-								)}
+								) : null}
 							</div>
-							{run.detail && (
-								<div className="text-xs text-muted-foreground">{run.detail}</div>
-							)}
+							{run.detail ? (
+								<div className="text-xs text-muted-foreground">
+									{run.detail}
+								</div>
+							) : null}
 						</div>
 					</button>
 
-					{/* Collapsible content */}
-					{hasContent && isExpanded && (
-						<div className="ml-5 mt-1 mb-2 space-y-2 overflow-hidden rounded-md border border-border/60 bg-muted/20 text-xs animate-in slide-in-from-top-1 duration-200">
-							{run.input && (
+					{hasContent && isExpanded ? (
+						<div className="ml-5 mt-1 space-y-2 overflow-hidden rounded-lg border border-border/60 bg-muted/10 text-xs">
+							{run.input ? (
 								<div>
-									<div className="border-b border-border/40 bg-muted/40 px-3 py-1">
-										<span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-											IN
-										</span>
+									<div className="border-b border-border/40 bg-muted/20 px-3 py-1 font-medium text-muted-foreground">
+										IN
 									</div>
-									<pre className="px-3 py-2 font-mono text-xs leading-relaxed text-foreground overflow-x-auto">
+									<pre className="overflow-x-auto px-3 py-2 font-mono text-xs leading-relaxed text-foreground">
 										{run.input}
 									</pre>
 								</div>
-							)}
-							{run.output && (
+							) : null}
+							{run.output ? (
 								<div>
-									<div className="border-b border-border/40 bg-muted/40 px-3 py-1">
-										<span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-											OUT
-										</span>
+									<div className="border-b border-border/40 bg-muted/20 px-3 py-1 font-medium text-muted-foreground">
+										OUT
 									</div>
-									<pre className="px-3 py-2 font-mono text-xs leading-relaxed text-muted-foreground overflow-x-auto">
+									<pre className="overflow-x-auto px-3 py-2 font-mono text-xs leading-relaxed text-muted-foreground">
 										{run.output}
 									</pre>
 								</div>
-							)}
+							) : null}
 						</div>
-					)}
-				</>
+					) : null}
+				</div>
 			)}
 		</div>
 	);
 }
 
 function StatusDot({ status }: { status: ToolRunStatus }) {
-	const color =
-		status === "success"
-			? "bg-emerald-500"
-			: status === "running"
-				? "bg-zinc-400 animate-pulse"
-				: status === "error"
-					? "bg-rose-500"
-					: status === "thinking"
-						? "bg-zinc-400"
-						: "bg-zinc-300";
+	const { fill, ring } = getStatusColors(status);
 	return (
-		<span
-			className={`inline-block mt-1 h-2 w-2 rounded-full ${color} shrink-0`}
-		/>
+		<span className="relative flex h-3.5 w-3.5 items-center justify-center">
+			<span
+				className={`absolute h-3 w-3 rounded-full border ${ring} bg-background`}
+			/>
+			<span className={`relative h-2 w-2 rounded-full ${fill}`} />
+		</span>
 	);
+}
+
+function getStatusColors(status: ToolRunStatus) {
+	switch (status) {
+		case "success":
+			return { fill: "bg-emerald-500", ring: "border-emerald-200" };
+		case "error":
+			return { fill: "bg-rose-500", ring: "border-rose-200" };
+		case "running":
+			return { fill: "bg-zinc-400 animate-pulse", ring: "border-zinc-300" };
+		case "thinking":
+			return { fill: "bg-zinc-400", ring: "border-zinc-300" };
+		default:
+			return { fill: "bg-zinc-300", ring: "border-zinc-200" };
+	}
 }

@@ -1,14 +1,17 @@
-import { useState, useId } from "react";
+import { useState, useId, useRef, useCallback, useEffect, useMemo } from "react";
 import { ArrowUp, ChevronDown, Plus } from "lucide-react";
 import { ChatMessageList } from "@/components/agent-chat/chat-message-list";
 import type { ViewContext } from "../../types";
 import type { ChatMessage } from "@/components/agent-chat/types";
+import { MOCK_COMMANDS, MOCK_FILES } from "./commands";
+import { MentionMenu, CommandMenu } from "./menu";
+import { useComposerState } from "./composer-state";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
 };
 
-// Mock data to demonstrate the Claude Code-inspired UI
+// Mock data to demonstrate the agent UI prototype
 const MOCK_MESSAGES: ChatMessage[] = [
 	{
 		id: "1",
@@ -24,7 +27,7 @@ const MOCK_MESSAGES: ChatMessage[] = [
 			{
 				id: "t1",
 				title: "Bash",
-				detail: "List contents of Claude Code extension webview directory",
+				detail: "List contents of the extension webview directory",
 				status: "success",
 				input:
 					"ls -la ~/.vscode/extensions/anthropic.claude-code-2.0.5/webview",
@@ -77,7 +80,7 @@ drwxr-xr-x  9 samuel  staff      288 Oct  3 09:19 ..
 			{
 				id: "t4",
 				title: "Bash",
-				detail: "List Claude Code extension root directory",
+				detail: "List extension root directory",
 				status: "success",
 				input: "ls -la ~/.vscode/extensions/anthropic.claude-code-2.0.5/",
 				output: `total 1936
@@ -105,23 +108,218 @@ drwxr-xr-x   5 samuel  staff     160 Oct  3 09:19 webview`,
 				title: "",
 				status: "thinking",
 				content:
-					"The extension is bundled. However, I can help you design an AI agent chat view inspired by Claude Code's UI.",
+					"The extension is bundled. However, I can help you design an AI agent chat view inspired by the reference UI.",
 			},
 		],
 	},
 ];
 
 /**
- * Claude Code-inspired agent chat view (UI-only mock for now).
- * Demonstrates the new tool visualization design with collapsible sections.
+ * Agent chat view (UI-only mock for now).
+ * Demonstrates the tool visualization design with collapsible sections.
  */
 export function AgentView({ context }: AgentViewProps) {
 	const [messages] = useState<ChatMessage[]>(MOCK_MESSAGES);
 	const textAreaId = useId();
+	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+	const {
+		value,
+		setValue,
+		history,
+		historyIdx,
+		setHistoryIdx,
+		slashOpen,
+		setSlashOpen,
+		slashIdx,
+		setSlashIdx,
+		mentionOpen,
+		setMentionOpen,
+		mentionIdx,
+		setMentionIdx,
+		mentionItems,
+		mentionCtx,
+		filteredCommands,
+		updateMentions,
+		pushHistory,
+	} = useComposerState({ commands: MOCK_COMMANDS, files: MOCK_FILES });
+
 	const hasConversations = false;
 	const conversationLabel = hasConversations
 		? "New conversation"
 		: "No previous conversations";
+
+	const updateMention = useCallback(() => {
+		updateMentions(textAreaRef.current);
+	}, [updateMentions]);
+
+	const insertMention = useCallback(
+		(path: string) => {
+			const ctx = mentionCtx.current;
+			if (!ctx) return;
+			const before = value.slice(0, ctx.start);
+			const after = value.slice(ctx.end);
+			const next = `${before}${path}${after}`;
+			setValue(next);
+			setMentionOpen(false);
+			mentionCtx.current = null;
+			queueMicrotask(() => {
+				const el = textAreaRef.current;
+				if (el) {
+					const pos = before.length + path.length;
+					el.setSelectionRange(pos, pos);
+					el.focus();
+				}
+			});
+		},
+		[value],
+	);
+
+	const commit = useCallback(() => {
+		const next = value.trimEnd();
+		if (!next) return;
+		if (next.startsWith("/")) {
+			const token = next.slice(1).trim().split(/\s+/)[0] ?? "";
+			const cmd =
+				filteredCommands.find((c) => c.name.startsWith(token))?.name ?? token;
+			console.info(`[mock] slash command: /${cmd}`);
+		} else {
+			console.info(`[mock] send message: ${next}`);
+			pushHistory(next);
+		}
+		setHistoryIdx(-1);
+		setValue("");
+		setSlashOpen(false);
+		setMentionOpen(false);
+		mentionCtx.current = null;
+		lastActionFocus(textAreaRef.current);
+	}, [value, filteredCommands]);
+
+	useEffect(() => {
+		updateMention();
+	}, [value, updateMention]);
+
+	const onKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+			// Enter sends unless shift pressed
+			if (e.key === "Enter" && !e.shiftKey) {
+				if (mentionOpen && mentionItems[mentionIdx]) {
+					e.preventDefault();
+					insertMention(mentionItems[mentionIdx]);
+					return;
+				}
+				e.preventDefault();
+				commit();
+				return;
+			}
+
+			if (mentionOpen) {
+				if (e.key === "ArrowDown") {
+					e.preventDefault();
+					setMentionIdx((idx: number) =>
+						Math.min(idx + 1, Math.max(mentionItems.length - 1, 0)),
+					);
+					return;
+				}
+				if (e.key === "ArrowUp") {
+					e.preventDefault();
+					setMentionIdx((idx: number) => Math.max(idx - 1, 0));
+					return;
+				}
+				if (e.key === "Tab") {
+					e.preventDefault();
+					if (mentionItems[mentionIdx]) insertMention(mentionItems[mentionIdx]);
+					return;
+				}
+				if (e.key === "Escape") {
+					e.preventDefault();
+					setMentionOpen(false);
+					mentionCtx.current = null;
+					return;
+				}
+			}
+
+			if (slashOpen) {
+				if (e.key === "ArrowDown") {
+					e.preventDefault();
+					setSlashIdx((idx: number) =>
+						Math.min(idx + 1, Math.max(filteredCommands.length - 1, 0)),
+					);
+					return;
+				}
+				if (e.key === "ArrowUp") {
+					e.preventDefault();
+					setSlashIdx((idx: number) => Math.max(idx - 1, 0));
+					return;
+				}
+				if (e.key === "Tab") {
+					e.preventDefault();
+					const pick = filteredCommands[slashIdx];
+					if (pick) setValue(`/${pick.name} `);
+					return;
+				}
+				if (e.key === "Escape") {
+					e.preventDefault();
+					setSlashOpen(false);
+					return;
+				}
+			}
+
+			if (
+				(e.key === "ArrowUp" || e.key === "ArrowDown") &&
+				!e.shiftKey &&
+				!e.metaKey &&
+				!e.ctrlKey
+			) {
+				e.preventDefault();
+				setHistoryIdx((idx) => {
+					if (e.key === "ArrowUp") {
+						const nextIdx = Math.min(idx + 1, history.length - 1);
+						const entry = history[nextIdx];
+						if (entry !== undefined) setValue(entry);
+						queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
+						return nextIdx;
+					}
+					const nextIdx = Math.max(idx - 1, -1);
+					const entry = nextIdx === -1 ? "" : history[nextIdx] ?? "";
+					setValue(entry);
+					queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
+					return nextIdx;
+				});
+				return;
+			}
+
+			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
+				e.preventDefault();
+				setValue("");
+				setHistoryIdx(-1);
+				setMentionOpen(false);
+				setSlashOpen(false);
+				return;
+			}
+		},
+		[
+			mentionOpen,
+			mentionItems,
+			mentionIdx,
+			insertMention,
+			commit,
+			slashOpen,
+			filteredCommands,
+			slashIdx,
+			history,
+		],
+	);
+
+	const menuFragment = useMemo(() => {
+		if (mentionOpen && mentionItems.length > 0) {
+			return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
+		}
+		if (slashOpen) {
+			return <CommandMenu commands={filteredCommands} selectedIndex={slashIdx} />;
+		}
+		return null;
+	}, [mentionOpen, mentionItems, mentionIdx, slashOpen, filteredCommands, slashIdx]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
@@ -149,29 +347,60 @@ export function AgentView({ context }: AgentViewProps) {
 			</div>
 
 			{/* Input area */}
-			<div className="sticky bottom-0 flex justify-center px-2 pb-2 pt-6">
-				<form className="w-full max-w-3xl overflow-hidden rounded-md border border-border/80 bg-background">
-					<label htmlFor={textAreaId} className="sr-only">
-						Ask the assistant
-					</label>
+		<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
+			<div className="relative w-full max-w-3xl overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
+				<label htmlFor={textAreaId} className="sr-only">
+					Ask the assistant
+				</label>
 					<textarea
+						ref={textAreaRef}
 						id={textAreaId}
 						placeholder="Ask Lix Agent…"
-						className="h-28 w-full resize-none border-b border-border/70 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:bg-muted/40"
-					/>
-					<div className="flex items-center justify-end gap-2 bg-muted/40 px-3 py-1 text-[10px] text-muted-foreground">
-						<span className="text-muted-foreground/60">/</span>
-						<button
-							type="submit"
-							className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-muted text-muted-foreground transition hover:bg-muted/80"
-						>
-							<ArrowUp className="h-3.5 w-3.5" />
-						</button>
+						value={value}
+					onChange={(event) => {
+						const next = event.target.value;
+						setValue(next);
+						setSlashOpen(next.startsWith("/"));
+						setSlashIdx(0);
+						setMentionOpen(false);
+						mentionCtx.current = null;
+					}}
+					onKeyDown={onKeyDown}
+					onClick={updateMention}
+					onSelect={updateMention}
+						className="h-28 w-full resize-none border-0 bg-transparent pl-3 pr-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
+				/>
+				{menuFragment ? (
+					<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
+						{menuFragment}
 					</div>
-				</form>
+				) : null}
+				<div className="flex justify-end bg-muted/40 pr-3 py-1 text-[11px] text-muted-foreground">
+					<button
+						type="button"
+						onClick={() => commit()}
+						className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted"
+					>
+						<ArrowUp className="h-3.5 w-3.5" />
+					</button>
+				</div>
 			</div>
+		</div>
 		</div>
 	);
 }
 
 export default AgentView;
+
+function lastActionFocus(el: HTMLTextAreaElement | null) {
+	if (!el) return;
+	el.focus();
+	el.setSelectionRange(0, 0);
+}
+
+function moveCaretToEnd(el: HTMLTextAreaElement | null) {
+	if (!el) return;
+	const len = el.value.length;
+	el.setSelectionRange(len, len);
+	el.focus();
+}

@@ -3,7 +3,7 @@ import type { ChatMessage as Msg } from "./types";
 import { ToolRunList } from "./tool-run-list";
 
 /**
- * Claude Code-inspired message component with clean typography and spacing.
+ * Chat message component with clean typography and spacing.
  * User messages are shown in a subtle card, assistant messages are plain text.
  *
  * @example
@@ -22,7 +22,7 @@ export function ChatMessage({ message }: { message: Msg }) {
 	}
 
 	return (
-		<div className="w-full py-2 px-3">
+		<div className="w-full py-2">
 			{message.toolRuns && message.toolRuns.length > 0 && (
 				<ToolRunList runs={message.toolRuns} />
 			)}
@@ -43,7 +43,7 @@ export function ChatMessage({ message }: { message: Msg }) {
 }
 
 /**
- * Renders message content with code blocks styled like Claude Code.
+ * Renders message content with lightweight code block styling.
  * Plain text uses sans-serif, code blocks use monospace.
  */
 function MessageBody({ content, isUser }: { content: string; isUser: boolean }) {

@@ -12,7 +12,7 @@ export function ChatHeader({ onToggleHelp }: { onToggleHelp?: () => void }) {
 		<div className="flex items-center gap-2 border-b px-3 py-2 text-xs">
 			<Bot className="h-3.5 w-3.5 text-amber-500" />
 			<div className="font-medium">Agent</div>
-			<div className="ml-1 text-muted-foreground">Claude Code for writing</div>
+			<div className="ml-1 text-muted-foreground">Agent Console</div>
 			<div className="ml-auto inline-flex items-center gap-2">
 				<button
 					type="button"
