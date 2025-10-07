@@ -59,6 +59,8 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"lix_commit",
 	"commit_edge",
 	"lix_commit_edge",
+	"log",
+	"lix_log",
 ]);
 
 /**
