@@ -25,7 +25,11 @@ export const LixCommitSchema = {
 	],
 	type: "object",
 	properties: {
-		id: { type: "string", description: "Commit identifier" },
+		id: {
+			type: "string",
+			description: "Commit identifier",
+			"x-lix-default-call": { name: "lix_uuid_v7" },
+		},
 		change_set_id: {
 			type: "string",
 			description:

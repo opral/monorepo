@@ -44,6 +44,10 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"expression_update_schema",
 	"active_version",
 	"lix_active_version",
+	"commit",
+	"lix_commit",
+	"commit_edge",
+	"lix_commit_edge",
 ]);
 
 /**

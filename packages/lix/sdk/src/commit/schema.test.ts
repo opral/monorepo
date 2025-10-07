@@ -59,7 +59,7 @@ describe("commit_edge (derived)", () => {
 		expect(viewAfterUnlink).toEqual([]);
 	});
 
-	test.skip("should enforce primary key constraint (parent_id, child_id)", async () => {
+	test("should enforce primary key constraint (parent_id, child_id)", async () => {
 		const lix = await openLix({});
 
 		// Create the referenced change sets and commits first
@@ -102,7 +102,7 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Primary key constraint violation/i);
 	});
 
-	test.skip("should enforce foreign key constraint on parent_id", async () => {
+	test("should enforce foreign key constraint on parent_id", async () => {
 		const lix = await openLix({});
 
 		// Create only child commit (not parent)
@@ -133,7 +133,7 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 
-	test.skip("should enforce foreign key constraint on child_id", async () => {
+	test("should enforce foreign key constraint on child_id", async () => {
 		const lix = await openLix({});
 
 		// Create only parent commit (not child)
@@ -164,7 +164,7 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 
-	test.skip("should prevent self-referencing edges", async () => {
+	test("should prevent self-referencing edges", async () => {
 		const lix = await openLix({});
 
 		// Create a commit
