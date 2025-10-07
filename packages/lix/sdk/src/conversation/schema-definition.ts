@@ -18,7 +18,11 @@ export const LixConversationSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-generated": true,
+			"x-lix-default-call": { name: "lix_uuid_v7" },
+		},
 	},
 	required: ["id"],
 	additionalProperties: false,
@@ -57,7 +61,11 @@ export const LixConversationMessageSchema = {
 	],
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-generated": true,
+			"x-lix-default-call": { name: "lix_uuid_v7" },
+		},
 		conversation_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,

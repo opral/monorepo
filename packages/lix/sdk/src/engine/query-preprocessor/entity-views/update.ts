@@ -105,9 +105,9 @@ export function rewriteEntityUpdate(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
- 	if (!isEntityRewriteAllowed(baseKey)) {
- 		return null;
- 	}
+	if (!isEntityRewriteAllowed(baseKey)) {
+		return null;
+	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;

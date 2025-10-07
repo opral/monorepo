@@ -104,8 +104,8 @@ export function initDb(args: {
 	// applyChangeAuthorDatabaseSchema({ engine: engine });
 	// applyLabelDatabaseSchema({ engine: engine });
 	applyStateHistoryDatabaseSchema({ engine: engine });
-	applyConversationDatabaseSchema({ engine });
-	applyEntityConversationDatabaseSchema({ engine });
+	// applyConversationDatabaseSchema({ engine });
+	// applyEntityConversationDatabaseSchema({ engine });
 	// applyChangeProposalDatabaseSchema({ engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema({ engine: engine });

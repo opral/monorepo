@@ -95,7 +95,11 @@ function maybeRewriteTrigger(args: {
 	tokens: Token[];
 	kind: StatementKind;
 }): QueryPreprocessorResult | null {
-	if (args.kind !== "insert" && args.kind !== "update" && args.kind !== "delete") {
+	if (
+		args.kind !== "insert" &&
+		args.kind !== "update" &&
+		args.kind !== "delete"
+	) {
 		return null;
 	}
 
@@ -113,7 +117,11 @@ function maybeRewriteEntityView(args: {
 	tokens: Token[];
 	kind: StatementKind;
 }): QueryPreprocessorResult | null {
-	if (args.kind !== "insert" && args.kind !== "update" && args.kind !== "delete") {
+	if (
+		args.kind !== "insert" &&
+		args.kind !== "update" &&
+		args.kind !== "delete"
+	) {
 		return null;
 	}
 

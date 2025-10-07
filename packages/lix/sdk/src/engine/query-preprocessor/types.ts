@@ -20,12 +20,7 @@ export interface QueryPreprocessorResult {
 /**
  * Supported top-level SQL statement kinds understood by the preprocessor.
  */
-export type StatementKind =
-	| "select"
-	| "insert"
-	| "update"
-	| "delete"
-	| "other";
+export type StatementKind = "select" | "insert" | "update" | "delete" | "other";
 
 /**
  * Arguments accepted by the query preprocessor function.
@@ -42,4 +37,3 @@ export interface QueryPreprocessorArgs {
 export type QueryPreprocessorFn = (
 	args: QueryPreprocessorArgs
 ) => QueryPreprocessorResult;
-

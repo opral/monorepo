@@ -234,8 +234,8 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		await lix.close();
 	});
 
-		test("rewrites INSERT DEFAULT VALUES", async () => {
-			const lix = await openLix({});
+	test("rewrites INSERT DEFAULT VALUES", async () => {
+		const lix = await openLix({});
 
 		lix.engine!.sqlite.exec(`
 				CREATE TABLE sink (
@@ -269,10 +269,10 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		await lix.close();
 	});
 
-		test("rewrite INSERT supports RETURNING", async () => {
-			const lix = await openLix({});
+	test("rewrite INSERT supports RETURNING", async () => {
+		const lix = await openLix({});
 
-			lix.engine!.sqlite.exec(`
+		lix.engine!.sqlite.exec(`
 				CREATE TABLE sink (
 					message TEXT,
 					code TEXT
@@ -285,25 +285,26 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 				END;
 			`);
 
-			const sql = "INSERT INTO rewrite_view (message, code) VALUES (?, upper(?)) RETURNING message, code";
-			const rewritten = maybeRewriteInsteadOfTrigger({
-				engine: lix.engine!,
-				sql,
-				tokens: tokenize(sql),
-				parameters: ["hi", "id"],
-				op: "insert",
-			});
-
-			const result = executeRewritten(lix.engine!, rewritten!);
-			expect(result.rows).toEqual([{ message: "hi", code: "ID" }]);
-
-			const { rows } = lix.engine!.executeSync({
-				sql: "SELECT message, code FROM sink",
-				parameters: [],
-			});
-			expect(rows).toEqual([{ message: "hi", code: "ID" }]);
-			await lix.close();
+		const sql =
+			"INSERT INTO rewrite_view (message, code) VALUES (?, upper(?)) RETURNING message, code";
+		const rewritten = maybeRewriteInsteadOfTrigger({
+			engine: lix.engine!,
+			sql,
+			tokens: tokenize(sql),
+			parameters: ["hi", "id"],
+			op: "insert",
 		});
+
+		const result = executeRewritten(lix.engine!, rewritten!);
+		expect(result.rows).toEqual([{ message: "hi", code: "ID" }]);
+
+		const { rows } = lix.engine!.executeSync({
+			sql: "SELECT message, code FROM sink",
+			parameters: [],
+		});
+		expect(rows).toEqual([{ message: "hi", code: "ID" }]);
+		await lix.close();
+	});
 
 	test("returns null when NEW references cannot be substituted", async () => {
 		const lix = await openLix({});

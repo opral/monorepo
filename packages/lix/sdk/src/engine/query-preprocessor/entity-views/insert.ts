@@ -24,7 +24,7 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	type RewriteResult,
-type StoredSchemaDefinition,
+	type StoredSchemaDefinition,
 } from "./shared.js";
 
 type ExpressionValue = { kind: "expression"; sql: string };
