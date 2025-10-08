@@ -24,7 +24,7 @@ describe("entity view select synthesis", () => {
 			const schema = {
 				"x-lix-key": "lix_alias_test",
 				"x-lix-version": "1.0",
-				"x-lix-primary-key": ["id"],
+				"x-lix-primary-key": ["/id"],
 				type: "object",
 				properties: {
 					id: { type: "string" },
@@ -60,7 +60,7 @@ describe("entity view select synthesis", () => {
 			const schema = {
 				"x-lix-key": "unit_test_schema",
 				"x-lix-version": "1.0",
-				"x-lix-primary-key": ["id"],
+				"x-lix-primary-key": ["/id"],
 				type: "object",
 				properties: {
 					id: { type: "string" },
@@ -106,7 +106,7 @@ describe("entity view select synthesis", () => {
 			const schema = {
 				"x-lix-key": "e2e_schema",
 				"x-lix-version": "1.0",
-				"x-lix-primary-key": ["id"],
+				"x-lix-primary-key": ["/id"],
 				type: "object",
 				properties: {
 					id: { type: "string" },
@@ -182,7 +182,7 @@ describe("entity view select synthesis", () => {
 			const schema = {
 				"x-lix-key": "cache_test_schema",
 				"x-lix-version": "1.0",
-				"x-lix-primary-key": ["id"],
+				"x-lix-primary-key": ["/id"],
 				type: "object",
 				properties: {
 					id: { type: "string" },
@@ -219,7 +219,7 @@ describe("entity view select synthesis", () => {
 			const schema = {
 				"x-lix-key": "transient_schema",
 				"x-lix-version": "1.0",
-				"x-lix-primary-key": ["id"],
+				"x-lix-primary-key": ["/id"],
 				type: "object",
 				properties: {
 					id: { type: "string" },

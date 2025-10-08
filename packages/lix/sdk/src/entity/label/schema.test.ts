@@ -583,7 +583,7 @@ test("entity_label foreign key constraint prevents referencing non-existent stat
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\)/
 	);
 });
 
@@ -616,7 +616,7 @@ test("entity_label foreign key constraint prevents referencing non-existent labe
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/label_id\).*lix_label\.\(\/id\)/
 	);
 });
 

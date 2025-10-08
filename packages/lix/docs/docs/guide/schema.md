@@ -53,16 +53,16 @@ Let's look at a more advanced `AccountSchema` example:
 const AccountSchema: LixSchemaDefinition = {
   "x-lix-key": "example_account",
   "x-lix-version": "1.0",
-  "x-lix-primary-key": ["id"],
+  "x-lix-primary-key": ["/id"],
   "x-lix-unique": [
-    ["email"] // email must be unique
+    ["/email"] // email must be unique
   ],
   "x-lix-foreign-keys": [
     {
-      properties: ["owner_id"],
+      properties: ["/owner_id"],
       references: {
         schemaKey: "user", // References a 'user' schema
-        properties: ["id"]
+        properties: ["/id"]
       }
     }
   ],

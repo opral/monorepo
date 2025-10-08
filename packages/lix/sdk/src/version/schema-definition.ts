@@ -10,7 +10,7 @@ export type LixVersionDescriptor = FromLixSchemaDefinition<
 export const LixVersionDescriptorSchema = {
 	"x-lix-key": "lix_version_descriptor",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-foreign-keys": [],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
@@ -33,17 +33,17 @@ export type LixVersionTip = FromLixSchemaDefinition<typeof LixVersionTipSchema>;
 export const LixVersionTipSchema = {
 	"x-lix-key": "lix_version_tip",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["working_commit_id"]],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-unique": [["/working_commit_id"]],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["commit_id"],
-			references: { schemaKey: "lix_commit", properties: ["id"] },
+			properties: ["/commit_id"],
+			references: { schemaKey: "lix_commit", properties: ["/id"] },
 			mode: "materialized",
 		},
 		{
-			properties: ["working_commit_id"],
-			references: { schemaKey: "lix_commit", properties: ["id"] },
+			properties: ["/working_commit_id"],
+			references: { schemaKey: "lix_commit", properties: ["/id"] },
 			mode: "materialized",
 		},
 	],
@@ -69,13 +69,13 @@ export type LixActiveVersion = FromLixSchemaDefinition<
 export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["version_id"],
+	"x-lix-primary-key": ["/version_id"],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["version_id"],
+			properties: ["/version_id"],
 			references: {
 				schemaKey: "lix_version_descriptor",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

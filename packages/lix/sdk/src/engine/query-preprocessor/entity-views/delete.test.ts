@@ -5,7 +5,7 @@ import { createQueryPreprocessor } from "../create-query-preprocessor.js";
 const DELETE_SCHEMA = {
 	"x-lix-key": "delete_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",

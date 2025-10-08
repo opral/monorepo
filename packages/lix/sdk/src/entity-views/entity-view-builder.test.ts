@@ -7,7 +7,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	const testSchema: LixSchemaDefinition = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		additionalProperties: false,
 		properties: {
@@ -113,7 +113,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const roSchema: LixSchemaDefinition = {
 			"x-lix-key": "ro_entity",
 			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["id"],
+			"x-lix-primary-key": ["/id"],
 			additionalProperties: false,
 			type: "object",
 			properties: {

@@ -8,7 +8,7 @@ export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 export const LixChangeSetSchema = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -31,29 +31,29 @@ export const LixChangeSetElementSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["/change_set_id"],
 			references: {
 				schemaKey: "lix_change_set",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["change_id"],
+			properties: ["/change_id"],
 			references: {
 				schemaKey: "lix_change",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["schema_key"],
+			properties: ["/schema_key"],
 			references: {
 				schemaKey: "lix_stored_schema",
 				properties: ["/value/x-lix-key"],
 			},
 		},
 	],
-	"x-lix-primary-key": ["change_set_id", "change_id"],
-	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
+	"x-lix-primary-key": ["/change_set_id", "/change_id"],
+	"x-lix-unique": [["/change_set_id", "/entity_id", "/schema_key", "/file_id"]],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -84,24 +84,24 @@ export type LixChangeSetLabel = FromLixSchemaDefinition<
 export const LixChangeSetLabelSchema = {
 	"x-lix-key": "lix_change_set_label",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_set_id", "label_id"],
+	"x-lix-primary-key": ["/change_set_id", "/label_id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
 	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["/change_set_id"],
 			references: {
 				schemaKey: "lix_change_set",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["label_id"],
+			properties: ["/label_id"],
 			references: {
 				schemaKey: "lix_label",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

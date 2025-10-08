@@ -7,7 +7,7 @@ export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 export const LixAccountSchema = {
 	"x-lix-key": "lix_account",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -33,17 +33,17 @@ export type LixActiveAccount = FromLixSchemaDefinition<
 export const LixActiveAccountSchema = {
 	"x-lix-key": "lix_active_account",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["account_id"],
+	"x-lix-primary-key": ["/account_id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
 	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["account_id"],
+			properties: ["/account_id"],
 			references: {
 				schemaKey: "lix_account",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

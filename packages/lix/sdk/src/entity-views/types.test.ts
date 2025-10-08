@@ -54,7 +54,7 @@ test("LixGenerated markers work with NewState", () => {
 	const MockEntitySchema = {
 		"x-lix-key": "mock_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: { type: "string", "x-lix-generated": true },

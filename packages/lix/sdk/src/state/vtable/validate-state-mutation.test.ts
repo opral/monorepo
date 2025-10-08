@@ -141,7 +141,7 @@ test("passes when primary key is unique", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -180,7 +180,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -236,7 +236,7 @@ test("immutable schemas reject repeated inserts", async () => {
 	const schema: LixSchemaDefinition = {
 		"x-lix-key": "immutable_schema_test",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-immutable": true,
 		type: "object",
 		properties: {
@@ -297,7 +297,7 @@ test("state_all: inserting same PK twice in one transaction overwrites without P
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "kv_mock_vtab",
-		"x-lix-primary-key": ["key"],
+		"x-lix-primary-key": ["/key"],
 		properties: {
 			key: { type: "string" },
 			value: { type: "string" },
@@ -358,7 +358,7 @@ test("handles composite primary keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user_role",
-		"x-lix-primary-key": ["user_id", "role_id"],
+		"x-lix-primary-key": ["/user_id", "/role_id"],
 		properties: {
 			user_id: { type: "string" },
 			role_id: { type: "string" },
@@ -437,8 +437,8 @@ test("passes when unique constraint is satisfied", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["email"], ["username"]],
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/email"], ["/username"]],
 		properties: {
 			id: { type: "string" },
 			email: { type: "string" },
@@ -476,8 +476,8 @@ test("throws when single field unique constraint is violated", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["email"], ["username"]],
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/email"], ["/username"]],
 		properties: {
 			id: { type: "string" },
 			email: { type: "string" },
@@ -563,10 +563,10 @@ test("handles composite unique constraints", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "product",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-unique": [
-			["category", "name"], // Composite unique constraint
-			["sku"], // Single field unique constraint
+			["/category", "/name"], // Composite unique constraint
+			["/sku"], // Single field unique constraint
 		],
 		properties: {
 			id: { type: "string" },
@@ -683,7 +683,7 @@ test("passes when foreign key references exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -696,13 +696,13 @@ test("passes when foreign key references exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -766,7 +766,7 @@ test("throws when foreign key reference does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -779,13 +779,13 @@ test("throws when foreign key reference does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -832,7 +832,7 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -845,7 +845,7 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "category",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -858,20 +858,20 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 			{
-				properties: ["category_id"],
+				properties: ["/category_id"],
 				references: {
 					schemaKey: "category",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -971,7 +971,7 @@ test("allows null foreign key values", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -984,13 +984,13 @@ test("allows null foreign key values", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1052,7 +1052,7 @@ test("handles composite foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "address",
-		"x-lix-primary-key": ["country", "postal_code", "street"],
+		"x-lix-primary-key": ["/country", "/postal_code", "/street"],
 		properties: {
 			country: { type: "string" },
 			postal_code: { type: "string" },
@@ -1068,13 +1068,13 @@ test("handles composite foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "delivery",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["address_country", "address_postal", "address_street"],
+				properties: ["/address_country", "/address_postal", "/address_street"],
 				references: {
 					schemaKey: "address",
-					properties: ["country", "postal_code", "street"],
+					properties: ["/country", "/postal_code", "/street"],
 				},
 			},
 		],
@@ -1158,7 +1158,7 @@ test("handles composite foreign keys", async () => {
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(
-		/Foreign key constraint violation.*address_country, address_postal, address_street.*referencing.*address.*country, postal_code, street/
+		/Foreign key constraint violation.*\/address_country, \/address_postal, \/address_street.*referencing.*address.*\/country, \/postal_code, \/street/
 	);
 });
 
@@ -1195,10 +1195,10 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		"x-lix-key": "change_set_element_test",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1256,7 +1256,7 @@ test("allows updates with same primary key", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1305,8 +1305,8 @@ test("unique constraints are validated per version, not globally", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "file",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["path"]], // Unique path constraint
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/path"]], // Unique path constraint
 		properties: {
 			id: { type: "string" },
 			path: { type: "string" },
@@ -1385,7 +1385,7 @@ test("throws when version_id is not provided", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1413,7 +1413,7 @@ test("throws when referenced version does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1440,7 +1440,7 @@ test("passes when version_id is provided and version exists", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1472,7 +1472,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1485,13 +1485,13 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1572,7 +1572,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1630,7 +1630,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mfk_parent",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1643,13 +1643,13 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mfk_child",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
+				properties: ["/parent_id"],
 				references: {
 					schemaKey: "mfk_parent",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 				mode: "materialized",
 			},
@@ -1758,7 +1758,7 @@ test("should throw when deleting non-existent entity", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1792,7 +1792,7 @@ test("should throw when entity_id is missing for delete operations", async () =>
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1898,7 +1898,7 @@ test("should parse JSON object properties before validation", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "document",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			title: { type: "string" },
@@ -1997,7 +1997,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 	const userSchema = {
 		"x-lix-key": "mock_user",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: { type: "string" },
@@ -2011,13 +2011,13 @@ test("foreign key validation should fail when referenced entity exists in differ
 	const postSchema = {
 		"x-lix-key": "mock_post",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "mock_user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2118,13 +2118,13 @@ test("should allow self-referential foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version", // Self-referential foreign key
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2220,13 +2220,13 @@ test("should allow self-referential foreign keys for update operations", async (
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2324,13 +2324,13 @@ test("should prevent deletion when self-referential foreign keys reference the e
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2548,7 +2548,7 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2561,13 +2561,13 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2639,7 +2639,7 @@ test("should allow untracked entities to reference tracked entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2652,13 +2652,13 @@ test("should allow untracked entities to reference tracked entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2730,7 +2730,7 @@ test("should allow untracked entities to reference other untracked entities", as
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2743,13 +2743,13 @@ test("should allow untracked entities to reference other untracked entities", as
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2964,13 +2964,13 @@ test("should validate foreign keys that reference changes in internal_transactio
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_change_reference",
-		"x-lix-primary-key": ["change_id"],
+		"x-lix-primary-key": ["/change_id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -3067,13 +3067,13 @@ test("should allow foreign keys to changes from any version context", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_schema",
-		"x-lix-primary-key": ["change_id"],
+		"x-lix-primary-key": ["/change_id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -3151,13 +3151,13 @@ test("should validate composite foreign keys referencing state table", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3227,7 +3227,7 @@ test("should validate composite foreign keys referencing state table", async () 
 			version_id: activeVersion.version_id,
 		})
 	).toThrow(
-		/Foreign key constraint violation.*mock_state_reference.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\).*no matching record exists/
+		/Foreign key constraint violation.*mock_state_reference.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\).*no matching record exists/
 	);
 });
 
@@ -3239,13 +3239,13 @@ test("state foreign key references should respect version context", async () => 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3379,13 +3379,13 @@ test("state foreign key references should handle inherited entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3461,22 +3461,22 @@ test("state foreign key with mixed single and composite properties", async () =>
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "complex_reference",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
 				// Composite foreign key to state
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 			{
 				// Single property foreign key to change
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],

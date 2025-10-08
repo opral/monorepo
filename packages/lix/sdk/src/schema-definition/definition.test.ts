@@ -96,7 +96,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": [["id"], ["name", "age"]],
+		"x-lix-unique": [["/id"], ["/name", "/age"]],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -116,7 +116,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": ["id", "name"],
+		"x-lix-unique": ["/id", "/name"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -235,7 +235,7 @@ test("x-lix-primary-key must be array of strings when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id", "version"],
+		"x-lix-primary-key": ["/id", "/version"],
 		properties: {
 			id: { type: "string" },
 			version: { type: "string" },
@@ -275,17 +275,17 @@ test("x-lix-foreign-keys with valid structure", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user_profile",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 			{
-				properties: ["category_id"],
+				properties: ["/category_id"],
 				references: {
 					schemaKey: "post_category",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -310,10 +310,10 @@ test("x-lix-foreign-keys with schemaVersion", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
+				properties: ["/post_id"],
 				references: {
 					schemaKey: "blog_post",
-					properties: ["id"],
+					properties: ["/id"],
 					schemaVersion: "1.0",
 				},
 			},
@@ -339,7 +339,7 @@ test("x-lix-foreign-keys fails without required fields", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				// Missing required "references" field
 			},
 		],
@@ -363,10 +363,10 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
+				properties: ["/post_id"],
 				references: {
 					schemaKey: "blog_post",
-					properties: ["id"],
+					properties: ["/id"],
 					schemaVersion: "v1.0.0", // Invalid format
 				},
 			},
@@ -389,11 +389,11 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		type: "object",
 		"x-lix-key": "child_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
-				references: { schemaKey: "parent_entity", properties: ["id"] },
+				properties: ["/parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["/id"] },
 				mode: "materialized",
 			},
 		],
@@ -406,11 +406,11 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		type: "object",
 		"x-lix-key": "comment",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
-				references: { schemaKey: "post", properties: ["id"] },
+				properties: ["/post_id"],
+				references: { schemaKey: "post", properties: ["/id"] },
 				mode: "immediate",
 			},
 		],
@@ -431,11 +431,11 @@ test("x-lix-foreign-keys fails with invalid mode value", () => {
 		type: "object",
 		"x-lix-key": "child_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
-				references: { schemaKey: "parent_entity", properties: ["id"] },
+				properties: ["/parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["/id"] },
 				// @ts-expect-error - invalid mode value
 				mode: "deferred",
 			},
@@ -457,17 +457,17 @@ test("x-lix-foreign-keys with composite key", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 			{
-				properties: ["label_id"],
+				properties: ["/label_id"],
 				references: {
 					schemaKey: "lix_label",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -526,7 +526,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": [["id"], ["name", "age"]],
+		"x-lix-unique": [["/id"], ["/name", "/age"]],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -546,7 +546,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": ["id", "name"],
+		"x-lix-unique": ["/id", "/name"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -565,7 +565,7 @@ test("x-lix-generated property is allowed in schema definition", () => {
 	const TestSchemaWithGenerated = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: {
@@ -587,7 +587,7 @@ test("x-lix-generated property is allowed in schema definition", () => {
 	const TestSchemaWithExplicitFalse = {
 		"x-lix-key": "test_entity2",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: {

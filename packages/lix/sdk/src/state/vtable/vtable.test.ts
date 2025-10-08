@@ -2106,7 +2106,7 @@ simulationTest(
 		const parentSchema: LixSchemaDefinition = {
 			"x-lix-key": "parent_entity",
 			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["id"],
+			"x-lix-primary-key": ["/id"],
 			type: "object",
 			properties: {
 				id: { type: "string" },
@@ -2120,13 +2120,13 @@ simulationTest(
 		const childSchema: LixSchemaDefinition = {
 			"x-lix-key": "child_entity",
 			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["id"],
+			"x-lix-primary-key": ["/id"],
 			"x-lix-foreign-keys": [
 				{
-					properties: ["parent_id"],
+					properties: ["/parent_id"],
 					references: {
 						schemaKey: "parent_entity",
-						properties: ["id"],
+						properties: ["/id"],
 					},
 				},
 			],

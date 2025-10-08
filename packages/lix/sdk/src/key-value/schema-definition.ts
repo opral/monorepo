@@ -62,7 +62,7 @@ export type LixKeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema> & {
 export const LixKeyValueSchema = {
 	"x-lix-key": "lix_key_value",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["key"],
+	"x-lix-primary-key": ["/key"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",

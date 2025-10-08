@@ -7,7 +7,7 @@ describe("createEntityViewIfNotExists", () => {
 	const testSchema: LixSchemaDefinition = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		additionalProperties: false,
 		properties: {
@@ -21,7 +21,7 @@ describe("createEntityViewIfNotExists", () => {
 	const compositeKeySchema: LixSchemaDefinition = {
 		"x-lix-key": "composite_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["category", "id"],
+		"x-lix-primary-key": ["/category", "/id"],
 		additionalProperties: false,
 		type: "object",
 		properties: {

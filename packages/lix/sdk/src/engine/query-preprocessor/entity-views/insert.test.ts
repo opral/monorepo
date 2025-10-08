@@ -5,7 +5,7 @@ import { createQueryPreprocessor } from "../create-query-preprocessor.js";
 const INSERTABLE_SCHEMA = {
 	"x-lix-key": "insertable_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -130,7 +130,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	const compositeSchema = {
 		"x-lix-key": "mock_composite_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["category", "id"],
+		"x-lix-primary-key": ["/category", "/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",
@@ -206,7 +206,7 @@ test("stored_schema insert uses pointer primary key components", async () => {
 	const schema = {
 		"x-lix-key": "pointer_insert_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: { type: "string" },
@@ -311,7 +311,7 @@ test("preserves SQL expression parameters during insert rewrite", async () => {
 	const schema = {
 		"x-lix-key": "expression_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",
@@ -415,7 +415,7 @@ test("applies JSON defaults when column is omitted", async () => {
 	const schemaWithDefaults = {
 		"x-lix-key": "mock_default_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",
@@ -464,7 +464,7 @@ test("applies function defaults when column is omitted", async () => {
 	const schemaWithFnDefault = {
 		"x-lix-key": "mock_fn_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",
@@ -509,7 +509,7 @@ test("function defaults override literal defaults", async () => {
 	const schemaWithBoth = {
 		"x-lix-key": "mock_fn_override",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",
@@ -554,7 +554,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 	const schema = {
 		"x-lix-key": "multi_schema",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-defaults": {
 			lixcol_file_id: "lix",
 			lixcol_plugin_key: "lix_own_entity",

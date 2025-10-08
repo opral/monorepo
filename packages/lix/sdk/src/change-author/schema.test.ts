@@ -161,7 +161,7 @@ simulationTest(
 				})
 				.execute()
 		).rejects.toThrow(
-			/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
+			/Foreign key constraint violation.*lix_change_author.*\(\/change_id\).*lix_change\.\(\/id\)/i
 		);
 	}
 );
@@ -202,7 +202,7 @@ simulationTest(
 				})
 				.execute()
 		).rejects.toThrow(
-			/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
+			/Foreign key constraint violation.*lix_change_author.*\(\/account_id\).*lix_account\.\(\/id\)/i
 		);
 	}
 );

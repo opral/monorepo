@@ -238,7 +238,7 @@ test("FromLixSchemaDefinition transforms schema with x-lix-generated to LixGener
 	const TestSchema = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: {
@@ -272,7 +272,7 @@ test("FromLixSchemaDefinition transforms empty object types to Record<string, an
 	const TestSchema = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-immutable": true,
 		type: "object",
 		properties: {

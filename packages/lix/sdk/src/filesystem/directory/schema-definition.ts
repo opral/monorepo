@@ -10,8 +10,8 @@ export type LixDirectoryDescriptor = FromLixSchemaDefinition<
 export const LixDirectoryDescriptorSchema = {
 	"x-lix-key": "lix_directory_descriptor",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["parent_id", "name"]],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-unique": [["/parent_id", "/name"]],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",

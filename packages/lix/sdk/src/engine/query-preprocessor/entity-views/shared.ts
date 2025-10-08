@@ -225,18 +225,12 @@ export function extractPrimaryKeys(
 		if (typeof entry !== "string" || entry.length === 0) {
 			return null;
 		}
-		let segments: string[];
-		if (entry.startsWith("/")) {
-			try {
-				segments = parseJsonPointer(entry);
-			} catch {
-				return null;
-			}
-			if (segments.length === 0) {
-				return null;
-			}
-		} else {
-			segments = [entry];
+		if (!entry.startsWith("/")) {
+			return null;
+		}
+		const segments = parseJsonPointer(entry);
+		if (segments.length === 0) {
+			return null;
 		}
 		const root = segments[0]!.toLowerCase();
 		const column = segments[segments.length - 1]!.toLowerCase();

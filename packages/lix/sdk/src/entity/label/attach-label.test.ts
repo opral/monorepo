@@ -68,7 +68,7 @@ test("attachLabel throws error if entity doesn't exist", async () => {
 			label: { id: label.id },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\)/
 	);
 });
 
@@ -101,7 +101,7 @@ test("attachLabel throws error if label doesn't exist", async () => {
 			label: { id: "non-existent-label" },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/label_id\).*lix_label\.\(\/id\)/
 	);
 });
 

@@ -172,7 +172,7 @@ test("query state at specific commit", async () => {
 			id: { type: "string" },
 			value: { type: "string" },
 		},
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 	};
 
 	await lix.db

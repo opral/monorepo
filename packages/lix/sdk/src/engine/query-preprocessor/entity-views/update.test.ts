@@ -5,7 +5,7 @@ import { createQueryPreprocessor } from "../create-query-preprocessor.js";
 const UPDATE_SCHEMA = {
 	"x-lix-key": "update_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -22,7 +22,7 @@ const UPDATE_SCHEMA = {
 const EXPRESSION_SCHEMA = {
 	"x-lix-key": "expression_update_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -39,7 +39,7 @@ const EXPRESSION_SCHEMA = {
 const IMMUTABLE_SCHEMA = {
 	"x-lix-key": "immutable_update_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -320,7 +320,7 @@ test("rewrites updates with JSON payloads", async () => {
 		const schema = {
 			"x-lix-key": "json_update_schema",
 			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["id"],
+			"x-lix-primary-key": ["/id"],
 			"x-lix-defaults": {
 				lixcol_file_id: "lix",
 				lixcol_plugin_key: "lix_own_entity",

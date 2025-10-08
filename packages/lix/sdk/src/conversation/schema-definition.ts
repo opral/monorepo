@@ -11,7 +11,7 @@ export type LixConversation = FromLixSchemaDefinition<
 export const LixConversationSchema = {
 	"x-lix-key": "lix_conversation",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
@@ -38,24 +38,24 @@ export type LixConversationMessage = FromLixSchemaDefinition<
 export const LixConversationMessageSchema = {
 	"x-lix-key": "lix_conversation_message",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
 	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["conversation_id"],
+			properties: ["/conversation_id"],
 			references: {
 				schemaKey: "lix_conversation",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["parent_id"],
+			properties: ["/parent_id"],
 			references: {
 				schemaKey: "lix_conversation_message",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

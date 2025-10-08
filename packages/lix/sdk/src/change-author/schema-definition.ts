@@ -10,24 +10,24 @@ export type LixChangeAuthor = FromLixSchemaDefinition<
 export const LixChangeAuthorSchema = {
 	"x-lix-key": "lix_change_author",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_id", "account_id"],
+	"x-lix-primary-key": ["/change_id", "/account_id"],
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
 	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_id"],
+			properties: ["/change_id"],
 			references: {
 				schemaKey: "lix_change",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["account_id"],
+			properties: ["/account_id"],
 			references: {
 				schemaKey: "lix_account",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],
