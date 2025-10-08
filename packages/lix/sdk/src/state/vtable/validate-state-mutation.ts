@@ -1,6 +1,9 @@
 import { Ajv } from "ajv";
 import type { LixEngine } from "../../engine/boot.js";
-import { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import {
+	LixSchemaDefinition,
+	type LixForeignKey,
+} from "../../schema-definition/definition.js";
 import { sql, type Kysely } from "kysely";
 import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
@@ -19,6 +22,61 @@ const ajv = new Ajv({
 	strictSchema: false,
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
+
+const decodePointerSegment = (segment: string): string =>
+	segment.replace(/~1/g, "/").replace(/~0/g, "~");
+
+const normalizeSchemaPath = (value: string): string => {
+	if (typeof value !== "string") {
+		return "";
+	}
+	if (!value.startsWith("/")) {
+		return value;
+	}
+	const segments = value
+		.slice(1)
+		.split("/")
+		.map(decodePointerSegment);
+	return segments[0] ?? "";
+};
+
+const normalizeSchemaPathArray = (
+	values?: readonly string[] | string[]
+): string[] => {
+	if (!Array.isArray(values)) {
+		return [];
+	}
+	return values
+		.map((value) => normalizeSchemaPath(value))
+		.filter((value): value is string => value.length > 0);
+};
+
+type NormalizedForeignKey = {
+	properties: string[];
+	references: {
+		schemaKey: string;
+		properties: string[];
+		schemaVersion?: string;
+	};
+	mode?: "immediate" | "materialized";
+};
+
+const normalizeForeignKeys = (
+	foreignKeys?: readonly LixForeignKey[] | LixForeignKey[]
+): NormalizedForeignKey[] => {
+	if (!Array.isArray(foreignKeys)) {
+		return [];
+	}
+	return foreignKeys.map((foreignKey) => ({
+		properties: normalizeSchemaPathArray(foreignKey.properties),
+		references: {
+			schemaKey: foreignKey.references.schemaKey,
+			properties: normalizeSchemaPathArray(foreignKey.references.properties),
+			schemaVersion: foreignKey.references.schemaVersion,
+		},
+		mode: foreignKey.mode,
+	}));
+};
 
 export function validateStateMutation(args: {
 	engine: Pick<LixEngine, "executeSync">;
@@ -183,8 +241,10 @@ function validatePrimaryKeyConstraints(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
-	const primaryKeyFields = args.schema["x-lix-primary-key"];
-	if (!primaryKeyFields || primaryKeyFields.length === 0) {
+	const primaryKeyFields = normalizeSchemaPathArray(
+		args.schema["x-lix-primary-key"]
+	);
+	if (primaryKeyFields.length === 0) {
 		return;
 	}
 
@@ -255,8 +315,10 @@ function validateUniqueConstraints(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
-	const uniqueConstraints = args.schema["x-lix-unique"];
-	if (!uniqueConstraints || uniqueConstraints.length === 0) {
+	const uniqueConstraints = (args.schema["x-lix-unique"] ?? [])
+		.map((group) => normalizeSchemaPathArray(group))
+		.filter((group) => group.length > 0);
+	if (uniqueConstraints.length === 0) {
 		return;
 	}
 
@@ -345,8 +407,8 @@ function validateForeignKeyConstraints(args: {
 	version_id: string;
 	untracked?: boolean;
 }): void {
-	const foreignKeys = args.schema["x-lix-foreign-keys"];
-	if (!foreignKeys || !Array.isArray(foreignKeys)) {
+	const foreignKeys = normalizeForeignKeys(args.schema["x-lix-foreign-keys"]);
+	if (foreignKeys.length === 0) {
 		return;
 	}
 
@@ -685,15 +747,10 @@ function validateDeletionConstraints(args: {
 				? (JSON.parse(storedSchema.value) as LixSchemaDefinition)
 				: (storedSchema.value as LixSchemaDefinition);
 
-		if (!schema["x-lix-foreign-keys"]) {
-			continue;
-		}
-
-		// Check each foreign key in this schema
-		const foreignKeys = schema["x-lix-foreign-keys"];
-		if (!foreignKeys || !Array.isArray(foreignKeys)) {
-			continue;
-		}
+	const foreignKeys = normalizeForeignKeys(schema["x-lix-foreign-keys"]);
+	if (foreignKeys.length === 0) {
+		continue;
+	}
 
 		for (const foreignKey of foreignKeys) {
 			// Skip if this foreign key doesn't reference our schema
@@ -746,7 +803,7 @@ function validateDeletionConstraints(args: {
 			const referencingEntities = args.engine.executeSync(query.compile()).rows;
 
 			if (referencingEntities.length > 0) {
-				const localPropsStr = foreignKey.properties.join(", ");
+		const localPropsStr = foreignKey.properties.join(", ");
 				throw new Error(
 					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key (${localPropsStr})`
 				);

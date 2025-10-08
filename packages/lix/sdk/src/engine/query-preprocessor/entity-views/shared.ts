@@ -204,9 +204,26 @@ export function extractPrimaryKeys(
 ): string[] | null {
 	const pk = schema["x-lix-primary-key"];
 	if (Array.isArray(pk) && pk.length > 0) {
-		return pk.map((key) => key.toLowerCase());
+		return pk
+			.map((key) => normalizeSchemaPath(key))
+			.filter((key): key is string => key.length > 0)
+			.map((key) => key.toLowerCase());
 	}
 	return null;
+}
+
+function normalizeSchemaPath(raw: string): string {
+	if (typeof raw !== "string") {
+		return "";
+	}
+	if (!raw.startsWith("/")) {
+		return raw;
+	}
+	const segments = raw
+		.slice(1)
+		.split("/")
+		.map((segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~"));
+	return segments[0] ?? "";
 }
 
 /**

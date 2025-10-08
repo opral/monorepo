@@ -6,6 +6,34 @@ import type {
 } from "../schema-definition/definition.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
 
+const decodePointerSegment = (segment: string): string =>
+	segment.replace(/~1/g, "/").replace(/~0/g, "~");
+
+const normalizeSchemaPath = (value: string): string => {
+	if (typeof value !== "string") {
+		return "";
+	}
+	if (!value.startsWith("/")) {
+		return value;
+	}
+	const segments = value
+		.slice(1)
+		.split("/")
+		.map(decodePointerSegment);
+	return segments[0] ?? "";
+};
+
+const normalizeSchemaPathArray = (
+	values?: readonly string[] | string[]
+): string[] => {
+	if (!Array.isArray(values)) {
+		return [];
+	}
+	return values
+		.map((value) => normalizeSchemaPath(value))
+		.filter((value): value is string => value.length > 0);
+};
+
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
  * These views do NOT expose lixcol_version_id to prevent accidental version-specific operations.
@@ -356,7 +384,10 @@ function createSingleEntityView(args: {
 	validation?: ValidationCallbacks;
 	readOnly?: boolean;
 }): void {
-	if (!args.schema["x-lix-primary-key"]) {
+	const primaryKeys = normalizeSchemaPathArray(
+		args.schema["x-lix-primary-key"]
+	);
+	if (primaryKeys.length === 0) {
 		throw new Error(
 			`Schema must define 'x-lix-primary-key' for entity view generation`
 		);
@@ -366,7 +397,6 @@ function createSingleEntityView(args: {
 	const quoted_view_name = args.quotedViewName || `"${view_name}"`;
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
-	const primaryKeys = args.schema["x-lix-primary-key"];
 
 	const fileId = args.hardcodedFileId
 		? `'${args.hardcodedFileId}'`

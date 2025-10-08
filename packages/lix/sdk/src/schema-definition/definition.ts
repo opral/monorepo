@@ -1,4 +1,5 @@
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
+import type { JsonPointer } from "./json-pointer.js";
 
 /**
  * Foreign key constraint definition
@@ -8,7 +9,11 @@ export type LixForeignKey = {
 	 * Local JSON-schema property names that participate in the FK.
 	 * Must have at least one property.
 	 */
-	properties: readonly string[] | string[];
+	properties:
+		| readonly string[]
+		| readonly JsonPointer[]
+		| string[]
+		| JsonPointer[];
 
 	/**
 	 * Where they point to.
@@ -21,7 +26,11 @@ export type LixForeignKey = {
 		/**
 		 * Remote property names (must have same length as local properties)
 		 */
-		properties: readonly string[] | string[];
+		properties:
+			| readonly string[]
+			| readonly JsonPointer[]
+			| string[]
+			| JsonPointer[];
 		/**
 		 * Optional version of the referenced schema
 		 */
@@ -58,7 +67,18 @@ export const LixSchemaDefinition = {
 					items: {
 						type: "array",
 						items: {
-							type: "string",
+							anyOf: [
+								{
+									type: "string",
+									format: "json-pointer",
+									description: "JSON Pointer referencing a property",
+								},
+								{
+									type: "string",
+									description:
+										"Legacy top-level property name (will be interpreted as a pointer in future versions).",
+								},
+							],
 						},
 					},
 				},
@@ -71,7 +91,19 @@ export const LixSchemaDefinition = {
 				"x-primary-key": {
 					type: "array",
 					items: {
-						type: "string",
+						anyOf: [
+							{
+								type: "string",
+								format: "json-pointer",
+								description:
+									"JSON Pointer referencing a property that participates in the primary key.",
+							},
+							{
+								type: "string",
+								description:
+									"Legacy top-level property name (will be interpreted as a pointer in future versions).",
+							},
+						],
 					},
 				},
 				"x-lix-foreign-keys": {
@@ -83,7 +115,19 @@ export const LixSchemaDefinition = {
 							properties: {
 								type: "array",
 								minItems: 1,
-								items: { type: "string" },
+								items: {
+									anyOf: [
+										{
+											type: "string",
+											format: "json-pointer",
+											description: "JSON Pointer referencing the local field.",
+										},
+										{
+											type: "string",
+											description: "Legacy top-level property name.",
+										},
+									],
+								},
 								description:
 									"Local JSON-schema property names that participate in the FK",
 							},
@@ -98,7 +142,20 @@ export const LixSchemaDefinition = {
 									properties: {
 										type: "array",
 										minItems: 1,
-										items: { type: "string" },
+										items: {
+											anyOf: [
+												{
+													type: "string",
+													format: "json-pointer",
+													description:
+														"JSON Pointer referencing the remote field.",
+												},
+												{
+													type: "string",
+													description: "Legacy top-level property name.",
+												},
+											],
+										},
 										description:
 											"Remote property names (same length as local properties)",
 									},
@@ -262,7 +319,9 @@ export type LixSchemaDefinition = JSONSchema & {
 	 * Does not provide defaults for JSON properties inside `properties`.
 	 */
 	"x-lix-defaults"?: Record<string, string | number | boolean | null>;
-	"x-lix-primary-key"?: string[] | readonly string[];
+	"x-lix-primary-key"?:
+		| (string | JsonPointer)[]
+		| readonly (string | JsonPointer)[];
 	/**
 	 * Properties that must be unique per version.
 	 *
@@ -284,7 +343,9 @@ export type LixSchemaDefinition = JSONSchema & {
 	 *     },
 	 *   }
 	 */
-	"x-lix-unique"?: string[][] | readonly (readonly string[])[];
+	"x-lix-unique"?:
+		| (string | JsonPointer)[][]
+		| readonly (readonly (string | JsonPointer)[])[];
 	/**
 	 * Foreign key constraints referencing other schemas.
 	 *

@@ -7,6 +7,17 @@ const ajv = new Ajv({
 	// https://json-schema.org/blog/posts/stable-json-schema
 	strictSchema: false,
 });
+ajv.addFormat("json-pointer", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
 
 const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);
 

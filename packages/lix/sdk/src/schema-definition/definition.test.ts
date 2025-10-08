@@ -1,8 +1,20 @@
 import { test, expect } from "vitest";
 import { Ajv } from "ajv";
 import { LixSchemaDefinition } from "./definition.js";
+import { parseJsonPointer } from "./json-pointer.js";
 
 const ajv = new Ajv();
+ajv.addFormat("json-pointer", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
 
 test("valid schema", () => {
 	const schema = {
