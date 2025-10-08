@@ -46,7 +46,7 @@ export function FileTree({
 
 	const sortedNodes = useMemo(() => sortNodes(nodes), [nodes]);
 
-	const toggleDirectory = (path: string) => {
+	const toggleDirectory = useCallback((path: string) => {
 		setOpenDirectories((prev) => {
 			const next = new Set(prev);
 			if (next.has(path)) {
@@ -56,7 +56,7 @@ export function FileTree({
 			}
 			return next;
 		});
-	};
+	}, []);
 
 	const selectedClasses = isPanelFocused
 		? "bg-brand-200/80 border border-brand-500 text-neutral-900"

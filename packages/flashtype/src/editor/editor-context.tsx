@@ -9,7 +9,13 @@ const Ctx = React.createContext<EditorContextValue | undefined>(undefined);
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
 	const [editor, setEditor] = React.useState<any | null>(null);
-	const value = React.useMemo(() => ({ editor, setEditor }), [editor]);
+	const setEditorStable = React.useCallback((next: any | null) => {
+		setEditor(next);
+	}, []);
+	const value = React.useMemo(
+		() => ({ editor, setEditor: setEditorStable }),
+		[editor, setEditorStable],
+	);
 	return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

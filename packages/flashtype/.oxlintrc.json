@@ -15,7 +15,19 @@
 		"react/react-in-jsx-scope": "off",
 		"react/jsx-uses-react": "off",
 		"react/rules-of-hooks": "error",
-		"react/exhaustive-deps": "warn",
+		"react/exhaustive-deps": "error",
+		"react/jsx-no-constructed-context-values": "error",
+		"react/jsx-no-bind": [
+			"error",
+			{
+				"allowArrowFunctions": false,
+				"allowFunctions": false,
+				"allowBind": false,
+				"ignoreRefs": true,
+				"allowInlineHooks": false,
+				"ignoreDOMComponents": false
+			}
+		],
 		"import/no-commonjs": "error",
 		// Third-party UI sometimes uses role=link; allow for now
 		"jsx-a11y/prefer-tag-over-role": "off"

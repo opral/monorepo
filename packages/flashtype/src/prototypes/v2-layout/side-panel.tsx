@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useDroppable } from "@dnd-kit/core";
+import { useMemo } from "react";
 import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
 import type {
 	PanelSide,
@@ -66,14 +67,32 @@ export function SidePanel({
 		data: { panel: side },
 	});
 
-	const availableViews = VIEW_DEFINITIONS.filter(
-		(view) => !panel.views.some((entry) => entry.viewKey === view.key),
-	);
+	const panelViewKeySignature = useMemo(() => {
+		if (panel.views.length === 0) {
+			return "";
+		}
+		const keys = panel.views.map((entry) => entry.viewKey).sort();
+		return keys.join("|");
+	}, [panel.views]);
+
+	const availableViews = useMemo(() => {
+		if (panelViewKeySignature === "") {
+			return VIEW_DEFINITIONS;
+		}
+		const activeKeys = new Set(panelViewKeySignature.split("|"));
+		return VIEW_DEFINITIONS.filter((view) => !activeKeys.has(view.key));
+	}, [panelViewKeySignature]);
 	const canAddMoreViews = availableViews.length > 0;
 
-	const contextWithFocus: ViewContext | undefined = viewContext
-		? { ...viewContext, isPanelFocused: isFocused }
-		: { isPanelFocused: isFocused };
+	const contextWithFocus: ViewContext | undefined = useMemo(() => {
+		if (!viewContext) {
+			return { isPanelFocused: isFocused };
+		}
+		if (viewContext.isPanelFocused === isFocused) {
+			return viewContext;
+		}
+		return { ...viewContext, isPanelFocused: isFocused };
+	}, [viewContext, isFocused]);
 
 	return (
 		<aside

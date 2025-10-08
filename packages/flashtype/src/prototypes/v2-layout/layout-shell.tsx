@@ -170,7 +170,11 @@ export function V2LayoutShell() {
 	useEffect(() => {
 		if (!uiStateKV) return;
 		const serialized = JSON.stringify(uiStateKV);
-		if (serialized === lastPersistedRef.current) {
+		if (
+			serialized === lastPersistedRef.current ||
+			serialized === pendingPersistRef.current
+		) {
+			lastPersistedRef.current = serialized;
 			if (pendingPersistRef.current === serialized) {
 				pendingPersistRef.current = null;
 			}
@@ -178,11 +182,35 @@ export function V2LayoutShell() {
 		}
 		hydratingRef.current = true;
 		lastPersistedRef.current = serialized;
-		setLeftPanel(hydratePanel(uiStateKV.panels.left));
-		setCentralPanel(hydratePanel(uiStateKV.panels.central));
-		setRightPanel(hydratePanel(uiStateKV.panels.right));
-		setFocusedPanel(uiStateKV.focusedPanel);
-		setPanelSizes(normalizeLayoutSizes(uiStateKV.layout?.sizes));
+		setLeftPanel((prev) =>
+			prev === uiStateKV.panels.left
+				? prev
+				: hydratePanel(uiStateKV.panels.left),
+		);
+		setCentralPanel((prev) =>
+			prev === uiStateKV.panels.central
+				? prev
+				: hydratePanel(uiStateKV.panels.central),
+		);
+		setRightPanel((prev) =>
+			prev === uiStateKV.panels.right
+				? prev
+				: hydratePanel(uiStateKV.panels.right),
+		);
+		setFocusedPanel((prev) =>
+			prev === uiStateKV.focusedPanel ? prev : uiStateKV.focusedPanel,
+		);
+		setPanelSizes((prev) => {
+			const next = normalizeLayoutSizes(uiStateKV.layout?.sizes);
+			if (
+				prev.left === next.left &&
+				prev.central === next.central &&
+				prev.right === next.right
+			) {
+				return prev;
+			}
+			return next;
+		});
 		queueMicrotask(() => {
 			hydratingRef.current = false;
 			if (pendingPersistRef.current === serialized) {
@@ -210,7 +238,15 @@ export function V2LayoutShell() {
 			return;
 		}
 		pendingPersistRef.current = serialized;
-		void setUiStateKV(nextState);
+		const timeoutId = setTimeout(() => {
+			void setUiStateKV(nextState);
+		}, 200);
+		return () => {
+			clearTimeout(timeoutId);
+			if (pendingPersistRef.current === serialized) {
+				pendingPersistRef.current = null;
+			}
+		};
 	}, [
 		leftPanel,
 		centralPanel,
@@ -220,45 +256,60 @@ export function V2LayoutShell() {
 		setUiStateKV,
 	]);
 
-	const panels = useMemo(
-		() => ({ left: leftPanel, central: centralPanel, right: rightPanel }),
-		[leftPanel, centralPanel, rightPanel],
+	const setPanelState = useCallback(
+		(
+			side: PanelSide,
+			reducer: (state: PanelState) => PanelState,
+			options: { focus?: boolean } = {},
+		) => {
+			const applyReducer = (prev: PanelState) =>
+				hydratePanel(reducer(hydratePanel(prev)));
+			if (side === "left") {
+				setLeftPanel(applyReducer);
+			} else if (side === "central") {
+				setCentralPanel(applyReducer);
+			} else {
+				setRightPanel(applyReducer);
+			}
+			if (options.focus) {
+				setFocusedPanel((prev) => (prev === side ? prev : side));
+			}
+		},
+		[setLeftPanel, setCentralPanel, setRightPanel, setFocusedPanel],
 	);
 
-	const setPanelState = (
-		side: PanelSide,
-		reducer: (state: PanelState) => PanelState,
-		options: { focus?: boolean } = {},
-	) => {
-		const applyReducer = (prev: PanelState) =>
-			hydratePanel(reducer(hydratePanel(prev)));
-		if (side === "left") {
-			setLeftPanel(applyReducer);
-		} else if (side === "central") {
-			setCentralPanel(applyReducer);
-		} else {
-			setRightPanel(applyReducer);
-		}
-		if (options.focus) {
-			setFocusedPanel(side);
-		}
-	};
+	const handleAddView = useCallback(
+		(side: PanelSide, viewKey: ViewKey) => {
+			setPanelState(
+				side,
+				(panel) => {
+					const next: ViewInstance = {
+						instanceKey: createViewInstanceKey(viewKey),
+						viewKey,
+					};
+					return {
+						views: [...panel.views, next],
+						activeInstanceKey: next.instanceKey,
+					};
+				},
+				{ focus: true },
+			);
+		},
+		[setPanelState],
+	);
 
-	const focusPanel = (side: PanelSide) => setFocusedPanel(side);
-
-	const hydratedLeft = hydratePanel(panels.left);
-	const hydratedCentral = hydratePanel(panels.central);
-	const hydratedRight = hydratePanel(panels.right);
+	const focusPanel = useCallback((side: PanelSide) => {
+		setFocusedPanel((prev) => (prev === side ? prev : side));
+	}, []);
 
 	const [activeId, setActiveId] = useState<string | null>(null);
 
-	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: {
-				distance: 8,
-			},
-		}),
+	const pointerSensorOptions = useMemo(
+		() => ({ activationConstraint: { distance: 8 } }),
+		[],
 	);
+	const pointerSensor = useSensor(PointerSensor, pointerSensorOptions);
+	const sensors = useSensors(pointerSensor);
 
 	const handleLayoutChange = useCallback((sizes: number[]) => {
 		if (sizes.length !== 3) return;
@@ -279,54 +330,61 @@ export function V2LayoutShell() {
 		});
 	}, []);
 
-	const handleDragStart = (event: DragStartEvent) => {
+	const handleDragStart = useCallback((event: DragStartEvent) => {
 		setActiveId(event.active.id as string);
-	};
+	}, []);
 
-	const handleDragEnd = (event: DragEndEvent) => {
-		setActiveId(null);
-		const { active, over } = event;
+	const handleDragEnd = useCallback(
+		(event: DragEndEvent) => {
+			setActiveId(null);
+			const { active, over } = event;
 
-		if (!over || active.id === over.id) return;
+			if (!over || active.id === over.id) return;
 
-		// Parse drag data
-		const dragData = active.data.current as
-			| { instanceKey: string; viewKey: ViewKey; fromPanel: PanelSide }
-			| undefined;
-		const dropData = over.data.current as { panel: PanelSide } | undefined;
+			// Parse drag data
+			const dragData = active.data.current as
+				| { instanceKey: string; viewKey: ViewKey; fromPanel: PanelSide }
+				| undefined;
+			const dropData = over.data.current as { panel: PanelSide } | undefined;
 
-		if (!dragData || !dropData) return;
+			if (!dragData || !dropData) return;
 
-		const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
-		const { panel: toPanel } = dropData;
-		const sourcePanel = panels[fromPanel];
-		const movedView = sourcePanel.views.find(
-			(entry) => entry.instanceKey === instanceKey,
-		);
-		if (!movedView) return;
+			const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
+			const { panel: toPanel } = dropData;
 
-		// Remove from source panel
-		setPanelState(fromPanel, (panel) => ({
-			views: panel.views.filter((entry) => entry.instanceKey !== instanceKey),
-			activeInstanceKey:
-				panel.activeInstanceKey === instanceKey
-					? null
-					: panel.activeInstanceKey,
-		}));
+			let movedView: ViewInstance | null = null;
 
-		// Add to target panel
-		setPanelState(
-			toPanel,
-			(panel) => {
-				const newView = movedView;
-				return {
-					views: [...panel.views, newView],
-					activeInstanceKey: newView.instanceKey,
-				};
-			},
-			{ focus: true },
-		);
-	};
+			setPanelState(fromPanel, (panel) => {
+				const view = panel.views.find(
+					(entry) => entry.instanceKey === instanceKey,
+				);
+				if (!view) {
+					return panel;
+				}
+				movedView = view;
+				const remaining = panel.views.filter(
+					(entry) => entry.instanceKey !== instanceKey,
+				);
+				const nextActive =
+					panel.activeInstanceKey === instanceKey
+						? (remaining[remaining.length - 1]?.instanceKey ?? null)
+						: panel.activeInstanceKey;
+				return { views: remaining, activeInstanceKey: nextActive };
+			});
+
+			if (!movedView) return;
+
+			setPanelState(
+				toPanel,
+				(panel) => ({
+					views: [...panel.views, movedView as ViewInstance],
+					activeInstanceKey: (movedView as ViewInstance).instanceKey,
+				}),
+				{ focus: true },
+			);
+		},
+		[setPanelState],
+	);
 
 	const activeDragData = activeId
 		? [
@@ -339,136 +397,239 @@ export function V2LayoutShell() {
 		? VIEW_MAP.get(activeDragData.viewKey)
 		: null;
 
-	const handleOpenFile = (
-		filePath: string,
-		options?: {
-			readonly focus?: boolean;
-		},
-	) => {
-		const shouldFocus = options?.focus ?? true;
-		const existingFileView = hydratedCentral.views.find(
-			(view) => view.metadata?.filePath === filePath,
-		);
-
-		if (existingFileView) {
-			setPanelState(
-				"central",
-				(panel) => activatePanelView(panel, existingFileView.instanceKey),
-				{ focus: shouldFocus },
-			);
-		} else {
-			const encodedLabel =
-				filePath.split("/").filter(Boolean).pop() ?? filePath;
-			const label = decodeURIComponentSafe(encodedLabel);
-			const newView: ViewInstance = {
-				instanceKey: createViewInstanceKey("file-content"),
-				viewKey: "file-content" as ViewKey,
-				isPending: true,
-				metadata: {
-					filePath,
-					label,
-				},
-			};
-
-			setPanelState("central", (panel) => upsertPendingView(panel, newView), {
-				focus: shouldFocus,
-			});
-		}
-	};
-
-	const handleOpenCommit = (
-		checkpointId: string,
-		label: string,
-		options?: {
-			readonly focus?: boolean;
-		},
-	) => {
-		const shouldFocus = options?.focus ?? true;
-		const existingCommitView = hydratedCentral.views.find(
-			(view) => view.metadata?.checkpointId === checkpointId,
-		);
-
-		if (existingCommitView) {
-			setPanelState(
-				"central",
-				(panel) => activatePanelView(panel, existingCommitView.instanceKey),
-				{ focus: shouldFocus },
-			);
-		} else {
-			const newView: ViewInstance = {
-				instanceKey: createViewInstanceKey("commit"),
-				viewKey: "commit" as ViewKey,
-				isPending: true,
-				metadata: {
-					checkpointId,
-					label,
-				},
-			};
-
-			setPanelState("central", (panel) => upsertPendingView(panel, newView), {
-				focus: shouldFocus,
-			});
-		}
-	};
-
-	const handleOpenDiff = (
-		fileId: string,
-		filePath: string,
-		options?: {
-			readonly focus?: boolean;
-		},
-	) => {
-		const shouldFocus = options?.focus ?? true;
-		const existingDiffView = hydratedCentral.views.find(
-			(view) => view.viewKey === "diff" && view.metadata?.fileId === fileId,
-		);
-		const diffLabel = diffLabelFromPath(filePath) ?? filePath;
-		const diffConfig = createWorkingVsCheckpointDiffConfig(fileId, diffLabel);
-
-		if (existingDiffView) {
+	const handleOpenFile = useCallback(
+		(
+			filePath: string,
+			options?: {
+				readonly focus?: boolean;
+			},
+		) => {
+			const shouldFocus = options?.focus ?? true;
 			setPanelState(
 				"central",
 				(panel) => {
-					const nextViews = panel.views.map((entry) =>
-						entry.instanceKey === existingDiffView.instanceKey
-							? {
-									...entry,
-									isPending: false,
-									metadata: {
-										fileId,
-										filePath,
-										label: diffLabel,
-										diff: diffConfig,
-									},
-								}
-							: entry,
+					const existingFileView = panel.views.find(
+						(view) => view.metadata?.filePath === filePath,
 					);
-					return {
-						views: nextViews,
-						activeInstanceKey: existingDiffView.instanceKey,
+					if (existingFileView) {
+						return activatePanelView(panel, existingFileView.instanceKey);
+					}
+					const encodedLabel =
+						filePath.split("/").filter(Boolean).pop() ?? filePath;
+					const label = decodeURIComponentSafe(encodedLabel);
+					const newView: ViewInstance = {
+						instanceKey: createViewInstanceKey("file-content"),
+						viewKey: "file-content" as ViewKey,
+						isPending: true,
+						metadata: {
+							filePath,
+							label,
+						},
 					};
+					return upsertPendingView(panel, newView);
 				},
 				{ focus: shouldFocus },
 			);
-			return;
-		}
+		},
+		[setPanelState],
+	);
 
-		const newView: ViewInstance = {
-			instanceKey: createViewInstanceKey("diff"),
-			viewKey: "diff",
-			isPending: true,
-			metadata: {
-				fileId,
-				filePath,
-				label: diffLabel,
-				diff: diffConfig,
+	const handleOpenCommit = useCallback(
+		(
+			checkpointId: string,
+			label: string,
+			options?: {
+				readonly focus?: boolean;
 			},
-		};
+		) => {
+			const shouldFocus = options?.focus ?? true;
+			setPanelState(
+				"central",
+				(panel) => {
+					const existingCommitView = panel.views.find(
+						(view) => view.metadata?.checkpointId === checkpointId,
+					);
+					if (existingCommitView) {
+						return activatePanelView(panel, existingCommitView.instanceKey);
+					}
+					const newView: ViewInstance = {
+						instanceKey: createViewInstanceKey("commit"),
+						viewKey: "commit" as ViewKey,
+						isPending: true,
+						metadata: {
+							checkpointId,
+							label,
+						},
+					};
+					return upsertPendingView(panel, newView);
+				},
+				{ focus: shouldFocus },
+			);
+		},
+		[setPanelState],
+	);
 
-		setPanelState("central", (panel) => upsertPendingView(panel, newView), {
-			focus: shouldFocus,
-		});
-	};
+	const handleOpenDiff = useCallback(
+		(
+			fileId: string,
+			filePath: string,
+			options?: {
+				readonly focus?: boolean;
+			},
+		) => {
+			const shouldFocus = options?.focus ?? true;
+			setPanelState(
+				"central",
+				(panel) => {
+					const diffLabel = diffLabelFromPath(filePath) ?? filePath;
+					const diffConfig = createWorkingVsCheckpointDiffConfig(
+						fileId,
+						diffLabel,
+					);
+					const existingDiffView = panel.views.find(
+						(view) =>
+							view.viewKey === "diff" && view.metadata?.fileId === fileId,
+					);
+					if (existingDiffView) {
+						const nextViews = panel.views.map((entry) =>
+							entry.instanceKey === existingDiffView.instanceKey
+								? {
+										...entry,
+										isPending: false,
+										metadata: {
+											fileId,
+											filePath,
+											label: diffLabel,
+											diff: diffConfig,
+										},
+									}
+								: entry,
+						);
+						return {
+							views: nextViews,
+							activeInstanceKey: existingDiffView.instanceKey,
+						};
+					}
+					const newView: ViewInstance = {
+						instanceKey: createViewInstanceKey("diff"),
+						viewKey: "diff",
+						isPending: true,
+						metadata: {
+							fileId,
+							filePath,
+							label: diffLabel,
+							diff: diffConfig,
+						},
+					};
+					return upsertPendingView(panel, newView);
+				},
+				{ focus: shouldFocus },
+			);
+		},
+		[setPanelState],
+	);
+
+	const sharedViewContext = useMemo(
+		() => ({
+			onOpenFile: handleOpenFile,
+			onOpenCommit: handleOpenCommit,
+			onOpenDiff: handleOpenDiff,
+		}),
+		[handleOpenFile, handleOpenCommit, handleOpenDiff],
+	);
+
+	const isLeftFocused = focusedPanel === "left";
+	const isCentralFocused = focusedPanel === "central";
+	const isRightFocused = focusedPanel === "right";
+
+	const addViewOnLeft = useCallback(
+		(viewKey: ViewKey) => handleAddView("left", viewKey),
+		[handleAddView],
+	);
+
+	const addViewOnRight = useCallback(
+		(viewKey: ViewKey) => handleAddView("right", viewKey),
+		[handleAddView],
+	);
+
+	const handleSelectLeftView = useCallback(
+		(instanceKey: string) =>
+			setPanelState(
+				"left",
+				(panel) => ({
+					views: panel.views,
+					activeInstanceKey: instanceKey,
+				}),
+				{ focus: true },
+			),
+		[setPanelState],
+	);
+
+	const handleSelectCentralView = useCallback(
+		(instanceKey: string) =>
+			setPanelState(
+				"central",
+				(panel) => activatePanelView(panel, instanceKey),
+				{ focus: true },
+			),
+		[setPanelState],
+	);
+
+	const handleSelectRightView = useCallback(
+		(instanceKey: string) =>
+			setPanelState(
+				"right",
+				(panel) => ({
+					views: panel.views,
+					activeInstanceKey: instanceKey,
+				}),
+				{ focus: true },
+			),
+		[setPanelState],
+	);
+
+	const handleRemoveView = useCallback(
+		(side: PanelSide, instanceKey: string) =>
+			setPanelState(
+				side,
+				(panel) => {
+					const views = panel.views.filter(
+						(entry) => entry.instanceKey !== instanceKey,
+					);
+					const nextActive =
+						panel.activeInstanceKey === instanceKey
+							? (views[views.length - 1]?.instanceKey ?? null)
+							: panel.activeInstanceKey;
+					return { views, activeInstanceKey: nextActive };
+				},
+				{ focus: true },
+			),
+		[setPanelState],
+	);
+
+	const leftViewContext = useMemo(
+		() => ({
+			...sharedViewContext,
+			isPanelFocused: isLeftFocused,
+		}),
+		[sharedViewContext, isLeftFocused],
+	);
+
+	const centralViewContext = useMemo(
+		() => ({
+			...sharedViewContext,
+			isPanelFocused: isCentralFocused,
+		}),
+		[sharedViewContext, isCentralFocused],
+	);
+
+	const rightViewContext = useMemo(
+		() => ({
+			...sharedViewContext,
+			isPanelFocused: isRightFocused,
+		}),
+		[sharedViewContext, isRightFocused],
+	);
 
 	return (
 		<DndContext
@@ -484,56 +645,15 @@ export function V2LayoutShell() {
 							<SidePanel
 								side="left"
 								title="Navigator"
-								panel={hydratedLeft}
+								panel={leftPanel}
 								isFocused={focusedPanel === "left"}
 								onFocusPanel={focusPanel}
-								onSelectView={(instanceKey) =>
-									setPanelState(
-										"left",
-										(panel) => ({
-											views: panel.views,
-											activeInstanceKey: instanceKey,
-										}),
-										{ focus: true },
-									)
-								}
-								onAddView={(viewKey) =>
-									setPanelState(
-										"left",
-										(panel) => {
-											const next: ViewInstance = {
-												instanceKey: createViewInstanceKey(viewKey),
-												viewKey,
-											};
-											return {
-												views: [...panel.views, next],
-												activeInstanceKey: next.instanceKey,
-											};
-										},
-										{ focus: true },
-									)
-								}
+								onSelectView={handleSelectLeftView}
+								onAddView={addViewOnLeft}
 								onRemoveView={(instanceKey) =>
-									setPanelState(
-										"left",
-										(panel) => {
-											const views = panel.views.filter(
-												(entry) => entry.instanceKey !== instanceKey,
-											);
-											const nextActive =
-												panel.activeInstanceKey === instanceKey
-													? (views[views.length - 1]?.instanceKey ?? null)
-													: panel.activeInstanceKey;
-											return { views, activeInstanceKey: nextActive };
-										},
-										{ focus: true },
-									)
+									handleRemoveView("left", instanceKey)
 								}
-								viewContext={{
-									onOpenFile: handleOpenFile,
-									onOpenCommit: handleOpenCommit,
-									onOpenDiff: handleOpenDiff,
-								}}
+								viewContext={leftViewContext}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
@@ -541,31 +661,12 @@ export function V2LayoutShell() {
 						</PanelResizeHandle>
 						<Panel defaultSize={panelSizes.central} minSize={30}>
 							<CentralPanel
-								panel={hydratedCentral}
+								panel={centralPanel}
 								isFocused={focusedPanel === "central"}
 								onFocusPanel={focusPanel}
-								onSelectView={(instanceKey) =>
-									setPanelState(
-										"central",
-										(panel) => activatePanelView(panel, instanceKey),
-										{ focus: true },
-									)
-								}
+								onSelectView={handleSelectCentralView}
 								onRemoveView={(instanceKey) =>
-									setPanelState(
-										"central",
-										(panel) => {
-											const views = panel.views.filter(
-												(entry) => entry.instanceKey !== instanceKey,
-											);
-											const nextActive =
-												panel.activeInstanceKey === instanceKey
-													? (views[views.length - 1]?.instanceKey ?? null)
-													: panel.activeInstanceKey;
-											return { views, activeInstanceKey: nextActive };
-										},
-										{ focus: true },
-									)
+									handleRemoveView("central", instanceKey)
 								}
 								onFinalizePendingView={(instanceKey) =>
 									setPanelState(
@@ -574,11 +675,7 @@ export function V2LayoutShell() {
 										{ focus: true },
 									)
 								}
-								viewContext={{
-									onOpenFile: handleOpenFile,
-									onOpenCommit: handleOpenCommit,
-									onOpenDiff: handleOpenDiff,
-								}}
+								viewContext={centralViewContext}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
@@ -588,56 +685,15 @@ export function V2LayoutShell() {
 							<SidePanel
 								side="right"
 								title="Secondary"
-								panel={hydratedRight}
+								panel={rightPanel}
 								isFocused={focusedPanel === "right"}
 								onFocusPanel={focusPanel}
-								onSelectView={(instanceKey) =>
-									setPanelState(
-										"right",
-										(panel) => ({
-											views: panel.views,
-											activeInstanceKey: instanceKey,
-										}),
-										{ focus: true },
-									)
-								}
-								onAddView={(viewKey) =>
-									setPanelState(
-										"right",
-										(panel) => {
-											const next: ViewInstance = {
-												instanceKey: createViewInstanceKey(viewKey),
-												viewKey,
-											};
-											return {
-												views: [...panel.views, next],
-												activeInstanceKey: next.instanceKey,
-											};
-										},
-										{ focus: true },
-									)
-								}
+								onSelectView={handleSelectRightView}
+								onAddView={addViewOnRight}
 								onRemoveView={(instanceKey) =>
-									setPanelState(
-										"right",
-										(panel) => {
-											const views = panel.views.filter(
-												(entry) => entry.instanceKey !== instanceKey,
-											);
-											const nextActive =
-												panel.activeInstanceKey === instanceKey
-													? (views[views.length - 1]?.instanceKey ?? null)
-													: panel.activeInstanceKey;
-											return { views, activeInstanceKey: nextActive };
-										},
-										{ focus: true },
-									)
+									handleRemoveView("right", instanceKey)
 								}
-								viewContext={{
-									onOpenFile: handleOpenFile,
-									onOpenCommit: handleOpenCommit,
-									onOpenDiff: handleOpenDiff,
-								}}
+								viewContext={rightViewContext}
 							/>
 						</Panel>
 					</PanelGroup>

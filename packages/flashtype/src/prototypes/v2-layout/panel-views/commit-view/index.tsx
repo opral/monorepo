@@ -45,10 +45,7 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 	const checkpointId = view?.metadata?.checkpointId;
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
-	const checkpoint = useMemo(
-		() => checkpoints.find((cp) => cp.id === checkpointId),
-		[checkpoints, checkpointId],
-	);
+	const checkpoint = checkpoints.find((cp) => cp.id === checkpointId);
 
 	// Mock file data - replace with actual data from checkpoint
 	const files = useMemo<CommitFile[]>(() => {

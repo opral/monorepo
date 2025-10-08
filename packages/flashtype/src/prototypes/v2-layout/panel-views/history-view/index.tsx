@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
@@ -43,15 +43,11 @@ type HistoryViewProps = {
 export function HistoryView({ context }: HistoryViewProps) {
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
-	const items = useMemo<HistoryCheckpoint[]>(
-		() =>
-			checkpoints.map((cp) => ({
-				id: cp.id,
-				title: deriveTitle(cp.added ?? 0, cp.removed ?? 0),
-				timestampLabel: formatTimestamp(cp.checkpoint_created_at),
-			})),
-		[checkpoints],
-	);
+const items: HistoryCheckpoint[] = checkpoints.map((cp) => ({
+	id: cp.id,
+	title: deriveTitle(cp.added ?? 0, cp.removed ?? 0),
+	timestampLabel: formatTimestamp(cp.checkpoint_created_at),
+}));
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
