@@ -7,7 +7,16 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [react(), TanStackRouterVite(), tailwindcss(), cloudflare()],
+	plugins: [
+		react({
+			babel: {
+				plugins: ["babel-plugin-react-compiler"],
+			},
+		}),
+		TanStackRouterVite(),
+		tailwindcss(),
+		cloudflare(),
+	],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "src"),
