@@ -2,7 +2,6 @@ import type { IToken } from "chevrotain";
 import type { LixEngine } from "../../boot.js";
 import {
 	DELETE,
-	Comma,
 	Dot,
 	QMark,
 	QMarkNumber,
@@ -24,6 +23,7 @@ import {
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
+	collectPointerColumnDescriptors,
 	type RewriteResult,
 } from "./shared.js";
 
@@ -102,7 +102,8 @@ export function rewriteEntityDelete(args: {
 		propertyLowerToActual.set(key.toLowerCase(), key);
 	}
 
-	if (!extractPrimaryKeys(schema)) return null;
+	const primaryKeys = extractPrimaryKeys(schema);
+	if (!primaryKeys) return null;
 
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	if (!isEntityRewriteAllowed(storedSchemaKey)) {
@@ -149,6 +150,22 @@ export function rewriteEntityDelete(args: {
 	const propertyLowerSet = new Set(
 		propertyKeys.map((key) => key.toLowerCase())
 	);
+	const pointerColumnExpressions = new Map<string, string>();
+	const pointerColumns = collectPointerColumnDescriptors({
+		schema,
+		primaryKeys,
+	});
+	for (const pointer of pointerColumns) {
+		for (const matcher of pointer.matchers) {
+			const key = matcher.toLowerCase();
+			if (propertyLowerSet.has(key)) {
+				continue;
+			}
+			if (!pointerColumnExpressions.has(key)) {
+				pointerColumnExpressions.set(key, pointer.expression);
+			}
+		}
+	}
 	const whereClauses: string[] = [];
 	let hasVersionCondition = false;
 
@@ -168,6 +185,12 @@ export function rewriteEntityDelete(args: {
 			);
 			continue;
 		}
+		const pointerExpr = pointerColumnExpressions.get(column);
+		if (pointerExpr) {
+			whereClauses.push(`${pointerExpr} = ${rendered}`);
+			continue;
+		}
+
 		switch (column) {
 			case "lixcol_entity_id":
 				whereClauses.push(`state_all.entity_id = ${rendered}`);

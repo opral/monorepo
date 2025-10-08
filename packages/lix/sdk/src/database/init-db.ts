@@ -97,7 +97,7 @@ export function initDb(args: {
 	// applyEntityDatabaseSchema({ engine: engine });
 	// applyChangeSetDatabaseSchema({ engine: engine });
 	// applyCommitDatabaseSchema({ engine: engine });
-	applyStoredSchemaDatabaseSchema({ engine: engine });
+	// applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
 	applyAccountDatabaseSchema({ engine: engine });
 	// applyKeyValueDatabaseSchema({ engine: engine });

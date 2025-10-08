@@ -709,9 +709,7 @@ function createBootstrapChanges(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
-				key: schema["x-lix-key"],
-				version: schema["x-lix-version"],
-				value: JSON.stringify(schema),
+				value: schema,
 			} satisfies LixStoredSchema,
 			created_at: args.created_at,
 		});
@@ -732,9 +730,7 @@ function createBootstrapChanges(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
-				key: schema["x-lix-key"],
-				version: schema["x-lix-version"],
-				value: JSON.stringify(schema),
+				value: schema,
 			} satisfies LixStoredSchema,
 			created_at: args.created_at,
 		});

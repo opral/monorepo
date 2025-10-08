@@ -1,5 +1,6 @@
 import { Ajv } from "ajv";
 import { LixSchemaDefinition } from "./definition.js";
+import { parseJsonPointer } from "./json-pointer.js";
 
 const ajv = new Ajv({
 	strict: true,

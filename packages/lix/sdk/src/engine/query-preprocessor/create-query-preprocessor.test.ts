@@ -170,11 +170,11 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		const sql =
-			'SELECT "key", "version", "value" FROM "stored_schema" WHERE "key" = ? AND "version" = ? LIMIT ?';
+			'SELECT "value" FROM "stored_schema" WHERE "lixcol_entity_id" = ? LIMIT ?';
 
 		const result = preprocess({
 			sql,
-			parameters: ["schema", "1.0", 1],
+			parameters: ["lix_stored_schema~1.0", 1],
 		});
 
 		expect(result.sql).toContain("WITH RECURSIVE");

@@ -199,6 +199,113 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	await lix.close();
 });
 
+test("stored_schema insert uses pointer primary key components", async () => {
+	const lix = await openLix({});
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+
+	const schema = {
+		"x-lix-key": "pointer_insert_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+
+	const rewrite = preprocess({
+		sql: "INSERT INTO stored_schema (value) VALUES (?)",
+		parameters: [schema],
+	});
+
+	expect(rewrite?.sql).toMatch(/INSERT INTO state_all/);
+
+	lix.engine!.executeSync({
+		sql: rewrite!.sql,
+		parameters: rewrite!.parameters as any[],
+	});
+
+	const inserted = await lix.db
+		.selectFrom("state_all")
+		.select(["entity_id", "schema_key", "snapshot_content"])
+		.where("schema_key", "=", "lix_stored_schema")
+		.where(
+			"entity_id",
+			"=",
+			`${schema["x-lix-key"]}~${schema["x-lix-version"]}`
+		)
+		.executeTakeFirst();
+
+	expect(inserted?.entity_id).toBe(
+		`${schema["x-lix-key"]}~${schema["x-lix-version"]}`
+	);
+	expect(inserted?.snapshot_content).toEqual({ value: schema });
+
+	await lix.close();
+});
+
+test("pointer primary key schema uses pointer components for entity id", async () => {
+	const lix = await openLix({});
+
+	const pointerSchema = {
+		"x-lix-key": "pointer_entity_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/payload/id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			payload: {
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					value: { type: "string" },
+				},
+				required: ["id", "value"],
+				additionalProperties: false,
+			},
+		},
+		required: ["payload"],
+		additionalProperties: false,
+	} as const;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: pointerSchema })
+		.execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+
+	const rewritten = preprocess({
+		sql: "INSERT INTO pointer_entity_schema (payload) VALUES (?)",
+		parameters: [{ id: "nested-id", value: "payload-value" }],
+	});
+
+	expect(rewritten?.sql).toContain("INSERT INTO state_all");
+
+	lix.engine!.executeSync({
+		sql: rewritten!.sql,
+		parameters: rewritten!.parameters as any[],
+	});
+
+	const stateRow = await lix.db
+		.selectFrom("state_all")
+		.select(["entity_id", "snapshot_content"])
+		.where("schema_key", "=", "pointer_entity_schema")
+		.executeTakeFirstOrThrow();
+
+	expect(stateRow.entity_id).toBe("nested-id");
+	expect(stateRow.snapshot_content).toEqual({
+		payload: { id: "nested-id", value: "payload-value" },
+	});
+
+	await lix.close();
+});
+
 test("preserves SQL expression parameters during insert rewrite", async () => {
 	const lix = await openLix({});
 	const schema = {

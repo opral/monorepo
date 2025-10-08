@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 import type { LixPlugin } from "../../plugin/lix-plugin.js";
+import { sql } from "kysely";
 
 test("storeDetectedChangeSchema stores new schema on first use", async () => {
 	const lix = await openLix({});
@@ -25,9 +26,17 @@ test("storeDetectedChangeSchema stores new schema on first use", async () => {
 	// Check that schema was stored
 	const storedSchema = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "=", "test_schema")
-		.where("version", "=", "1.0")
-		.selectAll()
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"test_schema"
+		)
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-version"')`,
+			"=",
+			"1.0"
+		)
 		.execute();
 
 	expect(storedSchema).toHaveLength(1);
@@ -64,8 +73,12 @@ test("storeDetectedChangeSchema allows identical schema to be used again", async
 	// Should only have one schema stored
 	const storedSchemas = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "=", "test_schema_2")
-		.selectAll()
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"test_schema_2"
+		)
 		.execute();
 
 	expect(storedSchemas).toHaveLength(1);
@@ -151,12 +164,18 @@ test("storeDetectedChangeSchema allows different schemas with different versions
 	// Should have both schemas stored
 	const storedSchemas = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "=", "test_schema_4")
-		.selectAll()
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"test_schema_4"
+		)
 		.execute();
 
 	expect(storedSchemas).toHaveLength(2);
-	expect(storedSchemas.map((s) => s.version).sort()).toEqual(["1.0", "2.0"]);
+	expect(
+		storedSchemas.map((s) => (s.value as any)["x-lix-version"]).sort()
+	).toEqual(["1.0", "2.0"]);
 });
 
 test("storeDetectedChangeSchema enforces strict JSON determinism", async () => {
@@ -240,9 +259,17 @@ test("integration with plugin detectChanges", async () => {
 	// Check that schema was automatically stored
 	const storedSchema = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "=", "integration_test_schema")
-		.where("version", "=", "1.0")
-		.selectAll()
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"integration_test_schema"
+		)
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-version"')`,
+			"=",
+			"1.0"
+		)
 		.execute();
 
 	expect(storedSchema).toHaveLength(1);

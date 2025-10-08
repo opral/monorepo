@@ -6,34 +6,7 @@ import type {
 } from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
-
-const decodePointerSegment = (segment: string): string =>
-	segment.replace(/~1/g, "/").replace(/~0/g, "~");
-
-const normalizeSchemaPath = (value: string): string => {
-	if (typeof value !== "string") {
-		return "";
-	}
-	if (!value.startsWith("/")) {
-		return value;
-	}
-	const segments = value
-		.slice(1)
-		.split("/")
-		.map(decodePointerSegment);
-	return segments[0] ?? "";
-};
-
-const normalizeSchemaPathArray = (
-	values?: readonly string[] | string[]
-): string[] => {
-	if (!Array.isArray(values)) {
-		return [];
-	}
-	return values
-		.map((value) => normalizeSchemaPath(value))
-		.filter((value): value is string => value.length > 0);
-};
+import { normalizePointerProperties } from "../schema-definition/json-pointer.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
@@ -385,7 +358,7 @@ function createSingleEntityAllView(args: {
 	validation?: ValidationCallbacks;
 	readOnly?: boolean;
 }): void {
-	const primaryKeys = normalizeSchemaPathArray(
+	const primaryKeys = normalizePointerProperties(
 		args.schema["x-lix-primary-key"]
 	);
 	if (primaryKeys.length === 0) {

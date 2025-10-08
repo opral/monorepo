@@ -78,8 +78,7 @@ test("newLixFile creates all schema definitions", async () => {
 	// Check that all schemas from LixSchemaViewMap are created
 	const storedSchemas = await lix.db
 		.selectFrom("stored_schema")
-		.orderBy("key")
-		.selectAll()
+		.select(["value", "lixcol_inherited_from_version_id"])
 		.execute();
 
 	const expectedSchemaCount = Object.keys(LixSchemaViewMap).length;
@@ -88,10 +87,10 @@ test("newLixFile creates all schema definitions", async () => {
 	// Check that each schema from LixSchemaViewMap exists
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		const storedSchema = storedSchemas.find(
-			(s) => s.key === schema["x-lix-key"]
+			(row) => row.value["x-lix-key"] === schema["x-lix-key"]
 		);
 		expect(storedSchema).toBeDefined();
-		expect(storedSchema?.version).toBe(schema["x-lix-version"]);
+		expect(storedSchema?.value["x-lix-version"]).toBe(schema["x-lix-version"]);
 		expect(storedSchema?.lixcol_inherited_from_version_id).toBe("global");
 
 		// Verify the stored value is valid JSON and matches the schema

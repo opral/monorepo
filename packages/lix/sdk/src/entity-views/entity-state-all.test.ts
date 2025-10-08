@@ -451,7 +451,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		// Store the test schema
 		await lix.db
 			.insertInto("stored_schema")
-			.values({ key: "test_entity", value: testSchema as any })
+			.values({ value: testSchema })
 			.execute();
 
 		createEntityStateAllView({

@@ -1,4 +1,5 @@
 import type { LixEngine } from "../../boot.js";
+import { collectPointerColumnDescriptors } from "./shared.js";
 
 type CachedSelects = {
 	signature: string;
@@ -167,7 +168,7 @@ function createActiveSelect(args: {
 }): string {
 	const { schema, properties } = args;
 	const expressions = [
-		...buildPropertyExpressions(properties),
+		...buildPropertyExpressions({ schema, properties }),
 		"entity_id AS lixcol_entity_id",
 		"schema_key AS lixcol_schema_key",
 		"file_id AS lixcol_file_id",
@@ -190,7 +191,7 @@ function createAllSelect(args: {
 }): string {
 	const { schema, properties } = args;
 	const expressions = [
-		...buildPropertyExpressions(properties),
+		...buildPropertyExpressions({ schema, properties }),
 		"entity_id AS lixcol_entity_id",
 		"schema_key AS lixcol_schema_key",
 		"file_id AS lixcol_file_id",
@@ -214,7 +215,7 @@ function createHistorySelect(args: {
 }): string {
 	const { schema, properties } = args;
 	const expressions = [
-		...buildPropertyExpressions(properties),
+		...buildPropertyExpressions({ schema, properties }),
 		"entity_id AS lixcol_entity_id",
 		"schema_key AS lixcol_schema_key",
 		"file_id AS lixcol_file_id",
@@ -230,11 +231,31 @@ function createHistorySelect(args: {
 	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_history\nWHERE schema_key = '${schema["x-lix-key"]}'`;
 }
 
-function buildPropertyExpressions(properties: string[]): string[] {
-	return properties.map(
-		(prop) =>
-			`json_extract(snapshot_content, '$.${prop}') AS ${escapeIdentifier(prop)}`
+function buildPropertyExpressions(args: {
+	schema: StoredSchemaDefinition;
+	properties: string[];
+}): string[] {
+	const expressions: string[] = [];
+	const propertyLower = new Set(
+		args.properties.map((prop) => prop.toLowerCase())
 	);
+	const pointerColumns = collectPointerColumnDescriptors({
+		schema: args.schema,
+	});
+	for (const pointer of pointerColumns) {
+		if (propertyLower.has(pointer.alias.toLowerCase())) {
+			continue;
+		}
+		expressions.push(
+			`${pointer.expression} AS ${escapeIdentifier(pointer.alias)}`
+		);
+	}
+	for (const prop of args.properties) {
+		expressions.push(
+			`json_extract(snapshot_content, '$.${prop}') AS ${escapeIdentifier(prop)}`
+		);
+	}
+	return expressions;
 }
 
 function escapeIdentifier(identifier: string): string {

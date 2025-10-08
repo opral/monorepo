@@ -143,7 +143,6 @@ describe("change_set_element", () => {
 		await lix.db
 			.insertInto("stored_schema")
 			.values({
-				key: "mock_schema",
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
@@ -224,7 +223,6 @@ describe("change_set_element", () => {
 		await lix.db
 			.insertInto("stored_schema")
 			.values({
-				key: "mock_schema",
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
@@ -284,7 +282,6 @@ describe("change_set_element", () => {
 		await lix.db
 			.insertInto("stored_schema")
 			.values({
-				key: "mock_schema",
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
@@ -321,7 +318,6 @@ describe("change_set_element", () => {
 		await lix.db
 			.insertInto("stored_schema")
 			.values({
-				key: "mock_schema",
 				value: {
 					"x-lix-key": "mock_schema",
 					additionalProperties: false,
@@ -383,7 +379,6 @@ describe("change_set_element", () => {
 		await lix.db
 			.insertInto("stored_schema")
 			.values({
-				key: "sk1",
 				value: {
 					"x-lix-key": "sk1",
 					"x-lix-version": "1.0",
@@ -452,7 +447,6 @@ test("should allow the same change to be in multiple change sets", async () => {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({
-			key: "mock_schema",
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",

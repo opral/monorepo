@@ -17,6 +17,7 @@ import {
 	RParen,
 } from "../../sql-parser/tokenizer.js";
 import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
+import { buildSqliteJsonPath } from "../../../schema-definition/json-pointer.js";
 import {
 	baseSchemaKey,
 	classifyViewVariant,
@@ -26,7 +27,9 @@ import {
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
+	collectPointerColumnDescriptors,
 	type RewriteResult,
+	type PrimaryKeyDescriptor,
 	type StoredSchemaDefinition,
 } from "./shared.js";
 
@@ -151,8 +154,7 @@ export function rewriteEntityUpdate(args: {
 		tokens,
 		setIndex,
 		boundaryIndex,
-		parameterState,
-		sql
+		parameterState
 	);
 	if (!assignments) return null;
 
@@ -162,8 +164,7 @@ export function rewriteEntityUpdate(args: {
 					tokens,
 					whereIndex,
 					returningIndex !== -1 ? returningIndex : tokens.length,
-					parameterState,
-					sql
+					parameterState
 				)
 			: [];
 	if (whereIndex !== -1 && !whereConditions) {
@@ -195,29 +196,31 @@ export function rewriteEntityUpdate(args: {
 		});
 	};
 
-	const propertyExpressions = new Map<string, () => string>();
+	const propertyExpressionCache = new Map<string, string>();
 	const getPropertyExpression = (prop: string): string => {
 		const lower = prop.toLowerCase();
-		let factory = propertyExpressions.get(lower);
-		if (!factory) {
-			const assignment = assignments.get(lower);
-			if (assignment) {
-				factory = () => renderValueSource(assignment.value);
-			} else {
-				const expression = `json_extract(snapshot_content, '$.${prop}')`;
-				factory = () => expression;
-			}
-			propertyExpressions.set(lower, factory);
+		const assignment = assignments.get(lower);
+		if (assignment) {
+			return renderValueSource(assignment.value);
 		}
-		return factory();
+		let cached = propertyExpressionCache.get(lower);
+		if (!cached) {
+			cached = `json_extract(snapshot_content, '$.${prop}')`;
+			propertyExpressionCache.set(lower, cached);
+		}
+		return cached;
 	};
 
 	const buildEntityIdExpr = (): { sql: string; params: unknown[] } => {
 		const startLen = params.length;
-		const parts = primaryKeys.map((key) => {
-			const actual = propertyLowerToActual.get(key) ?? key;
-			return getPropertyExpression(actual);
-		});
+		const parts = primaryKeys.map((descriptor) =>
+			renderPrimaryKeySource({
+				descriptor,
+				assignments,
+				renderValueSource,
+				propertyLowerToActual,
+			})
+		);
 		const sql =
 			parts.length === 1 ? parts[0]! : `(${parts.join(" || '~' || ")})`;
 		const addedParams = params.splice(startLen);
@@ -269,7 +272,11 @@ export function rewriteEntityUpdate(args: {
 		},
 	});
 
-	const touchesPrimaryKey = primaryKeys.some((key) => assignments.has(key));
+	const touchesPrimaryKey = primaryKeys.some(
+		(descriptor) =>
+			assignments.has(descriptor.column) ||
+			assignments.has(descriptor.rootColumn)
+	);
 	const assignmentClauses = [
 		`schema_key = ${schemaKeyExpr}`,
 		`file_id = ${
@@ -315,8 +322,25 @@ export function rewriteEntityUpdate(args: {
 	const propertyLowerSet = new Set(
 		propertyKeys.map((key) => key.toLowerCase())
 	);
+	const pointerColumnExpressions = new Map<string, string>();
+	const pointerColumns = collectPointerColumnDescriptors({
+		schema,
+		primaryKeys,
+	});
+	for (const pointer of pointerColumns) {
+		for (const matcher of pointer.matchers) {
+			const key = matcher.toLowerCase();
+			if (propertyLowerSet.has(key)) {
+				continue;
+			}
+			if (!pointerColumnExpressions.has(key)) {
+				pointerColumnExpressions.set(key, pointer.expression);
+			}
+		}
+	}
 	const whereClauses: string[] = [];
 	let hasVersionCondition = false;
+
 	for (const condition of whereConditions ?? []) {
 		const column = condition.name;
 		const valueSql = renderValueSource(condition.value);
@@ -325,6 +349,11 @@ export function rewriteEntityUpdate(args: {
 			whereClauses.push(
 				`json_extract(snapshot_content, '$.${actual}') = ${valueSql}`
 			);
+			continue;
+		}
+		const pointerExpr = pointerColumnExpressions.get(column);
+		if (pointerExpr) {
+			whereClauses.push(`${pointerExpr} = ${valueSql}`);
 			continue;
 		}
 		switch (column) {
@@ -378,8 +407,7 @@ function parseAssignments(
 	tokens: IToken[],
 	setIndex: number,
 	endIndex: number,
-	state: ParameterState,
-	sql: string
+	state: ParameterState
 ): Map<string, ColumnAssignment> | null {
 	if (!isKeyword(tokens[setIndex], "SET")) return null;
 	let index = setIndex + 1;
@@ -418,8 +446,7 @@ function parseWhere(
 	tokens: IToken[],
 	whereIndex: number,
 	endIndex: number,
-	state: ParameterState,
-	sql: string
+	state: ParameterState
 ): Condition[] | null {
 	if (!isKeyword(tokens[whereIndex], "WHERE")) return null;
 	let index = whereIndex + 1;
@@ -597,6 +624,43 @@ function parseExpression(
 		source: { kind: "expression", tokens: captured, params },
 		nextIndex: i,
 	};
+}
+
+function renderPrimaryKeySource(args: {
+	descriptor: PrimaryKeyDescriptor;
+	assignments: Map<string, ColumnAssignment>;
+	renderValueSource: (source: ValueSource) => string;
+	propertyLowerToActual: Map<string, string>;
+}): string {
+	const assignment =
+		args.assignments.get(args.descriptor.column) ??
+		args.assignments.get(args.descriptor.rootColumn);
+	const normalizedPath = normalizePointerPath(
+		args.descriptor,
+		args.propertyLowerToActual
+	);
+	if (assignment) {
+		const base = args.renderValueSource(assignment.value);
+		if (normalizedPath.length <= 1) {
+			return base;
+		}
+		const restPath = buildSqliteJsonPath(normalizedPath.slice(1));
+		return `json_extract(${base}, '${restPath}')`;
+	}
+	const fullPath = buildSqliteJsonPath(normalizedPath);
+	return `json_extract(snapshot_content, '${fullPath}')`;
+}
+
+function normalizePointerPath(
+	descriptor: PrimaryKeyDescriptor,
+	propertyLowerToActual: Map<string, string>
+): string[] {
+	return descriptor.path.map((segment, index) => {
+		if (index === 0) {
+			return propertyLowerToActual.get(segment.toLowerCase()) ?? segment;
+		}
+		return segment;
+	});
 }
 
 function renderExpressionTokens(args: {

@@ -48,7 +48,7 @@ export const LixChangeSetElementSchema = {
 			properties: ["schema_key"],
 			references: {
 				schemaKey: "lix_stored_schema",
-				properties: ["key"],
+				properties: ["/value/x-lix-key"],
 			},
 		},
 	],

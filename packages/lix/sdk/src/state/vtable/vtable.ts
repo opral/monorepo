@@ -1003,9 +1003,9 @@ function getStoredSchema(
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.where("schema_key", "=", "lix_stored_schema")
 			.where(
-				sql`json_extract(snapshot_content, '$.key')`,
+				sql`json_extract(snapshot_content, '$.value."x-lix-key"')`,
 				"=",
-				String(schemaKey)
+				schemaKey
 			)
 			.where("snapshot_content", "is not", null)
 			.limit(1)

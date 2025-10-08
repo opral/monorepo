@@ -12,6 +12,7 @@ import {
 	NULL as NULL_TOKEN,
 } from "../../sql-parser/tokenizer.js";
 import { isJsonType } from "../../../schema-definition/json-type.js";
+import { buildSqliteJsonPath } from "../../../schema-definition/json-pointer.js";
 
 import {
 	baseSchemaKey,
@@ -25,6 +26,7 @@ import {
 	isEntityRewriteAllowed,
 	type RewriteResult,
 	type StoredSchemaDefinition,
+	type PrimaryKeyDescriptor,
 } from "./shared.js";
 
 type ExpressionValue = { kind: "expression"; sql: string };
@@ -125,24 +127,37 @@ export function rewriteEntityInsert(args: {
 	const rowsSql: string[] = [];
 
 	for (const columnMap of columnMaps) {
-		const renderPrimaryKeyExpr = (primaryKey: string): string | null => {
-			const pkValue = columnMap.get(primaryKey);
-			if (pkValue === undefined) {
-				const actualPk = propertyLowerToActual.get(primaryKey) ?? primaryKey;
-				const pkDefinition = (schema.properties ?? {})[actualPk];
-				const defaultExpr = renderDefaultSnapshotValue({
-					definition: pkDefinition,
-					addParam,
-				});
-				if (!defaultExpr || defaultExpr === "NULL") {
-					return null;
+		const renderPrimaryKeyExpr = (
+			descriptor: PrimaryKeyDescriptor
+		): string | null => {
+			const pkValue = columnMap.get(descriptor.column);
+			if (pkValue !== undefined) {
+				if (isExpressionValue(pkValue)) {
+					return pkValue.sql;
 				}
-				return defaultExpr;
+				return addParam(pkValue);
 			}
-			if (isExpressionValue(pkValue)) {
-				return pkValue.sql;
+			const pointerExpr = renderPointerExpression({
+				descriptor,
+				columnMap,
+				addParam,
+			});
+			if (pointerExpr) {
+				return pointerExpr;
 			}
-			return addParam(pkValue);
+			const fallbackKey =
+				propertyLowerToActual.get(descriptor.column) ??
+				propertyLowerToActual.get(descriptor.rootColumn) ??
+				descriptor.column;
+			const pkDefinition = (schema.properties ?? {})[fallbackKey];
+			const defaultExpr = renderDefaultSnapshotValue({
+				definition: pkDefinition,
+				addParam,
+			});
+			if (!defaultExpr || defaultExpr === "NULL") {
+				return null;
+			}
+			return defaultExpr;
 		};
 
 		let entityIdExpr: string;
@@ -486,6 +501,51 @@ function buildSnapshotObjectExpression(args: {
 		entries.push(`'${prop}', ${expression}`);
 	}
 	return `json_object(${entries.join(", ")})`;
+}
+
+function renderPointerExpression(args: {
+	descriptor: PrimaryKeyDescriptor;
+	columnMap: Map<string, unknown>;
+	addParam: (value: unknown) => string;
+}): string | null {
+	const path = args.descriptor.path;
+	if (path.length === 0) {
+		return null;
+	}
+	const root = path[0]!.toLowerCase();
+	const baseValue = args.columnMap.get(root);
+	if (baseValue === undefined) {
+		return null;
+	}
+	const baseExpr = valueToSqlExpression(baseValue, args.addParam);
+	if (!baseExpr) {
+		return null;
+	}
+	if (path.length === 1) {
+		return baseExpr;
+	}
+	const jsonPath = buildSqliteJsonPath(path.slice(1));
+	return `json_extract(${baseExpr}, '${jsonPath}')`;
+}
+
+function valueToSqlExpression(
+	value: unknown,
+	addParam: (value: unknown) => string
+): string | null {
+	if (value === undefined || value === null) {
+		return null;
+	}
+	if (isExpressionValue(value)) {
+		return value.sql;
+	}
+	if (typeof value === "object") {
+		const serialized = jsonStringifyOrNull(value);
+		if (serialized === null) {
+			return null;
+		}
+		return `json(${addParam(serialized)})`;
+	}
+	return addParam(value);
 }
 
 function renderSnapshotValue(args: {

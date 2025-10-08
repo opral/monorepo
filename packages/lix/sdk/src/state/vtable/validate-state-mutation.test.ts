@@ -51,12 +51,12 @@ test("inserts the version and active version schemas to enable validation", asyn
 
 	const result = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "in", [
+		.select("value")
+		.where(sql`json_extract("stored_schema"."value", '$."x-lix-key"')`, "in", [
 			"lix_version_tip",
 			"lix_active_version",
 			"lix_version_descriptor",
 		])
-		.selectAll()
 		.execute();
 
 	expect(result.length).toBe(3);
@@ -1868,7 +1868,11 @@ test("should handle deletion validation for change sets referenced by versions",
 	const changeSetSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_change_set"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should fail - cannot delete change set because version references it
@@ -2442,7 +2446,11 @@ test("should prevent foreign key references to inherited entities from different
 	const threadCommentSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_conversation_message")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_conversation_message"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should FAIL: attempting to create a conversation_message in the active version
@@ -2498,7 +2506,11 @@ test("should prevent change set elements from referencing change sets defined in
 	const changeSetElementSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set_element")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_change_set_element"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should FAIL: attempting to create a change_set_element in the active version
@@ -2806,7 +2818,11 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_commit_edge")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_commit_edge"
+		)
 		.executeTakeFirstOrThrow();
 
 	// Create a few change sets and commits
@@ -2883,7 +2899,11 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_commit_edge")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_commit_edge"
+		)
 		.executeTakeFirstOrThrow();
 
 	// Create a few change sets and commits

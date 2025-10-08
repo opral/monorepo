@@ -1,6 +1,10 @@
 import type { IToken } from "chevrotain";
 import type { LixEngine } from "../../boot.js";
 import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
+import {
+	parseJsonPointer,
+	buildSqliteJsonPath,
+} from "../../../schema-definition/json-pointer.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
@@ -43,6 +47,7 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"immutable_update_schema",
 	"json_update_schema",
 	"expression_update_schema",
+	"pointer_entity_schema",
 	"active_version",
 	"lix_active_version",
 	"label",
@@ -65,6 +70,8 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"lix_account",
 	"active_account",
 	"lix_active_account",
+	"stored_schema",
+	"lix_stored_schema",
 ]);
 
 /**
@@ -173,9 +180,9 @@ function loadStoredSchemaDefinitionForKey(
 		sql: `SELECT json_extract(snapshot_content, '$.value') AS value
 			FROM internal_state_vtable
 			WHERE schema_key = 'lix_stored_schema'
-			AND json_extract(snapshot_content, '$.key') = ?
+			AND json_extract(snapshot_content, '$.value."x-lix-key"') = ?
 			AND snapshot_content IS NOT NULL
-			ORDER BY json_extract(snapshot_content, '$.version') DESC
+			ORDER BY json_extract(snapshot_content, '$.value."x-lix-version"') DESC
 			LIMIT 1`,
 		parameters: [schemaKey],
 	});
@@ -199,31 +206,108 @@ function loadStoredSchemaDefinitionForKey(
 /**
  * Extracts the lower-cased primary key fields from a stored schema.
  */
-export function extractPrimaryKeys(
-	schema: StoredSchemaDefinition
-): string[] | null {
-	const pk = schema["x-lix-primary-key"];
-	if (Array.isArray(pk) && pk.length > 0) {
-		return pk
-			.map((key) => normalizeSchemaPath(key))
-			.filter((key): key is string => key.length > 0)
-			.map((key) => key.toLowerCase());
-	}
-	return null;
+export interface PrimaryKeyDescriptor {
+	readonly column: string;
+	readonly rootColumn: string;
+	readonly path: readonly string[];
 }
 
-function normalizeSchemaPath(raw: string): string {
-	if (typeof raw !== "string") {
-		return "";
+export function extractPrimaryKeys(
+	schema: StoredSchemaDefinition
+): PrimaryKeyDescriptor[] | null {
+	const pk = schema["x-lix-primary-key"];
+	if (!Array.isArray(pk) || pk.length === 0) {
+		return null;
 	}
-	if (!raw.startsWith("/")) {
-		return raw;
+
+	const descriptors: PrimaryKeyDescriptor[] = [];
+	for (const entry of pk) {
+		if (typeof entry !== "string" || entry.length === 0) {
+			return null;
+		}
+		let segments: string[];
+		if (entry.startsWith("/")) {
+			try {
+				segments = parseJsonPointer(entry);
+			} catch {
+				return null;
+			}
+			if (segments.length === 0) {
+				return null;
+			}
+		} else {
+			segments = [entry];
+		}
+		const root = segments[0]!.toLowerCase();
+		const column = segments[segments.length - 1]!.toLowerCase();
+		descriptors.push({
+			column,
+			rootColumn: root,
+			path: segments.map((segment) => segment),
+		});
 	}
-	const segments = raw
-		.slice(1)
-		.split("/")
-		.map((segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~"));
-	return segments[0] ?? "";
+	return descriptors;
+}
+
+export interface PointerColumnDescriptor {
+	readonly alias: string;
+	readonly expression: string;
+	readonly matchers: readonly string[];
+}
+
+/**
+ * Derives column expressions for JSON pointers referenced by a schema's primary key.
+ * These descriptors allow entity view rewrites to match WHERE clauses that target
+ * nested structures using either the pointer name (e.g. `/value/x-lix-key`) or
+ * friendly aliases such as `key`.
+ *
+ * @example
+ * const columns = collectPointerColumnDescriptors({ schema });
+ * // columns[0]?.alias === "key"
+ * // columns[0]?.expression === `json_extract(snapshot_content, '$.value."x-lix-key"')`
+ */
+export function collectPointerColumnDescriptors(args: {
+	schema: StoredSchemaDefinition;
+	primaryKeys?: PrimaryKeyDescriptor[] | null;
+}): PointerColumnDescriptor[] {
+	const primaryKeys = args.primaryKeys ?? extractPrimaryKeys(args.schema);
+	if (!primaryKeys || primaryKeys.length === 0) {
+		return [];
+	}
+
+	const descriptors = new Map<string, PointerColumnDescriptor>();
+	for (const descriptor of primaryKeys) {
+		if (!descriptor.path || descriptor.path.length <= 1) {
+			continue;
+		}
+		const lastSegment = descriptor.path.at(-1) ?? "";
+		const aliasInfo = buildPointerAliasInfo(lastSegment);
+		if (!aliasInfo) continue;
+
+		const aliasLower = aliasInfo.alias.toLowerCase();
+		if (descriptors.has(aliasLower)) {
+			continue;
+		}
+
+		const expression = `json_extract(snapshot_content, '${buildSqliteJsonPath(descriptor.path)}')`;
+		const matcherSet = new Set<string>();
+		for (const matcher of aliasInfo.matchers) {
+			if (matcher.length > 0) {
+				matcherSet.add(matcher.toLowerCase());
+			}
+		}
+		if (descriptor.column.length > 0) {
+			matcherSet.add(descriptor.column.toLowerCase());
+		}
+
+		descriptors.set(aliasLower, {
+			alias: aliasInfo.alias,
+			expression,
+			matchers: Array.from(matcherSet),
+		});
+	}
+
+	return Array.from(descriptors.values());
 }
 
 /**
@@ -239,4 +323,40 @@ export function getColumnOrDefault(
 		return value;
 	}
 	return defaultValue;
+}
+
+function buildPointerAliasInfo(
+	segment: string
+): { alias: string; matchers: readonly string[] } | null {
+	if (!segment) {
+		return null;
+	}
+	const stripped = segment.replace(/^x-lix-/, "");
+	let alias = stripped.replace(/[^A-Za-z0-9_]/g, "_");
+	if (alias.length === 0) {
+		return null;
+	}
+	if (/^[0-9]/.test(alias)) {
+		alias = `_${alias}`;
+	}
+
+	const matchers = new Set<string>();
+	matchers.add(alias);
+	matchers.add(alias.toLowerCase());
+	if (stripped.length > 0) {
+		matchers.add(stripped);
+		matchers.add(stripped.toLowerCase());
+	}
+	matchers.add(segment);
+	matchers.add(segment.toLowerCase());
+	const sanitizedSegment = segment.replace(/[^A-Za-z0-9_]/g, "_");
+	if (sanitizedSegment.length > 0) {
+		matchers.add(sanitizedSegment);
+		matchers.add(sanitizedSegment.toLowerCase());
+	}
+
+	return {
+		alias,
+		matchers: Array.from(matchers),
+	};
 }
