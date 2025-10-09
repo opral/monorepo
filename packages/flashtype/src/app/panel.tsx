@@ -138,13 +138,13 @@ interface TabProps {
 	readonly isActive?: boolean;
 	readonly isFocused?: boolean;
 	readonly isPending?: boolean;
-	readonly onClose?: () => void;
-	readonly onClick?: () => void;
-	readonly dragData?: {
-		instanceKey: string;
-		viewKey: string;
-		fromPanel: string;
-	};
+ readonly onClose?: () => void;
+ readonly onClick?: () => void;
+ readonly dragData?: {
+   instanceKey: string;
+   viewKey: string;
+   fromPanel: string;
+  };
 }
 
 const tabBaseClasses =
@@ -167,6 +167,7 @@ Panel.Tab = function Tab({
 	dragData,
 }: TabProps) {
 	const state = isActive ? (isFocused ? "focused" : "active") : "idle";
+	const tabInstanceKey = dragData?.instanceKey ?? null;
 
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: dragData?.instanceKey || `tab-${label}`,
@@ -180,6 +181,8 @@ Panel.Tab = function Tab({
 			type="button"
 			onClick={onClick}
 			data-focused={isFocused ? "true" : undefined}
+			data-view-instance={tabInstanceKey ?? undefined}
+			data-view-key={dragData?.viewKey ?? undefined}
 			className={clsx(
 				tabBaseClasses,
 				tabStateClasses[state],

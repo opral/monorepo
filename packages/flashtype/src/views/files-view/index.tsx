@@ -3,7 +3,7 @@ import { useLix, useQuery } from "@lix-js/react-utils";
 import { nanoId, normalizeDirectoryPath, normalizeFilePath } from "@lix-js/sdk";
 import { selectFilesystemEntries } from "@/queries";
 import { buildFilesystemTree } from "@/views/files-view/build-filesystem-tree";
-import type { ViewContext } from "../../types";
+import type { ViewContext } from "../../app/types";
 import { FileTree } from "./file-tree";
 
 type FilesViewProps = {

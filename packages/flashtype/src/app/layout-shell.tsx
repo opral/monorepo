@@ -305,6 +305,9 @@ export function V2LayoutShell() {
 	}, []);
 
 	const [activeId, setActiveId] = useState<string | null>(null);
+	const hydratedLeft = leftPanel;
+	const hydratedCentral = centralPanel;
+	const hydratedRight = rightPanel;
 
 	const pointerSensorOptions = useMemo(
 		() => ({ activationConstraint: { distance: 8 } }),

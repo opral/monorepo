@@ -82,6 +82,7 @@ createRoot(document.getElementById("root")!).render(
 	</StrictMode>,
 );
 
+// Register the offline shell in production and force new workers to activate immediately.
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker

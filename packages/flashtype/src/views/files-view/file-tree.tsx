@@ -21,6 +21,12 @@ export type FileTreeProps = {
 	readonly onSelectItem?: (path: string, kind: "file" | "directory") => void;
 };
 
+const sanitizeForTestId = (value: string): string =>
+	value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/(^-|-$)/g, "") || "root";
+
 /**
  * Minimal prototype file tree that mirrors the structure of the left sidebar.
  *
@@ -117,11 +123,13 @@ function FileTreeNode({
 			!isSelected && "hover:bg-neutral-100",
 			isSelected ? selectedClasses : "text-neutral-700",
 		);
+		const itemTestId = `file-tree-item-${sanitizeForTestId(node.path)}`;
 		return (
 			<li>
 				<button
 					type="button"
 					data-selected={isSelected ? "true" : undefined}
+					data-testid={itemTestId}
 					className={buttonClass}
 					onClick={() => {
 						onSelectItem?.(node.path, "file");
@@ -153,6 +161,7 @@ function FileTreeNode({
 					type="button"
 					aria-expanded={isOpen}
 					data-selected={isSelected ? "true" : undefined}
+					data-testid={`file-tree-directory-${sanitizeForTestId(node.path)}`}
 					className={buttonClass}
 					onClick={() => {
 						onSelectItem?.(node.path, "directory");

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
-import type { ViewContext, ViewInstance } from "../../types";
+import type { ViewContext, ViewInstance } from "../../app/types";
 import { File } from "lucide-react";
 
 type CommitFile = {

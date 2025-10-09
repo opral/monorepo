@@ -25,7 +25,7 @@ describe("CentralPanel", () => {
 		).toBeInTheDocument();
 	});
 
-	test("renders the active view and wires tab selection", () => {
+	test("renders the active view and wires tab selection", async () => {
 		const panelState: PanelState = {
 			views: [{ instanceKey: "search-1", viewKey: "search" }],
 			activeInstanceKey: "search-1",
@@ -44,18 +44,16 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		expect(
-			screen.getByPlaceholderText("Search project..."),
-		).toBeInTheDocument();
+		expect(await screen.findByTestId("search-view-input")).toBeInTheDocument();
 
-		const tabButton = screen.getByRole("button", { name: "Search" });
+		const tabButton = await screen.findByRole("button", { name: "Search" });
 		fireEvent.click(tabButton);
 
 		expect(handleSelect).toHaveBeenCalledWith("search-1");
 		expect(tabButton.getAttribute("data-focused")).toBe("true");
 	});
 
-	test("active tab is not focused when panel loses focus", () => {
+	test("active tab is not focused when panel loses focus", async () => {
 		const panelState: PanelState = {
 			views: [{ instanceKey: "search-1", viewKey: "search" }],
 			activeInstanceKey: "search-1",
@@ -73,11 +71,11 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		const tabButton = screen.getByRole("button", { name: "Search" });
+		const tabButton = await screen.findByRole("button", { name: "Search" });
 		expect(tabButton.getAttribute("data-focused")).toBeNull();
 	});
 
-	test("finalizes pending view when interacting with content", () => {
+	test("finalizes pending view when interacting with content", async () => {
 		const panelState: PanelState = {
 			views: [{ instanceKey: "search-1", viewKey: "search", isPending: true }],
 			activeInstanceKey: "search-1",
@@ -97,7 +95,7 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		const input = screen.getByPlaceholderText("Search project...");
+		const input = await screen.findByTestId("search-view-input");
 		fireEvent.pointerDown(input);
 
 		expect(handleFinalize).toHaveBeenCalledWith("search-1");

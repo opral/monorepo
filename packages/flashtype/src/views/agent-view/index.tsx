@@ -8,7 +8,7 @@ import {
 } from "react";
 import { ArrowUp, ChevronDown, Plus } from "lucide-react";
 import { ChatMessageList } from "@/components/agent-chat/chat-message-list";
-import type { ViewContext } from "../../types";
+import type { ViewContext } from "../../app/types";
 import type { ChatMessage } from "@/components/agent-chat/types";
 import { MOCK_COMMANDS } from "./commands";
 import { MentionMenu, CommandMenu } from "./menu";

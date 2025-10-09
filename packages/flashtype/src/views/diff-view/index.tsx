@@ -4,13 +4,13 @@ import { selectWorkingDiff } from "@lix-js/sdk";
 import type { Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { Diff } from "@/components/diff";
-import type { DiffViewConfig, RenderableDiff } from "../../types";
+import type { DiffViewConfig, RenderableDiff } from "../../app/types";
 
-interface DiffPanelViewProps {
+interface DiffViewProps {
 	readonly config?: DiffViewConfig;
 }
 
-export function DiffPanelView({ config }: DiffPanelViewProps) {
+export function DiffView({ config }: DiffViewProps) {
 	const queryFactory = useMemo(() => {
 		if (!config?.query) {
 			return ({ lix }: { lix: Lix }) => emptyDiffQuery(lix);

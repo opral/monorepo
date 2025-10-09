@@ -8,6 +8,7 @@ export function SearchView() {
 				Query
 				<input
 					placeholder="Search project..."
+					data-testid="search-view-input"
 					className="rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-50"
 				/>
 			</label>

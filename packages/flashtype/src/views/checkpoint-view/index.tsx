@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLix, useQuery } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
 import { selectWorkingDiffFiles } from "./queries";
-import type { ViewContext } from "../../types";
+import type { ViewContext } from "../../app/types";
 import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
 import { LatestCheckpoint } from "./latest-checkpoint";

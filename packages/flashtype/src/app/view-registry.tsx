@@ -8,16 +8,62 @@ import {
 	GitCommitVertical,
 	Search,
 } from "lucide-react";
+import { lazy } from "react";
 import type { ViewDefinition, ViewKey } from "./types";
-import { FilesView } from "../views/files-view/index";
-import { SearchView } from "../views/search-view/index";
-import { TasksView } from "../views/tasks-view/index";
-import { MarkdownView } from "../views/markdown-view/index";
-import { CheckpointView } from "../views/checkpoint-view/index";
-import { HistoryView } from "../views/history-view/index";
-import { CommitView } from "../views/commit-view/index";
-import { DiffPanelView } from "../views/diff-view/index";
-import { AgentView } from "../views/agent-view/index";
+
+const AgentView = lazy(() =>
+	import("../views/agent-view/index").then((mod) => ({
+		default: mod.AgentView,
+	})),
+);
+
+const FilesView = lazy(() =>
+	import("../views/files-view/index").then((mod) => ({
+		default: mod.FilesView,
+	})),
+);
+
+const SearchView = lazy(() =>
+	import("../views/search-view/index").then((mod) => ({
+		default: mod.SearchView,
+	})),
+);
+
+const TasksView = lazy(() =>
+	import("../views/tasks-view/index").then((mod) => ({
+		default: mod.TasksView,
+	})),
+);
+
+const CheckpointView = lazy(() =>
+	import("../views/checkpoint-view/index").then((mod) => ({
+		default: mod.CheckpointView,
+	})),
+);
+
+const HistoryView = lazy(() =>
+	import("../views/history-view/index").then((mod) => ({
+		default: mod.HistoryView,
+	})),
+);
+
+const MarkdownView = lazy(() =>
+	import("../views/markdown-view/index").then((mod) => ({
+		default: mod.MarkdownView,
+	})),
+);
+
+const CommitView = lazy(() =>
+	import("../views/commit-view/index").then((mod) => ({
+		default: mod.CommitView,
+	})),
+);
+
+const DiffView = lazy(() =>
+	import("../views/diff-view/index").then((mod) => ({
+		default: mod.DiffView,
+	})),
+);
 
 /**
  * Canonical catalogue of prototype views available to each panel.
@@ -95,7 +141,7 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		description: "Inspect changes for a file.",
 		icon: Diff,
 		render: (_context, panelView) => (
-			<DiffPanelView config={panelView?.metadata?.diff} />
+			<DiffView config={panelView?.metadata?.diff} />
 		),
 	},
 ];

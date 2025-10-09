@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
-import type { ViewContext } from "../../types";
+import type { ViewContext } from "../../app/types";
 
 type HistoryCheckpoint = {
 	id: string;

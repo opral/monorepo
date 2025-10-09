@@ -84,7 +84,7 @@ describe("SidePanel", () => {
 		).toBeInTheDocument();
 	});
 
-	test("renders the active view and forwards interactions", () => {
+	test("renders the active view and forwards interactions", async () => {
 		const panelState: PanelState = {
 			views: [{ instanceKey: "files-1", viewKey: "files" }],
 			activeInstanceKey: "files-1",
@@ -110,20 +110,26 @@ describe("SidePanel", () => {
 			</DndContext>,
 		);
 
-		fireEvent.click(screen.getByRole("button", { name: "Files" }));
+		const filesTab = await screen.findByRole("button", { name: "Files" });
+
+		fireEvent.click(filesTab);
 		expect(handleSelect).toHaveBeenCalledWith("files-1");
 
-		const filesTab = screen.getByRole("button", { name: "Files" });
 		expect(filesTab.getAttribute("data-focused")).toBe("true");
 
-		fireEvent.click(screen.getByText("writing-style.md"));
+		const fileRow = await screen.findByRole(
+			"button",
+			{ name: "writing-style.md" },
+			{ timeout: 3000 },
+		);
+		fireEvent.click(fileRow);
 		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
 			"/docs/guides/writing-style.md",
 			{ focus: false },
 		);
 	});
 
-	test("removes focus flag when panel not focused", () => {
+	test("removes focus flag when panel not focused", async () => {
 		const panelState: PanelState = {
 			views: [{ instanceKey: "files-1", viewKey: "files" }],
 			activeInstanceKey: "files-1",
@@ -144,7 +150,7 @@ describe("SidePanel", () => {
 			</DndContext>,
 		);
 
-		const filesTab = screen.getByRole("button", { name: "Files" });
+		const filesTab = await screen.findByRole("button", { name: "Files" });
 		expect(filesTab.getAttribute("data-focused")).toBeNull();
 	});
 });
