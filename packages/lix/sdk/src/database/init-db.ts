@@ -45,21 +45,16 @@ import { getTimestampSync } from "../engine/functions/timestamp.js";
  * }
  * ```
  */
-export function initDb(args: {
+export function prepareEngineDatabase(args: {
 	executeSync: LixEngine["executeSync"];
 	runtimeCacheRef: LixEngine["runtimeCacheRef"];
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;
-}): Kysely<LixDatabaseSchema> {
+}): void {
 	// Lower fsync frequency for better write throughput; NORMAL still syncs at txn boundaries.
 	args.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
 	// Enlarge the page cache to keep more hot pages in memory (approximately 40 MiB at 4 KiB pages).
 	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
-
-	const db = new Kysely<LixDatabaseSchema>({
-		dialect: createEngineDialect({ database: args.sqlite }),
-		plugins: [...createDefaultPlugins()],
-	});
 
 	const engine = {
 		sqlite: args.sqlite,
@@ -101,6 +96,18 @@ export function initDb(args: {
 	// applyChangeProposalDatabaseSchema({ engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	// applyLogDatabaseSchema({ engine: engine });
+}
+
+export function initDb(args: {
+	executeSync: LixEngine["executeSync"];
+	runtimeCacheRef: LixEngine["runtimeCacheRef"];
+	sqlite: SqliteWasmDatabase;
+	hooks: LixHooks;
+}): Kysely<LixDatabaseSchema> {
+	const db = new Kysely<LixDatabaseSchema>({
+		dialect: createEngineDialect({ database: args.sqlite }),
+		plugins: [...createDefaultPlugins()],
+	});
 
 	return db;
 }
