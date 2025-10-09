@@ -192,33 +192,6 @@ export const LixSchemaDefinition = {
 										description:
 											"CEL expression evaluated to produce the default value when the property is omitted.",
 									},
-									"x-lix-default-call": {
-										type: "object",
-										required: ["name"],
-										properties: {
-											name: {
-												type: "string",
-												description:
-													"Engine function to invoke when the property is omitted (e.g. lix_uuid_v7)",
-											},
-											args: {
-												type: "object",
-												additionalProperties: {
-													anyOf: [
-														{ type: "string" },
-														{ type: "number" },
-														{ type: "boolean" },
-														{ type: "null" },
-														{ type: "object" },
-													],
-												},
-												description:
-													"Optional JSON-serializable arguments passed to the default function.",
-											},
-										},
-										description:
-											"Invoke an engine function when the property is omitted. Overrides the JSON `default` value when both are present. Unknown functions cause an error at rewrite time.",
-									},
 								},
 							},
 						],
@@ -236,13 +209,6 @@ export const LixSchemaDefinition = {
 type LixPropertySchema = JSONSchema & {
 	"x-lix-generated"?: boolean;
 	"x-lix-default"?: string;
-	"x-lix-default-call"?: {
-		name: string;
-		args?: Record<
-			string,
-			string | number | boolean | null | Record<string, unknown>
-		>;
-	};
 };
 
 /**

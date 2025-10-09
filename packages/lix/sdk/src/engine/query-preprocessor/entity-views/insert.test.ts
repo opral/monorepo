@@ -522,7 +522,7 @@ test("applies function defaults when column is omitted", async () => {
 			name: { type: "string" },
 			token: {
 				type: "string",
-				"x-lix-default-call": { name: "lix_uuid_v7" },
+				"x-lix-default": "lix_uuid_v7()",
 			},
 		},
 		required: ["id", "name"],
@@ -627,7 +627,7 @@ test("function defaults override literal defaults", async () => {
 			stamp: {
 				type: "string",
 				default: "literal",
-				"x-lix-default-call": { name: "lix_timestamp" },
+				"x-lix-default": "lix_timestamp()",
 			},
 		},
 		required: ["id"],

@@ -21,7 +21,7 @@ export const LixConversationSchema = {
 		id: {
 			type: "string",
 			"x-lix-generated": true,
-			"x-lix-default-call": { name: "lix_uuid_v7" },
+			"x-lix-default": "lix_uuid_v7()",
 		},
 	},
 	required: ["id"],
@@ -64,7 +64,7 @@ export const LixConversationMessageSchema = {
 		id: {
 			type: "string",
 			"x-lix-generated": true,
-			"x-lix-default-call": { name: "lix_uuid_v7" },
+			"x-lix-default": "lix_uuid_v7()",
 		},
 		conversation_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },

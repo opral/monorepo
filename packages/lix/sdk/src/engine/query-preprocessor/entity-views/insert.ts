@@ -671,19 +671,6 @@ function renderDefaultSnapshotValue(args: {
 		});
 	}
 
-	const defaultCall = record["x-lix-default-call"] as
-		| {
-				name: string;
-				args?: Record<
-					string,
-					string | number | boolean | null | Record<string, unknown>
-				>;
-		  }
-		| undefined;
-	if (defaultCall) {
-		return renderDefaultFunctionCall({ call: defaultCall });
-	}
-
 	const defaultValue = record.default;
 	if (defaultValue !== undefined) {
 		resolvedDefaults.set(propertyName, defaultValue);
@@ -696,41 +683,6 @@ function renderDefaultSnapshotValue(args: {
 	}
 
 	return "NULL";
-}
-
-/**
- * Serializes an `x-lix-default-call` descriptor into a SQL invocation of the `lix_call` UDF.
- *
- * The descriptor is encoded as JSON and inlined directly into the SQL statement, enabling the
- * runtime engine to dispatch the call without requiring per-function rewrites.
- *
- * @example
- * const sql = renderDefaultFunctionCall({ call: { name: "lix_timestamp" } });
- * // sql === "lix_call('{\"name\":\"lix_timestamp\"}')"
- */
-function renderDefaultFunctionCall(args: {
-	call: {
-		name: string;
-		args?: Record<
-			string,
-			string | number | boolean | null | Record<string, unknown>
-		>;
-	};
-}): string {
-	const { call } = args;
-	const payload: {
-		name: string;
-		args?: Record<
-			string,
-			string | number | boolean | null | Record<string, unknown>
-		>;
-	} = { name: call.name };
-	if (call.args && Object.keys(call.args).length > 0) {
-		payload.args = call.args;
-	}
-	const json = JSON.stringify(payload);
-	const escaped = json.replace(/'/g, "''");
-	return `lix_call('${escaped}')`;
 }
 
 function jsonStringifyOrNull(value: unknown): unknown {
