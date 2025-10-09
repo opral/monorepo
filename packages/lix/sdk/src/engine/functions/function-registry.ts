@@ -1,10 +1,16 @@
 import type { LixEngine } from "../boot.js";
-import type { Call } from "./router.js";
+
+export type Call = (name: string, args?: unknown) => any;
 
 export type FunctionHandlerContext = {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "call" | "preprocessQuery" | "fn"
+		| "sqlite"
+		| "hooks"
+		| "executeSync"
+		| "runtimeCacheRef"
+		| "call"
+		| "preprocessQuery"
 	>;
 };
 
@@ -13,7 +19,7 @@ export type RegisteredFunctionDefinition = {
 	handler: (ctx: FunctionHandlerContext, args: any) => any;
 };
 
-export type FunctionRegistryPublicApi = {
+export type FunctionRegistry = {
 	register: (def: RegisteredFunctionDefinition) => void;
 	call: Call;
 	list: () => readonly { name: string }[];
@@ -26,9 +32,14 @@ type RegisteredFunction = {
 export function createFunctionRegistry(args: {
 	getEngine: () => Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "call" | "preprocessQuery" | "fn"
+		| "sqlite"
+		| "hooks"
+		| "executeSync"
+		| "runtimeCacheRef"
+		| "call"
+		| "preprocessQuery"
 	>;
-}): FunctionRegistryPublicApi {
+}): FunctionRegistry {
 	const functions = new Map<string, RegisteredFunction>();
 
 	const register = (def: RegisteredFunctionDefinition): void => {

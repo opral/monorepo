@@ -205,7 +205,7 @@ test("base view delete uses schema default version when omitted", async () => {
 		parameters: deleteResult.parameters as any[],
 	});
 
-	const rows = await lix.db
+	const rows = await (lix.db as any)
 		.selectFrom("delete_schema")
 		.where("id", "=", "acc-default")
 		.selectAll()

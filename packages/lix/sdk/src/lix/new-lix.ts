@@ -162,6 +162,10 @@ export async function newLixFile(args?: {
 			}
 			return executeSyncImpl(args);
 		}) as LixEngine["executeSync"],
+		call: (_name: string, _args?: unknown) => {
+			throw new Error("Engine call not available during bootstrap");
+		},
+		listFunctions: () => [],
 	} as const;
 
 	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);

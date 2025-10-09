@@ -38,7 +38,7 @@ export type Lix = {
 	 *
 	 * Preferred entrypoint for invoking engine functions.
 	 */
-	call: (name: string, payload?: unknown) => Promise<unknown>;
+	call: (name: string, args?: unknown) => Promise<unknown>;
 
 	/**
 	 * Serialises the Lix into a {@link Blob}.
@@ -261,8 +261,8 @@ export async function openLix(args: {
 		plugin: {
 			getAll: async () => hostPlugins,
 		},
-		call: async (name: string, payload?: unknown): Promise<unknown> =>
-			environment.call(name, payload),
+		call: async (name: string, args?: unknown): Promise<unknown> =>
+			environment.call(name, args),
 		close: async () => {
 			await environment.close();
 		},

@@ -61,8 +61,8 @@ export class InMemoryEnvironment implements LixEnvironment {
 		return false;
 	}
 
-	async call(name: string, payload?: unknown): Promise<unknown> {
+	async call(name: string, args?: unknown): Promise<unknown> {
 		if (!this.engine) throw new Error("Environment not initialized");
-		return this.engine.call(name, payload);
+		return this.engine.call(name, args);
 	}
 }

@@ -46,8 +46,13 @@ export function rewriteEntityInsert(args: {
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
 	engine: Pick<
-	LixEngine,
-	"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef" | "fn"
+		LixEngine,
+		| "sqlite"
+		| "executeSync"
+		| "hooks"
+		| "runtimeCacheRef"
+		| "listFunctions"
+		| "call"
 	>;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
@@ -89,7 +94,10 @@ export function rewriteEntityInsert(args: {
 				"string"
 	);
 	const celState: CelEnvironmentState | null = hasCelDefaults
-		? createCelEnvironment({ registry: args.engine.fn })
+		? createCelEnvironment({
+				listFunctions: args.engine.listFunctions,
+				callFunction: args.engine.call,
+			})
 		: null;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	if (!isEntityRewriteAllowed(storedSchemaKey)) {
@@ -140,15 +148,15 @@ export function rewriteEntityInsert(args: {
 		"untracked",
 	];
 
-const schemaVersionValue = String(schema["x-lix-version"] ?? "");
-const rowsSql: string[] = [];
+	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
+	const rowsSql: string[] = [];
 
-for (const columnMap of columnMaps) {
-	const celContext = buildCelContext({
-		columnMap,
-		propertyLowerToActual,
-	});
-	const resolvedDefaults = new Map<string, unknown>();
+	for (const columnMap of columnMaps) {
+		const celContext = buildCelContext({
+			columnMap,
+			propertyLowerToActual,
+		});
+		const resolvedDefaults = new Map<string, unknown>();
 
 		const renderPrimaryKeyExpr = (
 			descriptor: PrimaryKeyDescriptor
@@ -286,11 +294,11 @@ for (const columnMap of columnMaps) {
 		);
 	}
 
-const rewrittenSql = `INSERT INTO state_all (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
-return {
-	sql: rewrittenSql,
-	parameters: params,
-};
+	const rewrittenSql = `INSERT INTO state_all (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
+	return {
+		sql: rewrittenSql,
+		parameters: params,
+	};
 }
 
 function buildCelContext(args: {

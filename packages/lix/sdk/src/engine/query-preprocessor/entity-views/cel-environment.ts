@@ -1,18 +1,19 @@
 import { Environment } from "@marcbachmann/cel-js";
-import type { FunctionRegistryPublicApi } from "../../functions/function-registry.js";
+import type { Call } from "../../functions/function-registry.js";
 
 export type CelEnvironmentState = {
 	/**
 	 * Evaluate a CEL expression with the provided context.
 	 *
- * Returns the expression result converted into JSON-serialisable primitives
- * (bigints downgraded to numbers/strings, nested collections normalised).
+	 * Returns the expression result converted into JSON-serialisable primitives
+	 * (bigints downgraded to numbers/strings, nested collections normalised).
 	 */
 	evaluate: (expression: string, context: Record<string, unknown>) => unknown;
 };
 
 export function createCelEnvironment(args: {
-	registry: FunctionRegistryPublicApi;
+	listFunctions: () => readonly { name: string }[];
+	callFunction: Call;
 }): CelEnvironmentState {
 	const env = new Environment({
 		unlistedVariablesAreDyn: true,
@@ -20,8 +21,8 @@ export function createCelEnvironment(args: {
 
 	const programCache = new Map<string, ReturnType<Environment["parse"]>>();
 
-	const callSync = (name: string, payload?: unknown): unknown => {
-		const result = args.registry.call(name, payload);
+	const callSync = (name: string, callArgs?: unknown): unknown => {
+		const result = args.callFunction(name, callArgs);
 		if (result instanceof Promise) {
 			throw new Error(
 				`CEL helper "${name}" returned a Promise; asynchronous helpers are not supported`
@@ -30,7 +31,7 @@ export function createCelEnvironment(args: {
 		return result;
 	};
 
-	for (const { name } of args.registry.list()) {
+	for (const { name } of args.listFunctions()) {
 		env.registerFunction(`${name}(): dyn`, () => {
 			const result = callSync(name);
 			return normalizeCelValue(result);

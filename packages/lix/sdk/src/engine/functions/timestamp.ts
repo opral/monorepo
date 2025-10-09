@@ -79,7 +79,7 @@ export function getTimestampSync(args: {
  * ```
  */
 export async function getTimestamp(args: {
-	lix: { call: (name: string, payload?: unknown) => Promise<unknown> };
+	lix: { call: (name: string, args?: unknown) => Promise<unknown> };
 }): Promise<string> {
 	const res = await args.lix.call("lix_timestamp");
 	return String(res);

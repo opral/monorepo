@@ -77,9 +77,7 @@ test("x-lix-default typing", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	assertType<string | undefined>(
-		schema.properties.id?.["x-lix-default"]
-	);
+	assertType<string | undefined>(schema.properties.id?.["x-lix-default"]);
 });
 
 test("LixInsertable combined with LixGenerated makes columns optional", () => {

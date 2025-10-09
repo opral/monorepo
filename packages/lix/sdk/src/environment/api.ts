@@ -33,7 +33,7 @@ export interface LixEnvironment {
 	 * thread or inside a Worker. The SQL driver uses the "lix_exec_sync" route to
 	 * execute compiled statements.
 	 */
-	call: import("../engine/functions/router.js").Call;
+	call: import("../engine/functions/function-registry.js").Call;
 
 	spawnActor?: (opts: SpawnActorOptions) => Promise<EnvironmentActorHandle>;
 }
