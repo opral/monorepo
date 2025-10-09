@@ -12,6 +12,11 @@ import { createQueryPreprocessor } from "./query-preprocessor/create-query-prepr
 import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
 import { internalQueryBuilder } from "./internal-query-builder.js";
 import { setDeterministicBoot } from "./deterministic-mode/is-deterministic-mode.js";
+import {
+	createFunctionRegistry,
+	type FunctionRegistryPublicApi,
+} from "./functions/function-registry.js";
+import { registerBuiltinFunctions } from "./functions/register-builtins.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -74,6 +79,8 @@ export type LixEngine = {
 	};
 	/** Invoke an engine function (router) */
 	call: Call;
+	/** Registered engine helper functions */
+	fn: FunctionRegistryPublicApi;
 };
 
 export async function boot(env: BootEnv): Promise<LixEngine> {
@@ -87,6 +94,19 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
+
+	let engineRef: LixEngine | null = null;
+
+	const fnRegistry = createFunctionRegistry({
+		getEngine: () => {
+			if (!engineRef) {
+				throw new Error("Engine functions not initialised");
+			}
+			return engineRef;
+		},
+	});
+
+	let callImpl: LixEngine["call"] | null = null;
 
 	if (deterministicBoot) {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
@@ -104,6 +124,13 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 			}
 			return executeSyncImpl(args);
 		}) as LixEngine["executeSync"],
+		call: ((name, payload, opts) => {
+			if (!callImpl) {
+				throw new Error("Engine call not initialised");
+			}
+			return callImpl(name, payload, opts);
+		}) as LixEngine["call"],
+		fn: fnRegistry,
 	} as const;
 
 	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
@@ -134,19 +161,22 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		plugins.push(input);
 	}
 
-	const engine: LixEngine = {
-		sqlite: env.sqlite,
-		hooks,
-		getAllPluginsSync: () => plugins,
-		runtimeCacheRef,
-		preprocessQuery,
-		executeSync,
-		call: async () => {
-			throw new Error("Engine router not initialised");
-		},
-	};
+const engine: LixEngine = {
+	sqlite: env.sqlite,
+	hooks,
+	getAllPluginsSync: () => plugins,
+	runtimeCacheRef,
+	preprocessQuery,
+	executeSync,
+	call: async () => {
+		throw new Error("Engine router not initialised");
+	},
+	fn: fnRegistry,
+};
 
-	applyFilesystemSchema({ engine });
+engineRef = engine;
+
+applyFilesystemSchema({ engine });
 
 	hooks.onStateCommit(({ changes }) => {
 		env.emit({ type: "state_commit", payload: { changes } });
@@ -254,8 +284,11 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		}
 	}
 
-	const call = createCallRouter({ engine });
+	const call = createCallRouter({ registry: fnRegistry });
 	engine.call = call;
+	callImpl = call;
+
+	registerBuiltinFunctions({ registry: fnRegistry, engine });
 
 	// Register synchronous UDFs now that we have the engine context
 	env.sqlite.createFunction({

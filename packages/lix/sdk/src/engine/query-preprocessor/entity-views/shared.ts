@@ -39,6 +39,7 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"insertable_schema",
 	"mock_default_schema",
 	"mock_fn_schema",
+	"mock_cel_schema",
 	"mock_fn_override",
 	"multi_schema",
 	"expression_schema",

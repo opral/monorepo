@@ -28,6 +28,10 @@ import {
 	type StoredSchemaDefinition,
 	type PrimaryKeyDescriptor,
 } from "./shared.js";
+import {
+	createCelEnvironment,
+	type CelEnvironmentState,
+} from "./cel-environment.js";
 
 type ExpressionValue = { kind: "expression"; sql: string };
 
@@ -41,7 +45,10 @@ export function rewriteEntityInsert(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite" | "executeSync">;
+	engine: Pick<
+	LixEngine,
+	"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef" | "fn"
+	>;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== INSERT) {
@@ -74,6 +81,16 @@ export function rewriteEntityInsert(args: {
 	for (const key of Object.keys(propertiesObject ?? {})) {
 		propertyLowerToActual.set(key.toLowerCase(), key);
 	}
+	const hasCelDefaults = Object.values(propertiesObject ?? {}).some(
+		(definition) =>
+			definition &&
+			typeof definition === "object" &&
+			typeof (definition as Record<string, unknown>)["x-lix-default"] ===
+				"string"
+	);
+	const celState: CelEnvironmentState | null = hasCelDefaults
+		? createCelEnvironment({ registry: args.engine.fn })
+		: null;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	if (!isEntityRewriteAllowed(storedSchemaKey)) {
 		return null;
@@ -123,10 +140,16 @@ export function rewriteEntityInsert(args: {
 		"untracked",
 	];
 
-	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
-	const rowsSql: string[] = [];
+const schemaVersionValue = String(schema["x-lix-version"] ?? "");
+const rowsSql: string[] = [];
 
-	for (const columnMap of columnMaps) {
+for (const columnMap of columnMaps) {
+	const celContext = buildCelContext({
+		columnMap,
+		propertyLowerToActual,
+	});
+	const resolvedDefaults = new Map<string, unknown>();
+
 		const renderPrimaryKeyExpr = (
 			descriptor: PrimaryKeyDescriptor
 		): string | null => {
@@ -151,8 +174,12 @@ export function rewriteEntityInsert(args: {
 				descriptor.column;
 			const pkDefinition = (schema.properties ?? {})[fallbackKey];
 			const defaultExpr = renderDefaultSnapshotValue({
+				propertyName: fallbackKey,
 				definition: pkDefinition,
 				addParam,
+				cel: celState,
+				context: celContext,
+				resolvedDefaults,
 			});
 			if (!defaultExpr || defaultExpr === "NULL") {
 				return null;
@@ -232,11 +259,13 @@ export function rewriteEntityInsert(args: {
 		}
 
 		const pluginKeyExpr = addParam(pluginKeyValue);
-
 		const snapshotContentExpr = buildSnapshotObjectExpression({
 			schema,
 			columnMap,
 			addParam,
+			cel: celState,
+			context: celContext,
+			resolvedDefaults,
 		});
 		const schemaVersionExpr = addParam(schemaVersionValue);
 		const metadataExpr = addParam(metadataValue);
@@ -257,11 +286,25 @@ export function rewriteEntityInsert(args: {
 		);
 	}
 
-	const rewrittenSql = `INSERT INTO state_all (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
-	return {
-		sql: rewrittenSql,
-		parameters: params,
-	};
+const rewrittenSql = `INSERT INTO state_all (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
+return {
+	sql: rewrittenSql,
+	parameters: params,
+};
+}
+
+function buildCelContext(args: {
+	columnMap: Map<string, unknown>;
+	propertyLowerToActual: Map<string, string>;
+}): Record<string, unknown> {
+	const context: Record<string, unknown> = {};
+	for (const [lowerName, actualName] of args.propertyLowerToActual.entries()) {
+		if (!args.columnMap.has(lowerName)) continue;
+		const raw = args.columnMap.get(lowerName);
+		if (raw === undefined || isExpressionValue(raw)) continue;
+		context[actualName] = raw;
+	}
+	return context;
 }
 
 function parseColumnList(
@@ -479,6 +522,9 @@ function buildSnapshotObjectExpression(args: {
 	schema: StoredSchemaDefinition;
 	columnMap: Map<string, unknown>;
 	addParam: (value: unknown) => string;
+	cel: CelEnvironmentState | null;
+	context: Record<string, unknown>;
+	resolvedDefaults: Map<string, unknown>;
 }): string {
 	const properties = Object.keys(args.schema.properties ?? {});
 	if (properties.length === 0) {
@@ -490,8 +536,12 @@ function buildSnapshotObjectExpression(args: {
 		const lower = prop.toLowerCase();
 		if (!args.columnMap.has(lower)) {
 			const defaultExpr = renderDefaultSnapshotValue({
+				propertyName: prop,
 				definition: def,
 				addParam: args.addParam,
+				cel: args.cel,
+				context: args.context,
+				resolvedDefaults: args.resolvedDefaults,
 			});
 			entries.push(`'${prop}', ${defaultExpr}`);
 			continue;
@@ -579,16 +629,49 @@ function renderSnapshotValue(args: {
 }
 
 function renderDefaultSnapshotValue(args: {
+	propertyName: string;
 	definition: unknown;
 	addParam: (value: unknown) => string;
+	cel: CelEnvironmentState | null;
+	context: Record<string, unknown>;
+	resolvedDefaults: Map<string, unknown>;
 }): string {
-	const { definition, addParam } = args;
+	const { propertyName, definition, addParam, cel, context, resolvedDefaults } =
+		args;
+
+	if (resolvedDefaults.has(propertyName)) {
+		const cached = resolvedDefaults.get(propertyName);
+		return renderSnapshotValue({
+			definition,
+			value: cached,
+			addParam,
+		});
+	}
+
 	if (!definition || typeof definition !== "object") {
 		return "NULL";
 	}
-	const defaultCall = (definition as Record<string, unknown>)[
-		"x-lix-default-call"
-	] as
+
+	const record = definition as Record<string, unknown>;
+
+	const celExpression = record["x-lix-default"];
+	if (typeof celExpression === "string") {
+		if (!cel) {
+			throw new Error(
+				`Encountered x-lix-default on ${propertyName} but CEL evaluation is not initialised.`
+			);
+		}
+		const value = cel.evaluate(celExpression, { ...context });
+		resolvedDefaults.set(propertyName, value);
+		context[propertyName] = value as unknown;
+		return renderSnapshotValue({
+			definition,
+			value,
+			addParam,
+		});
+	}
+
+	const defaultCall = record["x-lix-default-call"] as
 		| {
 				name: string;
 				args?: Record<
@@ -600,18 +683,18 @@ function renderDefaultSnapshotValue(args: {
 	if (defaultCall) {
 		return renderDefaultFunctionCall({ call: defaultCall });
 	}
-	const defaultValue = (definition as Record<string, unknown>).default;
+
+	const defaultValue = record.default;
 	if (defaultValue !== undefined) {
-		if (defaultValue === null) {
-			return "NULL";
-		}
-		if (typeof defaultValue === "object") {
-			const serialized = jsonStringifyOrNull(defaultValue);
-			if (serialized === null) return "NULL";
-			return `json(${addParam(serialized)})`;
-		}
-		return addParam(defaultValue);
+		resolvedDefaults.set(propertyName, defaultValue);
+		context[propertyName] = defaultValue as unknown;
+		return renderSnapshotValue({
+			definition,
+			value: defaultValue,
+			addParam,
+		});
 	}
+
 	return "NULL";
 }
 

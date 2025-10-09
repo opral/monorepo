@@ -63,7 +63,10 @@ export function rewriteEntityDelete(args: {
 	sql: string;
 	tokens: IToken[];
 	parameters: ReadonlyArray<unknown>;
-	engine: Pick<LixEngine, "sqlite" | "executeSync">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef"
+	>;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
 	if (tokens.length === 0 || tokens[0]?.tokenType !== DELETE) {

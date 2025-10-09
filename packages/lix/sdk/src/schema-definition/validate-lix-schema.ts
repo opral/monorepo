@@ -1,4 +1,5 @@
 import { Ajv } from "ajv";
+import { parse } from "@marcbachmann/cel-js";
 import { LixSchemaDefinition } from "./definition.js";
 import { parseJsonPointer } from "./json-pointer.js";
 
@@ -13,6 +14,17 @@ ajv.addFormat("json-pointer", {
 	validate: (value: string) => {
 		try {
 			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
+ajv.addFormat("cel", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parse(value);
 			return true;
 		} catch {
 			return false;

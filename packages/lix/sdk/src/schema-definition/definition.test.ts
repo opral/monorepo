@@ -1,20 +1,6 @@
-import { test, expect } from "vitest";
-import { Ajv } from "ajv";
+import { expect, test } from "vitest";
 import { LixSchemaDefinition } from "./definition.js";
-import { parseJsonPointer } from "./json-pointer.js";
-
-const ajv = new Ajv();
-ajv.addFormat("json-pointer", {
-	type: "string",
-	validate: (value: string) => {
-		try {
-			parseJsonPointer(value);
-			return true;
-		} catch {
-			return false;
-		}
-	},
-});
+import { validateLixSchemaDefinition } from "./validate-lix-schema.js";
 
 test("valid schema", () => {
 	const schema = {
@@ -29,13 +15,7 @@ test("valid schema", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-	const x2 = ajv.compile(LixSchemaDefinition);
-
-	const valid2 = x2(schema);
-
-	expect(valid).toBe(true);
-	expect(valid2).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-immutable accepts boolean values", () => {
@@ -51,9 +31,7 @@ test("x-lix-immutable accepts boolean values", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-key is required", () => {
@@ -69,9 +47,7 @@ test("x-key is required", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-unique is optional", () => {
@@ -86,9 +62,7 @@ test("x-lix-unique is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique must be array of arrays when present", () => {
@@ -106,9 +80,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
@@ -125,9 +97,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-defaults accepts primitive values", () => {
@@ -148,9 +118,7 @@ test("x-lix-defaults accepts primitive values", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-defaults rejects complex values", () => {
@@ -169,9 +137,43 @@ test("x-lix-defaults rejects complex values", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
 
-	expect(valid).toBe(false);
+test("x-lix-default accepts cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7()",
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-default rejects invalid cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7(", // missing closing paren
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-default-call accepts function descriptors", () => {
@@ -190,9 +192,7 @@ test("x-lix-default-call accepts function descriptors", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-default-call requires name", () => {
@@ -208,9 +208,7 @@ test("x-lix-default-call requires name", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-primary-key is optional", () => {
@@ -225,9 +223,7 @@ test("x-lix-primary-key is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-primary-key must be array of strings when present", () => {
@@ -245,9 +241,7 @@ test("x-lix-primary-key must be array of strings when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys is optional", () => {
@@ -263,9 +257,7 @@ test("x-lix-foreign-keys is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys with valid structure", () => {
@@ -298,9 +290,7 @@ test("x-lix-foreign-keys with valid structure", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys with schemaVersion", () => {
@@ -327,9 +317,7 @@ test("x-lix-foreign-keys with schemaVersion", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys fails without required fields", () => {
@@ -351,9 +339,7 @@ test("x-lix-foreign-keys fails without required fields", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
@@ -379,9 +365,7 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
@@ -419,11 +403,8 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const v1 = ajv.validate(LixSchemaDefinition, schemaMaterialized);
-	const v2 = ajv.validate(LixSchemaDefinition, schemaImmediate);
-
-	expect(v1).toBe(true);
-	expect(v2).toBe(true);
+	expect(validateLixSchemaDefinition(schemaMaterialized)).toBe(true);
+	expect(validateLixSchemaDefinition(schemaImmediate)).toBe(true);
 });
 
 test("x-lix-foreign-keys fails with invalid mode value", () => {
@@ -445,9 +426,7 @@ test("x-lix-foreign-keys fails with invalid mode value", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys with composite key", () => {
@@ -481,9 +460,7 @@ test("x-lix-foreign-keys with composite key", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-version is required", () => {
@@ -499,9 +476,7 @@ test("x-version is required", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-unique is optional", () => {
@@ -516,9 +491,7 @@ test("x-lix-unique is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique must be array of arrays when present", () => {
@@ -536,9 +509,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
@@ -555,9 +526,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-generated property is allowed in schema definition", () => {
@@ -580,8 +549,7 @@ test("x-lix-generated property is allowed in schema definition", () => {
 	TestSchemaWithGenerated satisfies LixSchemaDefinition;
 
 	// Validate with Ajv
-	const valid = ajv.validate(LixSchemaDefinition, TestSchemaWithGenerated);
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(TestSchemaWithGenerated)).toBe(true);
 
 	// Test that x-lix-generated can be false
 	const TestSchemaWithExplicitFalse = {
@@ -600,6 +568,5 @@ test("x-lix-generated property is allowed in schema definition", () => {
 	} as const;
 
 	TestSchemaWithExplicitFalse satisfies LixSchemaDefinition;
-	const valid2 = ajv.validate(LixSchemaDefinition, TestSchemaWithExplicitFalse);
-	expect(valid2).toBe(true);
+	expect(validateLixSchemaDefinition(TestSchemaWithExplicitFalse)).toBe(true);
 });

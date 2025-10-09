@@ -41,7 +41,7 @@ import {
 export async function createQueryPreprocessor(
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
+		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync" | "call" | "fn"
 	>
 ): Promise<QueryPreprocessorFn> {
 	return ({
@@ -141,7 +141,10 @@ function maybeRewriteTrigger(args: {
  * Rewrites entity view mutations to operate directly on the state views.
  */
 function maybeRewriteEntityView(args: {
-	engine: Pick<LixEngine, "sqlite" | "executeSync">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef" | "call" | "fn"
+	>;
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
 	tokens: Token[];

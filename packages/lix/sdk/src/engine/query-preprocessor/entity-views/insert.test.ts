@@ -552,6 +552,66 @@ test("applies function defaults when column is omitted", async () => {
 	await lix.close();
 });
 
+test("applies CEL defaults when column is omitted", async () => {
+	const schemaWithCelDefault = {
+		"x-lix-key": "mock_cel_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-defaults": {
+			lixcol_file_id: "lix",
+			lixcol_plugin_key: "lix_own_entity",
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			slug: {
+				type: "string",
+				"x-lix-default": "name + '-slug'",
+			},
+			token: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7()",
+			},
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const;
+
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: schemaWithCelDefault })
+		.execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+
+	const insert = preprocess({
+		sql: "INSERT INTO mock_cel_schema (id, name) VALUES (?, ?)",
+		parameters: ["row-cel", "Sample"],
+	});
+
+	lix.engine!.executeSync({
+		sql: insert.sql,
+		parameters: insert.parameters as any[],
+	});
+
+	const select = preprocess({
+		sql: "SELECT slug, token FROM mock_cel_schema WHERE id = ?",
+		parameters: ["row-cel"],
+	});
+
+	const row = lix.engine!.executeSync({
+		sql: select.sql,
+		parameters: select.parameters as any[],
+	}).rows[0] as Record<string, unknown>;
+
+	expect(row.slug).toBe("Sample-slug");
+	expect(typeof row.token).toBe("string");
+	expect((row.token as string).length).toBeGreaterThan(0);
+	await lix.close();
+});
+
 test("function defaults override literal defaults", async () => {
 	const schemaWithBoth = {
 		"x-lix-key": "mock_fn_override",

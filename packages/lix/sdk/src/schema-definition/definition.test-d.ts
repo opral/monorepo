@@ -62,6 +62,26 @@ test("x-lix-defaults typing", () => {
 	);
 });
 
+test("x-lix-default typing", () => {
+	const schema = {
+		"x-lix-key": "cel_default",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7()",
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	assertType<string | undefined>(
+		schema.properties.id?.["x-lix-default"]
+	);
+});
+
 test("x-lix-default-call typing", () => {
 	const schema = {
 		"x-lix-key": "fn_default",
