@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import path from "node:path";
 import react from "@vitejs/plugin-react";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
@@ -13,7 +12,6 @@ export default defineConfig({
 				plugins: ["babel-plugin-react-compiler"],
 			},
 		}),
-		TanStackRouterVite(),
 		tailwindcss(),
 		cloudflare(),
 	],
