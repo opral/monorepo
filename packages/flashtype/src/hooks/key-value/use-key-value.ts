@@ -174,61 +174,64 @@ async function upsertValue<T>(
 	value: T,
 	opts: { defaultVersionId: string; untracked: boolean },
 ) {
-	if (opts.untracked) {
-		let versionId: string;
-		if (opts.defaultVersionId === "active") {
-			const row = await lix.db
-				.selectFrom("active_version")
-				.select("version_id")
-				.executeTakeFirstOrThrow();
-			versionId = row.version_id as unknown as string;
-		} else {
-			versionId = opts.defaultVersionId;
+	await lix.db.transaction().execute(async (trx) => {
+		if (opts.untracked) {
+			let versionId: string;
+			if (opts.defaultVersionId === "active") {
+				const row = await trx
+					.selectFrom("active_version")
+					.select("version_id")
+					.executeTakeFirstOrThrow();
+				versionId = row.version_id as unknown as string;
+			} else {
+				versionId = opts.defaultVersionId;
+			}
+
+			const exists = await trx
+				.selectFrom("key_value_all")
+				.where("key", "=", key)
+				.where("lixcol_version_id", "=", versionId)
+				.select("key")
+				.executeTakeFirst();
+
+			if (exists) {
+				await trx
+					.updateTable("key_value_all")
+					.set({ value, lixcol_untracked: true })
+					.where("key", "=", key)
+					.where("lixcol_version_id", "=", versionId)
+					.execute();
+			} else {
+				await trx
+					.insertInto("key_value_all")
+					.values({
+						key,
+						value,
+						lixcol_version_id: versionId,
+						lixcol_untracked: true,
+					})
+					.execute();
+			}
+			return;
 		}
-		// Cannot use UPSERT on a view. Manually check and insert/update.
-		const exists = await lix.db
-			.selectFrom("key_value_all")
+
+		const trackedExists = await trx
+			.selectFrom("key_value")
 			.where("key", "=", key)
-			.where("lixcol_version_id", "=", versionId)
 			.select("key")
 			.executeTakeFirst();
 
-		if (exists) {
-			await lix.db
-				.updateTable("key_value_all")
-				.set({ value, lixcol_untracked: true })
+		if (trackedExists) {
+			await trx
+				.updateTable("key_value")
+				.set({ value })
 				.where("key", "=", key)
-				.where("lixcol_version_id", "=", versionId)
 				.execute();
-		} else {
-			await lix.db
-				.insertInto("key_value_all")
-				.values({
-					key,
-					value,
-					lixcol_version_id: versionId,
-					lixcol_untracked: true,
-				})
-				.execute();
+			return;
 		}
-		return;
-	}
-	// tracked (active version)
-	const trackedExists = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", key)
-		.select("key")
-		.executeTakeFirst();
 
-	if (trackedExists) {
-		await lix.db
-			.updateTable("key_value")
-			.set({ value })
-			.where("key", "=", key)
-			.execute();
-	} else {
-		await lix.db.insertInto("key_value").values({ key, value }).execute();
-	}
+		await trx.insertInto("key_value").values({ key, value }).execute();
+	});
 }
 
 function valuesEqual(a: unknown, b: unknown): boolean {
