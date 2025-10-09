@@ -275,17 +275,17 @@ test("ebEntity works with different entity types", async () => {
 
 	// Create various entities
 	await lix.db
-		.insertInto("account")
-		.values({ id: "acc1", name: "Test Account" })
+		.insertInto("key_value")
+		.values({ key: "acc1", value: "Test Account" })
 		.execute();
 
 	await lix.db.insertInto("conversation").values({ id: "thread1" }).execute();
 
 	// Get entity info from views
-	const account = await lix.db
-		.selectFrom("account")
+	const kv = await lix.db
+		.selectFrom("key_value")
 		.selectAll()
-		.where("id", "=", "acc1")
+		.where("key", "=", "acc1")
 		.executeTakeFirstOrThrow();
 
 	const thread = await lix.db
@@ -295,7 +295,7 @@ test("ebEntity works with different entity types", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Label all entities as reviewed
-	for (const entity of [account, thread]) {
+	for (const entity of [kv, thread]) {
 		await attachLabel({
 			lix,
 			entity: entity,
@@ -304,9 +304,9 @@ test("ebEntity works with different entity types", async () => {
 	}
 
 	// Query reviewed entities from different tables using new API
-	const reviewedAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity("account").hasLabel({ name: "reviewed" }))
+	const reviewedKeyValues = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity("key_value").hasLabel({ name: "reviewed" }))
 		.selectAll()
 		.execute();
 
@@ -316,7 +316,7 @@ test("ebEntity works with different entity types", async () => {
 		.selectAll()
 		.execute();
 
-	expect(reviewedAccounts).toHaveLength(1);
+	expect(reviewedKeyValues).toHaveLength(1);
 	expect(reviewedThreads).toHaveLength(1);
 });
 

@@ -437,26 +437,23 @@ test("deterministic mode config with global version_id is persisted correctly", 
 	expect(result?.value).toEqual({ enabled: true, randomLixId: true }); // JSON values are preserved
 });
 
-test("newLixFile creates anonymous account and active account during bootstrap", async () => {
+test("newLixFile does not create accounts during bootstrap", async () => {
 	const blob = await newLixFile();
 	const lix = await openLix({ blob });
 
-	// Check that an anonymous account exists in account_all (untracked)
-	const allAccounts = await lix.db.selectFrom("account").selectAll().execute();
+	const allAccounts = await lix.db
+		.selectFrom("account_all")
+		.selectAll()
+		.execute();
 
-	expect(allAccounts.length).toBe(1);
-	const anonymousAccount = allAccounts[0]!;
-	expect(anonymousAccount.name).toMatch(/^Anonymous \w+$/);
-	expect(anonymousAccount.lixcol_untracked).toBe(1);
+	expect(allAccounts.length).toBe(0);
 
-	// Check that active_account references this account
-	const activeAccount = await lix.db
+	const activeAccounts = await lix.db
 		.selectFrom("active_account")
 		.selectAll()
-		.executeTakeFirst();
+		.execute();
 
-	expect(activeAccount).toBeDefined();
-	expect(activeAccount?.account_id).toBe(anonymousAccount.id);
+	expect(activeAccounts.length).toBe(0);
 
 	await lix.close();
 });

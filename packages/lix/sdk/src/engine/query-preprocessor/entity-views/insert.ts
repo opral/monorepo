@@ -207,15 +207,9 @@ export function rewriteEntityInsert(args: {
 		const schemaKeyExpr = addParam(schemaKeyValue);
 		const fileIdExpr = addParam(fileIdValue);
 
+		const explicitVersion = columnMap.get("lixcol_version_id");
 		let versionExpr: string;
 		if (variant === "all") {
-			const explicitVersion = columnMap.get("lixcol_version_id");
-			if (explicitVersion === undefined) return null;
-			versionExpr = isExpressionValue(explicitVersion)
-				? explicitVersion.sql
-				: addParam(explicitVersion);
-		} else {
-			const explicitVersion = columnMap.get("lixcol_version_id");
 			if (explicitVersion !== undefined) {
 				versionExpr = isExpressionValue(explicitVersion)
 					? explicitVersion.sql
@@ -223,8 +217,18 @@ export function rewriteEntityInsert(args: {
 			} else if (defaults.lixcol_version_id !== undefined) {
 				versionExpr = addParam(defaults.lixcol_version_id);
 			} else {
-				versionExpr = "(SELECT version_id FROM active_version)";
+				throw new Error(
+					`INSERT into ${viewNameRaw} requires explicit lixcol_version_id or schema default`
+				);
 			}
+		} else if (explicitVersion !== undefined) {
+			versionExpr = isExpressionValue(explicitVersion)
+				? explicitVersion.sql
+				: addParam(explicitVersion);
+		} else if (defaults.lixcol_version_id !== undefined) {
+			versionExpr = addParam(defaults.lixcol_version_id);
+		} else {
+			versionExpr = "(SELECT version_id FROM active_version)";
 		}
 
 		const pluginKeyExpr = addParam(pluginKeyValue);

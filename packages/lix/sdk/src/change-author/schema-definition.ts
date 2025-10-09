@@ -14,6 +14,7 @@ export const LixChangeAuthorSchema = {
 	"x-lix-defaults": {
 		lixcol_file_id: "lix",
 		lixcol_plugin_key: "lix_own_entity",
+		lixcol_version_id: "global",
 	},
 	"x-lix-foreign-keys": [
 		{

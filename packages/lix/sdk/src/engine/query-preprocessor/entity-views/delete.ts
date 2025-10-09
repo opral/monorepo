@@ -92,6 +92,8 @@ export function rewriteEntityDelete(args: {
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
+	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+
 	const propertiesObject = (schema as Record<string, unknown>).properties ?? {};
 	if (!propertiesObject || typeof propertiesObject !== "object") {
 		return null;
@@ -219,10 +221,25 @@ export function rewriteEntityDelete(args: {
 		}
 	}
 
-	if (variant === "base" && !hasVersionCondition) {
-		whereClauses.push(
-			`state_all.version_id = (SELECT version_id FROM active_version)`
-		);
+	const defaultVersion = defaults.lixcol_version_id;
+	if (!hasVersionCondition) {
+		if (variant === "base") {
+			if (defaultVersion !== undefined) {
+				whereClauses.push(`state_all.version_id = ${addParam(defaultVersion)}`);
+			} else {
+				whereClauses.push(
+					`state_all.version_id = (SELECT version_id FROM active_version)`
+				);
+			}
+		} else if (variant === "all") {
+			if (defaultVersion !== undefined) {
+				whereClauses.push(`state_all.version_id = ${addParam(defaultVersion)}`);
+			} else {
+				throw new Error(
+					`DELETE from ${viewNameRaw} requires explicit lixcol_version_id or schema default`
+				);
+			}
+		}
 	}
 
 	const rewrittenSql = `DELETE FROM state_all\nWHERE\n  ${whereClauses.join("\n  AND ")}`;

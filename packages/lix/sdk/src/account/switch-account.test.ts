@@ -2,28 +2,20 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "./create-account.js";
 import { switchAccount } from "./switch-account.js";
-import { createVersion } from "../version/create-version.js";
 
 test("should switch the active account", async () => {
 	const lix = await openLix({});
-
-	const version = await createVersion({
-		lix,
-		id: "test-version",
-	});
 
 	// Create two accounts
 	const account1 = await createAccount({
 		lix,
 		id: "account1",
 		name: "Account One",
-		lixcol_version_id: version.id,
 	});
 	const account2 = await createAccount({
 		lix,
 		id: "account2",
 		name: "Account Two",
-		lixcol_version_id: version.id,
 	});
 
 	// Switch to account1
@@ -52,16 +44,10 @@ test("should switch the active account", async () => {
 test("should handle switching to the same account", async () => {
 	const lix = await openLix({});
 
-	const version = await createVersion({
-		lix,
-		id: "test-version-2",
-	});
-
 	// Create an account
 	const account = await createAccount({
 		lix,
 		name: "account",
-		lixcol_version_id: version.id,
 	});
 
 	// Switch to the account

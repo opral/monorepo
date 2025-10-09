@@ -8,7 +8,7 @@ import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
-import { applyAccountDatabaseSchema } from "../account/schema.js";
+// import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { LixEngine } from "../engine/boot.js";
@@ -86,7 +86,7 @@ export function prepareEngineDatabase(args: {
 	// applyCommitDatabaseSchema({ engine: engine });
 	// applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
-	applyAccountDatabaseSchema({ engine: engine });
+	// applyAccountDatabaseSchema({ engine: engine });
 	// applyKeyValueDatabaseSchema({ engine: engine });
 	// applyChangeAuthorDatabaseSchema({ engine: engine });
 	// applyLabelDatabaseSchema({ engine: engine });

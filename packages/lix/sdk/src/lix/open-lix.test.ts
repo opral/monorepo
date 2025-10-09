@@ -113,9 +113,6 @@ test("provided key values in openLix should default to the active version if lix
 	expect(mainVersion?.name).toBe("main");
 });
 
-// TODO occasional test failures due to timing issues
-// faulty state materialization might be the cause.
-// fix after https://github.com/opral/lix-sdk/issues/308
 test("providing an account should be possible", async () => {
 	const mockAccount: LixAccount = {
 		id: "mock-account",

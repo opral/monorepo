@@ -234,7 +234,14 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		const sql =
 			"INSERT INTO mock_trigger_view (source_id, target_schema, payload) VALUES (?, ?, ?), (?, ?, ?)";
 		const tokens = tokenize(sql);
-		const parameters = ["alpha", "mock_schema", '{"foo":1}', "beta", "mock_schema", '{"foo":2}'];
+		const parameters = [
+			"alpha",
+			"mock_schema",
+			'{"foo":1}',
+			"beta",
+			"mock_schema",
+			'{"foo":2}',
+		];
 		const rewritten = maybeRewriteInsteadOfTrigger({
 			engine: lix.engine!,
 			sql,
@@ -261,7 +268,8 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		const inserted = rows.filter(
-			(row: any) => row.entity_id === "mock_alpha" || row.entity_id === "mock_beta"
+			(row: any) =>
+				row.entity_id === "mock_alpha" || row.entity_id === "mock_beta"
 		);
 
 		expect(inserted).toEqual(

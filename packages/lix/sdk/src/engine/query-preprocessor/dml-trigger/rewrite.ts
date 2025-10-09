@@ -227,9 +227,7 @@ function splitInsertValuesStatement(sql: string): {
 	if (valuesIndex === -1) {
 		return null;
 	}
-	const prefixBase = trimmed
-		.slice(0, valuesIndex + "VALUES".length)
-		.trimEnd();
+	const prefixBase = trimmed.slice(0, valuesIndex + "VALUES".length).trimEnd();
 	let cursor = valuesIndex + "VALUES".length;
 	while (cursor < trimmed.length && /\s/.test(trimmed[cursor]!)) {
 		cursor += 1;

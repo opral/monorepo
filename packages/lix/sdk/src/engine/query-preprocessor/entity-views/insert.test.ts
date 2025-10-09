@@ -125,6 +125,53 @@ test("rewrites inserts for _all view", async () => {
 	await lix.close();
 });
 
+test("missing lixcol_version_id for _all view throws", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: INSERTABLE_SCHEMA })
+		.execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+
+	expect(() =>
+		preprocess({
+			sql: "INSERT INTO insertable_schema_all (id, name) VALUES (?, ?)",
+			parameters: ["row-3", "Entity 3"],
+		})
+	).toThrow(/lixcol_version_id/);
+
+	await lix.close();
+});
+
+test("defaults version for _all view when schema defines lixcol_version_id", async () => {
+	const lix = await openLix({});
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+
+	const rewritten = preprocess({
+		sql: "INSERT INTO account_all (id, name) VALUES (?, ?)",
+		parameters: ["acc-1", "Defaulted"],
+	});
+
+	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.parameters[3]).toBe("global");
+
+	lix.engine!.executeSync({
+		sql: rewritten.sql,
+		parameters: rewritten.parameters as any[],
+	});
+
+	const rows = await lix.db
+		.selectFrom("account_all")
+		.where("id", "=", "acc-1")
+		.selectAll()
+		.execute();
+
+	const globalRow = rows.find((row) => row.lixcol_version_id === "global");
+	expect(globalRow).toBeDefined();
+	await lix.close();
+});
+
 test("rewrites inserts for composite primary key entity views", async () => {
 	const lix = await openLix({});
 	const compositeSchema = {

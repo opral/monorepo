@@ -341,6 +341,10 @@ simulationTest(
 	"materializes change_author from commit.author_account_ids",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
+			account: {
+				id: "materialization-test-account",
+				name: "Materialization Test User",
+			},
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
