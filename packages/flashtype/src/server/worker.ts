@@ -1,4 +1,4 @@
-import { LLM_PROXY_PREFIX } from "../config/proxy";
+import { LLM_PROXY_PREFIX } from "../env-variables";
 import { handleLlmProxyRequest, type WorkerEnv } from "./llm-proxy";
 
 export type { WorkerEnv as Env } from "./llm-proxy";

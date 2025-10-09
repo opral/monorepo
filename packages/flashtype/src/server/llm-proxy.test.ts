@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { handleLlmProxyRequest, type WorkerEnv } from "./llm-proxy";
-import { LLM_PROXY_PREFIX } from "../config/proxy";
+import { LLM_PROXY_PREFIX } from "../env-variables";
 
 const ORIGINAL_FETCH = globalThis.fetch;
 

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest";
 
 import { handleFetch, type Env as WorkerEnv } from "./worker";
-import { LLM_PROXY_PREFIX } from "../config/proxy";
+import { LLM_PROXY_PREFIX } from "../env-variables";
 
 describe("handleFetch", () => {
 	test("delegates non-proxy requests to the asset binding", async () => {

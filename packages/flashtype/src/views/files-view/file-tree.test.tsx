@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
-import type { FilesystemTreeNode } from "@/lib/build-filesystem-tree";
+import type { FilesystemTreeNode } from "@/views/files-view/build-filesystem-tree";
 import { FileTree } from "./file-tree";
 
 describe("FileTree", () => {

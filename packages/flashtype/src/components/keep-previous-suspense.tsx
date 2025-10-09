@@ -51,13 +51,15 @@ export function KeepPreviousSuspense({
 	);
 
 	const suspenseFallback = useMemo(
-		() => (lastSettled !== null ? lastSettled : fallback ?? null),
+		() => (lastSettled !== null ? lastSettled : (fallback ?? null)),
 		[lastSettled, fallback],
 	);
 
 	return (
 		<Suspense fallback={suspenseFallback}>
-			<SuspenseSettler onSettled={recordSettledChild}>{children}</SuspenseSettler>
+			<SuspenseSettler onSettled={recordSettledChild}>
+				{children}
+			</SuspenseSettler>
 		</Suspense>
 	);
 }

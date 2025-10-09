@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
-import { useKeyValue } from "@/key-value/use-key-value";
-import { EditorProvider } from "@/editor/editor-context";
+import { useKeyValue } from "@/hooks/key-value/use-key-value";
+import { EditorProvider } from "@/components/editor/editor-context";
 import { TipTapEditor } from "@/components/editor/tip-tap-editor";
 import "./style.css";
 

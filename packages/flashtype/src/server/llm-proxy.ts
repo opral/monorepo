@@ -1,4 +1,4 @@
-import { LLM_PROXY_PREFIX } from "../config/proxy";
+import { LLM_PROXY_PREFIX } from "../env-variables";
 
 const GOOGLE_API_HOST = "https://generativelanguage.googleapis.com";
 

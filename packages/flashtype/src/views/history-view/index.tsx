@@ -43,11 +43,11 @@ type HistoryViewProps = {
 export function HistoryView({ context }: HistoryViewProps) {
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
-const items: HistoryCheckpoint[] = checkpoints.map((cp) => ({
-	id: cp.id,
-	title: deriveTitle(cp.added ?? 0, cp.removed ?? 0),
-	timestampLabel: formatTimestamp(cp.checkpoint_created_at),
-}));
+	const items: HistoryCheckpoint[] = checkpoints.map((cp) => ({
+		id: cp.id,
+		title: deriveTitle(cp.added ?? 0, cp.removed ?? 0),
+		timestampLabel: formatTimestamp(cp.checkpoint_created_at),
+	}));
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 

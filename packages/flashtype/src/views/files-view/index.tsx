@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLix, useQuery } from "@lix-js/react-utils";
 import { nanoId, normalizeDirectoryPath, normalizeFilePath } from "@lix-js/sdk";
 import { selectFilesystemEntries } from "@/queries";
-import { buildFilesystemTree } from "@/lib/build-filesystem-tree";
+import { buildFilesystemTree } from "@/views/files-view/build-filesystem-tree";
 import type { ViewContext } from "../../types";
 import { FileTree } from "./file-tree";
 

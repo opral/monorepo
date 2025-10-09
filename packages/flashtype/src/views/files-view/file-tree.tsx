@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { ChevronRight, FileText, Folder, FolderOpen } from "lucide-react";
-import type { FilesystemTreeNode } from "@/lib/build-filesystem-tree";
+import type { FilesystemTreeNode } from "@/views/files-view/build-filesystem-tree";
 
 export type FileTreeDraft = {
 	readonly kind: "file" | "directory";
@@ -112,11 +112,11 @@ function FileTreeNode({
 }) {
 	if (node.type === "file") {
 		const isSelected = selectedPath === node.path;
-	const buttonClass = clsx(
-		"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-[13px] transition-colors",
-		!isSelected && "hover:bg-neutral-100",
-		isSelected ? selectedClasses : "text-neutral-700",
-	);
+		const buttonClass = clsx(
+			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-[13px] transition-colors",
+			!isSelected && "hover:bg-neutral-100",
+			isSelected ? selectedClasses : "text-neutral-700",
+		);
 		return (
 			<li>
 				<button

@@ -6,8 +6,8 @@ import "./index.css";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, OpfsSahEnvironment, type Lix } from "@lix-js/sdk";
 import { initLixInspector } from "@lix-js/inspector";
-import { KeyValueProvider } from "./key-value/use-key-value";
-import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
+import { KeyValueProvider } from "./hooks/key-value/use-key-value";
+import { KEY_VALUE_DEFINITIONS } from "./hooks/key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
 

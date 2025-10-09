@@ -1,5 +1,5 @@
 import { createRootRoute } from "@tanstack/react-router";
-import { V2LayoutShell } from "../prototypes/v2-layout/layout-shell";
+import { V2LayoutShell } from "../app/layout-shell";
 
 export const Route = createRootRoute({
 	component: Root,

@@ -9,7 +9,7 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { useKeyValue } from "@/key-value/use-key-value";
+import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { selectWorkingDiff } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { SidePanel } from "./side-panel";

@@ -9,15 +9,15 @@ import {
 	Search,
 } from "lucide-react";
 import type { ViewDefinition, ViewKey } from "./types";
-import { FilesView } from "./panel-views/files-view/index";
-import { SearchView } from "./panel-views/search-view/index";
-import { TasksView } from "./panel-views/tasks-view/index";
-import { MarkdownView } from "./panel-views/markdown-view/index";
-import { CheckpointView } from "./panel-views/checkpoint-view/index";
-import { HistoryView } from "./panel-views/history-view/index";
-import { CommitView } from "./panel-views/commit-view/index";
-import { DiffPanelView } from "./panel-views/diff-view/index";
-import { AgentView } from "./panel-views/agent-view/index";
+import { FilesView } from "../views/files-view/index";
+import { SearchView } from "../views/search-view/index";
+import { TasksView } from "../views/tasks-view/index";
+import { MarkdownView } from "../views/markdown-view/index";
+import { CheckpointView } from "../views/checkpoint-view/index";
+import { HistoryView } from "../views/history-view/index";
+import { CommitView } from "../views/commit-view/index";
+import { DiffPanelView } from "../views/diff-view/index";
+import { AgentView } from "../views/agent-view/index";
 
 /**
  * Canonical catalogue of prototype views available to each panel.

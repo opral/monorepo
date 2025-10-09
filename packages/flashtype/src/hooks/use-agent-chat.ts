@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { Lix } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import { LLM_PROXY_PREFIX } from "@/config/proxy";
+import { LLM_PROXY_PREFIX } from "@/env-variables";
 import {
 	createLixAgent,
 	type LixAgent,
