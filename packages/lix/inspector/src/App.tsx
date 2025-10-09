@@ -1,7 +1,6 @@
-import { useEffect, useState, useRef, Suspense } from "react";
-import { useLix, useSuspenseQuery } from "@lix-js/react-utils";
+import { useEffect, useState, useRef, useContext } from "react";
+import { useLix } from "@lix-js/react-utils";
 import { openLix } from "@lix-js/sdk";
-import { useContext } from "react";
 import { Context } from "./context";
 import {
   DownloadIcon,
@@ -14,8 +13,10 @@ import {
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
-import { LogIndicator } from "./components/log-indicator";
-import { WindowManagerProvider, useWindowManager } from "./components/window-manager-context";
+import {
+  WindowManagerProvider,
+  useWindowManager,
+} from "./components/window-manager-context";
 
 // Define the types of content that can be displayed
 type Pages = "data-explorer" | "graph";
@@ -81,62 +82,6 @@ interface WindowState {
 }
 
 // Component that uses useSuspenseQuery for log counts
-function LogCountsProvider({
-  children,
-}: {
-  children: (logCounts: any) => React.ReactNode;
-}) {
-  // Get error counts
-  const errorLogs = useSuspenseQuery(({ lix }) =>
-    lix.db
-      .selectFrom("log")
-      .select(({ fn }) => fn.countAll().as("count"))
-      .where("level", "=", "error")
-  );
-
-  // Get warning counts
-  const warningLogs = useSuspenseQuery(({ lix }) =>
-    lix.db
-      .selectFrom("log")
-      .select(({ fn }) => fn.countAll().as("count"))
-      .where("level", "=", "warning")
-  );
-
-  // Get info counts
-  const infoLogs = useSuspenseQuery(({ lix }) =>
-    lix.db
-      .selectFrom("log")
-      .select(({ fn }) => fn.countAll().as("count"))
-      .where("level", "=", "info")
-  );
-
-  // Get debug counts
-  const debugLogs = useSuspenseQuery(({ lix }) =>
-    lix.db
-      .selectFrom("log")
-      .select(({ fn }) => fn.countAll().as("count"))
-      .where("level", "=", "debug")
-  );
-
-  // Get unknown level counts
-  const unknownLogs = useSuspenseQuery(({ lix }) =>
-    lix.db
-      .selectFrom("log")
-      .select(({ fn }) => fn.countAll().as("count"))
-      .where("level", "not in", ["error", "warning", "info", "debug"])
-  );
-
-  const logCounts = {
-    error: Number(errorLogs[0]?.count ?? 0),
-    warning: Number(warningLogs[0]?.count ?? 0),
-    info: Number(infoLogs[0]?.count ?? 0),
-    debug: Number(debugLogs[0]?.count ?? 0),
-    unknown: Number(unknownLogs[0]?.count ?? 0),
-  };
-
-  return <>{children(logCounts)}</>;
-}
-
 function AppContent(args: { show: boolean }) {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
@@ -246,13 +191,13 @@ function AppContent(args: { show: boolean }) {
             viewportWidth - config.initialSize.width - 20
           )
         );
-        
+
         initialStates[pageId] = {
           position: { x: centerX, y: topY + offsetX },
           size: config.initialSize,
           isExpanded: false,
         };
-        
+
         offsetX += 30; // Stagger each window by 30px
       });
 
@@ -327,12 +272,12 @@ function AppContent(args: { show: boolean }) {
   const handleCloseWindow = (pageId: Pages) => {
     // Remove from open windows
     setOpenWindows((prev: Pages[]) => prev.filter((id) => id !== pageId));
-    
+
     // If window is pinned, unpin it
     if (pinnedWindows.includes(pageId)) {
       setPinnedWindows((prev: Pages[]) => prev.filter((id) => id !== pageId));
     }
-    
+
     // If this was the focused window, clear the focus
     if (windowManager.focusedWindow === pageId) {
       windowManager.clearFocus();
@@ -351,8 +296,9 @@ function AppContent(args: { show: boolean }) {
     if (id === "data-explorer" || id === "graph") {
       const pageId = id as Pages;
 
-      const isWindowOpen = openWindows.includes(pageId) || pinnedWindows.includes(pageId);
-      
+      const isWindowOpen =
+        openWindows.includes(pageId) || pinnedWindows.includes(pageId);
+
       if (isWindowOpen) {
         // If window is open, bring it to the front (focus it)
         windowManager.focusWindow(pageId);
@@ -436,18 +382,21 @@ function AppContent(args: { show: boolean }) {
                 { id: "data-explorer", label: "Data Explorer" },
               ].map((item) => {
                 const pageId = item.id as Pages;
-                const isWindowOpen = openWindows.includes(pageId) || pinnedWindows.includes(pageId);
-                const isFocused = isWindowOpen && windowManager.focusedWindow === pageId;
-                
+                const isWindowOpen =
+                  openWindows.includes(pageId) ||
+                  pinnedWindows.includes(pageId);
+                const isFocused =
+                  isWindowOpen && windowManager.focusedWindow === pageId;
+
                 return (
                   <button
                     key={item.id}
                     className={`btn btn-xs ${
-                      isFocused 
+                      isFocused
                         ? "btn-primary" // Focused window gets primary styling
-                        : isWindowOpen 
+                        : isWindowOpen
                           ? "btn-outline" // Open but not focused gets outline
-                          : "btn-ghost"   // Closed window gets ghost styling
+                          : "btn-ghost" // Closed window gets ghost styling
                     }`}
                     onClick={() => handleNavItemClick(item.id)}
                   >
@@ -458,45 +407,6 @@ function AppContent(args: { show: boolean }) {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              {/* Log Indicator with Suspense */}
-              <Suspense
-                fallback={
-                  <div className="loading loading-spinner loading-xs"></div>
-                }
-              >
-                <LogCountsProvider>
-                  {(logCounts) => (
-                    <LogIndicator
-                      errorCount={logCounts?.error ?? 0}
-                      warningCount={logCounts?.warning ?? 0}
-                      otherCount={
-                        (logCounts?.info ?? 0) +
-                        (logCounts?.debug ?? 0) +
-                        (logCounts?.unknown ?? 0)
-                      }
-                      onClick={(level) => {
-                        // Open data explorer if not already open, otherwise just focus it
-                        if (!openWindows.includes("data-explorer") && !pinnedWindows.includes("data-explorer")) {
-                          setOpenWindows((prev) => [...prev, "data-explorer"]);
-                        }
-                        windowManager.focusWindow("data-explorer");
-                        
-                        // Only set filter for error or warning; show all logs for 'other'
-                        if (level === "error" || level === "warning") {
-                          window.localStorage.setItem(
-                            "lix-inspector-log-filter",
-                            level
-                          );
-                        } else {
-                          window.localStorage.removeItem(
-                            "lix-inspector-log-filter"
-                          );
-                        }
-                      }}
-                    />
-                  )}
-                </LogCountsProvider>
-              </Suspense>
               {/* Freeze/Unfreeze Button with Tooltip */}
               <div className="tooltip tooltip-bottom">
                 <div className="tooltip-content">

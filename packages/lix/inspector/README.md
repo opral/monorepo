@@ -13,10 +13,11 @@ Dev tool to analyze and debug Lix'es.
 ```ts
 import { initLixInspector } from "@lix-js/inspector";
 
-// optionally only add in development
-if (import.meta.env.DEV){
-  // pass the lix to the inspector 
-  initLixInspector({ lix });
-}
+initLixInspector({ lix });
 
 ```
+
+## Best practices
+
+- Ship the inspector in production. It lazy-loads on first toggle, so initial bundles stay lean while users can capture precise snapshots for bug reports.
+- Read the `--lix-inspector-offset` CSS variable on `:root` (e.g. `padding-top: var(--lix-inspector-offset)`) to keep your chrome aligned when the inspector is visible.
