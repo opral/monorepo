@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	Bell,
 	Command,
@@ -17,8 +16,6 @@ import {
  * <TopBar />
  */
 export function TopBar() {
-	const navigate = useNavigate();
-
 	return (
 		<header className="flex h-10 items-center px-2 text-neutral-600">
 			<div className="flex flex-1 items-center gap-1 text-sm">
@@ -65,14 +62,6 @@ export function TopBar() {
 					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
 				>
 					<Bell className="h-4 w-4" />
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-7 px-2 text-xs hover:bg-neutral-200 hover:text-neutral-900"
-					onClick={() => void navigate({ to: "/" })}
-				>
-					Back to main UI
 				</Button>
 			</div>
 		</header>

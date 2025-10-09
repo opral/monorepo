@@ -1,43 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { TipTapEditor } from "@/components/editor/tip-tap-editor";
-import { useKeyValue } from "@/key-value/use-key-value";
-import { DiffView } from "@/components/diff-view";
-import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
+import { createFileRoute } from "@tanstack/react-router";
 
+/**
+ * Minimal placeholder for the root path while the V2 layout owns rendering.
+ *
+ * @example
+ * <Route />
+ */
 export const Route = createFileRoute("/")({
-	component: Index,
+	component: RootIndex,
 });
 
-function Index() {
-	const [activeFileId] = useKeyValue("flashtype_active_file_id");
-	const [diffOpen] = useKeyValue("flashtype_diff_open", {
-		defaultVersionId: "global",
-		untracked: true,
-	});
-
-	return (
-		<main style={{ padding: "0 16px" }}>
-			{activeFileId ? (
-				<KeepPreviousSuspense>
-					{diffOpen ? <DiffView /> : <TipTapEditor />}
-				</KeepPreviousSuspense>
-			) : (
-				<div style={{ padding: 12, opacity: 0.7 }}>
-					<div>Select a file to start editing.</div>
-					<div style={{ marginTop: 16 }}>
-						<Link
-							to="/v2-layout"
-							style={{
-								color: "#0066cc",
-								textDecoration: "underline",
-								cursor: "pointer",
-							}}
-						>
-							View V2 Layout Prototype →
-						</Link>
-					</div>
-				</div>
-			)}
-		</main>
-	);
+function RootIndex() {
+	return null;
 }

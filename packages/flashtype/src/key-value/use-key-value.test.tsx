@@ -12,7 +12,9 @@ import { openLix } from "@lix-js/sdk";
 import { useKeyValue, KeyValueProvider } from "./use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./schema";
 
-test("reads a global, untracked key (left sidebar tab)", async () => {
+const UNTRACKED_TEST_KEY = "flashtype_test_untracked";
+
+test("reads a global, untracked key (test fixture)", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -26,8 +28,8 @@ test("reads a global, untracked key (left sidebar tab)", async () => {
 	await lix.db
 		.insertInto("key_value_all")
 		.values({
-			key: "flashtype_left_sidebar_active_tab",
-			value: "files",
+			key: UNTRACKED_TEST_KEY,
+			value: "alpha",
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -35,20 +37,19 @@ test("reads a global, untracked key (left sidebar tab)", async () => {
 	let hookResult: { current: unknown } = { current: null };
 
 	await act(async () => {
-		const { result } = renderHook(
-			() => useKeyValue("flashtype_left_sidebar_active_tab"),
-			{ wrapper },
-		);
+		const { result } = renderHook(() => useKeyValue(UNTRACKED_TEST_KEY), {
+			wrapper,
+		});
 		hookResult = result as unknown as { current: unknown };
 	});
 
 	await waitFor(() => Array.isArray(hookResult.current as any));
 
-	const [tab] = hookResult.current as any;
-	expect(tab).toBe("files");
+	const [value] = hookResult.current as any;
+	expect(value).toBe("alpha");
 });
 
-test("writes and reads a global, untracked key (left sidebar tab)", async () => {
+test("writes and reads a global, untracked key (test fixture)", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -60,10 +61,9 @@ test("writes and reads a global, untracked key (left sidebar tab)", async () => 
 
 	let resultRef: { current: unknown } = { current: null };
 	await act(async () => {
-		const { result } = renderHook(
-			() => useKeyValue("flashtype_left_sidebar_active_tab"),
-			{ wrapper },
-		);
+		const { result } = renderHook(() => useKeyValue(UNTRACKED_TEST_KEY), {
+			wrapper,
+		});
 		resultRef = result as unknown as { current: unknown };
 	});
 
@@ -71,19 +71,19 @@ test("writes and reads a global, untracked key (left sidebar tab)", async () => 
 	await waitFor(() => Array.isArray(resultRef.current as any));
 
 	await act(async () => {
-		await (resultRef.current as any)?.[1]("history");
+		await (resultRef.current as any)?.[1]("beta");
 	});
 
-	await waitFor(() => expect((resultRef.current as any)?.[0]).toBe("history"));
+	await waitFor(() => expect((resultRef.current as any)?.[0]).toBe("beta"));
 
 	// Verify DB row persisted to key_value_all with lixcol_version_id = 'global'
 	const rows = (await lix.db
 		.selectFrom("key_value_all")
-		.where("key", "=", "flashtype_left_sidebar_active_tab")
+		.where("key", "=", UNTRACKED_TEST_KEY)
 		.where("lixcol_version_id", "=", "global")
 		.select(["value"])
 		.execute()) as any;
-	expect(rows[0]?.value).toBe("history");
+	expect(rows[0]?.value).toBe("beta");
 });
 
 test("writes and reads a tracked key on active version", async () => {
@@ -132,8 +132,8 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	await lix.db
 		.insertInto("key_value_all")
 		.values({
-			key: "flashtype_left_sidebar_active_tab",
-			value: "files",
+			key: UNTRACKED_TEST_KEY,
+			value: "ready",
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -148,7 +148,7 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	);
 
 	function ReadKV() {
-		const [val] = useKeyValue("flashtype_left_sidebar_active_tab");
+		const [val] = useKeyValue(UNTRACKED_TEST_KEY);
 		return <div data-testid="val">{String(val)}</div>;
 	}
 
@@ -157,7 +157,7 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	});
 	// Eventually value appears once Suspense resolves
 	const el = await screen.findByTestId("val");
-	expect(el.textContent).toBe("files");
+	expect(el.textContent).toBe("ready");
 });
 
 test("re-renders when key value changes externally", async () => {
@@ -237,8 +237,8 @@ test("memoized children should not re-render when parent state changes", async (
 	await lix.db
 		.insertInto("key_value_all")
 		.values({
-			key: "flashtype_left_sidebar_active_tab",
-			value: "files",
+			key: UNTRACKED_TEST_KEY,
+			value: "initial",
 			lixcol_version_id: "global",
 		})
 		.execute();
@@ -263,7 +263,7 @@ test("memoized children should not re-render when parent state changes", async (
 	});
 
 	function Parent() {
-		const pair = useKeyValue("flashtype_left_sidebar_active_tab", {
+		const pair = useKeyValue(UNTRACKED_TEST_KEY, {
 			defaultVersionId: "global",
 			untracked: true,
 		});

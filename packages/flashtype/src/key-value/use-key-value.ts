@@ -79,10 +79,12 @@ function getDefaults(
  * - Honors per-key defaults from `KeyValueProvider` or built-in schema.
  *
  * @example
- * function SidebarTab() {
- *   const [tab, setTab] = useKeyValue('flashtype_left_sidebar_active_tab')
+ * function AutoAcceptToggle() {
+ *   const [autoAccept, setAutoAccept] = useKeyValue('flashtype_auto_accept_session')
  *   return (
- *     <button onClick={() => setTab('history')}>{tab ?? 'loading'}</button>
+ *     <button onClick={() => setAutoAccept(!autoAccept)}>
+ *       {autoAccept ? 'Enabled' : 'Disabled'}
+ *     </button>
  *   )
  * }
  */
