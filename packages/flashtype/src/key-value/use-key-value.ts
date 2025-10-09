@@ -113,9 +113,9 @@ export function useKeyValue<K extends string>(
 		rows && rows[0]?.value !== undefined ? rows[0]?.value : defVal
 	) as ValueOf<K> | null;
 
-	const [optimistic, setOptimistic] = useState<{ value: ValueOf<K> | null } | null>(
-		null,
-	);
+	const [optimistic, setOptimistic] = useState<{
+		value: ValueOf<K> | null;
+	} | null>(null);
 
 	useEffect(() => {
 		if (!optimistic) return;
@@ -137,7 +137,10 @@ export function useKeyValue<K extends string>(
 
 	const resolvedValue = optimistic?.value ?? value;
 
-	return useMemo(() => [resolvedValue, setValue] as const, [resolvedValue, setValue]);
+	return useMemo(
+		() => [resolvedValue, setValue] as const,
+		[resolvedValue, setValue],
+	);
 }
 
 function selectValue(

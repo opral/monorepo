@@ -201,7 +201,7 @@ test("re-renders when key value changes externally", async () => {
 
 test("returns optimistic value immediately when setter is called", async () => {
 	const lix = await openLix({});
-	const TEST_KEY = "flashtype_test_optimistic";
+	const TEST_KEY = "flashtype_test_optimistic" as any;
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
 			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>

@@ -27,7 +27,6 @@ import type {
 import { createViewInstanceKey, VIEW_MAP } from "./view-registry";
 import { Panel as PanelComponent } from "./panel";
 import {
-	DEFAULT_FLASHTYPE_UI_STATE,
 	FLASHTYPE_UI_STATE_KEY,
 	normalizeLayoutSizes,
 	type PanelLayoutSizes,
@@ -126,11 +125,14 @@ const createWorkingVsCheckpointDiffConfig = (
  */
 export function V2LayoutShell() {
 	const [uiStateKV, setUiStateKV] = useKeyValue(FLASHTYPE_UI_STATE_KEY);
-	const persistedState = uiStateKV ?? DEFAULT_FLASHTYPE_UI_STATE;
-	const initialLayoutSizes = normalizeLayoutSizes(persistedState.layout?.sizes);
+	if (!uiStateKV) {
+		throw new Error("Flashtype UI state is unavailable.");
+	}
+
+	const initialLayoutSizes = normalizeLayoutSizes(uiStateKV.layout?.sizes);
 
 	const [leftPanel, setLeftPanel] = useState<PanelState>(() => {
-		const existing = persistedState.panels.left;
+		const existing = uiStateKV.panels.left;
 		if (existing.views.length > 0) {
 			return hydratePanel(existing);
 		}
@@ -145,13 +147,13 @@ export function V2LayoutShell() {
 		});
 	});
 	const [centralPanel, setCentralPanel] = useState<PanelState>(() =>
-		hydratePanel(persistedState.panels.central),
+		hydratePanel(uiStateKV.panels.central),
 	);
 	const [rightPanel, setRightPanel] = useState<PanelState>(() =>
-		hydratePanel(persistedState.panels.right),
+		hydratePanel(uiStateKV.panels.right),
 	);
 	const [focusedPanel, setFocusedPanel] = useState<PanelSide>(
-		() => persistedState.focusedPanel,
+		() => uiStateKV.focusedPanel,
 	);
 	const [panelSizes, setPanelSizes] = useState<PanelLayoutSizes>(
 		() => initialLayoutSizes,
@@ -159,8 +161,8 @@ export function V2LayoutShell() {
 
 	const lastPersistedRef = useRef<string>(
 		JSON.stringify({
-			focusedPanel: persistedState.focusedPanel,
-			panels: persistedState.panels,
+			focusedPanel: uiStateKV.focusedPanel,
+			panels: uiStateKV.panels,
 			layout: { sizes: initialLayoutSizes },
 		} satisfies FlashtypeUiState),
 	);
