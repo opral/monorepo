@@ -32,6 +32,11 @@ import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
+import { maybeRewriteInsteadOfTrigger } from "./dml-trigger/rewrite.js";
+import {
+	readDmlTarget,
+	type DmlOperation,
+} from "./dml-trigger/read-dml-target.js";
 
 export async function createQueryPreprocessor(
 	engine: Pick<
@@ -47,17 +52,6 @@ export async function createQueryPreprocessor(
 		const tokens = tokenize(sql);
 		const kind = detectStatementKind(tokens);
 
-		const triggerRewrite = maybeRewriteTrigger({
-			engine,
-			sql,
-			parameters,
-			tokens,
-			kind,
-		});
-		if (triggerRewrite) {
-			return triggerRewrite;
-		}
-
 		const entityViewRewrite = maybeRewriteEntityView({
 			engine,
 			sql,
@@ -68,6 +62,17 @@ export async function createQueryPreprocessor(
 		if (entityViewRewrite) {
 			return entityViewRewrite;
 		}
+
+		// const triggerRewrite = maybeRewriteTrigger({
+		// 	engine,
+		// 	sql,
+		// 	parameters,
+		// 	tokens,
+		// 	kind,
+		// });
+		// if (triggerRewrite) {
+		// 	return triggerRewrite;
+		// }
 
 		const vtableRewrite = maybeRewriteVtable({
 			engine,
@@ -88,6 +93,8 @@ export async function createQueryPreprocessor(
 /**
  * Routes DML statements through registered INSTEAD OF trigger handlers when available.
  */
+const DML_TRIGGER_WHITELIST = new Set(["active_account", "lix_active_account"]);
+
 function maybeRewriteTrigger(args: {
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
 	sql: string;
@@ -103,8 +110,31 @@ function maybeRewriteTrigger(args: {
 		return null;
 	}
 
-	// Trigger rewriting is still experimental; fall back to SQLite's own triggers for now.
-	return null;
+	const op: DmlOperation =
+		args.kind === "insert"
+			? "insert"
+			: args.kind === "update"
+				? "update"
+				: "delete";
+
+	const target = readDmlTarget(args.tokens, op);
+	if (!target) {
+		return null;
+	}
+	const normalizedTarget = target.toLowerCase();
+	if (!DML_TRIGGER_WHITELIST.has(normalizedTarget)) {
+		return null;
+	}
+
+	return (
+		maybeRewriteInsteadOfTrigger({
+			engine: args.engine,
+			sql: args.sql,
+			tokens: args.tokens,
+			parameters: args.parameters,
+			op,
+		}) ?? null
+	);
 }
 
 /**

@@ -113,6 +113,15 @@ function rewriteInsertTrigger(args: RewriteInsertArgs): RewriteResult | null {
 	if (rows.length === 0) {
 		return null;
 	}
+	if (rows.length > 1) {
+		return rewriteInsertTriggerMultiRow({
+			body,
+			rows,
+			columnNames,
+			returningClause,
+			parameters,
+		});
+	}
 
 	const statements: string[] = [];
 	const returningStatements: string[] = [];
@@ -143,6 +152,130 @@ function rewriteInsertTrigger(args: RewriteInsertArgs): RewriteResult | null {
 		sql: finalSql,
 		parameters,
 	};
+}
+
+interface MultiRowRewriteArgs {
+	readonly body: string;
+	readonly rows: RowExpressions[];
+	readonly columnNames: string[];
+	readonly returningClause: string | null;
+	readonly parameters: ReadonlyArray<unknown>;
+}
+
+function rewriteInsertTriggerMultiRow(
+	args: MultiRowRewriteArgs
+): RewriteResult | null {
+	if (args.returningClause) {
+		return null;
+	}
+
+	const tuples: string[] = [];
+	let prefix: string | null = null;
+	let suffix: string | null = null;
+
+	for (const row of args.rows) {
+		const rewritten = substituteNewForRow({
+			body: args.body,
+			row,
+			columnNames: args.columnNames,
+		});
+		if (!rewritten) {
+			return null;
+		}
+		const parsed = splitInsertValuesStatement(rewritten);
+		if (!parsed) {
+			return null;
+		}
+		if (prefix === null) {
+			prefix = parsed.prefix;
+			suffix = parsed.suffix;
+		} else {
+			if (!equivalentInsertPrefix(prefix, parsed.prefix)) {
+				return null;
+			}
+			if (!equivalentSuffix(suffix, parsed.suffix)) {
+				return null;
+			}
+		}
+		tuples.push(parsed.tuple);
+	}
+
+	if (!prefix || tuples.length === 0) {
+		return null;
+	}
+
+	const valuesList = tuples.join(", ");
+	const finalSql = `${prefix} ${valuesList}${
+		suffix && suffix.length > 0 ? ` ${suffix}` : ""
+	}`;
+
+	return {
+		sql: ensureTerminated(finalSql),
+		parameters: args.parameters,
+	};
+}
+
+function splitInsertValuesStatement(sql: string): {
+	prefix: string;
+	tuple: string;
+	suffix: string;
+} | null {
+	const trimmed = sql.trim();
+	if (trimmed.length === 0) return null;
+	const upper = trimmed.toUpperCase();
+	const valuesIndex = upper.indexOf("VALUES");
+	if (valuesIndex === -1) {
+		return null;
+	}
+	const prefixBase = trimmed
+		.slice(0, valuesIndex + "VALUES".length)
+		.trimEnd();
+	let cursor = valuesIndex + "VALUES".length;
+	while (cursor < trimmed.length && /\s/.test(trimmed[cursor]!)) {
+		cursor += 1;
+	}
+	if (cursor >= trimmed.length || trimmed[cursor] !== "(") {
+		return null;
+	}
+	let depth = 0;
+	let endIndex = -1;
+	for (let i = cursor; i < trimmed.length; i++) {
+		const ch = trimmed[i];
+		if (ch === "(") {
+			depth += 1;
+		} else if (ch === ")") {
+			depth -= 1;
+			if (depth === 0) {
+				endIndex = i + 1;
+				break;
+			}
+		}
+	}
+	if (endIndex === -1) {
+		return null;
+	}
+	const tuple = trimmed.slice(cursor, endIndex).trim();
+	const remainder = trimmed.slice(endIndex).trimStart();
+	return {
+		prefix: prefixBase,
+		tuple,
+		suffix: remainder,
+	};
+}
+
+function equivalentInsertPrefix(a: string | null, b: string | null): boolean {
+	if (a === null || b === null) return a === b;
+	return normalizeWhitespace(a) === normalizeWhitespace(b);
+}
+
+function equivalentSuffix(a: string | null, b: string | null): boolean {
+	const normA = normalizeWhitespace(a ?? "");
+	const normB = normalizeWhitespace(b ?? "");
+	return normA === normB;
+}
+
+function normalizeWhitespace(input: string): string {
+	return input.replace(/\s+/g, " ").trim();
 }
 
 interface RewriteUpdateArgs {

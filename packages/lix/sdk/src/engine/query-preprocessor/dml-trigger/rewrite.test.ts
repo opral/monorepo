@@ -182,10 +182,11 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			op: "insert",
 		});
 
-		expect(rewritten?.sql.split("\n")).toEqual([
-			"INSERT INTO sink VALUES (?1, ?2);",
-			"INSERT INTO sink VALUES (?3, ?4);",
-		]);
+		const normalizedSql = rewritten?.sql.replace(/\s+/g, " ").trim() ?? "";
+		expect(normalizedSql).toMatch(
+			/^INSERT INTO sink VALUES \(\?1, \?2\), \(\?3, \?4\)\s*;$/
+		);
+		expect(rewritten?.parameters).toEqual(["a", 1, "b", 2]);
 		executeRewritten(lix.engine!, rewritten!);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT id, value FROM sink ORDER BY rowid",
@@ -195,6 +196,92 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			{ id: "a", value: 1 },
 			{ id: "b", value: 2 },
 		]);
+		await lix.close();
+	});
+
+	test("rewrites complex multi-row INSERT via trigger pipeline", async () => {
+		const lix = await openLix({});
+
+		lix.engine!.sqlite.exec(`
+				CREATE TABLE mock_state (
+					entity_id TEXT,
+					schema_key TEXT,
+					payload TEXT,
+					flag INTEGER
+				);
+				CREATE VIEW mock_trigger_view AS
+				SELECT
+					'' AS source_id,
+					'' AS target_schema,
+					'' AS payload;
+				CREATE TRIGGER mock_trigger_view_insert
+				INSTEAD OF INSERT ON mock_trigger_view
+				BEGIN
+					INSERT INTO mock_state (
+						entity_id,
+						schema_key,
+						payload,
+						flag
+					) VALUES (
+						'mock_' || NEW.source_id,
+						NEW.target_schema,
+						NEW.payload,
+						1
+					);
+				END;
+		`);
+
+		const sql =
+			"INSERT INTO mock_trigger_view (source_id, target_schema, payload) VALUES (?, ?, ?), (?, ?, ?)";
+		const tokens = tokenize(sql);
+		const parameters = ["alpha", "mock_schema", '{"foo":1}', "beta", "mock_schema", '{"foo":2}'];
+		const rewritten = maybeRewriteInsteadOfTrigger({
+			engine: lix.engine!,
+			sql,
+			tokens,
+			parameters,
+			op: "insert",
+		});
+
+		expect(rewritten).not.toBeNull();
+		const normalizedSql = rewritten?.sql.replace(/\s+/g, " ") ?? "";
+		expect(normalizedSql).toContain("INSERT INTO mock_state");
+		const compactSql = normalizedSql.replace(/\s+/g, "");
+		expect(compactSql).toContain(
+			"VALUES('mock_'||?1,?2,?3,1),('mock_'||?4,?5,?6,1);"
+		);
+		expect(rewritten?.parameters).toEqual(parameters);
+
+		executeRewritten(lix.engine!, rewritten!);
+		const { rows } = lix.engine!.executeSync({
+			sql: `SELECT entity_id, schema_key, payload, flag
+			FROM mock_state
+			ORDER BY entity_id`,
+			parameters: [],
+		});
+
+		const inserted = rows.filter(
+			(row: any) => row.entity_id === "mock_alpha" || row.entity_id === "mock_beta"
+		);
+
+		expect(inserted).toEqual(
+			expect.arrayContaining([
+				{
+					entity_id: "mock_alpha",
+					schema_key: "mock_schema",
+					payload: '{"foo":1}',
+					flag: 1,
+				},
+				{
+					entity_id: "mock_beta",
+					schema_key: "mock_schema",
+					payload: '{"foo":2}',
+					flag: 1,
+				},
+			])
+		);
+		expect(inserted.length).toBeGreaterThanOrEqual(2);
+
 		await lix.close();
 	});
 

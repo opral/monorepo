@@ -318,7 +318,7 @@ export async function newLixFile(args?: {
 		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
-				entity_id: `active_${activeAccountId}`,
+				entity_id: activeAccountId,
 				schema_key: LixActiveAccountSchema["x-lix-key"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",

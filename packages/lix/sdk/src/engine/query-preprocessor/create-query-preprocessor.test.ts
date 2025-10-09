@@ -133,6 +133,34 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
+	test("rewrites active_account insert via trigger pipeline", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const sql = "INSERT INTO active_account (account_id) VALUES (?)";
+
+		const result = preprocess({
+			sql,
+			parameters: ["user123"],
+		});
+
+		expect(result.sql).toContain("INSERT INTO state_all");
+		expect(result.sql).not.toMatch(/\bactive_account\b/i);
+		expect(result.sql).toContain("json_object('account_id', ?)");
+		expect(result.parameters).toEqual([
+			"user123",
+			"lix_active_account",
+			"lix",
+			"global",
+			"lix_own_entity",
+			"user123",
+			"1.0",
+			null,
+			1,
+		]);
+
+		await lix.close();
+	});
+
 	test("skips WITH ... DELETE statements", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);

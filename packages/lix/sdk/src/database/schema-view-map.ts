@@ -1,4 +1,7 @@
-import { LixAccountSchema } from "../account/schema-definition.js";
+import {
+	LixAccountSchema,
+	LixActiveAccountSchema,
+} from "../account/schema-definition.js";
 import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
 import {
@@ -36,6 +39,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
 	account: LixAccountSchema,
+	active_account: LixActiveAccountSchema,
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,

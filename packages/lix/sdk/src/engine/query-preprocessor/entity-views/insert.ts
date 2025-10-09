@@ -198,7 +198,11 @@ export function rewriteEntityInsert(args: {
 			);
 		}
 		const metadataValue = columnMap.get("lixcol_metadata") ?? null;
-		const untrackedValue = columnMap.get("lixcol_untracked") ?? 0;
+		const untrackedValue = getColumnOrDefault(
+			columnMap,
+			"lixcol_untracked",
+			defaults.lixcol_untracked ?? 0
+		);
 
 		const schemaKeyExpr = addParam(schemaKeyValue);
 		const fileIdExpr = addParam(fileIdValue);
