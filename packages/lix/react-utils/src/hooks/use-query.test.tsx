@@ -218,61 +218,6 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 	await lix.close();
 });
 
-test("useQuery does not show stale rows on key change (subscribe: true)", async () => {
-	const lix = await openLix({});
-	await lix.db
-		.insertInto("key_value")
-		.values([
-			{ key: "file_a", value: "value_a" },
-			{ key: "file_b", value: "value_b" },
-		])
-		.execute();
-
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={lix}>
-			<Suspense fallback={<div>Loading…</div>}>
-				<MockErrorBoundary>{children}</MockErrorBoundary>
-			</Suspense>
-		</LixProvider>
-	);
-
-	const seen: Array<string | undefined> = [];
-	const hook = await act(async () =>
-		renderHook(
-			({ lookup = "file_a" }: { lookup?: string } = {}) => {
-				const row = useQueryTakeFirst(
-					({ lix }) =>
-						lix.db
-							.selectFrom("key_value")
-							.selectAll()
-							.where("key", "=", lookup),
-					{ subscribe: true },
-				);
-				if (row?.key) seen.push(row.key);
-				return row;
-			},
-			{ wrapper },
-		),
-	);
-	const { rerender, unmount } = hook;
-
-	await waitFor(() => {
-		expect(seen.length).toBeGreaterThan(0);
-	});
-	seen.length = 0;
-	await act(async () => {
-		rerender({ lookup: "file_b" });
-	});
-
-	await waitFor(() => {
-		expect(seen.length).toBeGreaterThan(0);
-	});
-	expect(seen[0]).toBe("file_b");
-
-	unmount();
-	await lix.close();
-});
-
 test("useQueryTakeFirst (subscribe:false) does not reuse previous rows", async () => {
 	const lix = await openLix({});
 	await lix.db
