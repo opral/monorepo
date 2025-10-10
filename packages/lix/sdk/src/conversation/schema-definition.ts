@@ -12,7 +12,7 @@ export const LixConversationSchema = {
 	"x-lix-key": "lix_conversation",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},
@@ -39,7 +39,7 @@ export const LixConversationMessageSchema = {
 	"x-lix-key": "lix_conversation_message",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},

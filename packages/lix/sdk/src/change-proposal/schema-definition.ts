@@ -11,7 +11,7 @@ export const LixChangeProposalSchema = {
 	"x-lix-key": "lix_change_proposal",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 		lixcol_version_id: '"global"',

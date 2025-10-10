@@ -82,8 +82,9 @@ export function rewriteEntityInsert(args: {
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 	const rawMetadataDefaults =
-		schema["x-lix-defaults"] && typeof schema["x-lix-defaults"] === "object"
-			? (schema["x-lix-defaults"] as Record<string, unknown>)
+		schema["x-lix-override-lixcols"] &&
+		typeof schema["x-lix-override-lixcols"] === "object"
+			? (schema["x-lix-override-lixcols"] as Record<string, unknown>)
 			: undefined;
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	const propertyLowerToActual = new Map<string, string>();
@@ -237,7 +238,7 @@ export function rewriteEntityInsert(args: {
 		);
 		if (fileIdValue === undefined) {
 			throw new Error(
-				`Schema ${storedSchemaKey} requires lixcol_file_id via column or x-lix-defaults`
+				`Schema ${storedSchemaKey} requires lixcol_file_id via column or x-lix-override-lixcols`
 			);
 		}
 		const pluginKeyValue = getColumnOrDefault(
@@ -247,7 +248,7 @@ export function rewriteEntityInsert(args: {
 		);
 		if (pluginKeyValue === undefined) {
 			throw new Error(
-				`Schema ${storedSchemaKey} requires lixcol_plugin_key via column or x-lix-defaults`
+				`Schema ${storedSchemaKey} requires lixcol_plugin_key via column or x-lix-override-lixcols`
 			);
 		}
 		const metadataValue = columnMap.get("lixcol_metadata") ?? null;

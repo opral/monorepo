@@ -41,7 +41,7 @@ test("a json change schema should be infer the properties", () => {
 	}>(snapshot);
 });
 
-test("x-lix-defaults typing", () => {
+test("x-lix-override-lixcols typing", () => {
 	const schema = {
 		"x-lix-key": "defaults",
 		"x-lix-version": "1.0",
@@ -51,13 +51,15 @@ test("x-lix-defaults typing", () => {
 		},
 		required: ["id"],
 		additionalProperties: false,
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			attempts: "3",
 		},
 	} as const satisfies LixSchemaDefinition;
 
-	assertType<Record<string, string> | undefined>(schema["x-lix-defaults"]);
+	assertType<Record<string, string> | undefined>(
+		schema["x-lix-override-lixcols"]
+	);
 });
 
 test("x-lix-default typing", () => {

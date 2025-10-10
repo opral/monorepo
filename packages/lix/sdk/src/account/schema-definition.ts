@@ -8,7 +8,7 @@ export const LixAccountSchema = {
 	"x-lix-key": "lix_account",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 		lixcol_version_id: '"global"',
@@ -35,7 +35,7 @@ export const LixActiveAccountSchema = {
 	"x-lix-key": "lix_active_account",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/account_id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 		lixcol_version_id: '"global"',

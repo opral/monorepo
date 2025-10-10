@@ -129,8 +129,9 @@ export function rewriteEntityUpdate(args: {
 	if (!schema) return null;
 
 	const rawMetadataDefaults =
-		schema["x-lix-defaults"] && typeof schema["x-lix-defaults"] === "object"
-			? (schema["x-lix-defaults"] as Record<string, unknown>)
+		schema["x-lix-override-lixcols"] &&
+		typeof schema["x-lix-override-lixcols"] === "object"
+			? (schema["x-lix-override-lixcols"] as Record<string, unknown>)
 			: undefined;
 	let metadataCel: CelEnvironmentState | null = null;
 	if (

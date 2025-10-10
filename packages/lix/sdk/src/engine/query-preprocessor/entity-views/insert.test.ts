@@ -6,7 +6,7 @@ const INSERTABLE_SCHEMA = {
 	"x-lix-key": "insertable_schema",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},
@@ -178,7 +178,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		"x-lix-key": "mock_composite_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/category", "/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -300,7 +300,7 @@ test("pointer primary key schema uses pointer components for entity id", async (
 		"x-lix-key": "pointer_entity_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/payload/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -359,7 +359,7 @@ test("preserves SQL expression parameters during insert rewrite", async () => {
 		"x-lix-key": "expression_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -463,7 +463,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		"x-lix-key": "mock_default_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -512,7 +512,7 @@ test("applies function defaults when column is omitted", async () => {
 		"x-lix-key": "mock_fn_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -557,7 +557,7 @@ test("applies CEL defaults when column is omitted", async () => {
 		"x-lix-key": "mock_cel_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -617,7 +617,7 @@ test("function defaults override literal defaults", async () => {
 		"x-lix-key": "mock_fn_override",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},
@@ -662,7 +662,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 		"x-lix-key": "multi_schema",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
-		"x-lix-defaults": {
+		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			lixcol_plugin_key: '"lix_own_entity"',
 		},

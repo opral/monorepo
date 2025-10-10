@@ -15,7 +15,7 @@ export const LixStoredSchemaSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/value/x-lix-key", "/value/x-lix-version"],
 	"x-lix-immutable": true,
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},

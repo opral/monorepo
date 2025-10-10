@@ -16,7 +16,7 @@ export const LixEntityConversationSchema = {
 		"/file_id",
 		"/conversation_id",
 	],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},

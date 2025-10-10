@@ -6,7 +6,7 @@ const DELETE_SCHEMA = {
 	"x-lix-key": "delete_schema",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},
@@ -164,8 +164,8 @@ test("base view delete uses schema default version when omitted", async () => {
 	const lix = await openLix({});
 	const defaultedSchema = {
 		...DELETE_SCHEMA,
-		"x-lix-defaults": {
-			...DELETE_SCHEMA["x-lix-defaults"],
+		"x-lix-override-lixcols": {
+			...DELETE_SCHEMA["x-lix-override-lixcols"],
 			lixcol_version_id: '"global"',
 		},
 	} as const;

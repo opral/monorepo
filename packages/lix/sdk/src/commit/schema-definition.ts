@@ -9,7 +9,7 @@ export const LixCommitSchema = {
 	"x-lix-key": "lix_commit",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},
@@ -71,7 +71,7 @@ export const LixCommitEdgeSchema = {
 	"x-lix-key": "lix_commit_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/parent_id", "/child_id"],
-	"x-lix-defaults": {
+	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 	},

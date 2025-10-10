@@ -322,7 +322,7 @@ export function getColumnOrDefault(
 }
 
 /**
- * Evaluates metadata defaults defined via x-lix-defaults. Values that are strings are treated
+ * Evaluates metadata overrides defined via x-lix-override-lixcols. Values that are strings are treated
  * as CEL expressions; other primitive values are passed through unchanged.
  */
 export function resolveMetadataDefaults(args: {
@@ -343,7 +343,7 @@ export function resolveMetadataDefaults(args: {
 		if (typeof raw === "string") {
 			if (!cel) {
 				throw new Error(
-					`Encountered x-lix-defaults entry "${key}" but CEL evaluation is not initialised.`
+					`Encountered x-lix-override-lixcols entry "${key}" but CEL evaluation is not initialised.`
 				);
 			}
 			const value = cel.evaluate(raw, { ...context });
