@@ -28,7 +28,6 @@ import type {
 	ViewKey,
 } from "./types";
 import { VIEW_MAP } from "./view-registry";
-import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
 import styles from "./panel.module.css";
 
 /**
@@ -150,11 +149,9 @@ export function PanelV2({
 				{hasViews ? (
 					<PanelContent {...contentHandlers}>
 						{activeView && activeEntry && (
-							<KeepPreviousSuspense>
-								<div className="flex min-h-0 flex-1 flex-col overflow-auto">
-									{activeView.render(contextWithFocus, activeEntry)}
-								</div>
-							</KeepPreviousSuspense>
+							<div className="flex min-h-0 flex-1 flex-col overflow-auto">
+								{activeView.render(contextWithFocus, activeEntry)}
+							</div>
 						)}
 					</PanelContent>
 				) : (

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "@lix-js/react-utils";
 import { selectWorkingDiff } from "@lix-js/sdk";
@@ -6,12 +6,21 @@ import type { Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { Diff } from "@/components/diff";
 import type { DiffViewConfig, RenderableDiff } from "../../app/types";
+import { Loader2 } from "lucide-react";
 
 interface DiffViewProps {
 	readonly config?: DiffViewConfig;
 }
 
 export function DiffView({ config }: DiffViewProps) {
+	return (
+		<Suspense fallback={<DiffLoadingSpinner />}>
+			<DiffViewContent config={config} />
+		</Suspense>
+	);
+}
+
+function DiffViewContent({ config }: DiffViewProps) {
 	const queryFactory = useMemo(() => {
 		if (!config?.query) {
 			return ({ lix }: { lix: Lix }) => emptyDiffQuery(lix);
@@ -106,4 +115,15 @@ function normalizeSnapshot(snapshot: unknown): Record<string, any> | null {
 
 function isRecord(value: unknown): value is Record<string, any> {
 	return typeof value === "object" && value !== null;
+}
+
+function DiffLoadingSpinner(): ReactNode {
+	return (
+		<div className="flex h-full items-center justify-center px-3 py-2 text-muted-foreground">
+			<div className="flex items-center gap-2 text-sm">
+				<Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+				<span>Loading diff…</span>
+			</div>
+		</div>
+	);
 }

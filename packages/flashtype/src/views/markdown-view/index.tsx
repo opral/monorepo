@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { EditorProvider } from "@/components/editor/editor-context";
 import { TipTapEditor } from "@/components/editor/tip-tap-editor";
+import { Loader2 } from "lucide-react";
 import "./style.css";
 
 type MarkdownViewProps = {
@@ -17,6 +18,14 @@ type MarkdownViewProps = {
  * <MarkdownView filePath="/docs/guide.md" />
  */
 export function MarkdownView({ filePath }: MarkdownViewProps) {
+	return (
+		<Suspense fallback={<MarkdownLoadingSpinner />}>
+			<MarkdownViewContent filePath={filePath} />
+		</Suspense>
+	);
+}
+
+function MarkdownViewContent({ filePath }: MarkdownViewProps) {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
 	);
@@ -62,5 +71,16 @@ export function MarkdownView({ filePath }: MarkdownViewProps) {
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">{content}</div>
+	);
+}
+
+function MarkdownLoadingSpinner(): ReactNode {
+	return (
+		<div className="flex h-full items-center justify-center px-3 py-2 text-muted-foreground">
+			<div className="flex items-center gap-2 text-sm">
+				<Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+				<span>Loading editor…</span>
+			</div>
+		</div>
 	);
 }
