@@ -1,3 +1,5 @@
+import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
+import { LixActiveAccountSchema } from "./schema-definition.js";
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
@@ -321,4 +323,92 @@ test("active_account should enforce foreign key constraint on account_id", async
 			})
 			.execute()
 	).rejects.toThrow(/foreign key/i);
+});
+
+test("active_account view injects global version defaults", async () => {
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("account_all")
+		.values({
+			id: "acct-1",
+			name: "Global User",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("active_account")
+		.values({ account_id: "acct-1" })
+		.execute();
+
+	const row = await lix.db
+		.selectFrom("state_all")
+		.select([
+			"schema_key",
+			"file_id",
+			"plugin_key",
+			"version_id",
+			"untracked",
+			"inherited_from_version_id",
+		])
+		.where("schema_key", "=", "lix_active_account")
+		.where("inherited_from_version_id", "is", "global")
+		.where("entity_id", "=", "acct-1")
+		.executeTakeFirstOrThrow();
+
+	expect(row).toMatchObject({
+		schema_key: "lix_active_account",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		untracked: 1,
+	});
+	expect(row.version_id).toBeDefined();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select(["lixcol_inherited_from_version_id"])
+		.executeTakeFirstOrThrow();
+
+	expect(activeVersion.lixcol_inherited_from_version_id).toBeNull();
+
+	await lix.close();
+});
+
+test("active_account schema exposes only the base view", async () => {
+	const lix = await openLix({});
+
+	const storedSchema = {
+		...LixActiveAccountSchema,
+		"x-lix-version": "1.1",
+	} as const;
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: storedSchema })
+		.execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const rewritten = preprocess({
+		sql: "SELECT * FROM active_account_all",
+		parameters: [],
+	});
+
+	expect(rewritten.sql).toContain("active_account_all");
+	expect(rewritten.sql).not.toContain("schema_key = 'lix_active_account'");
+
+	await expect(
+		lix.db
+			.selectFrom("active_account_all" as any)
+			.selectAll()
+			.execute()
+	).rejects.toThrow(/no such table/i);
+
+	await expect(
+		lix.db
+			.selectFrom("active_account_history" as any)
+			.selectAll()
+			.execute()
+	).rejects.toThrow(/no such table/i);
+
+	await lix.close();
 });

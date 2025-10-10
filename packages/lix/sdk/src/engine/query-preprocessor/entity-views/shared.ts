@@ -5,14 +5,13 @@ import {
 	parseJsonPointer,
 	buildSqliteJsonPath,
 } from "../../../schema-definition/json-pointer.js";
+import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironmentState } from "./cel-environment.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
  */
-export interface StoredSchemaDefinition {
-	readonly [key: string]: any;
-}
+export type StoredSchemaDefinition = LixSchemaDefinition;
 
 /**
  * Result emitted by entity view rewriters. When null is returned the
@@ -49,6 +48,7 @@ const ENTITY_REWRITE_WHITELIST = new Set([
 	"immutable_update_schema",
 	"json_update_schema",
 	"expression_update_schema",
+	"version_override_schema",
 	"pointer_entity_schema",
 	"active_version",
 	"lix_active_version",
@@ -136,6 +136,30 @@ export function baseSchemaKey(name: string): string | null {
 	return name;
 }
 
+const VIEW_VARIANT_TO_KEY: Record<"base" | "all" | "history", string> = {
+	base: "state",
+	all: "state_all",
+	history: "state_history",
+};
+
+/**
+ * Returns true if a specific view variant is enabled for the schema.
+ */
+export function isEntityViewVariantEnabled(
+	schema: StoredSchemaDefinition,
+	variant: "base" | "all" | "history"
+): boolean {
+	const selected = schema?.["x-lix-entity-views"];
+	if (!Array.isArray(selected)) {
+		return true;
+	}
+	const viewKey = VIEW_VARIANT_TO_KEY[variant];
+	return selected.some(
+		(entry): boolean =>
+			typeof entry === "string" && entry.toLowerCase() === viewKey
+	);
+}
+
 /**
  * Loads the latest stored schema definition for a given schema key.
  */
@@ -194,15 +218,25 @@ function loadStoredSchemaDefinitionForKey(
 	const raw = first.value;
 	if (typeof raw === "string") {
 		try {
-			return JSON.parse(raw) as StoredSchemaDefinition;
+			return normalizeStoredSchema(JSON.parse(raw));
 		} catch {
 			return null;
 		}
 	}
 	if (typeof raw === "object" && raw !== null) {
-		return raw as StoredSchemaDefinition;
+		return normalizeStoredSchema(raw);
 	}
 	return null;
+}
+
+function normalizeStoredSchema(schema: unknown): StoredSchemaDefinition | null {
+	if (!schema || typeof schema !== "object") {
+		return null;
+	}
+	if (typeof (schema as Record<string, unknown>)["x-lix-key"] !== "string") {
+		return null;
+	}
+	return schema as StoredSchemaDefinition;
 }
 
 /**

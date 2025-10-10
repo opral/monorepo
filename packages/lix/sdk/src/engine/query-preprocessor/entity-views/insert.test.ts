@@ -1,42 +1,40 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../../lix/open-lix.js";
 import { createQueryPreprocessor } from "../create-query-preprocessor.js";
-
-const INSERTABLE_SCHEMA = {
-	"x-lix-key": "insertable_schema",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["/id"],
-	"x-lix-override-lixcols": {
-		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
-	},
-	type: "object",
-	properties: {
-		id: { type: "string" },
-		name: { type: "string" },
-	},
-	required: ["id"],
-	additionalProperties: false,
-} as const;
+import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 
 test("rewrites inserts for stored schema views", async () => {
 	const lix = await openLix({});
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: INSERTABLE_SCHEMA })
-		.execute();
+	const schema = {
+		"x-lix-key": "insertable_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const table = schema["x-lix-key"];
 
 	const rewritten = preprocess({
-		sql: "INSERT INTO insertable_schema (id, name) VALUES (?, ?)",
+		sql: `INSERT INTO ${table} (id, name) VALUES (?, ?)`,
 		parameters: ["row-1", "Entity 1"],
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
 	expect(rewritten.parameters).toEqual([
 		"row-1",
-		"insertable_schema",
+		table,
 		"lix",
 		"lix_own_entity",
 		"row-1",
@@ -52,7 +50,7 @@ test("rewrites inserts for stored schema views", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: "SELECT name FROM insertable_schema WHERE id = ?",
+		sql: `SELECT name FROM ${table} WHERE id = ?`,
 		parameters: ["row-1"],
 	});
 
@@ -71,12 +69,27 @@ test("rewrites inserts for stored schema views", async () => {
 
 test("rewrites inserts for _all view", async () => {
 	const lix = await openLix({});
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: INSERTABLE_SCHEMA })
-		.execute();
+	const schema = {
+		"x-lix-key": "insertable_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const table = schema["x-lix-key"];
+	const allView = `${table}_all`;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -84,14 +97,14 @@ test("rewrites inserts for _all view", async () => {
 		.executeTakeFirstOrThrow();
 
 	const rewritten = preprocess({
-		sql: "INSERT INTO insertable_schema_all (id, name, lixcol_version_id) VALUES (?, ?, ?)",
+		sql: `INSERT INTO ${allView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
 		parameters: ["row-2", "Entity 2", activeVersion.version_id],
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
 	expect(rewritten.parameters).toEqual([
 		"row-2",
-		"insertable_schema",
+		table,
 		"lix",
 		activeVersion.version_id,
 		"lix_own_entity",
@@ -108,7 +121,7 @@ test("rewrites inserts for _all view", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: "SELECT name FROM insertable_schema_all WHERE id = ? AND lixcol_version_id = ?",
+		sql: `SELECT name FROM ${allView} WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
@@ -125,18 +138,66 @@ test("rewrites inserts for _all view", async () => {
 	await lix.close();
 });
 
-test("missing lixcol_version_id for _all view throws", async () => {
+test("skips rewriting for disabled state_all view", async () => {
 	const lix = await openLix({});
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: INSERTABLE_SCHEMA })
-		.execute();
+	const schema = {
+		"x-lix-key": "limited_insert_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-entity-views": ["state"] as (
+			| "state"
+			| "state_all"
+			| "state_history"
+		)[],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const sql =
+		"INSERT INTO limited_insert_schema_all (id, name, lixcol_version_id) VALUES (?, ?, ?)";
+	const parameters = ["row-limited", "Disabled", "v1"];
+	const rewritten = preprocess({ sql, parameters });
+
+	expect(rewritten.sql).toBe(sql);
+	expect(rewritten.parameters).toEqual(parameters);
+
+	await lix.close();
+});
+
+test("missing lixcol_version_id for _all view throws", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "insertable_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const allView = `${schema["x-lix-key"]}_all`;
 
 	expect(() =>
 		preprocess({
-			sql: "INSERT INTO insertable_schema_all (id, name) VALUES (?, ?)",
+			sql: `INSERT INTO ${allView} (id, name) VALUES (?, ?)`,
 			parameters: ["row-3", "Entity 3"],
 		})
 	).toThrow(/lixcol_version_id/);
@@ -146,10 +207,28 @@ test("missing lixcol_version_id for _all view throws", async () => {
 
 test("defaults version for _all view when schema defines lixcol_version_id", async () => {
 	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "insertable_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_version_id: '"global"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 	const preprocess = await createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
-		sql: "INSERT INTO account_all (id, name) VALUES (?, ?)",
+		sql: "INSERT INTO insertable_schema_all (id, name) VALUES (?, ?)",
 		parameters: ["acc-1", "Defaulted"],
 	});
 
@@ -162,13 +241,70 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	});
 
 	const rows = await lix.db
-		.selectFrom("account_all")
-		.where("id", "=", "acc-1")
-		.selectAll()
+		.selectFrom("state_all")
+		.select(["version_id", "schema_key", "entity_id"] as const)
+		.where("schema_key", "=", "insertable_schema")
+		.where("entity_id", "=", "acc-1")
 		.execute();
 
-	const globalRow = rows.find((row) => row.lixcol_version_id === "global");
-	expect(globalRow).toBeDefined();
+	expect(rows.some((row) => row.version_id === "global")).toBe(true);
+	await lix.close();
+});
+
+test("base-only views apply metadata version defaults", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "insertable_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_version_id: '"global"',
+		},
+		"x-lix-entity-views": ["state"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const table = schema["x-lix-key"];
+
+	const rewritten = preprocess({
+		sql: `INSERT INTO ${table} (id, name) VALUES (?, ?)`,
+		parameters: ["base-1", "Base Entity"],
+	});
+
+	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.parameters[3]).toBe("global");
+
+	lix.engine!.executeSync({
+		sql: rewritten.sql,
+		parameters: rewritten.parameters as any[],
+	});
+
+	const row = await lix.db
+		.selectFrom("state_all")
+		.select([
+			"entity_id",
+			"version_id",
+			"schema_key",
+			"snapshot_content",
+		] as const)
+		.where("schema_key", "=", table)
+		.where("entity_id", "=", "base-1")
+		.executeTakeFirstOrThrow();
+
+	expect(typeof row.version_id).toBe("string");
+	expect(row.snapshot_content).toEqual({
+		id: "base-1",
+		name: "Base Entity",
+	});
 	await lix.close();
 });
 
@@ -439,15 +575,28 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 
 test("does not rewrite history view inserts", async () => {
 	const lix = await openLix({});
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: INSERTABLE_SCHEMA })
-		.execute();
+	const schema = {
+		"x-lix-key": "history_insert_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const historyView = `${schema["x-lix-key"]}_history`;
 
-	const originalSql =
-		"INSERT INTO insertable_schema_history (id, name) VALUES (?, ?)";
+	const originalSql = `INSERT INTO ${historyView} (id, name) VALUES (?, ?)`;
 	const rewritten = preprocess({
 		sql: originalSql,
 		parameters: ["row-3", "Entity 3"],

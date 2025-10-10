@@ -392,52 +392,6 @@ export function applyVersionDatabaseSchema(args: {
 			untracked AS lixcol_untracked
 		FROM state_all
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
-
-		CREATE TRIGGER IF NOT EXISTS active_version_insert
-		INSTEAD OF INSERT ON active_version
-		BEGIN
-			INSERT INTO state_all (
-				entity_id,
-				schema_key,
-				file_id,
-				plugin_key,
-				snapshot_content,
-				schema_version,
-				version_id,
-				untracked
-			) VALUES (
-				'active',
-				'lix_active_version',
-				'lix',
-				'lix_own_entity',
-				json_object('version_id', NEW.version_id),
-				'1.0',
-				'global',
-				1
-			);
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS active_version_update
-		INSTEAD OF UPDATE ON active_version
-		BEGIN
-			UPDATE state_all
-			SET
-				snapshot_content = json_object('version_id', NEW.version_id),
-				untracked = 1
-			WHERE
-				entity_id = 'active'
-				AND schema_key = 'lix_active_version'
-				AND version_id = 'global';
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS active_version_delete
-		INSTEAD OF DELETE ON active_version
-		BEGIN
-			DELETE FROM state_all
-			WHERE entity_id = 'active'
-			AND schema_key = 'lix_active_version'
-			AND version_id = 'global';
-		END;
 	`);
 }
 

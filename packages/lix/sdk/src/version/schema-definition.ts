@@ -86,6 +86,7 @@ export const LixActiveVersionSchema = {
 		lixcol_untracked: "1",
 		lixcol_version_id: '"global"',
 	},
+	"x-lix-entity-views": ["state"],
 	type: "object",
 	properties: {
 		version_id: { type: "string" },

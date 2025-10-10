@@ -28,6 +28,7 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
+	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
 	type RewriteResult,
 	type PrimaryKeyDescriptor,
@@ -127,6 +128,9 @@ export function rewriteEntityUpdate(args: {
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
+	if (!isEntityViewVariantEnabled(schema, variant)) {
+		return null;
+	}
 
 	const rawMetadataDefaults =
 		schema["x-lix-override-lixcols"] &&
@@ -156,6 +160,7 @@ export function rewriteEntityUpdate(args: {
 		return null;
 	}
 	const isActiveVersionSchema = storedSchemaKey === "lix_active_version";
+
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	if (typeof propertiesObject !== "object" || propertiesObject === null) {
 		return null;
@@ -266,33 +271,6 @@ export function rewriteEntityUpdate(args: {
 	const fileIdAssignment = assignments.get("lixcol_file_id");
 	const metadataAssignment = assignments.get("lixcol_metadata");
 	const untrackedAssignment = assignments.get("lixcol_untracked");
-	const versionAssignment =
-		assignments.get("lixcol_version_id") ??
-		(variant === "base" &&
-		(metadataDefaults.has("lixcol_version_id") || isActiveVersionSchema)
-			? undefined
-			: assignments.get("version_id"));
-
-	let versionFallbackExpr: string | null = null;
-	let versionSource: ValueSource | null = null;
-	if (variant === "all") {
-		if (versionAssignment) {
-			versionSource = versionAssignment.value;
-		} else {
-			versionFallbackExpr = "version_id";
-		}
-	} else {
-		if (versionAssignment) {
-			versionSource = versionAssignment.value;
-		} else if (isActiveVersionSchema) {
-			versionSource = paramSource("global");
-		} else if (metadataDefaults.has("lixcol_version_id")) {
-			versionSource = paramSource(getMetadataDefault("lixcol_version_id"));
-		} else {
-			versionFallbackExpr = "(SELECT version_id FROM active_version)";
-		}
-	}
-
 	const pluginKeyExpr = metadataDefaults.has("lixcol_plugin_key")
 		? addParam(getMetadataDefault("lixcol_plugin_key"))
 		: "plugin_key";
@@ -305,6 +283,24 @@ export function rewriteEntityUpdate(args: {
 			return getPropertyExpression(prop);
 		},
 	});
+	const explicitVersionAssignment =
+		assignments.get("lixcol_version_id") ?? assignments.get("version_id");
+
+	let versionFallbackExpr: string | null = null;
+	let versionSource: ValueSource | null = null;
+	const useCaseForActiveBase =
+		explicitVersionAssignment && isActiveVersionSchema && variant === "base";
+	if (explicitVersionAssignment && !useCaseForActiveBase) {
+		versionSource = explicitVersionAssignment.value;
+	} else if (variant === "all") {
+		versionFallbackExpr = "version_id";
+	} else if (metadataDefaults.has("lixcol_version_id")) {
+		versionSource = paramSource(getMetadataDefault("lixcol_version_id"));
+	} else if (isActiveVersionSchema) {
+		versionSource = paramSource("global");
+	} else {
+		versionFallbackExpr = "(SELECT version_id FROM active_version)";
+	}
 
 	const touchesPrimaryKey = primaryKeys.some(
 		(descriptor) =>
@@ -319,11 +315,19 @@ export function rewriteEntityUpdate(args: {
 		`plugin_key = ${pluginKeyExpr}`,
 		`snapshot_content = json_object(${snapshotEntries})`,
 		`schema_version = ${renderValueSource(schemaVersionSource)}`,
-		`version_id = ${
-			versionSource
-				? renderValueSource(versionSource)
-				: (versionFallbackExpr ?? "version_id")
-		}`,
+		(() => {
+			if (useCaseForActiveBase) {
+				const explicitSql = renderValueSource(explicitVersionAssignment!.value);
+				const globalWhen = addParam("global");
+				const globalThen = addParam("global");
+				return `version_id = CASE WHEN state_all.version_id = ${globalWhen} THEN ${globalThen} ELSE ${explicitSql} END`;
+			}
+			return `version_id = ${
+				versionSource
+					? renderValueSource(versionSource)
+					: (versionFallbackExpr ?? "version_id")
+			}`;
+		})(),
 		`metadata = ${
 			metadataAssignment
 				? renderValueSource(metadataAssignment.value)
@@ -423,7 +427,7 @@ export function rewriteEntityUpdate(args: {
 	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
 	if (variant === "base" && !hasVersionCondition) {
 		if (isActiveVersionSchema) {
-			whereClauses.push(`state_all.version_id = ${addParam("global")}`);
+			whereClauses.push(`state_all.entity_id = ${addParam("active")}`);
 		} else {
 			whereClauses.push(
 				`state_all.version_id = (SELECT version_id FROM active_version)`

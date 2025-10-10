@@ -41,7 +41,7 @@ import type {
 import { LixLogSchema } from "../log/schema-definition.js";
 import {
 	LixAccountSchema,
-	type LixActiveAccount,
+	LixActiveAccountSchema,
 } from "../account/schema-definition.js";
 import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixLabelSchema } from "../label/schema-definition.js";
@@ -111,7 +111,10 @@ type DirectoryDescriptorHistoryView = ToKysely<
 >;
 
 export type LixDatabaseSchema = {
-	active_account: ToKysely<LixActiveAccount>;
+	active_account: EntityViews<
+		typeof LixActiveAccountSchema,
+		"active_account"
+	>["active_account"];
 	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;

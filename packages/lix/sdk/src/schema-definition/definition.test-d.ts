@@ -51,6 +51,7 @@ test("x-lix-override-lixcols typing", () => {
 		},
 		required: ["id"],
 		additionalProperties: false,
+		"x-lix-entity-views": ["state"] as const,
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
 			attempts: "3",
@@ -59,6 +60,9 @@ test("x-lix-override-lixcols typing", () => {
 
 	assertType<Record<string, string> | undefined>(
 		schema["x-lix-override-lixcols"]
+	);
+	assertType<readonly ("state" | "state_all" | "state_history")[] | undefined>(
+		schema["x-lix-entity-views"]
 	);
 });
 

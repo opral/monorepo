@@ -158,6 +158,39 @@ test("x-lix-override-lixcols rejects invalid cel expressions", () => {
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
+test("x-lix-entity-views accepts known view names", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-entity-views": ["state", "state_all"],
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-entity-views rejects unknown view names", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		// @ts-expect-error - invalid entry should fail validation
+		"x-lix-entity-views": ["state", "unknown"],
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
 test("x-lix-default accepts cel expressions", () => {
 	const schema = {
 		type: "object",

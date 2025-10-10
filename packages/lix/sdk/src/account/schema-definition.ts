@@ -41,6 +41,7 @@ export const LixActiveAccountSchema = {
 		lixcol_version_id: '"global"',
 		lixcol_untracked: "1",
 	},
+	"x-lix-entity-views": ["state"],
 	"x-lix-foreign-keys": [
 		{
 			properties: ["/account_id"],

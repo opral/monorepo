@@ -1,5 +1,9 @@
 import type { LixEngine } from "../../boot.js";
-import { collectPointerColumnDescriptors } from "./shared.js";
+import {
+	collectPointerColumnDescriptors,
+	isEntityViewVariantEnabled,
+	type StoredSchemaDefinition,
+} from "./shared.js";
 
 type CachedSelects = {
 	signature: string;
@@ -46,26 +50,38 @@ export function getEntityViewSelects(args: {
 			if ((schema as any).type !== "object") continue;
 
 			const props = extractPropertyKeys(schema);
-			const baseSql = createActiveSelect({ schema, properties: props });
-			const allSql = createAllSelect({ schema, properties: props });
-			const historySql = createHistorySelect({ schema, properties: props });
+			const baseSql = isEntityViewVariantEnabled(schema, "base")
+				? createActiveSelect({ schema, properties: props })
+				: null;
+			const allSql = isEntityViewVariantEnabled(schema, "all")
+				? createAllSelect({ schema, properties: props })
+				: null;
+			const historySql = isEntityViewVariantEnabled(schema, "history")
+				? createHistorySelect({ schema, properties: props })
+				: null;
 
 			const aliasBaseName = dropLixPrefix(baseName);
-			registerView(map, {
-				primary: baseName,
-				alias: aliasBaseName,
-				sql: baseSql,
-			});
-			registerView(map, {
-				primary: `${baseName}_all`,
-				alias: aliasBaseName ? `${aliasBaseName}_all` : null,
-				sql: allSql,
-			});
-			registerView(map, {
-				primary: `${baseName}_history`,
-				alias: aliasBaseName ? `${aliasBaseName}_history` : null,
-				sql: historySql,
-			});
+			if (baseSql) {
+				registerView(map, {
+					primary: baseName,
+					alias: aliasBaseName,
+					sql: baseSql,
+				});
+			}
+			if (allSql) {
+				registerView(map, {
+					primary: `${baseName}_all`,
+					alias: aliasBaseName ? `${aliasBaseName}_all` : null,
+					sql: allSql,
+				});
+			}
+			if (historySql) {
+				registerView(map, {
+					primary: `${baseName}_history`,
+					alias: aliasBaseName ? `${aliasBaseName}_history` : null,
+					sql: historySql,
+				});
+			}
 		}
 
 		cache.set(engine.runtimeCacheRef, { signature, map });
@@ -74,10 +90,6 @@ export function getEntityViewSelects(args: {
 		loading.delete(engine.runtimeCacheRef);
 	}
 }
-
-type StoredSchemaDefinition = {
-	readonly [key: string]: any;
-};
 
 type LoadedSchema = {
 	definition: StoredSchemaDefinition;
@@ -167,22 +179,30 @@ function createActiveSelect(args: {
 	properties: string[];
 }): string {
 	const { schema, properties } = args;
+	const alias = "sa";
+
 	const expressions = [
-		...buildPropertyExpressions({ schema, properties }),
-		"entity_id AS lixcol_entity_id",
-		"schema_key AS lixcol_schema_key",
-		"file_id AS lixcol_file_id",
-		"plugin_key AS lixcol_plugin_key",
-		"inherited_from_version_id AS lixcol_inherited_from_version_id",
-		"created_at AS lixcol_created_at",
-		"updated_at AS lixcol_updated_at",
-		"change_id AS lixcol_change_id",
-		"untracked AS lixcol_untracked",
-		"commit_id AS lixcol_commit_id",
-		"metadata AS lixcol_metadata",
+		...buildPropertyExpressions({
+			schema,
+			properties,
+			jsonSourceAlias: alias,
+		}),
+		`${alias}.entity_id AS lixcol_entity_id`,
+		`${alias}.schema_key AS lixcol_schema_key`,
+		`${alias}.file_id AS lixcol_file_id`,
+		`${alias}.plugin_key AS lixcol_plugin_key`,
+		`${alias}.inherited_from_version_id AS lixcol_inherited_from_version_id`,
+		`${alias}.created_at AS lixcol_created_at`,
+		`${alias}.updated_at AS lixcol_updated_at`,
+		`${alias}.change_id AS lixcol_change_id`,
+		`${alias}.untracked AS lixcol_untracked`,
+		`${alias}.commit_id AS lixcol_commit_id`,
+		`${alias}.metadata AS lixcol_metadata`,
 	];
 
-	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state\nWHERE schema_key = '${schema["x-lix-key"]}'`;
+	const versionFilter = buildActiveVersionFilter(schema, alias);
+
+	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_all ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'\n  AND ${versionFilter}`;
 }
 
 function createAllSelect(args: {
@@ -190,23 +210,28 @@ function createAllSelect(args: {
 	properties: string[];
 }): string {
 	const { schema, properties } = args;
+	const alias = "sa";
 	const expressions = [
-		...buildPropertyExpressions({ schema, properties }),
-		"entity_id AS lixcol_entity_id",
-		"schema_key AS lixcol_schema_key",
-		"file_id AS lixcol_file_id",
-		"plugin_key AS lixcol_plugin_key",
-		"version_id AS lixcol_version_id",
-		"inherited_from_version_id AS lixcol_inherited_from_version_id",
-		"created_at AS lixcol_created_at",
-		"updated_at AS lixcol_updated_at",
-		"change_id AS lixcol_change_id",
-		"untracked AS lixcol_untracked",
-		"commit_id AS lixcol_commit_id",
-		"metadata AS lixcol_metadata",
+		...buildPropertyExpressions({
+			schema,
+			properties,
+			jsonSourceAlias: alias,
+		}),
+		`${alias}.entity_id AS lixcol_entity_id`,
+		`${alias}.schema_key AS lixcol_schema_key`,
+		`${alias}.file_id AS lixcol_file_id`,
+		`${alias}.plugin_key AS lixcol_plugin_key`,
+		`${alias}.version_id AS lixcol_version_id`,
+		`${alias}.inherited_from_version_id AS lixcol_inherited_from_version_id`,
+		`${alias}.created_at AS lixcol_created_at`,
+		`${alias}.updated_at AS lixcol_updated_at`,
+		`${alias}.change_id AS lixcol_change_id`,
+		`${alias}.untracked AS lixcol_untracked`,
+		`${alias}.commit_id AS lixcol_commit_id`,
+		`${alias}.metadata AS lixcol_metadata`,
 	];
 
-	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_all\nWHERE schema_key = '${schema["x-lix-key"]}'`;
+	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_all ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'`;
 }
 
 function createHistorySelect(args: {
@@ -214,26 +239,66 @@ function createHistorySelect(args: {
 	properties: string[];
 }): string {
 	const { schema, properties } = args;
+	const alias = "sh";
 	const expressions = [
-		...buildPropertyExpressions({ schema, properties }),
-		"entity_id AS lixcol_entity_id",
-		"schema_key AS lixcol_schema_key",
-		"file_id AS lixcol_file_id",
-		"plugin_key AS lixcol_plugin_key",
-		"schema_version AS lixcol_schema_version",
-		"change_id AS lixcol_change_id",
-		"commit_id AS lixcol_commit_id",
-		"root_commit_id AS lixcol_root_commit_id",
-		"depth AS lixcol_depth",
-		"metadata AS lixcol_metadata",
+		...buildPropertyExpressions({
+			schema,
+			properties,
+			jsonSourceAlias: alias,
+		}),
+		`${alias}.entity_id AS lixcol_entity_id`,
+		`${alias}.schema_key AS lixcol_schema_key`,
+		`${alias}.file_id AS lixcol_file_id`,
+		`${alias}.plugin_key AS lixcol_plugin_key`,
+		`${alias}.schema_version AS lixcol_schema_version`,
+		`${alias}.change_id AS lixcol_change_id`,
+		`${alias}.commit_id AS lixcol_commit_id`,
+		`${alias}.root_commit_id AS lixcol_root_commit_id`,
+		`${alias}.depth AS lixcol_depth`,
+		`${alias}.metadata AS lixcol_metadata`,
 	];
 
-	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_history\nWHERE schema_key = '${schema["x-lix-key"]}'`;
+	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_history ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'`;
+}
+
+function buildActiveVersionFilter(
+	schema: StoredSchemaDefinition,
+	alias: string
+): string {
+	const override = extractLiteralVersionOverride(schema);
+	if (override) {
+		return `${alias}.version_id = '${escapeSqlLiteral(override)}'`;
+	}
+	return `${alias}.version_id = (SELECT version_id FROM active_version)`;
+}
+
+function extractLiteralVersionOverride(
+	schema: StoredSchemaDefinition
+): string | null {
+	const overrides = schema["x-lix-override-lixcols"];
+	if (!overrides || typeof overrides !== "object") {
+		return null;
+	}
+	const raw = (overrides as Record<string, unknown>)["lixcol_version_id"];
+	if (typeof raw !== "string") {
+		return null;
+	}
+	const trimmed = raw.trim();
+	const match = /^"([^"]*)"$/u.exec(trimmed);
+	if (match) {
+		return match[1] ?? null;
+	}
+	return null;
+}
+
+function escapeSqlLiteral(value: string): string {
+	return value.replace(/'/g, "''");
 }
 
 function buildPropertyExpressions(args: {
 	schema: StoredSchemaDefinition;
 	properties: string[];
+	jsonSourceAlias?: string;
 }): string[] {
 	const expressions: string[] = [];
 	const propertyLower = new Set(
@@ -242,17 +307,21 @@ function buildPropertyExpressions(args: {
 	const pointerColumns = collectPointerColumnDescriptors({
 		schema: args.schema,
 	});
+	const jsonSource = args.jsonSourceAlias
+		? `${args.jsonSourceAlias}.snapshot_content`
+		: "snapshot_content";
 	for (const pointer of pointerColumns) {
 		if (propertyLower.has(pointer.alias.toLowerCase())) {
 			continue;
 		}
 		expressions.push(
-			`${pointer.expression} AS ${escapeIdentifier(pointer.alias)}`
+			`${pointer.expression.replace("snapshot_content", jsonSource)} AS ${escapeIdentifier(pointer.alias)}`
 		);
 	}
 	for (const prop of args.properties) {
+		const source = jsonSource;
 		expressions.push(
-			`json_extract(snapshot_content, '$.${prop}') AS ${escapeIdentifier(prop)}`
+			`json_extract(${source}, '$.${prop}') AS ${escapeIdentifier(prop)}`
 		);
 	}
 	return expressions;

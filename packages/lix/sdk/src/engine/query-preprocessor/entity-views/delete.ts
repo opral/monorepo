@@ -24,6 +24,7 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
+	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
 	type RewriteResult,
 } from "./shared.js";
@@ -104,6 +105,9 @@ export function rewriteEntityDelete(args: {
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
+	if (!isEntityViewVariantEnabled(schema, variant)) {
+		return null;
+	}
 
 	const rawMetadataDefaults =
 		schema["x-lix-override-lixcols"] &&

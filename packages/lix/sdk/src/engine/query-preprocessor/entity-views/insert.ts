@@ -24,6 +24,7 @@ import {
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
+	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
 	type RewriteResult,
 	type StoredSchemaDefinition,
@@ -81,6 +82,9 @@ export function rewriteEntityInsert(args: {
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
+	if (!isEntityViewVariantEnabled(schema, variant)) {
+		return null;
+	}
 	const rawMetadataDefaults =
 		schema["x-lix-override-lixcols"] &&
 		typeof schema["x-lix-override-lixcols"] === "object"

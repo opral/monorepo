@@ -197,7 +197,7 @@ test("querying by id", async () => {
 	expect(versions[0]?.id).toBe("version0");
 });
 
-test("update active version view (FK against descriptor)", async () => {
+test("update active version view", async () => {
 	const lix = await openLix({});
 
 	// Create required change sets and version first
