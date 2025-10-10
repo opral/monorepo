@@ -341,7 +341,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
-	expect(rewritten.sql).toMatch(/\(\?\s*\|\|\s*'~'\s*\|\|\s*\?\)/);
+	expect(rewritten.sql).toMatch(/\(\?\d+\s*\|\|\s*'~'\s*\|\|\s*\?\d+\)/);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
@@ -528,7 +528,11 @@ test("preserves SQL expression parameters during insert rewrite", async () => {
 		.execute();
 
 	expect(rows).toEqual([{ id: "exp-1", name: "Expression" }]);
-	expect(rewritten.sql).toContain("SELECT version_id FROM active_version");
+	expect(rewritten.sql.trim().startsWith("WITH")).toBe(true);
+	expect(rewritten.sql).toContain("SELECT version_id FROM (");
+	expect(rewritten.sql).not.toMatch(/\bFROM\s+active_version\b/i);
+	expect(rewritten.expandedSql).toBeDefined();
+	expect(rewritten.expandedSql).not.toMatch(/\bFROM\s+active_version\b/i);
 
 	await lix.close();
 });

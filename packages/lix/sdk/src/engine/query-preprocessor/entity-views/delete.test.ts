@@ -42,7 +42,7 @@ test("rewrites deletes for stored schema views", async () => {
 		parameters: ["row-1"],
 	});
 
-	expect(deleteResult.sql).toContain("DELETE FROM state_all");
+	expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
 	expect(deleteResult.parameters).toEqual([table, "row-1"]);
 
 	lix.engine!.executeSync({
@@ -148,7 +148,7 @@ test("rewrites deletes for _all views", async () => {
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
-	expect(deleteResult.sql).toContain("DELETE FROM state_all");
+	expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
 	expect(deleteResult.parameters).toEqual([
 		table,
 		"row-2",
@@ -249,7 +249,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 		parameters: ["base-del-1"],
 	});
 
-	expect(deleteResult.sql).toContain("DELETE FROM state_all");
+	expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
 	expect(deleteResult.parameters).toEqual([table, "base-del-1", "global"]);
 
 	lix.engine!.executeSync({
@@ -308,7 +308,7 @@ test("base view delete uses schema default version when omitted", async () => {
 		parameters: ["acc-default"],
 	});
 
-	expect(deleteResult.sql).toContain("DELETE FROM state_all");
+	expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
 	expect(deleteResult.parameters).toEqual([table, "acc-default", "global"]);
 
 	lix.engine!.executeSync({

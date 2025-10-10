@@ -26,7 +26,6 @@ import {
 	UPDATE,
 	WITH,
 	tokenize,
-	type Token,
 } from "../sql-parser/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
@@ -54,18 +53,25 @@ export async function createQueryPreprocessor(
 		parameters,
 		sideEffects,
 	}: QueryPreprocessorArgs): QueryPreprocessorResult => {
-		const tokens = tokenize(sql);
-		const kind = detectStatementKind(tokens);
+		let currentSql = sql;
+		let currentParameters: ReadonlyArray<unknown> = parameters;
+		let tokens = tokenize(currentSql);
+		let kind = detectStatementKind(tokens);
+		let entityRewriteApplied = false;
 
 		const entityViewRewrite = maybeRewriteEntityView({
 			engine,
-			sql,
-			parameters,
 			tokens,
 			kind,
+			sql: currentSql,
+			parameters: currentParameters,
 		});
 		if (entityViewRewrite) {
-			return entityViewRewrite;
+			entityRewriteApplied = true;
+			currentSql = entityViewRewrite.sql;
+			currentParameters = entityViewRewrite.parameters;
+			tokens = tokenize(currentSql);
+			kind = detectStatementKind(tokens);
 		}
 
 		// const triggerRewrite = maybeRewriteTrigger({
@@ -79,16 +85,25 @@ export async function createQueryPreprocessor(
 		// 	return triggerRewrite;
 		// }
 
-		const vtableRewrite = maybeRewriteVtable({
-			engine,
-			sql,
-			parameters,
-			tokens,
-			kind,
-			sideEffects,
-		});
-		if (vtableRewrite) {
-			return vtableRewrite;
+		const allowStateRewrite = kind === "select" || entityRewriteApplied;
+		if (allowStateRewrite) {
+			const stateRewrite = maybeRewriteStateAccess({
+				engine,
+				sql: currentSql,
+				parameters: currentParameters,
+				kind,
+				sideEffects,
+			});
+			if (stateRewrite) {
+				return stateRewrite;
+			}
+		}
+
+		if (entityRewriteApplied) {
+			return {
+				sql: currentSql,
+				parameters: currentParameters,
+			};
 		}
 
 		return { sql, parameters };
@@ -201,26 +216,33 @@ function maybeRewriteEntityView(args: {
 }
 
 /**
- * Expands view references, refreshes caches, and applies internal vtable rewrites for SELECTs.
+ * Expands view references, refreshes caches, and applies internal vtable rewrites for statements
+ * that read from state tables. Supports both top-level SELECT queries and subqueries emitted by
+ * entity rewrites.
+ *
+ * @example
+ * ```ts
+ * const rewritten = maybeRewriteStateAccess({
+ *   engine,
+ *   sql: "SELECT * FROM internal_state_vtable",
+ *   parameters: [],
+ *   kind: "select",
+ * });
+ * console.log(rewritten?.sql.includes("internal_state_vtable_rewritten"));
+ * ```
  */
-function maybeRewriteVtable(args: {
+function maybeRewriteStateAccess(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
 	>;
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
-	tokens: Token[];
 	kind: StatementKind;
 	sideEffects?: boolean;
 }): QueryPreprocessorResult | null {
-	if (args.kind !== "select") {
-		return null;
-	}
-
 	let currentSql = args.sql;
 	let expandedSql: string | undefined;
-	let tokens = args.tokens;
 
 	const views = getViewSelectMap(args.engine);
 	const expansion = expandQuery({
@@ -231,10 +253,41 @@ function maybeRewriteVtable(args: {
 	if (expansion.expanded) {
 		currentSql = expansion.sql;
 		expandedSql = currentSql;
-		tokens = tokenize(currentSql);
 	}
 
+	const tokens = tokenize(currentSql);
 	const shapes = analyzeShapes(tokens);
+
+	if (shapes.length === 0) {
+		if (args.kind === "select") {
+			const includeTransaction = hasOpenTransaction(args.engine);
+			const existingCacheTables = getStateCacheV2Tables({
+				engine: args.engine,
+			});
+			const rewrittenSql = rewriteSql(currentSql, {
+				tokens,
+				hasOpenTransaction: includeTransaction,
+				existingCacheTables,
+			});
+
+			return {
+				sql: rewrittenSql,
+				parameters: args.parameters,
+				expandedSql,
+			};
+		}
+
+		if (expandedSql) {
+			return {
+				sql: currentSql,
+				parameters: args.parameters,
+				expandedSql,
+			};
+		}
+
+		return null;
+	}
+
 	const existingCacheTables = getStateCacheV2Tables({ engine: args.engine });
 	if (args.sideEffects !== false) {
 		for (const shape of shapes) {
@@ -249,8 +302,13 @@ function maybeRewriteVtable(args: {
 		existingCacheTables,
 	});
 
+	const finalSql =
+		args.kind === "select"
+			? rewrittenSql
+			: collapseDerivedTableTarget(rewrittenSql, args.kind) ?? rewrittenSql;
+
 	return {
-		sql: rewrittenSql,
+		sql: finalSql,
 		parameters: args.parameters,
 		expandedSql,
 	};
@@ -330,6 +388,90 @@ function extractSelectFromCreateView(sql: string): string | undefined {
 		statement = statement.slice(0, semicolon);
 	}
 	return statement.trim() || undefined;
+}
+
+function collapseDerivedTableTarget(
+	sql: string,
+	kind: StatementKind
+): string | null {
+	if (kind !== "delete") {
+		return null;
+	}
+
+	const tokens = tokenize(sql);
+	let deleteIndex = -1;
+	for (let i = 0; i < tokens.length; i++) {
+		if (tokens[i]?.tokenType === DELETE) {
+			deleteIndex = i;
+			break;
+		}
+	}
+	if (deleteIndex === -1) {
+		return null;
+	}
+
+	let fromIndex = -1;
+	for (let i = deleteIndex + 1; i < tokens.length; i++) {
+		const token = tokens[i];
+		if (!token?.image) continue;
+		if (token.image.toUpperCase() === "FROM") {
+			fromIndex = i;
+			break;
+		}
+	}
+	if (fromIndex === -1) {
+		return null;
+	}
+
+	const openToken = tokens[fromIndex + 1];
+	if (!openToken || openToken.image !== "(") {
+		return null;
+	}
+
+	let depth = 0;
+	let closeIndex = -1;
+	for (let i = fromIndex + 1; i < tokens.length; i++) {
+		const token = tokens[i];
+		if (!token?.image) continue;
+		if (token.image === "(") {
+			depth += 1;
+			continue;
+		}
+		if (token.image === ")") {
+			depth -= 1;
+			if (depth === 0) {
+				closeIndex = i;
+				break;
+			}
+		}
+	}
+
+	if (closeIndex === -1) {
+		return null;
+	}
+
+	let aliasIndex = closeIndex + 1;
+	const asToken = tokens[aliasIndex];
+	if (asToken?.image?.toUpperCase() === "AS") {
+		aliasIndex += 1;
+	}
+	const aliasToken = tokens[aliasIndex];
+	if (!aliasToken || !aliasToken.image) {
+		return null;
+	}
+
+	const start = openToken.startOffset ?? -1;
+	const end = aliasToken.endOffset ?? aliasToken.startOffset ?? -1;
+	if (start < 0 || end < start) {
+		return null;
+	}
+
+	const before = sql.slice(0, start);
+	const after = sql.slice(end + 1);
+	const needsSpace = before.length > 0 && !/\s$/.test(before);
+	const replacement = `${needsSpace ? " " : ""}${aliasToken.image}`;
+
+	return `${before}${replacement}${after}`;
 }
 
 const ddlGuards = new Set([

@@ -254,6 +254,44 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
+	test("entity delete rewrite expands active_version subquery", async () => {
+		const lix = await openLix({});
+		try {
+			const schema = {
+				"x-lix-key": "delete_schema",
+				"x-lix-version": "1.0",
+				"x-lix-primary-key": ["/id"],
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					name: { type: "string" },
+				},
+				required: ["id"],
+				additionalProperties: false,
+			} as const;
+
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: schema })
+				.execute();
+
+			const preprocess = await createQueryPreprocessor(lix.engine!);
+			const deleteResult = preprocess({
+				sql: `DELETE FROM ${schema["x-lix-key"]} WHERE id = ?`,
+				parameters: ["row-1"],
+			});
+
+			expect(deleteResult.sql.trim().startsWith("WITH")).toBe(true);
+			expect(deleteResult.sql).toMatch(/\bDELETE\s+FROM\s+state_all\b/i);
+			expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
+			expect(deleteResult.sql).not.toMatch(/\bFROM\s+active_version\b/i);
+			expect(deleteResult.expandedSql).toBeDefined();
+			expect(deleteResult.expandedSql).not.toMatch(/\bFROM\s+active_version\b/i);
+		} finally {
+			await lix.close();
+		}
+	});
+
 	test("does not rewrite change history query without vtable references", async () => {
 		const lix = await openLix({
 			keyValues: [
