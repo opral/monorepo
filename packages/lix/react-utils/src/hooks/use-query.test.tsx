@@ -218,6 +218,61 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 	await lix.close();
 });
 
+test("useQuery does not show stale rows on key change (subscribe: true)", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "file_a", value: "value_a" },
+			{ key: "file_b", value: "value_b" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading…</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	const seen: Array<string | undefined> = [];
+	const hook = await act(async () =>
+		renderHook(
+			({ lookup = "file_a" }: { lookup?: string } = {}) => {
+				const row = useQueryTakeFirst(
+					({ lix }) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", lookup),
+					{ subscribe: true },
+				);
+				if (row?.key) seen.push(row.key);
+				return row;
+			},
+			{ wrapper },
+		),
+	);
+	const { rerender, unmount } = hook;
+
+	await waitFor(() => {
+		expect(seen.length).toBeGreaterThan(0);
+	});
+	seen.length = 0;
+	await act(async () => {
+		rerender({ lookup: "file_b" });
+	});
+
+	await waitFor(() => {
+		expect(seen.length).toBeGreaterThan(0);
+	});
+	expect(seen[0]).toBe("file_b");
+
+	unmount();
+	await lix.close();
+});
+
 test("useQueryTakeFirst (subscribe:false) does not reuse previous rows", async () => {
 	const lix = await openLix({});
 	await lix.db
@@ -274,6 +329,61 @@ test("useQueryTakeFirst (subscribe:false) does not reuse previous rows", async (
 	await lix.close();
 });
 
+test("useQueryTakeFirst (subscribe:false) returns fresh data on rerender", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "memo_a", value: "value_a" },
+			{ key: "memo_b", value: "value_b" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading…</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	const seenKeys: Array<string | undefined> = [];
+	const hook = await act(async () =>
+		renderHook(
+			({ lookup = "memo_a" }: { lookup?: string } = {}) => {
+				const row = useQueryTakeFirst(
+					({ lix }) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", lookup),
+					{ subscribe: false },
+				);
+				if (row?.key) seenKeys.push(row.key);
+				return row;
+			},
+			{ wrapper },
+		),
+	);
+	const { rerender, unmount } = hook;
+
+	await waitFor(() => {
+		expect(seenKeys.length).toBeGreaterThan(0);
+	});
+	seenKeys.length = 0;
+	await act(async () => {
+		rerender({ lookup: "memo_b" });
+	});
+
+	await waitFor(() => {
+		expect(seenKeys.length).toBeGreaterThan(0);
+	});
+	expect(seenKeys[0]).toBe("memo_b");
+
+	unmount();
+	await lix.close();
+});
+
 test("useSuspenseQueryTakeFirst updates reference when underlying row changes", async () => {
 	const lix = await openLix({});
 	const rowKey = "react_first_ref";
@@ -324,6 +434,64 @@ test("useSuspenseQueryTakeFirst updates reference when underlying row changes", 
 	});
 
 	await lix.close();
+});
+
+test("useQuery key includes lix instance (no cross-instance reuse)", async () => {
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
+
+	await lix1.db
+		.insertInto("key_value")
+		.values({ key: "shared_key", value: "instance_one" })
+		.execute();
+	await lix2.db
+		.insertInto("key_value")
+		.values({ key: "shared_key", value: "instance_two" })
+		.execute();
+
+	let current = lix1;
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={current}>
+			<Suspense fallback={<div>Loading…</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<LixKeyValue>[] };
+	let rerender: () => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(
+			() =>
+				useQuery(({ lix }) =>
+					lix.db
+						.selectFrom("key_value")
+						.selectAll()
+						.where("key", "=", "shared_key"),
+				),
+			{ wrapper },
+		);
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	await waitFor(() => {
+		expect(hookResult.current[0]?.value).toBe("instance_one");
+	});
+
+	await act(async () => {
+		current = lix2;
+		rerender();
+	});
+
+	await waitFor(() => {
+		expect(hookResult.current[0]?.value).toBe("instance_two");
+	});
+
+	await lix1.close();
+	await lix2.close();
 });
 
 test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the initial value", async () => {
