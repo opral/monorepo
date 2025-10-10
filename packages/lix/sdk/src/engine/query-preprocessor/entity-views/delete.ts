@@ -24,8 +24,13 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
+	resolveMetadataDefaults,
 	type RewriteResult,
 } from "./shared.js";
+import {
+	createCelEnvironment,
+	type CelEnvironmentState,
+} from "./cel-environment.js";
 
 interface ParameterState {
 	readonly parameters: ReadonlyArray<unknown>;
@@ -65,7 +70,12 @@ export function rewriteEntityDelete(args: {
 	parameters: ReadonlyArray<unknown>;
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef"
+		| "sqlite"
+		| "executeSync"
+		| "hooks"
+		| "runtimeCacheRef"
+		| "listFunctions"
+		| "call"
 	>;
 }): RewriteResult | null {
 	const { tokens, parameters, engine } = args;
@@ -95,7 +105,28 @@ export function rewriteEntityDelete(args: {
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
-	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const rawMetadataDefaults =
+		schema["x-lix-defaults"] && typeof schema["x-lix-defaults"] === "object"
+			? (schema["x-lix-defaults"] as Record<string, unknown>)
+			: undefined;
+	let metadataCel: CelEnvironmentState | null = null;
+	if (
+		rawMetadataDefaults &&
+		Object.values(rawMetadataDefaults).some(
+			(value) => typeof value === "string"
+		)
+	) {
+		metadataCel = createCelEnvironment({
+			listFunctions: engine.listFunctions,
+			callFunction: engine.call,
+		});
+	}
+	const metadataDefaults = resolveMetadataDefaults({
+		defaults: rawMetadataDefaults,
+		cel: metadataCel,
+	});
+	const getMetadataDefault = (key: string): unknown =>
+		metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
 
 	const propertiesObject = (schema as Record<string, unknown>).properties ?? {};
 	if (!propertiesObject || typeof propertiesObject !== "object") {
@@ -224,7 +255,7 @@ export function rewriteEntityDelete(args: {
 		}
 	}
 
-	const defaultVersion = defaults.lixcol_version_id;
+	const defaultVersion = getMetadataDefault("lixcol_version_id");
 	if (!hasVersionCondition) {
 		if (variant === "base") {
 			if (defaultVersion !== undefined) {

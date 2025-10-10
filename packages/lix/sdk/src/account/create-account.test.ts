@@ -48,11 +48,7 @@ test("should create an account using schema default version when lixcol_version_
 		.selectFrom("account_all")
 		.selectAll()
 		.where("id", "=", account.id)
-		.where(
-			"lixcol_version_id",
-			"=",
-			LixAccountSchema["x-lix-defaults"].lixcol_version_id
-		)
+		.where("lixcol_version_id", "=", "global")
 		.executeTakeFirstOrThrow();
 
 	expect(dbAccount).toMatchObject({

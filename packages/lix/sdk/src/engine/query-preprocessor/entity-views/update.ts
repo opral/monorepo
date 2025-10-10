@@ -28,10 +28,15 @@ import {
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
+	resolveMetadataDefaults,
 	type RewriteResult,
 	type PrimaryKeyDescriptor,
 	type StoredSchemaDefinition,
 } from "./shared.js";
+import {
+	createCelEnvironment,
+	type CelEnvironmentState,
+} from "./cel-environment.js";
 
 interface ParameterState {
 	readonly parameters: ReadonlyArray<unknown>;
@@ -88,7 +93,12 @@ export function rewriteEntityUpdate(args: {
 	parameters: ReadonlyArray<unknown>;
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "executeSync" | "hooks" | "runtimeCacheRef"
+		| "sqlite"
+		| "executeSync"
+		| "hooks"
+		| "runtimeCacheRef"
+		| "listFunctions"
+		| "call"
 	>;
 }): RewriteResult | null {
 	const { sql, tokens, parameters, engine } = args;
@@ -118,7 +128,28 @@ export function rewriteEntityUpdate(args: {
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
 
-	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const rawMetadataDefaults =
+		schema["x-lix-defaults"] && typeof schema["x-lix-defaults"] === "object"
+			? (schema["x-lix-defaults"] as Record<string, unknown>)
+			: undefined;
+	let metadataCel: CelEnvironmentState | null = null;
+	if (
+		rawMetadataDefaults &&
+		Object.values(rawMetadataDefaults).some(
+			(value) => typeof value === "string"
+		)
+	) {
+		metadataCel = createCelEnvironment({
+			listFunctions: args.engine.listFunctions,
+			callFunction: args.engine.call,
+		});
+	}
+	const metadataDefaults = resolveMetadataDefaults({
+		defaults: rawMetadataDefaults,
+		cel: metadataCel,
+	});
+	const getMetadataDefault = (key: string): unknown =>
+		metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	if (!isEntityRewriteAllowed(storedSchemaKey)) {
 		return null;
@@ -237,7 +268,7 @@ export function rewriteEntityUpdate(args: {
 	const versionAssignment =
 		assignments.get("lixcol_version_id") ??
 		(variant === "base" &&
-		(defaults.lixcol_version_id !== undefined || isActiveVersionSchema)
+		(metadataDefaults.has("lixcol_version_id") || isActiveVersionSchema)
 			? undefined
 			: assignments.get("version_id"));
 
@@ -254,17 +285,16 @@ export function rewriteEntityUpdate(args: {
 			versionSource = versionAssignment.value;
 		} else if (isActiveVersionSchema) {
 			versionSource = paramSource("global");
-		} else if (defaults.lixcol_version_id !== undefined) {
-			versionSource = paramSource(defaults.lixcol_version_id);
+		} else if (metadataDefaults.has("lixcol_version_id")) {
+			versionSource = paramSource(getMetadataDefault("lixcol_version_id"));
 		} else {
 			versionFallbackExpr = "(SELECT version_id FROM active_version)";
 		}
 	}
 
-	const pluginKeyExpr =
-		defaults.lixcol_plugin_key !== undefined
-			? addParam(defaults.lixcol_plugin_key)
-			: "plugin_key";
+	const pluginKeyExpr = metadataDefaults.has("lixcol_plugin_key")
+		? addParam(getMetadataDefault("lixcol_plugin_key"))
+		: "plugin_key";
 	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
 	const schemaVersionSource = paramSource(schemaVersionValue);
 
@@ -315,8 +345,10 @@ export function rewriteEntityUpdate(args: {
 		};
 		const entityIdRendered = isActiveVersionSchema
 			? renderWithOrdering(paramSource("active"))
-			: defaults.lixcol_entity_id !== undefined
-				? renderWithOrdering(paramSource(defaults.lixcol_entity_id))
+			: metadataDefaults.has("lixcol_entity_id")
+				? renderWithOrdering(
+						paramSource(getMetadataDefault("lixcol_entity_id"))
+					)
 				: buildEntityIdExpr();
 		params.unshift(...entityIdRendered.params);
 		assignmentClauses.unshift(`entity_id = ${entityIdRendered.sql}`);

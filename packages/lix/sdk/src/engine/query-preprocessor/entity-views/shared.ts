@@ -5,6 +5,7 @@ import {
 	parseJsonPointer,
 	buildSqliteJsonPath,
 } from "../../../schema-definition/json-pointer.js";
+import type { CelEnvironmentState } from "./cel-environment.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
@@ -318,6 +319,47 @@ export function getColumnOrDefault(
 		return value;
 	}
 	return defaultValue;
+}
+
+/**
+ * Evaluates metadata defaults defined via x-lix-defaults. Values that are strings are treated
+ * as CEL expressions; other primitive values are passed through unchanged.
+ */
+export function resolveMetadataDefaults(args: {
+	defaults: unknown;
+	cel: CelEnvironmentState | null;
+	context?: Record<string, unknown>;
+}): Map<string, unknown> {
+	const { defaults, cel } = args;
+	const resolved = new Map<string, unknown>();
+	if (!defaults || typeof defaults !== "object") {
+		return resolved;
+	}
+
+	const context = args.context ?? {};
+	for (const [key, raw] of Object.entries(
+		defaults as Record<string, unknown>
+	)) {
+		if (typeof raw === "string") {
+			if (!cel) {
+				throw new Error(
+					`Encountered x-lix-defaults entry "${key}" but CEL evaluation is not initialised.`
+				);
+			}
+			const value = cel.evaluate(raw, { ...context });
+			if (value !== undefined) {
+				resolved.set(key, value);
+				context[key] = value as unknown;
+			}
+			continue;
+		}
+		if (raw !== undefined) {
+			resolved.set(key, raw);
+			context[key] = raw as unknown;
+		}
+	}
+
+	return resolved;
 }
 
 function buildPointerAliasInfo(

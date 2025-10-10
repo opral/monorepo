@@ -158,12 +158,8 @@ export const LixSchemaDefinition = {
 					description:
 						"Default metadata column values (such as lixcol_file_id). Does not affect JSON property defaults.",
 					additionalProperties: {
-						anyOf: [
-							{ type: "string" },
-							{ type: "number" },
-							{ type: "boolean" },
-							{ type: "null" },
-						],
+						type: "string",
+						format: "cel",
 					},
 				},
 				"x-lix-version": {
@@ -246,9 +242,18 @@ export type LixSchemaDefinition = JSONSchema & {
 	"x-lix-version": string;
 	/**
 	 * Default metadata column values applied by entity-view rewrites (e.g. `lixcol_file_id`).
-	 * Does not provide defaults for JSON properties inside `properties`.
+	 * Does not provide defaults for JSON properties inside `properties`. Each entry is a CEL
+	 * expression evaluated in the same context as property defaults.
+	 *
+	 * @example
+	 *   {
+	 *     "x-lix-defaults": {
+	 *       "lixcol_file_id": "\"lix\"",
+	 *       "lixcol_untracked": "0"
+	 *     }
+	 *   }
 	 */
-	"x-lix-defaults"?: Record<string, string | number | boolean | null>;
+	"x-lix-defaults"?: Record<string, string>;
 	"x-lix-primary-key"?: JsonPointer[] | readonly JsonPointer[];
 	/**
 	 * Properties that must be unique per version.

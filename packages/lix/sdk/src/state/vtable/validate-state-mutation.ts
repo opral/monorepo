@@ -13,6 +13,7 @@ import { sql, type Kysely } from "kysely";
 import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { parse } from "@marcbachmann/cel-js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -31,6 +32,17 @@ ajv.addFormat("json-pointer", {
 	validate: (value: string) => {
 		try {
 			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
+ajv.addFormat("cel", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parse(value);
 			return true;
 		} catch {
 			return false;

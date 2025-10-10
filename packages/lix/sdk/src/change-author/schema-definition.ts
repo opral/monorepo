@@ -12,9 +12,9 @@ export const LixChangeAuthorSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/change_id", "/account_id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
-		lixcol_version_id: "global",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
 	},
 	"x-lix-foreign-keys": [
 		{

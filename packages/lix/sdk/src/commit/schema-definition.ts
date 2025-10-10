@@ -10,8 +10,8 @@ export const LixCommitSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	"x-lix-foreign-keys": [
 		{
@@ -72,8 +72,8 @@ export const LixCommitEdgeSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/parent_id", "/child_id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	"x-lix-foreign-keys": [
 		{

@@ -7,8 +7,8 @@ const UPDATE_SCHEMA = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	type: "object",
 	properties: {
@@ -24,8 +24,8 @@ const EXPRESSION_SCHEMA = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	type: "object",
 	properties: {
@@ -41,8 +41,8 @@ const IMMUTABLE_SCHEMA = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	"x-lix-immutable": true,
 	type: "object",
@@ -322,8 +322,8 @@ test("rewrites updates with JSON payloads", async () => {
 			"x-lix-version": "1.0",
 			"x-lix-primary-key": ["/id"],
 			"x-lix-defaults": {
-				lixcol_file_id: "lix",
-				lixcol_plugin_key: "lix_own_entity",
+				lixcol_file_id: '"lix"',
+				lixcol_plugin_key: '"lix_own_entity"',
 			},
 			type: "object",
 			properties: {

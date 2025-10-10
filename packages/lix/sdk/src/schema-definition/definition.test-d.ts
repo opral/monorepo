@@ -52,14 +52,12 @@ test("x-lix-defaults typing", () => {
 		required: ["id"],
 		additionalProperties: false,
 		"x-lix-defaults": {
-			lixcol_file_id: "lix",
-			attempts: 3,
+			lixcol_file_id: '"lix"',
+			attempts: "3",
 		},
 	} as const satisfies LixSchemaDefinition;
 
-	assertType<Record<string, string | number | boolean | null> | undefined>(
-		schema["x-lix-defaults"]
-	);
+	assertType<Record<string, string> | undefined>(schema["x-lix-defaults"]);
 });
 
 test("x-lix-default typing", () => {

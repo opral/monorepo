@@ -9,9 +9,9 @@ export const LixAccountSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
-		lixcol_version_id: "global",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
 	},
 	type: "object",
 	properties: {
@@ -36,10 +36,10 @@ export const LixActiveAccountSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["/account_id"],
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
-		lixcol_version_id: "global",
-		lixcol_untracked: 1,
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
+		lixcol_untracked: "1",
 	},
 	"x-lix-foreign-keys": [
 		{

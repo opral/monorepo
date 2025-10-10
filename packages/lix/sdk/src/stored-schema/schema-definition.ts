@@ -16,8 +16,8 @@ export const LixStoredSchemaSchema = {
 	"x-lix-primary-key": ["/value/x-lix-key", "/value/x-lix-version"],
 	"x-lix-immutable": true,
 	"x-lix-defaults": {
-		lixcol_file_id: "lix",
-		lixcol_plugin_key: "lix_own_entity",
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
 	},
 	type: "object",
 	properties: {

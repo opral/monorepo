@@ -100,16 +100,16 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
-test("x-lix-defaults accepts primitive values", () => {
+test("x-lix-defaults accepts cel expressions", () => {
 	const schema = {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
 		"x-lix-defaults": {
-			lixcol_file_id: "lix",
-			attempts: 3,
-			enabled: true,
-			nullable: null,
+			lixcol_file_id: '"lix"',
+			attempts: "3",
+			enabled: "true",
+			nullable: "null",
 		},
 		properties: {
 			name: { type: "string" },
@@ -129,6 +129,24 @@ test("x-lix-defaults rejects complex values", () => {
 		"x-lix-defaults": {
 			// @ts-expect-error - objects are not allowed
 			options: { nested: true },
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
+test("x-lix-defaults rejects invalid cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-defaults": {
+			bad: "lix_uuid_v7(",
 		},
 		properties: {
 			name: { type: "string" },

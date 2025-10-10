@@ -24,6 +24,7 @@ import {
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
 	isEntityRewriteAllowed,
+	resolveMetadataDefaults,
 	type RewriteResult,
 	type StoredSchemaDefinition,
 	type PrimaryKeyDescriptor,
@@ -80,19 +81,29 @@ export function rewriteEntityInsert(args: {
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
-	const defaults = (schema["x-lix-defaults"] ?? {}) as Record<string, unknown>;
+	const rawMetadataDefaults =
+		schema["x-lix-defaults"] && typeof schema["x-lix-defaults"] === "object"
+			? (schema["x-lix-defaults"] as Record<string, unknown>)
+			: undefined;
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};
 	const propertyLowerToActual = new Map<string, string>();
 	for (const key of Object.keys(propertiesObject ?? {})) {
 		propertyLowerToActual.set(key.toLowerCase(), key);
 	}
-	const hasCelDefaults = Object.values(propertiesObject ?? {}).some(
-		(definition) =>
-			definition &&
-			typeof definition === "object" &&
-			typeof (definition as Record<string, unknown>)["x-lix-default"] ===
-				"string"
-	);
+	const hasMetadataCelDefaults = rawMetadataDefaults
+		? Object.values(rawMetadataDefaults).some(
+				(value) => typeof value === "string"
+			)
+		: false;
+	const hasCelDefaults =
+		hasMetadataCelDefaults ||
+		Object.values(propertiesObject ?? {}).some(
+			(definition) =>
+				definition &&
+				typeof definition === "object" &&
+				typeof (definition as Record<string, unknown>)["x-lix-default"] ===
+					"string"
+		);
 	const celState: CelEnvironmentState | null = hasCelDefaults
 		? createCelEnvironment({
 				listFunctions: args.engine.listFunctions,
@@ -156,6 +167,13 @@ export function rewriteEntityInsert(args: {
 			columnMap,
 			propertyLowerToActual,
 		});
+		const metadataDefaults = resolveMetadataDefaults({
+			defaults: rawMetadataDefaults,
+			cel: celState,
+			context: celContext,
+		});
+		const getMetadataDefault = (key: string): unknown =>
+			metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
 		const resolvedDefaults = new Map<string, unknown>();
 
 		const renderPrimaryKeyExpr = (
@@ -215,7 +233,7 @@ export function rewriteEntityInsert(args: {
 		const fileIdValue = getColumnOrDefault(
 			columnMap,
 			"lixcol_file_id",
-			defaults.lixcol_file_id
+			getMetadataDefault("lixcol_file_id")
 		);
 		if (fileIdValue === undefined) {
 			throw new Error(
@@ -225,7 +243,7 @@ export function rewriteEntityInsert(args: {
 		const pluginKeyValue = getColumnOrDefault(
 			columnMap,
 			"lixcol_plugin_key",
-			defaults.lixcol_plugin_key
+			getMetadataDefault("lixcol_plugin_key")
 		);
 		if (pluginKeyValue === undefined) {
 			throw new Error(
@@ -236,7 +254,9 @@ export function rewriteEntityInsert(args: {
 		const untrackedValue = getColumnOrDefault(
 			columnMap,
 			"lixcol_untracked",
-			defaults.lixcol_untracked ?? 0
+			metadataDefaults.has("lixcol_untracked")
+				? metadataDefaults.get("lixcol_untracked")
+				: 0
 		);
 
 		const schemaKeyExpr = addParam(schemaKeyValue);
@@ -249,8 +269,8 @@ export function rewriteEntityInsert(args: {
 				versionExpr = isExpressionValue(explicitVersion)
 					? explicitVersion.sql
 					: addParam(explicitVersion);
-			} else if (defaults.lixcol_version_id !== undefined) {
-				versionExpr = addParam(defaults.lixcol_version_id);
+			} else if (metadataDefaults.has("lixcol_version_id")) {
+				versionExpr = addParam(metadataDefaults.get("lixcol_version_id"));
 			} else {
 				throw new Error(
 					`INSERT into ${viewNameRaw} requires explicit lixcol_version_id or schema default`
@@ -260,8 +280,8 @@ export function rewriteEntityInsert(args: {
 			versionExpr = isExpressionValue(explicitVersion)
 				? explicitVersion.sql
 				: addParam(explicitVersion);
-		} else if (defaults.lixcol_version_id !== undefined) {
-			versionExpr = addParam(defaults.lixcol_version_id);
+		} else if (metadataDefaults.has("lixcol_version_id")) {
+			versionExpr = addParam(metadataDefaults.get("lixcol_version_id"));
 		} else {
 			versionExpr = "(SELECT version_id FROM active_version)";
 		}
