@@ -26,6 +26,7 @@ import {
 	UPDATE,
 	WITH,
 	tokenize,
+	type Token,
 } from "../sql-parser/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
@@ -57,7 +58,7 @@ export async function createQueryPreprocessor(
 		let currentParameters: ReadonlyArray<unknown> = parameters;
 		let tokens = tokenize(currentSql);
 		let kind = detectStatementKind(tokens);
-		let entityRewriteApplied = false;
+		let rewriteApplied = false;
 
 		const entityViewRewrite = maybeRewriteEntityView({
 			engine,
@@ -67,25 +68,29 @@ export async function createQueryPreprocessor(
 			parameters: currentParameters,
 		});
 		if (entityViewRewrite) {
-			entityRewriteApplied = true;
+			rewriteApplied = true;
 			currentSql = entityViewRewrite.sql;
 			currentParameters = entityViewRewrite.parameters;
 			tokens = tokenize(currentSql);
 			kind = detectStatementKind(tokens);
 		}
 
-		// const triggerRewrite = maybeRewriteTrigger({
-		// 	engine,
-		// 	sql,
-		// 	parameters,
-		// 	tokens,
-		// 	kind,
-		// });
-		// if (triggerRewrite) {
-		// 	return triggerRewrite;
-		// }
+		const triggerRewrite = maybeRewriteTrigger({
+			engine,
+			sql: currentSql,
+			parameters: currentParameters,
+			tokens,
+			kind,
+		});
+		if (triggerRewrite) {
+			rewriteApplied = true;
+			currentSql = triggerRewrite.sql;
+			currentParameters = triggerRewrite.parameters;
+			tokens = tokenize(currentSql);
+			kind = detectStatementKind(tokens);
+		}
 
-		const allowStateRewrite = kind === "select" || entityRewriteApplied;
+		const allowStateRewrite = kind === "select" || rewriteApplied;
 		if (allowStateRewrite) {
 			const stateRewrite = maybeRewriteStateAccess({
 				engine,
@@ -99,7 +104,7 @@ export async function createQueryPreprocessor(
 			}
 		}
 
-		if (entityRewriteApplied) {
+		if (rewriteApplied) {
 			return {
 				sql: currentSql,
 				parameters: currentParameters,
@@ -115,6 +120,21 @@ export async function createQueryPreprocessor(
  */
 const DML_TRIGGER_WHITELIST = new Set(["active_account", "lix_active_account"]);
 
+/**
+ * Attempts to rewrite a DML statement by inlining a registered INSTEAD OF trigger body.
+ *
+ * @example
+ * ```ts
+ * const rewrite = maybeRewriteTrigger({
+ *   engine,
+ *   sql: "INSERT INTO active_account (account_id) VALUES (?)",
+ *   parameters: ["user123"],
+ *   tokens: tokenize("INSERT INTO active_account (account_id) VALUES (?)"),
+ *   kind: "insert",
+ * });
+ * console.log(rewrite?.sql.includes("state_all"));
+ * ```
+ */
 function maybeRewriteTrigger(args: {
 	engine: Pick<LixEngine, "sqlite" | "runtimeCacheRef" | "executeSync">;
 	sql: string;
@@ -305,7 +325,7 @@ function maybeRewriteStateAccess(args: {
 	const finalSql =
 		args.kind === "select"
 			? rewrittenSql
-			: collapseDerivedTableTarget(rewrittenSql, args.kind) ?? rewrittenSql;
+			: (collapseDerivedTableTarget(rewrittenSql, args.kind) ?? rewrittenSql);
 
 	return {
 		sql: finalSql,

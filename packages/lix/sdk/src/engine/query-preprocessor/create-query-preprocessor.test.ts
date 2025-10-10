@@ -286,7 +286,9 @@ describe("createQueryPreprocessorV2", () => {
 			expect(deleteResult.sql).toContain("internal_state_vtable_rewritten");
 			expect(deleteResult.sql).not.toMatch(/\bFROM\s+active_version\b/i);
 			expect(deleteResult.expandedSql).toBeDefined();
-			expect(deleteResult.expandedSql).not.toMatch(/\bFROM\s+active_version\b/i);
+			expect(deleteResult.expandedSql).not.toMatch(
+				/\bFROM\s+active_version\b/i
+			);
 		} finally {
 			await lix.close();
 		}

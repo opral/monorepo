@@ -370,7 +370,7 @@ test("active_account view injects global version defaults", async () => {
 		.select(["lixcol_inherited_from_version_id"])
 		.executeTakeFirstOrThrow();
 
-	expect(activeVersion.lixcol_inherited_from_version_id).toBeNull();
+	expect(activeVersion.lixcol_inherited_from_version_id).toBe("global");
 
 	await lix.close();
 });

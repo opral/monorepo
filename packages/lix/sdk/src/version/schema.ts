@@ -379,18 +379,15 @@ export function applyVersionDatabaseSchema(args: {
         END;
     `);
 
-	// Create active_version as an entity view manually with untracked state
+	// This is a fallback for SQLite subquery's that run
+	// as part of a DML trigger and are not (yet) preprocessed
+	// in the lix engine. The view purposefully bypasses the vtable
+	// to let SQLite's query planner optimize the query.
 	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_version AS
 		SELECT
-			json_extract(snapshot_content, '$.version_id') AS version_id,
-			inherited_from_version_id AS lixcol_inherited_from_version_id,
-			created_at AS lixcol_created_at,
-			updated_at AS lixcol_updated_at,
-			file_id AS lixcol_file_id,
-			change_id AS lixcol_change_id,
-			untracked AS lixcol_untracked
-		FROM state_all
+			json_extract(snapshot_content, '$.version_id') AS version_id
+		FROM internal_state_all_untracked
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
 	`);
 }

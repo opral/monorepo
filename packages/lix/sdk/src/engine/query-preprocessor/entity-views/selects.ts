@@ -181,6 +181,7 @@ function createActiveSelect(args: {
 	const { schema, properties } = args;
 	const alias = "sa";
 
+	const inheritedExpr = buildInheritedFromVersionExpression(schema, alias);
 	const expressions = [
 		...buildPropertyExpressions({
 			schema,
@@ -191,7 +192,7 @@ function createActiveSelect(args: {
 		`${alias}.schema_key AS lixcol_schema_key`,
 		`${alias}.file_id AS lixcol_file_id`,
 		`${alias}.plugin_key AS lixcol_plugin_key`,
-		`${alias}.inherited_from_version_id AS lixcol_inherited_from_version_id`,
+		`${inheritedExpr} AS lixcol_inherited_from_version_id`,
 		`${alias}.created_at AS lixcol_created_at`,
 		`${alias}.updated_at AS lixcol_updated_at`,
 		`${alias}.change_id AS lixcol_change_id`,
@@ -211,6 +212,7 @@ function createAllSelect(args: {
 }): string {
 	const { schema, properties } = args;
 	const alias = "sa";
+	const inheritedExpr = buildInheritedFromVersionExpression(schema, alias);
 	const expressions = [
 		...buildPropertyExpressions({
 			schema,
@@ -222,7 +224,7 @@ function createAllSelect(args: {
 		`${alias}.file_id AS lixcol_file_id`,
 		`${alias}.plugin_key AS lixcol_plugin_key`,
 		`${alias}.version_id AS lixcol_version_id`,
-		`${alias}.inherited_from_version_id AS lixcol_inherited_from_version_id`,
+		`${inheritedExpr} AS lixcol_inherited_from_version_id`,
 		`${alias}.created_at AS lixcol_created_at`,
 		`${alias}.updated_at AS lixcol_updated_at`,
 		`${alias}.change_id AS lixcol_change_id`,
@@ -275,11 +277,18 @@ function buildActiveVersionFilter(
 function extractLiteralVersionOverride(
 	schema: StoredSchemaDefinition
 ): string | null {
+	return extractLiteralOverride(schema, "lixcol_version_id");
+}
+
+function extractLiteralOverride(
+	schema: StoredSchemaDefinition,
+	key: string
+): string | null {
 	const overrides = schema["x-lix-override-lixcols"];
 	if (!overrides || typeof overrides !== "object") {
 		return null;
 	}
-	const raw = (overrides as Record<string, unknown>)["lixcol_version_id"];
+	const raw = (overrides as Record<string, unknown>)[key];
 	if (typeof raw !== "string") {
 		return null;
 	}
@@ -293,6 +302,24 @@ function extractLiteralVersionOverride(
 
 function escapeSqlLiteral(value: string): string {
 	return value.replace(/'/g, "''");
+}
+
+function buildInheritedFromVersionExpression(
+	schema: StoredSchemaDefinition,
+	alias: string
+): string {
+	const inheritedOverride = extractLiteralOverride(
+		schema,
+		"lixcol_inherited_from_version_id"
+	);
+	if (inheritedOverride !== null) {
+		return `'${escapeSqlLiteral(inheritedOverride)}'`;
+	}
+	const versionOverride = extractLiteralVersionOverride(schema);
+	if (versionOverride !== null) {
+		return `COALESCE(${alias}.inherited_from_version_id, '${escapeSqlLiteral(versionOverride)}')`;
+	}
+	return `${alias}.inherited_from_version_id`;
 }
 
 function buildPropertyExpressions(args: {
