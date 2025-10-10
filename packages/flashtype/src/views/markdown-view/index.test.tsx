@@ -5,9 +5,7 @@ import { LixProvider } from "@lix-js/react-utils";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { MarkdownView } from "./index";
-import {
-	KeyValueProvider,
-} from "@/hooks/key-value/use-key-value";
+import { KeyValueProvider } from "@/hooks/key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "@/hooks/key-value/schema";
 
 describe("MarkdownView", () => {

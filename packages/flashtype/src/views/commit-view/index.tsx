@@ -72,9 +72,9 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 	const timestamp = formatTimestamp(checkpoint.checkpoint_created_at);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col overflow-auto">
+		<div className="flex min-h-0 flex-1 flex-col overflow-auto px-3 py-2">
 			{/* Header */}
-			<div className="border-b border-border bg-background px-4 py-3">
+			<div className="border-b border-border bg-background px-3 py-2">
 				<h2 className="text-sm font-semibold text-foreground">{title}</h2>
 				<p className="mt-0.5 text-xs text-muted-foreground">{timestamp}</p>
 			</div>

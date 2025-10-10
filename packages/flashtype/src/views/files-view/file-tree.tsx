@@ -69,7 +69,7 @@ export function FileTree({
 		: "bg-neutral-200/70 border border-neutral-300 text-neutral-900";
 
 	return (
-		<ul className="space-y-1 text-[13px] text-neutral-900">
+		<ul className="space-y-1 text-sm text-neutral-900">
 			{draft?.directoryPath === "/" ? (
 				<DraftRow
 					key="draft:root"
@@ -119,7 +119,7 @@ function FileTreeNode({
 	if (node.type === "file") {
 		const isSelected = selectedPath === node.path;
 		const buttonClass = clsx(
-			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-[13px] transition-colors",
+			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm transition-colors",
 			!isSelected && "hover:bg-neutral-100",
 			isSelected ? selectedClasses : "text-neutral-700",
 		);
@@ -149,7 +149,7 @@ function FileTreeNode({
 	const suppressSelection = Boolean(draft && draft.directoryPath === node.path);
 	const isSelected = !suppressSelection && selectedPath === node.path;
 	const buttonClass = clsx(
-		"flex items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-[13px] font-medium transition-colors",
+		"flex items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-sm font-medium transition-colors",
 		!isSelected && "hover:bg-neutral-100",
 		isSelected ? selectedClasses : "text-neutral-700",
 	);
@@ -260,7 +260,7 @@ function DraftRow({
 			<div
 				ref={rowRef}
 				className={clsx(
-					"flex items-center gap-2 rounded bg-neutral-0 px-2 py-1 text-left text-[13px] text-neutral-900 shadow-sm",
+					"flex items-center gap-2 rounded bg-neutral-0 px-2 py-1 text-left text-sm text-neutral-900 shadow-sm",
 					ringClasses,
 				)}
 			>
@@ -268,7 +268,7 @@ function DraftRow({
 				<input
 					ref={inputRef}
 					data-testid="files-view-draft-input"
-					className="min-w-0 flex-1 bg-transparent px-0 py-0 text-[13px] outline-none focus:outline-none"
+					className="min-w-0 flex-1 bg-transparent px-0 py-0 text-sm outline-none focus:outline-none"
 					value={value}
 					onChange={(event) => {
 						const next = event.target.value.replaceAll("/", "");

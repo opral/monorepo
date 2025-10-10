@@ -5,7 +5,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useDroppable } from "@dnd-kit/core";
 import { useMemo } from "react";
 import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
 import type {
@@ -15,10 +14,8 @@ import type {
 	ViewContext,
 	ViewDefinition,
 } from "./types";
-import { VIEW_DEFINITIONS, VIEW_MAP } from "./view-registry";
-import { ViewPanel } from "./view-panel";
-import { Panel } from "./panel";
-import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
+import { VIEW_DEFINITIONS } from "./view-registry";
+import { PanelV2 } from "./panel-v2";
 
 interface SidePanelProps {
 	readonly side: PanelSide;
@@ -50,23 +47,6 @@ export function SidePanel({
 	isFocused,
 	onFocusPanel,
 }: SidePanelProps) {
-	const activeEntry = panel.activeInstanceKey
-		? (panel.views.find(
-				(view) => view.instanceKey === panel.activeInstanceKey,
-			) ?? null)
-		: (panel.views[0] ?? null);
-
-	const activeView = activeEntry
-		? (VIEW_MAP.get(activeEntry.viewKey) ?? null)
-		: null;
-
-	const hasViews = panel.views.length > 0;
-
-	const { setNodeRef, isOver } = useDroppable({
-		id: `${side}-panel`,
-		data: { panel: side },
-	});
-
 	const panelViewKeySignature = useMemo(() => {
 		if (panel.views.length === 0) {
 			return "";
@@ -84,101 +64,54 @@ export function SidePanel({
 	}, [panelViewKeySignature]);
 	const canAddMoreViews = availableViews.length > 0;
 
-	const contextWithFocus: ViewContext | undefined = useMemo(() => {
-		if (!viewContext) {
-			return { isPanelFocused: isFocused };
-		}
-		if (viewContext.isPanelFocused === isFocused) {
-			return viewContext;
-		}
-		return { ...viewContext, isPanelFocused: isFocused };
-	}, [viewContext, isFocused]);
+	const addViewButton = canAddMoreViews ? (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<button
+					type="button"
+					title="Add view"
+					className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100"
+				>
+					<Plus className="h-4 w-4" />
+				</button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				align={side === "left" ? "start" : "end"}
+				className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
+			>
+				{availableViews.map((ext) => (
+					<DropdownMenuItem
+						key={ext.key}
+						onSelect={() => onAddView(ext.key)}
+						className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
+					>
+						<ext.icon className="h-4 w-4" />
+						<span>{ext.label}</span>
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
+	) : null;
 
 	return (
-		<aside
-			ref={setNodeRef}
-			onClickCapture={() => onFocusPanel(side)}
-			className="flex h-full w-full flex-col text-neutral-600"
-		>
-			<Panel className={isOver ? "ring-2 ring-brand-600 ring-inset" : ""}>
-				{hasViews && (
-					<Panel.TabBar>
-						{panel.views.map((entry) => {
-							const view = VIEW_MAP.get(entry.viewKey);
-							if (!view) return null;
-							const isActive = activeEntry?.instanceKey === entry.instanceKey;
-							return (
-								<Panel.Tab
-									key={entry.instanceKey}
-									icon={view.icon}
-									label={view.label}
-									isActive={isActive}
-									isFocused={isFocused && isActive}
-									onClick={() => onSelectView(entry.instanceKey)}
-									onClose={() => onRemoveView(entry.instanceKey)}
-									dragData={{
-										instanceKey: entry.instanceKey,
-										viewKey: entry.viewKey,
-										fromPanel: side,
-									}}
-								/>
-							);
-						})}
-						{canAddMoreViews && (
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<button
-										type="button"
-										title="Add view"
-										className="flex h-7 w-7 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100"
-									>
-										<Plus className="h-4 w-4" />
-									</button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent
-									align={side === "left" ? "start" : "end"}
-									className="w-40 border border-neutral-100 bg-neutral-0 p-1 shadow-lg"
-								>
-									{availableViews.map((ext) => (
-										<DropdownMenuItem
-											key={ext.key}
-											onSelect={() => onAddView(ext.key)}
-											className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
-										>
-											<ext.icon className="h-4 w-4" />
-											<span>{ext.label}</span>
-										</DropdownMenuItem>
-									))}
-								</DropdownMenuContent>
-							</DropdownMenu>
-						)}
-					</Panel.TabBar>
-				)}
-				<Panel.Content
-					className={
-						activeEntry && activeView
-							? "px-1.5 py-1"
-							: "flex items-center justify-center"
-					}
-				>
-					{activeEntry && activeView ? (
-						<KeepPreviousSuspense>
-							<ViewPanel
-								view={activeView}
-								context={contextWithFocus}
-								viewInstance={activeEntry}
-							/>
-						</KeepPreviousSuspense>
-					) : (
-						<EmptyPanelState
-							side={side}
-							onAddView={onAddView}
-							availableViews={availableViews}
-						/>
-					)}
-				</Panel.Content>
-			</Panel>
-		</aside>
+		<PanelV2
+			side={side}
+			panel={panel}
+			isFocused={isFocused}
+			onFocusPanel={onFocusPanel}
+			onSelectView={onSelectView}
+			onRemoveView={onRemoveView}
+			viewContext={viewContext}
+			tabLabel={(view) => view.label}
+			extraTabBarContent={addViewButton}
+			emptyStatePlaceholder={
+				<EmptyPanelState
+					side={side}
+					onAddView={onAddView}
+					availableViews={availableViews}
+				/>
+			}
+		/>
 	);
 }
 

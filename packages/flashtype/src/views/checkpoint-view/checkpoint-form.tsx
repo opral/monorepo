@@ -32,7 +32,7 @@ export function CheckpointForm({
 					value={message}
 					onChange={(e) => onMessageChange(e.target.value)}
 					rows={4}
-					className="w-full resize-none rounded-md border border-input bg-transparent pl-3 pr-28 pt-3 pb-3 text-[11px] leading-4 text-foreground shadow-none outline-none"
+					className="w-full resize-none rounded-md border border-input bg-transparent pl-3 pr-28 pt-3 pb-3 text-xs leading-4 text-foreground shadow-none outline-none"
 					disabled={isSubmitting}
 					data-testid="checkpoint-message"
 				/>
@@ -40,7 +40,7 @@ export function CheckpointForm({
 					type="submit"
 					disabled={isSubmitting || !message.trim()}
 					className={cn(
-						"absolute bottom-3 right-3 z-10 inline-flex items-center rounded-md border px-3 py-1.5 text-[11px] font-medium transition-colors",
+						"absolute bottom-3 right-3 z-10 inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
 						"border-input bg-transparent text-neutral-500",
 						message.trim() &&
 							!isSubmitting &&

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { EditorProvider } from "@/components/editor/editor-context";
@@ -36,27 +37,30 @@ export function MarkdownView({ filePath }: MarkdownViewProps) {
 		void setActiveFileId(fileRow.id);
 	}, [fileRow?.id, activeFileId, setActiveFileId]);
 
+	let content: ReactNode;
 	if (!filePath) {
-		return (
-			<div className="flex h-full items-center justify-center px-4 py-6 text-sm text-neutral-500">
+		content = (
+			<div className="flex h-full items-center justify-center text-sm text-neutral-500">
 				Select a Markdown file to preview.
 			</div>
 		);
-	}
-
-	if (!fileRow) {
-		return (
-			<div className="flex h-full items-center justify-center px-4 py-6 text-sm text-neutral-500">
+	} else if (!fileRow) {
+		content = (
+			<div className="flex h-full items-center justify-center text-sm text-neutral-500">
 				File not found in the workspace.
 			</div>
+		);
+	} else {
+		content = (
+			<EditorProvider>
+				<div className="markdown-view h-full">
+					<TipTapEditor className="h-full" />
+				</div>
+			</EditorProvider>
 		);
 	}
 
 	return (
-		<EditorProvider>
-			<div className="markdown-view h-full">
-				<TipTapEditor className="h-full" />
-			</div>
-		</EditorProvider>
+		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">{content}</div>
 	);
 }

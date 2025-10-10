@@ -63,11 +63,11 @@ function MessageBody({
 						className="rounded-md border border-border/50 bg-muted/30 overflow-hidden"
 					>
 						<div className="border-b border-border/40 bg-muted/50 px-3 py-1.5">
-							<span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+							<span className="text-xs font-mono font-semibold uppercase tracking-[0.18em] text-muted-foreground">
 								{p.lang || "code"}
 							</span>
 						</div>
-						<pre className="px-3 py-2.5 text-[13px] font-mono leading-relaxed text-foreground overflow-x-auto">
+						<pre className="px-3 py-2.5 text-sm font-mono leading-relaxed text-foreground overflow-x-auto">
 							{p.body}
 						</pre>
 					</div>

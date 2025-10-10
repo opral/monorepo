@@ -11,7 +11,7 @@ type LatestCheckpointProps = {
 export function LatestCheckpoint({ checkpoint }: LatestCheckpointProps) {
 	if (!checkpoint) {
 		return (
-			<div className="px-3 py-1.5 text-[11px] text-muted-foreground">
+			<div className="px-3 py-1.5 text-xs text-muted-foreground">
 				No checkpoints yet
 			</div>
 		);
@@ -21,7 +21,7 @@ export function LatestCheckpoint({ checkpoint }: LatestCheckpointProps) {
 	const placeholderMessage = "Previous checkpoint";
 
 	return (
-		<div className="px-3 py-1.5 text-[11px] text-muted-foreground">
+		<div className="px-3 py-1.5 text-xs text-muted-foreground">
 			{placeholderMessage}
 		</div>
 	);

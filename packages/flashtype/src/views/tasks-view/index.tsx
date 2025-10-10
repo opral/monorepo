@@ -3,7 +3,7 @@
  */
 export function TasksView() {
 	return (
-		<div className="space-y-2 text-[13px] text-neutral-900">
+		<div className="flex min-h-0 flex-1 flex-col space-y-2 px-3 py-2 text-sm text-neutral-900">
 			<ul className="space-y-2">
 				<li className="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2">
 					<div className="flex items-center justify-between text-sm">

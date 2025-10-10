@@ -25,7 +25,7 @@ import type {
 	RenderableDiff,
 } from "./types";
 import { createViewInstanceKey, VIEW_MAP } from "./view-registry";
-import { Panel as PanelComponent } from "./panel";
+import { PanelTabPreview } from "./panel-v2";
 import {
 	FLASHTYPE_UI_STATE_KEY,
 	normalizeLayoutSizes,
@@ -733,7 +733,7 @@ export function V2LayoutShell() {
 			<DragOverlay>
 				{activeId && activeDragView ? (
 					<div className="cursor-grabbing">
-						<PanelComponent.Tab
+						<PanelTabPreview
 							icon={activeDragView.icon}
 							label={activeDragView.label}
 							isActive={true}

@@ -3,7 +3,7 @@
  */
 export function SearchView() {
 	return (
-		<div className="space-y-3 text-[13px] text-neutral-900">
+		<div className="flex min-h-0 flex-1 flex-col space-y-3 px-3 py-2 text-sm text-neutral-900">
 			<label className="grid gap-1 text-xs font-medium text-neutral-600">
 				Query
 				<input

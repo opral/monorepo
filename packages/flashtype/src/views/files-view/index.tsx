@@ -308,25 +308,27 @@ export function FilesView({ context }: FilesViewProps) {
 	}, [handleDeleteSelection, isMacPlatform, resolveDraftDirectory]);
 
 	return (
-		<FileTree
-			nodes={nodes}
-			onOpenFile={handleOpenFile}
-			onSelectItem={handleSelectItem}
-			selectedPath={selectedPath ?? undefined}
-			isPanelFocused={isPanelFocused}
-			draft={
-				draft
-					? {
-							kind: draft.kind,
-							directoryPath: draft.directoryPath,
-							value: draft.value,
-							onChange: handleDraftChange,
-							onCommit: handleDraftCommit,
-							onCancel: handleDraftCancel,
-						}
-					: null
-			}
-		/>
+		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
+			<FileTree
+				nodes={nodes}
+				onOpenFile={handleOpenFile}
+				onSelectItem={handleSelectItem}
+				selectedPath={selectedPath ?? undefined}
+				isPanelFocused={isPanelFocused}
+				draft={
+					draft
+						? {
+								kind: draft.kind,
+								directoryPath: draft.directoryPath,
+								value: draft.value,
+								onChange: handleDraftChange,
+								onCommit: handleDraftCommit,
+								onCancel: handleDraftCancel,
+							}
+						: null
+				}
+			/>
+		</div>
 	);
 }
 

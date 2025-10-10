@@ -365,7 +365,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 				return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
 			}
 			return (
-				<div className="pointer-events-none rounded-md border border-border/50 bg-white px-3 py-2 text-[13px] text-zinc-500 shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+				<div className="pointer-events-none rounded-md border border-border/50 bg-white px-3 py-2 text-sm text-zinc-500 shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
 					{hasFiles ? "Type to search files…" : "No files available"}
 				</div>
 			);
@@ -387,7 +387,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	]);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col">
+		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
 			{/* Header with conversation picker */}
 			<header className="flex items-center justify-between border-b border-border/80 py-1">
 				<button
@@ -444,7 +444,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 							{menuFragment}
 						</div>
 					) : null}
-					<div className="flex justify-end bg-muted/40 pr-3 py-1 text-[11px] text-muted-foreground">
+					<div className="flex justify-end bg-muted/40 pr-3 py-1 text-xs text-muted-foreground">
 						<button
 							type="button"
 							onClick={() => commit()}

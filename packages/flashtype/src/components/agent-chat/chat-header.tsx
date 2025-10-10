@@ -16,7 +16,7 @@ export function ChatHeader({ onToggleHelp }: { onToggleHelp?: () => void }) {
 			<div className="ml-auto inline-flex items-center gap-2">
 				<button
 					type="button"
-					className="inline-flex items-center gap-1 rounded-sm border px-2 py-1 text-[11px] hover:bg-accent"
+					className="inline-flex items-center gap-1 rounded-sm border px-2 py-1 text-xs hover:bg-accent"
 					onClick={onToggleHelp}
 					aria-label="Keyboard shortcuts"
 					title="Keyboard shortcuts"

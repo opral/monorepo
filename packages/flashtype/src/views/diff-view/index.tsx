@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { useQuery } from "@lix-js/react-utils";
 import { selectWorkingDiff } from "@lix-js/sdk";
 import type { Lix } from "@lix-js/sdk";
@@ -31,23 +32,28 @@ export function DiffView({ config }: DiffViewProps) {
 		}));
 	}, [rawDiffs]);
 
+	let content: ReactNode;
 	if (!config?.query) {
-		return (
-			<div className="flex h-full items-center justify-center px-4 py-6 text-sm text-muted-foreground">
+		content = (
+			<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
 				Diff view is unavailable for this tab.
 			</div>
 		);
-	}
-
-	if (diffs.length === 0) {
-		return (
-			<div className="p-3 text-sm text-muted-foreground">
+	} else if (diffs.length === 0) {
+		content = (
+			<div className="text-sm text-muted-foreground">
 				No differences detected for this source.
 			</div>
 		);
+	} else {
+		content = <Diff diffs={diffs} contentClassName="ProseMirror" />;
 	}
 
-	return <Diff diffs={diffs} contentClassName="ProseMirror" />;
+	return (
+		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
+			<div className="flex-1 overflow-auto px-1">{content}</div>
+		</div>
+	);
 }
 
 function emptyDiffQuery(lix: Lix) {

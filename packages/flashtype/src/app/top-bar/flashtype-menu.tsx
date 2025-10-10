@@ -103,45 +103,45 @@ export function FlashtypeMenu() {
 				sideOffset={6}
 			>
 				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="gap-2 text-sm">
-						<Hammer className="size-4" />
+					<DropdownMenuSubTrigger className="gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700">
+						<Hammer className="h-3.5 w-3.5" />
 						<span>Developer tools</span>
 					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="min-w-56 text-sm">
+					<DropdownMenuSubContent className="min-w-56 text-xs">
 						<DropdownMenuItem
-							className="gap-2 text-sm"
+							className="gap-1.5 text-xs"
 							onSelect={() => {
 								void handleToggleInspector();
 							}}
 						>
-							<Search className="size-4" />
+							<Search className="h-3.5 w-3.5" />
 							<span>Toggle Lix Inspector</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
-							className="gap-2 text-sm"
+							className="gap-1.5 text-xs"
 							onSelect={() => {
 								void handleSeedMarkdown();
 							}}
 						>
-							<FilePlus className="size-4" />
+							<FilePlus className="h-3.5 w-3.5" />
 							<span>Seed Markdown files</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
-							className="gap-2 text-sm"
+							className="gap-1.5 text-xs"
 							onSelect={() => {
 								void handleExportLix();
 							}}
 						>
-							<Download className="size-4" />
+							<Download className="h-3.5 w-3.5" />
 							<span>Export Lix blob</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
-							className="gap-2 text-sm"
+							className="gap-1.5 text-xs"
 							onSelect={() => {
 								void handleResetOpfs();
 							}}
 						>
-							<RotateCcw className="size-4" />
+							<RotateCcw className="h-3.5 w-3.5" />
 							<span>Reset OPFS</span>
 						</DropdownMenuItem>
 					</DropdownMenuSubContent>

@@ -62,7 +62,7 @@ export function HistoryView({ context }: HistoryViewProps) {
 	}, [items, selectedId]);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col overflow-auto px-3 py-3">
+		<div className="flex min-h-0 flex-1 flex-col overflow-auto px-3 py-2">
 			{items.length === 0 ? (
 				<div className="px-1 py-6 text-center text-xs text-muted-foreground">
 					No checkpoints yet
@@ -99,10 +99,10 @@ export function HistoryView({ context }: HistoryViewProps) {
 											: "border border-transparent hover:bg-muted/60",
 									)}
 								>
-									<span className="text-[13px] font-medium leading-5 text-foreground">
+									<span className="text-sm font-medium leading-5 text-foreground">
 										{item.title}
 									</span>
-									<span className="text-[11px] leading-4 text-muted-foreground">
+									<span className="text-xs leading-4 text-muted-foreground">
 										{item.timestampLabel}
 									</span>
 								</button>

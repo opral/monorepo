@@ -76,7 +76,7 @@ export function AcceptChangesMenu({
 										isSel ? "bg-muted" : "",
 									].join(" ")}
 								>
-									<span className="text-[13px]">{label}</span>
+									<span className="text-sm">{label}</span>
 								</button>
 							);
 						})}
