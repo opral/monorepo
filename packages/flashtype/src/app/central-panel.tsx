@@ -275,7 +275,6 @@ export function CentralPanel({
 			tabLabel={labelResolver}
 			onActiveViewInteraction={finalizePendingIfNeeded}
 			emptyStatePlaceholder={emptyState}
-			emptyStateContentClassName="px-6 pt-4 text-sm leading-7"
 			dropId="central-panel"
 		/>
 	);

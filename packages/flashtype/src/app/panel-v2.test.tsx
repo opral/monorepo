@@ -1,4 +1,5 @@
 import { vi, describe, expect, test } from "vitest";
+import React from "react";
 
 vi.mock("@dnd-kit/core", async () => {
 	const actual =
@@ -9,12 +10,24 @@ vi.mock("@dnd-kit/core", async () => {
 			setNodeRef: vi.fn(),
 			isOver: false,
 		}),
-		useDraggable: vi.fn().mockReturnValue({
+	};
+});
+
+vi.mock("@dnd-kit/sortable", async () => {
+	const actual = await vi.importActual<any>("@dnd-kit/sortable");
+	return {
+		...actual,
+		useSortable: vi.fn().mockReturnValue({
 			attributes: {},
 			listeners: {},
 			setNodeRef: vi.fn(),
+			transform: null,
+			transition: null,
 			isDragging: false,
 		}),
+		SortableContext: ({ children }: { children: React.ReactNode }) => (
+			<div>{children}</div>
+		),
 	};
 });
 
@@ -22,6 +35,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { PanelV2 } from "./panel-v2";
 import type { PanelState } from "./types";
 import { useDroppable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 
 const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 
@@ -92,6 +106,26 @@ describe("PanelV2", () => {
 		expect(input).toBeInTheDocument();
 	});
 
+	test("registers the panel container as a droppable target", () => {
+		const droppableMock = vi.mocked(useDroppable);
+		droppableMock.mockClear();
+		render(
+			<PanelV2
+				side="left"
+				panel={singleSearchPanel}
+				isFocused={false}
+				onFocusPanel={vi.fn()}
+				onSelectView={vi.fn()}
+				onRemoveView={vi.fn()}
+			/>,
+		);
+
+		expect(droppableMock).toHaveBeenCalledWith({
+			id: "left-panel",
+			data: { panel: "left" },
+		});
+	});
+
 	test("uses the tab label resolver when provided", () => {
 		render(
 			<PanelV2
@@ -108,6 +142,32 @@ describe("PanelV2", () => {
 		expect(
 			screen.getByRole("button", { name: "Custom Search" }),
 		).toBeInTheDocument();
+	});
+
+	test("registers sortable handlers for tabs", () => {
+		const sortableMock = vi.mocked(useSortable);
+		sortableMock.mockClear();
+		render(
+			<PanelV2
+				side="left"
+				panel={singleSearchPanel}
+				isFocused={false}
+				onFocusPanel={vi.fn()}
+				onSelectView={vi.fn()}
+				onRemoveView={vi.fn()}
+			/>,
+		);
+
+		expect(sortableMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				id: "search-1",
+				data: expect.objectContaining({
+					instanceKey: "search-1",
+					panel: "left",
+					fromPanel: "left",
+				}),
+			}),
+		);
 	});
 
 	test("renders any extra tab bar content", () => {

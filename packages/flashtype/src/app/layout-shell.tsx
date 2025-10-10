@@ -137,6 +137,61 @@ export function cloneViewInstanceByKey(
 	};
 }
 
+export function reorderPanelViews(
+	panel: PanelState,
+	movingInstanceKey: string,
+	targetInstanceKey: string,
+): PanelState {
+	if (movingInstanceKey === targetInstanceKey) {
+		return panel;
+	}
+	const views = panel.views.slice();
+	const fromIndex = views.findIndex(
+		(entry) => entry.instanceKey === movingInstanceKey,
+	);
+	const targetIndex = views.findIndex(
+		(entry) => entry.instanceKey === targetInstanceKey,
+	);
+	if (fromIndex === -1 || targetIndex === -1) {
+		return panel;
+	}
+	const [moving] = views.splice(fromIndex, 1);
+	const insertionIndex =
+		fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
+	views.splice(insertionIndex, 0, moving);
+	return {
+		views,
+		activeInstanceKey:
+			panel.activeInstanceKey === moving.instanceKey
+				? moving.instanceKey
+				: panel.activeInstanceKey,
+	};
+}
+
+export function reorderPanelViewsByIndex(
+	panel: PanelState,
+	fromIndex: number,
+	toIndex: number,
+): PanelState {
+	if (fromIndex === toIndex) return panel;
+	const views = panel.views.slice();
+	if (
+		fromIndex < 0 ||
+		fromIndex >= views.length ||
+		toIndex < 0 ||
+		toIndex > views.length
+	) {
+		return panel;
+	}
+	const [moving] = views.splice(fromIndex, 1);
+	const target = toIndex > views.length ? views.length : toIndex;
+	views.splice(target, 0, moving);
+	return {
+		views,
+		activeInstanceKey: panel.activeInstanceKey,
+	};
+}
+
 /**
  * App layout shell with independent left and right islands.
  *
@@ -364,18 +419,55 @@ export function V2LayoutShell() {
 			setActiveId(null);
 			const { active, over } = event;
 
-			if (!over || active.id === over.id) return;
+			if (!over) return;
 
-			// Parse drag data
 			const dragData = active.data.current as
 				| { instanceKey: string; viewKey: ViewKey; fromPanel: PanelSide }
 				| undefined;
-			const dropData = over.data.current as { panel: PanelSide } | undefined;
+			const dropData = over.data.current as
+				| {
+						panel?: PanelSide;
+						instanceKey?: string;
+						sortable?: { index: number };
+				  }
+				| undefined;
+			const overSortable = (over.data.current as any)?.sortable as
+				| { index: number }
+				| undefined;
 
 			if (!dragData || !dropData) return;
 
 			const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
-			const { panel: toPanel } = dropData;
+			const toPanel = dropData.panel ?? fromPanel;
+			const targetInstanceKey = dropData.instanceKey;
+
+			if (toPanel === fromPanel) {
+				setPanelState(
+					fromPanel,
+					(panel) => {
+						const fromIndex = panel.views.findIndex(
+							(entry) => entry.instanceKey === instanceKey,
+						);
+						if (fromIndex === -1) return panel;
+						let toIndex: number | null = null;
+						if (overSortable?.index != null) {
+							toIndex = overSortable.index;
+						} else if (targetInstanceKey) {
+							toIndex = panel.views.findIndex(
+								(entry) => entry.instanceKey === targetInstanceKey,
+							);
+						} else {
+							toIndex = panel.views.length - 1;
+						}
+						if (toIndex == null || toIndex === -1) {
+							return panel;
+						}
+						return reorderPanelViewsByIndex(panel, fromIndex, toIndex);
+					},
+					{ focus: true },
+				);
+				return;
+			}
 
 			const sourcePanel =
 				fromPanel === "left"
@@ -400,10 +492,25 @@ export function V2LayoutShell() {
 
 			setPanelState(
 				toPanel,
-				(panel) => ({
-					views: [...panel.views, movedView],
-					activeInstanceKey: movedView.instanceKey,
-				}),
+				(panel) => {
+					const views = [...panel.views];
+					let insertIndex = views.length;
+					if (overSortable?.index != null) {
+						insertIndex = Math.min(overSortable.index, views.length);
+					} else if (targetInstanceKey) {
+						const targetIndex = views.findIndex(
+							(entry) => entry.instanceKey === targetInstanceKey,
+						);
+						if (targetIndex !== -1) {
+							insertIndex = targetIndex;
+						}
+					}
+					views.splice(insertIndex, 0, movedView);
+					return {
+						views,
+						activeInstanceKey: movedView.instanceKey,
+					};
+				},
 				{ focus: true },
 			);
 		},

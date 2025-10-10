@@ -5,10 +5,19 @@ import {
 	useLayoutEffect,
 	useRef,
 	useState,
+	type ButtonHTMLAttributes,
+	type CSSProperties,
 	type HTMLAttributes,
+	type MouseEvent,
 	type ReactNode,
 } from "react";
-import { useDroppable, useDraggable } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
+import {
+	SortableContext,
+	useSortable,
+	horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { X, type LucideIcon } from "lucide-react";
 import type {
 	PanelSide,
@@ -16,6 +25,7 @@ import type {
 	ViewContext,
 	ViewDefinition,
 	ViewInstance,
+	ViewKey,
 } from "./types";
 import { VIEW_MAP } from "./view-registry";
 import { KeepPreviousSuspense } from "@/components/keep-previous-suspense";
@@ -107,29 +117,33 @@ export function PanelV2({
 			>
 				{showTabBar ? (
 					<TabBar extraContent={extraTabBarContent}>
-						{panel.views.map((entry) => {
-							const view = VIEW_MAP.get(entry.viewKey);
-							if (!view) return null;
-							const isActive = activeInstanceKey === entry.instanceKey;
-							const label = resolveLabel(view, entry, tabLabel);
-							return (
-								<DraggableTab
-									key={entry.instanceKey}
-									icon={view.icon}
-									label={label}
-									isActive={isActive}
-									isFocused={isFocused && isActive}
-									isPending={entry.isPending}
-									onClick={() => onSelectView(entry.instanceKey)}
-									onClose={() => onRemoveView(entry.instanceKey)}
-									dragData={{
-										instanceKey: entry.instanceKey,
-										viewKey: entry.viewKey,
-										fromPanel: side,
-									}}
-								/>
-							);
-						})}
+						<SortableContext
+							id={`panel-${side}`}
+							items={panel.views.map((entry) => entry.instanceKey)}
+							strategy={horizontalListSortingStrategy}
+						>
+							{panel.views.map((entry) => {
+								const view = VIEW_MAP.get(entry.viewKey);
+								if (!view) return null;
+								const isActive = activeInstanceKey === entry.instanceKey;
+								const label = resolveLabel(view, entry, tabLabel);
+								return (
+									<SortableTab
+										key={entry.instanceKey}
+										instanceKey={entry.instanceKey}
+										panelSide={side}
+										viewKey={entry.viewKey}
+										icon={view.icon}
+										label={label}
+										isActive={isActive}
+										isFocused={isFocused && isActive}
+										isPending={entry.isPending}
+										onClick={() => onSelectView(entry.instanceKey)}
+										onClose={() => onRemoveView(entry.instanceKey)}
+									/>
+								);
+							})}
+						</SortableContext>
 					</TabBar>
 				) : null}
 
@@ -277,33 +291,69 @@ function PanelContent({
 	);
 }
 
-interface TabButtonProps extends PanelTabPreviewProps {
+interface SortableTabProps extends PanelTabPreviewProps {
+	readonly instanceKey: string;
+	readonly panelSide: PanelSide;
+	readonly viewKey: ViewKey;
 	readonly onClick?: () => void;
 	readonly onClose?: () => void;
-	readonly dragData?: {
-		readonly instanceKey: string;
-		readonly viewKey: string;
-		readonly fromPanel: PanelSide;
-	};
+	readonly isPending?: boolean;
 }
 
-function DraggableTab({ dragData, ...rest }: TabButtonProps) {
-	const tabInstanceKey = dragData?.instanceKey ?? null;
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: dragData?.instanceKey || `tab-${rest.label}`,
-		data: dragData,
-		disabled: !dragData,
+function SortableTab({
+	instanceKey,
+	panelSide,
+	viewKey,
+	icon,
+	label,
+	isActive,
+	isFocused,
+	isPending,
+	onClick,
+	onClose,
+}: SortableTabProps) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id: instanceKey,
+		data: {
+			type: "panel-tab",
+			panel: panelSide,
+			instanceKey,
+			viewKey,
+			fromPanel: panelSide,
+		},
 	});
+
+	const style: CSSProperties = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
 
 	return (
 		<TabButtonBase
 			ref={setNodeRef}
-			{...rest}
+			icon={icon}
+			label={label}
+			isActive={isActive}
+			isFocused={isFocused}
+			isPending={isPending}
+			onClick={onClick}
+			onClose={onClose}
 			isDragging={isDragging}
-			dataFocused={rest.isFocused ? "true" : undefined}
-			dataViewInstance={tabInstanceKey ?? undefined}
-			dataViewKey={dragData?.viewKey ?? undefined}
-			buttonProps={{ ...attributes, ...listeners }}
+			dataFocused={isFocused ? "true" : undefined}
+			dataViewInstance={instanceKey}
+			dataViewKey={viewKey}
+			style={style}
+			buttonProps={{
+				...(attributes as ButtonHTMLAttributes<HTMLButtonElement>),
+				...(listeners as ButtonHTMLAttributes<HTMLButtonElement>),
+			}}
 		/>
 	);
 }
@@ -318,13 +368,14 @@ const tabStateClasses = {
 } as const;
 
 interface TabBaseProps extends PanelTabPreviewProps {
-	readonly onClick?: () => void;
+	readonly onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 	readonly onClose?: () => void;
 	readonly isDragging?: boolean;
 	readonly dataFocused?: string;
 	readonly dataViewInstance?: string;
 	readonly dataViewKey?: string;
-	readonly buttonProps?: Record<string, unknown>;
+	readonly buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> | null;
+	readonly style?: CSSProperties;
 }
 
 const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
@@ -341,15 +392,20 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 			dataFocused,
 			dataViewInstance,
 			dataViewKey,
-			buttonProps = {},
+			buttonProps = null,
+			style,
 		},
 		ref,
 	) => {
 		const state = isActive ? (isFocused ? "focused" : "active") : "idle";
+		const { onClick: dragOnClick, ...restButtonProps } = buttonProps ?? {};
 		return (
 			<button
 				type="button"
-				onClick={onClick}
+				onClick={(event) => {
+					dragOnClick?.(event);
+					onClick?.(event);
+				}}
 				ref={ref}
 				data-focused={dataFocused}
 				data-view-instance={dataViewInstance}
@@ -359,7 +415,8 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 					tabStateClasses[state],
 					isDragging && "opacity-50 cursor-grabbing",
 				)}
-				{...buttonProps}
+				style={style}
+				{...restButtonProps}
 			>
 				<Icon className="h-3.5 w-3.5" />
 				<span

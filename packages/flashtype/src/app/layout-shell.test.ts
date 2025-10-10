@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { cloneViewInstanceByKey } from "./layout-shell";
+import {
+	cloneViewInstanceByKey,
+	reorderPanelViews,
+	reorderPanelViewsByIndex,
+} from "./layout-shell";
 import type { PanelState, ViewInstance } from "./types";
 
 describe("cloneViewInstanceByKey", () => {
@@ -31,5 +35,54 @@ describe("cloneViewInstanceByKey", () => {
 		const cloned = cloneViewInstanceByKey(panelState, "missing");
 
 		expect(cloned).toBeNull();
+	});
+});
+
+describe("panel view reordering", () => {
+	const samplePanel: PanelState = {
+		views: [
+			{ instanceKey: "files-1", viewKey: "files" },
+			{ instanceKey: "search-1", viewKey: "search" },
+			{ instanceKey: "agent-1", viewKey: "agent" },
+		],
+		activeInstanceKey: "files-1",
+	};
+
+	test("reorderPanelViews moves the dragged view before the target (forward)", () => {
+		const result = reorderPanelViews(samplePanel, "files-1", "agent-1");
+		expect(result.views.map((entry) => entry.instanceKey)).toEqual([
+			"search-1",
+			"files-1",
+			"agent-1",
+		]);
+		expect(result.activeInstanceKey).toBe("files-1");
+	});
+
+	test("reorderPanelViews moves the dragged view before the target (backward)", () => {
+		const result = reorderPanelViews(samplePanel, "agent-1", "files-1");
+		expect(result.views.map((entry) => entry.instanceKey)).toEqual([
+			"agent-1",
+			"files-1",
+			"search-1",
+		]);
+	});
+
+	test("reorderPanelViews returns the original panel when keys are missing", () => {
+		const unchanged = reorderPanelViews(samplePanel, "missing", "files-1");
+		expect(unchanged).toEqual(samplePanel);
+	});
+
+	test("reorderPanelViewsByIndex moves an item to the requested index", () => {
+		const result = reorderPanelViewsByIndex(samplePanel, 0, 2);
+		expect(result.views.map((entry) => entry.instanceKey)).toEqual([
+			"search-1",
+			"agent-1",
+			"files-1",
+		]);
+	});
+
+	test("reorderPanelViewsByIndex ignores invalid indices", () => {
+		const unchanged = reorderPanelViewsByIndex(samplePanel, -1, 2);
+		expect(unchanged).toEqual(samplePanel);
 	});
 });
