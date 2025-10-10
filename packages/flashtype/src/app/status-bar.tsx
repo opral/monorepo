@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react";
 
 /**
- * Bottom status ribbon mirroring Fleet's understated footer.
+ * Bottom status ribbon displaying lint and sync feedback.
  *
  * @example
  * <StatusBar />

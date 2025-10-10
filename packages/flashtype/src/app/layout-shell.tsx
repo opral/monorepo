@@ -118,7 +118,7 @@ const createWorkingVsCheckpointDiffConfig = (
 });
 
 /**
- * Fleet-style layout shell with independent left and right islands.
+ * App layout shell with independent left and right islands.
  *
  * @example
  * <V2LayoutShell />
@@ -642,9 +642,15 @@ export function V2LayoutShell() {
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
 		>
-			<div className="flex h-screen flex-col bg-neutral-100 text-neutral-900">
+			<div
+				className="relative flex flex-col bg-neutral-100 text-neutral-900"
+				style={{
+					// Pin the shell to the available viewport (inspector offset included) to avoid vertical scrolling.
+					height: "calc(100dvh - var(--lix-inspector-offset, 0px))",
+				}}
+			>
 				<TopBar />
-				<div className="flex flex-1 overflow-hidden px-2 gap-4">
+				<div className="flex flex-1 min-h-0 overflow-hidden px-2 gap-4">
 					<PanelGroup direction="horizontal" onLayout={handleLayoutChange}>
 						<Panel defaultSize={panelSizes.left} minSize={10} maxSize={40}>
 							<SidePanel

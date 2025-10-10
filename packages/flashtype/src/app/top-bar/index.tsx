@@ -6,11 +6,11 @@ import {
 	PanelLeft,
 	PanelRight,
 	Search,
-	Zap,
 } from "lucide-react";
+import { FlashtypeMenu } from "./flashtype-menu";
 
 /**
- * Fleet-inspired top chrome with window controls and quick actions.
+ * Top navigation with window controls, quick actions, and app menu.
  *
  * @example
  * <TopBar />
@@ -19,9 +19,7 @@ export function TopBar() {
 	return (
 		<header className="flex h-10 items-center px-2 text-neutral-600">
 			<div className="flex flex-1 items-center gap-1 text-sm">
-				<div className="flex h-7 w-7 items-center justify-center">
-					<Zap className="h-4 w-4 text-amber-500" />
-				</div>
+				<FlashtypeMenu />
 				<Button
 					variant="ghost"
 					size="icon"

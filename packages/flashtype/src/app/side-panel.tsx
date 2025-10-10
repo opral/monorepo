@@ -189,7 +189,7 @@ interface EmptyPanelStateProps {
 }
 
 /**
- * Fleet-style empty state for panels with no active views
+ * Empty state displayed when a panel has no active views.
  */
 function EmptyPanelState({
 	side,

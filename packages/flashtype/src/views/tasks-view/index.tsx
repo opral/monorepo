@@ -20,7 +20,7 @@ export function TasksView() {
 						<span className="text-xs text-neutral-400">Todo</span>
 					</div>
 					<p className="text-xs text-neutral-600">
-						Align neutral palette with Fleet islands guidance.
+						Align neutral palette with updated shell spacing guidance.
 					</p>
 				</li>
 			</ul>

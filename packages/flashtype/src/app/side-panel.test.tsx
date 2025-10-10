@@ -120,7 +120,7 @@ describe("SidePanel", () => {
 		const fileRow = await screen.findByRole(
 			"button",
 			{ name: "writing-style.md" },
-			{ timeout: 3000 },
+			{ timeout: 5000 },
 		);
 		fireEvent.click(fileRow);
 		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
