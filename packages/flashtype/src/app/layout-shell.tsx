@@ -118,6 +118,26 @@ const createWorkingVsCheckpointDiffConfig = (
 });
 
 /**
+ * Returns a shallow clone of a view instance stored in a panel, including a
+ * copied metadata object to keep state transitions immutable when moving tabs
+ * between panels.
+ *
+ * @example
+ * const cloned = cloneViewInstanceByKey(panelState, "files-1");
+ */
+export function cloneViewInstanceByKey(
+	panel: PanelState,
+	instanceKey: string,
+): ViewInstance | null {
+	const view = panel.views.find((entry) => entry.instanceKey === instanceKey);
+	if (!view) return null;
+	return {
+		...view,
+		metadata: view.metadata ? { ...view.metadata } : undefined,
+	};
+}
+
+/**
  * App layout shell with independent left and right islands.
  *
  * @example
@@ -357,16 +377,17 @@ export function V2LayoutShell() {
 			const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
 			const { panel: toPanel } = dropData;
 
-			let movedView: ViewInstance | null = null;
+			const sourcePanel =
+				fromPanel === "left"
+					? leftPanel
+					: fromPanel === "central"
+						? centralPanel
+						: rightPanel;
+			const movedView = cloneViewInstanceByKey(sourcePanel, instanceKey);
+
+			if (!movedView) return;
 
 			setPanelState(fromPanel, (panel) => {
-				const view = panel.views.find(
-					(entry) => entry.instanceKey === instanceKey,
-				);
-				if (!view) {
-					return panel;
-				}
-				movedView = view;
 				const remaining = panel.views.filter(
 					(entry) => entry.instanceKey !== instanceKey,
 				);
@@ -377,18 +398,16 @@ export function V2LayoutShell() {
 				return { views: remaining, activeInstanceKey: nextActive };
 			});
 
-			if (!movedView) return;
-
 			setPanelState(
 				toPanel,
 				(panel) => ({
-					views: [...panel.views, movedView as ViewInstance],
-					activeInstanceKey: (movedView as ViewInstance).instanceKey,
+					views: [...panel.views, movedView],
+					activeInstanceKey: movedView.instanceKey,
 				}),
 				{ focus: true },
 			);
 		},
-		[setPanelState],
+		[centralPanel, leftPanel, rightPanel, setPanelState],
 	);
 
 	const activeDragData = activeId
