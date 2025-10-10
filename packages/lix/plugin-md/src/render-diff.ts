@@ -3,6 +3,15 @@ import { AstSchemas, type MarkdownNode, type Ast } from "@opral/markdown-wc";
 import { serializeToHtml } from "@opral/markdown-wc/html";
 import type { RenderDiffArgs } from "@lix-js/sdk";
 
+const MARKDOWN_NODE_SCHEMA_KEYS = new Set<string>(
+	Object.values(AstSchemas.schemasByType).flatMap(
+		(schema: Record<string, unknown>) => {
+			const key = schema?.["x-lix-key"];
+			return typeof key === "string" ? [key] : [];
+		},
+	),
+);
+
 async function buildAstFromDiffs(
 	diffs: RenderDiffArgs["diffs"],
 	which: "before" | "after",
@@ -15,6 +24,7 @@ async function buildAstFromDiffs(
 	const nodes = new Map<string, MarkdownNode>();
 	for (const diff of diffs) {
 		if (diff.schema_key === rootKey) continue;
+		if (!MARKDOWN_NODE_SCHEMA_KEYS.has(String(diff.schema_key ?? ""))) continue;
 		const snapshot = diff[`${which}_snapshot_content` as const];
 		if (snapshot)
 			nodes.set(diff.entity_id, snapshot as unknown as MarkdownNode);
