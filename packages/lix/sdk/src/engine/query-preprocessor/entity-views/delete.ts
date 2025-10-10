@@ -126,12 +126,12 @@ export function rewriteEntityDelete(args: {
 			callFunction: engine.call,
 		});
 	}
-	const metadataDefaults = resolveMetadataDefaults({
+	const lixcolOverrides = resolveMetadataDefaults({
 		defaults: rawMetadataDefaults,
 		cel: metadataCel,
 	});
-	const getMetadataDefault = (key: string): unknown =>
-		metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
+	const getLixcolOverride = (key: string): unknown =>
+		lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
 
 	const propertiesObject = (schema as Record<string, unknown>).properties ?? {};
 	if (!propertiesObject || typeof propertiesObject !== "object") {
@@ -260,7 +260,7 @@ export function rewriteEntityDelete(args: {
 		}
 	}
 
-	const defaultVersion = getMetadataDefault("lixcol_version_id");
+	const defaultVersion = getLixcolOverride("lixcol_version_id");
 	if (!hasVersionCondition) {
 		if (variant === "base") {
 			if (defaultVersion !== undefined) {

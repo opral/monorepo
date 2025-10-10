@@ -149,12 +149,12 @@ export function rewriteEntityUpdate(args: {
 			callFunction: args.engine.call,
 		});
 	}
-	const metadataDefaults = resolveMetadataDefaults({
+	const lixcolOverrides = resolveMetadataDefaults({
 		defaults: rawMetadataDefaults,
 		cel: metadataCel,
 	});
-	const getMetadataDefault = (key: string): unknown =>
-		metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
+	const getLixcolOverride = (key: string): unknown =>
+		lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	if (!isEntityRewriteAllowed(storedSchemaKey)) {
 		return null;
@@ -271,9 +271,32 @@ export function rewriteEntityUpdate(args: {
 	const fileIdAssignment = assignments.get("lixcol_file_id");
 	const metadataAssignment = assignments.get("lixcol_metadata");
 	const untrackedAssignment = assignments.get("lixcol_untracked");
-	const pluginKeyExpr = metadataDefaults.has("lixcol_plugin_key")
-		? addParam(getMetadataDefault("lixcol_plugin_key"))
-		: "plugin_key";
+	const overrideEntityId = lixcolOverrides.has("lixcol_entity_id")
+		? getLixcolOverride("lixcol_entity_id")
+		: undefined;
+	const overrideFileId = lixcolOverrides.has("lixcol_file_id")
+		? getLixcolOverride("lixcol_file_id")
+		: undefined;
+	const overridePluginKey = lixcolOverrides.has("lixcol_plugin_key")
+		? getLixcolOverride("lixcol_plugin_key")
+		: undefined;
+	const overrideVersion = lixcolOverrides.has("lixcol_version_id")
+		? getLixcolOverride("lixcol_version_id")
+		: undefined;
+	const overrideMetadata = lixcolOverrides.has("lixcol_metadata")
+		? getLixcolOverride("lixcol_metadata")
+		: undefined;
+	const overrideUntracked = lixcolOverrides.has("lixcol_untracked")
+		? getLixcolOverride("lixcol_untracked")
+		: undefined;
+	const fileIdOverrideExpr =
+		overrideFileId !== undefined ? addParam(overrideFileId) : null;
+	const pluginOverrideExpr =
+		overridePluginKey !== undefined ? addParam(overridePluginKey) : null;
+	const metadataOverrideSource =
+		overrideMetadata !== undefined ? paramSource(overrideMetadata) : null;
+	const untrackedOverrideSource =
+		overrideUntracked !== undefined ? paramSource(overrideUntracked) : null;
 	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
 	const schemaVersionSource = paramSource(schemaVersionValue);
 
@@ -288,14 +311,16 @@ export function rewriteEntityUpdate(args: {
 
 	let versionFallbackExpr: string | null = null;
 	let versionSource: ValueSource | null = null;
-	const useCaseForActiveBase =
-		explicitVersionAssignment && isActiveVersionSchema && variant === "base";
-	if (explicitVersionAssignment && !useCaseForActiveBase) {
+	if (variant === "all") {
+		if (explicitVersionAssignment) {
+			versionSource = explicitVersionAssignment.value;
+		} else {
+			versionFallbackExpr = "version_id";
+		}
+	} else if (overrideVersion !== undefined) {
+		versionSource = paramSource(overrideVersion);
+	} else if (explicitVersionAssignment) {
 		versionSource = explicitVersionAssignment.value;
-	} else if (variant === "all") {
-		versionFallbackExpr = "version_id";
-	} else if (metadataDefaults.has("lixcol_version_id")) {
-		versionSource = paramSource(getMetadataDefault("lixcol_version_id"));
 	} else if (isActiveVersionSchema) {
 		versionSource = paramSource("global");
 	} else {
@@ -310,18 +335,15 @@ export function rewriteEntityUpdate(args: {
 	const assignmentClauses = [
 		`schema_key = ${schemaKeyExpr}`,
 		`file_id = ${
-			fileIdAssignment ? renderValueSource(fileIdAssignment.value) : "file_id"
+			fileIdOverrideExpr ??
+			(fileIdAssignment
+				? renderValueSource(fileIdAssignment.value)
+				: "file_id")
 		}`,
-		`plugin_key = ${pluginKeyExpr}`,
+		`plugin_key = ${pluginOverrideExpr ?? "plugin_key"}`,
 		`snapshot_content = json_object(${snapshotEntries})`,
 		`schema_version = ${renderValueSource(schemaVersionSource)}`,
 		(() => {
-			if (useCaseForActiveBase) {
-				const explicitSql = renderValueSource(explicitVersionAssignment!.value);
-				const globalWhen = addParam("global");
-				const globalThen = addParam("global");
-				return `version_id = CASE WHEN state_all.version_id = ${globalWhen} THEN ${globalThen} ELSE ${explicitSql} END`;
-			}
 			return `version_id = ${
 				versionSource
 					? renderValueSource(versionSource)
@@ -329,14 +351,18 @@ export function rewriteEntityUpdate(args: {
 			}`;
 		})(),
 		`metadata = ${
-			metadataAssignment
-				? renderValueSource(metadataAssignment.value)
-				: "metadata"
+			metadataOverrideSource
+				? renderValueSource(metadataOverrideSource)
+				: metadataAssignment
+					? renderValueSource(metadataAssignment.value)
+					: "metadata"
 		}`,
 		`untracked = ${
-			untrackedAssignment
-				? renderValueSource(untrackedAssignment.value)
-				: "untracked"
+			untrackedOverrideSource
+				? renderValueSource(untrackedOverrideSource)
+				: untrackedAssignment
+					? renderValueSource(untrackedAssignment.value)
+					: "untracked"
 		}`,
 	];
 	if (touchesPrimaryKey) {
@@ -350,10 +376,8 @@ export function rewriteEntityUpdate(args: {
 		};
 		const entityIdRendered = isActiveVersionSchema
 			? renderWithOrdering(paramSource("active"))
-			: metadataDefaults.has("lixcol_entity_id")
-				? renderWithOrdering(
-						paramSource(getMetadataDefault("lixcol_entity_id"))
-					)
+			: overrideEntityId !== undefined
+				? renderWithOrdering(paramSource(overrideEntityId))
 				: buildEntityIdExpr();
 		params.unshift(...entityIdRendered.params);
 		assignmentClauses.unshift(`entity_id = ${entityIdRendered.sql}`);

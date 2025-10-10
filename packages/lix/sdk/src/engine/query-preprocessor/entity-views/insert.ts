@@ -172,13 +172,13 @@ export function rewriteEntityInsert(args: {
 			columnMap,
 			propertyLowerToActual,
 		});
-		const metadataDefaults = resolveMetadataDefaults({
-			defaults: rawMetadataDefaults,
-			cel: celState,
-			context: celContext,
-		});
-		const getMetadataDefault = (key: string): unknown =>
-			metadataDefaults.has(key) ? metadataDefaults.get(key) : undefined;
+	const lixcolOverrides = resolveMetadataDefaults({
+		defaults: rawMetadataDefaults,
+		cel: celState,
+		context: celContext,
+	});
+	const getLixcolOverride = (key: string): unknown =>
+		lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
 		const resolvedDefaults = new Map<string, unknown>();
 
 		const renderPrimaryKeyExpr = (
@@ -218,8 +218,13 @@ export function rewriteEntityInsert(args: {
 			return defaultExpr;
 		};
 
+		const overrideEntityId = lixcolOverrides.has("lixcol_entity_id")
+			? lixcolOverrides.get("lixcol_entity_id")
+			: undefined;
 		let entityIdExpr: string;
-		if (primaryKeys.length === 1) {
+		if (overrideEntityId !== undefined) {
+			entityIdExpr = addParam(overrideEntityId);
+		} else if (primaryKeys.length === 1) {
 			const expr = renderPrimaryKeyExpr(primaryKeys[0]!);
 			if (!expr) return null;
 			entityIdExpr = expr;
@@ -235,58 +240,72 @@ export function rewriteEntityInsert(args: {
 			entityIdExpr = `(${parts.join(" || '~' || ")})`;
 		}
 		const schemaKeyValue = storedSchemaKey;
-		const fileIdValue = getColumnOrDefault(
-			columnMap,
-			"lixcol_file_id",
-			getMetadataDefault("lixcol_file_id")
-		);
+		const fileIdValue = lixcolOverrides.has("lixcol_file_id")
+			? getLixcolOverride("lixcol_file_id")
+			: getColumnOrDefault(
+					columnMap,
+					"lixcol_file_id",
+					getLixcolOverride("lixcol_file_id")
+				);
 		if (fileIdValue === undefined) {
 			throw new Error(
 				`Schema ${storedSchemaKey} requires lixcol_file_id via column or x-lix-override-lixcols`
 			);
 		}
-		const pluginKeyValue = getColumnOrDefault(
-			columnMap,
-			"lixcol_plugin_key",
-			getMetadataDefault("lixcol_plugin_key")
-		);
+		const pluginKeyValue = lixcolOverrides.has("lixcol_plugin_key")
+			? getLixcolOverride("lixcol_plugin_key")
+			: getColumnOrDefault(
+					columnMap,
+					"lixcol_plugin_key",
+					getLixcolOverride("lixcol_plugin_key")
+				);
 		if (pluginKeyValue === undefined) {
 			throw new Error(
 				`Schema ${storedSchemaKey} requires lixcol_plugin_key via column or x-lix-override-lixcols`
 			);
 		}
-		const metadataValue = columnMap.get("lixcol_metadata") ?? null;
-		const untrackedValue = getColumnOrDefault(
-			columnMap,
-			"lixcol_untracked",
-			metadataDefaults.has("lixcol_untracked")
-				? metadataDefaults.get("lixcol_untracked")
-				: 0
-		);
+		const metadataValue = lixcolOverrides.has("lixcol_metadata")
+			? lixcolOverrides.get("lixcol_metadata")
+			: columnMap.get("lixcol_metadata") ?? null;
+		const untrackedValue = lixcolOverrides.has("lixcol_untracked")
+			? lixcolOverrides.get("lixcol_untracked")
+			: getColumnOrDefault(
+					columnMap,
+					"lixcol_untracked",
+					lixcolOverrides.has("lixcol_untracked")
+						? lixcolOverrides.get("lixcol_untracked")
+						: 0
+				);
 
 		const schemaKeyExpr = addParam(schemaKeyValue);
 		const fileIdExpr = addParam(fileIdValue);
 
-		const explicitVersion = columnMap.get("lixcol_version_id");
+		const overrideVersion = lixcolOverrides.has("lixcol_version_id")
+			? lixcolOverrides.get("lixcol_version_id")
+			: undefined;
+		const explicitVersion =
+			variant === "all" || overrideVersion === undefined
+				? columnMap.get("lixcol_version_id")
+				: undefined;
 		let versionExpr: string;
 		if (variant === "all") {
 			if (explicitVersion !== undefined) {
 				versionExpr = isExpressionValue(explicitVersion)
 					? explicitVersion.sql
 					: addParam(explicitVersion);
-			} else if (metadataDefaults.has("lixcol_version_id")) {
-				versionExpr = addParam(metadataDefaults.get("lixcol_version_id"));
+			} else if (overrideVersion !== undefined) {
+				versionExpr = addParam(overrideVersion);
 			} else {
 				throw new Error(
 					`INSERT into ${viewNameRaw} requires explicit lixcol_version_id or schema default`
 				);
 			}
+		} else if (overrideVersion !== undefined) {
+			versionExpr = addParam(overrideVersion);
 		} else if (explicitVersion !== undefined) {
 			versionExpr = isExpressionValue(explicitVersion)
 				? explicitVersion.sql
 				: addParam(explicitVersion);
-		} else if (metadataDefaults.has("lixcol_version_id")) {
-			versionExpr = addParam(metadataDefaults.get("lixcol_version_id"));
 		} else {
 			versionExpr = "(SELECT version_id FROM active_version)";
 		}

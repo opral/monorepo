@@ -47,6 +47,7 @@ test("rewrites updates for stored schema views", async () => {
 	);
 	expect(updateResult.parameters).toEqual([
 		table,
+		"lix",
 		"lix_own_entity",
 		"Updated",
 		"1.0",
@@ -375,6 +376,7 @@ test("rewrites updates for _all views", async () => {
 	expect(updateResult.sql).toContain("UPDATE state_all");
 	expect(updateResult.parameters).toEqual([
 		table,
+		"lix",
 		"lix_own_entity",
 		"Updated All",
 		"1.0",

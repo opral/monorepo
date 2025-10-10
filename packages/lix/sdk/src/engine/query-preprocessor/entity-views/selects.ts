@@ -267,17 +267,11 @@ function buildActiveVersionFilter(
 	schema: StoredSchemaDefinition,
 	alias: string
 ): string {
-	const override = extractLiteralVersionOverride(schema);
-	if (override) {
-		return `${alias}.version_id = '${escapeSqlLiteral(override)}'`;
+	const versionOverride = extractLiteralOverride(schema, "lixcol_version_id");
+	if (versionOverride) {
+		return `${alias}.version_id = '${escapeSqlLiteral(versionOverride)}'`;
 	}
 	return `${alias}.version_id = (SELECT version_id FROM active_version)`;
-}
-
-function extractLiteralVersionOverride(
-	schema: StoredSchemaDefinition
-): string | null {
-	return extractLiteralOverride(schema, "lixcol_version_id");
 }
 
 function extractLiteralOverride(
@@ -315,7 +309,7 @@ function buildInheritedFromVersionExpression(
 	if (inheritedOverride !== null) {
 		return `'${escapeSqlLiteral(inheritedOverride)}'`;
 	}
-	const versionOverride = extractLiteralVersionOverride(schema);
+	const versionOverride = extractLiteralOverride(schema, "lixcol_version_id");
 	if (versionOverride !== null) {
 		return `COALESCE(${alias}.inherited_from_version_id, '${escapeSqlLiteral(versionOverride)}')`;
 	}
