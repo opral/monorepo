@@ -1,4 +1,6 @@
 import type { LixEngine } from "../../boot.js";
+import { buildResolvedStateQuery } from "../../../state/vtable/resolved-state.js";
+import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.js";
 import {
 	collectPointerColumnDescriptors,
 	isEntityViewVariantEnabled,
@@ -13,8 +15,6 @@ type CachedSelects = {
 const cache = new WeakMap<object, CachedSelects>();
 const subscriptions = new WeakMap<object, () => void>();
 const loading = new WeakSet<object>();
-
-const STORED_SCHEMA_KEY = "lix_stored_schema";
 
 /**
  * Returns a map of logical entity view names to their SELECT statements derived
@@ -100,12 +100,13 @@ function loadStoredSchemas(engine: Pick<LixEngine, "executeSync">): {
 	schemas: LoadedSchema[];
 	signature: string;
 } {
-	const result = engine.executeSync({
-		sql: `SELECT snapshot_content, updated_at
-			FROM internal_state_vtable
-			WHERE schema_key = ? AND snapshot_content IS NOT NULL`,
-		parameters: [STORED_SCHEMA_KEY],
-	});
+	const compiledQuery = buildResolvedStateQuery()
+		.select(["snapshot_content", "updated_at"])
+		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
+		.where("snapshot_content", "is not", null)
+		.compile();
+
+	const result = engine.executeSync(compiledQuery);
 
 	const rows = (result.rows ?? []) as Array<Record<string, unknown>>;
 
@@ -141,7 +142,7 @@ function ensureSubscription(
 	const unsubscribe = engine.hooks.onStateCommit(({ changes }) => {
 		if (!changes || changes.length === 0) return;
 		for (const change of changes) {
-			if (change.schema_key === STORED_SCHEMA_KEY) {
+			if (change.schema_key === LixStoredSchemaSchema["x-lix-key"]) {
 				cache.delete(engine.runtimeCacheRef);
 				break;
 			}

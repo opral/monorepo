@@ -1,4 +1,5 @@
 import type { IToken } from "chevrotain";
+import { sql } from "kysely";
 import type { LixEngine } from "../../boot.js";
 import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
 import {
@@ -7,6 +8,8 @@ import {
 } from "../../../schema-definition/json-pointer.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironmentState } from "./cel-environment.js";
+import { buildResolvedStateQuery } from "../../../state/vtable/resolved-state.js";
+import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
@@ -202,16 +205,21 @@ function loadStoredSchemaDefinitionForKey(
 	engine: Pick<LixEngine, "executeSync">,
 	schemaKey: string
 ): StoredSchemaDefinition | null {
-	const { rows } = engine.executeSync({
-		sql: `SELECT json_extract(snapshot_content, '$.value') AS value
-			FROM internal_state_vtable
-			WHERE schema_key = 'lix_stored_schema'
-			AND json_extract(snapshot_content, '$.value."x-lix-key"') = ?
-			AND snapshot_content IS NOT NULL
-			ORDER BY json_extract(snapshot_content, '$.value."x-lix-version"') DESC
-			LIMIT 1`,
-		parameters: [schemaKey],
-	});
+	const compiledQuery = buildResolvedStateQuery()
+		.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
+		.where(
+			sql`json_extract(snapshot_content, '$.value."x-lix-key"') = ${schemaKey}` as any
+		)
+		.where("snapshot_content", "is not", null)
+		.orderBy(
+			sql`json_extract(snapshot_content, '$.value."x-lix-version"')`,
+			"desc"
+		)
+		.limit(1)
+		.compile();
+
+	const { rows } = engine.executeSync(compiledQuery);
 
 	const first = rows?.[0];
 	if (!first) return null;
