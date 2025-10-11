@@ -14,10 +14,914 @@ INSERT INTO state (
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 
 -- expanded SQL --
-<unchanged>
+INSERT INTO state_all (
+        entity_id,
+        schema_key,
+        file_id,
+        version_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        metadata,
+        untracked
+      ) VALUES (
+        ?1,
+        ?2,
+        ?3,
+        (SELECT version_id FROM ( SELECT
+  json_extract(sa.snapshot_content, '$.id') AS id,
+  json_extract(sa.snapshot_content, '$.version_id') AS version_id,
+  sa.entity_id AS lixcol_entity_id,
+  sa.schema_key AS lixcol_schema_key,
+  sa.file_id AS lixcol_file_id,
+  sa.plugin_key AS lixcol_plugin_key,
+  COALESCE(sa.inherited_from_version_id, 'global') AS lixcol_inherited_from_version_id,
+  sa.created_at AS lixcol_created_at,
+  sa.updated_at AS lixcol_updated_at,
+  sa.change_id AS lixcol_change_id,
+  sa.untracked AS lixcol_untracked,
+  sa.commit_id AS lixcol_commit_id,
+  sa.metadata AS lixcol_metadata
+FROM ( SELECT 
+      entity_id,
+      schema_key,
+      file_id,
+      version_id,
+      plugin_key,
+      snapshot_content,
+      schema_version,
+      created_at,
+      updated_at,
+      inherited_from_version_id,
+      change_id,
+      untracked,
+      commit_id,
+      writer_key,
+      (
+        SELECT json(metadata)
+        FROM change
+        WHERE change.id = lix_internal_state_vtable.change_id
+      ) AS metadata
+    FROM lix_internal_state_vtable
+    WHERE snapshot_content IS NOT NULL ) AS sa
+WHERE sa.schema_key = 'lix_active_version'
+  AND sa.version_id = 'global' ) AS active_version),
+        ?4,
+        ?5,
+        ?6,
+        ?7,
+        COALESCE(?8, 0)
+      );
 
 -- rewritten SQL --
-<unchanged>
+WITH
+-- hoisted_lix_internal_state_vtable_rewrite
+lix_internal_state_vtable_rewritten AS (
+  WITH RECURSIVE
+    version_descriptor_base AS (
+      SELECT
+        json_extract(desc.snapshot_content, '$.id') AS version_id,
+        json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+      FROM lix_internal_state_cache_lix_version_descriptor desc
+    ),
+    version_inheritance(version_id, ancestor_version_id) AS (
+      SELECT
+        vdb.version_id,
+        vdb.inherits_from_version_id
+      FROM version_descriptor_base vdb
+      WHERE vdb.inherits_from_version_id IS NOT NULL
+
+      UNION ALL
+
+      SELECT
+        vir.version_id,
+        vdb.inherits_from_version_id
+      FROM version_inheritance vir
+      JOIN version_descriptor_base vdb ON vdb.version_id = vir.ancestor_version_id
+      WHERE vdb.inherits_from_version_id IS NOT NULL
+    ),
+    version_parent AS (
+      SELECT
+        vdb.version_id,
+        vdb.inherits_from_version_id AS parent_version_id
+      FROM version_descriptor_base vdb
+      WHERE vdb.inherits_from_version_id IS NOT NULL
+    )
+  ,
+    candidates AS (
+      SELECT
+        'U' || '~' || lix_encode_pk_part(u.file_id) || '~' || lix_encode_pk_part(u.entity_id) || '~' || lix_encode_pk_part(u.version_id) AS _pk,
+        u.entity_id,
+        u.schema_key,
+        u.file_id,
+        u.plugin_key,
+        json(u.snapshot_content) AS snapshot_content,
+        u.schema_version,
+        u.version_id AS src_version_id,
+        u.version_id AS dst_version_id,
+        u.created_at,
+        u.updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        2 AS priority
+      FROM lix_internal_state_all_untracked u
+      WHERE (
+        (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
+        (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+      )
+
+      UNION ALL
+
+      SELECT
+        'C' || '~' || lix_encode_pk_part(c.file_id) || '~' || lix_encode_pk_part(c.entity_id) || '~' || lix_encode_pk_part(c.version_id) AS _pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        json(c.snapshot_content) AS snapshot_content,
+        c.schema_version,
+        c.version_id AS src_version_id,
+        c.version_id AS dst_version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        0 AS untracked,
+        c.commit_id,
+        NULL AS metadata,
+        3 AS priority
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_descriptor
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit_edge
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_tip
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set_element
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_stored_schema
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_key_value
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_label
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_state_view) c
+      WHERE (
+        (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
+        (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+      )
+
+      UNION ALL
+
+      SELECT
+        'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        isc.entity_id,
+        isc.schema_key,
+        isc.file_id,
+        isc.plugin_key,
+        json(isc.snapshot_content) AS snapshot_content,
+        isc.schema_version,
+        isc.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        isc.created_at,
+        isc.updated_at,
+        isc.version_id AS inherited_from_version_id,
+        isc.change_id,
+        0 AS untracked,
+        isc.commit_id,
+        NULL AS metadata,
+        4 AS priority
+      FROM version_inheritance vi
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_descriptor
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit_edge
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_tip
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set_element
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_stored_schema
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_key_value
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_label
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_state_view) isc ON isc.version_id = vi.ancestor_version_id
+      WHERE isc.inheritance_delete_marker = 0
+        AND isc.snapshot_content IS NOT NULL
+
+      UNION ALL
+
+      SELECT
+        'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+        unt.entity_id,
+        unt.schema_key,
+        unt.file_id,
+        unt.plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version,
+        unt.version_id AS src_version_id,
+        vi.version_id AS dst_version_id,
+        unt.created_at,
+        unt.updated_at,
+        unt.version_id AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        5 AS priority
+      FROM version_inheritance vi
+      JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+      WHERE unt.inheritance_delete_marker = 0
+        AND unt.snapshot_content IS NOT NULL
+    ),
+    ranked AS (
+      SELECT
+        c._pk,
+        c.entity_id,
+        c.schema_key,
+        c.file_id,
+        c.plugin_key,
+        c.snapshot_content,
+        c.schema_version,
+        c.dst_version_id AS version_id,
+        c.created_at,
+        c.updated_at,
+        c.inherited_from_version_id,
+        c.change_id,
+        c.untracked,
+        c.commit_id,
+        c.metadata,
+        c.priority,
+        ROW_NUMBER() OVER (
+          PARTITION BY c.file_id, c.schema_key, c.entity_id, c.dst_version_id
+          ORDER BY c.priority,
+                   c.created_at DESC,
+                   c._pk
+        ) AS rn
+      FROM candidates c
+
+    )
+  SELECT
+    w._pk,
+    w.entity_id,
+    w.schema_key,
+    w.file_id,
+    w.plugin_key,
+    w.snapshot_content,
+    w.schema_version,
+    w.version_id,
+    w.created_at,
+    w.updated_at,
+    w.inherited_from_version_id,
+    w.change_id,
+    w.untracked,
+    w.commit_id,
+    COALESCE(w.metadata, json(chc.metadata)) AS metadata,
+    COALESCE(ws_dst.writer_key, ws_src.writer_key) AS writer_key
+  FROM ranked w
+  LEFT JOIN lix_internal_state_writer ws_dst ON
+    ws_dst.file_id = w.file_id AND
+    ws_dst.entity_id = w.entity_id AND
+    ws_dst.schema_key = w.schema_key AND
+    ws_dst.version_id = w.version_id
+  LEFT JOIN lix_internal_state_writer ws_src ON
+    ws_src.file_id = w.file_id AND
+    ws_src.entity_id = w.entity_id AND
+    ws_src.schema_key = w.schema_key AND
+    ws_src.version_id = COALESCE(w.inherited_from_version_id, w.version_id)
+  LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
+
+  WHERE w.rn = 1
+
+)
+INSERT INTO state_all (
+        entity_id,
+        schema_key,
+        file_id,
+        version_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        metadata,
+        untracked
+      ) VALUES (
+        ?1,
+        ?2,
+        ?3,
+        (SELECT version_id FROM ( SELECT
+  json_extract(sa.snapshot_content, '$.id') AS id,
+  json_extract(sa.snapshot_content, '$.version_id') AS version_id,
+  sa.entity_id AS lixcol_entity_id,
+  sa.schema_key AS lixcol_schema_key,
+  sa.file_id AS lixcol_file_id,
+  sa.plugin_key AS lixcol_plugin_key,
+  COALESCE(sa.inherited_from_version_id, 'global') AS lixcol_inherited_from_version_id,
+  sa.created_at AS lixcol_created_at,
+  sa.updated_at AS lixcol_updated_at,
+  sa.change_id AS lixcol_change_id,
+  sa.untracked AS lixcol_untracked,
+  sa.commit_id AS lixcol_commit_id,
+  sa.metadata AS lixcol_metadata
+FROM ( SELECT 
+      entity_id,
+      schema_key,
+      file_id,
+      version_id,
+      plugin_key,
+      snapshot_content,
+      schema_version,
+      created_at,
+      updated_at,
+      inherited_from_version_id,
+      change_id,
+      untracked,
+      commit_id,
+      writer_key,
+      (
+        SELECT json(metadata)
+        FROM change
+        WHERE change.id = lix_internal_state_vtable.change_id
+      ) AS metadata
+    FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable
+    WHERE snapshot_content IS NOT NULL ) AS sa
+WHERE sa.schema_key = 'lix_active_version'
+  AND sa.version_id = 'global' ) AS active_version),
+        ?4,
+        ?5,
+        ?6,
+        ?7,
+        COALESCE(?8, 0)
+      );
 
 -- plan --
-[]
+[
+  {
+    "id": 6,
+    "parent": 0,
+    "notused": 0,
+    "detail": "SCALAR SUBQUERY 35"
+  },
+  {
+    "id": 9,
+    "parent": 6,
+    "notused": 0,
+    "detail": "CO-ROUTINE ranked"
+  },
+  {
+    "id": 12,
+    "parent": 9,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-39)"
+  },
+  {
+    "id": 14,
+    "parent": 12,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 15,
+    "parent": 14,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 16,
+    "parent": 15,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 19,
+    "parent": 16,
+    "notused": 61,
+    "detail": "SEARCH u USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+  },
+  {
+    "id": 64,
+    "parent": 15,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 65,
+    "parent": 64,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 66,
+    "parent": 65,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 70,
+    "parent": 66,
+    "notused": 0,
+    "detail": "MULTI-INDEX OR"
+  },
+  {
+    "id": 71,
+    "parent": 70,
+    "notused": 0,
+    "detail": "INDEX 1"
+  },
+  {
+    "id": 82,
+    "parent": 71,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_lix_version_descriptor_live_vfe (version_id=?)"
+  },
+  {
+    "id": 90,
+    "parent": 70,
+    "notused": 0,
+    "detail": "INDEX 2"
+  },
+  {
+    "id": 101,
+    "parent": 90,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_lix_version_descriptor_tomb_vfe (version_id=?)"
+  },
+  {
+    "id": 143,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 145,
+    "parent": 143,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_commit"
+  },
+  {
+    "id": 189,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 191,
+    "parent": 189,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+  },
+  {
+    "id": 235,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 237,
+    "parent": 235,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+  },
+  {
+    "id": 281,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 283,
+    "parent": 281,
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+  },
+  {
+    "id": 327,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 329,
+    "parent": 327,
+    "notused": 82,
+    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+  },
+  {
+    "id": 373,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 375,
+    "parent": 373,
+    "notused": 59,
+    "detail": "SCAN lix_internal_state_cache_lix_stored_schema"
+  },
+  {
+    "id": 419,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 423,
+    "parent": 419,
+    "notused": 0,
+    "detail": "MULTI-INDEX OR"
+  },
+  {
+    "id": 424,
+    "parent": 423,
+    "notused": 0,
+    "detail": "INDEX 1"
+  },
+  {
+    "id": 435,
+    "parent": 424,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_key_value USING INDEX idx_lix_internal_state_cache_lix_key_value_live_vfe (version_id=?)"
+  },
+  {
+    "id": 443,
+    "parent": 423,
+    "notused": 0,
+    "detail": "INDEX 2"
+  },
+  {
+    "id": 454,
+    "parent": 443,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_key_value USING INDEX idx_lix_internal_state_cache_lix_key_value_tomb_vfe (version_id=?)"
+  },
+  {
+    "id": 496,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 500,
+    "parent": 496,
+    "notused": 0,
+    "detail": "MULTI-INDEX OR"
+  },
+  {
+    "id": 501,
+    "parent": 500,
+    "notused": 0,
+    "detail": "INDEX 1"
+  },
+  {
+    "id": 512,
+    "parent": 501,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe (version_id=?)"
+  },
+  {
+    "id": 520,
+    "parent": 500,
+    "notused": 0,
+    "detail": "INDEX 2"
+  },
+  {
+    "id": 531,
+    "parent": 520,
+    "notused": 24,
+    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_tomb_vfe (version_id=?)"
+  },
+  {
+    "id": 573,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 575,
+    "parent": 573,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_bench_state_view"
+  },
+  {
+    "id": 619,
+    "parent": 65,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 620,
+    "parent": 619,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 621,
+    "parent": 620,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 624,
+    "parent": 621,
+    "notused": 0,
+    "detail": "MATERIALIZE version_inheritance"
+  },
+  {
+    "id": 628,
+    "parent": 624,
+    "notused": 0,
+    "detail": "SETUP"
+  },
+  {
+    "id": 631,
+    "parent": 628,
+    "notused": 212,
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+  },
+  {
+    "id": 656,
+    "parent": 624,
+    "notused": 0,
+    "detail": "RECURSIVE STEP"
+  },
+  {
+    "id": 659,
+    "parent": 656,
+    "notused": 216,
+    "detail": "SCAN vir"
+  },
+  {
+    "id": 660,
+    "parent": 656,
+    "notused": 54,
+    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
+  },
+  {
+    "id": 682,
+    "parent": 621,
+    "notused": 24,
+    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_lix_version_descriptor_live_vfe"
+  },
+  {
+    "id": 692,
+    "parent": 621,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 730,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 734,
+    "parent": 730,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_commit"
+  },
+  {
+    "id": 744,
+    "parent": 730,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 756,
+    "parent": 730,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 795,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 799,
+    "parent": 795,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+  },
+  {
+    "id": 809,
+    "parent": 795,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 821,
+    "parent": 795,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 860,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 864,
+    "parent": 860,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+  },
+  {
+    "id": 874,
+    "parent": 860,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 886,
+    "parent": 860,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 925,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 929,
+    "parent": 925,
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+  },
+  {
+    "id": 937,
+    "parent": 925,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 975,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 979,
+    "parent": 975,
+    "notused": 82,
+    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+  },
+  {
+    "id": 989,
+    "parent": 975,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 1001,
+    "parent": 975,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 1040,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1044,
+    "parent": 1040,
+    "notused": 59,
+    "detail": "SCAN lix_internal_state_cache_lix_stored_schema"
+  },
+  {
+    "id": 1054,
+    "parent": 1040,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 1066,
+    "parent": 1040,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 1105,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1110,
+    "parent": 1105,
+    "notused": 24,
+    "detail": "SCAN lix_internal_state_cache_lix_key_value USING INDEX idx_lix_internal_state_cache_lix_key_value_live_vfe"
+  },
+  {
+    "id": 1118,
+    "parent": 1105,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 1156,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1161,
+    "parent": 1156,
+    "notused": 24,
+    "detail": "SCAN lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe"
+  },
+  {
+    "id": 1169,
+    "parent": 1156,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 1207,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1211,
+    "parent": 1207,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_bench_state_view"
+  },
+  {
+    "id": 1221,
+    "parent": 1207,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 1233,
+    "parent": 1207,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 1272,
+    "parent": 620,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1276,
+    "parent": 1272,
+    "notused": 216,
+    "detail": "SCAN unt"
+  },
+  {
+    "id": 1286,
+    "parent": 1272,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 1298,
+    "parent": 1272,
+    "notused": 53,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 1339,
+    "parent": 65,
+    "notused": 246,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 1372,
+    "parent": 65,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 1408,
+    "parent": 64,
+    "notused": 226,
+    "detail": "SCAN (subquery-39)"
+  },
+  {
+    "id": 1487,
+    "parent": 15,
+    "notused": 226,
+    "detail": "SCAN w"
+  }
+]

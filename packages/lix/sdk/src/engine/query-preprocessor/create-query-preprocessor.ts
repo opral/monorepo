@@ -81,6 +81,7 @@ export async function createQueryPreprocessor(
 			parameters: currentParameters,
 			tokens,
 			kind,
+			sideEffects,
 		});
 		if (triggerRewrite) {
 			rewriteApplied = true;
@@ -118,7 +119,11 @@ export async function createQueryPreprocessor(
 /**
  * Routes DML statements through registered INSTEAD OF trigger handlers when available.
  */
-const DML_TRIGGER_WHITELIST = new Set(["active_account", "lix_active_account"]);
+const DML_TRIGGER_WHITELIST = new Set([
+	"active_account",
+	"lix_active_account",
+	"state",
+]);
 
 /**
  * Attempts to rewrite a DML statement by inlining a registered INSTEAD OF trigger body.
@@ -141,6 +146,7 @@ function maybeRewriteTrigger(args: {
 	parameters: ReadonlyArray<unknown>;
 	tokens: Token[];
 	kind: StatementKind;
+	sideEffects?: boolean;
 }): QueryPreprocessorResult | null {
 	if (
 		args.kind !== "insert" &&
@@ -163,6 +169,12 @@ function maybeRewriteTrigger(args: {
 	}
 	const normalizedTarget = target.toLowerCase();
 	if (!DML_TRIGGER_WHITELIST.has(normalizedTarget)) {
+		return null;
+	}
+	if (
+		normalizedTarget === "state" &&
+		(args.sideEffects === undefined || args.sideEffects === true)
+	) {
 		return null;
 	}
 
