@@ -18,7 +18,10 @@ export const LixDirectoryDescriptorSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 		parent_id: {
 			type: "string",
 			nullable: true,
@@ -30,7 +33,10 @@ export const LixDirectoryDescriptorSchema = {
 			pattern: "^[^/\\\\]+$",
 			description: "Directory segment without slashes.",
 		},
-		hidden: { type: "boolean", "x-lix-generated": true },
+		hidden: {
+			type: "boolean",
+			"x-lix-default": "false",
+		},
 	},
 	required: ["id", "parent_id", "name"],
 	additionalProperties: false,

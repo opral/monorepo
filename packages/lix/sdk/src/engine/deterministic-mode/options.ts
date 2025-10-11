@@ -27,28 +27,23 @@ export const LixDeterministicModeOptionsSchema = {
 		},
 		randomLixId: {
 			type: "boolean",
-			default: false,
-			"x-lix-generated": true,
+			"x-lix-default": "false",
 		},
 		timestamp: {
 			type: "boolean",
-			default: true,
-			"x-lix-generated": true,
+			"x-lix-default": "true",
 		},
 		random_seed: {
 			type: "string",
-			default: "lix-deterministic-seed",
-			"x-lix-generated": true,
+			"x-lix-default": "'lix-deterministic-seed'",
 		},
 		nano_id: {
 			type: "boolean",
-			default: true,
-			"x-lix-generated": true,
+			"x-lix-default": "true",
 		},
 		uuid_v7: {
 			type: "boolean",
-			default: true,
-			"x-lix-generated": true,
+			"x-lix-default": "true",
 		},
 	},
 	required: ["enabled"],

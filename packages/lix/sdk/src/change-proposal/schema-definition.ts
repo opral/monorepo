@@ -30,12 +30,11 @@ export const LixChangeProposalSchema = {
 	properties: {
 		id: {
 			type: "string",
-			"x-lix-generated": true,
 			"x-lix-default": "lix_uuid_v7()",
 		},
 		source_version_id: { type: "string" },
 		target_version_id: { type: "string" },
-		status: { type: "string", "x-lix-generated": true, default: "open" },
+		status: { type: "string", "x-lix-default": "'open'" },
 	},
 	required: ["id", "source_version_id", "target_version_id", "status"],
 	additionalProperties: false,

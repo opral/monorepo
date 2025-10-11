@@ -55,7 +55,10 @@ export const LixChangeSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 		entity_id: { type: "string" },
 		schema_key: { type: "string" },
 		schema_version: { type: "string" },

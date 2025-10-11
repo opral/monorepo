@@ -18,10 +18,19 @@ export const LixVersionDescriptorSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		name: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
+		name: {
+			type: "string",
+			"x-lix-default": "lix_human_id()",
+		},
 		inherits_from_version_id: { type: ["string", "null"] },
-		hidden: { type: "boolean", "x-lix-generated": true },
+		hidden: {
+			type: "boolean",
+			"x-lix-default": "false",
+		},
 	},
 	required: ["id", "name"],
 	additionalProperties: false,
@@ -53,9 +62,9 @@ export const LixVersionTipSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
-		commit_id: { type: "string", "x-lix-generated": true },
-		working_commit_id: { type: "string", "x-lix-generated": true },
+		id: { type: "string", "x-lix-default": "lix_nano_id()" },
+		commit_id: { type: "string" },
+		working_commit_id: { type: "string" },
 	},
 	required: ["id", "commit_id", "working_commit_id"],
 	additionalProperties: false,
@@ -91,7 +100,6 @@ export const LixActiveVersionSchema = {
 		id: {
 			type: "string",
 			"x-lix-default": "lix_nano_id()",
-			"x-lix-generated": true,
 		},
 		version_id: { type: "string" },
 	},

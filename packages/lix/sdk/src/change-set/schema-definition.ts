@@ -16,7 +16,10 @@ export const LixChangeSetSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 	},
 	required: ["id"],
 	additionalProperties: false,

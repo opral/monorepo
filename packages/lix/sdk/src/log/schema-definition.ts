@@ -19,7 +19,6 @@ export const LixLogSchema = {
 		id: {
 			type: "string",
 			description: "The unique identifier of the log entry",
-			"x-lix-generated": true,
 			"x-lix-default": "lix_uuid_v7()",
 		},
 		key: {

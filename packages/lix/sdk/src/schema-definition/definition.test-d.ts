@@ -227,8 +227,8 @@ test("LixUpdateable makes all fields optional and unwraps LixGenerated", () => {
 	};
 });
 
-test("FromLixSchemaDefinition transforms schema with x-lix-generated to LixGenerated types", () => {
-	// Define a test schema with x-lix-generated properties
+test("FromLixSchemaDefinition transforms schema with x-lix-default to LixGenerated types", () => {
+	// Define a test schema with x-lix-default properties
 	const TestSchema = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
@@ -237,7 +237,7 @@ test("FromLixSchemaDefinition transforms schema with x-lix-generated to LixGener
 		properties: {
 			id: {
 				type: "string",
-				"x-lix-generated": true,
+				"x-lix-default": "lix_nano_id()",
 			},
 			name: {
 				type: "string",

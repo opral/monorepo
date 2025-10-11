@@ -146,12 +146,14 @@ test("schema has correct metadata", () => {
 test("schema has correct default values", () => {
 	const properties = LixDeterministicModeOptionsSchema.properties;
 
-	expect(properties.randomLixId.default).toBe(false);
-	expect(properties.timestamp.default).toBe(true);
-	expect(properties.random_seed.default).toBe("lix-deterministic-seed");
-	expect(properties.nano_id.default).toBe(true);
-	expect(properties.uuid_v7.default).toBe(true);
+	expect(properties.randomLixId["x-lix-default"]).toBe("false");
+	expect(properties.timestamp["x-lix-default"]).toBe("true");
+	expect(properties.random_seed["x-lix-default"]).toBe(
+		"'lix-deterministic-seed'"
+	);
+	expect(properties.nano_id["x-lix-default"]).toBe("true");
+	expect(properties.uuid_v7["x-lix-default"]).toBe("true");
 
 	// enabled should not have a default
-	expect(properties.enabled).not.toHaveProperty("default");
+	expect(properties.enabled).not.toHaveProperty("x-lix-default");
 });

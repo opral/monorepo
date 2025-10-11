@@ -18,7 +18,7 @@ export const LixFileDescriptorSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: { type: "string", "x-lix-default": "lix_uuid_v7()" },
 		directory_id: {
 			type: "string",
 			nullable: true,
@@ -41,7 +41,7 @@ export const LixFileDescriptorSchema = {
 			type: "object",
 			nullable: true,
 		},
-		hidden: { type: "boolean", "x-lix-generated": true },
+		hidden: { type: "boolean", "x-lix-default": "false" },
 	},
 	required: ["id", "directory_id", "name", "extension"],
 	additionalProperties: false,
