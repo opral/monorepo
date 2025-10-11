@@ -10,8 +10,8 @@ import {
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, type Lix } from "@lix-js/sdk";
 import { TipTapEditor } from "./tip-tap-editor";
-import { KeyValueProvider } from "../../hooks/key-value/use-key-value";
-import { KEY_VALUE_DEFINITIONS } from "../../hooks/key-value/schema";
+import { KeyValueProvider } from "@/hooks/key-value/use-key-value";
+import { KEY_VALUE_DEFINITIONS } from "@/hooks/key-value/schema";
 import { EditorProvider } from "./editor-context";
 import { AstSchemas } from "@opral/markdown-wc";
 import type { Editor } from "@tiptap/core";

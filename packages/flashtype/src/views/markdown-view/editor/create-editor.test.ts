@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "../../../../lix/plugin-md/dist";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { createEditor } from "./create-editor";
 import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
 import { parseMarkdown } from "@opral/markdown-wc";

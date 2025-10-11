@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ChatMessage as Msg } from "./types";
+import type { ChatMessage as Msg } from "./chat-types";
 import { ChatMessage } from "./chat-message";
 
 /**

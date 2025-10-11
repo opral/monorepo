@@ -62,10 +62,7 @@ describe("MarkdownView", () => {
 				<LixProvider lix={lix}>
 					<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
 						<Suspense fallback={null}>
-							<MarkdownView
-								fileId="file_1"
-								filePath="/docs/readme.md"
-							/>
+							<MarkdownView fileId="file_1" filePath="/docs/readme.md" />
 						</Suspense>
 					</KeyValueProvider>
 				</LixProvider>,

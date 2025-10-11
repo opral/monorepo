@@ -7,9 +7,9 @@ import {
 	useEffect,
 } from "react";
 import { ArrowUp, ChevronDown, Plus } from "lucide-react";
-import { ChatMessageList } from "@/components/agent-chat/chat-message-list";
+import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
-import type { ChatMessage } from "@/components/agent-chat/types";
+import type { ChatMessage } from "./chat-types";
 import { MOCK_COMMANDS } from "./commands";
 import { MentionMenu, CommandMenu } from "./menu";
 import { extractSlashToken, useComposerState } from "./composer-state";

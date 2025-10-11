@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ToolRun, ToolRunStatus } from "./types";
+import type { ToolRun, ToolRunStatus } from "./chat-types";
 import { ChevronRight } from "lucide-react";
 
 /**
