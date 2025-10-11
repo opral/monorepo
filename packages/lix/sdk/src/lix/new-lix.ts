@@ -274,15 +274,20 @@ export async function newLixFile(args?: {
 	)?.entity_id;
 
 	// Set active version using updateUntrackedState for proper inheritance handling
+	const activeVersionEntityId = generateNanoid();
+
 	updateUntrackedState({
 		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
-				entity_id: "active",
+				entity_id: activeVersionEntityId,
 				schema_key: "lix_active_version",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ version_id: initialVersionId }),
+				snapshot_content: JSON.stringify({
+					id: activeVersionEntityId,
+					version_id: initialVersionId,
+				}),
 				schema_version: "1.0",
 				created_at: created_at,
 				lixcol_version_id: "global",

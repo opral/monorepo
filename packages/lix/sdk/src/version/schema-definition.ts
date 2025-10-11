@@ -69,7 +69,7 @@ export type LixActiveVersion = FromLixSchemaDefinition<
 export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["/version_id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-foreign-keys": [
 		{
 			properties: ["/version_id"],
@@ -80,7 +80,6 @@ export const LixActiveVersionSchema = {
 		},
 	],
 	"x-lix-override-lixcols": {
-		lixcol_entity_id: '"active"',
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
 		lixcol_untracked: "1",
@@ -89,9 +88,14 @@ export const LixActiveVersionSchema = {
 	"x-lix-entity-views": ["state"],
 	type: "object",
 	properties: {
+		id: {
+			type: "string",
+			"x-lix-default": "lix_nano_id()",
+			"x-lix-generated": true,
+		},
 		version_id: { type: "string" },
 	},
-	required: ["version_id"],
+	required: ["id", "version_id"],
 	additionalProperties: false,
 } as const;
 LixActiveVersionSchema satisfies LixSchemaDefinition;

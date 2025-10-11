@@ -372,9 +372,8 @@ export function rewriteEntityUpdate(args: {
 			const added = params.splice(startLen);
 			return { sql, params: added };
 		};
-		const entityIdRendered = isActiveVersionSchema
-			? renderWithOrdering(paramSource("active"))
-			: overrideEntityId !== undefined
+		const entityIdRendered =
+			overrideEntityId !== undefined
 				? renderWithOrdering(paramSource(overrideEntityId))
 				: buildEntityIdExpr();
 		params.unshift(...entityIdRendered.params);
@@ -448,13 +447,9 @@ export function rewriteEntityUpdate(args: {
 
 	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
 	if (variant === "base" && !hasVersionCondition) {
-		if (isActiveVersionSchema) {
-			whereClauses.push(`state_all.entity_id = ${addParam("active")}`);
-		} else {
-			whereClauses.push(
-				`state_all.version_id = (SELECT version_id FROM active_version)`
-			);
-		}
+		whereClauses.push(
+			`state_all.version_id = (SELECT version_id FROM active_version)`
+		);
 	}
 
 	const rewrittenSql = `UPDATE state_all\nSET\n  ${assignmentClauses.join(",\n  ")}\nWHERE\n  ${whereClauses.join("\n  AND ")}`;
