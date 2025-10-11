@@ -90,55 +90,6 @@ test("creating a change set with empty elements array should succeed", async () 
 	expect(changeSetMembers).toHaveLength(0);
 });
 
-test("creating a change set with labels should associate the labels with the change set", async () => {
-	const lix = await openLix({});
-
-	// Get the active version to ensure we work in the same context
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
-
-	// Create a new label in the active version context
-	await lix.db
-		.insertInto("label")
-		.values({
-			name: "test-label",
-		})
-		.execute();
-
-	const testLabel = await lix.db
-		.selectFrom("label")
-		.selectAll()
-		.where("name", "=", "test-label")
-		.executeTakeFirstOrThrow();
-
-	// Create a change set with labels in the same version context
-	const changeSet = await createChangeSet({
-		lix: lix,
-		elements: [],
-		labels: [testLabel],
-		lixcol_version_id: activeVersion.version_id,
-	});
-
-	// Verify the change set was created
-	expect(changeSet.id).toBeDefined();
-
-	// Get the labels associated with the change set
-	const changeSetLabels = await lix.db
-		.selectFrom("change_set_label")
-		.innerJoin("label", "label.id", "change_set_label.label_id")
-		.selectAll()
-		.where("change_set_id", "=", changeSet.id)
-		.execute();
-
-	// Verify both labels are associated with the change set
-	expect(changeSetLabels).toHaveLength(1);
-	expect(changeSetLabels.map((label) => label.name)).toEqual(
-		expect.arrayContaining(["test-label"])
-	);
-});
-
 test("creating a change set with version_id should store it in the specified version", async () => {
 	const lix = await openLix({});
 

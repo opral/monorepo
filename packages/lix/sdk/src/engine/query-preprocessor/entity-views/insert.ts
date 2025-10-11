@@ -172,13 +172,13 @@ export function rewriteEntityInsert(args: {
 			columnMap,
 			propertyLowerToActual,
 		});
-	const lixcolOverrides = resolveMetadataDefaults({
-		defaults: rawMetadataDefaults,
-		cel: celState,
-		context: celContext,
-	});
-	const getLixcolOverride = (key: string): unknown =>
-		lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
+		const lixcolOverrides = resolveMetadataDefaults({
+			defaults: rawMetadataDefaults,
+			cel: celState,
+			context: celContext,
+		});
+		const getLixcolOverride = (key: string): unknown =>
+			lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
 		const resolvedDefaults = new Map<string, unknown>();
 
 		const renderPrimaryKeyExpr = (
@@ -266,7 +266,7 @@ export function rewriteEntityInsert(args: {
 		}
 		const metadataValue = lixcolOverrides.has("lixcol_metadata")
 			? lixcolOverrides.get("lixcol_metadata")
-			: columnMap.get("lixcol_metadata") ?? null;
+			: (columnMap.get("lixcol_metadata") ?? null);
 		const untrackedValue = lixcolOverrides.has("lixcol_untracked")
 			? lixcolOverrides.get("lixcol_untracked")
 			: getColumnOrDefault(

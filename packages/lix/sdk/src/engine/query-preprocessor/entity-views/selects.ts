@@ -1,5 +1,5 @@
 import type { LixEngine } from "../../boot.js";
-import { buildResolvedStateQuery } from "../../../state/vtable/resolved-state.js";
+import { getAllStoredSchemas } from "../../../stored-schema/get-stored-schema.js";
 import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.js";
 import {
 	collectPointerColumnDescriptors,
@@ -40,7 +40,7 @@ export function getEntityViewSelects(args: {
 
 	loading.add(engine.runtimeCacheRef);
 	try {
-		const { schemas, signature } = loadStoredSchemas(engine);
+		const { schemas, signature } = getAllStoredSchemas({ engine });
 		const map = new Map<string, string>();
 		for (const entry of schemas) {
 			const schema = entry.definition;
@@ -91,48 +91,6 @@ export function getEntityViewSelects(args: {
 	}
 }
 
-type LoadedSchema = {
-	definition: StoredSchemaDefinition;
-	updatedAt: string;
-};
-
-function loadStoredSchemas(engine: Pick<LixEngine, "executeSync">): {
-	schemas: LoadedSchema[];
-	signature: string;
-} {
-	const compiledQuery = buildResolvedStateQuery()
-		.select(["snapshot_content", "updated_at"])
-		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
-		.where("snapshot_content", "is not", null)
-		.compile();
-
-	const result = engine.executeSync(compiledQuery);
-
-	const rows = (result.rows ?? []) as Array<Record<string, unknown>>;
-
-	const schemas: LoadedSchema[] = [];
-	let maxUpdated = "";
-
-	for (const row of rows) {
-		const snapshot = parseJson(row.snapshot_content);
-		if (!snapshot || typeof snapshot !== "object") continue;
-		const value = extractSchemaValue(snapshot);
-		if (value && typeof value === "object") {
-			const updatedAt = String(row.updated_at ?? "");
-			schemas.push({
-				definition: value as StoredSchemaDefinition,
-				updatedAt,
-			});
-			if (updatedAt > maxUpdated) {
-				maxUpdated = updatedAt;
-			}
-		}
-	}
-
-	const signature = `${schemas.length}:${maxUpdated}`;
-	return { schemas, signature };
-}
-
 function ensureSubscription(
 	engine: Pick<LixEngine, "hooks" | "runtimeCacheRef">
 ): void {
@@ -150,23 +108,6 @@ function ensureSubscription(
 	});
 
 	subscriptions.set(engine.runtimeCacheRef, unsubscribe);
-}
-
-function extractSchemaValue(snapshot: unknown): unknown {
-	if (!snapshot || typeof snapshot !== "object") return undefined;
-	const raw = (snapshot as Record<string, unknown>).value;
-	if (!raw) return undefined;
-	if (typeof raw === "string") return parseJson(raw);
-	return raw;
-}
-
-function parseJson(input: unknown): unknown {
-	if (typeof input !== "string") return input ?? undefined;
-	try {
-		return JSON.parse(input);
-	} catch {
-		return undefined;
-	}
 }
 
 function extractPropertyKeys(schema: StoredSchemaDefinition): string[] {

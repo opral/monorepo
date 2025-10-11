@@ -336,9 +336,7 @@ export function rewriteEntityUpdate(args: {
 		`schema_key = ${schemaKeyExpr}`,
 		`file_id = ${
 			fileIdOverrideExpr ??
-			(fileIdAssignment
-				? renderValueSource(fileIdAssignment.value)
-				: "file_id")
+			(fileIdAssignment ? renderValueSource(fileIdAssignment.value) : "file_id")
 		}`,
 		`plugin_key = ${pluginOverrideExpr ?? "plugin_key"}`,
 		`snapshot_content = json_object(${snapshotEntries})`,

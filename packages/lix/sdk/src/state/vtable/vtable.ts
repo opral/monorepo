@@ -13,6 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { buildResolvedStateQuery } from "./resolved-state.js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -639,11 +640,14 @@ export function applyStateVTable(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(engine, schema_key);
+					const storedSchema = getStoredSchema({
+						engine,
+						key: String(schema_key),
+					});
 
 					validateStateMutation({
 						engine: engine,
-						schema: storedSchema ? JSON.parse(storedSchema) : null,
+						schema: storedSchema,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
@@ -962,11 +966,14 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(engine, schema_key);
+	const storedSchema = getStoredSchema({
+		engine,
+		key: String(schema_key),
+	});
 
 	validateStateMutation({
 		engine: engine,
-		schema: storedSchema ? JSON.parse(storedSchema) : null,
+		schema: storedSchema,
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
 		entity_id: String(entity_id),
@@ -989,30 +996,6 @@ export function handleStateDelete(
 			},
 		],
 	});
-}
-
-// Helper functions for the virtual table
-
-function getStoredSchema(
-	engine: Pick<LixEngine, "executeSync" | "hooks">,
-	schemaKey: any
-): string | null {
-	// Query the resolved-state builder directly to avoid vtable recursion
-	const result = engine.executeSync(
-		buildResolvedStateQuery()
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-			.where("schema_key", "=", "lix_stored_schema")
-			.where(
-				sql`json_extract(snapshot_content, '$.value."x-lix-key"')`,
-				"=",
-				schemaKey
-			)
-			.where("snapshot_content", "is not", null)
-			.limit(1)
-			.compile()
-	).rows;
-
-	return result && result.length > 0 ? result[0]!.value : null;
 }
 
 function getColumnName(columnIndex: number): string {

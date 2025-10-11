@@ -12,6 +12,7 @@ export const LixChangeSetSchema = {
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
 	},
 	type: "object",
 	properties: {
@@ -57,6 +58,7 @@ export const LixChangeSetElementSchema = {
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
 	},
 	type: "object",
 	properties: {
@@ -88,6 +90,7 @@ export const LixChangeSetLabelSchema = {
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
 		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
 	},
 	"x-lix-foreign-keys": [
 		{

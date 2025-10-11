@@ -459,7 +459,11 @@ test("entity_label works with change_set entities", async () => {
 	const lix = await openLix({});
 
 	// Create a label for change sets
-	const reviewedLabel = await createLabel({ lix, name: "reviewed" });
+	const reviewedLabel = await createLabel({
+		lix,
+		name: "reviewed",
+		lixcol_version_id: "global",
+	});
 
 	// Create a change set (which automatically creates state entry)
 	await lix.db
@@ -477,12 +481,13 @@ test("entity_label works with change_set entities", async () => {
 
 	// Label the change set
 	await lix.db
-		.insertInto("entity_label")
+		.insertInto("entity_label_all")
 		.values({
 			entity_id: changeSet.id,
 			schema_key: "lix_change_set",
 			file_id: "lix",
 			label_id: reviewedLabel.id,
+			lixcol_version_id: "global",
 		})
 		.execute();
 

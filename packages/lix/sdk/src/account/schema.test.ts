@@ -367,7 +367,7 @@ test("active_account view injects global version defaults", async () => {
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.select(["lixcol_inherited_from_version_id"])
+		.select(["lixcol_inherited_from_version_id" as any])
 		.executeTakeFirstOrThrow();
 
 	expect(activeVersion.lixcol_inherited_from_version_id).toBe("global");

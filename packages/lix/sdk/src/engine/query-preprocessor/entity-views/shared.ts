@@ -1,5 +1,4 @@
 import type { IToken } from "chevrotain";
-import { sql } from "kysely";
 import type { LixEngine } from "../../boot.js";
 import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
 import {
@@ -8,8 +7,8 @@ import {
 } from "../../../schema-definition/json-pointer.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironmentState } from "./cel-environment.js";
-import { buildResolvedStateQuery } from "../../../state/vtable/resolved-state.js";
 import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.js";
+import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 
 /**
  * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
@@ -163,22 +162,6 @@ export function isEntityViewVariantEnabled(
 	);
 }
 
-/**
- * Loads the latest stored schema definition for a given schema key.
- */
-export function loadStoredSchemaDefinition(
-	engine: Pick<LixEngine, "executeSync">,
-	schemaKey: string
-): StoredSchemaDefinition | null {
-	for (const candidate of candidateStoredSchemaKeys(schemaKey)) {
-		const definition = loadStoredSchemaDefinitionForKey(engine, candidate);
-		if (definition) {
-			return definition;
-		}
-	}
-	return null;
-}
-
 export function resolveStoredSchemaKey(
 	schema: StoredSchemaDefinition,
 	fallbackKey: string
@@ -201,50 +184,17 @@ function candidateStoredSchemaKeys(schemaKey: string): string[] {
 	return candidates;
 }
 
-function loadStoredSchemaDefinitionForKey(
-	engine: Pick<LixEngine, "executeSync">,
+export function loadStoredSchemaDefinition(
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
 	schemaKey: string
 ): StoredSchemaDefinition | null {
-	const compiledQuery = buildResolvedStateQuery()
-		.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
-		.where(
-			sql`json_extract(snapshot_content, '$.value."x-lix-key"') = ${schemaKey}` as any
-		)
-		.where("snapshot_content", "is not", null)
-		.orderBy(
-			sql`json_extract(snapshot_content, '$.value."x-lix-version"')`,
-			"desc"
-		)
-		.limit(1)
-		.compile();
-
-	const { rows } = engine.executeSync(compiledQuery);
-
-	const first = rows?.[0];
-	if (!first) return null;
-	const raw = first.value;
-	if (typeof raw === "string") {
-		try {
-			return normalizeStoredSchema(JSON.parse(raw));
-		} catch {
-			return null;
+	for (const candidate of candidateStoredSchemaKeys(schemaKey)) {
+		const schema = getStoredSchema({ engine, key: candidate });
+		if (schema) {
+			return schema;
 		}
 	}
-	if (typeof raw === "object" && raw !== null) {
-		return normalizeStoredSchema(raw);
-	}
 	return null;
-}
-
-function normalizeStoredSchema(schema: unknown): StoredSchemaDefinition | null {
-	if (!schema || typeof schema !== "object") {
-		return null;
-	}
-	if (typeof (schema as Record<string, unknown>)["x-lix-key"] !== "string") {
-		return null;
-	}
-	return schema as StoredSchemaDefinition;
 }
 
 /**
