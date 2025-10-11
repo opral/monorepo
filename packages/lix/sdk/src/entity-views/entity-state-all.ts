@@ -6,6 +6,7 @@ import type {
 } from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
+import { normalizePointerProperties } from "../schema-definition/json-pointer.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
@@ -357,7 +358,10 @@ function createSingleEntityAllView(args: {
 	validation?: ValidationCallbacks;
 	readOnly?: boolean;
 }): void {
-	if (!args.schema["x-lix-primary-key"]) {
+	const primaryKeys = normalizePointerProperties(
+		args.schema["x-lix-primary-key"]
+	);
+	if (primaryKeys.length === 0) {
 		throw new Error(
 			`Schema must define 'x-lix-primary-key' for entity view generation`
 		);
@@ -367,7 +371,6 @@ function createSingleEntityAllView(args: {
 	const quoted_view_name = args.quotedViewName || `"${view_name}"`;
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
-	const primaryKeys = args.schema["x-lix-primary-key"];
 
 	const fileId = args.hardcodedFileId
 		? `'${args.hardcodedFileId}'`

@@ -11,24 +11,28 @@ export const LixEntityConversationSchema = {
 	"x-lix-key": "lix_entity_conversation",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": [
-		"entity_id",
-		"schema_key",
-		"file_id",
-		"conversation_id",
+		"/entity_id",
+		"/schema_key",
+		"/file_id",
+		"/conversation_id",
 	],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["entity_id", "schema_key", "file_id"],
+			properties: ["/entity_id", "/schema_key", "/file_id"],
 			references: {
 				schemaKey: "state",
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 			},
 		},
 		{
-			properties: ["conversation_id"],
+			properties: ["/conversation_id"],
 			references: {
 				schemaKey: "lix_conversation",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

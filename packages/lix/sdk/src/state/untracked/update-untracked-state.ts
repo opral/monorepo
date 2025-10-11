@@ -69,7 +69,7 @@ export function updateUntrackedState(args: {
 			}
 
 			let sel = internalQueryBuilder
-				.selectFrom("internal_state_all_untracked")
+				.selectFrom("lix_internal_state_all_untracked")
 				.where("version_id", "=", versionId);
 			const entArr = Array.from(ent);
 			const schArr = Array.from(sch);
@@ -92,7 +92,7 @@ export function updateUntrackedState(args: {
 				if (existingSet.has(key)) {
 					engine.executeSync(
 						internalQueryBuilder
-							.deleteFrom("internal_state_all_untracked")
+							.deleteFrom("lix_internal_state_all_untracked")
 							.where("entity_id", "=", c.entity_id)
 							.where("schema_key", "=", c.schema_key)
 							.where("file_id", "=", c.file_id)
@@ -124,7 +124,7 @@ export function updateUntrackedState(args: {
 			if (tombstoneValues.length > 0) {
 				engine.executeSync(
 					internalQueryBuilder
-						.insertInto("internal_state_all_untracked")
+						.insertInto("lix_internal_state_all_untracked")
 						.values(tombstoneValues)
 						.onConflict((oc) =>
 							oc
@@ -149,7 +149,7 @@ export function updateUntrackedState(args: {
 			const content: any = c.snapshot_content as any;
 			engine.executeSync(
 				internalQueryBuilder
-					.insertInto("internal_state_all_untracked")
+					.insertInto("lix_internal_state_all_untracked")
 					.values({
 						entity_id: c.entity_id,
 						schema_key: c.schema_key,

@@ -6,12 +6,12 @@
  *
  * Tag meanings:
  *
- * - T: Transaction direct (from internal_transaction_state in child version)
- * - TI: Transaction inherited (from internal_transaction_state in parent version)
- * - U: Untracked direct (from internal_state_all_untracked in child version)
- * - UI: Untracked inherited (from internal_state_all_untracked in parent version)
- * - C: Cache-tracked direct (from internal_state_cache in child version)
- * - CI: Cache-tracked inherited (from internal_state_cache in parent version)
+ * - T: Transaction direct (from lix_internal_transaction_state in child version)
+ * - TI: Transaction inherited (from lix_internal_transaction_state in parent version)
+ * - U: Untracked direct (from lix_internal_state_all_untracked in child version)
+ * - UI: Untracked inherited (from lix_internal_state_all_untracked in parent version)
+ * - C: Cache-tracked direct (from lix_internal_state_cache in child version)
+ * - CI: Cache-tracked inherited (from lix_internal_state_cache in parent version)
  */
 
 export type StatePkTag = "T" | "TI" | "U" | "UI" | "C" | "CI";

@@ -22,7 +22,7 @@ export function applyStateDatabaseSchema(args: {
 	// Writer metadata table: stores last writer per (file, version, entity, schema).
 	// No NULL storage policy: absence of row = unknown writer.
 	engine.sqlite.exec(`
-	  CREATE TABLE IF NOT EXISTS internal_state_writer (
+	  CREATE TABLE IF NOT EXISTS lix_internal_state_writer (
 	    file_id    TEXT NOT NULL,
 	    version_id TEXT NOT NULL,
 	    entity_id  TEXT NOT NULL,
@@ -31,8 +31,8 @@ export function applyStateDatabaseSchema(args: {
 	    PRIMARY KEY (file_id, version_id, entity_id, schema_key)
 	  ) WITHOUT ROWID;
 
-	  CREATE INDEX IF NOT EXISTS idx_internal_state_writer_fvw
-	    ON internal_state_writer(file_id, version_id, writer_key);
+	  CREATE INDEX IF NOT EXISTS idx_lix_internal_state_writer_fvw
+	    ON lix_internal_state_writer(file_id, version_id, writer_key);
 	`);
 
 	// Views that route reads through the preprocessor must exist before the vtable registers

@@ -18,14 +18,12 @@ type ExplainQueryStage = {
 	plan: any[];
 };
 
-export async function createExplainQuery(args: {
+export function createExplainQuery(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery" | "executeSync"
 	>;
-}): Promise<
-	(args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage
-> {
+}): (args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage {
 	const preprocess = args.engine.preprocessQuery;
 
 	return ({ query }) => {
@@ -74,12 +72,12 @@ function ensureCacheTablesForSql(
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
 	sql: string
 ): void {
-	const matches = sql.matchAll(/internal_state_cache_([A-Za-z0-9_]+)/g);
+	const matches = sql.matchAll(/lix_internal_state_cache_([A-Za-z0-9_]+)/g);
 	const tableCache = getStateCacheV2Tables({ engine });
 	for (const match of matches) {
 		const sanitizedSuffix = match[1];
 		if (!sanitizedSuffix) continue;
-		const tableName = `internal_state_cache_${sanitizedSuffix}`;
+		const tableName = `lix_internal_state_cache_${sanitizedSuffix}`;
 		if (tableCache.has(tableName)) continue;
 		createSchemaCacheTable({ engine, tableName });
 		tableCache.add(tableName);

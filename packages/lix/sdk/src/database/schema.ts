@@ -4,7 +4,6 @@ import type {
 } from "../change/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema-definition.js";
 import {
@@ -41,7 +40,7 @@ import type {
 import { LixLogSchema } from "../log/schema-definition.js";
 import {
 	LixAccountSchema,
-	type LixActiveAccount,
+	LixActiveAccountSchema,
 } from "../account/schema-definition.js";
 import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixLabelSchema } from "../label/schema-definition.js";
@@ -68,16 +67,16 @@ export const LixDatabaseSchemaJsonColumns = {
 } as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
-	internal_transaction_state: InternalTransactionStateTable;
-	internal_change: InternalChangeTable;
-	internal_snapshot: InternalSnapshotTable;
-	internal_state_cache: InternalStateCacheTable;
-	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_state_vtable: InternalStateVTable;
-	internal_state_reader: InternalStateVTable;
-	internal_file_data_cache: InternalFileDataCacheTable;
-	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
-	internal_state_writer: InternalStateWriterTable;
+	lix_internal_transaction_state: InternalTransactionStateTable;
+	lix_internal_change: InternalChangeTable;
+	lix_internal_snapshot: InternalSnapshotTable;
+	lix_internal_state_cache: InternalStateCacheTable;
+	lix_internal_state_all_untracked: InternalStateAllUntrackedTable;
+	lix_internal_state_vtable: InternalStateVTable;
+	lix_internal_state_reader: InternalStateVTable;
+	lix_internal_file_data_cache: InternalFileDataCacheTable;
+	lix_internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	lix_internal_state_writer: InternalStateWriterTable;
 };
 
 export type InternalStateWriterTable = {
@@ -111,7 +110,10 @@ type DirectoryDescriptorHistoryView = ToKysely<
 >;
 
 export type LixDatabaseSchema = {
-	active_account: ToKysely<LixActiveAccount>;
+	active_account: EntityViews<
+		typeof LixActiveAccountSchema,
+		"active_account"
+	>["active_account"];
 	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;
@@ -131,7 +133,6 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
-	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<
 		typeof LixFileDescriptorSchema,

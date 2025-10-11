@@ -1484,7 +1484,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify cache has exactly one entry for this entity (in global version)
 	const cacheEntries = await db
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.where("entity_id", "=", "mock-global-entity")
 		.execute();
@@ -1494,7 +1494,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["version_id", "entity_id", "schema_key"])
 		.where("entity_id", "=", "mock-global-entity")
 		.orderBy("version_id", "asc")
@@ -1524,7 +1524,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check that the cache was populated
 		const cacheEntries = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 
@@ -1560,7 +1560,7 @@ describe("file lixcol cache updates", () => {
 
 		// Get initial cache entry
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -1575,7 +1575,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check that cache was updated
 		const updatedCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("file_id", "=", initialCache.file_id)
 			.selectAll()
 			.executeTakeFirstOrThrow();
@@ -1608,7 +1608,7 @@ describe("file lixcol cache updates", () => {
 
 		// Verify cache exists
 		const cacheBeforeDelete = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(cacheBeforeDelete.length).toBe(1);
@@ -1618,7 +1618,7 @@ describe("file lixcol cache updates", () => {
 
 		// Cache entry should be removed
 		const cacheAfterDelete = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(cacheAfterDelete.length).toBe(0);
@@ -1640,7 +1640,7 @@ describe("file lixcol cache updates", () => {
 
 		// All files should have cache entries
 		const cacheEntries = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 
@@ -1668,7 +1668,7 @@ describe("file lixcol cache updates", () => {
 			.execute();
 
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
@@ -1689,7 +1689,7 @@ describe("file lixcol cache updates", () => {
 			.execute();
 
 		const finalCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("file_id", "=", initialCache.file_id)
 			.where("version_id", "=", "global")
 			.selectAll()
@@ -1742,7 +1742,7 @@ describe("file lixcol cache updates", () => {
 
 		// Get initial state
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(initialCache.length).toBe(3);
@@ -1810,7 +1810,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check final cache state
 		const finalCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.orderBy("file_id")
 			.execute();

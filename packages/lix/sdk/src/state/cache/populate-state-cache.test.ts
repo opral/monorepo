@@ -65,7 +65,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_test table
 	const lixTestTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -76,7 +76,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_other table
 	const lixOtherTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_other ORDER BY entity_id`,
+		sql: `SELECT * FROM lix_internal_state_cache_lix_other ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -140,7 +140,7 @@ test("populates v2 cache with version filter", async () => {
 
 	// Verify both versions exist
 	const allData = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -158,7 +158,7 @@ test("populates v2 cache with version filter", async () => {
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
 	const afterPopulate = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -223,15 +223,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// Verify data exists in all tables
 	const schemaA = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_a`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
 		returnValue: "resultRows",
 	});
 	const schemaB = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_b`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
 		returnValue: "resultRows",
 	});
 	const schemaC = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_c`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
 		returnValue: "resultRows",
 	});
 
@@ -244,15 +244,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// All tables should be empty now (no materializer data)
 	const schemaAAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_a`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
 		returnValue: "resultRows",
 	});
 	const schemaBAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_b`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
 		returnValue: "resultRows",
 	});
 	const schemaCAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM internal_state_cache_schema_c`,
+		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
 		returnValue: "resultRows",
 	});
 
@@ -365,11 +365,11 @@ test("inheritance is queryable from the resolved view after population", async (
 	});
 
 	// ASSERT: Check what got populated in the cache
-	// Read from the virtual table internal_state_cache using Kysely with json function
+	// Read from the virtual table lix_internal_state_cache using Kysely with json function
 	const resolvedContents = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select([
 			"entity_id",
 			"schema_key",
@@ -505,7 +505,7 @@ test("global version entities are populated when populating child versions", asy
 	// Check the physical cache directly: the parent/global authored entry
 	// should be materialized in its own version's cache table.
 	const cacheEntries = await db
-		.selectFrom("internal_state_cache_test_entity" as any)
+		.selectFrom("lix_internal_state_cache_test_entity" as any)
 		.where("entity_id", "=", "global_entity_1")
 		.select([
 			"entity_id",
@@ -522,7 +522,7 @@ test("global version entities are populated when populating child versions", asy
 	// Inheritance is resolved at read time via the resolved view.
 	// Verify the child version sees the inherited row from global.
 	const resolvedInherited = await db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")

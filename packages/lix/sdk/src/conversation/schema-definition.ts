@@ -11,10 +11,17 @@ export type LixConversation = FromLixSchemaDefinition<
 export const LixConversationSchema = {
 	"x-lix-key": "lix_conversation",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 	},
 	required: ["id"],
 	additionalProperties: false,
@@ -30,26 +37,33 @@ export type LixConversationMessage = FromLixSchemaDefinition<
 export const LixConversationMessageSchema = {
 	"x-lix-key": "lix_conversation_message",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["conversation_id"],
+			properties: ["/conversation_id"],
 			references: {
 				schemaKey: "lix_conversation",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["parent_id"],
+			properties: ["/parent_id"],
 			references: {
 				schemaKey: "lix_conversation_message",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 		conversation_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,

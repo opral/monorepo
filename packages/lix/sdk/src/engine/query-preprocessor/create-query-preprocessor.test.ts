@@ -10,20 +10,20 @@ describe("createQueryPreprocessorV2", () => {
 		vi.restoreAllMocks();
 	});
 
-	test("rewrites internal_state_vtable queries using Chevrotain pipeline", async () => {
+	test("rewrites lix_internal_state_vtable queries using Chevrotain pipeline", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		setHasOpenTransaction(lix.engine!, true);
 
 		const result = preprocess({
-			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
+			sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",
 			parameters: [],
 		});
 
 		expect(result.sql.trim().startsWith("WITH")).toBe(true);
-		expect(result.sql).toContain("internal_state_vtable_rewritten AS (");
+		expect(result.sql).toContain("lix_internal_state_vtable_rewritten AS (");
 		expect(result.sql).toContain(
-			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS internal_state_vtable"
+			"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable"
 		);
 
 		await lix.close();
@@ -41,7 +41,7 @@ describe("createQueryPreprocessorV2", () => {
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 
 		preprocess({
-			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
+			sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",
 			parameters: [],
 		});
 
@@ -63,7 +63,7 @@ describe("createQueryPreprocessorV2", () => {
 			const preprocess = await createQueryPreprocessor(lix.engine!);
 
 			preprocess({
-				sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'lix_key_value'",
+				sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",
 				parameters: [],
 				sideEffects: false,
 			});
@@ -78,8 +78,8 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		lix.engine!.sqlite.exec({
 			sql: `
-				CREATE VIEW internal_state_view AS
-				SELECT schema_key FROM internal_state_vtable WHERE schema_key = 'lix_key_value'
+				CREATE VIEW lix_internal_state_view AS
+				SELECT schema_key FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'
 			`,
 			returnValue: "resultRows",
 		});
@@ -88,14 +88,14 @@ describe("createQueryPreprocessorV2", () => {
 		setHasOpenTransaction(lix.engine!, true);
 
 		const result = preprocess({
-			sql: "SELECT * FROM internal_state_view",
+			sql: "SELECT * FROM lix_internal_state_view",
 			parameters: [],
 		});
 
 		expect(result.expandedSql).toBeDefined();
-		expect(result.expandedSql).not.toMatch(/FROM\s+internal_state_view\b/i);
-		expect(result.sql).toContain("internal_transaction_state");
-		expect(result.sql).not.toMatch(/FROM\s+internal_state_view\b/i);
+		expect(result.expandedSql).not.toMatch(/FROM\s+lix_internal_state_view\b/i);
+		expect(result.sql).toContain("lix_internal_transaction_state");
+		expect(result.sql).not.toMatch(/FROM\s+lix_internal_state_view\b/i);
 
 		await lix.close();
 	});
@@ -104,8 +104,8 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		lix.engine!.sqlite.exec({
 			sql: `
-				CREATE VIEW internal_state_view AS
-				SELECT schema_key FROM internal_state_vtable WHERE schema_key = 'lix_key_value'
+				CREATE VIEW lix_internal_state_view AS
+				SELECT schema_key FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'
 			`,
 			returnValue: "resultRows",
 		});
@@ -113,11 +113,11 @@ describe("createQueryPreprocessorV2", () => {
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 
 		const result = preprocess({
-			sql: "SELECT * FROM internal_state_view",
+			sql: "SELECT * FROM lix_internal_state_view",
 			parameters: [],
 		});
 
-		expect(result.sql).not.toContain("internal_transaction_state");
+		expect(result.sql).not.toContain("lix_internal_transaction_state");
 		await lix.close();
 	});
 
@@ -125,11 +125,39 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		const sql =
-			"DELETE FROM internal_state_vtable WHERE entity_id = 'mock' AND schema_key = 'mock_schema'";
+			"DELETE FROM lix_internal_state_vtable WHERE entity_id = 'mock' AND schema_key = 'mock_schema'";
 
 		const result = preprocess({ sql, parameters: [] });
 
 		expect(result.sql).toBe(sql);
+		await lix.close();
+	});
+
+	test("rewrites active_account insert via trigger pipeline", async () => {
+		const lix = await openLix({});
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const sql = "INSERT INTO active_account (account_id) VALUES (?)";
+
+		const result = preprocess({
+			sql,
+			parameters: ["user123"],
+		});
+
+		expect(result.sql).toContain("INSERT INTO state_all");
+		expect(result.sql).not.toMatch(/\bactive_account\b/i);
+		expect(result.sql).toContain("json_object('account_id', ?)");
+		expect(result.parameters).toEqual([
+			"user123",
+			"lix_active_account",
+			"lix",
+			"global",
+			"lix_own_entity",
+			"user123",
+			"1.0",
+			null,
+			1,
+		]);
+
 		await lix.close();
 	});
 
@@ -137,9 +165,9 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		const sql = `WITH target AS (
-			SELECT entity_id FROM internal_state_vtable
+			SELECT entity_id FROM lix_internal_state_vtable
 		)
-		DELETE FROM internal_state_vtable WHERE entity_id IN (SELECT entity_id FROM target)`;
+		DELETE FROM lix_internal_state_vtable WHERE entity_id IN (SELECT entity_id FROM target)`;
 
 		const result = preprocess({ sql, parameters: [] });
 
@@ -147,11 +175,11 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
-	test("leaves internal_state_materializer select semantically equal", async () => {
+	test("leaves lix_internal_state_materializer select semantically equal", async () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		const sql =
-			'select * from "internal_state_materializer" where "version_id" = ? and "entity_id" = ?';
+			'select * from "lix_internal_state_materializer" where "version_id" = ? and "entity_id" = ?';
 
 		const result = preprocess({
 			sql,
@@ -159,7 +187,7 @@ describe("createQueryPreprocessorV2", () => {
 		});
 
 		expect(result.sql).toBe(
-			`select * from "internal_state_materializer" where "version_id" = ?1 and "entity_id" = ?2`
+			`select * from "lix_internal_state_materializer" where "version_id" = ?1 and "entity_id" = ?2`
 		);
 		expect(result.expandedSql).toBeUndefined();
 
@@ -170,11 +198,11 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const preprocess = await createQueryPreprocessor(lix.engine!);
 		const sql =
-			'SELECT "key", "version", "value" FROM "stored_schema" WHERE "key" = ? AND "version" = ? LIMIT ?';
+			'SELECT "value" FROM "stored_schema" WHERE "lixcol_entity_id" = ? LIMIT ?';
 
 		const result = preprocess({
 			sql,
-			parameters: ["schema", "1.0", 1],
+			parameters: ["lix_stored_schema~1.0", 1],
 		});
 
 		expect(result.sql).toContain("WITH RECURSIVE");
@@ -190,6 +218,80 @@ describe("createQueryPreprocessorV2", () => {
 
 		expect(Array.isArray(rows)).toBe(true);
 		await lix.close();
+	});
+
+	test("expands stored schema entity view without sqlite view", async () => {
+		const lix = await openLix({});
+		const customSchema = {
+			"x-lix-key": "my_cool_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id"],
+			additionalProperties: false,
+		} as const;
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: customSchema })
+			.execute();
+
+		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const result = preprocess({
+			sql: "SELECT name FROM my_cool_schema WHERE id = ?",
+			parameters: ["demo"],
+		});
+
+		expect(result.expandedSql).toBeDefined();
+		expect(result.sql).toContain("schema_key = 'my_cool_schema'");
+		expect(result.sql).not.toMatch(/FROM\s+my_cool_schema\b/i);
+		expect(result.sql).toContain("lix_internal_state_vtable_rewritten");
+
+		await lix.close();
+	});
+
+	test("entity delete rewrite expands active_version subquery", async () => {
+		const lix = await openLix({});
+		try {
+			const schema = {
+				"x-lix-key": "delete_schema",
+				"x-lix-version": "1.0",
+				"x-lix-primary-key": ["/id"],
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					name: { type: "string" },
+				},
+				required: ["id"],
+				additionalProperties: false,
+			} as const;
+
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: schema })
+				.execute();
+
+			const preprocess = await createQueryPreprocessor(lix.engine!);
+			const deleteResult = preprocess({
+				sql: `DELETE FROM ${schema["x-lix-key"]} WHERE id = ?`,
+				parameters: ["row-1"],
+			});
+
+			expect(deleteResult.sql.trim().startsWith("WITH")).toBe(true);
+			expect(deleteResult.sql).toMatch(/\bDELETE\s+FROM\s+state_all\b/i);
+			expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
+			expect(deleteResult.sql).not.toMatch(/\bFROM\s+active_version\b/i);
+			expect(deleteResult.expandedSql).toBeDefined();
+			expect(deleteResult.expandedSql).not.toMatch(
+				/\bFROM\s+active_version\b/i
+			);
+		} finally {
+			await lix.close();
+		}
 	});
 
 	test("does not rewrite change history query without vtable references", async () => {

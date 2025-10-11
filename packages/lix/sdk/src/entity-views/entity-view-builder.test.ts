@@ -7,8 +7,9 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	const testSchema: LixSchemaDefinition = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -24,6 +25,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const mockSchema: LixSchemaDefinition = {
 			"x-lix-key": "test_entity",
 			"x-lix-version": "1.0",
+			additionalProperties: false,
 			type: "object",
 			properties: {
 				id: { type: "string" },
@@ -111,7 +113,8 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const roSchema: LixSchemaDefinition = {
 			"x-lix-key": "ro_entity",
 			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["id"],
+			"x-lix-primary-key": ["/id"],
+			additionalProperties: false,
 			type: "object",
 			properties: {
 				id: { type: "string" },
@@ -174,6 +177,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			"x-lix-key": "test_entity",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				id: { type: "string" },
 				name: { type: "string" },
@@ -336,6 +340,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			"x-lix-key": "invalid_schema",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				name: { type: "string" },
 			},

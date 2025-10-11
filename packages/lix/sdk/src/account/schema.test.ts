@@ -1,3 +1,5 @@
+import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
+import { LixActiveAccountSchema } from "./schema-definition.js";
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
@@ -211,7 +213,7 @@ test("account operations are version specific and isolated", async () => {
 test("active_account temp table operations", async () => {
 	const lix = await openLix({});
 
-	// Check if the default anonymous account was created with proper details
+	// No accounts should exist by default
 	const activeAccounts = await lix.db
 		.selectFrom("active_account as aa")
 		.innerJoin("account_all as a", "a.id", "aa.account_id")
@@ -219,8 +221,7 @@ test("active_account temp table operations", async () => {
 		.select(["aa.account_id", "a.id", "a.name"])
 		.execute();
 
-	expect(activeAccounts).toHaveLength(1);
-	expect(activeAccounts[0]?.name).toMatch(/^Anonymous \w+$/);
+	expect(activeAccounts).toHaveLength(0);
 
 	// First create a real account in global version (where active accounts look)
 	await lix.db
@@ -245,9 +246,7 @@ test("active_account temp table operations", async () => {
 		.selectAll()
 		.execute();
 
-	expect(updatedActiveAccounts).toHaveLength(2);
-	// The new active account might show null name if the account is not in the right version
-	// Let's check if the ID is there at least
+	expect(updatedActiveAccounts).toHaveLength(1);
 	const aliceActive = updatedActiveAccounts.find(
 		(acc) => acc.account_id === "user123"
 	);
@@ -289,28 +288,19 @@ test("active_account temp table operations", async () => {
 		.selectAll()
 		.execute();
 
-	expect(afterDelete).toHaveLength(1);
-	expect(afterDelete.some((acc) => acc.account_id === "user123")).toBe(false);
+	expect(afterDelete).toHaveLength(0);
 });
 
-test("account table should have one untracked entry initially and active_account should reference it", async () => {
+test("account tables start empty until an account is created", async () => {
 	const lix = await openLix({});
 
-	// Check the anonymous account in account_all (includes untracked)
 	const allAccounts = await lix.db
 		.selectFrom("account_all")
 		.selectAll()
 		.execute();
 
-	// The anonymous account exists and is initially untracked
-	expect(allAccounts.length).toBeGreaterThan(0);
-	const anonymousAccount = allAccounts.find((acc) =>
-		acc.name?.match(/^Anonymous \w+$/)
-	);
-	expect(anonymousAccount).toBeDefined();
-	expect(anonymousAccount?.lixcol_untracked).toBe(1);
+	expect(allAccounts.length).toBe(0);
 
-	// Check that active_account references the same account using a join
 	const activeAccount = await lix.db
 		.selectFrom("active_account as aa")
 		.innerJoin("account_all as a", "a.id", "aa.account_id")
@@ -318,15 +308,10 @@ test("account table should have one untracked entry initially and active_account
 		.select(["aa.account_id", "a.id", "a.name"])
 		.executeTakeFirst();
 
-	expect(activeAccount).toBeDefined();
-	expect(activeAccount?.account_id).toBe(anonymousAccount?.id);
+	expect(activeAccount).toBeUndefined();
 });
 
-test.skip("active_account should enforce foreign key constraint on account_id", async () => {
-	// TODO: Foreign key constraints are not enforced on views with INSTEAD OF triggers
-	// because the LixActiveAccountSchema is not stored in stored_schema table.
-	// This would require storing the schema and ensuring validation is called
-	// in the trigger or virtual table implementation.
+test("active_account should enforce foreign key constraint on account_id", async () => {
 	const lix = await openLix({});
 
 	// Try to insert an active account reference to a non-existent account
@@ -340,33 +325,90 @@ test.skip("active_account should enforce foreign key constraint on account_id", 
 	).rejects.toThrow(/foreign key/i);
 });
 
-test("should generate different anonymous account names", async () => {
-	const lix0 = await openLix({});
-	const lix1 = await openLix({});
-	const lix2 = await openLix({});
+test("active_account view injects global version defaults", async () => {
+	const lix = await openLix({});
 
-	// Get active accounts with details using joins
-	const account0 = await lix0.db
-		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
-		.where("a.lixcol_version_id", "=", "global")
-		.select(["a.id", "a.name"])
-		.executeTakeFirst();
+	await lix.db
+		.insertInto("account_all")
+		.values({
+			id: "acct-1",
+			name: "Global User",
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const account1 = await lix1.db
-		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
-		.where("a.lixcol_version_id", "=", "global")
-		.select(["a.id", "a.name"])
-		.executeTakeFirst();
+	await lix.db
+		.insertInto("active_account")
+		.values({ account_id: "acct-1" })
+		.execute();
 
-	const account2 = await lix2.db
-		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
-		.where("a.lixcol_version_id", "=", "global")
-		.select(["a.id", "a.name"])
-		.executeTakeFirst();
+	const row = await lix.db
+		.selectFrom("state_all")
+		.select([
+			"schema_key",
+			"file_id",
+			"plugin_key",
+			"version_id",
+			"untracked",
+			"inherited_from_version_id",
+		])
+		.where("schema_key", "=", "lix_active_account")
+		.where("inherited_from_version_id", "is", "global")
+		.where("entity_id", "=", "acct-1")
+		.executeTakeFirstOrThrow();
 
-	expect(account0?.name).not.toBe(account1?.name);
-	expect(account1?.name).not.toBe(account2?.name);
+	expect(row).toMatchObject({
+		schema_key: "lix_active_account",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		untracked: 1,
+	});
+	expect(row.version_id).toBeDefined();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select(["lixcol_inherited_from_version_id" as any])
+		.executeTakeFirstOrThrow();
+
+	expect(activeVersion.lixcol_inherited_from_version_id).toBe("global");
+
+	await lix.close();
+});
+
+test("active_account schema exposes only the base view", async () => {
+	const lix = await openLix({});
+
+	const storedSchema = {
+		...LixActiveAccountSchema,
+		"x-lix-version": "1.1",
+	} as const;
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: storedSchema })
+		.execute();
+
+	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const rewritten = preprocess({
+		sql: "SELECT * FROM active_account_all",
+		parameters: [],
+	});
+
+	expect(rewritten.sql).toContain("active_account_all");
+	expect(rewritten.sql).not.toContain("schema_key = 'lix_active_account'");
+
+	await expect(
+		lix.db
+			.selectFrom("active_account_all" as any)
+			.selectAll()
+			.execute()
+	).rejects.toThrow(/no such table/i);
+
+	await expect(
+		lix.db
+			.selectFrom("active_account_history" as any)
+			.selectAll()
+			.execute()
+	).rejects.toThrow(/no such table/i);
+
+	await lix.close();
 });

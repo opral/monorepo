@@ -5,7 +5,6 @@ import { createChangeProposal } from "./create-change-proposal.js";
 
 test("createChangeProposal creates a global, open proposal with correct refs", async () => {
 	const lix = await openLix({});
-
 	// Resolve main and create a source version
 	const main = await lix.db
 		.selectFrom("version")

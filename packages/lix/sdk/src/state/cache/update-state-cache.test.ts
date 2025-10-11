@@ -45,7 +45,7 @@ test("inserts into cache based on change", async () => {
 	const cacheEntries = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testChange.entity_id)
@@ -114,7 +114,7 @@ test("upserts cache entry on conflict", async () => {
 	// Verify initial entry exists
 	const intDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 	const initialEntries = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", initialChange.entity_id)
@@ -156,7 +156,7 @@ test("upserts cache entry on conflict", async () => {
 
 	// Verify only one entry exists (upserted, not inserted as new)
 	const finalEntries = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", updatedChange.entity_id)
@@ -229,7 +229,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 2. Verify entity exists in parent cache
 	const parentCache = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -264,7 +264,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 4. Verify parent still has the entity in cache
 	const parentCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -279,7 +279,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 5. Verify child version HAS a tombstone cache entry
 	const childCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -292,7 +292,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 6. Verify subchild version has NO direct cache entry (inherits deletion from child)
 	const subchildCacheAfterDelete = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -303,7 +303,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// 7. Verify cache entries are correct (tombstones filtered out)
 	const parentStateAll = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -313,7 +313,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.execute();
 
 	const childStateAll = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -323,7 +323,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.execute();
 
 	const subchildStateAll = await intDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
@@ -397,7 +397,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 
 	// Query the cache to verify only the latest change is present
 	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-entity")
@@ -473,7 +473,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 
 	// Query the cache to verify only the latest change is present
 	const result = await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", "test-entity")

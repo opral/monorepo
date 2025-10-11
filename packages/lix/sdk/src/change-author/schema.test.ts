@@ -161,7 +161,7 @@ simulationTest(
 				})
 				.execute()
 		).rejects.toThrow(
-			/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
+			/Foreign key constraint violation.*lix_change_author.*\(\/change_id\).*lix_change\.\(\/id\)/i
 		);
 	}
 );
@@ -202,7 +202,7 @@ simulationTest(
 				})
 				.execute()
 		).rejects.toThrow(
-			/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
+			/Foreign key constraint violation.*lix_change_author.*\(\/account_id\).*lix_account\.\(\/id\)/i
 		);
 	}
 );
@@ -439,6 +439,10 @@ simulationTest(
 	"materializes author for committed key_value and ties lixcol_change_id to commit",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
+			account: {
+				id: "materialization-test-account",
+				name: "Materialization Test User",
+			},
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",

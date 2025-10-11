@@ -22,9 +22,9 @@ WITH
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
-    FROM internal_state_vtable ) AS state_with_tombstones
+    FROM lix_internal_state_vtable ) AS state_with_tombstones
     WHERE version_id = 'test_0000000017'
   ),
   t AS (
@@ -47,9 +47,9 @@ WITH
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
-    FROM internal_state_vtable
+    FROM lix_internal_state_vtable
     WHERE snapshot_content IS NOT NULL ) AS state_all
     WHERE version_id = 'test_0000000047'
   ),

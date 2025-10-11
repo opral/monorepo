@@ -5,7 +5,7 @@ export function applyTransactionStateSchema(args: {
 	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	args.engine.sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS internal_transaction_state (
+  CREATE TABLE IF NOT EXISTS lix_internal_transaction_state (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
@@ -22,7 +22,7 @@ export function applyTransactionStateSchema(args: {
   ) STRICT;
 
   CREATE INDEX IF NOT EXISTS ix_txn_v_f_s_e
-    ON internal_transaction_state(version_id, file_id, schema_key, entity_id);
+    ON lix_internal_transaction_state(version_id, file_id, schema_key, entity_id);
 `);
 }
 

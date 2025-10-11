@@ -88,8 +88,8 @@ export class OpfsSahEnvironment implements LixEnvironment {
 	/**
 	 * Invoke a named engine function inside the worker engine.
 	 */
-	async call(name: string, payload?: unknown): Promise<unknown> {
-		return this.send("call", { route: name, payload });
+	async call(name: string, args?: unknown): Promise<unknown> {
+		return this.send("call", { route: name, payload: args });
 	}
 
 	async create(

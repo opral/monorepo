@@ -51,16 +51,16 @@ export function applyStateAllView(args: {
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
-    FROM internal_state_vtable
+    FROM lix_internal_state_vtable
     WHERE snapshot_content IS NOT NULL;
 
     -- Forward writes on state_all to the internal vtable
     CREATE TRIGGER IF NOT EXISTS state_all_insert
     INSTEAD OF INSERT ON state_all
     BEGIN
-      INSERT INTO internal_state_vtable (
+      INSERT INTO lix_internal_state_vtable (
         entity_id,
         schema_key,
         file_id,
@@ -83,7 +83,7 @@ export function applyStateAllView(args: {
       );
 
       -- Invalidate file data cache for this file/version
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = NEW.file_id
         AND version_id = NEW.version_id;
     END;
@@ -91,7 +91,7 @@ export function applyStateAllView(args: {
     CREATE TRIGGER IF NOT EXISTS state_all_update
     INSTEAD OF UPDATE ON state_all
     BEGIN
-      UPDATE internal_state_vtable
+      UPDATE lix_internal_state_vtable
       SET
         entity_id = NEW.entity_id,
         schema_key = NEW.schema_key,
@@ -109,7 +109,7 @@ export function applyStateAllView(args: {
         version_id = OLD.version_id;
 
       -- Invalidate file data cache for this file/version
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = NEW.file_id
         AND version_id = NEW.version_id;
     END;
@@ -117,7 +117,7 @@ export function applyStateAllView(args: {
     CREATE TRIGGER IF NOT EXISTS state_all_delete
     INSTEAD OF DELETE ON state_all
     BEGIN
-      DELETE FROM internal_state_vtable
+      DELETE FROM lix_internal_state_vtable
       WHERE
         entity_id = OLD.entity_id AND
         schema_key = OLD.schema_key AND
@@ -125,7 +125,7 @@ export function applyStateAllView(args: {
         version_id = OLD.version_id;
 
       -- Invalidate file data cache for this file/version
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = OLD.file_id
         AND version_id = OLD.version_id;
     END;

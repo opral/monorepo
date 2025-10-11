@@ -4,7 +4,8 @@ import {
 	Ident,
 	QIdent,
 	type Token,
-} from "./sql-rewriter/tokenizer.js";
+} from "../sql-parser/tokenizer.js";
+import { normalizeIdentifier } from "./shared/schema-version.js";
 
 export interface ExpandQueryArgs {
 	sql: string;
@@ -23,13 +24,6 @@ interface NormalizedView {
 }
 
 const lower = (value: string): string => value.toLowerCase();
-
-const normalizeIdentifier = (value: string): string => {
-	if (value.startsWith('"') && value.endsWith('"')) {
-		return value.slice(1, -1).replace(/""/g, "").toLowerCase();
-	}
-	return value.toLowerCase();
-};
 
 type CacheEntry = {
 	source: Map<string, string>;
@@ -147,7 +141,7 @@ function expandSqlBody(
 			context.blocked.add(bestMatch.viewKey);
 			continue;
 		}
-		if (!/\binternal_state_vtable\b/i.test(resolved)) {
+		if (!/\blix_internal_state_vtable\b/i.test(resolved)) {
 			context.blocked.add(bestMatch.viewKey);
 			continue;
 		}

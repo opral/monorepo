@@ -21,7 +21,7 @@ export function updateFileDataCache(args: {
 	// Use INSERT OR REPLACE for write-through caching
 	args.engine.sqlite.exec({
 		sql: `
-      INSERT OR REPLACE INTO internal_file_data_cache 
+      INSERT OR REPLACE INTO lix_internal_file_data_cache 
       (file_id, version_id, data)
       VALUES (?, ?, ?)
     `,

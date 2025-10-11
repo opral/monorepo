@@ -30,7 +30,7 @@ class StubActorEnvironment implements LixEnvironment {
 		this.terminatedActors.clear();
 	}
 
-	async call(name: string, payload?: unknown): Promise<unknown> {
+	async call(name: string, args?: unknown): Promise<unknown> {
 		if (name === "lix_exec_sync") {
 			return { rows: [] } satisfies { rows?: any[] };
 		}

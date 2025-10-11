@@ -1,43 +1,35 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "./create-account.js";
-import { createVersion } from "../version/create-version.js";
+import { LixAccountSchema } from "./schema-definition.js";
 
 test("should create an account", async () => {
 	const lix = await openLix({});
-
-	const version = await createVersion({
-		lix,
-		id: "test-version",
-	});
 
 	const accountName = "test_account";
 	const account = await createAccount({
 		lix,
 		name: accountName,
-		lixcol_version_id: version.id,
 	});
 
 	// Verify the account was created
 	expect(account).toMatchObject({
 		name: accountName,
-		lixcol_version_id: version.id,
 	});
 
 	// Verify the account exists in the database
 	const dbAccount = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account")
 		.selectAll()
 		.where("id", "=", account.id)
 		.executeTakeFirstOrThrow();
 
 	expect(dbAccount).toMatchObject({
 		name: accountName,
-		lixcol_version_id: version.id,
 	});
 });
 
-test("should create an account using active version when lixcol_version_id is not provided", async () => {
+test("should create an account using schema default version when lixcol_version_id is not provided", async () => {
 	const lix = await openLix({});
 
 	const accountName = "test_account_active";
@@ -56,16 +48,11 @@ test("should create an account using active version when lixcol_version_id is no
 		.selectFrom("account_all")
 		.selectAll()
 		.where("id", "=", account.id)
-		.executeTakeFirstOrThrow();
-
-	// Get the active version to verify it was used
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.selectAll()
+		.where("lixcol_version_id", "=", "global")
 		.executeTakeFirstOrThrow();
 
 	expect(dbAccount).toMatchObject({
 		name: accountName,
-		lixcol_version_id: activeVersion.version_id,
+		lixcol_version_id: "global",
 	});
 });

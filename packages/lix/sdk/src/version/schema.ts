@@ -379,65 +379,16 @@ export function applyVersionDatabaseSchema(args: {
         END;
     `);
 
-	// Create active_version as an entity view manually with untracked state
+	// This is a fallback for SQLite subquery's that run
+	// as part of a DML trigger and are not (yet) preprocessed
+	// in the lix engine. The view purposefully bypasses the vtable
+	// to let SQLite's query planner optimize the query.
 	args.engine.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_version AS
 		SELECT
-			json_extract(snapshot_content, '$.version_id') AS version_id,
-			inherited_from_version_id AS lixcol_inherited_from_version_id,
-			created_at AS lixcol_created_at,
-			updated_at AS lixcol_updated_at,
-			file_id AS lixcol_file_id,
-			change_id AS lixcol_change_id,
-			untracked AS lixcol_untracked
-		FROM state_all
+			json_extract(snapshot_content, '$.version_id') AS version_id
+		FROM lix_internal_state_all_untracked
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
-
-		CREATE TRIGGER IF NOT EXISTS active_version_insert
-		INSTEAD OF INSERT ON active_version
-		BEGIN
-			INSERT INTO state_all (
-				entity_id,
-				schema_key,
-				file_id,
-				plugin_key,
-				snapshot_content,
-				schema_version,
-				version_id,
-				untracked
-			) VALUES (
-				'active',
-				'lix_active_version',
-				'lix',
-				'lix_own_entity',
-				json_object('version_id', NEW.version_id),
-				'1.0',
-				'global',
-				1
-			);
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS active_version_update
-		INSTEAD OF UPDATE ON active_version
-		BEGIN
-			UPDATE state_all
-			SET
-				snapshot_content = json_object('version_id', NEW.version_id),
-				untracked = 1
-			WHERE
-				entity_id = 'active'
-				AND schema_key = 'lix_active_version'
-				AND version_id = 'global';
-		END;
-
-		CREATE TRIGGER IF NOT EXISTS active_version_delete
-		INSTEAD OF DELETE ON active_version
-		BEGIN
-			DELETE FROM state_all
-			WHERE entity_id = 'active'
-			AND schema_key = 'lix_active_version'
-			AND version_id = 'global';
-		END;
 	`);
 }
 

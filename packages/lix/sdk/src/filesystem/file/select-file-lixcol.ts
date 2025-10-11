@@ -35,7 +35,7 @@ export function selectFileLixcol(args: {
 				created_at,
 				updated_at,
 				writer_key
-			FROM internal_file_lixcol_cache 
+			FROM lix_internal_file_lixcol_cache 
 			WHERE file_id = ? AND version_id = ?
 		`,
 		bind: [args.fileId, args.versionId],
@@ -117,7 +117,7 @@ export function selectFileLixcol(args: {
 	// Only cache if we have valid data (file exists)
 	args.engine.sqlite.exec({
 		sql: `
-			INSERT OR REPLACE INTO internal_file_lixcol_cache 
+			INSERT OR REPLACE INTO lix_internal_file_lixcol_cache 
 			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at, writer_key)
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`,

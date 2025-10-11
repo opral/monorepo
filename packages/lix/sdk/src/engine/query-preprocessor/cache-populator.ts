@@ -84,7 +84,7 @@ function hasInternalStateVtable(
 ): boolean {
 	try {
 		const result = engine.sqlite.exec({
-			sql: `SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'internal_state_vtable'`,
+			sql: `SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'lix_internal_state_vtable'`,
 			returnValue: "resultRows",
 			rowMode: "array",
 		});
@@ -134,8 +134,8 @@ function isMissingInternalStateVtableError(error: unknown): boolean {
 	}
 	const message = String((error as any).message ?? "");
 	return (
-		message.includes("no such table: internal_state_vtable") ||
-		message.includes("no such module: internal_state_vtable")
+		message.includes("no such table: lix_internal_state_vtable") ||
+		message.includes("no such module: lix_internal_state_vtable")
 	);
 }
 

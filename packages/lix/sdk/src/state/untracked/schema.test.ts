@@ -23,7 +23,7 @@ test("untracked schema validates JSONB content properly", async () => {
 
 	// Test 1: Valid JSONB object should work
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-valid-jsonb",
 			schema_key: "lix_key_value",
@@ -41,7 +41,7 @@ test("untracked schema validates JSONB content properly", async () => {
 
 	// Verify it was inserted correctly
 	const validResult = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-valid-jsonb")
 		.select([
 			"entity_id",
@@ -89,7 +89,7 @@ test("untracked schema rejects invalid JSONB", async () => {
 	// Test: Invalid JSON should be rejected by CHECK constraint
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-json",
 				schema_key: "lix_key_value",
@@ -127,7 +127,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 	// Test: JSONB array should be rejected (must be object)
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-jsonb-array",
 				schema_key: "lix_key_value",
@@ -147,7 +147,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 	// Test: JSONB string should be rejected (must be object)
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-jsonb-string",
 				schema_key: "lix_key_value",
@@ -184,7 +184,7 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 
 	// Test 1: inheritance_delete_marker = 1 with NULL content should work (tombstone)
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-valid-tombstone",
 			schema_key: "lix_key_value",
@@ -202,7 +202,7 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 
 	// Verify tombstone was created correctly
 	const tombstoneResult = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-valid-tombstone")
 		.selectAll()
 		.execute();
@@ -214,7 +214,7 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 	// Test 2: inheritance_delete_marker = 1 with content should be rejected
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-tombstone",
 				schema_key: "lix_key_value",
@@ -234,7 +234,7 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 	// Test 3: Invalid inheritance_delete_marker values should be rejected
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-marker",
 				schema_key: "lix_key_value",
@@ -272,7 +272,7 @@ test("untracked schema allows NULL snapshot_content with inheritance_delete_mark
 	// Test: inheritance_delete_marker = 0 with NULL content should work
 	// (this could represent a normal deletion that's not a tombstone)
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-null-content-normal",
 			schema_key: "lix_key_value",
@@ -290,7 +290,7 @@ test("untracked schema allows NULL snapshot_content with inheritance_delete_mark
 
 	// Verify it was inserted correctly
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-null-content-normal")
 		.selectAll()
 		.execute();

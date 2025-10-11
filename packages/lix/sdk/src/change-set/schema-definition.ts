@@ -8,10 +8,18 @@ export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 export const LixChangeSetSchema = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
+	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: {
+			type: "string",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 	},
 	required: ["id"],
 	additionalProperties: false,
@@ -27,29 +35,34 @@ export const LixChangeSetElementSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["/change_set_id"],
 			references: {
 				schemaKey: "lix_change_set",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["change_id"],
+			properties: ["/change_id"],
 			references: {
 				schemaKey: "lix_change",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["schema_key"],
+			properties: ["/schema_key"],
 			references: {
 				schemaKey: "lix_stored_schema",
-				properties: ["key"],
+				properties: ["/value/x-lix-key"],
 			},
 		},
 	],
-	"x-lix-primary-key": ["change_set_id", "change_id"],
-	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
+	"x-lix-primary-key": ["/change_set_id", "/change_id"],
+	"x-lix-unique": [["/change_set_id", "/entity_id", "/schema_key", "/file_id"]],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
+	},
 	type: "object",
 	properties: {
 		change_set_id: { type: "string" },
@@ -68,37 +81,3 @@ export const LixChangeSetElementSchema = {
 	additionalProperties: false,
 } as const;
 LixChangeSetElementSchema satisfies LixSchemaDefinition;
-
-export type LixChangeSetLabel = FromLixSchemaDefinition<
-	typeof LixChangeSetLabelSchema
->;
-
-export const LixChangeSetLabelSchema = {
-	"x-lix-key": "lix_change_set_label",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_set_id", "label_id"],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["change_set_id"],
-			references: {
-				schemaKey: "lix_change_set",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["label_id"],
-			references: {
-				schemaKey: "lix_label",
-				properties: ["id"],
-			},
-		},
-	],
-	type: "object",
-	properties: {
-		change_set_id: { type: "string" },
-		label_id: { type: "string" },
-	},
-	required: ["change_set_id", "label_id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetLabelSchema satisfies LixSchemaDefinition;

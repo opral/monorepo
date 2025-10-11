@@ -7,7 +7,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	const testSchema: LixSchemaDefinition = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: { type: "string" },

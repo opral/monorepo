@@ -18,7 +18,7 @@ const CACHE_COLUMNS = [
 	"commit_id",
 ] as const;
 
-const ROUTED_ALIAS = "internal_state_cache_routed";
+const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
 type StateCacheColumn = (typeof CACHE_COLUMNS)[number];
 

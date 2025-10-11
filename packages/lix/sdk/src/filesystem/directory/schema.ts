@@ -315,7 +315,7 @@ export function applyDirectoryDatabaseSchema(args: {
 		END;
 	`);
 
-	// internal_state_vtable is a virtual table; adding SQLite indexes would fail. Historical
+	// lix_internal_state_vtable is a virtual table; adding SQLite indexes would fail. Historical
 	// performance improvements for directories can be handled within the change/history tables
 	// if needed.
 }

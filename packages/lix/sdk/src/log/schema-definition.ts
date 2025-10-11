@@ -9,13 +9,17 @@ export type LixLog = FromLixSchemaDefinition<typeof LixLogSchema>;
 export const LixLogSchema = {
 	"x-lix-key": "lix_log",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	type: "object",
 	properties: {
 		id: {
 			type: "string",
 			description: "The unique identifier of the log entry",
-			"x-lix-generated": true,
+			"x-lix-default": "lix_uuid_v7()",
 		},
 		key: {
 			type: "string",

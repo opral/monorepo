@@ -4,32 +4,22 @@ import type { LixDatabaseSchema } from "./schema.js";
 import { createEngineDialect } from "./sqlite/engine-dialect.js";
 import { createDefaultPlugins } from "./kysely/plugins.js";
 // Schema imports
-import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
-import { applyChangeSetDatabaseSchema } from "../change-set/schema.js";
-import { applyCommitDatabaseSchema } from "../commit/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
-import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
-import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
-import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
-import { applyLabelDatabaseSchema } from "../label/schema.js";
-import { applyConversationDatabaseSchema } from "../conversation/schema.js";
-import { applyAccountDatabaseSchema } from "../account/schema.js";
+// import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { LixEngine } from "../engine/boot.js";
 import { nanoIdSync } from "../engine/functions/nano-id.js";
-import { applyEntityDatabaseSchema } from "../entity/schema.js";
-import { applyEntityConversationDatabaseSchema } from "../entity/conversation/schema.js";
-import { applyChangeProposalDatabaseSchema } from "../change-proposal/schema.js";
 import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
 import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 import { humanIdSync } from "../engine/functions/generate-human-id.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
+// import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -91,21 +81,21 @@ export function prepareEngineDatabase(args: {
 	// Ensure file data cache table exists before any triggers may reference it
 	applyFileDataCacheSchema({ engine: engine });
 	applyStateDatabaseSchema({ engine: engine });
-	applyEntityDatabaseSchema({ engine: engine });
-	applyChangeSetDatabaseSchema({ engine: engine });
-	applyCommitDatabaseSchema({ engine: engine });
-	applyStoredSchemaDatabaseSchema({ engine: engine });
+	// applyEntityDatabaseSchema({ engine: engine });
+	// applyChangeSetDatabaseSchema({ engine: engine });
+	// applyCommitDatabaseSchema({ engine: engine });
+	// applyStoredSchemaDatabaseSchema({ engine: engine });
 	applyVersionDatabaseSchema({ engine: engine });
-	applyAccountDatabaseSchema({ engine: engine });
-	applyKeyValueDatabaseSchema({ engine: engine });
-	applyChangeAuthorDatabaseSchema({ engine: engine });
-	applyLabelDatabaseSchema({ engine: engine });
+	// applyAccountDatabaseSchema({ engine: engine });
+	// applyKeyValueDatabaseSchema({ engine: engine });
+	// applyChangeAuthorDatabaseSchema({ engine: engine });
+	// applyLabelDatabaseSchema({ engine: engine });
 	applyStateHistoryDatabaseSchema({ engine: engine });
-	applyConversationDatabaseSchema({ engine });
-	applyEntityConversationDatabaseSchema({ engine });
-	applyChangeProposalDatabaseSchema({ engine });
+	// applyConversationDatabaseSchema({ engine });
+	// applyEntityConversationDatabaseSchema({ engine });
+	// applyChangeProposalDatabaseSchema({ engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	applyLogDatabaseSchema({ engine: engine });
+	// applyLogDatabaseSchema({ engine: engine });
 }
 
 export function initDb(args: {
@@ -161,8 +151,24 @@ function initFunctions(args: {
 		name: "lix_nano_id",
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
-		xFunc: (_ctx: number, length: number) => {
-			return nanoIdSync({ engine: engine, length });
+		xFunc: (_ctx: number, length?: number) => {
+			return nanoIdSync({ engine, length });
+		},
+	});
+
+	args.sqlite.createFunction({
+		name: "lix_trigger_raise",
+		arity: -1,
+		xFunc: (_ctx: number, kind?: unknown, message?: unknown) => {
+			const action = typeof kind === "string" ? kind.toUpperCase() : "FAIL";
+			if (action === "IGNORE") {
+				return null;
+			}
+			const text =
+				typeof message === "string" && message.length > 0
+					? message
+					: `Trigger ${action}`;
+			throw new Error(text);
 		},
 	});
 }

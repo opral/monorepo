@@ -25,7 +25,7 @@ test("boot installs engine and triggers plugin on file insert", async () => {
             schema: {
               "x-lix-key": "test_item",
               "x-lix-version": "1.0",
-              "x-lix-primary-key": ["id"],
+              "x-lix-primary-key": ["/id"],
               "type": "object",
               "properties": { "id": {"type": "string"}, "title": {"type": "string"} },
               "required": ["id", "title"],

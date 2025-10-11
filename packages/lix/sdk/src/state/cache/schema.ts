@@ -23,7 +23,7 @@ export type InternalStateCacheTable = {
 	change_id: string | null;
 	commit_id: string | null;
 };
-// Virtual table schema definition - matches existing internal_state_cache structure
+// Virtual table schema definition - matches existing lix_internal_state_cache structure
 const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	_pk HIDDEN TEXT NOT NULL PRIMARY KEY,
 	entity_id TEXT NOT NULL,
@@ -67,7 +67,7 @@ export function applyStateCacheV2Schema(args: {
 
 	// Initialize cache with existing tables on startup
 	const existingTables = sqlite.exec({
-		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_%'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -268,7 +268,7 @@ export function applyStateCacheV2Schema(args: {
 				argc: number,
 				argv: any
 			) => {
-				// throw new Error("Read should happen via internal_state_vtable");
+				// throw new Error("Read should happen via lix_internal_state_vtable");
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
@@ -297,7 +297,7 @@ export function applyStateCacheV2Schema(args: {
 						/[^a-zA-Z0-9]/g,
 						"_"
 					);
-					const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+					const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
 					// Check if table exists
 					const tableExists = sqlite.exec({
 						sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
@@ -476,14 +476,14 @@ export function applyStateCacheV2Schema(args: {
 
 	capi.sqlite3_create_module(
 		sqlite.pointer!,
-		"internal_state_cache_vtable",
+		"lix_internal_state_cache_vtable",
 		module,
 		0
 	);
 
 	// Create the virtual table
 	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_cache USING internal_state_cache_vtable();`
+		`CREATE VIRTUAL TABLE IF NOT EXISTS lix_internal_state_cache USING lix_internal_state_cache_vtable();`
 	);
 }
 
@@ -494,7 +494,7 @@ function getPhysicalTables(
 ): string[] {
 	// Always refresh cache from database since direct function may have created new tables
 	const existingTables = sqlite.exec({
-		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'internal_state_cache_%'`,
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_%'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -506,7 +506,7 @@ function getPhysicalTables(
 
 	// Convert Set to array and filter out base tables
 	return Array.from(cache).filter(
-		(name) => name !== "internal_state_cache" && name !== "internal_state_cache"
+		(name) => name !== "lix_internal_state_cache" && name !== "lix_internal_state_cache"
 	);
 }
 

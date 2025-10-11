@@ -16,7 +16,7 @@ function buildResolvedStateSql(options?: ResolvedStateQueryOptions): string {
 	if (schemaKeys.length === 0) {
 		return buildBaseResolvedStateSql().replaceAll(
 			CACHE_SOURCE_TOKEN,
-			"internal_state_cache"
+			"lix_internal_state_cache"
 		);
 	}
 
@@ -44,7 +44,7 @@ function compileCacheSelectStatement(schemaKey: string): string {
 		);
 	}
 	const match = compiled.sql.match(
-		/^select\s+\*\s+from\s*\((?<inner>select[\s\S]+)\)\s+as\s+"internal_state_cache_routed"$/i
+		/^select\s+\*\s+from\s*\((?<inner>select[\s\S]+)\)\s+as\s+"lix_internal_state_cache_routed"$/i
 	);
 	return match?.groups?.inner?.trim() ?? compiled.sql;
 }
@@ -126,8 +126,8 @@ function buildTransactionSegment(): string {
 			'pending' AS commit_id,
 			json(txn.metadata) AS metadata,
 			ws_txn.writer_key
-		FROM internal_transaction_state txn
-		LEFT JOIN internal_state_writer ws_txn ON
+		FROM lix_internal_transaction_state txn
+		LEFT JOIN lix_internal_state_writer ws_txn ON
 			ws_txn.file_id = txn.file_id AND
 			ws_txn.entity_id = txn.entity_id AND
 			ws_txn.schema_key = txn.schema_key AND
@@ -155,8 +155,8 @@ function buildUntrackedSegment(): string {
 			'untracked' AS commit_id,
 			NULL AS metadata,
 			ws_untracked.writer_key
-		FROM internal_state_all_untracked u
-		LEFT JOIN internal_state_writer ws_untracked ON
+		FROM lix_internal_state_all_untracked u
+		LEFT JOIN lix_internal_state_writer ws_untracked ON
 			ws_untracked.file_id = u.file_id AND
 			ws_untracked.entity_id = u.entity_id AND
 			ws_untracked.schema_key = u.schema_key AND
@@ -166,7 +166,7 @@ function buildUntrackedSegment(): string {
 			(u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
 		)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
+				SELECT 1 FROM lix_internal_transaction_state t
 				WHERE t.version_id = u.version_id
 					AND t.file_id = u.file_id
 					AND t.schema_key = u.schema_key
@@ -197,7 +197,7 @@ function buildCachedSegment(): string {
 			ws_cache.writer_key
 		FROM ${CACHE_SOURCE_TOKEN} c
 		LEFT JOIN change ch ON ch.id = c.change_id
-		LEFT JOIN internal_state_writer ws_cache ON
+		LEFT JOIN lix_internal_state_writer ws_cache ON
 			ws_cache.file_id = c.file_id AND
 			ws_cache.entity_id = c.entity_id AND
 			ws_cache.schema_key = c.schema_key AND
@@ -207,14 +207,14 @@ function buildCachedSegment(): string {
 			(c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
 		)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
+				SELECT 1 FROM lix_internal_transaction_state t
 				WHERE t.version_id = c.version_id
 					AND t.file_id = c.file_id
 					AND t.schema_key = c.schema_key
 					AND t.entity_id = c.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked u
+				SELECT 1 FROM lix_internal_state_all_untracked u
 				WHERE u.version_id = c.version_id
 					AND u.file_id = c.file_id
 					AND u.schema_key = c.schema_key
@@ -246,12 +246,12 @@ function buildInheritedCacheSegment(): string {
 		FROM version_inheritance vi
 		JOIN ${CACHE_SOURCE_TOKEN} isc ON isc.version_id = vi.ancestor_version_id
 		LEFT JOIN change ch ON ch.id = isc.change_id
-		LEFT JOIN internal_state_writer ws_child ON
+		LEFT JOIN lix_internal_state_writer ws_child ON
 			ws_child.file_id = isc.file_id AND
 			ws_child.entity_id = isc.entity_id AND
 			ws_child.schema_key = isc.schema_key AND
 			ws_child.version_id = vi.version_id
-		LEFT JOIN internal_state_writer ws_parent ON
+		LEFT JOIN lix_internal_state_writer ws_parent ON
 			ws_parent.file_id = isc.file_id AND
 			ws_parent.entity_id = isc.entity_id AND
 			ws_parent.schema_key = isc.schema_key AND
@@ -259,7 +259,7 @@ function buildInheritedCacheSegment(): string {
 		WHERE isc.inheritance_delete_marker = 0
 			AND isc.snapshot_content IS NOT NULL
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
+				SELECT 1 FROM lix_internal_transaction_state t
 				WHERE t.version_id = vi.version_id
 					AND t.file_id = isc.file_id
 					AND t.schema_key = isc.schema_key
@@ -273,7 +273,7 @@ function buildInheritedCacheSegment(): string {
 					AND child_isc.entity_id = isc.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked child_unt
+				SELECT 1 FROM lix_internal_state_all_untracked child_unt
 				WHERE child_unt.version_id = vi.version_id
 					AND child_unt.file_id = isc.file_id
 					AND child_unt.schema_key = isc.schema_key
@@ -303,13 +303,13 @@ function buildInheritedUntrackedSegment(): string {
 			NULL AS metadata,
 			COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 		FROM version_inheritance vi
-		JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-		LEFT JOIN internal_state_writer ws_child ON
+		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+		LEFT JOIN lix_internal_state_writer ws_child ON
 			ws_child.file_id = unt.file_id AND
 			ws_child.entity_id = unt.entity_id AND
 			ws_child.schema_key = unt.schema_key AND
 			ws_child.version_id = vi.version_id
-		LEFT JOIN internal_state_writer ws_parent ON
+		LEFT JOIN lix_internal_state_writer ws_parent ON
 			ws_parent.file_id = unt.file_id AND
 			ws_parent.entity_id = unt.entity_id AND
 			ws_parent.schema_key = unt.schema_key AND
@@ -317,7 +317,7 @@ function buildInheritedUntrackedSegment(): string {
 		WHERE unt.inheritance_delete_marker = 0
 			AND unt.snapshot_content IS NOT NULL
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state t
+				SELECT 1 FROM lix_internal_transaction_state t
 				WHERE t.version_id = vi.version_id
 					AND t.file_id = unt.file_id
 					AND t.schema_key = unt.schema_key
@@ -331,7 +331,7 @@ function buildInheritedUntrackedSegment(): string {
 					AND child_isc.entity_id = unt.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked child_unt
+				SELECT 1 FROM lix_internal_state_all_untracked child_unt
 				WHERE child_unt.version_id = vi.version_id
 					AND child_unt.file_id = unt.file_id
 					AND child_unt.schema_key = unt.schema_key
@@ -361,13 +361,13 @@ function buildInheritedTransactionSegment(): string {
 			json(txn.metadata) AS metadata,
 			COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 		FROM version_parent vi
-		JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
-		LEFT JOIN internal_state_writer ws_child ON
+		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
+		LEFT JOIN lix_internal_state_writer ws_child ON
 			ws_child.file_id = txn.file_id AND
 			ws_child.entity_id = txn.entity_id AND
 			ws_child.schema_key = txn.schema_key AND
 			ws_child.version_id = vi.version_id
-		LEFT JOIN internal_state_writer ws_parent ON
+		LEFT JOIN lix_internal_state_writer ws_parent ON
 			ws_parent.file_id = txn.file_id AND
 			ws_parent.entity_id = txn.entity_id AND
 			ws_parent.schema_key = txn.schema_key AND
@@ -375,7 +375,7 @@ function buildInheritedTransactionSegment(): string {
 		WHERE vi.parent_version_id IS NOT NULL
 			AND txn.snapshot_content IS NOT NULL
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_transaction_state child_txn
+				SELECT 1 FROM lix_internal_transaction_state child_txn
 				WHERE child_txn.version_id = vi.version_id
 					AND child_txn.file_id = txn.file_id
 					AND child_txn.schema_key = txn.schema_key
@@ -389,7 +389,7 @@ function buildInheritedTransactionSegment(): string {
 					AND child_isc.entity_id = txn.entity_id
 			)
 			AND NOT EXISTS (
-				SELECT 1 FROM internal_state_all_untracked child_unt
+				SELECT 1 FROM lix_internal_state_all_untracked child_unt
 				WHERE child_unt.version_id = vi.version_id
 					AND child_unt.file_id = txn.file_id
 					AND child_unt.schema_key = txn.schema_key
@@ -408,7 +408,7 @@ function stripIndent(value: string): string {
 	return lines.map((line) => line.slice(minIndent)).join("\n");
 }
 
-const RESOLVED_ALIAS = "internal_resolved_state_all";
+const RESOLVED_ALIAS = "lix_internal_resolved_state_all";
 
 export type ResolvedStateRow = Omit<StateAllView, "snapshot_content"> & {
 	/**
@@ -421,7 +421,7 @@ export type ResolvedStateRow = Omit<StateAllView, "snapshot_content"> & {
 };
 
 /**
- * Returns a `SelectQueryBuilder` that mirrors the legacy `internal_resolved_state_all`
+ * Returns a `SelectQueryBuilder` that mirrors the legacy `lix_internal_resolved_state_all`
  * view. Optional cache routing swaps the cache source for a UNION of physical tables,
  * allowing the caller to bypass the virtual cache view.
  *

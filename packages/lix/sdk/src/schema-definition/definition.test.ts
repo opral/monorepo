@@ -1,14 +1,13 @@
-import { test, expect } from "vitest";
-import { Ajv } from "ajv";
+import { expect, test } from "vitest";
 import { LixSchemaDefinition } from "./definition.js";
-
-const ajv = new Ajv();
+import { validateLixSchemaDefinition } from "./validate-lix-schema.js";
 
 test("valid schema", () => {
 	const schema = {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
+		"x-lix-immutable": true,
 		properties: {
 			name: { type: "string" },
 		},
@@ -16,13 +15,23 @@ test("valid schema", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-	const x2 = ajv.compile(LixSchemaDefinition);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
 
-	const valid2 = x2(schema);
+test("x-lix-immutable accepts boolean values", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-immutable": false,
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
 
-	expect(valid).toBe(true);
-	expect(valid2).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-key is required", () => {
@@ -38,9 +47,7 @@ test("x-key is required", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-unique is optional", () => {
@@ -55,9 +62,7 @@ test("x-lix-unique is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique must be array of arrays when present", () => {
@@ -65,7 +70,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": [["id"], ["name", "age"]],
+		"x-lix-unique": [["/id"], ["/name", "/age"]],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -75,9 +80,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
@@ -85,7 +88,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": ["id", "name"],
+		"x-lix-unique": ["/id", "/name"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -94,9 +97,134 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
 
-	expect(valid).toBe(false);
+test("x-lix-override-lixcols accepts cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			attempts: "3",
+			enabled: "true",
+			nullable: "null",
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-override-lixcols rejects complex values", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-override-lixcols": {
+			// @ts-expect-error - objects are not allowed
+			options: { nested: true },
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
+test("x-lix-override-lixcols rejects invalid cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-override-lixcols": {
+			bad: "lix_uuid_v7(",
+		},
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
+test("x-lix-entity-views accepts known view names", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-entity-views": ["state", "state_all"],
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-entity-views rejects unknown view names", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		// @ts-expect-error - invalid entry should fail validation
+		"x-lix-entity-views": ["state", "unknown"],
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
+test("x-lix-default accepts cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7()",
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-default rejects invalid cel expressions", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7(", // missing closing paren
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-primary-key is optional", () => {
@@ -111,9 +239,7 @@ test("x-lix-primary-key is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-primary-key must be array of strings when present", () => {
@@ -121,7 +247,7 @@ test("x-lix-primary-key must be array of strings when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id", "version"],
+		"x-lix-primary-key": ["/id", "/version"],
 		properties: {
 			id: { type: "string" },
 			version: { type: "string" },
@@ -131,9 +257,7 @@ test("x-lix-primary-key must be array of strings when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys is optional", () => {
@@ -149,9 +273,7 @@ test("x-lix-foreign-keys is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys with valid structure", () => {
@@ -161,17 +283,17 @@ test("x-lix-foreign-keys with valid structure", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user_profile",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 			{
-				properties: ["category_id"],
+				properties: ["/category_id"],
 				references: {
 					schemaKey: "post_category",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -184,9 +306,7 @@ test("x-lix-foreign-keys with valid structure", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys with schemaVersion", () => {
@@ -196,10 +316,10 @@ test("x-lix-foreign-keys with schemaVersion", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
+				properties: ["/post_id"],
 				references: {
 					schemaKey: "blog_post",
-					properties: ["id"],
+					properties: ["/id"],
 					schemaVersion: "1.0",
 				},
 			},
@@ -213,9 +333,7 @@ test("x-lix-foreign-keys with schemaVersion", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-foreign-keys fails without required fields", () => {
@@ -225,7 +343,7 @@ test("x-lix-foreign-keys fails without required fields", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				// Missing required "references" field
 			},
 		],
@@ -237,9 +355,7 @@ test("x-lix-foreign-keys fails without required fields", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
@@ -249,10 +365,10 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
+				properties: ["/post_id"],
 				references: {
 					schemaKey: "blog_post",
-					properties: ["id"],
+					properties: ["/id"],
 					schemaVersion: "v1.0.0", // Invalid format
 				},
 			},
@@ -265,9 +381,7 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
@@ -275,11 +389,11 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		type: "object",
 		"x-lix-key": "child_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
-				references: { schemaKey: "parent_entity", properties: ["id"] },
+				properties: ["/parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["/id"] },
 				mode: "materialized",
 			},
 		],
@@ -292,11 +406,11 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		type: "object",
 		"x-lix-key": "comment",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["post_id"],
-				references: { schemaKey: "post", properties: ["id"] },
+				properties: ["/post_id"],
+				references: { schemaKey: "post", properties: ["/id"] },
 				mode: "immediate",
 			},
 		],
@@ -305,11 +419,8 @@ test("x-lix-foreign-keys supports mode 'materialized' and 'immediate'", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const v1 = ajv.validate(LixSchemaDefinition, schemaMaterialized);
-	const v2 = ajv.validate(LixSchemaDefinition, schemaImmediate);
-
-	expect(v1).toBe(true);
-	expect(v2).toBe(true);
+	expect(validateLixSchemaDefinition(schemaMaterialized)).toBe(true);
+	expect(validateLixSchemaDefinition(schemaImmediate)).toBe(true);
 });
 
 test("x-lix-foreign-keys fails with invalid mode value", () => {
@@ -317,11 +428,11 @@ test("x-lix-foreign-keys fails with invalid mode value", () => {
 		type: "object",
 		"x-lix-key": "child_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
-				references: { schemaKey: "parent_entity", properties: ["id"] },
+				properties: ["/parent_id"],
+				references: { schemaKey: "parent_entity", properties: ["/id"] },
 				// @ts-expect-error - invalid mode value
 				mode: "deferred",
 			},
@@ -331,9 +442,7 @@ test("x-lix-foreign-keys fails with invalid mode value", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys with composite key", () => {
@@ -343,17 +452,17 @@ test("x-lix-foreign-keys with composite key", () => {
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 			{
-				properties: ["label_id"],
+				properties: ["/label_id"],
 				references: {
 					schemaKey: "lix_label",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -367,9 +476,7 @@ test("x-lix-foreign-keys with composite key", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-version is required", () => {
@@ -385,9 +492,7 @@ test("x-version is required", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-unique is optional", () => {
@@ -402,9 +507,7 @@ test("x-lix-unique is optional", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique must be array of arrays when present", () => {
@@ -412,7 +515,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": [["id"], ["name", "age"]],
+		"x-lix-unique": [["/id"], ["/name", "/age"]],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -422,9 +525,7 @@ test("x-lix-unique must be array of arrays when present", () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(true);
+	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
 test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
@@ -432,7 +533,7 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-unique": ["id", "name"],
+		"x-lix-unique": ["/id", "/name"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -441,51 +542,5 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 		additionalProperties: false,
 	};
 
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
-});
-
-test("x-lix-generated property is allowed in schema definition", () => {
-	// Test that schemas with x-lix-generated compile correctly
-	const TestSchemaWithGenerated = {
-		"x-lix-key": "test_entity",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
-		type: "object",
-		properties: {
-			id: {
-				type: "string",
-				description: "The unique identifier",
-				"x-lix-generated": true,
-			},
-		},
-		required: ["id"],
-		additionalProperties: false,
-	} as const;
-	TestSchemaWithGenerated satisfies LixSchemaDefinition;
-
-	// Validate with Ajv
-	const valid = ajv.validate(LixSchemaDefinition, TestSchemaWithGenerated);
-	expect(valid).toBe(true);
-
-	// Test that x-lix-generated can be false
-	const TestSchemaWithExplicitFalse = {
-		"x-lix-key": "test_entity2",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
-		type: "object",
-		properties: {
-			id: {
-				type: "string",
-				"x-lix-generated": false,
-			},
-		},
-		required: ["id"],
-		additionalProperties: false,
-	} as const;
-
-	TestSchemaWithExplicitFalse satisfies LixSchemaDefinition;
-	const valid2 = ajv.validate(LixSchemaDefinition, TestSchemaWithExplicitFalse);
-	expect(valid2).toBe(true);
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });

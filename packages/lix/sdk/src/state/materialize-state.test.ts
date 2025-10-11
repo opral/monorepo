@@ -22,7 +22,7 @@ function stripWriterKey<T extends Record<string, any> | null | undefined>(
 	return rest as T;
 }
 
-describe("internal_materialization_version_tips", () => {
+describe("lix_internal_materialization_version_tips", () => {
 	simulationTest(
 		"includes all versions with state, even if other versions branch from them",
 		async ({ openSimulatedLix }) => {
@@ -108,7 +108,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Query version tips - should include ALL versions with state, not just leaf tips
 			const tips = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.selectAll()
 				.where("version_id", "in", ["base-version", "version-a", "version-b"])
 				.orderBy("version_id")
@@ -130,7 +130,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Verify that the base version's state can be materialized (not excluded from materialization pipeline)
 			const baseMaterializedState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "base-version")
 				.where("entity_id", "=", "base-entity")
@@ -164,7 +164,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Query the view
 			const results = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.where("version_id", "=", activeVersion.id)
 				.selectAll()
 				.execute();
@@ -196,7 +196,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Get initial tip
 			const initialResults = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.where("version_id", "=", activeVersion.id)
 				.selectAll()
 				.execute();
@@ -218,7 +218,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Get updated tip
 			const updatedResults = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.where("version_id", "=", activeVersion.id)
 				.selectAll()
 				.execute();
@@ -281,7 +281,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Get tips for both versions
 			const tips = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.selectAll()
 				.where("version_id", "in", ["version-1", "version-2"])
 				.orderBy("version_id")
@@ -315,7 +315,7 @@ describe("internal_materialization_version_tips", () => {
 
 			// Get updated tips
 			const updatedTips = await lix.db
-				.selectFrom("internal_materialization_version_tips" as any)
+				.selectFrom("lix_internal_materialization_version_tips" as any)
 				.selectAll()
 				.orderBy("version_id")
 				.execute();
@@ -341,6 +341,10 @@ simulationTest(
 	"materializes change_author from commit.author_account_ids",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
+			account: {
+				id: "materialization-test-account",
+				name: "Materialization Test User",
+			},
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
@@ -366,9 +370,9 @@ simulationTest(
 			.select(["id"]) // domain change id
 			.executeTakeFirstOrThrow();
 
-		// Authors should appear in internal_materialization_latest_visible_state
+		// Authors should appear in lix_internal_materialization_latest_visible_state
 		const authorRows = await lix.db
-			.selectFrom("internal_materialization_latest_visible_state" as any)
+			.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 			.selectAll()
 			.where("schema_key", "=", "lix_change_author")
 			.where(
@@ -424,7 +428,7 @@ simulationTest(
 		});
 
 		const tips = await (lix.db as any)
-			.selectFrom("internal_materialization_version_tips" as any)
+			.selectFrom("lix_internal_materialization_version_tips" as any)
 			.selectAll()
 			.where("version_id", "=", versionId)
 			.execute();
@@ -432,7 +436,7 @@ simulationTest(
 		expectDeterministic(tips.length).toBe(1);
 
 		const matRows = await (lix.db as any)
-			.selectFrom("internal_state_materializer" as any)
+			.selectFrom("lix_internal_state_materializer" as any)
 			.select(sql`json_extract(snapshot_content,'$.commit_id')`.as("commit_id"))
 			.where("schema_key", "=", "lix_version_tip")
 			.where("version_id", "=", "global")
@@ -478,7 +482,7 @@ simulationTest(
 
 		// Read tip from materializer tips view via Kysely on internal view
 		const tips = await (lix.db as any)
-			.selectFrom("internal_materialization_version_tips" as any)
+			.selectFrom("lix_internal_materialization_version_tips" as any)
 			.selectAll()
 			.where("version_id", "=", versionA.id)
 			.execute();
@@ -486,9 +490,9 @@ simulationTest(
 		expectDeterministic(tips.length).toBe(1);
 		expectDeterministic(tips[0]!.tip_commit_id).not.toEqual(versionA.commit_id);
 
-		// Read tip from internal_state_materializer via Kysely with expression select
+		// Read tip from lix_internal_state_materializer via Kysely with expression select
 		const matRows = await (lix.db as any)
-			.selectFrom("internal_state_materializer" as any)
+			.selectFrom("lix_internal_state_materializer" as any)
 			.select(sql`json_extract(snapshot_content,'$.commit_id')`.as("commit_id"))
 			.where("schema_key", "=", "lix_version_tip")
 			.where("version_id", "=", "global")
@@ -500,7 +504,7 @@ simulationTest(
 	}
 );
 
-describe("internal_materialization_commit_graph", () => {
+describe("lix_internal_materialization_commit_graph", () => {
 	simulationTest(
 		"builds linear commit history with correct depths",
 		async ({ openSimulatedLix }) => {
@@ -601,7 +605,7 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query the commit graph view
 			const graph = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "linear-test-version")
 				.orderBy("depth")
@@ -732,7 +736,7 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query the commit graph for version1
 			const graph1 = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "branch-version-1")
 				.orderBy("depth")
@@ -740,7 +744,7 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query the commit graph for version2
 			const graph2 = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "branch-version-2")
 				.orderBy("depth")
@@ -908,7 +912,7 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query the commit graph for the merged version
 			const graph = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "merge-version-a")
 				.orderBy("depth")
@@ -998,7 +1002,7 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query version ancestry - should not hang due to cycle detection
 			const ancestry = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-cycle-a")
 				.execute();
@@ -1076,19 +1080,19 @@ describe("internal_materialization_commit_graph", () => {
 
 			// Query graphs for each version
 			const graphX = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "version-x")
 				.execute();
 
 			const graphY = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "version-y")
 				.execute();
 
 			const graphZ = await lix.db
-				.selectFrom("internal_materialization_commit_graph" as any)
+				.selectFrom("lix_internal_materialization_commit_graph" as any)
 				.selectAll()
 				.where("version_id", "=", "version-z")
 				.execute();
@@ -1232,7 +1236,7 @@ simulationTest(
 
 		// Read edges from the materializer for this merge commit (global scope)
 		const edges = await lix.db
-			.selectFrom("internal_state_materializer" as any)
+			.selectFrom("lix_internal_state_materializer" as any)
 			.select([
 				sql`json_extract(snapshot_content, '$.parent_id')`.as("parent_id"),
 				sql`json_extract(snapshot_content, '$.child_id')`.as("child_id"),
@@ -1313,7 +1317,7 @@ simulationTest(
 
 		// Query materializer for CSE rows for this change set (domain-only)
 		const cseRows = await lix.db
-			.selectFrom("internal_state_materializer" as any)
+			.selectFrom("lix_internal_state_materializer" as any)
 			.select([
 				sql`json_extract(snapshot_content, '$.change_set_id')`.as(
 					"change_set_id"
@@ -1345,7 +1349,7 @@ simulationTest(
 	}
 );
 
-describe("internal_materialization_latest_visible_state", () => {
+describe("lix_internal_materialization_latest_visible_state", () => {
 	simulationTest(
 		"finds latest change for each entity in a single version",
 		async ({ openSimulatedLix }) => {
@@ -1408,7 +1412,7 @@ describe("internal_materialization_latest_visible_state", () => {
 
 			// Query the latest visible state view
 			const latestState = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "latest-test-version")
 				.where("entity_id", "=", "entity-1")
@@ -1543,7 +1547,7 @@ describe("internal_materialization_latest_visible_state", () => {
 
 			// Query the latest visible state view
 			const latestStates = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "multi-entity-version")
 				.where("schema_key", "=", "mock_entity")
@@ -1682,7 +1686,7 @@ describe("internal_materialization_latest_visible_state", () => {
 
 			// Query the latest visible state view
 			const latestState = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "deletion-test-version")
 				.where("entity_id", "=", "entity-to-delete")
@@ -1721,7 +1725,7 @@ describe("internal_materialization_latest_visible_state", () => {
 
 			// Query all latest states for this version
 			const allStates = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "deletion-test-version")
 				.where("schema_key", "=", "mock_entity")
@@ -1752,7 +1756,7 @@ describe("internal_materialization_latest_visible_state", () => {
 	);
 });
 
-describe("internal_materialization_version_ancestry", () => {
+describe("lix_internal_materialization_version_ancestry", () => {
 	simulationTest(
 		"version is its own ancestor at depth 0",
 		async ({ openSimulatedLix }) => {
@@ -1772,7 +1776,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query the version ancestry view
 			const ancestry = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "standalone-version")
 				.execute();
@@ -1828,7 +1832,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry for version B
 			const ancestry = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-b")
 				.orderBy("inheritance_depth", "asc")
@@ -1898,7 +1902,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry for version D
 			const ancestry = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-d")
 				.orderBy("inheritance_depth", "asc")
@@ -1990,7 +1994,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry for version D
 			const ancestryD = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-d")
 				.orderBy("inheritance_depth", "asc")
@@ -2025,7 +2029,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Verify C also sees A as ancestor
 			const ancestryC = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-c")
 				.orderBy("inheritance_depth", "asc")
@@ -2061,7 +2065,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry
 			const ancestry = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "standalone-version")
 				.orderBy("inheritance_depth", "asc")
@@ -2117,7 +2121,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry for version A with DISTINCT to remove duplicates
 			const ancestryA = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-a")
 				.distinct()
@@ -2143,7 +2147,7 @@ describe("internal_materialization_version_ancestry", () => {
 
 			// Query ancestry for version B
 			const ancestryB = await lix.db
-				.selectFrom("internal_materialization_version_ancestry" as any)
+				.selectFrom("lix_internal_materialization_version_ancestry" as any)
 				.selectAll()
 				.where("version_id", "=", "version-b")
 				.distinct()
@@ -2172,7 +2176,7 @@ describe("internal_materialization_version_ancestry", () => {
 	);
 });
 
-describe("internal_state_materializer", () => {
+describe("lix_internal_state_materializer", () => {
 	simulationTest(
 		"shows entity from own version",
 		async ({ openSimulatedLix }) => {
@@ -2200,7 +2204,7 @@ describe("internal_state_materializer", () => {
 
 			// Query the materializer for version-1
 			const materializedState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-1")
 				.where("entity_id", "=", "test-key")
@@ -2261,7 +2265,7 @@ describe("internal_state_materializer", () => {
 
 			// Query the materializer for child version
 			const materializedState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "child-version")
 				.where("entity_id", "=", "inherited-key")
@@ -2335,7 +2339,7 @@ describe("internal_state_materializer", () => {
 
 			// Query the materializer for child version
 			const materializedState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "child-version")
 				.where("entity_id", "=", "shared-key")
@@ -2412,7 +2416,7 @@ describe("internal_state_materializer", () => {
 
 			// Query materializer for version C
 			const materializedStates = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-c")
 				.where("schema_key", "=", "lix_key_value")
@@ -2488,7 +2492,7 @@ describe("internal_state_materializer", () => {
 
 			// Query the materializer - should return deleted entities as tombstones
 			const materializedState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-1")
 				.where("entity_id", "=", "entity-to-delete")
@@ -2502,7 +2506,7 @@ describe("internal_state_materializer", () => {
 
 			// But the latest visible state should still have it with NULL
 			const latestVisible = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "version-1")
 				.where("entity_id", "=", "entity-to-delete")
@@ -2555,7 +2559,7 @@ describe("internal_state_materializer", () => {
 
 			// Query materializer for parent - should see the entity
 			const parentState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "parent-version")
 				.where("entity_id", "=", "entity-to-override")
@@ -2580,7 +2584,7 @@ describe("internal_state_materializer", () => {
 
 			// Query materializer for child - should see the entity as a tombstone (deleted)
 			const childState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "child-version")
 				.where("entity_id", "=", "entity-to-override")
@@ -2594,7 +2598,7 @@ describe("internal_state_materializer", () => {
 
 			// But the latest visible state for child should have NULL snapshot
 			const childLatestVisible = await lix.db
-				.selectFrom("internal_materialization_latest_visible_state" as any)
+				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "child-version")
 				.where("entity_id", "=", "entity-to-override")
@@ -2679,7 +2683,7 @@ describe("internal_state_materializer", () => {
 
 			// Query materializer for version D
 			const dState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-d")
 				.where("entity_id", "=", "shared-entity")
@@ -2695,7 +2699,7 @@ describe("internal_state_materializer", () => {
 
 			// Verify that B sees its own value
 			const bState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-b")
 				.where("entity_id", "=", "shared-entity")
@@ -2710,7 +2714,7 @@ describe("internal_state_materializer", () => {
 
 			// Verify that C sees its own value
 			const cState = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-c")
 				.where("entity_id", "=", "shared-entity")
@@ -2735,7 +2739,7 @@ describe("internal_state_materializer", () => {
 
 			// D should inherit it through B (depth 2 from D's perspective)
 			const dRootEntity = await lix.db
-				.selectFrom("internal_state_materializer" as any)
+				.selectFrom("lix_internal_state_materializer" as any)
 				.selectAll()
 				.where("version_id", "=", "version-d")
 				.where("entity_id", "=", "root-only-entity")

@@ -3,7 +3,6 @@ import type { LixEngine } from "../engine/boot.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 } from "./schema-definition.js";
 import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 
@@ -31,15 +30,6 @@ export function applyChangeSetDatabaseSchema(args: {
 		engine: engine,
 		schema: LixChangeSetElementSchema,
 		overrideName: "change_set_element",
-		pluginKey: "lix_own_entity",
-		hardcodedFileId: "lix",
-	});
-
-	// Create change_set_label views
-	createEntityViewsIfNotExists({
-		engine: engine,
-		schema: LixChangeSetLabelSchema,
-		overrideName: "change_set_label",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 	});

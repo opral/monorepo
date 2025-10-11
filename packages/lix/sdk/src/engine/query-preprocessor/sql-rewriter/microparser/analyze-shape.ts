@@ -14,7 +14,7 @@ import {
 	SQStr,
 	SELECT,
 	type Token,
-} from "../tokenizer.js";
+} from "../../../sql-parser/tokenizer.js";
 import { findTableFactors, type TableFactorMatch } from "./table-factor.js";
 
 export type PlaceholderToken = Token;
@@ -103,11 +103,11 @@ export function analyzeShape(tokens: Token[]): Shape | null {
 }
 
 /**
- * Derives rewrite metadata for every `internal_state_vtable` reference inside the token stream.
+ * Derives rewrite metadata for every `lix_internal_state_vtable` reference inside the token stream.
  *
  * @example
  * ```ts
- * const tokens = tokenize("SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'example'");
+ * const tokens = tokenize("SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'example'");
  * const [shape] = analyzeShapes(tokens);
  * console.log(shape.table.alias); // "v"
  * ```
@@ -118,7 +118,7 @@ export function analyzeShapes(tokens: Token[]): Shape[] {
 		return [];
 	}
 
-	const matches = findTableFactors(tokens, "internal_state_vtable");
+	const matches = findTableFactors(tokens, "lix_internal_state_vtable");
 	if (matches.length === 0) {
 		return [];
 	}
@@ -151,7 +151,7 @@ function analyzeShapeInternal(
 	const lowerAlias = table.alias.toLowerCase();
 	const allowedAliases = new Set<string>([lowerAlias]);
 	if (!table.explicitAlias) {
-		allowedAliases.add("internal_state_vtable");
+		allowedAliases.add("lix_internal_state_vtable");
 	}
 
 	let referencesPrimaryKey = false;

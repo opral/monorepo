@@ -56,6 +56,7 @@
 	},
 	"dependencies": {
 		"@lix-js/server-protocol-schema": "workspace:*",
+		"@marcbachmann/cel-js": "^2.5.2",
 		"@opral/zettel-ast": "workspace:*",
 		"@sqlite.org/sqlite-wasm": "^3.50.4-build1",
 		"ajv": "^8.17.1",

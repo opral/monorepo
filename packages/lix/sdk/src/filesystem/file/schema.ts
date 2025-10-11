@@ -353,12 +353,12 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   INSTEAD OF DELETE ON file
   BEGIN
       -- Clear the file data cache
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
       -- Clear the file lixcol cache
-      DELETE FROM internal_file_lixcol_cache
+      DELETE FROM lix_internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
@@ -407,12 +407,12 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   INSTEAD OF DELETE ON file_all
   BEGIN
       -- Clear the file data cache
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         
       -- Clear the file lixcol cache
-      DELETE FROM internal_file_lixcol_cache
+      DELETE FROM lix_internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         
@@ -476,7 +476,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   WHERE schema_key = 'lix_file_descriptor';
 `);
 
-	// internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.
+	// lix_internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.
 	// History queries can be optimized later with dedicated cache tables if necessary.
 }
 

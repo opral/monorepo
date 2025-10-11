@@ -127,8 +127,8 @@ WITH
 			     WHEN ic.metadata IS NULL THEN NULL
 			     ELSE json(ic.metadata)
 			   END AS metadata
-		FROM internal_change ic
-		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		FROM lix_internal_change ic
+		LEFT JOIN lix_internal_snapshot s ON ic.snapshot_id = s.id
 	),
 
 	-- Fast path for depth = 0 (no recursion, direct commit join)

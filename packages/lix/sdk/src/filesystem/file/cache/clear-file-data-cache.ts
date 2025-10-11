@@ -19,7 +19,7 @@ export function clearFileDataCache(args: {
 		// Clear specific file in specific version
 		args.engine.sqlite.exec({
 			sql: `
-        DELETE FROM internal_file_data_cache 
+        DELETE FROM lix_internal_file_data_cache 
         WHERE file_id = ? 
         AND version_id = ?
       `,
@@ -30,7 +30,7 @@ export function clearFileDataCache(args: {
 		// Clear all files in a specific version
 		args.engine.sqlite.exec({
 			sql: `
-        DELETE FROM internal_file_data_cache 
+        DELETE FROM lix_internal_file_data_cache 
         WHERE version_id = ?
       `,
 			bind: [args.versionId],
@@ -40,7 +40,7 @@ export function clearFileDataCache(args: {
 		// Clear specific file across all versions
 		args.engine.sqlite.exec({
 			sql: `
-        DELETE FROM internal_file_data_cache 
+        DELETE FROM lix_internal_file_data_cache 
         WHERE file_id = ?
       `,
 			bind: [args.fileId],
@@ -49,7 +49,7 @@ export function clearFileDataCache(args: {
 	} else {
 		// Clear entire cache
 		args.engine.sqlite.exec({
-			sql: `DELETE FROM internal_file_data_cache`,
+			sql: `DELETE FROM lix_internal_file_data_cache`,
 			returnValue: "resultRows",
 		});
 	}

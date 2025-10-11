@@ -52,7 +52,7 @@ export async function applyChangeSet(args: {
 			.selectAll("change")
 			.execute();
 
-		// Write-through cache: populate internal_state_cache for all applied changes
+		// Write-through cache: populate lix_internal_state_cache for all applied changes
 		const changesForCache = changesResult.map((change) => ({
 			...change,
 			snapshot_content: change.snapshot_content

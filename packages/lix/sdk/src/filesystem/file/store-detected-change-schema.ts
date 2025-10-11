@@ -1,6 +1,7 @@
 import type { LixEngine } from "../../engine/boot.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { sql } from "kysely";
 
 export function storeDetectedChangeSchema(args: {
 	engine: Pick<LixEngine, "executeSync">;
@@ -14,9 +15,17 @@ export function storeDetectedChangeSchema(args: {
 	const [existingSchema] = args.engine.executeSync(
 		internalQueryBuilder
 			.selectFrom("stored_schema")
-			.where("key", "=", schemaKey)
-			.where("version", "=", schemaVersion)
-			.select(["key", "version", "value"])
+			.select("value")
+			.where(
+				sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+				"=",
+				schemaKey
+			)
+			.where(
+				sql`json_extract("stored_schema"."value", '$."x-lix-version"')`,
+				"=",
+				schemaVersion
+			)
 			.limit(1)
 			.compile()
 	).rows;
@@ -44,9 +53,7 @@ export function storeDetectedChangeSchema(args: {
 			internalQueryBuilder
 				.insertInto("stored_schema")
 				.values({
-					key: schemaKey,
-					version: schemaVersion,
-					value: args.schema as any,
+					value: args.schema,
 					lixcol_untracked: args.untracked || false,
 				})
 				.compile()

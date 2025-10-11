@@ -68,7 +68,7 @@ test("attachLabel throws error if entity doesn't exist", async () => {
 			label: { id: label.id },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\)/
 	);
 });
 
@@ -101,7 +101,7 @@ test("attachLabel throws error if label doesn't exist", async () => {
 			label: { id: "non-existent-label" },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/label_id\).*lix_label\.\(\/id\)/
 	);
 });
 
@@ -220,7 +220,11 @@ test("detachLabel removes the mapping", async () => {
 test("attachLabel works with change_set entities", async () => {
 	const lix = await openLix({});
 
-	const reviewedLabel = await createLabel({ lix, name: "reviewed" });
+	const reviewedLabel = await createLabel({
+		lix,
+		name: "reviewed",
+		lixcol_version_id: "global",
+	});
 
 	// Create a change set
 	await lix.db
@@ -239,14 +243,16 @@ test("attachLabel works with change_set entities", async () => {
 			file_id: "lix",
 		},
 		label: { id: reviewedLabel.id },
+		versionId: "global",
 	});
 
 	// Verify the label was applied by checking entity_label table directly
 	const mapping = await lix.db
-		.selectFrom("entity_label")
+		.selectFrom("entity_label_all")
 		.where("entity_id", "=", "cs789")
 		.where("schema_key", "=", "lix_change_set")
 		.where("file_id", "=", "lix")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 

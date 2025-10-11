@@ -181,16 +181,14 @@ Deterministic state is automatically persisted:
 | Read-only transaction           | ❌             |
 | Transaction rollback/error      | ❌             |
 
-All state is stored in `internal_state_all_untracked` with `version_id = "global"`.
-
 ## API Reference Quick-Links
 
 The following functions provide deterministic behavior when `lix_deterministic_mode` is enabled:
 
-| Function                                   | Purpose                          | Docs                                                       |
-| ------------------------------------------ | -------------------------------- | ---------------------------------------------------------- |
-| `getTimestamp({ lix })`                       | Logical clock timestamps         | [API docs](/api/functions/timestamp)                       |
-| `random({ lix })`                          | Reproducible random numbers      | [API docs](/api/functions/random)                          |
-| `uuidV7({ lix })`                          | Deterministic UUID v7 generation | [API docs](/api/functions/uuidV7)                          |
-| `nanoId({ lix })`                          | Deterministic nano ID generation | [API docs](/api/functions/nanoId)                          |
+| Function                      | Purpose                          | Docs                                                       |
+| ----------------------------- | -------------------------------- | ---------------------------------------------------------- |
+| `getTimestamp({ lix })`       | Logical clock timestamps         | [API docs](/api/functions/timestamp)                       |
+| `random({ lix })`             | Reproducible random numbers      | [API docs](/api/functions/random)                          |
+| `uuidV7({ lix })`             | Deterministic UUID v7 generation | [API docs](/api/functions/uuidV7)                          |
+| `nanoId({ lix })`             | Deterministic nano ID generation | [API docs](/api/functions/nanoId)                          |
 | `nextSequenceNumber({ lix })` | Monotonic counter (advanced)     | [API docs](/api/functions/nextDeterministicSequenceNumber) |

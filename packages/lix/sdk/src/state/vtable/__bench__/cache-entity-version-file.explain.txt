@@ -2,7 +2,7 @@
 cache • entity+version+file
 
 -- original SQL --
-SELECT * FROM internal_state_vtable
+SELECT * FROM lix_internal_state_vtable
 	        WHERE schema_key = 'bench_vtable_schema'
           AND entity_id = ?
           AND version_id = ?
@@ -14,8 +14,8 @@ SELECT * FROM internal_state_vtable
 
 -- rewritten SQL --
 WITH
--- hoisted_internal_state_vtable_rewrite
-internal_state_vtable_rewritten AS (
+-- hoisted_lix_internal_state_vtable_rewrite
+lix_internal_state_vtable_rewritten AS (
   		WITH RECURSIVE
   		  params(version_id, entity_id, schema_key, file_id) AS (
     SELECT
@@ -28,7 +28,7 @@ internal_state_vtable_rewritten AS (
   		    SELECT
   		      json_extract(desc.snapshot_content, '$.id') AS version_id,
   		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-  		    FROM internal_state_cache_lix_version_descriptor desc
+  		    FROM lix_internal_state_cache_lix_version_descriptor desc
   		  ),
   		  version_inheritance(version_id, ancestor_version_id) AS (
   		    SELECT
@@ -75,7 +75,7 @@ internal_state_vtable_rewritten AS (
         'untracked' AS commit_id,
         NULL AS metadata,
         2 AS priority
-      FROM internal_state_all_untracked u
+      FROM lix_internal_state_all_untracked u
         JOIN params p ON
           p.entity_id = u.entity_id
           AND p.version_id = u.version_id
@@ -109,7 +109,7 @@ internal_state_vtable_rewritten AS (
         c.commit_id,
         NULL AS metadata,
         3 AS priority
-      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) c
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) c
         JOIN params p ON
           p.entity_id = c.entity_id
           AND p.version_id = c.version_id
@@ -144,7 +144,7 @@ internal_state_vtable_rewritten AS (
         NULL AS metadata,
         4 AS priority
       FROM version_inheritance vi
-      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
         JOIN params p ON
           p.version_id = vi.version_id
           AND p.entity_id = isc.entity_id
@@ -177,7 +177,7 @@ internal_state_vtable_rewritten AS (
         NULL AS metadata,
         5 AS priority
       FROM version_inheritance vi
-      JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+      JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
         JOIN params p ON
           p.version_id = vi.version_id
           AND p.entity_id = unt.entity_id
@@ -234,22 +234,22 @@ internal_state_vtable_rewritten AS (
     COALESCE(w.metadata, json(chc.metadata)) AS metadata,
     COALESCE(ws_dst.writer_key, ws_src.writer_key) AS writer_key
   FROM ranked w
-  LEFT JOIN internal_state_writer ws_dst ON
+  LEFT JOIN lix_internal_state_writer ws_dst ON
     ws_dst.file_id = w.file_id AND
     ws_dst.entity_id = w.entity_id AND
     ws_dst.schema_key = w.schema_key AND
     ws_dst.version_id = w.version_id
-  LEFT JOIN internal_state_writer ws_src ON
+  LEFT JOIN lix_internal_state_writer ws_src ON
     ws_src.file_id = w.file_id AND
     ws_src.entity_id = w.entity_id AND
     ws_src.schema_key = w.schema_key AND
     ws_src.version_id = COALESCE(w.inherited_from_version_id, w.version_id)
-  LEFT JOIN internal_change chc ON chc.id = w.change_id
+  LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 
   WHERE w.rn = 1
 
 )
-SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM internal_state_vtable_rewritten) AS internal_state_vtable
+SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable
 	        WHERE schema_key = 'bench_vtable_schema'
           AND entity_id = ?1
           AND version_id = ?2
@@ -310,7 +310,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 51,
     "parent": 9,
     "notused": 47,
-    "detail": "SEARCH u USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
+    "detail": "SEARCH u USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
     "id": 104,
@@ -322,7 +322,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 114,
     "parent": 104,
     "notused": 35,
-    "detail": "SEARCH internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
   },
   {
     "id": 135,
@@ -352,7 +352,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 195,
     "parent": 190,
     "notused": 22,
-    "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
     "id": 205,
@@ -376,7 +376,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 241,
     "parent": 238,
     "notused": 22,
-    "detail": "SCAN desc USING COVERING INDEX idx_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
   },
   {
     "id": 249,
@@ -388,7 +388,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 271,
     "parent": 183,
     "notused": 38,
-    "detail": "SEARCH internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=? AND file_id=?)"
   },
   {
     "id": 290,
@@ -424,7 +424,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 415,
     "parent": 402,
     "notused": 60,
-    "detail": "SEARCH unt USING INDEX sqlite_autoindex_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=?)"
+    "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=?)"
   },
   {
     "id": 434,
@@ -490,6 +490,6 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 760,
     "parent": 0,
     "notused": 46,
-    "detail": "SEARCH chc USING INDEX sqlite_autoindex_internal_change_1 (id=?) LEFT-JOIN"
+    "detail": "SEARCH chc USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?) LEFT-JOIN"
   }
 ]

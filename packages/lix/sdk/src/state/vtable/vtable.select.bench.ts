@@ -217,7 +217,7 @@ async function seedVtableFixture(lix: Awaited<ReturnType<typeof openLix>>) {
 	});
 
 	const childRows = lix.engine!.executeSync({
-		sql: `SELECT entity_id FROM internal_state_vtable WHERE schema_key = ? AND version_id = ?`,
+		sql: `SELECT entity_id FROM lix_internal_state_vtable WHERE schema_key = ? AND version_id = ?`,
 		parameters: [TEST_SCHEMA, ACTIVE_VERSION_ID],
 	});
 
@@ -330,7 +330,7 @@ async function insertViaVtable(
 	}
 ) {
 	lix.engine!.executeSync({
-		sql: `INSERT INTO internal_state_vtable (
+		sql: `INSERT INTO lix_internal_state_vtable (
         entity_id,
         schema_key,
         file_id,
@@ -366,7 +366,7 @@ function buildQuery(
 	filter: FilterDefinition
 ): QueryShape {
 	const clauses = [`schema_key = '${TEST_SCHEMA}'`, ...filter.clauses];
-	const baseSql = `SELECT * FROM internal_state_vtable
+	const baseSql = `SELECT * FROM lix_internal_state_vtable
 	        WHERE ${clauses.join("\n          AND ")}`;
 	const sql =
 		params.includeLimit === false ? baseSql : `${baseSql}\n        LIMIT 1`;

@@ -24,25 +24,19 @@ import {
 import type { LixChange } from "../change/schema-definition.js";
 import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
 import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
-import {
-	LixAccountSchema,
-	LixActiveAccountSchema,
-	type LixAccount,
-	type LixActiveAccount,
-} from "../account/schema-definition.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
 import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
+import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -168,6 +162,10 @@ export async function newLixFile(args?: {
 			}
 			return executeSyncImpl(args);
 		}) as LixEngine["executeSync"],
+		call: (_name: string, _args?: unknown) => {
+			throw new Error("Engine call not available during bootstrap");
+		},
+		listFunctions: () => [],
 	} as const;
 
 	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
@@ -245,7 +243,7 @@ export async function newLixFile(args?: {
 	for (const change of bootstrapChanges) {
 		if (change.snapshot_content) {
 			sqlite.exec({
-				sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+				sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 				bind: [change.snapshot_id, JSON.stringify(change.snapshot_content)],
 				returnValue: "resultRows",
 			});
@@ -253,7 +251,7 @@ export async function newLixFile(args?: {
 
 		// Insert the change record
 		sqlite.exec({
-			sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
+			sql: `INSERT INTO lix_internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
 					VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			bind: [
 				change.id,
@@ -276,66 +274,21 @@ export async function newLixFile(args?: {
 	)?.entity_id;
 
 	// Set active version using updateUntrackedState for proper inheritance handling
+	const activeVersionEntityId = generateNanoid();
+
 	updateUntrackedState({
 		engine: { executeSync, runtimeCacheRef },
 		changes: [
 			{
-				entity_id: "active",
+				entity_id: activeVersionEntityId,
 				schema_key: "lix_active_version",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({ version_id: initialVersionId }),
+				snapshot_content: JSON.stringify({
+					id: activeVersionEntityId,
+					version_id: initialVersionId,
+				}),
 				schema_version: "1.0",
-				created_at: created_at,
-				lixcol_version_id: "global",
-			},
-		],
-	});
-
-	// Create anonymous account as untracked for deterministic behavior
-	const activeAccountId = generateNanoid();
-	const humanName = isDeterministicBootstrap
-		? "Deterministic"
-		: randomHumanIdWord({
-				capitalize: true,
-				engine: { executeSync, hooks, runtimeCacheRef },
-				separator: "",
-			});
-	const anonymousAccountName = `Anonymous ${humanName}`;
-
-	// Create the anonymous account as untracked
-	updateUntrackedState({
-		engine: { executeSync, runtimeCacheRef },
-		changes: [
-			{
-				entity_id: activeAccountId,
-				schema_key: LixAccountSchema["x-lix-key"],
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					id: activeAccountId,
-					name: anonymousAccountName,
-				} satisfies LixAccount),
-				schema_version: LixAccountSchema["x-lix-version"],
-				created_at: created_at,
-				lixcol_version_id: "global",
-			},
-		],
-	});
-
-	// Set it as the active account
-	updateUntrackedState({
-		engine: { executeSync, runtimeCacheRef },
-		changes: [
-			{
-				entity_id: `active_${activeAccountId}`,
-				schema_key: LixActiveAccountSchema["x-lix-key"],
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					account_id: activeAccountId,
-				} satisfies LixActiveAccount),
-				schema_version: LixActiveAccountSchema["x-lix-version"],
 				created_at: created_at,
 				lixcol_version_id: "global",
 			},
@@ -719,9 +672,7 @@ function createBootstrapChanges(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
-				key: schema["x-lix-key"],
-				version: schema["x-lix-version"],
-				value: JSON.stringify(schema),
+				value: schema,
 			} satisfies LixStoredSchema,
 			created_at: args.created_at,
 		});
@@ -742,15 +693,11 @@ function createBootstrapChanges(args: {
 			plugin_key: "lix_own_entity",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
-				key: schema["x-lix-key"],
-				version: schema["x-lix-version"],
-				value: JSON.stringify(schema),
+				value: schema,
 			} satisfies LixStoredSchema,
 			created_at: args.created_at,
 		});
 	}
-
-	// Anonymous account is now created during bootstrap for deterministic behavior
 
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes

@@ -88,7 +88,7 @@ export function selectCommitDiff(args: {
           ON c.change_set_id = cse.change_set_id
          AND cse.lixcol_version_id = 'global'
         ${useChangedTriples ? sql`JOIN changed_triples ck ON ck.entity_id = cse.entity_id AND ck.schema_key = cse.schema_key AND ck.file_id = cse.file_id` : sql``}
-        JOIN internal_change ic
+        JOIN lix_internal_change ic
           ON ic.id = cse.change_id
         ${hints.fileId ? sql`AND cse.file_id = ${sql.lit(hints.fileId)}` : sql``}
         ${hints.pluginKey ? sql`AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
@@ -124,7 +124,7 @@ WITH RECURSIVE
     FROM anc_after a
     JOIN commit_all c ON c.id = a.id AND c.lixcol_version_id = 'global'
     JOIN change_set_element_all cse ON cse.change_set_id = c.change_set_id AND cse.lixcol_version_id = 'global'
-    ${hints.pluginKey ? sql`JOIN internal_change ic ON ic.id = cse.change_id AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
+    ${hints.pluginKey ? sql`JOIN lix_internal_change ic ON ic.id = cse.change_id AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
     ${hints.fileId ? sql`WHERE cse.file_id = ${sql.lit(hints.fileId)}` : sql``}
     ${hints.schemaKeys && hints.schemaKeys.length ? sql`${hints.fileId ? sql`AND` : sql`WHERE`} cse.schema_key IN (${sql.join(hints.schemaKeys.map((k) => sql.lit(k)))})` : sql``}
     ${hints.entityIds && hints.entityIds.length ? sql`${hints.fileId || (hints.schemaKeys && hints.schemaKeys.length) ? sql`AND` : sql`WHERE`} cse.entity_id IN (${sql.join(hints.entityIds.map((k) => sql.lit(k)))})` : sql``}

@@ -3,7 +3,7 @@ import {
 	buildHoistedInternalStateVtableCte,
 	buildInternalStateVtableProjection,
 } from "./recipes/rewrite-internal-state-vtable.js";
-import { tokenize, type Token } from "./tokenizer.js";
+import { tokenize, type Token } from "../../sql-parser/tokenizer.js";
 
 export interface RewriteSqlOptions {
 	tokens?: Token[];

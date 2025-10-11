@@ -163,7 +163,7 @@ function attachInvalidation(
  * const [config] = withRuntimeCache(
  *   engine,
  *   internalQueryBuilder
- *     .selectFrom("internal_state_vtable")
+ *     .selectFrom("lix_internal_state_vtable")
  *     .where("entity_id", "=", "lix_deterministic_mode")
  *     .where("schema_key", "=", "lix_key_value")
  *     .select(sql`json_extract(snapshot_content, '$.value.enabled')`.as("enabled"))

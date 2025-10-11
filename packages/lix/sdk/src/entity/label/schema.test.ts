@@ -459,7 +459,11 @@ test("entity_label works with change_set entities", async () => {
 	const lix = await openLix({});
 
 	// Create a label for change sets
-	const reviewedLabel = await createLabel({ lix, name: "reviewed" });
+	const reviewedLabel = await createLabel({
+		lix,
+		name: "reviewed",
+		lixcol_version_id: "global",
+	});
 
 	// Create a change set (which automatically creates state entry)
 	await lix.db
@@ -477,12 +481,13 @@ test("entity_label works with change_set entities", async () => {
 
 	// Label the change set
 	await lix.db
-		.insertInto("entity_label")
+		.insertInto("entity_label_all")
 		.values({
 			entity_id: changeSet.id,
 			schema_key: "lix_change_set",
 			file_id: "lix",
 			label_id: reviewedLabel.id,
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -583,7 +588,7 @@ test("entity_label foreign key constraint prevents referencing non-existent stat
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\)/
 	);
 });
 
@@ -616,7 +621,7 @@ test("entity_label foreign key constraint prevents referencing non-existent labe
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/label_id\).*lix_label\.\(\/id\)/
 	);
 });
 

@@ -49,17 +49,17 @@ test("ToKysely converts LixGenerated to Kysely Generated", () => {
 	const optional3: OptionalType = undefined;
 });
 
-test("LixGenerated markers work with NewState", () => {
-	// Define a mock schema with x-lix-generated
+test("LixDefault markers work with NewState", () => {
+	// Define a mock schema with x-lix-default
 	const MockEntitySchema = {
 		"x-lix-key": "mock_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
-			id: { type: "string", "x-lix-generated": true },
+			id: { type: "string", "x-lix-default": "lix_nano_id()" },
 			name: { type: "string" },
-			count: { type: "number", "x-lix-generated": true },
+			count: { type: "number", "x-lix-default": "0" },
 			optional_field: { type: "string", nullable: true },
 		},
 		required: ["id", "name", "count"],
