@@ -26,7 +26,7 @@ export function selectFileData(args: {
 	const result = args.engine.sqlite.exec({
 		sql: `
 			SELECT data 
-			FROM internal_file_data_cache 
+			FROM lix_internal_file_data_cache 
 			WHERE file_id = ? 
 			AND version_id = ?
 		`,

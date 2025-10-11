@@ -11,7 +11,7 @@ import {
 } from "../../../sql-parser/tokenizer.js";
 
 /**
- * Result returned when the lexer encounters an internal_state_vtable table factor.
+ * Result returned when the lexer encounters an lix_internal_state_vtable table factor.
  */
 export interface TableFactorMatch {
 	/** Inclusive start offset of the slice to replace. */
@@ -114,8 +114,8 @@ const offsetOrThrow = (value: number | undefined, label: string): number => {
  *
  * @example
  * ```ts
- * const tokens = tokenize("SELECT * FROM internal_state_vtable v");
- * const [match] = findTableFactors(tokens, "internal_state_vtable");
+ * const tokens = tokenize("SELECT * FROM lix_internal_state_vtable v");
+ * const [match] = findTableFactors(tokens, "lix_internal_state_vtable");
  * console.log(match.alias); // "v"
  * ```
  */

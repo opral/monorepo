@@ -1216,7 +1216,7 @@ simulationTest(
 			})
 			.execute();
 
-		// First read: populates internal_file_data_cache via select_file_data
+		// First read: populates lix_internal_file_data_cache via select_file_data
 		const initial = await lix.db
 			.selectFrom("file")
 			.where("id", "=", fileId)

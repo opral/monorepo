@@ -48,7 +48,7 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 
 	// Insert all rows in one batch
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 });
@@ -94,13 +94,13 @@ bench("query with json_extract from cache", async () => {
 	}
 
 	await db
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 
 	// Now perform the query with json_extract
 	await db
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.select([
 			"entity_id",
 			"schema_key",
@@ -154,13 +154,13 @@ bench("query through resolved_state_all view", async () => {
 	}
 
 	await db
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 
 	// Query through the resolved state view which has json() conversion
 	await db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select([
 			"entity_id",
 			"schema_key",
@@ -210,7 +210,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 	}
 
 	await db
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 
@@ -226,7 +226,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 
 	// This mimics the query from deletionReconciliation
 	await db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select([
 			"_pk",
 			sql`json_extract(snapshot_content, '$.entity_id')`.as("entity_id"),
@@ -299,7 +299,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 	}
 
 	await db
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 
@@ -316,7 +316,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 		};
 
 		await db
-			.updateTable("internal_state_cache")
+			.updateTable("lix_internal_state_cache")
 			.set({
 				snapshot_content: sql`jsonb(${JSON.stringify(updatedSnapshot)})`,
 				updated_at: await getTimestamp({ lix }),
@@ -365,13 +365,13 @@ bench(`delete ${ROW_NUM / 10} rows from cache`, async () => {
 	}
 
 	await db
-		.insertInto("internal_state_cache")
+		.insertInto("lix_internal_state_cache")
 		.values(rows as any)
 		.execute();
 
 	// Delete all rows
 	await db
-		.deleteFrom("internal_state_cache")
+		.deleteFrom("lix_internal_state_cache")
 		.where("schema_key", "=", "lix_test")
 		.where("version_id", "=", "global")
 		.execute();

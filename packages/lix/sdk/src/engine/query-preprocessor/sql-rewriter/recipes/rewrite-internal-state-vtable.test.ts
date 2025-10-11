@@ -36,20 +36,20 @@ const EXPECTED_VISIBLE_COLUMNS = [
 ];
 
 test("hoists wide path with schema filters", () => {
-	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
+	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
 	expect(shape).not.toBeNull();
 
 	const cte = buildHoistedInternalStateVtableCte([shape!]);
 	expect(cte).toBeTruthy();
-	expect(cte).toContain("internal_state_vtable_rewritten AS");
-	expect(cte).toContain("internal_state_cache_lix_key_value");
+	expect(cte).toContain("lix_internal_state_vtable_rewritten AS");
+	expect(cte).toContain("lix_internal_state_cache_lix_key_value");
 	expect(cte).toContain("lix_key_value");
 });
 
 test("prunes cache branches without physical tables", () => {
-	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
+	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
 
@@ -59,13 +59,13 @@ test("prunes cache branches without physical tables", () => {
 		existingCacheTables: new Set(),
 	});
 	expect(cte).toBeTruthy();
-	expect(cte).not.toContain("internal_state_cache_lix_key_value");
+	expect(cte).not.toContain("lix_internal_state_cache_lix_key_value");
 	expect(cte).not.toContain("'CI' ||");
-	expect(cte).toContain("internal_state_all_untracked");
+	expect(cte).toContain("lix_internal_state_all_untracked");
 });
 
 test("buildInternalStateVtableProjection strips hidden primary key when unused", () => {
-	const sql = `SELECT * FROM internal_state_vtable;`;
+	const sql = `SELECT * FROM lix_internal_state_vtable;`;
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
 
@@ -73,23 +73,23 @@ test("buildInternalStateVtableProjection strips hidden primary key when unused",
 
 	const projection = buildInternalStateVtableProjection(shape!);
 	expect(projection).toBe(
-		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable_rewritten) AS internal_state_vtable`
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable`
 	);
 });
 
 test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
-	const sql = `SELECT * FROM internal_state_vtable;`;
+	const sql = `SELECT * FROM lix_internal_state_vtable;`;
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
-	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
+	expect(rewritten).toContain("lix_internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain(
-		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM internal_state_vtable_rewritten) AS internal_state_vtable`
+		`(SELECT ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable`
 	);
 });
 
 test("version placeholder seeds recursion with numbered parameter", () => {
-	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = ?`;
+	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = ?`;
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten).toMatch(/params\(version_id/);
@@ -98,7 +98,7 @@ test("version placeholder seeds recursion with numbered parameter", () => {
 });
 
 test("version placeholder seeds recursion with named parameter", () => {
-	const sql = `SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = :version_id`;
+	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value' AND v.version_id = :version_id`;
 	const rewritten = rewriteSql(sql);
 
 	expect(rewritten).toMatch(/params\(version_id/);
@@ -107,19 +107,19 @@ test("version placeholder seeds recursion with named parameter", () => {
 });
 
 test("queries selecting _pk keep the raw CTE projection", () => {
-	const sql = `SELECT v._pk FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
+	const sql = `SELECT v._pk FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const rewritten = rewriteSql(sql);
 
 	// Hoisted CTE present
-	expect(rewritten).toContain("internal_state_vtable_rewritten AS (");
+	expect(rewritten).toContain("lix_internal_state_vtable_rewritten AS (");
 	// _pk selection is unmodified
-	expect(rewritten).toContain("SELECT v._pk FROM internal_state_vtable v");
+	expect(rewritten).toContain("SELECT v._pk FROM lix_internal_state_vtable v");
 });
 
 test("matrix of queries preserves precedence across rewrites", async () => {
 	await withSeededFixture(async (ctx) => {
-		const baseSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' ORDER BY pk_tag;`;
-		const limitSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' AND v.entity_id = '${ENTITY_TXN}' LIMIT 1;`;
+		const baseSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM lix_internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' ORDER BY pk_tag;`;
+		const limitSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM lix_internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' AND v.entity_id = '${ENTITY_TXN}' LIMIT 1;`;
 
 		const variants: Array<{
 			name: string;
@@ -237,7 +237,7 @@ async function insertUntrackedRow(
 	snapshot: Record<string, unknown>
 ) {
 	const compiled = internalQueryBuilder
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: entityId,
 			schema_key: TEST_SCHEMA,

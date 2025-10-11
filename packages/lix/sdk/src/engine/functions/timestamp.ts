@@ -25,7 +25,7 @@ export function getTimestampSync(args: {
 		const [config] = withRuntimeCache(
 			engine,
 			internalQueryBuilder
-				.selectFrom("internal_state_vtable")
+				.selectFrom("lix_internal_state_vtable")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
 				.where("snapshot_content", "is not", null)

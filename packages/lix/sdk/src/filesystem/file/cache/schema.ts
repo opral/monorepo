@@ -14,7 +14,7 @@ export function applyFileDataCacheSchema(args: {
 	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	args.engine.sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS internal_file_data_cache (
+    CREATE TABLE IF NOT EXISTS lix_internal_file_data_cache (
       file_id TEXT NOT NULL,
       version_id TEXT NOT NULL,
       data BLOB NOT NULL,
@@ -22,8 +22,8 @@ export function applyFileDataCacheSchema(args: {
     ) strict;
 
     -- Index for fast version_id filtering
-    CREATE INDEX IF NOT EXISTS idx_internal_file_data_cache_version_id 
-      ON internal_file_data_cache (version_id);
+    CREATE INDEX IF NOT EXISTS idx_lix_internal_file_data_cache_version_id 
+      ON lix_internal_file_data_cache (version_id);
   `);
 }
 

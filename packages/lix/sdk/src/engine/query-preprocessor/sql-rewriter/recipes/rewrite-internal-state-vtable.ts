@@ -31,8 +31,8 @@ export function buildHoistedInternalStateVtableCte(
 		existingCacheTables: options?.existingCacheTables,
 	});
 	const cteBody = stripIndent(`
-		-- hoisted_internal_state_vtable_rewrite
-		internal_state_vtable_rewritten AS (
+		-- hoisted_lix_internal_state_vtable_rewrite
+		lix_internal_state_vtable_rewritten AS (
 ${indent(canonicalQuery, 4)}
 		)
 	`);
@@ -49,11 +49,11 @@ export function buildInternalStateVtableProjection(
 
 	const projection = VISIBLE_STATE_COLUMNS.join(", ");
 	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
-	return `(SELECT ${projection} FROM internal_state_vtable_rewritten) AS ${aliasSql}`;
+	return `(SELECT ${projection} FROM lix_internal_state_vtable_rewritten) AS ${aliasSql}`;
 }
 
 /**
- * Build a replacement subquery for `internal_state_vtable`.
+ * Build a replacement subquery for `lix_internal_state_vtable`.
  * Returns `null` when the query shape is outside the supported surface.
  */
 export function rewriteInternalStateVtableQuery(
@@ -160,7 +160,7 @@ function buildInternalStateVtableQuery(
 		: "COALESCE(w.metadata, json(chc.metadata))";
 	const transactionWriterJoin = options.includeTransaction
 		? stripIndent(`
-LEFT JOIN internal_transaction_state itx ON itx.id = w.change_id
+LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id
 		`)
 		: "";
 	const finalSelect = stripIndent(`
@@ -182,17 +182,17 @@ SELECT
   ${metadataExpression} AS metadata,
   COALESCE(ws_dst.writer_key, ws_src.writer_key) AS writer_key
 FROM ranked w
-LEFT JOIN internal_state_writer ws_dst ON
+LEFT JOIN lix_internal_state_writer ws_dst ON
   ws_dst.file_id = w.file_id AND
   ws_dst.entity_id = w.entity_id AND
   ws_dst.schema_key = w.schema_key AND
   ws_dst.version_id = w.version_id
-LEFT JOIN internal_state_writer ws_src ON
+LEFT JOIN lix_internal_state_writer ws_src ON
   ws_src.file_id = w.file_id AND
   ws_src.entity_id = w.entity_id AND
   ws_src.schema_key = w.schema_key AND
   ws_src.version_id = COALESCE(w.inherited_from_version_id, w.version_id)
-LEFT JOIN internal_change chc ON chc.id = w.change_id
+LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 ${transactionWriterJoin}
 WHERE w.rn = 1
 	`);
@@ -375,7 +375,7 @@ function buildCandidateTransactionSegment(
 		  'pending' AS commit_id,
 		  json(txn.metadata) AS metadata,
 		  1 AS priority
-		FROM internal_transaction_state txn${paramsJoin}
+		FROM lix_internal_transaction_state txn${paramsJoin}
 		${buildFilterClauses("txn", options.schemaFilter, options.entityFilter)}
 	`).trim();
 }
@@ -414,7 +414,7 @@ function buildCandidateUntrackedSegment(
 		  'untracked' AS commit_id,
 		  NULL AS metadata,
 		  2 AS priority
-		FROM internal_state_all_untracked u${paramsJoin}
+		FROM lix_internal_state_all_untracked u${paramsJoin}
 		WHERE (
 		  (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
 		  (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
@@ -541,7 +541,7 @@ function buildCandidateInheritedUntrackedSegment(
 		  NULL AS metadata,
 		  5 AS priority
 		FROM version_inheritance vi
-		JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id${paramsJoin}
+		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id${paramsJoin}
 		WHERE unt.inheritance_delete_marker = 0
 		  AND unt.snapshot_content IS NOT NULL
 		${buildFilterClauses("unt", options.schemaFilter, options.entityFilter, { indentLevel: 2, hasWhere: true })}
@@ -583,7 +583,7 @@ function buildCandidateInheritedTransactionSegment(
 		  json(txn.metadata) AS metadata,
 		  6 AS priority
 		FROM version_parent vi
-		JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id${paramsJoin}
+		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id${paramsJoin}
 		WHERE vi.parent_version_id IS NOT NULL
 		  AND txn.snapshot_content IS NOT NULL
 		${buildFilterClauses("txn", options.schemaFilter, options.entityFilter, { indentLevel: 2, hasWhere: true })}
@@ -602,15 +602,15 @@ function buildCacheRouting(
 	const uniqueCandidates = new Set<string>();
 	if (schemaKeys.length > 0) {
 		for (const key of schemaKeys) {
-			uniqueCandidates.add(`internal_state_cache_${sanitizeSchemaKey(key)}`);
+			uniqueCandidates.add(`lix_internal_state_cache_${sanitizeSchemaKey(key)}`);
 		}
 	} else if (!existingCacheTables) {
-		uniqueCandidates.add("internal_state_cache");
-	} else if (existingCacheTables.has("internal_state_cache")) {
-		uniqueCandidates.add("internal_state_cache");
+		uniqueCandidates.add("lix_internal_state_cache");
+	} else if (existingCacheTables.has("lix_internal_state_cache")) {
+		uniqueCandidates.add("lix_internal_state_cache");
 	} else {
 		for (const name of existingCacheTables) {
-			if (name.startsWith("internal_state_cache_")) {
+			if (name.startsWith("lix_internal_state_cache_")) {
 				uniqueCandidates.add(name);
 			}
 		}
@@ -685,7 +685,7 @@ function buildSeededVersionCtesFromLiteral(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM internal_state_cache_lix_version_descriptor desc
+		    FROM lix_internal_state_cache_lix_version_descriptor desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -728,7 +728,7 @@ function buildSeededVersionCtesFromToken(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM internal_state_cache_lix_version_descriptor desc
+		    FROM lix_internal_state_cache_lix_version_descriptor desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -958,7 +958,7 @@ function buildUnseededVersionCtes(): VersionCteResult {
         SELECT
           json_extract(desc.snapshot_content, '$.id') AS version_id,
           json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-        FROM internal_state_cache_lix_version_descriptor desc
+        FROM lix_internal_state_cache_lix_version_descriptor desc
       ),
       version_inheritance(version_id, ancestor_version_id) AS (
         SELECT

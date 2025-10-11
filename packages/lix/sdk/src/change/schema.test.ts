@@ -42,11 +42,11 @@ test("insert on the change view", async () => {
 	});
 	expect(viewAfterInsert[0]?.created_at).toBeDefined();
 
-	// Verify it was also inserted into the internal_change table
+	// Verify it was also inserted into the lix_internal_change table
 	const internalChange = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_change")
+		.selectFrom("lix_internal_change")
 		.where("id", "=", "change1")
 		.selectAll()
 		.execute();
@@ -62,11 +62,11 @@ test("insert on the change view", async () => {
 	// The snapshot_id should have been generated internally
 	expect(internalChange[0]?.snapshot_id).toBeDefined();
 
-	// Verify that an internal_snapshot was created
+	// Verify that an lix_internal_snapshot was created
 	const internalSnapshot = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", internalChange[0]!.snapshot_id)
 		.select((eb) => eb.fn("json", [`content`]).as("content"))
 		.executeTakeFirst();
@@ -272,11 +272,11 @@ test("inserting a change with snapshot_content: null uses no-content snapshot", 
 	expect(change).toBeDefined();
 	expect(change?.snapshot_content).toBe(null);
 
-	// Verify that the internal_change references the no-content snapshot
+	// Verify that the lix_internal_change references the no-content snapshot
 	const internalChange = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_change")
+		.selectFrom("lix_internal_change")
 		.where("id", "=", "change_deletion")
 		.selectAll()
 		.executeTakeFirst();
@@ -298,8 +298,8 @@ test("changes in transaction can be accessed via change view", async () => {
 			})
 			.execute();
 
-		// This should create a change in internal_transaction_state
-		// The change view should include changes from both internal_change and internal_transaction_state
+		// This should create a change in lix_internal_transaction_state
+		// The change view should include changes from both lix_internal_change and lix_internal_transaction_state
 
 		// Try to find the change within the transaction via the change view
 		const changesInTransaction = await trx
@@ -309,7 +309,7 @@ test("changes in transaction can be accessed via change view", async () => {
 			.selectAll()
 			.execute();
 
-		// This should find the change that was created in internal_transaction_state
+		// This should find the change that was created in lix_internal_transaction_state
 		expect(changesInTransaction).toHaveLength(1);
 		expect(changesInTransaction[0]).toMatchObject({
 			entity_id: "test_key_in_transaction",

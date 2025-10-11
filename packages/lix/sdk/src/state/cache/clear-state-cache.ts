@@ -31,9 +31,9 @@ export function clearStateCache(args: {
 	const existingTables = args.engine.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' 
-		      AND name LIKE 'internal_state_cache_%' 
-		      AND name != 'internal_state_cache'
-		      AND name != 'internal_state_cache'`,
+		      AND name LIKE 'lix_internal_state_cache_%' 
+		      AND name != 'lix_internal_state_cache'
+		      AND name != 'lix_internal_state_cache'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -42,7 +42,7 @@ export function clearStateCache(args: {
 		for (const row of existingTables) {
 			const tableName = row[0] as string;
 			// Skip virtual tables (shouldn't happen with our query, but be safe)
-			if (tableName === "internal_state_cache") continue;
+			if (tableName === "lix_internal_state_cache") continue;
 
 			args.engine.sqlite.exec({
 				sql: `DELETE FROM ${tableName}`,

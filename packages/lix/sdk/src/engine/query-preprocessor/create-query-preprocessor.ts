@@ -244,11 +244,11 @@ function maybeRewriteEntityView(args: {
  * ```ts
  * const rewritten = maybeRewriteStateAccess({
  *   engine,
- *   sql: "SELECT * FROM internal_state_vtable",
+ *   sql: "SELECT * FROM lix_internal_state_vtable",
  *   parameters: [],
  *   kind: "select",
  * });
- * console.log(rewritten?.sql.includes("internal_state_vtable_rewritten"));
+ * console.log(rewritten?.sql.includes("lix_internal_state_vtable_rewritten"));
  * ```
  */
 function maybeRewriteStateAccess(args: {

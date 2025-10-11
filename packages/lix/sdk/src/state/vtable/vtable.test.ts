@@ -14,7 +14,7 @@ import { withWriterKey } from "../writer.js";
 test("simulation test discover", () => {});
 
 simulationTest(
-	"select, insert, update, delete entity via internal_state_vtable",
+	"select, insert, update, delete entity via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const mockSchema: LixSchemaDefinition = {
 			"x-lix-key": "mock_schema",
@@ -47,9 +47,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Test INSERT via internal_state_vtable
+		// Test INSERT via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -64,9 +64,9 @@ simulationTest(
 			})
 			.execute();
 
-		// Test SELECT from internal_state_vtable
+		// Test SELECT from lix_internal_state_vtable
 		const viewAfterInsert = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
 			.select([
@@ -90,9 +90,9 @@ simulationTest(
 			},
 		]);
 
-		// Test UPDATE via internal_state_vtable
+		// Test UPDATE via lix_internal_state_vtable
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({
 					value: "hello world - updated",
@@ -104,7 +104,7 @@ simulationTest(
 			.execute();
 
 		const viewAfterUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
 			.select([
@@ -128,9 +128,9 @@ simulationTest(
 			},
 		]);
 
-		// Test DELETE via internal_state_vtable
+		// Test DELETE via lix_internal_state_vtable
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where(
 				"version_id",
@@ -141,7 +141,7 @@ simulationTest(
 			.execute();
 
 		const viewAfterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
@@ -183,7 +183,7 @@ simulationTest(
 		// Insert with writer via withWriterKey helper
 		await withWriterKey(db, ME, (trx) =>
 			trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "w1",
 					file_id: "f1",
@@ -198,7 +198,7 @@ simulationTest(
 		);
 
 		const afterInsert = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
 			.select([
@@ -213,7 +213,7 @@ simulationTest(
 		// Update with different writer via withWriterKey helper
 		await withWriterKey(db, `${ME}-2`, (trx) =>
 			trx
-				.updateTable("internal_state_vtable")
+				.updateTable("lix_internal_state_vtable")
 				.set({ snapshot_content: JSON.stringify({ value: "B" }) })
 				.where("entity_id", "=", "w1")
 				.where("schema_key", "=", "mock_schema_writer")
@@ -222,7 +222,7 @@ simulationTest(
 		);
 
 		const afterUpdateWithWriter = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
 			.select([
@@ -237,7 +237,7 @@ simulationTest(
 
 		// Update WITHOUT writer_key should clear writer (delete writer row)
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({ snapshot_content: JSON.stringify({ value: "C" }) })
 			.where("entity_id", "=", "w1")
 			.where("schema_key", "=", "mock_schema_writer")
@@ -245,7 +245,7 @@ simulationTest(
 			.execute();
 
 		const afterUpdateNoWriter = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
 			.select([
@@ -290,7 +290,7 @@ simulationTest(
 
 		// Insert tracked row (no writer yet)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "wd1",
 				file_id: "fd",
@@ -306,7 +306,7 @@ simulationTest(
 		// Delete WITH writer via withWriterKey helper
 		await withWriterKey(db, `${ME}-del`, (trx) =>
 			trx
-				.deleteFrom("internal_state_vtable")
+				.deleteFrom("lix_internal_state_vtable")
 				.where("entity_id", "=", "wd1")
 				.where("schema_key", "=", "mock_schema_writer_del")
 				.where("file_id", "=", "fd")
@@ -319,7 +319,7 @@ simulationTest(
 		);
 
 		const tombstoneWithWriter = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "wd1")
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
@@ -331,7 +331,7 @@ simulationTest(
 
 		// Recreate and delete WITHOUT writer -> writer row cleared
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "wd1",
 				file_id: "fd",
@@ -344,7 +344,7 @@ simulationTest(
 			})
 			.execute();
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "wd1")
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
@@ -356,7 +356,7 @@ simulationTest(
 			.execute();
 
 		const tombstoneNoWriter = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "wd1")
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
@@ -401,7 +401,7 @@ simulationTest(
 		// Insert in parent with writer P
 		await withWriterKey(db, P, (trx) =>
 			trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "wi1",
 					file_id: "fi1",
@@ -417,7 +417,7 @@ simulationTest(
 
 		// Child inherits content; should expose parent's writer_key
 		const inherited = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
 			.orderBy("entity_id")
@@ -436,7 +436,7 @@ simulationTest(
 		// Now override in child with its own writer C
 		await withWriterKey(db, C, (trx) =>
 			trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "wi1",
 					file_id: "fi1",
@@ -451,7 +451,7 @@ simulationTest(
 		);
 
 		const childNow = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
 			.orderBy("entity_id")
@@ -498,7 +498,7 @@ simulationTest(
 		// Insert with writer via withWriterKey helper
 		await withWriterKey(db, ME, (trx) =>
 			trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "vw1",
 					file_id: "fv",
@@ -570,7 +570,7 @@ simulationTest(
 
 		// Insert a tracked row via the vtable into the active version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e_tomb",
 				file_id: "f_tomb",
@@ -585,7 +585,7 @@ simulationTest(
 
 		// Delete it via the vtable in the active version (creates a tracked tombstone)
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e_tomb")
 			.where("schema_key", "=", "mock_schema_tombstone")
 			.where("file_id", "=", "f_tomb")
@@ -598,7 +598,7 @@ simulationTest(
 
 		// Default filter (snapshot_content IS NOT NULL) would hide the deletion; ensure tombstone is exposed
 		const rows = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e_tomb")
 			.where("schema_key", "=", "mock_schema_tombstone")
 			.where("file_id", "=", "f_tomb")
@@ -637,7 +637,7 @@ simulationTest(
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		// Create a tracked entity in active version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "tracked-entity",
 				schema_key: "mock_test_schema",
@@ -652,7 +652,7 @@ simulationTest(
 
 		// Create an untracked entity in active version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "untracked-entity",
 				schema_key: "mock_test_schema",
@@ -667,7 +667,7 @@ simulationTest(
 
 		// Verify both exist in vtable
 		const beforeDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
 			.select(["entity_id"])
@@ -676,7 +676,7 @@ simulationTest(
 
 		// Delete all entities of schema in active version
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.where(
 				"version_id",
@@ -687,7 +687,7 @@ simulationTest(
 
 		// Check both were deleted in vtable
 		const afterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
@@ -715,7 +715,7 @@ simulationTest(
 
 		// Create a tracked entity in active version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "tracked-entity",
 				schema_key: "mock_test_schema",
@@ -730,7 +730,7 @@ simulationTest(
 
 		// Create an untracked entity in active version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "untracked-entity",
 				schema_key: "mock_test_schema",
@@ -745,7 +745,7 @@ simulationTest(
 
 		// Verify both exist in the vtable
 		const beforeDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
 			.select(["entity_id"])
@@ -754,7 +754,7 @@ simulationTest(
 
 		// Delete the untracked entity by id in active version
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.where(
 				"version_id",
@@ -765,7 +765,7 @@ simulationTest(
 
 		// Should only have the tracked entity remaining
 		const afterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
 			.select(["entity_id"])
@@ -775,7 +775,7 @@ simulationTest(
 
 		// Confirm the untracked entry is gone in vtable
 		const stateAfterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
@@ -818,10 +818,10 @@ simulationTest(
 			.select("id")
 			.execute();
 
-		// Insert some state data via internal_state_vtable
+		// Insert some state data via lix_internal_state_vtable
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "test-entity-1",
 				schema_key: "test_schema",
@@ -845,7 +845,7 @@ simulationTest(
 
 		// Query to check the commit_id via vtable
 		const stateAfterInsert = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
 			.orderBy("entity_id")
 			.select(["entity_id", "commit_id"])
@@ -874,14 +874,14 @@ simulationTest(
 
 		// Update the state via vtable to trigger another auto-commit
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
 			.set({ snapshot_content: JSON.stringify({ value: "updated value" }) })
 			.execute();
 
 		// Check again
 		const stateAfterUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
 			.orderBy("entity_id")
 			.select(["entity_id", "commit_id"])
@@ -1029,7 +1029,7 @@ simulationTest(
 
 		// 1. Insert untracked state in global version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "untracked_override_test",
 				file_id: "f1",
@@ -1044,7 +1044,7 @@ simulationTest(
 
 		// 2. Verify child inherits untracked state
 		const inheritedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1059,7 +1059,7 @@ simulationTest(
 
 		// 3. Insert untracked state in child version for same entity
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "untracked_override_test",
 				file_id: "f1",
@@ -1074,7 +1074,7 @@ simulationTest(
 
 		// 4. Verify child now sees its own untracked state
 		const finalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1121,7 +1121,7 @@ simulationTest(
 
 		// 1. Insert untracked state in global version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "override_test",
 				file_id: "f1",
@@ -1136,7 +1136,7 @@ simulationTest(
 
 		// 2. Verify child inherits untracked state
 		const inheritedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1158,7 +1158,7 @@ simulationTest(
 
 		// 3. Insert tracked state in child version for same entity
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "override_test",
 				file_id: "f1",
@@ -1173,7 +1173,7 @@ simulationTest(
 
 		// 4. Verify child now sees tracked state, not inherited untracked
 		const finalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1220,7 +1220,7 @@ simulationTest(
 
 		// 1. Insert untracked state in global version (will be inherited by child)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "inherited-entity",
 				file_id: "test-file",
@@ -1235,7 +1235,7 @@ simulationTest(
 
 		// 2. Insert untracked state directly in child version (non-inherited)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "non-inherited-entity",
 				file_id: "test-file",
@@ -1250,7 +1250,7 @@ simulationTest(
 
 		// 3. Query all untracked entities in child version
 		const untrackedEntities = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("version_id", "=", childVersion.id)
 			.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
 			.where("untracked", "=", 1)
@@ -1282,7 +1282,7 @@ simulationTest(
 	}
 );
 simulationTest(
-	"internal_state_vtable inherits untracked state from parent version into child",
+	"lix_internal_state_vtable inherits untracked state from parent version into child",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -1320,7 +1320,7 @@ simulationTest(
 
 		// Insert untracked entity into global version (parent)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				file_id: "test-file",
 				schema_key: "mock_schema",
@@ -1335,7 +1335,7 @@ simulationTest(
 
 		// Read from global (parent)
 		const globalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", "global")
 			.orderBy("entity_id")
@@ -1346,7 +1346,7 @@ simulationTest(
 
 		// Read from child active version (should inherit from global)
 		const versionState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", activeVersion.id)
 			.orderBy("entity_id")
@@ -1395,7 +1395,7 @@ simulationTest(
 
 		// Step 1: Insert entity in global version (tracked)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "inherited-entity",
 				file_id: "test-file",
@@ -1416,7 +1416,7 @@ simulationTest(
 
 		// Step 3: Verify child initially sees inherited entity
 		const inheritedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1436,7 +1436,7 @@ simulationTest(
 
 		// Step 4: Add untracked state for same entity in child version
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "inherited-entity",
 				file_id: "test-file",
@@ -1451,7 +1451,7 @@ simulationTest(
 
 		// Step 5: Query should return untracked state (higher priority than inherited)
 		const finalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
@@ -1471,7 +1471,7 @@ simulationTest(
 
 		// Step 6: Verify the inherited entity still exists in global version (unchanged)
 		const globalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", "global")
 			.orderBy("entity_id")
@@ -1532,7 +1532,7 @@ simulationTest(
 
 		// Step 1: Insert tracked state with "init"
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "entity0",
 				file_id: "test-file",
@@ -1547,7 +1547,7 @@ simulationTest(
 
 		// Verify tracked state exists
 		const afterInit = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
@@ -1560,7 +1560,7 @@ simulationTest(
 
 		// Step 2: Update to untracked state with "update" (should NOT delete tracked state)
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ value: "update" }),
 				untracked: 1,
@@ -1572,7 +1572,7 @@ simulationTest(
 
 		// Step 3: Query should return untracked state "update" (highest priority)
 		const afterUntrackedUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
@@ -1585,7 +1585,7 @@ simulationTest(
 
 		// Step 4: Update back to tracked state with "update2" (should delete untracked state)
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ value: "update2" }),
 				untracked: 0,
@@ -1597,7 +1597,7 @@ simulationTest(
 
 		// Step 5: Query should return tracked state "update2"
 		const afterTrackedUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
@@ -1635,7 +1635,7 @@ simulationTest(
 		// Insert an entity into global version via vtable
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -1660,7 +1660,7 @@ simulationTest(
 
 		// Verify inheritance - both global and child should see the entity via vtable
 		const beforeDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
 			.orderBy("entity_id")
@@ -1690,13 +1690,13 @@ simulationTest(
 
 		// Delete across versions by not filtering by version_id
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
 			.where("schema_key", "=", "test_schema")
 			.execute();
 
 		const afterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "shared-entity")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
@@ -1742,7 +1742,7 @@ simulationTest(
 		const db1 = lix1.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 		await db1
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "persistent-entity",
 				file_id: "test-file",
@@ -1762,7 +1762,7 @@ simulationTest(
 
 		const db2 = lix2.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const persistedState = await db2
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "persistent-entity")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
@@ -2221,7 +2221,7 @@ simulationTest(
 	}
 );
 simulationTest(
-	"validates the schema on insert via internal_state_vtable",
+	"validates the schema on insert via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2252,10 +2252,10 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Test that invalid data is rejected by internal_state_vtable
+		// Test that invalid data is rejected by lix_internal_state_vtable
 		await expect(
 			db
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "e0",
 					file_id: "f0",
@@ -2274,7 +2274,7 @@ simulationTest(
 );
 
 simulationTest(
-	"validates the schema on update via internal_state_vtable",
+	"validates the schema on update via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({});
 
@@ -2299,7 +2299,7 @@ simulationTest(
 
 		// Insert valid data first
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -2314,10 +2314,10 @@ simulationTest(
 			})
 			.execute();
 
-		// Test that invalid update is rejected by internal_state_vtable
+		// Test that invalid update is rejected by lix_internal_state_vtable
 		await expect(
 			db
-				.updateTable("internal_state_vtable")
+				.updateTable("lix_internal_state_vtable")
 				.set({
 					snapshot_content: JSON.stringify({
 						value: "hello world - updated", // Should be a number, not a string
@@ -2331,7 +2331,7 @@ simulationTest(
 
 		// Verify the data wasn't changed
 		const viewAfterFailedUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
 			.select([
@@ -2358,7 +2358,7 @@ simulationTest(
 );
 
 simulationTest(
-	"delete operations remove entries from underlying data via internal_state_vtable",
+	"delete operations remove entries from underlying data via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2378,9 +2378,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert initial state via internal_state_vtable
+		// Insert initial state via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "delete-cache-entity",
 				schema_key: "delete-cache-schema",
@@ -2395,16 +2395,16 @@ simulationTest(
 
 		// Verify data exists
 		const beforeDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
 			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		expect(beforeDelete).toHaveLength(1);
 
-		// Delete the state via internal_state_vtable
+		// Delete the state via lix_internal_state_vtable
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
 			.where("schema_key", "=", "delete-cache-schema")
 			.where("file_id", "=", "delete-cache-file")
@@ -2413,7 +2413,7 @@ simulationTest(
 
 		// Data should no longer be accessible
 		const afterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
@@ -2424,7 +2424,7 @@ simulationTest(
 );
 
 simulationTest(
-	"write-through cache: insert operations populate cache immediately via internal_state_vtable",
+	"write-through cache: insert operations populate cache immediately via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2444,9 +2444,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert state data via internal_state_vtable - should populate cache
+		// Insert state data via lix_internal_state_vtable - should populate cache
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "write-through-entity",
 				schema_key: "write-through-schema",
@@ -2461,7 +2461,7 @@ simulationTest(
 
 		// Cache should be populated immediately via write-through
 		const cacheEntry = await db
-			.selectFrom("internal_state_cache")
+			.selectFrom("lix_internal_state_cache")
 			.where("entity_id", "=", "write-through-entity")
 			.where("schema_key", "=", "write-through-schema")
 			.where("file_id", "=", "write-through-file")
@@ -2479,7 +2479,7 @@ simulationTest(
 
 		// Virtual table should return the same data
 		const stateResults = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "write-through-entity")
 			.orderBy("entity_id")
 			.select(["entity_id", sql`json(snapshot_content)`.as("snapshot_content")])
@@ -2495,7 +2495,7 @@ simulationTest(
 );
 
 simulationTest(
-	"write-through cache: update operations update cache immediately via internal_state_vtable",
+	"write-through cache: update operations update cache immediately via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2515,9 +2515,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert initial state via internal_state_vtable
+		// Insert initial state via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "update-cache-entity",
 				schema_key: "update-cache-schema",
@@ -2530,9 +2530,9 @@ simulationTest(
 			})
 			.execute();
 
-		// Update the state via internal_state_vtable - should update cache
+		// Update the state via lix_internal_state_vtable - should update cache
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ updated: "value" }),
 				plugin_key: "updated-plugin",
@@ -2545,7 +2545,7 @@ simulationTest(
 
 		// Cache should be immediately updated
 		const cacheEntry = await db
-			.selectFrom("internal_state_cache")
+			.selectFrom("lix_internal_state_cache")
 			.where("entity_id", "=", "update-cache-entity")
 			.where("schema_key", "=", "update-cache-schema")
 			.where("file_id", "=", "update-cache-file")
@@ -2562,7 +2562,7 @@ simulationTest(
 
 		// Virtual table should return updated data
 		const stateResults = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "update-cache-entity")
 			.orderBy("entity_id")
 			.select([
@@ -2626,7 +2626,7 @@ simulationTest(
 		const changeRecord = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("internal_change")
+			.selectFrom("lix_internal_change")
 			.where("entity_id", "=", "timestamp-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.select(["created_at"])
@@ -2636,7 +2636,7 @@ simulationTest(
 		const cacheRecord = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("internal_state_cache")
+			.selectFrom("lix_internal_state_cache")
 			.where("entity_id", "=", "timestamp-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.select(["created_at", "updated_at"])
@@ -2650,7 +2650,7 @@ simulationTest(
 );
 
 simulationTest(
-	"internal_state_vtable exposes change_id for blame and diff functionality",
+	"lix_internal_state_vtable exposes change_id for blame and diff functionality",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2681,9 +2681,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert initial state via internal_state_vtable (tracked)
+		// Insert initial state via lix_internal_state_vtable (tracked)
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "change-id-test-entity",
 				file_id: "change-id-test-file",
@@ -2696,9 +2696,9 @@ simulationTest(
 			})
 			.execute();
 
-		// Query internal_state_vtable to verify change_id is exposed
+		// Query lix_internal_state_vtable to verify change_id is exposed
 		const initialResult = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "change-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
@@ -2724,9 +2724,9 @@ simulationTest(
 			value: "initial value",
 		});
 
-		// Update the entity to create a new change via internal_state_vtable
+		// Update the entity to create a new change via lix_internal_state_vtable
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ value: "updated value" }),
 			})
@@ -2737,7 +2737,7 @@ simulationTest(
 
 		// Query again to verify change_id updated after modification
 		const updatedResult = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "change-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
@@ -2800,7 +2800,7 @@ simulationTest(
 
 		// Insert initial state using Kysely to ensure virtual table is triggered
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "change-set-id-test-entity",
 				schema_key: "mock_schema",
@@ -2821,7 +2821,7 @@ simulationTest(
 
 		// Query state_all view to verify commit_id is exposed
 		const stateResult = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "change-set-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
@@ -2896,7 +2896,7 @@ simulationTest(
 );
 
 simulationTest(
-	"transaction table is empty after select, insert, update, delete via internal_state_vtable",
+	"transaction table is empty after select, insert, update, delete via lix_internal_state_vtable",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -2929,7 +2929,7 @@ simulationTest(
 		// Helper to assert transaction table is empty
 		const expectTxnEmpty = async () => {
 			const rows = await db
-				.selectFrom("internal_transaction_state")
+				.selectFrom("lix_internal_transaction_state")
 				.selectAll()
 				.execute();
 			expectDeterministic(rows.length).toBe(0);
@@ -2937,16 +2937,16 @@ simulationTest(
 
 		// 1) SELECT should not stage anything
 		await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema_txn")
 			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 		await expectTxnEmpty();
 
-		// 2) INSERT tracked via internal_state_vtable
+		// 2) INSERT tracked via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e_txn",
 				file_id: "f_txn",
@@ -2960,9 +2960,9 @@ simulationTest(
 			.execute();
 		await expectTxnEmpty();
 
-		// 3) UPDATE via internal_state_vtable
+		// 3) UPDATE via lix_internal_state_vtable
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({ snapshot_content: JSON.stringify({ value: "v2" }) })
 			.where("entity_id", "=", "e_txn")
 			.where("schema_key", "=", "mock_schema_txn")
@@ -2970,9 +2970,9 @@ simulationTest(
 			.execute();
 		await expectTxnEmpty();
 
-		// 4) DELETE via internal_state_vtable
+		// 4) DELETE via lix_internal_state_vtable
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e_txn")
 			.where("schema_key", "=", "mock_schema_txn")
 			.where("file_id", "=", "f_txn")
@@ -2982,7 +2982,7 @@ simulationTest(
 );
 
 simulationTest(
-	"untracked mutations don't trigger change control via internal_state_vtable",
+	"untracked mutations don't trigger change control via lix_internal_state_vtable",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3016,9 +3016,9 @@ simulationTest(
 		// Count changes before any untracked mutations
 		const changesInitial = await db.selectFrom("change").selectAll().execute();
 
-		// 1. INSERT untracked state via internal_state_vtable
+		// 1. INSERT untracked state via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "untracked-entity",
 				file_id: "test-file",
@@ -3044,7 +3044,7 @@ simulationTest(
 
 		// Verify the untracked entity exists in vtable
 		const untrackedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.orderBy("entity_id")
 			.select([
@@ -3060,9 +3060,9 @@ simulationTest(
 		});
 		expectDeterministic(untrackedState[0]?.untracked).toBe(1);
 
-		// 2. UPDATE untracked state via internal_state_vtable
+		// 2. UPDATE untracked state via lix_internal_state_vtable
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.set({
 				snapshot_content: JSON.stringify({
@@ -3080,9 +3080,9 @@ simulationTest(
 		// Still no new changes
 		expectDeterministic(changesAfterUpdate.length).toBe(changesInitial.length);
 
-		// 3. DELETE untracked state via internal_state_vtable
+		// 3. DELETE untracked state via lix_internal_state_vtable
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.execute();
 
@@ -3098,7 +3098,7 @@ simulationTest(
 );
 
 simulationTest(
-	"tracked update to previously untracked entity deletes untracked state via internal_state_vtable",
+	"tracked update to previously untracked entity deletes untracked state via lix_internal_state_vtable",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3129,9 +3129,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert untracked state via internal_state_vtable
+		// Insert untracked state via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "override-entity",
 				file_id: "test-file",
@@ -3148,7 +3148,7 @@ simulationTest(
 
 		// Verify untracked state exists
 		const untrackedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
@@ -3161,7 +3161,7 @@ simulationTest(
 
 		// Now update the entity as tracked (should delete from untracked table)
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({
 					value: "tracked value",
@@ -3174,7 +3174,7 @@ simulationTest(
 
 		// Verify tracked state has overridden untracked state
 		const finalState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
 			.orderBy("entity_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
@@ -3198,7 +3198,7 @@ simulationTest(
 );
 
 simulationTest(
-	"created_at and updated_at timestamps are computed correctly via internal_state_vtable",
+	"created_at and updated_at timestamps are computed correctly via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3229,9 +3229,9 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert initial entity via internal_state_vtable
+		// Insert initial entity via lix_internal_state_vtable
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -3247,7 +3247,7 @@ simulationTest(
 			.execute();
 
 		const stateAfterInsert = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
 			.selectAll()
@@ -3260,9 +3260,9 @@ simulationTest(
 			stateAfterInsert[0]?.updated_at
 		);
 
-		// Update the entity via internal_state_vtable
+		// Update the entity via lix_internal_state_vtable
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({
 					value: "updated value",
@@ -3273,7 +3273,7 @@ simulationTest(
 			.execute();
 
 		const stateAfterUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
 			.selectAll()
@@ -3296,7 +3296,7 @@ simulationTest(
 );
 
 simulationTest(
-	"untracked insert then delete within same transaction leaves no residue via internal_state_vtable",
+	"untracked insert then delete within same transaction leaves no residue via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3333,7 +3333,7 @@ simulationTest(
 
 		await db.transaction().execute(async (trx) => {
 			await trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "tx_skip_flag_untracked",
 					file_id: "system",
@@ -3350,7 +3350,7 @@ simulationTest(
 				.execute();
 
 			await trx
-				.deleteFrom("internal_state_vtable")
+				.deleteFrom("lix_internal_state_vtable")
 				.where("entity_id", "=", "tx_skip_flag_untracked")
 				.where(
 					"version_id",
@@ -3361,7 +3361,7 @@ simulationTest(
 		});
 
 		const remaining = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "tx_skip_flag_untracked")
 			.where(
 				"version_id",
@@ -3396,7 +3396,7 @@ simulationTest(
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values([
 				{
 					entity_id: "e0",
@@ -3426,7 +3426,7 @@ simulationTest(
 			.execute();
 
 		const stateAfterInserts = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
@@ -3454,7 +3454,7 @@ simulationTest(
 		expect(stateAfterInserts[1]?.updated_at).toBeDefined();
 
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({
 					value: "hello world from version b UPDATED",
@@ -3466,7 +3466,7 @@ simulationTest(
 			.execute();
 
 		const stateAfterUpdate = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
@@ -3487,13 +3487,13 @@ simulationTest(
 		});
 
 		await db
-			.deleteFrom("internal_state_vtable")
+			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
 			.execute();
 
 		const stateAfterDelete = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
@@ -3513,7 +3513,7 @@ simulationTest(
 );
 
 simulationTest(
-	"created_at and updated_at are version specific via internal_state_vtable",
+	"created_at and updated_at are version specific via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3549,7 +3549,7 @@ simulationTest(
 
 		// Insert entity in version A
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -3566,7 +3566,7 @@ simulationTest(
 
 		// Insert same entity in version B
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -3582,7 +3582,7 @@ simulationTest(
 			.execute();
 
 		const stateVersionA = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
 			.orderBy("entity_id")
@@ -3590,7 +3590,7 @@ simulationTest(
 			.execute();
 
 		const stateVersionB = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
 			.orderBy("entity_id")
@@ -3610,7 +3610,7 @@ simulationTest(
 		expect(stateVersionA[0]?.created_at).not.toBe(stateVersionB[0]?.created_at);
 
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({
 					value: "updated value in version b",
@@ -3621,7 +3621,7 @@ simulationTest(
 			.execute();
 
 		const updatedStateVersionA = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
 			.orderBy("entity_id")
@@ -3629,7 +3629,7 @@ simulationTest(
 			.execute();
 
 		const updatedStateVersionB = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
 			.orderBy("entity_id")
@@ -3649,7 +3649,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state appears in both versions when they share the same commit via internal_state_vtable",
+	"state appears in both versions when they share the same commit via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3667,7 +3667,7 @@ simulationTest(
 
 		// Insert state into version A
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -3697,7 +3697,7 @@ simulationTest(
 		expect(versionB.commit_id).toBe(versionAAfterInsert.commit_id);
 
 		const stateInBothVersions = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
@@ -3726,7 +3726,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state diverges when versions have common ancestor but different changes via internal_state_vtable",
+	"state diverges when versions have common ancestor but different changes via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3744,7 +3744,7 @@ simulationTest(
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 		await db
-			.insertInto("internal_state_vtable")
+			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -3782,7 +3782,7 @@ simulationTest(
 
 		// Both versions should initially see the base state
 		const initialState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
@@ -3793,7 +3793,7 @@ simulationTest(
 
 		// Update state in version A
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ value: "updated in version A" }),
 			})
@@ -3803,7 +3803,7 @@ simulationTest(
 
 		// Update state in version B differently
 		await db
-			.updateTable("internal_state_vtable")
+			.updateTable("lix_internal_state_vtable")
 			.set({
 				snapshot_content: JSON.stringify({ value: "updated in version B" }),
 			})
@@ -3812,7 +3812,7 @@ simulationTest(
 			.execute();
 
 		const divergedState = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.selectAll()
@@ -3836,7 +3836,7 @@ simulationTest(
 );
 
 simulationTest(
-	"tracked insert then delete within same transaction leaves no residue via internal_state_vtable",
+	"tracked insert then delete within same transaction leaves no residue via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -3874,7 +3874,7 @@ simulationTest(
 		await db.transaction().execute(async (trx) => {
 			// tracked by default (untracked: 0)
 			await trx
-				.insertInto("internal_state_vtable")
+				.insertInto("lix_internal_state_vtable")
 				.values({
 					entity_id: "tx_skip_flag_tracked",
 					file_id: "system",
@@ -3891,7 +3891,7 @@ simulationTest(
 				.execute();
 
 			await trx
-				.deleteFrom("internal_state_vtable")
+				.deleteFrom("lix_internal_state_vtable")
 				.where("entity_id", "=", "tx_skip_flag_tracked")
 				.where(
 					"version_id",
@@ -3902,7 +3902,7 @@ simulationTest(
 		});
 
 		const remaining = await db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "tx_skip_flag_tracked")
 			.where(
 				"version_id",

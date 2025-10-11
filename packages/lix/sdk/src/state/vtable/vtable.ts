@@ -37,7 +37,7 @@ export function hasOpenTransaction(
 	}
 	// fall through on initial
 	const rows = engine.sqlite.exec({
-		sql: "SELECT 1 FROM internal_transaction_state LIMIT 1",
+		sql: "SELECT 1 FROM lix_internal_transaction_state LIMIT 1",
 		returnValue: "resultRows",
 	});
 	setHasOpenTransaction(engine, Array.isArray(rows) && rows.length > 0);
@@ -224,10 +224,10 @@ export function applyStateVTable(
 			xBegin: () => {
 				setHasOpenTransaction(engine, true);
 				// TODO comment in after all internal v-table logic uses underlying state view
-				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
+				// // assert that we are not already in a transaction (the lix_internal_change_in_transaction table is empty)
 				// const existingChangesInTransaction = executeSync({
 				// 	lix: { sqlite },
-				// 	query: db.selectFrom("internal_change_in_transaction").selectAll(),
+				// 	query: db.selectFrom("lix_internal_change_in_transaction").selectAll(),
 				// });
 				// if (existingChangesInTransaction.length > 0) {
 				// 	const errorMessage = "Transaction already in progress";
@@ -252,7 +252,7 @@ export function applyStateVTable(
 
 			xRollback: () => {
 				sqlite.exec({
-					sql: "DELETE FROM internal_transaction_state",
+					sql: "DELETE FROM lix_internal_transaction_state",
 					returnValue: "resultRows",
 				});
 				currentWriterKey = null;
@@ -479,11 +479,11 @@ export function applyStateVTable(
 				} else {
 					const columnName = getColumnName(iCol);
 					if (columnName === "writer_key") {
-						// Compute writer on demand from internal_state_writer with inheritance fallback
+						// Compute writer on demand from lix_internal_state_writer with inheritance fallback
 						try {
 							const keyRows = engine.executeSync(
 								internalQueryBuilder
-									.selectFrom("internal_state_writer")
+									.selectFrom("lix_internal_state_writer")
 									.select(["writer_key"])
 									.where("file_id", "=", String(row.file_id))
 									.where("version_id", "=", String(row.version_id))
@@ -500,7 +500,7 @@ export function applyStateVTable(
 								if (parent) {
 									const parentRows = engine.executeSync(
 										internalQueryBuilder
-											.selectFrom("internal_state_writer")
+											.selectFrom("lix_internal_state_writer")
 											.select(["writer_key"])
 											.where("file_id", "=", String(row.file_id))
 											.where("version_id", "=", String(parent))
@@ -601,7 +601,7 @@ export function applyStateVTable(
 						const idx = STATE_VTAB_COLUMN_NAMES.indexOf(name);
 						if (idx === -1)
 							throw new Error(
-								`Unknown column '${name}' in internal_state_vtable`
+								`Unknown column '${name}' in lix_internal_state_vtable`
 							);
 						return idx;
 					};
@@ -728,7 +728,7 @@ export function applyStateVTable(
 
 								// Get all unique schema keys from the source version
 								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
+									sql: `SELECT DISTINCT schema_key FROM lix_internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
 									bind: [sourceVersionId],
 									returnValue: "resultRows",
 								}) as string[][];
@@ -741,7 +741,7 @@ export function applyStateVTable(
 										/[^a-zA-Z0-9]/g,
 										"_"
 									);
-									const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+									const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
 
 									// Check if table exists first
 									const tableExists = sqlite.exec({
@@ -808,7 +808,7 @@ export function applyStateVTable(
 			// UPSERT writer
 			engine.executeSync(
 				internalQueryBuilder
-					.insertInto("internal_state_writer")
+					.insertInto("lix_internal_state_writer")
 					.values({
 						file_id: args.fileId,
 						version_id: args.versionId,
@@ -827,7 +827,7 @@ export function applyStateVTable(
 			// DELETE writer row (no NULL storage)
 			engine.executeSync(
 				internalQueryBuilder
-					.deleteFrom("internal_state_writer")
+					.deleteFrom("lix_internal_state_writer")
 					.where("file_id", "=", args.fileId)
 					.where("version_id", "=", args.versionId)
 					.where("entity_id", "=", args.entityId)
@@ -857,14 +857,14 @@ export function applyStateVTable(
 	// Register the vtable under a clearer internal name
 	capi.sqlite3_create_module(
 		sqlite.pointer!,
-		"internal_state_vtable",
+		"lix_internal_state_vtable",
 		module,
 		0
 	);
 
 	// Create the internal vtable (raw state surface)
 	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_vtable USING internal_state_vtable();`
+		`CREATE VIRTUAL TABLE IF NOT EXISTS lix_internal_state_vtable USING lix_internal_state_vtable();`
 	);
 }
 
@@ -956,7 +956,7 @@ export function handleStateDelete(
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
 		engine.executeSync(
 			internalQueryBuilder
-				.deleteFrom("internal_state_all_untracked")
+				.deleteFrom("lix_internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
 				.where("file_id", "=", String(file_id))

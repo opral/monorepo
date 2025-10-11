@@ -5,19 +5,19 @@ export function applyChangeDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS internal_change (
+  CREATE TABLE IF NOT EXISTS lix_internal_change (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    snapshot_id TEXT NOT NULL, -- Foreign key to internal_snapshot
+    snapshot_id TEXT NOT NULL, -- Foreign key to lix_internal_snapshot
     metadata BLOB,
     created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
 
     UNIQUE (id, entity_id, file_id, schema_key),
-    FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
+    FOREIGN KEY(snapshot_id) REFERENCES lix_internal_snapshot(id)
   ) STRICT;
 
   CREATE VIEW IF NOT EXISTS change AS
@@ -32,9 +32,9 @@ export function applyChangeDatabaseSchema(
     c.created_at,
     json(s.content) AS snapshot_content
   FROM 
-    internal_change AS c
+    lix_internal_change AS c
   LEFT JOIN 
-    internal_snapshot AS s ON s.id = c.snapshot_id
+    lix_internal_snapshot AS s ON s.id = c.snapshot_id
 
   UNION ALL
 
@@ -49,21 +49,21 @@ export function applyChangeDatabaseSchema(
     t.created_at,
     json(t.snapshot_content) AS snapshot_content
   FROM 
-    internal_transaction_state AS t
+    lix_internal_transaction_state AS t
   WHERE t.untracked = 0;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change
   BEGIN
     -- Insert the snapshot first (if there's content)
-    INSERT INTO internal_snapshot (id, content)
+    INSERT INTO lix_internal_snapshot (id, content)
     SELECT 
       lix_uuid_v7(), 
       jsonb(NEW.snapshot_content)
     WHERE NEW.snapshot_content IS NOT NULL;
 
     -- Insert the change, referencing the last inserted snapshot (or 'no-content')
-    INSERT INTO internal_change (
+    INSERT INTO lix_internal_change (
       id,
       entity_id,
       schema_key,
@@ -82,7 +82,7 @@ export function applyChangeDatabaseSchema(
       NEW.plugin_key,
       CASE 
         WHEN NEW.snapshot_content IS NULL THEN 'no-content'
-        ELSE (SELECT id FROM internal_snapshot WHERE rowid = last_insert_rowid())
+        ELSE (SELECT id FROM lix_internal_snapshot WHERE rowid = last_insert_rowid())
       END,
       CASE
         WHEN NEW.metadata IS NULL THEN NULL
@@ -94,7 +94,7 @@ export function applyChangeDatabaseSchema(
 `);
 }
 
-// Types for the internal_change TABLE
+// Types for the lix_internal_change TABLE
 export type InternalChangeTable = {
 	id: Generated<string>;
 	entity_id: string;

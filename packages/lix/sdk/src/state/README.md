@@ -46,14 +46,14 @@ The virtual table:
 
 - **Purpose**: Accumulate multiple mutations
 - **Scope**: Multiple entities, single version
-- **Storage**: Temporary (`internal_transaction_state`)
+- **Storage**: Temporary (`lix_internal_transaction_state`)
 - **Rollback**: Automatic on error or explicit rollback
 
 #### 3. COMMIT Stage
 
 - **Purpose**: Persist changes permanently
 - **Scope**: All pending changes across versions
-- **Storage**: Permanent (`internal_change`, `internal_snapshot`)
+- **Storage**: Permanent (`lix_internal_change`, `lix_internal_snapshot`)
 - **Rollback**: Not possible after commit
 
 ## Virtual Table Architecture
@@ -80,10 +80,10 @@ The virtual table acts as a facade over the actual storage mechanism:
 ┌─────────────────────────────────────────────────┐
 │         Regular SQLite Tables                   │
 │                                                 │
-│  • internal_transaction_state                   │
-│  • internal_state_cache                         │
-│  • internal_change                              │
-│  • internal_snapshot                            │
+│  • lix_internal_transaction_state                   │
+│  • lix_internal_state_cache                         │
+│  • lix_internal_change                              │
+│  • lix_internal_snapshot                            │
 └─────────────────────────────────────────────────┘
 ```
 

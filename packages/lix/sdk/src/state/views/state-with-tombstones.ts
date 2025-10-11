@@ -54,8 +54,8 @@ export function applyStateWithTombstonesView(args: {
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
-    FROM internal_state_vtable;
+    FROM lix_internal_state_vtable;
   `);
 }

@@ -387,7 +387,7 @@ export function applyVersionDatabaseSchema(args: {
 		CREATE VIEW IF NOT EXISTS active_version AS
 		SELECT
 			json_extract(snapshot_content, '$.version_id') AS version_id
-		FROM internal_state_all_untracked
+		FROM lix_internal_state_all_untracked
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
 	`);
 }

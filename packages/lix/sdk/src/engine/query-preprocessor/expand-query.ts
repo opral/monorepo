@@ -141,7 +141,7 @@ function expandSqlBody(
 			context.blocked.add(bestMatch.viewKey);
 			continue;
 		}
-		if (!/\binternal_state_vtable\b/i.test(resolved)) {
+		if (!/\blix_internal_state_vtable\b/i.test(resolved)) {
 			context.blocked.add(bestMatch.viewKey);
 			continue;
 		}

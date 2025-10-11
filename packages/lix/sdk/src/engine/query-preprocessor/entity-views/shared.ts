@@ -11,7 +11,7 @@ import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 
 /**
- * JSON-schema definition as stored in the `internal_state_vtable` for entity views.
+ * JSON-schema definition as stored in the `lix_internal_state_vtable` for entity views.
  */
 export type StoredSchemaDefinition = LixSchemaDefinition;
 

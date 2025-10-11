@@ -12,7 +12,7 @@ function getFileDataCache(args: {
 	const result = args.lix.engine!.sqlite.exec({
 		sql: `
 			SELECT data 
-			FROM internal_file_data_cache 
+			FROM lix_internal_file_data_cache 
 			WHERE file_id = ? 
 			AND version_id = ?
 		`,

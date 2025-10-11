@@ -21,7 +21,7 @@ test("clearStateCache deletes all cache entries", async () => {
 
 	// Verify cache has entries
 	const cacheBeforeClear = await internalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.execute();
 
@@ -36,7 +36,7 @@ test("clearStateCache deletes all cache entries", async () => {
 
 	// Verify cache is empty
 	const cacheAfterClear = await internalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_cache")
 		.selectAll()
 		.execute();
 

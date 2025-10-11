@@ -32,7 +32,7 @@ bench("materializer: select all from single version", async () => {
 
 	// Read from the final materializer view
 	await lix.db
-		.selectFrom("internal_state_materializer" as any)
+		.selectFrom("lix_internal_state_materializer" as any)
 		.where("version_id", "=", "global")
 		.selectAll()
 		.execute();
@@ -64,7 +64,7 @@ bench("materializer: linear history (entities x commits)", async () => {
 
 	// Query latest visible state resolved through the full pipeline
 	await lix.db
-		.selectFrom("internal_state_materializer" as any)
+		.selectFrom("lix_internal_state_materializer" as any)
 		.where("version_id", "=", "bench_linear")
 		.selectAll()
 		.execute();
@@ -154,7 +154,7 @@ bench("materializer: inheritance (global -> A -> B -> C)", async () => {
 
 	// Query materialized state for C (should include inherited + overrides)
 	await lix.db
-		.selectFrom("internal_state_materializer" as any)
+		.selectFrom("lix_internal_state_materializer" as any)
 		.where("version_id", "=", versionC.id)
 		.selectAll()
 		.execute();
@@ -183,7 +183,7 @@ bench("materializer: point lookup by entity_id", async () => {
 
 	// Point query by entity_id
 	await lix.db
-		.selectFrom("internal_state_materializer" as any)
+		.selectFrom("lix_internal_state_materializer" as any)
 		.where("version_id", "=", "bench_point")
 		.where("entity_id", "=", "point_entity_123")
 		.selectAll()

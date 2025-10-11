@@ -89,11 +89,11 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		const lix = await openLix({});
 
 		lix.engine!.sqlite.exec(`
-		CREATE VIEW rewrite_view AS SELECT schema_key FROM internal_state_vtable;
+		CREATE VIEW rewrite_view AS SELECT schema_key FROM lix_internal_state_vtable;
 		CREATE TRIGGER rewrite_view_insert
 		INSTEAD OF INSERT ON rewrite_view
 		BEGIN
-			SELECT schema_key FROM internal_state_vtable;
+			SELECT schema_key FROM lix_internal_state_vtable;
 		END;
 	`);
 
@@ -107,7 +107,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		expect(rewritten?.sql.trim()).toBe(
-			"SELECT schema_key FROM internal_state_vtable;"
+			"SELECT schema_key FROM lix_internal_state_vtable;"
 		);
 
 		const postRewrite = lix.engine!.preprocessQuery({
@@ -116,7 +116,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			sideEffects: false,
 		});
 
-		expect(postRewrite.sql).toContain("internal_state_vtable_rewritten");
+		expect(postRewrite.sql).toContain("lix_internal_state_vtable_rewritten");
 		await lix.close();
 	});
 

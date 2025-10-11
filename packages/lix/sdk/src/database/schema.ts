@@ -67,16 +67,16 @@ export const LixDatabaseSchemaJsonColumns = {
 } as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
-	internal_transaction_state: InternalTransactionStateTable;
-	internal_change: InternalChangeTable;
-	internal_snapshot: InternalSnapshotTable;
-	internal_state_cache: InternalStateCacheTable;
-	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_state_vtable: InternalStateVTable;
-	internal_state_reader: InternalStateVTable;
-	internal_file_data_cache: InternalFileDataCacheTable;
-	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
-	internal_state_writer: InternalStateWriterTable;
+	lix_internal_transaction_state: InternalTransactionStateTable;
+	lix_internal_change: InternalChangeTable;
+	lix_internal_snapshot: InternalSnapshotTable;
+	lix_internal_state_cache: InternalStateCacheTable;
+	lix_internal_state_all_untracked: InternalStateAllUntrackedTable;
+	lix_internal_state_vtable: InternalStateVTable;
+	lix_internal_state_reader: InternalStateVTable;
+	lix_internal_file_data_cache: InternalFileDataCacheTable;
+	lix_internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	lix_internal_state_writer: InternalStateWriterTable;
 };
 
 export type InternalStateWriterTable = {

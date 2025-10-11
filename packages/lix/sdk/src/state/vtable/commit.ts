@@ -20,7 +20,7 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * Commits all transaction changes to permanent storage.
  *
  * This function handles the COMMIT stage of the state mutation flow. It takes
- * all changes accumulated in the transaction table (internal_transaction_state),
+ * all changes accumulated in the transaction table (lix_internal_transaction_state),
  * creates commits for each version with data changes, and then creates a global
  * commit containing all the graph metadata (commits, changesets, edges, version updates).
  *
@@ -42,7 +42,7 @@ export function commit(args: {
 	// Query all transaction changes
 	const allTransactionChanges = engine.executeSync(
 		db
-			.selectFrom("internal_transaction_state")
+			.selectFrom("lix_internal_transaction_state")
 			.select([
 				"id",
 				"entity_id",
@@ -106,7 +106,7 @@ export function commit(args: {
 	const loadMergedVersion = (version_id: string): LixVersion => {
 		const [desc] = engine.executeSync(
 			db
-				.selectFrom("internal_state_vtable")
+				.selectFrom("lix_internal_state_vtable")
 				.where("schema_key", "=", "lix_version_descriptor")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
@@ -119,7 +119,7 @@ export function commit(args: {
 		const d = JSON.parse(desc.snapshot_content) as any;
 		const [tip] = engine.executeSync(
 			db
-				.selectFrom("internal_state_vtable")
+				.selectFrom("lix_internal_state_vtable")
 				.where("schema_key", "=", "lix_version_tip")
 				.where("entity_id", "=", version_id)
 				.where("snapshot_content", "is not", null)
@@ -177,7 +177,7 @@ export function commit(args: {
 	// Get active accounts for change_author records
 	const activeAccounts = engine.executeSync(
 		db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "lix_active_account")
 			.where("version_id", "=", "global")
 			.where("snapshot_content", "is not", null)
@@ -211,7 +211,7 @@ export function commit(args: {
 
 		const [workingCommitRow] = engine.executeSync(
 			db
-				.selectFrom("internal_state_vtable")
+				.selectFrom("lix_internal_state_vtable")
 				.where("schema_key", "=", "lix_commit")
 				.where("entity_id", "=", versionData.working_commit_id)
 				.where("snapshot_content", "is not", null)
@@ -314,7 +314,7 @@ export function commit(args: {
 				// Find existing working change set elements to delete
 				const existingEntities = engine.executeSync(
 					db
-						.selectFrom("internal_state_vtable")
+						.selectFrom("lix_internal_state_vtable")
 						.select([
 							"_pk",
 							"entity_id",
@@ -457,7 +457,7 @@ export function commit(args: {
 	for (const [, cs] of trackedChangesByVersion) totalTracked += cs.length;
 	if (totalTracked === 0) {
 		// Clear the transaction table after handling any untracked updates
-		engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
+		engine.executeSync(db.deleteFrom("lix_internal_transaction_state").compile());
 		setHasOpenTransaction(engine, false);
 		commitSequenceNumberSync({
 			engine: engine,
@@ -531,7 +531,7 @@ export function commit(args: {
 	}
 
 	// Clear the transaction table after committing
-	engine.executeSync(db.deleteFrom("internal_transaction_state").compile());
+	engine.executeSync(db.deleteFrom("lix_internal_transaction_state").compile());
 	setHasOpenTransaction(engine, false);
 
 	// Update cache entries in a single call using materialized state with inline commit/version
@@ -554,7 +554,7 @@ export function commit(args: {
 			const [entity_id, schema_key, file_id, vid] = key.split("|");
 			engine.executeSync(
 				db
-					.deleteFrom("internal_state_all_untracked")
+					.deleteFrom("lix_internal_state_all_untracked")
 					.where("entity_id", "=", entity_id!)
 					.where("schema_key", "=", schema_key!)
 					.where("file_id", "=", file_id!)
@@ -630,7 +630,7 @@ export function commit(args: {
 			if (filesToDelete.length > 0) {
 				engine.executeSync(
 					db
-						.deleteFrom("internal_file_lixcol_cache")
+						.deleteFrom("lix_internal_file_lixcol_cache")
 						.where("version_id", "=", version_id)
 						.where("file_id", "in", filesToDelete)
 						.compile()
@@ -639,7 +639,7 @@ export function commit(args: {
 			if (filesToUpdate.length > 0) {
 				engine.executeSync(
 					db
-						.insertInto("internal_file_lixcol_cache")
+						.insertInto("lix_internal_file_lixcol_cache")
 						.values(filesToUpdate)
 						.onConflict((oc) =>
 							oc.columns(["file_id", "version_id"]).doUpdateSet({

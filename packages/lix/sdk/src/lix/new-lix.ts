@@ -243,7 +243,7 @@ export async function newLixFile(args?: {
 	for (const change of bootstrapChanges) {
 		if (change.snapshot_content) {
 			sqlite.exec({
-				sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+				sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 				bind: [change.snapshot_id, JSON.stringify(change.snapshot_content)],
 				returnValue: "resultRows",
 			});
@@ -251,7 +251,7 @@ export async function newLixFile(args?: {
 
 		// Insert the change record
 		sqlite.exec({
-			sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
+			sql: `INSERT INTO lix_internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
 					VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			bind: [
 				change.id,

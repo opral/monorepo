@@ -22,7 +22,7 @@ WITH
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
     FROM (    SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key
     FROM (
@@ -31,7 +31,7 @@ WITH
     SELECT
       json_extract(isc_v.snapshot_content, '$.id') AS version_id,
       json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-    FROM internal_state_cache isc_v
+    FROM lix_internal_state_cache isc_v
     WHERE isc_v.schema_key = 'lix_version_descriptor'
   ),
   version_inheritance(version_id, ancestor_version_id) AS (
@@ -77,8 +77,8 @@ SELECT
   'pending' AS commit_id,
   json(txn.metadata) AS metadata,
   ws_txn.writer_key
-FROM internal_transaction_state txn
-LEFT JOIN internal_state_writer ws_txn ON
+FROM lix_internal_transaction_state txn
+LEFT JOIN lix_internal_state_writer ws_txn ON
   ws_txn.file_id = txn.file_id AND
   ws_txn.entity_id = txn.entity_id AND
   ws_txn.schema_key = txn.schema_key AND
@@ -105,8 +105,8 @@ SELECT
   'untracked' AS commit_id,
   NULL AS metadata,
   ws_untracked.writer_key
-FROM internal_state_all_untracked u
-LEFT JOIN internal_state_writer ws_untracked ON
+FROM lix_internal_state_all_untracked u
+LEFT JOIN lix_internal_state_writer ws_untracked ON
   ws_untracked.file_id = u.file_id AND
   ws_untracked.entity_id = u.entity_id AND
   ws_untracked.schema_key = u.schema_key AND
@@ -116,7 +116,7 @@ WHERE (
   (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = u.version_id
       AND t.file_id = u.file_id
       AND t.schema_key = u.schema_key
@@ -144,9 +144,9 @@ SELECT
   c.commit_id,
   ch.metadata AS metadata,
   ws_cache.writer_key
-FROM internal_state_cache c
+FROM lix_internal_state_cache c
 LEFT JOIN change ch ON ch.id = c.change_id
-LEFT JOIN internal_state_writer ws_cache ON
+LEFT JOIN lix_internal_state_writer ws_cache ON
   ws_cache.file_id = c.file_id AND
   ws_cache.entity_id = c.entity_id AND
   ws_cache.schema_key = c.schema_key AND
@@ -156,14 +156,14 @@ WHERE (
   (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = c.version_id
       AND t.file_id = c.file_id
       AND t.schema_key = c.schema_key
       AND t.entity_id = c.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked u
+    SELECT 1 FROM lix_internal_state_all_untracked u
     WHERE u.version_id = c.version_id
       AND u.file_id = c.file_id
       AND u.schema_key = c.schema_key
@@ -192,14 +192,14 @@ SELECT
   ch.metadata AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_inheritance vi
-JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
+JOIN lix_internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
 LEFT JOIN change ch ON ch.id = isc.change_id
-LEFT JOIN internal_state_writer ws_child ON
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = isc.file_id AND
   ws_child.entity_id = isc.entity_id AND
   ws_child.schema_key = isc.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = isc.file_id AND
   ws_parent.entity_id = isc.entity_id AND
   ws_parent.schema_key = isc.schema_key AND
@@ -207,21 +207,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE isc.inheritance_delete_marker = 0
   AND isc.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = vi.version_id
       AND t.file_id = isc.file_id
       AND t.schema_key = isc.schema_key
       AND t.entity_id = isc.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = isc.file_id
       AND child_isc.schema_key = isc.schema_key
       AND child_isc.entity_id = isc.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = isc.file_id
       AND child_unt.schema_key = isc.schema_key
@@ -250,13 +250,13 @@ SELECT
   NULL AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_inheritance vi
-JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-LEFT JOIN internal_state_writer ws_child ON
+JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = unt.file_id AND
   ws_child.entity_id = unt.entity_id AND
   ws_child.schema_key = unt.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = unt.file_id AND
   ws_parent.entity_id = unt.entity_id AND
   ws_parent.schema_key = unt.schema_key AND
@@ -264,21 +264,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE unt.inheritance_delete_marker = 0
   AND unt.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = vi.version_id
       AND t.file_id = unt.file_id
       AND t.schema_key = unt.schema_key
       AND t.entity_id = unt.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = unt.file_id
       AND child_isc.schema_key = unt.schema_key
       AND child_isc.entity_id = unt.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = unt.file_id
       AND child_unt.schema_key = unt.schema_key
@@ -307,13 +307,13 @@ SELECT
   json(txn.metadata) AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_parent vi
-JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
-LEFT JOIN internal_state_writer ws_child ON
+JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = txn.file_id AND
   ws_child.entity_id = txn.entity_id AND
   ws_child.schema_key = txn.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = txn.file_id AND
   ws_parent.entity_id = txn.entity_id AND
   ws_parent.schema_key = txn.schema_key AND
@@ -321,21 +321,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE vi.parent_version_id IS NOT NULL
   AND txn.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state child_txn
+    SELECT 1 FROM lix_internal_transaction_state child_txn
     WHERE child_txn.version_id = vi.version_id
       AND child_txn.file_id = txn.file_id
       AND child_txn.schema_key = txn.schema_key
       AND child_txn.entity_id = txn.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = txn.file_id
       AND child_isc.schema_key = txn.schema_key
       AND child_isc.entity_id = txn.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = txn.file_id
       AND child_unt.schema_key = txn.schema_key
@@ -344,7 +344,7 @@ WHERE vi.parent_version_id IS NOT NULL
 
 		)
     )
-  ) AS internal_state_vtable ) AS state_with_tombstones
+  ) AS lix_internal_state_vtable ) AS state_with_tombstones
     WHERE version_id = 'test_0000000017'
   ),
   t AS (
@@ -367,7 +367,7 @@ WHERE vi.parent_version_id IS NOT NULL
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
     FROM (    SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key
     FROM (
@@ -376,7 +376,7 @@ WHERE vi.parent_version_id IS NOT NULL
     SELECT
       json_extract(isc_v.snapshot_content, '$.id') AS version_id,
       json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-    FROM internal_state_cache isc_v
+    FROM lix_internal_state_cache isc_v
     WHERE isc_v.schema_key = 'lix_version_descriptor'
   ),
   version_inheritance(version_id, ancestor_version_id) AS (
@@ -422,8 +422,8 @@ SELECT
   'pending' AS commit_id,
   json(txn.metadata) AS metadata,
   ws_txn.writer_key
-FROM internal_transaction_state txn
-LEFT JOIN internal_state_writer ws_txn ON
+FROM lix_internal_transaction_state txn
+LEFT JOIN lix_internal_state_writer ws_txn ON
   ws_txn.file_id = txn.file_id AND
   ws_txn.entity_id = txn.entity_id AND
   ws_txn.schema_key = txn.schema_key AND
@@ -450,8 +450,8 @@ SELECT
   'untracked' AS commit_id,
   NULL AS metadata,
   ws_untracked.writer_key
-FROM internal_state_all_untracked u
-LEFT JOIN internal_state_writer ws_untracked ON
+FROM lix_internal_state_all_untracked u
+LEFT JOIN lix_internal_state_writer ws_untracked ON
   ws_untracked.file_id = u.file_id AND
   ws_untracked.entity_id = u.entity_id AND
   ws_untracked.schema_key = u.schema_key AND
@@ -461,7 +461,7 @@ WHERE (
   (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = u.version_id
       AND t.file_id = u.file_id
       AND t.schema_key = u.schema_key
@@ -489,9 +489,9 @@ SELECT
   c.commit_id,
   ch.metadata AS metadata,
   ws_cache.writer_key
-FROM internal_state_cache c
+FROM lix_internal_state_cache c
 LEFT JOIN change ch ON ch.id = c.change_id
-LEFT JOIN internal_state_writer ws_cache ON
+LEFT JOIN lix_internal_state_writer ws_cache ON
   ws_cache.file_id = c.file_id AND
   ws_cache.entity_id = c.entity_id AND
   ws_cache.schema_key = c.schema_key AND
@@ -501,14 +501,14 @@ WHERE (
   (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = c.version_id
       AND t.file_id = c.file_id
       AND t.schema_key = c.schema_key
       AND t.entity_id = c.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked u
+    SELECT 1 FROM lix_internal_state_all_untracked u
     WHERE u.version_id = c.version_id
       AND u.file_id = c.file_id
       AND u.schema_key = c.schema_key
@@ -537,14 +537,14 @@ SELECT
   ch.metadata AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_inheritance vi
-JOIN internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
+JOIN lix_internal_state_cache isc ON isc.version_id = vi.ancestor_version_id
 LEFT JOIN change ch ON ch.id = isc.change_id
-LEFT JOIN internal_state_writer ws_child ON
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = isc.file_id AND
   ws_child.entity_id = isc.entity_id AND
   ws_child.schema_key = isc.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = isc.file_id AND
   ws_parent.entity_id = isc.entity_id AND
   ws_parent.schema_key = isc.schema_key AND
@@ -552,21 +552,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE isc.inheritance_delete_marker = 0
   AND isc.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = vi.version_id
       AND t.file_id = isc.file_id
       AND t.schema_key = isc.schema_key
       AND t.entity_id = isc.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = isc.file_id
       AND child_isc.schema_key = isc.schema_key
       AND child_isc.entity_id = isc.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = isc.file_id
       AND child_unt.schema_key = isc.schema_key
@@ -595,13 +595,13 @@ SELECT
   NULL AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_inheritance vi
-JOIN internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-LEFT JOIN internal_state_writer ws_child ON
+JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = unt.file_id AND
   ws_child.entity_id = unt.entity_id AND
   ws_child.schema_key = unt.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = unt.file_id AND
   ws_parent.entity_id = unt.entity_id AND
   ws_parent.schema_key = unt.schema_key AND
@@ -609,21 +609,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE unt.inheritance_delete_marker = 0
   AND unt.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state t
+    SELECT 1 FROM lix_internal_transaction_state t
     WHERE t.version_id = vi.version_id
       AND t.file_id = unt.file_id
       AND t.schema_key = unt.schema_key
       AND t.entity_id = unt.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = unt.file_id
       AND child_isc.schema_key = unt.schema_key
       AND child_isc.entity_id = unt.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = unt.file_id
       AND child_unt.schema_key = unt.schema_key
@@ -652,13 +652,13 @@ SELECT
   json(txn.metadata) AS metadata,
   COALESCE(ws_child.writer_key, ws_parent.writer_key) AS writer_key
 FROM version_parent vi
-JOIN internal_transaction_state txn ON txn.version_id = vi.parent_version_id
-LEFT JOIN internal_state_writer ws_child ON
+JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
+LEFT JOIN lix_internal_state_writer ws_child ON
   ws_child.file_id = txn.file_id AND
   ws_child.entity_id = txn.entity_id AND
   ws_child.schema_key = txn.schema_key AND
   ws_child.version_id = vi.version_id
-LEFT JOIN internal_state_writer ws_parent ON
+LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.file_id = txn.file_id AND
   ws_parent.entity_id = txn.entity_id AND
   ws_parent.schema_key = txn.schema_key AND
@@ -666,21 +666,21 @@ LEFT JOIN internal_state_writer ws_parent ON
 WHERE vi.parent_version_id IS NOT NULL
   AND txn.snapshot_content IS NOT NULL
   AND NOT EXISTS (
-    SELECT 1 FROM internal_transaction_state child_txn
+    SELECT 1 FROM lix_internal_transaction_state child_txn
     WHERE child_txn.version_id = vi.version_id
       AND child_txn.file_id = txn.file_id
       AND child_txn.schema_key = txn.schema_key
       AND child_txn.entity_id = txn.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_cache child_isc
+    SELECT 1 FROM lix_internal_state_cache child_isc
     WHERE child_isc.version_id = vi.version_id
       AND child_isc.file_id = txn.file_id
       AND child_isc.schema_key = txn.schema_key
       AND child_isc.entity_id = txn.entity_id
   )
   AND NOT EXISTS (
-    SELECT 1 FROM internal_state_all_untracked child_unt
+    SELECT 1 FROM lix_internal_state_all_untracked child_unt
     WHERE child_unt.version_id = vi.version_id
       AND child_unt.file_id = txn.file_id
       AND child_unt.schema_key = txn.schema_key
@@ -689,7 +689,7 @@ WHERE vi.parent_version_id IS NOT NULL
 
 		)
     )
-  ) AS internal_state_vtable
+  ) AS lix_internal_state_vtable
     WHERE snapshot_content IS NOT NULL ) AS state_all
     WHERE version_id = 'test_0000000047'
   ),

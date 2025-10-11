@@ -6,7 +6,7 @@ export function applyMaterializeStateSchema(args: {
 	// View 0: Unified commit edges (derived from all commit rows ∪ physical rows)
 	// Ensure latest definition is applied
 	args.engine.sqlite.exec(`
-        CREATE VIEW IF NOT EXISTS internal_materialization_all_commit_edges AS
+        CREATE VIEW IF NOT EXISTS lix_internal_materialization_all_commit_edges AS
         WITH derived AS (
             SELECT
                 je.value AS parent_id,
@@ -33,7 +33,7 @@ export function applyMaterializeStateSchema(args: {
 	// • C appears in at least one lix_version_tip change row for V AND
 	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version_tip row of the same version V
 	args.engine.sqlite.exec(`
-        CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
+        CREATE VIEW IF NOT EXISTS lix_internal_materialization_version_tips AS
         WITH
         -- 1. every (version, commit) ever recorded
         version_commits(version_id, commit_id) AS (
@@ -50,7 +50,7 @@ export function applyMaterializeStateSchema(args: {
                 vc.version_id,
                 vc.commit_id
             FROM version_commits vc
-            JOIN internal_materialization_all_commit_edges e
+            JOIN lix_internal_materialization_all_commit_edges e
                 ON e.parent_id = vc.commit_id
             JOIN version_commits vc_child
                 ON vc_child.commit_id = e.child_id
@@ -72,14 +72,14 @@ export function applyMaterializeStateSchema(args: {
 	// View 2: Commit graph - lineage with depth (cache-free, DAG traversal)
 	// Assumes commit graph is a DAG; enforce cycle checks at write time if needed.
 	args.engine.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
+		CREATE VIEW IF NOT EXISTS lix_internal_materialization_commit_graph AS
 		WITH RECURSIVE commit_paths(commit_id, version_id, depth) AS (
 			-- Start from version tips at depth 0
 			SELECT 
 				tip_commit_id, 
 				version_id, 
 				0
-			FROM internal_materialization_version_tips
+			FROM lix_internal_materialization_version_tips
 			
 			UNION ALL
 			
@@ -88,7 +88,7 @@ export function applyMaterializeStateSchema(args: {
 				e.parent_id,
 				g.version_id,
 				g.depth + 1
-			FROM internal_materialization_all_commit_edges e
+			FROM lix_internal_materialization_all_commit_edges e
 			JOIN commit_paths g ON e.child_id = g.commit_id
 			WHERE e.parent_id IS NOT NULL
 		)
@@ -107,10 +107,10 @@ export function applyMaterializeStateSchema(args: {
 	// Ensure latest definition is applied
 
 	args.engine.sqlite.exec(`
-        CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
+        CREATE VIEW IF NOT EXISTS lix_internal_materialization_latest_visible_state AS
         WITH cg_distinct AS (
             SELECT commit_id, version_id, MIN(depth) AS depth
-            FROM internal_materialization_commit_graph
+            FROM lix_internal_materialization_commit_graph
             GROUP BY commit_id, version_id
         ),
         commit_targets AS (
@@ -187,7 +187,7 @@ export function applyMaterializeStateSchema(args: {
             COALESCE(MIN(v.schema_version), '1.0') AS schema_version,
             MIN(v.created_at)       AS entity_created_at,
             MIN(v.created_at)       AS entity_updated_at
-        FROM internal_materialization_version_tips t
+        FROM lix_internal_materialization_version_tips t
         LEFT JOIN change v
           ON v.schema_key = 'lix_version_tip'
          AND v.entity_id  = t.version_id
@@ -213,7 +213,7 @@ export function applyMaterializeStateSchema(args: {
 			PARTITION BY 'global', c.entity_id, 'lix_commit', 'lix'
 			ORDER BY cg.depth ASC, c.created_at DESC, c.id DESC
 		) AS first_seen
-        FROM internal_materialization_commit_graph cg
+        FROM lix_internal_materialization_commit_graph cg
         JOIN change c ON c.entity_id = cg.commit_id AND c.schema_key = 'lix_commit'
     ),
     commit_cse AS (
@@ -288,7 +288,7 @@ export function applyMaterializeStateSchema(args: {
                 ORDER BY cg.depth ASC
                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
             ) AS entity_updated_at
-        FROM internal_materialization_commit_graph cg
+        FROM lix_internal_materialization_commit_graph cg
         JOIN change cmt ON cmt.entity_id = cg.commit_id AND cmt.schema_key = 'lix_commit'
         JOIN json_each(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) je
         WHERE json_type(json_extract(cmt.snapshot_content,'$.parent_commit_ids')) = 'array'
@@ -483,7 +483,7 @@ export function applyMaterializeStateSchema(args: {
 	// Used by the state materializer to implement multi-level inheritance where
 	// child versions can see state from all ancestors unless overridden
 	args.engine.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_version_ancestry AS
+		CREATE VIEW IF NOT EXISTS lix_internal_materialization_version_ancestry AS
 		WITH RECURSIVE version_ancestry(version_id, ancestor_version_id, inheritance_depth, path) AS (
 			-- Each version is its own ancestor at depth 0
 			SELECT 
@@ -517,7 +517,7 @@ export function applyMaterializeStateSchema(args: {
 	// View 5: Final state materializer with multi-level inheritance
 	// Ensure latest definition is applied
 	args.engine.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
+		CREATE VIEW IF NOT EXISTS lix_internal_state_materializer AS
 		WITH all_possible_states AS (
 			SELECT
 				va.version_id,
@@ -538,8 +538,8 @@ export function applyMaterializeStateSchema(args: {
 					PARTITION BY va.version_id, s.entity_id, s.schema_key, s.file_id
 					ORDER BY va.inheritance_depth ASC
 				) as inheritance_rank
-		FROM internal_materialization_version_ancestry va
-			JOIN internal_materialization_latest_visible_state s
+		FROM lix_internal_materialization_version_ancestry va
+			JOIN lix_internal_materialization_latest_visible_state s
 				ON s.version_id = va.ancestor_version_id
 		)
 		SELECT 

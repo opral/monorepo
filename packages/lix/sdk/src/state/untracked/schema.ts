@@ -12,7 +12,7 @@ export function applyUntrackedStateSchema(args: {
 }): void {
 	args.engine.sqlite.exec(`
 		-- Table for untracked state that bypasses change control
-		CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
+		CREATE TABLE IF NOT EXISTS lix_internal_state_all_untracked (
 			entity_id TEXT NOT NULL,
 			schema_key TEXT NOT NULL,
 			file_id TEXT NOT NULL,
@@ -39,11 +39,11 @@ export function applyUntrackedStateSchema(args: {
 		) STRICT;
 
 		-- Index for fast version_id filtering
-		CREATE INDEX IF NOT EXISTS idx_internal_state_all_untracked_version_id 
-			ON internal_state_all_untracked (version_id);
+		CREATE INDEX IF NOT EXISTS idx_lix_internal_state_all_untracked_version_id 
+			ON lix_internal_state_all_untracked (version_id);
 
 		CREATE INDEX IF NOT EXISTS ix_unt_v_f_s_e
-			ON internal_state_all_untracked (version_id, file_id, schema_key, entity_id);
+			ON lix_internal_state_all_untracked (version_id, file_id, schema_key, entity_id);
 	`);
 }
 

@@ -57,13 +57,13 @@ bench(`insert ${ROW_NUM} changes with snapshots`, async () => {
 
 		// Insert snapshots first
 		await db
-			.insertInto("internal_snapshot")
+			.insertInto("lix_internal_snapshot")
 			.values(snapshots as any)
 			.execute();
 
 		// Then insert changes
 		await db
-			.insertInto("internal_change")
+			.insertInto("lix_internal_change")
 			.values(changes as any)
 			.execute();
 	}
@@ -118,12 +118,12 @@ bench(
 			}
 
 			await db
-				.insertInto("internal_snapshot")
+				.insertInto("lix_internal_snapshot")
 				.values(snapshots as any)
 				.execute();
 
 			await db
-				.insertInto("internal_change")
+				.insertInto("lix_internal_change")
 				.values(changes as any)
 				.execute();
 		}
@@ -144,7 +144,7 @@ bench(`select single change by id from change view`, async () => {
 	const changeId = await uuidV7({ lix });
 
 	await db
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: snapshotId,
 			content: sql`jsonb(${JSON.stringify({
@@ -155,7 +155,7 @@ bench(`select single change by id from change view`, async () => {
 		.execute();
 
 	await db
-		.insertInto("internal_change")
+		.insertInto("lix_internal_change")
 		.values({
 			id: changeId,
 			entity_id: "single-entity",
@@ -218,12 +218,12 @@ bench(`select changes with filtering by schema_key`, async () => {
 		}
 
 		await db
-			.insertInto("internal_snapshot")
+			.insertInto("lix_internal_snapshot")
 			.values(snapshots as any)
 			.execute();
 
 		await db
-			.insertInto("internal_change")
+			.insertInto("lix_internal_change")
 			.values(changes as any)
 			.execute();
 	}
@@ -247,7 +247,7 @@ bench(`compare: direct query vs change view`, async () => {
 	const changeId = await uuidV7({ lix });
 
 	await db
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: snapshotId,
 			content: sql`jsonb(${JSON.stringify({
@@ -258,7 +258,7 @@ bench(`compare: direct query vs change view`, async () => {
 		.execute();
 
 	await db
-		.insertInto("internal_change")
+		.insertInto("lix_internal_change")
 		.values({
 			id: changeId,
 			entity_id: "test-entity",
@@ -272,8 +272,8 @@ bench(`compare: direct query vs change view`, async () => {
 		.execute();
 
 	await db
-		.selectFrom("internal_change as c")
-		.innerJoin("internal_snapshot as s", "s.id", "c.snapshot_id")
+		.selectFrom("lix_internal_change as c")
+		.innerJoin("lix_internal_snapshot as s", "s.id", "c.snapshot_id")
 		.select([
 			"c.id",
 			"c.entity_id",
@@ -320,7 +320,7 @@ bench(`select changes with NULL snapshots (deletions)`, async () => {
 		}
 
 		await db
-			.insertInto("internal_change")
+			.insertInto("lix_internal_change")
 			.values(changes as any)
 			.execute();
 	}

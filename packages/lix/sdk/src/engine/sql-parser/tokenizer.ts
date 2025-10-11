@@ -5,12 +5,12 @@ import { createToken, Lexer, type IToken, type TokenType } from "chevrotain";
  *
  * The lexer skips whitespace and comments and recognizes identifiers (quoted/unquoted),
  * SQLite-style named parameters, basic punctuation, and the subset of keywords that
- * drive internal_state_vtable rewriting.
+ * drive lix_internal_state_vtable rewriting.
  *
  * @example
  * ```ts
  * import { tokenize, FROM, Ident } from "./tokenizer";
- * const sql = "SELECT * FROM internal_state_vtable";
+ * const sql = "SELECT * FROM lix_internal_state_vtable";
  * const tokens = tokenize(sql);
  * const fromIx = tokens.findIndex((t) => t.tokenType === FROM);
  * console.log(tokens[fromIx + 1].tokenType === Ident); // true

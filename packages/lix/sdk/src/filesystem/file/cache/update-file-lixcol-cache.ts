@@ -64,7 +64,7 @@ export function updateFileLixcolCache(args: {
 	// Insert or update the cache entry, preserving created_at on updates
 	args.engine.sqlite.exec({
 		sql: `
-			INSERT INTO internal_file_lixcol_cache 
+			INSERT INTO lix_internal_file_lixcol_cache 
 			(file_id, version_id, latest_change_id, latest_commit_id, created_at, updated_at, writer_key)
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT (file_id, version_id) DO UPDATE SET

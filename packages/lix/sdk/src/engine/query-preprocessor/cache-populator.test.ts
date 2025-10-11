@@ -14,7 +14,7 @@ const shapeFrom = (sql: string) => {
 	const tokens = tokenize(sql);
 	const shape = analyzeShape(tokens);
 	if (!shape) {
-		throw new Error("expected query to target internal_state_vtable");
+		throw new Error("expected query to target lix_internal_state_vtable");
 	}
 	return shape;
 };
@@ -31,7 +31,7 @@ describe("ensureStateCacheFresh", () => {
 
 		markStateCacheAsFresh({ engine });
 		const shape = shapeFrom(
-			"SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
+			"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
 		);
 		ensureFreshStateCache({ engine, shape });
 
@@ -52,7 +52,7 @@ describe("ensureStateCacheFresh", () => {
 		expect(isStaleStateCache({ engine })).toBe(true);
 
 		const shape = shapeFrom(
-			"SELECT * FROM internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
+			"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
 		);
 		ensureFreshStateCache({ engine, shape });
 
@@ -72,7 +72,7 @@ describe("ensureStateCacheFresh", () => {
 
 		markStateCacheAsStale({ engine });
 		const shape = shapeFrom(
-			"SELECT * FROM internal_state_vtable v WHERE v.version_id = 'global'"
+			"SELECT * FROM lix_internal_state_vtable v WHERE v.version_id = 'global'"
 		);
 		ensureFreshStateCache({ engine, shape });
 

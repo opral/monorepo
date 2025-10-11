@@ -310,11 +310,11 @@ function validatePrimaryKeyConstraints(args: {
 	const db =
 		internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 	let query = db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["snapshot_content"])
 		.where("schema_key", "=", args.schema["x-lix-key"]);
 
-	// Constrain by version – internal_state_vtable exposes child version_id directly
+	// Constrain by version – lix_internal_state_vtable exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
@@ -391,7 +391,7 @@ function validateUniqueConstraints(args: {
 		const db =
 			internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 		let query = db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.select(["snapshot_content"])
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 

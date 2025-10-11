@@ -11,7 +11,7 @@ test("createExplainQuery returns rewritten when query is mutated", async () => {
 		const explain = await createExplainQuery({ engine });
 
 		const query = {
-			sql: "SELECT * FROM internal_state_vtable WHERE schema_key = 'mock_schema'",
+			sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'mock_schema'",
 			parameters: [],
 		};
 
@@ -20,7 +20,7 @@ test("createExplainQuery returns rewritten when query is mutated", async () => {
 		expect(report.rewritten).toBeDefined();
 		expect(report.rewritten?.sql).not.toBe(report.original.sql);
 		expect(report.rewritten?.sql ?? "").toContain(
-			"hoisted_internal_state_vtable_rewrite"
+			"hoisted_lix_internal_state_vtable_rewrite"
 		);
 	} finally {
 		await lix.close();

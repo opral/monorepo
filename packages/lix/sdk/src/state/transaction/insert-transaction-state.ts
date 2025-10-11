@@ -87,7 +87,7 @@ export function insertTransactionState(args: {
 		change_id: uuidV7Sync({ engine: engine as any }),
 	}));
 
-	// Batch insert into internal_transaction_state
+	// Batch insert into lix_internal_transaction_state
 	const transactionRows = dataWithChangeIds.map((data) => ({
 		id: data.change_id,
 		entity_id: data.entity_id,
@@ -107,7 +107,7 @@ export function insertTransactionState(args: {
 
 	args.engine.executeSync(
 		internalQueryBuilder
-			.insertInto("internal_transaction_state")
+			.insertInto("lix_internal_transaction_state")
 			.values(transactionRows)
 			.onConflict((oc) =>
 				oc

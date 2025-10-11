@@ -32,7 +32,7 @@ export function populateStateCache(args: {
 		const ancestorRows = sqlite.exec({
 			sql: `
 				SELECT DISTINCT ancestor_version_id as version_id
-				FROM internal_materialization_version_ancestry
+				FROM lix_internal_materialization_version_ancestry
 				WHERE version_id = ?
 			`,
 			bind: [options.version_id],
@@ -48,7 +48,7 @@ export function populateStateCache(args: {
 	} else {
 		// If no version_id specified, populate all active versions (with tips)
 		const tipRows = sqlite.exec({
-			sql: `SELECT version_id FROM internal_materialization_version_tips`,
+			sql: `SELECT version_id FROM lix_internal_materialization_version_tips`,
 			returnValue: "resultRows",
 			rowMode: "array",
 		}) as [string][];
@@ -62,7 +62,7 @@ export function populateStateCache(args: {
 	// Clear existing cache entries for the versions being populated
 	const tableCache = getStateCacheV2Tables({ engine: args.engine });
 	for (const tableName of tableCache) {
-		if (tableName === "internal_state_cache") continue;
+		if (tableName === "lix_internal_state_cache") continue;
 
 		const tableExists = sqlite.exec({
 			sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
@@ -95,7 +95,7 @@ export function populateStateCache(args: {
 			m.change_id,
 			m.commit_id,
 			m.inherited_from_version_id
-		FROM internal_state_materializer m
+		FROM lix_internal_state_materializer m
 		WHERE m.version_id IN (${placeholders})
 		  AND m.inherited_from_version_id IS NULL
 	`;
@@ -125,7 +125,7 @@ export function populateStateCache(args: {
 	for (const [schema_key, schemaRows] of rowsBySchema) {
 		// Sanitize schema_key for use in table name - must match update-state-cache.ts
 		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+		const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
 
 		// Ensure table exists (creates if needed, updates cache)
 		ensureTableExists(args.engine, tableName);
