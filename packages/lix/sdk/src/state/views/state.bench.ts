@@ -12,7 +12,10 @@ const UNTRACKED_ENTITY_ID = "bench_state_untracked_anchor";
 const SELECT_ENTITY_LABEL = "state select • tracked entity";
 const SELECT_FILE_SCAN_LABEL = "state select • recent file scan";
 const SELECT_UNTRACKED_LABEL = "state select • untracked filter";
-const DELETE_LABEL = "state delete • cleanup";
+const INSERT_TRACKED_LABEL = "state insert • tracked row";
+const INSERT_UNTRACKED_LABEL = "state insert • untracked row";
+const UPDATE_TRACKED_LABEL = "state update • tracked row";
+const DELETE_TRACKED_LABEL = "state delete • tracked row";
 
 const BENCH_OUTPUT_DIR = decodeURIComponent(
 	new URL("./__bench__", import.meta.url).pathname
@@ -36,7 +39,7 @@ type QueryShape = { sql: string; parameters: ReadonlyArray<unknown> };
 type BenchCtx = {
 	lix: Awaited<ReturnType<typeof openLix>>;
 	selectQueries: Record<string, QueryShape>;
-	counters: { tracked: number; untracked: number };
+	counters: { tracked: number; untracked: number; updates: number; deletes: number };
 };
 
 const STATE_INSERT_SQL = `INSERT INTO state (
@@ -49,6 +52,10 @@ const STATE_INSERT_SQL = `INSERT INTO state (
         metadata,
         untracked
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+const STATE_UPDATE_SQL = `UPDATE state
+      SET snapshot_content = ?, metadata = ?
+      WHERE entity_id = ? AND schema_key = ? AND file_id = ?`;
 
 const STATE_DELETE_SQL = `DELETE FROM state
       WHERE entity_id = ? AND schema_key = ? AND file_id = ?`;
@@ -91,17 +98,27 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 		};
 
 	const mutationQueries: Record<string, QueryShape> = {
-		"state insert • tracked row": buildInsertQuery({
+		[INSERT_TRACKED_LABEL]: buildInsertQuery({
 			entityId: "bench_state_tracked_insert_plan",
 			untracked: 0,
 			value: "tracked-plan",
 		}),
-		"state insert • untracked row": buildInsertQuery({
+		[INSERT_UNTRACKED_LABEL]: buildInsertQuery({
 			entityId: "bench_state_untracked_insert_plan",
 			untracked: 1,
 			value: "untracked-plan",
 		}),
-		[DELETE_LABEL]: {
+		[UPDATE_TRACKED_LABEL]: {
+			sql: STATE_UPDATE_SQL,
+			parameters: [
+				JSON.stringify({ id: TRACKED_ENTITY_ID, value: "tracked-update-plan" }),
+				JSON.stringify({ bench: true, plan: true }),
+				TRACKED_ENTITY_ID,
+				BENCH_SCHEMA_KEY,
+				BENCH_FILE_ID,
+			],
+		},
+		[DELETE_TRACKED_LABEL]: {
 			sql: STATE_DELETE_SQL,
 			parameters: [TRACKED_ENTITY_ID, BENCH_SCHEMA_KEY, BENCH_FILE_ID],
 		},
@@ -115,7 +132,7 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 	return {
 		lix,
 		selectQueries,
-		counters: { tracked: 0, untracked: 0 },
+		counters: { tracked: 0, untracked: 0, updates: 0, deletes: 0 },
 	};
 })();
 
@@ -142,7 +159,7 @@ for (const label of [
 	});
 }
 
-bench("state insert • tracked row", async () => {
+bench(INSERT_TRACKED_LABEL, async () => {
 	const ctx = await readyCtx;
 	const entityId = `bench_state_tracked_insert_${ctx.counters.tracked++}`;
 	insertStateRow(ctx.lix, {
@@ -153,7 +170,7 @@ bench("state insert • tracked row", async () => {
 	deleteStateRow(ctx.lix, entityId);
 });
 
-bench("state insert • untracked row", async () => {
+bench(INSERT_UNTRACKED_LABEL, async () => {
 	const ctx = await readyCtx;
 	const entityId = `bench_state_untracked_insert_${ctx.counters.untracked++}`;
 	insertStateRow(ctx.lix, {
@@ -162,6 +179,47 @@ bench("state insert • untracked row", async () => {
 		value: "untracked-insert",
 	});
 	deleteStateRow(ctx.lix, entityId);
+});
+
+bench(UPDATE_TRACKED_LABEL, async () => {
+	const ctx = await readyCtx;
+	const updateIndex = ctx.counters.updates++;
+	const updatedValue = `tracked-update-${updateIndex}`;
+	const updatedMetadata = { bench: true, revision: updateIndex };
+
+	ctx.lix.engine!.executeSync({
+		sql: STATE_UPDATE_SQL,
+		parameters: [
+			JSON.stringify({ id: TRACKED_ENTITY_ID, value: updatedValue }),
+			JSON.stringify(updatedMetadata),
+			TRACKED_ENTITY_ID,
+			BENCH_SCHEMA_KEY,
+			BENCH_FILE_ID,
+		],
+	});
+
+	ctx.lix.engine!.executeSync({
+		sql: STATE_UPDATE_SQL,
+		parameters: [
+			JSON.stringify({ id: TRACKED_ENTITY_ID, value: "tracked-anchor" }),
+			JSON.stringify({ bench: true }),
+			TRACKED_ENTITY_ID,
+			BENCH_SCHEMA_KEY,
+			BENCH_FILE_ID,
+		],
+	});
+});
+
+bench(DELETE_TRACKED_LABEL, async () => {
+	const ctx = await readyCtx;
+	ctx.counters.deletes += 1;
+
+	deleteStateRow(ctx.lix, TRACKED_ENTITY_ID);
+	insertStateRow(ctx.lix, {
+		entityId: TRACKED_ENTITY_ID,
+		untracked: 0,
+		value: "tracked-anchor",
+	});
 });
 
 async function registerBenchSchema(lix: Awaited<ReturnType<typeof openLix>>) {

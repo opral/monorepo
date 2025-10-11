@@ -119,11 +119,14 @@ export async function createQueryPreprocessor(
 /**
  * Routes DML statements through registered INSTEAD OF trigger handlers when available.
  */
-const DML_TRIGGER_WHITELIST = new Set([
-	"active_account",
-	"lix_active_account",
-	"state",
-]);
+// We currently skip DML trigger rewrites. Mutations are not a bottleneck, and the
+// preprocessor primarily optimizes reads. Retain a commented whitelist in case we
+// revisit trigger inlining.
+// const DML_TRIGGER_WHITELIST = new Set([
+// 	"active_account",
+// 	"lix_active_account",
+// 	"state",
+// ]);
 
 /**
  * Attempts to rewrite a DML statement by inlining a registered INSTEAD OF trigger body.
@@ -167,26 +170,18 @@ function maybeRewriteTrigger(args: {
 	if (!target) {
 		return null;
 	}
-	const normalizedTarget = target.toLowerCase();
-	if (!DML_TRIGGER_WHITELIST.has(normalizedTarget)) {
-		return null;
-	}
-	if (
-		normalizedTarget === "state" &&
-		(args.sideEffects === undefined || args.sideEffects === true)
-	) {
-		return null;
-	}
+	// Mutation rewrites are currently disabled; we only optimize SELECT queries.
+	return null;
 
-	return (
-		maybeRewriteInsteadOfTrigger({
-			engine: args.engine,
-			sql: args.sql,
-			tokens: args.tokens,
-			parameters: args.parameters,
-			op,
-		}) ?? null
-	);
+	// return (
+	// 	maybeRewriteInsteadOfTrigger({
+	// 		engine: args.engine,
+	// 		sql: args.sql,
+	// 		tokens: args.tokens,
+	// 		parameters: args.parameters,
+	// 		op,
+	// 	}) ?? null
+	// );
 }
 
 /**
