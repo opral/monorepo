@@ -1,5 +1,5 @@
 import React from "react";
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import {
 	render,
 	renderHook,
@@ -197,6 +197,125 @@ test("re-renders when key value changes externally", async () => {
 
 	// observe re-render with new value
 	await waitFor(() => expect((resultRef.current as any)[0]).toBe("external"));
+});
+
+function createDeferred<T>() {
+	let resolve!: (value: T | PromiseLike<T>) => void;
+	let reject!: (reason?: unknown) => void;
+	const promise = new Promise<T>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+}
+
+test("shares optimistic updates across hook instances", async () => {
+	const lix = await openLix({});
+	const SHARED_KEY = "flashtype_test_tracked_shared_optimistic" as const;
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: SHARED_KEY, value: "initial" })
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+				<React.Suspense fallback={null}>{children}</React.Suspense>
+			</KeyValueProvider>
+		</LixProvider>
+	);
+
+	type Snapshot = { primary: unknown; secondary: unknown };
+	const snapshots: Snapshot[] = [];
+	let setValueRef:
+		| ((value: string) => Promise<void>)
+		| ((value: string | null) => Promise<void>)
+		| null = null;
+
+	function TwinReaders({
+		onSnapshot,
+		assignSetter,
+	}: {
+		onSnapshot: (snapshot: Snapshot) => void;
+		assignSetter: (
+			setter:
+				| ((value: string) => Promise<void>)
+				| ((value: string | null) => Promise<void>),
+		) => void;
+	}) {
+		const [primary, setPrimary] = useKeyValue(SHARED_KEY as any);
+		const [secondary] = useKeyValue(SHARED_KEY as any);
+
+		React.useEffect(() => {
+			assignSetter(setPrimary);
+		}, [assignSetter, setPrimary]);
+
+		React.useEffect(() => {
+			onSnapshot({ primary, secondary });
+		}, [onSnapshot, primary, secondary]);
+
+		return null;
+	}
+
+	await act(async () => {
+		render(
+			<TwinReaders
+				onSnapshot={(snapshot) => snapshots.push(snapshot)}
+				assignSetter={(setter) => {
+					setValueRef = setter;
+				}}
+			/>,
+			{ wrapper },
+		);
+	});
+
+	await waitFor(() => setValueRef != null);
+	await waitFor(() =>
+		snapshots.some(
+			(snapshot) =>
+				snapshot.primary === "initial" && snapshot.secondary === "initial",
+		),
+	);
+
+	const gate = createDeferred<void>();
+	const originalTransaction = lix.db.transaction.bind(lix.db);
+	const transactionSpy = vi
+		.spyOn(lix.db, "transaction")
+		.mockImplementation(() => {
+			const tx = originalTransaction();
+			const originalExecute = tx.execute.bind(tx);
+			(tx as any).execute = (async (cb: Parameters<typeof tx.execute>[0]) => {
+				return originalExecute(async (trx) => {
+					const result = await cb(trx);
+					await gate.promise;
+					return result;
+				});
+			}) as typeof tx.execute;
+			return tx as any;
+		});
+
+	let pendingWrite: Promise<void> | null = null;
+	act(() => {
+		pendingWrite = setValueRef
+			? (setValueRef("next") as Promise<void>)
+			: Promise.resolve();
+	});
+
+	await waitFor(() =>
+		snapshots.some((snapshot) => snapshot.primary === "next"),
+	);
+	const latest = snapshots[snapshots.length - 1];
+	expect(latest).toMatchObject({
+		primary: "next",
+		secondary: "next",
+	});
+
+	await act(async () => {
+		gate.resolve();
+		await pendingWrite;
+	});
+
+	transactionSpy.mockRestore();
 });
 
 test("returns optimistic value immediately when setter is called", async () => {

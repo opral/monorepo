@@ -55,6 +55,67 @@ export type UseKeyValueOptions = {
 	untracked?: boolean;
 };
 
+type OptimisticSlot = {
+	hasValue: boolean;
+	value: unknown;
+	listeners: Set<() => void>;
+};
+
+const OPTIMISTIC_SLOTS = new Map<string, OptimisticSlot>();
+
+function getOptimisticSlot(key: string): OptimisticSlot {
+	let slot = OPTIMISTIC_SLOTS.get(key);
+	if (!slot) {
+		slot = { hasValue: false, value: undefined, listeners: new Set() };
+		OPTIMISTIC_SLOTS.set(key, slot);
+	}
+	return slot;
+}
+
+function readOptimisticSnapshot(key: string): {
+	hasValue: boolean;
+	value: unknown;
+} {
+	const slot = OPTIMISTIC_SLOTS.get(key);
+	if (!slot) {
+		return { hasValue: false, value: undefined };
+	}
+	return { hasValue: slot.hasValue, value: slot.value };
+}
+
+function setOptimisticValue(key: string, value: unknown): void {
+	const slot = getOptimisticSlot(key);
+	slot.hasValue = true;
+	slot.value = value;
+	for (const listener of slot.listeners) {
+		listener();
+	}
+}
+
+function clearOptimisticValue(key: string): void {
+	const slot = OPTIMISTIC_SLOTS.get(key);
+	if (!slot) return;
+	slot.hasValue = false;
+	slot.value = undefined;
+	for (const listener of slot.listeners) {
+		listener();
+	}
+	if (slot.listeners.size === 0) {
+		OPTIMISTIC_SLOTS.delete(key);
+	}
+}
+
+function subscribeOptimistic(key: string, listener: () => void): () => void {
+	const slot = getOptimisticSlot(key);
+	slot.listeners.add(listener);
+	return () => {
+		slot.listeners.delete(listener);
+		if (!slot.hasValue && slot.listeners.size === 0) {
+			OPTIMISTIC_SLOTS.delete(key);
+		}
+	};
+}
+
 function getDefaults(
 	key: string,
 	defs: Record<string, KeyDef<any>>,
@@ -115,20 +176,46 @@ export function useKeyValue<K extends string>(
 		rows && rows[0]?.value !== undefined ? rows[0]?.value : defVal
 	) as ValueOf<K> | null;
 
-	const [optimistic, setOptimistic] = useState<{
+	const [optimistic, setOptimisticState] = useState<{
+		hasValue: boolean;
 		value: ValueOf<K> | null;
-	} | null>(null);
+	}>(() => {
+		const snapshot = readOptimisticSnapshot(key as string);
+		return {
+			hasValue: snapshot.hasValue,
+			value: (snapshot.value ?? null) as ValueOf<K> | null,
+		};
+	});
 
 	useEffect(() => {
-		if (!optimistic) return;
+		const snapshot = readOptimisticSnapshot(key as string);
+		setOptimisticState({
+			hasValue: snapshot.hasValue,
+			value: (snapshot.value ?? null) as ValueOf<K> | null,
+		});
+	}, [key]);
+
+	useEffect(() => {
+		const handle = () => {
+			const snapshot = readOptimisticSnapshot(key as string);
+			setOptimisticState({
+				hasValue: snapshot.hasValue,
+				value: (snapshot.value ?? null) as ValueOf<K> | null,
+			});
+		};
+		return subscribeOptimistic(key as string, handle);
+	}, [key]);
+
+	useEffect(() => {
+		if (!optimistic.hasValue) return;
 		if (valuesEqual(value, optimistic.value)) {
-			setOptimistic(null);
+			clearOptimisticValue(key as string);
 		}
-	}, [value, optimistic]);
+	}, [value, optimistic.hasValue, optimistic.value, key]);
 
 	const setValue = useCallback(
 		async (newValue: ValueOf<K>) => {
-			setOptimistic({ value: newValue as ValueOf<K> | null });
+			setOptimisticValue(key as string, newValue as ValueOf<K> | null);
 			await upsertValue(lix, key as string, newValue as unknown, {
 				defaultVersionId: String(defaultVersionId),
 				untracked,
@@ -137,7 +224,7 @@ export function useKeyValue<K extends string>(
 		[lix, key, defaultVersionId, untracked],
 	);
 
-	const resolvedValue = optimistic?.value ?? value;
+	const resolvedValue = optimistic.hasValue ? optimistic.value : value;
 
 	return useMemo(
 		() => [resolvedValue, setValue] as const,
