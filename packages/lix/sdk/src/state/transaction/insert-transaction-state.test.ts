@@ -5,6 +5,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { commit } from "../vtable/commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import { createCheckpoint } from "../create-checkpoint.js";
 
 test("creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -853,29 +854,7 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
-	// Create a checkpoint label to mark the current state
-	const checkpointLabel = await lix.db
-		.selectFrom("label")
-		.where("name", "=", "checkpoint")
-		.select("id")
-		.executeTakeFirstOrThrow();
-
-	// Get the change set from the commit to add checkpoint label
-	const currentCommit = await lix.db
-		.selectFrom("commit")
-		.where("id", "=", activeVersion.commit_id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Add checkpoint label to the current change set (simulating a checkpoint)
-	await lix.db
-		.insertInto("change_set_label_all")
-		.values({
-			change_set_id: currentCommit.change_set_id,
-			label_id: checkpointLabel.id,
-			lixcol_version_id: "global",
-		})
-		.execute();
+	await createCheckpoint({ lix: lix });
 
 	// AFTER checkpoint: Insert an entity
 	await lix.db

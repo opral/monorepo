@@ -96,12 +96,8 @@ test("should extract schema keys from complex join queries", async () => {
 			"change_set.id",
 			"change_set_element.change_set_id"
 		)
-		.leftJoin(
-			"change_set_label",
-			"change_set.id",
-			"change_set_label.change_set_id"
-		)
-		.leftJoin("label", "label.id", "change_set_label.label_id")
+		.leftJoin("entity_label", "change_set.id", "entity_label.entity_id")
+		.leftJoin("label", "label.id", "entity_label.label_id")
 		.where("label.name", "=", "checkpoint")
 		.selectAll("change_set");
 
@@ -110,7 +106,7 @@ test("should extract schema keys from complex join queries", async () => {
 	// Should include schema keys for all joined tables
 	expect(schemaKeys).toContain("lix_change_set");
 	expect(schemaKeys).toContain("lix_change_set_element");
-	expect(schemaKeys).toContain("lix_change_set_label");
+	expect(schemaKeys).toContain("lix_entity_label");
 	expect(schemaKeys).toContain("lix_label");
 
 	await lix.close();

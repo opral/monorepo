@@ -4,7 +4,6 @@ import type {
 } from "../change/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema-definition.js";
 import {
@@ -134,7 +133,6 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
-	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<
 		typeof LixFileDescriptorSchema,

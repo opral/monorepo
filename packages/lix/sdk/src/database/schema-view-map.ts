@@ -6,7 +6,6 @@ import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema-definition.js";
 import {
@@ -30,7 +29,6 @@ import { LixStoredSchemaSchema } from "../stored-schema/schema-definition.js";
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
-	change_set_label: LixChangeSetLabelSchema,
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
