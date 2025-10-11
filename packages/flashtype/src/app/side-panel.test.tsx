@@ -59,6 +59,35 @@ vi.mock("@lix-js/react-utils", async () => {
 	};
 });
 
+vi.mock("./view-registry", async () => {
+	const MockIcon = () => null;
+	const definitions = [
+		{
+			key: "files" as const,
+			label: "Files",
+			description: "Files view",
+			icon: MockIcon,
+			render: (context?: ViewContext) => (
+				<button
+					type="button"
+					onClick={() =>
+						context?.onOpenFile?.("file-writing", {
+							focus: false,
+							filePath: "/docs/guides/writing-style.md",
+						})
+					}
+				>
+					writing-style.md
+				</button>
+			),
+		},
+	];
+	return {
+		VIEW_DEFINITIONS: definitions,
+		VIEW_MAP: new Map(definitions.map((def) => [def.key, def])),
+	};
+});
+
 describe("SidePanel", () => {
 	test("renders the empty state helper when nothing is open", () => {
 		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
@@ -123,10 +152,10 @@ describe("SidePanel", () => {
 			{ timeout: 5000 },
 		);
 		fireEvent.click(fileRow);
-		expect(viewContext.onOpenFile).toHaveBeenCalledWith(
-			"/docs/guides/writing-style.md",
-			{ focus: false },
-		);
+		expect(viewContext.onOpenFile).toHaveBeenCalledWith("file-writing", {
+			focus: false,
+			filePath: "/docs/guides/writing-style.md",
+		});
 	});
 
 	test("removes focus flag when panel not focused", async () => {

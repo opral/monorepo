@@ -123,7 +123,10 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 		description: "Display file contents.",
 		icon: FileText,
 		render: (_context, panelView) => (
-			<MarkdownView filePath={panelView?.metadata?.filePath} />
+			<MarkdownView
+				fileId={panelView?.metadata?.fileId}
+				filePath={panelView?.metadata?.filePath}
+			/>
 		),
 	},
 	{

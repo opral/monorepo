@@ -2,6 +2,7 @@ import type { FilesystemEntryRow } from "@/queries";
 
 export type FilesystemTreeFile = {
 	type: "file";
+	id: string;
 	name: string;
 	path: string;
 	hidden: boolean;
@@ -9,6 +10,7 @@ export type FilesystemTreeFile = {
 
 export type FilesystemTreeDirectory = {
 	type: "directory";
+	id: string;
 	name: string;
 	path: string;
 	hidden: boolean;
@@ -47,6 +49,7 @@ export function buildFilesystemTree(
 		if (entry.kind !== "directory") continue;
 		directories.set(entry.id, {
 			type: "directory",
+			id: entry.id,
 			name: entry.display_name,
 			path: entry.path,
 			hidden: Boolean(entry.hidden),
@@ -71,6 +74,7 @@ export function buildFilesystemTree(
 		if (entry.kind !== "file") continue;
 		const fileNode: FilesystemTreeFile = {
 			type: "file",
+			id: entry.id,
 			name: entry.display_name,
 			path: entry.path,
 			hidden: Boolean(entry.hidden),

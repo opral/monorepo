@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import "./style.css";
 
 type MarkdownViewProps = {
+	readonly fileId?: string;
 	readonly filePath?: string;
 };
 
@@ -15,17 +16,17 @@ type MarkdownViewProps = {
  * Embeds the shared TipTap editor to render Markdown documents.
  *
  * @example
- * <MarkdownView filePath="/docs/guide.md" />
+ * <MarkdownView fileId="file-123" filePath="/docs/guide.md" />
  */
-export function MarkdownView({ filePath }: MarkdownViewProps) {
+export function MarkdownView({ fileId, filePath }: MarkdownViewProps) {
 	return (
 		<Suspense fallback={<MarkdownLoadingSpinner />}>
-			<MarkdownViewContent filePath={filePath} />
+			<MarkdownViewContent fileId={fileId} filePath={filePath} />
 		</Suspense>
 	);
 }
 
-function MarkdownViewContent({ filePath }: MarkdownViewProps) {
+function MarkdownViewContent({ fileId, filePath }: MarkdownViewProps) {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
 	);
@@ -35,7 +36,11 @@ function MarkdownViewContent({ filePath }: MarkdownViewProps) {
 			lix.db
 				.selectFrom("file")
 				.select(["id", "path"])
-				.where("path", "=", filePath ?? "")
+				.where(
+					fileId ? "id" : "path",
+					"=",
+					fileId ?? (filePath ?? ""),
+				)
 				.limit(1),
 		{ subscribe: false },
 	);
@@ -47,7 +52,9 @@ function MarkdownViewContent({ filePath }: MarkdownViewProps) {
 	}, [fileRow?.id, activeFileId, setActiveFileId]);
 
 	let content: ReactNode;
-	if (!filePath) {
+	const hasTarget = Boolean(fileId || filePath);
+
+	if (!hasTarget) {
 		content = (
 			<div className="flex h-full items-center justify-center text-sm text-neutral-500">
 				Select a Markdown file to preview.

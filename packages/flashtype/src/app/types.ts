@@ -80,20 +80,25 @@ export interface ViewDefinition {
  * Context passed to views for interacting with the layout.
  *
  * @example
- * context.onOpenFile?.("/docs/guide.md", { focus: false });
+ * context.onOpenFile?.("file-123", { focus: false, filePath: "/docs/guide.md" });
  * context.onOpenDiff?.("file-123", "/docs/guide.md");
  */
 export interface ViewContext {
 	readonly onOpenFile?: (
-		filePath: string,
+		fileId: string,
 		options?: {
 			/**
 			 * Whether the central panel should receive focus when the file opens.
 			 * Defaults to `true` for backwards compatibility.
 			 */
 			readonly focus?: boolean;
+			/**
+			 * Optional absolute workspace path for the file. When provided, the
+			 * layout uses it to label the tab and avoid an extra lookup.
+			 */
+			readonly filePath?: string;
 		},
-	) => void;
+	) => Promise<void> | void;
 	readonly onOpenCommit?: (
 		checkpointId: string,
 		label: string,

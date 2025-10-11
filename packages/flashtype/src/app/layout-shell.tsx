@@ -81,6 +81,16 @@ const diffLabelFromPath = (filePath?: string): string | undefined => {
 	return encodedLabel ? decodeURIComponentSafe(encodedLabel) : undefined;
 };
 
+const fileLabelFromPath = (
+	filePath?: string,
+	fallbackLabel?: string,
+): string => {
+	const derived = diffLabelFromPath(filePath);
+	if (derived) return derived;
+	if (filePath) return filePath;
+	return fallbackLabel ?? "Untitled";
+};
+
 const decodeURIComponentSafe = (value: string): string => {
 	try {
 		return decodeURIComponent(value);
@@ -530,32 +540,67 @@ export function V2LayoutShell() {
 
 	const handleOpenFile = useCallback(
 		(
-			filePath: string,
+			fileId: string,
 			options?: {
 				readonly focus?: boolean;
+				readonly filePath?: string;
 			},
 		) => {
 			const shouldFocus = options?.focus ?? true;
+			const filePath = options?.filePath;
 			setPanelState(
 				"central",
 				(panel) => {
 					const existingFileView = panel.views.find(
-						(view) => view.metadata?.filePath === filePath,
+						(view) =>
+							view.metadata?.fileId === fileId ||
+							(filePath && view.metadata?.filePath === filePath),
 					);
 					if (existingFileView) {
-						return activatePanelView(panel, existingFileView.instanceKey);
+						const activated = activatePanelView(
+							panel,
+							existingFileView.instanceKey,
+						);
+						const nextViews = activated.views.map((entry) => {
+							if (entry.instanceKey !== existingFileView.instanceKey) {
+								return entry;
+							}
+							const nextMetadata = {
+								...entry.metadata,
+								fileId,
+								filePath: filePath ?? entry.metadata?.filePath,
+							};
+							if (!nextMetadata.label) {
+								nextMetadata.label = fileLabelFromPath(
+									nextMetadata.filePath,
+									fileId,
+								);
+							}
+							return {
+								...entry,
+								metadata: nextMetadata,
+							};
+						});
+						return {
+							views: nextViews,
+							activeInstanceKey: activated.activeInstanceKey,
+						};
 					}
-					const encodedLabel =
-						filePath.split("/").filter(Boolean).pop() ?? filePath;
-					const label = decodeURIComponentSafe(encodedLabel);
+					const label = fileLabelFromPath(filePath, fileId);
 					const newView: ViewInstance = {
 						instanceKey: createViewInstanceKey("file-content"),
 						viewKey: "file-content" as ViewKey,
 						isPending: true,
-						metadata: {
-							filePath,
-							label,
-						},
+						metadata: filePath
+							? {
+									fileId,
+									filePath,
+									label,
+								}
+							: {
+									fileId,
+									label,
+								},
 					};
 					return upsertPendingView(panel, newView);
 				},

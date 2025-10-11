@@ -46,13 +46,26 @@ describe("MarkdownView", () => {
 			})
 			.execute();
 
+		await lix.db
+			.insertInto("key_value_all")
+			.values({
+				key: "flashtype_active_file_id",
+				value: "file_1",
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			})
+			.execute();
+
 		let utils: ReturnType<typeof render> | undefined;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
 						<Suspense fallback={null}>
-							<MarkdownView filePath="/docs/readme.md" />
+							<MarkdownView
+								fileId="file_1"
+								filePath="/docs/readme.md"
+							/>
 						</Suspense>
 					</KeyValueProvider>
 				</LixProvider>,
@@ -85,7 +98,7 @@ describe("MarkdownView", () => {
 				<LixProvider lix={lix}>
 					<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
 						<Suspense fallback={null}>
-							<MarkdownView filePath="/missing.md" />
+							<MarkdownView fileId="missing_file" />
 						</Suspense>
 					</KeyValueProvider>
 				</LixProvider>,

@@ -70,10 +70,17 @@ describe("FilesView", () => {
 		});
 
 		await waitFor(async () => {
-			const rows = await lix.db.selectFrom("file").select(["path"]).execute();
+			const rows = await lix.db
+				.selectFrom("file")
+				.select(["id", "path"])
+				.execute();
 			expect(rows).toHaveLength(1);
 			expect(rows[0]?.path).toBe("/notes.md");
-			expect(onOpenFile).toHaveBeenCalledWith("/notes.md", { focus: false });
+			const createdId = rows[0]?.id as string;
+			expect(onOpenFile).toHaveBeenCalledWith(createdId, {
+				focus: false,
+				filePath: "/notes.md",
+			});
 		});
 
 		utils!.unmount();

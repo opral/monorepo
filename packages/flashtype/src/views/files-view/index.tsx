@@ -23,7 +23,12 @@ type DraftState = {
  * when rendered in the UI, so callers must perform the matching decode step.
  *
  * @example
- * <FilesView context={{ onOpenFile: (path) => console.log(path) }} />
+ * <FilesView
+ *   context={{
+ *     onOpenFile: (fileId, options) =>
+ *       console.log(fileId, options?.filePath),
+ *   }}
+ * />
  */
 export function FilesView({ context }: FilesViewProps) {
 	const lix = useLix();
@@ -126,7 +131,9 @@ export function FilesView({ context }: FilesViewProps) {
 				setPendingPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
 				setSelectedKind("file");
-				context?.onOpenFile?.(path, { focus: false });
+				if (context?.onOpenFile) {
+					await context.onOpenFile(id, { focus: false, filePath: path });
+				}
 			} catch (error) {
 				console.error("Failed to create file", error);
 			} finally {
@@ -169,10 +176,15 @@ export function FilesView({ context }: FilesViewProps) {
 	}, [context, draft, existingDirectoryPaths, existingFilePaths, lix]);
 
 	const handleOpenFile = useCallback(
-		(path: string) => {
+		async (fileId: string, path: string) => {
 			setSelectedPath(path);
 			setSelectedKind("file");
-			context?.onOpenFile?.(path, { focus: false });
+			if (context?.onOpenFile) {
+				await context.onOpenFile(fileId, {
+					focus: false,
+					filePath: path,
+				});
+			}
 		},
 		[context],
 	);

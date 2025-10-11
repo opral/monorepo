@@ -14,7 +14,7 @@ export type FileTreeDraft = {
 
 export type FileTreeProps = {
 	readonly nodes?: FilesystemTreeNode[];
-	readonly onOpenFile?: (path: string) => void;
+	readonly onOpenFile?: (fileId: string, path: string) => Promise<void> | void;
 	readonly draft?: FileTreeDraft | null;
 	readonly selectedPath?: string;
 	readonly isPanelFocused?: boolean;
@@ -31,7 +31,7 @@ const sanitizeForTestId = (value: string): string =>
  * Minimal prototype file tree that mirrors the structure of the left sidebar.
  *
  * @example
- * <FileTree onOpenFile={(path) => console.log(path)} />
+ * <FileTree onOpenFile={(id) => console.log(id)} />
  */
 export function FileTree({
 	nodes = [],
@@ -109,7 +109,7 @@ function FileTreeNode({
 	readonly node: FilesystemTreeNode;
 	readonly onToggleDirectory: (path: string) => void;
 	readonly openDirectories: Set<string>;
-	readonly onOpenFile?: (path: string) => void;
+	readonly onOpenFile?: (fileId: string, path: string) => Promise<void> | void;
 	readonly draft?: FileTreeDraft | null;
 	readonly selectedPath?: string;
 	readonly onSelectItem?: (path: string, kind: "file" | "directory") => void;
@@ -133,7 +133,7 @@ function FileTreeNode({
 					className={buttonClass}
 					onClick={() => {
 						onSelectItem?.(node.path, "file");
-						onOpenFile?.(node.path);
+						void onOpenFile?.(node.id, node.path);
 					}}
 				>
 					<FileText className="h-3.5 w-3.5 text-neutral-500" />
