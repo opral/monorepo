@@ -1,3 +1,4 @@
+import { promises as fs } from "fs";
 import { bench, afterAll } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { openLix } from "../../lix/open-lix.js";
@@ -11,6 +12,11 @@ const UNTRACKED_ENTITY_ID = "bench_state_untracked_anchor";
 const SELECT_ENTITY_LABEL = "state select • tracked entity";
 const SELECT_FILE_SCAN_LABEL = "state select • recent file scan";
 const SELECT_UNTRACKED_LABEL = "state select • untracked filter";
+const DELETE_LABEL = "state delete • cleanup";
+
+const BENCH_OUTPUT_DIR = decodeURIComponent(
+	new URL("./__bench__", import.meta.url).pathname
+);
 
 const BENCH_SCHEMA_DEFINITION: LixSchemaDefinition = {
 	"x-lix-key": BENCH_SCHEMA_KEY,
@@ -32,6 +38,20 @@ type BenchCtx = {
 	selectQueries: Record<string, QueryShape>;
 	counters: { tracked: number; untracked: number };
 };
+
+const STATE_INSERT_SQL = `INSERT INTO state (
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        metadata,
+        untracked
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+const STATE_DELETE_SQL = `DELETE FROM state
+      WHERE entity_id = ? AND schema_key = ? AND file_id = ?`;
 
 const readyCtx: Promise<BenchCtx> = (async () => {
 	const lix = await openLix({});
@@ -67,8 +87,30 @@ const readyCtx: Promise<BenchCtx> = (async () => {
         WHERE untracked = 1 AND schema_key = ?
         LIMIT 1`,
 			parameters: [BENCH_SCHEMA_KEY],
+			},
+		};
+
+	const mutationQueries: Record<string, QueryShape> = {
+		"state insert • tracked row": buildInsertQuery({
+			entityId: "bench_state_tracked_insert_plan",
+			untracked: 0,
+			value: "tracked-plan",
+		}),
+		"state insert • untracked row": buildInsertQuery({
+			entityId: "bench_state_untracked_insert_plan",
+			untracked: 1,
+			value: "untracked-plan",
+		}),
+		[DELETE_LABEL]: {
+			sql: STATE_DELETE_SQL,
+			parameters: [TRACKED_ENTITY_ID, BENCH_SCHEMA_KEY, BENCH_FILE_ID],
 		},
 	};
+
+	await exportExplainPlans({
+		lix,
+		queries: { ...selectQueries, ...mutationQueries },
+	});
 
 	return {
 		lix,
@@ -185,16 +227,7 @@ function insertStateRow(
 	args: { entityId: string; untracked: 0 | 1; value: string }
 ) {
 	lix.engine!.executeSync({
-		sql: `INSERT INTO state (
-        entity_id,
-        schema_key,
-        file_id,
-        plugin_key,
-        snapshot_content,
-        schema_version,
-        metadata,
-        untracked
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		sql: STATE_INSERT_SQL,
 		parameters: [
 			args.entityId,
 			BENCH_SCHEMA_KEY,
@@ -213,8 +246,68 @@ function deleteStateRow(
 	entityId: string
 ) {
 	lix.engine!.executeSync({
-		sql: `DELETE FROM state
-      WHERE entity_id = ? AND schema_key = ? AND file_id = ?`,
+		sql: STATE_DELETE_SQL,
 		parameters: [entityId, BENCH_SCHEMA_KEY, BENCH_FILE_ID],
 	});
+}
+
+function buildInsertQuery(args: {
+	entityId: string;
+	untracked: 0 | 1;
+	value: string;
+}): QueryShape {
+	return {
+		sql: STATE_INSERT_SQL,
+		parameters: [
+			args.entityId,
+			BENCH_SCHEMA_KEY,
+			BENCH_FILE_ID,
+			BENCH_PLUGIN_KEY,
+			JSON.stringify({ id: args.entityId, value: args.value }),
+			BENCH_SCHEMA_VERSION,
+			JSON.stringify({ bench: true }),
+			args.untracked,
+		],
+	};
+}
+
+async function exportExplainPlans(args: {
+	lix: Awaited<ReturnType<typeof openLix>>;
+	queries: Record<string, QueryShape>;
+}) {
+	await fs.mkdir(BENCH_OUTPUT_DIR, { recursive: true });
+
+	for (const [label, query] of Object.entries(args.queries)) {
+		const slug = label
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "");
+		const outputPath = `${BENCH_OUTPUT_DIR}/${slug}.explain.txt`;
+
+		const report = (await args.lix.call("lix_explain_query", {
+			sql: query.sql,
+			parameters: [...query.parameters],
+		})) as {
+			original: { sql: string };
+			expanded?: { sql: string };
+			rewritten?: { sql: string };
+			plan: unknown;
+		};
+
+		const payload = [
+			"-- label --",
+			label,
+			"\n-- original SQL --",
+			report.original.sql,
+			"\n-- expanded SQL --",
+			report.expanded?.sql ?? "<unchanged>",
+			"\n-- rewritten SQL --",
+			report.rewritten?.sql ?? "<unchanged>",
+			"\n-- plan --",
+			JSON.stringify(report.plan, null, 2),
+			"",
+		].join("\n");
+
+		await fs.writeFile(outputPath, payload, "utf8");
+	}
 }
