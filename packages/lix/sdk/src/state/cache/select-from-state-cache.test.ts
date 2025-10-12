@@ -51,13 +51,18 @@ test("supports standard joins for advanced routing queries", () => {
 					"commit_cache.entity_id"
 				)
 		)
-		.select(["lix_internal_state_cache_routed.entity_id", "commit_cache.entity_id"])
+		.select([
+			"lix_internal_state_cache_routed.entity_id",
+			"commit_cache.entity_id",
+		])
 		.compile();
 
 	expect(compiled.sql).toMatch(
 		/inner join\s+lix_internal_state_cache_lix_commit\s+as\s+"commit_cache"/i
 	);
-	expect(compiled.sql).toMatch(/"lix_internal_state_cache_routed"\."entity_id"/);
+	expect(compiled.sql).toMatch(
+		/"lix_internal_state_cache_routed"\."entity_id"/
+	);
 });
 
 test("returns an empty select when no schema key is provided", () => {

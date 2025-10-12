@@ -39,7 +39,12 @@ type QueryShape = { sql: string; parameters: ReadonlyArray<unknown> };
 type BenchCtx = {
 	lix: Awaited<ReturnType<typeof openLix>>;
 	selectQueries: Record<string, QueryShape>;
-	counters: { tracked: number; untracked: number; updates: number; deletes: number };
+	counters: {
+		tracked: number;
+		untracked: number;
+		updates: number;
+		deletes: number;
+	};
 };
 
 const STATE_INSERT_SQL = `INSERT INTO state (
@@ -94,8 +99,8 @@ const readyCtx: Promise<BenchCtx> = (async () => {
         WHERE untracked = 1 AND schema_key = ?
         LIMIT 1`,
 			parameters: [BENCH_SCHEMA_KEY],
-			},
-		};
+		},
+	};
 
 	const mutationQueries: Record<string, QueryShape> = {
 		[INSERT_TRACKED_LABEL]: buildInsertQuery({

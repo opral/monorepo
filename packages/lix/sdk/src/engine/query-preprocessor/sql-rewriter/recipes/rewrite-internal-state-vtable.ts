@@ -602,7 +602,9 @@ function buildCacheRouting(
 	const uniqueCandidates = new Set<string>();
 	if (schemaKeys.length > 0) {
 		for (const key of schemaKeys) {
-			uniqueCandidates.add(`lix_internal_state_cache_${sanitizeSchemaKey(key)}`);
+			uniqueCandidates.add(
+				`lix_internal_state_cache_${sanitizeSchemaKey(key)}`
+			);
 		}
 	} else if (!existingCacheTables) {
 		uniqueCandidates.add("lix_internal_state_cache");

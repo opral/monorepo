@@ -457,7 +457,9 @@ export function commit(args: {
 	for (const [, cs] of trackedChangesByVersion) totalTracked += cs.length;
 	if (totalTracked === 0) {
 		// Clear the transaction table after handling any untracked updates
-		engine.executeSync(db.deleteFrom("lix_internal_transaction_state").compile());
+		engine.executeSync(
+			db.deleteFrom("lix_internal_transaction_state").compile()
+		);
 		setHasOpenTransaction(engine, false);
 		commitSequenceNumberSync({
 			engine: engine,

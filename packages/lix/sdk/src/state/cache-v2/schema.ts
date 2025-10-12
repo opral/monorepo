@@ -1,51 +1,59 @@
 import type { LixEngine } from "../../engine/boot.js";
 import type { SqliteWasmDatabase } from "../../database/sqlite/index.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
 import {
-	createSchemaCacheTable,
-	schemaKeyToCacheTableName,
+	createSchemaCacheTableV2,
+	getSchemaVersion,
+	schemaKeyToCacheTableNameV2,
 } from "./create-schema-cache-table.js";
 
 export type InternalStateCache = InternalStateCacheTable;
 
 // Type definition for the cache v2 virtual table
 export type InternalStateCacheTable = {
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-	version_id: string;
-	plugin_key: string;
-	snapshot_content: string | null; // BLOB stored as string/JSON
-	schema_version: string;
-	created_at: string;
-	updated_at: string;
-	inherited_from_version_id: string | null;
-	inheritance_delete_marker: number; // 0 or 1
-	change_id: string | null;
-	commit_id: string | null;
+	lixcol_entity_id: string;
+	lixcol_schema_key: string;
+	lixcol_file_id: string;
+	lixcol_version_id: string;
+	lixcol_plugin_key: string;
+	lixcol_schema_version: string;
+	lixcol_created_at: string;
+	lixcol_updated_at: string;
+	lixcol_inherited_from_version_id: string | null;
+	lixcol_is_tombstone: number; // 0 or 1
+	lixcol_change_id: string | null;
+	lixcol_commit_id: string | null;
+	[property: string]: unknown;
 };
 // Virtual table schema definition - matches existing lix_internal_state_cache structure
 const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	_pk HIDDEN TEXT NOT NULL PRIMARY KEY,
-	entity_id TEXT NOT NULL,
-	schema_key TEXT NOT NULL,
-	file_id TEXT NOT NULL,
-	version_id TEXT NOT NULL,
-	plugin_key TEXT NOT NULL,
-	snapshot_content BLOB,
-	schema_version TEXT NOT NULL,
-	created_at TEXT NOT NULL,
-	updated_at TEXT NOT NULL,
-	inherited_from_version_id TEXT,
-	inheritance_delete_marker INTEGER DEFAULT 0,
-	change_id TEXT,
-	commit_id TEXT
+		lixcol_entity_id TEXT NOT NULL,
+		lixcol_schema_key TEXT NOT NULL,
+		lixcol_file_id TEXT NOT NULL,
+		lixcol_version_id TEXT NOT NULL,
+		lixcol_plugin_key TEXT NOT NULL,
+		lixcol_schema_version TEXT NOT NULL,
+		lixcol_created_at TEXT NOT NULL,
+		lixcol_updated_at TEXT NOT NULL,
+		lixcol_inherited_from_version_id TEXT,
+		lixcol_is_tombstone INTEGER DEFAULT 0,
+		lixcol_change_id TEXT,
+		lixcol_commit_id TEXT
 ) WITHOUT ROWID;`;
 
 // Cache of physical tables scoped to each Lix instance
 // Using WeakMap ensures proper cleanup when Lix instances are garbage collected
 const stateCacheV2TablesMap = new WeakMap<object, Set<string>>();
+const stateCacheV2ColumnsMap = new WeakMap<object, Map<string, Set<string>>>();
 
-// Export a getter function to access the cache for a specific Lix instance
+/**
+ * Returns the memoized set of cache tables for a Lix engine instance.
+ *
+ * @example
+ * const tables = getStateCacheV2Tables({ engine: lix.engine! });
+ */
 export function getStateCacheV2Tables(args: {
 	engine: Pick<LixEngine, "runtimeCacheRef">;
 }): Set<string> {
@@ -57,8 +65,81 @@ export function getStateCacheV2Tables(args: {
 	return cache;
 }
 
+function getColumnCacheMap(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+}): Map<string, Set<string>> {
+	let map = stateCacheV2ColumnsMap.get(args.engine.runtimeCacheRef);
+	if (!map) {
+		map = new Map<string, Set<string>>();
+		stateCacheV2ColumnsMap.set(args.engine.runtimeCacheRef, map);
+	}
+	return map;
+}
+
+function fetchTableColumns(args: {
+	engine: Pick<LixEngine, "executeSync">;
+	tableName: string;
+}): Set<string> {
+	const result = args.engine.executeSync({
+		sql: `PRAGMA table_info(${args.tableName})`,
+	});
+	const rows = Array.isArray(result?.rows) ? result.rows : [];
+	const columns = new Set<string>();
+	for (const row of rows as any[]) {
+		if (row && typeof row.name === "string") {
+			columns.add(row.name);
+		}
+	}
+	return columns;
+}
+
+export function getStateCacheV2Columns(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
+	tableName: string;
+}): Set<string> {
+	const cacheMap = getColumnCacheMap({ engine: args.engine });
+	let columns = cacheMap.get(args.tableName);
+	if (!columns) {
+		columns = fetchTableColumns({
+			engine: args.engine,
+			tableName: args.tableName,
+		});
+		cacheMap.set(args.tableName, columns);
+	}
+	return columns;
+}
+
+export function registerStateCacheV2Column(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
+	tableName: string;
+	columnName: string;
+}): void {
+	const columns = getStateCacheV2Columns({
+		engine: args.engine,
+		tableName: args.tableName,
+	});
+	columns.add(args.columnName);
+}
+
+export function clearStateCacheV2Columns(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
+	tableName: string;
+}): void {
+	const cacheMap = getColumnCacheMap({ engine: args.engine });
+	cacheMap.delete(args.tableName);
+}
+
+/**
+ * Installs the cache v2 virtual table and ensures bootstrap tables exist.
+ *
+ * @example
+ * applyStateCacheV2Schema({ engine: lix.engine! });
+ */
 export function applyStateCacheV2Schema(args: {
-	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "executeSync" | "runtimeCacheRef" | "hooks"
+	>;
 }): void {
 	const { sqlite } = args.engine;
 
@@ -78,10 +159,19 @@ export function applyStateCacheV2Schema(args: {
 	}
 
 	// Ensure descriptor cache table exists for inheritance rewrites
-	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	const descriptorSchema = requireSchemaDefinition({
+		engine: args.engine,
+		schemaKey: "lix_version_descriptor",
+	});
+	const descriptorVersion = getSchemaVersion(descriptorSchema);
+	const descriptorTable = schemaKeyToCacheTableNameV2(
+		"lix_version_descriptor",
+		descriptorVersion
+	);
 	if (!tableCache.has(descriptorTable)) {
-		createSchemaCacheTable({
+		createSchemaCacheTableV2({
 			engine: args.engine,
+			schema: descriptorSchema,
 			tableName: descriptorTable,
 		});
 		tableCache.add(descriptorTable);
@@ -148,19 +238,18 @@ export function applyStateCacheV2Schema(args: {
 				// Column mapping (matching the CREATE TABLE order)
 				const columnMap = [
 					"_pk", // 0 (HIDDEN column)
-					"entity_id", // 1
-					"schema_key", // 2
-					"file_id", // 3
-					"version_id", // 4
-					"plugin_key", // 5
-					"snapshot_content", // 6
-					"schema_version", // 7
-					"created_at", // 8
-					"updated_at", // 9
-					"inherited_from_version_id", // 10
-					"inheritance_delete_marker", // 11
-					"change_id", // 12
-					"commit_id", // 13
+					"lixcol_entity_id",
+					"lixcol_schema_key",
+					"lixcol_file_id",
+					"lixcol_version_id",
+					"lixcol_plugin_key",
+					"lixcol_schema_version",
+					"lixcol_created_at",
+					"lixcol_updated_at",
+					"lixcol_inherited_from_version_id",
+					"lixcol_is_tombstone",
+					"lixcol_change_id",
+					"lixcol_commit_id",
 				];
 
 				// Process constraints
@@ -182,10 +271,10 @@ export function applyStateCacheV2Schema(args: {
 							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
 							const usage = idxInfo.nthConstraintUsage(i);
 							usage.$argvIndex = ++argIndex;
-							if (columnName === "schema_key") {
-								// schema_key determines which physical cache table we read from, so
+							if (columnName === "lixcol_schema_key") {
+								// schema key determines which physical cache table we read from, so
 								// once the planner hands us this constraint we can omit re-applying
-								// it at SQL level. Preventing SQLite from emitting `WHERE schema_key = ?`
+								// it at SQL level. Preventing SQLite from emitting `WHERE lixcol_schema_key = ?`
 								// makes it clear that each cache table already holds rows for exactly
 								// one schema.
 								usage.$omit = 1;
@@ -205,9 +294,9 @@ export function applyStateCacheV2Schema(args: {
 					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
 					idxInfo.$needToFreeIdxStr = 1;
 
-					// Lower cost when we can use filters (especially schema_key)
-					// Schema_key is the most selective since it determines which table to query
-					const hasSchemaKey = usableConstraints.includes("schema_key");
+					// Lower cost when we can use filters (especially lixcol_schema_key)
+					// Schema key is the most selective since it determines which table to query
+					const hasSchemaKey = usableConstraints.includes("lixcol_schema_key");
 					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
 					idxInfo.$estimatedCost = hasSchemaKey
 						? fullTableCost / 1000
@@ -287,31 +376,48 @@ export function applyStateCacheV2Schema(args: {
 				}
 
 				// Store filters in cursor state for use in xNext
+				if (
+					filters.schema_key !== undefined &&
+					filters.lixcol_schema_key === undefined
+				) {
+					filters.lixcol_schema_key = filters.schema_key;
+				}
 				cursorState.filters = filters;
 
 				// Determine which tables to query
-				if (filters.schema_key) {
-					// Single schema_key - query single table
-					// Sanitize schema_key for table name - must match update-state-cache.ts
-					const sanitizedSchemaKey = String(filters.schema_key).replace(
-						/[^a-zA-Z0-9]/g,
-						"_"
-					);
-					const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
-					// Check if table exists
-					const tableExists = sqlite.exec({
-						sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
-						bind: [tableName],
-						returnValue: "resultRows",
-					});
+				if (filters.lixcol_schema_key) {
+					const schemaKeyValue = String(filters.lixcol_schema_key);
+					const versionFilter =
+						typeof filters.lixcol_schema_version === "string"
+							? filters.lixcol_schema_version
+							: undefined;
 
-					if (tableExists && tableExists.length > 0) {
-						cursorState.tables = [tableName];
+					if (versionFilter) {
+						const tableName = schemaKeyToCacheTableNameV2(
+							schemaKeyValue,
+							versionFilter
+						);
+						const tableExists = sqlite.exec({
+							sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
+							bind: [tableName],
+							returnValue: "resultRows",
+						});
+
+						if (tableExists && tableExists.length > 0) {
+							cursorState.tables = [tableName];
+							tableCache.add(tableName);
+						} else {
+							cursorState.tables = [];
+						}
 					} else {
-						cursorState.tables = [];
+						cursorState.tables = getTablesForSchemaKey(
+							sqlite,
+							tableCache,
+							schemaKeyValue
+						);
 					}
 				} else {
-					// No schema_key filter - need to query all cache tables
+					// No schema key filter - need to query all cache tables
 					cursorState.tables = getPhysicalTables(sqlite, tableCache);
 				}
 
@@ -406,47 +512,44 @@ export function applyStateCacheV2Schema(args: {
 				switch (iCol) {
 					case 0: {
 						// _pk - composite primary key (needs schema_key for DELETE)
-						value = `${row.entity_id}|${row.schema_key}|${row.file_id}|${row.version_id}`;
+						value = `${row.lixcol_entity_id}|${row.lixcol_schema_key}|${row.lixcol_file_id}|${row.lixcol_version_id}`;
 						break;
 					}
 					case 1:
-						value = row.entity_id;
+						value = row.lixcol_entity_id;
 						break;
 					case 2: // schema_key - read from row
-						value = row.schema_key;
+						value = row.lixcol_schema_key;
 						break;
 					case 3:
-						value = row.file_id;
+						value = row.lixcol_file_id;
 						break;
 					case 4:
-						value = row.version_id;
+						value = row.lixcol_version_id;
 						break;
 					case 5:
-						value = row.plugin_key;
+						value = row.lixcol_plugin_key;
 						break;
 					case 6:
-						value = row.snapshot_content;
+						value = row.lixcol_schema_version;
 						break;
 					case 7:
-						value = row.schema_version;
+						value = row.lixcol_created_at;
 						break;
 					case 8:
-						value = row.created_at;
+						value = row.lixcol_updated_at;
 						break;
 					case 9:
-						value = row.updated_at;
+						value = row.lixcol_inherited_from_version_id;
 						break;
 					case 10:
-						value = row.inherited_from_version_id;
+						value = row.lixcol_is_tombstone;
 						break;
 					case 11:
-						value = row.inheritance_delete_marker;
+						value = row.lixcol_change_id;
 						break;
 					case 12:
-						value = row.change_id;
-						break;
-					case 13:
-						value = row.commit_id;
+						value = row.lixcol_commit_id;
 						break;
 					default:
 						value = null;
@@ -511,6 +614,41 @@ function getPhysicalTables(
 	);
 }
 
+function getTablesForSchemaKey(
+	sqlite: SqliteWasmDatabase,
+	cache: Set<string>,
+	schemaKey: string
+): string[] {
+	const sanitizedKey = String(schemaKey).replace(/[^a-zA-Z0-9]/g, "_");
+	const likePattern = `lix_internal_state_cache_${sanitizedKey}_v%`;
+	const existingTables = sqlite.exec({
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE ?`,
+		bind: [likePattern],
+		returnValue: "resultRows",
+	}) as any[];
+
+	const tableNames = (existingTables ?? []).map((row) => row?.[0] as string);
+	for (const name of tableNames) {
+		if (typeof name === "string" && name.length > 0) {
+			cache.add(name);
+		}
+	}
+	return tableNames.filter(Boolean);
+}
+
+function requireSchemaDefinition(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+	schemaKey: string;
+}): LixSchemaDefinition {
+	const schema = getStoredSchema({ engine: args.engine, key: args.schemaKey });
+	if (!schema) {
+		throw new Error(
+			`applyStateCacheV2Schema: stored schema not found for schema_key "${args.schemaKey}"`
+		);
+	}
+	return schema;
+}
+
 // Helper function to load rows from next table
 function loadNextTable(
 	sqlite: SqliteWasmDatabase,
@@ -523,7 +661,7 @@ function loadNextTable(
 
 	const tableName = cursorState.tables[cursorState.currentTableIndex];
 
-	// Build query with filters (except schema_key which is implicit in table name)
+	// Build query with filters (except schema key which is implicit in table name)
 	let sql = `SELECT * FROM ${tableName}`;
 	const whereClauses: string[] = [];
 	const bindParams: any[] = [];
@@ -532,8 +670,13 @@ function loadNextTable(
 	// This allows the resolved view to check for tombstones when needed
 
 	for (const [column, value] of Object.entries(filters)) {
-		if (column !== "schema_key") {
-			// Skip schema_key as it's implicit
+		if (
+			column !== "schema_key" &&
+			column !== "lixcol_schema_key" &&
+			column !== "schema_version" &&
+			column !== "lixcol_schema_version"
+		) {
+			// Skip schema key as it's implicit
 			whereClauses.push(`${column} = ?`);
 			bindParams.push(value);
 		}

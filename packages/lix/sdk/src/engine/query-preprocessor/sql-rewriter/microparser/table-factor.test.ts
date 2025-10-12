@@ -66,7 +66,8 @@ describe("findInternalStateVtable", () => {
 	});
 
 	test("ignores column references", () => {
-		const sql = "SELECT lix_internal_state_vtable.schema_key FROM mock_other_table";
+		const sql =
+			"SELECT lix_internal_state_vtable.schema_key FROM mock_other_table";
 		const tokens = tokenize(sql);
 		const match = findTableFactor(tokens, "lix_internal_state_vtable");
 		expect(match).toBeNull();
