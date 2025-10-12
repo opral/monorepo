@@ -1,5 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type CSSProperties,
+} from "react";
+import {
+	Panel,
+	PanelGroup,
+	PanelResizeHandle,
+	type ImperativePanelHandle,
+} from "react-resizable-panels";
 import {
 	DndContext,
 	DragOverlay,
@@ -127,6 +139,14 @@ const createWorkingVsCheckpointDiffConfig = (
 			.$castTo<RenderableDiff>(),
 });
 
+const DEFAULT_PANEL_FALLBACK_SIZES = normalizeLayoutSizes();
+const MIN_VISIBLE_PANEL_SIZE = 1;
+const PANEL_TRANSITION_STYLE: CSSProperties = {
+	transitionProperty: "flex-grow, flex-basis",
+	transitionDuration: "200ms",
+	transitionTimingFunction: "ease-in-out",
+};
+
 /**
  * Returns a shallow clone of a view instance stored in a panel, including a
  * copied metadata object to keep state transitions immutable when moving tabs
@@ -243,6 +263,26 @@ export function V2LayoutShell() {
 	const [panelSizes, setPanelSizes] = useState<PanelLayoutSizes>(
 		() => initialLayoutSizes,
 	);
+	const [isLeftCollapsed, setIsLeftCollapsed] = useState(
+		() => initialLayoutSizes.left <= MIN_VISIBLE_PANEL_SIZE,
+	);
+	const [isRightCollapsed, setIsRightCollapsed] = useState(
+		() => initialLayoutSizes.right <= MIN_VISIBLE_PANEL_SIZE,
+	);
+	const [shouldAnimatePanels, setShouldAnimatePanels] = useState(false);
+	const animationTimeoutRef = useRef<number | null>(null);
+	const lastNonZeroSizesRef = useRef({
+		left:
+			initialLayoutSizes.left > MIN_VISIBLE_PANEL_SIZE
+				? initialLayoutSizes.left
+				: DEFAULT_PANEL_FALLBACK_SIZES.left,
+		right:
+			initialLayoutSizes.right > MIN_VISIBLE_PANEL_SIZE
+				? initialLayoutSizes.right
+				: DEFAULT_PANEL_FALLBACK_SIZES.right,
+	});
+	const leftPanelRef = useRef<ImperativePanelHandle | null>(null);
+	const rightPanelRef = useRef<ImperativePanelHandle | null>(null);
 
 	const lastPersistedRef = useRef<string>(
 		JSON.stringify({
@@ -253,6 +293,20 @@ export function V2LayoutShell() {
 	);
 	const pendingPersistRef = useRef<string | null>(null);
 	const hydratingRef = useRef(false);
+
+	const updateDerivedPanelState = useCallback(
+		(next: PanelLayoutSizes) => {
+			if (next.left > MIN_VISIBLE_PANEL_SIZE) {
+				lastNonZeroSizesRef.current.left = next.left;
+			}
+			if (next.right > MIN_VISIBLE_PANEL_SIZE) {
+				lastNonZeroSizesRef.current.right = next.right;
+			}
+			setIsLeftCollapsed(next.left <= MIN_VISIBLE_PANEL_SIZE);
+			setIsRightCollapsed(next.right <= MIN_VISIBLE_PANEL_SIZE);
+		},
+		[setIsLeftCollapsed, setIsRightCollapsed],
+	);
 
 	useEffect(() => {
 		if (!uiStateKV) return;
@@ -296,6 +350,7 @@ export function V2LayoutShell() {
 			) {
 				return prev;
 			}
+			updateDerivedPanelState(next);
 			return next;
 		});
 		queueMicrotask(() => {
@@ -304,7 +359,7 @@ export function V2LayoutShell() {
 				pendingPersistRef.current = null;
 			}
 		});
-	}, [uiStateKV]);
+	}, [uiStateKV, updateDerivedPanelState]);
 
 	useEffect(() => {
 		if (hydratingRef.current) return;
@@ -401,24 +456,28 @@ export function V2LayoutShell() {
 	const pointerSensor = useSensor(PointerSensor, pointerSensorOptions);
 	const sensors = useSensors(pointerSensor);
 
-	const handleLayoutChange = useCallback((sizes: number[]) => {
-		if (sizes.length !== 3) return;
-		setPanelSizes((prev) => {
-			const next = {
-				left: sizes[0],
-				central: sizes[1],
-				right: sizes[2],
-			};
-			if (
-				prev.left === next.left &&
-				prev.central === next.central &&
-				prev.right === next.right
-			) {
-				return prev;
-			}
-			return next;
-		});
-	}, []);
+	const handleLayoutChange = useCallback(
+		(sizes: number[]) => {
+			if (sizes.length !== 3) return;
+			setPanelSizes((prev) => {
+				const next = {
+					left: sizes[0],
+					central: sizes[1],
+					right: sizes[2],
+				};
+				if (
+					prev.left === next.left &&
+					prev.central === next.central &&
+					prev.right === next.right
+				) {
+					return prev;
+				}
+				updateDerivedPanelState(next);
+				return next;
+			});
+		},
+		[updateDerivedPanelState],
+	);
 
 	const handleDragStart = useCallback((event: DragStartEvent) => {
 		setActiveId(event.active.id as string);
@@ -807,6 +866,76 @@ export function V2LayoutShell() {
 		[sharedViewContext, isRightFocused],
 	);
 
+	const schedulePanelAnimation = useCallback(() => {
+		setShouldAnimatePanels(true);
+		if (animationTimeoutRef.current !== null) {
+			window.clearTimeout(animationTimeoutRef.current);
+		}
+		animationTimeoutRef.current = window.setTimeout(() => {
+			setShouldAnimatePanels(false);
+			animationTimeoutRef.current = null;
+		}, 220);
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			if (animationTimeoutRef.current !== null) {
+				window.clearTimeout(animationTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	const toggleLeftSidebar = useCallback(() => {
+		const panel = leftPanelRef.current;
+		if (!panel) return;
+		if (isLeftCollapsed) {
+			const desiredSize =
+				lastNonZeroSizesRef.current.left > MIN_VISIBLE_PANEL_SIZE
+					? lastNonZeroSizesRef.current.left
+					: initialLayoutSizes.left;
+			const target =
+				desiredSize > MIN_VISIBLE_PANEL_SIZE
+					? desiredSize
+					: DEFAULT_PANEL_FALLBACK_SIZES.left;
+			setIsLeftCollapsed(false);
+			schedulePanelAnimation();
+			panel.resize(target);
+		} else {
+			setIsLeftCollapsed(true);
+			schedulePanelAnimation();
+			panel.resize(0);
+		}
+	}, [isLeftCollapsed, initialLayoutSizes.left, schedulePanelAnimation]);
+
+	const toggleRightSidebar = useCallback(() => {
+		const panel = rightPanelRef.current;
+		if (!panel) return;
+		if (isRightCollapsed) {
+			const desiredSize =
+				lastNonZeroSizesRef.current.right > MIN_VISIBLE_PANEL_SIZE
+					? lastNonZeroSizesRef.current.right
+					: initialLayoutSizes.right;
+			const target =
+				desiredSize > MIN_VISIBLE_PANEL_SIZE
+					? desiredSize
+					: DEFAULT_PANEL_FALLBACK_SIZES.right;
+			setIsRightCollapsed(false);
+			schedulePanelAnimation();
+			panel.resize(target);
+		} else {
+			setIsRightCollapsed(true);
+			schedulePanelAnimation();
+			panel.resize(0);
+		}
+	}, [isRightCollapsed, initialLayoutSizes.right, schedulePanelAnimation]);
+
+	const animatedPanelClass = shouldAnimatePanels
+		? "transition-[flex-basis] duration-200 ease-in-out"
+		: undefined;
+	const animatedPanelStyle = shouldAnimatePanels
+		? PANEL_TRANSITION_STYLE
+		: undefined;
+
 	return (
 		<DndContext
 			sensors={sensors}
@@ -820,10 +949,24 @@ export function V2LayoutShell() {
 					height: "calc(100dvh - var(--lix-inspector-offset, 0px))",
 				}}
 			>
-				<TopBar />
+				<TopBar
+					onToggleLeftSidebar={toggleLeftSidebar}
+					onToggleRightSidebar={toggleRightSidebar}
+					isLeftSidebarVisible={!isLeftCollapsed}
+					isRightSidebarVisible={!isRightCollapsed}
+				/>
 				<div className="flex flex-1 min-h-0 overflow-hidden px-2 gap-4">
 					<PanelGroup direction="horizontal" onLayout={handleLayoutChange}>
-						<Panel defaultSize={panelSizes.left} minSize={10} maxSize={40}>
+						<Panel
+							ref={leftPanelRef}
+							defaultSize={panelSizes.left}
+							minSize={10}
+							maxSize={40}
+							collapsible
+							collapsedSize={0}
+							className={animatedPanelClass}
+							style={animatedPanelStyle}
+						>
 							<SidePanel
 								side="left"
 								title="Navigator"
@@ -841,7 +984,12 @@ export function V2LayoutShell() {
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
-						<Panel defaultSize={panelSizes.central} minSize={30}>
+						<Panel
+							defaultSize={panelSizes.central}
+							minSize={30}
+							className={animatedPanelClass}
+							style={animatedPanelStyle}
+						>
 							<CentralPanel
 								panel={centralPanel}
 								isFocused={focusedPanel === "central"}
@@ -863,7 +1011,16 @@ export function V2LayoutShell() {
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
 						</PanelResizeHandle>
-						<Panel defaultSize={panelSizes.right} minSize={10} maxSize={40}>
+						<Panel
+							ref={rightPanelRef}
+							defaultSize={panelSizes.right}
+							minSize={10}
+							maxSize={40}
+							collapsible
+							collapsedSize={0}
+							className={animatedPanelClass}
+							style={animatedPanelStyle}
+						>
 							<SidePanel
 								side="right"
 								title="Secondary"
