@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Command, GitBranch, Search } from "lucide-react";
+import { Bell, Command, Search } from "lucide-react";
 import { FlashtypeMenu } from "./flashtype-menu";
+import { VersionSwitcher } from "./version-switcher";
 
 export type TopBarProps = {
 	readonly onToggleLeftSidebar?: () => void;
@@ -56,10 +57,7 @@ export function TopBar({
 				>
 					<PanelToggleIcon side="right" isActive={isRightSidebarVisible} />
 				</Button>
-				<span className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-neutral-900">
-					<GitBranch className="h-3.5 w-3.5" />
-					main
-				</span>
+				<VersionSwitcher />
 			</div>
 			<div className="flex items-center gap-0.5">
 				<Button
