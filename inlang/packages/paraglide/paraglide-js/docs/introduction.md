@@ -56,7 +56,7 @@ Paraglide JS is built on top of the [open inlang file format](https://github.com
 <doc-links>
   <doc-link title="Sherlock" description="VSCode extension" icon="twemoji:detective" href="https://inlang.com/m/r7kp499g/app-inlang-ideExtension"></doc-link>
   <doc-link title="CLI" description="Machine translate" icon="garden:terminal-cli-fill-16" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
-  <doc-link title="Fink" description="CAT editor for translators" icon="fxemoji:bird" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
+  <doc-link title="Fink" description="CAT editor for translators" icon="fxemoji:bird" href="https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor"></doc-link>
   <doc-link title="Parrot" description="Manage translations in Figma" icon="twemoji:parrot" href="https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin"></doc-link>
   <doc-link icon="material-symbols-light:travel-explore-rounded" title="Explore more" href="https://inlang.com/c/apps"></doc-link>
 </doc-links>
