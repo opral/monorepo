@@ -9,7 +9,7 @@ test("rewrites top-level lix_internal_state_vtable reference", () => {
 	expect(rewritten.trim().startsWith("WITH")).toBe(true);
 	expect(rewritten).toContain("lix_internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain(
-		"lix_internal_state_cache_lix_version_descriptor"
+		"lix_internal_state_cache_v1_lix_version_descriptor"
 	);
 	expect(rewritten).toContain(
 		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable"
@@ -30,7 +30,7 @@ test("omits cache arms when no cache tables exist", () => {
 		existingCacheTables: new Set(),
 	});
 
-	expect(rewritten).not.toContain("lix_internal_state_cache_lix_key_value");
+	expect(rewritten).not.toContain("lix_internal_state_cache_v1_lix_key_value");
 	// Should still include other sources like untracked rows
 	expect(rewritten).toContain("lix_internal_state_all_untracked");
 	// Ensure cache-specific priorities are absent
@@ -41,10 +41,10 @@ test("omits cache arms when no cache tables exist", () => {
 test("includes only known cache tables", () => {
 	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key IN ('lix_key_value', 'missing_schema')`;
 	const rewritten = rewriteSql(sql, {
-		existingCacheTables: new Set(["lix_internal_state_cache_lix_key_value"]),
+		existingCacheTables: new Set(["lix_internal_state_cache_v1_lix_key_value"]),
 	});
 
-	expect(rewritten).toContain("lix_internal_state_cache_lix_key_value");
+	expect(rewritten).toContain("lix_internal_state_cache_v1_lix_key_value");
 	expect(rewritten).not.toContain("lix_internal_state_cache_missing_schema");
 });
 

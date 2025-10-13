@@ -69,7 +69,7 @@ export function createSchemaCacheTable(args: {
 	});
 
 	// Extra expression indexes for descriptor cache
-	if (tableName === "lix_internal_state_cache_lix_version_descriptor") {
+	if (tableName === "lix_internal_state_cache_v1_lix_version_descriptor") {
 		// Speed up recursive inheritance walks by indexing the parent pointer extracted from JSON
 		engine.executeSync({
 			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_inherits_from
@@ -90,5 +90,5 @@ export function createSchemaCacheTable(args: {
 /** Utility to sanitize a schema_key for use in a physical table name */
 export function schemaKeyToCacheTableName(schema_key: string): string {
 	const sanitized = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-	return `lix_internal_state_cache_${sanitized}`;
+	return `lix_internal_state_cache_v1_${sanitized}`;
 }

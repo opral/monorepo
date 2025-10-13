@@ -11,6 +11,7 @@ import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { updateStateCache } from "../cache/update-state-cache.js";
+import { updateStateCacheV2 } from "../cache-v2/update-state-cache.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { generateCommit } from "./generate-commit.js";
 import { setHasOpenTransaction } from "./vtable.js";
@@ -30,7 +31,10 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
  * // All pending changes are now persisted
  */
 export function commit(args: {
-	engine: Pick<LixEngine, "hooks" | "executeSync" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"hooks" | "executeSync" | "runtimeCacheRef" | "sqlite"
+	>;
 }): number {
 	const engine = args.engine;
 	const transactionTimestamp = getTimestampSync({ engine: engine });
@@ -542,6 +546,10 @@ export function commit(args: {
 			engine: engine,
 			changes: genRes.materializedState,
 		});
+		// updateStateCacheV2({
+		// 	engine,
+		// 	changes: genRes.materializedState,
+		// });
 	}
 
 	// Delete untracked state for any tracked changes that were committed

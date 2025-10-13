@@ -315,15 +315,18 @@ test("derives commit edges and change sets", async () => {
 
 			updateStateCacheV2({ engine: lix.engine!, changes: [change] });
 
-			const edgeRows = selectCacheRows(
-				lix.engine!.sqlite,
-				"lix_commit_edge",
-				"1.0",
-				{
-					versionId: "global",
-				}
-			);
-			expect(edgeRows).toHaveLength(2);
+		const edgeRows = selectCacheRows(
+			lix.engine!.sqlite,
+			"lix_commit_edge",
+			"1.0",
+			{
+				versionId: "global",
+			}
+		);
+		const relevantEdges = edgeRows.filter(
+			(row) => row.child_id === "commit-987"
+		);
+		expect(relevantEdges).toHaveLength(2);
 
 			const changeSetRows = selectCacheRows(
 				lix.engine!.sqlite,

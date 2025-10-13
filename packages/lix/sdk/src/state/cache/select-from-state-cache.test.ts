@@ -5,7 +5,7 @@ import { selectFromStateCache } from "./select-from-state-cache.js";
 test("routes to the physical cache table for the provided schema key", () => {
 	const compiled = selectFromStateCache("lix_change_set").selectAll().compile();
 
-	expect(compiled.sql).toContain("lix_internal_state_cache_lix_change_set");
+	expect(compiled.sql).toContain("lix_internal_state_cache_v1_lix_change_set");
 });
 
 test("exposes raw cache columns including snapshot content", () => {
@@ -35,15 +35,15 @@ test("supports Kysely unions between independent cache builders", () => {
 		.unionAll(selectFromStateCache("lix_commit").select(["entity_id"]));
 
 	const compiled = unionQuery.compile();
-	expect(compiled.sql).toContain("lix_internal_state_cache_lix_change_set");
-	expect(compiled.sql).toContain("lix_internal_state_cache_lix_commit");
+	expect(compiled.sql).toContain("lix_internal_state_cache_v1_lix_change_set");
+	expect(compiled.sql).toContain("lix_internal_state_cache_v1_lix_commit");
 	expect(compiled.sql).toMatch(/union all/i);
 });
 
 test("supports standard joins for advanced routing queries", () => {
 	const compiled = selectFromStateCache("lix_change_set")
 		.innerJoin(
-			sql`lix_internal_state_cache_lix_commit`.as("commit_cache"),
+			sql`lix_internal_state_cache_v1_lix_commit`.as("commit_cache"),
 			(join) =>
 				join.onRef(
 					"lix_internal_state_cache_routed.entity_id",
@@ -58,7 +58,7 @@ test("supports standard joins for advanced routing queries", () => {
 		.compile();
 
 	expect(compiled.sql).toMatch(
-		/inner join\s+lix_internal_state_cache_lix_commit\s+as\s+"commit_cache"/i
+		/inner join\s+lix_internal_state_cache_v1_lix_commit\s+as\s+"commit_cache"/i
 	);
 	expect(compiled.sql).toMatch(
 		/"lix_internal_state_cache_routed"\."entity_id"/

@@ -2,6 +2,10 @@ import type { LixEngine } from "../../engine/boot.js";
 
 const tableCacheMap = new WeakMap<object, Set<string>>();
 const columnCacheMap = new WeakMap<object, Map<string, Set<string>>>();
+const tableMetadataMap = new WeakMap<
+	object,
+	Map<string, { schemaKey: string; schemaVersion: string }>
+>();
 
 function getTableCache(args: { engine: Pick<LixEngine, "runtimeCacheRef"> }): Set<string> {
 	let cache = tableCacheMap.get(args.engine.runtimeCacheRef);
@@ -19,6 +23,17 @@ function getColumnCache(
 	if (!cache) {
 		cache = new Map<string, Set<string>>();
 		columnCacheMap.set(args.engine.runtimeCacheRef, cache);
+	}
+	return cache;
+}
+
+function getTableMetadataCache(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+}): Map<string, { schemaKey: string; schemaVersion: string }> {
+	let cache = tableMetadataMap.get(args.engine.runtimeCacheRef);
+	if (!cache) {
+		cache = new Map();
+		tableMetadataMap.set(args.engine.runtimeCacheRef, cache);
 	}
 	return cache;
 }
@@ -48,6 +63,35 @@ export function clearStateCacheV2Columns(args: {
 }): void {
 	const columnCache = getColumnCache({ engine: args.engine });
 	columnCache.delete(args.tableName);
+}
+
+export function registerStateCacheV2TableMetadata(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+	tableName: string;
+	schemaKey: string;
+	schemaVersion: string;
+}): void {
+	const metadataCache = getTableMetadataCache({ engine: args.engine });
+	metadataCache.set(args.tableName, {
+		schemaKey: args.schemaKey,
+		schemaVersion: args.schemaVersion,
+	});
+}
+
+export function getStateCacheV2TableMetadata(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+	tableName: string;
+}): { schemaKey: string; schemaVersion: string } | undefined {
+	const metadataCache = getTableMetadataCache({ engine: args.engine });
+	return metadataCache.get(args.tableName);
+}
+
+export function clearStateCacheV2TableMetadata(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+	tableName: string;
+}): void {
+	const metadataCache = getTableMetadataCache({ engine: args.engine });
+	metadataCache.delete(args.tableName);
 }
 
 function fetchTableColumns(args: {

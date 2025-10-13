@@ -603,7 +603,7 @@ function buildCacheRouting(
 	if (schemaKeys.length > 0) {
 		for (const key of schemaKeys) {
 			uniqueCandidates.add(
-				`lix_internal_state_cache_${sanitizeSchemaKey(key)}`
+				`lix_internal_state_cache_v1_${sanitizeSchemaKey(key)}`
 			);
 		}
 	} else if (!existingCacheTables) {
@@ -612,7 +612,7 @@ function buildCacheRouting(
 		uniqueCandidates.add("lix_internal_state_cache");
 	} else {
 		for (const name of existingCacheTables) {
-			if (name.startsWith("lix_internal_state_cache_")) {
+            if (name.startsWith("lix_internal_state_cache_v1_")) {
 				uniqueCandidates.add(name);
 			}
 		}
@@ -687,7 +687,7 @@ function buildSeededVersionCtesFromLiteral(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM lix_internal_state_cache_lix_version_descriptor desc
+		    FROM lix_internal_state_cache_v1_lix_version_descriptor desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -730,7 +730,7 @@ function buildSeededVersionCtesFromToken(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM lix_internal_state_cache_lix_version_descriptor desc
+		    FROM lix_internal_state_cache_v1_lix_version_descriptor desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -960,7 +960,7 @@ function buildUnseededVersionCtes(): VersionCteResult {
         SELECT
           json_extract(desc.snapshot_content, '$.id') AS version_id,
           json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-        FROM lix_internal_state_cache_lix_version_descriptor desc
+        FROM lix_internal_state_cache_v1_lix_version_descriptor desc
       ),
       version_inheritance(version_id, ancestor_version_id) AS (
         SELECT

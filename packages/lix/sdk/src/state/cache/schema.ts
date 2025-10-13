@@ -4,6 +4,11 @@ import {
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "./create-schema-cache-table.js";
+import { selectFromStateCacheV2 } from "../cache-v2/select-from-state-cache.js";
+import {
+	getStateCacheV2Columns,
+	getStateCacheV2TableMetadata,
+} from "../cache-v2/schema.js";
 
 export type InternalStateCache = InternalStateCacheTable;
 
@@ -41,6 +46,26 @@ const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	commit_id TEXT
 ) WITHOUT ROWID;`;
 
+const LEGACY_TO_PHYSICAL_COLUMNS: Record<string, string> = {
+	entity_id: "lixcol_entity_id",
+	schema_key: "lixcol_schema_key",
+	file_id: "lixcol_file_id",
+	version_id: "lixcol_version_id",
+	plugin_key: "lixcol_plugin_key",
+	snapshot_content: "snapshot_content",
+	schema_version: "lixcol_schema_version",
+	created_at: "lixcol_created_at",
+	updated_at: "lixcol_updated_at",
+	inherited_from_version_id: "lixcol_inherited_from_version_id",
+	inheritance_delete_marker: "lixcol_is_tombstone",
+	change_id: "lixcol_change_id",
+	commit_id: "lixcol_commit_id",
+};
+
+function quoteIdentifier(value: string): string {
+	return `"${value.replace(/"/g, '""')}"`;
+}
+
 // Cache of physical tables scoped to each Lix instance
 // Using WeakMap ensures proper cleanup when Lix instances are garbage collected
 const stateCacheV2TablesMap = new WeakMap<object, Set<string>>();
@@ -67,7 +92,7 @@ export function applyStateCacheV2Schema(args: {
 
 	// Initialize cache with existing tables on startup
 	const existingTables = sqlite.exec({
-		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_%'`,
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_v1_%'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -297,19 +322,15 @@ export function applyStateCacheV2Schema(args: {
 						/[^a-zA-Z0-9]/g,
 						"_"
 					);
-					const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
-					// Check if table exists
-					const tableExists = sqlite.exec({
-						sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
-						bind: [tableName],
-						returnValue: "resultRows",
-					});
+			const matchingTables = sqlite.exec({
+				sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE ?`,
+				bind: [`lix_internal_state_cache_v1_${sanitizedSchemaKey}%`],
+				returnValue: "resultRows",
+			}) as Array<[string]> | undefined;
 
-					if (tableExists && tableExists.length > 0) {
-						cursorState.tables = [tableName];
-					} else {
-						cursorState.tables = [];
-					}
+			cursorState.tables = matchingTables
+				? matchingTables.map((row) => row[0] as string).sort()
+				: [];
 				} else {
 					// No schema_key filter - need to query all cache tables
 					cursorState.tables = getPhysicalTables(sqlite, tableCache);
@@ -326,7 +347,7 @@ export function applyStateCacheV2Schema(args: {
 
 				// Load first non-empty table if available
 				if (cursorState.tables.length > 0) {
-					loadNextTable(sqlite, cursorState, filters);
+					loadNextTable(sqlite, cursorState, filters, args.engine);
 					// Skip empty tables at the start
 					while (
 						cursorState.currentRows.length === 0 &&
@@ -334,7 +355,7 @@ export function applyStateCacheV2Schema(args: {
 					) {
 						cursorState.currentTableIndex++;
 						cursorState.currentRowIndex = 0;
-						loadNextTable(sqlite, cursorState, filters);
+						loadNextTable(sqlite, cursorState, filters, args.engine);
 					}
 				}
 
@@ -364,7 +385,12 @@ export function applyStateCacheV2Schema(args: {
 					// Load next table if available
 					if (cursorState.currentTableIndex < cursorState.tables.length) {
 						// Use the stored filters from xFilter
-						loadNextTable(sqlite, cursorState, cursorState.filters || {});
+					loadNextTable(
+						sqlite,
+						cursorState,
+						cursorState.filters || {},
+						args.engine
+					);
 						// If the table we just loaded is also empty, continue loop
 					}
 				}
@@ -494,7 +520,7 @@ function getPhysicalTables(
 ): string[] {
 	// Always refresh cache from database since direct function may have created new tables
 	const existingTables = sqlite.exec({
-		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_%'`,
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_v1_%'`,
 		returnValue: "resultRows",
 	}) as any[];
 
@@ -515,7 +541,8 @@ function getPhysicalTables(
 function loadNextTable(
 	sqlite: SqliteWasmDatabase,
 	cursorState: any,
-	filters: Record<string, any>
+	filters: Record<string, any>,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">
 ): void {
 	if (cursorState.currentTableIndex >= cursorState.tables.length) {
 		return;
@@ -523,18 +550,69 @@ function loadNextTable(
 
 	const tableName = cursorState.tables[cursorState.currentTableIndex];
 
-	// Build query with filters (except schema_key which is implicit in table name)
-	let sql = `SELECT * FROM ${tableName}`;
+	const columnNames = getStateCacheV2Columns({
+		engine,
+		tableName,
+	});
+
+	const tableMetadata = getStateCacheV2TableMetadata({
+		engine,
+		tableName,
+	});
+
+	if (
+		tableMetadata &&
+		columnNames.has("lixcol_entity_id") &&
+		columnNames.has("lixcol_schema_key")
+	) {
+		let builder = selectFromStateCacheV2(
+			tableMetadata.schemaKey,
+			tableMetadata.schemaVersion
+		).selectAll();
+
+		for (const [column, value] of Object.entries(filters)) {
+			if (column === "schema_key") continue;
+			builder = builder.where(column as any, "=", value);
+		}
+
+		const compiled = builder.compile();
+		const result = sqlite.exec({
+			sql: compiled.sql,
+			bind: compiled.parameters as any[],
+			returnValue: "resultRows",
+			rowMode: "object",
+		});
+		cursorState.currentRows = result || [];
+		return;
+	}
+
+	const aliasExpressions: string[] = [];
+	for (const [legacy, physical] of Object.entries(LEGACY_TO_PHYSICAL_COLUMNS)) {
+		if (legacy === "snapshot_content") {
+			continue;
+		}
+		const physicalColumn = columnNames.has(physical)
+			? physical
+			: columnNames.has(legacy)
+				? legacy
+				: null;
+		if (physicalColumn && physicalColumn !== legacy) {
+			aliasExpressions.push(
+				`t.${quoteIdentifier(physicalColumn)} AS ${quoteIdentifier(legacy)}`
+			);
+		}
+	}
+	const aliasSql =
+		aliasExpressions.length > 0 ? `, ${aliasExpressions.join(", ")}` : "";
+
+	let sql = `SELECT t.*${aliasSql} FROM ${tableName} AS t`;
 	const whereClauses: string[] = [];
 	const bindParams: any[] = [];
 
-	// Don't filter tombstones here - let the view decide what to filter
-	// This allows the resolved view to check for tombstones when needed
-
 	for (const [column, value] of Object.entries(filters)) {
 		if (column !== "schema_key") {
-			// Skip schema_key as it's implicit
-			whereClauses.push(`${column} = ?`);
+			const physicalColumn = resolvePhysicalColumn(columnNames, column);
+			whereClauses.push(`t.${quoteIdentifier(physicalColumn)} = ?`);
 			bindParams.push(value);
 		}
 	}
@@ -551,4 +629,18 @@ function loadNextTable(
 	});
 
 	cursorState.currentRows = result || [];
+}
+
+function resolvePhysicalColumn(
+	columnNames: Set<string>,
+	column: string
+): string {
+	if (columnNames.has(column)) {
+		return column;
+	}
+	const mapped = LEGACY_TO_PHYSICAL_COLUMNS[column];
+	if (mapped && columnNames.has(mapped)) {
+		return mapped;
+	}
+	return column;
 }

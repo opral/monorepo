@@ -11,7 +11,7 @@ test("routes to the physical cache table for the provided schema key", () => {
 		.compile();
 
 	expect(compiled.sql).toContain(
-		"lix_internal_state_cache_lix_change_set_v1_0"
+		"lix_internal_state_cache_v2_lix_change_set_v1_0"
 	);
 });
 
@@ -71,16 +71,16 @@ test("supports Kysely unions between independent cache builders", () => {
 
 	const compiled = unionQuery.compile();
 	expect(compiled.sql).toContain(
-		"lix_internal_state_cache_lix_change_set_v1_0"
+		"lix_internal_state_cache_v2_lix_change_set_v1_0"
 	);
-	expect(compiled.sql).toContain("lix_internal_state_cache_lix_commit_v1_0");
+	expect(compiled.sql).toContain("lix_internal_state_cache_v2_lix_commit_v1_0");
 	expect(compiled.sql).toMatch(/union all/i);
 });
 
 test("supports standard joins for advanced routing queries", () => {
 	const compiled = selectFromStateCacheV2("lix_change_set", VERSION)
 		.innerJoin(
-			sql`lix_internal_state_cache_lix_commit_v1_0`.as("commit_cache"),
+			sql`lix_internal_state_cache_v2_lix_commit_v1_0`.as("commit_cache"),
 			(join) =>
 				join.onRef(
 					"lix_internal_state_cache_routed.lixcol_entity_id",
@@ -95,7 +95,7 @@ test("supports standard joins for advanced routing queries", () => {
 		.compile();
 
 	expect(compiled.sql).toMatch(
-		/inner join\s+lix_internal_state_cache_lix_commit_v1_0\s+as\s+"commit_cache"/i
+		/inner join\s+lix_internal_state_cache_v2_lix_commit_v1_0\s+as\s+"commit_cache"/i
 	);
 	expect(compiled.sql).toMatch(
 		/"lix_internal_state_cache_routed"\."lixcol_entity_id"/

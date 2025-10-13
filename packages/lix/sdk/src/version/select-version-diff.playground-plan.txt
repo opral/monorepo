@@ -178,7 +178,7 @@ lix_internal_state_vtable_rewritten AS (
       SELECT
         json_extract(desc.snapshot_content, '$.id') AS version_id,
         json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-      FROM lix_internal_state_cache_lix_version_descriptor desc
+      FROM lix_internal_state_cache_v1_lix_version_descriptor desc
     ),
     version_inheritance(version_id, ancestor_version_id) AS (
       SELECT
@@ -249,25 +249,25 @@ lix_internal_state_vtable_rewritten AS (
         c.commit_id,
         NULL AS metadata,
         3 AS priority
-      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_descriptor
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_descriptor
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit_edge
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit_edge
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_tip
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_tip
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set_element
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_label
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_label
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_stored_schema
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_stored_schema
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_key_value
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_key_value
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_diff_entity) c
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_bench_diff_entity) c
       WHERE (
         (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
         (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
@@ -294,25 +294,25 @@ lix_internal_state_vtable_rewritten AS (
         NULL AS metadata,
         4 AS priority
       FROM version_inheritance vi
-      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_descriptor
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_descriptor
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_commit_edge
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit_edge
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_version_tip
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_tip
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_change_set_element
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_label
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_label
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_stored_schema
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_stored_schema
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_lix_key_value
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_lix_key_value
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_diff_entity) isc ON isc.version_id = vi.ancestor_version_id
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_v1_bench_diff_entity) isc ON isc.version_id = vi.ancestor_version_id
       WHERE isc.inheritance_delete_marker = 0
         AND isc.snapshot_content IS NOT NULL
 
@@ -578,7 +578,7 @@ FROM joined
     "id": 61,
     "parent": 59,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 103,
@@ -590,7 +590,7 @@ FROM joined
     "id": 105,
     "parent": 103,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 147,
@@ -602,7 +602,7 @@ FROM joined
     "id": 149,
     "parent": 147,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 191,
@@ -614,7 +614,7 @@ FROM joined
     "id": 193,
     "parent": 191,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 235,
@@ -626,7 +626,7 @@ FROM joined
     "id": 237,
     "parent": 235,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 279,
@@ -638,7 +638,7 @@ FROM joined
     "id": 281,
     "parent": 279,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 323,
@@ -662,7 +662,7 @@ FROM joined
     "id": 337,
     "parent": 328,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=?)"
   },
   {
     "id": 345,
@@ -674,7 +674,7 @@ FROM joined
     "id": 354,
     "parent": 345,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_tomb_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_tomb_vfe (version_id=?)"
   },
   {
     "id": 394,
@@ -698,7 +698,7 @@ FROM joined
     "id": 408,
     "parent": 399,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_live_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_live_vfe (version_id=?)"
   },
   {
     "id": 416,
@@ -710,7 +710,7 @@ FROM joined
     "id": 425,
     "parent": 416,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_tomb_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_tomb_vfe (version_id=?)"
   },
   {
     "id": 465,
@@ -722,7 +722,7 @@ FROM joined
     "id": 467,
     "parent": 465,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 509,
@@ -734,7 +734,7 @@ FROM joined
     "id": 511,
     "parent": 509,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 553,
@@ -770,7 +770,7 @@ FROM joined
     "id": 565,
     "parent": 562,
     "notused": 28,
-    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent"
   },
   {
     "id": 590,
@@ -788,13 +788,13 @@ FROM joined
     "id": 594,
     "parent": 590,
     "notused": 20,
-    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
+    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
     "id": 615,
     "parent": 555,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 625,
@@ -818,7 +818,7 @@ FROM joined
     "id": 680,
     "parent": 676,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 688,
@@ -842,7 +842,7 @@ FROM joined
     "id": 743,
     "parent": 739,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 751,
@@ -866,7 +866,7 @@ FROM joined
     "id": 806,
     "parent": 802,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 814,
@@ -890,7 +890,7 @@ FROM joined
     "id": 869,
     "parent": 865,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 877,
@@ -914,7 +914,7 @@ FROM joined
     "id": 932,
     "parent": 928,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 940,
@@ -938,7 +938,7 @@ FROM joined
     "id": 996,
     "parent": 991,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
     "id": 1002,
@@ -956,7 +956,7 @@ FROM joined
     "id": 1045,
     "parent": 1040,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_live_vfe"
   },
   {
     "id": 1051,
@@ -974,7 +974,7 @@ FROM joined
     "id": 1093,
     "parent": 1089,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 1101,
@@ -998,7 +998,7 @@ FROM joined
     "id": 1156,
     "parent": 1152,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 1164,
@@ -1112,7 +1112,7 @@ FROM joined
     "id": 1470,
     "parent": 1468,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 1510,
@@ -1124,7 +1124,7 @@ FROM joined
     "id": 1512,
     "parent": 1510,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 1552,
@@ -1136,7 +1136,7 @@ FROM joined
     "id": 1554,
     "parent": 1552,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 1594,
@@ -1148,7 +1148,7 @@ FROM joined
     "id": 1596,
     "parent": 1594,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 1636,
@@ -1160,7 +1160,7 @@ FROM joined
     "id": 1638,
     "parent": 1636,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 1678,
@@ -1172,7 +1172,7 @@ FROM joined
     "id": 1680,
     "parent": 1678,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 1720,
@@ -1184,7 +1184,7 @@ FROM joined
     "id": 1722,
     "parent": 1720,
     "notused": 216,
-    "detail": "SCAN lix_internal_state_cache_lix_label"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_label"
   },
   {
     "id": 1762,
@@ -1196,7 +1196,7 @@ FROM joined
     "id": 1764,
     "parent": 1762,
     "notused": 216,
-    "detail": "SCAN lix_internal_state_cache_lix_stored_schema"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
   },
   {
     "id": 1804,
@@ -1208,7 +1208,7 @@ FROM joined
     "id": 1806,
     "parent": 1804,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 1846,
@@ -1220,7 +1220,7 @@ FROM joined
     "id": 1848,
     "parent": 1846,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 1888,
@@ -1256,7 +1256,7 @@ FROM joined
     "id": 1900,
     "parent": 1897,
     "notused": 28,
-    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent"
   },
   {
     "id": 1925,
@@ -1274,13 +1274,13 @@ FROM joined
     "id": 1929,
     "parent": 1925,
     "notused": 20,
-    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
+    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
     "id": 1950,
     "parent": 1890,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 1958,
@@ -1298,7 +1298,7 @@ FROM joined
     "id": 1998,
     "parent": 1994,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 2004,
@@ -1316,7 +1316,7 @@ FROM joined
     "id": 2044,
     "parent": 2040,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 2050,
@@ -1334,7 +1334,7 @@ FROM joined
     "id": 2090,
     "parent": 2086,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 2096,
@@ -1352,7 +1352,7 @@ FROM joined
     "id": 2136,
     "parent": 2132,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 2142,
@@ -1376,13 +1376,13 @@ FROM joined
     "id": 2186,
     "parent": 2178,
     "notused": 0,
-    "detail": "BLOOM FILTER ON lix_internal_state_cache_lix_change_set_element (inheritance_delete_marker=?)"
+    "detail": "BLOOM FILTER ON lix_internal_state_cache_v1_lix_change_set_element (inheritance_delete_marker=?)"
   },
   {
     "id": 2209,
     "parent": 2178,
     "notused": 47,
-    "detail": "SEARCH lix_internal_state_cache_lix_change_set_element USING AUTOMATIC PARTIAL COVERING INDEX (inheritance_delete_marker=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING AUTOMATIC PARTIAL COVERING INDEX (inheritance_delete_marker=?)"
   },
   {
     "id": 2250,
@@ -1394,7 +1394,7 @@ FROM joined
     "id": 2255,
     "parent": 2250,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
     "id": 2261,
@@ -1412,7 +1412,7 @@ FROM joined
     "id": 2302,
     "parent": 2297,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_live_vfe"
   },
   {
     "id": 2308,
@@ -1430,7 +1430,7 @@ FROM joined
     "id": 2348,
     "parent": 2344,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 2354,
@@ -1448,7 +1448,7 @@ FROM joined
     "id": 2394,
     "parent": 2390,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 2400,
@@ -1598,7 +1598,7 @@ FROM joined
     "id": 2884,
     "parent": 2882,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 2926,
@@ -1610,7 +1610,7 @@ FROM joined
     "id": 2928,
     "parent": 2926,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 2970,
@@ -1622,7 +1622,7 @@ FROM joined
     "id": 2972,
     "parent": 2970,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 3014,
@@ -1634,7 +1634,7 @@ FROM joined
     "id": 3016,
     "parent": 3014,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 3058,
@@ -1646,7 +1646,7 @@ FROM joined
     "id": 3060,
     "parent": 3058,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 3102,
@@ -1658,7 +1658,7 @@ FROM joined
     "id": 3104,
     "parent": 3102,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 3146,
@@ -1682,7 +1682,7 @@ FROM joined
     "id": 3160,
     "parent": 3151,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=?)"
   },
   {
     "id": 3168,
@@ -1694,7 +1694,7 @@ FROM joined
     "id": 3177,
     "parent": 3168,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_tomb_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_tomb_vfe (version_id=?)"
   },
   {
     "id": 3217,
@@ -1718,7 +1718,7 @@ FROM joined
     "id": 3231,
     "parent": 3222,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_live_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_live_vfe (version_id=?)"
   },
   {
     "id": 3239,
@@ -1730,7 +1730,7 @@ FROM joined
     "id": 3248,
     "parent": 3239,
     "notused": 24,
-    "detail": "SEARCH lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_tomb_vfe (version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_tomb_vfe (version_id=?)"
   },
   {
     "id": 3288,
@@ -1742,7 +1742,7 @@ FROM joined
     "id": 3290,
     "parent": 3288,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 3332,
@@ -1754,7 +1754,7 @@ FROM joined
     "id": 3334,
     "parent": 3332,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 3376,
@@ -1790,7 +1790,7 @@ FROM joined
     "id": 3388,
     "parent": 3385,
     "notused": 28,
-    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent"
   },
   {
     "id": 3413,
@@ -1808,13 +1808,13 @@ FROM joined
     "id": 3417,
     "parent": 3413,
     "notused": 20,
-    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent (<expr>=?)"
+    "detail": "SEARCH desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent (<expr>=?)"
   },
   {
     "id": 3438,
     "parent": 3378,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_version_descriptor"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
     "id": 3448,
@@ -1838,7 +1838,7 @@ FROM joined
     "id": 3503,
     "parent": 3499,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_commit"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
     "id": 3511,
@@ -1862,7 +1862,7 @@ FROM joined
     "id": 3566,
     "parent": 3562,
     "notused": 46,
-    "detail": "SCAN lix_internal_state_cache_lix_commit_edge"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
     "id": 3574,
@@ -1886,7 +1886,7 @@ FROM joined
     "id": 3629,
     "parent": 3625,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_lix_version_tip"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 3637,
@@ -1910,7 +1910,7 @@ FROM joined
     "id": 3692,
     "parent": 3688,
     "notused": 52,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 3700,
@@ -1934,7 +1934,7 @@ FROM joined
     "id": 3755,
     "parent": 3751,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_lix_change_set_element"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 3763,
@@ -1958,7 +1958,7 @@ FROM joined
     "id": 3819,
     "parent": 3814,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_label USING INDEX idx_lix_internal_state_cache_lix_label_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
     "id": 3825,
@@ -1976,7 +1976,7 @@ FROM joined
     "id": 3868,
     "parent": 3863,
     "notused": 24,
-    "detail": "SCAN lix_internal_state_cache_lix_stored_schema USING INDEX idx_lix_internal_state_cache_lix_stored_schema_live_vfe"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_live_vfe"
   },
   {
     "id": 3874,
@@ -1994,7 +1994,7 @@ FROM joined
     "id": 3916,
     "parent": 3912,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_lix_key_value"
+    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
     "id": 3924,
@@ -2018,7 +2018,7 @@ FROM joined
     "id": 3979,
     "parent": 3975,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_bench_diff_entity"
+    "detail": "SCAN lix_internal_state_cache_v1_bench_diff_entity"
   },
   {
     "id": 3987,

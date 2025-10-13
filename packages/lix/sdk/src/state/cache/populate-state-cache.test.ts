@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
+import { schemaKeyToCacheTableName } from "./create-schema-cache-table.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 import { clearStateCache } from "./clear-state-cache.js";
@@ -65,7 +66,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_test table
 	const lixTestTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -76,7 +77,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_other table
 	const lixOtherTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_other ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_other")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -140,7 +141,7 @@ test("populates v2 cache with version filter", async () => {
 
 	// Verify both versions exist
 	const allData = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -158,7 +159,7 @@ test("populates v2 cache with version filter", async () => {
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
 	const afterPopulate = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -223,15 +224,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// Verify data exists in all tables
 	const schemaA = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_a")}`,
 		returnValue: "resultRows",
 	});
 	const schemaB = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_b")}`,
 		returnValue: "resultRows",
 	});
 	const schemaC = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_c")}`,
 		returnValue: "resultRows",
 	});
 
@@ -244,15 +245,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// All tables should be empty now (no materializer data)
 	const schemaAAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_a")}`,
 		returnValue: "resultRows",
 	});
 	const schemaBAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_b")}`,
 		returnValue: "resultRows",
 	});
 	const schemaCAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_c")}`,
 		returnValue: "resultRows",
 	});
 
@@ -505,7 +506,7 @@ test("global version entities are populated when populating child versions", asy
 	// Check the physical cache directly: the parent/global authored entry
 	// should be materialized in its own version's cache table.
 	const cacheEntries = await db
-		.selectFrom("lix_internal_state_cache_test_entity" as any)
+		.selectFrom(schemaKeyToCacheTableName("test_entity") as any)
 		.where("entity_id", "=", "global_entity_1")
 		.select([
 			"entity_id",

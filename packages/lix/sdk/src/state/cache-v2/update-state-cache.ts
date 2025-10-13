@@ -10,7 +10,11 @@ import {
 	propertyNameToColumn,
 	schemaKeyToCacheTableNameV2,
 } from "./create-schema-cache-table.js";
-import { getStateCacheV2Tables, getStateCacheV2Columns } from "./schema.js";
+import {
+	getStateCacheV2Tables,
+	getStateCacheV2Columns,
+	registerStateCacheV2TableMetadata,
+} from "./schema.js";
 import { CACHE_COLUMNS, PRIMARY_KEY_COLUMNS } from "./cache-columns.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 import {
@@ -512,6 +516,13 @@ function initializeSchemaMetadata(args: {
 	if (!tables.has(tableName)) {
 		tables.add(tableName);
 	}
+
+	registerStateCacheV2TableMetadata({
+		engine: args.engine,
+		tableName,
+		schemaKey: args.schemaKey,
+		schemaVersion,
+	});
 
 	getStateCacheV2Columns({ engine: args.engine, tableName });
 

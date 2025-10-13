@@ -125,7 +125,7 @@ export function schemaKeyToCacheTableNameV2(
 ): string {
 	const sanitizedKey = sanitizeIdentifier(schema_key);
 	const versionSuffix = formatSchemaVersion(schema_version);
-	return `lix_internal_state_cache_${sanitizedKey}_${versionSuffix}`;
+	return `lix_internal_state_cache_v2_${sanitizedKey}_${versionSuffix}`;
 }
 
 type PropertyColumn = {

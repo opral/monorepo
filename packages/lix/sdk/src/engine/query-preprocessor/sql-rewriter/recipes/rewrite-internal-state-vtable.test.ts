@@ -44,7 +44,7 @@ test("hoists wide path with schema filters", () => {
 	const cte = buildHoistedInternalStateVtableCte([shape!]);
 	expect(cte).toBeTruthy();
 	expect(cte).toContain("lix_internal_state_vtable_rewritten AS");
-	expect(cte).toContain("lix_internal_state_cache_lix_key_value");
+	expect(cte).toContain("lix_internal_state_cache_v1_lix_key_value");
 	expect(cte).toContain("lix_key_value");
 });
 
@@ -59,7 +59,7 @@ test("prunes cache branches without physical tables", () => {
 		existingCacheTables: new Set(),
 	});
 	expect(cte).toBeTruthy();
-	expect(cte).not.toContain("lix_internal_state_cache_lix_key_value");
+	expect(cte).not.toContain("lix_internal_state_cache_v1_lix_key_value");
 	expect(cte).not.toContain("'CI' ||");
 	expect(cte).toContain("lix_internal_state_all_untracked");
 });

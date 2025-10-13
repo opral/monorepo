@@ -74,8 +74,7 @@ export function populateStateCacheV2(args: {
 	const existingTables = sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' 
-		      AND name LIKE 'lix_internal_state_cache_%' 
-		      AND name != 'lix_internal_state_cache'`,
+		      AND name LIKE 'lix_internal_state_cache_v2_%'`,
 		returnValue: "resultRows",
 	}) as any[];
 

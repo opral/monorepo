@@ -125,7 +125,7 @@ export function populateStateCache(args: {
 	for (const [schema_key, schemaRows] of rowsBySchema) {
 		// Sanitize schema_key for use in table name - must match update-state-cache.ts
 		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
+		const tableName = `lix_internal_state_cache_v1_${sanitizedSchemaKey}`;
 
 		// Ensure table exists (creates if needed, updates cache)
 		ensureTableExists(args.engine, tableName);

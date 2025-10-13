@@ -3,13 +3,9 @@ import { clearStateCacheV2 } from "./clear-state-cache.js";
 import { isStaleStateCacheV2 } from "./is-stale-state-cache.js";
 import { markStateCacheAsFreshV2 } from "./mark-state-cache-as-stale.js";
 import { openLix } from "../../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { Kysely } from "kysely";
 
 test("clearStateCacheV2 deletes all cache entries", async () => {
 	const lix = await openLix({});
-	const internalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
 	// Insert some data to populate cache
 	await lix.db
 		.insertInto("key_value")
@@ -19,13 +15,22 @@ test("clearStateCacheV2 deletes all cache entries", async () => {
 		})
 		.execute();
 
-	// Verify cache has entries
-	const cacheBeforeClear = await internalDb
-		.selectFrom("lix_internal_state_cache")
-		.selectAll()
-		.execute();
+	// Verify cache has entries in v2 tables
+	const cacheTables = lix.engine!.sqlite.exec({
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_v2_%'`,
+		returnValue: "resultRows",
+	}) as Array<[string]>;
 
-	expect(cacheBeforeClear.length).toBeGreaterThan(0);
+	expect(cacheTables.length).toBeGreaterThan(0);
+
+	for (const [tableName] of cacheTables) {
+		const before = lix.engine!.sqlite.exec({
+			sql: `SELECT COUNT(*) AS cnt FROM ${tableName}`,
+			returnValue: "resultRows",
+			rowMode: "object",
+		}) as Array<{ cnt: number }>;
+		expect(Number(before?.[0]?.cnt ?? 0)).toBeGreaterThan(0);
+	}
 
 	// Ensure the stale flag is false and cached before we clear it
 	markStateCacheAsFreshV2({ engine: lix.engine! });
@@ -35,12 +40,14 @@ test("clearStateCacheV2 deletes all cache entries", async () => {
 	clearStateCacheV2({ engine: lix.engine! });
 
 	// Verify cache is empty
-	const cacheAfterClear = await internalDb
-		.selectFrom("lix_internal_state_cache")
-		.selectAll()
-		.execute();
-
-	expect(cacheAfterClear.length).toBe(0);
+	for (const [tableName] of cacheTables) {
+		const after = lix.engine!.sqlite.exec({
+			sql: `SELECT COUNT(*) AS cnt FROM ${tableName}`,
+			returnValue: "resultRows",
+			rowMode: "object",
+		}) as Array<{ cnt: number }>;
+		expect(Number(after?.[0]?.cnt ?? 0)).toBe(0);
+	}
 
 	// Verify the cache is marked as stale
 	const isStale = isStaleStateCacheV2({

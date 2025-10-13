@@ -1,7 +1,6 @@
 import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { schemaKeyToCacheTableNameV2 } from "./create-schema-cache-table.js";
-import { CACHE_COLUMNS } from "./cache-columns.js";
 import {
 	getStateCacheSchemaProperties,
 	type CacheSchemaPropertyMetadata,
@@ -11,10 +10,43 @@ const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
 const SNAPSHOT_COLUMN = "snapshot_content" as const;
 
+const LEGACY_CACHE_COLUMNS = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"version_id",
+	"plugin_key",
+	"schema_version",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"inheritance_delete_marker",
+	"change_id",
+	"commit_id",
+] as const;
+
+const LEGACY_COLUMN_TO_PHYSICAL: Record<
+	(typeof LEGACY_CACHE_COLUMNS)[number],
+	string
+> = {
+	entity_id: "lixcol_entity_id",
+	schema_key: "lixcol_schema_key",
+	file_id: "lixcol_file_id",
+	version_id: "lixcol_version_id",
+	plugin_key: "lixcol_plugin_key",
+	schema_version: "lixcol_schema_version",
+	created_at: "lixcol_created_at",
+	updated_at: "lixcol_updated_at",
+	inherited_from_version_id: "lixcol_inherited_from_version_id",
+	inheritance_delete_marker: "lixcol_is_tombstone",
+	change_id: "lixcol_change_id",
+	commit_id: "lixcol_commit_id",
+} as const;
+
 const VIRTUAL_COLUMN_NAMES = [SNAPSHOT_COLUMN] as const;
 
 const SELECTABLE_COLUMNS = [
-	...CACHE_COLUMNS,
+	...LEGACY_CACHE_COLUMNS,
 	...VIRTUAL_COLUMN_NAMES,
 ] as const;
 
@@ -109,17 +141,26 @@ function formatProjection(
 		propertyMetadata: CacheSchemaPropertyMetadata[];
 	}
 ): string {
-	const identifier = quoteIdentifier(column);
+	const aliasIdentifier = quoteIdentifier(column);
 	if (column === SNAPSHOT_COLUMN) {
 		if (!options.includeTableColumn) {
-			return `CAST(NULL AS TEXT) AS ${identifier}`;
+			return `CAST(NULL AS TEXT) AS ${aliasIdentifier}`;
 		}
-		return `${buildSnapshotContentExpression(options.propertyMetadata)} AS ${identifier}`;
+		return `${buildSnapshotContentExpression(options.propertyMetadata)} AS ${aliasIdentifier}`;
 	}
 	if (options.includeTableColumn) {
-		return identifier;
+		const physical =
+			LEGACY_COLUMN_TO_PHYSICAL[column as keyof typeof LEGACY_COLUMN_TO_PHYSICAL];
+		if (physical) {
+			const physicalIdentifier = quoteIdentifier(physical);
+			if (physical === column) {
+				return physicalIdentifier;
+			}
+			return `${physicalIdentifier} AS ${aliasIdentifier}`;
+		}
+		return aliasIdentifier;
 	}
-	return `CAST(NULL AS TEXT) AS ${identifier}`;
+	return `CAST(NULL AS TEXT) AS ${aliasIdentifier}`;
 }
 
 function buildSnapshotContentExpression(

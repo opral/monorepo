@@ -741,7 +741,7 @@ export function applyStateVTable(
 										/[^a-zA-Z0-9]/g,
 										"_"
 									);
-									const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
+									const tableName = `lix_internal_state_cache_v1_${sanitizedSchemaKey}`;
 
 									// Check if table exists first
 									const tableExists = sqlite.exec({
