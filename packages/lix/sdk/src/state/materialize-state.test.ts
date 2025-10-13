@@ -12,6 +12,7 @@ import {
 	LixVersionTipSchema,
 	type LixVersionTip,
 } from "../version/schema-definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 function stripWriterKey<T extends Record<string, any> | null | undefined>(
 	row: T
@@ -20,6 +21,33 @@ function stripWriterKey<T extends Record<string, any> | null | undefined>(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { writer_key, metadata, ...rest } = row as any;
 	return rest as T;
+}
+
+const testEntitySchema = {
+	"x-lix-key": "test_entity",
+	"x-lix-version": "1.0",
+	type: "object",
+	nullable: true,
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+		value: { type: "string" },
+		status: { type: "string" },
+		data: { type: "string" },
+		active: { type: "boolean" },
+	},
+	required: ["id"],
+} as const satisfies LixSchemaDefinition;
+
+async function storeMaterializationTestSchemas(lix: {
+	db: any;
+}): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.onConflict((oc: any) => oc.doNothing())
+		.execute();
 }
 
 describe("lix_internal_materialization_version_tips", () => {
@@ -36,6 +64,7 @@ describe("lix_internal_materialization_version_tips", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create base version with state
 			await createVersion({ lix, id: "base-version" });
@@ -43,7 +72,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "base-entity",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "base-version",
@@ -72,7 +101,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-a",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-a",
@@ -94,7 +123,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-b",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-b",
@@ -158,6 +187,7 @@ describe("lix_internal_materialization_version_tips", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			const activeVersion =
 				await selectActiveVersion(lix).executeTakeFirstOrThrow();
@@ -190,6 +220,7 @@ describe("lix_internal_materialization_version_tips", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			const activeVersion =
 				await selectActiveVersion(lix).executeTakeFirstOrThrow();
@@ -208,7 +239,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					plugin_key: "mock-plugin",
@@ -246,6 +277,7 @@ describe("lix_internal_materialization_version_tips", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create two versions
 			await createVersion({ lix, id: "version-1" });
@@ -256,7 +288,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-1",
@@ -270,7 +302,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-2",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-2",
@@ -301,7 +333,7 @@ describe("lix_internal_materialization_version_tips", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-3",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-1",
@@ -353,6 +385,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMaterializationTestSchemas(lix);
 
 		// Insert a tracked key_value on active version to trigger a commit
 		const kvKey = "kv_for_author_mat";
@@ -420,6 +453,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMaterializationTestSchemas(lix);
 
 		// Create a new version from the current global tip
 		const { id: versionId } = await createVersion({
@@ -462,6 +496,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMaterializationTestSchemas(lix);
 
 		// Create version A
 		const versionA = await createVersion({ lix, id: "mat-tip-version-a" });
@@ -471,7 +506,7 @@ simulationTest(
 			.insertInto("state_all")
 			.values({
 				entity_id: "mat-entity-1",
-				schema_key: "mock_schema",
+				schema_key: "test_entity",
 				schema_version: "1.0",
 				file_id: "mat-file",
 				version_id: versionA.id,
@@ -520,6 +555,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			const initialVersion = await createVersion({
@@ -532,7 +568,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "linear-test-version",
@@ -557,7 +593,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-2",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "linear-test-version",
@@ -582,7 +618,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-3",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "linear-test-version",
@@ -669,6 +705,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create two versions that branch from a common commit
 			await createVersion({ lix, id: "branch-version-1" });
@@ -679,7 +716,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "common-entity",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "branch-version-1",
@@ -711,7 +748,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "branch1-entity",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "branch-version-1",
@@ -725,7 +762,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "branch2-entity",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "branch-version-2",
@@ -809,6 +846,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create version A
 			await createVersion({ lix, id: "merge-version-a" });
@@ -821,7 +859,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-a",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "merge-version-a",
@@ -835,7 +873,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-b",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "merge-version-b",
@@ -976,6 +1014,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create three versions
 			const versionA = await createVersion({ lix, id: "version-cycle-a" });
@@ -1045,6 +1084,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create three versions
 			await createVersion({ lix, id: "version-x" });
@@ -1056,7 +1096,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-x",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-x",
@@ -1069,7 +1109,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-y",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "version-y",
@@ -1148,6 +1188,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMaterializationTestSchemas(lix);
 
 		// Create two versions and commit one change in each to produce parent commits
 		const vA = await createVersion({ lix, id: "edge-test-a" });
@@ -1157,7 +1198,7 @@ simulationTest(
 			.insertInto("state_all")
 			.values({
 				entity_id: "edge-entity-a",
-				schema_key: "mock_entity",
+				schema_key: "test_entity",
 				schema_version: "1.0",
 				file_id: "edge-file",
 				version_id: vA.id,
@@ -1170,7 +1211,7 @@ simulationTest(
 			.insertInto("state_all")
 			.values({
 				entity_id: "edge-entity-b",
-				schema_key: "mock_entity",
+				schema_key: "test_entity",
 				schema_version: "1.0",
 				file_id: "edge-file",
 				version_id: vB.id,
@@ -1267,6 +1308,7 @@ simulationTest(
 		const lix = await openSimulatedLix({
 			keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 		});
+		await storeMaterializationTestSchemas(lix);
 
 		// Create a version and make two domain changes in a single statement
 		const v = await createVersion({ lix, id: "cse-dom-version" });
@@ -1276,7 +1318,7 @@ simulationTest(
 			.values([
 				{
 					entity_id: "dom-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "cse-file",
 					version_id: v.id,
@@ -1285,7 +1327,7 @@ simulationTest(
 				},
 				{
 					entity_id: "dom-2",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "cse-file",
 					version_id: v.id,
@@ -1336,7 +1378,7 @@ simulationTest(
 			.where(
 				sql`json_extract(snapshot_content, '$.schema_key')`,
 				"=",
-				"mock_entity" as any
+				"test_entity" as any
 			)
 			.execute();
 
@@ -1363,6 +1405,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			await createVersion({ lix, id: "latest-test-version" });
@@ -1373,12 +1416,16 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "latest-test-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", name: "Initial Name", value: 1 },
+					snapshot_content: {
+						id: "entity-1",
+						name: "Initial Name",
+						value: "1",
+					},
 				})
 				.execute();
 
@@ -1387,12 +1434,16 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "latest-test-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", name: "Updated Name", value: 2 },
+					snapshot_content: {
+						id: "entity-1",
+						name: "Updated Name",
+						value: "2",
+					},
 				})
 				.execute();
 
@@ -1401,12 +1452,16 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "latest-test-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", name: "Final Name", value: 3 },
+					snapshot_content: {
+						id: "entity-1",
+						name: "Final Name",
+						value: "3",
+					},
 				})
 				.execute();
 
@@ -1427,7 +1482,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 			expect(state.snapshot_content).toEqual({
 				id: "entity-1",
 				name: "Final Name",
-				value: 3,
+				value: "3",
 			});
 			expect(state.depth).toBe(0); // Latest commit is at depth 0
 
@@ -1460,6 +1515,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			await createVersion({ lix, id: "multi-entity-version" });
@@ -1469,12 +1525,12 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", version: 1 },
+					snapshot_content: { id: "entity-1", value: "v1" },
 				})
 				.execute();
 
@@ -1482,12 +1538,12 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", version: 2 },
+					snapshot_content: { id: "entity-1", value: "v2" },
 				})
 				.execute();
 
@@ -1495,12 +1551,12 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-1",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
 					plugin_key: "mock-plugin",
-					snapshot_content: { id: "entity-1", version: 3 },
+					snapshot_content: { id: "entity-1", value: "v3" },
 				})
 				.execute();
 
@@ -1509,7 +1565,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-2",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
@@ -1522,7 +1578,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-2",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
@@ -1536,7 +1592,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-3",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "multi-entity-version",
@@ -1550,7 +1606,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "multi-entity-version")
-				.where("schema_key", "=", "mock_entity")
+				.where("schema_key", "=", "test_entity")
 				.orderBy("entity_id")
 				.execute();
 
@@ -1571,7 +1627,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 			expect(entity1State).toBeDefined();
 			expect(entity1State!.snapshot_content).toEqual({
 				id: "entity-1",
-				version: 3,
+				value: "v3",
 			});
 
 			expect(entity2State).toBeDefined();
@@ -1629,6 +1685,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			await createVersion({ lix, id: "deletion-test-version" });
@@ -1638,7 +1695,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-to-delete",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "deletion-test-version",
@@ -1656,7 +1713,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-to-delete",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "deletion-test-version",
@@ -1674,7 +1731,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-to-delete",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "deletion-test-version",
@@ -1703,7 +1760,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 			expect(deletionState.depth).toBe(0); // Latest commit
 
 			// Verify it's tracking the deletion, not earlier states
-			expect(deletionState.schema_key).toBe("mock_entity");
+			expect(deletionState.schema_key).toBe("test_entity");
 			expect(deletionState.file_id).toBe("mock-file");
 
 			// Create another entity that is NOT deleted to verify filtering
@@ -1711,7 +1768,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.insertInto("state_all")
 				.values({
 					entity_id: "entity-still-exists",
-					schema_key: "mock_entity",
+					schema_key: "test_entity",
 					schema_version: "1.0",
 					file_id: "mock-file",
 					version_id: "deletion-test-version",
@@ -1728,7 +1785,7 @@ describe("lix_internal_materialization_latest_visible_state", () => {
 				.selectFrom("lix_internal_materialization_latest_visible_state" as any)
 				.selectAll()
 				.where("version_id", "=", "deletion-test-version")
-				.where("schema_key", "=", "mock_entity")
+				.where("schema_key", "=", "test_entity")
 				.orderBy("entity_id")
 				.execute();
 
@@ -1770,6 +1827,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a standalone version
 			await createVersion({ lix, id: "standalone-version" });
@@ -1819,6 +1877,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create parent version A
 			await createVersion({ lix, id: "version-a" });
@@ -1878,6 +1937,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create inheritance chain: global → A → B → C → D
 			await createVersion({ lix, id: "version-a" });
@@ -1957,6 +2017,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create diamond pattern:
 			//     global
@@ -2055,6 +2116,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version that explicitly does NOT inherit from global
 			await createVersion({
@@ -2096,6 +2158,7 @@ describe("lix_internal_materialization_version_ancestry", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create version A that will later point to B
 			await createVersion({
@@ -2188,6 +2251,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			await createVersion({ lix, id: "version-1" });
@@ -2244,6 +2308,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create parent and child versions
 			await createVersion({ lix, id: "parent-version" });
@@ -2308,6 +2373,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create parent and child versions
 			await createVersion({ lix, id: "parent-version" });
@@ -2380,6 +2446,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create inheritance chain: A -> B -> C
 			await createVersion({ lix, id: "version-a" });
@@ -2469,6 +2536,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create a version
 			await createVersion({ lix, id: "version-1" });
@@ -2531,6 +2599,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create parent and child versions
 			await createVersion({ lix, id: "parent-version" });
@@ -2623,6 +2692,7 @@ describe("lix_internal_state_materializer", () => {
 					},
 				],
 			});
+			await storeMaterializationTestSchemas(lix);
 
 			// Create diamond inheritance pattern:
 			//       A (root)

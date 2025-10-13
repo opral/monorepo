@@ -13,7 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { buildResolvedStateQuery } from "./resolved-state.js";
-import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -146,23 +146,6 @@ export function applyStateVTable(
 		arity: 0,
 		xFunc: () => {
 			return currentWriterKey ?? null;
-		},
-	});
-
-	sqlite.createFunction({
-		name: "validate_snapshot_content",
-		deterministic: true,
-		arity: 5,
-		// @ts-expect-error - type mismatch
-		xFunc: (_ctxPtr: number, ...args: any[]) => {
-			return validateStateMutation({
-				engine: engine,
-				schema: args[0] ? JSON.parse(args[0]) : null,
-				snapshot_content: JSON.parse(args[1]),
-				operation: args[2] || undefined,
-				entity_id: args[3] || undefined,
-				version_id: args[4],
-			});
 		},
 	});
 
@@ -640,14 +623,14 @@ export function applyStateVTable(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema({
-						engine,
-						key: String(schema_key),
-					});
-
+					const schemaKey = String(schema_key);
 					validateStateMutation({
 						engine: engine,
-						schema: storedSchema,
+						schema:
+							schemaKey === LixStoredSchemaSchema["x-lix-key"]
+								? LixStoredSchemaSchema
+								: null,
+						schemaKey,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
@@ -966,14 +949,13 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema({
-		engine,
-		key: String(schema_key),
-	});
-
 	validateStateMutation({
 		engine: engine,
-		schema: storedSchema,
+		schema:
+			String(schema_key) === LixStoredSchemaSchema["x-lix-key"]
+				? LixStoredSchemaSchema
+				: null,
+		schemaKey: String(schema_key),
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
 		entity_id: String(entity_id),

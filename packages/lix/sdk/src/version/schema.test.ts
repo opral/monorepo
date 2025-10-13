@@ -1,6 +1,18 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+
+const testStateSchema = {
+	"x-lix-key": "test_schema",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		foo: { type: "string" },
+	},
+	required: ["foo"],
+} as const satisfies LixSchemaDefinition;
 
 test("insert, update, delete on version descriptor", async () => {
 	const lix = await openLix({});
@@ -552,6 +564,11 @@ test("mutation of a version's state should NOT lead to duplicate version entries
 		commit_id: expect.any(String),
 		working_commit_id: expect.any(String),
 	});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testStateSchema })
+		.execute();
 
 	await lix.db
 		.insertInto("state_all")

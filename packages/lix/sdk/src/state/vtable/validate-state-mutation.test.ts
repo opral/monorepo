@@ -1952,7 +1952,7 @@ test("should parse JSON object properties before validation", async () => {
 	const documentSchema = {
 		type: "object",
 		"x-lix-version": "1.0",
-		"x-lix-key": "document",
+		"x-lix-key": "test_document",
 		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
@@ -3226,6 +3226,23 @@ test("should validate composite foreign keys referencing state table", async () 
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
+
 	// Store the schema
 	await lix.db
 		.insertInto("stored_schema")
@@ -3313,6 +3330,22 @@ test("state foreign key references should respect version context", async () => 
 		required: ["entity_id", "schema_key", "file_id", "tag"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
 
 	// Store the schema
 	await lix.db
@@ -3454,6 +3487,23 @@ test("state foreign key references should handle inherited entities", async () =
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
+
 	// Store the schema
 	await lix.db
 		.insertInto("stored_schema")
@@ -3545,6 +3595,22 @@ test("state foreign key with mixed single and composite properties", async () =>
 		required: ["id", "entity_id", "schema_key", "file_id", "change_id"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
 
 	// Store the schema
 	await lix.db

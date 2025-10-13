@@ -9,6 +9,28 @@ import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const testEntitySchema = {
+	"x-lix-key": "test_entity",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		updated_after_merge: { type: "boolean" },
+	},
+	required: ["id", "value"],
+} as const satisfies LixSchemaDefinition;
+
+async function ensureTestEntitySchema(lix: { db: any }): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.onConflict((oc: any) => oc.doNothing())
+		.execute();
+}
 
 test("populates v2 cache from materializer", async () => {
 	const lix = await openLix({
@@ -275,6 +297,8 @@ test("inheritance is queryable from the resolved view after population", async (
 		],
 	});
 
+	await ensureTestEntitySchema(lix);
+
 	const currentTimestamp = await getTimestamp({ lix });
 
 	// Create version hierarchy: C inherits from B, B inherits from A
@@ -426,6 +450,8 @@ test("global version entities are populated when populating child versions", asy
 			},
 		],
 	});
+
+	await ensureTestEntitySchema(lix);
 
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 

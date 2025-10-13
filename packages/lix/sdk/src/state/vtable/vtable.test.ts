@@ -635,6 +635,20 @@ simulationTest(
 		});
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
 		// Create a tracked entity in active version
 		await db
 			.insertInto("lix_internal_state_vtable")
@@ -712,6 +726,19 @@ simulationTest(
 		});
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		// Create a tracked entity in active version
 		await db
@@ -813,13 +840,27 @@ simulationTest(
 			activeVersion.working_commit_id
 		);
 
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		const commitsBeforeInsert = await lix.db
 			.selectFrom("commit")
 			.select("id")
 			.execute();
 
 		// Insert some state data via lix_internal_state_vtable
-		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		await db
 			.insertInto("lix_internal_state_vtable")
 			.values({
@@ -1634,6 +1675,22 @@ simulationTest(
 
 		// Insert an entity into global version via vtable
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id", "name"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		await db
 			.insertInto("lix_internal_state_vtable")
 			.values({
@@ -1790,6 +1847,22 @@ simulationTest(
 			],
 		});
 
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id", "name"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		// Insert an entity into global version
 		await lix.db
 			.insertInto("state_all")
@@ -1850,6 +1923,23 @@ simulationTest(
 				},
 			],
 		});
+
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+				count: { type: "number" },
+			},
+			required: ["id", "name", "count"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		// Insert an entity into global version
 		await lix.db
@@ -2377,6 +2467,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const deleteSchema: LixSchemaDefinition = {
+			"x-lix-key": "delete-cache-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				to: { type: "string" },
+			},
+			required: ["to"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: deleteSchema })
+			.execute();
 
 		// Insert initial state via lix_internal_state_vtable
 		await db
@@ -2443,6 +2547,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const writeThroughSchema: LixSchemaDefinition = {
+			"x-lix-key": "write-through-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				test: { type: "string" },
+			},
+			required: ["test"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: writeThroughSchema })
+			.execute();
 
 		// Insert state data via lix_internal_state_vtable - should populate cache
 		await db
@@ -2514,6 +2632,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const updateSchema: LixSchemaDefinition = {
+			"x-lix-key": "update-cache-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				initial: { type: "string" },
+				updated: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: updateSchema })
+			.execute();
 
 		// Insert initial state via lix_internal_state_vtable
 		await db
@@ -3394,6 +3526,19 @@ simulationTest(
 		await createVersion({ lix, id: "version_b" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		await db
 			.insertInto("lix_internal_state_vtable")
@@ -3664,6 +3809,19 @@ simulationTest(
 		const versionA = await createVersion({ lix, id: "version_a" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		// Insert state into version A
 		await db
@@ -3742,6 +3900,21 @@ simulationTest(
 		const baseVersion = await createVersion({ lix, id: "base_version" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		await db
 			.insertInto("lix_internal_state_vtable")

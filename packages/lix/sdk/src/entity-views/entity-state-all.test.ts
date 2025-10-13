@@ -40,10 +40,17 @@ describe("createEntityAllViewIfNotExists", () => {
 		}).toThrow(
 			"Schema must define 'x-lix-primary-key' for entity view generation"
 		);
+
+		await lix.close();
 	});
 
 	test("should create view with correct columns (including lixcol_version_id)", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateAllView({
 			engine: lix.engine!,
@@ -90,6 +97,11 @@ describe("createEntityAllViewIfNotExists", () => {
 
 	test("should create CRUD triggers for _all view", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateAllView({
 			engine: lix.engine!,
@@ -150,6 +162,11 @@ describe("createEntityAllViewIfNotExists", () => {
 	test("should handle explicit version_id in _all view", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateAllView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -200,6 +217,11 @@ describe("createEntityAllViewIfNotExists", () => {
 
 	test("should handle default values in _all view", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
@@ -261,6 +283,11 @@ describe("createEntityAllViewIfNotExists", () => {
 	test("should use schema key + _all as default view name", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateAllView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -302,6 +329,11 @@ describe("createEntityAllViewIfNotExists", () => {
 
 	test("should handle cross-version operations", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateAllView({
 			engine: lix.engine!,
@@ -363,6 +395,11 @@ describe("createEntityAllViewIfNotExists", () => {
 
 	test("should expose lixcol_untracked column for untracked state operations", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateAllView({
 			engine: lix.engine!,
@@ -517,6 +554,11 @@ describe("createEntityAllViewIfNotExists", () => {
 	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key in _all view", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateAllView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -568,6 +610,11 @@ describe("createEntityAllViewIfNotExists", () => {
 
 	test("DELETE with version_id only affects the specified version", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		// Create the entity view
 		createEntityStateAllView({

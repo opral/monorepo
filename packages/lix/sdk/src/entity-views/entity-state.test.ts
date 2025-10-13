@@ -54,10 +54,17 @@ describe("createEntityViewIfNotExists", () => {
 		}).toThrow(
 			"Schema must define 'x-lix-primary-key' for entity view generation"
 		);
+
+		await lix.close();
 	});
 
 	test("should create view with correct columns (no lixcol_version_id)", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -104,6 +111,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should create CRUD triggers", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -155,6 +167,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should handle insert operations without defaults", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -210,6 +227,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should handle update operations", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -269,6 +291,11 @@ describe("createEntityViewIfNotExists", () => {
 	test("should handle delete operations", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -313,6 +340,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should handle composite primary keys", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: compositeKeySchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -379,6 +411,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should handle default values", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
@@ -457,6 +494,11 @@ describe("createEntityViewIfNotExists", () => {
 	test("should use dynamic file_id when not hardcoded", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -491,6 +533,11 @@ describe("createEntityViewIfNotExists", () => {
 	test("should use schema key as default view name", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -520,6 +567,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should expose lixcol_untracked column for untracked state operations", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,
@@ -650,6 +702,11 @@ describe("createEntityViewIfNotExists", () => {
 	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -692,6 +749,11 @@ describe("createEntityViewIfNotExists", () => {
 
 	test("should expose entity identification columns for composite primary keys", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: compositeKeySchema })
+			.execute();
 
 		createEntityStateView({
 			engine: lix.engine!,

@@ -21,22 +21,9 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	test("should create all three views: active, _all, and _history", async () => {
 		const lix = await openLix({});
 
-		// Add stored schema
-		const mockSchema: LixSchemaDefinition = {
-			"x-lix-key": "test_entity",
-			"x-lix-version": "1.0",
-			additionalProperties: false,
-			type: "object",
-			properties: {
-				id: { type: "string" },
-				name: { type: "string" },
-				value: { type: "number" },
-			},
-		};
-
 		await lix.db
 			.insertInto("stored_schema")
-			.values({ value: mockSchema })
+			.values({ value: testSchema })
 			.execute();
 
 		createEntityViewsIfNotExists({
@@ -172,22 +159,9 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	test("should handle cross-view operations", async () => {
 		const lix = await openLix({});
 
-		// Add stored schema
-		const mockSchema: LixSchemaDefinition = {
-			"x-lix-key": "test_entity",
-			"x-lix-version": "1.0",
-			type: "object",
-			additionalProperties: false,
-			properties: {
-				id: { type: "string" },
-				name: { type: "string" },
-				value: { type: "number" },
-			},
-		};
-
 		await lix.db
 			.insertInto("stored_schema")
-			.values({ value: mockSchema })
+			.values({ value: testSchema })
 			.execute();
 
 		createEntityViewsIfNotExists({
@@ -287,6 +261,11 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 
 	test("should use consistent naming conventions", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityViewsIfNotExists({
 			engine: lix.engine!,

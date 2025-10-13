@@ -44,6 +44,11 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	test("should create history view with correct columns", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateHistoryView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -107,6 +112,11 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	test("should use schema key + _history as default view name", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateHistoryView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -157,21 +167,9 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const lix = await openLix({});
 
 		// Add stored schema first
-		const mockSchema: LixSchemaDefinition = {
-			"x-lix-key": "test_entity",
-			"x-lix-version": "1.0",
-			type: "object",
-			additionalProperties: false,
-			properties: {
-				id: { type: "string" },
-				name: { type: "string" },
-				value: { type: "number" },
-			},
-		};
-
 		await lix.db
 			.insertInto("stored_schema")
-			.values({ value: mockSchema })
+			.values({ value: testSchema })
 			.execute();
 
 		createEntityStateHistoryView({
@@ -249,6 +247,11 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	test("should be read-only (no CRUD triggers)", async () => {
 		const lix = await openLix({});
 
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		createEntityStateHistoryView({
 			engine: lix.engine!,
 			schema: testSchema,
@@ -325,6 +328,11 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key in history view", async () => {
 		const lix = await openLix({});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
 
 		createEntityStateHistoryView({
 			engine: lix.engine!,

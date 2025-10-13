@@ -15,6 +15,7 @@ import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { parse } from "@marcbachmann/cel-js";
 import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -103,6 +104,7 @@ const normalizeForeignKeys = (
 export function validateStateMutation(args: {
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 	schema: LixSchemaDefinition | null;
+	schemaKey?: string;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
@@ -111,10 +113,6 @@ export function validateStateMutation(args: {
 }): void {
 	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
 	// Validate version_id is provided
-	// Skip validation if schema is null (during initialization when schemas aren't stored yet)
-	if (!args.schema) {
-		return;
-	}
 
 	if (!args.version_id) {
 		throw new Error("version_id is required");
@@ -132,30 +130,36 @@ export function validateStateMutation(args: {
 		throw new Error(`Version with id '${args.version_id}' does not exist`);
 	}
 
-	const isValidLixSchema = validateLixSchema(args.schema);
+	let schemaKey =
+		typeof args.schemaKey === "string" && args.schemaKey.length > 0
+			? args.schemaKey
+			: typeof args.schema?.["x-lix-key"] === "string" &&
+				  args.schema["x-lix-key"].length > 0
+				? (args.schema["x-lix-key"] as string)
+				: undefined;
 
-	if (!isValidLixSchema) {
-		throw new Error(
-			`The provided schema is not a valid lix schema: ${ajv.errorsText(validateLixSchema.errors)}`
-		);
-	}
+	let effectiveSchema = args.schema ?? null;
 
-	const isImmutable = args.schema["x-lix-immutable"] === true;
-	const schemaKey = args.schema["x-lix-key"];
-
-	if (schemaKey && schemaKey !== "lix_stored_schema") {
+	if (schemaKey === LixStoredSchemaSchema["x-lix-key"]) {
+		effectiveSchema ??= LixStoredSchemaSchema;
+	} else if (schemaKey) {
 		const storedSchema = getStoredSchema({
 			engine: args.engine,
 			key: schemaKey,
 		});
+
 		if (!storedSchema) {
 			throw new Error(
 				`Schema '${schemaKey}' is not stored. Store the schema before mutating state.`
 			);
 		}
 
+		if (!effectiveSchema) {
+			effectiveSchema = storedSchema;
+		}
+
 		const expectedVersion = storedSchema["x-lix-version"];
-		const receivedVersion = args.schema["x-lix-version"];
+		const receivedVersion = effectiveSchema?.["x-lix-version"];
 		if (
 			typeof expectedVersion === "string" &&
 			expectedVersion.length > 0 &&
@@ -169,8 +173,24 @@ export function validateStateMutation(args: {
 		}
 	}
 
-	if (isImmutable) {
-		const immutableMessage = `Schema "${schemaKey}" is immutable and cannot be updated.`;
+	if (!effectiveSchema) {
+		throw new Error("Schema definition is required for state validation");
+	}
+
+	const isValidLixSchema = validateLixSchema(effectiveSchema);
+
+	if (!isValidLixSchema) {
+		throw new Error(
+			`The provided schema is not a valid lix schema: ${ajv.errorsText(validateLixSchema.errors)}`
+		);
+	}
+
+	const immutableFlag = effectiveSchema["x-lix-immutable"] === true;
+	const normalizedSchemaKey =
+		schemaKey ?? effectiveSchema["x-lix-key"] ?? "<unknown>";
+
+	if (immutableFlag) {
+		const immutableMessage = `Schema "${normalizedSchemaKey}" is immutable and cannot be updated.`;
 		if (args.operation === "update") {
 			throw new Error(immutableMessage);
 		}
@@ -181,11 +201,11 @@ export function validateStateMutation(args: {
 		// Parse JSON strings back to objects for properties defined as objects in the schema
 		const parsedSnapshotContent = parseJsonPropertiesInSnapshotContent(
 			args.snapshot_content,
-			args.schema
+			effectiveSchema
 		);
 
 		const isValidSnapshotContent = ajv.validate(
-			args.schema,
+			effectiveSchema,
 			parsedSnapshotContent
 		);
 
@@ -200,7 +220,7 @@ export function validateStateMutation(args: {
 				.join("; ");
 
 			throw new Error(
-				`The provided snapshot content does not match the schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
+				`The provided snapshot content does not match the schema '${effectiveSchema["x-lix-key"]}' (${effectiveSchema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
 			);
 		}
 	}
@@ -209,19 +229,19 @@ export function validateStateMutation(args: {
 	if (args.operation === "delete") {
 		validateDeletionConstraints({
 			engine: args.engine,
-			schema: args.schema,
+			schema: effectiveSchema,
 			entity_id: args.entity_id,
 			version_id: args.version_id,
 		});
 	} else {
-		if (args.schema["x-lix-key"] === "lix_stored_schema") {
+		if (effectiveSchema["x-lix-key"] === "lix_stored_schema") {
 			validateStoredSchemaValue(args.snapshot_content);
 		}
 		// Validate primary key constraints (only for insert/update)
-		if (args.schema["x-lix-primary-key"]) {
+		if (effectiveSchema["x-lix-primary-key"]) {
 			validatePrimaryKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -230,10 +250,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate unique constraints (only for insert/update)
-		if (args.schema["x-lix-unique"]) {
+		if (effectiveSchema["x-lix-unique"]) {
 			validateUniqueConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -242,10 +262,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate foreign key constraints (only for insert/update)
-		if (args.schema["x-lix-foreign-keys"]) {
+		if (effectiveSchema["x-lix-foreign-keys"]) {
 			validateForeignKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
 				untracked: args.untracked,
@@ -254,7 +274,7 @@ export function validateStateMutation(args: {
 	}
 
 	// Hardcoded validation for commit_edge self-referencing
-	if (args.schema["x-lix-key"] === "lix_commit_edge") {
+	if (effectiveSchema["x-lix-key"] === "lix_commit_edge") {
 		const content = args.snapshot_content as any;
 		if (content.parent_id === content.child_id) {
 			throw new Error(

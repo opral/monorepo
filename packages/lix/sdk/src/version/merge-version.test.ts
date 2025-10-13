@@ -3,8 +3,28 @@ import { sql } from "kysely";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 import { createVersion } from "./create-version.js";
 import { mergeVersion } from "./merge-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("simulationTest discovery", () => {});
+
+const mergeTestEntitySchema = {
+	"x-lix-key": "test_entity",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		v: { type: "string" },
+	},
+	required: ["v"],
+} as const satisfies LixSchemaDefinition;
+
+async function storeMergeTestSchemas(lix: { db: any }): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mergeTestEntitySchema })
+		.onConflict((oc: any) => oc.doNothing())
+		.execute();
+}
 
 // We will implement mergeVersion step by step.
 // For now, outline the test plan with todos (flat list).
@@ -22,6 +42,8 @@ simulationTest(
 				},
 			],
 		});
+
+		await storeMergeTestSchemas(lix);
 
 		// Create versions
 		const source = await createVersion({ lix, name: "source" });
@@ -129,6 +151,8 @@ simulationTest(
 			],
 		});
 
+		await storeMergeTestSchemas(lix);
+
 		const source = await createVersion({ lix, name: "source" });
 		const target = await createVersion({ lix, name: "target" });
 
@@ -198,6 +222,8 @@ simulationTest(
 				},
 			],
 		});
+
+		await storeMergeTestSchemas(lix);
 
 		const source = await createVersion({ lix, name: "source" });
 		const target = await createVersion({ lix, name: "target" });
@@ -318,6 +344,8 @@ simulationTest(
 			],
 		});
 
+		await storeMergeTestSchemas(lix);
+
 		const source = await createVersion({ lix, name: "source" });
 		const target = await createVersion({ lix, name: "target" });
 
@@ -378,6 +406,8 @@ simulationTest(
 				},
 			],
 		});
+		await storeMergeTestSchemas(lix);
+
 		const source = await createVersion({ lix, name: "source" });
 		const target = await createVersion({ lix, name: "target" });
 
@@ -411,6 +441,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMergeTestSchemas(lix);
 		const source = await createVersion({ lix, name: "source" });
 		const target = await createVersion({ lix, name: "target" });
 
@@ -562,6 +593,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMergeTestSchemas(lix);
 
 		const version = await createVersion({ lix, name: "same" });
 
@@ -650,6 +682,7 @@ simulationTest(
 				},
 			],
 		});
+		await storeMergeTestSchemas(lix);
 
 		// Create versions
 		const source = await createVersion({ lix, name: "source" });
