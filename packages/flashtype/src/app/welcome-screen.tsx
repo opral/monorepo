@@ -39,12 +39,12 @@ export function WelcomeScreen({
 					<p className="text-base text-neutral-600">
 						Zero install. AI-powered. Built on top of
 						<svg
-							width="15"
-							height="11"
+							width="17"
+							height="12"
 							viewBox="0 0 105 72"
 							fill="none"
 							xmlns="http://www.w3.org/2000/svg"
-							className="inline translate-y-[-1px] ml-1.5"
+							className="inline -translate-y-1/7 ml-1.5"
 						>
 							<path
 								d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
