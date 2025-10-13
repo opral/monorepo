@@ -1,6 +1,12 @@
 import React, { Suspense } from "react";
-import { describe, expect, test, beforeEach, afterEach } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { createVersion, openLix, type Lix } from "@lix-js/sdk";
 import { VersionSwitcher } from "./version-switcher";
@@ -82,5 +88,132 @@ describe("VersionSwitcher", () => {
 			.select("version_id")
 			.executeTakeFirstOrThrow();
 		expect(active.version_id).toBe(newVersion.id);
+	});
+
+	test("renames a version via actions menu", async () => {
+		const target = await createVersion({ lix, name: "docs" });
+		const promptSpy = vi
+			.spyOn(window, "prompt")
+			.mockReturnValue("docs-renamed");
+
+		await renderWithProviders();
+
+		await act(async () => {
+			fireEvent.pointerDown(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+			fireEvent.pointerUp(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+		});
+
+		const actionsButton = await screen.findByRole("button", {
+			name: "Version actions for docs",
+		});
+		await act(async () => {
+			fireEvent.pointerDown(actionsButton, { button: 0 });
+			fireEvent.pointerUp(actionsButton, { button: 0 });
+		});
+
+		const renameItem = await screen.findByRole("menuitem", { name: "Rename" });
+		await act(async () => {
+			fireEvent.click(renameItem);
+		});
+
+		await waitFor(() => {
+			expect(screen.getByText("docs-renamed")).toBeInTheDocument();
+		});
+
+		const row = await lix.db
+			.selectFrom("version")
+			.select(["id", "name"])
+			.where("id", "=", target.id)
+			.executeTakeFirstOrThrow();
+		expect(row.name).toBe("docs-renamed");
+
+		promptSpy.mockRestore();
+	});
+
+	test("deletes a version via actions menu", async () => {
+		const target = await createVersion({ lix, name: "temp" });
+		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+		await renderWithProviders();
+
+		await act(async () => {
+			fireEvent.pointerDown(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+			fireEvent.pointerUp(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+		});
+
+		const actionsButton = await screen.findByRole("button", {
+			name: "Version actions for temp",
+		});
+		await act(async () => {
+			fireEvent.pointerDown(actionsButton, { button: 0 });
+			fireEvent.pointerUp(actionsButton, { button: 0 });
+		});
+
+		const deleteItem = await screen.findByRole("menuitem", { name: "Delete" });
+		await act(async () => {
+			fireEvent.click(deleteItem);
+		});
+
+		await act(async () => {
+			fireEvent.pointerDown(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+			fireEvent.pointerUp(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.queryByRole("menuitem", { name: "temp" }),
+			).not.toBeInTheDocument();
+		});
+
+		const row = await lix.db
+			.selectFrom("version")
+			.select(["id", "hidden"])
+			.where("id", "=", target.id)
+			.executeTakeFirstOrThrow();
+		expect(row.hidden).toBeTruthy();
+
+		const active = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+		expect(active.version_id).not.toBe(target.id);
+
+		confirmSpy.mockRestore();
+	});
+
+	test("delete action is disabled for active version", async () => {
+		await renderWithProviders();
+
+		await act(async () => {
+			fireEvent.pointerDown(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+			fireEvent.pointerUp(
+				screen.getByRole("button", { name: "Select version" }),
+			);
+		});
+
+		const actionsButton = await screen.findByRole("button", {
+			name: "Version actions for main",
+		});
+		await act(async () => {
+			fireEvent.pointerDown(actionsButton, { button: 0 });
+			fireEvent.pointerUp(actionsButton, { button: 0 });
+		});
+
+		const deleteItem = await screen.findByRole("menuitem", { name: "Delete" });
+		expect(deleteItem).toHaveAttribute("data-disabled");
 	});
 });
