@@ -150,7 +150,9 @@ function formatProjection(
 	}
 	if (options.includeTableColumn) {
 		const physical =
-			LEGACY_COLUMN_TO_PHYSICAL[column as keyof typeof LEGACY_COLUMN_TO_PHYSICAL];
+			LEGACY_COLUMN_TO_PHYSICAL[
+				column as keyof typeof LEGACY_COLUMN_TO_PHYSICAL
+			];
 		if (physical) {
 			const physicalIdentifier = quoteIdentifier(physical);
 			if (physical === column) {

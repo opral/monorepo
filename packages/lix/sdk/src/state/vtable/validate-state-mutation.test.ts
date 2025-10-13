@@ -82,6 +82,8 @@ test("valid lix schema with a valid snapshot passes", async () => {
 		},
 	};
 
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
@@ -134,6 +136,36 @@ test("an invalid snapshot fails", async () => {
 	).toThrowError();
 });
 
+test("throws when stored schema is missing", async () => {
+	const lix = await openLix({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "missing_stored_schema_test",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/is not stored/i);
+});
+
 test("passes when primary key is unique", async () => {
 	const lix = await openLix({});
 
@@ -156,6 +188,8 @@ test("passes when primary key is unique", async () => {
 			name: "John",
 		},
 	};
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -246,6 +280,8 @@ test("immutable schemas reject repeated inserts", async () => {
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -448,6 +484,8 @@ test("passes when unique constraint is satisfied", async () => {
 		required: ["id", "email", "username", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const snapshot = {
 		content: {
@@ -1210,6 +1248,11 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: changeSetElementSchema })
+		.execute();
+
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
@@ -1448,6 +1491,8 @@ test("passes when version_id is provided and version exists", async () => {
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1767,6 +1812,11 @@ test("should throw when deleting non-existent entity", async () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: userSchema })
+		.execute();
+
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
@@ -1800,6 +1850,11 @@ test("should throw when entity_id is missing for delete operations", async () =>
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: userSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")

@@ -612,7 +612,7 @@ function buildCacheRouting(
 		uniqueCandidates.add("lix_internal_state_cache");
 	} else {
 		for (const name of existingCacheTables) {
-            if (name.startsWith("lix_internal_state_cache_v1_")) {
+			if (name.startsWith("lix_internal_state_cache_v1_")) {
 				uniqueCandidates.add(name);
 			}
 		}

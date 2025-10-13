@@ -10,7 +10,7 @@ import { selectFromStateCacheV2 } from "../cache-v2/select-from-state-cache.js";
 import type { MaterializedState } from "./generate-commit.js";
 
 const TEST_SCHEMA: LixSchemaDefinition = {
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	$schema: "http://json-schema.org/draft-07/schema#",
 	type: "object",
 	additionalProperties: false,
 	properties: {
@@ -105,10 +105,7 @@ test("cache v1 and v2 selections return identical rows", async () => {
 		changes,
 	});
 
-	const rowsV1 = await selectCacheV1Rows(
-		lix,
-		TEST_SCHEMA["x-lix-key"]
-	);
+	const rowsV1 = await selectCacheV1Rows(lix, TEST_SCHEMA["x-lix-key"]);
 	const rowsV2 = await selectCacheV2Rows(
 		lix,
 		TEST_SCHEMA["x-lix-key"],

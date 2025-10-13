@@ -45,7 +45,7 @@ test("provides a virtual snapshot_content column", () => {
 	expect(compiled.sql).toContain("json_object('example'");
 	expect(compiled.sql).toContain('json_quote("example")');
 	expect(compiled.sql).toContain(
-		"CASE WHEN \"flag\" IS NULL THEN NULL WHEN \"flag\" = 1 THEN json('true')"
+		'CASE WHEN "flag" IS NULL THEN NULL WHEN "flag" = 1 THEN json(\'true\')'
 	);
 	expect(compiled.sql).toContain('AS "snapshot_content"');
 });

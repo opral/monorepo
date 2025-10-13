@@ -322,15 +322,15 @@ export function applyStateCacheV2Schema(args: {
 						/[^a-zA-Z0-9]/g,
 						"_"
 					);
-			const matchingTables = sqlite.exec({
-				sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE ?`,
-				bind: [`lix_internal_state_cache_v1_${sanitizedSchemaKey}%`],
-				returnValue: "resultRows",
-			}) as Array<[string]> | undefined;
+					const matchingTables = sqlite.exec({
+						sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE ?`,
+						bind: [`lix_internal_state_cache_v1_${sanitizedSchemaKey}%`],
+						returnValue: "resultRows",
+					}) as Array<[string]> | undefined;
 
-			cursorState.tables = matchingTables
-				? matchingTables.map((row) => row[0] as string).sort()
-				: [];
+					cursorState.tables = matchingTables
+						? matchingTables.map((row) => row[0] as string).sort()
+						: [];
 				} else {
 					// No schema_key filter - need to query all cache tables
 					cursorState.tables = getPhysicalTables(sqlite, tableCache);
@@ -385,12 +385,12 @@ export function applyStateCacheV2Schema(args: {
 					// Load next table if available
 					if (cursorState.currentTableIndex < cursorState.tables.length) {
 						// Use the stored filters from xFilter
-					loadNextTable(
-						sqlite,
-						cursorState,
-						cursorState.filters || {},
-						args.engine
-					);
+						loadNextTable(
+							sqlite,
+							cursorState,
+							cursorState.filters || {},
+							args.engine
+						);
 						// If the table we just loaded is also empty, continue loop
 					}
 				}

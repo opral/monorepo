@@ -7,7 +7,9 @@ const tableMetadataMap = new WeakMap<
 	Map<string, { schemaKey: string; schemaVersion: string }>
 >();
 
-function getTableCache(args: { engine: Pick<LixEngine, "runtimeCacheRef"> }): Set<string> {
+function getTableCache(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+}): Set<string> {
 	let cache = tableCacheMap.get(args.engine.runtimeCacheRef);
 	if (!cache) {
 		cache = new Set<string>();
@@ -16,9 +18,9 @@ function getTableCache(args: { engine: Pick<LixEngine, "runtimeCacheRef"> }): Se
 	return cache;
 }
 
-function getColumnCache(
-	args: { engine: Pick<LixEngine, "runtimeCacheRef"> }
-): Map<string, Set<string>> {
+function getColumnCache(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+}): Map<string, Set<string>> {
 	let cache = columnCacheMap.get(args.engine.runtimeCacheRef);
 	if (!cache) {
 		cache = new Map<string, Set<string>>();

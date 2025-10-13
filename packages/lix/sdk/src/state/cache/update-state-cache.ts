@@ -109,7 +109,7 @@ export function updateStateCache(args: {
 						: undefined;
 
 					// Clear existing cached edges for this child in global scope
-		const edgeTable = "lix_internal_state_cache_v1_lix_commit_edge";
+					const edgeTable = "lix_internal_state_cache_v1_lix_commit_edge";
 					ensureTableExists({ engine, tableName: edgeTable });
 					engine.executeSync({
 						sql: `DELETE FROM ${edgeTable} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = ?`,
@@ -161,7 +161,7 @@ export function updateStateCache(args: {
 				if (edgeRows.length > 0) {
 					batchInsertDirectToTable({
 						engine,
-			tableName: "lix_internal_state_cache_v1_lix_commit_edge",
+						tableName: "lix_internal_state_cache_v1_lix_commit_edge",
 						changes: edgeRows,
 						default_commit_id: args.commit_id,
 						default_version_id: "global",
@@ -172,11 +172,11 @@ export function updateStateCache(args: {
 					// Ensure the change_set cache table exists before inserting
 					ensureTableExists({
 						engine,
-			tableName: "lix_internal_state_cache_v1_lix_change_set",
+						tableName: "lix_internal_state_cache_v1_lix_change_set",
 					});
 					batchInsertDirectToTable({
 						engine,
-			tableName: "lix_internal_state_cache_v1_lix_change_set",
+						tableName: "lix_internal_state_cache_v1_lix_change_set",
 						changes: changeSetRows,
 						default_commit_id: args.commit_id,
 						default_version_id: "global",

@@ -40,5 +40,7 @@ export function clearStateCacheSchemaProperties(args: {
 	schemaKey: string;
 	schemaVersion: string;
 }): void {
-	schemaPropertyMetadata.delete(metadataKey(args.schemaKey, args.schemaVersion));
+	schemaPropertyMetadata.delete(
+		metadataKey(args.schemaKey, args.schemaVersion)
+	);
 }

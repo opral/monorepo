@@ -14,6 +14,7 @@ import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { parse } from "@marcbachmann/cel-js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -100,7 +101,7 @@ const normalizeForeignKeys = (
 };
 
 export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "executeSync">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
@@ -141,6 +142,32 @@ export function validateStateMutation(args: {
 
 	const isImmutable = args.schema["x-lix-immutable"] === true;
 	const schemaKey = args.schema["x-lix-key"];
+
+	if (schemaKey && schemaKey !== "lix_stored_schema") {
+		const storedSchema = getStoredSchema({
+			engine: args.engine,
+			key: schemaKey,
+		});
+		if (!storedSchema) {
+			throw new Error(
+				`Schema '${schemaKey}' is not stored. Store the schema before mutating state.`
+			);
+		}
+
+		const expectedVersion = storedSchema["x-lix-version"];
+		const receivedVersion = args.schema["x-lix-version"];
+		if (
+			typeof expectedVersion === "string" &&
+			expectedVersion.length > 0 &&
+			typeof receivedVersion === "string" &&
+			receivedVersion.length > 0 &&
+			expectedVersion !== receivedVersion
+		) {
+			throw new Error(
+				`Stored schema '${schemaKey}' version mismatch. Expected '${expectedVersion}', received '${receivedVersion}'.`
+			);
+		}
+	}
 
 	if (isImmutable) {
 		const immutableMessage = `Schema "${schemaKey}" is immutable and cannot be updated.`;
