@@ -38,31 +38,33 @@ export function WelcomeScreen({
 					</p>
 					<p className="text-base text-neutral-600">
 						Zero install. AI-powered. Built on top of
-						<svg
-							width="17"
-							height="12"
-							viewBox="0 0 105 72"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-							className="inline -translate-y-1/7 ml-1.5"
-						>
-							<path
-								d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
-								fill="#07B6D4"
-							/>
-							<path
-								d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
-								fill="#07B6D4"
-							/>
-							<path
-								d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
-								fill="#07B6D4"
-							/>
-							<path
-								d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
-								fill="#07B6D4"
-							/>
-						</svg>
+						<a href="https://lix.dev" target="_blank" rel="noreferrer">
+							<svg
+								width="17"
+								height="12"
+								viewBox="0 0 105 72"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+								className="inline -translate-y-1/7 ml-1.5"
+							>
+								<path
+									d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
+									fill="#07B6D4"
+								/>
+							</svg>
+						</a>
 						.
 					</p>
 				</div>
