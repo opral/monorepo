@@ -15,9 +15,9 @@ describe("handleLlmProxyRequest", () => {
 	});
 
 	test("returns 500 when proxy is configured without an API key", async () => {
-		const env = createEnv({ GOOGLE_API_KEY: undefined });
+		const env = createEnv({ AI_GATEWAY_API_KEY: undefined });
 		const request = new Request(
-			`https://example.com${LLM_PROXY_PREFIX}/v1beta/models`,
+			`https://example.com${LLM_PROXY_PREFIX}/v1/models`,
 		);
 
 		const response = await handleLlmProxyRequest({
@@ -27,16 +27,14 @@ describe("handleLlmProxyRequest", () => {
 		});
 
 		expect(response.status).toBe(500);
-		expect(await response.text()).toBe("Missing GOOGLE_API_KEY");
+		expect(await response.text()).toBe("Missing AI_GATEWAY_API_KEY");
 	});
 
-	test("forwards proxy requests to Google with sanitized headers", async () => {
+	test("forwards proxy requests to the AI Gateway with sanitized headers", async () => {
 		const mockFetch = vi.fn<typeof fetch>(async (input, init) => {
 			const req = input instanceof Request ? input : new Request(input, init);
-			expect(req.url).toBe(
-				"https://generativelanguage.googleapis.com/v1beta/models?foo=bar",
-			);
-			expect(req.headers.get("x-goog-api-key")).toBe("secret");
+			expect(req.url).toBe("https://ai-gateway.vercel.sh/v1/models?foo=bar");
+			expect(req.headers.get("authorization")).toBe("Bearer secret");
 			expect(req.headers.get("origin")).toBeNull();
 			expect(req.headers.get("referer")).toBeNull();
 			return new Response("proxied", {
@@ -46,13 +44,13 @@ describe("handleLlmProxyRequest", () => {
 		});
 		globalThis.fetch = mockFetch;
 
-		const env = createEnv({ GOOGLE_API_KEY: "secret" });
+		const env = createEnv({ AI_GATEWAY_API_KEY: "secret" });
 		const request = new Request(
-			`https://example.com${LLM_PROXY_PREFIX}/v1beta/models?foo=bar`,
+			`https://example.com${LLM_PROXY_PREFIX}/v1/models?foo=bar`,
 			{
 				headers: {
 					"cf-ray": "123",
-					"x-goog-api-key": "client",
+					authorization: "Bearer client",
 				},
 			},
 		);
@@ -73,9 +71,9 @@ describe("handleLlmProxyRequest", () => {
 	});
 
 	test("responds to CORS preflight requests", async () => {
-		const env = createEnv({ GOOGLE_API_KEY: "secret" });
+		const env = createEnv({ AI_GATEWAY_API_KEY: "secret" });
 		const request = new Request(
-			`https://example.com${LLM_PROXY_PREFIX}/v1beta/models`,
+			`https://example.com${LLM_PROXY_PREFIX}/v1/models`,
 			{
 				method: "OPTIONS",
 				headers: {
@@ -103,7 +101,7 @@ function createEnv(overrides?: Partial<WorkerEnv>): WorkerEnv {
 		ASSETS: {
 			fetch: vi.fn().mockResolvedValue(new Response("asset", { status: 200 })),
 		},
-		GOOGLE_API_KEY: "secret",
+		AI_GATEWAY_API_KEY: "secret",
 		...overrides,
 	};
 }

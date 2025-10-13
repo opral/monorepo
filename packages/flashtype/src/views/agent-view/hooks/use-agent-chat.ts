@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGatewayProvider } from "@ai-sdk/gateway";
 import type { Lix } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
@@ -17,23 +17,23 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 
-	const modelName = "gemini-2.5-pro";
+	const modelName = "google/gemini-2.5-flash";
 	const [missingKey, setMissingKey] = useState(false);
 	const provider = useMemo(() => {
-		return createGoogleGenerativeAI({
+		return createGatewayProvider({
 			apiKey: "proxy", // placeholder, the worker injects the real key
-			baseURL: `${LLM_PROXY_PREFIX}/v1beta`,
-			fetch: async (input, init) => {
+			baseURL: `${LLM_PROXY_PREFIX}/v1/ai`,
+			fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
 				const request =
 					input instanceof Request ? input : new Request(input, init);
 				const headers = new Headers(request.headers);
-				headers.delete("x-goog-api-key");
+				headers.delete("authorization");
 				const response = await fetch(new Request(request, { headers }));
 				if (response.status === 500) {
 					try {
 						const clone = response.clone();
 						const text = await clone.text();
-						if (text.includes("Missing GOOGLE_API_KEY")) {
+						if (text.includes("Missing AI_GATEWAY_API_KEY")) {
 							setMissingKey(true);
 						}
 					} catch {

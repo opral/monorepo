@@ -1,136 +1,56 @@
 import {
-	useState,
-	useId,
-	useRef,
 	useCallback,
-	useMemo,
 	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
 import { ArrowUp, ChevronDown, Plus } from "lucide-react";
+import { useLix, useQuery } from "@lix-js/react-utils";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
-import type { ChatMessage } from "./chat-types";
+import type { ChatMessage, ToolRun } from "./chat-types";
 import { MOCK_COMMANDS } from "./commands";
 import { MentionMenu, CommandMenu } from "./menu";
 import { extractSlashToken, useComposerState } from "./composer-state";
-import { useQuery } from "@lix-js/react-utils";
 import { selectFilePaths } from "./select-file-paths";
+import { useAgentChat } from "./hooks/use-agent-chat";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
 };
 
-// Mock data to demonstrate the agent UI prototype
-const MOCK_MESSAGES: ChatMessage[] = [
-	{
-		id: "1",
-		role: "user",
-		content:
-			"can you see the vscode's extensions source code at ~/.vscode/extensions/anthropic.claude-code-2.0.5/webview?",
-	},
-	{
-		id: "2",
-		role: "assistant",
-		content: "",
-		toolRuns: [
-			{
-				id: "t1",
-				title: "Bash",
-				detail: "List contents of the extension webview directory",
-				status: "success",
-				input:
-					"ls -la ~/.vscode/extensions/anthropic.claude-code-2.0.5/webview",
-				output: `total 9008
-drwxr-xr-x  5 samuel  staff      160 Oct  3 09:19 .
-drwxr-xr-x  9 samuel  staff      288 Oct  3 09:19 ..
--rw-r--r--  1 samuel  staff    80340 Oct  3 09:19 codicon-37A3DWZT.ttf
--rw-r--r--  1 samuel  staff   167564 Oct  3 09:19 index.css
--rw-r--r--  1 samuel  staff  4362164 Oct  3 09:19 index.js`,
-			},
-			{
-				id: "t2",
-				title: "Read",
-				detail: "index.js (lines 2-101)",
-				status: "success",
-				input:
-					"/Users/samuel/.vscode/extensions/anthropic.claude-code-2.0.5/webview/index.js",
-				output: `var TKe=Object.create;var dX=Object.defineProperty;...
-[498 lines truncated]`,
-			},
-			{
-				id: "t3",
-				title: "Read",
-				detail: "index.css (lines 2-201)",
-				status: "success",
-				input:
-					"/Users/samuel/.vscode/extensions/anthropic.claude-code-2.0.5/webview/index.css",
-			},
-			{
-				id: "t3a",
-				title: "",
-				status: "thinking",
-				content:
-					"Yes! I can access that directory. Let me explore the structure:",
-			},
-		],
-	},
-	{
-		id: "3",
-		role: "assistant",
-		content: "",
-		toolRuns: [
-			{
-				id: "t3b",
-				title: "",
-				status: "thinking",
-				content:
-					"The files are too large since they're bundled/minified. Let me check if there's a source directory or look at the extension's package structure:",
-			},
-			{
-				id: "t4",
-				title: "Bash",
-				detail: "List extension root directory",
-				status: "success",
-				input: "ls -la ~/.vscode/extensions/anthropic.claude-code-2.0.5/",
-				output: `total 1936
-drwxr-xr-x   9 samuel  staff     288 Oct  3 09:19 .
-drwxr-xr-x  89 samuel  staff    2848 Oct  4 17:53 ..
--rw-r--r--   1 samuel  staff    1969 Oct  3 09:19 .vsixmanifest
--rw-r--r--   1 samuel  staff   12368 Oct  3 09:19 claude-code-settings.schema.json
--rw-r--r--   1 samuel  staff  954679 Oct  3 09:19 extension.js
--rw-r--r--   1 samuel  staff    5974 Oct  3 09:19 package.json
--rw-r--r--   1 samuel  staff    1360 Oct  3 09:19 README.md
-drwxr-xr-x   8 samuel  staff     256 Oct  3 09:19 resources
-drwxr-xr-x   5 samuel  staff     160 Oct  3 09:19 webview`,
-			},
-			{
-				id: "t5",
-				title: "Glob",
-				detail: 'pattern: "**/panel-views/**/index.tsx"',
-				status: "success",
-				input: 'find . -path "**/panel-views/**/index.tsx"',
-				output: `/Users/samuel/git-repos/monorepo-3/packages/flashtype/src/prototypes/v2-layout/panel-views/agent-view/index.tsx
-/Users/samuel/git-repos/monorepo-3/packages/flashtype/src/prototypes/v2-layout/panel-views/diff-view/index.tsx`,
-			},
-			{
-				id: "t5a",
-				title: "",
-				status: "thinking",
-				content:
-					"The extension is bundled. However, I can help you design an AI agent chat view inspired by the reference UI.",
-			},
-		],
-	},
-];
+type ToolSession = {
+	id: string;
+	runs: ToolRun[];
+};
 
 /**
- * Agent chat view (UI-only mock for now).
- * Demonstrates the tool visualization design with collapsible sections.
+ * Agent chat view backed by the real Lix agent.
+ *
+ * The composer retains the prototype UX (slash commands, mentions) while
+ * delegating message handling to the agent SDK. Tool executions stream into
+ * the transcript via the existing tool run visualization.
+ *
+ * @example
+ * <AgentView />
  */
 export function AgentView({ context: _context }: AgentViewProps) {
-	const [messages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+	const lix = useLix();
+	const {
+		messages: agentMessages,
+		send,
+		clear,
+		pending,
+		error,
+		ready,
+		hasKey,
+	} = useAgentChat({ lix });
+
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
 	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
 	const filePaths = useMemo(
 		() => (fileRows ?? []).map((row: any) => String(row.path)),
@@ -159,14 +79,69 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		pushHistory,
 	} = useComposerState({ commands: MOCK_COMMANDS, files: filePaths });
 
-	const hasConversations = false;
+	const hasConversations = agentMessages.length > 0;
 	const conversationLabel = hasConversations
-		? "New conversation"
-		: "No previous conversations";
+		? "Current conversation"
+		: "New conversation";
+
+	const [notice, setNotice] = useState<string | null>(null);
+	const [toolSessions, setToolSessions] = useState<ToolSession[]>([]);
+	const activeSessionRef = useRef<string | null>(null);
+
+	const agentTranscript = useMemo<ChatMessage[]>(() => {
+		return agentMessages.map((message) => ({
+			id: message.id,
+			role: message.role,
+			content: message.content,
+		}));
+	}, [agentMessages]);
+
+	const transcript = useMemo<ChatMessage[]>(() => {
+		const out: ChatMessage[] = [...agentTranscript];
+		for (const session of toolSessions) {
+			if (session.runs.length === 0) continue;
+			out.push({
+				id: `tool-session-${session.id}`,
+				role: "assistant",
+				content: "",
+				toolRuns: session.runs,
+			});
+		}
+		if (pending) {
+			out.push({
+				id: "agent-pending",
+				role: "assistant",
+				content: "Thinking…",
+			});
+		}
+		if (notice) {
+			out.push({
+				id: "agent-notice",
+				role: "system",
+				content: notice,
+			});
+		}
+		if (error) {
+			out.push({
+				id: "agent-error",
+				role: "system",
+				content: `Error: ${error}`,
+			});
+		}
+		if (!hasKey) {
+			out.push({
+				id: "agent-missing-key",
+				role: "system",
+				content:
+					"Missing GOOGLE_API_KEY. Add one to enable the Lix Agent conversation.",
+			});
+		}
+		return out;
+	}, [agentTranscript, toolSessions, pending, notice, error, hasKey]);
 
 	const updateMention = useCallback(() => {
 		updateMentions(textAreaRef.current);
-	}, [textAreaRef, updateMentions]);
+	}, [updateMentions]);
 
 	const insertMention = useCallback(
 		(path: string) => {
@@ -190,54 +165,198 @@ export function AgentView({ context: _context }: AgentViewProps) {
 				}
 			});
 		},
-		[
-			value,
-			setValue,
-			setMentionOpen,
-			setSlashOpen,
-			setSlashIdx,
-			mentionCtx,
-			textAreaRef,
-		],
+		[value, setValue, setMentionOpen, setSlashOpen, setSlashIdx, mentionCtx],
 	);
 
-	const commit = useCallback(() => {
-		const trimmedEnd = value.trimEnd();
-		if (!trimmedEnd) return;
-		const trimmedStart = trimmedEnd.trimStart();
-		if (trimmedStart.startsWith("/")) {
-			const rawToken = trimmedStart.slice(1).split(/\s+/)[0] ?? "";
-			const lower = rawToken.toLowerCase();
-			const matched =
-				filteredCommands.find((c) => c.name.toLowerCase().startsWith(lower)) ??
-				MOCK_COMMANDS.find((c) => c.name.toLowerCase().startsWith(lower));
-			const commandName = (matched?.name ?? rawToken).trim();
-			console.info(`[mock] slash command: /${commandName}`);
-		} else {
-			console.info(`[mock] send message: ${trimmedEnd}`);
-			pushHistory(trimmedEnd);
-		}
-		setHistoryIdx(-1);
-		setValue("");
-		setSlashOpen(false);
-		setMentionOpen(false);
-		mentionCtx.current = null;
-		lastActionFocus(textAreaRef.current);
-	}, [
-		value,
-		filteredCommands,
-		pushHistory,
-		setHistoryIdx,
-		setValue,
-		setSlashOpen,
-		setMentionOpen,
-		mentionCtx,
-		textAreaRef,
-	]);
+	const beginToolSession = useCallback(() => {
+		const id = generateSessionId();
+		activeSessionRef.current = id;
+		setToolSessions((prev) => [...prev, { id, runs: [] }]);
+		return id;
+	}, []);
+
+	const finalizeToolSession = useCallback((id: string) => {
+		setToolSessions((prev) => {
+			const index = prev.findIndex((session) => session.id === id);
+			if (index === -1) return prev;
+			const next = prev.slice();
+			if (next[index]?.runs.length === 0) {
+				next.splice(index, 1);
+				return next;
+			}
+			return next;
+		});
+	}, []);
+
+	const resetToolSessions = useCallback(() => {
+		activeSessionRef.current = null;
+		setToolSessions([]);
+	}, []);
+
+	const handleToolEvent = useCallback(
+		(event: import("@lix-js/agent-sdk").ToolEvent) => {
+			const sessionId = activeSessionRef.current;
+			if (!sessionId) return;
+			setToolSessions((prev) => {
+				const index = prev.findIndex((session) => session.id === sessionId);
+				if (index === -1) return prev;
+				const session = prev[index];
+				const runs = session.runs.slice();
+				const name = formatToolName(event.name);
+				if (event.type === "start") {
+					runs.push({
+						id: event.id,
+						title: name,
+						status: "running",
+						input: stringifyPayload(event.input),
+					});
+				} else if (event.type === "finish") {
+					const existingIdx = runs.findIndex((run) => run.id === event.id);
+					const output = stringifyPayload(event.output);
+					if (existingIdx === -1) {
+						runs.push({
+							id: event.id,
+							title: name,
+							status: "success",
+							output,
+						});
+					} else {
+						runs[existingIdx] = {
+							...runs[existingIdx],
+							status: "success",
+							title: name,
+							output,
+						};
+					}
+				} else if (event.type === "error") {
+					const existingIdx = runs.findIndex((run) => run.id === event.id);
+					if (existingIdx === -1) {
+						runs.push({
+							id: event.id,
+							title: name,
+							status: "error",
+							output: event.errorText,
+						});
+					} else {
+						runs[existingIdx] = {
+							...runs[existingIdx],
+							status: "error",
+							title: name,
+							output: event.errorText,
+						};
+					}
+				}
+				const next = prev.slice();
+				next[index] = { ...session, runs };
+				return next;
+			});
+		},
+		[],
+	);
 
 	useEffect(() => {
 		updateMention();
 	}, [value, updateMention]);
+
+	const handleSlashCommand = useCallback(
+		async (raw: string) => {
+			const normalized = raw.trim().toLowerCase();
+			if (normalized === "clear" || normalized === "reset") {
+				try {
+					await clear();
+					resetToolSessions();
+					setNotice("Conversation cleared.");
+				} catch (err) {
+					const message =
+						err instanceof Error ? err.message : String(err ?? "unknown");
+					setNotice(`Failed to clear conversation: ${message}`);
+				}
+				return;
+			}
+			if (normalized === "help") {
+				setNotice(
+					"Commands: /clear – clear the conversation, /help – show this list.",
+				);
+				return;
+			}
+			setNotice(`Unknown command: /${normalized}`);
+		},
+		[clear, resetToolSessions],
+	);
+
+	const commit = useCallback(async () => {
+		const trimmedEnd = value.trimEnd();
+		if (!trimmedEnd) return;
+		const trimmedStart = trimmedEnd.trimStart();
+
+		const resetComposer = () => {
+			setHistoryIdx(-1);
+			setValue("");
+			setSlashOpen(false);
+			setSlashIdx(0);
+			setMentionOpen(false);
+			setMentionIdx(0);
+			mentionCtx.current = null;
+			lastActionFocus(textAreaRef.current);
+		};
+
+		if (trimmedStart.startsWith("/")) {
+			const token = trimmedStart.slice(1).split(/\s+/)[0] ?? "";
+			const lower = token.toLowerCase();
+			const matched =
+				filteredCommands.find((cmd) =>
+					cmd.name.toLowerCase().startsWith(lower),
+				) ?? MOCK_COMMANDS.find((cmd) => cmd.name.toLowerCase() === lower);
+			resetComposer();
+			await handleSlashCommand((matched?.name ?? token).toLowerCase());
+			return;
+		}
+
+		if (!hasKey) {
+			setNotice("Add a GOOGLE_API_KEY to enable the Lix Agent.");
+			return;
+		}
+		if (!ready) {
+			setNotice(
+				"The Lix Agent is still starting up. Please try again shortly.",
+			);
+			return;
+		}
+
+		const sessionId = beginToolSession();
+		setNotice(null);
+		pushHistory(trimmedEnd);
+		resetComposer();
+
+		try {
+			await send(trimmedEnd, { onToolEvent: handleToolEvent });
+		} catch (err) {
+			const message =
+				err instanceof Error ? err.message : String(err ?? "unknown");
+			console.error("Failed to send agent message:", err);
+			setNotice(`Failed to send message: ${message}`);
+		} finally {
+			finalizeToolSession(sessionId);
+			activeSessionRef.current = null;
+		}
+	}, [
+		value,
+		hasKey,
+		ready,
+		setHistoryIdx,
+		setValue,
+		setSlashOpen,
+		setSlashIdx,
+		setMentionOpen,
+		setMentionIdx,
+		mentionCtx,
+		handleSlashCommand,
+		beginToolSession,
+		pushHistory,
+		send,
+		handleToolEvent,
+		finalizeToolSession,
+	]);
 
 	const onKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -249,7 +368,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 					return;
 				}
 				e.preventDefault();
-				commit();
+				void commit();
 				return;
 			}
 
@@ -329,13 +448,18 @@ export function AgentView({ context: _context }: AgentViewProps) {
 				return;
 			}
 
-			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
-				e.preventDefault();
-				setValue("");
-				setHistoryIdx(-1);
-				setMentionOpen(false);
-				setSlashOpen(false);
-				return;
+			if (e.key === "@" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+				queueMicrotask(() => updateMention());
+			}
+
+			if (e.key === "Escape") {
+				if (mentionOpen || slashOpen) {
+					e.preventDefault();
+					setMentionOpen(false);
+					setSlashOpen(false);
+					mentionCtx.current = null;
+					return;
+				}
 			}
 		},
 		[
@@ -355,7 +479,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 			setHistoryIdx,
 			setMentionOpen,
 			mentionCtx,
-			textAreaRef,
+			updateMention,
 		],
 	);
 
@@ -386,6 +510,11 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		slashIdx,
 	]);
 
+	const composerPlaceholder = hasKey
+		? "Ask Lix Agent…"
+		: "Add GOOGLE_API_KEY to enable the Lix Agent…";
+	const sendDisabled = pending || !hasKey || !ready;
+
 	return (
 		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
 			{/* Header with conversation picker */}
@@ -408,7 +537,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 
 			{/* Chat messages */}
 			<div className="flex-1 min-h-0 overflow-y-auto">
-				<ChatMessageList messages={messages} />
+				<ChatMessageList messages={transcript} />
 			</div>
 
 			{/* Input area */}
@@ -421,12 +550,13 @@ export function AgentView({ context: _context }: AgentViewProps) {
 						ref={textAreaRef}
 						id={textAreaId}
 						data-testid="agent-composer-input"
-						placeholder="Ask Lix Agent…"
+						placeholder={composerPlaceholder}
 						value={value}
 						onChange={(event) => {
 							const next = event.target.value;
 							const token = extractSlashToken(next);
 							setValue(next);
+							setNotice(null);
 							setSlashOpen(token !== null);
 							setSlashIdx(0);
 							if (token !== null) {
@@ -437,18 +567,21 @@ export function AgentView({ context: _context }: AgentViewProps) {
 						onKeyDown={onKeyDown}
 						onClick={updateMention}
 						onSelect={updateMention}
-						className="h-28 w-full resize-none border-0 bg-transparent pl-3 pr-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
+						className="h-28 w-full resize-none border-0 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
 					/>
 					{menuFragment ? (
 						<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
 							{menuFragment}
 						</div>
 					) : null}
-					<div className="flex justify-end bg-muted/40 pr-3 py-1 text-xs text-muted-foreground">
+					<div className="flex justify-end bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
 						<button
 							type="button"
-							onClick={() => commit()}
-							className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted"
+							onClick={() => {
+								void commit();
+							}}
+							disabled={sendDisabled}
+							className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							<ArrowUp className="h-3.5 w-3.5" />
 						</button>
@@ -472,4 +605,28 @@ function moveCaretToEnd(el: HTMLTextAreaElement | null) {
 	const len = el.value.length;
 	el.setSelectionRange(len, len);
 	el.focus();
+}
+
+function generateSessionId(): string {
+	const rand = Math.random().toString(36).slice(2, 10);
+	return `session-${Date.now().toString(36)}-${rand}`;
+}
+
+function formatToolName(name: string): string {
+	if (!name) return "Tool";
+	return name
+		.split(/[_\s-]+/)
+		.filter(Boolean)
+		.map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+		.join(" ");
+}
+
+function stringifyPayload(payload: unknown): string | undefined {
+	if (payload === null || payload === undefined) return undefined;
+	if (typeof payload === "string") return payload;
+	try {
+		return JSON.stringify(payload, null, 2);
+	} catch {
+		return String(payload);
+	}
 }

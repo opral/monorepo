@@ -28,7 +28,7 @@ describe("handleFetch", () => {
 
 		const response = await handleFetch(proxyRequest, {
 			...env,
-			GOOGLE_API_KEY: undefined,
+			AI_GATEWAY_API_KEY: undefined,
 		});
 		expect(response.status).toBe(500);
 	});
@@ -48,7 +48,7 @@ function createEnv(overrides?: Partial<WorkerEnv>): WorkerEnv {
 		ASSETS: {
 			fetch: vi.fn().mockResolvedValue(new Response("asset", { status: 200 })),
 		},
-		GOOGLE_API_KEY: "secret",
+		AI_GATEWAY_API_KEY: "secret",
 		...overrides,
 	};
 }

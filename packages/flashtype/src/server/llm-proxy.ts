@@ -1,16 +1,17 @@
 import { LLM_PROXY_PREFIX } from "../env-variables";
 
-const GOOGLE_API_HOST = "https://generativelanguage.googleapis.com";
+const DEFAULT_AI_GATEWAY_URL = "https://ai-gateway.vercel.sh";
 
 export type WorkerEnv = {
 	ASSETS: {
 		fetch(request: Request): Promise<Response>;
 	};
-	GOOGLE_API_KEY?: string;
+	AI_GATEWAY_API_KEY?: string;
+	AI_GATEWAY_URL?: string;
 };
 
 /**
- * Proxies requests destined for the Gemini API, ensuring the server-only API key
+ * Proxies requests destined for the Vercel AI Gateway, ensuring the server-only API key
  * remains hidden from the client while preserving browser streaming behaviour.
  *
  * @example
@@ -37,10 +38,10 @@ export async function handleLlmProxyRequest(args: {
 		});
 	}
 
-	if (!env.GOOGLE_API_KEY) {
+	if (!env.AI_GATEWAY_API_KEY) {
 		return createCorsResponse({
 			status: 500,
-			body: "Missing GOOGLE_API_KEY",
+			body: "Missing AI_GATEWAY_API_KEY",
 			origin,
 			headers: {
 				"content-type": "text/plain",
@@ -49,11 +50,15 @@ export async function handleLlmProxyRequest(args: {
 	}
 
 	const upstreamPath = url.pathname.slice(LLM_PROXY_PREFIX.length) || "/";
-	const upstreamUrl = new URL(`${GOOGLE_API_HOST}${upstreamPath}${url.search}`);
+	const baseUrl = (env.AI_GATEWAY_URL ?? DEFAULT_AI_GATEWAY_URL).replace(
+		/\/$/,
+		"",
+	);
+	const upstreamUrl = new URL(`${upstreamPath}${url.search}`, `${baseUrl}/`);
 	const upstreamRequest = new Request(upstreamUrl.toString(), request);
 	const headers = new Headers(upstreamRequest.headers);
 
-	headers.set("x-goog-api-key", env.GOOGLE_API_KEY);
+	headers.set("authorization", `Bearer ${env.AI_GATEWAY_API_KEY}`);
 	headers.delete("host");
 	headers.delete("cf-connecting-ip");
 	headers.delete("cf-ew-via");
@@ -64,7 +69,8 @@ export async function handleLlmProxyRequest(args: {
 	headers.delete("referer");
 
 	try {
-		const response = await fetch(new Request(upstreamRequest, { headers }));
+		const proxiedRequest = new Request(upstreamRequest, { headers });
+		const response = await fetch(proxiedRequest);
 		const responseHeaders = new Headers(response.headers);
 		responseHeaders.set("Access-Control-Allow-Origin", origin);
 		return createCorsResponse({
@@ -74,7 +80,7 @@ export async function handleLlmProxyRequest(args: {
 			origin,
 		});
 	} catch (error) {
-		console.error("Google proxy request failed", error);
+		console.error("AI Gateway proxy request failed", error);
 		return createCorsResponse({
 			status: 502,
 			body: "Upstream request failed",
