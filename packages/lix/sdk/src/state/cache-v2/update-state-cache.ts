@@ -21,6 +21,14 @@ import {
 	LixChangeSetSchema,
 	type LixChangeSet,
 } from "../../change-set/schema-definition.js";
+import {
+	registerStateCacheSchemaProperties,
+	type CacheSchemaPropertyMetadata,
+} from "./schema-metadata.js";
+import {
+	extractPrimaryType,
+	extractPropertySchema,
+} from "./sqlite-type-mapper.js";
 
 type CacheChange = LixChangeRaw | MaterializedChange;
 type CacheChangeEntry = {
@@ -510,6 +518,12 @@ function initializeSchemaMetadata(args: {
 	const propertyColumns = Array.from(
 		new Set(getSchemaPropertyColumnNames(args.schema))
 	).sort();
+
+	registerStateCacheSchemaProperties({
+		schemaKey: args.schemaKey,
+		schemaVersion,
+		properties: buildSchemaPropertyMetadata(args.schema),
+	});
 	const metadata: SchemaMetadata = {
 		schema: args.schema,
 		schemaVersion,
@@ -520,6 +534,46 @@ function initializeSchemaMetadata(args: {
 
 	getSchemaMetadataCache({ engine: args.engine }).set(args.schemaKey, metadata);
 	return metadata;
+}
+
+function buildSchemaPropertyMetadata(
+	schema: LixSchemaDefinition
+): CacheSchemaPropertyMetadata[] {
+	const properties = (schema as Record<string, unknown>)?.properties;
+	if (!properties || typeof properties !== "object") {
+		return [];
+	}
+
+	const metadata: CacheSchemaPropertyMetadata[] = [];
+	for (const key of Object.keys(properties)) {
+		const definition = extractPropertySchema(schema, key);
+		const primaryType = extractPrimaryType(definition);
+		metadata.push({
+			propertyName: key,
+			columnName: propertyNameToColumn(key),
+			valueKind: mapPrimaryTypeToValueKind(primaryType),
+		});
+	}
+	return metadata;
+}
+
+function mapPrimaryTypeToValueKind(
+	primaryType: string | null
+): CacheSchemaPropertyMetadata["valueKind"] {
+	switch (primaryType) {
+		case "integer":
+			return "integer";
+		case "number":
+			return "number";
+		case "boolean":
+			return "boolean";
+		case "array":
+		case "object":
+			return "json";
+		case "string":
+		default:
+			return "string";
+	}
 }
 
 function formatPropertyValue(value: unknown): unknown {

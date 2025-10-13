@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { sql } from "kysely";
 import { selectFromStateCacheV2 } from "./select-from-state-cache.js";
+import { registerStateCacheSchemaProperties } from "./schema-metadata.js";
 
 const VERSION = "1.0";
 
@@ -21,6 +22,32 @@ test("exposes normalized lixcol metadata columns", () => {
 
 	expect(compiled.sql).toContain('"lixcol_entity_id"');
 	expect(compiled.sql).toContain('"lixcol_is_tombstone"');
+});
+
+test("provides a virtual snapshot_content column", () => {
+	const schemaKey = "test_cache_snapshot";
+	registerStateCacheSchemaProperties({
+		schemaKey,
+		schemaVersion: VERSION,
+		properties: [
+			{ propertyName: "example", columnName: "example", valueKind: "string" },
+			{ propertyName: "flag", columnName: "flag", valueKind: "boolean" },
+		],
+	});
+
+	const compiled = selectFromStateCacheV2(schemaKey, VERSION)
+		.select(["snapshot_content"])
+		.compile();
+
+	expect(compiled.sql).toMatch(
+		/CASE\s+WHEN\s+"lixcol_is_tombstone"\s*=\s*1\s+THEN\s+NULL\s+ELSE\s+json_object/i
+	);
+	expect(compiled.sql).toContain("json_object('example'");
+	expect(compiled.sql).toContain('json_quote("example")');
+	expect(compiled.sql).toContain(
+		"CASE WHEN \"flag\" IS NULL THEN NULL WHEN \"flag\" = 1 THEN json('true')"
+	);
+	expect(compiled.sql).toContain('AS "snapshot_content"');
 });
 
 test("uses the internal query builder so callers can chain Kysely clauses", () => {

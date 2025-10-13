@@ -28,25 +28,23 @@ function buildResolvedStateSql(options?: ResolvedStateQueryOptions): string {
 }
 
 function buildCacheRoutingSql(schemaKeys: readonly string[]): string {
-	const statements = schemaKeys.map(compileCacheSelectStatement);
-	if (statements.length === 1) {
-		return statements[0]!;
+	const uniqueKeys = [...new Set(schemaKeys)];
+	if (uniqueKeys.length === 0) {
+		throw new Error("buildCacheRoutingSql requires at least one schema key.");
 	}
 
-	return statements.join("\nUNION ALL\n");
-}
+	let builder = selectFromStateCache(uniqueKeys[0]!).selectAll();
+	for (const schemaKey of uniqueKeys.slice(1)) {
+		builder = builder.unionAll(selectFromStateCache(schemaKey).selectAll());
+	}
 
-function compileCacheSelectStatement(schemaKey: string): string {
-	const compiled = selectFromStateCache(schemaKey).selectAll().compile();
+	const compiled = builder.compile();
 	if (compiled.parameters.length > 0) {
 		throw new Error(
 			"selectFromStateCache generated parameterised SQL which is not supported"
 		);
 	}
-	const match = compiled.sql.match(
-		/^select\s+\*\s+from\s*\((?<inner>select[\s\S]+)\)\s+as\s+"lix_internal_state_cache_routed"$/i
-	);
-	return match?.groups?.inner?.trim() ?? compiled.sql;
+	return compiled.sql;
 }
 
 function buildBaseResolvedStateSql(): string {
