@@ -26,17 +26,17 @@ export function WelcomeScreen({
 		>
 			<main className="flex flex-col items-center gap-6 text-center">
 				{/* Logo/Brand */}
-				<div className="flex items-center gap-2 text-lg">
+				<div className="flex items-center gap-2 text-xl">
 					<Zap className="h-5 w-5 text-brand-600" />
-					<span className="font-semibold text-neutral-900">Flashtype</span>
+					<span className="font-semibold text-neutral-900">flashtype.ai</span>
 				</div>
 
 				{/* Description */}
 				<div className="flex flex-col items-center gap-1">
-					<p className="text-sm text-neutral-600">
+					<p className="text-base text-neutral-600">
 						A Claude Code-style WYSIWYG markdown editor in the browser.
 					</p>
-					<p className="text-sm text-neutral-500">
+					<p className="text-base text-neutral-600">
 						Zero install. AI-powered. Built on top of
 						<svg
 							width="15"
@@ -72,7 +72,7 @@ export function WelcomeScreen({
 					<button
 						type="button"
 						onClick={handleCreateNewFile}
-						className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-3.5 py-2 shadow-sm transition hover:border-brand-200 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2"
+						className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-3.5 py-2 shadow-sm transition hover:border-brand-600 hover:shadow focus-visible:!bg-brand-200 focus-visible:!outline-none"
 					>
 						<div className="flex items-center gap-2">
 							<span className="text-sm font-medium leading-none text-neutral-900">
@@ -134,7 +134,7 @@ export function WelcomeScreen({
 						className="inline-flex items-center gap-1.5 transition hover:text-neutral-600"
 					>
 						<svg
-							className="h-4 w-4"
+							className="h-5 w-5"
 							fill="currentColor"
 							viewBox="0 0 24 24"
 							aria-hidden="true"
@@ -155,7 +155,7 @@ export function WelcomeScreen({
 						className="inline-flex items-center gap-1.5 transition hover:text-neutral-600"
 					>
 						<svg
-							className="h-4 w-4"
+							className="h-5 w-5"
 							fill="currentColor"
 							viewBox="0 0 24 24"
 							aria-hidden="true"
@@ -172,7 +172,7 @@ export function WelcomeScreen({
 						className="inline-flex items-center gap-1.5 transition hover:text-neutral-600"
 					>
 						<svg
-							className="h-4 w-4"
+							className="h-5 w-5"
 							fill="currentColor"
 							viewBox="0 0 24 24"
 							aria-hidden="true"
