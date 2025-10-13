@@ -12,6 +12,14 @@ import {
 } from "./create-schema-cache-table.js";
 import { getStateCacheV2Tables, getStateCacheV2Columns } from "./schema.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import {
+	LixCommitEdgeSchema,
+	type LixCommitEdge,
+} from "../../commit/schema-definition.js";
+import {
+	LixChangeSetSchema,
+	type LixChangeSet,
+} from "../../change-set/schema-definition.js";
 
 const PRIMARY_KEY_COLUMNS = [
 	"lixcol_entity_id",
@@ -35,6 +43,37 @@ const BASE_INSERT_COLUMNS = [
 ] as const;
 
 type CacheChange = LixChangeRaw | MaterializedChange;
+type CacheChangeEntry = {
+	row: CacheChange;
+	snapshot?: Record<string, unknown>;
+};
+type SchemaMetadata = {
+	schema: LixSchemaDefinition;
+	schemaVersion: string;
+	tableName: string;
+	propertyColumns: readonly string[];
+	propertyColumnSet: Set<string>;
+};
+
+/**
+ * Memoizes per-engine schema metadata—schema definition, version, cache table name, and property columns—
+ * keyed by `runtimeCacheRef` so we can reuse it across updateStateCacheV2 runs.
+ */
+const schemaMetadataCacheMap = new WeakMap<
+	object,
+	Map<string, SchemaMetadata>
+>();
+
+function getSchemaMetadataCache(args: {
+	engine: Pick<LixEngine, "runtimeCacheRef">;
+}): Map<string, SchemaMetadata> {
+	let cache = schemaMetadataCacheMap.get(args.engine.runtimeCacheRef);
+	if (!cache) {
+		cache = new Map<string, SchemaMetadata>();
+		schemaMetadataCacheMap.set(args.engine.runtimeCacheRef, cache);
+	}
+	return cache;
+}
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
@@ -62,18 +101,20 @@ export function updateStateCacheV2(args: {
 		return;
 	}
 
-	const schemaMetadataCache = new Map<string, SchemaMetadata>();
-
 	const grouped = new Map<
 		string,
-		{ inserts: CacheChange[]; deletes: CacheChange[] }
+		{ inserts: CacheChangeEntry[]; deletes: CacheChangeEntry[] }
 	>();
 
 	for (const change of changes) {
+		const snapshot =
+			change.snapshot_content === null
+				? undefined
+				: (JSON.parse(change.snapshot_content) as Record<string, unknown>);
+
 		if (change.schema_key === LixStoredSchemaSchema["x-lix-key"]) {
-			if (change.snapshot_content !== null) {
-				const storedSnapshot = extractSnapshotObject(change.snapshot_content);
-				const schemaCandidate = storedSnapshot?.value;
+			if (snapshot) {
+				const schemaCandidate = (snapshot as { value?: unknown }).value;
 				if (
 					schemaCandidate &&
 					typeof schemaCandidate === "object" &&
@@ -86,7 +127,6 @@ export function updateStateCacheV2(args: {
 							engine,
 							schemaKey,
 							schema: schemaDefinition,
-							cache: schemaMetadataCache,
 						});
 					}
 				}
@@ -99,9 +139,9 @@ export function updateStateCacheV2(args: {
 			deletes: [],
 		};
 		if (change.snapshot_content === null) {
-			bucket.deletes.push(change);
+			bucket.deletes.push({ row: change });
 		} else {
-			bucket.inserts.push(change);
+			bucket.inserts.push({ row: change, snapshot });
 		}
 		grouped.set(change.schema_key, bucket);
 	}
@@ -110,11 +150,10 @@ export function updateStateCacheV2(args: {
 		const metadata = resolveSchemaMetadata({
 			engine,
 			schemaKey,
-			cache: schemaMetadataCache,
 		});
 
 		if (inserts.length > 0) {
-			insertRows({
+			upsertCacheRows({
 				engine,
 				tableName: metadata.tableName,
 				rows: inserts,
@@ -122,20 +161,20 @@ export function updateStateCacheV2(args: {
 				defaultVersionId: args.version_id,
 				propertyColumns: metadata.propertyColumns,
 				propertyColumnSet: metadata.propertyColumnSet,
+				tombstone: false,
 			});
 
 			if (schemaKey === "lix_commit") {
-				deriveCommitArtifacts({
+				upsertDerivedCommitEntities({
 					engine,
-					changes: inserts,
+					changes: inserts.map(({ row }) => row),
 					defaultCommitId: args.commit_id,
-					cache: schemaMetadataCache,
 				});
 			}
 		}
 
 		if (deletes.length > 0) {
-			insertTombstones({
+			upsertCacheRows({
 				engine,
 				tableName: metadata.tableName,
 				rows: deletes,
@@ -143,34 +182,44 @@ export function updateStateCacheV2(args: {
 				defaultVersionId: args.version_id,
 				propertyColumns: metadata.propertyColumns,
 				propertyColumnSet: metadata.propertyColumnSet,
+				tombstone: true,
 			});
 		}
 	}
 }
 
-function insertRows(args: {
+function upsertCacheRows(args: {
 	engine: Pick<
 		LixEngine,
 		"executeSync" | "runtimeCacheRef" | "hooks" | "sqlite"
 	>;
 	tableName: string;
-	rows: CacheChange[];
+	rows: CacheChangeEntry[];
 	defaultCommitId?: string;
 	defaultVersionId?: string;
 	propertyColumns: readonly string[];
 	propertyColumnSet: Set<string>;
+	tombstone: boolean;
 }): void {
-	const { engine, tableName, rows, defaultCommitId, defaultVersionId } = args;
-	const propertyColumnOrder = args.propertyColumns;
-	const propertyColumnSet = args.propertyColumnSet;
+	const {
+		engine,
+		tableName,
+		rows,
+		defaultCommitId,
+		defaultVersionId,
+		propertyColumns,
+		propertyColumnSet,
+		tombstone,
+	} = args;
 
-	const processed = rows.map((row) =>
+	const processed = rows.map(({ row, snapshot }) =>
 		processChange({
 			row,
 			defaultCommitId,
 			defaultVersionId,
-			tombstone: false,
+			tombstone,
 			propertyColumns: propertyColumnSet,
+			snapshot,
 		})
 	);
 
@@ -178,7 +227,7 @@ function insertRows(args: {
 		return;
 	}
 
-	const allColumns = [...BASE_INSERT_COLUMNS, ...propertyColumnOrder];
+	const allColumns = [...BASE_INSERT_COLUMNS, ...propertyColumns];
 	const columnList = allColumns.join(", ");
 	const updateColumns = allColumns.filter(
 		(column) =>
@@ -195,7 +244,7 @@ function insertRows(args: {
 	ON CONFLICT(lixcol_entity_id, lixcol_file_id, lixcol_version_id) DO UPDATE SET ${updateAssignments}`;
 
 	const stmt = engine.sqlite.prepare(sql);
-	engine.sqlite.exec("BEGIN");
+	// updateStateCacheV2 executes inside the engine's transaction scope; no local BEGIN/COMMIT.
 	for (const change of processed) {
 		stmt.bind([
 			change.lixcol_entity_id,
@@ -207,103 +256,42 @@ function insertRows(args: {
 			change.lixcol_created_at,
 			change.lixcol_updated_at,
 			change.lixcol_inherited_from_version_id ?? null,
-			0,
+			tombstone ? 1 : 0,
 			change.lixcol_change_id,
 			change.lixcol_commit_id,
-			...propertyColumnOrder.map((column) =>
-				change.propertyValues.has(column)
-					? change.propertyValues.get(column)
-					: null
+			...propertyColumns.map((column) =>
+				tombstone
+					? null
+					: change.propertyValues.has(column)
+						? change.propertyValues.get(column)
+						: null
 			),
 		]);
 		stmt.step();
 		stmt.reset();
 	}
-	engine.sqlite.exec("COMMIT");
 	stmt.finalize();
 }
 
-function insertTombstones(args: {
-	engine: Pick<
-		LixEngine,
-		"executeSync" | "runtimeCacheRef" | "hooks" | "sqlite"
-	>;
-	tableName: string;
-	rows: CacheChange[];
-	defaultCommitId?: string;
-	defaultVersionId?: string;
-	propertyColumns: readonly string[];
-	propertyColumnSet: Set<string>;
-}): void {
-	const { engine, tableName, rows, defaultCommitId, defaultVersionId } = args;
-	const propertyColumnOrder = args.propertyColumns;
-	const propertyColumnSet = args.propertyColumnSet;
-
-	const processed = rows.map((row) =>
-		processChange({
-			row,
-			defaultCommitId,
-			defaultVersionId,
-			tombstone: true,
-			propertyColumns: propertyColumnSet,
-		})
-	);
-
-	if (processed.length === 0) {
-		return;
-	}
-
-	const allColumns = [...BASE_INSERT_COLUMNS, ...propertyColumnOrder];
-	const columnList = allColumns.join(", ");
-	const updateColumns = allColumns.filter(
-		(column) =>
-			!PRIMARY_KEY_COLUMNS.includes(column as any) &&
-			column !== "lixcol_created_at"
-	);
-
-	const placeholders = allColumns.map(() => "?").join(", ");
-	const updateAssignments = updateColumns
-		.map((column) => `${column} = excluded.${column}`)
-		.join(", ");
-
-	const sql = `INSERT INTO ${tableName} (${columnList}) VALUES (${placeholders})
-	ON CONFLICT(lixcol_entity_id, lixcol_file_id, lixcol_version_id) DO UPDATE SET ${updateAssignments}`;
-
-	const stmt = engine.sqlite.prepare(sql);
-	engine.sqlite.exec("BEGIN");
-	for (const change of processed) {
-		stmt.bind([
-			change.lixcol_entity_id,
-			change.lixcol_schema_key,
-			change.lixcol_file_id,
-			change.lixcol_version_id,
-			change.lixcol_plugin_key,
-			change.lixcol_schema_version,
-			change.lixcol_created_at,
-			change.lixcol_updated_at,
-			change.lixcol_inherited_from_version_id ?? null,
-			1,
-			change.lixcol_change_id,
-			change.lixcol_commit_id,
-			...propertyColumnOrder.map(() => null),
-		]);
-		stmt.step();
-		stmt.reset();
-	}
-	engine.sqlite.exec("COMMIT");
-	stmt.finalize();
-}
-
-function deriveCommitArtifacts(args: {
+/**
+ * Materializes derived commit entities (edges and change-sets) from the normalized cache.
+ *
+ * @example
+ * upsertDerivedCommitEntities({
+ *   engine,
+ *   changes,
+ *   defaultCommitId: "commit-123",
+ * });
+ */
+function upsertDerivedCommitEntities(args: {
 	engine: Pick<
 		LixEngine,
 		"executeSync" | "runtimeCacheRef" | "hooks" | "sqlite"
 	>;
 	changes: CacheChange[];
 	defaultCommitId?: string;
-	cache: Map<string, SchemaMetadata>;
 }): void {
-	const { engine, changes, defaultCommitId, cache } = args;
+	const { engine, changes, defaultCommitId } = args;
 
 	if (changes.length === 0) {
 		return;
@@ -312,27 +300,22 @@ function deriveCommitArtifacts(args: {
 	const edgeMetadata = resolveSchemaMetadata({
 		engine,
 		schemaKey: "lix_commit_edge",
-		cache,
 	});
 	const changeSetMetadata = resolveSchemaMetadata({
 		engine,
 		schemaKey: "lix_change_set",
-		cache,
 	});
 
 	const edgeRows: LixChangeRaw[] = [];
 	const changeSetRows: LixChangeRaw[] = [];
 
 	for (const change of changes) {
-		const parsed = extractSnapshotObject(change.snapshot_content);
-		if (
-			!parsed ||
-			typeof (parsed as Record<string, unknown>).id === "undefined"
-		) {
-			continue;
-		}
+		const parsed = JSON.parse(change.snapshot_content as string) as Record<
+			string,
+			unknown
+		>;
 
-		const childId = String((parsed as Record<string, unknown>).id);
+		const childId = String(parsed.id);
 
 		const parents = Array.isArray((parsed as any).parent_commit_ids)
 			? (parsed as any).parent_commit_ids.map((parent: unknown) =>
@@ -354,14 +337,14 @@ function deriveCommitArtifacts(args: {
 			const edgeRow = {
 				id: change.id,
 				entity_id: `${parentId}~${childId}`,
-				schema_key: "lix_commit_edge",
-				schema_version: "1.0",
+				schema_key: LixCommitEdgeSchema["x-lix-key"],
+				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					parent_id: parentId,
 					child_id: childId,
-				}),
+				} satisfies LixCommitEdge),
 				created_at: change.created_at,
 			} as LixChangeRaw;
 			(edgeRow as any).lixcol_version_id = "global";
@@ -373,14 +356,13 @@ function deriveCommitArtifacts(args: {
 			const changeSetRow = {
 				id: change.id,
 				entity_id: changeSetId,
-				schema_key: "lix_change_set",
-				schema_version: "1.0",
+				schema_key: LixChangeSetSchema["x-lix-key"],
+				schema_version: LixChangeSetSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					id: changeSetId,
-					metadata: null,
-				}),
+				} satisfies LixChangeSet),
 				created_at: change.created_at,
 			} as LixChangeRaw;
 			(changeSetRow as any).lixcol_version_id = "global";
@@ -391,26 +373,28 @@ function deriveCommitArtifacts(args: {
 	}
 
 	if (edgeRows.length > 0) {
-		insertRows({
+		upsertCacheRows({
 			engine,
 			tableName: edgeMetadata.tableName,
-			rows: edgeRows,
+			rows: edgeRows.map((row) => ({ row })),
 			defaultCommitId: defaultCommitId,
 			defaultVersionId: "global",
 			propertyColumns: edgeMetadata.propertyColumns,
 			propertyColumnSet: edgeMetadata.propertyColumnSet,
+			tombstone: false,
 		});
 	}
 
 	if (changeSetRows.length > 0) {
-		insertRows({
+		upsertCacheRows({
 			engine,
 			tableName: changeSetMetadata.tableName,
-			rows: changeSetRows,
+			rows: changeSetRows.map((row) => ({ row })),
 			defaultCommitId: defaultCommitId,
 			defaultVersionId: "global",
 			propertyColumns: changeSetMetadata.propertyColumns,
 			propertyColumnSet: changeSetMetadata.propertyColumnSet,
+			tombstone: false,
 		});
 	}
 }
@@ -434,9 +418,16 @@ function processChange(args: {
 	defaultVersionId?: string;
 	tombstone: boolean;
 	propertyColumns: Set<string>;
+	snapshot?: Record<string, unknown>;
 }) {
-	const { row, defaultCommitId, defaultVersionId, tombstone, propertyColumns } =
-		args;
+	const {
+		row,
+		defaultCommitId,
+		defaultVersionId,
+		tombstone,
+		propertyColumns,
+		snapshot,
+	} = args;
 	const rowAny = row as any;
 
 	const resolvedVersionId =
@@ -462,11 +453,12 @@ function processChange(args: {
 
 	const snapshotObject = tombstone
 		? {}
-		: extractSnapshotObject(row.snapshot_content);
+		: (snapshot ??
+			(JSON.parse(row.snapshot_content as string) as Record<string, unknown>));
 
 	const propertyValues = new Map<string, unknown>();
 	for (const [key, value] of Object.entries(snapshotObject ?? {})) {
-		const column = propertyColumnName(key);
+		const column = propertyNameToColumn(key);
 		if (propertyColumns.has(column)) {
 			propertyValues.set(column, formatPropertyValue(value));
 		}
@@ -488,23 +480,15 @@ function processChange(args: {
 	};
 }
 
-type SchemaMetadata = {
-	schema: LixSchemaDefinition;
-	schemaVersion: string;
-	tableName: string;
-	propertyColumns: readonly string[];
-	propertyColumnSet: Set<string>;
-};
-
 function resolveSchemaMetadata(args: {
 	engine: Pick<
 		LixEngine,
 		"executeSync" | "runtimeCacheRef" | "hooks" | "sqlite"
 	>;
 	schemaKey: string;
-	cache: Map<string, SchemaMetadata>;
 }): SchemaMetadata {
-	const cached = args.cache.get(args.schemaKey);
+	const cache = getSchemaMetadataCache({ engine: args.engine });
+	const cached = cache.get(args.schemaKey);
 	if (cached) return cached;
 
 	const schemaDefinition = requireSchemaDefinition({
@@ -516,7 +500,6 @@ function resolveSchemaMetadata(args: {
 		engine: args.engine,
 		schemaKey: args.schemaKey,
 		schema: schemaDefinition,
-		cache: args.cache,
 	});
 }
 
@@ -527,7 +510,6 @@ function initializeSchemaMetadata(args: {
 	>;
 	schemaKey: string;
 	schema: LixSchemaDefinition;
-	cache: Map<string, SchemaMetadata>;
 }): SchemaMetadata {
 	const schemaVersion = getSchemaVersion(args.schema);
 	const tableName = schemaKeyToCacheTableNameV2(args.schemaKey, schemaVersion);
@@ -556,38 +538,8 @@ function initializeSchemaMetadata(args: {
 		propertyColumnSet: new Set(propertyColumns),
 	};
 
-	args.cache.set(args.schemaKey, metadata);
+	getSchemaMetadataCache({ engine: args.engine }).set(args.schemaKey, metadata);
 	return metadata;
-}
-
-function extractSnapshotObject(
-	raw: LixChangeRaw["snapshot_content"]
-): Record<string, unknown> | undefined {
-	if (raw === null || raw === undefined) {
-		return undefined;
-	}
-
-	if (typeof raw === "object") {
-		return raw as Record<string, unknown>;
-	}
-
-	if (typeof raw === "string") {
-		const trimmed = raw.trim();
-		if (trimmed.length === 0) return undefined;
-
-		try {
-			const parsed = JSON.parse(trimmed);
-			if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-				return parsed as Record<string, unknown>;
-			}
-		} catch (error) {
-			throw new Error(
-				`updateStateCacheV2: snapshot_content is not valid JSON (${(error as Error).message})`
-			);
-		}
-	}
-
-	return undefined;
 }
 
 function formatPropertyValue(value: unknown): unknown {
@@ -595,8 +547,4 @@ function formatPropertyValue(value: unknown): unknown {
 	if (typeof value === "boolean") return value ? 1 : 0;
 	if (typeof value === "object") return JSON.stringify(value);
 	return value;
-}
-
-function propertyColumnName(property: string): string {
-	return propertyNameToColumn(property);
 }

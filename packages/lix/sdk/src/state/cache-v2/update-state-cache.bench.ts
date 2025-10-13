@@ -4,8 +4,6 @@ import { updateStateCacheV2 } from "./update-state-cache.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 
-console.log("Preparing updateStateCacheV2 benchmarks...");
-
 /**
  * Regression benchmarks for updateStateCacheV2 performance
  *
@@ -64,7 +62,6 @@ function generateChanges(
 }
 
 describe("updateStateCacheV2 Regression Tests", () => {
-	console.log("Preparing updateStateCacheV2 benchmarks...");
 	const schemas = [
 		"bench_schema_file",
 		"bench_schema_change",
@@ -106,7 +103,6 @@ describe("updateStateCacheV2 Regression Tests", () => {
 	}
 
 	bench("Standard batch - 1000 records", async () => {
-		console.log("Starting standard batch benchmark...");
 		try {
 			const lix = await openLix({
 				keyValues: [
