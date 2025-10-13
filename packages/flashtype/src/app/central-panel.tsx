@@ -13,6 +13,7 @@ type CentralPanelProps = {
 	readonly onSelectView: (instanceKey: string) => void;
 	readonly onRemoveView: (instanceKey: string) => void;
 	readonly viewContext?: ViewContext;
+	readonly onCreateNewFile?: () => void | Promise<void>;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
 	readonly onFinalizePendingView?: (instanceKey: string) => void;
@@ -22,7 +23,12 @@ type CentralPanelProps = {
  * Central panel - the main content area between left and right panels.
  *
  * @example
- * <CentralPanel panel={centralPanel} onSelectView={...} onRemoveView={...} />
+ * <CentralPanel
+ *   panel={centralPanel}
+ *   onSelectView={handleSelect}
+ *   onRemoveView={handleRemove}
+ *   onCreateNewFile={() => console.log("create")}
+ * />
  */
 export function CentralPanel({
 	panel,
@@ -32,6 +38,7 @@ export function CentralPanel({
 	isFocused,
 	onFocusPanel,
 	onFinalizePendingView,
+	onCreateNewFile,
 }: CentralPanelProps) {
 	const finalizePendingIfNeeded = useCallback(
 		(instanceKey: string) => {
@@ -46,7 +53,7 @@ export function CentralPanel({
 		[onFinalizePendingView, panel.views],
 	);
 
-	const emptyState = <WelcomeScreen />;
+	const emptyState = <WelcomeScreen onCreateNewFile={onCreateNewFile} />;
 
 	const labelResolver = useCallback(
 		(view: ViewDefinition, entry: (typeof panel.views)[number]) =>

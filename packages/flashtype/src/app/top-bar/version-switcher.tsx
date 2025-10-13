@@ -192,9 +192,11 @@ export function VersionSwitcher() {
 							<DropdownMenuItem
 								key={version.id}
 								onSelect={(event) => {
-									const originalTarget = (
-										event.detail as { originalEvent?: Event }
-									)?.originalEvent?.target as HTMLElement | undefined;
+									type DropdownSelectEvent = Event & {
+										detail?: { originalEvent?: Event };
+									};
+									const originalTarget = (event as DropdownSelectEvent).detail
+										?.originalEvent?.target as HTMLElement | undefined;
 									if (originalTarget?.closest("[data-version-actions]")) {
 										event.preventDefault();
 										return;

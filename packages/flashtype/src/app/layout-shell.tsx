@@ -21,8 +21,9 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
+import { useLix } from "@lix-js/react-utils";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
-import { selectWorkingDiff } from "@lix-js/sdk";
+import { nanoId, normalizeFilePath, selectWorkingDiff } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
@@ -226,6 +227,32 @@ export function reorderPanelViewsByIndex(
 }
 
 /**
+ * Generates a unique root-level markdown path for a newly created document.
+ *
+ * Uses a stable `new-file.md` naming scheme and appends numeric suffixes when
+ * conflicts are detected (e.g. `/new-file-2.md`). Falls back to a timestamped
+ * suffix if a unique path cannot be found within a reasonable range.
+ *
+ * @example
+ * const nextPath = deriveUntitledMarkdownPath(new Set(["/new-file.md"]));
+ * console.log(nextPath); // "/new-file-2.md"
+ */
+function deriveUntitledMarkdownPath(existingPaths: Set<string>): string {
+	const baseStem = "new-file";
+	const primary = normalizeFilePath(`/${baseStem}.md`);
+	if (!existingPaths.has(primary)) {
+		return primary;
+	}
+	for (let suffix = 2; suffix < 1000; suffix += 1) {
+		const candidate = normalizeFilePath(`/${baseStem}-${suffix}.md`);
+		if (!existingPaths.has(candidate)) {
+			return candidate;
+		}
+	}
+	return normalizeFilePath(`/${baseStem}-${Date.now()}.md`);
+}
+
+/**
  * App layout shell with independent left and right islands.
  *
  * @example
@@ -233,6 +260,7 @@ export function reorderPanelViewsByIndex(
  */
 export function V2LayoutShell() {
 	const [uiStateKV, setUiStateKV] = useKeyValue(FLASHTYPE_UI_STATE_KEY);
+	const lix = useLix();
 	if (!uiStateKV) {
 		throw new Error("Flashtype UI state is unavailable.");
 	}
@@ -672,6 +700,25 @@ export function V2LayoutShell() {
 		[setPanelState],
 	);
 
+	const handleCreateNewFile = useCallback(async () => {
+		if (!lix) return;
+		const rows = await lix.db.selectFrom("file").select("path").execute();
+		const existingPaths = new Set(
+			rows.map((row) => normalizeFilePath(row.path)),
+		);
+		const path = deriveUntitledMarkdownPath(existingPaths);
+		const id = await nanoId({ lix });
+		await lix.db
+			.insertInto("file")
+			.values({
+				id,
+				path,
+				data: new TextEncoder().encode(""),
+			})
+			.execute();
+		handleOpenFile(id, { focus: true, filePath: path });
+	}, [handleOpenFile, lix]);
+
 	const handleOpenCommit = useCallback(
 		(
 			checkpointId: string,
@@ -1009,6 +1056,7 @@ export function V2LayoutShell() {
 									)
 								}
 								viewContext={centralViewContext}
+								onCreateNewFile={handleCreateNewFile}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">

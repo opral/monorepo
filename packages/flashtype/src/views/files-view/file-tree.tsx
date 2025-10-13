@@ -68,6 +68,41 @@ export function FileTree({
 		? "bg-brand-200/80 border border-brand-500 text-neutral-900"
 		: "bg-neutral-200/70 border border-neutral-300 text-neutral-900";
 
+	const isEmpty = sortedNodes.length === 0 && !draft;
+
+	if (isEmpty) {
+		return (
+			<div className="text-xs leading-relaxed text-neutral-500">
+				<p>No files yet.</p>
+				<br></br>
+				<p>
+					Create new files with{" "}
+					<span className="inline-flex items-center gap-1">
+						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
+							CMD
+						</kbd>
+						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
+							.
+						</kbd>
+					</span>{" "}
+					and directories with{" "}
+					<span className="inline-flex items-center gap-1">
+						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
+							⌘
+						</kbd>
+						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
+							⇧
+						</kbd>
+						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
+							.
+						</kbd>
+					</span>
+					.
+				</p>
+			</div>
+		);
+	}
+
 	return (
 		<ul className="space-y-1 text-sm text-neutral-900">
 			{draft?.directoryPath === "/" ? (

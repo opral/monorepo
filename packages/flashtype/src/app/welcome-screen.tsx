@@ -1,15 +1,29 @@
-import type { JSX } from "react";
+import { useCallback, type JSX } from "react";
 import { ArrowRight, Zap } from "lucide-react";
+
+type WelcomeScreenProps = {
+	readonly onCreateNewFile?: () => void | Promise<void>;
+};
 
 /**
  * Minimal welcome screen that introduces Flashtype and nudges first actions.
  *
  * @example
- * return <WelcomeScreen />;
+ * return <WelcomeScreen onCreateNewFile={() => console.log("create")} />;
  */
-export function WelcomeScreen(): JSX.Element {
+export function WelcomeScreen({
+	onCreateNewFile,
+}: WelcomeScreenProps): JSX.Element {
+	const handleCreateNewFile = useCallback(() => {
+		if (!onCreateNewFile) return;
+		void onCreateNewFile();
+	}, [onCreateNewFile]);
+
 	return (
-		<div className="flex h-full flex-col items-center justify-center px-6 text-neutral-900" data-testid="welcome-screen">
+		<div
+			className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
+			data-testid="welcome-screen"
+		>
 			<main className="flex flex-col items-center gap-6 text-center">
 				{/* Logo/Brand */}
 				<div className="flex items-center gap-2 text-lg">
@@ -55,9 +69,13 @@ export function WelcomeScreen(): JSX.Element {
 
 				{/* CTAs */}
 				<div className="flex items-center gap-3">
-					<div className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-4 py-2.5 shadow-sm transition hover:border-brand-200 hover:shadow">
-						<div className="flex items-center gap-2.5">
-							<span className="text-sm font-medium text-neutral-900">
+					<button
+						type="button"
+						onClick={handleCreateNewFile}
+						className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-3.5 py-2 shadow-sm transition hover:border-brand-200 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2"
+					>
+						<div className="flex items-center gap-2">
+							<span className="text-sm font-medium leading-none text-neutral-900">
 								Create a new file
 							</span>
 							<span className="flex items-center gap-1">
@@ -69,7 +87,7 @@ export function WelcomeScreen(): JSX.Element {
 								</kbd>
 							</span>
 						</div>
-					</div>
+					</button>
 
 					<a
 						href="https://lix.dev"

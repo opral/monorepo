@@ -98,4 +98,26 @@ describe("CentralPanel", () => {
 
 		expect(handleFinalize).toHaveBeenCalledWith("search-1");
 	});
+
+	test("triggers create-new-file callback from welcome screen", () => {
+		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+		const handleCreateNewFile = vi.fn();
+
+		render(
+			<DndContext>
+				<CentralPanel
+					panel={emptyPanel}
+					onSelectView={() => {}}
+					onRemoveView={() => {}}
+					isFocused={false}
+					onFocusPanel={vi.fn()}
+					onCreateNewFile={handleCreateNewFile}
+				/>
+			</DndContext>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /create a new file/i }));
+
+		expect(handleCreateNewFile).toHaveBeenCalledTimes(1);
+	});
 });
