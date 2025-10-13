@@ -93,7 +93,7 @@ export function FlashtypeMenu() {
 					size="icon"
 					className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900 data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-900"
 				>
-					<Zap className="size-4 text-amber-500" />
+					<Zap className="size-4 text-brand-600" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent

@@ -5,7 +5,7 @@ import { CentralPanel } from "./central-panel";
 import type { PanelState } from "./types";
 
 describe("CentralPanel", () => {
-	test("shows the empty repository welcome when no views are open", () => {
+	test("shows the welcome screen when no views are open", () => {
 		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 
 		render(
@@ -20,9 +20,7 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		expect(
-			screen.getByText("Welcome to Opral's repository."),
-		).toBeInTheDocument();
+		expect(screen.getByTestId("welcome-screen")).toBeInTheDocument();
 	});
 
 	test("renders the active view and wires tab selection", async () => {

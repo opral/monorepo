@@ -47,7 +47,10 @@ import {
 import { activatePanelView, upsertPendingView } from "./pending-view";
 
 const hydratePanel = (panel: PanelState): PanelState => {
-	const views = panel.views.map(upgradeDiffMetadata);
+	const views = panel.views
+		// Drop unknown view keys that might linger in persisted UI state.
+		.filter((view) => VIEW_MAP.has(view.viewKey))
+		.map(upgradeDiffMetadata);
 	if (views.length === 0) {
 		return { views, activeInstanceKey: null };
 	}
