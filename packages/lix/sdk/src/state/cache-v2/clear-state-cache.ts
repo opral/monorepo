@@ -32,7 +32,6 @@ export function clearStateCacheV2(args: {
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' 
 		      AND name LIKE 'lix_internal_state_cache_%' 
-		      AND name != 'lix_internal_state_cache'
 		      AND name != 'lix_internal_state_cache'`,
 		returnValue: "resultRows",
 	}) as any[];

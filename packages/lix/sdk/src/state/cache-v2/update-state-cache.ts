@@ -11,6 +11,7 @@ import {
 	schemaKeyToCacheTableNameV2,
 } from "./create-schema-cache-table.js";
 import { getStateCacheV2Tables, getStateCacheV2Columns } from "./schema.js";
+import { CACHE_COLUMNS, PRIMARY_KEY_COLUMNS } from "./cache-columns.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 import {
 	LixCommitEdgeSchema,
@@ -20,27 +21,6 @@ import {
 	LixChangeSetSchema,
 	type LixChangeSet,
 } from "../../change-set/schema-definition.js";
-
-const PRIMARY_KEY_COLUMNS = [
-	"lixcol_entity_id",
-	"lixcol_file_id",
-	"lixcol_version_id",
-] as const;
-
-const BASE_INSERT_COLUMNS = [
-	"lixcol_entity_id",
-	"lixcol_schema_key",
-	"lixcol_file_id",
-	"lixcol_version_id",
-	"lixcol_plugin_key",
-	"lixcol_schema_version",
-	"lixcol_created_at",
-	"lixcol_updated_at",
-	"lixcol_inherited_from_version_id",
-	"lixcol_is_tombstone",
-	"lixcol_change_id",
-	"lixcol_commit_id",
-] as const;
 
 type CacheChange = LixChangeRaw | MaterializedChange;
 type CacheChangeEntry = {
@@ -227,7 +207,7 @@ function upsertCacheRows(args: {
 		return;
 	}
 
-	const allColumns = [...BASE_INSERT_COLUMNS, ...propertyColumns];
+	const allColumns = [...CACHE_COLUMNS, ...propertyColumns];
 	const columnList = allColumns.join(", ");
 	const updateColumns = allColumns.filter(
 		(column) =>

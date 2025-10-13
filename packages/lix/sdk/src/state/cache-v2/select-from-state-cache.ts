@@ -1,21 +1,7 @@
 import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { schemaKeyToCacheTableNameV2 } from "./create-schema-cache-table.js";
-
-const CACHE_COLUMNS = [
-	"lixcol_entity_id",
-	"lixcol_schema_key",
-	"lixcol_file_id",
-	"lixcol_version_id",
-	"lixcol_plugin_key",
-	"lixcol_schema_version",
-	"lixcol_created_at",
-	"lixcol_updated_at",
-	"lixcol_inherited_from_version_id",
-	"lixcol_is_tombstone",
-	"lixcol_change_id",
-	"lixcol_commit_id",
-] as const;
+import { CACHE_COLUMNS } from "./cache-columns.js";
 
 const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
