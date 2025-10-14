@@ -15,13 +15,13 @@ test("routes to the physical cache table for the provided schema key", () => {
 	);
 });
 
-test("exposes normalized lixcol metadata columns", () => {
+test("exposes normalized metadata columns", () => {
 	const compiled = selectFromStateCacheV2("lix_change_set", VERSION)
-		.select(["lixcol_entity_id", "lixcol_is_tombstone"])
+		.select(["entity_id", "is_tombstone"])
 		.compile();
 
-	expect(compiled.sql).toContain('"lixcol_entity_id"');
-	expect(compiled.sql).toContain('"lixcol_is_tombstone"');
+	expect(compiled.sql).toContain('"entity_id"');
+	expect(compiled.sql).toContain('"is_tombstone"');
 });
 
 test("provides a virtual snapshot_content column", () => {
@@ -30,8 +30,8 @@ test("provides a virtual snapshot_content column", () => {
 		schemaKey,
 		schemaVersion: VERSION,
 		properties: [
-			{ propertyName: "example", columnName: "example", valueKind: "string" },
-			{ propertyName: "flag", columnName: "flag", valueKind: "boolean" },
+			{ propertyName: "example", columnName: "x_example", valueKind: "string" },
+			{ propertyName: "flag", columnName: "x_flag", valueKind: "boolean" },
 		],
 	});
 
@@ -40,33 +40,33 @@ test("provides a virtual snapshot_content column", () => {
 		.compile();
 
 	expect(compiled.sql).toMatch(
-		/CASE\s+WHEN\s+"lixcol_is_tombstone"\s*=\s*1\s+THEN\s+NULL\s+ELSE\s+json_object/i
+		/CASE\s+WHEN\s+"is_tombstone"\s*=\s*1\s+THEN\s+NULL\s+ELSE\s+json_object/i
 	);
 	expect(compiled.sql).toContain("json_object('example'");
-	expect(compiled.sql).toContain('json_quote("example")');
+	expect(compiled.sql).toContain('json_quote("x_example")');
 	expect(compiled.sql).toContain(
-		'CASE WHEN "flag" IS NULL THEN NULL WHEN "flag" = 1 THEN json(\'true\')'
+		'CASE WHEN "x_flag" IS NULL THEN NULL WHEN "x_flag" = 1 THEN json(\'true\')'
 	);
 	expect(compiled.sql).toContain('AS "snapshot_content"');
 });
 
 test("uses the internal query builder so callers can chain Kysely clauses", () => {
 	const compiled = selectFromStateCacheV2("lix_change_set", VERSION)
-		.where("lixcol_schema_key", "=", "lix_change_set")
-		.where("lixcol_version_id", "=", "global")
-		.select(["lixcol_entity_id"])
+		.where("schema_key", "=", "lix_change_set")
+		.where("version_id", "=", "global")
+		.select(["entity_id"])
 		.compile();
 
-	expect(compiled.sql).toMatch(/WHERE\s+"lixcol_schema_key"\s*=\s*\?/i);
-	expect(compiled.sql).toMatch(/"lixcol_version_id"\s*=\s*\?/i);
+	expect(compiled.sql).toMatch(/WHERE\s+"schema_key"\s*=\s*\?/i);
+	expect(compiled.sql).toMatch(/"version_id"\s*=\s*\?/i);
 	expect(compiled.parameters).toEqual(["lix_change_set", "global"]);
 });
 
 test("supports Kysely unions between independent cache builders", () => {
 	const unionQuery = selectFromStateCacheV2("lix_change_set", VERSION)
-		.select(["lixcol_entity_id"])
+		.select(["entity_id"])
 		.unionAll(
-			selectFromStateCacheV2("lix_commit", VERSION).select(["lixcol_entity_id"])
+			selectFromStateCacheV2("lix_commit", VERSION).select(["entity_id"])
 		);
 
 	const compiled = unionQuery.compile();
@@ -83,14 +83,14 @@ test("supports standard joins for advanced routing queries", () => {
 			sql`lix_internal_state_cache_v2_lix_commit_v1_0`.as("commit_cache"),
 			(join) =>
 				join.onRef(
-					"lix_internal_state_cache_routed.lixcol_entity_id",
+					"lix_internal_state_cache_routed.entity_id",
 					"=",
-					"commit_cache.lixcol_entity_id"
+					"commit_cache.entity_id"
 				)
 		)
 		.select([
-			"lix_internal_state_cache_routed.lixcol_entity_id",
-			"commit_cache.lixcol_entity_id",
+			"lix_internal_state_cache_routed.entity_id",
+			"commit_cache.entity_id",
 		])
 		.compile();
 
@@ -98,7 +98,7 @@ test("supports standard joins for advanced routing queries", () => {
 		/inner join\s+lix_internal_state_cache_v2_lix_commit_v1_0\s+as\s+"commit_cache"/i
 	);
 	expect(compiled.sql).toMatch(
-		/"lix_internal_state_cache_routed"\."lixcol_entity_id"/
+		/"lix_internal_state_cache_routed"\."entity_id"/
 	);
 });
 

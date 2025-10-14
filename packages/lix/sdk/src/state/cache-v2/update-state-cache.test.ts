@@ -22,11 +22,11 @@ function selectCacheRows(
 	const bind: any[] = [];
 
 	if (filters.entityId) {
-		where.push("lixcol_entity_id = ?");
+		where.push("entity_id = ?");
 		bind.push(filters.entityId);
 	}
 	if (filters.versionId) {
-		where.push("lixcol_version_id = ?");
+		where.push("version_id = ?");
 		bind.push(filters.versionId);
 	}
 
@@ -150,20 +150,22 @@ test("writes normalized columns for inserted entities", async () => {
 
 		expect(rows).toHaveLength(1);
 		const row = rows[0]!;
-		expect(row.lixcol_entity_id).toBe("entity-1");
-		expect(row.lixcol_schema_key).toBe("lix_example");
-		expect(row.lixcol_file_id).toBe("lix");
-		expect(row.lixcol_version_id).toBe("global");
-		expect(row.lixcol_plugin_key).toBe("test_plugin");
-		expect(row.lixcol_schema_version).toBe("1.0");
-		expect(row.lixcol_created_at).toBe(timestamp);
-		expect(row.lixcol_updated_at).toBe(timestamp);
-		expect(row.lixcol_inherited_from_version_id).toBeNull();
-		expect(row.lixcol_is_tombstone).toBe(0);
-		expect(row.lixcol_change_id).toBe("change-1");
-		expect(row.lixcol_commit_id).toBe("commit-1");
-		expect(row.id).toBe("entity-1");
-		expect(row.value).toBe("test-data");
+		expect(row).toMatchObject({
+			entity_id: "entity-1",
+			schema_key: "lix_example",
+			file_id: "lix",
+			version_id: "global",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			created_at: timestamp,
+			updated_at: timestamp,
+			inherited_from_version_id: null,
+			is_tombstone: 0,
+			change_id: "change-1",
+			commit_id: "commit-1",
+		});
+		expect(row.x_id).toBe("entity-1");
+		expect(row.x_value).toBe("test-data");
 	});
 });
 
@@ -222,11 +224,11 @@ test("upserts while preserving creation timestamp", async () => {
 
 			expect(rows).toHaveLength(1);
 			const row = rows[0]!;
-			expect(row.lixcol_created_at).toBe(firstTimestamp);
-			expect(row.lixcol_updated_at).toBe(secondTimestamp);
-			expect(row.lixcol_schema_version).toBe("2.0");
-			expect(row.lixcol_commit_id).toBe("commit-updated");
-			expect(row.value).toBe("updated");
+			expect(row.created_at).toBe(firstTimestamp);
+			expect(row.updated_at).toBe(secondTimestamp);
+			expect(row.schema_version).toBe("2.0");
+			expect(row.commit_id).toBe("commit-updated");
+			expect(row.x_value).toBe("updated");
 		}
 	);
 });
@@ -278,8 +280,8 @@ test("creates tombstones with cleared property columns", async () => {
 
 		expect(rows).toHaveLength(1);
 		const row = rows[0]!;
-		expect(row.lixcol_is_tombstone).toBe(1);
-		expect(row.value).toBeNull();
+		expect(row.is_tombstone).toBe(1);
+		expect(row.x_value).toBeNull();
 	});
 });
 
@@ -324,7 +326,7 @@ test("derives commit edges and change sets", async () => {
 				}
 			);
 			const relevantEdges = edgeRows.filter(
-				(row) => row.child_id === "commit-987"
+				(row) => row.x_child_id === "commit-987"
 			);
 			expect(relevantEdges).toHaveLength(2);
 
@@ -335,7 +337,8 @@ test("derives commit edges and change sets", async () => {
 				{ entityId: "changeset-123", versionId: "global" }
 			);
 			expect(changeSetRows).toHaveLength(1);
-			expect(changeSetRows[0]!.id).toBe("changeset-123");
+			expect(changeSetRows[0]!.entity_id).toBe("changeset-123");
+			expect(changeSetRows[0]!.x_id).toBe("changeset-123");
 		}
 	);
 });

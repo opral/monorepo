@@ -89,7 +89,7 @@ export function populateStateCacheV2(args: {
 			engine: args.engine,
 			tableName,
 		});
-		if (!columns.has("lixcol_version_id")) {
+		if (!columns.has("version_id")) {
 			sqlite.exec({ sql: `DROP TABLE ${tableName}` });
 			clearStateCacheV2Columns({ engine: args.engine, tableName });
 			tableCache.delete(tableName);
@@ -98,7 +98,7 @@ export function populateStateCacheV2(args: {
 
 		tableCache.add(tableName);
 		sqlite.exec({
-			sql: `DELETE FROM ${tableName} WHERE lixcol_version_id IN (${placeholders})`,
+			sql: `DELETE FROM ${tableName} WHERE version_id IN (${placeholders})`,
 			bind: versionsToPopulate,
 		});
 	}
@@ -154,6 +154,8 @@ export function populateStateCacheV2(args: {
 			snapshot_content: row.snapshot_content,
 			created_at: row.created_at,
 			metadata: null,
+			version_id: row.version_id,
+			commit_id: commitId,
 			lixcol_version_id: row.version_id,
 			lixcol_commit_id: commitId,
 			inherited_from_version_id: row.inherited_from_version_id,

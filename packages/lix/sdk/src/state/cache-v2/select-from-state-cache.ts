@@ -1,6 +1,7 @@
 import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { schemaKeyToCacheTableNameV2 } from "./create-schema-cache-table.js";
+import { CACHE_COLUMNS } from "./cache-columns.js";
 import {
 	getStateCacheSchemaProperties,
 	type CacheSchemaPropertyMetadata,
@@ -10,47 +11,45 @@ const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
 const SNAPSHOT_COLUMN = "snapshot_content" as const;
 
-const LEGACY_CACHE_COLUMNS = [
-	"entity_id",
-	"schema_key",
-	"file_id",
-	"version_id",
-	"plugin_key",
-	"schema_version",
-	"created_at",
-	"updated_at",
-	"inherited_from_version_id",
-	"inheritance_delete_marker",
-	"change_id",
-	"commit_id",
-] as const;
+type MaterializedCacheColumn =
+	| (typeof CACHE_COLUMNS)[number]
+	| "inheritance_delete_marker";
 
-const LEGACY_COLUMN_TO_PHYSICAL: Record<
-	(typeof LEGACY_CACHE_COLUMNS)[number],
-	string
-> = {
-	entity_id: "lixcol_entity_id",
-	schema_key: "lixcol_schema_key",
-	file_id: "lixcol_file_id",
-	version_id: "lixcol_version_id",
-	plugin_key: "lixcol_plugin_key",
-	schema_version: "lixcol_schema_version",
-	created_at: "lixcol_created_at",
-	updated_at: "lixcol_updated_at",
-	inherited_from_version_id: "lixcol_inherited_from_version_id",
-	inheritance_delete_marker: "lixcol_is_tombstone",
-	change_id: "lixcol_change_id",
-	commit_id: "lixcol_commit_id",
+const MATERIALIZED_CACHE_COLUMNS: MaterializedCacheColumn[] = [];
+for (const column of CACHE_COLUMNS) {
+	MATERIALIZED_CACHE_COLUMNS.push(column);
+}
+MATERIALIZED_CACHE_COLUMNS.push("inheritance_delete_marker");
+
+const COLUMN_TO_PHYSICAL: Record<MaterializedCacheColumn, string> = {
+	entity_id: "entity_id",
+	schema_key: "schema_key",
+	file_id: "file_id",
+	version_id: "version_id",
+	plugin_key: "plugin_key",
+	schema_version: "schema_version",
+	created_at: "created_at",
+	updated_at: "updated_at",
+	inherited_from_version_id: "inherited_from_version_id",
+	change_id: "change_id",
+	commit_id: "commit_id",
+	is_tombstone: "is_tombstone",
+	inheritance_delete_marker: "is_tombstone",
 } as const;
 
-const VIRTUAL_COLUMN_NAMES = [SNAPSHOT_COLUMN] as const;
+type VirtualColumn = typeof SNAPSHOT_COLUMN;
 
-const SELECTABLE_COLUMNS = [
-	...LEGACY_CACHE_COLUMNS,
-	...VIRTUAL_COLUMN_NAMES,
-] as const;
+const VIRTUAL_COLUMN_NAMES: readonly VirtualColumn[] = [SNAPSHOT_COLUMN];
 
-type StateCacheColumn = (typeof SELECTABLE_COLUMNS)[number];
+type StateCacheColumn = MaterializedCacheColumn | VirtualColumn;
+
+const SELECTABLE_COLUMNS: StateCacheColumn[] = [];
+for (const column of MATERIALIZED_CACHE_COLUMNS) {
+	SELECTABLE_COLUMNS.push(column);
+}
+for (const column of VIRTUAL_COLUMN_NAMES) {
+	SELECTABLE_COLUMNS.push(column);
+}
 
 export type StateCacheRow = Record<StateCacheColumn, unknown>;
 
@@ -107,7 +106,7 @@ function buildSelectStatement(
 	propertyMetadata?: CacheSchemaPropertyMetadata[]
 ): string {
 	const quoted = quoteIdentifier(tableName);
-	const projection = SELECTABLE_COLUMNS.map((column) =>
+	const projection = SELECTABLE_COLUMNS.map((column: StateCacheColumn) =>
 		formatProjection(column, {
 			includeTableColumn: true,
 			propertyMetadata: propertyMetadata ?? [],
@@ -119,7 +118,7 @@ FROM ${quoted}`;
 }
 
 function buildEmptySelect(): string {
-	const projection = SELECTABLE_COLUMNS.map((column) =>
+	const projection = SELECTABLE_COLUMNS.map((column: StateCacheColumn) =>
 		formatProjection(column, {
 			includeTableColumn: false,
 			propertyMetadata: [],
@@ -150,9 +149,7 @@ function formatProjection(
 	}
 	if (options.includeTableColumn) {
 		const physical =
-			LEGACY_COLUMN_TO_PHYSICAL[
-				column as keyof typeof LEGACY_COLUMN_TO_PHYSICAL
-			];
+			COLUMN_TO_PHYSICAL[column as keyof typeof COLUMN_TO_PHYSICAL];
 		if (physical) {
 			const physicalIdentifier = quoteIdentifier(physical);
 			if (physical === column) {
@@ -168,7 +165,7 @@ function formatProjection(
 function buildSnapshotContentExpression(
 	properties: CacheSchemaPropertyMetadata[]
 ): string {
-	const tombstoneColumn = quoteIdentifier("lixcol_is_tombstone");
+	const tombstoneColumn = quoteIdentifier("is_tombstone");
 	const jsonExpression = properties.length
 		? `json_object(${properties
 				.map((property) => buildSnapshotPropertyPair(property))

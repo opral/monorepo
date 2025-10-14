@@ -182,7 +182,7 @@ bench("complex OR query (tag filter)", async () => {
 	lix.engine!.sqlite.exec({
 		sql: `SELECT entity_id FROM ${tableName}
 			WHERE tag = 'tag-1' OR tag = 'tag-2'
-			AND lixcol_is_tombstone = 0`,
+			AND is_tombstone = 0`,
 		returnValue: "resultRows",
 	});
 });

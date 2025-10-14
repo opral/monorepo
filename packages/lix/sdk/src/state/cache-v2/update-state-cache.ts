@@ -39,6 +39,22 @@ type CacheChangeEntry = {
 	row: CacheChange;
 	snapshot?: Record<string, unknown>;
 };
+type SqliteBindable = any;
+
+type ProcessedCacheEntry = {
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+	version_id: string;
+	plugin_key: string;
+	schema_version: string;
+	created_at: string;
+	updated_at: string;
+	inherited_from_version_id: string | null;
+	change_id: string;
+	commit_id: string;
+	propertyValues: Map<string, SqliteBindable>;
+};
 type SchemaMetadata = {
 	schema: LixSchemaDefinition;
 	schemaVersion: string;
@@ -204,7 +220,7 @@ function upsertCacheRows(args: {
 		tombstone,
 	} = args;
 
-	const processed = rows.map(({ row, snapshot }) =>
+	const processed: ProcessedCacheEntry[] = rows.map(({ row, snapshot }) =>
 		processChange({
 			row,
 			defaultCommitId,
@@ -223,8 +239,7 @@ function upsertCacheRows(args: {
 	const columnList = allColumns.join(", ");
 	const updateColumns = allColumns.filter(
 		(column) =>
-			!PRIMARY_KEY_COLUMNS.includes(column as any) &&
-			column !== "lixcol_created_at"
+			!PRIMARY_KEY_COLUMNS.includes(column as any) && column !== "created_at"
 	);
 
 	const placeholders = allColumns.map(() => "?").join(", ");
@@ -233,31 +248,29 @@ function upsertCacheRows(args: {
 		.join(", ");
 
 	const sql = `INSERT INTO ${tableName} (${columnList}) VALUES (${placeholders})
-	ON CONFLICT(lixcol_entity_id, lixcol_file_id, lixcol_version_id) DO UPDATE SET ${updateAssignments}`;
+	ON CONFLICT(entity_id, file_id, version_id) DO UPDATE SET ${updateAssignments}`;
 
 	const stmt = engine.sqlite.prepare(sql);
 	// updateStateCacheV2 executes inside the engine's transaction scope; no local BEGIN/COMMIT.
 	for (const change of processed) {
 		stmt.bind([
-			change.lixcol_entity_id,
-			change.lixcol_schema_key,
-			change.lixcol_file_id,
-			change.lixcol_version_id,
-			change.lixcol_plugin_key,
-			change.lixcol_schema_version,
-			change.lixcol_created_at,
-			change.lixcol_updated_at,
-			change.lixcol_inherited_from_version_id ?? null,
+			change.entity_id,
+			change.schema_key,
+			change.file_id,
+			change.version_id,
+			change.plugin_key,
+			change.schema_version,
+			change.created_at,
+			change.updated_at,
+			change.inherited_from_version_id ?? null,
 			tombstone ? 1 : 0,
-			change.lixcol_change_id,
-			change.lixcol_commit_id,
-			...propertyColumns.map((column) =>
-				tombstone
-					? null
-					: change.propertyValues.has(column)
-						? change.propertyValues.get(column)
-						: null
-			),
+			change.change_id,
+			change.commit_id,
+			...propertyColumns.map((column) => {
+				if (tombstone) return null;
+				const value = change.propertyValues.get(column);
+				return value ?? null;
+			}),
 		]);
 		stmt.step();
 		stmt.reset();
@@ -320,7 +333,7 @@ function upsertDerivedCommitEntities(args: {
 
 		if (parents.length > 0) {
 			engine.executeSync({
-				sql: `DELETE FROM ${edgeMetadata.tableName} WHERE lixcol_version_id = 'global' AND child_id = ?`,
+				sql: `DELETE FROM ${edgeMetadata.tableName} WHERE version_id = 'global' AND x_child_id = ?`,
 				parameters: [childId],
 			});
 		}
@@ -339,8 +352,8 @@ function upsertDerivedCommitEntities(args: {
 				} satisfies LixCommitEdge),
 				created_at: change.created_at,
 			} as LixChangeRaw;
-			(edgeRow as any).lixcol_version_id = "global";
-			(edgeRow as any).lixcol_commit_id = (defaultCommitId as any) ?? childId;
+			(edgeRow as any).version_id = "global";
+			(edgeRow as any).commit_id = (defaultCommitId as any) ?? childId;
 			edgeRows.push(edgeRow);
 		}
 
@@ -357,9 +370,8 @@ function upsertDerivedCommitEntities(args: {
 				} satisfies LixChangeSet),
 				created_at: change.created_at,
 			} as LixChangeRaw;
-			(changeSetRow as any).lixcol_version_id = "global";
-			(changeSetRow as any).lixcol_commit_id =
-				(defaultCommitId as any) ?? childId;
+			(changeSetRow as any).version_id = "global";
+			(changeSetRow as any).commit_id = (defaultCommitId as any) ?? childId;
 			changeSetRows.push(changeSetRow);
 		}
 	}
@@ -411,7 +423,7 @@ function processChange(args: {
 	tombstone: boolean;
 	propertyColumns: Set<string>;
 	snapshot?: Record<string, unknown>;
-}) {
+}): ProcessedCacheEntry {
 	const {
 		row,
 		defaultCommitId,
@@ -423,24 +435,24 @@ function processChange(args: {
 	const rowAny = row as any;
 
 	const resolvedVersionId =
-		rowAny.lixcol_version_id ?? rowAny.version_id ?? defaultVersionId;
+		rowAny.version_id ?? rowAny.lixcol_version_id ?? defaultVersionId;
 	if (!resolvedVersionId) {
 		throw new Error(
-			"updateStateCacheV2: version_id missing; provide inline lixcol_version_id or top-level version_id"
+			"updateStateCacheV2: version_id missing; provide inline version_id or top-level version_id"
 		);
 	}
 
 	const resolvedCommitId =
-		rowAny.lixcol_commit_id ?? defaultCommitId ?? rowAny.commit_id;
+		rowAny.commit_id ?? rowAny.lixcol_commit_id ?? defaultCommitId;
 	if (!resolvedCommitId) {
 		throw new Error(
-			"updateStateCacheV2: commit_id missing; provide inline lixcol_commit_id or top-level commit_id"
+			"updateStateCacheV2: commit_id missing; provide inline commit_id or top-level commit_id"
 		);
 	}
 
 	const inheritedFrom =
-		rowAny.lixcol_inherited_from_version_id ??
 		rowAny.inherited_from_version_id ??
+		rowAny.lixcol_inherited_from_version_id ??
 		null;
 
 	const snapshotObject = tombstone
@@ -448,7 +460,7 @@ function processChange(args: {
 		: (snapshot ??
 			(JSON.parse(row.snapshot_content as string) as Record<string, unknown>));
 
-	const propertyValues = new Map<string, unknown>();
+	const propertyValues = new Map<string, SqliteBindable>();
 	for (const [key, value] of Object.entries(snapshotObject ?? {})) {
 		const column = propertyNameToColumn(key);
 		if (propertyColumns.has(column)) {
@@ -457,17 +469,17 @@ function processChange(args: {
 	}
 
 	return {
-		lixcol_entity_id: row.entity_id,
-		lixcol_schema_key: row.schema_key,
-		lixcol_file_id: row.file_id,
-		lixcol_version_id: resolvedVersionId,
-		lixcol_plugin_key: row.plugin_key,
-		lixcol_schema_version: row.schema_version,
-		lixcol_created_at: row.created_at,
-		lixcol_updated_at: row.created_at,
-		lixcol_inherited_from_version_id: inheritedFrom,
-		lixcol_change_id: row.id,
-		lixcol_commit_id: resolvedCommitId,
+		entity_id: row.entity_id,
+		schema_key: row.schema_key,
+		file_id: row.file_id,
+		version_id: resolvedVersionId,
+		plugin_key: row.plugin_key,
+		schema_version: row.schema_version,
+		created_at: row.created_at,
+		updated_at: row.created_at,
+		inherited_from_version_id: inheritedFrom,
+		change_id: row.id,
+		commit_id: resolvedCommitId,
 		propertyValues,
 	};
 }
@@ -587,9 +599,9 @@ function mapPrimaryTypeToValueKind(
 	}
 }
 
-function formatPropertyValue(value: unknown): unknown {
+function formatPropertyValue(value: unknown): SqliteBindable {
 	if (value === null || value === undefined) return null;
 	if (typeof value === "boolean") return value ? 1 : 0;
 	if (typeof value === "object") return JSON.stringify(value);
-	return value;
+	return value as SqliteBindable;
 }

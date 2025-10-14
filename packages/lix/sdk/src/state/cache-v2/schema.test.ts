@@ -7,6 +7,7 @@ import {
 } from "./create-schema-cache-table.js";
 import { getStateCacheV2Tables } from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { CACHE_COLUMNS } from "./cache-columns.js";
 
 const sanitize = (schemaKey: string): string =>
 	schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
@@ -104,12 +105,12 @@ test("normalized cache tables are registered per schema", async () => {
 	expect(tables.has(expectedTable)).toBe(true);
 
 	const columnInfo = pragmaColumns(lix.engine!.sqlite, expectedTable);
-	const columnNames = columnInfo.map((row) => row.name);
-	const metaColumns = columnNames.filter((name) => name.startsWith("lixcol_"));
-
-	expect(metaColumns.length).toBeGreaterThanOrEqual(12);
-	expect(columnNames).not.toContain("entity_id");
-	expect(columnNames).toContain("value");
+	const columnNames = new Set(columnInfo.map((row) => row.name));
+	for (const core of CACHE_COLUMNS) {
+		expect(columnNames.has(core)).toBe(true);
+	}
+	expect(columnNames.has("x_id")).toBe(true);
+	expect(columnNames.has("x_value")).toBe(true);
 
 	const rows = selectCacheRows(
 		lix.engine!.sqlite,
@@ -118,8 +119,21 @@ test("normalized cache tables are registered per schema", async () => {
 	);
 	expect(rows).toHaveLength(1);
 	const row = rows[0]!;
-	expect(row.lixcol_entity_id).toBe("entity1");
-	expect(row.value).toBe("a1");
+	expect(row).toMatchObject({
+		entity_id: "entity1",
+		schema_key: "schema_meta",
+		file_id: "file1",
+		version_id: "version-1",
+		plugin_key: "plugin1",
+		schema_version: "1.0",
+		created_at: "2024-01-01T00:00:00Z",
+		updated_at: "2024-01-01T00:00:00Z",
+		is_tombstone: 0,
+		change_id: "change1",
+		commit_id: "commit1",
+	});
+	expect(row.x_id).toBeNull();
+	expect(row.x_value).toBe("a1");
 });
 
 test("string properties create TEXT columns", async () => {
@@ -151,7 +165,7 @@ test("string properties create TEXT columns", async () => {
 		lix.engine!.sqlite,
 		cacheTable("schema_string", schema["x-lix-version"] ?? "1.0")
 	);
-	const nameColumn = columnInfo.find((row) => row.name === "name");
+	const nameColumn = columnInfo.find((row) => row.name === "x_name");
 	expect(nameColumn?.type).toBe("TEXT");
 });
 
@@ -184,7 +198,7 @@ test("integer properties create INTEGER columns", async () => {
 		lix.engine!.sqlite,
 		cacheTable("schema_integer", schema["x-lix-version"] ?? "1.0")
 	);
-	const column = columnInfo.find((row) => row.name === "count");
+	const column = columnInfo.find((row) => row.name === "x_count");
 	expect(column?.type).toBe("INTEGER");
 });
 
@@ -217,7 +231,7 @@ test("number properties create REAL columns", async () => {
 		lix.engine!.sqlite,
 		cacheTable("schema_number", schema["x-lix-version"] ?? "1.0")
 	);
-	const column = columnInfo.find((row) => row.name === "price");
+	const column = columnInfo.find((row) => row.name === "x_price");
 	expect(column?.type).toBe("REAL");
 });
 
@@ -250,7 +264,7 @@ test("boolean properties create INTEGER columns", async () => {
 		lix.engine!.sqlite,
 		cacheTable("schema_boolean", schema["x-lix-version"] ?? "1.0")
 	);
-	const column = columnInfo.find((row) => row.name === "isActive");
+	const column = columnInfo.find((row) => row.name === "x_isActive");
 	expect(column?.type).toBe("INTEGER");
 });
 
@@ -283,7 +297,7 @@ test("object properties create TEXT columns and store JSON", async () => {
 		lix.engine!.sqlite,
 		cacheTable("schema_object", schema["x-lix-version"] ?? "1.0")
 	);
-	const column = columnInfo.find((row) => row.name === "metadata");
+	const column = columnInfo.find((row) => row.name === "x_metadata");
 	expect(column?.type).toBe("TEXT");
 
 	updateStateCacheV2({
@@ -311,6 +325,6 @@ test("object properties create TEXT columns and store JSON", async () => {
 	);
 	expect(rows).toHaveLength(1);
 	const stored = rows[0]!;
-	expect(stored.metadata).toBe(JSON.stringify({ nested: true }));
-	expect(JSON.parse(stored.metadata as string)).toEqual({ nested: true });
+	expect(stored.x_metadata).toBe(JSON.stringify({ nested: true }));
+	expect(JSON.parse(stored.x_metadata as string)).toEqual({ nested: true });
 });

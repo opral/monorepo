@@ -11,8 +11,8 @@ import {
  *
  * Core choices:
  * - STRICT + WITHOUT ROWID for compact storage and fast PK lookups
- * - `lixcol_*` metadata columns mirror the entity view column names
- * - Property columns are created using sanitized schema property names
+ * - Metadata columns reuse the canonical state column names (`entity_id`, `version_id`, ...)
+ * - Property columns are created using sanitized schema property names prefixed with `x_`
  * - Indexes continue to accelerate hot access patterns (version/file scans, tombstones)
  *
  * @example
@@ -41,7 +41,7 @@ export function createSchemaCacheTableV2(args: {
 
 	if (existingInfo && existingInfo.length > 0) {
 		const hasNormalizedColumns = existingInfo.some(
-			(column) => column?.name === "lixcol_entity_id"
+			(column) => column?.name === "entity_id"
 		);
 		if (!hasNormalizedColumns) {
 			engine.executeSync({ sql: `DROP TABLE ${tableName}` });
@@ -61,19 +61,19 @@ export function createSchemaCacheTableV2(args: {
 
 	const createTableSql = `
     CREATE TABLE IF NOT EXISTS ${tableName} (
-      lixcol_entity_id TEXT NOT NULL,
-      lixcol_schema_key TEXT NOT NULL,
-      lixcol_file_id TEXT NOT NULL,
-      lixcol_version_id TEXT NOT NULL,
-      lixcol_plugin_key TEXT NOT NULL,
-      lixcol_schema_version TEXT NOT NULL,
-      lixcol_created_at TEXT NOT NULL,
-      lixcol_updated_at TEXT NOT NULL,
-      lixcol_inherited_from_version_id TEXT,
-      lixcol_is_tombstone INTEGER DEFAULT 0,
-      lixcol_change_id TEXT,
-      lixcol_commit_id TEXT,
-      ${propertyColumnSql}PRIMARY KEY (lixcol_entity_id, lixcol_file_id, lixcol_version_id)
+      entity_id TEXT NOT NULL,
+      schema_key TEXT NOT NULL,
+      file_id TEXT NOT NULL,
+      version_id TEXT NOT NULL,
+      plugin_key TEXT NOT NULL,
+      schema_version TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      inherited_from_version_id TEXT,
+      is_tombstone INTEGER DEFAULT 0,
+      change_id TEXT,
+      commit_id TEXT,
+      ${propertyColumnSql}PRIMARY KEY (entity_id, file_id, version_id)
     ) STRICT, WITHOUT ROWID;
   `;
 
@@ -82,31 +82,31 @@ export function createSchemaCacheTableV2(args: {
 	// Core static indexes for common access patterns
 	// 1) Fast version-scoped lookups (frequent)
 	engine.executeSync({
-		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (lixcol_version_id)`,
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
 	});
 
 	// 2) Fast lookups by (version_id, file_id, entity_id) – complements PK order
 	engine.executeSync({
-		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_vfe ON ${tableName} (lixcol_version_id, lixcol_file_id, lixcol_entity_id)`,
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_vfe ON ${tableName} (version_id, file_id, entity_id)`,
 	});
 
 	// 3) Fast scans by file within a version
 	engine.executeSync({
-		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (lixcol_file_id, lixcol_version_id)`,
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
 	});
 
 	// 4) Partial index for live rows only to skip tombstones when applying predicates
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_live_vfe
-			ON ${tableName} (lixcol_version_id, lixcol_file_id, lixcol_entity_id)
-			WHERE lixcol_is_tombstone = 0`,
+			ON ${tableName} (version_id, file_id, entity_id)
+			WHERE is_tombstone = 0`,
 	});
 
 	// 5) Partial index for tombstones when they are queried explicitly
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_tomb_vfe
-			ON ${tableName} (lixcol_version_id, lixcol_file_id, lixcol_entity_id)
-			WHERE lixcol_is_tombstone = 1`,
+			ON ${tableName} (version_id, file_id, entity_id)
+			WHERE is_tombstone = 1`,
 	});
 
 	// Update planner stats
@@ -153,10 +153,8 @@ function extractPropertyColumns(
 
 export function propertyNameToColumn(property: string): string {
 	const base = sanitizeIdentifier(property);
-	if (/^[0-9]/.test(base)) {
-		return `_${base}`;
-	}
-	return base;
+	const normalized = /^[0-9]/.test(base) ? `_${base}` : base;
+	return `x_${normalized}`;
 }
 
 export function sanitizeIdentifier(value: string): string {

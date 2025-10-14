@@ -546,10 +546,10 @@ export function commit(args: {
 			engine: engine,
 			changes: genRes.materializedState,
 		});
-		// updateStateCacheV2({
-		// 	engine,
-		// 	changes: genRes.materializedState,
-		// });
+		updateStateCacheV2({
+			engine,
+			changes: genRes.materializedState,
+		});
 	}
 
 	// Delete untracked state for any tracked changes that were committed

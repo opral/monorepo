@@ -118,7 +118,7 @@ test("populateStateCacheV2 materializes normalized rows for global version", asy
 	const rows = selectCacheRows(lix.engine!.sqlite, "lix_example");
 	expect(rows).toHaveLength(1);
 	const row = rows[0]!;
-	expect(row.lixcol_version_id).toBe("global");
-	expect(typeof row.lixcol_commit_id).toBe("string");
-	expect(row.value).toBe("seed");
+	expect(row.version_id).toBe("global");
+	expect(typeof row.commit_id).toBe("string");
+	expect(row.x_value).toBe("seed");
 });

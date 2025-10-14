@@ -4,6 +4,7 @@ import {
 	createSchemaCacheTableV2,
 	schemaKeyToCacheTableNameV2,
 } from "./create-schema-cache-table.js";
+import { CACHE_COLUMNS } from "./cache-columns.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const exampleSchema: LixSchemaDefinition = {
@@ -73,9 +74,13 @@ test("createSchemaCacheTableV2 creates table with core indexes and is idempotent
 		returnValue: "resultRows",
 	}) as Array<[string]>;
 	const columnNames = new Set(columns.map((row) => row[0]));
-	expect(columnNames.has("id")).toBe(true);
-	expect(columnNames.has("name")).toBe(true);
-	expect(columnNames.has("count")).toBe(true);
+
+	for (const core of CACHE_COLUMNS) {
+		expect(columnNames.has(core)).toBe(true);
+	}
+	for (const propertyColumn of ["x_id", "x_name", "x_count"]) {
+		expect(columnNames.has(propertyColumn)).toBe(true);
+	}
 
 	const idxRows2 = lix.engine!.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema WHERE type='index' AND tbl_name = ?`,
