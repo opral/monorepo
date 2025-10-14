@@ -25,7 +25,7 @@ lix_internal_state_vtable_rewritten AS (
   		    SELECT
   		      json_extract(desc.snapshot_content, '$.id') AS version_id,
   		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-  		    FROM lix_internal_state_cache_lix_version_descriptor desc
+  		    FROM lix_internal_state_cache_v1_lix_version_descriptor desc
   		  ),
   		  version_inheritance(version_id, ancestor_version_id) AS (
   		    SELECT
@@ -105,7 +105,7 @@ lix_internal_state_vtable_rewritten AS (
         c.commit_id,
         NULL AS metadata,
         3 AS priority
-      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) c
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_bench_vtable_schema) c
         JOIN params p ON
           p.entity_id = c.entity_id
           AND p.version_id = c.version_id
@@ -139,7 +139,7 @@ lix_internal_state_vtable_rewritten AS (
         NULL AS metadata,
         4 AS priority
       FROM version_inheritance vi
-      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
         JOIN params p ON
           p.version_id = vi.version_id
           AND p.entity_id = isc.entity_id
@@ -313,7 +313,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 110,
     "parent": 99,
     "notused": 38,
-    "detail": "SEARCH lix_internal_state_cache_bench_vtable_schema USING INDEX idx_lix_internal_state_cache_bench_vtable_schema_version_id (version_id=? AND entity_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_bench_vtable_schema USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_version_id (version_id=? AND entity_id=?)"
   },
   {
     "id": 134,
@@ -343,7 +343,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 191,
     "parent": 186,
     "notused": 22,
-    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent"
   },
   {
     "id": 201,
@@ -367,7 +367,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 237,
     "parent": 234,
     "notused": 22,
-    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_lix_version_descriptor_id_parent"
+    "detail": "SCAN desc USING COVERING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_id_parent"
   },
   {
     "id": 245,
@@ -379,7 +379,7 @@ SELECT * FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_conte
     "id": 267,
     "parent": 179,
     "notused": 38,
-    "detail": "SEARCH lix_internal_state_cache_bench_vtable_schema USING PRIMARY KEY (entity_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_bench_vtable_schema USING PRIMARY KEY (entity_id=?)"
   },
   {
     "id": 285,

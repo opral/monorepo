@@ -3,12 +3,44 @@ import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const COMMIT_BENCHMARK_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		metadata: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				type: { type: "string" },
+				index: { type: "number" },
+				txn: { type: "number" },
+			},
+		},
+	},
+	required: ["id", "value"],
+	"x-lix-key": "commit_benchmark_entity",
+	"x-lix-version": "1.0",
+};
+
+async function registerCommitSchema(
+	lix: Awaited<ReturnType<typeof openLix>>
+): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: COMMIT_BENCHMARK_SCHEMA })
+		.execute();
+}
 
 // NOTE: openLix includes database initialization overhead
 // This affects all benchmarks equally and represents real-world usage patterns
 // this test exists to act as baseline for commit performance
 bench("commit empty transaction (baseline)", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
 	commit({
 		engine: lix.engine!,
@@ -17,6 +49,7 @@ bench("commit empty transaction (baseline)", async () => {
 
 bench("commit transaction with 1 row", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
 	// Insert multiple transaction states in a single batch
 	const multipleData = [];
@@ -51,6 +84,7 @@ bench("commit transaction with 1 row", async () => {
 
 bench("commit transaction with 100 rows", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
 	// Insert multiple transaction states in a single batch
 	const multipleData = [];
@@ -84,6 +118,7 @@ bench("commit transaction with 100 rows", async () => {
 
 bench("commit 10 transactions x 10 changes (sequential)", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
 	const TXN_COUNT = 10;
 	const ROWS_PER_TXN = 10;
@@ -123,6 +158,7 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 
 bench("commit with mixed operations (insert/update/delete)", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
 	// Preload a baseline of entities to update/delete
 	const BASE_COUNT = 30; // baseline rows to enable realistic updates/deletes

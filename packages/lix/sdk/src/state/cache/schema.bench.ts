@@ -3,11 +3,80 @@ import { openLix } from "../../lix/open-lix.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const ROW_NUM = 1000;
 
+const LIX_TEST_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		entity_id: { type: "string" },
+		schema_key: { type: "string" },
+		file_id: { type: "string" },
+		data: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+				index: { type: "number" },
+				nested: {
+					type: "object",
+					additionalProperties: false,
+					properties: {
+						field1: { type: "string" },
+						field2: { type: "number" },
+						field3: { type: "boolean" },
+					},
+					required: ["field1", "field2", "field3"],
+				},
+			},
+			required: ["value", "index", "nested"],
+		},
+	},
+	required: ["entity_id", "schema_key", "file_id", "data"],
+	"x-lix-key": "lix_test",
+	"x-lix-version": "1.0",
+};
+
+const LIX_CHANGE_SET_ELEMENT_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		entity_id: { type: "string" },
+		schema_key: { type: "string" },
+		file_id: { type: "string" },
+		change_id: { type: "string" },
+		data: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+				index: { type: "number" },
+			},
+			required: ["value", "index"],
+		},
+	},
+	required: ["entity_id", "schema_key", "file_id", "change_id", "data"],
+	"x-lix-key": "lix_change_set_element",
+	"x-lix-version": "1.0",
+};
+
+async function registerCacheSchemas(
+	lix: Awaited<ReturnType<typeof openLix>>
+): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values([
+			{ value: LIX_TEST_SCHEMA },
+			{ value: LIX_CHANGE_SET_ELEMENT_SCHEMA },
+		])
+		.execute();
+}
+
 bench(`insert ${ROW_NUM} rows into cache`, async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 
 	// Generate test rows for cache
 	const rows = [];
@@ -55,6 +124,7 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 
 bench("query with json_extract from cache", async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
@@ -115,6 +185,7 @@ bench("query with json_extract from cache", async () => {
 
 bench("query through resolved_state_all view", async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
@@ -175,6 +246,7 @@ bench("query through resolved_state_all view", async () => {
 
 bench("complex OR query (deletionReconciliation pattern)", async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
@@ -265,6 +337,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 
 bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
@@ -331,6 +404,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 
 bench(`delete ${ROW_NUM / 10} rows from cache`, async () => {
 	const lix = await openLix({});
+	await registerCacheSchemas(lix);
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data

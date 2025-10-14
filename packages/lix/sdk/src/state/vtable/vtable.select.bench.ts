@@ -4,6 +4,7 @@ import { openLix } from "../../lix/open-lix.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const TEST_SCHEMA = "bench_vtable_schema";
 const FILE_ID = "bench-file";
@@ -121,6 +122,24 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 			},
 		],
 	});
+
+	const BENCH_STORED_SCHEMA: LixSchemaDefinition = {
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			source: { type: "string" },
+			idx: { type: "integer" },
+		},
+		required: ["source"],
+		"x-lix-key": TEST_SCHEMA,
+		"x-lix-version": SCHEMA_VERSION,
+		"x-lix-primary-key": ["/source"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: BENCH_STORED_SCHEMA })
+		.execute();
 
 	await seedVtableFixture(lix);
 
@@ -250,7 +269,7 @@ function buildTransactionRows(args: { versionId: string; suffix: string }) {
 			file_id: FILE_ID,
 			plugin_key: PLUGIN_KEY,
 			snapshot_content: JSON.stringify({
-				source: `${baseLabel}-extra`,
+				source: `${baseLabel}-extra-${index}`,
 				idx: index,
 			}),
 			schema_version: SCHEMA_VERSION,
@@ -308,7 +327,7 @@ async function insertEntityRows(args: {
 			entityId: `${baseEntityId}_extra_${index}`,
 			versionId,
 			snapshot: {
-				source: `${sourcePrefix}-extra-${suffix}`,
+				source: `${sourcePrefix}-extra-${suffix}-${index}`,
 				idx: index,
 			},
 			untracked,

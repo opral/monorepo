@@ -1,6 +1,7 @@
 import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 // Keep sizes moderate to avoid long CI runs while still being meaningful
 const ROWS_SIMPLE = 100;
@@ -8,8 +9,31 @@ const ENTITIES_LINEAR = 50;
 const COMMITS_LINEAR = 5;
 const INHERIT_BASE = 50;
 
+const BENCH_STORED_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		v: { type: "number" },
+		rev: { type: "number" },
+		src: { type: "string" },
+	},
+	required: ["id"],
+	"x-lix-key": "bench_entity",
+	"x-lix-version": "1.0",
+};
+
+async function registerBenchSchema(
+	lix: Awaited<ReturnType<typeof openLix>>
+): Promise<void> {
+	await lix.db.insertInto("stored_schema").values({
+		value: BENCH_STORED_SCHEMA,
+	}).execute();
+}
+
 bench("materializer: select all from single version", async () => {
 	const lix = await openLix({});
+	await registerBenchSchema(lix);
 
 	// Seed a single commit containing many entities in the global version
 	await lix.db
@@ -40,6 +64,7 @@ bench("materializer: select all from single version", async () => {
 
 bench("materializer: linear history (entities x commits)", async () => {
 	const lix = await openLix({});
+	await registerBenchSchema(lix);
 
 	// Create an isolated version for this benchmark
 	await createVersion({ lix, id: "bench_linear" });
@@ -72,6 +97,7 @@ bench("materializer: linear history (entities x commits)", async () => {
 
 bench("materializer: inheritance (global -> A -> B -> C)", async () => {
 	const lix = await openLix({});
+	await registerBenchSchema(lix);
 
 	// Create a 3-level inheritance chain from global
 	const versionA = await createVersion({
@@ -162,6 +188,7 @@ bench("materializer: inheritance (global -> A -> B -> C)", async () => {
 
 bench("materializer: point lookup by entity_id", async () => {
 	const lix = await openLix({});
+	await registerBenchSchema(lix);
 
 	// Seed a reasonable set of entities in a dedicated version
 	await createVersion({ lix, id: "bench_point" });

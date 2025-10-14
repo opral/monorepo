@@ -111,9 +111,6 @@ export function validateStateMutation(args: {
 	version_id: string;
 	untracked?: boolean;
 }): void {
-	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
-	// Validate version_id is provided
-
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}

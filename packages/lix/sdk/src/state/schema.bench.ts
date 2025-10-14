@@ -1,10 +1,62 @@
 import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 const NUM_ROWS = 100;
 
+const BENCHMARK_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		metadata: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				index: { type: "number" },
+				type: { type: "string" },
+			},
+			required: ["index", "type"],
+		},
+	},
+	required: ["id", "value", "metadata"],
+	"x-lix-key": "benchmark_entity",
+	"x-lix-version": "1.0",
+};
+
+const MUTATION_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		metadata: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				type: { type: "string" },
+			},
+			required: ["type"],
+		},
+	},
+	required: ["id", "value", "metadata"],
+	"x-lix-key": "mutation_benchmark_entity",
+	"x-lix-version": "1.0",
+};
+
+async function registerSchemas(
+	lix: Awaited<ReturnType<typeof openLix>>
+): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: BENCHMARK_SCHEMA }, { value: MUTATION_SCHEMA }])
+		.execute();
+}
+
 bench("select entities from single version", async () => {
 	const lix = await openLix({});
+	await registerSchemas(lix);
 
 	await lix.db
 		.insertInto("state_all")

@@ -2,6 +2,7 @@ import { bench } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 import { selectVersionDiff } from "./select-version-diff.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 const COUNTS = {
 	created: 10,
@@ -26,6 +27,22 @@ const readyCtx: Promise<Ctx> = (async () => {
 		],
 	});
 
+	const BENCH_STORED_SCHEMA: LixSchemaDefinition = {
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			v: { type: "string" },
+		},
+		required: ["v"],
+		"x-lix-key": "bench_diff_entity",
+		"x-lix-version": "1.0",
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: BENCH_STORED_SCHEMA })
+		.execute();
+
 	const source = await createVersion({ lix, name: "bench_source" });
 	const target = await createVersion({ lix, name: "bench_target" });
 
@@ -39,7 +56,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 				file_id: "bench_file",
 				version_id: source.id,
 				plugin_key: "bench_plugin",
-				snapshot_content: { v: i },
+				snapshot_content: { v: `${i}` },
 				schema_version: "1.0",
 			})
 			.execute();
@@ -55,7 +72,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 				file_id: "bench_file",
 				version_id: target.id,
 				plugin_key: "bench_plugin",
-				snapshot_content: { v: i },
+				snapshot_content: { v: `${i}` },
 				schema_version: "1.0",
 			})
 			.execute();
