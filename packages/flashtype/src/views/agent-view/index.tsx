@@ -6,11 +6,11 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { ArrowUp, ChevronDown, Plus } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useLix, useQuery } from "@lix-js/react-utils";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
-import type { ChatMessage, ToolRun } from "./chat-types";
+import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
 import { MOCK_COMMANDS } from "./commands";
 import { MentionMenu, CommandMenu } from "./menu";
 import { extractSlashToken, useComposerState } from "./composer-state";
@@ -24,6 +24,19 @@ type AgentViewProps = {
 type ToolSession = {
 	id: string;
 	runs: ToolRun[];
+};
+
+type LixAgentStep = {
+	id: string;
+	kind?: string;
+	label?: string;
+	status?: string;
+	tool_name?: string;
+	tool_input?: unknown;
+	tool_output?: unknown;
+	error_text?: string;
+	started_at?: string;
+	finished_at?: string;
 };
 
 /**
@@ -79,33 +92,64 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		pushHistory,
 	} = useComposerState({ commands: MOCK_COMMANDS, files: filePaths });
 
-	const hasConversations = agentMessages.length > 0;
-	const conversationLabel = hasConversations
-		? "Current conversation"
-		: "New conversation";
+	// const hasConversations = agentMessages.length > 0;
+	// const conversationLabel = hasConversations
+	// 	? "Current conversation"
+	// 	: "New conversation";
 
 	const [notice, setNotice] = useState<string | null>(null);
 	const [toolSessions, setToolSessions] = useState<ToolSession[]>([]);
 	const activeSessionRef = useRef<string | null>(null);
 
 	const agentTranscript = useMemo<ChatMessage[]>(() => {
-		return agentMessages.map((message) => ({
-			id: message.id,
-			role: message.role,
-			content: message.content,
-		}));
+		return agentMessages.map((message) => {
+			const rawSteps = (message.metadata as Record<string, unknown> | undefined)
+				?.lix_agent_steps;
+			const steps: LixAgentStep[] = Array.isArray(rawSteps)
+				? (rawSteps as LixAgentStep[])
+				: [];
+			if (message.role === "assistant" && steps.length > 0) {
+				const toolRuns = stepsToToolRuns(steps);
+				if (message.content.trim().length > 0) {
+					toolRuns.push({
+						id: `${message.id}-response`,
+						title: "",
+						detail: undefined,
+						status: "thinking",
+						input: undefined,
+						output: undefined,
+						content: message.content,
+					});
+				}
+				return {
+					id: message.id,
+					role: message.role,
+					content: "",
+					toolRuns,
+				};
+			}
+			return {
+				id: message.id,
+				role: message.role,
+				content: message.content,
+			};
+		});
 	}, [agentMessages]);
 
 	const transcript = useMemo<ChatMessage[]>(() => {
 		const out: ChatMessage[] = [...agentTranscript];
-		for (const session of toolSessions) {
-			if (session.runs.length === 0) continue;
-			out.push({
-				id: `tool-session-${session.id}`,
-				role: "assistant",
-				content: "",
-				toolRuns: session.runs,
-			});
+		if (toolSessions.length > 0) {
+			const pendingRuns = toolSessions.flatMap((session) => session.runs);
+			if (pendingRuns.length > 0) {
+				const lastSessionId =
+					toolSessions[toolSessions.length - 1]?.id ?? "pending";
+				out.push({
+					id: `tool-session-${lastSessionId}`,
+					role: "assistant",
+					content: "",
+					toolRuns: pendingRuns,
+				});
+			}
 		}
 		if (pending) {
 			out.push({
@@ -133,7 +177,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 				id: "agent-missing-key",
 				role: "system",
 				content:
-					"Missing GOOGLE_API_KEY. Add one to enable the Lix Agent conversation.",
+					"Missing AI_GATEWAY_API_KEY. Add one to enable the Lix Agent conversation.",
 			});
 		}
 		return out;
@@ -176,16 +220,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	}, []);
 
 	const finalizeToolSession = useCallback((id: string) => {
-		setToolSessions((prev) => {
-			const index = prev.findIndex((session) => session.id === id);
-			if (index === -1) return prev;
-			const next = prev.slice();
-			if (next[index]?.runs.length === 0) {
-				next.splice(index, 1);
-				return next;
-			}
-			return next;
-		});
+		setToolSessions((prev) => prev.filter((session) => session.id !== id));
 	}, []);
 
 	const resetToolSessions = useCallback(() => {
@@ -518,6 +553,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
 			{/* Header with conversation picker */}
+			{/*
 			<header className="flex items-center justify-between border-b border-border/80 py-1">
 				<button
 					type="button"
@@ -534,6 +570,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 					<Plus className="h-4 w-4" />
 				</button>
 			</header>
+			*/}
 
 			{/* Chat messages */}
 			<div className="flex-1 min-h-0 overflow-y-auto">
@@ -593,6 +630,38 @@ export function AgentView({ context: _context }: AgentViewProps) {
 }
 
 export default AgentView;
+
+function stepsToToolRuns(steps: LixAgentStep[]): ToolRun[] {
+	const statusFromStep = (status?: string): ToolRunStatus => {
+		if (status === "succeeded") return "success";
+		if (status === "failed") return "error";
+		return "running";
+	};
+
+	return steps
+		.filter((step) => (step.kind ?? "tool_call") === "tool_call")
+		.map((step) => {
+			const status = statusFromStep(step.status);
+			const formattedInput = stringifyPayload(step.tool_input);
+			const formattedOutput =
+				status === "error"
+					? (step.error_text ?? stringifyPayload(step.tool_output))
+					: stringifyPayload(step.tool_output);
+			const titleSource = step.tool_name
+				? formatToolName(step.tool_name)
+				: (step.label ?? "Tool");
+			return {
+				id: step.id,
+				title: titleSource,
+				detail: step.label,
+				status,
+				input: formattedInput,
+				output: formattedOutput,
+				content:
+					status === "error" ? (step.error_text ?? undefined) : undefined,
+			};
+		});
+}
 
 function lastActionFocus(el: HTMLTextAreaElement | null) {
 	if (!el) return;

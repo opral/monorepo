@@ -3,7 +3,7 @@ import { createConversation, createConversationMessage } from "@lix-js/sdk";
 import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ChatMessage } from "./send-message.js";
 
-const POINTER_KEY = "lix_agent_conversation_id";
+const DEFAULT_CONVERSATION_ID_KEY = "lix_agent_conversation_id";
 
 export async function getOrCreateDefaultAgentConversationId(
 	lix: Lix
@@ -11,22 +11,21 @@ export async function getOrCreateDefaultAgentConversationId(
 	const row = await lix.db
 		.selectFrom("key_value_all")
 		.where("lixcol_version_id", "=", "global")
-		.where("key", "=", POINTER_KEY)
+		.where("key", "=", DEFAULT_CONVERSATION_ID_KEY)
 		.select(["value"])
 		.executeTakeFirst();
 
-	const id =
-		(row?.value as any)?.value ??
-		(row?.value as any)?.id ??
-		(row as any)?.value;
-	if (id && typeof id === "string") return id;
+	const storedValue = row?.value;
+	if (typeof storedValue === "string") {
+		return storedValue;
+	}
 
 	const conv = await createConversation({ lix, versionId: "global" });
-	await upsertConversationPointer(lix, conv.id);
+	await setDefaultAgentConversationId(lix, conv.id);
 	return conv.id;
 }
 
-export async function upsertConversationPointer(
+export async function setDefaultAgentConversationId(
 	lix: Lix,
 	conversationId: string
 ): Promise<void> {
@@ -34,7 +33,7 @@ export async function upsertConversationPointer(
 		const exists = await trx
 			.selectFrom("key_value_all")
 			.where("lixcol_version_id", "=", "global")
-			.where("key", "=", POINTER_KEY)
+			.where("key", "=", DEFAULT_CONVERSATION_ID_KEY)
 			.select(["key"])
 			.executeTakeFirst();
 
@@ -42,14 +41,14 @@ export async function upsertConversationPointer(
 			await trx
 				.updateTable("key_value_all")
 				.set({ value: conversationId, lixcol_untracked: true })
-				.where("key", "=", POINTER_KEY)
+				.where("key", "=", DEFAULT_CONVERSATION_ID_KEY)
 				.where("lixcol_version_id", "=", "global")
 				.execute();
 		} else {
 			await trx
 				.insertInto("key_value_all")
 				.values({
-					key: POINTER_KEY,
+					key: DEFAULT_CONVERSATION_ID_KEY,
 					value: conversationId,
 					lixcol_version_id: "global",
 					lixcol_untracked: true,
@@ -62,26 +61,34 @@ export async function upsertConversationPointer(
 export async function appendUserMessage(
 	lix: Lix,
 	conversationId: string,
-	text: string
+	text: string,
+	metadata?: Record<string, any>
 ): Promise<void> {
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: { lix_agent_role: "user" },
+		lixcol_metadata: {
+			lix_agent_role: "user",
+			...(metadata ?? {}),
+		},
 	});
 }
 
 export async function appendAssistantMessage(
 	lix: Lix,
 	conversationId: string,
-	text: string
+	text: string,
+	metadata?: Record<string, any>
 ): Promise<void> {
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: { lix_agent_role: "assistant" },
+		lixcol_metadata: {
+			lix_agent_role: "assistant",
+			...(metadata ?? {}),
+		},
 	});
 }
 
@@ -103,12 +110,20 @@ export async function loadConversationHistory(
 	const history: ChatMessage[] = [];
 	for (const r of rows as ConversationRow[]) {
 		const role = (r.lixcol_metadata?.lix_agent_role as string) ?? "assistant";
+		const metadata =
+			(r.lixcol_metadata as Record<string, any> | null | undefined) ??
+			undefined;
 		const content = toPlainText(r.body).replace(
 			/^\[(user|assistant)\]\s*/i,
 			""
 		);
 		if (role === "user" || role === "assistant") {
-			history.push({ id: String(r.id), role, content });
+			history.push({
+				id: String(r.id),
+				role,
+				content,
+				metadata,
+			});
 		}
 	}
 	return history;

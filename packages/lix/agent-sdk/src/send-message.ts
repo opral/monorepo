@@ -7,6 +7,7 @@ export type ChatMessage = {
 	id: string;
 	role: "system" | "user" | "assistant";
 	content: string;
+	metadata?: Record<string, any>;
 };
 
 export type ToolEvent =
@@ -42,7 +43,10 @@ export async function sendMessageCore(args: {
 	signal?: AbortSignal;
 	tools: Record<string, any>;
 	persistUser: (text: string) => Promise<void>;
-	persistAssistant: (text: string) => Promise<void>;
+	persistAssistant: (args: {
+		text: string;
+		metadata?: Record<string, any>;
+	}) => Promise<void>;
 	onToolEvent?: (event: ToolEvent) => void;
 }): Promise<{
 	text: string;
@@ -85,18 +89,67 @@ export async function sendMessageCore(args: {
 				execute: async (input: unknown) => {
 					const id = await uuidV7({ lix });
 					try {
-						onToolEvent?.({ type: "start", id, name, input, at: Date.now() });
+						const startedAt = Date.now();
+						const startEvent: ToolEvent = {
+							type: "start",
+							id,
+							name,
+							input,
+							at: startedAt,
+						};
+						onToolEvent?.(startEvent);
+						attachStep(startEvent);
 						const output = await originalExecute(input);
-						onToolEvent?.({ type: "finish", id, name, output, at: Date.now() });
+						const finishEvent: ToolEvent = {
+							type: "finish",
+							id,
+							name,
+							output,
+							at: Date.now(),
+						};
+						onToolEvent?.(finishEvent);
+						updateStep(finishEvent, (existing) => {
+							const finishedAt = new Date(finishEvent.at).toISOString();
+							return {
+								id: existing?.id ?? id,
+								kind: "tool_call",
+								label: existing?.label ?? name,
+								status: "succeeded",
+								tool_name: name,
+								tool_input: existing?.tool_input,
+								tool_output: finishEvent.output,
+								error_text: undefined,
+								started_at:
+									existing?.started_at ?? new Date(startedAt).toISOString(),
+								finished_at: finishedAt,
+							};
+						});
 						return output;
 					} catch (err: any) {
 						const msg = err?.message ? String(err.message) : String(err);
-						onToolEvent?.({
+						const errorEvent: ToolEvent = {
 							type: "error",
 							id,
 							name,
 							errorText: msg,
 							at: Date.now(),
+						};
+						onToolEvent?.(errorEvent);
+						updateStep(errorEvent, (existing) => {
+							const finishedAt = new Date(errorEvent.at).toISOString();
+							return {
+								id: existing?.id ?? id,
+								kind: "tool_call",
+								label: existing?.label ?? name,
+								status: "failed",
+								tool_name: name,
+								tool_input: existing?.tool_input,
+								tool_output: existing?.tool_output,
+								error_text: msg,
+								started_at:
+									existing?.started_at ?? new Date(errorEvent.at).toISOString(),
+								finished_at: finishedAt,
+							};
 						});
 						throw err;
 					}
@@ -105,6 +158,50 @@ export async function sendMessageCore(args: {
 			return [name, wrapped];
 		})
 	);
+
+	type ToolStep = {
+		id: string;
+		kind: "tool_call";
+		label: string;
+		status: "running" | "succeeded" | "failed";
+		tool_name: string;
+		tool_input?: unknown;
+		tool_output?: unknown;
+		error_text?: string;
+		started_at: string;
+		finished_at?: string;
+	};
+	const toolSteps: ToolStep[] = [];
+
+	const attachStep = (event: ToolEvent) => {
+		const startedAt = new Date(event.at).toISOString();
+		const step: ToolStep = {
+			id: event.id,
+			kind: "tool_call",
+			label: event.name,
+			status: "running",
+			tool_name: event.name,
+			started_at: startedAt,
+		};
+		if ("input" in event && event.input !== undefined) {
+			step.tool_input = event.input;
+		}
+		toolSteps.push(step);
+	};
+
+	const updateStep = (
+		event: ToolEvent,
+		updater: (existing: ToolStep | undefined) => ToolStep
+	) => {
+		const index = toolSteps.findIndex((step) => step.id === event.id);
+		const existing = index !== -1 ? toolSteps[index] : undefined;
+		const updated = updater(existing);
+		if (index !== -1) {
+			toolSteps[index] = updated;
+		} else {
+			toolSteps.push(updated);
+		}
+	};
 
 	const { text: reply, usage } = await generateText({
 		model,
@@ -151,8 +248,22 @@ export async function sendMessageCore(args: {
 		id: await uuidV7({ lix }),
 		role: "assistant",
 		content: reply,
+		metadata:
+			toolSteps.length > 0
+				? {
+						lix_agent_steps: toolSteps,
+					}
+				: undefined,
 	});
-	await persistAssistant(reply);
+	await persistAssistant({
+		text: reply,
+		metadata:
+			toolSteps.length > 0
+				? {
+						lix_agent_steps: toolSteps,
+					}
+				: undefined,
+	});
 	return { text: reply, usage };
 }
 

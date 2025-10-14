@@ -13,7 +13,7 @@ import {
 	loadConversationHistory,
 	appendUserMessage,
 	appendAssistantMessage,
-	upsertConversationPointer,
+	setDefaultAgentConversationId,
 } from "./conversation-storage.js";
 
 export type ChatMessage = {
@@ -239,8 +239,8 @@ export async function createLixAgent(args: {
 				create_change_proposal,
 			},
 			persistUser: (t: string) => appendUserMessage(lix, conversationId, t),
-			persistAssistant: (t: string) =>
-				appendAssistantMessage(lix, conversationId, t),
+			persistAssistant: ({ text: assistantText, metadata }) =>
+				appendAssistantMessage(lix, conversationId, assistantText, metadata),
 			onToolEvent,
 		});
 		const result = {
@@ -261,7 +261,7 @@ export async function createLixAgent(args: {
 		history.length = 0;
 		const { createConversation } = await import("@lix-js/sdk");
 		const t = await createConversation({ lix, versionId: "global" });
-		await upsertConversationPointer(lix, t.id);
+		await setDefaultAgentConversationId(lix, t.id);
 	}
 
 	const read_file = createReadFileTool({ lix });

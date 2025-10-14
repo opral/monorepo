@@ -7,7 +7,7 @@ import { ChevronRight } from "lucide-react";
  */
 export function ToolRunList({ runs }: { runs: ToolRun[] }) {
 	return (
-		<div className="space-y-1.5">
+		<div className="flex flex-col">
 			{runs.map((run, index) => (
 				<ToolRunRow
 					key={run.id}
@@ -30,41 +30,49 @@ function ToolRunRow({
 	connectBelow: boolean;
 }) {
 	const [isExpanded, setIsExpanded] = React.useState(false);
-	const hasContent = Boolean(run.input || run.output);
+	const hasStructuredIO = Boolean(run.input || run.output);
 	const isThinking = run.status === "thinking";
+	const showPlainContent = Boolean(run.content) && !hasStructuredIO;
 
 	return (
-		<div className="group flex min-w-0 gap-3">
+		<div className="group flex min-w-0 gap-3 py-0">
 			<div className="relative flex w-4 justify-center">
 				{connectAbove ? (
 					<span className="absolute left-1/2 top-0 bottom-1/2 w-px -translate-x-1/2 bg-border/60" />
 				) : null}
 				{connectBelow ? (
 					<span className="absolute left-1/2 top-1/2 bottom-0 w-px -translate-x-1/2 bg-border/60" />
-				) : null}
+				) : (
+					<span
+						className="absolute left-1/2 bottom-0 w-px translate-y-full -translate-x-1/2 bg-border/40"
+						style={{ height: "25%" }}
+					/>
+				)}
 				<div className="mt-1">
 					<StatusDot status={run.status} />
 				</div>
 			</div>
 
-			{isThinking && run.content ? (
+			{(isThinking || showPlainContent) && run.content ? (
 				<div className="flex-1 text-sm leading-relaxed text-foreground">
 					{run.content}
 				</div>
 			) : (
-				<div className="flex-1">
+				<div className="flex-1 pb-2">
 					<button
 						type="button"
-						onClick={() => hasContent && setIsExpanded(!isExpanded)}
-						disabled={!hasContent}
-						className="flex w-full items-start justify-between rounded-md py-1 pr-1 text-left transition hover:bg-muted/20 disabled:cursor-default disabled:hover:bg-transparent"
+						onClick={() => hasStructuredIO && setIsExpanded(!isExpanded)}
+						disabled={!hasStructuredIO}
+						className="flex w-full items-start justify-between rounded-md pr-1 text-left transition hover:bg-muted/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-default disabled:hover:bg-transparent"
 					>
 						<div className="min-w-0 flex-1">
 							<div className="flex items-center gap-2">
-								<span className="text-sm font-medium text-foreground">
-									{run.title}
-								</span>
-								{hasContent ? (
+								{run.title ? (
+									<span className="text-sm font-medium text-foreground">
+										{run.title}
+									</span>
+								) : null}
+								{hasStructuredIO ? (
 									<ChevronRight
 										className={`h-3 w-3 text-muted-foreground transition-transform ${
 											isExpanded ? "rotate-90" : ""
@@ -72,7 +80,7 @@ function ToolRunRow({
 									/>
 								) : null}
 							</div>
-							{run.detail ? (
+							{run.detail && !hasStructuredIO ? (
 								<div className="text-xs text-muted-foreground">
 									{run.detail}
 								</div>
@@ -80,32 +88,83 @@ function ToolRunRow({
 						</div>
 					</button>
 
-					{hasContent && isExpanded ? (
-						<div className="ml-5 mt-1 space-y-2 overflow-hidden rounded-lg border border-border/60 bg-muted/10 text-xs">
-							{run.input ? (
-								<div>
-									<div className="border-b border-border/40 bg-muted/20 px-3 py-1 font-medium text-muted-foreground">
-										IN
-									</div>
-									<pre className="overflow-x-auto px-3 py-2 font-mono text-xs leading-relaxed text-foreground">
-										{run.input}
-									</pre>
-								</div>
-							) : null}
-							{run.output ? (
-								<div>
-									<div className="border-b border-border/40 bg-muted/20 px-3 py-1 font-medium text-muted-foreground">
-										OUT
-									</div>
-									<pre className="overflow-x-auto px-3 py-2 font-mono text-xs leading-relaxed text-muted-foreground">
-										{run.output}
-									</pre>
-								</div>
-							) : null}
+					{hasStructuredIO && isExpanded ? (
+						<ToolCard
+							className="mt-4 mb-2"
+							name={run.detail ?? run.title ?? "tool"}
+							input={run.input}
+							output={run.output}
+						/>
+					) : null}
+					{!isExpanded && !hasStructuredIO && run.detail ? (
+						<div className="ml-5 text-xs text-muted-foreground">
+							{run.detail}
 						</div>
 					) : null}
 				</div>
 			)}
+		</div>
+	);
+}
+
+type ToolCardProps = {
+	name: string;
+	input?: string;
+	output?: string;
+	className?: string;
+};
+
+function beautifyJSON(str: string) {
+	try {
+		const parsed = JSON.parse(str);
+		return JSON.stringify(parsed, null, 2);
+	} catch {
+		return str;
+	}
+}
+
+function ToolCard({ name, input, output, className }: ToolCardProps) {
+	const containerClass = [
+		"overflow-hidden rounded-lg border border-border/60 bg-muted/10 text-xs",
+		className,
+	]
+		.filter(Boolean)
+		.join(" ");
+
+	return (
+		<div className={containerClass}>
+			{/* Tool Name Header */}
+			<div className="border-b border-border/60 bg-muted/20 px-4 py-2">
+				<span className="text-sm font-medium text-foreground">{name}</span>
+			</div>
+
+			{/* Input Section */}
+			{input ? (
+				<div className="border-b border-border/60">
+					<div className="bg-muted/10 px-4 py-1.5">
+						<span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+							Input
+						</span>
+					</div>
+					<pre className="whitespace-pre-wrap break-words px-4 py-3 font-mono text-[11px] leading-relaxed text-foreground">
+						{beautifyJSON(input)}
+					</pre>
+				</div>
+			) : null}
+
+			{/* Output Section */}
+			{output ? (
+				<div>
+					<div className="bg-muted/10 px-4 py-1.5">
+						<span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+							Output
+						</span>
+					</div>
+					<pre className="whitespace-pre-wrap break-words px-4 py-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+						{beautifyJSON(output)}
+					</pre>
+				</div>
+			) : null}
 		</div>
 	);
 }
@@ -131,7 +190,7 @@ function getStatusColors(status: ToolRunStatus) {
 		case "running":
 			return { fill: "bg-zinc-400 animate-pulse", ring: "border-zinc-300" };
 		case "thinking":
-			return { fill: "bg-zinc-400", ring: "border-zinc-300" };
+			return { fill: "bg-zinc-400/80", ring: "border-zinc-300/70" };
 		default:
 			return { fill: "bg-zinc-300", ring: "border-zinc-200" };
 	}

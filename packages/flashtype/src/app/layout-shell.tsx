@@ -267,21 +267,9 @@ export function V2LayoutShell() {
 
 	const initialLayoutSizes = normalizeLayoutSizes(uiStateKV.layout?.sizes);
 
-	const [leftPanel, setLeftPanel] = useState<PanelState>(() => {
-		const existing = uiStateKV.panels.left;
-		if (existing.views.length > 0) {
-			return hydratePanel(existing);
-		}
-		const defaultViews: ViewInstance[] = [
-			{ instanceKey: createViewInstanceKey("files"), viewKey: "files" },
-			{ instanceKey: createViewInstanceKey("search"), viewKey: "search" },
-		];
-		return hydratePanel({
-			views: defaultViews,
-			activeInstanceKey:
-				existing.activeInstanceKey ?? defaultViews[0]?.instanceKey ?? null,
-		});
-	});
+	const [leftPanel, setLeftPanel] = useState<PanelState>(() =>
+		hydratePanel(uiStateKV.panels.left),
+	);
 	const [centralPanel, setCentralPanel] = useState<PanelState>(() =>
 		hydratePanel(uiStateKV.panels.central),
 	);

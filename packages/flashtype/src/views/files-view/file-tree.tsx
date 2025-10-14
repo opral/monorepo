@@ -84,11 +84,13 @@ export function FileTree({
 						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
 							.
 						</kbd>
-					</span>{" "}
-					and directories with{" "}
+					</span>
+				</p>
+				<p>
+					Create directories with{" "}
 					<span className="inline-flex items-center gap-1">
 						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
-							⌘
+							CMD
 						</kbd>
 						<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1 py-0.5 font-mono text-[10px] text-neutral-600">
 							⇧
@@ -97,7 +99,6 @@ export function FileTree({
 							.
 						</kbd>
 					</span>
-					.
 				</p>
 			</div>
 		);

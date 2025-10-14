@@ -45,9 +45,18 @@ const DEFAULT_LAYOUT_SIZES: PanelLayoutSizes = {
 export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
 	focusedPanel: "left",
 	panels: {
-		left: { views: [], activeInstanceKey: null },
+		left: {
+			views: [
+				{ instanceKey: "files-default", viewKey: "files" },
+				{ instanceKey: "checkpoint-default", viewKey: "checkpoint" },
+			],
+			activeInstanceKey: "files-default",
+		},
 		central: { views: [], activeInstanceKey: null },
-		right: { views: [], activeInstanceKey: null },
+		right: {
+			views: [{ instanceKey: "agent-default", viewKey: "agent" }],
+			activeInstanceKey: "agent-default",
+		},
 	},
 	layout: { sizes: { ...DEFAULT_LAYOUT_SIZES } },
 };

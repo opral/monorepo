@@ -9,10 +9,14 @@ import {
 	type ChatMessage as AgentMessage,
 } from "@lix-js/agent-sdk";
 
+type AgentChatMessage = AgentMessage & {
+	metadata?: Record<string, unknown>;
+};
+
 export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const { lix, system } = args;
 
-	const [messages, setMessages] = useState<AgentMessage[]>([]);
+	const [messages, setMessages] = useState<AgentChatMessage[]>([]);
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
@@ -83,22 +87,23 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			sub = lix.observe(query).subscribe({
 				next: (rows) => {
 					type ConversationRow = (typeof rows)[number] & {
-						lixcol_metadata?: {
-							lix_agent_role?: "user" | "assistant" | string;
-						} | null;
+						lixcol_metadata?: Record<string, unknown> | null;
 					};
-					const hist: AgentMessage[] = (rows as ConversationRow[]).map((r) => {
-						const role =
-							(r.lixcol_metadata?.lix_agent_role as
-								| "user"
-								| "assistant"
-								| undefined) ?? "assistant";
-						return {
-							id: String(r.id),
-							role,
-							content: toPlainText(r.body),
-						};
-					});
+					const hist: AgentChatMessage[] = (rows as ConversationRow[]).map(
+						(r) => {
+							const role =
+								(r.lixcol_metadata?.lix_agent_role as
+									| "user"
+									| "assistant"
+									| undefined) ?? "assistant";
+							return {
+								id: String(r.id),
+								role,
+								content: toPlainText(r.body),
+								metadata: r.lixcol_metadata ?? undefined,
+							};
+						},
+					);
 					setMessages(hist);
 				},
 				error: (e) => setError(e?.message || String(e)),
