@@ -260,7 +260,7 @@ function batchInsertDirectToTable(args: {
 			created_at,
 			updated_at,
 			inherited_from_version_id,
-			inheritance_delete_marker,
+			is_tombstone,
 			change_id,
 			commit_id
 		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
@@ -271,7 +271,7 @@ function batchInsertDirectToTable(args: {
 			schema_version = excluded.schema_version,
 			updated_at = excluded.updated_at,
 			inherited_from_version_id = excluded.inherited_from_version_id,
-			inheritance_delete_marker = excluded.inheritance_delete_marker,
+			is_tombstone = excluded.is_tombstone,
 			change_id = excluded.change_id,
 			commit_id = excluded.commit_id`,
 			parameters: [
@@ -326,7 +326,7 @@ function batchDeleteDirectFromTable(args: {
 		const result = engine.executeSync({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
-			      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
+			      AND is_tombstone = 0 AND snapshot_content IS NOT NULL`,
 			parameters: [change.entity_id, change.file_id, resolvedVersionId],
 		}).rows;
 
@@ -354,7 +354,7 @@ function batchDeleteDirectFromTable(args: {
 				created_at,
 				updated_at,
 				inherited_from_version_id,
-				inheritance_delete_marker,
+				is_tombstone,
 				change_id,
 				commit_id
 			) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)
@@ -365,7 +365,7 @@ function batchDeleteDirectFromTable(args: {
 				schema_version = excluded.schema_version,
 				updated_at = excluded.updated_at,
 				inherited_from_version_id = NULL,
-				inheritance_delete_marker = 1,
+				is_tombstone = 1,
 				change_id = excluded.change_id,
 				commit_id = excluded.commit_id`,
 			parameters: [

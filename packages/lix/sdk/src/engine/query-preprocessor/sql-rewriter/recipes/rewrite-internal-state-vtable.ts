@@ -88,7 +88,7 @@ interface VersionCteResult {
 
 const CACHE_SOURCE_TOKEN = "__CACHE_SOURCE__";
 const CACHE_PROJECTION =
-	"entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id";
+	"entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id";
 
 const PARAM_COLUMN_ORDER: ParamColumn[] = [
 	"version_id",
@@ -416,8 +416,8 @@ function buildCandidateUntrackedSegment(
 		  2 AS priority
 		FROM lix_internal_state_all_untracked u${paramsJoin}
 		WHERE (
-		  (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-		  (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+		  (u.is_tombstone = 0 AND u.snapshot_content IS NOT NULL) OR
+		  (u.is_tombstone = 1 AND u.snapshot_content IS NULL)
 		)
 		${buildFilterClauses("u", options.schemaFilter, options.entityFilter, { indentLevel: 3, hasWhere: true })}
 	`).trim();
@@ -457,8 +457,8 @@ function buildCandidateCacheSegment(options: CandidateSegmentOptions): string {
 		  3 AS priority
 		FROM ${CACHE_SOURCE_TOKEN} c${paramsJoin}
 		WHERE (
-		  (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-		  (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+		  (c.is_tombstone = 0 AND c.snapshot_content IS NOT NULL) OR
+		  (c.is_tombstone = 1 AND c.snapshot_content IS NULL)
 		)
 		${buildFilterClauses("c", options.schemaFilter, options.entityFilter, { indentLevel: 3, hasWhere: true })}
 	`).trim();
@@ -500,7 +500,7 @@ function buildCandidateInheritedCacheSegment(
 		  4 AS priority
 		FROM version_inheritance vi
 		JOIN ${CACHE_SOURCE_TOKEN} isc ON isc.version_id = vi.ancestor_version_id${paramsJoin}
-		WHERE isc.inheritance_delete_marker = 0
+		WHERE isc.is_tombstone = 0
 		  AND isc.snapshot_content IS NOT NULL
 		${buildFilterClauses("isc", options.schemaFilter, options.entityFilter, { indentLevel: 2, hasWhere: true })}
 	`).trim();
@@ -542,7 +542,7 @@ function buildCandidateInheritedUntrackedSegment(
 		  5 AS priority
 		FROM version_inheritance vi
 		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id${paramsJoin}
-		WHERE unt.inheritance_delete_marker = 0
+		WHERE unt.is_tombstone = 0
 		  AND unt.snapshot_content IS NOT NULL
 		${buildFilterClauses("unt", options.schemaFilter, options.entityFilter, { indentLevel: 2, hasWhere: true })}
 	`).trim();
@@ -642,7 +642,7 @@ function buildEmptyCacheSourceSql(): string {
 		  CAST(NULL AS TEXT)    AS created_at,
 		  CAST(NULL AS TEXT)    AS updated_at,
 		  CAST(NULL AS TEXT)    AS inherited_from_version_id,
-		  CAST(NULL AS INTEGER) AS inheritance_delete_marker,
+		  CAST(NULL AS INTEGER) AS is_tombstone,
 		  CAST(NULL AS TEXT)    AS change_id,
 		  CAST(NULL AS TEXT)    AS commit_id
 		  WHERE 0)

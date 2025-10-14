@@ -143,7 +143,7 @@ async function selectCacheV1Rows(
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 			"change_id",
 			"commit_id",
 			sql`json(snapshot_content)`.as("snapshot_content"),

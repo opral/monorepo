@@ -68,7 +68,7 @@ test("inserts into cache based on change", async () => {
 		created_at: currentTimestamp,
 		updated_at: currentTimestamp,
 		inherited_from_version_id: null,
-		inheritance_delete_marker: 0,
+		is_tombstone: 0,
 		change_id: testChange.id,
 		commit_id: commitId,
 	} satisfies InternalStateCache);
@@ -179,7 +179,7 @@ test("upserts cache entry on conflict", async () => {
 		created_at: initialTimestamp, // Should remain from initial insert (v2 now matches v1 behavior)
 		updated_at: updateTimestamp, // Should be updated
 		inherited_from_version_id: null,
-		inheritance_delete_marker: 0,
+		is_tombstone: 0,
 		change_id: updatedChange.id, // Should be updated
 		commit_id: updatedCommitId, // Should be updated
 	} satisfies InternalStateCache);
@@ -308,7 +308,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", parentVersion)
-		.where("inheritance_delete_marker", "=", 0)
+		.where("is_tombstone", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
 
@@ -318,7 +318,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", childVersion)
-		.where("inheritance_delete_marker", "=", 0)
+		.where("is_tombstone", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
 
@@ -328,7 +328,7 @@ test("handles inheritance chain deletions with tombstones", async () => {
 		.select(sql`json(snapshot_content)`.as("snapshot_content"))
 		.where("entity_id", "=", testEntity)
 		.where("version_id", "=", subchildVersion)
-		.where("inheritance_delete_marker", "=", 0)
+		.where("is_tombstone", "=", 0)
 		.where("snapshot_content", "is not", null)
 		.execute();
 

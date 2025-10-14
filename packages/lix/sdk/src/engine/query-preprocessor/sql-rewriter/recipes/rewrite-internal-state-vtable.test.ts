@@ -249,7 +249,7 @@ async function insertUntrackedRow(
 			created_at: timestamp,
 			updated_at: timestamp,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 		})
 		.onConflict((oc) => oc.doNothing())
 		.compile();

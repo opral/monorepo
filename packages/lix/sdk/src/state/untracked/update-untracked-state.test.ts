@@ -61,7 +61,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
@@ -74,7 +74,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 		value: "direct-value",
 	});
 	expect(result[0]!.inherited_from_version_id).toBe(null);
-	expect(result[0]!.inheritance_delete_marker).toBe(0);
+	expect(result[0]!.is_tombstone).toBe(0);
 });
 
 test("updateUntrackedState updates existing direct untracked entity", async () => {
@@ -154,7 +154,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
@@ -283,7 +283,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 			created_at: currentTime,
 			updated_at: currentTime,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 		})
 		.execute();
 
@@ -325,7 +325,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	expect(afterDelete).toHaveLength(1);
 	expect(afterDelete[0]!.snapshot_content).toBe(null);
-	expect(afterDelete[0]!.inheritance_delete_marker).toBe(1);
+	expect(afterDelete[0]!.is_tombstone).toBe(1);
 	expect(afterDelete[0]!.inherited_from_version_id).toBe(null);
 });
 
@@ -428,7 +428,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 		.execute();
 
 	expect(tombstone).toHaveLength(1);
-	expect(tombstone[0]!.inheritance_delete_marker).toBe(1);
+	expect(tombstone[0]!.is_tombstone).toBe(1);
 	expect(tombstone[0]!.snapshot_content).toBe(null);
 
 	// Update the tombstone with actual content
@@ -468,12 +468,12 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
 	expect(result).toHaveLength(1);
-	expect(result[0]!.inheritance_delete_marker).toBe(0);
+	expect(result[0]!.is_tombstone).toBe(0);
 	const content = result[0]!.snapshot_content;
 	const parsedContent =
 		typeof content === "string" ? JSON.parse(content) : content;

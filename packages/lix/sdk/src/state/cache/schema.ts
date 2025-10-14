@@ -24,7 +24,7 @@ export type InternalStateCacheTable = {
 	created_at: string;
 	updated_at: string;
 	inherited_from_version_id: string | null;
-	inheritance_delete_marker: number; // 0 or 1
+	is_tombstone: number; // 0 or 1
 	change_id: string | null;
 	commit_id: string | null;
 };
@@ -41,7 +41,7 @@ const CACHE_VTAB_CREATE_SQL = `CREATE TABLE x(
 	created_at TEXT NOT NULL,
 	updated_at TEXT NOT NULL,
 	inherited_from_version_id TEXT,
-	inheritance_delete_marker INTEGER DEFAULT 0,
+	is_tombstone INTEGER DEFAULT 0,
 	change_id TEXT,
 	commit_id TEXT
 ) WITHOUT ROWID;`;
@@ -57,7 +57,7 @@ const LEGACY_TO_PHYSICAL_COLUMNS: Record<string, string> = {
 	created_at: "lixcol_created_at",
 	updated_at: "lixcol_updated_at",
 	inherited_from_version_id: "lixcol_inherited_from_version_id",
-	inheritance_delete_marker: "lixcol_is_tombstone",
+	is_tombstone: "lixcol_is_tombstone",
 	change_id: "lixcol_change_id",
 	commit_id: "lixcol_commit_id",
 };
@@ -183,7 +183,7 @@ export function applyStateCacheV2Schema(args: {
 					"created_at", // 8
 					"updated_at", // 9
 					"inherited_from_version_id", // 10
-					"inheritance_delete_marker", // 11
+					"is_tombstone", // 11
 					"change_id", // 12
 					"commit_id", // 13
 				];
@@ -466,7 +466,7 @@ export function applyStateCacheV2Schema(args: {
 						value = row.inherited_from_version_id;
 						break;
 					case 11:
-						value = row.inheritance_delete_marker;
+						value = row.is_tombstone;
 						break;
 					case 12:
 						value = row.change_id;

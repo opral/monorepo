@@ -29,7 +29,7 @@ export function createSchemaCacheTable(args: {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       inherited_from_version_id TEXT,
-      inheritance_delete_marker INTEGER DEFAULT 0,
+      is_tombstone INTEGER DEFAULT 0,
       change_id TEXT,
       commit_id TEXT,
       PRIMARY KEY (entity_id, file_id, version_id)
@@ -58,14 +58,14 @@ export function createSchemaCacheTable(args: {
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_live_vfe
 			ON ${tableName} (version_id, file_id, entity_id)
-			WHERE inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
+			WHERE is_tombstone = 0 AND snapshot_content IS NOT NULL`,
 	});
 
 	// 5) Partial index for tombstones when they are queried explicitly
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_tomb_vfe
 			ON ${tableName} (version_id, file_id, entity_id)
-			WHERE inheritance_delete_marker = 1 AND snapshot_content IS NULL`,
+			WHERE is_tombstone = 1 AND snapshot_content IS NULL`,
 	});
 
 	// Extra expression indexes for descriptor cache

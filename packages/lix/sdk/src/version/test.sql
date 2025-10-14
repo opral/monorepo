@@ -112,8 +112,8 @@ LEFT JOIN lix_internal_state_writer ws_untracked ON
   ws_untracked.schema_key = u.schema_key AND
   ws_untracked.version_id = u.version_id
 WHERE (
-  (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-  (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+  (u.is_tombstone = 0 AND u.snapshot_content IS NOT NULL) OR
+  (u.is_tombstone = 1 AND u.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -152,8 +152,8 @@ LEFT JOIN lix_internal_state_writer ws_cache ON
   ws_cache.schema_key = c.schema_key AND
   ws_cache.version_id = c.version_id
 WHERE (
-  (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-  (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+  (c.is_tombstone = 0 AND c.snapshot_content IS NOT NULL) OR
+  (c.is_tombstone = 1 AND c.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -204,7 +204,7 @@ LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.entity_id = isc.entity_id AND
   ws_parent.schema_key = isc.schema_key AND
   ws_parent.version_id = isc.version_id
-WHERE isc.inheritance_delete_marker = 0
+WHERE isc.is_tombstone = 0
   AND isc.snapshot_content IS NOT NULL
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -261,7 +261,7 @@ LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.entity_id = unt.entity_id AND
   ws_parent.schema_key = unt.schema_key AND
   ws_parent.version_id = unt.version_id
-WHERE unt.inheritance_delete_marker = 0
+WHERE unt.is_tombstone = 0
   AND unt.snapshot_content IS NOT NULL
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -457,8 +457,8 @@ LEFT JOIN lix_internal_state_writer ws_untracked ON
   ws_untracked.schema_key = u.schema_key AND
   ws_untracked.version_id = u.version_id
 WHERE (
-  (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-  (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+  (u.is_tombstone = 0 AND u.snapshot_content IS NOT NULL) OR
+  (u.is_tombstone = 1 AND u.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -497,8 +497,8 @@ LEFT JOIN lix_internal_state_writer ws_cache ON
   ws_cache.schema_key = c.schema_key AND
   ws_cache.version_id = c.version_id
 WHERE (
-  (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-  (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+  (c.is_tombstone = 0 AND c.snapshot_content IS NOT NULL) OR
+  (c.is_tombstone = 1 AND c.snapshot_content IS NULL)
 )
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -549,7 +549,7 @@ LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.entity_id = isc.entity_id AND
   ws_parent.schema_key = isc.schema_key AND
   ws_parent.version_id = isc.version_id
-WHERE isc.inheritance_delete_marker = 0
+WHERE isc.is_tombstone = 0
   AND isc.snapshot_content IS NOT NULL
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t
@@ -606,7 +606,7 @@ LEFT JOIN lix_internal_state_writer ws_parent ON
   ws_parent.entity_id = unt.entity_id AND
   ws_parent.schema_key = unt.schema_key AND
   ws_parent.version_id = unt.version_id
-WHERE unt.inheritance_delete_marker = 0
+WHERE unt.is_tombstone = 0
   AND unt.snapshot_content IS NOT NULL
   AND NOT EXISTS (
     SELECT 1 FROM lix_internal_transaction_state t

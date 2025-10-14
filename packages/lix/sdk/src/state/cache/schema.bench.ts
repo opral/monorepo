@@ -41,7 +41,7 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}
@@ -88,7 +88,7 @@ bench("query with json_extract from cache", async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}
@@ -148,7 +148,7 @@ bench("query through resolved_state_all view", async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}
@@ -204,7 +204,7 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}
@@ -293,7 +293,7 @@ bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}
@@ -359,7 +359,7 @@ bench(`delete ${ROW_NUM / 10} rows from cache`, async () => {
 			created_at: time,
 			updated_at: time,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
 		});
 	}

@@ -84,8 +84,8 @@ lix_internal_state_vtable_rewritten AS (
           AND p.file_id = u.file_id
           AND p.plugin_key = u.plugin_key
       WHERE (
-        (u.inheritance_delete_marker = 0 AND u.snapshot_content IS NOT NULL) OR
-        (u.inheritance_delete_marker = 1 AND u.snapshot_content IS NULL)
+        (u.is_tombstone = 0 AND u.snapshot_content IS NOT NULL) OR
+        (u.is_tombstone = 1 AND u.snapshot_content IS NULL)
       )
 
           AND u.schema_key = 'bench_vtable_schema'
@@ -111,7 +111,7 @@ lix_internal_state_vtable_rewritten AS (
         c.commit_id,
         NULL AS metadata,
         3 AS priority
-      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) c
+      FROM (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) c
         JOIN params p ON
           p.entity_id = c.entity_id
           AND p.version_id = c.version_id
@@ -119,8 +119,8 @@ lix_internal_state_vtable_rewritten AS (
           AND p.file_id = c.file_id
           AND p.plugin_key = c.plugin_key
       WHERE (
-        (c.inheritance_delete_marker = 0 AND c.snapshot_content IS NOT NULL) OR
-        (c.inheritance_delete_marker = 1 AND c.snapshot_content IS NULL)
+        (c.is_tombstone = 0 AND c.snapshot_content IS NOT NULL) OR
+        (c.is_tombstone = 1 AND c.snapshot_content IS NULL)
       )
 
           AND c.schema_key = 'bench_vtable_schema'
@@ -147,14 +147,14 @@ lix_internal_state_vtable_rewritten AS (
         NULL AS metadata,
         4 AS priority
       FROM version_inheritance vi
-      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
+      JOIN (SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_bench_vtable_schema) isc ON isc.version_id = vi.ancestor_version_id
         JOIN params p ON
           p.version_id = vi.version_id
           AND p.entity_id = isc.entity_id
           AND p.schema_key = isc.schema_key
           AND p.file_id = isc.file_id
           AND p.plugin_key = isc.plugin_key
-      WHERE isc.inheritance_delete_marker = 0
+      WHERE isc.is_tombstone = 0
         AND isc.snapshot_content IS NOT NULL
 
         AND isc.schema_key = 'bench_vtable_schema'
@@ -188,7 +188,7 @@ lix_internal_state_vtable_rewritten AS (
           AND p.schema_key = unt.schema_key
           AND p.file_id = unt.file_id
           AND p.plugin_key = unt.plugin_key
-      WHERE unt.inheritance_delete_marker = 0
+      WHERE unt.is_tombstone = 0
         AND unt.snapshot_content IS NOT NULL
 
         AND unt.schema_key = 'bench_vtable_schema'

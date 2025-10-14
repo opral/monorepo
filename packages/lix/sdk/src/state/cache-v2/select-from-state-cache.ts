@@ -11,15 +11,12 @@ const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
 const SNAPSHOT_COLUMN = "snapshot_content" as const;
 
-type MaterializedCacheColumn =
-	| (typeof CACHE_COLUMNS)[number]
-	| "inheritance_delete_marker";
+type MaterializedCacheColumn = (typeof CACHE_COLUMNS)[number];
 
 const MATERIALIZED_CACHE_COLUMNS: MaterializedCacheColumn[] = [];
 for (const column of CACHE_COLUMNS) {
 	MATERIALIZED_CACHE_COLUMNS.push(column);
 }
-MATERIALIZED_CACHE_COLUMNS.push("inheritance_delete_marker");
 
 const COLUMN_TO_PHYSICAL: Record<MaterializedCacheColumn, string> = {
 	entity_id: "entity_id",
@@ -34,7 +31,6 @@ const COLUMN_TO_PHYSICAL: Record<MaterializedCacheColumn, string> = {
 	change_id: "change_id",
 	commit_id: "commit_id",
 	is_tombstone: "is_tombstone",
-	inheritance_delete_marker: "is_tombstone",
 } as const;
 
 type VirtualColumn = typeof SNAPSHOT_COLUMN;

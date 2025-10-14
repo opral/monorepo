@@ -738,14 +738,14 @@ export function applyStateVTable(
 										sqlite.exec({
 											sql: `
 												INSERT OR IGNORE INTO ${tableName} 
-												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
+												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
 												SELECT 
 													entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
 													CASE 
 														WHEN inherited_from_version_id IS NULL THEN ?
 														ELSE inherited_from_version_id
 													END as inherited_from_version_id,
-													inheritance_delete_marker, change_id, commit_id
+													is_tombstone, change_id, commit_id
 												FROM ${tableName}
 												WHERE version_id = ?
 											`,

@@ -1456,18 +1456,35 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	expect(activeVersion.version_id).not.toBe("global");
 
-	// Insert a mock entity into global version via transaction
+	const testSchema = {
+		"x-lix-key": "test_global_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			data: { type: "string" },
+		},
+		required: ["id", "data"],
+	} as const;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testSchema })
+		.execute();
+
+	// Insert a test entity into global version via transaction
 	insertTransactionState({
 		engine: lix.engine!,
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
-				entity_id: "mock-global-entity",
-				schema_key: "mock_schema",
-				file_id: "mock-file",
-				plugin_key: "mock_plugin",
+				entity_id: "test-global-entity",
+				schema_key: "test_global_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
 				snapshot_content: JSON.stringify({
-					id: "mock-global-entity",
+					id: "test-global-entity",
 					data: "test-data",
 				}),
 				schema_version: "1.0",
@@ -1486,7 +1503,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 	const cacheEntries = await db
 		.selectFrom("lix_internal_state_cache")
 		.selectAll()
-		.where("entity_id", "=", "mock-global-entity")
+		.where("entity_id", "=", "test-global-entity")
 		.execute();
 
 	expect(cacheEntries).toHaveLength(1);
@@ -1496,7 +1513,7 @@ test("global cache entry should be inherited by child versions in resolved view"
 	const resolvedEntries = await db
 		.selectFrom("lix_internal_state_vtable")
 		.select(["version_id", "entity_id", "schema_key"])
-		.where("entity_id", "=", "mock-global-entity")
+		.where("entity_id", "=", "test-global-entity")
 		.orderBy("version_id", "asc")
 		.execute();
 

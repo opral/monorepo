@@ -26,7 +26,7 @@ export type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * - Inherited entities: Visible through parent version queries
  * - Deletions:
  *   - Direct entities: Remove from untracked table
- *   - Inherited entities: Create tombstone with inheritance_delete_marker: 1
+ *   - Inherited entities: Create tombstone with is_tombstone: 1
  *
  * @param args - Update parameters
  * @param args.lix - Lix instance with sqlite and db
@@ -118,7 +118,7 @@ export function updateUntrackedState(args: {
 					created_at: c.created_at,
 					updated_at: c.created_at,
 					inherited_from_version_id: null as null,
-					inheritance_delete_marker: 1,
+					is_tombstone: 1,
 				}));
 
 			if (tombstoneValues.length > 0) {
@@ -132,7 +132,7 @@ export function updateUntrackedState(args: {
 								.doUpdateSet((eb) => ({
 									snapshot_content: eb.val(null),
 									updated_at: eb.ref("excluded.updated_at"),
-									inheritance_delete_marker: eb.val(1),
+									is_tombstone: eb.val(1),
 									plugin_key: eb.ref("excluded.plugin_key"),
 									schema_version: eb.ref("excluded.schema_version"),
 								}))
@@ -161,7 +161,7 @@ export function updateUntrackedState(args: {
 						created_at: c.created_at,
 						updated_at: c.created_at,
 						inherited_from_version_id: null,
-						inheritance_delete_marker: 0,
+						is_tombstone: 0,
 					})
 					.onConflict((oc) =>
 						oc
@@ -171,7 +171,7 @@ export function updateUntrackedState(args: {
 								snapshot_content: sql`jsonb(${content})`,
 								schema_version: c.schema_version,
 								updated_at: c.created_at,
-								inheritance_delete_marker: 0,
+								is_tombstone: 0,
 							})
 					)
 					.compile()

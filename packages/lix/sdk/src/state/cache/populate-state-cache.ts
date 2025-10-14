@@ -143,7 +143,7 @@ export function populateStateCache(args: {
 				created_at,
 				updated_at,
 				inherited_from_version_id,
-				inheritance_delete_marker,
+				is_tombstone,
 				change_id,
 				commit_id
 			) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
@@ -156,7 +156,7 @@ export function populateStateCache(args: {
 				created_at = excluded.created_at,
 				updated_at = excluded.updated_at,
 				inherited_from_version_id = excluded.inherited_from_version_id,
-				inheritance_delete_marker = excluded.inheritance_delete_marker,
+				is_tombstone = excluded.is_tombstone,
 				change_id = excluded.change_id,
 				commit_id = excluded.commit_id
 		`);
@@ -176,7 +176,7 @@ export function populateStateCache(args: {
 					row.created_at, // Preserve original created_at
 					row.updated_at, // Preserve original updated_at
 					row.inherited_from_version_id,
-					isDeletion ? 1 : 0, // inheritance_delete_marker
+					isDeletion ? 1 : 0, // is_tombstone
 					row.change_id,
 					row.commit_id,
 				]);

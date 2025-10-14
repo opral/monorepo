@@ -227,7 +227,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 		.execute();
 
 	expect(tombstoneAfterCommit).toHaveLength(1);
-	expect(tombstoneAfterCommit[0]?.inheritance_delete_marker).toBe(1);
+	expect(tombstoneAfterCommit[0]?.is_tombstone).toBe(1);
 	expect(tombstoneAfterCommit[0]?.snapshot_content).toBe(null);
 
 	// Verify entity no longer appears in active version
@@ -328,7 +328,7 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 		.execute();
 
 	expect(tombstone).toHaveLength(1);
-	expect(tombstone[0]?.inheritance_delete_marker).toBe(1);
+	expect(tombstone[0]?.is_tombstone).toBe(1);
 	expect(tombstone[0]?.snapshot_content).toBe(null);
 
 	// Verify entity no longer appears in active version
@@ -485,7 +485,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 

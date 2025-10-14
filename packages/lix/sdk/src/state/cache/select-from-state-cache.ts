@@ -13,7 +13,7 @@ const CACHE_COLUMNS = [
 	"created_at",
 	"updated_at",
 	"inherited_from_version_id",
-	"inheritance_delete_marker",
+	"is_tombstone",
 	"change_id",
 	"commit_id",
 ] as const;
