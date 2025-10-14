@@ -22,13 +22,13 @@ import { X, type LucideIcon } from "lucide-react";
 import type {
 	PanelSide,
 	PanelState,
-	ViewContext,
 	ViewDefinition,
 	ViewInstance,
 	ViewKey,
 } from "./types";
 import { VIEW_MAP } from "./view-registry";
 import styles from "./panel.module.css";
+import { useViewContext } from "./view-context";
 
 /**
  * Unified panel host that renders the shared tab strip and body layout for any side.
@@ -59,6 +59,7 @@ export function PanelV2({
 	emptyStatePlaceholder,
 	onActiveViewInteraction,
 	dropId,
+	viewOverrides,
 }: PanelV2Props) {
 	const { setNodeRef, isOver } = useDroppable({
 		id: dropId ?? `${side}-panel`,
@@ -71,17 +72,27 @@ export function PanelV2({
 			) ?? null)
 		: (panel.views[0] ?? null);
 
+	const resolveViewDefinition = useCallback(
+		(viewKey: ViewKey): ViewDefinition | null => {
+			const override = viewOverrides?.find(
+				(candidate) => candidate.key === viewKey,
+			);
+			return override ?? VIEW_MAP.get(viewKey) ?? null;
+		},
+		[viewOverrides],
+	);
+
 	const activeView = activeEntry
-		? (VIEW_MAP.get(activeEntry.viewKey) ?? null)
+		? resolveViewDefinition(activeEntry.viewKey)
 		: null;
 	const hasViews = panel.views.length > 0;
 	const activeInstanceKey = activeEntry?.instanceKey ?? null;
 
-	const contextWithFocus: ViewContext | undefined = viewContext
-		? viewContext.isPanelFocused === isFocused
-			? viewContext
-			: { ...viewContext, isPanelFocused: isFocused }
-		: { isPanelFocused: isFocused };
+	const { badgeCounts, makeContext } = useViewContext({
+		panel,
+		isFocused,
+		parentContext: viewContext,
+	});
 
 	const handleInteraction = () => {
 		if (!onActiveViewInteraction || !activeInstanceKey) return;
@@ -122,10 +133,11 @@ export function PanelV2({
 							strategy={horizontalListSortingStrategy}
 						>
 							{panel.views.map((entry) => {
-								const view = VIEW_MAP.get(entry.viewKey);
+								const view = resolveViewDefinition(entry.viewKey);
 								if (!view) return null;
 								const isActive = activeInstanceKey === entry.instanceKey;
 								const label = resolveLabel(view, entry, tabLabel);
+								const badgeCount = badgeCounts[entry.instanceKey] ?? null;
 								return (
 									<SortableTab
 										key={entry.instanceKey}
@@ -134,6 +146,7 @@ export function PanelV2({
 										viewKey={entry.viewKey}
 										icon={view.icon}
 										label={label}
+										badgeCount={badgeCount}
 										isActive={isActive}
 										isFocused={isFocused && isActive}
 										isPending={entry.isPending}
@@ -148,11 +161,11 @@ export function PanelV2({
 
 				{hasViews ? (
 					<PanelContent {...contentHandlers}>
-						{activeView && activeEntry && (
+						{activeView && activeEntry ? (
 							<div className="flex min-h-0 flex-1 flex-col overflow-auto">
-								{activeView.render(contextWithFocus, activeEntry)}
+								{activeView.render(makeContext(activeEntry), activeEntry)}
 							</div>
-						)}
+						) : null}
 					</PanelContent>
 				) : (
 					<PanelContent>{emptyStatePlaceholder}</PanelContent>
@@ -175,6 +188,7 @@ export type PanelV2Props = {
 	readonly emptyStatePlaceholder?: ReactNode;
 	readonly onActiveViewInteraction?: (instanceKey: string) => void;
 	readonly dropId?: string;
+	readonly viewOverrides?: ViewDefinition[];
 };
 
 const resolveLabel = (
@@ -303,6 +317,7 @@ function SortableTab({
 	viewKey,
 	icon,
 	label,
+	badgeCount,
 	isActive,
 	isFocused,
 	isPending,
@@ -337,6 +352,7 @@ function SortableTab({
 			ref={setNodeRef}
 			icon={icon}
 			label={label}
+			badgeCount={badgeCount}
 			isActive={isActive}
 			isFocused={isFocused}
 			isPending={isPending}
@@ -356,7 +372,7 @@ function SortableTab({
 }
 
 const tabBaseClasses =
-	"group flex flex-none max-w-[20rem] items-center gap-0.5 rounded-md border px-1.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap";
+	"group relative flex flex-none max-w-[20rem] items-center gap-0.5 rounded-md border px-1.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap";
 
 const tabStateClasses = {
 	focused: "bg-brand-200 text-neutral-900 border-brand-600",
@@ -380,6 +396,7 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 		{
 			icon: Icon,
 			label,
+			badgeCount,
 			isActive,
 			isFocused,
 			isPending,
@@ -415,31 +432,47 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 				style={style}
 				{...restButtonProps}
 			>
-				<Icon className="h-3.5 w-3.5" />
+				<span className="relative flex h-3.5 w-3.5 items-center justify-center">
+					<Icon className="h-3.5 w-3.5" />
+					{badgeCount ? (
+						<span
+							className={clsx(
+								"pointer-events-none absolute -top-1 -left-1 flex h-4 min-w-[16px] -translate-y-1/2 items-center justify-center rounded-full px-[3px] text-[0.65rem] font-semibold leading-none transform",
+								isActive
+									? "bg-brand-600 text-white"
+									: "bg-secondary text-secondary-foreground",
+							)}
+						>
+							{badgeCount > 99 ? "99+" : badgeCount}
+						</span>
+					) : null}
+				</span>
 				<span
 					className={clsx("max-w-[10rem] truncate", isPending && "italic")}
 					title={label}
 				>
 					{label}
 				</span>
-				{onClose && isActive ? (
-					<X
-						className="h-3 w-3 text-neutral-400 hover:text-neutral-600"
-						onClick={(event) => {
-							event.stopPropagation();
-							onClose();
-						}}
-					/>
-				) : null}
-				{onClose && !isActive ? (
-					<X
-						className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-600"
-						onClick={(event) => {
-							event.stopPropagation();
-							onClose();
-						}}
-					/>
-				) : null}
+				<span className="relative ml-1 flex h-3.5 w-3.5 items-center justify-center">
+					{onClose && isActive ? (
+						<X
+							className="h-3 w-3 text-neutral-400 hover:text-neutral-600"
+							onClick={(event) => {
+								event.stopPropagation();
+								onClose();
+							}}
+						/>
+					) : null}
+					{onClose && !isActive ? (
+						<X
+							className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-600"
+							onClick={(event) => {
+								event.stopPropagation();
+								onClose();
+							}}
+						/>
+					) : null}
+				</span>
 			</button>
 		);
 	},
@@ -450,6 +483,7 @@ TabButtonBase.displayName = "PanelTabButton";
 export type PanelTabPreviewProps = {
 	readonly icon: LucideIcon;
 	readonly label: string;
+	readonly badgeCount?: number | null;
 	readonly isActive: boolean;
 	readonly isFocused: boolean;
 	readonly isPending?: boolean;

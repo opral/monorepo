@@ -9,16 +9,7 @@ import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
  * @example
  * const activeView: ViewKey = "files";
  */
-export type ViewKey =
-	| "agent"
-	| "files"
-	| "search"
-	| "tasks"
-	| "checkpoint"
-	| "history"
-	| "file-content"
-	| "commit"
-	| "diff";
+export type ViewKey = string;
 
 /**
  * Declares how a diff view should source its data.
@@ -121,6 +112,7 @@ export interface ViewContext {
 		},
 	) => void;
 	readonly isPanelFocused?: boolean;
+	readonly setTabBadgeCount?: (count: number | null | undefined) => void;
 }
 
 /**
