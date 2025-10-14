@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { useQuery } from "@lix-js/react-utils";
+import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
 import type { ViewContext, ViewInstance } from "../../app/types";
-import { File } from "lucide-react";
+import { File, GitCommitVertical } from "lucide-react";
+import { createReactViewDefinition } from "../../app/react-view";
 
 type CommitFile = {
 	path: string;
@@ -111,3 +112,21 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 		</div>
 	);
 }
+
+/**
+ * Commit detail view definition used by the registry.
+ *
+ * @example
+ * import { view as commitView } from "@/views/commit-view";
+ */
+export const view = createReactViewDefinition({
+	key: "commit",
+	label: "Commit",
+	description: "View commit details and changes.",
+	icon: GitCommitVertical,
+	component: ({ context, instance }) => (
+		<LixProvider lix={context.lix}>
+			<CommitView context={context} view={instance} />
+		</LixProvider>
+	),
+});

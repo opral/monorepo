@@ -31,10 +31,17 @@ vi.mock("@dnd-kit/sortable", async () => {
 	};
 });
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { PanelV2 } from "./panel-v2";
-import type { PanelState, ViewDefinition, ViewContext } from "./types";
-import { Flag } from "lucide-react";
+import type { PanelState, ViewContext, ViewDefinition } from "./types";
+import type { Lix } from "@lix-js/sdk";
+import { Flag, Search } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 
@@ -50,6 +57,33 @@ const pendingSearchPanel: PanelState = {
 	activeInstanceKey: "search-1",
 };
 
+const mockLix = {} as Lix;
+
+const createViewContext = (
+	overrides: Partial<ViewContext> = {},
+): ViewContext => ({
+	lix: mockLix,
+	isPanelFocused: false,
+	setTabBadgeCount: () => {},
+	...overrides,
+});
+
+const searchViewOverride: ViewDefinition = {
+	key: "search",
+	label: "Search",
+	description: "Test search view",
+	icon: Search,
+	activate: () => undefined,
+	render: ({ target }) => {
+		const input = document.createElement("input");
+		input.setAttribute("placeholder", "Search project...");
+		target.replaceChildren(input);
+		return () => {
+			target.replaceChildren();
+		};
+	},
+};
+
 describe("PanelV2", () => {
 	test("renders content container without padding or margin utilities", () => {
 		render(
@@ -60,6 +94,7 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
 				emptyStatePlaceholder={<div data-testid="empty-placeholder">Empty</div>}
 			/>,
 		);
@@ -100,6 +135,8 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -118,6 +155,8 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -137,6 +176,8 @@ describe("PanelV2", () => {
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
 				tabLabel={() => "Custom Search"}
+				viewContext={createViewContext()}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -156,6 +197,8 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -180,7 +223,9 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
 				extraTabBarContent={<button data-testid="add-btn">+</button>}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -198,6 +243,8 @@ describe("PanelV2", () => {
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
 				onActiveViewInteraction={finalize}
+				viewContext={createViewContext()}
+				viewOverrides={[searchViewOverride]}
 			/>,
 		);
 
@@ -215,6 +262,7 @@ describe("PanelV2", () => {
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
 				emptyStatePlaceholder={<div>No tabs</div>}
 			/>,
 		);
@@ -235,6 +283,7 @@ describe("PanelV2", () => {
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
 				emptyStatePlaceholder={<div />}
+				viewContext={createViewContext()}
 				dropId="custom-drop"
 			/>,
 		);
@@ -245,47 +294,36 @@ describe("PanelV2", () => {
 		});
 	});
 
-test("renders tab badge counts and updates when the value changes", async () => {
-	const BadgeViewComponent = ({
-		context,
-		count,
-	}: {
-		context?: ViewContext;
-		count: number;
-	}) => {
-		const setCount = context?.setTabBadgeCount;
-		const lastRef = React.useRef<number | null>(null);
-		React.useEffect(() => {
-			if (!setCount) return;
-			if (lastRef.current !== count) {
-				setCount(count);
-				lastRef.current = count;
-			}
-			return () => {
-				setCount(null);
-				lastRef.current = null;
-			};
-		}, [setCount, count]);
-		return <div data-testid="badge-view" />;
-	};
+	test("renders tab badge counts and updates when the value changes", async () => {
+		let updateBadge: ((value: number | null) => void) | undefined;
 
-	let currentCount = 3;
-	const badgePanel: PanelState = {
-		views: [{ instanceKey: "badge-1", viewKey: "badge-view" }],
-		activeInstanceKey: "badge-1",
-	};
+		const badgePanel: PanelState = {
+			views: [{ instanceKey: "badge-1", viewKey: "badge-view" }],
+			activeInstanceKey: "badge-1",
+		};
 
-	const badgeView: ViewDefinition = {
-		key: "badge-view",
-		label: "Badge",
-		description: "Test badge view",
-		icon: Flag,
-		render: (context) => (
-			<BadgeViewComponent context={context} count={currentCount} />
-		),
-	};
+		const badgeView: ViewDefinition = {
+			key: "badge-view",
+			label: "Badge",
+			description: "Test badge view",
+			icon: Flag,
+			activate: ({ context }) => {
+				updateBadge = (value) => context.setTabBadgeCount?.(value);
+				return () => {
+					context.setTabBadgeCount?.(null);
+					if (updateBadge === context.setTabBadgeCount) {
+						updateBadge = undefined;
+					}
+				};
+			},
+			render: ({ target }) => {
+				target.textContent = "Badge view content";
+				return () => {
+					target.replaceChildren();
+				};
+			},
+		};
 
-	const renderPanel = () =>
 		render(
 			<PanelV2
 				side="left"
@@ -294,28 +332,20 @@ test("renders tab badge counts and updates when the value changes", async () => 
 				onFocusPanel={vi.fn()}
 				onSelectView={vi.fn()}
 				onRemoveView={vi.fn()}
+				viewContext={createViewContext()}
 				viewOverrides={[badgeView]}
 			/>,
 		);
 
-	const { rerender } = renderPanel();
-	expect(await screen.findByTestId("badge-view")).toBeInTheDocument();
-	expect(await screen.findByText("3")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(updateBadge).toBeDefined();
+		});
 
-	currentCount = 7;
-	rerender(
-		<PanelV2
-			side="left"
-			panel={badgePanel}
-			isFocused={false}
-			onFocusPanel={vi.fn()}
-			onSelectView={vi.fn()}
-			onRemoveView={vi.fn()}
-			viewOverrides={[badgeView]}
-		/>,
-	);
+		act(() => updateBadge?.(3));
+		expect(await screen.findByText("3")).toBeInTheDocument();
 
-	expect(await screen.findByText("7")).toBeInTheDocument();
-	expect(screen.queryByText("3")).not.toBeInTheDocument();
-});
+		act(() => updateBadge?.(7));
+		expect(await screen.findByText("7")).toBeInTheDocument();
+		expect(screen.queryByText("3")).not.toBeInTheDocument();
+	});
 });

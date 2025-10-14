@@ -1,3 +1,6 @@
+import { CalendarDays } from "lucide-react";
+import { createReactViewDefinition } from "../../app/react-view";
+
 /**
  * Tasks view - Track the current sprint notes
  */
@@ -27,3 +30,17 @@ export function TasksView() {
 		</div>
 	);
 }
+
+/**
+ * Tasks panel view definition used by the registry.
+ *
+ * @example
+ * import { view as tasksView } from "@/views/tasks-view";
+ */
+export const view = createReactViewDefinition({
+	key: "tasks",
+	label: "Tasks",
+	description: "Track the current sprint notes.",
+	icon: CalendarDays,
+	component: () => <TasksView />,
+});

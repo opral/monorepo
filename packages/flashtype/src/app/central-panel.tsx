@@ -12,7 +12,7 @@ type CentralPanelProps = {
 	readonly panel: PanelState;
 	readonly onSelectView: (instanceKey: string) => void;
 	readonly onRemoveView: (instanceKey: string) => void;
-	readonly viewContext?: ViewContext;
+	readonly viewContext: ViewContext;
 	readonly onCreateNewFile?: () => void | Promise<void>;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;

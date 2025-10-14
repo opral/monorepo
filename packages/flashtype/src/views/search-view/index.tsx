@@ -1,3 +1,6 @@
+import { Search } from "lucide-react";
+import { createReactViewDefinition } from "../../app/react-view";
+
 /**
  * Search view - Quickly locate files, symbols, or commands
  */
@@ -31,3 +34,17 @@ export function SearchView() {
 		</div>
 	);
 }
+
+/**
+ * Search panel view definition used by the registry.
+ *
+ * @example
+ * import { view as searchView } from "@/views/search-view";
+ */
+export const view = createReactViewDefinition({
+	key: "search",
+	label: "Search",
+	description: "Quickly locate files, symbols, or commands.",
+	icon: Search,
+	component: () => <SearchView />,
+});

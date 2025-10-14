@@ -2,7 +2,9 @@ import clsx from "clsx";
 import {
 	forwardRef,
 	useCallback,
+	useEffect,
 	useLayoutEffect,
+	useMemo,
 	useRef,
 	useState,
 	type ButtonHTMLAttributes,
@@ -22,6 +24,7 @@ import { X, type LucideIcon } from "lucide-react";
 import type {
 	PanelSide,
 	PanelState,
+	ViewContext,
 	ViewDefinition,
 	ViewInstance,
 	ViewKey,
@@ -29,6 +32,7 @@ import type {
 import { VIEW_MAP } from "./view-registry";
 import styles from "./panel.module.css";
 import { useViewContext } from "./view-context";
+import { Activity } from "react";
 
 /**
  * Unified panel host that renders the shared tab strip and body layout for any side.
@@ -82,17 +86,62 @@ export function PanelV2({
 		[viewOverrides],
 	);
 
-	const activeView = activeEntry
-		? resolveViewDefinition(activeEntry.viewKey)
-		: null;
 	const hasViews = panel.views.length > 0;
 	const activeInstanceKey = activeEntry?.instanceKey ?? null;
-
 	const { badgeCounts, makeContext } = useViewContext({
 		panel,
 		isFocused,
 		parentContext: viewContext,
 	});
+
+	const viewContexts = useMemo(() => {
+		const map = new Map<string, ReturnType<typeof makeContext>>();
+		for (const entry of panel.views) {
+			map.set(entry.instanceKey, makeContext(entry));
+		}
+		return map;
+	}, [panel.views, makeContext]);
+
+	const activationCleanupRef = useRef<Map<string, (() => void) | undefined>>(
+		new Map(),
+	);
+
+	useEffect(() => {
+		const cleanupMap = activationCleanupRef.current;
+		for (const entry of panel.views) {
+			if (cleanupMap.has(entry.instanceKey)) continue;
+			const view = resolveViewDefinition(entry.viewKey);
+			if (!view?.activate) {
+				cleanupMap.set(entry.instanceKey, undefined);
+				continue;
+			}
+			const contextForView = viewContexts.get(entry.instanceKey);
+			if (!contextForView) {
+				cleanupMap.set(entry.instanceKey, undefined);
+				continue;
+			}
+			const cleanup = view.activate({
+				context: contextForView,
+				instance: entry,
+			});
+			cleanupMap.set(entry.instanceKey, cleanup ?? undefined);
+		}
+
+		for (const [key, cleanup] of Array.from(cleanupMap.entries())) {
+			if (!panel.views.some((entry) => entry.instanceKey === key)) {
+				cleanup?.();
+				cleanupMap.delete(key);
+			}
+		}
+	}, [panel.views, resolveViewDefinition, viewContexts]);
+
+	useEffect(() => {
+		const cleanupMap = activationCleanupRef.current;
+		return () => {
+			cleanupMap.forEach((cleanup) => cleanup?.());
+			cleanupMap.clear();
+		};
+	}, []);
 
 	const handleInteraction = () => {
 		if (!onActiveViewInteraction || !activeInstanceKey) return;
@@ -161,11 +210,25 @@ export function PanelV2({
 
 				{hasViews ? (
 					<PanelContent {...contentHandlers}>
-						{activeView && activeEntry ? (
-							<div className="flex min-h-0 flex-1 flex-col overflow-auto">
-								{activeView.render(makeContext(activeEntry), activeEntry)}
-							</div>
-						) : null}
+						{panel.views.map((entry) => {
+							const view = resolveViewDefinition(entry.viewKey);
+							if (!view) return null;
+							const context = viewContexts.get(entry.instanceKey);
+							if (!context) return null;
+							const isActive = activeInstanceKey === entry.instanceKey;
+							return (
+								<Activity
+									key={entry.instanceKey}
+									mode={isActive ? "visible" : "hidden"}
+								>
+									<ViewRenderer
+										view={view}
+										instance={entry}
+										context={context}
+									/>
+								</Activity>
+							);
+						})}
 					</PanelContent>
 				) : (
 					<PanelContent>{emptyStatePlaceholder}</PanelContent>
@@ -182,7 +245,7 @@ export type PanelV2Props = {
 	readonly onFocusPanel: (side: PanelSide) => void;
 	readonly onSelectView: (instanceKey: string) => void;
 	readonly onRemoveView: (instanceKey: string) => void;
-	readonly viewContext?: ViewContext;
+	readonly viewContext: ViewContext;
 	readonly tabLabel?: (view: ViewDefinition, instance: ViewInstance) => string;
 	readonly extraTabBarContent?: ReactNode;
 	readonly emptyStatePlaceholder?: ReactNode;
@@ -299,6 +362,33 @@ function PanelContent({
 		>
 			{children}
 		</div>
+	);
+}
+
+function ViewRenderer({
+	view,
+	instance,
+	context,
+}: {
+	view: ViewDefinition;
+	instance: ViewInstance;
+	context: ViewContext;
+}) {
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		const target = containerRef.current;
+		if (!view || !target) return;
+		const cleanup = view.render({ context, instance, target });
+		return () => {
+			cleanup?.();
+		};
+	}, [view, instance, context]);
+
+	return (
+		<div
+			ref={containerRef}
+			className="flex min-h-0 flex-1 flex-col overflow-hidden"
+		/>
 	);
 }
 

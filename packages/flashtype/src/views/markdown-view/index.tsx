@@ -1,11 +1,12 @@
 import { Suspense, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useQueryTakeFirst } from "@lix-js/react-utils";
+import { FileText, Loader2 } from "lucide-react";
+import { LixProvider, useQueryTakeFirst } from "@lix-js/react-utils";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { EditorProvider } from "@/views/markdown-view/editor/editor-context";
 import { TipTapEditor } from "@/views/markdown-view/editor/tip-tap-editor";
-import { Loader2 } from "lucide-react";
 import "./style.css";
+import { createReactViewDefinition } from "../../app/react-view";
 
 type MarkdownViewProps = {
 	readonly fileId?: string;
@@ -87,3 +88,24 @@ function MarkdownLoadingSpinner(): ReactNode {
 		</div>
 	);
 }
+
+/**
+ * Markdown content view definition used by the registry.
+ *
+ * @example
+ * import { view as markdownView } from "@/views/markdown-view";
+ */
+export const view = createReactViewDefinition({
+	key: "file-content",
+	label: "File",
+	description: "Display file contents.",
+	icon: FileText,
+	component: ({ context, instance }) => (
+		<LixProvider lix={context.lix}>
+			<MarkdownView
+				fileId={instance.metadata?.fileId}
+				filePath={instance.metadata?.filePath}
+			/>
+		</LixProvider>
+	),
+});

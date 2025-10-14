@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLix, useQuery } from "@lix-js/react-utils";
+import { Files } from "lucide-react";
+import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { nanoId, normalizeDirectoryPath, normalizeFilePath } from "@lix-js/sdk";
 import { selectFilesystemEntries } from "@/queries";
 import { buildFilesystemTree } from "@/views/files-view/build-filesystem-tree";
 import type { ViewContext } from "../../app/types";
 import { FileTree } from "./file-tree";
+import { createReactViewDefinition } from "../../app/react-view";
 
 type FilesViewProps = {
 	readonly context?: ViewContext;
@@ -343,6 +345,24 @@ export function FilesView({ context }: FilesViewProps) {
 		</div>
 	);
 }
+
+/**
+ * Files panel view definition used by the registry.
+ *
+ * @example
+ * import { view as filesView } from "@/views/files-view";
+ */
+export const view = createReactViewDefinition({
+	key: "files",
+	label: "Files",
+	description: "Browse and pin project documents.",
+	icon: Files,
+	component: ({ context }) => (
+		<LixProvider lix={context.lix}>
+			<FilesView context={context} />
+		</LixProvider>
+	),
+});
 
 function isInteractiveTarget(target: EventTarget | null): boolean {
 	if (!target || !(target instanceof HTMLElement)) {

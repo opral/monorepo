@@ -6,6 +6,16 @@ import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 import { FilesView } from "./index";
+import type { ViewContext } from "../../app/types";
+
+const createViewContext = (
+	lix: Awaited<ReturnType<typeof openLix>>,
+	overrides: Partial<ViewContext> = {},
+): ViewContext => ({
+	setTabBadgeCount: () => {},
+	lix,
+	...overrides,
+});
 
 const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(
 	window.navigator,
@@ -43,7 +53,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -189,7 +199,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -233,7 +243,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -284,7 +294,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -313,7 +323,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -350,7 +360,7 @@ describe("FilesView", () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={{ onOpenFile }} />
+						<FilesView context={createViewContext(lix, { onOpenFile })} />
 					</Suspense>
 				</LixProvider>,
 			);

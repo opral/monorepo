@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { GitCommitVertical } from "lucide-react";
 import clsx from "clsx";
-import { useQuery } from "@lix-js/react-utils";
+import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
 import type { ViewContext } from "../../app/types";
+import { createReactViewDefinition } from "../../app/react-view";
 
 type HistoryCheckpoint = {
 	id: string;
@@ -114,3 +116,21 @@ export function HistoryView({ context }: HistoryViewProps) {
 		</div>
 	);
 }
+
+/**
+ * History panel view definition used by the registry.
+ *
+ * @example
+ * import { view as historyView } from "@/views/history-view";
+ */
+export const view = createReactViewDefinition({
+	key: "history",
+	label: "History",
+	description: "Browse saved checkpoints in chronological order.",
+	icon: GitCommitVertical,
+	component: ({ context }) => (
+		<LixProvider lix={context.lix}>
+			<HistoryView context={context} />
+		</LixProvider>
+	),
+});

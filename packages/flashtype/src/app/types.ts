@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { Lix } from "@lix-js/sdk";
 import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
@@ -64,7 +63,15 @@ export interface ViewDefinition {
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
-	readonly render: (context?: ViewContext, view?: ViewInstance) => ReactNode;
+	readonly activate?: (args: {
+		context: ViewContext;
+		instance: ViewInstance;
+	}) => void | (() => void);
+	readonly render: (args: {
+		context: ViewContext;
+		instance: ViewInstance;
+		target: HTMLElement;
+	}) => void | (() => void);
 }
 
 /**
@@ -112,7 +119,8 @@ export interface ViewContext {
 		},
 	) => void;
 	readonly isPanelFocused?: boolean;
-	readonly setTabBadgeCount?: (count: number | null | undefined) => void;
+	readonly setTabBadgeCount: (count: number | null | undefined) => void;
+	readonly lix: Lix;
 }
 
 /**

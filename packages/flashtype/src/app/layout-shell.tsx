@@ -807,8 +807,10 @@ export function V2LayoutShell() {
 			onOpenFile: handleOpenFile,
 			onOpenCommit: handleOpenCommit,
 			onOpenDiff: handleOpenDiff,
+			setTabBadgeCount: () => {},
+			lix,
 		}),
-		[handleOpenFile, handleOpenCommit, handleOpenDiff],
+		[handleOpenFile, handleOpenCommit, handleOpenDiff, lix],
 	);
 
 	const isLeftFocused = focusedPanel === "left";

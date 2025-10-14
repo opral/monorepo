@@ -24,7 +24,7 @@ interface SidePanelProps {
 	readonly onSelectView: (instanceKey: string) => void;
 	readonly onAddView: (toolId: ViewKey) => void;
 	readonly onRemoveView: (instanceKey: string) => void;
-	readonly viewContext?: ViewContext;
+	readonly viewContext: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
 }

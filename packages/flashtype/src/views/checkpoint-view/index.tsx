@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { useLix, useQuery } from "@lix-js/react-utils";
+import { useMemo, useState } from "react";
+import { Flag } from "lucide-react";
+import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
 import { selectWorkingDiffFiles } from "./queries";
 import type { ViewContext } from "../../app/types";
 import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
 import { LatestCheckpoint } from "./latest-checkpoint";
+import { createReactViewDefinition } from "../../app/react-view";
 
 /**
  * Checkpoint view - Shows working changes and allows creating checkpoints
@@ -20,9 +22,14 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 	const [isCreating, setIsCreating] = useState(false);
 	const lix = useLix();
 
-	const files = useQuery(({ lix }) => selectWorkingDiffFiles(lix)) ?? [];
-	const validFileIds = new Set(files.map((file) => file.id));
-	const visibleSelection = (() => {
+	const files = useQuery(({ lix }) => selectWorkingDiffFiles(lix));
+
+	const validFileIds = useMemo(
+		() => new Set(files.map((file) => file.id)),
+		[files],
+	);
+
+	const visibleSelection = useMemo(() => {
 		const filtered = new Set<string>();
 		for (const id of selectedFiles) {
 			if (validFileIds.has(id)) {
@@ -30,7 +37,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 			}
 		}
 		return filtered;
-	})();
+	}, [selectedFiles, validFileIds]);
 
 	const latestCheckpoint = null;
 
@@ -108,3 +115,37 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 		</div>
 	);
 }
+
+/**
+ * Checkpoint panel view definition used by the registry.
+ *
+ * @example
+ * import { view as checkpointView } from "@/views/checkpoint-view";
+ */
+export const view = createReactViewDefinition({
+	key: "checkpoint",
+	label: "Checkpoint",
+	description: "View working changes and create checkpoints.",
+	icon: Flag,
+	component: ({ context }) => (
+		<LixProvider lix={context.lix}>
+			<CheckpointView context={context} />
+		</LixProvider>
+	),
+	activate: ({ context }) => {
+		const query = selectWorkingDiffFiles(context.lix);
+		const subscription = context.lix.observe(query).subscribe({
+			next: (rows) => {
+				const count = rows.length;
+				context.setTabBadgeCount(count > 0 ? count : null);
+			},
+			error: () => {
+				context.setTabBadgeCount(null);
+			},
+		});
+		return () => {
+			subscription.unsubscribe();
+			context.setTabBadgeCount(null);
+		};
+	},
+});

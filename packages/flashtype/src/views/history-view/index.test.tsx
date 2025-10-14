@@ -26,6 +26,8 @@ describe("HistoryView", () => {
 				context={{
 					onOpenCommit: handleOpenCommit,
 					isPanelFocused: true,
+					setTabBadgeCount: () => {},
+					lix: {} as any,
 				}}
 			/>,
 		);
@@ -48,6 +50,8 @@ describe("HistoryView", () => {
 				context={{
 					onOpenCommit: handleOpenCommit,
 					isPanelFocused: false,
+					setTabBadgeCount: () => {},
+					lix: {} as any,
 				}}
 			/>,
 		);

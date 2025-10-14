@@ -1,12 +1,13 @@
 import { Suspense, useMemo } from "react";
 import type { ReactNode } from "react";
-import { useQuery } from "@lix-js/react-utils";
+import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectWorkingDiff } from "@lix-js/sdk";
 import type { Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { Diff as DiffIcon, Loader2 } from "lucide-react";
 import { Diff } from "@/components/diff";
 import type { DiffViewConfig, RenderableDiff } from "../../app/types";
-import { Loader2 } from "lucide-react";
+import { createReactViewDefinition } from "../../app/react-view";
 
 interface DiffViewProps {
 	readonly config?: DiffViewConfig;
@@ -127,3 +128,21 @@ function DiffLoadingSpinner(): ReactNode {
 		</div>
 	);
 }
+
+/**
+ * Diff inspection view definition used by the registry.
+ *
+ * @example
+ * import { view as diffView } from "@/views/diff-view";
+ */
+export const view = createReactViewDefinition({
+	key: "diff",
+	label: "Diff",
+	description: "Inspect changes for a file.",
+	icon: DiffIcon,
+	component: ({ context, instance }) => (
+		<LixProvider lix={context.lix}>
+			<DiffView config={instance.metadata?.diff} />
+		</LixProvider>
+	),
+});

@@ -2,7 +2,52 @@ import { DndContext } from "@dnd-kit/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { CentralPanel } from "./central-panel";
-import type { PanelState } from "./types";
+import type { PanelState, ViewContext } from "./types";
+import type { Lix } from "@lix-js/sdk";
+
+vi.mock("./view-registry", () => {
+	const definitions = [
+		{
+			key: "search" as const,
+			label: "Search",
+			description: "Search view",
+			icon: () => <svg></svg>,
+			render: ({
+				context,
+				target,
+			}: {
+				context: ViewContext;
+				target: HTMLElement;
+			}) => {
+				const input = document.createElement("input");
+				input.setAttribute("data-testid", "search-view-input");
+				input.setAttribute("placeholder", "Search project...");
+				input.addEventListener("pointerdown", () => {
+					context.onOpenFile?.("search", { focus: false });
+				});
+				target.replaceChildren(input);
+				return () => {
+					target.replaceChildren();
+				};
+			},
+		},
+	];
+	return {
+		VIEW_DEFINITIONS: definitions,
+		VIEW_MAP: new Map(definitions.map((def) => [def.key, def])),
+	};
+});
+
+const mockLix = {} as Lix;
+
+const createViewContext = (
+	overrides: Partial<ViewContext> = {},
+): ViewContext => ({
+	lix: mockLix,
+	isPanelFocused: false,
+	setTabBadgeCount: () => {},
+	...overrides,
+});
 
 describe("CentralPanel", () => {
 	test("shows the welcome screen when no views are open", () => {
@@ -14,6 +59,7 @@ describe("CentralPanel", () => {
 					panel={emptyPanel}
 					onSelectView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext()}
 					isFocused={false}
 					onFocusPanel={vi.fn()}
 				/>
@@ -36,6 +82,7 @@ describe("CentralPanel", () => {
 					panel={panelState}
 					onSelectView={handleSelect}
 					onRemoveView={() => {}}
+					viewContext={createViewContext({ isPanelFocused: true })}
 					isFocused={true}
 					onFocusPanel={vi.fn()}
 				/>
@@ -63,6 +110,7 @@ describe("CentralPanel", () => {
 					panel={panelState}
 					onSelectView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext()}
 					isFocused={false}
 					onFocusPanel={vi.fn()}
 				/>
@@ -86,6 +134,7 @@ describe("CentralPanel", () => {
 					panel={panelState}
 					onSelectView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext({ isPanelFocused: true })}
 					isFocused={true}
 					onFocusPanel={vi.fn()}
 					onFinalizePendingView={handleFinalize}
@@ -109,6 +158,7 @@ describe("CentralPanel", () => {
 					panel={emptyPanel}
 					onSelectView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext()}
 					isFocused={false}
 					onFocusPanel={vi.fn()}
 					onCreateNewFile={handleCreateNewFile}

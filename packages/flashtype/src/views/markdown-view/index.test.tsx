@@ -32,7 +32,6 @@ describe("MarkdownView", () => {
 		await act(async () => {
 			utils?.unmount();
 		});
-		await lix.close();
 	});
 
 	test("renders the TipTap editor when file is found", async () => {
@@ -83,7 +82,6 @@ describe("MarkdownView", () => {
 		await act(async () => {
 			utils?.unmount();
 		});
-		await lix.close();
 	});
 
 	test("shows a not found message when the file is missing", async () => {
@@ -108,6 +106,5 @@ describe("MarkdownView", () => {
 		await act(async () => {
 			utils?.unmount();
 		});
-		await lix.close();
 	});
 });

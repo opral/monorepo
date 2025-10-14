@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 import type { FilesystemEntryRow } from "@/queries";
 import { SidePanel } from "./side-panel";
 import type { PanelState, ViewContext } from "./types";
+import type { Lix } from "@lix-js/sdk";
 
 const mockEntries: FilesystemEntryRow[] = [
 	{
@@ -60,32 +61,50 @@ vi.mock("@lix-js/react-utils", async () => {
 });
 
 vi.mock("./view-registry", async () => {
-	const MockIcon = () => null;
 	const definitions = [
 		{
 			key: "files" as const,
 			label: "Files",
 			description: "Files view",
-			icon: MockIcon,
-			render: (context?: ViewContext) => (
-				<button
-					type="button"
-					onClick={() =>
-						context?.onOpenFile?.("file-writing", {
-							focus: false,
-							filePath: "/docs/guides/writing-style.md",
-						})
-					}
-				>
-					writing-style.md
-				</button>
-			),
+			icon: () => <svg></svg>,
+			render: ({
+				context,
+				target,
+			}: {
+				context: ViewContext;
+				target: HTMLElement;
+			}) => {
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = "writing-style.md";
+				button.addEventListener("click", () => {
+					context.onOpenFile?.("file-writing", {
+						focus: false,
+						filePath: "/docs/guides/writing-style.md",
+					});
+				});
+				target.replaceChildren(button);
+				return () => {
+					target.replaceChildren();
+				};
+			},
 		},
 	];
 	return {
 		VIEW_DEFINITIONS: definitions,
 		VIEW_MAP: new Map(definitions.map((def) => [def.key, def])),
 	};
+});
+
+const mockLix = {} as Lix;
+
+const createViewContext = (
+	overrides: Partial<ViewContext> = {},
+): ViewContext => ({
+	lix: mockLix,
+	isPanelFocused: false,
+	setTabBadgeCount: () => {},
+	...overrides,
 });
 
 describe("SidePanel", () => {
@@ -101,6 +120,7 @@ describe("SidePanel", () => {
 					onSelectView={() => {}}
 					onAddView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext()}
 					isFocused={false}
 					onFocusPanel={vi.fn()}
 				/>
@@ -121,7 +141,11 @@ describe("SidePanel", () => {
 		const handleSelect = vi.fn();
 		const handleAdd = vi.fn();
 		const handleRemove = vi.fn();
-		const viewContext: ViewContext = { onOpenFile: vi.fn() };
+		const handleOpenFile = vi.fn();
+		const viewContext = createViewContext({
+			onOpenFile: handleOpenFile,
+			isPanelFocused: true,
+		});
 
 		render(
 			<DndContext>
@@ -152,7 +176,7 @@ describe("SidePanel", () => {
 			{ timeout: 5000 },
 		);
 		fireEvent.click(fileRow);
-		expect(viewContext.onOpenFile).toHaveBeenCalledWith("file-writing", {
+		expect(handleOpenFile).toHaveBeenCalledWith("file-writing", {
 			focus: false,
 			filePath: "/docs/guides/writing-style.md",
 		});
@@ -173,6 +197,7 @@ describe("SidePanel", () => {
 					onSelectView={() => {}}
 					onAddView={() => {}}
 					onRemoveView={() => {}}
+					viewContext={createViewContext()}
 					isFocused={false}
 					onFocusPanel={vi.fn()}
 				/>

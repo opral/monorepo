@@ -4,7 +4,7 @@ import type { PanelState, ViewContext, ViewInstance } from "./types";
 type UsePanelViewContextArgs = {
 	panel: PanelState;
 	isFocused: boolean;
-	parentContext?: ViewContext;
+	parentContext: ViewContext;
 };
 
 export function useViewContext({
@@ -13,10 +13,9 @@ export function useViewContext({
 	parentContext,
 }: UsePanelViewContextArgs): {
 	badgeCounts: Record<string, number>;
-	makeContext: (instance: ViewInstance) => ViewContext | undefined;
+	makeContext: (instance: ViewInstance) => ViewContext;
 } {
-	const baseContext = useMemo<ViewContext | undefined>(() => {
-		if (!parentContext) return { isPanelFocused: isFocused };
+	const baseContext = useMemo<ViewContext>(() => {
 		if (parentContext.isPanelFocused === isFocused) return parentContext;
 		return { ...parentContext, isPanelFocused: isFocused };
 	}, [parentContext, isFocused]);
@@ -48,42 +47,39 @@ export function useViewContext({
 		}
 	}, [panel.views]);
 
-	const getBadgeSetter = useCallback(
-		(instanceKey: string) => {
-			const cached = setterRef.current[instanceKey];
-			if (cached) return cached;
-			const setter = (count: number | null | undefined) => {
-				setBadgeCounts((prev) => {
-					if (
-						count === null ||
-						count === undefined ||
-						!Number.isFinite(count) ||
-						Number(count) <= 0
-					) {
-						if (!(instanceKey in prev)) return prev;
-						const { [instanceKey]: _, ...rest } = prev;
-						return rest;
-					}
-					const normalized = Number(count);
-					if (prev[instanceKey] === normalized) return prev;
-					return { ...prev, [instanceKey]: normalized };
-				});
-			};
-			setterRef.current[instanceKey] = setter;
-			return setter;
-		},
-		[],
-	);
+	const getBadgeSetter = useCallback((instanceKey: string) => {
+		const cached = setterRef.current[instanceKey];
+		if (cached) return cached;
+		const setter = (count: number | null | undefined) => {
+			setBadgeCounts((prev) => {
+				if (
+					count === null ||
+					count === undefined ||
+					!Number.isFinite(count) ||
+					Number(count) <= 0
+				) {
+					if (!(instanceKey in prev)) return prev;
+					const { [instanceKey]: _, ...rest } = prev;
+					return rest;
+				}
+				const normalized = Number(count);
+				if (prev[instanceKey] === normalized) return prev;
+				return { ...prev, [instanceKey]: normalized };
+			});
+		};
+		setterRef.current[instanceKey] = setter;
+		return setter;
+	}, []);
 
 	useEffect(() => {
 		contextRef.current = {};
 	}, [baseContext]);
 
 	const makeContext = useCallback(
-		(instance: ViewInstance): ViewContext | undefined => {
+		(instance: ViewInstance): ViewContext => {
 			const setCount = getBadgeSetter(instance.instanceKey);
 			const cached = contextRef.current[instance.instanceKey];
-			const focusValue = baseContext?.isPanelFocused ?? isFocused;
+			const focusValue = baseContext.isPanelFocused ?? isFocused;
 			if (
 				cached &&
 				cached.setTabBadgeCount === setCount &&
@@ -92,9 +88,7 @@ export function useViewContext({
 				return cached;
 			}
 
-			const next: ViewContext = baseContext
-				? { ...baseContext, setTabBadgeCount: setCount }
-				: { isPanelFocused: isFocused, setTabBadgeCount: setCount };
+			const next: ViewContext = { ...baseContext, setTabBadgeCount: setCount };
 			contextRef.current[instance.instanceKey] = next;
 			return next;
 		},

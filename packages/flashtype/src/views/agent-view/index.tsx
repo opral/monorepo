@@ -6,8 +6,8 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { ArrowUp } from "lucide-react";
-import { useLix, useQuery } from "@lix-js/react-utils";
+import { ArrowUp, Bot } from "lucide-react";
+import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
 import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
@@ -16,6 +16,7 @@ import { MentionMenu, CommandMenu } from "./menu";
 import { extractSlashToken, useComposerState } from "./composer-state";
 import { selectFilePaths } from "./select-file-paths";
 import { useAgentChat } from "./hooks/use-agent-chat";
+import { createReactViewDefinition } from "../../app/react-view";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -391,6 +392,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		send,
 		handleToolEvent,
 		finalizeToolSession,
+		filteredCommands,
 	]);
 
 	const onKeyDown = useCallback(
@@ -629,15 +631,27 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	);
 }
 
+/**
+ * Agent panel view definition used by the registry.
+ *
+ * @example
+ * import { view as agentView } from "@/views/agent-view";
+ */
+export const view = createReactViewDefinition({
+	key: "agent",
+	label: "Lix Agent",
+	description: "Chat with the project assistant.",
+	icon: Bot,
+	component: ({ context }) => (
+		<LixProvider lix={context.lix}>
+			<AgentView context={context} />
+		</LixProvider>
+	),
+});
+
 export default AgentView;
 
 function stepsToToolRuns(steps: LixAgentStep[]): ToolRun[] {
-	const statusFromStep = (status?: string): ToolRunStatus => {
-		if (status === "succeeded") return "success";
-		if (status === "failed") return "error";
-		return "running";
-	};
-
 	return steps
 		.filter((step) => (step.kind ?? "tool_call") === "tool_call")
 		.map((step) => {
@@ -661,6 +675,12 @@ function stepsToToolRuns(steps: LixAgentStep[]): ToolRun[] {
 					status === "error" ? (step.error_text ?? undefined) : undefined,
 			};
 		});
+}
+
+function statusFromStep(status?: string): ToolRunStatus {
+	if (status === "succeeded") return "success";
+	if (status === "failed") return "error";
+	return "running";
 }
 
 function lastActionFocus(el: HTMLTextAreaElement | null) {

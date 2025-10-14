@@ -1,152 +1,27 @@
-import {
-	Bot,
-	CalendarDays,
-	Diff,
-	FileText,
-	Files,
-	Flag,
-	GitCommitVertical,
-	Search,
-} from "lucide-react";
-import { lazy } from "react";
 import type { ViewDefinition, ViewKey } from "./types";
+import { view as agentViewDefinition } from "../views/agent-view";
+import { view as filesViewDefinition } from "../views/files-view";
+import { view as searchViewDefinition } from "../views/search-view";
+import { view as tasksViewDefinition } from "../views/tasks-view";
+import { view as checkpointViewDefinition } from "../views/checkpoint-view";
+import { view as historyViewDefinition } from "../views/history-view";
+import { view as markdownViewDefinition } from "../views/markdown-view";
+import { view as commitViewDefinition } from "../views/commit-view";
+import { view as diffViewDefinition } from "../views/diff-view";
 
-const AgentView = lazy(() =>
-	import("../views/agent-view/index").then((mod) => ({
-		default: mod.AgentView,
-	})),
-);
-
-const FilesView = lazy(() =>
-	import("../views/files-view/index").then((mod) => ({
-		default: mod.FilesView,
-	})),
-);
-
-const SearchView = lazy(() =>
-	import("../views/search-view/index").then((mod) => ({
-		default: mod.SearchView,
-	})),
-);
-
-const TasksView = lazy(() =>
-	import("../views/tasks-view/index").then((mod) => ({
-		default: mod.TasksView,
-	})),
-);
-
-const CheckpointView = lazy(() =>
-	import("../views/checkpoint-view/index").then((mod) => ({
-		default: mod.CheckpointView,
-	})),
-);
-
-const HistoryView = lazy(() =>
-	import("../views/history-view/index").then((mod) => ({
-		default: mod.HistoryView,
-	})),
-);
-
-const MarkdownView = lazy(() =>
-	import("../views/markdown-view/index").then((mod) => ({
-		default: mod.MarkdownView,
-	})),
-);
-
-const CommitView = lazy(() =>
-	import("../views/commit-view/index").then((mod) => ({
-		default: mod.CommitView,
-	})),
-);
-
-const DiffView = lazy(() =>
-	import("../views/diff-view/index").then((mod) => ({
-		default: mod.DiffView,
-	})),
-);
-
-/**
- * Canonical catalogue of prototype views available to each panel.
- *
- * @example
- * const filesView = VIEW_DEFINITIONS.find((ext) => ext.key === "files");
- */
 const VISIBLE_VIEWS: ViewDefinition[] = [
-	{
-		key: "agent",
-		label: "Lix Agent",
-		description: "Chat with the project assistant.",
-		icon: Bot,
-		render: (context) => <AgentView context={context} />,
-	},
-	{
-		key: "files",
-		label: "Files",
-		description: "Browse and pin project documents.",
-		icon: Files,
-		render: (context) => <FilesView context={context} />,
-	},
-	{
-		key: "search",
-		label: "Search",
-		description: "Quickly locate files, symbols, or commands.",
-		icon: Search,
-		render: () => <SearchView />,
-	},
-	{
-		key: "tasks",
-		label: "Tasks",
-		description: "Track the current sprint notes.",
-		icon: CalendarDays,
-		render: () => <TasksView />,
-	},
-	{
-		key: "checkpoint",
-		label: "Checkpoint",
-		description: "View working changes and create checkpoints.",
-		icon: Flag,
-		render: (context) => <CheckpointView context={context} />,
-	},
-	{
-		key: "history",
-		label: "History",
-		description: "Browse saved checkpoints in chronological order.",
-		icon: GitCommitVertical,
-		render: (context) => <HistoryView context={context} />,
-	},
+	agentViewDefinition,
+	filesViewDefinition,
+	searchViewDefinition,
+	tasksViewDefinition,
+	checkpointViewDefinition,
+	historyViewDefinition,
 ];
 
 const HIDDEN_VIEWS: ViewDefinition[] = [
-	{
-		key: "file-content",
-		label: "File",
-		description: "Display file contents.",
-		icon: FileText,
-		render: (_context, panelView) => (
-			<MarkdownView
-				fileId={panelView?.metadata?.fileId}
-				filePath={panelView?.metadata?.filePath}
-			/>
-		),
-	},
-	{
-		key: "commit",
-		label: "Commit",
-		description: "View commit details and changes.",
-		icon: GitCommitVertical,
-		render: (context, panelView) => (
-			<CommitView context={context} view={panelView} />
-		),
-	},
-	{
-		key: "diff",
-		label: "Diff",
-		description: "Inspect changes for a file.",
-		icon: Diff,
-		render: (_context, panelView) => (
-			<DiffView config={panelView?.metadata?.diff} />
-		),
-	},
+	markdownViewDefinition,
+	commitViewDefinition,
+	diffViewDefinition,
 ];
 
 export const VIEW_DEFINITIONS: ViewDefinition[] = VISIBLE_VIEWS;
@@ -157,12 +32,6 @@ export const VIEW_MAP = new Map<ViewKey, ViewDefinition>(
 
 let viewCounter = 0;
 
-/**
- * Generates a stable identifier for each opened view inside a panel.
- *
- * @example
- * const key = createViewInstanceKey("files");
- */
 export function createViewInstanceKey(viewKey: ViewKey): string {
 	viewCounter += 1;
 	return `${viewKey}-${viewCounter}`;
