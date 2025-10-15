@@ -12,7 +12,7 @@ import { V2LayoutShell } from "./app/layout-shell";
 
 // Error UI moved to ./main.error.tsx
 
-function AppRoot() {
+export const AppRoot = () => {
 	const [lix, setLix] = useState<Lix | null>(null);
 	const [error, setError] = useState<unknown>(null);
 
@@ -74,7 +74,7 @@ function AppRoot() {
 			</KeyValueProvider>
 		</LixProvider>
 	);
-}
+};
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>

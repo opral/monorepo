@@ -1,9 +1,8 @@
 import { describe, expect, test } from "vitest";
 import {
 	cloneViewInstanceByKey,
-	reorderPanelViews,
 	reorderPanelViewsByIndex,
-} from "./layout-shell";
+} from "./panel-utils";
 import type { PanelState, ViewInstance } from "./types";
 
 describe("cloneViewInstanceByKey", () => {
@@ -47,30 +46,6 @@ describe("panel view reordering", () => {
 		],
 		activeInstanceKey: "files-1",
 	};
-
-	test("reorderPanelViews moves the dragged view before the target (forward)", () => {
-		const result = reorderPanelViews(samplePanel, "files-1", "agent-1");
-		expect(result.views.map((entry) => entry.instanceKey)).toEqual([
-			"search-1",
-			"files-1",
-			"agent-1",
-		]);
-		expect(result.activeInstanceKey).toBe("files-1");
-	});
-
-	test("reorderPanelViews moves the dragged view before the target (backward)", () => {
-		const result = reorderPanelViews(samplePanel, "agent-1", "files-1");
-		expect(result.views.map((entry) => entry.instanceKey)).toEqual([
-			"agent-1",
-			"files-1",
-			"search-1",
-		]);
-	});
-
-	test("reorderPanelViews returns the original panel when keys are missing", () => {
-		const unchanged = reorderPanelViews(samplePanel, "missing", "files-1");
-		expect(unchanged).toEqual(samplePanel);
-	});
 
 	test("reorderPanelViewsByIndex moves an item to the requested index", () => {
 		const result = reorderPanelViewsByIndex(samplePanel, 0, 2);

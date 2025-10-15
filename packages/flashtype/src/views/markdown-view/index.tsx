@@ -7,6 +7,7 @@ import { EditorProvider } from "@/views/markdown-view/editor/editor-context";
 import { TipTapEditor } from "@/views/markdown-view/editor/tip-tap-editor";
 import "./style.css";
 import { createReactViewDefinition } from "../../app/react-view";
+import { FormattingToolbar } from "./components/formatting-toolbar";
 
 type MarkdownViewProps = {
 	readonly fileId?: string;
@@ -66,15 +67,16 @@ function MarkdownViewContent({ fileId, filePath }: MarkdownViewProps) {
 	} else {
 		content = (
 			<EditorProvider>
-				<div className="markdown-view h-full">
-					<TipTapEditor className="h-full" />
+				<div className="markdown-view flex h-full flex-col bg-background">
+					<FormattingToolbar className="mb-3" />
+					<TipTapEditor className="flex-1" />
 				</div>
 			</EditorProvider>
 		);
 	}
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">{content}</div>
+		<div className="flex min-h-0 flex-1 flex-col px-2 py-2">{content}</div>
 	);
 }
 

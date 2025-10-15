@@ -8,12 +8,10 @@
 
 /* Base markdown view container */
 .markdown-view .ProseMirror {
-	padding-left: 1rem;
-	padding-right: 1rem;
-	padding-top: 1rem;
-	padding-bottom: 1.5rem;
-	font-size: 15px;
-	line-height: 1.625;
+	padding-left: 0.75rem;
+	padding-right: 0.75em;
+	font-size: 0.9rem;
+	line-height: 1.6;
 	min-height: auto;
 	cursor: auto;
 	width: 100%;

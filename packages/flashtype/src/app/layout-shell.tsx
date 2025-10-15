@@ -46,6 +46,10 @@ import {
 	type FlashtypeUiState,
 } from "./ui-state";
 import { activatePanelView, upsertPendingView } from "./pending-view";
+import {
+	cloneViewInstanceByKey,
+	reorderPanelViewsByIndex,
+} from "./panel-utils";
 
 const hydratePanel = (panel: PanelState): PanelState => {
 	const views = panel.views
@@ -150,81 +154,6 @@ const PANEL_TRANSITION_STYLE: CSSProperties = {
 	transitionDuration: "200ms",
 	transitionTimingFunction: "ease-in-out",
 };
-
-/**
- * Returns a shallow clone of a view instance stored in a panel, including a
- * copied metadata object to keep state transitions immutable when moving tabs
- * between panels.
- *
- * @example
- * const cloned = cloneViewInstanceByKey(panelState, "files-1");
- */
-export function cloneViewInstanceByKey(
-	panel: PanelState,
-	instanceKey: string,
-): ViewInstance | null {
-	const view = panel.views.find((entry) => entry.instanceKey === instanceKey);
-	if (!view) return null;
-	return {
-		...view,
-		metadata: view.metadata ? { ...view.metadata } : undefined,
-	};
-}
-
-export function reorderPanelViews(
-	panel: PanelState,
-	movingInstanceKey: string,
-	targetInstanceKey: string,
-): PanelState {
-	if (movingInstanceKey === targetInstanceKey) {
-		return panel;
-	}
-	const views = panel.views.slice();
-	const fromIndex = views.findIndex(
-		(entry) => entry.instanceKey === movingInstanceKey,
-	);
-	const targetIndex = views.findIndex(
-		(entry) => entry.instanceKey === targetInstanceKey,
-	);
-	if (fromIndex === -1 || targetIndex === -1) {
-		return panel;
-	}
-	const [moving] = views.splice(fromIndex, 1);
-	const insertionIndex =
-		fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
-	views.splice(insertionIndex, 0, moving);
-	return {
-		views,
-		activeInstanceKey:
-			panel.activeInstanceKey === moving.instanceKey
-				? moving.instanceKey
-				: panel.activeInstanceKey,
-	};
-}
-
-export function reorderPanelViewsByIndex(
-	panel: PanelState,
-	fromIndex: number,
-	toIndex: number,
-): PanelState {
-	if (fromIndex === toIndex) return panel;
-	const views = panel.views.slice();
-	if (
-		fromIndex < 0 ||
-		fromIndex >= views.length ||
-		toIndex < 0 ||
-		toIndex > views.length
-	) {
-		return panel;
-	}
-	const [moving] = views.splice(fromIndex, 1);
-	const target = toIndex > views.length ? views.length : toIndex;
-	views.splice(target, 0, moving);
-	return {
-		views,
-		activeInstanceKey: panel.activeInstanceKey,
-	};
-}
 
 /**
  * Generates a unique root-level markdown path for a newly created document.

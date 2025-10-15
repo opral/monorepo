@@ -1,5 +1,6 @@
 {
-	"plugins": ["unicorn", "typescript", "oxc", "react", "jsx-a11y"],
+	"plugins": ["typescript", "oxc", "react", "jsx-a11y"],
+	"jsPlugins": ["eslint-plugin-react-hooks"],
 	"categories": {
 		"correctness": "error",
 		"suspicious": "warn"
