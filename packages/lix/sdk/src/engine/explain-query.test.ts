@@ -1,5 +1,4 @@
 import { expect, test } from "vitest";
-import type { CompiledQuery } from "kysely";
 import { openLix } from "../lix/index.js";
 import { createExplainQuery } from "./explain-query.js";
 
@@ -15,7 +14,7 @@ test("createExplainQuery returns rewritten when query is mutated", async () => {
 			parameters: [],
 		};
 
-		const report = explain({ query });
+		const report = explain(query);
 
 		expect(report.rewritten).toBeDefined();
 		expect(report.rewritten?.sql).not.toBe(report.original.sql);
@@ -39,7 +38,7 @@ test.skip("createExplainQuery omits rewritten when query is unchanged", async ()
 			parameters: [],
 		};
 
-		const report = explain({ query });
+		const report = explain(query);
 
 		expect(report.rewritten).toBeUndefined();
 		expect(report.expanded?.sql).toContain("state_all");

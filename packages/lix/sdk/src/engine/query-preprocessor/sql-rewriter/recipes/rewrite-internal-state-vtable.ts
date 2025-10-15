@@ -43,11 +43,10 @@ ${indent(canonicalQuery, 4)}
 export function buildInternalStateVtableProjection(
 	shape: Shape
 ): string | null {
-	if (shape.referencesPrimaryKey) {
-		return null;
-	}
-
-	const projection = VISIBLE_STATE_COLUMNS.join(", ");
+	const columns = shape.referencesPrimaryKey
+		? ["_pk", ...VISIBLE_STATE_COLUMNS]
+		: VISIBLE_STATE_COLUMNS;
+	const projection = columns.join(", ");
 	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
 	return `(SELECT ${projection} FROM lix_internal_state_vtable_rewritten) AS ${aliasSql}`;
 }

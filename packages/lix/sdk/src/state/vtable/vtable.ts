@@ -12,7 +12,6 @@ import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
-import { buildResolvedStateQuery } from "./resolved-state.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
@@ -379,7 +378,10 @@ export function applyStateVTable(
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
 						// Query directly from resolved state (now includes tombstones)
-						let query = buildResolvedStateQuery().selectAll();
+						let query = internalQueryBuilder
+							.selectFrom("lix_internal_state_vtable")
+							.select("_pk")
+							.selectAll();
 
 						// Apply filters
 						for (const [column, value] of Object.entries(filters)) {
@@ -393,7 +395,10 @@ export function applyStateVTable(
 						return capi.SQLITE_OK;
 					}
 
-					let query = buildResolvedStateQuery().selectAll();
+					let query = internalQueryBuilder
+						.selectFrom("lix_internal_state_vtable")
+						.select("_pk")
+						.selectAll();
 
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
@@ -686,7 +691,8 @@ export function applyStateVTable(
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit
 							const existingVersionsWithSameCommit = engine.executeSync(
-								buildResolvedStateQuery()
+								internalQueryBuilder
+									.selectFrom("lix_internal_state_vtable")
 									.select(
 										sql`json_extract(snapshot_content, '$.id')`.as("version_id")
 									)
@@ -825,7 +831,8 @@ export function applyStateVTable(
 		versionId: string;
 	}): string {
 		const [entity] = engine.executeSync(
-			buildResolvedStateQuery()
+			internalQueryBuilder
+				.selectFrom("lix_internal_state_vtable")
 				.select(["schema_key"])
 				.where("file_id", "=", args.fileId)
 				.where("entity_id", "=", args.entityId)
@@ -858,7 +865,8 @@ export function handleStateDelete(
 ): void {
 	// Look up the resolved row via the dynamic builder to avoid the legacy view
 	const [rowToDelete] = engine.executeSync(
-		buildResolvedStateQuery()
+		internalQueryBuilder
+			.selectFrom("lix_internal_state_vtable")
 			.select([
 				"entity_id",
 				"schema_key",

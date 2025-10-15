@@ -121,6 +121,6 @@ export function registerBuiltinFunctions({
 
 	register({
 		name: "lix_explain_query",
-		handler: (_ctx, args) => explain({ query: (args ?? {}) as any }),
+		handler: (_ctx, args) => explain(args),
 	});
 }

@@ -23,13 +23,12 @@ export function createExplainQuery(args: {
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery" | "executeSync"
 	>;
-}): (args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage {
+}): (args: { sql: string; parameters: any[] }) => ExplainQueryStage {
 	const preprocess = args.engine.preprocessQuery;
 
-	return ({ query }) => {
-		const parameters = [...(query.parameters ?? [])];
+	return ({ sql, parameters }) => {
 		const result = preprocess({
-			sql: query.sql,
+			sql,
 			parameters,
 			sideEffects: false,
 		});
@@ -44,11 +43,11 @@ export function createExplainQuery(args: {
 			columnNames: [],
 		}) as any[];
 
-		const wasRewritten = result.sql !== query.sql;
+		const wasRewritten = result.sql !== sql;
 
 		return {
 			original: {
-				sql: query.sql,
+				sql,
 				parameters,
 			},
 			expanded: result.expandedSql

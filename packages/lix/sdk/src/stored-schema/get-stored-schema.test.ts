@@ -4,16 +4,18 @@ import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { getStoredSchema, getAllStoredSchemas } from "./get-stored-schema.js";
 import { createVersion } from "../version/create-version.js";
-import { buildResolvedStateQuery } from "../state/vtable/resolved-state.js";
 import { LixStoredSchemaSchema } from "./schema-definition.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
-const ALL_STORED_SCHEMAS_SQL = buildResolvedStateQuery()
+const ALL_STORED_SCHEMAS_SQL = internalQueryBuilder
+	.selectFrom("lix_internal_state_vtable")
 	.select(["snapshot_content", "updated_at"])
 	.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 	.where("snapshot_content", "is not", null)
 	.compile().sql;
 
-const SINGLE_STORED_SCHEMA_SQL = buildResolvedStateQuery()
+const SINGLE_STORED_SCHEMA_SQL = internalQueryBuilder
+	.selectFrom("lix_internal_state_vtable")
 	.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 	.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 	.where(sql`json_extract(snapshot_content, '$.value."x-lix-key"')`, "=", "")

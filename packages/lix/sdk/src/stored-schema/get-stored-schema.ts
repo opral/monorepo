@@ -1,8 +1,8 @@
 import { sql } from "kysely";
 import type { LixEngine } from "../engine/boot.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { buildResolvedStateQuery } from "../state/vtable/resolved-state.js";
 import { LixStoredSchemaSchema } from "./schema-definition.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 export type LoadedStoredSchema = {
 	definition: LixSchemaDefinition;
@@ -59,10 +59,12 @@ export function getAllStoredSchemas(args: {
 		return cacheEntry.all;
 	}
 
-	const compiledQuery = buildResolvedStateQuery()
+	const compiledQuery = internalQueryBuilder
+		.selectFrom("lix_internal_state_vtable")
 		.select(["snapshot_content", "updated_at"])
 		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 		.where("snapshot_content", "is not", null)
+		.where("version_id", "=", "global")
 		.compile();
 
 	const { rows } = engine.executeSync(compiledQuery);
@@ -90,7 +92,8 @@ function loadSchema(
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
 	key: string
 ): LixSchemaDefinition | null {
-	const compiledQuery = buildResolvedStateQuery()
+	const compiledQuery = internalQueryBuilder
+		.selectFrom("lix_internal_state_vtable")
 		.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 		.where(sql`json_extract(snapshot_content, '$.value."x-lix-key"')`, "=", key)

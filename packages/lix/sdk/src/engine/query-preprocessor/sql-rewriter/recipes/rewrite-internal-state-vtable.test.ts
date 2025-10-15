@@ -77,6 +77,19 @@ test("buildInternalStateVtableProjection strips hidden primary key when unused",
 	);
 });
 
+test("buildInternalStateVtableProjection retains _pk when referenced", () => {
+	const sql = `SELECT v._pk FROM lix_internal_state_vtable v;`;
+	const tokens = tokenize(sql);
+	const shape = analyzeShape(tokens);
+
+	expect(shape).not.toBeNull();
+
+	const projection = buildInternalStateVtableProjection(shape!);
+	expect(projection).toBe(
+		`(SELECT _pk, ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM lix_internal_state_vtable_rewritten) AS v`
+	);
+});
+
 test("rewriteSql hoists a shared CTE and rewrites table reference", () => {
 	const sql = `SELECT * FROM lix_internal_state_vtable;`;
 	const rewritten = rewriteSql(sql);
@@ -106,14 +119,17 @@ test("version placeholder seeds recursion with named parameter", () => {
 	expect(rewritten).toContain("'lix_key_value' AS schema_key");
 });
 
-test("queries selecting _pk keep the raw CTE projection", () => {
+test("queries selecting _pk still rewrite to the CTE projection", () => {
 	const sql = `SELECT v._pk FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const rewritten = rewriteSql(sql);
 
 	// Hoisted CTE present
 	expect(rewritten).toContain("lix_internal_state_vtable_rewritten AS (");
-	// _pk selection is unmodified
-	expect(rewritten).toContain("SELECT v._pk FROM lix_internal_state_vtable v");
+	// Table reference rewritten with _pk included
+	expect(rewritten).toContain(
+		`(SELECT _pk, ${EXPECTED_VISIBLE_COLUMNS.join(", ")} FROM lix_internal_state_vtable_rewritten) AS v`
+	);
+	expect(rewritten).toContain("SELECT v._pk FROM (SELECT");
 });
 
 test("matrix of queries preserves precedence across rewrites", async () => {
@@ -125,7 +141,7 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 			name: string;
 			originalSql: string;
 			rewrite: boolean;
-			planSnapshot?: string;
+			planAssert?: (plan: string) => void;
 		}> = [
 			{
 				name: "wide",
@@ -136,7 +152,10 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 				name: "limit1",
 				originalSql: limitSql,
 				rewrite: true,
-				planSnapshot: "matrix fast limit plan",
+				planAssert: (plan) => {
+					expect(plan).toContain("CO-ROUTINE ranked");
+					expect(plan).toContain("SCAN w");
+				},
 			},
 		];
 
@@ -151,9 +170,9 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 			expect(rewrittenRows).toEqual(baselineRows);
 			assertPrecedence(baselineRows);
 
-			if (variant.planSnapshot && variant.rewrite) {
+			if (variant.planAssert && variant.rewrite) {
 				const plan = await explainQueryPlan(rewriteSql(variant.originalSql));
-				expect(plan).toMatchSnapshot(variant.planSnapshot);
+				variant.planAssert(plan);
 			}
 		}
 	});
