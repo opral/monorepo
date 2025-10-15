@@ -32,13 +32,12 @@ import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getStateCacheV2Tables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
-import { maybeRewriteInsteadOfTrigger } from "./dml-trigger/rewrite.js";
 import {
 	readDmlTarget,
 	type DmlOperation,
 } from "./dml-trigger/read-dml-target.js";
 
-export async function createQueryPreprocessor(
+export function createQueryPreprocessor(
 	engine: Pick<
 		LixEngine,
 		| "sqlite"
@@ -48,7 +47,7 @@ export async function createQueryPreprocessor(
 		| "call"
 		| "listFunctions"
 	>
-): Promise<QueryPreprocessorFn> {
+): QueryPreprocessorFn {
 	return ({
 		sql,
 		parameters,

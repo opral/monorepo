@@ -18,6 +18,7 @@ export const disabledQueryPreprocessorSimulation: SimulationTestDef = {
 		}
 
 		const originalExecuteSync = engine.executeSync;
+		const originalPreprocessQuery = engine.preprocessQuery;
 
 		const bypassExecuteSync: typeof engine.executeSync = ({
 			sql,
@@ -35,11 +36,13 @@ export const disabledQueryPreprocessorSimulation: SimulationTestDef = {
 		};
 
 		engine.executeSync = bypassExecuteSync;
+		engine.preprocessQuery = ((args) => args) as typeof engine.preprocessQuery;
 
 		return {
 			...lix,
 			close: async () => {
 				engine.executeSync = originalExecuteSync;
+				engine.preprocessQuery = originalPreprocessQuery;
 				await lix.close();
 			},
 		} as typeof lix;

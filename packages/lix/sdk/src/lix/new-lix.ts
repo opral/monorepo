@@ -2,7 +2,7 @@ import {
 	createInMemoryDatabase,
 	contentFromDatabase,
 } from "../database/sqlite/index.js";
-import { initDb, prepareEngineDatabase } from "../database/init-db.js";
+import { prepareEngineDatabase } from "../database/init-db.js";
 import {
 	LixActiveVersionSchema,
 	LixVersionDescriptorSchema,
@@ -128,6 +128,30 @@ export async function newLixFile(args?: {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
 
+	const engine: LixEngine = {
+		sqlite: sqlite,
+		hooks,
+		getAllPluginsSync: () => {
+			throw new Error("preprocessQuery() is not yet initialised");
+		},
+		runtimeCacheRef,
+		preprocessQuery: () => {
+			throw new Error("preprocessQuery() is not yet initialised");
+		},
+		executeSync: () => {
+			throw new Error("executeSync() is not yet initialised");
+		},
+		call: async () => {
+			throw new Error("call() is not yet initialised");
+		},
+		registerFunction: () => {
+			throw new Error("registerFunction() is not yet initialised");
+		},
+		listFunctions: () => {
+			throw new Error("listFunctions() is not yet initialised");
+		},
+	};
+
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
@@ -150,46 +174,11 @@ export async function newLixFile(args?: {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	let executeSyncImpl: LixEngine["executeSync"] | null = null;
+	engine.preprocessQuery = createQueryPreprocessor(engine);
 
-	const preprocessorEngine = {
-		sqlite,
-		hooks,
-		runtimeCacheRef,
-		executeSync: ((args) => {
-			if (!executeSyncImpl) {
-				throw new Error("executeSync not initialised");
-			}
-			return executeSyncImpl(args);
-		}) as LixEngine["executeSync"],
-		call: (_name: string, _args?: unknown) => {
-			throw new Error("Engine call not available during bootstrap");
-		},
-		listFunctions: () => [],
-	} as const;
+	engine.executeSync = createExecuteSync({ engine });
 
-	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
-
-	const executeSync = await createExecuteSync({
-		engine: {
-			sqlite,
-			hooks,
-			runtimeCacheRef,
-		},
-		preprocess: preprocessQuery,
-	});
-	executeSyncImpl = executeSync;
-
-	prepareEngineDatabase({ sqlite, hooks, executeSync, runtimeCacheRef });
-
-	const bootstrapEngine = {
-		executeSync,
-		hooks,
-		runtimeCacheRef,
-	} as const;
-
-	// applying the schema etc.
-	const db = initDb({ sqlite, hooks, executeSync, runtimeCacheRef });
+	prepareEngineDatabase({ engine });
 
 	// Counter for deterministic IDs
 	let deterministicIdCounter = 0;
@@ -215,7 +204,7 @@ export async function newLixFile(args?: {
 
 	const created_at = isDeterministicBootstrap
 		? new Date(0).toISOString()
-		: getTimestampSync({ engine: bootstrapEngine });
+		: getTimestampSync({ engine });
 
 	// Create bootstrap changes for initial data
 	const bootstrapChanges = createBootstrapChanges({
@@ -225,7 +214,7 @@ export async function newLixFile(args?: {
 		generateNanoid,
 		isDeterministicBootstrap,
 		useRandomLixId,
-		engineForRandom: bootstrapEngine,
+		engineForRandom: engine,
 	});
 
 	// Extract the lix_id from bootstrap changes
@@ -277,7 +266,7 @@ export async function newLixFile(args?: {
 	const activeVersionEntityId = generateNanoid();
 
 	updateUntrackedState({
-		engine: { executeSync, runtimeCacheRef },
+		engine,
 		changes: [
 			{
 				entity_id: activeVersionEntityId,
@@ -303,7 +292,7 @@ export async function newLixFile(args?: {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
 			updateUntrackedState({
-				engine: { executeSync, runtimeCacheRef },
+				engine,
 				changes: [
 					{
 						entity_id: kv.key,
@@ -325,10 +314,10 @@ export async function newLixFile(args?: {
 
 	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
 	markStateCacheAsFresh({
-		engine: bootstrapEngine,
+		engine,
 		timestamp: created_at,
 	});
-	populateStateCache({ engine: { sqlite, runtimeCacheRef, executeSync } });
+	populateStateCache({ engine });
 
 	try {
 		const blob = new Blob([
@@ -346,7 +335,7 @@ export async function newLixFile(args?: {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
 		setDeterministicBoot({ runtimeCacheRef, value: false });
-		await db.destroy();
+		sqlite.close();
 	}
 }
 

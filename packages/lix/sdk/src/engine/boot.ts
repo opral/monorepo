@@ -102,62 +102,45 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
 
-	let engineRef: LixEngine | null = null;
+	const engine: LixEngine = {
+		sqlite: env.sqlite,
+		hooks,
+		getAllPluginsSync: () => plugins,
+		runtimeCacheRef,
+		preprocessQuery: () => {
+			throw new Error("preprocessQuery() is not yet initialised");
+		},
+		executeSync: () => {
+			throw new Error("executeSync() is not yet initialised");
+		},
+		call: async () => {
+			throw new Error("call() is not yet initialised");
+		},
+		registerFunction: () => {
+			throw new Error("registerFunction() is not yet initialised");
+		},
+		listFunctions: () => {
+			throw new Error("listFunctions() is not yet initialised");
+		},
+	};
 
 	const fnRegistry = createFunctionRegistry({
-		getEngine: () => {
-			if (!engineRef) {
-				throw new Error("Engine functions not initialised");
-			}
-			return engineRef;
-		},
+		engine,
 	});
 
-	let callImpl: LixEngine["call"] | null = null;
+	engine.registerFunction = fnRegistry.register;
+	engine.listFunctions = fnRegistry.list;
+	engine.call = fnRegistry.call;
 
 	if (deterministicBoot) {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	let executeSyncImpl: LixEngine["executeSync"] | null = null;
+	engine.preprocessQuery = createQueryPreprocessor(engine);
 
-	const preprocessorEngine = {
-		sqlite: env.sqlite,
-		hooks,
-		runtimeCacheRef,
-		executeSync: ((args) => {
-			if (!executeSyncImpl) {
-				throw new Error("executeSync not initialised");
-			}
-			return executeSyncImpl(args);
-		}) as LixEngine["executeSync"],
-		call: ((name, callArgs) => {
-			if (!callImpl) {
-				throw new Error("Engine call not initialised");
-			}
-			return callImpl(name, callArgs);
-		}) as LixEngine["call"],
-		listFunctions: fnRegistry.list,
-	} as const;
+	engine.executeSync = createExecuteSync({ engine });
 
-	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
-
-	const executeSync = await createExecuteSync({
-		engine: {
-			sqlite: env.sqlite,
-			hooks,
-			runtimeCacheRef,
-		},
-		preprocess: preprocessQuery,
-	});
-	executeSyncImpl = executeSync;
-
-	prepareEngineDatabase({
-		sqlite: env.sqlite,
-		hooks,
-		executeSync,
-		runtimeCacheRef,
-	});
+	prepareEngineDatabase({ engine });
 
 	const plugins: LixPlugin[] = [];
 	for (const code of env.args.providePluginsRaw ?? []) {
@@ -167,22 +150,6 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	for (const input of env.args.providePlugins ?? []) {
 		plugins.push(input);
 	}
-
-	const engine: LixEngine = {
-		sqlite: env.sqlite,
-		hooks,
-		getAllPluginsSync: () => plugins,
-		runtimeCacheRef,
-		preprocessQuery,
-		executeSync,
-		call: async () => {
-			throw new Error("Engine router not initialised");
-		},
-		registerFunction: fnRegistry.register,
-		listFunctions: fnRegistry.list,
-	};
-
-	engineRef = engine;
 
 	applyFilesystemSchema({ engine });
 
@@ -292,25 +259,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		}
 	}
 
-	const call = fnRegistry.call;
-	engine.call = call;
-	callImpl = call;
-
 	registerBuiltinFunctions({ register: fnRegistry.register, engine });
-
-	// Register synchronous UDFs now that we have the engine context
-	env.sqlite.createFunction({
-		name: "lix_call",
-		arity: 1,
-		// @ts-expect-error - not sure why this is not working
-		xFunc: (_ctx: number, descriptorJson: string) => {
-			const { name, args } = JSON.parse(descriptorJson) as {
-				name: string;
-				args?: Record<string, unknown>;
-			};
-			return call(name, args ?? {});
-		},
-	});
 
 	if (deterministicBoot) {
 		setDeterministicBoot({ runtimeCacheRef, value: false });

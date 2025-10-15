@@ -26,9 +26,12 @@ const BENCH_STORED_SCHEMA: LixSchemaDefinition = {
 async function registerBenchSchema(
 	lix: Awaited<ReturnType<typeof openLix>>
 ): Promise<void> {
-	await lix.db.insertInto("stored_schema").values({
-		value: BENCH_STORED_SCHEMA,
-	}).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: BENCH_STORED_SCHEMA,
+		})
+		.execute();
 }
 
 bench("materializer: select all from single version", async () => {

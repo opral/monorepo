@@ -46,63 +46,45 @@ import { getTimestampSync } from "../engine/functions/timestamp.js";
  * ```
  */
 export function prepareEngineDatabase(args: {
-	executeSync: LixEngine["executeSync"];
-	runtimeCacheRef: LixEngine["runtimeCacheRef"];
-	sqlite: SqliteWasmDatabase;
-	hooks: LixHooks;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "preprocessQuery"
+	>;
 }): void {
 	// Lower fsync frequency for better write throughput; NORMAL still syncs at txn boundaries.
-	args.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
+	args.engine.sqlite.exec({ sql: "PRAGMA synchronous = NORMAL;" });
 	// Enlarge the page cache to keep more hot pages in memory (approximately 40 MiB at 4 KiB pages).
-	args.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
+	args.engine.sqlite.exec({ sql: "PRAGMA cache_size = 10000;" });
 
-	const engine = {
-		sqlite: args.sqlite,
-		hooks: args.hooks,
-		executeSync: args.executeSync,
-		runtimeCacheRef: args.runtimeCacheRef,
-	} as const satisfies Pick<
-		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
-	>;
-
-	initFunctions({
-		sqlite: args.sqlite,
-		executeSync: args.executeSync,
-		hooks: args.hooks,
-		runtimeCacheRef: args.runtimeCacheRef,
-	});
+	initFunctions(args.engine);
 
 	// Apply all database schemas first (tables, views, triggers)
-	applyTransactionStateSchema({ engine: engine });
-	applySnapshotDatabaseSchema(args.sqlite);
-	applyChangeDatabaseSchema(args.sqlite);
-	applyFileLixcolCacheSchema({ engine: engine });
+	applyTransactionStateSchema({ engine: args.engine });
+	applySnapshotDatabaseSchema(args.engine.sqlite);
+	applyChangeDatabaseSchema(args.engine.sqlite);
+	applyFileLixcolCacheSchema({ engine: args.engine });
 	// Ensure file data cache table exists before any triggers may reference it
-	applyFileDataCacheSchema({ engine: engine });
-	applyStateDatabaseSchema({ engine: engine });
-	// applyEntityDatabaseSchema({ engine: engine });
-	// applyChangeSetDatabaseSchema({ engine: engine });
-	// applyCommitDatabaseSchema({ engine: engine });
-	// applyStoredSchemaDatabaseSchema({ engine: engine });
-	applyVersionDatabaseSchema({ engine: engine });
-	// applyAccountDatabaseSchema({ engine: engine });
-	// applyKeyValueDatabaseSchema({ engine: engine });
-	// applyChangeAuthorDatabaseSchema({ engine: engine });
-	// applyLabelDatabaseSchema({ engine: engine });
-	applyStateHistoryDatabaseSchema({ engine: engine });
-	// applyConversationDatabaseSchema({ engine });
-	// applyEntityConversationDatabaseSchema({ engine });
-	// applyChangeProposalDatabaseSchema({ engine });
+	applyFileDataCacheSchema({ engine: args.engine });
+	applyStateDatabaseSchema({ engine: args.engine });
+	// applyEntityDatabaseSchema({ engine: args.engine });
+	// applyChangeSetDatabaseSchema({ engine: args.engine });
+	// applyCommitDatabaseSchema({ engine: args.engine });
+	// applyStoredSchemaDatabaseSchema({ engine: args.engine });
+	applyVersionDatabaseSchema({ engine: args.engine });
+	// applyAccountDatabaseSchema({ engine: args.engine });
+	// applyKeyValueDatabaseSchema({ engine: args.engine });
+	// applyChangeAuthorDatabaseSchema({ engine: args.engine });
+	// applyLabelDatabaseSchema({ engine: args.engine });
+	applyStateHistoryDatabaseSchema({ engine: args.engine });
+	// applyConversationDatabaseSchema({ engine: args.engine });
+	// applyEntityConversationDatabaseSchema({ engine: args.engine });
+	// applyChangeProposalDatabaseSchema({ engine: args.engine });
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	// applyLogDatabaseSchema({ engine: engine });
+	// applyLogDatabaseSchema({ engine: args.engine });
 }
 
-export function initDb(args: {
-	executeSync: LixEngine["executeSync"];
-	runtimeCacheRef: LixEngine["runtimeCacheRef"];
+export function initKysely(args: {
 	sqlite: SqliteWasmDatabase;
-	hooks: LixHooks;
 }): Kysely<LixDatabaseSchema> {
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createEngineDialect({ database: args.sqlite }),
@@ -128,6 +110,7 @@ function initFunctions(args: {
 		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
 	>;
 
+	// TODO function registration is in the engine's boot itself.
 	args.sqlite.createFunction({
 		name: "lix_uuid_v7",
 		arity: 0,

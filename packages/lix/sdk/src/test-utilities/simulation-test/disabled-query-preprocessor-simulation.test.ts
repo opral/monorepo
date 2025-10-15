@@ -25,7 +25,7 @@ describe("disabledQueryPreprocessorSimulation", () => {
 		vi.spyOn(
 			createQueryPreprocessorModule,
 			"createQueryPreprocessor"
-		).mockResolvedValue(preprocessSpy as any);
+		).mockReturnValue(preprocessSpy as any);
 
 		const lix = await openLix({});
 		const engine = lix.engine;

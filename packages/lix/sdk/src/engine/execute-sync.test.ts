@@ -14,13 +14,13 @@ describe("createExecuteSync", () => {
 			})
 		);
 
-		const executeSync = await createExecuteSync({
+		const executeSync = createExecuteSync({
 			engine: {
 				sqlite,
 				hooks: {} as any,
 				runtimeCacheRef: {} as any,
+				preprocessQuery: preprocess as any,
 			},
-			preprocess: preprocess as any,
 		});
 
 		const parameters = [1, "two", { three: 3 }];

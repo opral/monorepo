@@ -5,6 +5,14 @@ import { newLixFile } from "../lix/new-lix.js";
 import { openLix } from "../lix/open-lix.js";
 import { withRuntimeCache } from "./with-runtime-cache.js";
 
+const countCallsForSql = (
+	calls: ReadonlyArray<ReadonlyArray<unknown>>,
+	targetSql: string
+) =>
+	calls.filter(
+		([args]) => (args as { sql?: string } | undefined)?.sql === targetSql
+	).length;
+
 describe("withRuntimeCache", () => {
 	test("caches executeSync results per runtimeCacheRef", async () => {
 		const lix = await openLix({ blob: await newLixFile() });
@@ -20,12 +28,14 @@ describe("withRuntimeCache", () => {
 			.compile();
 
 		const executeSpy = vi.spyOn(engine, "executeSync");
+		const countTargetCalls = () =>
+			countCallsForSql(executeSpy.mock.calls, compiled.sql);
 
 		const first = withRuntimeCache(engine, compiled);
 		const second = withRuntimeCache(engine, compiled);
 
 		expect(first.rows).toEqual(second.rows);
-		expect(executeSpy).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls()).toBe(1);
 
 		executeSpy.mockRestore();
 		await lix.close();
@@ -45,9 +55,11 @@ describe("withRuntimeCache", () => {
 			.compile();
 
 		const executeSpy = vi.spyOn(engine, "executeSync");
+		const countTargetCalls = () =>
+			countCallsForSql(executeSpy.mock.calls, compiled.sql);
 
 		withRuntimeCache(engine, compiled);
-		expect(executeSpy).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls()).toBe(1);
 
 		engine.hooks._emit("state_commit", {
 			changes: [
@@ -69,7 +81,7 @@ describe("withRuntimeCache", () => {
 
 		withRuntimeCache(engine, compiled);
 
-		expect(executeSpy).toHaveBeenCalledTimes(2);
+		expect(countTargetCalls()).toBe(2);
 
 		executeSpy.mockRestore();
 		await lix.close();
@@ -89,9 +101,11 @@ describe("withRuntimeCache", () => {
 			.compile();
 
 		const executeSpy = vi.spyOn(engine, "executeSync");
+		const countTargetCalls = () =>
+			countCallsForSql(executeSpy.mock.calls, compiled.sql);
 
 		withRuntimeCache(engine, compiled);
-		expect(executeSpy).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls()).toBe(1);
 
 		engine.hooks._emit("state_commit", {
 			changes: [
@@ -113,7 +127,7 @@ describe("withRuntimeCache", () => {
 
 		withRuntimeCache(engine, compiled);
 
-		expect(executeSpy).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls()).toBe(1);
 
 		executeSpy.mockRestore();
 		await lix.close();
@@ -136,18 +150,20 @@ describe("withRuntimeCache", () => {
 
 		const spyA = vi.spyOn(engineA, "executeSync");
 		const spyB = vi.spyOn(engineB, "executeSync");
+		const countTargetCalls = (calls: typeof spyA.mock.calls) =>
+			countCallsForSql(calls, compiled.sql);
 
 		withRuntimeCache(engineA, compiled);
 		withRuntimeCache(engineB, compiled);
 
-		expect(spyA).toHaveBeenCalledTimes(1);
-		expect(spyB).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls(spyA.mock.calls)).toBe(1);
+		expect(countTargetCalls(spyB.mock.calls)).toBe(1);
 
 		withRuntimeCache(engineA, compiled);
 		withRuntimeCache(engineB, compiled);
 
-		expect(spyA).toHaveBeenCalledTimes(1);
-		expect(spyB).toHaveBeenCalledTimes(1);
+		expect(countTargetCalls(spyA.mock.calls)).toBe(1);
+		expect(countTargetCalls(spyB.mock.calls)).toBe(1);
 
 		spyA.mockRestore();
 		spyB.mockRestore();

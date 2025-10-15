@@ -11,7 +11,7 @@ import { applyInternalStateReaderSchema } from "./reader/schema.js";
 export function applyStateDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "preprocessQuery"
 	>;
 }): void {
 	const { engine } = args;

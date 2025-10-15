@@ -63,11 +63,13 @@ export function registerBuiltinFunctions({
 		handler: (ctx) => randomSync({ engine: ctx.engine }),
 	});
 
+	// TODO likely remove from public API
 	register({
 		name: "lix_next_sequence_number",
 		handler: (ctx) => nextSequenceNumberSync({ engine: ctx.engine }),
 	});
 
+	// TODO likely remove from public API
 	register({
 		name: "lix_commit_deterministic_rng_state",
 		handler: (ctx, args) => {
@@ -79,6 +81,7 @@ export function registerBuiltinFunctions({
 		},
 	});
 
+	// TODO likely remove from public API
 	register({
 		name: "lix_commit_sequence_number",
 		handler: (ctx, args) => {
@@ -90,6 +93,7 @@ export function registerBuiltinFunctions({
 		},
 	});
 
+	// TODO likely remove from public API
 	register({
 		name: "lix_update_state_cache",
 		handler: (ctx, args) => {
@@ -101,6 +105,7 @@ export function registerBuiltinFunctions({
 		},
 	});
 
+	// TODO likely remove from public API
 	register({
 		name: "lix_mark_state_cache_as_fresh",
 		handler: (ctx) => {

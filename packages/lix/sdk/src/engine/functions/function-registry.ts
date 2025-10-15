@@ -30,7 +30,7 @@ type RegisteredFunction = {
 };
 
 export function createFunctionRegistry(args: {
-	getEngine: () => Pick<
+	engine: Pick<
 		LixEngine,
 		| "sqlite"
 		| "hooks"
@@ -56,8 +56,7 @@ export function createFunctionRegistry(args: {
 			err.code = "LIX_CALL_UNKNOWN";
 			throw err;
 		}
-		const engine = args.getEngine();
-		return entry.handler({ engine }, argsValue);
+		return entry.handler({ engine: args.engine }, argsValue);
 	};
 
 	const list = () => Array.from(functions.keys(), (name) => ({ name }));

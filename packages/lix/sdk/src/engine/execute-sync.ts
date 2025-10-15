@@ -1,22 +1,21 @@
 import type { LixEngine } from "./boot.js";
-import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
 
 type ExecuteSyncFn = (args: {
 	sql: string;
 	parameters?: Readonly<unknown[]>;
 }) => { rows: any[] };
 
-export async function createExecuteSync(args: {
-	engine: Pick<LixEngine, "sqlite" | "hooks" | "runtimeCacheRef">;
-	preprocess: QueryPreprocessorFn;
-}): Promise<ExecuteSyncFn> {
-	const preprocess = args.preprocess;
-
+export function createExecuteSync(args: {
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery"
+	>;
+}): ExecuteSyncFn {
 	const executeSyncFn: ExecuteSyncFn = (args2: {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
 	}) => {
-		const preprocessed = preprocess({
+		const preprocessed = args.engine.preprocessQuery({
 			sql: args2.sql,
 			parameters: (args2.parameters as ReadonlyArray<unknown>) ?? [],
 		});
