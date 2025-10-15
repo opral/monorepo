@@ -6,6 +6,7 @@ import type { Lix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { Diff as DiffIcon, Loader2 } from "lucide-react";
 import { Diff } from "@/components/diff";
+import "../markdown-view/style.css";
 import type { DiffViewConfig, RenderableDiff } from "../../app/types";
 import { createReactViewDefinition } from "../../app/react-view";
 
@@ -56,7 +57,13 @@ function DiffViewContent({ config }: DiffViewProps) {
 			</div>
 		);
 	} else {
-		content = <Diff diffs={diffs} contentClassName="ProseMirror" />;
+		content = (
+			<Diff
+				diffs={diffs}
+				className="markdown-view h-full"
+				contentClassName="ProseMirror"
+			/>
+		);
 	}
 
 	return (
