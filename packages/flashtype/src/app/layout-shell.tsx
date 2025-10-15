@@ -802,6 +802,36 @@ export function V2LayoutShell() {
 		[setPanelState],
 	);
 
+	const activeCentralEntry = useMemo(() => {
+		const activeKey =
+			centralPanel.activeInstanceKey ??
+			centralPanel.views[0]?.instanceKey ??
+			null;
+		if (!activeKey) return null;
+		return (
+			centralPanel.views.find((entry) => entry.instanceKey === activeKey) ??
+			null
+		);
+	}, [centralPanel]);
+
+	const activeStatusLabel = useMemo(() => {
+		if (!activeCentralEntry) return null;
+		const rawPath = activeCentralEntry.metadata?.filePath;
+		if (rawPath) {
+			const parts = rawPath.split("/").map((segment, index) => {
+				if (index === 0 && segment === "") return "";
+				return decodeURIComponentSafe(segment);
+			});
+			const decoded = parts.join("/");
+			return decoded.length > 0 ? decoded : rawPath;
+		}
+		return (
+			activeCentralEntry.metadata?.label ??
+			VIEW_MAP.get(activeCentralEntry.viewKey)?.label ??
+			null
+		);
+	}, [activeCentralEntry]);
+
 	const sharedViewContext = useMemo(
 		() => ({
 			onOpenFile: handleOpenFile,
@@ -1078,7 +1108,7 @@ export function V2LayoutShell() {
 						</Panel>
 					</PanelGroup>
 				</div>
-				<StatusBar />
+				<StatusBar activePath={activeStatusLabel} />
 			</div>
 			<DragOverlay>
 				{activeId && activeDragView ? (

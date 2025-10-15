@@ -4,24 +4,20 @@ import { FileText } from "lucide-react";
  * Bottom status ribbon displaying lint and sync feedback.
  *
  * @example
- * <StatusBar />
+ * <StatusBar activePath="/docs/hello.md" />
  */
-export function StatusBar() {
+export function StatusBar(props: { activePath?: string | null }) {
+	const label =
+		typeof props.activePath === "string" && props.activePath.length > 0
+			? props.activePath
+			: null;
+
 	return (
 		<footer className="flex h-8 items-center px-3 text-xs text-neutral-600">
-			<div className="flex items-center gap-2">
-				<span className="flex items-center gap-1 font-medium text-neutral-900">
-					<FileText className="h-3.5 w-3.5" />
-					writing-style.md
-				</span>
-				<span className="text-neutral-200">•</span>
-				<span>main</span>
-			</div>
-			<div className="ml-auto flex items-center gap-3">
-				<span>23:1</span>
-				<span>UTF-8</span>
-				<span>Markdown</span>
-			</div>
+			<span className="flex min-w-0 items-center gap-1 font-medium text-neutral-900">
+				<FileText className="h-3.5 w-3.5 shrink-0" />
+				<span className="truncate">{label ?? "No active file"}</span>
+			</span>
 		</footer>
 	);
 }

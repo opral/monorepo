@@ -153,7 +153,7 @@ export function TipTapEditor({
 	return (
 		<div className={className ?? undefined}>
 			<div
-				className="tiptap-container w-full h-full min-h-screen bg-background px-3 py-0 cursor-text"
+				className="tiptap-container w-full h-full min-h-screen bg-background py-0 cursor-text"
 				data-editor-focused={isEditorFocused ? "true" : "false"}
 				onMouseDown={handleSurfacePointerDown}
 			>
