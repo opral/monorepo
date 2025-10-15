@@ -12,6 +12,7 @@ import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
+import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
 
 /**
  * One-Commit Model
@@ -1159,7 +1160,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", activeVersionId)
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	const latestGlobalVersionChange = await db
@@ -1167,7 +1168,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", "global")
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	// Cross-check commit_id via JSON extraction
@@ -1500,14 +1501,23 @@ test("global cache entry should be inherited by child versions in resolved view"
 	});
 
 	// Verify cache has exactly one entry for this entity (in global version)
-	const cacheEntries = await db
-		.selectFrom("lix_internal_state_cache")
-		.selectAll()
-		.where("entity_id", "=", "test-global-entity")
-		.execute();
+	const cacheTable = schemaKeyToCacheTableName("test_global_schema");
+	const cacheResult = lix.engine!.executeSync({
+		sql: `
+				SELECT
+					*,
+					json(snapshot_content) AS snapshot_content
+				FROM ${cacheTable}
+				WHERE entity_id = ?
+					AND schema_key = ?
+			`,
+		parameters: ["test-global-entity", "test_global_schema"],
+	});
+	const cacheRows = cacheResult?.rows ?? [];
+	const cacheEntry = cacheRows?.[0];
 
-	expect(cacheEntries).toHaveLength(1);
-	expect(cacheEntries[0]?.version_id).toBe("global");
+	expect(cacheRows).toHaveLength(1);
+	expect(cacheEntry?.version_id).toBe("global");
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db

@@ -70,7 +70,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	lix_internal_transaction_state: InternalTransactionStateTable;
 	lix_internal_change: InternalChangeTable;
 	lix_internal_snapshot: InternalSnapshotTable;
-	lix_internal_state_cache: InternalStateCacheTable;
 	lix_internal_state_all_untracked: InternalStateAllUntrackedTable;
 	lix_internal_state_vtable: InternalStateVTable;
 	lix_internal_state_reader: InternalStateVTable;

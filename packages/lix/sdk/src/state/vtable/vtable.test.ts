@@ -10,6 +10,7 @@ import {
 import { createVersionFromCommit } from "../../version/create-version-from-commit.js";
 import { openLix } from "../../lix/open-lix.js";
 import { withWriterKey } from "../writer.js";
+import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
 
 test("simulation test discover", () => {});
 
@@ -2578,20 +2579,34 @@ simulationTest(
 			.execute();
 
 		// Cache should be populated immediately via write-through
-		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
-			.where("entity_id", "=", "write-through-entity")
-			.where("schema_key", "=", "write-through-schema")
-			.where("file_id", "=", "write-through-file")
-			.where("version_id", "=", activeVersion.id)
-			.selectAll()
-			.select(sql`json(snapshot_content)`.as("snapshot_content"))
-			.executeTakeFirst();
+		const cacheTable = schemaKeyToCacheTableName("write-through-schema");
+		const { rows: cacheRows } = lix.engine!.executeSync({
+			sql: `
+				SELECT
+					*,
+					json(snapshot_content) AS snapshot_content
+				FROM ${cacheTable}
+				WHERE entity_id = ?
+					AND schema_key = ?
+					AND file_id = ?
+					AND version_id = ?
+			`,
+			parameters: [
+				"write-through-entity",
+				"write-through-schema",
+				"write-through-file",
+				activeVersion.id,
+			],
+		});
+		const cacheEntry = cacheRows?.[0];
 
 		expect(cacheEntry).toBeDefined();
+		const parsedSnapshot = cacheEntry?.snapshot_content
+			? JSON.parse(String(cacheEntry.snapshot_content))
+			: null;
 		expect(cacheEntry?.entity_id).toBe("write-through-entity");
 		expect(cacheEntry?.plugin_key).toBe("write-through-plugin");
-		expect(cacheEntry?.snapshot_content).toEqual({
+		expect(parsedSnapshot).toEqual({
 			test: "write-through-data",
 		});
 
@@ -2676,20 +2691,37 @@ simulationTest(
 			.execute();
 
 		// Cache should be immediately updated
-		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
-			.where("entity_id", "=", "update-cache-entity")
-			.where("schema_key", "=", "update-cache-schema")
-			.where("file_id", "=", "update-cache-file")
-			.where("version_id", "=", activeVersion.id)
-			.selectAll()
-			.select(sql`json(snapshot_content)`.as("snapshot_content"))
-			.executeTakeFirst();
+		const updateCacheTable = schemaKeyToCacheTableName("update-cache-schema");
+		const { rows: updateCacheRows } = lix.engine!.executeSync({
+			sql: `
+				SELECT
+					*,
+					json(snapshot_content) AS snapshot_content
+				FROM ${updateCacheTable}
+				WHERE entity_id = ?
+					AND schema_key = ?
+					AND file_id = ?
+					AND version_id = ?
+			`,
+			parameters: [
+				"update-cache-entity",
+				"update-cache-schema",
+				"update-cache-file",
+				activeVersion.id,
+			],
+		});
+		const cacheEntry = updateCacheRows?.[0] as
+			| {
+					plugin_key: string;
+					snapshot_content: string | null;
+			  }
+			| undefined;
 
 		expect(cacheEntry).toBeDefined();
-		expect(cacheEntry?.snapshot_content).toEqual({
-			updated: "value",
-		});
+		const updatedSnapshot = cacheEntry?.snapshot_content
+			? JSON.parse(String(cacheEntry.snapshot_content))
+			: null;
+		expect(updatedSnapshot).toEqual({ updated: "value" });
 		expect(cacheEntry?.plugin_key).toBe("updated-plugin");
 
 		// Virtual table should return updated data
@@ -2765,14 +2797,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		// Get the state cache record
-		const cacheRecord = await (
-			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-		)
-			.selectFrom("lix_internal_state_cache")
-			.where("entity_id", "=", "timestamp-test-entity")
-			.where("schema_key", "=", "mock_schema")
-			.select(["created_at", "updated_at"])
-			.executeTakeFirstOrThrow();
+		const timestampCacheTable = schemaKeyToCacheTableName("mock_schema");
+		const { rows: timestampCacheRows } = lix.engine!.executeSync({
+			sql: `
+				SELECT
+					created_at,
+					updated_at
+				FROM ${timestampCacheTable}
+				WHERE entity_id = ?
+					AND schema_key = ?
+			`,
+			parameters: ["timestamp-test-entity", "mock_schema"],
+		});
+		const cacheRecord = timestampCacheRows?.[0];
+		expect(cacheRecord).toBeDefined();
 
 		// Verify all timestamps are identical
 		expect(changeRecord.created_at).toBe(cacheRecord.created_at);

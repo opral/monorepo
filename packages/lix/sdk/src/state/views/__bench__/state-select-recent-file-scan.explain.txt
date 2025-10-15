@@ -175,13 +175,13 @@ lix_internal_state_vtable_rewritten AS (
   UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit_edge
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
-  UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
-  UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_label
   UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
+  UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_tip
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
   UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_stored_schema
   UNION ALL
@@ -220,13 +220,13 @@ lix_internal_state_vtable_rewritten AS (
   UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_commit_edge
   UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
-  UNION ALL
-  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
-  UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_label
   UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set
+  UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_version_tip
+  UNION ALL
+  SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_change_set_element
   UNION ALL
   SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id FROM lix_internal_state_cache_v1_lix_stored_schema
   UNION ALL
@@ -494,34 +494,34 @@ WHERE sa.schema_key = 'lix_active_version'
     "detail": "UNION ALL"
   },
   {
-    "id": 196,
+    "id": 197,
     "parent": 194,
+    "notused": 62,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=?)"
+  },
+  {
+    "id": 245,
+    "parent": 54,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 247,
+    "parent": 245,
     "notused": 76,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
-    "id": 238,
+    "id": 289,
     "parent": 54,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 240,
-    "parent": 238,
-    "notused": 82,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
-  },
-  {
-    "id": 282,
-    "parent": 54,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 285,
-    "parent": 282,
-    "notused": 62,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=?)"
+    "id": 291,
+    "parent": 289,
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 333,
@@ -532,8 +532,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 335,
     "parent": 333,
-    "notused": 26,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+    "notused": 82,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 377,
@@ -680,50 +680,50 @@ WHERE sa.schema_key = 'lix_active_version'
     "detail": "UNION ALL"
   },
   {
-    "id": 731,
+    "id": 732,
     "parent": 727,
-    "notused": 76,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
-  },
-  {
-    "id": 739,
-    "parent": 727,
-    "notused": 248,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 775,
-    "parent": 517,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 779,
-    "parent": 775,
-    "notused": 82,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
-  },
-  {
-    "id": 787,
-    "parent": 775,
-    "notused": 248,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 823,
-    "parent": 517,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 828,
-    "parent": 823,
     "notused": 24,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=?)"
   },
   {
+    "id": 746,
+    "parent": 727,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 782,
+    "parent": 517,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 786,
+    "parent": 782,
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
+  },
+  {
+    "id": 794,
+    "parent": 782,
+    "notused": 248,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 830,
+    "parent": 517,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 834,
+    "parent": 830,
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+  },
+  {
     "id": 842,
-    "parent": 823,
+    "parent": 830,
     "notused": 248,
     "detail": "SCAN vi"
   },
@@ -736,8 +736,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 882,
     "parent": 878,
-    "notused": 26,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+    "notused": 82,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 890,
@@ -940,8 +940,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 1493,
     "parent": 1491,
-    "notused": 76,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
+    "notused": 216,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_label"
   },
   {
     "id": 1535,
@@ -952,8 +952,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 1537,
     "parent": 1535,
-    "notused": 82,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
+    "notused": 76,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 1579,
@@ -964,8 +964,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 1581,
     "parent": 1579,
-    "notused": 216,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_label"
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
     "id": 1623,
@@ -976,8 +976,8 @@ WHERE sa.schema_key = 'lix_active_version'
   {
     "id": 1625,
     "parent": 1623,
-    "notused": 26,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+    "notused": 82,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
     "id": 1667,
@@ -1136,82 +1136,82 @@ WHERE sa.schema_key = 'lix_active_version'
     "detail": "UNION ALL"
   },
   {
-    "id": 2060,
+    "id": 2061,
     "parent": 2056,
-    "notused": 296,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 2064,
-    "parent": 2056,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON lix_internal_state_cache_v1_lix_change_set (is_tombstone=?)"
-  },
-  {
-    "id": 2087,
-    "parent": 2056,
-    "notused": 47,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
-  },
-  {
-    "id": 2130,
-    "parent": 1800,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 2134,
-    "parent": 2130,
-    "notused": 296,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 2138,
-    "parent": 2130,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON lix_internal_state_cache_v1_lix_change_set_element (is_tombstone=?)"
-  },
-  {
-    "id": 2161,
-    "parent": 2130,
-    "notused": 47,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
-  },
-  {
-    "id": 2204,
-    "parent": 1800,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 2209,
-    "parent": 2204,
     "notused": 24,
     "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
-    "id": 2215,
-    "parent": 2204,
+    "id": 2067,
+    "parent": 2056,
     "notused": 296,
     "detail": "SCAN vi"
   },
   {
-    "id": 2253,
+    "id": 2105,
     "parent": 1800,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2257,
-    "parent": 2253,
+    "id": 2109,
+    "parent": 2105,
+    "notused": 296,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 2113,
+    "parent": 2105,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON lix_internal_state_cache_v1_lix_change_set (is_tombstone=?)"
+  },
+  {
+    "id": 2136,
+    "parent": 2105,
+    "notused": 47,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
+  },
+  {
+    "id": 2179,
+    "parent": 1800,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 2183,
+    "parent": 2179,
     "notused": 26,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
-    "id": 2263,
-    "parent": 2253,
+    "id": 2189,
+    "parent": 2179,
     "notused": 296,
     "detail": "SCAN vi"
+  },
+  {
+    "id": 2227,
+    "parent": 1800,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 2231,
+    "parent": 2227,
+    "notused": 296,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 2235,
+    "parent": 2227,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON lix_internal_state_cache_v1_lix_change_set_element (is_tombstone=?)"
+  },
+  {
+    "id": 2258,
+    "parent": 2227,
+    "notused": 47,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
   },
   {
     "id": 2301,

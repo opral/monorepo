@@ -13,6 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -715,22 +716,33 @@ export function applyStateVTable(
 								const sourceVersionId =
 									existingVersionsWithSameCommit[0]!.version_id; // Take first existing version
 
-								// Get all unique schema keys from the source version
-								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM lix_internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
-									bind: [sourceVersionId],
-									returnValue: "resultRows",
-								}) as string[][];
+								// Get all unique schema keys from the source version via the vtable cache rows
+								const schemaKeysResult = engine.executeSync(
+									internalQueryBuilder
+										.selectFrom("lix_internal_state_vtable")
+										.select(["schema_key"])
+										.distinct()
+										.where("version_id", "=", sourceVersionId)
+										.where("_pk", "like", "C~%")
+										.compile()
+								).rows as Array<{ schema_key?: string }>;
+
+								const schemaKeys = Array.from(
+									new Set(
+										(schemaKeysResult ?? [])
+											.map((row) => row.schema_key)
+											.filter(
+												(schemaKey): schemaKey is string =>
+													typeof schemaKey === "string" &&
+													schemaKey !== "lix_version_tip" &&
+													schemaKey !== "lix_version_descriptor"
+											)
+									)
+								);
 
 								// Copy cache entries for each schema key to the appropriate physical table
-								for (const row of schemaKeys || []) {
-									const sourceSchemaKey = row[0];
-									if (!sourceSchemaKey) continue;
-									const sanitizedSchemaKey = sourceSchemaKey.replace(
-										/[^a-zA-Z0-9]/g,
-										"_"
-									);
-									const tableName = `lix_internal_state_cache_v1_${sanitizedSchemaKey}`;
+								for (const sourceSchemaKey of schemaKeys) {
+									const tableName = schemaKeyToCacheTableName(sourceSchemaKey);
 
 									// Check if table exists first
 									const tableExists = sqlite.exec({
