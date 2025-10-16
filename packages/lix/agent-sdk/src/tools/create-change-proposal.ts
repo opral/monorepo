@@ -4,10 +4,21 @@ import { tool } from "ai";
 import { z } from "zod";
 import dedent from "dedent";
 
-export const CreateChangeProposalInputSchema = z.object({
-	sourceVersionId: z.string().min(1, "sourceVersionId is required"),
-	targetVersionId: z.string().min(1, "targetVersionId is required"),
-});
+export const CreateChangeProposalInputSchema = z
+	.object({
+		sourceVersionId: z.string().min(1).optional(),
+		source_version_id: z.string().min(1).optional(),
+		targetVersionId: z.string().min(1).optional(),
+		target_version_id: z.string().min(1).optional(),
+	})
+	.refine(
+		(v) =>
+			(v.sourceVersionId || v.source_version_id) &&
+			(v.targetVersionId || v.target_version_id),
+		{
+			message: "Provide 'source_version_id' and 'target_version_id'",
+		}
+	);
 export type CreateChangeProposalInput = z.infer<
 	typeof CreateChangeProposalInputSchema
 >;
@@ -29,7 +40,13 @@ export async function createChangeProposalToolExec(args: {
 }): Promise<CreateChangeProposalOutput> {
 	const { lix, input } = args;
 
-	const sourceVersionId = input.sourceVersionId;
+	const sourceVersionId = input.sourceVersionId ?? input.source_version_id;
+	const targetVersionId = input.targetVersionId ?? input.target_version_id;
+	if (!sourceVersionId || !targetVersionId) {
+		throw new Error(
+			"create_change_proposal: provide source_version_id and target_version_id"
+		);
+	}
 
 	const exec = async (trx: Lix["db"]) => {
 		const source = await trx
@@ -46,12 +63,12 @@ export async function createChangeProposalToolExec(args: {
 		// Resolve target version (defaults to main if not provided)
 		const target = await trx
 			.selectFrom("version")
-			.where("id", "=", input.targetVersionId as any)
+			.where("id", "=", targetVersionId as any)
 			.select(["id"])
 			.executeTakeFirst();
 		if (!target) {
 			throw new Error(
-				`create_change_proposal: target version ${input.targetVersionId} not found`
+				`create_change_proposal: target version ${targetVersionId} not found`
 			);
 		}
 
@@ -103,8 +120,8 @@ export function createCreateChangeProposalTool(args: {
 		description: dedent`
       Finalize a logical unit of work by creating a change proposal.
 
-      Provide both sourceVersionId (where your edits live) and
-      targetVersionId (where the proposal should merge).
+      Provide both source_version_id (where your edits live) and
+      target_version_id (where the proposal should merge).
 
       Returns { id, sourceVersionId, targetVersionId, status }.
     `,

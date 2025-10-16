@@ -17,6 +17,7 @@ import { extractSlashToken, useComposerState } from "./composer-state";
 import { selectFilePaths } from "./select-file-paths";
 import { useAgentChat } from "./hooks/use-agent-chat";
 import { createReactViewDefinition } from "../../app/react-view";
+import { systemPrompt } from "./system-prompt";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -60,7 +61,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		error,
 		ready,
 		hasKey,
-	} = useAgentChat({ lix });
+	} = useAgentChat({ lix, systemPrompt });
 
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);

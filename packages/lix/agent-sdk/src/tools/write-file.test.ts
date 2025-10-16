@@ -21,7 +21,7 @@ describe("write_file tool", () => {
 
 		const res1 = await writeFile({
 			lix,
-			versionId,
+			version_id: versionId,
 			path: "/hello.txt",
 			content: "hi",
 		});
@@ -31,7 +31,7 @@ describe("write_file tool", () => {
 
 		const res2 = await writeFile({
 			lix,
-			versionId,
+			version_id: versionId,
 			path: "/hello.txt",
 			content: "world",
 		});
@@ -54,13 +54,13 @@ describe("write_file tool", () => {
 
 		await writeFile({
 			lix,
-			versionId,
+			version_id: versionId,
 			path: "/a.md",
 			content: "A",
 		});
 		const res = await writeFile({
 			lix,
-			versionId,
+			version_id: versionId,
 			path: "/a.md",
 			content: "B",
 			mode: "append",

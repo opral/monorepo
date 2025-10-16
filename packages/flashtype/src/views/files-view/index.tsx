@@ -322,7 +322,7 @@ export function FilesView({ context }: FilesViewProps) {
 	}, [handleDeleteSelection, isMacPlatform, resolveDraftDirectory]);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
+		<div className="flex min-h-0 flex-1 flex-col px-1 py-1">
 			<FileTree
 				nodes={nodes}
 				onOpenFile={handleOpenFile}

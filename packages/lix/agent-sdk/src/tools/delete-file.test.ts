@@ -27,7 +27,11 @@ describe("delete_file tool", () => {
 			})
 			.execute();
 
-		const res = await deleteFile({ lix, path: "/del.txt", versionId });
+		const res = await deleteFile({
+			lix,
+			path: "/del.txt",
+			version_id: versionId,
+		});
 		expect(res.deleted).toBe(true);
 		expect(res.path).toBe("/del.txt");
 
@@ -43,7 +47,11 @@ describe("delete_file tool", () => {
 	test("returns deleted=false when not found", async () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
-		const res = await deleteFile({ lix, path: "/missing.txt", versionId });
+		const res = await deleteFile({
+			lix,
+			path: "/missing.txt",
+			version_id: versionId,
+		});
 		expect(res.deleted).toBe(false);
 	});
 
@@ -68,7 +76,7 @@ describe("delete_file tool", () => {
 		const res = await deleteFile({
 			lix,
 			fileId: row.id as string,
-			versionId,
+			version_id: versionId,
 		});
 		expect(res.deleted).toBe(true);
 		expect(res.fileId).toBe(row.id);

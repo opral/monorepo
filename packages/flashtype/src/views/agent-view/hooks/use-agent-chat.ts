@@ -14,8 +14,8 @@ type AgentChatMessage = AgentMessage & {
 	metadata?: Record<string, unknown>;
 };
 
-export function useAgentChat(args: { lix: Lix; system?: string }) {
-	const { lix, system } = args;
+export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
+	const { lix, systemPrompt } = args;
 
 	const [messages, setMessages] = useState<AgentChatMessage[]>([]);
 	const [pending, setPending] = useState(false);
@@ -23,7 +23,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 	const [conversationId, setConversationId] = useState<string | null>(null);
 
-	const modelName = "google/gemini-2.5-flash";
+	const modelName = "google/gemini-2.5-pro";
 	const [missingKey, setMissingKey] = useState(false);
 	const provider = useMemo(() => {
 		return createGatewayProvider({
@@ -85,7 +85,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 				setMessages([]);
 				return;
 			}
-			const a = await createLixAgent({ lix, model, system });
+			const a = await createLixAgent({ lix, model, systemPrompt });
 			if (cancelled) return;
 			setAgent(a);
 			await refreshConversationId();
@@ -93,7 +93,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 		return () => {
 			cancelled = true;
 		};
-	}, [lix, model, hasKey, system, refreshConversationId]);
+	}, [lix, model, hasKey, systemPrompt, refreshConversationId]);
 
 	// Subscribe to conversation messages when the ID changes
 	useEffect(() => {

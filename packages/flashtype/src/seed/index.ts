@@ -9,6 +9,8 @@ import meetingNotes from "./meeting-notes.md?raw";
 import changelog from "./changelog.md?raw";
 // eslint-disable-next-line import/no-unresolved
 import welcome from "./welcome.md?raw";
+// eslint-disable-next-line import/no-unresolved
+import agentsSeed from "./AGENTS.md?raw";
 
 const encoder = new TextEncoder();
 
@@ -43,4 +45,20 @@ export async function seedMarkdownFiles(lix: Lix): Promise<void> {
 				.execute();
 		}
 	}
+}
+
+export async function ensureAgentsFile(lix: Lix): Promise<void> {
+	const exists = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/AGENTS.md")
+		.select(["path"])
+		.executeTakeFirst();
+
+	if (exists) return;
+
+	const data = encoder.encode(agentsSeed);
+	await lix.db
+		.insertInto("file")
+		.values({ path: "/AGENTS.md", data })
+		.execute();
 }

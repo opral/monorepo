@@ -9,6 +9,7 @@ import { KEY_VALUE_DEFINITIONS } from "./hooks/key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
 import { V2LayoutShell } from "./app/layout-shell";
+import { ensureAgentsFile } from "./seed";
 
 // Error UI moved to ./main.error.tsx
 
@@ -32,6 +33,7 @@ export const AppRoot = () => {
 				}
 				current = instance;
 				await initLixInspector({ lix: instance, show: false });
+				await ensureAgentsFile(instance);
 				if (!cancelled) setLix(instance);
 			} catch (e) {
 				if (!cancelled) setError(e);

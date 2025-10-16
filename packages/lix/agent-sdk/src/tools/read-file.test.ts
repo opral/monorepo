@@ -28,7 +28,11 @@ describe("readFile / createReadFileTool", () => {
 			})
 			.execute();
 
-		const res = await readFile({ lix, path: "/notes.md", versionId });
+		const res = await readFile({
+			lix,
+			path: "/notes.md",
+			version_id: versionId,
+		});
 
 		expect(res).toMatchObject({
 			path: "/notes.md",
@@ -58,7 +62,7 @@ describe("readFile / createReadFileTool", () => {
 		const res = await readFile({
 			lix,
 			path: "/a.txt",
-			versionId,
+			version_id: versionId,
 			byteOffset: 3,
 			byteLength: 4,
 		});
@@ -83,7 +87,7 @@ describe("readFile / createReadFileTool", () => {
 		const res = await readFile({
 			lix,
 			path: "/b.txt",
-			versionId,
+			version_id: versionId,
 			lineOffset: 1,
 			lineLimit: 2,
 		});
@@ -106,7 +110,7 @@ describe("readFile / createReadFileTool", () => {
 		const res = await readFile({
 			lix,
 			path: "/c.txt",
-			versionId,
+			version_id: versionId,
 			maxChars: 100,
 		});
 		expect(res.text.length).toBe(100);

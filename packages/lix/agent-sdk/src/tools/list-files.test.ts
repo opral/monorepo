@@ -39,7 +39,7 @@ describe("listFiles tool", () => {
 			])
 			.execute();
 
-		const res = await listFiles({ lix, versionId, query: "doc" });
+		const res = await listFiles({ lix, version_id: versionId, query: "doc" });
 		expect(res.paths).toEqual(["/docs/goodbye.md", "/docs/hello.md"].sort());
 	});
 
@@ -74,29 +74,29 @@ describe("listFiles tool", () => {
 
 		const res = await listFiles({
 			lix,
-			versionId,
+			version_id: versionId,
 			prefix: "/notes/",
 			ext: ".md",
 			limit: 2,
-			orderBy: "path",
+			order_by: "path",
 			order: "asc",
 		});
 		expect(res.paths).toEqual(["/notes/a.md", "/notes/b.md"]);
 
 		const res2 = await listFiles({
 			lix,
-			versionId,
+			version_id: versionId,
 			prefix: "/notes/",
 			ext: "md",
 			limit: 2,
 			offset: 2,
-			orderBy: "path",
+			order_by: "path",
 			order: "asc",
 		});
 		expect(res2.paths).toEqual(["/notes/d.md"]);
 	});
 
-	test("exclude hidden when includeHidden=false", async () => {
+	test("exclude hidden when include_hidden=false", async () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
@@ -117,7 +117,11 @@ describe("listFiles tool", () => {
 			])
 			.execute();
 
-		const res = await listFiles({ lix, versionId, includeHidden: false });
+		const res = await listFiles({
+			lix,
+			version_id: versionId,
+			include_hidden: false,
+		});
 		expect(res.paths).toEqual(["/visible.md"]);
 	});
 });

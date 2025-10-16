@@ -22,8 +22,8 @@ describe("create_change_proposal tool", () => {
 		const result = await createChangeProposalToolExec({
 			lix,
 			input: {
-				sourceVersionId: source.id as string,
-				targetVersionId: mainId,
+				source_version_id: source.id as string,
+				target_version_id: mainId,
 			},
 		});
 
@@ -41,8 +41,8 @@ describe("create_change_proposal tool", () => {
 		await createChangeProposalToolExec({
 			lix,
 			input: {
-				sourceVersionId: source.id as string,
-				targetVersionId: mainId,
+				source_version_id: source.id as string,
+				target_version_id: mainId,
 			},
 		});
 
@@ -50,8 +50,8 @@ describe("create_change_proposal tool", () => {
 			createChangeProposalToolExec({
 				lix,
 				input: {
-					sourceVersionId: source.id as string,
-					targetVersionId: mainId,
+					source_version_id: source.id as string,
+					target_version_id: mainId,
 				},
 			})
 		).rejects.toThrow(/Active proposal already exists/);
@@ -65,8 +65,8 @@ describe("create_change_proposal tool", () => {
 		const result = await createChangeProposalToolExec({
 			lix,
 			input: {
-				sourceVersionId: source.id as string,
-				targetVersionId: target.id as string,
+				source_version_id: source.id as string,
+				target_version_id: target.id as string,
 			},
 		});
 

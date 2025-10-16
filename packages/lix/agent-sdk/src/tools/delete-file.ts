@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const DeleteFileInputSchema = z
 	.object({
-		versionId: z.string().min(1, "versionId is required"),
+		version_id: z.string().min(1),
 		path: z
 			.string()
 			.min(1)
@@ -34,16 +34,16 @@ export type DeleteFileOutput = z.infer<typeof DeleteFileOutputSchema>;
 export async function deleteFile(
 	args: DeleteFileInput & { lix: Lix }
 ): Promise<DeleteFileOutput> {
-	const { lix, versionId, path, fileId } = args;
+	const { lix, version_id, path, fileId } = args;
 
 	const exec = async (trx: Lix["db"]) => {
 		const version = await trx
 			.selectFrom("version")
-			.where("id", "=", versionId as any)
+			.where("id", "=", version_id as any)
 			.select(["id"])
 			.executeTakeFirst();
 		if (!version) {
-			throw new Error(`delete_file: version ${versionId} not found`);
+			throw new Error(`delete_file: version ${version_id} not found`);
 		}
 
 		// Resolve the target row by path or id within the agent version
@@ -51,13 +51,13 @@ export async function deleteFile(
 			? await trx
 					.selectFrom("file_all")
 					.where("path", "=", path)
-					.where("lixcol_version_id", "=", versionId as any)
+					.where("lixcol_version_id", "=", version_id)
 					.select(["id", "path"])
 					.executeTakeFirst()
 			: await trx
 					.selectFrom("file_all")
 					.where("id", "=", fileId as string)
-					.where("lixcol_version_id", "=", versionId as any)
+					.where("lixcol_version_id", "=", version_id)
 					.select(["id", "path"])
 					.executeTakeFirst();
 
@@ -68,7 +68,7 @@ export async function deleteFile(
 		await trx
 			.deleteFrom("file_all")
 			.where("id", "=", row.id as string)
-			.where("lixcol_version_id", "=", versionId as any)
+			.where("lixcol_version_id", "=", version_id as any)
 			.execute();
 
 		return DeleteFileOutputSchema.parse({
@@ -85,7 +85,7 @@ export async function deleteFile(
 export function createDeleteFileTool(args: { lix: Lix }) {
 	return tool({
 		description:
-			"Delete a file from the lix for a specific version. Provide an absolute path (starting with '/') or a fileId together with the versionId.",
+			"Delete a file from the lix for a specific version. Provide an absolute path (starting with '/') or a fileId together with the version_id.",
 		inputSchema: DeleteFileInputSchema,
 		execute: async (input) =>
 			deleteFile({ lix: args.lix, ...(input as DeleteFileInput) }),
