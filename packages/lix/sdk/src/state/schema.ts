@@ -1,7 +1,9 @@
 import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
-import { applyStateCacheV2Schema } from "./cache/schema.js";
+import { applyStateCacheV2Schema as applyStateCacheV1Schema } from "./cache/schema.js";
+
+import { applyStateCacheV2Schema } from "./cache-v2/schema.js";
 import { applyStateAllView } from "./views/state-all.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
@@ -16,6 +18,7 @@ export function applyStateDatabaseSchema(args: {
 }): void {
 	const { engine } = args;
 	applyMaterializeStateSchema({ engine });
+	applyStateCacheV1Schema({ engine });
 	applyStateCacheV2Schema({ engine });
 	applyUntrackedStateSchema({ engine });
 

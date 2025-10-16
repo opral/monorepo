@@ -2,7 +2,10 @@ import { test, expect } from "vitest";
 import { clearStateCacheV2 } from "./clear-state-cache.js";
 import { isStaleStateCacheV2 } from "./is-stale-state-cache.js";
 import { markStateCacheAsFreshV2 } from "./mark-state-cache-as-stale.js";
-import { createSchemaCacheTableV2 } from "./create-schema-cache-table.js";
+import {
+	createSchemaCacheTableV2,
+	schemaKeyToCacheTableNameV2,
+} from "./create-schema-cache-table.js";
 import { updateStateCacheV2 } from "./update-state-cache.js";
 import { openLix } from "../../lix/open-lix.js";
 
@@ -62,13 +65,24 @@ test("clearStateCacheV2 deletes all cache entries", async () => {
 
 	expect(cacheTables.length).toBeGreaterThan(0);
 
+	const schemaTable = schemaKeyToCacheTableNameV2(schemaKey, "1.0");
+	expect(cacheTables.some(([tableName]) => tableName === schemaTable)).toBe(
+		true
+	);
+
 	for (const [tableName] of cacheTables) {
 		const before = lix.engine!.sqlite.exec({
 			sql: `SELECT COUNT(*) AS cnt FROM ${tableName}`,
 			returnValue: "resultRows",
 			rowMode: "object",
 		}) as Array<{ cnt: number }>;
-		expect(Number(before?.[0]?.cnt ?? 0)).toBeGreaterThan(0);
+
+		const rowCount = Number(before?.[0]?.cnt ?? 0);
+		if (tableName === schemaTable) {
+			expect(rowCount).toBeGreaterThan(0);
+		} else {
+			expect(rowCount).toBeGreaterThanOrEqual(0);
+		}
 	}
 
 	// Ensure the stale flag is false and cached before we clear it

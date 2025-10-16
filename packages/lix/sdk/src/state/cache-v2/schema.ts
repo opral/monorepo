@@ -1,4 +1,9 @@
 import type { LixEngine } from "../../engine/boot.js";
+import {
+	createSchemaCacheTableV2,
+	schemaKeyToCacheTableNameV2,
+} from "./create-schema-cache-table.js";
+import { LixVersionDescriptorSchema } from "../../version/schema-definition.js";
 
 const tableCacheMap = new WeakMap<object, Set<string>>();
 const columnCacheMap = new WeakMap<object, Map<string, Set<string>>>();
@@ -111,4 +116,57 @@ function fetchTableColumns(args: {
 		}
 	}
 	return columns;
+}
+
+/**
+ * Registers existing normalized cache tables and ensures descriptor state cache exists.
+ *
+ * This warms the in-memory table cache so subsequent lookups avoid redundant PRAGMA
+ * calls and guarantees that inheritance rewrites can rely on the descriptor cache table.
+ *
+ * @example
+ * applyStateCacheV2Schema({ engine });
+ */
+export function applyStateCacheV2Schema(args: {
+	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
+}): void {
+	const { sqlite } = args.engine;
+
+	const tableCache = getStateCacheV2Tables({ engine: args.engine });
+
+	const existingTables = sqlite.exec({
+		sql: `SELECT name FROM sqlite_schema WHERE type='table' AND name LIKE 'lix_internal_state_cache_v2_%'`,
+		returnValue: "resultRows",
+		rowMode: "array",
+	}) as Array<[string]> | undefined;
+
+	if (Array.isArray(existingTables)) {
+		for (const row of existingTables) {
+			const tableName = row?.[0];
+			if (typeof tableName === "string") {
+				tableCache.add(tableName);
+			}
+		}
+	}
+
+	const descriptorSchema = LixVersionDescriptorSchema;
+	const descriptorTable = schemaKeyToCacheTableNameV2(
+		descriptorSchema["x-lix-key"],
+		descriptorSchema["x-lix-version"]
+	);
+
+	if (!tableCache.has(descriptorTable)) {
+		createSchemaCacheTableV2({
+			engine: args.engine,
+			schema: descriptorSchema,
+		});
+	}
+
+	tableCache.add(descriptorTable);
+	registerStateCacheV2TableMetadata({
+		engine: args.engine,
+		tableName: descriptorTable,
+		schemaKey: descriptorSchema["x-lix-key"],
+		schemaVersion: descriptorSchema["x-lix-version"],
+	});
 }

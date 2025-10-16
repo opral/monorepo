@@ -5,7 +5,11 @@ import {
 	createSchemaCacheTableV2,
 	schemaKeyToCacheTableNameV2,
 } from "./create-schema-cache-table.js";
-import { getStateCacheV2Tables } from "./schema.js";
+import {
+	applyStateCacheV2Schema,
+	getStateCacheV2TableMetadata,
+	getStateCacheV2Tables,
+} from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { CACHE_COLUMNS } from "./cache-columns.js";
 
@@ -48,6 +52,30 @@ async function registerStoredSchema(
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 }
+
+test("applyStateCacheV2Schema ensures descriptor cache table exists", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
+
+	applyStateCacheV2Schema({ engine: lix.engine! });
+
+	const descriptorTable = cacheTable("lix_version_descriptor");
+	const tables = getStateCacheV2Tables({ engine: lix.engine! });
+	expect(tables.has(descriptorTable)).toBe(true);
+
+	const metadata = getStateCacheV2TableMetadata({
+		engine: lix.engine!,
+		tableName: descriptorTable,
+	});
+	expect(metadata).toEqual({
+		schemaKey: "lix_version_descriptor",
+		schemaVersion: "1.0",
+	});
+
+	const descriptorColumns = pragmaColumns(lix.engine!.sqlite, descriptorTable);
+	expect(descriptorColumns.length).toBeGreaterThan(0);
+});
 
 test("normalized cache tables are registered per schema", async () => {
 	const lix = await openLix({
