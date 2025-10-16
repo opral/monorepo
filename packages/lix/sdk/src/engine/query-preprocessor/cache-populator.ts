@@ -1,11 +1,13 @@
-import { populateStateCache } from "../../state/cache/populate-state-cache.js";
-import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
-import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
+import { populateStateCacheV2 } from "../../state/cache-v2/populate-state-cache.js";
+import { isStaleStateCacheV2 } from "../../state/cache-v2/is-stale-state-cache.js";
+import { markStateCacheAsFreshV2 } from "../../state/cache-v2/mark-state-cache-as-stale.js";
 import {
-	createSchemaCacheTable,
-	schemaKeyToCacheTableName,
-} from "../../state/cache/create-schema-cache-table.js";
-import { getStateCacheV2Tables } from "../../state/cache/schema.js";
+	createSchemaCacheTableV2,
+	getSchemaVersion,
+	schemaKeyToCacheTableNameV2,
+} from "../../state/cache-v2/create-schema-cache-table.js";
+import { getStateCacheV2Tables } from "../../state/cache-v2/schema.js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
 import type { LixEngine } from "../boot.js";
 import type { Shape } from "./sql-rewriter/microparser/analyze-shape.js";
 
@@ -98,7 +100,7 @@ function safeIsStaleStateCache(
 	engine: Pick<LixEngine, "executeSync" | "hooks">
 ): boolean {
 	try {
-		return isStaleStateCache({ engine });
+		return isStaleStateCacheV2({ engine });
 	} catch (error) {
 		if (isMissingInternalStateVtableError(error)) {
 			return false;
@@ -115,11 +117,11 @@ function safePopulateStateCache(
 	versionId: string | undefined
 ): void {
 	try {
-		populateStateCache({
+		populateStateCacheV2({
 			engine,
 			options: versionId ? { version_id: versionId } : undefined,
 		});
-		markStateCacheAsFresh({ engine });
+		markStateCacheAsFreshV2({ engine });
 	} catch (error) {
 		if (isMissingInternalStateVtableError(error)) {
 			return;
@@ -140,12 +142,16 @@ function isMissingInternalStateVtableError(error: unknown): boolean {
 }
 
 function ensureCacheTablesForShape(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
 	shape: Shape
 ): void {
-	const literalSchemaKeys = shape.schemaKeys
-		.filter((entry) => entry.kind === "literal")
-		.map((entry) => entry.value);
+	const literalSchemaKeys = Array.from(
+		new Set(
+			shape.schemaKeys
+				.filter((entry) => entry.kind === "literal")
+				.map((entry) => entry.value)
+		)
+	);
 
 	if (literalSchemaKeys.length === 0) {
 		return;
@@ -153,11 +159,21 @@ function ensureCacheTablesForShape(
 
 	const tableCache = getStateCacheV2Tables({ engine });
 	for (const schemaKey of literalSchemaKeys) {
-		const tableName = schemaKeyToCacheTableName(schemaKey);
+		const schemaDefinition = getStoredSchema({ engine, key: schemaKey });
+		if (!schemaDefinition) {
+			continue;
+		}
+
+		const schemaVersion = getSchemaVersion(schemaDefinition);
+		const tableName = schemaKeyToCacheTableNameV2(schemaKey, schemaVersion);
 		if (tableCache.has(tableName)) {
 			continue;
 		}
-		createSchemaCacheTable({ engine, tableName });
+
+		createSchemaCacheTableV2({
+			engine,
+			schema: schemaDefinition,
+		});
 		tableCache.add(tableName);
 	}
 }

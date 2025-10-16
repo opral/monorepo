@@ -27,7 +27,6 @@ import { createHooks } from "../hooks/create-hooks.js";
 import type { NewStateAll } from "../entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
-import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
@@ -37,6 +36,7 @@ import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
 import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
+import { markStateCacheAsFreshV2 } from "../state/cache-v2/mark-state-cache-as-stale.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -313,7 +313,7 @@ export async function newLixFile(args?: {
 	}
 
 	// Initialize the cache stale flag so synchronous reads see a warm cache immediately.
-	markStateCacheAsFresh({
+	markStateCacheAsFreshV2({
 		engine,
 		timestamp: created_at,
 	});

@@ -9,9 +9,6 @@ import { getStateCacheV2Tables } from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { CACHE_COLUMNS } from "./cache-columns.js";
 
-const sanitize = (schemaKey: string): string =>
-	schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
-
 const cacheTable = (schemaKey: string, schemaVersion = "1.0"): string =>
 	schemaKeyToCacheTableNameV2(schemaKey, schemaVersion);
 
@@ -75,7 +72,6 @@ test("normalized cache tables are registered per schema", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_meta", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	updateStateCacheV2({
@@ -158,7 +154,6 @@ test("string properties create TEXT columns", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_string", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	const columnInfo = pragmaColumns(
@@ -191,7 +186,6 @@ test("integer properties create INTEGER columns", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_integer", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	const columnInfo = pragmaColumns(
@@ -224,7 +218,6 @@ test("number properties create REAL columns", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_number", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	const columnInfo = pragmaColumns(
@@ -257,7 +250,6 @@ test("boolean properties create INTEGER columns", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_boolean", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	const columnInfo = pragmaColumns(
@@ -290,7 +282,6 @@ test("object properties create TEXT columns and store JSON", async () => {
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName: cacheTable("schema_object", schema["x-lix-version"] ?? "1.0"),
 	});
 
 	const columnInfo = pragmaColumns(

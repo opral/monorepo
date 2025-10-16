@@ -152,6 +152,30 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		});
 		this.actorWorkers.add(actor);
 
+		// Buffer early worker messages so the caller can subscribe after spawn without losing events.
+		const listeners = new Set<(message: unknown) => void>();
+		const pending: unknown[] = [];
+
+		const flushPending = (listener: (message: unknown) => void) => {
+			if (pending.length === 0) return;
+			for (const entry of pending.splice(0, pending.length)) {
+				listener(entry);
+			}
+		};
+
+		const broadcast = (message: unknown) => {
+			if (listeners.size === 0) {
+				pending.push(message);
+				return;
+			}
+			for (const listener of listeners) {
+				listener(message);
+			}
+		};
+
+		const messageHandler = (event: MessageEvent) => broadcast(event.data);
+		actor.addEventListener("message", messageHandler);
+
 		const handle: EnvironmentActorHandle = {
 			post: (message: unknown, transfer?: Transferable[]) => {
 				if (transfer && transfer.length > 0) {
@@ -161,14 +185,15 @@ export class OpfsSahEnvironment implements LixEnvironment {
 				actor.postMessage(message);
 			},
 			subscribe: (listener: (message: unknown) => void) => {
-				const handler = (event: MessageEvent) => listener(event.data);
-				actor.addEventListener("message", handler);
+				listeners.add(listener);
+				flushPending(listener);
 				return () => {
-					actor.removeEventListener("message", handler);
+					listeners.delete(listener);
 				};
 			},
 			terminate: async () => {
 				this.actorWorkers.delete(actor);
+				actor.removeEventListener("message", messageHandler);
 				actor.terminate();
 			},
 		};

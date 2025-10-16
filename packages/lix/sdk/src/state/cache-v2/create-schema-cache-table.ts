@@ -19,21 +19,23 @@ import {
  * createSchemaCacheTableV2({
  *   engine,
  *   schema,
- *   tableName: schemaKeyToCacheTableNameV2("lix.commit", "1.0")
  * });
  */
 export function createSchemaCacheTableV2(args: {
 	engine: Pick<LixEngine, "executeSync">;
 	schema: LixSchemaDefinition | null | undefined;
-	tableName: string;
 }): void {
-	const { engine, tableName, schema } = args;
+	const { engine, schema } = args;
 
 	if (!schema) {
 		throw new Error(
 			"createSchemaCacheTableV2: schema definition is required for cache table creation."
 		);
 	}
+
+	const schemaKey = getSchemaKey(schema);
+	const schemaVersion = getSchemaVersion(schema);
+	const tableName = schemaKeyToCacheTableNameV2(schemaKey, schemaVersion);
 
 	const existingInfo = engine.executeSync({
 		sql: `PRAGMA table_info(${tableName})`,
@@ -191,6 +193,20 @@ export function getSchemaVersion(
 	}
 	throw new Error(
 		"createSchemaCacheTableV2: schema version (x-lix-version) is required."
+	);
+}
+
+export function getSchemaKey(
+	schema: LixSchemaDefinition | null | undefined
+): string {
+	const rawKey = (schema as Record<string, unknown> | null | undefined)?.[
+		"x-lix-key"
+	];
+	if (typeof rawKey === "string" && rawKey.trim().length > 0) {
+		return rawKey;
+	}
+	throw new Error(
+		"createSchemaCacheTableV2: schema key (x-lix-key) is required."
 	);
 }
 

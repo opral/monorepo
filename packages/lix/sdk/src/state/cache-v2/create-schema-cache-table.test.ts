@@ -30,7 +30,6 @@ test("createSchemaCacheTableV2 creates table with core indexes and is idempotent
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema: exampleSchema,
-		tableName,
 	});
 
 	// Verify table exists and WITHOUT ROWID
@@ -65,7 +64,6 @@ test("createSchemaCacheTableV2 creates table with core indexes and is idempotent
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema: exampleSchema,
-		tableName,
 	});
 
 	// Property columns are created for schema properties

@@ -2,8 +2,8 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { openLix } from "../../lix/index.js";
 import { createQueryPreprocessor } from "./create-query-preprocessor.js";
 import { setHasOpenTransaction } from "../../state/vtable/vtable.js";
-import { markStateCacheAsStale } from "../../state/cache/mark-state-cache-as-stale.js";
-import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
+import * as populateStateCacheModule from "../../state/cache-v2/populate-state-cache.js";
+import { markStateCacheAsStaleV2 } from "../../state/cache-v2/mark-state-cache-as-stale.js";
 
 describe("createQueryPreprocessorV2", () => {
 	afterEach(() => {
@@ -33,12 +33,12 @@ describe("createQueryPreprocessorV2", () => {
 		const lix = await openLix({});
 		const populateSpy = vi.spyOn(
 			populateStateCacheModule,
-			"populateStateCache"
+			"populateStateCacheV2"
 		);
 
-		markStateCacheAsStale({ engine: lix.engine! });
+		markStateCacheAsStaleV2({ engine: lix.engine! });
 
-		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const preprocess = createQueryPreprocessor(lix.engine!);
 
 		preprocess({
 			sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",
@@ -55,12 +55,12 @@ describe("createQueryPreprocessorV2", () => {
 		try {
 			const populateSpy = vi.spyOn(
 				populateStateCacheModule,
-				"populateStateCache"
+				"populateStateCacheV2"
 			);
 
-			markStateCacheAsStale({ engine: lix.engine! });
+			markStateCacheAsStaleV2({ engine: lix.engine! });
 
-			const preprocess = await createQueryPreprocessor(lix.engine!);
+			const preprocess = createQueryPreprocessor(lix.engine!);
 
 			preprocess({
 				sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",

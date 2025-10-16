@@ -12,7 +12,7 @@ import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
-import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 /**
  * One-Commit Model
@@ -1501,23 +1501,35 @@ test("global cache entry should be inherited by child versions in resolved view"
 	});
 
 	// Verify cache has exactly one entry for this entity (in global version)
-	const cacheTable = schemaKeyToCacheTableName("test_global_schema");
-	const cacheResult = lix.engine!.executeSync({
-		sql: `
-				SELECT
-					*,
-					json(snapshot_content) AS snapshot_content
-				FROM ${cacheTable}
-				WHERE entity_id = ?
-					AND schema_key = ?
-			`,
-		parameters: ["test-global-entity", "test_global_schema"],
-	});
-	const cacheRows = cacheResult?.rows ?? [];
+	const cacheQuery = internalQueryBuilder
+		.selectFrom("lix_internal_state_vtable")
+		.selectAll()
+		.select(sql`json(snapshot_content)`.as("snapshot_content_json"))
+		.where("_pk", "like", "C~%")
+		.where("version_id", "=", "global")
+		.where("entity_id", "=", "test-global-entity")
+		.where("schema_key", "=", "test_global_schema")
+		.compile();
+
+	const cacheResult = lix.engine!.executeSync(cacheQuery);
+	const cacheRows = (cacheResult?.rows ?? []) as Array<{
+		_pk?: string;
+		version_id?: string;
+		snapshot_content_json?: unknown;
+	}>;
 	const cacheEntry = cacheRows?.[0];
 
 	expect(cacheRows).toHaveLength(1);
+	expect(cacheEntry?._pk).toMatch(/^C~/);
 	expect(cacheEntry?.version_id).toBe("global");
+
+	const parsedCacheSnapshot = JSON.parse(
+		String(cacheEntry!.snapshot_content_json)
+	);
+	expect(parsedCacheSnapshot).toEqual({
+		id: "test-global-entity",
+		data: "test-data",
+	});
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db

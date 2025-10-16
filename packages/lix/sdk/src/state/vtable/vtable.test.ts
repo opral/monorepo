@@ -11,6 +11,7 @@ import { createVersionFromCommit } from "../../version/create-version-from-commi
 import { openLix } from "../../lix/open-lix.js";
 import { withWriterKey } from "../writer.js";
 import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
+import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 
 test("simulation test discover", () => {});
 
@@ -2579,33 +2580,27 @@ simulationTest(
 			.execute();
 
 		// Cache should be populated immediately via write-through
-		const cacheTable = schemaKeyToCacheTableName("write-through-schema");
-		const { rows: cacheRows } = lix.engine!.executeSync({
-			sql: `
-				SELECT
-					*,
-					json(snapshot_content) AS snapshot_content
-				FROM ${cacheTable}
-				WHERE entity_id = ?
-					AND schema_key = ?
-					AND file_id = ?
-					AND version_id = ?
-			`,
-			parameters: [
-				"write-through-entity",
-				"write-through-schema",
-				"write-through-file",
-				activeVersion.id,
-			],
-		});
-		const cacheEntry = cacheRows?.[0];
+		const cacheQuery = internalQueryBuilder
+			.selectFrom("lix_internal_state_vtable")
+			.selectAll()
+			.select(sql`json(snapshot_content)`.as("snapshot_content_json"))
+			.where("_pk", "like", "C~%")
+			.where("entity_id", "=", "write-through-entity")
+			.where("schema_key", "=", "write-through-schema")
+			.where("file_id", "=", "write-through-file")
+			.where("version_id", "=", activeVersion.id)
+			.compile();
+		const cacheResult = lix.engine!.executeSync(cacheQuery);
 
-		expect(cacheEntry).toBeDefined();
-		const parsedSnapshot = cacheEntry?.snapshot_content
-			? JSON.parse(String(cacheEntry.snapshot_content))
-			: null;
+		const cacheEntry = cacheResult.rows?.[0];
+
+		expect(cacheResult.rows).toHaveLength(1);
+		expect(cacheEntry?._pk).toMatch(/^C~/);
 		expect(cacheEntry?.entity_id).toBe("write-through-entity");
 		expect(cacheEntry?.plugin_key).toBe("write-through-plugin");
+		const parsedSnapshot = JSON.parse(
+			String(cacheEntry!.snapshot_content_json)
+		);
 		expect(parsedSnapshot).toEqual({
 			test: "write-through-data",
 		});

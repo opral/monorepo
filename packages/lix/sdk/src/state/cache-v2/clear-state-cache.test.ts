@@ -2,10 +2,7 @@ import { test, expect } from "vitest";
 import { clearStateCacheV2 } from "./clear-state-cache.js";
 import { isStaleStateCacheV2 } from "./is-stale-state-cache.js";
 import { markStateCacheAsFreshV2 } from "./mark-state-cache-as-stale.js";
-import {
-	createSchemaCacheTableV2,
-	schemaKeyToCacheTableNameV2,
-} from "./create-schema-cache-table.js";
+import { createSchemaCacheTableV2 } from "./create-schema-cache-table.js";
 import { updateStateCacheV2 } from "./update-state-cache.js";
 import { openLix } from "../../lix/open-lix.js";
 
@@ -32,11 +29,9 @@ test("clearStateCacheV2 deletes all cache entries", async () => {
 		"x-lix-version": "1.0",
 	} as const;
 
-	const tableName = schemaKeyToCacheTableNameV2(schemaKey, "1.0");
 	createSchemaCacheTableV2({
 		engine: lix.engine!,
 		schema,
-		tableName,
 	});
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();

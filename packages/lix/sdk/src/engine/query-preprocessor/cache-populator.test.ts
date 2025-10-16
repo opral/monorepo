@@ -2,11 +2,11 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { openLix } from "../../lix/index.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import {
-	markStateCacheAsFresh,
-	markStateCacheAsStale,
-} from "../../state/cache/mark-state-cache-as-stale.js";
-import * as populateStateCacheModule from "../../state/cache/populate-state-cache.js";
-import { isStaleStateCache } from "../../state/cache/is-stale-state-cache.js";
+	markStateCacheAsFreshV2,
+	markStateCacheAsStaleV2,
+} from "../../state/cache-v2/mark-state-cache-as-stale.js";
+import * as populateStateCacheModule from "../../state/cache-v2/populate-state-cache.js";
+import { isStaleStateCacheV2 } from "../../state/cache-v2/is-stale-state-cache.js";
 import { tokenize } from "../sql-parser/tokenizer.js";
 import { analyzeShape } from "./sql-rewriter/microparser/analyze-shape.js";
 
@@ -27,9 +27,9 @@ describe("ensureStateCacheFresh", () => {
 	test("skips population when cache is already fresh", async () => {
 		const lix = await openLix({});
 		const engine = lix.engine!;
-		const spy = vi.spyOn(populateStateCacheModule, "populateStateCache");
+		const spy = vi.spyOn(populateStateCacheModule, "populateStateCacheV2");
 
-		markStateCacheAsFresh({ engine });
+		markStateCacheAsFreshV2({ engine });
 		const shape = shapeFrom(
 			"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
 		);
@@ -43,13 +43,13 @@ describe("ensureStateCacheFresh", () => {
 	test("repopulates when cache is stale", async () => {
 		const lix = await openLix({});
 		const engine = lix.engine!;
-		const original = populateStateCacheModule.populateStateCache;
+		const original = populateStateCacheModule.populateStateCacheV2;
 		const spy = vi
-			.spyOn(populateStateCacheModule, "populateStateCache")
+			.spyOn(populateStateCacheModule, "populateStateCacheV2")
 			.mockImplementation((args) => original(args));
 
-		markStateCacheAsStale({ engine });
-		expect(isStaleStateCache({ engine })).toBe(true);
+		markStateCacheAsStaleV2({ engine });
+		expect(isStaleStateCacheV2({ engine })).toBe(true);
 
 		const shape = shapeFrom(
 			"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value'"
@@ -57,7 +57,7 @@ describe("ensureStateCacheFresh", () => {
 		ensureFreshStateCache({ engine, shape });
 
 		expect(spy).toHaveBeenCalledTimes(1);
-		expect(isStaleStateCache({ engine })).toBe(false);
+		expect(isStaleStateCacheV2({ engine })).toBe(false);
 
 		await lix.close();
 	});
@@ -65,12 +65,12 @@ describe("ensureStateCacheFresh", () => {
 	test("scopes population when version hint is provided", async () => {
 		const lix = await openLix({});
 		const engine = lix.engine!;
-		const original = populateStateCacheModule.populateStateCache;
+		const original = populateStateCacheModule.populateStateCacheV2;
 		const spy = vi
-			.spyOn(populateStateCacheModule, "populateStateCache")
+			.spyOn(populateStateCacheModule, "populateStateCacheV2")
 			.mockImplementation((args) => original(args));
 
-		markStateCacheAsStale({ engine });
+		markStateCacheAsStaleV2({ engine });
 		const shape = shapeFrom(
 			"SELECT * FROM lix_internal_state_vtable v WHERE v.version_id = 'global'"
 		);

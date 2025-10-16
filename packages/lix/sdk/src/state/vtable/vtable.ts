@@ -14,6 +14,7 @@ import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 import { schemaKeyToCacheTableName } from "../cache/create-schema-cache-table.js";
+import { schemaKeyToCacheTableNameV2 } from "../cache-v2/create-schema-cache-table.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -720,19 +721,22 @@ export function applyStateVTable(
 								const schemaKeysResult = engine.executeSync(
 									internalQueryBuilder
 										.selectFrom("lix_internal_state_vtable")
-										.select(["schema_key"])
+										.select(["schema_key", "schema_version"])
 										.distinct()
 										.where("version_id", "=", sourceVersionId)
 										.where("_pk", "like", "C~%")
 										.compile()
-								).rows as Array<{ schema_key?: string }>;
+								).rows as Array<{
+									schema_key?: string;
+									schema_version?: string;
+								}>;
 
 								const schemaKeys = Array.from(
 									new Set(
 										(schemaKeysResult ?? [])
-											.map((row) => row.schema_key)
+											.map((row) => [row.schema_key, row.schema_version])
 											.filter(
-												(schemaKey): schemaKey is string =>
+												([schemaKey]) =>
 													typeof schemaKey === "string" &&
 													schemaKey !== "lix_version_tip" &&
 													schemaKey !== "lix_version_descriptor"
@@ -740,35 +744,92 @@ export function applyStateVTable(
 									)
 								);
 
-								// Copy cache entries for each schema key to the appropriate physical table
-								for (const sourceSchemaKey of schemaKeys) {
-									const tableName = schemaKeyToCacheTableName(sourceSchemaKey);
-
-									// Check if table exists first
+								const copyCacheEntries = (tableName: string): void => {
 									const tableExists = sqlite.exec({
 										sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
 										bind: [tableName],
 										returnValue: "resultRows",
 									});
 
-									if (tableExists && tableExists.length > 0) {
-										// Copy entries from source version to new version using v2 cache structure
-										sqlite.exec({
-											sql: `
-												INSERT OR IGNORE INTO ${tableName} 
-												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
-												SELECT 
-													entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
-													CASE 
-														WHEN inherited_from_version_id IS NULL THEN ?
-														ELSE inherited_from_version_id
-													END as inherited_from_version_id,
-													is_tombstone, change_id, commit_id
-												FROM ${tableName}
-												WHERE version_id = ?
-											`,
-											bind: [newVersionId, sourceVersionId, sourceVersionId],
-										});
+									if (!tableExists || tableExists.length === 0) {
+										return;
+									}
+
+									const pragmaColumns = sqlite.exec({
+										sql: `PRAGMA table_info(${tableName})`,
+										returnValue: "resultRows",
+										rowMode: "object",
+									}) as Array<{ name?: string }> | undefined;
+
+									const columnNames =
+										pragmaColumns
+											?.map((row) => row?.name)
+											.filter(
+												(name): name is string =>
+													typeof name === "string" && name.length > 0
+											) ?? [];
+
+									if (columnNames.length === 0) {
+										return;
+									}
+
+									const selectExpressions: string[] = [];
+									const insertColumns: string[] = [];
+									const bindParameters: Array<string> = [];
+
+									for (const column of columnNames) {
+										insertColumns.push(column);
+										if (column === "version_id") {
+											selectExpressions.push("? AS version_id");
+											bindParameters.push(newVersionId);
+										} else if (column === "inherited_from_version_id") {
+											selectExpressions.push(
+												"CASE WHEN inherited_from_version_id IS NULL THEN ? ELSE inherited_from_version_id END AS inherited_from_version_id"
+											);
+											bindParameters.push(sourceVersionId);
+										} else {
+											selectExpressions.push(column);
+										}
+									}
+
+									// WHERE clause parameter
+									bindParameters.push(sourceVersionId);
+
+									sqlite.exec({
+										sql: `
+											INSERT OR IGNORE INTO ${tableName} 
+											(${insertColumns.join(", ")})
+											SELECT 
+												${selectExpressions.join(", ")}
+											FROM ${tableName}
+											WHERE version_id = ?
+										`,
+										bind: bindParameters,
+									});
+								};
+
+								// Copy cache entries for each schema key to the appropriate physical tables
+								for (const [
+									sourceSchemaKey,
+									sourceSchemaVersion,
+								] of schemaKeys) {
+									if (
+										typeof sourceSchemaKey !== "string" ||
+										typeof sourceSchemaVersion !== "string"
+									) {
+										continue;
+									}
+
+									const candidateTables = new Set<string>([
+										schemaKeyToCacheTableName(sourceSchemaKey),
+										schemaKeyToCacheTableNameV2(
+											sourceSchemaKey,
+											sourceSchemaVersion
+										),
+									]);
+
+									for (const tableName of candidateTables) {
+										copyCacheEntries(tableName);
 									}
 								}
 							}

@@ -522,7 +522,6 @@ function initializeSchemaMetadata(args: {
 	createSchemaCacheTableV2({
 		engine: args.engine,
 		schema: args.schema,
-		tableName,
 	});
 
 	if (!tables.has(tableName)) {

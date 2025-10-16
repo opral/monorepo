@@ -11,7 +11,7 @@ import { getTimestamp } from "../engine/functions/timestamp.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema-definition.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
-import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
+
 export async function mergeVersion(args: {
 	lix: Lix;
 	source: Pick<LixVersion, "id">;

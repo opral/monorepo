@@ -1,20 +1,17 @@
-import { expect, test, vi } from "vitest";
+import { expect, test, vi, type Mock } from "vitest";
 import {
 	simulationTest,
 	normalSimulation,
 	cacheMissSimulation,
 } from "./simulation-test.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
-import * as clearCacheModule from "../../state/cache/clear-state-cache.js";
+import * as clearCacheModule from "../../state/cache-v2/clear-state-cache.js";
 
 test("cache miss simulation test discovery", () => {});
 
 simulationTest(
 	"cache miss simulation clears cache on first select after commit",
 	async ({ openSimulatedLix }) => {
-		// Spy on clearStateCache (lazy clear)
-		const clearSpy = vi.spyOn(clearCacheModule, "clearStateCache");
-
 		const lix = await openSimulatedLix({
 			keyValues: [
 				{
@@ -25,6 +22,8 @@ simulationTest(
 				},
 			],
 		});
+
+		const clearSpy = clearCacheModule.clearStateCacheV2 as unknown as Mock;
 
 		// Reset the spy counter after initialization
 		clearSpy.mockClear();
@@ -159,8 +158,8 @@ simulationTest(
 	"cache miss simulation clears even on lix_internal_* tables",
 	async ({ openSimulatedLix }) => {
 		// Spy on the actual clear export so we observe real calls
-		const clearModule = await import("../../state/cache/clear-state-cache.js");
-		const spy = vi.spyOn(clearModule, "clearStateCache");
+		const clearModule = await import("../../state/cache-v2/clear-state-cache.js");
+		const spy = vi.spyOn(clearModule, "clearStateCacheV2");
 
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -172,8 +171,6 @@ simulationTest(
 				},
 			],
 		});
-
-		spy.mockClear();
 
 		// Make a commit so the simulation marks repopulation as needed
 		await lix.db

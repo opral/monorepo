@@ -1,17 +1,18 @@
 import { vi } from "vitest";
-import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
-import { clearStateCache } from "../../state/cache/clear-state-cache.js";
+import * as cacheModule from "../../state/cache-v2/mark-state-cache-as-stale.js";
+import * as clearCacheModule from "../../state/cache-v2/clear-state-cache.js";
 import { clearFileDataCache } from "../../filesystem/file/cache/clear-file-data-cache.js";
-import { populateStateCache } from "../../state/cache/populate-state-cache.js";
-import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
+import * as populateCacheModule from "../../state/cache-v2/populate-state-cache.js";
 import * as insertVTableLogModule from "../../state/vtable/insert-vtable-log.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 const CACHE_TIMESTAMP = "2099-12-31T23:59:59.999Z";
 
 // Store original functions
-const originalMarkStale = cacheModule.markStateCacheAsStale;
-const originalMarkFresh = cacheModule.markStateCacheAsFresh;
+const originalMarkStale = cacheModule.markStateCacheAsStaleV2;
+const originalMarkFresh = cacheModule.markStateCacheAsFreshV2;
+const originalPopulateCache = populateCacheModule.populateStateCacheV2;
+const originalClearCache = clearCacheModule.clearStateCacheV2;
 const originalInsertVTableLog = insertVTableLogModule.insertVTableLog;
 
 // Create wrapped versions that inject the fixed timestamp
@@ -21,6 +22,14 @@ const wrappedMarkStale = (args: any) => {
 
 const wrappedMarkFresh = (args: any) => {
 	return originalMarkFresh({ ...args, timestamp: CACHE_TIMESTAMP });
+};
+
+const wrappedPopulateCache = (args: any) => {
+	return originalPopulateCache(args);
+};
+
+const wrappedClearCache = (args: any) => {
+	return originalClearCache({ ...args, timestamp: CACHE_TIMESTAMP });
 };
 
 const wrappedInsertVTableLog = (args: any) => {
@@ -42,15 +51,36 @@ export const cacheMissSimulation: SimulationTestDef = {
 	name: "cache miss",
 	setup: async (lix) => {
 		// Set up mocks for cache operations and logs
-		vi.spyOn(cacheModule, "markStateCacheAsStale").mockImplementation(
-			wrappedMarkStale
-		);
-		vi.spyOn(cacheModule, "markStateCacheAsFresh").mockImplementation(
-			wrappedMarkFresh
-		);
-		vi.spyOn(insertVTableLogModule, "insertVTableLog").mockImplementation(
-			wrappedInsertVTableLog
-		);
+		/**
+		 * Reuses an existing mock if present or installs a new spy with the provided implementation.
+		 *
+		 * @example
+		 * useMock(cacheModule, "markStateCacheAsStaleV2", wrappedMarkStale);
+		 */
+		const useMock = <T extends object, K extends keyof T & string>(
+			module: T,
+			property: K,
+			implementation: T[K]
+		) => {
+			const currentImplementation = module[property];
+			if (
+				typeof currentImplementation === "function" &&
+				"mock" in currentImplementation &&
+				"mockImplementation" in currentImplementation
+			) {
+				(currentImplementation as any).mockImplementation(implementation);
+				return currentImplementation;
+			}
+			return vi
+				.spyOn(module, property as any)
+				.mockImplementation(implementation as any);
+		};
+
+		useMock(cacheModule, "markStateCacheAsStaleV2", wrappedMarkStale);
+		useMock(cacheModule, "markStateCacheAsFreshV2", wrappedMarkFresh);
+		useMock(populateCacheModule, "populateStateCacheV2", wrappedPopulateCache);
+		useMock(clearCacheModule, "clearStateCacheV2", wrappedClearCache);
+		useMock(insertVTableLogModule, "insertVTableLog", wrappedInsertVTableLog);
 
 		// Strategy: do not mutate cache inside transactions or during SELECTs.
 		// After any state commit, mark that a repopulation is needed. Before the
@@ -70,12 +100,17 @@ export const cacheMissSimulation: SimulationTestDef = {
 		lix.db.selectFrom = (table: any) => {
 			if (needsCacheClearance) {
 				// Clear tracked cache and mark stale with deterministic timestamp
-				clearStateCache({ engine: lix.engine!, timestamp: CACHE_TIMESTAMP });
+				clearCacheModule.clearStateCacheV2({
+					engine: lix.engine!,
+					timestamp: CACHE_TIMESTAMP,
+				});
 				clearFileDataCache({ engine: lix.engine! });
 				// Immediately repopulate from the materializer to avoid writes during SELECT
-				populateStateCache({ engine: lix.engine! });
+				populateCacheModule.populateStateCacheV2({
+					engine: lix.engine!,
+				});
 				// Mark as fresh so vtable won't try to repopulate
-				markStateCacheAsFresh({
+				cacheModule.markStateCacheAsFreshV2({
 					engine: lix.engine!,
 					timestamp: CACHE_TIMESTAMP,
 				});

@@ -9,9 +9,9 @@ import {
 	nextSequenceNumberSync,
 } from "./sequence.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
-import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
 import type { LixEngine } from "../boot.js";
 import { createExplainQuery } from "../explain-query.js";
+import { markStateCacheAsFreshV2 } from "../../state/cache-v2/mark-state-cache-as-stale.js";
 
 type RegisterBuiltinArgs = {
 	register: (def: RegisteredFunctionDefinition) => void;
@@ -109,7 +109,7 @@ export function registerBuiltinFunctions({
 	register({
 		name: "lix_mark_state_cache_as_fresh",
 		handler: (ctx) => {
-			markStateCacheAsFresh({ engine: ctx.engine });
+			markStateCacheAsFreshV2({ engine: ctx.engine });
 			return null;
 		},
 	});
