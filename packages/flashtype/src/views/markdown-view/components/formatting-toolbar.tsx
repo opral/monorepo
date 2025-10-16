@@ -2,6 +2,7 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 	type ComponentType,
 	type MouseEvent,
@@ -9,6 +10,7 @@ import {
 } from "react";
 import { Toolbar } from "@base-ui-components/react/toolbar";
 import { Select } from "@base-ui-components/react/select";
+import { Tooltip } from "@base-ui-components/react/tooltip";
 import clsx from "clsx";
 import {
 	Bold,
@@ -56,7 +58,7 @@ type BlockOption = {
 };
 
 const toolbarButtonClass =
-	"inline-flex h-7 min-w-7 select-none items-center justify-center rounded-sm px-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40";
+	"inline-flex h-7 min-w-7 select-none items-center rounded-sm px-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40";
 
 const ToolbarSeparator = () => (
 	<Toolbar.Separator className="mx-1 h-4 w-px bg-border" />
@@ -150,6 +152,18 @@ export function FormattingToolbar({ className }: { className?: string }) {
 	const [copyStatus, setCopyStatus] = useState<"idle" | "success" | "error">(
 		"idle",
 	);
+	const [blockMenuOpen, setBlockMenuOpen] = useState(false);
+	const longestBlockLabel = useMemo(
+		() =>
+			BLOCK_OPTIONS.reduce(
+				(acc, option) =>
+					option.label.length > acc.length ? option.label : acc,
+				"",
+			),
+		[],
+	);
+	const labelMeasureRef = useRef<HTMLSpanElement | null>(null);
+	const [labelWidth, setLabelWidth] = useState<number | null>(null);
 
 	const suppressMouseDown = useCallback((event: MouseEvent<HTMLElement>) => {
 		event.preventDefault();
@@ -203,6 +217,7 @@ export function FormattingToolbar({ className }: { className?: string }) {
 			if (!editor) return;
 			const option = BLOCK_OPTIONS.find((entry) => entry.value === value);
 			option?.apply(editor);
+			setBlockMenuOpen(false);
 		},
 		[editor],
 	);
@@ -282,181 +297,255 @@ export function FormattingToolbar({ className }: { className?: string }) {
 		return () => window.clearTimeout(reset);
 	}, [copyStatus]);
 
+	useEffect(() => {
+		const element = labelMeasureRef.current;
+		if (!element) return;
+		const initialWidth = Math.ceil(element.getBoundingClientRect().width) + 6;
+		setLabelWidth(initialWidth);
+		const observer = new ResizeObserver((entries) => {
+			const entry = entries[0];
+			if (!entry) return;
+			setLabelWidth(Math.ceil(entry.contentRect.width) + 6);
+		});
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [longestBlockLabel]);
+
 	if (!editor) return null;
 
 	return (
-		<Toolbar.Root
-			className={clsx(
-				"flex w-full max-w-5xl items-center gap-1 rounded-md border border-border py-0.5 text-xs text-foreground",
-				className,
-			)}
-			aria-label="Formatting toolbar"
-		>
-			<Toolbar.Group className="flex flex-1 items-center gap-1">
-				<Select.Root
-					value={formatState.block}
-					onValueChange={handleBlockChange}
-				>
+		<>
+			<span
+				ref={labelMeasureRef}
+				aria-hidden="true"
+				className="pointer-events-none select-none text-sm font-medium"
+				style={{
+					position: "fixed",
+					top: -1000,
+					left: -1000,
+					visibility: "hidden",
+					whiteSpace: "nowrap",
+				}}
+			>
+				{longestBlockLabel}
+			</span>
+			<Toolbar.Root
+				className={clsx(
+					"flex w-full max-w-5xl items-center gap-1 rounded-md border border-border py-0.5 text-xs text-foreground",
+					className,
+				)}
+				aria-label="Formatting toolbar"
+			>
+				<Toolbar.Group className="flex flex-1 items-center gap-1">
+					<Select.Root
+						value={formatState.block}
+						onValueChange={handleBlockChange}
+						open={blockMenuOpen}
+						onOpenChange={setBlockMenuOpen}
+					>
+						<Toolbar.Button
+							render={<Select.Trigger />}
+							nativeButton={false}
+							className={clsx(
+								toolbarButtonClass,
+								"gap-1 text-sm font-medium text-foreground pr-0 pl-3 min-w-[7rem]",
+							)}
+							onMouseDown={suppressMouseDown}
+						>
+							<Select.Value
+								className="block truncate"
+								style={
+									labelWidth != null
+										? {
+												width: labelWidth,
+											}
+										: undefined
+								}
+							>
+								{activeBlockLabel}
+							</Select.Value>
+							<Select.Icon className="text-muted-foreground">
+								<ChevronDown className="h-4 w-4" aria-hidden />
+							</Select.Icon>
+						</Toolbar.Button>
+						<Select.Portal>
+							<Select.Positioner
+								className="z-50 outline-none"
+								side="bottom"
+								align="start"
+								sideOffset={6}
+								alignItemWithTrigger={false}
+							>
+								<Select.Popup className="min-w-[12rem] rounded-lg border border-border bg-card p-1 shadow-xl data-[side=bottom]:mt-2 data-[side=top]:mb-2 origin-[var(--transform-origin)] transition-[transform,opacity] duration-150 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-100 data-[ending-style]:opacity-100">
+									<div className="px-2 pb-1 pt-1 text-xs font-medium text-muted-foreground">
+										Turn into
+									</div>
+									{BLOCK_OPTIONS.map((option) => (
+										<Select.Item
+											key={option.value}
+											value={option.value}
+											className="group flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none focus-visible:ring-0 data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
+										>
+											<span className="flex size-5 items-center justify-center text-muted-foreground group-data-[highlighted]:text-foreground">
+												<option.icon className="h-4 w-4" aria-hidden />
+											</span>
+											<div className="flex flex-1 flex-col">
+												<span className="text-sm font-medium">
+													{option.label}
+												</span>
+												<span className="text-xs text-muted-foreground group-data-[highlighted]:text-muted-foreground/80">
+													{option.description}
+												</span>
+											</div>
+											<Select.ItemIndicator className="text-foreground">
+												<Check className="h-4 w-4" aria-hidden />
+											</Select.ItemIndicator>
+										</Select.Item>
+									))}
+								</Select.Popup>
+							</Select.Positioner>
+						</Select.Portal>
+					</Select.Root>
+
+					<ToolbarSeparator />
+
 					<Toolbar.Button
-						render={<Select.Trigger />}
-						nativeButton={false}
 						className={clsx(
 							toolbarButtonClass,
-							"min-w-[8.5rem] justify-between gap-2 px-3 text-sm font-medium text-foreground",
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isBold && "bg-neutral-100 text-neutral-900",
 						)}
+						onClick={handleToggleBold}
 						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isBold}
+						aria-label="Bold"
 					>
-						<Select.Value className="truncate">{activeBlockLabel}</Select.Value>
-						<Select.Icon className="text-muted-foreground">
-							<ChevronDown className="h-4 w-4" aria-hidden />
-						</Select.Icon>
+						<Bold className="h-4 w-4" aria-hidden />
 					</Toolbar.Button>
-					<Select.Portal>
-						<Select.Positioner className="z-50 outline-none" sideOffset={8}>
-							<Select.Popup className="min-w-[12rem] rounded-lg border border-border bg-card p-1 shadow-xl">
-								<div className="px-2 pb-1 pt-1 text-xs font-medium text-muted-foreground">
-									Turn into
-								</div>
-								{BLOCK_OPTIONS.map((option) => (
-									<Select.Item
-										key={option.value}
-										value={option.value}
-										className="group flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none focus-visible:ring-0 data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
-									>
-										<span className="flex size-5 items-center justify-center text-muted-foreground group-data-[highlighted]:text-foreground">
-											<option.icon className="h-4 w-4" aria-hidden />
-										</span>
-										<div className="flex flex-1 flex-col">
-											<span className="text-sm font-medium">
-												{option.label}
-											</span>
-											<span className="text-xs text-muted-foreground group-data-[highlighted]:text-muted-foreground/80">
-												{option.description}
-											</span>
-										</div>
-										<Select.ItemIndicator className="text-foreground">
-											<Check className="h-4 w-4" aria-hidden />
-										</Select.ItemIndicator>
-									</Select.Item>
-								))}
-							</Select.Popup>
-						</Select.Positioner>
-					</Select.Portal>
-				</Select.Root>
 
-				<ToolbarSeparator />
+					<Toolbar.Button
+						className={clsx(
+							toolbarButtonClass,
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isItalic && "bg-neutral-100 text-neutral-900",
+						)}
+						onClick={handleToggleItalic}
+						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isItalic}
+						aria-label="Italic"
+					>
+						<Italic className="h-4 w-4" aria-hidden />
+					</Toolbar.Button>
 
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isBold && "bg-accent/30 text-foreground",
-					)}
-					onClick={handleToggleBold}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isBold}
-					aria-label="Bold"
-				>
-					<Bold className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
+					<Toolbar.Button
+						className={clsx(
+							toolbarButtonClass,
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isCode && "bg-neutral-100 text-neutral-900",
+						)}
+						onClick={handleToggleCode}
+						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isCode}
+						aria-label="Inline code"
+					>
+						<Code2 className="h-4 w-4" aria-hidden />
+					</Toolbar.Button>
 
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isItalic && "bg-accent/30 text-foreground",
-					)}
-					onClick={handleToggleItalic}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isItalic}
-					aria-label="Italic"
-				>
-					<Italic className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
+					<ToolbarSeparator />
 
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isCode && "bg-accent/30 text-foreground",
-					)}
-					onClick={handleToggleCode}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isCode}
-					aria-label="Inline code"
-				>
-					<Code2 className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
+					<Toolbar.Button
+						className={clsx(
+							toolbarButtonClass,
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isOrderedList && "bg-neutral-100 text-neutral-900",
+						)}
+						onClick={handleToggleOrderedList}
+						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isOrderedList}
+						aria-label="Numbered list"
+					>
+						<ListOrdered className="h-4 w-4" aria-hidden />
+					</Toolbar.Button>
 
-				<ToolbarSeparator />
+					<Toolbar.Button
+						className={clsx(
+							toolbarButtonClass,
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isBulletList && "bg-neutral-100 text-neutral-900",
+						)}
+						onClick={handleToggleBulletList}
+						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isBulletList}
+						aria-label="Bullet list"
+					>
+						<List className="h-4 w-4" aria-hidden />
+					</Toolbar.Button>
 
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isOrderedList && "bg-accent/30 text-foreground",
-					)}
-					onClick={handleToggleOrderedList}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isOrderedList}
-					aria-label="Numbered list"
-				>
-					<ListOrdered className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
+					<Toolbar.Button
+						className={clsx(
+							toolbarButtonClass,
+							"text-muted-foreground hover:bg-muted hover:text-foreground",
+							formatState.isTaskList && "bg-neutral-100 text-neutral-900",
+						)}
+						onClick={handleToggleTaskList}
+						onMouseDown={suppressMouseDown}
+						aria-pressed={formatState.isTaskList}
+						aria-label="Checklist"
+					>
+						<CheckSquare className="h-4 w-4" aria-hidden />
+					</Toolbar.Button>
+				</Toolbar.Group>
 
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isBulletList && "bg-accent/30 text-foreground",
-					)}
-					onClick={handleToggleBulletList}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isBulletList}
-					aria-label="Bullet list"
-				>
-					<List className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
-
-				<Toolbar.Button
-					className={clsx(
-						toolbarButtonClass,
-						"text-muted-foreground hover:bg-muted hover:text-foreground",
-						formatState.isTaskList && "bg-accent/30 text-foreground",
-						!hasTaskListCommand && "opacity-60",
-					)}
-					onClick={handleToggleTaskList}
-					onMouseDown={suppressMouseDown}
-					aria-pressed={formatState.isTaskList}
-					aria-label="Checklist"
-				>
-					<CheckSquare className="h-4 w-4" aria-hidden />
-				</Toolbar.Button>
-			</Toolbar.Group>
-
-			<Toolbar.Button
-				className={clsx(
-					toolbarButtonClass,
-					"ml-auto gap-2 px-3 text-muted-foreground hover:bg-muted hover:text-foreground",
-					copyStatus === "success" && "bg-accent/30 text-foreground",
-					copyStatus === "error" && "bg-destructive/20 text-destructive",
-				)}
-				onClick={handleCopyMarkdown}
-				aria-label="Copy markdown"
-			>
-				{copyStatus === "success" ? (
-					<>
-						<Check className="h-4 w-4" aria-hidden />
-						<span className="hidden text-sm font-medium sm:inline">Copied</span>
-					</>
-				) : (
-					<>
-						<MarkdownCopyIcon className="h-4 w-4" aria-hidden />
-						<span className="hidden text-sm font-medium sm:inline">Copy</span>
-					</>
-				)}
-			</Toolbar.Button>
-		</Toolbar.Root>
+				<Tooltip.Root>
+					<Tooltip.Trigger
+						render={
+							<Toolbar.Button
+								className={clsx(
+									toolbarButtonClass,
+									"ml-auto px-3 text-muted-foreground hover:bg-muted hover:text-foreground",
+									copyStatus === "success" && "bg-accent/30 text-foreground",
+									copyStatus === "error" &&
+										"bg-destructive/20 text-destructive",
+								)}
+								onClick={handleCopyMarkdown}
+								onMouseDown={suppressMouseDown}
+								aria-label={
+									copyStatus === "success" ? "Copied markdown" : "Copy markdown"
+								}
+							>
+								<span className="relative inline-flex h-4 w-4 items-center justify-center">
+									<MarkdownCopyIcon
+										className={clsx(
+											"h-4 w-4 transition-all duration-150",
+											copyStatus === "success"
+												? "scale-75 opacity-0"
+												: "scale-100 opacity-100",
+										)}
+										aria-hidden
+									/>
+									<Check
+										className={clsx(
+											"absolute h-4 w-4 text-emerald-600 transition-all duration-150",
+											copyStatus === "success"
+												? "scale-100 opacity-100"
+												: "scale-75 opacity-0",
+										)}
+										aria-hidden
+									/>
+								</span>
+							</Toolbar.Button>
+						}
+					/>
+					<Tooltip.Portal>
+						<Tooltip.Positioner side="top" align="center" sideOffset={6}>
+							<Tooltip.Popup className="rounded-md border border-border bg-popover px-2 py-1 text-xs text-foreground shadow-md transition-opacity duration-150 data-[state=closed]:opacity-0 data-[state=open]:opacity-100">
+								{copyStatus === "success" ? "Copied Markdown" : "Copy Markdown"}
+							</Tooltip.Popup>
+						</Tooltip.Positioner>
+					</Tooltip.Portal>
+				</Tooltip.Root>
+			</Toolbar.Root>
+		</>
 	);
 }
 
