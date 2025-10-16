@@ -259,17 +259,17 @@ test("keeps json path string intact", () => {
 });
 
 test("skips block comments and preserves offsets", () => {
-	const sql = `SELECT /* block comment */ *\n    FROM\n      /* comment with lix_internal_state_reader */\n      lix_internal_state_reader r\n    WHERE /* inline */ r.schema_key = 'reader_key'\n  `;
+	const sql = `SELECT /* block comment */ *\n    FROM\n      /* comment with lix_internal_state_vtable */\n      lix_internal_state_vtable r\n    WHERE /* inline */ r.schema_key = 'reader_key'\n  `;
 	const tokens = tokenize(sql);
 	expectMonotonicOffsets(tokens);
 
 	const tableTok = requireToken(
 		tokens.find(
-			(t) => t.tokenType === Ident && t.image === "lix_internal_state_reader"
+			(t) => t.tokenType === Ident && t.image === "lix_internal_state_vtable"
 		),
 		"real table identifier"
 	);
-	expect(sliceBy(sql, tableTok)).toBe("lix_internal_state_reader");
+	expect(sliceBy(sql, tableTok)).toBe("lix_internal_state_vtable");
 
 	const literal = requireToken(
 		tokens.find((t) => t.tokenType === SQStr && t.image === `'reader_key'`),
@@ -279,7 +279,7 @@ test("skips block comments and preserves offsets", () => {
 });
 
 test("tokenizes numeric literals and signed limits", () => {
-	const sql = `SELECT 42, 3.14, 1.2e3, 4E-2 FROM lix_internal_state_reader r LIMIT -1`;
+	const sql = `SELECT 42, 3.14, 1.2e3, 4E-2 FROM lix_internal_state_vtable r LIMIT -1`;
 	const tokens = tokenize(sql);
 
 	const numImages = tokens
@@ -299,7 +299,7 @@ test("tokenizes numeric literals and signed limits", () => {
 });
 
 test("distinguishes dollar-number params", () => {
-	const sql = `SELECT * FROM lix_internal_state_reader r WHERE r.schema_key = $1 AND r.created_by = $param`;
+	const sql = `SELECT * FROM lix_internal_state_vtable r WHERE r.schema_key = $1 AND r.created_by = $param`;
 	const tokens = tokenize(sql);
 
 	const dollarNumber = requireToken(
@@ -316,7 +316,7 @@ test("distinguishes dollar-number params", () => {
 });
 
 test("tokenizes join with quoted reader and mock table", () => {
-	const sql = `SELECT * FROM "lix_internal_state_reader" r JOIN mock_other_table m ON m.reader_id = r.reader_id`;
+	const sql = `SELECT * FROM "lix_internal_state_vtable" r JOIN mock_other_table m ON m.reader_id = r.reader_id`;
 	const tokens = tokenize(sql);
 
 	const fromIx = tokens.findIndex((t) => t.tokenType === FROM);
@@ -326,7 +326,7 @@ test("tokenizes join with quoted reader and mock table", () => {
 
 	const readerTok = requireToken(tokens[fromIx + 1], "quoted reader");
 	expect(readerTok.tokenType).toBe(QIdent);
-	expect(readerTok.image).toBe(`"lix_internal_state_reader"`);
+	expect(readerTok.image).toBe(`"lix_internal_state_vtable"`);
 
 	const mockTok = requireToken(tokens[joinIx + 1], "mock table ident");
 	expect(mockTok.tokenType).toBe(Ident);
@@ -340,7 +340,7 @@ test("tokenizes join with quoted reader and mock table", () => {
 });
 
 test("tokenizes CTE with nested select", () => {
-	const sql = `WITH reader AS (SELECT * FROM lix_internal_state_reader) SELECT * FROM reader`;
+	const sql = `WITH reader AS (SELECT * FROM lix_internal_state_vtable) SELECT * FROM reader`;
 	const tokens = tokenize(sql);
 
 	const withIx = tokens.findIndex((t) => t.tokenType === WITH);
@@ -352,24 +352,24 @@ test("tokenizes CTE with nested select", () => {
 
 	const innerTable = requireToken(
 		tokens.find(
-			(t) => t.tokenType === Ident && t.image === "lix_internal_state_reader"
+			(t) => t.tokenType === Ident && t.image === "lix_internal_state_vtable"
 		),
 		"inner table"
 	);
-	expect(innerTable.image).toBe("lix_internal_state_reader");
+	expect(innerTable.image).toBe("lix_internal_state_vtable");
 });
 
 test("continues tokenizing after unknown characters", () => {
-	const sql = `SELECT ☺ FROM lix_internal_state_reader`; // smiley is intentionally unsupported
+	const sql = `SELECT ☺ FROM lix_internal_state_vtable`; // smiley is intentionally unsupported
 	const tokens = tokenize(sql);
 
 	const tableTok = requireToken(
 		tokens.find(
-			(t) => t.tokenType === Ident && t.image === "lix_internal_state_reader"
+			(t) => t.tokenType === Ident && t.image === "lix_internal_state_vtable"
 		),
 		"table token after unknown char"
 	);
-	expect(tableTok.image).toBe("lix_internal_state_reader");
+	expect(tableTok.image).toBe("lix_internal_state_vtable");
 
 	// We expect at least one token even though the smiley is unrecognized
 	expect(tokens.length).toBeGreaterThan(0);

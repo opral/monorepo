@@ -11,7 +11,6 @@ import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import type { LixEngine } from "../../engine/boot.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { updateStateCache } from "../cache/update-state-cache.js";
-import { updateStateCacheV2 } from "../cache-v2/update-state-cache.js";
 import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { generateCommit } from "./generate-commit.js";
 import { setHasOpenTransaction } from "./vtable.js";
@@ -544,10 +543,6 @@ export function commit(args: {
 	if (genRes.materializedState.length > 0) {
 		updateStateCache({
 			engine: engine,
-			changes: genRes.materializedState,
-		});
-		updateStateCacheV2({
-			engine,
 			changes: genRes.materializedState,
 		});
 	}

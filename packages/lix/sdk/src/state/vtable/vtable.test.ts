@@ -2579,7 +2579,8 @@ simulationTest(
 
 		// Cache should be populated immediately via write-through
 		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "write-through-entity")
 			.where("schema_key", "=", "write-through-schema")
 			.where("file_id", "=", "write-through-file")
@@ -2677,7 +2678,8 @@ simulationTest(
 
 		// Cache should be immediately updated
 		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "update-cache-entity")
 			.where("schema_key", "=", "update-cache-schema")
 			.where("file_id", "=", "update-cache-file")
@@ -2768,7 +2770,8 @@ simulationTest(
 		const cacheRecord = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "timestamp-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.select(["created_at", "updated_at"])

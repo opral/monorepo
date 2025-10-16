@@ -1,6 +1,7 @@
 import { analyzeShapes } from "./microparser/analyze-shape.js";
 import {
 	buildHoistedInternalStateVtableCte,
+	buildInternalStateCacheProjection,
 	buildInternalStateVtableProjection,
 } from "./recipes/rewrite-internal-state-vtable.js";
 import { tokenize, type Token } from "../../sql-parser/tokenizer.js";
@@ -23,7 +24,12 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 
 	const replacements = shapes
 		.map((shape) => {
-			const wrapped = buildInternalStateVtableProjection(shape);
+			const wrapped =
+				shape.table.tableName === "lix_internal_state_cache"
+					? buildInternalStateCacheProjection(shape, {
+							existingCacheTables: options?.existingCacheTables,
+						})
+					: buildInternalStateVtableProjection(shape);
 			if (!wrapped) return null;
 			return {
 				start: shape.table.start,
@@ -47,7 +53,11 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 		}
 	}
 
-	const cteClause = buildHoistedInternalStateVtableCte(shapes, {
+	const vtableShapes = shapes.filter(
+		(shape) => shape.table.tableName === "lix_internal_state_vtable"
+	);
+
+	const cteClause = buildHoistedInternalStateVtableCte(vtableShapes, {
 		includeTransaction,
 		existingCacheTables: options?.existingCacheTables,
 	});

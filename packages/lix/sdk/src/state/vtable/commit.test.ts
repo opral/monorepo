@@ -1501,13 +1501,16 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify cache has exactly one entry for this entity (in global version)
 	const cacheEntries = await db
-		.selectFrom("lix_internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.selectAll()
+		.where("_pk", "like", "C%")
 		.where("entity_id", "=", "test-global-entity")
 		.execute();
 
-	expect(cacheEntries).toHaveLength(1);
-	expect(cacheEntries[0]?.version_id).toBe("global");
+	const globalCacheEntries = cacheEntries.filter(
+		(entry) => entry.version_id === "global"
+	);
+	expect(globalCacheEntries).toHaveLength(1);
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db

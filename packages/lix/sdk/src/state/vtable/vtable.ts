@@ -13,6 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { getStateCacheTables } from "../cache/schema.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -716,21 +717,14 @@ export function applyStateVTable(
 									existingVersionsWithSameCommit[0]!.version_id; // Take first existing version
 
 								// Get all unique schema keys from the source version
-								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM lix_internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
-									bind: [sourceVersionId],
-									returnValue: "resultRows",
-								}) as string[][];
-
-								// Copy cache entries for each schema key to the appropriate physical table
-								for (const row of schemaKeys || []) {
-									const sourceSchemaKey = row[0];
-									if (!sourceSchemaKey) continue;
-									const sanitizedSchemaKey = sourceSchemaKey.replace(
-										/[^a-zA-Z0-9]/g,
-										"_"
-									);
-									const tableName = `lix_internal_state_cache_v1_${sanitizedSchemaKey}`;
+								const tableCache = getStateCacheTables({ engine });
+								for (const tableName of tableCache) {
+									if (
+										tableName === "lix_internal_state_cache" ||
+										!tableName.startsWith("lix_internal_state_cache_v1_")
+									) {
+										continue;
+									}
 
 									// Check if table exists first
 									const tableExists = sqlite.exec({
@@ -739,25 +733,37 @@ export function applyStateVTable(
 										returnValue: "resultRows",
 									});
 
-									if (tableExists && tableExists.length > 0) {
-										// Copy entries from source version to new version using v2 cache structure
-										sqlite.exec({
-											sql: `
-												INSERT OR IGNORE INTO ${tableName} 
-												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
-												SELECT 
-													entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
-													CASE 
+									if (!tableExists || tableExists.length === 0) {
+										continue;
+									}
+
+									const hasSourceRows = sqlite.exec({
+										sql: `SELECT 1 FROM ${tableName} WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor') LIMIT 1`,
+										bind: [sourceVersionId],
+										returnValue: "resultRows",
+									});
+
+									if (!hasSourceRows || hasSourceRows.length === 0) {
+										continue;
+									}
+
+									// Copy entries from source version to new version using v2 cache structure
+									sqlite.exec({
+										sql: `
+									INSERT OR IGNORE INTO ${tableName} 
+									(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
+									SELECT 
+										entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+										CASE 
 														WHEN inherited_from_version_id IS NULL THEN ?
 														ELSE inherited_from_version_id
 													END as inherited_from_version_id,
 													is_tombstone, change_id, commit_id
-												FROM ${tableName}
-												WHERE version_id = ?
-											`,
-											bind: [newVersionId, sourceVersionId, sourceVersionId],
-										});
-									}
+									FROM ${tableName}
+									WHERE version_id = ?
+								`,
+										bind: [newVersionId, sourceVersionId, sourceVersionId],
+									});
 								}
 							}
 						}

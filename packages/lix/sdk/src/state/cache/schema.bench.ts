@@ -4,10 +4,11 @@ import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { updateStateCache } from "./update-state-cache.js";
 
 const ROW_NUM = 1000;
 
-const LIX_TEST_SCHEMA: LixSchemaDefinition = {
+const TEST_STATE_SCHEMA: LixSchemaDefinition = {
 	type: "object",
 	additionalProperties: false,
 	properties: {
@@ -35,7 +36,7 @@ const LIX_TEST_SCHEMA: LixSchemaDefinition = {
 		},
 	},
 	required: ["entity_id", "schema_key", "file_id", "data"],
-	"x-lix-key": "lix_test",
+	"x-lix-key": "test_state",
 	"x-lix-version": "1.0",
 };
 
@@ -67,10 +68,7 @@ async function registerCacheSchemas(
 ): Promise<void> {
 	await lix.db
 		.insertInto("stored_schema")
-		.values([
-			{ value: LIX_TEST_SCHEMA },
-			{ value: LIX_CHANGE_SET_ELEMENT_SCHEMA },
-		])
+		.values([{ value: TEST_STATE_SCHEMA }])
 		.execute();
 }
 
@@ -79,14 +77,14 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 	await registerCacheSchemas(lix);
 
 	// Generate test rows for cache
-	const rows = [];
+	const changes = [];
 
 	const time = await getTimestamp({ lix });
 
 	for (let i = 0; i < ROW_NUM; i++) {
 		const snapshotContent = {
 			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
+			schema_key: "test_state",
 			file_id: "lix",
 			data: {
 				value: `test-value-${i}`,
@@ -99,149 +97,95 @@ bench(`insert ${ROW_NUM} rows into cache`, async () => {
 			},
 		};
 
-		rows.push({
+		changes.push({
+			id: `change-${i}`,
 			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
+			schema_key: "test_state",
 			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify(snapshotContent),
 			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
+			lixcol_version_id: "global",
+			lixcol_commit_id: `commit-${i}`,
 		});
 	}
 
-	// Insert all rows in one batch
-	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
+	updateStateCache({
+		engine: lix.engine!,
+		changes,
+	});
 });
 
 bench("query with json_extract from cache", async () => {
-	const lix = await openLix({});
-	await registerCacheSchemas(lix);
-	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	try {
+		const lix = await openLix({});
+		await registerCacheSchemas(lix);
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	// First, insert test data
-	const rows = [];
-	const time = await getTimestamp({ lix });
+		// First, insert test data
+		const changes = [];
+		const time = await getTimestamp({ lix });
 
-	for (let i = 0; i < ROW_NUM; i++) {
-		const snapshotContent = {
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			data: {
-				value: `test-value-${i}`,
-				index: i,
-				nested: {
-					field1: `field1-${i}`,
-					field2: i * 2,
-					field3: i % 2 === 0,
+		for (let i = 0; i < ROW_NUM; i++) {
+			const snapshotContent = {
+				entity_id: `entity-${i}`,
+				schema_key: "test_state",
+				file_id: "lix",
+				data: {
+					value: `test-value-${i}`,
+					index: i,
+					nested: {
+						field1: `field1-${i}`,
+						field2: i * 2,
+						field3: i % 2 === 0,
+					},
 				},
-			},
-		};
+			};
 
-		rows.push({
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
+			changes.push({
+				id: `change-${i}`,
+				entity_id: `entity-${i}`,
+				schema_key: "test_state",
+				schema_version: "1.0",
+				file_id: "lix",
+				plugin_key: "test_plugin",
+				snapshot_content: JSON.stringify(snapshotContent),
+				created_at: time,
+				lixcol_version_id: "global",
+				lixcol_commit_id: `commit-${i}`,
+			});
+		}
+
+		updateStateCache({
+			engine: lix.engine!,
+			changes,
 		});
+
+		// Now perform the query with json_extract
+		await db
+			.selectFrom("lix_internal_state_vtable")
+			.select([
+				"entity_id",
+				"schema_key",
+				sql`json_extract(snapshot_content, '$.data.value')`.as("value"),
+				sql`json_extract(snapshot_content, '$.data.index')`.as("index"),
+				sql`json_extract(snapshot_content, '$.data.nested.field3')`.as(
+					"field3"
+				),
+			])
+			.where("_pk", "like", "C%")
+			.where("schema_key", "=", "test_state")
+			.where(
+				sql`json_extract(snapshot_content, '$.data.nested.field3')`,
+				"=",
+				1
+			)
+			.execute();
+	} catch (error) {
+		console.error("Error during benchmark:", error);
+		throw error;
 	}
-
-	await db
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
-
-	// Now perform the query with json_extract
-	await db
-		.selectFrom("lix_internal_state_cache")
-		.select([
-			"entity_id",
-			"schema_key",
-			sql`json_extract(snapshot_content, '$.data.value')`.as("value"),
-			sql`json_extract(snapshot_content, '$.data.index')`.as("index"),
-			sql`json_extract(snapshot_content, '$.data.nested.field3')`.as("field3"),
-		])
-		.where("schema_key", "=", "lix_test")
-		.where(sql`json_extract(snapshot_content, '$.data.nested.field3')`, "=", 1)
-		.execute();
-});
-
-bench("query through resolved_state_all view", async () => {
-	const lix = await openLix({});
-	await registerCacheSchemas(lix);
-	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
-	// First, insert test data
-	const rows = [];
-	const time = await getTimestamp({ lix });
-
-	for (let i = 0; i < ROW_NUM; i++) {
-		const snapshotContent = {
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			data: {
-				value: `test-value-${i}`,
-				index: i,
-				nested: {
-					field1: `field1-${i}`,
-					field2: i * 2,
-					field3: i % 2 === 0,
-				},
-			},
-		};
-
-		rows.push({
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
-		});
-	}
-
-	await db
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
-
-	// Query through the resolved state view which has json() conversion
-	await db
-		.selectFrom("lix_internal_state_vtable")
-		.select([
-			"entity_id",
-			"schema_key",
-			sql`json_extract(snapshot_content, '$.data.value')`.as("value"),
-			sql`json_extract(snapshot_content, '$.data.index')`.as("index"),
-		])
-		.where("schema_key", "=", "lix_test")
-		.where("version_id", "=", "global")
-		.where(sql`json_extract(snapshot_content, '$.data.nested.field3')`, "=", 1)
-		.execute();
 });
 
 bench("complex OR query (deletionReconciliation pattern)", async () => {
@@ -250,11 +194,15 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
-	const rows = [];
 	const time = await getTimestamp({ lix });
-
-	for (let i = 0; i < ROW_NUM; i++) {
-		const snapshotContent = {
+	const rows = Array.from({ length: ROW_NUM }, (_, i) => ({
+		id: `bench-change-elements-${i}`,
+		entity_id: `changeset~entity-${i}`,
+		schema_key: "lix_change_set_element",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: JSON.stringify({
 			entity_id: `changeset~entity-${i}`,
 			schema_key: "lix_change_set_element",
 			file_id: "lix",
@@ -263,28 +211,16 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 				value: `test-value-${i}`,
 				index: i,
 			},
-		};
+		}),
+		created_at: time,
+		lixcol_version_id: "global",
+		lixcol_commit_id: `commit-${i}`,
+	}));
 
-		rows.push({
-			entity_id: `changeset~entity-${i}`,
-			schema_key: "lix_change_set_element",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
-		});
-	}
-
-	await db
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
+	updateStateCache({
+		engine: lix.engine!,
+		changes: rows,
+	});
 
 	// Simulate the deletionReconciliation pattern with complex OR conditions
 	const userChanges: any = [];
@@ -338,115 +274,111 @@ bench("complex OR query (deletionReconciliation pattern)", async () => {
 bench(`update ${ROW_NUM / 10} rows in cache`, async () => {
 	const lix = await openLix({});
 	await registerCacheSchemas(lix);
-	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
-	const rows = [];
-	const time = await getTimestamp({ lix });
-
-	for (let i = 0; i < ROW_NUM / 10; i++) {
-		const snapshotContent = {
+	const baseTimestamp = await getTimestamp({ lix });
+	const initialChanges = Array.from({ length: ROW_NUM / 10 }, (_, i) => ({
+		id: `update-bench-change-${i}`,
+		entity_id: `entity-${i}`,
+		schema_key: "test_state",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: JSON.stringify({
 			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
+			schema_key: "test_state",
 			file_id: "lix",
 			data: {
 				value: `test-value-${i}`,
 				index: i,
 			},
-		};
+		}),
+		created_at: baseTimestamp,
+		lixcol_version_id: "global",
+		lixcol_commit_id: `update-bench-commit-${i}`,
+	}));
 
-		rows.push({
+	updateStateCache({
+		engine: lix.engine!,
+		changes: initialChanges,
+	});
+
+	const updatedTimestamp = await getTimestamp({ lix });
+	const updatedChanges = initialChanges.map((change, i) => ({
+		id: `${change.id}-updated`,
+		entity_id: change.entity_id,
+		schema_key: change.schema_key,
+		schema_version: change.schema_version,
+		file_id: change.file_id,
+		plugin_key: change.plugin_key,
+		snapshot_content: JSON.stringify({
 			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
-		});
-	}
-
-	await db
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
-
-	// Update all rows
-	for (let i = 0; i < ROW_NUM / 10; i++) {
-		const updatedSnapshot = {
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
+			schema_key: "test_state",
 			file_id: "lix",
 			data: {
 				value: `updated-value-${i}`,
 				index: i * 10,
 			},
-		};
+		}),
+		created_at: updatedTimestamp,
+		lixcol_version_id: "global",
+		lixcol_commit_id: `${change.lixcol_commit_id}-updated`,
+	}));
 
-		await db
-			.updateTable("lix_internal_state_cache")
-			.set({
-				snapshot_content: sql`jsonb(${JSON.stringify(updatedSnapshot)})`,
-				updated_at: await getTimestamp({ lix }),
-			})
-			.where("entity_id", "=", `entity-${i}`)
-			.where("schema_key", "=", "lix_test")
-			.where("file_id", "=", "lix")
-			.where("version_id", "=", "global")
-			.execute();
-	}
+	updateStateCache({
+		engine: lix.engine!,
+		changes: updatedChanges,
+	});
 });
 
 bench(`delete ${ROW_NUM / 10} rows from cache`, async () => {
 	const lix = await openLix({});
 	await registerCacheSchemas(lix);
-	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// First, insert test data
-	const rows = [];
 	const time = await getTimestamp({ lix });
-
-	for (let i = 0; i < ROW_NUM / 10; i++) {
-		const snapshotContent = {
+	const changes = Array.from({ length: ROW_NUM / 10 }, (_, i) => ({
+		id: `delete-bench-change-${i}`,
+		entity_id: `entity-${i}`,
+		schema_key: "test_state",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: JSON.stringify({
 			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
+			schema_key: "test_state",
 			file_id: "lix",
 			data: {
 				value: `test-value-${i}`,
 				index: i,
 			},
-		};
+		}),
+		created_at: time,
+		lixcol_version_id: "global",
+		lixcol_commit_id: `delete-bench-commit-${i}`,
+	}));
 
-		rows.push({
-			entity_id: `entity-${i}`,
-			schema_key: "lix_test",
-			file_id: "lix",
-			version_id: "global",
-			change_id: `change-${i}`,
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			created_at: time,
-			updated_at: time,
-			inherited_from_version_id: null,
-			is_tombstone: 0,
-			snapshot_content: sql`jsonb(${JSON.stringify(snapshotContent)})`,
-		});
-	}
+	updateStateCache({
+		engine: lix.engine!,
+		changes,
+	});
 
-	await db
-		.insertInto("lix_internal_state_cache")
-		.values(rows as any)
-		.execute();
+	const deleteTimestamp = await getTimestamp({ lix });
+	const tombstones = changes.map((change, i) => ({
+		id: `${change.id}-delete`,
+		entity_id: change.entity_id,
+		schema_key: change.schema_key,
+		schema_version: change.schema_version,
+		file_id: change.file_id,
+		plugin_key: change.plugin_key,
+		snapshot_content: null,
+		created_at: deleteTimestamp,
+		lixcol_version_id: "global",
+		lixcol_commit_id: `${change.lixcol_commit_id}-delete`,
+	}));
 
-	// Delete all rows
-	await db
-		.deleteFrom("lix_internal_state_cache")
-		.where("schema_key", "=", "lix_test")
-		.where("version_id", "=", "global")
-		.execute();
+	updateStateCache({
+		engine: lix.engine!,
+		changes: tombstones,
+	});
 });

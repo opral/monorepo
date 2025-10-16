@@ -6,7 +6,6 @@ import { applyStateAllView } from "./views/state-all.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
 import { applyStateVTable } from "./vtable/vtable.js";
-import { applyInternalStateReaderSchema } from "./reader/schema.js";
 
 export function applyStateDatabaseSchema(args: {
 	engine: Pick<
@@ -34,10 +33,6 @@ export function applyStateDatabaseSchema(args: {
 	  CREATE INDEX IF NOT EXISTS idx_lix_internal_state_writer_fvw
 	    ON lix_internal_state_writer(file_id, version_id, writer_key);
 	`);
-
-	// Views that route reads through the preprocessor must exist before the vtable registers
-	// triggers that may query them during initialization.
-	applyInternalStateReaderSchema({ engine });
 
 	// Apply the virtual table (binds to the in-process engine)
 	applyStateVTable(engine);

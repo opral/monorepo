@@ -49,8 +49,9 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 
 	// Test 1: Select test rows from vtable (filter by our specific test data)
 	const allRows = await db
-		.selectFrom("lix_internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["entity_id", "schema_key", "file_id"])
+		.where("_pk", "like", "C%")
 		.where("schema_key", "in", ["schema_a", "schema_b"])
 		.orderBy("entity_id")
 		.execute();
@@ -74,8 +75,9 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 
 	// Test 2: Select with schema_key filter (should query single physical table)
 	const schemaARows = await db
-		.selectFrom("lix_internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["entity_id", "schema_key", "file_id"])
+		.where("_pk", "like", "C%")
 		.where("schema_key", "=", "schema_a")
 		.orderBy("entity_id")
 		.execute();
@@ -86,8 +88,9 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 
 	// Test 3: Select with entity_id filter
 	const entity2Row = await db
-		.selectFrom("lix_internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["entity_id", "schema_key", "file_id"])
+		.where("_pk", "like", "C%")
 		.where("entity_id", "=", "entity2")
 		.execute();
 
@@ -100,8 +103,9 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 
 	// Test 4: Select with multiple filters
 	const filteredRow = await db
-		.selectFrom("lix_internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["entity_id", "schema_key", "file_id"])
+		.where("_pk", "like", "C%")
 		.where("schema_key", "=", "schema_a")
 		.where("file_id", "=", "file3")
 		.execute();

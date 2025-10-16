@@ -102,12 +102,17 @@ export function analyzeShape(tokens: Token[]): Shape | null {
 	return shapes[0] ?? null;
 }
 
+const STATE_TABLE_CANDIDATES = [
+	"lix_internal_state_vtable",
+	"lix_internal_state_cache",
+] as const;
+
 /**
- * Derives rewrite metadata for every `lix_internal_state_vtable` reference inside the token stream.
+ * Derives rewrite metadata for every internal state table reference inside the token stream.
  *
  * @example
  * ```ts
- * const tokens = tokenize("SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = 'example'");
+ * const tokens = tokenize("SELECT * FROM lix_internal_state_cache v WHERE v.schema_key = 'example'");
  * const [shape] = analyzeShapes(tokens);
  * console.log(shape.table.alias); // "v"
  * ```
@@ -118,7 +123,9 @@ export function analyzeShapes(tokens: Token[]): Shape[] {
 		return [];
 	}
 
-	const matches = findTableFactors(tokens, "lix_internal_state_vtable");
+	const matches = STATE_TABLE_CANDIDATES.flatMap((tableName) =>
+		findTableFactors(tokens, tableName)
+	);
 	if (matches.length === 0) {
 		return [];
 	}
@@ -151,7 +158,7 @@ function analyzeShapeInternal(
 	const lowerAlias = table.alias.toLowerCase();
 	const allowedAliases = new Set<string>([lowerAlias]);
 	if (!table.explicitAlias) {
-		allowedAliases.add("lix_internal_state_vtable");
+		allowedAliases.add(table.tableName.toLowerCase());
 	}
 
 	let referencesPrimaryKey = false;

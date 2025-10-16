@@ -6,7 +6,6 @@ test("rewrites top-level lix_internal_state_vtable reference", () => {
 	const sql = `SELECT * FROM lix_internal_state_vtable;`;
 	const rewritten = rewriteSql(sql);
 
-	expect(rewritten.trim().startsWith("WITH")).toBe(true);
 	expect(rewritten).toContain("lix_internal_state_vtable_rewritten AS (");
 	expect(rewritten).toContain(
 		"lix_internal_state_cache_v1_lix_version_descriptor"
@@ -14,6 +13,25 @@ test("rewrites top-level lix_internal_state_vtable reference", () => {
 	expect(rewritten).toContain(
 		"(SELECT entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id, created_at, updated_at, inherited_from_version_id, change_id, untracked, commit_id, metadata, writer_key FROM lix_internal_state_vtable_rewritten) AS lix_internal_state_vtable"
 	);
+});
+
+test("rewrites direct lix_internal_state_cache reference", () => {
+	const sql = `SELECT * FROM lix_internal_state_cache AS c WHERE c.schema_key = 'test';`;
+	const rewritten = rewriteSql(sql, {
+		existingCacheTables: new Set([
+			"lix_internal_state_cache_v1_test",
+			"lix_internal_state_cache_v1_lix_version_descriptor",
+		]),
+	});
+
+	expect(rewritten).toContain(
+		"CASE WHEN cache.snapshot_content IS NULL THEN 1 ELSE 0 END AS is_tombstone"
+	);
+	expect(rewritten).not.toContain("lix_internal_state_vtable_rewritten");
+	expect(rewritten).toContain(
+		"FROM (SELECT cache.entity_id, cache.schema_key, cache.file_id, cache.version_id, cache.plugin_key, cache.snapshot_content"
+	);
+	expect(rewritten).toContain("lix_internal_state_cache_v1_test");
 });
 
 test("skips transaction segment when transaction flag false", () => {

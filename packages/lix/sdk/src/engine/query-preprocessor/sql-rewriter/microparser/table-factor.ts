@@ -11,7 +11,7 @@ import {
 } from "../../../sql-parser/tokenizer.js";
 
 /**
- * Result returned when the lexer encounters an lix_internal_state_vtable table factor.
+ * Result returned when the lexer encounters an internal state table factor.
  */
 export interface TableFactorMatch {
 	/** Inclusive start offset of the slice to replace. */
@@ -26,6 +26,8 @@ export interface TableFactorMatch {
 	aliasSql: string;
 	/** Index of the table identifier token inside the token array. */
 	tokenIndex: number;
+	/** Normalized table name that triggered this match. */
+	tableName: string;
 }
 
 const leadingTokens = new Set([FROM, JOIN, Comma]);
@@ -210,6 +212,7 @@ export function findTableFactor(
 			explicitAlias: explicit,
 			aliasSql,
 			tokenIndex: index,
+			tableName,
 		};
 	}
 
