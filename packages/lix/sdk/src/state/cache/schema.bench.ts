@@ -40,29 +40,6 @@ const TEST_STATE_SCHEMA: LixSchemaDefinition = {
 	"x-lix-version": "1.0",
 };
 
-const LIX_CHANGE_SET_ELEMENT_SCHEMA: LixSchemaDefinition = {
-	type: "object",
-	additionalProperties: false,
-	properties: {
-		entity_id: { type: "string" },
-		schema_key: { type: "string" },
-		file_id: { type: "string" },
-		change_id: { type: "string" },
-		data: {
-			type: "object",
-			additionalProperties: false,
-			properties: {
-				value: { type: "string" },
-				index: { type: "number" },
-			},
-			required: ["value", "index"],
-		},
-	},
-	required: ["entity_id", "schema_key", "file_id", "change_id", "data"],
-	"x-lix-key": "lix_change_set_element",
-	"x-lix-version": "1.0",
-};
-
 async function registerCacheSchemas(
 	lix: Awaited<ReturnType<typeof openLix>>
 ): Promise<void> {

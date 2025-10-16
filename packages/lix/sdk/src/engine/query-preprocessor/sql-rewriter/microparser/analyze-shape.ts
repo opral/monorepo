@@ -102,10 +102,7 @@ export function analyzeShape(tokens: Token[]): Shape | null {
 	return shapes[0] ?? null;
 }
 
-const STATE_TABLE_CANDIDATES = [
-	"lix_internal_state_vtable",
-	"lix_internal_state_cache",
-] as const;
+const STATE_TABLE_CANDIDATES = ["lix_internal_state_vtable"] as const;
 
 /**
  * Derives rewrite metadata for every internal state table reference inside the token stream.

@@ -44,33 +44,12 @@ export function buildInternalStateVtableProjection(
 	shape: Shape
 ): string | null {
 	const includePrimaryKey = shape.referencesPrimaryKey;
-	const projectionColumns =
-		shape.table.tableName === "lix_internal_state_cache"
-			? CACHE_TABLE_PROJECTION_COLUMNS
-			: VTABLE_PROJECTION_COLUMNS;
 	const projection = buildProjectionClause(
-		projectionColumns,
+		VTABLE_PROJECTION_COLUMNS,
 		includePrimaryKey
 	);
 	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
 	return `(SELECT ${projection} FROM lix_internal_state_vtable_rewritten) AS ${aliasSql}`;
-}
-
-export function buildInternalStateCacheProjection(
-	shape: Shape,
-	options?: { existingCacheTables?: Set<string> }
-): string | null {
-	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
-	const schemaKeys = shape.schemaKeys
-		.filter((entry) => entry.kind === "literal")
-		.map((entry) => entry.value);
-	const { sql: cacheSource, includeCache } = buildCacheRouting(
-		schemaKeys,
-		options?.existingCacheTables
-	);
-	const sourceSql = includeCache ? cacheSource : buildEmptyCacheSourceSql();
-	const columns = buildCacheProjection(shape.referencesPrimaryKey, "cache");
-	return `(SELECT ${columns} FROM ${sourceSql} AS cache) AS ${aliasSql}`;
 }
 
 /**
@@ -1064,34 +1043,6 @@ const VTABLE_PROJECTION_COLUMNS: ProjectionColumn[] = [
 	{ expression: "writer_key" },
 ];
 
-const CACHE_TABLE_PROJECTION_COLUMNS: ProjectionColumn[] = [
-	{ expression: "entity_id" },
-	{ expression: "schema_key" },
-	{ expression: "file_id" },
-	{ expression: "version_id" },
-	{ expression: "plugin_key" },
-	{ expression: "snapshot_content" },
-	{ expression: "schema_version" },
-	{ expression: "created_at" },
-	{ expression: "updated_at" },
-	{ expression: "inherited_from_version_id" },
-	{
-		expression: "CASE WHEN snapshot_content IS NULL THEN 1 ELSE 0 END",
-		alias: "is_tombstone",
-	},
-	{ expression: "change_id" },
-	{ expression: "commit_id" },
-];
-
-/**
- * Builds the column projection for an inlined state cache sub-select.
- *
- * @example
- * ```ts
- * const sql = buildProjectionClause([{ expression: "entity_id" }], false);
- * console.log(sql);
- * ```
- */
 function buildProjectionClause(
 	columns: ProjectionColumn[],
 	includePrimaryKey: boolean
@@ -1108,35 +1059,6 @@ function buildProjectionClause(
 		}
 	}
 	return parts.join(", ");
-}
-
-function buildCacheProjection(
-	includePrimaryKey: boolean,
-	sourceAlias = ""
-): string {
-	const aliasPrefix = sourceAlias ? `${sourceAlias}.` : "";
-	const columns: string[] = [];
-	if (includePrimaryKey) {
-		columns.push(
-			`${aliasPrefix}entity_id || '|' || ${aliasPrefix}schema_key || '|' || ${aliasPrefix}file_id || '|' || ${aliasPrefix}version_id AS _pk`
-		);
-	}
-	columns.push(`${aliasPrefix}entity_id`);
-	columns.push(`${aliasPrefix}schema_key`);
-	columns.push(`${aliasPrefix}file_id`);
-	columns.push(`${aliasPrefix}version_id`);
-	columns.push(`${aliasPrefix}plugin_key`);
-	columns.push(`${aliasPrefix}snapshot_content`);
-	columns.push(`${aliasPrefix}schema_version`);
-	columns.push(`${aliasPrefix}created_at`);
-	columns.push(`${aliasPrefix}updated_at`);
-	columns.push(`${aliasPrefix}inherited_from_version_id`);
-	columns.push(
-		`CASE WHEN ${aliasPrefix}snapshot_content IS NULL THEN 1 ELSE 0 END AS is_tombstone`
-	);
-	columns.push(`${aliasPrefix}change_id`);
-	columns.push(`${aliasPrefix}commit_id`);
-	return columns.join(", ");
 }
 
 function buildFilterClauses(
