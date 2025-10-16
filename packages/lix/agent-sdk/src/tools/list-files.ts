@@ -3,6 +3,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export const ListFilesInputSchema = z.object({
+	versionId: z.string().min(1, "versionId is required"),
 	// Simple filters over the file.path
 	query: z.string().min(1).optional(), // substring match (LIKE %query%)
 	prefix: z.string().min(1).optional(), // starts with (LIKE prefix%)
@@ -33,6 +34,7 @@ export async function listFiles(
 ): Promise<ListFilesOutput> {
 	const {
 		lix,
+		versionId,
 		query,
 		prefix,
 		ext,
@@ -44,7 +46,9 @@ export async function listFiles(
 	} = args;
 
 	// Build query
-	let q = lix.db.selectFrom("file");
+	let q = lix.db
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionId as any);
 
 	if (!includeHidden) {
 		q = q.where("hidden", "=", false);
@@ -85,7 +89,7 @@ export async function listFiles(
 export function createListFilesTool(args: { lix: Lix }) {
 	return tool({
 		description:
-			"List workspace file paths using simple filters (query/prefix/ext), with pagination and sorting.",
+			"List file paths in the lix for a specific version using simple filters (query/prefix/ext), with pagination and sorting.",
 		inputSchema: ListFilesInputSchema,
 		execute: async (input) =>
 			listFiles({ lix: args.lix, ...(input as ListFilesInput) }),

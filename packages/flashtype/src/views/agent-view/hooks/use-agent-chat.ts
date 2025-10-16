@@ -8,6 +8,7 @@ import {
 	type LixAgent,
 	type ChatMessage as AgentMessage,
 } from "@lix-js/agent-sdk";
+import { clearConversation as runClearConversation } from "../commands/clear";
 
 type AgentChatMessage = AgentMessage & {
 	metadata?: Record<string, unknown>;
@@ -20,6 +21,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
+	const [conversationId, setConversationId] = useState<string | null>(null);
 
 	const modelName = "google/gemini-2.5-flash";
 	const [missingKey, setMissingKey] = useState(false);
@@ -56,28 +58,52 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	);
 	const hasKey = !missingKey;
 
-	// Boot agent and subscribe to message changes for transcript
+	const refreshConversationId = useCallback(async (): Promise<
+		string | null
+	> => {
+		const ptr = await lix.db
+			.selectFrom("key_value_all")
+			.where("lixcol_version_id", "=", "global")
+			.where("key", "=", "lix_agent_conversation_id")
+			.select(["value"])
+			.executeTakeFirst();
+		const id =
+			typeof ptr?.value === "string" && ptr.value.length > 0
+				? (ptr.value as string)
+				: null;
+		setConversationId(id);
+		return id;
+	}, [lix]);
+
+	// Boot agent
 	useEffect(() => {
 		let cancelled = false;
-		let sub: { unsubscribe(): void } | null = null;
 		(async () => {
 			if (!hasKey || !model) {
 				setAgent(null);
+				setConversationId(null);
+				setMessages([]);
 				return;
 			}
 			const a = await createLixAgent({ lix, model, system });
 			if (cancelled) return;
 			setAgent(a);
-			// Fetch pointer to default conversation
-			const ptr = await lix.db
-				.selectFrom("key_value_all")
-				.where("lixcol_version_id", "=", "global")
-				.where("key", "=", "lix_agent_conversation_id")
-				.select(["value"])
-				.executeTakeFirst();
-			const conversationId = (ptr?.value as any) ?? null;
-			if (!conversationId) return;
+			await refreshConversationId();
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [lix, model, hasKey, system, refreshConversationId]);
 
+	// Subscribe to conversation messages when the ID changes
+	useEffect(() => {
+		let cancelled = false;
+		let sub: { unsubscribe(): void } | null = null;
+		(async () => {
+			if (!conversationId) {
+				setMessages([]);
+				return;
+			}
 			const query = lix.db
 				.selectFrom("conversation_message")
 				.where("conversation_id", "=", String(conversationId))
@@ -86,6 +112,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 				.orderBy("id", "asc");
 			sub = lix.observe(query).subscribe({
 				next: (rows) => {
+					if (cancelled) return;
 					type ConversationRow = (typeof rows)[number] & {
 						lixcol_metadata?: Record<string, unknown> | null;
 					};
@@ -113,7 +140,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			cancelled = true;
 			sub?.unsubscribe();
 		};
-	}, [lix, model, hasKey, system]);
+	}, [lix, conversationId]);
 
 	const send = useCallback(
 		async (
@@ -140,20 +167,9 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 	);
 
 	const clear = useCallback(async () => {
-		if (!agent) return;
-		await agent.clearHistory();
-		// After clearing, refetch pointer and let subscription update
-		try {
-			const ptr = await lix.db
-				.selectFrom("key_value_all")
-				.where("lixcol_version_id", "=", "global")
-				.where("key", "=", "lix_agent_conversation_id")
-				.select(["value"])
-				.executeTakeFirst();
-			void ptr;
-		} catch {
-			// ignore
-		}
+		const newId = await runClearConversation({ lix, agent });
+		setConversationId(newId);
+		setMessages([]);
 	}, [agent, lix]);
 
 	return {

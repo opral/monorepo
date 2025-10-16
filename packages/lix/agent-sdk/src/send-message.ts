@@ -75,7 +75,7 @@ export async function sendMessageCore(args: {
 	const mentionPaths = extractMentionPaths(text);
 	const mentionGuidance =
 		mentionPaths.length > 0
-			? `File mentions like @<path> may refer to workspace files. If helpful, you can call the read_file tool with { path: "<path>" } to inspect content before answering. Only read files when needed.`
+			? `File mentions like @<path> may refer to files in the lix. If helpful, you can call the read_file tool with { path: "<path>" } to inspect content before answering. Only read files when needed.`
 			: undefined;
 
 	let stepNo = 0;

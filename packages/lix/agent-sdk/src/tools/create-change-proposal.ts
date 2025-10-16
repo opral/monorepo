@@ -1,12 +1,13 @@
-import type { Lix, LixVersion } from "@lix-js/sdk";
+import type { Lix } from "@lix-js/sdk";
 import { createChangeProposal } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
-import { ensureAgentVersion } from "../agent-version.js";
 import dedent from "dedent";
 
-// No input; always targets the main version
-export const CreateChangeProposalInputSchema = z.object({}).optional();
+export const CreateChangeProposalInputSchema = z.object({
+	sourceVersionId: z.string().min(1, "sourceVersionId is required"),
+	targetVersionId: z.string().min(1, "targetVersionId is required"),
+});
 export type CreateChangeProposalInput = z.infer<
 	typeof CreateChangeProposalInputSchema
 >;
@@ -22,33 +23,43 @@ export type CreateChangeProposalOutput = z.infer<
 	typeof CreateChangeProposalOutputSchema
 >;
 
-async function resolveMainVersion(trx: Lix["db"]): Promise<LixVersion> {
-	const main = await trx
-		.selectFrom("version")
-		.where("name", "=", "main")
-		.selectAll()
-		.limit(1)
-		.executeTakeFirstOrThrow();
-	return main as unknown as LixVersion;
-}
-
 export async function createChangeProposalToolExec(args: {
 	lix: Lix;
+	input: CreateChangeProposalInput;
 }): Promise<CreateChangeProposalOutput> {
-	const { lix } = args;
+	const { lix, input } = args;
+
+	const sourceVersionId = input.sourceVersionId;
 
 	const exec = async (trx: Lix["db"]) => {
-		// Ensure source is the non-hidden agent version
-		const agentVersion = await ensureAgentVersion({ ...lix, db: trx });
+		const source = await trx
+			.selectFrom("version")
+			.where("id", "=", sourceVersionId as any)
+			.select(["id"])
+			.executeTakeFirst();
+		if (!source) {
+			throw new Error(
+				`create_change_proposal: source version ${sourceVersionId} not found`
+			);
+		}
 
-		// Resolve target version (always main)
-		const target = await resolveMainVersion(trx);
+		// Resolve target version (defaults to main if not provided)
+		const target = await trx
+			.selectFrom("version")
+			.where("id", "=", input.targetVersionId as any)
+			.select(["id"])
+			.executeTakeFirst();
+		if (!target) {
+			throw new Error(
+				`create_change_proposal: target version ${input.targetVersionId} not found`
+			);
+		}
 
 		// Idempotency: if an open proposal already exists for this source→target,
 		// return it instead of creating a duplicate.
 		const existing = await trx
 			.selectFrom("change_proposal")
-			.where("source_version_id", "=", agentVersion.id as any)
+			.where("source_version_id", "=", source.id as any)
 			.where("target_version_id", "=", target.id as any)
 			.where("status", "=", "open")
 			.selectAll()
@@ -61,20 +72,20 @@ export async function createChangeProposalToolExec(args: {
 			const err: any = new Error(msg);
 			err.code = "ACTIVE_PROPOSAL_EXISTS";
 			err.proposalId = existing.id;
-			err.sourceVersionId = agentVersion.id;
+			err.sourceVersionId = source.id;
 			err.targetVersionId = target.id;
 			throw err;
 		}
 
 		const proposal = await createChangeProposal({
 			lix: { ...lix, db: trx },
-			source: { id: agentVersion.id },
+			source: { id: source.id },
 			target: { id: target.id },
 		});
 
 		return CreateChangeProposalOutputSchema.parse({
 			id: proposal.id,
-			sourceVersionId: agentVersion.id,
+			sourceVersionId: source.id,
 			targetVersionId: target.id,
 			status: proposal.status ?? "open",
 		});
@@ -92,16 +103,18 @@ export function createCreateChangeProposalTool(args: {
 		description: dedent`
       Finalize a logical unit of work by creating a change proposal.
 
-      Use this after you have completed all file modifications needed to satisfy
-      the user's request (a task). You may call write_file and/or delete_file
-      multiple times; when the task is complete, call create_change_proposal to
-      bundle the changes for review.
+      Provide both sourceVersionId (where your edits live) and
+      targetVersionId (where the proposal should merge).
 
-      Returns: { id, sourceVersionId, targetVersionId, status }.
+      Returns { id, sourceVersionId, targetVersionId, status }.
     `,
 		inputSchema: CreateChangeProposalInputSchema,
-		execute: async () => {
-			const result = await createChangeProposalToolExec({ lix: args.lix });
+		execute: async (input) => {
+			const parsedInput = CreateChangeProposalInputSchema.parse(input);
+			const result = await createChangeProposalToolExec({
+				lix: args.lix,
+				input: parsedInput,
+			});
 			args.onCreated?.(result);
 			// Persist active proposal id globally so future turns know proposal mode
 			try {

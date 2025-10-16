@@ -2,7 +2,7 @@ import { act, render, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { useEffect } from "react";
 import { useComposerState } from "./composer-state";
-import { MOCK_COMMANDS } from "./commands";
+import { COMMANDS } from "./commands/index";
 
 const TEST_FILES = ["docs/readme.md", "src/app.ts", "README.md"];
 
@@ -79,7 +79,7 @@ describe("useComposerState", () => {
 
 function HookHarness({ onRender }: { onRender: (state: Snapshot) => void }) {
 	const state = useComposerState({
-		commands: MOCK_COMMANDS,
+		commands: COMMANDS,
 		files: TEST_FILES,
 	});
 	useEffect(() => {

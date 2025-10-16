@@ -11,7 +11,7 @@ import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
 import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
-import { MOCK_COMMANDS } from "./commands";
+import { COMMANDS } from "./commands/index";
 import { MentionMenu, CommandMenu } from "./menu";
 import { extractSlashToken, useComposerState } from "./composer-state";
 import { selectFilePaths } from "./select-file-paths";
@@ -91,7 +91,7 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		filteredCommands,
 		updateMentions,
 		pushHistory,
-	} = useComposerState({ commands: MOCK_COMMANDS, files: filePaths });
+	} = useComposerState({ commands: COMMANDS, files: filePaths });
 
 	// const hasConversations = agentMessages.length > 0;
 	// const conversationLabel = hasConversations
