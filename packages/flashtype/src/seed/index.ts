@@ -1,4 +1,6 @@
 import type { Lix } from "@lix-js/sdk";
+import { newLixFile, openLix, createCheckpoint } from "@lix-js/sdk";
+import mdPlugin from "@lix-js/plugin-md?raw";
 
 // Raw-import seed markdown content via Vite
 // eslint-disable-next-line import/no-unresolved
@@ -61,4 +63,27 @@ export async function ensureAgentsFile(lix: Lix): Promise<void> {
 		.insertInto("file")
 		.values({ path: "/AGENTS.md", data })
 		.execute();
+}
+
+/**
+ * Create a seeded Lix blob with AGENTS.md and an initial checkpoint.
+ *
+ * @example
+ * const blob = await createSeededLixBlob();
+ * await env.create({ blob: await blob.arrayBuffer() });
+ */
+export async function createSeededLixBlob(): Promise<Blob> {
+	const seed = await newLixFile();
+	const lix = await openLix({
+		blob: seed,
+		providePluginsRaw: [mdPlugin],
+	});
+
+	try {
+		await ensureAgentsFile(lix);
+		await createCheckpoint({ lix });
+		return await lix.toBlob();
+	} finally {
+		await lix.close();
+	}
 }

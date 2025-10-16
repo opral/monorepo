@@ -9,7 +9,7 @@ import { KEY_VALUE_DEFINITIONS } from "./hooks/key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
 import { V2LayoutShell } from "./app/layout-shell";
-import { ensureAgentsFile } from "./seed";
+import { ensureAgentsFile, createSeededLixBlob } from "./seed";
 
 // Error UI moved to ./main.error.tsx
 
@@ -23,6 +23,11 @@ export const AppRoot = () => {
 		let current: Lix | undefined;
 		(async () => {
 			try {
+				if (!(await env.exists())) {
+					const seededBlob = await createSeededLixBlob();
+					await env.create({ blob: await seededBlob.arrayBuffer() });
+				}
+
 				const instance = await openLix({
 					providePluginsRaw: [mdPlugin],
 					environment: env,
