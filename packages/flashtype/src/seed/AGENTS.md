@@ -1,6 +1,6 @@
 Dear User,
 
-Use this file to give instructions of how you want the lix agent to work for you. You can use any language you'd like (English, German, Spanish, etc). You can find more information on [https://agents.md/](https://agents.md/).
+Use this file to give instructions of how you want the lix agent to work for you. You can use any language you'd like (English, German, Spanish, etc). You can find more information on <https://agents.md/>.
 
 For example:
 

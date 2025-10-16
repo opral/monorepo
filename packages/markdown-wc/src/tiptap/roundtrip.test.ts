@@ -5,6 +5,8 @@ import { astToTiptapDoc } from "./mdwc-to-tiptap.js"
 import { tiptapDocToAst } from "./tiptap-to-mdwc.js"
 import { Editor } from "@tiptap/core"
 import { MarkdownWc } from "./markdown-wc.js"
+import { parseMarkdown } from "../ast/parse-markdown.js"
+import { serializeAst } from "../ast/serialize-ast.js"
 
 function roundtrip(ast: Ast): Ast {
 	const pmDoc = astToTiptapDoc(ast)
@@ -22,6 +24,12 @@ function roundtripThroughEditor(ast: Ast): Ast {
 	const result = tiptapDocToAst(outJSON)
 	editor.destroy()
 	return result
+}
+
+function roundtripMarkdownThroughEditor(markdown: string): string {
+	const ast = parseMarkdown(markdown)
+	const editorAst = roundtripThroughEditor(ast)
+	return serializeAst(editorAst)
 }
 
 describe("root & paragraph", () => {
@@ -184,6 +192,13 @@ describe("paragraph marks", () => {
 		expect(output).toEqual(input)
 		const editorOutput = roundtripThroughEditor(input)
 		expect(editorOutput).toEqual(input)
+	})
+
+	// <link> is a valid markdown form
+	test.skip("link retains literal bracket syntax when label matches url", () => {
+		const markdown = "[https://agents.md/](https://agents.md/)"
+		const roundtripped = roundtripMarkdownThroughEditor(markdown)
+		expect(roundtripped).toBe(markdown)
 	})
 })
 
