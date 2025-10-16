@@ -1,6 +1,6 @@
 import type { LixEngine } from "./boot.js";
 import { createSchemaCacheTable } from "../state/cache/create-schema-cache-table.js";
-import { getStateCacheV2Tables } from "../state/cache/schema.js";
+import { getStateCacheTables } from "../state/cache/schema.js";
 
 type ExplainQueryStage = {
 	original: {
@@ -72,7 +72,7 @@ function ensureCacheTablesForSql(
 	sql: string
 ): void {
 	const matches = sql.matchAll(/lix_internal_state_cache_([A-Za-z0-9_]+)/g);
-	const tableCache = getStateCacheV2Tables({ engine });
+	const tableCache = getStateCacheTables({ engine });
 	for (const match of matches) {
 		const sanitizedSuffix = match[1];
 		if (!sanitizedSuffix) continue;

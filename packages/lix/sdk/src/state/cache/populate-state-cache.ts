@@ -1,5 +1,5 @@
 import type { LixEngine } from "../../engine/boot.js";
-import { getStateCacheV2Tables } from "./schema.js";
+import { getStateCacheTables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
 export interface PopulateStateCacheV2Options {
@@ -60,7 +60,7 @@ export function populateStateCache(args: {
 	}
 
 	// Clear existing cache entries for the versions being populated
-	const tableCache = getStateCacheV2Tables({ engine: args.engine });
+	const tableCache = getStateCacheTables({ engine: args.engine });
 	for (const tableName of tableCache) {
 		if (tableName === "lix_internal_state_cache") continue;
 
@@ -198,7 +198,7 @@ function ensureTableExists(
 	tableName: string
 ): void {
 	createSchemaCacheTable({ engine, tableName });
-	const tableCache = getStateCacheV2Tables({ engine });
+	const tableCache = getStateCacheTables({ engine });
 	if (!tableCache.has(tableName)) {
 		tableCache.add(tableName);
 	}

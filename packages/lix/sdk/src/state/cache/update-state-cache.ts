@@ -1,7 +1,7 @@
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
-import { getStateCacheV2Tables } from "./schema.js";
+import { getStateCacheTables } from "./schema.js";
 import { createSchemaCacheTable } from "./create-schema-cache-table.js";
 
 /**
@@ -207,7 +207,7 @@ function ensureTableExists(args: {
 	tableName: string;
 }): void {
 	const { engine, tableName } = args;
-	const tableCache = getStateCacheV2Tables({ engine });
+	const tableCache = getStateCacheTables({ engine });
 	createSchemaCacheTable({
 		engine: args.engine,
 		tableName,

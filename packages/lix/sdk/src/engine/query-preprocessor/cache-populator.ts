@@ -5,7 +5,7 @@ import {
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "../../state/cache/create-schema-cache-table.js";
-import { getStateCacheV2Tables } from "../../state/cache/schema.js";
+import { getStateCacheTables } from "../../state/cache/schema.js";
 import type { LixEngine } from "../boot.js";
 import type { Shape } from "./sql-rewriter/microparser/analyze-shape.js";
 
@@ -151,7 +151,7 @@ function ensureCacheTablesForShape(
 		return;
 	}
 
-	const tableCache = getStateCacheV2Tables({ engine });
+	const tableCache = getStateCacheTables({ engine });
 	for (const schemaKey of literalSchemaKeys) {
 		const tableName = schemaKeyToCacheTableName(schemaKey);
 		if (tableCache.has(tableName)) {

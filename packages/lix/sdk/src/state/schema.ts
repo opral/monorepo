@@ -1,7 +1,7 @@
 import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
-import { applyStateCacheV2Schema } from "./cache/schema.js";
+import { applyStateCacheSchema } from "./cache/schema.js";
 import { applyStateAllView } from "./views/state-all.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
@@ -16,7 +16,7 @@ export function applyStateDatabaseSchema(args: {
 }): void {
 	const { engine } = args;
 	applyMaterializeStateSchema({ engine });
-	applyStateCacheV2Schema({ engine });
+	applyStateCacheSchema({ engine });
 	applyUntrackedStateSchema({ engine });
 
 	// Writer metadata table: stores last writer per (file, version, entity, schema).

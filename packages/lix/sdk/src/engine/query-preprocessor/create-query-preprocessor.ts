@@ -30,7 +30,7 @@ import {
 } from "../sql-parser/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
-import { getStateCacheV2Tables } from "../../state/cache/schema.js";
+import { getStateCacheTables } from "../../state/cache/schema.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
 import {
 	readDmlTarget,
@@ -287,7 +287,7 @@ function maybeRewriteStateAccess(args: {
 	if (shapes.length === 0) {
 		if (args.kind === "select") {
 			const includeTransaction = hasOpenTransaction(args.engine);
-			const existingCacheTables = getStateCacheV2Tables({
+			const existingCacheTables = getStateCacheTables({
 				engine: args.engine,
 			});
 			const rewrittenSql = rewriteSql(currentSql, {
@@ -314,7 +314,7 @@ function maybeRewriteStateAccess(args: {
 		return null;
 	}
 
-	const existingCacheTables = getStateCacheV2Tables({ engine: args.engine });
+	const existingCacheTables = getStateCacheTables({ engine: args.engine });
 	if (args.sideEffects !== false) {
 		for (const shape of shapes) {
 			ensureFreshStateCache({ engine: args.engine, shape });
