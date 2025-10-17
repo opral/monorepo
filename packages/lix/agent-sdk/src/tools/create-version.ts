@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import { createVersion } from "@lix-js/sdk";
+import { createVersion, withWriterKey } from "@lix-js/sdk";
 import { tool } from "ai";
 import dedent from "dedent";
 import { z } from "zod";
@@ -23,8 +23,9 @@ export type CreateVersionOutput = z.infer<typeof CreateVersionOutputSchema>;
 export async function createVersionToolExec(args: {
 	lix: Lix;
 	input: CreateVersionInput;
+	writerKey?: string | null;
 }): Promise<CreateVersionOutput> {
-	const { lix, input } = args;
+	const { lix, input, writerKey } = args;
 
 	const exec = async (trx: Lix["db"]) => {
 		let fromOption: { id: string } | undefined;
@@ -56,11 +57,20 @@ export async function createVersionToolExec(args: {
 		});
 	};
 
+	if (writerKey !== undefined) {
+		return withWriterKey(lix.db, writerKey, async (trx) =>
+			exec(trx as unknown as Lix["db"])
+		);
+	}
+
 	if (lix.db.isTransaction) return exec(lix.db);
 	return lix.db.transaction().execute(exec);
 }
 
-export function createCreateVersionTool(args: { lix: Lix }) {
+export function createCreateVersionTool(args: {
+	lix: Lix;
+	getWriterKey?: () => string | null | undefined;
+}) {
 	return tool({
 		description: dedent`
       Create a new version in the lix.
@@ -74,7 +84,11 @@ export function createCreateVersionTool(args: { lix: Lix }) {
 		inputSchema: CreateVersionInputSchema,
 		execute: async (input) => {
 			const parsed = CreateVersionInputSchema.parse(input);
-			return createVersionToolExec({ lix: args.lix, input: parsed });
+			return createVersionToolExec({
+				lix: args.lix,
+				input: parsed,
+				writerKey: args.getWriterKey?.() ?? undefined,
+			});
 		},
 	});
 }

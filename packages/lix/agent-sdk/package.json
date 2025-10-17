@@ -17,6 +17,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run --typecheck",
     "test:watch": "vitest --typecheck",
     "format": "prettier ./src --write",

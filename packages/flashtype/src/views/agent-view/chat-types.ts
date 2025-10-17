@@ -14,6 +14,14 @@ export interface ChatMessage {
 	at?: number;
 	/** Optional tool-call simulation data rendered for assistant messages. */
 	toolRuns?: ToolRun[];
+	/** Optional agent decision prompt rendered with actions. */
+	decision?: AgentDecision;
+}
+
+export interface AgentDecision {
+	prompt: string;
+	acceptLabel?: string;
+	rejectLabel?: string;
 }
 
 /** Keyboard shortcut descriptor. */

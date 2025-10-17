@@ -7,11 +7,103 @@ import {
 	createLixAgent,
 	type LixAgent,
 	type ChatMessage as AgentMessage,
+	getOrCreateDefaultAgentConversationId,
+	appendUserMessage,
+	appendAssistantMessage,
 } from "@lix-js/agent-sdk";
 import { clearConversation as runClearConversation } from "../commands/clear";
 
 type AgentChatMessage = AgentMessage & {
 	metadata?: Record<string, unknown>;
+};
+
+type DecisionChange = {
+	entityId: string;
+	schemaKey: string;
+	pluginKey: string;
+	fileId: string;
+	versionId: string;
+	changeId: string;
+};
+
+type PendingDecision = {
+	id: string;
+	writerKey: string;
+	changes: DecisionChange[];
+};
+
+export type ToolEvent =
+	| {
+			type: "start";
+			id: string;
+			name: string;
+			input?: unknown;
+			at: number;
+	  }
+	| {
+			type: "finish";
+			id: string;
+			name: string;
+			output?: unknown;
+			at: number;
+	  }
+	| {
+			type: "error";
+			id: string;
+			name: string;
+			errorText: string;
+			at: number;
+	  };
+
+type AgentStream = Awaited<ReturnType<LixAgent["sendMessage"]>>;
+
+const formatToolError = (value: unknown): string => {
+	if (value instanceof Error) return value.message;
+	if (typeof value === "string") return value;
+	try {
+		return JSON.stringify(value);
+	} catch {
+		return String(value);
+	}
+};
+
+const consumeAgentStream = async (
+	stream: AgentStream,
+	onToolEvent?: (event: ToolEvent) => void,
+): Promise<Awaited<AgentStream["done"]>> => {
+	if (!onToolEvent) {
+		return stream.drain();
+	}
+
+	for await (const part of stream.ai_sdk.fullStream) {
+		if (part.type === "tool-call") {
+			onToolEvent({
+				type: "start",
+				id: part.toolCallId,
+				name: String(part.toolName),
+				input: part.input,
+				at: Date.now(),
+			});
+		} else if (part.type === "tool-result") {
+			if (part.preliminary) continue;
+			onToolEvent({
+				type: "finish",
+				id: part.toolCallId,
+				name: String(part.toolName),
+				output: part.output,
+				at: Date.now(),
+			});
+		} else if (part.type === "tool-error") {
+			onToolEvent({
+				type: "error",
+				id: part.toolCallId,
+				name: String(part.toolName),
+				errorText: formatToolError(part.error),
+				at: Date.now(),
+			});
+		}
+	}
+	return stream.done;
 };
 
 export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
@@ -22,6 +114,8 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 	const [conversationId, setConversationId] = useState<string | null>(null);
+	const [pendingDecision, setPendingDecision] =
+		useState<PendingDecision | null>(null);
 
 	const modelName = "google/gemini-2.5-pro";
 	const [missingKey, setMissingKey] = useState(false);
@@ -57,6 +151,13 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		[missingKey, provider, modelName],
 	);
 	const hasKey = !missingKey;
+
+	const ensureConversationId = useCallback(async (): Promise<string> => {
+		if (conversationId) return conversationId;
+		const id = await getOrCreateDefaultAgentConversationId(lix);
+		setConversationId(id);
+		return id;
+	}, [conversationId, lix]);
 
 	const refreshConversationId = useCallback(async (): Promise<
 		string | null
@@ -146,30 +247,69 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		async (
 			text: string,
 			opts?: {
-				onToolEvent?: (e: import("@lix-js/agent-sdk").ToolEvent) => void;
+				signal?: AbortSignal;
+				onToolEvent?: (event: ToolEvent) => void;
 			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
-			if (!text.trim()) return;
+			const trimmed = text.trim();
+			if (!trimmed) return;
 			setError(null);
+			setPendingDecision(null);
 			setPending(true);
 			try {
-				const res = await agent.sendMessage({
+				const convId = await ensureConversationId();
+				await appendUserMessage(lix, convId, text);
+
+				const stream = await agent.sendMessage({
 					text,
-					onToolEvent: opts?.onToolEvent,
+					signal: opts?.signal,
 				});
-				return res;
+				const outcome = await consumeAgentStream(stream, opts?.onToolEvent);
+
+				await appendAssistantMessage(
+					lix,
+					convId,
+					outcome.text,
+					outcome.metadata ?? undefined,
+				);
+
+				setPendingDecision({
+					id: `decision-${Date.now().toString(36)}`,
+					writerKey: outcome.writerKey ?? "",
+					changes: [],
+				});
+			} catch (err) {
+				const message =
+					err instanceof Error ? err.message : String(err ?? "unknown");
+				setError(message);
+				throw err;
 			} finally {
 				setPending(false);
 			}
 		},
-		[agent],
+		[agent, ensureConversationId, lix],
 	);
+
+	const acceptPendingDecision = useCallback(() => {
+		if (!pendingDecision) return;
+		// eslint-disable-next-line no-console
+		console.log("Accepting agent changes", pendingDecision);
+		setPendingDecision(null);
+	}, [pendingDecision]);
+
+	const rejectPendingDecision = useCallback(() => {
+		if (!pendingDecision) return;
+		// eslint-disable-next-line no-console
+		console.log("Rejecting agent changes", pendingDecision);
+		setPendingDecision(null);
+	}, [pendingDecision]);
 
 	const clear = useCallback(async () => {
 		const newId = await runClearConversation({ lix, agent });
 		setConversationId(newId);
 		setMessages([]);
+		setPendingDecision(null);
 	}, [agent, lix]);
 
 	return {
@@ -181,5 +321,8 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		ready: !!agent,
 		modelName,
 		hasKey,
+		pendingDecision,
+		acceptPendingDecision,
+		rejectPendingDecision,
 	} as const;
 }

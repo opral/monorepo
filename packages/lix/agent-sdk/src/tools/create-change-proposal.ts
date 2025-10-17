@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import { createChangeProposal } from "@lix-js/sdk";
+import { createChangeProposal, withWriterKey } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
 import dedent from "dedent";
@@ -37,8 +37,9 @@ export type CreateChangeProposalOutput = z.infer<
 export async function createChangeProposalToolExec(args: {
 	lix: Lix;
 	input: CreateChangeProposalInput;
+	writerKey?: string | null;
 }): Promise<CreateChangeProposalOutput> {
-	const { lix, input } = args;
+	const { lix, input, writerKey } = args;
 
 	const sourceVersionId = input.sourceVersionId ?? input.source_version_id;
 	const targetVersionId = input.targetVersionId ?? input.target_version_id;
@@ -108,6 +109,12 @@ export async function createChangeProposalToolExec(args: {
 		});
 	};
 
+	if (writerKey !== undefined) {
+		return withWriterKey(lix.db, writerKey, async (trx) =>
+			exec(trx as unknown as Lix["db"])
+		);
+	}
+
 	if (lix.db.isTransaction) return exec(lix.db);
 	return lix.db.transaction().execute(exec);
 }
@@ -115,6 +122,7 @@ export async function createChangeProposalToolExec(args: {
 export function createCreateChangeProposalTool(args: {
 	lix: Lix;
 	onCreated?: (proposal: CreateChangeProposalOutput) => void;
+	getWriterKey?: () => string | null | undefined;
 }) {
 	return tool({
 		description: dedent`
@@ -131,6 +139,7 @@ export function createCreateChangeProposalTool(args: {
 			const result = await createChangeProposalToolExec({
 				lix: args.lix,
 				input: parsedInput,
+				writerKey: args.getWriterKey?.() ?? undefined,
 			});
 			args.onCreated?.(result);
 			// Persist active proposal id globally so future turns know proposal mode

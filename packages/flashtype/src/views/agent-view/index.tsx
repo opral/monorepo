@@ -6,18 +6,20 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { ArrowUp, Bot } from "lucide-react";
+import { Bot } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
 import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
-import { COMMANDS } from "./commands/index";
+import { COMMANDS, type SlashCommand } from "./commands/index";
 import { MentionMenu, CommandMenu } from "./menu";
-import { extractSlashToken, useComposerState } from "./composer-state";
+import { useComposerState } from "./composer-state";
 import { selectFilePaths } from "./select-file-paths";
-import { useAgentChat } from "./hooks/use-agent-chat";
+import { useAgentChat, type ToolEvent } from "./hooks/use-agent-chat";
 import { createReactViewDefinition } from "../../app/react-view";
 import { systemPrompt } from "./system-prompt";
+import { PromptComposer } from "./components/prompt-composer";
+import { ChangeDecisionOverlay } from "./components/change-decision";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -61,10 +63,13 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		error,
 		ready,
 		hasKey,
+		pendingDecision,
+		acceptPendingDecision,
+		rejectPendingDecision,
 	} = useAgentChat({ lix, systemPrompt });
 
 	const textAreaId = useId();
-	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
 	const filePaths = useMemo(
@@ -214,6 +219,22 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		[value, setValue, setMentionOpen, setSlashOpen, setSlashIdx, mentionCtx],
 	);
 
+	const handleAcceptDecision = useCallback(
+		(id: string) => {
+			if (!pendingDecision || pendingDecision.id !== id) return;
+			acceptPendingDecision();
+		},
+		[pendingDecision, acceptPendingDecision],
+	);
+
+	const handleRejectDecision = useCallback(
+		(id: string) => {
+			if (!pendingDecision || pendingDecision.id !== id) return;
+			rejectPendingDecision();
+		},
+		[pendingDecision, rejectPendingDecision],
+	);
+
 	const beginToolSession = useCallback(() => {
 		const id = generateSessionId();
 		activeSessionRef.current = id;
@@ -230,66 +251,63 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		setToolSessions([]);
 	}, []);
 
-	const handleToolEvent = useCallback(
-		(event: import("@lix-js/agent-sdk").ToolEvent) => {
-			const sessionId = activeSessionRef.current;
-			if (!sessionId) return;
-			setToolSessions((prev) => {
-				const index = prev.findIndex((session) => session.id === sessionId);
-				if (index === -1) return prev;
-				const session = prev[index];
-				const runs = session.runs.slice();
-				const name = formatToolName(event.name);
-				if (event.type === "start") {
+	const handleToolEvent = useCallback((event: ToolEvent) => {
+		const sessionId = activeSessionRef.current;
+		if (!sessionId) return;
+		setToolSessions((prev) => {
+			const index = prev.findIndex((session) => session.id === sessionId);
+			if (index === -1) return prev;
+			const session = prev[index];
+			const runs = session.runs.slice();
+			const name = formatToolName(event.name);
+			if (event.type === "start") {
+				runs.push({
+					id: event.id,
+					title: name,
+					status: "running",
+					input: stringifyPayload(event.input),
+				});
+			} else if (event.type === "finish") {
+				const existingIdx = runs.findIndex((run) => run.id === event.id);
+				const output = stringifyPayload(event.output);
+				if (existingIdx === -1) {
 					runs.push({
 						id: event.id,
 						title: name,
-						status: "running",
-						input: stringifyPayload(event.input),
+						status: "success",
+						output,
 					});
-				} else if (event.type === "finish") {
-					const existingIdx = runs.findIndex((run) => run.id === event.id);
-					const output = stringifyPayload(event.output);
-					if (existingIdx === -1) {
-						runs.push({
-							id: event.id,
-							title: name,
-							status: "success",
-							output,
-						});
-					} else {
-						runs[existingIdx] = {
-							...runs[existingIdx],
-							status: "success",
-							title: name,
-							output,
-						};
-					}
-				} else if (event.type === "error") {
-					const existingIdx = runs.findIndex((run) => run.id === event.id);
-					if (existingIdx === -1) {
-						runs.push({
-							id: event.id,
-							title: name,
-							status: "error",
-							output: event.errorText,
-						});
-					} else {
-						runs[existingIdx] = {
-							...runs[existingIdx],
-							status: "error",
-							title: name,
-							output: event.errorText,
-						};
-					}
+				} else {
+					runs[existingIdx] = {
+						...runs[existingIdx],
+						status: "success",
+						title: name,
+						output,
+					};
 				}
-				const next = prev.slice();
-				next[index] = { ...session, runs };
-				return next;
-			});
-		},
-		[],
-	);
+			} else if (event.type === "error") {
+				const existingIdx = runs.findIndex((run) => run.id === event.id);
+				if (existingIdx === -1) {
+					runs.push({
+						id: event.id,
+						title: name,
+						status: "error",
+						output: event.errorText,
+					});
+				} else {
+					runs[existingIdx] = {
+						...runs[existingIdx],
+						status: "error",
+						title: name,
+						output: event.errorText,
+					};
+				}
+			}
+			const next = prev.slice();
+			next[index] = { ...session, runs };
+			return next;
+		});
+	}, []);
 
 	useEffect(() => {
 		updateMention();
@@ -341,9 +359,9 @@ export function AgentView({ context: _context }: AgentViewProps) {
 			const token = trimmedStart.slice(1).split(/\s+/)[0] ?? "";
 			const lower = token.toLowerCase();
 			const matched =
-				filteredCommands.find((cmd) =>
+				filteredCommands.find((cmd: SlashCommand) =>
 					cmd.name.toLowerCase().startsWith(lower),
-				) ?? MOCK_COMMANDS.find((cmd) => cmd.name.toLowerCase() === lower);
+				) ?? COMMANDS.find((cmd) => cmd.name.toLowerCase() === lower);
 			resetComposer();
 			await handleSlashCommand((matched?.name ?? token).toLowerCase());
 			return;
@@ -577,56 +595,41 @@ export function AgentView({ context: _context }: AgentViewProps) {
 
 			{/* Chat messages */}
 			<div className="flex-1 min-h-0 overflow-y-auto">
-				<ChatMessageList messages={transcript} />
+				<ChatMessageList
+					messages={transcript}
+					onAcceptDecision={handleAcceptDecision}
+					onRejectDecision={handleRejectDecision}
+				/>
 			</div>
 
-			{/* Input area */}
 			<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
-				<div className="relative w-full max-w-3xl overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
-					<label htmlFor={textAreaId} className="sr-only">
-						Ask the assistant
-					</label>
-					<textarea
-						ref={textAreaRef}
-						id={textAreaId}
-						data-testid="agent-composer-input"
-						placeholder={composerPlaceholder}
-						value={value}
-						onChange={(event) => {
-							const next = event.target.value;
-							const token = extractSlashToken(next);
-							setValue(next);
-							setNotice(null);
-							setSlashOpen(token !== null);
-							setSlashIdx(0);
-							if (token !== null) {
-								setMentionOpen(false);
-								mentionCtx.current = null;
-							}
-						}}
-						onKeyDown={onKeyDown}
-						onClick={updateMention}
-						onSelect={updateMention}
-						className="h-28 w-full resize-none border-0 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
+				{pendingDecision ? (
+					<ChangeDecisionOverlay
+						id={pendingDecision.id}
+						onAccept={handleAcceptDecision}
+						onReject={handleRejectDecision}
 					/>
-					{menuFragment ? (
-						<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
-							{menuFragment}
-						</div>
-					) : null}
-					<div className="flex justify-end bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
-						<button
-							type="button"
-							onClick={() => {
-								void commit();
-							}}
-							disabled={sendDisabled}
-							className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-						>
-							<ArrowUp className="h-3.5 w-3.5" />
-						</button>
-					</div>
-				</div>
+				) : (
+					<PromptComposer
+						textAreaId={textAreaId}
+						value={value}
+						setValue={setValue}
+						setNotice={setNotice}
+						setSlashOpen={setSlashOpen}
+						setSlashIdx={setSlashIdx}
+						setMentionOpen={setMentionOpen}
+						mentionCtx={mentionCtx}
+						textAreaRef={textAreaRef}
+						onKeyDown={onKeyDown}
+						updateMention={updateMention}
+						menuFragment={menuFragment}
+						placeholder={composerPlaceholder}
+						sendDisabled={sendDisabled}
+						onSend={() => {
+							void commit();
+						}}
+					/>
+				)}
 			</div>
 		</div>
 	);

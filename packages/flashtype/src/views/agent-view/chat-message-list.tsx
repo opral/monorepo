@@ -9,7 +9,15 @@ import { ChatMessage } from "./chat-message";
  * @example
  * <ChatMessageList messages={messages} />
  */
-export function ChatMessageList({ messages }: { messages: Msg[] }) {
+export function ChatMessageList({
+	messages,
+	onAcceptDecision,
+	onRejectDecision,
+}: {
+	messages: Msg[];
+	onAcceptDecision?: (id: string) => void;
+	onRejectDecision?: (id: string) => void;
+}) {
 	const ref = React.useRef<HTMLDivElement>(null);
 	const [hideScrollbar, setHideScrollbar] = React.useState(false);
 
@@ -18,10 +26,25 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 	React.useLayoutEffect(() => {
 		const el = ref.current;
 		if (!el) return;
-		setHideScrollbar(true);
-		el.scrollTop = el.scrollHeight;
-		const t = window.setTimeout(() => setHideScrollbar(false), 150);
-		return () => window.clearTimeout(t);
+
+		const atBottomBeforeUpdate =
+			el.scrollTop >= el.scrollHeight - el.clientHeight - 10;
+
+		if (atBottomBeforeUpdate) {
+			setHideScrollbar(true);
+			el.scrollTop = el.scrollHeight;
+			const t = window.setTimeout(() => setHideScrollbar(false), 150);
+			return () => window.clearTimeout(t);
+		}
+
+		const previousScrollTop = el.scrollTop;
+		const previousScrollHeight = el.scrollHeight;
+		requestAnimationFrame(() => {
+			const delta = el.scrollHeight - previousScrollHeight;
+			if (delta !== 0) {
+				el.scrollTop = previousScrollTop + delta;
+			}
+		});
 	}, [messages]);
 
 	return (
@@ -34,7 +57,12 @@ export function ChatMessageList({ messages }: { messages: Msg[] }) {
 				{/* Bottom‑anchored transcript */}
 				<div className="mt-auto flex flex-col justify-end">
 					{messages.map((m) => (
-						<ChatMessage key={m.id} message={m} />
+						<ChatMessage
+							key={m.id}
+							message={m}
+							onAcceptDecision={onAcceptDecision}
+							onRejectDecision={onRejectDecision}
+						/>
 					))}
 				</div>
 			</div>

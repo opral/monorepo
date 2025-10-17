@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ContextStore } from "./context-store";
+import { ContextStore } from "./context-store.js";
 
 describe("ContextStore", () => {
 	test("set and get values", () => {
