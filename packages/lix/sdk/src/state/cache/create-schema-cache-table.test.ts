@@ -4,14 +4,23 @@ import {
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "./create-schema-cache-table.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const TEST_CACHE_SCHEMA = {
+	"x-lix-key": "lix_test_create",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {},
+} as const satisfies LixSchemaDefinition;
 
 test("createSchemaCacheTable creates table with core indexes and is idempotent", async () => {
 	const lix = await openLix({});
 
-	const tableName = schemaKeyToCacheTableName("lix_test_create");
+	const tableName = schemaKeyToCacheTableName(TEST_CACHE_SCHEMA["x-lix-key"]);
 
 	// First call should create the table and indexes
-	createSchemaCacheTable({ engine: lix.engine!, tableName });
+	createSchemaCacheTable({ engine: lix.engine!, schema: TEST_CACHE_SCHEMA });
 
 	// Verify table exists and WITHOUT ROWID
 	const tbl = lix.engine!.sqlite.exec({
@@ -42,7 +51,7 @@ test("createSchemaCacheTable creates table with core indexes and is idempotent",
 	);
 
 	// Second call should be a no-op (idempotent)
-	createSchemaCacheTable({ engine: lix.engine!, tableName });
+	createSchemaCacheTable({ engine: lix.engine!, schema: TEST_CACHE_SCHEMA });
 
 	const idxRows2 = lix.engine!.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema WHERE type='index' AND tbl_name = ?`,

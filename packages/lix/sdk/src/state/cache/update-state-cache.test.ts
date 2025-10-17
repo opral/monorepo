@@ -6,6 +6,36 @@ import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
 import type { InternalStateCacheRow } from "./schema.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+function simpleCacheSchema(key: string): LixSchemaDefinition {
+	return {
+		"x-lix-key": key,
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+}
+
+/**
+ * Seeds the stored_schema table with cache definitions used during tests.
+ */
+async function ensureCacheSchemas(
+	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
+	schemaKeys: string[]
+): Promise<void> {
+	for (const key of schemaKeys) {
+		await (lix.db as any)
+			.insertInto("stored_schema")
+			.values({ value: simpleCacheSchema(key) })
+			.onConflict((oc: any) => oc.doNothing())
+			.execute();
+	}
+}
 
 test("inserts into cache based on change", async () => {
 	const lix = await openLix({
@@ -16,6 +46,8 @@ test("inserts into cache based on change", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -84,6 +116,8 @@ test("upserts cache entry on conflict", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
 
 	const initialTimestamp = await getTimestamp({ lix });
 
@@ -196,6 +230,8 @@ test("handles inheritance chain deletions with tombstones", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
 
 	// Define test version ids (no actual version rows needed for cache tests)
 	const parentVersion = "parent-version";
@@ -362,6 +398,8 @@ test("handles duplicate entity updates - last change wins", async () => {
 		],
 	});
 
+	await ensureCacheSchemas(lix, ["test-schema"]);
+
 	// Create test changes for the same entity
 	const change1: MaterializedState = {
 		id: "change-1",
@@ -431,6 +469,8 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["test-schema"]);
 
 	// Create multiple changes for the same entity in a single batch
 	const changes: MaterializedState[] = [

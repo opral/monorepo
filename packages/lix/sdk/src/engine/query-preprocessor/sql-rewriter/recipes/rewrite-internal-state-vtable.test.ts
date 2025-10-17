@@ -12,10 +12,8 @@ import { getTimestamp } from "../../../../engine/functions/timestamp.js";
 import { internalQueryBuilder } from "../../../../engine/internal-query-builder.js";
 import { rewriteSql } from "../rewrite-sql.js";
 import { sql } from "kysely";
-import {
-	createSchemaCacheTable,
-	schemaKeyToCacheTableName,
-} from "../../../../state/cache/create-schema-cache-table.js";
+import { createSchemaCacheTable } from "../../../../state/cache/create-schema-cache-table.js";
+import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
 
 const EXPECTED_VISIBLE_COLUMNS = [
 	"entity_id",
@@ -188,6 +186,18 @@ const ENTITY_TXN = "priority_shared";
 const ENTITY_UNTRACKED = "priority_untracked";
 const ENTITY_CACHE = "priority_cache";
 
+const TEST_CACHE_SCHEMA_DEFINITION = {
+	"x-lix-key": TEST_SCHEMA,
+	"x-lix-version": SCHEMA_VERSION,
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+	},
+	required: ["id"],
+} as const satisfies LixSchemaDefinition;
+
 interface FixtureContext {
 	lix: Awaited<ReturnType<typeof openLix>>;
 }
@@ -203,6 +213,12 @@ async function withSeededFixture(run: (ctx: FixtureContext) => Promise<void>) {
 			},
 		],
 	});
+
+	await (lix.db as any)
+		.insertInto("stored_schema")
+		.values({ value: TEST_CACHE_SCHEMA_DEFINITION })
+		.onConflict((oc: any) => oc.doNothing())
+		.execute();
 	try {
 		await seedFixture(lix);
 		await run({ lix });
@@ -373,9 +389,14 @@ function assertPrecedence(rows: Array<{ _pk: string; entity_id: string }>) {
 
 async function explainQueryPlan(sql: string): Promise<string> {
 	const lix = await openLix({});
+	await (lix.db as any)
+		.insertInto("stored_schema")
+		.values({ value: TEST_CACHE_SCHEMA_DEFINITION })
+		.onConflict((oc: any) => oc.doNothing())
+		.execute();
 	createSchemaCacheTable({
 		engine: lix.engine!,
-		tableName: schemaKeyToCacheTableName(TEST_SCHEMA),
+		schema: TEST_CACHE_SCHEMA_DEFINITION,
 	});
 	const sanitized = sql.trim().replace(/;$/, "");
 	try {

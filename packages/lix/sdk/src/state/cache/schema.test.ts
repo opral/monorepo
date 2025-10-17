@@ -3,10 +3,39 @@ import { openLix } from "../../lix/open-lix.js";
 import { type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { updateStateCache } from "./update-state-cache.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+function simpleSchema(key: string): LixSchemaDefinition {
+	return {
+		"x-lix-key": key,
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+}
+
+async function ensureSchemas(
+	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
+	keys: string[]
+): Promise<void> {
+	for (const key of keys) {
+		await (lix.db as any)
+			.insertInto("stored_schema")
+			.values({ value: simpleSchema(key) })
+			.onConflict((oc: any) => oc.doNothing())
+			.execute();
+	}
+}
 
 test("selecting from vtable queries per-schema physical tables", async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	await ensureSchemas(lix, ["schema_a", "schema_b"]);
 
 	// Use the direct function to insert rows into different schemas
 	updateStateCache({

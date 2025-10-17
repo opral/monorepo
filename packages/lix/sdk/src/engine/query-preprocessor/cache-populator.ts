@@ -6,6 +6,7 @@ import {
 	schemaKeyToCacheTableName,
 } from "../../state/cache/create-schema-cache-table.js";
 import { getStateCacheTables } from "../../state/cache/schema.js";
+import { resolveCacheSchemaDefinition } from "../../state/cache/schema-resolver.js";
 import type { LixEngine } from "../boot.js";
 import type { Shape } from "./sql-rewriter/microparser/analyze-shape.js";
 
@@ -140,7 +141,7 @@ function isMissingInternalStateVtableError(error: unknown): boolean {
 }
 
 function ensureCacheTablesForShape(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
 	shape: Shape
 ): void {
 	const literalSchemaKeys = shape.schemaKeys
@@ -157,7 +158,20 @@ function ensureCacheTablesForShape(
 		if (tableCache.has(tableName)) {
 			continue;
 		}
-		createSchemaCacheTable({ engine, tableName });
-		tableCache.add(tableName);
+		const schemaDefinition = resolveCacheSchemaDefinition({
+			engine,
+			schemaKey,
+		});
+		if (!schemaDefinition) {
+			continue;
+		}
+		const created = createSchemaCacheTable({
+			engine,
+			schema: schemaDefinition,
+		});
+		tableCache.add(created);
+		if (created !== tableName) {
+			tableCache.add(tableName);
+		}
 	}
 }

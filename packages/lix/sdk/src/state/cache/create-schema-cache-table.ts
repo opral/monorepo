@@ -1,4 +1,5 @@
 import type { LixEngine } from "../../engine/boot.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 /**
  * Creates (or updates) a per-schema internal state cache table with core indexes.
@@ -10,11 +11,36 @@ import type { LixEngine } from "../../engine/boot.js";
  * - Indexes to accelerate common access patterns used by views/benches
  * - Partial indexes for live/tombstone scans so SQLite can skip dead rows quickly
  */
+/**
+ * Ensures a schema-specific cache table exists and returns its physical name.
+ *
+ * The table contains a strict layout that mirrors materialized state rows and
+ * creates core indexes optimised for read-heavy cache workloads. The function is
+ * idempotent — callers may invoke it multiple times without side effects.
+ *
+ * @example
+ *
+ * ```ts
+ * const tableName = createSchemaCacheTable({
+ *   engine,
+ *   schema: definition,
+ * });
+ * console.log(tableName); // "lix_internal_state_cache_v1_example"
+ * ```
+ */
 export function createSchemaCacheTable(args: {
 	engine: Pick<LixEngine, "executeSync">;
-	tableName: string;
-}): void {
-	const { engine, tableName } = args;
+	schema: LixSchemaDefinition;
+}): string {
+	const { engine, schema } = args;
+	const schemaKey = schema["x-lix-key"];
+	if (typeof schemaKey !== "string" || schemaKey.length === 0) {
+		throw new Error(
+			"createSchemaCacheTable: schema must include a non-empty x-lix-key."
+		);
+	}
+
+	const tableName = schemaKeyToCacheTableName(schemaKey);
 
 	// Create table if it doesn't exist
 	const createTableSql = `
@@ -85,6 +111,8 @@ export function createSchemaCacheTable(args: {
 
 	// Update planner stats
 	engine.executeSync({ sql: `ANALYZE ${tableName}` });
+
+	return tableName;
 }
 
 /** Utility to sanitize a schema_key for use in a physical table name */

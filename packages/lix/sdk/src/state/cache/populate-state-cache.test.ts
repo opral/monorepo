@@ -11,6 +11,36 @@ import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
+function createSimpleSchema(key: string): LixSchemaDefinition {
+	return {
+		"x-lix-key": key,
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+}
+
+/**
+ * Ensures stored schema rows exist for the provided schema keys so cache helpers
+ * can resolve definitions during tests.
+ */
+async function ensureCacheSchemas(
+	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
+	schemaKeys: string[]
+): Promise<void> {
+	for (const key of schemaKeys) {
+		await (lix.db as any)
+			.insertInto("stored_schema")
+			.values({ value: createSimpleSchema(key) })
+			.onConflict((oc: any) => oc.doNothing())
+			.execute();
+	}
+}
+
 const testEntitySchema = {
 	"x-lix-key": "test_entity",
 	"x-lix-version": "1.0",
@@ -41,6 +71,8 @@ test("populates v2 cache from materializer", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["lix_test", "lix_other"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -117,6 +149,8 @@ test("populates v2 cache with version filter", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -200,6 +234,8 @@ test("clears all v2 cache tables when no filters specified", async () => {
 			},
 		],
 	});
+
+	await ensureCacheSchemas(lix, ["schema_a", "schema_b", "schema_c"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 

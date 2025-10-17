@@ -1,6 +1,12 @@
 import type { LixEngine } from "../../engine/boot.js";
 import { getStateCacheTables } from "./schema.js";
-import { createSchemaCacheTable } from "./create-schema-cache-table.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "./create-schema-cache-table.js";
+import { resolveCacheSchemaDefinition } from "./schema-resolver.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
 
 export interface PopulateStateCacheV2Options {
 	version_id?: string; // Optional - if not provided, all active versions are populated
@@ -17,7 +23,10 @@ export interface PopulateStateCacheV2Options {
  * @param options - Optional filters for selective population
  */
 export function populateStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "executeSync" | "runtimeCacheRef" | "hooks"
+	>;
 	options?: PopulateStateCacheV2Options;
 }): void {
 	const { sqlite } = args.engine;
@@ -58,6 +67,9 @@ export function populateStateCache(args: {
 	if (versionsToPopulate.length === 0) {
 		return;
 	}
+
+	// Prime the stored schema cache so lookups succeed while rebuilding tables.
+	getAllStoredSchemas({ engine: args.engine });
 
 	// Clear existing cache entries for the versions being populated
 	const tableCache = getStateCacheTables({ engine: args.engine });
@@ -122,13 +134,38 @@ export function populateStateCache(args: {
 	}
 
 	// Process each schema's rows directly to its physical table
-	for (const [schema_key, schemaRows] of rowsBySchema) {
-		// Sanitize schema_key for use in table name - must match update-state-cache.ts
-		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `lix_internal_state_cache_v1_${sanitizedSchemaKey}`;
+	const schemaEntries = Array.from(rowsBySchema.entries());
+	const storedSchemaKey = LixStoredSchemaSchema["x-lix-key"];
 
-		// Ensure table exists (creates if needed, updates cache)
-		ensureTableExists(args.engine, tableName);
+	schemaEntries.sort((a, b) => {
+		if (a[0] === storedSchemaKey) return -1;
+		if (b[0] === storedSchemaKey) return 1;
+		return 0;
+	});
+
+	for (const [schema_key, schemaRows] of schemaEntries) {
+		const schemaDefinition = resolveCacheSchemaDefinition({
+			engine: args.engine,
+			schemaKey: schema_key,
+		});
+		if (!schemaDefinition) {
+			throw new Error(
+				`populateStateCache: missing stored schema for ${schema_key}`
+			);
+		}
+
+		const tableName = createSchemaCacheTable({
+			engine: args.engine,
+			schema: schemaDefinition,
+		});
+		const tableCache = getStateCacheTables({ engine: args.engine });
+		if (!tableCache.has(tableName)) {
+			tableCache.add(tableName);
+		}
+		const sanitized = schemaKeyToCacheTableName(schema_key);
+		if (!tableCache.has(sanitized)) {
+			tableCache.add(sanitized);
+		}
 
 		// Batch insert with prepared statement
 		const stmt = sqlite.prepare(`
@@ -186,20 +223,5 @@ export function populateStateCache(args: {
 		} finally {
 			stmt.finalize();
 		}
-	}
-}
-
-/**
- * Ensures a table exists and updates the cache.
- * Duplicated from update-state-cache.ts to avoid circular dependency.
- */
-function ensureTableExists(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
-	tableName: string
-): void {
-	createSchemaCacheTable({ engine, tableName });
-	const tableCache = getStateCacheTables({ engine });
-	if (!tableCache.has(tableName)) {
-		tableCache.add(tableName);
 	}
 }

@@ -3,6 +3,7 @@ import {
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "./create-schema-cache-table.js";
+import { LixVersionDescriptorSchema } from "../../version/schema-definition.js";
 
 // Type definition for the cache v2 virtual table
 export type InternalStateCacheRow = {
@@ -60,10 +61,13 @@ export function applyStateCacheSchema(args: {
 	// Ensure descriptor cache table exists for inheritance rewrites
 	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
 	if (!tableCache.has(descriptorTable)) {
-		createSchemaCacheTable({
+		const created = createSchemaCacheTable({
 			engine: args.engine,
-			tableName: descriptorTable,
+			schema: LixVersionDescriptorSchema,
 		});
-		tableCache.add(descriptorTable);
+		tableCache.add(created);
+		if (created !== descriptorTable) {
+			tableCache.add(descriptorTable);
+		}
 	}
 }

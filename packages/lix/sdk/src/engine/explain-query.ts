@@ -1,6 +1,11 @@
 import type { LixEngine } from "./boot.js";
-import { createSchemaCacheTable } from "../state/cache/create-schema-cache-table.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../state/cache/create-schema-cache-table.js";
 import { getStateCacheTables } from "../state/cache/schema.js";
+import { listAvailableCacheSchemas } from "../state/cache/schema-resolver.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 type ExplainQueryStage = {
 	original: {
@@ -68,17 +73,32 @@ export function createExplainQuery(args: {
 }
 
 function ensureCacheTablesForSql(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
 	sql: string
 ): void {
 	const matches = sql.matchAll(/lix_internal_state_cache_([A-Za-z0-9_]+)/g);
 	const tableCache = getStateCacheTables({ engine });
+	const availableSchemas = listAvailableCacheSchemas({ engine });
+	const tableToSchema = new Map<string, LixSchemaDefinition>();
+	for (const [schemaKey, definition] of availableSchemas.entries()) {
+		const tableName = schemaKeyToCacheTableName(schemaKey);
+		tableToSchema.set(tableName, definition);
+	}
 	for (const match of matches) {
-		const sanitizedSuffix = match[1];
-		if (!sanitizedSuffix) continue;
-		const tableName = `lix_internal_state_cache_${sanitizedSuffix}`;
+		const tableName = match[0];
+		if (!tableName) continue;
 		if (tableCache.has(tableName)) continue;
-		createSchemaCacheTable({ engine, tableName });
-		tableCache.add(tableName);
+		const schemaDefinition = tableToSchema.get(tableName);
+		if (!schemaDefinition) {
+			continue;
+		}
+		const created = createSchemaCacheTable({
+			engine,
+			schema: schemaDefinition,
+		});
+		tableCache.add(created);
+		if (created !== tableName) {
+			tableCache.add(tableName);
+		}
 	}
 }
