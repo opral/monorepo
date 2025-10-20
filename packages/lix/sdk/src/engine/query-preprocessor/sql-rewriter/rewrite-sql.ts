@@ -9,6 +9,7 @@ export interface RewriteSqlOptions {
 	tokens?: Token[];
 	hasOpenTransaction?: boolean;
 	existingCacheTables?: Set<string>;
+	parameters?: ReadonlyArray<unknown>;
 }
 
 export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
@@ -50,6 +51,7 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 	const cteClause = buildHoistedInternalStateVtableCte(shapes, {
 		includeTransaction,
 		existingCacheTables: options?.existingCacheTables,
+		parameters: options?.parameters,
 	});
 	if (!cteClause) {
 		return current;

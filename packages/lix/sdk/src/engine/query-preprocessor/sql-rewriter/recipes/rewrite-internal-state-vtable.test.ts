@@ -12,7 +12,10 @@ import { getTimestamp } from "../../../../engine/functions/timestamp.js";
 import { internalQueryBuilder } from "../../../../engine/internal-query-builder.js";
 import { rewriteSql } from "../rewrite-sql.js";
 import { sql } from "kysely";
-import { createSchemaCacheTable } from "../../../../state/cache/create-schema-cache-table.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../../../../state/cache/create-schema-cache-table.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
 
 const EXPECTED_VISIBLE_COLUMNS = [
@@ -117,6 +120,13 @@ test("version placeholder seeds recursion with named parameter", () => {
 	expect(rewritten).toContain("'lix_key_value' AS schema_key");
 });
 
+test("schema placeholder never references legacy cache view", () => {
+	const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = ?1 AND v.version_id = ?2`;
+	const rewritten = rewriteSql(sql);
+	expect(rewritten).toContain("params(version_id, schema_key)");
+	expect(rewritten).not.toContain("FROM lix_internal_state_cache ");
+});
+
 test("queries selecting _pk still rewrite to the CTE projection", () => {
 	const sql = `SELECT v._pk FROM lix_internal_state_vtable v WHERE v.schema_key = 'lix_key_value';`;
 	const rewritten = rewriteSql(sql);
@@ -174,6 +184,18 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 			}
 		}
 	});
+});
+
+test("rewriteSql routes placeholder schema key to specific cache table", () => {
+	const sqlText =
+		"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = ?1 AND v.version_id = ?2";
+	const rewritten = rewriteSql(sqlText, {
+		parameters: [TEST_SCHEMA, VERSION_GLOBAL],
+	});
+
+	const expectedTable = schemaKeyToCacheTableName(TEST_SCHEMA);
+	expect(rewritten).toContain(expectedTable);
+	expect(rewritten).not.toMatch(/UNION ALL\s+SELECT entity_id/);
 });
 
 const TEST_SCHEMA = "rewrite_matrix_schema";

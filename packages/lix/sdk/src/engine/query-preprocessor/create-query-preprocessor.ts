@@ -294,6 +294,7 @@ function maybeRewriteStateAccess(args: {
 				tokens,
 				hasOpenTransaction: includeTransaction,
 				existingCacheTables,
+				parameters: args.parameters,
 			});
 
 			return {
@@ -326,6 +327,7 @@ function maybeRewriteStateAccess(args: {
 		tokens,
 		hasOpenTransaction: includeTransaction,
 		existingCacheTables,
+		parameters: args.parameters,
 	});
 
 	const finalSql =

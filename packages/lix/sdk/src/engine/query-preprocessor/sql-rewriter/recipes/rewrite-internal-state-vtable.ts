@@ -3,6 +3,7 @@ import type { PlaceholderValue, Shape } from "../microparser/analyze-shape.js";
 type TransactionOption = {
 	includeTransaction?: boolean;
 	existingCacheTables?: Set<string>;
+	parameters?: ReadonlyArray<unknown>;
 };
 
 export function buildHoistedInternalStateVtableCte(
@@ -15,20 +16,17 @@ export function buildHoistedInternalStateVtableCte(
 
 	const includeTransaction = options?.includeTransaction !== false;
 
-	const schemaKeys = new Set<string>();
-	for (const shape of shapes) {
-		for (const entry of shape.schemaKeys) {
-			if (entry.kind === "literal") {
-				schemaKeys.add(entry.value);
-			}
-		}
-	}
+	const resolvedSchemaKeys = collectResolvedSchemaKeys(
+		shapes,
+		options?.parameters
+	);
 
 	const canonicalQuery = buildInternalStateVtableQuery({
 		shapes,
-		schemaKeys: [...schemaKeys],
+		schemaKeys: resolvedSchemaKeys,
 		includeTransaction,
 		existingCacheTables: options?.existingCacheTables,
+		parameters: options?.parameters,
 	});
 	const cteBody = stripIndent(`
 		-- hoisted_lix_internal_state_vtable_rewrite
@@ -60,7 +58,10 @@ export function rewriteInternalStateVtableQuery(
 	shape: Shape,
 	options?: TransactionOption
 ): string | null {
-	const schemaKey = pickSingleLiteral(shape.schemaKeys);
+	const schemaKey = pickResolvedSchemaKey(
+		shape.schemaKeys,
+		options?.parameters
+	);
 
 	const includePrimaryKey = shape.referencesPrimaryKey;
 	const includeTransaction = options?.includeTransaction !== false;
@@ -70,6 +71,7 @@ export function rewriteInternalStateVtableQuery(
 		schemaKeys: schemaKey ? [schemaKey] : [],
 		includeTransaction,
 		existingCacheTables: options?.existingCacheTables,
+		parameters: options?.parameters,
 	});
 	return maybeStripHiddenPrimaryKey(canonicalQuery, includePrimaryKey);
 }
@@ -79,6 +81,7 @@ interface InternalStateVtableQueryOptions {
 	schemaKeys: string[];
 	includeTransaction: boolean;
 	existingCacheTables?: Set<string>;
+	parameters?: ReadonlyArray<unknown>;
 }
 
 interface VersionCteResult {
@@ -130,6 +133,7 @@ function buildInternalStateVtableQuery(
 	const entityFilter = collectColumnFilter(options.shapes, "entity_id");
 	const fileFilter = collectColumnFilter(options.shapes, "file_id");
 	const pluginFilter = collectColumnFilter(options.shapes, "plugin_key");
+
 	const paramsClauseNeeded =
 		!versionCtes.paramsAvailable && paramBindings && paramBindings.size > 0;
 	let paramsClause = "";
@@ -606,11 +610,7 @@ function buildCacheRouting(
 				`lix_internal_state_cache_v1_${sanitizeSchemaKey(key)}`
 			);
 		}
-	} else if (!existingCacheTables) {
-		uniqueCandidates.add("lix_internal_state_cache");
-	} else if (existingCacheTables.has("lix_internal_state_cache")) {
-		uniqueCandidates.add("lix_internal_state_cache");
-	} else {
+	} else if (existingCacheTables) {
 		for (const name of existingCacheTables) {
 			if (name.startsWith("lix_internal_state_cache_v1_")) {
 				uniqueCandidates.add(name);
@@ -991,14 +991,87 @@ function buildUnseededVersionCtes(): VersionCteResult {
 
 type ShapeLiteral = { kind: "literal"; value: string };
 
-function pickSingleLiteral(
-	values: Array<ShapeLiteral | PlaceholderValue>
+function collectResolvedSchemaKeys(
+	shapes: Shape[],
+	parameters?: ReadonlyArray<unknown>
+): string[] {
+	let baseline: Set<string> | null = null;
+	for (const shape of shapes) {
+		const resolved = resolveSchemaKeyValues(shape.schemaKeys, parameters);
+		if (resolved === null || resolved.size === 0) {
+			return [];
+		}
+		if (!baseline) {
+			baseline = resolved;
+			continue;
+		}
+		if (!setsEqual(baseline, resolved)) {
+			return [];
+		}
+	}
+	return baseline ? [...baseline] : [];
+}
+
+function resolveSchemaKeyValues(
+	values: Array<ShapeLiteral | PlaceholderValue>,
+	parameters?: ReadonlyArray<unknown>
+): Set<string> | null {
+	if (!values || values.length === 0) {
+		return new Set<string>();
+	}
+	const result = new Set<string>();
+	for (const value of values) {
+		if (value.kind === "literal") {
+			if (value.value.length > 0) {
+				result.add(value.value);
+			}
+			continue;
+		}
+		const resolved = resolvePlaceholderValue(value.token?.image, parameters);
+		if (typeof resolved === "string" && resolved.length > 0) {
+			result.add(resolved);
+			continue;
+		}
+		return null;
+	}
+	return result;
+}
+
+function pickResolvedSchemaKey(
+	values: Array<ShapeLiteral | PlaceholderValue>,
+	parameters?: ReadonlyArray<unknown>
 ): string | undefined {
-	const literals = values.filter(
-		(entry): entry is ShapeLiteral => entry.kind === "literal"
-	);
-	if (literals.length !== 1) return undefined;
-	return literals[0]!.value;
+	const resolved = resolveSchemaKeyValues(values, parameters);
+	if (!resolved || resolved.size !== 1) {
+		return undefined;
+	}
+	return resolved.values().next().value;
+}
+
+function resolvePlaceholderValue(
+	tokenImage: string | undefined,
+	parameters?: ReadonlyArray<unknown>
+): unknown {
+	if (!tokenImage || !parameters) {
+		return undefined;
+}
+	const first = tokenImage[0];
+	const slice = tokenImage.slice(1);
+	if (first === "?" && slice.length > 0) {
+		const index = Number.parseInt(slice, 10);
+		if (!Number.isNaN(index) && index > 0 && index <= parameters.length) {
+			return parameters[index - 1];
+		}
+	}
+	return undefined;
+}
+
+function setsEqual(a: Set<string>, b: Set<string>): boolean {
+	if (a.size !== b.size) return false;
+	for (const value of a) {
+		if (!b.has(value)) return false;
+	}
+	return true;
 }
 
 function stripIndent(value: string): string {
