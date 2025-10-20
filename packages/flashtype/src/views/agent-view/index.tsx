@@ -117,21 +117,10 @@ export function AgentView({ context: _context }: AgentViewProps) {
 				: [];
 			if (message.role === "assistant" && steps.length > 0) {
 				const toolRuns = stepsToToolRuns(steps);
-				if (message.content.trim().length > 0) {
-					toolRuns.push({
-						id: `${message.id}-response`,
-						title: "",
-						detail: undefined,
-						status: "thinking",
-						input: undefined,
-						output: undefined,
-						content: message.content,
-					});
-				}
 				return {
 					id: message.id,
 					role: message.role,
-					content: "",
+					content: message.content,
 					toolRuns,
 				};
 			}
