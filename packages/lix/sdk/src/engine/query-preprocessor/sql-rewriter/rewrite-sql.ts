@@ -1,6 +1,6 @@
 import { analyzeShapes, type Shape } from "./microparser/analyze-shape.js";
 import {
-	buildHoistedInternalStateVtableCte,
+	buildHoistedInternalStateVtableRewrite,
 	buildInternalStateVtableProjection,
 } from "./recipes/rewrite-internal-state-vtable.js";
 import {
@@ -72,7 +72,7 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 		}
 	}
 
-	const cteClause = buildHoistedInternalStateVtableCte(shapes, {
+	const cteClause = buildHoistedInternalStateVtableRewrite(shapes, {
 		includeTransaction,
 		existingCacheTables: options?.existingCacheTables,
 		parameters: options?.parameters,

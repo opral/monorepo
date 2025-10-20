@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { tokenize } from "../../../sql-parser/tokenizer.js";
 import { analyzeShape } from "../microparser/analyze-shape.js";
 import {
-	buildHoistedInternalStateVtableCte,
+	buildHoistedInternalStateVtableRewrite,
 	buildInternalStateVtableProjection,
 } from "./rewrite-internal-state-vtable.js";
 import { openLix } from "../../../../lix/open-lix.js";
@@ -42,7 +42,7 @@ test("hoists wide path with schema filters", () => {
 	const shape = analyzeShape(tokens);
 	expect(shape).not.toBeNull();
 
-	const cte = buildHoistedInternalStateVtableCte([shape!]);
+	const cte = buildHoistedInternalStateVtableRewrite([shape!]);
 	expect(cte).toBeTruthy();
 	expect(cte).toContain("lix_internal_state_vtable_rewritten AS");
 	expect(cte).toContain("lix_internal_state_cache_v1_lix_key_value");
@@ -56,7 +56,7 @@ test("prunes cache branches without physical tables", () => {
 
 	expect(shape).not.toBeNull();
 
-	const cte = buildHoistedInternalStateVtableCte([shape!], {
+	const cte = buildHoistedInternalStateVtableRewrite([shape!], {
 		existingCacheTables: new Set(),
 	});
 	expect(cte).toBeTruthy();

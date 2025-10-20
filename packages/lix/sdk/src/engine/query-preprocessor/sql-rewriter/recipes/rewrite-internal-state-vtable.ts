@@ -8,7 +8,7 @@ type TransactionOption = {
 	schemaKeyHints?: readonly string[];
 };
 
-export function buildHoistedInternalStateVtableCte(
+export function buildHoistedInternalStateVtableRewrite(
 	shapes: Shape[],
 	options?: TransactionOption
 ): string | null {
@@ -51,33 +51,6 @@ export function buildInternalStateVtableProjection(
 	);
 	const aliasSql = shape.table.aliasSql ?? shape.table.alias;
 	return `(SELECT ${projection} FROM lix_internal_state_vtable_rewritten) AS ${aliasSql}`;
-}
-
-/**
- * Build a replacement subquery for `lix_internal_state_vtable`.
- * Returns `null` when the query shape is outside the supported surface.
- */
-export function rewriteInternalStateVtableQuery(
-	shape: Shape,
-	options?: TransactionOption
-): string | null {
-	const schemaKey = pickResolvedSchemaKey(
-		shape.schemaKeys,
-		options?.parameters,
-		options?.schemaKeyHints
-	);
-
-	const includePrimaryKey = shape.referencesPrimaryKey;
-	const includeTransaction = options?.includeTransaction !== false;
-
-	const canonicalQuery = buildInternalStateVtableQuery({
-		shapes: [shape],
-		schemaKeys: schemaKey ? [schemaKey] : [],
-		includeTransaction,
-		existingCacheTables: options?.existingCacheTables,
-		parameters: options?.parameters,
-	});
-	return maybeStripHiddenPrimaryKey(canonicalQuery, includePrimaryKey);
 }
 
 interface InternalStateVtableQueryOptions {
@@ -1099,21 +1072,6 @@ function resolveSchemaKeyValues(
 	return result;
 }
 
-function pickResolvedSchemaKey(
-	values: Array<ShapeLiteral | PlaceholderValue>,
-	parameters?: ReadonlyArray<unknown>,
-	hints?: readonly string[]
-): string | undefined {
-	const resolved = resolveSchemaKeyValues(values, parameters);
-	if (resolved && resolved.size === 1) {
-		return resolved.values().next().value;
-	}
-	if ((!resolved || resolved.size === 0) && hints && hints.length === 1) {
-		return hints[0];
-	}
-	return undefined;
-}
-
 function resolvePlaceholderValue(
 	tokenImage: string | undefined,
 	parameters?: ReadonlyArray<unknown>
@@ -1130,14 +1088,6 @@ function resolvePlaceholderValue(
 		}
 	}
 	return undefined;
-}
-
-function setsEqual(a: Set<string>, b: Set<string>): boolean {
-	if (a.size !== b.size) return false;
-	for (const value of a) {
-		if (!b.has(value)) return false;
-	}
-	return true;
 }
 
 function stripIndent(value: string): string {
@@ -1290,23 +1240,6 @@ function collectColumnFilter(
 		return null;
 	}
 	return { literals: [...literals].sort() };
-}
-
-function maybeStripHiddenPrimaryKey(
-	sql: string,
-	includePrimaryKey: boolean
-): string {
-	if (includePrimaryKey) {
-		return sql;
-	}
-
-	const projection = buildProjectionClause(VTABLE_PROJECTION_COLUMNS, false);
-	return stripIndent(`
-    SELECT ${projection}
-    FROM (
-      ${sql}
-    )
-  `);
 }
 
 function buildParamsJoinClause(
