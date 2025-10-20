@@ -3,6 +3,11 @@ import { uuidV7 } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
 import { streamText, stepCountIs } from "ai";
 import type { StreamTextResult } from "ai";
+import type {
+	ChatMessage,
+	LixAgentStep,
+	LixAgentConversationMessageMetadata,
+} from "./conversation-message.js";
 import type { ContextStore } from "./context/context-store.js";
 import { createReadFileTool } from "./tools/read-file.js";
 import { createListFilesTool } from "./tools/list-files.js";
@@ -11,26 +16,6 @@ import { createWriteFileTool } from "./tools/write-file.js";
 import { createDeleteFileTool } from "./tools/delete-file.js";
 import { createCreateVersionTool } from "./tools/create-version.js";
 import { createCreateChangeProposalTool } from "./tools/create-change-proposal.js";
-
-export type ChatMessage = {
-	id: string;
-	role: "system" | "user" | "assistant";
-	content: string;
-	metadata?: Record<string, any>;
-};
-
-type LixAgentStep = {
-	id: string;
-	kind: "tool_call";
-	label?: string;
-	status: "running" | "succeeded" | "failed";
-	tool_name: string;
-	tool_input?: unknown;
-	tool_output?: unknown;
-	error_text?: string;
-	started_at: string;
-	finished_at?: string;
-};
 
 export type AgentDetectedChange = {
 	entity_id: string;
@@ -63,12 +48,8 @@ type AgentToolStream = StreamTextResult<AgentToolSet, never>;
 
 export type AgentTurnOutcome = {
 	text: string;
-	metadata?: Record<string, unknown>;
+	metadata?: LixAgentConversationMessageMetadata;
 	steps: LixAgentStep[];
-	writerKey: string | null;
-	detectedChangesQuery: ReturnType<
-		typeof createWriterKeyDetectedChangesQuery
-	> | null;
 };
 
 export type AgentStreamResult = {
@@ -87,27 +68,13 @@ export function createSendMessage(deps: SendMessageDeps) {
 		setSystemInstruction,
 	} = deps;
 
-	let currentWriterKey: string | null = null;
-
 	const read_file = createReadFileTool({ lix });
 	const list_files = createListFilesTool({ lix });
 	const sql_select_state = createSqlSelectStateTool({ lix });
-	const write_file = createWriteFileTool({
-		lix,
-		getWriterKey: () => currentWriterKey,
-	});
-	const delete_file = createDeleteFileTool({
-		lix,
-		getWriterKey: () => currentWriterKey,
-	});
-	const create_version = createCreateVersionTool({
-		lix,
-		getWriterKey: () => currentWriterKey,
-	});
-	const create_change_proposal = createCreateChangeProposalTool({
-		lix,
-		getWriterKey: () => currentWriterKey,
-	});
+	const write_file = createWriteFileTool({ lix });
+	const delete_file = createDeleteFileTool({ lix });
+	const create_version = createCreateVersionTool({ lix });
+	const create_change_proposal = createCreateChangeProposalTool({ lix });
 
 	const tools = {
 		read_file,
@@ -120,7 +87,6 @@ export function createSendMessage(deps: SendMessageDeps) {
 	};
 
 	const steps: LixAgentStep[] = [];
-	const pendingToolInputs = new Map<string, unknown>();
 
 	const upsertStep = (
 		toolCallId: string,
@@ -191,9 +157,6 @@ export function createSendMessage(deps: SendMessageDeps) {
 		const userMessageId = await uuidV7({ lix });
 		history.push({ id: userMessageId, role: "user", content: text });
 
-		const writerKeyId = await uuidV7({ lix });
-		const writerKey = `lix_agent:${writerKeyId}`;
-
 		const mentionPaths = extractMentionPaths(text);
 		const mentionGuidance =
 			mentionPaths.length > 0
@@ -221,12 +184,6 @@ export function createSendMessage(deps: SendMessageDeps) {
 		const finalSystem = contextOverlay
 			? `${mergedSystemWithGuidance}\n\n${contextOverlay}`
 			: mergedSystemWithGuidance;
-
-		currentWriterKey = writerKey;
-
-		const resetWriterKey = () => {
-			currentWriterKey = null;
-		};
 
 		let doneSettled = false;
 		let resolveDone!: (value: AgentTurnOutcome) => void;
@@ -264,36 +221,18 @@ export function createSendMessage(deps: SendMessageDeps) {
 				onChunk: ({ chunk }) => {
 					if (chunk.type === "tool-call") {
 						const input = parseToolInput(chunk.input);
-						pendingToolInputs.set(chunk.toolCallId, input);
 						markRunning(chunk.toolCallId, chunk.toolName, input);
 					} else if (chunk.type === "tool-result") {
-						pendingToolInputs.delete(chunk.toolCallId);
 						markFinished(chunk.toolCallId, chunk.output);
 					}
 				},
 				onFinish: async ({ text }) => {
 					const finalizeTurn = async (): Promise<AgentTurnOutcome> => {
-						const writerKeyForTurn = currentWriterKey;
 						const stepSnapshot =
 							steps.length > 0 ? steps.map((step) => ({ ...step })) : [];
-						const detectedChangesQuery =
-							typeof writerKeyForTurn === "string"
-								? createWriterKeyDetectedChangesQuery({
-										lix,
-										writerKey: writerKeyForTurn,
-									})
-								: null;
-
-						const metadata =
-							stepSnapshot.length > 0 || writerKeyForTurn
-								? {
-										...(stepSnapshot.length > 0
-											? { lix_agent_steps: stepSnapshot }
-											: {}),
-										...(writerKeyForTurn
-											? { lix_agent_writer_key: writerKeyForTurn }
-											: {}),
-									}
+						const metadata: LixAgentConversationMessageMetadata | undefined =
+							stepSnapshot.length > 0
+								? { lix_agent_sdk_steps: stepSnapshot }
 								: undefined;
 
 						const assistantMessageId = await uuidV7({ lix });
@@ -308,8 +247,6 @@ export function createSendMessage(deps: SendMessageDeps) {
 							text,
 							metadata,
 							steps: stepSnapshot,
-							writerKey: writerKeyForTurn ?? null,
-							detectedChangesQuery,
 						};
 					};
 
@@ -322,29 +259,21 @@ export function createSendMessage(deps: SendMessageDeps) {
 							throw error;
 						})
 						.finally(() => {
-							resetWriterKey();
 							steps.length = 0;
-							pendingToolInputs.clear();
 						});
 				},
 				onError: (error) => {
 					rejectTurn(error ?? new Error("sendMessage stream error"));
-					resetWriterKey();
 					steps.length = 0;
-					pendingToolInputs.clear();
 				},
 				onAbort: () => {
 					rejectTurn(new Error("sendMessage aborted"));
-					resetWriterKey();
 					steps.length = 0;
-					pendingToolInputs.clear();
 				},
 				abortSignal: signal,
 			}) as AgentToolStream;
 		} catch (error) {
-			resetWriterKey();
 			steps.length = 0;
-			pendingToolInputs.clear();
 			rejectTurn(error);
 			throw error;
 		}
@@ -361,28 +290,6 @@ export function createSendMessage(deps: SendMessageDeps) {
 			},
 		};
 	};
-}
-
-/**
- * Create a query builder scoped to state rows written by the provided writer key.
- *
- * Consumer code can customize the projection with `.select()`, join other views,
- * or simply call `.selectAll().execute()` to retrieve the raw state rows.
- *
- * @example
- * const query = createWriterKeyDetectedChangesQuery({ lix, writerKey });
- * const rows = await query
- *   .select(["entity_id", "schema_key", "snapshot_content"])
- *   .execute();
- */
-export function createWriterKeyDetectedChangesQuery(args: {
-	lix: Lix;
-	writerKey: string;
-}) {
-	return args.lix.db
-		.selectFrom("state_all")
-		.where("writer_key", "=", args.writerKey as any)
-		.orderBy("created_at", "asc");
 }
 
 function toAiMessages(

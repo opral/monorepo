@@ -1,5 +1,4 @@
 import type { Lix } from "@lix-js/sdk";
-import { withWriterKey } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -28,9 +27,9 @@ export const WriteFileOutputSchema = z.object({
 export type WriteFileOutput = z.infer<typeof WriteFileOutputSchema>;
 
 export async function writeFile(
-	args: WriteFileInput & { lix: Lix; writerKey?: string | null }
+	args: WriteFileInput & { lix: Lix }
 ): Promise<WriteFileOutput> {
-	const { lix, writerKey, version_id, path, content, mode = "replace" } = args;
+	const { lix, version_id, path, content, mode = "replace" } = args;
 	const enc = new TextEncoder();
 
 	const exec = async (trx: Lix["db"]) => {
@@ -108,20 +107,11 @@ export async function writeFile(
 		}
 	};
 
-	if (writerKey !== undefined) {
-		return withWriterKey(lix.db, writerKey, async (trx) =>
-			exec(trx as unknown as Lix["db"])
-		);
-	}
-
 	if (lix.db.isTransaction) return exec(lix.db);
 	return lix.db.transaction().execute(exec);
 }
 
-export function createWriteFileTool(args: {
-	lix: Lix;
-	getWriterKey?: () => string | null | undefined;
-}) {
+export function createWriteFileTool(args: { lix: Lix }) {
 	return tool({
 		description:
 			"Write a UTF-8 text file to the lix for a specific version. Provide an absolute path ('/'), the version_id to modify, and optionally set mode to 'append'.",
@@ -129,7 +119,6 @@ export function createWriteFileTool(args: {
 		execute: async (input) =>
 			writeFile({
 				lix: args.lix,
-				writerKey: args.getWriterKey?.() ?? undefined,
 				...(input as WriteFileInput),
 			}),
 	});

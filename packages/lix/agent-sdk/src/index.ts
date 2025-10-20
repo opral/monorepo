@@ -5,6 +5,11 @@ export {
 } from "./system-prompt.js";
 export { summarizeWorkingChanges } from "./summarize-working-changes.js";
 export type { LixAgent, ChatMessage } from "./create-lix-agent.js";
+export type {
+	LixAgentConversationMessage,
+	LixAgentConversationMessageMetadata,
+	LixAgentStep,
+} from "./conversation-message.js";
 export {
 	getOrCreateDefaultAgentConversationId,
 	setDefaultAgentConversationId,

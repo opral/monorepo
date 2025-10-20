@@ -1,7 +1,10 @@
 import type { Lix } from "@lix-js/sdk";
 import { createConversation, createConversationMessage } from "@lix-js/sdk";
 import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import type { ChatMessage } from "./send-message.js";
+import type {
+	ChatMessage,
+	LixAgentConversationMessageMetadata,
+} from "./conversation-message.js";
 
 const DEFAULT_CONVERSATION_ID_KEY = "lix_agent_conversation_id";
 
@@ -62,16 +65,18 @@ export async function appendUserMessage(
 	lix: Lix,
 	conversationId: string,
 	text: string,
-	metadata?: Record<string, any>
+	metadata?: LixAgentConversationMessageMetadata
 ): Promise<void> {
+	const baseMetadata: LixAgentConversationMessageMetadata = {
+		...metadata,
+		lix_agent_sdk_role: "user",
+	};
+
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: {
-			lix_agent_role: "user",
-			...(metadata ?? {}),
-		},
+		lixcol_metadata: baseMetadata,
 	});
 }
 
@@ -79,16 +84,18 @@ export async function appendAssistantMessage(
 	lix: Lix,
 	conversationId: string,
 	text: string,
-	metadata?: Record<string, any>
+	metadata?: LixAgentConversationMessageMetadata
 ): Promise<void> {
+	const baseMetadata: LixAgentConversationMessageMetadata = {
+		...(metadata ?? {}),
+		lix_agent_sdk_role: "assistant",
+	};
+
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: {
-			lix_agent_role: "assistant",
-			...(metadata ?? {}),
-		},
+		lixcol_metadata: baseMetadata,
 	});
 }
 
@@ -109,10 +116,13 @@ export async function loadConversationHistory(
 	};
 	const history: ChatMessage[] = [];
 	for (const r of rows as ConversationRow[]) {
-		const role = (r.lixcol_metadata?.lix_agent_role as string) ?? "assistant";
+		const role =
+			(r.lixcol_metadata?.lix_agent_sdk_role as string) ?? "assistant";
 		const metadata =
-			(r.lixcol_metadata as Record<string, any> | null | undefined) ??
-			undefined;
+			(r.lixcol_metadata as
+				| LixAgentConversationMessageMetadata
+				| null
+				| undefined) ?? undefined;
 		const content = toPlainText(r.body).replace(
 			/^\[(user|assistant)\]\s*/i,
 			""

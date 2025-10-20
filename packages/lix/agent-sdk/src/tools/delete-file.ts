@@ -1,5 +1,4 @@
 import type { Lix } from "@lix-js/sdk";
-import { withWriterKey } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -33,9 +32,9 @@ export const DeleteFileOutputSchema = z.object({
 export type DeleteFileOutput = z.infer<typeof DeleteFileOutputSchema>;
 
 export async function deleteFile(
-	args: DeleteFileInput & { lix: Lix; writerKey?: string | null }
+	args: DeleteFileInput & { lix: Lix }
 ): Promise<DeleteFileOutput> {
-	const { lix, writerKey, version_id, path, fileId } = args;
+	const { lix, version_id, path, fileId } = args;
 
 	const exec = async (trx: Lix["db"]) => {
 		const version = await trx
@@ -79,20 +78,11 @@ export async function deleteFile(
 		});
 	};
 
-	if (writerKey !== undefined) {
-		return withWriterKey(lix.db, writerKey, async (trx) =>
-			exec(trx as unknown as Lix["db"])
-		);
-	}
-
 	if (lix.db.isTransaction) return exec(lix.db);
 	return lix.db.transaction().execute(exec);
 }
 
-export function createDeleteFileTool(args: {
-	lix: Lix;
-	getWriterKey?: () => string | null | undefined;
-}) {
+export function createDeleteFileTool(args: { lix: Lix }) {
 	return tool({
 		description:
 			"Delete a file from the lix for a specific version. Provide an absolute path (starting with '/') or a fileId together with the version_id.",
@@ -100,7 +90,6 @@ export function createDeleteFileTool(args: {
 		execute: async (input) =>
 			deleteFile({
 				lix: args.lix,
-				writerKey: args.getWriterKey?.() ?? undefined,
 				...(input as DeleteFileInput),
 			}),
 	});

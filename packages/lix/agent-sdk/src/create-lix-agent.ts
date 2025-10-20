@@ -1,14 +1,11 @@
 import type { Lix } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
+import type { ChatMessage } from "./conversation-message.js";
 import { ContextStore } from "./context/context-store.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./system-prompt.js";
 import { createSendMessage, type AgentStreamResult } from "./send-message.js";
 
-export type ChatMessage = {
-	id: string;
-	role: "system" | "user" | "assistant";
-	content: string;
-};
+export type { ChatMessage } from "./conversation-message.js";
 
 /**
  * Handle returned by {@link createLixAgent}.
@@ -66,6 +63,17 @@ export async function createLixAgent(args: {
 	const contextStore = new ContextStore();
 	let systemInstruction = providedSystemPrompt ?? DEFAULT_SYSTEM_PROMPT;
 
+	const send = createSendMessage({
+		lix,
+		model,
+		history,
+		contextStore,
+		getSystemInstruction: () => systemInstruction,
+		setSystemInstruction: (value: string) => {
+			systemInstruction = value;
+		},
+	});
+
 	function getHistory() {
 		return history.slice();
 	}
@@ -77,7 +85,7 @@ export async function createLixAgent(args: {
 	return {
 		lix,
 		model,
-		sendMessage: async ({
+		sendMessage: ({
 			text,
 			systemPrompt,
 			signal,
@@ -85,22 +93,12 @@ export async function createLixAgent(args: {
 			text: string;
 			systemPrompt?: string;
 			signal?: AbortSignal;
-		}): Promise<AgentStreamResult> => {
-			return createSendMessage({
-				lix,
-				model,
-				history,
-				contextStore,
-				getSystemInstruction: () => systemInstruction,
-				setSystemInstruction: (value: string) => {
-					systemInstruction = value;
-				},
-			})({
+		}): Promise<AgentStreamResult> =>
+			send({
 				text,
 				systemPromptOverride: systemPrompt,
 				signal,
-			});
-		},
+			}),
 		getHistory,
 		clearHistory,
 		setContext: (key: string, value: string) => {

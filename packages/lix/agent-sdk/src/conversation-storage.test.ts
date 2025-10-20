@@ -84,13 +84,13 @@ test("append message helpers persist metadata and loadConversationHistory normal
 	expect(history[0]).toMatchObject({
 		role: "user",
 		content: "Hello there",
-		metadata: { lix_agent_role: "user", topic: "greeting" },
+		metadata: { lix_agent_sdk_role: "user", topic: "greeting" },
 	});
 
 	expect(history[1]).toMatchObject({
 		role: "assistant",
 		content: "Hi friend!",
-		metadata: { lix_agent_role: "assistant", confidence: 0.5 },
+		metadata: { lix_agent_sdk_role: "assistant", confidence: 0.5 },
 	});
 
 	await lix.close();
