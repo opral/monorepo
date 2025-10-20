@@ -10,7 +10,7 @@ export type { ChatMessage } from "./conversation-message.js";
 /**
  * Handle returned by {@link createLixAgent}.
  */
-export type LixAgent = {
+export type Agent = {
 	lix: Lix;
 	model: LanguageModelV2;
 	/**
@@ -55,7 +55,7 @@ export async function createLixAgent(args: {
 	lix: Lix;
 	model: LanguageModelV2;
 	systemPrompt?: string;
-}): Promise<LixAgent> {
+}): Promise<Agent> {
 	const { lix, model, systemPrompt: providedSystemPrompt } = args;
 
 	// Default conversation state (in-memory)

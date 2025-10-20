@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import type { LixAgent } from "./create-lix-agent.js";
+import type { Agent } from "./create-lix-agent.js";
 import { generateText } from "ai";
 import { selectWorkingDiff } from "@lix-js/sdk";
 
@@ -10,7 +10,7 @@ import { selectWorkingDiff } from "@lix-js/sdk";
  * If a model is provided, generates a concise natural-language summary; otherwise returns a deterministic fallback.
  */
 export async function summarizeWorkingChanges(args: {
-	agent: LixAgent;
+	agent: Agent;
 	limit?: number;
 }): Promise<{ text: string }> {
 	// Diff since checkpoint using SDK helper

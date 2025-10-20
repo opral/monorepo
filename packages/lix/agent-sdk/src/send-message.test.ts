@@ -6,7 +6,7 @@ import { ContextStore } from "./context/context-store.js";
 import { createSendMessage } from "./send-message.js";
 import type {
 	ChatMessage,
-	LixAgentConversationMessageMetadata,
+	AgentConversationMessageMetadata,
 } from "./conversation-message.js";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
@@ -117,7 +117,7 @@ describe("createSendMessage", () => {
 			.at(-1);
 		expect(firstAssistantMessage?.metadata).toBeTruthy();
 		const firstMetadata = firstAssistantMessage?.metadata as
-			| LixAgentConversationMessageMetadata
+			| AgentConversationMessageMetadata
 			| undefined;
 		expect(firstMetadata?.lix_agent_sdk_steps).toBeDefined();
 		expect(firstMetadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
@@ -156,7 +156,7 @@ describe("createSendMessage", () => {
 			.filter((msg) => msg.role === "assistant")
 			.at(-1);
 		const secondMetadata = secondAssistantMessage?.metadata as
-			| LixAgentConversationMessageMetadata
+			| AgentConversationMessageMetadata
 			| undefined;
 		expect(secondMetadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
 		expect(secondMetadata?.lix_agent_sdk_steps?.[0]?.tool_name).toBe(
@@ -224,7 +224,7 @@ test("write_file tool persists structured data changes", async () => {
 		.at(-1);
 	expect(lastAssistantMessage).toBeTruthy();
 	const metadata = lastAssistantMessage?.metadata as
-		| LixAgentConversationMessageMetadata
+		| AgentConversationMessageMetadata
 		| undefined;
 	expect(metadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
 	expect(finalTurn.steps.at(0)?.tool_name).toBe("write_file");

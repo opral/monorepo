@@ -3,7 +3,7 @@ import type { LixConversationMessage, State } from "@lix-js/sdk";
 /**
  * A single tool call recorded for an agent turn.
  */
-export type LixAgentStep = {
+export type AgentStep = {
 	id: string;
 	kind: "tool_call";
 	label?: string;
@@ -25,25 +25,25 @@ type BaseMetadata = NonNullable<BaseConversationMessage["lixcol_metadata"]>;
  * Keys are prefixed with `lix_agent_sdk_` to avoid collisions with host apps.
  *
  * @example
- * const metadata: LixAgentConversationMessageMetadata = {
+ * const metadata: AgentConversationMessageMetadata = {
  * 	lix_agent_sdk_role: "assistant",
  * 	lix_agent_sdk_steps: [{ id: "tool-1", kind: "tool_call", status: "succeeded", tool_name: "read_file", started_at: iso }],
  * };
  */
-export type LixAgentConversationMessageMetadata = {
+export type AgentConversationMessageMetadata = {
 	lix_agent_sdk_role?: "user" | "assistant";
-	lix_agent_sdk_steps?: LixAgentStep[];
+	lix_agent_sdk_steps?: AgentStep[];
 } & Record<string, unknown>;
 
 /**
  * Conversation message row compatible with {@link State<LixConversationMessage>}
  * but with a typed metadata envelope.
  */
-export type LixAgentConversationMessage = Omit<
+export type AgentConversationMessage = Omit<
 	BaseConversationMessage,
 	"lixcol_metadata"
 > & {
-	lixcol_metadata: (BaseMetadata & LixAgentConversationMessageMetadata) | null;
+	lixcol_metadata: (BaseMetadata & AgentConversationMessageMetadata) | null;
 };
 
 /**
@@ -53,5 +53,5 @@ export type ChatMessage = {
 	id: string;
 	role: "system" | "user" | "assistant";
 	content: string;
-	metadata?: LixAgentConversationMessageMetadata;
+	metadata?: AgentConversationMessageMetadata;
 };

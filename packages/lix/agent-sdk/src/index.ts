@@ -4,11 +4,11 @@ export {
 	DEFAULT_SYSTEM_PROMPT,
 } from "./system-prompt.js";
 export { summarizeWorkingChanges } from "./summarize-working-changes.js";
-export type { LixAgent, ChatMessage } from "./create-lix-agent.js";
+export type { Agent, ChatMessage } from "./create-lix-agent.js";
 export type {
-	LixAgentConversationMessage,
-	LixAgentConversationMessageMetadata,
-	LixAgentStep,
+	AgentConversationMessage,
+	AgentConversationMessageMetadata,
+	AgentStep,
 } from "./conversation-message.js";
 export {
 	getOrCreateDefaultAgentConversationId,

@@ -5,28 +5,12 @@ import { streamText, stepCountIs } from "ai";
 import type { StreamTextResult } from "ai";
 import type {
 	ChatMessage,
-	LixAgentStep,
-	LixAgentConversationMessageMetadata,
+	AgentStep,
+	AgentConversationMessageMetadata,
 } from "./conversation-message.js";
 import type { ContextStore } from "./context/context-store.js";
-import { createReadFileTool } from "./tools/read-file.js";
-import { createListFilesTool } from "./tools/list-files.js";
-import { createSqlSelectStateTool } from "./tools/sql-select-state.js";
-import { createWriteFileTool } from "./tools/write-file.js";
-import { createDeleteFileTool } from "./tools/delete-file.js";
-import { createCreateVersionTool } from "./tools/create-version.js";
-import { createCreateChangeProposalTool } from "./tools/create-change-proposal.js";
-
-export type AgentDetectedChange = {
-	entity_id: string;
-	schema_key: string;
-	plugin_key: string;
-	file_id: string;
-	version_id: string;
-	change_id: string;
-	snapshot_content: unknown;
-	metadata?: Record<string, unknown>;
-};
+import { createAgentToolSet, type AgentToolSet } from "./tools/index.js";
+import { buildSystemPrompt } from "./system/build-system-prompt.js";
 
 type SendMessageDeps = {
 	lix: Lix;
@@ -43,13 +27,12 @@ type SendMessageInput = {
 	signal?: AbortSignal;
 };
 
-type AgentToolSet = Record<string, any>;
 type AgentToolStream = StreamTextResult<AgentToolSet, never>;
 
 export type AgentTurnOutcome = {
 	text: string;
-	metadata?: LixAgentConversationMessageMetadata;
-	steps: LixAgentStep[];
+	metadata?: AgentConversationMessageMetadata;
+	steps: AgentStep[];
 };
 
 export type AgentStreamResult = {
@@ -68,29 +51,13 @@ export function createSendMessage(deps: SendMessageDeps) {
 		setSystemInstruction,
 	} = deps;
 
-	const read_file = createReadFileTool({ lix });
-	const list_files = createListFilesTool({ lix });
-	const sql_select_state = createSqlSelectStateTool({ lix });
-	const write_file = createWriteFileTool({ lix });
-	const delete_file = createDeleteFileTool({ lix });
-	const create_version = createCreateVersionTool({ lix });
-	const create_change_proposal = createCreateChangeProposalTool({ lix });
+	const tools = createAgentToolSet({ lix });
 
-	const tools = {
-		read_file,
-		list_files,
-		sql_select_state,
-		write_file,
-		delete_file,
-		create_version,
-		create_change_proposal,
-	};
-
-	const steps: LixAgentStep[] = [];
+	const steps: AgentStep[] = [];
 
 	const upsertStep = (
 		toolCallId: string,
-		updater: (step: LixAgentStep) => LixAgentStep
+		updater: (step: AgentStep) => AgentStep
 	) => {
 		const index = steps.findIndex((step) => step.id === toolCallId);
 		if (index === -1) {
@@ -158,15 +125,7 @@ export function createSendMessage(deps: SendMessageDeps) {
 		history.push({ id: userMessageId, role: "user", content: text });
 
 		const mentionPaths = extractMentionPaths(text);
-		const mentionGuidance =
-			mentionPaths.length > 0
-				? `File mentions like @<path> may refer to files in the lix. If helpful, you can call the read_file tool with { path: "<path>" } to inspect content before answering. Only read files when needed.`
-				: undefined;
-
 		const systemInstruction = getSystemInstruction();
-		const mergedSystemWithGuidance = mentionGuidance
-			? `${systemInstruction}\n\n${mentionGuidance}`
-			: systemInstruction;
 
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
@@ -180,10 +139,11 @@ export function createSendMessage(deps: SendMessageDeps) {
 				activeVersion.name ?? "null"
 			)}`
 		);
-		const contextOverlay = contextStore.toOverlayBlock();
-		const finalSystem = contextOverlay
-			? `${mergedSystemWithGuidance}\n\n${contextOverlay}`
-			: mergedSystemWithGuidance;
+		const finalSystem = buildSystemPrompt({
+			basePrompt: systemInstruction,
+			mentionPaths,
+			contextOverlay: contextStore.toOverlayBlock(),
+		});
 
 		let doneSettled = false;
 		let resolveDone!: (value: AgentTurnOutcome) => void;
@@ -230,7 +190,7 @@ export function createSendMessage(deps: SendMessageDeps) {
 					const finalizeTurn = async (): Promise<AgentTurnOutcome> => {
 						const stepSnapshot =
 							steps.length > 0 ? steps.map((step) => ({ ...step })) : [];
-						const metadata: LixAgentConversationMessageMetadata | undefined =
+						const metadata: AgentConversationMessageMetadata | undefined =
 							stepSnapshot.length > 0
 								? { lix_agent_sdk_steps: stepSnapshot }
 								: undefined;

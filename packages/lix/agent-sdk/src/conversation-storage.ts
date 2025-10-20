@@ -3,7 +3,7 @@ import { createConversation, createConversationMessage } from "@lix-js/sdk";
 import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
 	ChatMessage,
-	LixAgentConversationMessageMetadata,
+	AgentConversationMessageMetadata,
 } from "./conversation-message.js";
 
 const DEFAULT_CONVERSATION_ID_KEY = "lix_agent_conversation_id";
@@ -65,9 +65,9 @@ export async function appendUserMessage(
 	lix: Lix,
 	conversationId: string,
 	text: string,
-	metadata?: LixAgentConversationMessageMetadata
+	metadata?: AgentConversationMessageMetadata
 ): Promise<void> {
-	const baseMetadata: LixAgentConversationMessageMetadata = {
+	const baseMetadata: AgentConversationMessageMetadata = {
 		...metadata,
 		lix_agent_sdk_role: "user",
 	};
@@ -84,9 +84,9 @@ export async function appendAssistantMessage(
 	lix: Lix,
 	conversationId: string,
 	text: string,
-	metadata?: LixAgentConversationMessageMetadata
+	metadata?: AgentConversationMessageMetadata
 ): Promise<void> {
-	const baseMetadata: LixAgentConversationMessageMetadata = {
+	const baseMetadata: AgentConversationMessageMetadata = {
 		...(metadata ?? {}),
 		lix_agent_sdk_role: "assistant",
 	};
@@ -120,7 +120,7 @@ export async function loadConversationHistory(
 			(r.lixcol_metadata?.lix_agent_sdk_role as string) ?? "assistant";
 		const metadata =
 			(r.lixcol_metadata as
-				| LixAgentConversationMessageMetadata
+				| AgentConversationMessageMetadata
 				| null
 				| undefined) ?? undefined;
 		const content = toPlainText(r.body).replace(
