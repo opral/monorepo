@@ -1,9 +1,5 @@
 import type { Generated } from "kysely";
-import type { LixEngine } from "../engine/boot.js";
-import type {
-	LixGenerated,
-	LixSchemaDefinition,
-} from "../schema-definition/definition.js";
+import type { LixGenerated } from "../schema-definition/definition.js";
 
 /**
  * Base type for entity history views that include historical data from the state_history table.
@@ -210,86 +206,3 @@ export type StateEntityHistoryColumns = {
 	 */
 	lixcol_metadata: LixGenerated<Record<string, any> | null>;
 };
-
-/**
- * Creates SQL view for entity history based on its schema definition.
- *
- * This function generates a read-only view that extracts JSON properties from the state_history table,
- * providing access to historical entity states at different points in change set history.
- *
- * The view supports:
- * - Querying entity states at specific change sets
- * - Traversing entity history by depth (blame functionality)
- * - Filtering by change set ancestry relationships
- *
- * @throws Error if schema type is not "object" or x-lix-primary-key is not defined
- *
- * @example
- * ```typescript
- * // Basic usage for key-value entities
- * createEntityHistoryViewIfNotExists({
- *   lix,
- *   schema: LixKeyValueSchema,
- *   overrideName: "key_value_history",
- * });
- *
- * // Usage for account entities
- * createEntityHistoryViewIfNotExists({
- *   lix,
- *   schema: LixAccountSchema,
- *   overrideName: "account_history",
- * });
- * ```
- */
-export function createEntityStateHistoryView(args: {
-	engine: Pick<LixEngine, "sqlite">;
-	schema: LixSchemaDefinition;
-	/** Overrides the view name which defaults to schema["x-lix-key"] + "_history" */
-	overrideName?: string;
-	/** Optional hardcoded file_id to constrain history queries */
-	hardcodedFileId?: string;
-}): void {
-	if (!args.schema["x-lix-primary-key"]) {
-		throw new Error(
-			`Schema must define 'x-lix-primary-key' for entity history view generation`
-		);
-	}
-
-	const view_name = args.overrideName ?? args.schema["x-lix-key"] + "_history";
-	// Quote the view name to handle SQL reserved keywords
-	const quoted_view_name = `"${view_name}"`;
-	const schema_key = args.schema["x-lix-key"];
-	const properties = Object.keys((args.schema as any).properties);
-
-	// Generated SQL query for history view
-	// History lookups benefit from the same optimisation—restricting to the
-	// known file id lets SQLite answer with a single indexed probe instead of
-	// exploring every file's history for the schema.
-	const fileFilterClause = args.hardcodedFileId
-		? ` AND file_id = '${args.hardcodedFileId}'`
-		: "";
-
-	const sqlQuery = `
-    CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
-      SELECT
-        ${properties
-					.map(
-						(prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
-					)
-					.join(",\n        ")},
-        entity_id AS lixcol_entity_id,
-        schema_key AS lixcol_schema_key,
-        file_id AS lixcol_file_id,
-        plugin_key AS lixcol_plugin_key,
-        schema_version AS lixcol_schema_version,
-        change_id AS lixcol_change_id,
-        commit_id AS lixcol_commit_id,
-        root_commit_id AS lixcol_root_commit_id,
-        depth AS lixcol_depth,
-        metadata AS lixcol_metadata
-      FROM state_history
-      WHERE schema_key = '${schema_key}'${fileFilterClause};
-    `;
-
-	args.engine.sqlite.exec(sqlQuery);
-}

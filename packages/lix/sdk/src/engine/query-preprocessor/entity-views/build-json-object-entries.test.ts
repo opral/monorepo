@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { buildJsonObjectEntries } from "./build-json-object-entries.js";
+import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 
 const TestSchema = {
 	"x-lix-key": "test_schema",

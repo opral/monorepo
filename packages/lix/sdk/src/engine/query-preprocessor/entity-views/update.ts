@@ -16,7 +16,6 @@ import {
 	LParen,
 	RParen,
 } from "../../sql-parser/tokenizer.js";
-import { buildJsonObjectEntries } from "../../../entity-views/build-json-object-entries.js";
 import { buildSqliteJsonPath } from "../../../schema-definition/json-pointer.js";
 import {
 	baseSchemaKey,
@@ -38,6 +37,7 @@ import {
 	createCelEnvironment,
 	type CelEnvironmentState,
 } from "./cel-environment.js";
+import { buildJsonObjectEntries } from "./build-json-object-entries.js";
 
 interface ParameterState {
 	readonly parameters: ReadonlyArray<unknown>;

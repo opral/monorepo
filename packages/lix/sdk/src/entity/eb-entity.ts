@@ -1,6 +1,6 @@
 import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { LixEntity, LixEntityCanonical } from "./schema.js";
+import type { LixEntity, LixEntityCanonical } from "./types.js";
 
 /**
  * List of tables that use canonical column names (entity_id, schema_key, file_id)

@@ -1,12 +1,3 @@
-import type { LixEngine } from "../engine/boot.js";
-import { applyEntityLabelDatabaseSchema } from "./label/schema.js";
-
-export function applyEntityDatabaseSchema(args: {
-	engine: Pick<LixEngine, "sqlite">;
-}): void {
-	applyEntityLabelDatabaseSchema(args);
-}
-
 // Entity type with canonical column names (used in regular tables like state, entity_label)
 export type LixEntityCanonical = {
 	schema_key: string;

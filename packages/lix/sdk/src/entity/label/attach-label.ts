@@ -1,5 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixEntity, LixEntityCanonical } from "../schema.js";
+import type { LixEntity, LixEntityCanonical } from "../types.js";
 
 /**
  * Attaches a label to an entity (creates mapping).
