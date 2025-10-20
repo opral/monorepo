@@ -1,5 +1,6 @@
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { buildSchemaIndexStatements } from "./schema-indexes.js";
 
 /**
  * Creates (or updates) a per-schema internal state cache table with core indexes.
@@ -111,6 +112,25 @@ export function createSchemaCacheTable(args: {
 
 	// Update planner stats
 	engine.executeSync({ sql: `ANALYZE ${tableName}` });
+
+	const indexStatements = buildSchemaIndexStatements({
+		schema,
+		tableName,
+	});
+
+	const traceEnv = (globalThis as any)?.process?.env;
+	const traceIndexesFlag =
+		typeof traceEnv?.LIX_TRACE_SCHEMA_INDEXES === "string" &&
+		traceEnv.LIX_TRACE_SCHEMA_INDEXES.toLowerCase() !== "false" &&
+		traceEnv.LIX_TRACE_SCHEMA_INDEXES !== "0";
+	for (const statement of indexStatements) {
+		if (traceIndexesFlag) {
+			console.debug(
+				`createSchemaCacheTable index -> ${statement.name}: ${statement.sql}`
+			);
+		}
+		engine.executeSync({ sql: statement.sql });
+	}
 
 	return tableName;
 }

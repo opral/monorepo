@@ -1,9 +1,11 @@
 import type { PlaceholderValue, Shape } from "../microparser/analyze-shape.js";
+import { schemaKeyToCacheTableName } from "../../../../state/cache/create-schema-cache-table.js";
 
 type TransactionOption = {
 	includeTransaction?: boolean;
 	existingCacheTables?: Set<string>;
 	parameters?: ReadonlyArray<unknown>;
+	schemaKeyHints?: readonly string[];
 };
 
 export function buildHoistedInternalStateVtableCte(
@@ -18,7 +20,8 @@ export function buildHoistedInternalStateVtableCte(
 
 	const resolvedSchemaKeys = collectResolvedSchemaKeys(
 		shapes,
-		options?.parameters
+		options?.parameters,
+		options?.schemaKeyHints
 	);
 
 	const canonicalQuery = buildInternalStateVtableQuery({
@@ -60,7 +63,8 @@ export function rewriteInternalStateVtableQuery(
 ): string | null {
 	const schemaKey = pickResolvedSchemaKey(
 		shape.schemaKeys,
-		options?.parameters
+		options?.parameters,
+		options?.schemaKeyHints
 	);
 
 	const includePrimaryKey = shape.referencesPrimaryKey;
@@ -121,13 +125,19 @@ function buildInternalStateVtableQuery(
 		options.schemaKeys,
 		options.existingCacheTables
 	);
+	const hasDescriptorCache = options.existingCacheTables
+		? options.existingCacheTables.has(
+				schemaKeyToCacheTableName("lix_version_descriptor")
+			)
+		: true;
 
 	const versionBinding = collectVersionBinding(options.shapes);
 	let paramBindings = buildParamBindings(options.shapes, versionBinding);
 	const versionCtes = buildVersionCtes(
 		options.shapes,
 		versionBinding,
-		paramBindings
+		paramBindings,
+		hasDescriptorCache
 	);
 	const schemaFilter = collectColumnFilter(options.shapes, "schema_key");
 	const entityFilter = collectColumnFilter(options.shapes, "entity_id");
@@ -617,9 +627,11 @@ function buildCacheRouting(
 			}
 		}
 	}
-
 	const existing = [...uniqueCandidates].filter((name) => tableExists(name));
 	if (existing.length === 0) {
+		if (schemaKeys.length > 0) {
+			return buildCacheRouting([], existingCacheTables);
+		}
 		return { sql: buildEmptyCacheSourceSql(), includeCache: false };
 	}
 
@@ -656,30 +668,35 @@ function sanitizeSchemaKey(key: string): string {
 function buildVersionCtes(
 	shapes: Shape[],
 	versionBinding: ParamBinding | null,
-	paramBindings: ParamBindings | null
+	paramBindings: ParamBindings | null,
+	hasDescriptorCache: boolean
 ): VersionCteResult {
 	if (versionBinding?.kind === "literal") {
 		return buildSeededVersionCtesFromLiteral(
 			versionBinding.value,
-			withVersionBinding(paramBindings, versionBinding)
+			withVersionBinding(paramBindings, versionBinding),
+			hasDescriptorCache
 		);
 	}
 
 	if (versionBinding?.kind === "placeholder") {
 		return buildSeededVersionCtesFromToken(
 			versionBinding.token,
-			withVersionBinding(paramBindings, versionBinding)
+			withVersionBinding(paramBindings, versionBinding),
+			hasDescriptorCache
 		);
 	}
 
-	return buildUnseededVersionCtes();
+	return buildUnseededVersionCtes(hasDescriptorCache);
 }
 
 function buildSeededVersionCtesFromLiteral(
 	value: string,
-	paramBindings: ParamBindings
+	paramBindings: ParamBindings,
+	hasDescriptorCache: boolean
 ): VersionCteResult {
 	const paramsClause = buildParamsCteClause(paramBindings);
+	const descriptorSource = buildDescriptorSource(hasDescriptorCache);
 	const sql = stripIndent(`
 		WITH RECURSIVE
 		  ${paramsClause},
@@ -687,7 +704,7 @@ function buildSeededVersionCtesFromLiteral(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM lix_internal_state_cache_v1_lix_version_descriptor desc
+		    FROM ${descriptorSource} desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -720,9 +737,11 @@ function buildSeededVersionCtesFromLiteral(
 
 function buildSeededVersionCtesFromToken(
 	_token: string,
-	paramBindings: ParamBindings
+	paramBindings: ParamBindings,
+	hasDescriptorCache: boolean
 ): VersionCteResult {
 	const paramsClause = buildParamsCteClause(paramBindings);
+	const descriptorSource = buildDescriptorSource(hasDescriptorCache);
 	const sql = stripIndent(`
 		WITH RECURSIVE
 		  ${paramsClause},
@@ -730,7 +749,7 @@ function buildSeededVersionCtesFromToken(
 		    SELECT
 		      json_extract(desc.snapshot_content, '$.id') AS version_id,
 		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-		    FROM lix_internal_state_cache_v1_lix_version_descriptor desc
+		    FROM ${descriptorSource} desc
 		  ),
 		  version_inheritance(version_id, ancestor_version_id) AS (
 		    SELECT
@@ -953,15 +972,18 @@ function buildParamsCteClause(paramBindings: ParamBindings): string {
 	`).trim();
 }
 
-function buildUnseededVersionCtes(): VersionCteResult {
+function buildUnseededVersionCtes(
+	hasDescriptorCache: boolean
+): VersionCteResult {
+	const descriptorSource = buildDescriptorSource(hasDescriptorCache);
 	const sql = stripIndent(`
-    WITH RECURSIVE
-      version_descriptor_base AS (
-        SELECT
-          json_extract(desc.snapshot_content, '$.id') AS version_id,
-          json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-        FROM lix_internal_state_cache_v1_lix_version_descriptor desc
-      ),
+		WITH RECURSIVE
+		  version_descriptor_base AS (
+		    SELECT
+		      json_extract(desc.snapshot_content, '$.id') AS version_id,
+		      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+		    FROM ${descriptorSource} desc
+		  ),
       version_inheritance(version_id, ancestor_version_id) AS (
         SELECT
           vdb.version_id,
@@ -989,25 +1011,68 @@ function buildUnseededVersionCtes(): VersionCteResult {
 	return { sql, paramsAvailable: false };
 }
 
+function buildDescriptorSource(hasDescriptorCache: boolean): string {
+	if (hasDescriptorCache) {
+		return "lix_internal_state_cache_v1_lix_version_descriptor";
+	}
+	return stripIndent(`
+		(SELECT
+		  entity_id,
+		  schema_key,
+		  file_id,
+		  plugin_key,
+		  snapshot_content,
+		  schema_version,
+		  version_id,
+		  created_at,
+		  updated_at,
+		  inherited_from_version_id,
+		  0 AS is_tombstone,
+		  change_id,
+		  commit_id
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'lix_version_descriptor'
+		  AND snapshot_content IS NOT NULL)
+	`);
+}
+
 type ShapeLiteral = { kind: "literal"; value: string };
 
 function collectResolvedSchemaKeys(
 	shapes: Shape[],
-	parameters?: ReadonlyArray<unknown>
+	parameters?: ReadonlyArray<unknown>,
+	hints?: readonly string[]
 ): string[] {
-	let baseline: Set<string> | null = null;
+	let baseline: Set<string> | null = hints
+		? new Set(
+				(hints ?? []).filter(
+					(value): value is string =>
+						typeof value === "string" && value.length > 0
+				)
+			)
+		: null;
 	for (const shape of shapes) {
 		const resolved = resolveSchemaKeyValues(shape.schemaKeys, parameters);
-		if (resolved === null || resolved.size === 0) {
+		if (resolved === null) {
 			return [];
+		}
+		if (resolved.size === 0) {
+			continue;
 		}
 		if (!baseline) {
 			baseline = resolved;
 			continue;
 		}
-		if (!setsEqual(baseline, resolved)) {
+		const intersection = new Set<string>();
+		for (const value of resolved) {
+			if (baseline.has(value)) {
+				intersection.add(value);
+			}
+		}
+		if (intersection.size === 0) {
 			return [];
 		}
+		baseline = intersection;
 	}
 	return baseline ? [...baseline] : [];
 }
@@ -1039,13 +1104,17 @@ function resolveSchemaKeyValues(
 
 function pickResolvedSchemaKey(
 	values: Array<ShapeLiteral | PlaceholderValue>,
-	parameters?: ReadonlyArray<unknown>
+	parameters?: ReadonlyArray<unknown>,
+	hints?: readonly string[]
 ): string | undefined {
 	const resolved = resolveSchemaKeyValues(values, parameters);
-	if (!resolved || resolved.size !== 1) {
-		return undefined;
+	if (resolved && resolved.size === 1) {
+		return resolved.values().next().value;
 	}
-	return resolved.values().next().value;
+	if ((!resolved || resolved.size === 0) && hints && hints.length === 1) {
+		return hints[0];
+	}
+	return undefined;
 }
 
 function resolvePlaceholderValue(
@@ -1054,7 +1123,7 @@ function resolvePlaceholderValue(
 ): unknown {
 	if (!tokenImage || !parameters) {
 		return undefined;
-}
+	}
 	const first = tokenImage[0];
 	const slice = tokenImage.slice(1);
 	if (first === "?" && slice.length > 0) {

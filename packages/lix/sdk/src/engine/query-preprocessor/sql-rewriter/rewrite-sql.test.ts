@@ -20,7 +20,7 @@ test("skips transaction segment when transaction flag false", () => {
 	const rewritten = rewriteSql(sql, { hasOpenTransaction: false });
 
 	expect(rewritten).not.toContain("lix_internal_transaction_state");
-	expect(rewritten).toContain("lix_internal_state_cache");
+	expect(rewritten).toContain("lix_internal_state_all_untracked");
 });
 
 test("omits cache arms when no cache tables exist", () => {

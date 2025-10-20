@@ -1,7 +1,10 @@
 import { expandQuery } from "./expand-query.js";
 import { ensureFreshStateCache } from "./cache-populator.js";
 import { analyzeShapes } from "./sql-rewriter/microparser/analyze-shape.js";
-import { rewriteSql } from "./sql-rewriter/rewrite-sql.js";
+import {
+	collectSchemaKeyHints,
+	rewriteSql,
+} from "./sql-rewriter/rewrite-sql.js";
 import { rewriteEntityInsert } from "./entity-views/insert.js";
 import { rewriteEntityUpdate } from "./entity-views/update.js";
 import { rewriteEntityDelete } from "./entity-views/delete.js";
@@ -18,11 +21,22 @@ export type {
 	QueryPreprocessorResult,
 } from "./types.js";
 import {
+	AtName,
+	ColonName,
+	Comma,
 	DELETE,
+	DollarName,
+	DollarNumber,
+	Equals,
+	Ident,
 	INSERT,
 	LParen,
+	QIdent,
+	QMark,
+	QMarkNumber,
 	RParen,
 	SELECT,
+	SQStr,
 	UPDATE,
 	WITH,
 	tokenize,
@@ -30,7 +44,15 @@ import {
 } from "../sql-parser/tokenizer.js";
 import type { LixEngine } from "../boot.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
-import { getStateCacheTables } from "../../state/cache/schema.js";
+import {
+	applyStateCacheSchema,
+	getStateCacheTables,
+} from "../../state/cache/schema.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../../state/cache/create-schema-cache-table.js";
+import { resolveCacheSchemaDefinition } from "../../state/cache/schema-resolver.js";
 import { getEntityViewSelects } from "./entity-views/selects.js";
 import {
 	readDmlTarget,
@@ -315,10 +337,26 @@ function maybeRewriteStateAccess(args: {
 		return null;
 	}
 
+	const schemaKeyHints = collectSchemaKeyHints(tokens, shapes, args.parameters);
+	const allowSchemaHints =
+		shapes.every((shape) => shape.schemaKeys.length > 0) ||
+		shapes.some((shape) =>
+			shape.schemaKeys.some((entry) => entry.kind === "placeholder")
+		) ||
+		hasSchemaKeyPlaceholderPredicate(tokens);
 	const existingCacheTables = getStateCacheTables({ engine: args.engine });
+	ensureDescriptorCacheTable({
+		engine: args.engine,
+		cacheTables: existingCacheTables,
+	});
 	if (args.sideEffects !== false) {
 		for (const shape of shapes) {
-			ensureFreshStateCache({ engine: args.engine, shape });
+			ensureFreshStateCache({
+				engine: args.engine,
+				shape,
+				parameters: args.parameters,
+				schemaKeyHints: allowSchemaHints ? schemaKeyHints : undefined,
+			});
 		}
 	}
 
@@ -328,6 +366,8 @@ function maybeRewriteStateAccess(args: {
 		hasOpenTransaction: includeTransaction,
 		existingCacheTables,
 		parameters: args.parameters,
+		schemaKeyHints:
+			args.kind === "select" && allowSchemaHints ? schemaKeyHints : [],
 	});
 
 	const finalSql =
@@ -403,6 +443,87 @@ function loadViewSelectMap(
 		map.set(name, selectSql);
 	}
 	return map;
+}
+
+const PLACEHOLDER_TOKEN_TYPES = new Set([
+	QMark,
+	QMarkNumber,
+	ColonName,
+	DollarName,
+	DollarNumber,
+	AtName,
+]);
+
+function hasSchemaKeyPlaceholderPredicate(tokens: Token[]): boolean {
+	for (let i = 0; i < tokens.length; i++) {
+		const token = tokens[i];
+		if (!token) continue;
+		if (normalizeIdentifier(token) !== "schema_key") {
+			continue;
+		}
+		const op = tokens[i + 1];
+		if (!op) continue;
+		if (op.tokenType === Equals) {
+			const valueToken = tokens[i + 2];
+			if (valueToken && PLACEHOLDER_TOKEN_TYPES.has(valueToken.tokenType)) {
+				return true;
+			}
+			continue;
+		}
+		if (op.image?.toLowerCase() === "in") {
+			let j = i + 2;
+			if (tokens[j]?.tokenType !== LParen) continue;
+			j += 1;
+			while (j < tokens.length && tokens[j]?.tokenType !== RParen) {
+				const valueToken = tokens[j];
+				if (valueToken && PLACEHOLDER_TOKEN_TYPES.has(valueToken.tokenType)) {
+					return true;
+				}
+				j += 1;
+				if (tokens[j]?.tokenType === Comma) {
+					j += 1;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+function normalizeIdentifier(token: Token | undefined): string | null {
+	if (!token?.image) return null;
+	const image = token.image;
+	if (token.tokenType === Ident) {
+		return image.toLowerCase();
+	}
+	if (token.tokenType === QIdent) {
+		return image.slice(1, -1).replace(/""/g, '"').toLowerCase();
+	}
+	return image.toLowerCase();
+}
+
+function ensureDescriptorCacheTable(args: {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+	cacheTables: Set<string>;
+}): void {
+	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
+	if (args.cacheTables.has(descriptorTable)) {
+		return;
+	}
+	const schemaDefinition = resolveCacheSchemaDefinition({
+		engine: args.engine,
+		schemaKey: "lix_version_descriptor",
+	});
+	if (!schemaDefinition) {
+		throw new Error("Missing schema definition for lix_version_descriptor");
+	}
+	const created = createSchemaCacheTable({
+		engine: args.engine,
+		schema: schemaDefinition,
+	});
+	args.cacheTables.add(created);
+	if (created !== descriptorTable) {
+		args.cacheTables.add(descriptorTable);
+	}
 }
 
 function extractSelectFromCreateView(sql: string): string | undefined {

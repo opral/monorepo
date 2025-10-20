@@ -57,7 +57,6 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			.innerJoin("version", "active_version.version_id", "version.id")
 			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
-
 		const historyResult = await lix.db
 			.selectFrom("triple_test_history" as any)
 			.where("lixcol_commit_id", "=", activeVersion.commit_id)

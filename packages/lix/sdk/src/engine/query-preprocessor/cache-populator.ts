@@ -16,6 +16,8 @@ export interface CachePopulationArgs {
 		"sqlite" | "hooks" | "runtimeCacheRef" | "executeSync"
 	>;
 	shape: Shape;
+	parameters?: ReadonlyArray<unknown>;
+	schemaKeyHints?: readonly string[];
 }
 
 // Prevent re-entrancy when the stale-flag probe performs its own state_all read.
@@ -62,7 +64,12 @@ export function ensureFreshStateCache(args: CachePopulationArgs): void {
 			return;
 		}
 
-		ensureCacheTablesForShape(args.engine, args.shape);
+		ensureCacheTablesForShape(
+			args.engine,
+			args.shape,
+			args.parameters,
+			args.schemaKeyHints
+		);
 
 		const needsRefresh = safeIsStaleStateCache(args.engine);
 		if (!needsRefresh) {
@@ -142,18 +149,39 @@ function isMissingInternalStateVtableError(error: unknown): boolean {
 
 function ensureCacheTablesForShape(
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
-	shape: Shape
+	shape: Shape,
+	parameters?: ReadonlyArray<unknown>,
+	schemaKeyHints?: readonly string[]
 ): void {
-	const literalSchemaKeys = shape.schemaKeys
-		.filter((entry) => entry.kind === "literal")
-		.map((entry) => entry.value);
+	const schemaKeys = new Set<string>();
 
-	if (literalSchemaKeys.length === 0) {
+	for (const entry of shape.schemaKeys) {
+		if (entry.kind === "literal") {
+			if (entry.value.length > 0) {
+				schemaKeys.add(entry.value);
+			}
+			continue;
+		}
+		const resolved = resolvePlaceholderValue(entry.token?.image, parameters);
+		if (typeof resolved === "string" && resolved.length > 0) {
+			schemaKeys.add(resolved);
+		}
+	}
+
+	if (schemaKeyHints) {
+		for (const hint of schemaKeyHints) {
+			if (typeof hint === "string" && hint.length > 0) {
+				schemaKeys.add(hint);
+			}
+		}
+	}
+
+	if (schemaKeys.size === 0) {
 		return;
 	}
 
 	const tableCache = getStateCacheTables({ engine });
-	for (const schemaKey of literalSchemaKeys) {
+	for (const schemaKey of schemaKeys) {
 		const tableName = schemaKeyToCacheTableName(schemaKey);
 		if (tableCache.has(tableName)) {
 			continue;
@@ -174,4 +202,24 @@ function ensureCacheTablesForShape(
 			tableCache.add(tableName);
 		}
 	}
+}
+
+function resolvePlaceholderValue(
+	tokenImage: string | undefined,
+	parameters?: ReadonlyArray<unknown>
+): unknown {
+	if (!tokenImage || !parameters) {
+		return undefined;
+	}
+	if (!tokenImage.startsWith("?")) {
+		return undefined;
+	}
+	const index = Number.parseInt(tokenImage.slice(1), 10);
+	if (Number.isNaN(index)) {
+		return undefined;
+	}
+	if (index <= 0 || index > parameters.length) {
+		return undefined;
+	}
+	return parameters[index - 1];
 }

@@ -186,16 +186,56 @@ test("matrix of queries preserves precedence across rewrites", async () => {
 	});
 });
 
-test("rewriteSql routes placeholder schema key to specific cache table", () => {
-	const sqlText =
-		"SELECT * FROM lix_internal_state_vtable v WHERE v.schema_key = ?1 AND v.version_id = ?2";
+test("rewriteSql routes placeholder schema key through state_all expansion with cache tables", () => {
+	const sqlText = `select "snapshot_content" from (
+      SELECT
+        entity_id,
+        schema_key,
+        file_id,
+        version_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        created_at,
+        updated_at,
+        inherited_from_version_id,
+        change_id,
+        untracked,
+        commit_id,
+        writer_key,
+        (
+          SELECT json(metadata)
+          FROM change
+          WHERE change.id = lix_internal_state_vtable.change_id
+        ) AS metadata
+      FROM lix_internal_state_vtable
+      WHERE snapshot_content IS NOT NULL
+    ) AS "state_all"
+    WHERE "schema_key" = ?1
+      AND json_extract(snapshot_content, '$.id') = ?2
+      AND "version_id" = ?3
+      AND "inherited_from_version_id" IS NULL`;
+	const schemaKey = `${TEST_SCHEMA}_expanded`;
+	const schemaTable = schemaKeyToCacheTableName(schemaKey);
+	const existingCacheTables = new Set([
+		"lix_internal_state_cache_v1_lix_version_descriptor",
+		"lix_internal_state_cache_v1_lix_stored_schema",
+		"lix_internal_state_cache_v1_lix_commit",
+		schemaTable,
+	]);
 	const rewritten = rewriteSql(sqlText, {
-		parameters: [TEST_SCHEMA, VERSION_GLOBAL],
+		parameters: [schemaKey, "entity-456", VERSION_GLOBAL],
+		existingCacheTables,
 	});
 
-	const expectedTable = schemaKeyToCacheTableName(TEST_SCHEMA);
-	expect(rewritten).toContain(expectedTable);
-	expect(rewritten).not.toMatch(/UNION ALL\s+SELECT entity_id/);
+	const unexpected = [
+		"lix_internal_state_cache_v1_lix_stored_schema",
+		"lix_internal_state_cache_v1_lix_commit",
+	];
+	for (const table of unexpected) {
+		expect(rewritten).not.toContain(table);
+	}
+	expect(rewritten).toContain(schemaTable);
 });
 
 const TEST_SCHEMA = "rewrite_matrix_schema";
