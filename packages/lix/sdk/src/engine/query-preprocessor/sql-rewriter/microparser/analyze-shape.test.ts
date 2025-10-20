@@ -36,6 +36,23 @@ describe("analyzeShape", () => {
 		]);
 	});
 
+	test("captures schema filter on quoted table without alias", () => {
+		const sql = `SELECT json_extract(snapshot_content, '$.value') AS "value"
+      FROM "lix_internal_state_vtable"
+      WHERE "schema_key" = ?
+        AND "entity_id" = ?
+        AND "version_id" = ?`;
+		const shape = analyzeShape(tokenize(sql));
+		expect(shape).not.toBeNull();
+		expect(shape?.schemaKeys).toEqual([
+			expect.objectContaining({ kind: "placeholder" }),
+		]);
+		expect(shape?.entityIds).toEqual([
+			expect.objectContaining({ kind: "placeholder" }),
+		]);
+		expect(shape?.versionId.kind).toBe("placeholder");
+	});
+
 	test("gracefully ignores unknown filters", () => {
 		const sql = `SELECT * FROM lix_internal_state_vtable v WHERE v.other_col = 'xyz'`;
 		const shape = analyzeShape(tokenize(sql));

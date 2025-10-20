@@ -238,6 +238,39 @@ test("rewriteSql routes placeholder schema key through state_all expansion with 
 	expect(rewritten).toContain(schemaTable);
 });
 
+test("rewriteSql narrows cache union when hints are empty", () => {
+	const sqlText = `SELECT snapshot_content FROM lix_internal_state_vtable
+    WHERE schema_key = ?1
+      AND entity_id = ?2
+      AND version_id = ?3`;
+	const schemaKey = `${TEST_SCHEMA}_hintless`;
+	const schemaTable = schemaKeyToCacheTableName(schemaKey);
+	const existingCacheTables = new Set([
+		"lix_internal_state_cache_v1_lix_version_descriptor",
+		"lix_internal_state_cache_v1_lix_stored_schema",
+		"lix_internal_state_cache_v1_lix_commit",
+		"lix_internal_state_cache_v1_lix_commit_edge",
+		"lix_internal_state_cache_v1_lix_change_set",
+		schemaTable,
+	]);
+	const rewritten = rewriteSql(sqlText, {
+		parameters: [schemaKey, "entity-456", VERSION_GLOBAL],
+		existingCacheTables,
+		schemaKeyHints: [],
+	});
+
+	expect(rewritten).toContain(schemaTable);
+	const unexpected = [
+		"lix_internal_state_cache_v1_lix_stored_schema",
+		"lix_internal_state_cache_v1_lix_commit",
+		"lix_internal_state_cache_v1_lix_commit_edge",
+		"lix_internal_state_cache_v1_lix_change_set",
+	];
+	for (const table of unexpected) {
+		expect(rewritten).not.toContain(table);
+	}
+});
+
 const TEST_SCHEMA = "rewrite_matrix_schema";
 const FILE_ID = "matrix-file";
 const VERSION_GLOBAL = "global";

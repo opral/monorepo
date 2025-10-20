@@ -1043,14 +1043,11 @@ function collectResolvedSchemaKeys(
 	parameters?: ReadonlyArray<unknown>,
 	hints?: readonly string[]
 ): string[] {
-	let baseline: Set<string> | null = hints
-		? new Set(
-				(hints ?? []).filter(
-					(value): value is string =>
-						typeof value === "string" && value.length > 0
-				)
-			)
-		: null;
+	const normalizedHints = (hints ?? []).filter(
+		(value): value is string => typeof value === "string" && value.length > 0
+	);
+	let baseline: Set<string> | null =
+		normalizedHints.length > 0 ? new Set(normalizedHints) : null;
 	for (const shape of shapes) {
 		const resolved = resolveSchemaKeyValues(shape.schemaKeys, parameters);
 		if (resolved === null) {
