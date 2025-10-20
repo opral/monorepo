@@ -5,6 +5,7 @@ import {
 	collectSchemaKeyHints,
 	rewriteSql,
 } from "./sql-rewriter/rewrite-sql.js";
+import { ensureNumberedPlaceholders } from "./sql-rewriter/ensure-numbered-placeholders.js";
 import { rewriteEntityInsert } from "./entity-views/insert.js";
 import { rewriteEntityUpdate } from "./entity-views/update.js";
 import { rewriteEntityDelete } from "./entity-views/delete.js";

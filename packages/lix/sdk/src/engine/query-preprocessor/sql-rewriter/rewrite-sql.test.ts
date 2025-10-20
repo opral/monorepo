@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { ensureNumberedPlaceholders, rewriteSql } from "./rewrite-sql.js";
+import { rewriteSql } from "./rewrite-sql.js";
 import * as tokenizer from "../../sql-parser/tokenizer.js";
 
 test("rewrites top-level lix_internal_state_vtable reference", () => {
@@ -151,14 +151,6 @@ test("keeps unseeded CTE when version filter is absent", () => {
 
 	expect(rewritten).not.toContain("seed_versions");
 	expect(rewritten).toContain("version_descriptor_base");
-});
-
-test("numbers anonymous placeholders while leaving strings/comments untouched", () => {
-	const sql = "SELECT '?' as literal -- ? comment\nWHERE version_id = ?";
-	const numbered = ensureNumberedPlaceholders(sql);
-	expect(numbered).toBe(
-		"SELECT '?' as literal -- ? comment\nWHERE version_id = ?1"
-	);
 });
 
 test("seeds version recursion when version filter uses anonymous placeholder", () => {
