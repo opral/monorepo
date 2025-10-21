@@ -23,7 +23,7 @@ test("rewrites inserts for stored schema views", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 
 	const rewritten = preprocess({
@@ -32,21 +32,11 @@ test("rewrites inserts for stored schema views", async () => {
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
-	expect(rewritten.parameters).toEqual([
-		"row-1",
-		table,
-		"lix",
-		"lix_own_entity",
-		"row-1",
-		"Entity 1",
-		"1.0",
-		null,
-		0,
-	]);
+	expect(rewritten.parameters).toEqual(["row-1", "Entity 1"]);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const selectResult = preprocess({
@@ -56,7 +46,7 @@ test("rewrites inserts for stored schema views", async () => {
 
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
-		parameters: selectResult.parameters as any[],
+		parameters: selectResult.parameters,
 	}).rows;
 
 	expect(rows).toEqual([
@@ -87,7 +77,7 @@ test("rewrites inserts for _all view", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 	const allView = `${table}_all`;
 
@@ -104,20 +94,13 @@ test("rewrites inserts for _all view", async () => {
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
 	expect(rewritten.parameters).toEqual([
 		"row-2",
-		table,
-		"lix",
-		activeVersion.version_id,
-		"lix_own_entity",
-		"row-2",
 		"Entity 2",
-		"1.0",
-		null,
-		0,
+		activeVersion.version_id,
 	]);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const selectResult = preprocess({
@@ -127,7 +110,7 @@ test("rewrites inserts for _all view", async () => {
 
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
-		parameters: selectResult.parameters as any[],
+		parameters: selectResult.parameters,
 	}).rows;
 
 	expect(rows).toEqual([
@@ -160,7 +143,7 @@ test("skips rewriting for disabled state_all view", async () => {
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const sql =
 		"INSERT INTO limited_insert_schema_all (id, name, lixcol_version_id) VALUES (?, ?, ?)";
 	const parameters = ["row-limited", "Disabled", "v1"];
@@ -192,7 +175,7 @@ test("missing lixcol_version_id for _all view throws", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const allView = `${schema["x-lix-key"]}_all`;
 
 	expect(() =>
@@ -225,7 +208,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 		additionalProperties: false,
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO insertable_schema_all (id, name) VALUES (?, ?)",
@@ -233,11 +216,12 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
-	expect(rewritten.parameters[3]).toBe("global");
+	expect(rewritten.sql).toContain("'global'");
+	expect(rewritten.parameters).toEqual(["acc-1", "Defaulted"]);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const rows = await lix.db
@@ -272,7 +256,7 @@ test("base-only views apply metadata version defaults", async () => {
 		additionalProperties: false,
 	} as const;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 
 	const rewritten = preprocess({
@@ -281,11 +265,12 @@ test("base-only views apply metadata version defaults", async () => {
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
-	expect(rewritten.parameters[3]).toBe("global");
+	expect(rewritten.sql).toContain("'global'");
+	expect(rewritten.parameters).toEqual(["base-1", "Base Entity"]);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const row = await lix.db
@@ -333,7 +318,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		.values({ value: compositeSchema })
 		.execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO mock_composite_schema (category, id, payload) VALUES (?, ?, ?)",
@@ -345,7 +330,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const stateRows = await lix.db
@@ -384,7 +369,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 
 test("stored_schema insert uses pointer primary key components", async () => {
 	const lix = await openLix({});
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const schema = {
 		"x-lix-key": "pointer_insert_schema",
@@ -400,14 +385,14 @@ test("stored_schema insert uses pointer primary key components", async () => {
 
 	const rewrite = preprocess({
 		sql: "INSERT INTO stored_schema (value) VALUES (?)",
-		parameters: [schema],
+		parameters: [JSON.stringify(schema)],
 	});
 
 	expect(rewrite?.sql).toMatch(/INSERT INTO state_all/);
 
 	lix.engine!.executeSync({
 		sql: rewrite!.sql,
-		parameters: rewrite!.parameters as any[],
+		parameters: rewrite!.parameters,
 	});
 
 	const inserted = await lix.db
@@ -461,18 +446,18 @@ test("pointer primary key schema uses pointer components for entity id", async (
 		.values({ value: pointerSchema })
 		.execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO pointer_entity_schema (payload) VALUES (?)",
-		parameters: [{ id: "nested-id", value: "payload-value" }],
+		parameters: [JSON.stringify({ id: "nested-id", value: "payload-value" })],
 	});
 
 	expect(rewritten?.sql).toContain("INSERT INTO state_all");
 
 	lix.engine!.executeSync({
 		sql: rewritten!.sql,
-		parameters: rewritten!.parameters as any[],
+		parameters: rewritten!.parameters,
 	});
 
 	const stateRow = await lix.db
@@ -510,7 +495,7 @@ test("preserves SQL expression parameters during insert rewrite", async () => {
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const rewritten = preprocess({
 		sql: `INSERT INTO expression_schema (id, name, lixcol_version_id) VALUES (?, ?, (SELECT version_id FROM active_version))`,
 		parameters: ["exp-1", "Expression"],
@@ -539,20 +524,20 @@ test("preserves SQL expression parameters during insert rewrite", async () => {
 
 test("uses stored schema key when inserting via prefixless alias", async () => {
 	const lix = await openLix({});
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
-		parameters: ["alias", { foo: "bar" }],
+		parameters: ["alias", JSON.stringify({ foo: "bar" })],
 	});
 
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
-	expect(rewritten.parameters[0]).toBe("alias");
-	expect(rewritten.parameters[1]).toBe("lix_key_value");
+	expect(rewritten.sql).toContain("lix_key_value");
+	expect(rewritten.parameters).toEqual(["alias", '{"foo":"bar"}']);
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const selectResult = preprocess({
@@ -562,7 +547,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
-		parameters: selectResult.parameters as any[],
+		parameters: selectResult.parameters,
 	}).rows;
 
 	expect(rows).toHaveLength(1);
@@ -597,7 +582,7 @@ test("does not rewrite history view inserts", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const historyView = `${schema["x-lix-key"]}_history`;
 
 	const originalSql = `INSERT INTO ${historyView} (id, name) VALUES (?, ?)`;
@@ -635,7 +620,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		.values({ value: schemaWithDefaults })
 		.execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO mock_default_schema (id) VALUES (?)",
@@ -645,7 +630,7 @@ test("applies JSON defaults when column is omitted", async () => {
 	expect(rewritten.sql).toContain("INSERT INTO state_all");
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const select = await lix.db
@@ -737,7 +722,7 @@ test("applies CEL defaults when column is omitted", async () => {
 		.values({ value: schemaWithCelDefault })
 		.execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const insert = preprocess({
 		sql: "INSERT INTO mock_cel_schema (id, name) VALUES (?, ?)",
@@ -746,7 +731,7 @@ test("applies CEL defaults when column is omitted", async () => {
 
 	lix.engine!.executeSync({
 		sql: insert.sql,
-		parameters: insert.parameters as any[],
+		parameters: insert.parameters,
 	});
 
 	const select = preprocess({
@@ -756,7 +741,7 @@ test("applies CEL defaults when column is omitted", async () => {
 
 	const row = lix.engine!.executeSync({
 		sql: select.sql,
-		parameters: select.parameters as any[],
+		parameters: select.parameters,
 	}).rows[0] as Record<string, unknown>;
 
 	expect(row.slug).toBe("Sample-slug");
@@ -830,23 +815,23 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
 		sql: "INSERT INTO multi_schema (id, payload) VALUES (?, ?), (?, ?), (?, ?)",
 		parameters: [
 			"row-1",
-			{ foo: "bar" },
+			JSON.stringify({ foo: "bar" }),
 			"row-2",
-			{ items: ["foo", "bar"] },
+			JSON.stringify({ items: ["foo", "bar"] }),
 			"row-3",
-			{ nested: { value: "primitive" } },
+			JSON.stringify({ nested: { value: "primitive" } }),
 		],
 	});
 
 	expect(rewritten.sql).toContain("VALUES (");
 	expect(rewritten.sql).toContain("), (");
-	expect(rewritten.parameters).toContain("multi_schema");
+	expect(rewritten.sql).toContain("multi_schema");
 	expect(rewritten.parameters).toContain("row-1");
 	expect(rewritten.parameters).toContain("row-3");
 	expect(rewritten.parameters).toContain('{"foo":"bar"}');
@@ -855,7 +840,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
-		parameters: rewritten.parameters as any[],
+		parameters: rewritten.parameters,
 	});
 
 	const selectResult = preprocess({
@@ -865,7 +850,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
-		parameters: selectResult.parameters as any[],
+		parameters: selectResult.parameters,
 	}).rows;
 
 	expect(rows).toEqual([

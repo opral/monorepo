@@ -38,7 +38,6 @@ export type PreprocessContext = {
 
 export type RewritePayload = {
 	sql: string;
-	parameters: ReadonlyArray<unknown>;
 };
 
 const ddlGuards = new Set([
@@ -142,7 +141,6 @@ export function applyRewriteResult(
 	rewrite: RewritePayload
 ): void {
 	context.sql = rewrite.sql;
-	context.parameters = rewrite.parameters;
 	context.rewriteApplied = true;
 	context.expandedSql = undefined;
 	retokenizeContext(context);

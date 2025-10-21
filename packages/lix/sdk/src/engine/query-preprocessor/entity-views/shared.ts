@@ -14,14 +14,52 @@ import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
  */
 export type StoredSchemaDefinition = LixSchemaDefinition;
 
+export const escapeSqlString = (input: string): string =>
+	input.replace(/'/g, "''");
+
+export const literal = (value: unknown): string => {
+	if (value === undefined || value === null) {
+		return "NULL";
+	}
+	if (typeof value === "number") {
+		if (!Number.isFinite(value)) {
+			return "NULL";
+		}
+		return String(value);
+	}
+	if (typeof value === "bigint") {
+		return value.toString();
+	}
+	if (typeof value === "boolean") {
+		return value ? "1" : "0";
+	}
+	if (typeof value === "string") {
+		return `'${escapeSqlString(value)}'`;
+	}
+	if (value instanceof Uint8Array) {
+		let hex = "";
+		for (const byte of value) {
+			hex += byte.toString(16).padStart(2, "0");
+		}
+		return `X'${hex}'`;
+	}
+	if (value instanceof Date) {
+		return `'${escapeSqlString(value.toISOString())}'`;
+	}
+	const serialized = JSON.stringify(value);
+	if (serialized === undefined) {
+		return "NULL";
+	}
+	return `'${escapeSqlString(serialized)}'`;
+};
+
 /**
  * Result emitted by entity view rewriters. When null is returned the
  * preprocessor should fall back to executing the original statement.
  */
-export interface RewriteResult {
+export type RewriteResult = {
 	sql: string;
-	parameters: ReadonlyArray<unknown>;
-}
+};
 
 /**
  * Finds the index of a keyword in a token stream, starting at a given offset.

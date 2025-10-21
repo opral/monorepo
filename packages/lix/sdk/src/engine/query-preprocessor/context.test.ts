@@ -34,7 +34,7 @@ describe("query-preprocessor context", () => {
 		expect(context.kind).toBe("select");
 	});
 
-	test("applyRewriteResult updates sql, parameters, and resets expansion", async () => {
+	test("applyRewriteResult updates sql and resets expansion", async () => {
 		const lix = await openLix({ keyValues: deterministicConfig });
 		const context = createPreprocessContext({
 			engine: lix.engine!,
@@ -44,10 +44,8 @@ describe("query-preprocessor context", () => {
 		context.expandedSql = "WITH demo AS (SELECT 1)";
 		applyRewriteResult(context, {
 			sql: "SELECT 2",
-			parameters: [42],
 		});
 		expect(context.sql).toBe("SELECT 2");
-		expect(context.parameters).toEqual([42]);
 		expect(context.expandedSql).toBeUndefined();
 		expect(context.kind).toBe("select");
 	});

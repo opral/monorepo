@@ -140,7 +140,7 @@ test("key_value insert stores proper JSON in state_all (no double encoding)", as
 	expect(byKey.get("key3")?.snapshot_content.value).toBe(42);
 	// With json(snapshot_content), driver decodes JSON booleans to true/false
 	// SQLite JSON1 surfaces booleans as 1/0
-	expect(byKey.get("key4")?.snapshot_content.value).toBe(1);
+	expect(byKey.get("key4")?.snapshot_content.value).toBe(true);
 	expect(byKey.get("key5")?.snapshot_content.value).toBeNull();
 });
 

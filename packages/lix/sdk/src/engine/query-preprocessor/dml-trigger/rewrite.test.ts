@@ -5,7 +5,8 @@ import { maybeRewriteInsteadOfTrigger } from "./rewrite.js";
 
 function executeRewritten(
 	engine: NonNullable<Awaited<ReturnType<typeof openLix>>["engine"]>,
-	rewritten: { sql: string; parameters: ReadonlyArray<unknown> }
+	rewritten: { sql: string },
+	allParameters: ReadonlyArray<unknown>
 ): { rows: any[] } {
 	const statements = rewritten.sql
 		.split(/;\s*(?:\n|$)/)
@@ -13,10 +14,7 @@ function executeRewritten(
 		.filter((stmt) => stmt.length > 0);
 	const collected: any[] = [];
 	for (const statement of statements) {
-		const { sql, parameters } = normalizeStatement(
-			statement,
-			rewritten.parameters
-		);
+		const { sql, parameters } = normalizeStatement(statement, allParameters);
 		const columnNames: string[] = [];
 		const rows = engine.sqlite.exec({
 			sql,
@@ -112,7 +110,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 
 		const postRewrite = lix.engine!.preprocessQuery({
 			sql: rewritten!.sql,
-			parameters: rewritten!.parameters,
+			parameters: [],
 			sideEffects: false,
 		});
 
@@ -147,7 +145,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		expect(rewritten?.sql).toBe("INSERT INTO sink VALUES (?1, upper(?2));");
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, ["hi", "id"]);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT message, code FROM sink",
 			parameters: [],
@@ -186,8 +184,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		expect(normalizedSql).toMatch(
 			/^INSERT INTO sink VALUES \(\?1, \?2\), \(\?3, \?4\)\s*;$/
 		);
-		expect(rewritten?.parameters).toEqual(["a", 1, "b", 2]);
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, ["a", 1, "b", 2]);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT id, value FROM sink ORDER BY rowid",
 			parameters: [],
@@ -257,9 +254,8 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		expect(compactSql).toContain(
 			"VALUES('mock_'||?1,?2,?3,1),('mock_'||?4,?5,?6,1);"
 		);
-		expect(rewritten?.parameters).toEqual(parameters);
 
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, parameters);
 		const { rows } = lix.engine!.executeSync({
 			sql: `SELECT entity_id, schema_key, payload, flag
 			FROM mock_state
@@ -320,7 +316,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		expect(rewritten?.sql).toBe("INSERT INTO sink VALUES (?1, NULL, NULL);");
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, [123]);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT id, description, status FROM sink",
 			parameters: [],
@@ -355,7 +351,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		expect(rewritten?.sql).toBe("INSERT INTO sink VALUES (NULL, NULL);");
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, []);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT id, flag FROM sink",
 			parameters: [],
@@ -390,7 +386,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			op: "insert",
 		});
 
-		const result = executeRewritten(lix.engine!, rewritten!);
+		const result = executeRewritten(lix.engine!, rewritten!, ["hi", "id"]);
 		expect(result.rows).toEqual([{ message: "hi", code: "ID" }]);
 
 		const { rows } = lix.engine!.executeSync({
@@ -448,7 +444,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		});
 
 		expect(rewritten?.sql).toContain("lix_trigger_raise('FAIL', 'boom')");
-		expect(() => executeRewritten(lix.engine!, rewritten!)).toThrowError(
+		expect(() => executeRewritten(lix.engine!, rewritten!, [])).toThrowError(
 			/boom/
 		);
 		await lix.close();
@@ -487,7 +483,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		expect(rewritten?.sql).toContain(
 			'UPDATE sink_update SET value = (?1) WHERE id = (SELECT "id" FROM __lix_old LIMIT 1);'
 		);
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, ["new", "row"]);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT value FROM sink_update WHERE id = 'row'",
 			parameters: [],
@@ -529,7 +525,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		expect(rewritten?.sql).toContain(
 			'DELETE FROM sink_delete WHERE id = (SELECT "id" FROM __lix_old LIMIT 1);'
 		);
-		executeRewritten(lix.engine!, rewritten!);
+		executeRewritten(lix.engine!, rewritten!, ["row"]);
 		const { rows } = lix.engine!.executeSync({
 			sql: "SELECT id FROM sink_delete",
 			parameters: [],
@@ -565,7 +561,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			op: "update",
 		});
 
-		const result = executeRewritten(lix.engine!, rewritten!);
+		const result = executeRewritten(lix.engine!, rewritten!, ["new", "row"]);
 		expect(result.rows).toEqual([{ value: "new" }]);
 
 		const { rows } = lix.engine!.executeSync({
@@ -603,7 +599,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 			op: "delete",
 		});
 
-		const result = executeRewritten(lix.engine!, rewritten!);
+		const result = executeRewritten(lix.engine!, rewritten!, ["row"]);
 		expect(result.rows).toEqual([{ id: "row" }]);
 
 		const { rows } = lix.engine!.executeSync({

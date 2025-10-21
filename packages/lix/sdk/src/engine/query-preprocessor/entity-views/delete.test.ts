@@ -43,7 +43,7 @@ test("rewrites deletes for stored schema views", async () => {
 	});
 
 	expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
-	expect(deleteResult.parameters).toEqual([table, "row-1"]);
+	expect(deleteResult.parameters).toEqual(["row-1"]);
 
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
@@ -65,11 +65,11 @@ test("rewrites deletes for stored schema views", async () => {
 
 test("prefixless alias deletes target stored schema key", async () => {
 	const lix = await openLix({});
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const insertResult = preprocess({
 		sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
-		parameters: ["alias", { foo: "bar" }],
+		parameters: ["alias", JSON.stringify({ foo: "bar" })],
 	});
 
 	lix.engine!.sqlite.exec({
@@ -83,7 +83,8 @@ test("prefixless alias deletes target stored schema key", async () => {
 		parameters: ["alias"],
 	});
 
-	expect(deleteResult.parameters[0]).toBe("lix_key_value");
+	expect(deleteResult.sql).toContain("lix_key_value");
+	expect(deleteResult.parameters).toEqual(["alias"]);
 
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
@@ -123,7 +124,7 @@ test("rewrites deletes for _all views", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 	const allView = `${table}_all`;
 
@@ -149,11 +150,7 @@ test("rewrites deletes for _all views", async () => {
 	});
 
 	expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
-	expect(deleteResult.parameters).toEqual([
-		table,
-		"row-2",
-		activeVersion.version_id,
-	]);
+	expect(deleteResult.parameters).toEqual(["row-2", activeVersion.version_id]);
 
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
@@ -195,7 +192,7 @@ test("skips rewriting for disabled state_all view", async () => {
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const sql = "DELETE FROM limited_delete_schema_all WHERE id = ?";
 	const parameters = ["row-1"];
 	const rewritten = preprocess({ sql, parameters });
@@ -231,7 +228,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 		additionalProperties: false,
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 
 	const insertResult = preprocess({
@@ -250,7 +247,9 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	});
 
 	expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
-	expect(deleteResult.parameters).toEqual([table, "base-del-1", "global"]);
+	expect(deleteResult.sql).toContain(table);
+	expect(deleteResult.sql).toContain("'global'");
+	expect(deleteResult.parameters).toEqual(["base-del-1"]);
 
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
@@ -289,7 +288,7 @@ test("base view delete uses schema default version when omitted", async () => {
 
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 
 	const insertResult = preprocess({
@@ -309,7 +308,9 @@ test("base view delete uses schema default version when omitted", async () => {
 	});
 
 	expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
-	expect(deleteResult.parameters).toEqual([table, "acc-default", "global"]);
+	expect(deleteResult.sql).toContain(table);
+	expect(deleteResult.sql).toContain("'global'");
+	expect(deleteResult.parameters).toEqual(["acc-default"]);
 
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,

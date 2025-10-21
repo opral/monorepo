@@ -25,6 +25,7 @@ import {
 	collectPointerColumnDescriptors,
 	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
+	literal,
 	type RewriteResult,
 } from "./shared.js";
 import {
@@ -43,10 +44,9 @@ interface Condition {
 	value: ValueSource;
 }
 
-type ValueSource =
-	| { kind: "param"; value: unknown }
-	| { kind: "null" }
-	| { kind: "literal"; sql: string };
+type ValueSource = { kind: "null" } | { kind: "sql"; sql: string };
+
+const formatPositionalParameter = (index: number): string => `?${index + 1}`;
 
 /**
  * Rewrites DELETE statements that target stored-schema entity views so that the
@@ -164,17 +164,8 @@ export function rewriteEntityDelete(args: {
 		return null;
 	}
 
-	const params: unknown[] = [];
-	const addParam = (value: unknown): string => {
-		params.push(value);
-		return "?";
-	};
-
 	const valueRenderCache = new Map<ValueSource, string>();
 	const renderValueSource = (source: ValueSource): string => {
-		if (source.kind === "param") {
-			return addParam(source.value);
-		}
 		if (source.kind === "null") {
 			return "NULL";
 		}
@@ -203,7 +194,7 @@ export function rewriteEntityDelete(args: {
 	const whereClauses: string[] = [];
 	let hasVersionCondition = false;
 
-	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
+	whereClauses.push(`state_all.schema_key = ${literal(storedSchemaKey)}`);
 
 	for (const condition of whereConditions ?? []) {
 		const column = condition.name;
@@ -257,7 +248,7 @@ export function rewriteEntityDelete(args: {
 	if (!hasVersionCondition) {
 		if (variant === "base") {
 			if (defaultVersion !== undefined) {
-				whereClauses.push(`state_all.version_id = ${addParam(defaultVersion)}`);
+				whereClauses.push(`state_all.version_id = ${literal(defaultVersion)}`);
 			} else {
 				whereClauses.push(
 					`state_all.version_id = (SELECT version_id FROM active_version)`
@@ -265,7 +256,7 @@ export function rewriteEntityDelete(args: {
 			}
 		} else if (variant === "all") {
 			if (defaultVersion !== undefined) {
-				whereClauses.push(`state_all.version_id = ${addParam(defaultVersion)}`);
+				whereClauses.push(`state_all.version_id = ${literal(defaultVersion)}`);
 			} else {
 				throw new Error(
 					`DELETE from ${viewNameRaw} requires explicit lixcol_version_id or schema default`
@@ -278,7 +269,6 @@ export function rewriteEntityDelete(args: {
 
 	return {
 		sql: rewrittenSql,
-		parameters: params,
 	};
 }
 
@@ -363,9 +353,15 @@ function parseValue(
 
 	if (token.tokenType === QMark) {
 		if (state.positional >= state.parameters.length) return null;
-		const value = state.parameters[state.positional];
+		const placeholderIndex = state.positional;
 		state.positional += 1;
-		return { source: { kind: "param", value }, nextIndex: index + 1 };
+		return {
+			source: {
+				kind: "sql",
+				sql: formatPositionalParameter(placeholderIndex),
+			},
+			nextIndex: index + 1,
+		};
 	}
 
 	if (token.tokenType === QMarkNumber) {
@@ -373,7 +369,7 @@ function parseValue(
 		if (!Number.isInteger(idx) || idx < 0 || idx >= state.parameters.length)
 			return null;
 		return {
-			source: { kind: "param", value: state.parameters[idx] },
+			source: { kind: "sql", sql: formatPositionalParameter(idx) },
 			nextIndex: index + 1,
 		};
 	}
@@ -386,7 +382,7 @@ function parseValue(
 		const next = tokens[index + 1];
 		if (next && next.tokenType === Num) {
 			return {
-				source: { kind: "literal", sql: `-${next.image}` },
+				source: { kind: "sql", sql: `-${next.image}` },
 				nextIndex: index + 2,
 			};
 		}
@@ -395,14 +391,14 @@ function parseValue(
 
 	if (token.tokenType === SQStr || token.tokenType === Num) {
 		return {
-			source: { kind: "literal", sql: token.image },
+			source: { kind: "sql", sql: token.image },
 			nextIndex: index + 1,
 		};
 	}
 
 	const ident = extractIdentifier(token);
 	if (ident) {
-		return { source: { kind: "literal", sql: ident }, nextIndex: index + 1 };
+		return { source: { kind: "sql", sql: ident }, nextIndex: index + 1 };
 	}
 
 	return null;

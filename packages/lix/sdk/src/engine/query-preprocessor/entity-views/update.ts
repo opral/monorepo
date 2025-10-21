@@ -28,6 +28,7 @@ import {
 	collectPointerColumnDescriptors,
 	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
+	literal,
 	type RewriteResult,
 	type PrimaryKeyDescriptor,
 	type StoredSchemaDefinition,
@@ -56,15 +57,11 @@ interface Condition {
 }
 
 type ValueSource =
-	| { kind: "param"; value: unknown }
 	| { kind: "null" }
-	| { kind: "literal"; sql: string }
-	| { kind: "expression"; tokens: IToken[]; params: unknown[] };
+	| { kind: "sql"; sql: string }
+	| { kind: "expression"; tokens: IToken[]; placeholders: number[] };
 
-const paramSource = (value: unknown): ValueSource => ({
-	kind: "param",
-	value,
-});
+const formatPositionalParameter = (index: number): string => `?${index + 1}`;
 
 /**
  * Rewrites UPDATE statements that target stored-schema entity views so the
@@ -204,27 +201,16 @@ export function rewriteEntityUpdate(args: {
 		return null;
 	}
 
-	const params: unknown[] = [];
-	const addParam = (value: unknown): string => {
-		params.push(serializeParameter(value));
-		return "?";
-	};
-
 	const renderValueSource = (source: ValueSource): string => {
-		if (source.kind === "param") {
-			return addParam(source.value);
-		}
 		if (source.kind === "null") {
 			return "NULL";
 		}
-		if (source.kind === "literal") {
+		if (source.kind === "sql") {
 			return source.sql;
-		}
-		for (const value of source.params) {
-			params.push(serializeParameter(value));
 		}
 		return renderExpressionTokens({
 			tokens: source.tokens,
+			placeholders: source.placeholders,
 			propertyLowerToActual,
 		});
 	};
@@ -244,8 +230,7 @@ export function rewriteEntityUpdate(args: {
 		return cached;
 	};
 
-	const buildEntityIdExpr = (): { sql: string; params: unknown[] } => {
-		const startLen = params.length;
+	const buildEntityIdExpr = (): string => {
 		const parts = primaryKeys.map((descriptor) =>
 			renderPrimaryKeySource({
 				descriptor,
@@ -254,13 +239,10 @@ export function rewriteEntityUpdate(args: {
 				propertyLowerToActual,
 			})
 		);
-		const sql =
-			parts.length === 1 ? parts[0]! : `(${parts.join(" || '~' || ")})`;
-		const addedParams = params.splice(startLen);
-		return { sql, params: addedParams };
+		return parts.length === 1 ? parts[0]! : `(${parts.join(" || '~' || ")})`;
 	};
 
-	const schemaKeyExpr = addParam(storedSchemaKey);
+	const schemaKeyExpr = literal(storedSchemaKey);
 	const fileIdAssignment = assignments.get("lixcol_file_id");
 	const metadataAssignment = assignments.get("lixcol_metadata");
 	const untrackedAssignment = assignments.get("lixcol_untracked");
@@ -283,15 +265,15 @@ export function rewriteEntityUpdate(args: {
 		? getLixcolOverride("lixcol_untracked")
 		: undefined;
 	const fileIdOverrideExpr =
-		overrideFileId !== undefined ? addParam(overrideFileId) : null;
+		overrideFileId !== undefined ? literal(overrideFileId) : null;
 	const pluginOverrideExpr =
-		overridePluginKey !== undefined ? addParam(overridePluginKey) : null;
-	const metadataOverrideSource =
-		overrideMetadata !== undefined ? paramSource(overrideMetadata) : null;
-	const untrackedOverrideSource =
-		overrideUntracked !== undefined ? paramSource(overrideUntracked) : null;
+		overridePluginKey !== undefined ? literal(overridePluginKey) : null;
+	const metadataOverrideExpr =
+		overrideMetadata !== undefined ? literal(overrideMetadata) : null;
+	const untrackedOverrideExpr =
+		overrideUntracked !== undefined ? literal(overrideUntracked) : null;
 	const schemaVersionValue = String(schema["x-lix-version"] ?? "");
-	const schemaVersionSource = paramSource(schemaVersionValue);
+	const schemaVersionExpr = literal(schemaVersionValue);
 
 	const snapshotEntries = buildJsonObjectEntries({
 		schema: schema as any,
@@ -302,20 +284,20 @@ export function rewriteEntityUpdate(args: {
 	const explicitVersionAssignment =
 		assignments.get("lixcol_version_id") ?? assignments.get("version_id");
 
+	let versionExpr: string | null = null;
 	let versionFallbackExpr: string | null = null;
-	let versionSource: ValueSource | null = null;
 	if (variant === "all") {
 		if (explicitVersionAssignment) {
-			versionSource = explicitVersionAssignment.value;
+			versionExpr = renderValueSource(explicitVersionAssignment.value);
 		} else {
 			versionFallbackExpr = "version_id";
 		}
 	} else if (overrideVersion !== undefined) {
-		versionSource = paramSource(overrideVersion);
+		versionExpr = literal(overrideVersion);
 	} else if (explicitVersionAssignment) {
-		versionSource = explicitVersionAssignment.value;
+		versionExpr = renderValueSource(explicitVersionAssignment.value);
 	} else if (isActiveVersionSchema) {
-		versionSource = paramSource("global");
+		versionExpr = literal("global");
 	} else {
 		versionFallbackExpr = "(SELECT version_id FROM active_version)";
 	}
@@ -333,44 +315,33 @@ export function rewriteEntityUpdate(args: {
 		}`,
 		`plugin_key = ${pluginOverrideExpr ?? "plugin_key"}`,
 		`snapshot_content = json_object(${snapshotEntries})`,
-		`schema_version = ${renderValueSource(schemaVersionSource)}`,
+		`schema_version = ${schemaVersionExpr}`,
 		(() => {
 			return `version_id = ${
-				versionSource
-					? renderValueSource(versionSource)
-					: (versionFallbackExpr ?? "version_id")
+				versionExpr ?? versionFallbackExpr ?? "version_id"
 			}`;
 		})(),
 		`metadata = ${
-			metadataOverrideSource
-				? renderValueSource(metadataOverrideSource)
+			metadataOverrideExpr
+				? metadataOverrideExpr
 				: metadataAssignment
 					? renderValueSource(metadataAssignment.value)
 					: "metadata"
 		}`,
 		`untracked = ${
-			untrackedOverrideSource
-				? renderValueSource(untrackedOverrideSource)
+			untrackedOverrideExpr
+				? untrackedOverrideExpr
 				: untrackedAssignment
 					? renderValueSource(untrackedAssignment.value)
 					: "untracked"
 		}`,
 	];
 	if (touchesPrimaryKey) {
-		const renderWithOrdering = (
-			source: ValueSource
-		): { sql: string; params: unknown[] } => {
-			const startLen = params.length;
-			const sql = renderValueSource(source);
-			const added = params.splice(startLen);
-			return { sql, params: added };
-		};
-		const entityIdRendered =
+		const entityIdSql =
 			overrideEntityId !== undefined
-				? renderWithOrdering(paramSource(overrideEntityId))
+				? literal(overrideEntityId)
 				: buildEntityIdExpr();
-		params.unshift(...entityIdRendered.params);
-		assignmentClauses.unshift(`entity_id = ${entityIdRendered.sql}`);
+		assignmentClauses.unshift(`entity_id = ${entityIdSql}`);
 	}
 
 	const propertyLowerSet = new Set(
@@ -438,7 +409,7 @@ export function rewriteEntityUpdate(args: {
 		}
 	}
 
-	whereClauses.push(`state_all.schema_key = ${addParam(storedSchemaKey)}`);
+	whereClauses.push(`state_all.schema_key = ${literal(storedSchemaKey)}`);
 	if (variant === "base" && !hasVersionCondition) {
 		whereClauses.push(
 			`state_all.version_id = (SELECT version_id FROM active_version)`
@@ -449,7 +420,6 @@ export function rewriteEntityUpdate(args: {
 
 	return {
 		sql: rewrittenSql,
-		parameters: params,
 	};
 }
 
@@ -573,9 +543,12 @@ function parseValue(
 
 	if (token.tokenType === QMark) {
 		if (state.positional >= state.parameters.length) return null;
-		const value = state.parameters[state.positional];
+		const placeholderIndex = state.positional;
 		state.positional += 1;
-		return { source: { kind: "param", value }, nextIndex: index + 1 };
+		return {
+			source: { kind: "sql", sql: formatPositionalParameter(placeholderIndex) },
+			nextIndex: index + 1,
+		};
 	}
 
 	if (token.tokenType === QMarkNumber) {
@@ -583,7 +556,7 @@ function parseValue(
 		if (!Number.isInteger(idx) || idx < 0 || idx >= state.parameters.length)
 			return null;
 		return {
-			source: { kind: "param", value: state.parameters[idx] },
+			source: { kind: "sql", sql: formatPositionalParameter(idx) },
 			nextIndex: index + 1,
 		};
 	}
@@ -596,7 +569,7 @@ function parseValue(
 		const next = tokens[index + 1];
 		if (next && next.tokenType === Num) {
 			return {
-				source: { kind: "literal", sql: `-${next.image}` },
+				source: { kind: "sql", sql: `-${next.image}` },
 				nextIndex: index + 2,
 			};
 		}
@@ -604,7 +577,7 @@ function parseValue(
 
 	if (token.tokenType === SQStr || token.tokenType === Num) {
 		return {
-			source: { kind: "literal", sql: token.image },
+			source: { kind: "sql", sql: token.image },
 			nextIndex: index + 1,
 		};
 	}
@@ -618,13 +591,28 @@ function parseExpression(
 	endIndex: number,
 	state: ParameterState
 ): { source: ValueSource; nextIndex: number } | null {
-	const startToken = tokens[index];
-	if (!startToken) return null;
+	const result = captureExpression(tokens, index, endIndex, state);
+	if (!result) return null;
+	return {
+		source: {
+			kind: "expression",
+			tokens: result.tokens,
+			placeholders: result.placeholders,
+		},
+		nextIndex: result.nextIndex,
+	};
+}
 
+function captureExpression(
+	tokens: IToken[],
+	index: number,
+	endIndex: number,
+	state: ParameterState
+): { tokens: IToken[]; placeholders: number[]; nextIndex: number } | null {
 	let i = index;
 	let depth = 0;
-	const params: unknown[] = [];
 	const captured: IToken[] = [];
+	const placeholders: number[] = [];
 
 	while (i < endIndex) {
 		const token = tokens[i];
@@ -643,8 +631,7 @@ function parseExpression(
 
 		if (token.tokenType === LParen) {
 			depth += 1;
-		}
-		if (token.tokenType === RParen) {
+		} else if (token.tokenType === RParen) {
 			if (depth > 0) {
 				depth -= 1;
 			} else {
@@ -654,26 +641,23 @@ function parseExpression(
 
 		if (token.tokenType === QMark) {
 			if (state.positional >= state.parameters.length) return null;
-			params.push(state.parameters[state.positional]);
+			placeholders.push(state.positional);
 			state.positional += 1;
-		}
-
-		if (token.tokenType === QMarkNumber) {
+		} else if (token.tokenType === QMarkNumber) {
 			const idx = Number(token.image.slice(1)) - 1;
 			if (!Number.isInteger(idx) || idx < 0 || idx >= state.parameters.length)
 				return null;
-			params.push(state.parameters[idx]);
+			placeholders.push(idx);
 		}
 
 		i += 1;
 	}
 
-	if (captured.length === 0) return null;
+	if (captured.length === 0) {
+		return null;
+	}
 
-	return {
-		source: { kind: "expression", tokens: captured, params },
-		nextIndex: i,
-	};
+	return { tokens: captured, placeholders, nextIndex: i };
 }
 
 function renderPrimaryKeySource(args: {
@@ -715,12 +699,19 @@ function normalizePointerPath(
 
 function renderExpressionTokens(args: {
 	tokens: IToken[];
+	placeholders: number[];
 	propertyLowerToActual: Map<string, string>;
 }): string {
-	const { tokens, propertyLowerToActual } = args;
+	const { tokens, placeholders, propertyLowerToActual } = args;
 	const rendered: string[] = [];
+	let placeholderCursor = 0;
 
 	for (const token of tokens) {
+		if (token.tokenType === QMark || token.tokenType === QMarkNumber) {
+			const index = placeholders[placeholderCursor++] ?? 0;
+			rendered.push(formatPositionalParameter(index));
+			continue;
+		}
 		const ident = extractIdentifier(token);
 		if (ident) {
 			const lower = ident.toLowerCase();
@@ -800,19 +791,4 @@ function renderExpressionTokens(args: {
 function isKeyword(token: IToken | undefined, keyword: string): boolean {
 	if (!token?.image) return false;
 	return token.image.toUpperCase() === keyword.toUpperCase();
-}
-
-function serializeParameter(value: unknown): unknown {
-	if (value === undefined) return null;
-	if (value === null) return null;
-	if (typeof value === "object") {
-		if (value instanceof Uint8Array) return value;
-		if (value instanceof Date) return value.toISOString();
-		try {
-			return JSON.stringify(value);
-		} catch {
-			return null;
-		}
-	}
-	return value;
 }

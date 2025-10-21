@@ -146,17 +146,10 @@ describe("createQueryPreprocessorV2", () => {
 		expect(result.sql).toContain("INSERT INTO state_all");
 		expect(result.sql).not.toMatch(/\bactive_account\b/i);
 		expect(result.sql).toMatch(/json_object\('account_id', \?\d*\)/);
-		expect(result.parameters).toEqual([
-			"user123",
-			"lix_active_account",
-			"lix",
-			"global",
-			"lix_own_entity",
-			"user123",
-			"1.0",
-			null,
-			1,
-		]);
+		expect(result.sql).toContain("lix_active_account");
+		expect(result.sql).toContain("'global'");
+		expect(result.sql).toContain("'lix_own_entity'");
+		expect(result.parameters).toEqual(["user123"]);
 
 		await lix.close();
 	});

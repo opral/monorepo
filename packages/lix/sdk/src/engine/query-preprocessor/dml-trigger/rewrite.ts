@@ -16,7 +16,7 @@ export function maybeRewriteInsteadOfTrigger(args: {
 	parameters: ReadonlyArray<unknown>;
 	op: DmlOperation;
 }): RewriteResult | null {
-	const { engine, sql, tokens, parameters, op } = args;
+	const { engine, sql, tokens, op } = args;
 	const resolvedTarget = readDmlTarget(tokens, op);
 	if (!resolvedTarget) {
 		return null;
@@ -40,7 +40,6 @@ export function maybeRewriteInsteadOfTrigger(args: {
 		const normalizedBody = rewriteRaiseCalls(body);
 		return {
 			sql: ensureTerminated(normalizedBody),
-			parameters,
 		};
 	}
 
@@ -49,7 +48,6 @@ export function maybeRewriteInsteadOfTrigger(args: {
 			engine,
 			sql,
 			tokens,
-			parameters,
 			body,
 			target: resolvedTarget,
 		});
@@ -63,7 +61,6 @@ export function maybeRewriteInsteadOfTrigger(args: {
 			engine,
 			sql,
 			tokens,
-			parameters,
 			body,
 			target: resolvedTarget,
 		});
@@ -77,7 +74,6 @@ export function maybeRewriteInsteadOfTrigger(args: {
 			engine,
 			sql,
 			tokens,
-			parameters,
 			body,
 			target: resolvedTarget,
 		});
@@ -93,7 +89,6 @@ interface RewriteInsertArgs {
 	readonly engine: Pick<LixEngine, "sqlite">;
 	readonly sql: string;
 	readonly tokens: Token[];
-	readonly parameters: ReadonlyArray<unknown>;
 	readonly body: string;
 	readonly target: string;
 }
@@ -104,7 +99,7 @@ interface RewriteInsertArgs {
  * `NEW.column` reference with the caller-provided expression.
  */
 function rewriteInsertTrigger(args: RewriteInsertArgs): RewriteResult | null {
-	const { engine, sql, tokens, parameters, body, target } = args;
+	const { engine, sql, tokens, body, target } = args;
 	const extraction = extractInsertValues({ sql, tokens, engine, target });
 	if (!extraction) {
 		return null;
@@ -119,7 +114,6 @@ function rewriteInsertTrigger(args: RewriteInsertArgs): RewriteResult | null {
 			rows,
 			columnNames,
 			returningClause,
-			parameters,
 		});
 	}
 
@@ -150,7 +144,6 @@ function rewriteInsertTrigger(args: RewriteInsertArgs): RewriteResult | null {
 			: statements.join("\n");
 	return {
 		sql: finalSql,
-		parameters,
 	};
 }
 
@@ -159,7 +152,6 @@ interface MultiRowRewriteArgs {
 	readonly rows: RowExpressions[];
 	readonly columnNames: string[];
 	readonly returningClause: string | null;
-	readonly parameters: ReadonlyArray<unknown>;
 }
 
 function rewriteInsertTriggerMultiRow(
@@ -211,7 +203,6 @@ function rewriteInsertTriggerMultiRow(
 
 	return {
 		sql: ensureTerminated(finalSql),
-		parameters: args.parameters,
 	};
 }
 
@@ -280,13 +271,12 @@ interface RewriteUpdateArgs {
 	readonly engine: Pick<LixEngine, "sqlite">;
 	readonly sql: string;
 	readonly tokens: Token[];
-	readonly parameters: ReadonlyArray<unknown>;
 	readonly body: string;
 	readonly target: string;
 }
 
 function rewriteUpdateTrigger(args: RewriteUpdateArgs): RewriteResult | null {
-	const { engine, sql, tokens, parameters, body, target } = args;
+	const { engine, sql, tokens, body, target } = args;
 	const viewColumns = loadViewColumns(engine, target);
 	if (viewColumns.length === 0) {
 		return null;
@@ -344,7 +334,6 @@ function rewriteUpdateTrigger(args: RewriteUpdateArgs): RewriteResult | null {
 	const sqlOut = `${cte}\n${updateParsed.returningClause ? updateStatement : rewrittenBody}`;
 	return {
 		sql: sqlOut,
-		parameters,
 	};
 }
 
@@ -352,13 +341,12 @@ interface RewriteDeleteArgs {
 	readonly engine: Pick<LixEngine, "sqlite">;
 	readonly sql: string;
 	readonly tokens: Token[];
-	readonly parameters: ReadonlyArray<unknown>;
 	readonly body: string;
 	readonly target: string;
 }
 
 function rewriteDeleteTrigger(args: RewriteDeleteArgs): RewriteResult | null {
-	const { engine, sql, tokens, parameters, body, target } = args;
+	const { engine, sql, tokens, body, target } = args;
 	const viewColumns = loadViewColumns(engine, target);
 	if (viewColumns.length === 0) {
 		return null;
@@ -394,7 +382,6 @@ function rewriteDeleteTrigger(args: RewriteDeleteArgs): RewriteResult | null {
 
 	return {
 		sql: `${cte}\n${rewrittenBody}`,
-		parameters,
 	};
 }
 

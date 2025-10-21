@@ -14,7 +14,7 @@ type CachedSelects = {
 
 const cache = new WeakMap<object, CachedSelects>();
 const subscriptions = new WeakMap<object, () => void>();
-const loading = new WeakSet<object>();
+const LOADING_SIGNATURE = "loading";
 
 /**
  * Returns a map of logical entity view names to their SELECT statements derived
@@ -31,64 +31,64 @@ export function getEntityViewSelects(args: {
 	if (cached) {
 		return { map: cached.map, signature: cached.signature };
 	}
-	if (loading.has(engine.runtimeCacheRef)) {
-		return {
-			map: new Map<string, string>(),
-			signature: "loading",
-		};
-	}
-
-	loading.add(engine.runtimeCacheRef);
-	try {
-		const { schemas, signature } = getAllStoredSchemas({ engine });
-		const map = new Map<string, string>();
-		for (const entry of schemas) {
-			const schema = entry.definition;
-			const baseName = schema["x-lix-key"];
-			if (!baseName || typeof baseName !== "string") continue;
-			if (!Array.isArray(schema["x-lix-primary-key"])) continue;
-			if ((schema as any).type !== "object") continue;
-
-			const props = extractPropertyKeys(schema);
-			const baseSql = isEntityViewVariantEnabled(schema, "base")
-				? createActiveSelect({ schema, properties: props })
-				: null;
-			const allSql = isEntityViewVariantEnabled(schema, "all")
-				? createAllSelect({ schema, properties: props })
-				: null;
-			const historySql = isEntityViewVariantEnabled(schema, "history")
-				? createHistorySelect({ schema, properties: props })
-				: null;
-
-			const aliasBaseName = dropLixPrefix(baseName);
-			if (baseSql) {
-				registerView(map, {
-					primary: baseName,
-					alias: aliasBaseName,
-					sql: baseSql,
-				});
-			}
-			if (allSql) {
-				registerView(map, {
-					primary: `${baseName}_all`,
-					alias: aliasBaseName ? `${aliasBaseName}_all` : null,
-					sql: allSql,
-				});
-			}
-			if (historySql) {
-				registerView(map, {
-					primary: `${baseName}_history`,
-					alias: aliasBaseName ? `${aliasBaseName}_history` : null,
-					sql: historySql,
-				});
-			}
+	const loadingEntry: CachedSelects = {
+		signature: LOADING_SIGNATURE,
+		map: new Map(),
+	};
+	cache.set(engine.runtimeCacheRef, loadingEntry);
+	queueMicrotask(() => {
+		const current = cache.get(engine.runtimeCacheRef);
+		if (current === loadingEntry) {
+			cache.delete(engine.runtimeCacheRef);
 		}
+	});
+	const { schemas, signature } = getAllStoredSchemas({ engine });
+	const map = new Map<string, string>();
+	for (const entry of schemas) {
+		const schema = entry.definition;
+		const baseName = schema["x-lix-key"];
+		if (!baseName || typeof baseName !== "string") continue;
+		if (!Array.isArray(schema["x-lix-primary-key"])) continue;
+		if ((schema as any).type !== "object") continue;
 
-		cache.set(engine.runtimeCacheRef, { signature, map });
-		return { map, signature };
-	} finally {
-		loading.delete(engine.runtimeCacheRef);
+		const props = extractPropertyKeys(schema);
+		const baseSql = isEntityViewVariantEnabled(schema, "base")
+			? createActiveSelect({ schema, properties: props })
+			: null;
+		const allSql = isEntityViewVariantEnabled(schema, "all")
+			? createAllSelect({ schema, properties: props })
+			: null;
+		const historySql = isEntityViewVariantEnabled(schema, "history")
+			? createHistorySelect({ schema, properties: props })
+			: null;
+
+		const aliasBaseName = dropLixPrefix(baseName);
+		if (baseSql) {
+			registerView(map, {
+				primary: baseName,
+				alias: aliasBaseName,
+				sql: baseSql,
+			});
+		}
+		if (allSql) {
+			registerView(map, {
+				primary: `${baseName}_all`,
+				alias: aliasBaseName ? `${aliasBaseName}_all` : null,
+				sql: allSql,
+			});
+		}
+		if (historySql) {
+			registerView(map, {
+				primary: `${baseName}_history`,
+				alias: aliasBaseName ? `${aliasBaseName}_history` : null,
+				sql: historySql,
+			});
+		}
 	}
+
+	const result = { signature, map } satisfies CachedSelects;
+	cache.set(engine.runtimeCacheRef, result);
+	return result;
 }
 
 function ensureSubscription(
