@@ -71,7 +71,7 @@ export const LixSchemaDefinition = {
 					description:
 						"Objects describing Lix schemas must not allow arbitrary additional properties; set this explicitly to false.",
 				},
-				"x-primary-key": {
+				"x-lix-primary-key": {
 					type: "array",
 					items: {
 						type: "string",
