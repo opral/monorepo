@@ -8,6 +8,13 @@ import {
 } from "react";
 import { Bot } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
+import type {
+	AgentConversationMessage,
+	AgentConversationMessageMetadata,
+	AgentStep,
+} from "@lix-js/agent-sdk";
+import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { ChatMessageList } from "./chat-message-list";
 import type { ViewContext } from "../../app/types";
 import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
@@ -28,19 +35,6 @@ type AgentViewProps = {
 type ToolSession = {
 	id: string;
 	runs: ToolRun[];
-};
-
-type LixAgentStep = {
-	id: string;
-	kind?: string;
-	label?: string;
-	status?: string;
-	tool_name?: string;
-	tool_input?: unknown;
-	tool_output?: unknown;
-	error_text?: string;
-	started_at?: string;
-	finished_at?: string;
 };
 
 /**
@@ -108,29 +102,27 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	const [toolSessions, setToolSessions] = useState<ToolSession[]>([]);
 	const activeSessionRef = useRef<string | null>(null);
 
-	const agentTranscript = useMemo<ChatMessage[]>(() => {
-		return agentMessages.map((message) => {
-			const rawSteps = (message.metadata as Record<string, unknown> | undefined)
-				?.lix_agent_steps;
-			const steps: LixAgentStep[] = Array.isArray(rawSteps)
-				? (rawSteps as LixAgentStep[])
-				: [];
-			if (message.role === "assistant" && steps.length > 0) {
-				const toolRuns = stepsToToolRuns(steps);
-				return {
-					id: message.id,
-					role: message.role,
-					content: message.content,
-					toolRuns,
-				};
-			}
-			return {
-				id: message.id,
-				role: message.role,
-				content: message.content,
-			};
-		});
-	}, [agentMessages]);
+const agentTranscript = useMemo<ChatMessage[]>(() => {
+	return agentMessages.flatMap((message) => {
+		const metadata = message.lixcol_metadata as
+			| AgentConversationMessageMetadata
+			| undefined;
+		const role =
+			(metadata?.lix_agent_sdk_role as "user" | "assistant" | undefined) ??
+			"assistant";
+		const rawSteps = metadata?.lix_agent_sdk_steps;
+		const steps: AgentStep[] = Array.isArray(rawSteps) ? rawSteps : [];
+	const base: ChatMessage = {
+		id: message.id,
+		role,
+		content: toPlainText(message.body as ZettelDoc),
+	};
+		if (role === "assistant" && steps.length > 0) {
+			return [{ ...base, toolRuns: stepsToToolRuns(steps) }];
+		}
+		return [base];
+	});
+}, [agentMessages]);
 
 	const transcript = useMemo<ChatMessage[]>(() => {
 		const out: ChatMessage[] = [...agentTranscript];
@@ -644,7 +636,7 @@ export const view = createReactViewDefinition({
 
 export default AgentView;
 
-function stepsToToolRuns(steps: LixAgentStep[]): ToolRun[] {
+function stepsToToolRuns(steps: AgentStep[]): ToolRun[] {
 	return steps
 		.filter((step) => (step.kind ?? "tool_call") === "tool_call")
 		.map((step) => {

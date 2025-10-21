@@ -1,11 +1,9 @@
-import type { Lix } from "@lix-js/sdk";
+import { uuidV7, type Lix } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
-import type { ChatMessage } from "./conversation-message.js";
+import { type AgentConversation } from "./types.js";
 import { ContextStore } from "./context/context-store.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./system-prompt.js";
-import { createSendMessage, type AgentStreamResult } from "./send-message.js";
-
-export type { ChatMessage } from "./conversation-message.js";
+import { createAgentToolSet, type AgentToolSet } from "./tools/index.js";
 
 /**
  * Handle returned by {@link createLixAgent}.
@@ -13,27 +11,34 @@ export type { ChatMessage } from "./conversation-message.js";
 export type Agent = {
 	lix: Lix;
 	model: LanguageModelV2;
-	/**
-	 * Send a user message to the agent.
-	 *
-	 * Returns a stream handle with two parts:
-	 * - `ai_sdk`: the underlying AI SDK stream, exposed for incremental token
-	 *   rendering or tool instrumentation.
-	 * - `drain()`: helper that consumes the AI SDK stream and resolves with the
-	 *   final turn outcome.
-	 * - `done`: a promise that resolves with the final assistant response plus
-	 *   step metadata when the stream finishes (also returned by `drain()`).
-	 */
-	sendMessage(args: {
-		text: string;
-		systemPrompt?: string;
-		signal?: AbortSignal;
-	}): Promise<AgentStreamResult>;
-	getHistory(): ChatMessage[];
-	clearHistory(): void;
+	/** Shared tool set scoped to this agent instance. */
+	tools: AgentToolSet;
 	setContext(key: string, value: string): void;
 	getContext(key: string): string | undefined;
+	getSystemPrompt(): string;
+	setSystemPrompt(value: string): void;
+	getContextSnapshot(): Record<string, string>;
 };
+
+type AgentState = {
+	conversation: AgentConversation;
+	contextStore: ContextStore;
+	systemInstruction: string;
+	tools: AgentToolSet;
+};
+
+const agentStates = new WeakMap<Agent, AgentState>();
+
+/**
+ * @internal Helper to access private state for agent utilities.
+ */
+export function getAgentState(agent: Agent): AgentState {
+	const state = agentStates.get(agent);
+	if (!state) {
+		throw new Error("Agent state is unavailable. Use createLixAgent.");
+	}
+	return state;
+}
 
 /**
  * Create a Lix agent handle that wraps Lix SDK interactions.
@@ -50,6 +55,12 @@ export type Agent = {
  * 	model,
  * 	systemPrompt: appendDefaultSystemPrompt("You are using flashtype..."),
  * });
+ *
+ * await agent.tools.write_file.execute({
+ * 	version_id: "version-id",
+ * 	path: "/notes.txt",
+ * 	content: "Hello from the agent!",
+ * });
  */
 export async function createLixAgent(args: {
 	lix: Lix;
@@ -58,54 +69,31 @@ export async function createLixAgent(args: {
 }): Promise<Agent> {
 	const { lix, model, systemPrompt: providedSystemPrompt } = args;
 
-	// Default conversation state (in-memory)
-	const history: ChatMessage[] = [];
-	const contextStore = new ContextStore();
-	let systemInstruction = providedSystemPrompt ?? DEFAULT_SYSTEM_PROMPT;
-
-	const send = createSendMessage({
-		lix,
-		model,
-		history,
-		contextStore,
-		getSystemInstruction: () => systemInstruction,
-		setSystemInstruction: (value: string) => {
-			systemInstruction = value;
-		},
-	});
-
-	function getHistory() {
-		return history.slice();
-	}
-
-	async function clearHistory() {
-		history.length = 0;
-	}
-
-	return {
-		lix,
-		model,
-		sendMessage: ({
-			text,
-			systemPrompt,
-			signal,
-		}: {
-			text: string;
-			systemPrompt?: string;
-			signal?: AbortSignal;
-		}): Promise<AgentStreamResult> =>
-			send({
-				text,
-				systemPromptOverride: systemPrompt,
-				signal,
-			}),
-		getHistory,
-		clearHistory,
-		setContext: (key: string, value: string) => {
-			contextStore.set(key, value);
-		},
-		getContext: (key: string) => contextStore.get(key),
+	const state: AgentState = {
+		conversation: { id: await uuidV7({ lix }), messages: [] },
+		contextStore: new ContextStore(),
+		tools: createAgentToolSet({ lix }),
+		systemInstruction: providedSystemPrompt ?? DEFAULT_SYSTEM_PROMPT,
 	};
+
+	const agent: Agent = {
+		lix,
+		model,
+		tools: state.tools,
+		setContext: (key: string, value: string) => {
+			state.contextStore.set(key, value);
+		},
+		getContext: (key: string) => state.contextStore.get(key),
+		getSystemPrompt: () => state.systemInstruction,
+		setSystemPrompt: (value: string) => {
+			state.systemInstruction = value;
+		},
+		getContextSnapshot: () => state.contextStore.toObject(),
+	};
+
+	agentStates.set(agent, state);
+
+	return agent;
 }
 
 // KV-based hydration removed; using threads instead

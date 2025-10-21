@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openLix } from "@lix-js/sdk";
 import type { LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
 import { appendDefaultSystemPrompt } from "./system-prompt.js";
 import { createLixAgent } from "./create-lix-agent.js";
-import type { AgentStreamResult } from "./send-message.js";
+import { sendMessage } from "./send-message.js";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	{ type: "stream-start", warnings: [] },
@@ -20,30 +21,13 @@ const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 
 function createStreamingModel() {
 	return new MockLanguageModelV2({
-		doStream: async (options) => {
-			const apply = (globalThis as any).__testApplyTools as
-				| ((
-						opts: typeof options
-				  ) =>
-						| Promise<LanguageModelV2StreamPart[]>
-						| LanguageModelV2StreamPart[]
-						| void)
-				| undefined;
-			const events = await apply?.(options);
-
-			const chunks = Array.isArray(events) ? events : STREAM_FINISH_CHUNKS;
-			return {
-				stream: simulateReadableStream<LanguageModelV2StreamPart>({
-					chunks,
-				}),
-			};
-		},
+		doStream: async () => ({
+			stream: simulateReadableStream<LanguageModelV2StreamPart>({
+				chunks: STREAM_FINISH_CHUNKS,
+			}),
+		}),
 	});
 }
-
-beforeEach(() => {
-	(globalThis as any).__testApplyTools = undefined;
-});
 
 describe("createLixAgent context", () => {
 	test("injects context overlay into system prompt", async () => {
@@ -52,8 +36,13 @@ describe("createLixAgent context", () => {
 
 		const agent = await createLixAgent({ lix, model });
 		agent.setContext("active_file", "/app.tsx");
-		const stream = await agent.sendMessage({ text: "hello" });
-		await stream.drain();
+
+		const turn = await sendMessage({
+			agent,
+			prompt: fromPlainText("hello"),
+		});
+
+		await turn.done;
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();
@@ -79,8 +68,12 @@ describe("createLixAgent context", () => {
 			"You are using flashtype..."
 		);
 		const agent = await createLixAgent({ lix, model, systemPrompt });
-		const stream = await agent.sendMessage({ text: "hello" });
-		await stream.drain();
+
+		const turn = await sendMessage({
+			agent,
+			prompt: fromPlainText("hello"),
+		});
+		await turn.done;
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();

@@ -32,4 +32,8 @@ export class ContextStore {
 		);
 		return lines.join("\n");
 	}
+
+	toObject(): Record<string, string> {
+		return Object.fromEntries(this.entries);
+	}
 }

@@ -1,4 +1,5 @@
-import type { LixConversationMessage, State } from "@lix-js/sdk";
+import type { LixConversation, LixConversationMessage } from "@lix-js/sdk";
+import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 
 /**
  * A single tool call recorded for an agent turn.
@@ -15,9 +16,6 @@ export type AgentStep = {
 	started_at: string;
 	finished_at?: string;
 };
-
-type BaseConversationMessage = State<LixConversationMessage>;
-type BaseMetadata = NonNullable<BaseConversationMessage["lixcol_metadata"]>;
 
 /**
  * Metadata we store alongside conversation messages persisted via the Lix SDK.
@@ -36,22 +34,39 @@ export type AgentConversationMessageMetadata = {
 } & Record<string, unknown>;
 
 /**
- * Conversation message row compatible with {@link State<LixConversationMessage>}
+ * Conversation message row compatible with {@link LixConversationMessage}
  * but with a typed metadata envelope.
+ *
+ * @example
+ * const message: AgentConversationMessage = {
+ * 	id: "user-1",
+ * 	parent_id: null,
+ * 	body: fromPlainText("Hello"),
+ * 	lixcol_metadata: { lix_agent_sdk_role: "user" },
+ * };
  */
-export type AgentConversationMessage = Omit<
-	BaseConversationMessage,
-	"lixcol_metadata"
-> & {
-	lixcol_metadata: (BaseMetadata & AgentConversationMessageMetadata) | null;
+export type AgentConversationMessage = LixConversationMessage & {
+	lixcol_metadata: AgentConversationMessageMetadata | null;
 };
 
 /**
- * Lightweight chat message used for in-memory agent history.
+ * In-memory representation of a conversation exchanged with the agent.
+ *
+ * Provide `id` when the messages map to a persisted Lix conversation. Omit it
+ * to keep the thread transient and in-memory.
  */
-export type ChatMessage = {
+export type AgentConversation = {
+	id?: LixConversation["id"];
+	messages: AgentConversationMessage[];
+};
+
+/**
+ * @internal Lightweight chat turn used within the agent SDK while composing a message.
+ */
+export type AgentTurnMessage = {
 	id: string;
 	role: "system" | "user" | "assistant";
 	content: string;
+	body?: ZettelDoc;
 	metadata?: AgentConversationMessageMetadata;
 };

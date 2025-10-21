@@ -10,11 +10,7 @@ export async function clearConversation(args: {
 	lix: Lix;
 	agent: LixAgent | null;
 }): Promise<string | null> {
-	const { lix, agent } = args;
-
-	if (agent) {
-		agent.clearHistory();
-	}
+	const { lix } = args;
 
 	const currentId = await getConversationId(lix);
 	if (!currentId) {

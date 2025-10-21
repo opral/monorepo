@@ -1,21 +1,12 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openLix } from "@lix-js/sdk";
 import { clearConversation } from "./clear";
 import { createConversation, createConversationMessage } from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
-const mockAgent = {
-	clearHistory: vi.fn().mockResolvedValue(undefined),
-} as any;
-
 describe("clearConversation", () => {
-	beforeEach(() => {
-		mockAgent.clearHistory.mockClear();
-	});
-
 	test("clears history, deletes old conversation, and creates a new one", async () => {
 		const lix = await openLix({});
-
 		const firstConversation = await createConversation({
 			lix,
 			versionId: "global",
@@ -34,9 +25,7 @@ describe("clearConversation", () => {
 		await setConversationKey(lix, String(firstConversation.id));
 
 		const oldPointer = await getConversationId(lix);
-		const newId = await clearConversation({ lix, agent: mockAgent });
-
-		expect(mockAgent.clearHistory).toHaveBeenCalledTimes(1);
+		const newId = await clearConversation({ lix, agent: null });
 		expect(newId).toBe(oldPointer);
 
 		const pointer = await getConversationId(lix);

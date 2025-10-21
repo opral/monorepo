@@ -1,16 +1,17 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openLix, mockJsonPlugin } from "@lix-js/sdk";
 import type { LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
-import { ContextStore } from "./context/context-store.js";
-import { createSendMessage } from "./send-message.js";
-import type {
-	ChatMessage,
-	AgentConversationMessageMetadata,
-} from "./conversation-message.js";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { createLixAgent, getAgentState } from "./create-lix-agent.js";
+import { sendMessage } from "./send-message.js";
+import { persistConversation } from "./conversation-storage.js";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	{ type: "stream-start", warnings: [] },
+	{ type: "text-start", id: "text-1" },
+	{ type: "text-delta", id: "text-1", delta: "response" },
+	{ type: "text-end", id: "text-1" },
 	{
 		type: "finish",
 		finishReason: "stop",
@@ -18,25 +19,29 @@ const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	},
 ];
 
-function createStreamingModel() {
-	return new MockLanguageModelV2({
-		doStream: async (options) => {
-			const apply = (globalThis as any).__testApplyTools as
-				| ((
-						opts: typeof options
-				  ) =>
-						| Promise<LanguageModelV2StreamPart[]>
-						| LanguageModelV2StreamPart[]
-						| void)
-				| undefined;
-			const events = await apply?.(options);
+type ToolHandler = (
+	options: Parameters<MockLanguageModelV2["doStream"]>[0]
+) =>
+	| Promise<LanguageModelV2StreamPart[] | void>
+	| LanguageModelV2StreamPart[]
+	| void;
 
+function createStreamingModel() {
+	let handler: ToolHandler | undefined;
+	const model = new MockLanguageModelV2({
+		doStream: async (options) => {
+			const events = await handler?.(options);
 			const chunks = Array.isArray(events) ? events : STREAM_FINISH_CHUNKS;
 			return {
 				stream: simulateReadableStream<LanguageModelV2StreamPart>({
 					chunks,
 				}),
 			};
+		},
+	});
+	return Object.assign(model, {
+		setToolHandler(next?: ToolHandler) {
+			handler = next;
 		},
 	});
 }
@@ -69,28 +74,11 @@ function createToolCallStreamChunks({
 	];
 }
 
-beforeEach(() => {
-	(globalThis as any).__testApplyTools = undefined;
-});
-
-describe("createSendMessage", () => {
-	test("records tool steps for each turn and persists file writes", async () => {
+describe("sendMessage", () => {
+	test("streams tool steps and updates the conversation", async () => {
 		const lix = await openLix({});
 		const model = createStreamingModel();
-		const history: ChatMessage[] = [];
-		const contextStore = new ContextStore();
-		let systemInstruction = "You are the Lix Agent.";
-
-		const sendMessage = createSendMessage({
-			lix,
-			model,
-			history,
-			contextStore,
-			getSystemInstruction: () => systemInstruction,
-			setSystemInstruction: (value) => {
-				systemInstruction = value;
-			},
-		});
+		const agent = await createLixAgent({ lix, model });
 
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
@@ -98,7 +86,7 @@ describe("createSendMessage", () => {
 			.executeTakeFirstOrThrow();
 		const versionId = activeVersion.version_id as string;
 
-		(globalThis as any).__testApplyTools = async () =>
+		model.setToolHandler(() =>
 			createToolCallStreamChunks({
 				toolCallId: "call-one",
 				input: {
@@ -107,25 +95,27 @@ describe("createSendMessage", () => {
 					content: "one",
 				},
 				text: "turn-one-complete",
-			});
-		const streamOne = await sendMessage({ text: "turn one" });
-		await streamOne.drain();
-		const turnOne = await streamOne.done;
+			})
+		);
 
-		const firstAssistantMessage = history
-			.filter((msg) => msg.role === "assistant")
-			.at(-1);
-		expect(firstAssistantMessage?.metadata).toBeTruthy();
-		const firstMetadata = firstAssistantMessage?.metadata as
-			| AgentConversationMessageMetadata
-			| undefined;
-		expect(firstMetadata?.lix_agent_sdk_steps).toBeDefined();
-		expect(firstMetadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
-		const firstStep = firstMetadata?.lix_agent_sdk_steps?.[0];
-		expect(firstStep?.tool_name).toBe("write_file");
-		expect(firstStep?.status).toBe("succeeded");
-		expect(turnOne.steps.at(0)?.tool_name).toBe("write_file");
-		expect(turnOne.steps.at(0)?.status).toBe("succeeded");
+	const turnOne = await sendMessage({
+		agent,
+		prompt: fromPlainText("turn one"),
+	});
+	const assistantOne = await turnOne.done;
+
+		expect(assistantOne.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
+		expect(
+			assistantOne.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
+		).toBe("write_file");
+
+		const conversationId = turnOne.conversationId;
+		const rowsAfterOne = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.select(["id"])
+			.execute();
+		expect(rowsAfterOne).toHaveLength(2);
 
 		const fileOne = await lix.db
 			.selectFrom("file_all")
@@ -138,7 +128,7 @@ describe("createSendMessage", () => {
 			)
 		).toBe("one");
 
-		(globalThis as any).__testApplyTools = async () =>
+		model.setToolHandler(() =>
 			createToolCallStreamChunks({
 				toolCallId: "call-two",
 				input: {
@@ -147,107 +137,140 @@ describe("createSendMessage", () => {
 					content: "two",
 				},
 				text: "turn-two-complete",
-			});
-		const streamTwo = await sendMessage({ text: "turn two" });
-		await streamTwo.drain();
-		const turnTwo = await streamTwo.done;
-
-		const secondAssistantMessage = history
-			.filter((msg) => msg.role === "assistant")
-			.at(-1);
-		const secondMetadata = secondAssistantMessage?.metadata as
-			| AgentConversationMessageMetadata
-			| undefined;
-		expect(secondMetadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
-		expect(secondMetadata?.lix_agent_sdk_steps?.[0]?.tool_name).toBe(
-			"write_file"
+			})
 		);
-		expect(turnTwo.steps.at(0)?.tool_name).toBe("write_file");
-		expect(turnTwo.steps.at(0)?.status).toBe("succeeded");
 
-		const fileTwo = await lix.db
-			.selectFrom("file_all")
-			.where("path", "=", "/turn-two.txt")
-			.select(["data"])
-			.executeTakeFirstOrThrow();
+	const turnTwo = await sendMessage({
+		agent,
+		prompt: fromPlainText("turn two"),
+		conversationId,
+	});
+
+	const assistantTwo = await turnTwo.done;
+
 		expect(
-			new TextDecoder("utf-8", { fatal: false }).decode(
-				fileTwo.data as unknown as Uint8Array
-			)
-		).toBe("two");
-	});
-});
+			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
+		).toBe("write_file");
 
-test("write_file tool persists structured data changes", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
-	});
-	const model = createStreamingModel();
-	const history: ChatMessage[] = [];
-	const contextStore = new ContextStore();
-	let systemInstruction = "You are the Lix Agent.";
+	const rowsAfterTwo = await lix.db
+		.selectFrom("conversation_message")
+		.where("conversation_id", "=", conversationId)
+		.select(["id"])
+		.execute();
+	expect(rowsAfterTwo).toHaveLength(4);
+	expect(getAgentState(agent).conversation.messages).toHaveLength(4);
+	}, 20000);
 
-	const sendMessage = createSendMessage({
-		lix,
-		model,
-		history,
-		contextStore,
-		getSystemInstruction: () => systemInstruction,
-		setSystemInstruction: (value) => {
-			systemInstruction = value;
-		},
+	test("does not persist messages when persist is false", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+	const turn = await sendMessage({
+		agent,
+		prompt: fromPlainText("draft message"),
+		persist: false,
 	});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select(["version_id"])
-		.executeTakeFirstOrThrow();
-	const versionId = activeVersion.version_id as string;
+	await turn.done;
 
-	(globalThis as any).__testApplyTools = async () =>
-		createToolCallStreamChunks({
-			toolCallId: "call-json",
-			input: {
-				version_id: versionId,
-				path: "/data.json",
-				content: JSON.stringify({ greeting: "hello" }),
-			},
-			text: "json-write-complete",
+		const storedConversation = await lix.db
+			.selectFrom("conversation")
+			.where("id", "=", turn.conversationId)
+			.select(["id"])
+			.executeTakeFirst();
+		expect(storedConversation).toBeUndefined();
+
+		const storedMessages = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", turn.conversationId)
+			.select(["id"])
+			.execute();
+		expect(storedMessages).toHaveLength(0);
+
+		await lix.close();
+	});
+
+	test("persistConversation writes the conversation to Lix", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+	const result = await sendMessage({
+		agent,
+		prompt: fromPlainText("hello there"),
+		persist: false,
+	});
+
+	await result.done;
+
+		const inMemoryConversation = getAgentState(agent).conversation;
+		const persisted = await persistConversation({
+			lix,
+			conversation: inMemoryConversation,
 		});
 
-	const stream = await sendMessage({ text: "write greeting" });
-	await stream.drain();
-	const finalTurn = await stream.done;
+		expect(persisted.id).toBeTruthy();
 
-	const lastAssistantMessage = history
-		.filter((msg) => msg.role === "assistant")
-		.at(-1);
-	expect(lastAssistantMessage).toBeTruthy();
-	const metadata = lastAssistantMessage?.metadata as
-		| AgentConversationMessageMetadata
-		| undefined;
-	expect(metadata?.lix_agent_sdk_steps?.length).toBeGreaterThan(0);
-	expect(finalTurn.steps.at(0)?.tool_name).toBe("write_file");
+		const rows = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", persisted.id as string)
+			.select(["id"])
+			.execute();
+		expect(rows).toHaveLength(inMemoryConversation.messages.length);
+	});
 
-	const rows = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_json_property" as any)
-		.select([
-			"entity_id",
-			"schema_key",
-			"plugin_key",
-			"version_id",
-			"snapshot_content",
-		])
-		.execute();
-	const greetingRow = rows.find((row) => row.entity_id === "greeting");
-	expect(greetingRow).toBeTruthy();
-	expect(greetingRow?.schema_key).toBe("mock_json_property");
-	expect(greetingRow?.plugin_key).toBe("mock_json_plugin");
-	expect(greetingRow?.version_id).toBe(versionId);
-	const snapshot =
-		typeof greetingRow?.snapshot_content === "string"
-			? JSON.parse(greetingRow.snapshot_content as string)
-			: greetingRow?.snapshot_content;
-	expect(snapshot).toEqual({ value: "hello" });
+	test("write_file tool persists structured data changes", async () => {
+		const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const versionId = activeVersion.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "call-json",
+				input: {
+					version_id: versionId,
+					path: "/data.json",
+					content: JSON.stringify({ greeting: "hello" }),
+				},
+				text: "json-write-complete",
+			})
+		);
+
+	const result = await sendMessage({
+		agent,
+		prompt: fromPlainText("write greeting"),
+	});
+
+	await result.done;
+
+		const rows = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_json_property" as any)
+			.select([
+				"entity_id",
+				"schema_key",
+				"plugin_key",
+				"version_id",
+				"snapshot_content",
+			])
+			.execute();
+
+		const greetingRow = rows.find((row) => row.entity_id === "greeting");
+		expect(greetingRow).toBeTruthy();
+		expect(greetingRow?.schema_key).toBe("mock_json_property");
+		expect(greetingRow?.plugin_key).toBe("mock_json_plugin");
+		expect(greetingRow?.version_id).toBe(versionId);
+		const snapshot =
+			typeof greetingRow?.snapshot_content === "string"
+				? JSON.parse(greetingRow.snapshot_content as string)
+				: greetingRow?.snapshot_content;
+		expect(snapshot).toEqual({ value: "hello" });
+	}, 20000);
 });

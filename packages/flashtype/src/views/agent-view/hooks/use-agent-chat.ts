@@ -1,35 +1,23 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGatewayProvider } from "@ai-sdk/gateway";
-import type { Lix } from "@lix-js/sdk";
-import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { createConversation, type Lix } from "@lix-js/sdk";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
 import {
 	createLixAgent,
-	type LixAgent,
-	type ChatMessage as AgentMessage,
-	getOrCreateDefaultAgentConversationId,
-	appendUserMessage,
-	appendAssistantMessage,
+	type Agent as LixAgent,
+	type AgentConversationMessage,
+	type AgentConversationMessageMetadata,
+	type AgentStreamResult,
+	sendMessage,
 } from "@lix-js/agent-sdk";
 import { clearConversation as runClearConversation } from "../commands/clear";
 
-type AgentChatMessage = AgentMessage & {
-	metadata?: Record<string, unknown>;
-};
-
-type DecisionChange = {
-	entityId: string;
-	schemaKey: string;
-	pluginKey: string;
-	fileId: string;
-	versionId: string;
-	changeId: string;
-};
+type AgentChatMessage = AgentConversationMessage;
 
 type PendingDecision = {
 	id: string;
-	writerKey: string;
-	changes: DecisionChange[];
 };
 
 export type ToolEvent =
@@ -55,7 +43,9 @@ export type ToolEvent =
 			at: number;
 	  };
 
-type AgentStream = Awaited<ReturnType<LixAgent["sendMessage"]>>;
+type AgentStream = AgentStreamResult;
+
+const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 
 const formatToolError = (value: unknown): string => {
 	if (value instanceof Error) return value.message;
@@ -67,12 +57,17 @@ const formatToolError = (value: unknown): string => {
 	}
 };
 
+
 const consumeAgentStream = async (
 	stream: AgentStream,
+	done: Promise<AgentConversationMessage>,
 	onToolEvent?: (event: ToolEvent) => void,
-): Promise<Awaited<AgentStream["done"]>> => {
+): Promise<AgentConversationMessage> => {
 	if (!onToolEvent) {
-		return stream.drain();
+		for await (const _ of stream.ai_sdk.fullStream) {
+			// consume events without emitting tool updates
+		}
+		return await done;
 	}
 
 	for await (const part of stream.ai_sdk.fullStream) {
@@ -103,7 +98,7 @@ const consumeAgentStream = async (
 			});
 		}
 	}
-	return stream.done;
+	return await done;
 };
 
 export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
@@ -152,20 +147,44 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 	);
 	const hasKey = !missingKey;
 
-	const ensureConversationId = useCallback(async (): Promise<string> => {
-		if (conversationId) return conversationId;
-		const id = await getOrCreateDefaultAgentConversationId(lix);
-		setConversationId(id);
-		return id;
-	}, [conversationId, lix]);
+	const upsertConversationPointer = useCallback(
+		async (id: string) => {
+			await lix.db.transaction().execute(async (trx) => {
+				const existing = await trx
+					.selectFrom("key_value_all")
+					.where("lixcol_version_id", "=", "global")
+					.where("key", "=", CONVERSATION_KEY)
+					.select(["key"])
+					.executeTakeFirst();
 
-	const refreshConversationId = useCallback(async (): Promise<
-		string | null
-	> => {
+				if (existing) {
+					await trx
+						.updateTable("key_value_all")
+						.set({ value: id, lixcol_untracked: true })
+						.where("key", "=", CONVERSATION_KEY)
+						.where("lixcol_version_id", "=", "global")
+						.execute();
+				} else {
+					await trx
+						.insertInto("key_value_all")
+						.values({
+							key: CONVERSATION_KEY,
+							value: id,
+							lixcol_version_id: "global",
+							lixcol_untracked: true,
+						})
+						.execute();
+				}
+			});
+		},
+		[lix],
+	);
+
+	const refreshConversationId = useCallback(async (): Promise<string | null> => {
 		const ptr = await lix.db
 			.selectFrom("key_value_all")
 			.where("lixcol_version_id", "=", "global")
-			.where("key", "=", "lix_agent_conversation_id")
+			.where("key", "=", CONVERSATION_KEY)
 			.select(["value"])
 			.executeTakeFirst();
 		const id =
@@ -175,6 +194,25 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		setConversationId(id);
 		return id;
 	}, [lix]);
+
+	const ensureConversationId = useCallback(async (): Promise<string> => {
+		if (conversationId) return conversationId;
+
+		const existing = await refreshConversationId();
+		if (existing) {
+			return existing;
+		}
+
+		const created = await createConversation({ lix, versionId: "global" });
+		await upsertConversationPointer(created.id);
+		setConversationId(created.id);
+		return created.id;
+	}, [
+		conversationId,
+		refreshConversationId,
+		lix,
+		upsertConversationPointer,
+	]);
 
 	// Boot agent
 	useEffect(() => {
@@ -208,7 +246,7 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 			const query = lix.db
 				.selectFrom("conversation_message")
 				.where("conversation_id", "=", String(conversationId))
-				.select(["id", "body", "lixcol_metadata", "lixcol_created_at"])
+				.select(["id", "body", "lixcol_metadata", "lixcol_created_at", "parent_id", "conversation_id"])
 				.orderBy("lixcol_created_at", "asc")
 				.orderBy("id", "asc");
 			sub = lix.observe(query).subscribe({
@@ -218,19 +256,14 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 						lixcol_metadata?: Record<string, unknown> | null;
 					};
 					const hist: AgentChatMessage[] = (rows as ConversationRow[]).map(
-						(r) => {
-							const role =
-								(r.lixcol_metadata?.lix_agent_role as
-									| "user"
-									| "assistant"
-									| undefined) ?? "assistant";
-							return {
-								id: String(r.id),
-								role,
-								content: toPlainText(r.body),
-								metadata: r.lixcol_metadata ?? undefined,
-							};
-						},
+						(r) => ({
+							...r,
+							id: String(r.id),
+							conversation_id: String(r.conversation_id),
+							parent_id: (r.parent_id as string | null) ?? null,
+							lixcol_metadata: (r.lixcol_metadata ??
+								null) as AgentConversationMessageMetadata | null,
+						}),
 					);
 					setMessages(hist);
 				},
@@ -259,25 +292,16 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 			setPending(true);
 			try {
 				const convId = await ensureConversationId();
-				await appendUserMessage(lix, convId, text);
-
-				const stream = await agent.sendMessage({
-					text,
+				const turn = await sendMessage({
+					agent,
+					prompt: fromPlainText(trimmed),
+					conversationId: convId,
 					signal: opts?.signal,
 				});
-				const outcome = await consumeAgentStream(stream, opts?.onToolEvent);
-
-				await appendAssistantMessage(
-					lix,
-					convId,
-					outcome.text,
-					outcome.metadata ?? undefined,
-				);
-
+				setConversationId(turn.conversationId);
+				await consumeAgentStream(turn.stream, turn.done, opts?.onToolEvent);
 				setPendingDecision({
 					id: `decision-${Date.now().toString(36)}`,
-					writerKey: outcome.writerKey ?? "",
-					changes: [],
 				});
 			} catch (err) {
 				const message =
@@ -288,7 +312,7 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 				setPending(false);
 			}
 		},
-		[agent, ensureConversationId, lix],
+		[agent, ensureConversationId],
 	);
 
 	const acceptPendingDecision = useCallback(() => {
