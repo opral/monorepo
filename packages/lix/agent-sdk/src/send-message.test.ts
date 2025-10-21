@@ -98,11 +98,11 @@ describe("sendMessage", () => {
 			})
 		);
 
-	const turnOne = await sendMessage({
-		agent,
-		prompt: fromPlainText("turn one"),
-	});
-	const assistantOne = await turnOne.done;
+		const turnOne = await sendMessage({
+			agent,
+			prompt: fromPlainText("turn one"),
+		});
+		const assistantOne = await turnOne.toPromise();
 
 		expect(assistantOne.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
 		expect(
@@ -140,25 +140,25 @@ describe("sendMessage", () => {
 			})
 		);
 
-	const turnTwo = await sendMessage({
-		agent,
-		prompt: fromPlainText("turn two"),
-		conversationId,
-	});
+		const turnTwo = await sendMessage({
+			agent,
+			prompt: fromPlainText("turn two"),
+			conversationId,
+		});
 
-	const assistantTwo = await turnTwo.done;
+		const assistantTwo = await turnTwo.toPromise();
 
 		expect(
 			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
 		).toBe("write_file");
 
-	const rowsAfterTwo = await lix.db
-		.selectFrom("conversation_message")
-		.where("conversation_id", "=", conversationId)
-		.select(["id"])
-		.execute();
-	expect(rowsAfterTwo).toHaveLength(4);
-	expect(getAgentState(agent).conversation.messages).toHaveLength(4);
+		const rowsAfterTwo = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.select(["id"])
+			.execute();
+		expect(rowsAfterTwo).toHaveLength(4);
+		expect(getAgentState(agent).conversation.messages).toHaveLength(4);
 	}, 20000);
 
 	test("does not persist messages when persist is false", async () => {
@@ -166,13 +166,13 @@ describe("sendMessage", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-	const turn = await sendMessage({
-		agent,
-		prompt: fromPlainText("draft message"),
-		persist: false,
-	});
+		const turn = await sendMessage({
+			agent,
+			prompt: fromPlainText("draft message"),
+			persist: false,
+		});
 
-	await turn.done;
+		await turn.toPromise();
 
 		const storedConversation = await lix.db
 			.selectFrom("conversation")
@@ -196,13 +196,13 @@ describe("sendMessage", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-	const result = await sendMessage({
-		agent,
-		prompt: fromPlainText("hello there"),
-		persist: false,
-	});
+		const result = await sendMessage({
+			agent,
+			prompt: fromPlainText("hello there"),
+			persist: false,
+		});
 
-	await result.done;
+		await result.toPromise();
 
 		const inMemoryConversation = getAgentState(agent).conversation;
 		const persisted = await persistConversation({
@@ -243,12 +243,12 @@ describe("sendMessage", () => {
 			})
 		);
 
-	const result = await sendMessage({
-		agent,
-		prompt: fromPlainText("write greeting"),
-	});
+		const result = await sendMessage({
+			agent,
+			prompt: fromPlainText("write greeting"),
+		});
 
-	await result.done;
+		await result.toPromise();
 
 		const rows = await lix.db
 			.selectFrom("state_all")

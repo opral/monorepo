@@ -9,7 +9,7 @@ import {
 	type Agent as LixAgent,
 	type AgentConversationMessage,
 	type AgentConversationMessageMetadata,
-	type AgentStreamResult,
+	type SendMessageResult,
 	sendMessage,
 } from "@lix-js/agent-sdk";
 import { clearConversation as runClearConversation } from "../commands/clear";
@@ -43,8 +43,6 @@ export type ToolEvent =
 			at: number;
 	  };
 
-type AgentStream = AgentStreamResult;
-
 const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 
 const formatToolError = (value: unknown): string => {
@@ -59,18 +57,18 @@ const formatToolError = (value: unknown): string => {
 
 
 const consumeAgentStream = async (
-	stream: AgentStream,
+	aiSdk: SendMessageResult["aiSdk"],
 	done: Promise<AgentConversationMessage>,
 	onToolEvent?: (event: ToolEvent) => void,
 ): Promise<AgentConversationMessage> => {
 	if (!onToolEvent) {
-		for await (const _ of stream.ai_sdk.fullStream) {
+		for await (const _ of aiSdk.fullStream) {
 			// consume events without emitting tool updates
 		}
 		return await done;
 	}
 
-	for await (const part of stream.ai_sdk.fullStream) {
+	for await (const part of aiSdk.fullStream) {
 		if (part.type === "tool-call") {
 			onToolEvent({
 				type: "start",
@@ -299,7 +297,7 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 					signal: opts?.signal,
 				});
 				setConversationId(turn.conversationId);
-				await consumeAgentStream(turn.stream, turn.done, opts?.onToolEvent);
+				await consumeAgentStream(turn.aiSdk, turn.done, opts?.onToolEvent);
 				setPendingDecision({
 					id: `decision-${Date.now().toString(36)}`,
 				});

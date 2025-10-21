@@ -1,6 +1,9 @@
-import { createConversation, createConversationMessage, uuidV7 } from "@lix-js/sdk";
-import { streamText, stepCountIs } from "ai";
-import type { StreamTextResult } from "ai";
+import {
+	createConversation,
+	createConversationMessage,
+	uuidV7,
+} from "@lix-js/sdk";
+import { streamText, stepCountIs, type StreamTextResult } from "ai";
 import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
@@ -14,12 +17,6 @@ import { loadConversation } from "./conversation-storage.js";
 import { buildSystemPrompt } from "./system/build-system-prompt.js";
 import { getAgentState, type Agent } from "./create-lix-agent.js";
 
-type AgentToolStream = StreamTextResult<Agent["tools"], never>;
-
-export type AgentStreamResult = {
-	ai_sdk: AgentToolStream;
-};
-
 export type SendMessageArgs = {
 	agent: Agent;
 	prompt: ZettelDoc;
@@ -30,8 +27,8 @@ export type SendMessageArgs = {
 
 export type SendMessageResult = {
 	conversationId: string;
-	stream: AgentStreamResult;
-	done: Promise<AgentConversationMessage>;
+	aiSdk: StreamTextResult<Agent["tools"], never>;
+	toPromise(): Promise<AgentConversationMessage>;
 };
 
 /**
@@ -45,17 +42,22 @@ export type SendMessageResult = {
  * 	agent,
  * 	prompt: fromPlainText("Hello"),
  * });
- * for await (const part of turn.stream.ai_sdk.fullStream) {
+ * for await (const part of turn.aiSdk.fullStream) {
  * 	if (part.type === "text-delta") {
  * 		process.stdout.write(part.delta);
  * 	}
  * }
- * const assistantMessage = await turn.done;
+ * const assistantMessage = await turn.toPromise();
  */
 export async function sendMessage(
 	args: SendMessageArgs
 ): Promise<SendMessageResult> {
-	const { agent, prompt, conversationId: providedConversationId, signal } = args;
+	const {
+		agent,
+		prompt,
+		conversationId: providedConversationId,
+		signal,
+	} = args;
 	const shouldPersist = args.persist !== false;
 	const state = getAgentState(agent);
 
@@ -236,7 +238,8 @@ export async function sendMessage(
 		}
 		rejectDone(reason);
 	};
-	let aiSdkStream: AgentToolStream;
+	let aiSdkStream: StreamTextResult<Agent["tools"], never>;
+	let toPromiseResult: Promise<AgentConversationMessage> | undefined;
 	try {
 		aiSdkStream = streamText({
 			model: agent.model,
@@ -280,9 +283,7 @@ export async function sendMessage(
 					assistantMessage = {
 						...stored,
 						id: String(stored.id),
-						conversation_id: String(
-							stored.conversation_id ?? conversationId
-						),
+						conversation_id: String(stored.conversation_id ?? conversationId),
 						lixcol_metadata: {
 							...(stored.lixcol_metadata ?? {}),
 							lix_agent_sdk_role: "assistant",
@@ -321,20 +322,26 @@ export async function sendMessage(
 				rejectTurn(new Error("sendMessage aborted"));
 			},
 			abortSignal: signal,
-		}) as AgentToolStream;
+		}) as StreamTextResult<Agent["tools"], never>;
 	} catch (error) {
 		rejectTurn(error);
 		throw error;
 	}
 
-	const stream: AgentStreamResult = {
-		ai_sdk: aiSdkStream,
+	const toPromise = () => {
+		if (!toPromiseResult) {
+			toPromiseResult = (async () => {
+				await aiSdkStream.consumeStream();
+				return await done;
+			})();
+		}
+		return toPromiseResult;
 	};
 
 	return {
 		conversationId,
-		stream,
-		done,
+		aiSdk: aiSdkStream,
+		toPromise,
 	};
 }
 

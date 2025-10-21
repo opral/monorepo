@@ -104,7 +104,7 @@ export async function loadConversation(
  * 	prompt: fromPlainText("Hello"),
  * 	persist: false,
  * });
- * await turn.done;
+ * await turn.toPromise();
  * await persistConversation({ lix, conversation: getAgentState(agent).conversation });
  */
 export async function persistConversation(args: {

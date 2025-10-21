@@ -42,7 +42,7 @@ describe("createLixAgent context", () => {
 			prompt: fromPlainText("hello"),
 		});
 
-		await turn.done;
+		await turn.toPromise();
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();
@@ -73,7 +73,7 @@ describe("createLixAgent context", () => {
 			agent,
 			prompt: fromPlainText("hello"),
 		});
-		await turn.done;
+		await turn.toPromise();
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();
