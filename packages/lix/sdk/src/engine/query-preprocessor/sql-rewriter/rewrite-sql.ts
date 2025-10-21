@@ -17,7 +17,6 @@ import {
 	tokenize,
 	type Token,
 } from "../../sql-parser/tokenizer.js";
-import { ensureNumberedPlaceholders } from "./ensure-numbered-placeholders.js";
 
 const DERIVED_STATE_ALIASES = new Set([
 	"state_all",
@@ -34,11 +33,11 @@ export interface RewriteSqlOptions {
 }
 
 export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
-	const normalizedSql = ensureNumberedPlaceholders(sql);
-	const tokens = tokenize(normalizedSql);
+	// const normalizedSql = ensureNumberedPlaceholders(sql);
+	const tokens = tokenize(sql);
 	const shapes = analyzeShapes(tokens);
 	if (shapes.length === 0) {
-		return normalizedSql;
+		return sql;
 	}
 
 	const includeTransaction = options?.hasOpenTransaction !== false;
@@ -61,7 +60,7 @@ export function rewriteSql(sql: string, options?: RewriteSqlOptions): string {
 				value !== null
 		);
 
-	let current = normalizedSql;
+	let current = sql;
 	if (replacements.length > 0) {
 		replacements.sort((a, b) => b.start - a.start);
 		for (const replacement of replacements) {

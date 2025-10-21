@@ -180,7 +180,7 @@ describe("createQueryPreprocessorV2", () => {
 		});
 
 		expect(result.sql).toBe(
-			`select * from "lix_internal_state_materializer" where "version_id" = ?1 and "entity_id" = ?2`
+			`select * from "lix_internal_state_materializer" where "version_id" = ? and "entity_id" = ?`
 		);
 		expect(result.expandedSql).toBeUndefined();
 

@@ -152,11 +152,3 @@ test("keeps unseeded CTE when version filter is absent", () => {
 	expect(rewritten).not.toContain("seed_versions");
 	expect(rewritten).toContain("version_descriptor_base");
 });
-
-test("seeds version recursion when version filter uses anonymous placeholder", () => {
-	const sql = `SELECT * FROM lix_internal_state_vtable WHERE version_id = ? AND schema_key = ?;`;
-	const rewritten = rewriteSql(sql);
-	expect(rewritten).toMatch(/params\(version_id/);
-	expect(rewritten).toContain("?1 AS version_id");
-	expect(rewritten).toContain("WHERE txn.schema_key = ?2");
-});
