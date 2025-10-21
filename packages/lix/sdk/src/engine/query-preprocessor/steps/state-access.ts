@@ -5,15 +5,7 @@ import {
 } from "../sql-rewriter/rewrite-sql.js";
 import { analyzeShapes } from "../sql-rewriter/microparser/analyze-shape.js";
 import { ensureFreshStateCache } from "../cache-populator.js";
-import {
-	applyStateCacheSchema,
-	getStateCacheTables,
-} from "../../../state/cache/schema.js";
-import {
-	createSchemaCacheTable,
-	schemaKeyToCacheTableName,
-} from "../../../state/cache/create-schema-cache-table.js";
-import { resolveCacheSchemaDefinition } from "../../../state/cache/schema-resolver.js";
+import { getStateCacheTables } from "../../../state/cache/schema.js";
 import { hasOpenTransaction } from "../../../state/vtable/vtable.js";
 import type { PreprocessorStep } from "./types.js";
 import {
@@ -35,7 +27,6 @@ import {
 } from "../../sql-parser/tokenizer.js";
 import type { PreprocessContext } from "../context.js";
 import type { QueryPreprocessorResult } from "../types.js";
-import type { LixEngine } from "../../boot.js";
 
 export const stateAccessStep: PreprocessorStep = (context) => {
 	if (context.kind !== "select" && !context.rewriteApplied) {
@@ -82,7 +73,6 @@ function maybeRewriteStateAccess(
 		return null;
 	}
 
-	applyStateCacheSchema({ engine });
 	const schemaKeyHints = collectSchemaKeyHints(
 		tokens,
 		shapes,
@@ -95,10 +85,7 @@ function maybeRewriteStateAccess(
 		) ||
 		hasSchemaKeyPlaceholderPredicate(tokens);
 	const existingCacheTables = getStateCacheTables({ engine });
-	ensureDescriptorCacheTable({
-		engine,
-		cacheTables: existingCacheTables,
-	});
+
 	if (context.sideEffects !== false) {
 		for (const shape of shapes) {
 			ensureFreshStateCache({
@@ -184,31 +171,6 @@ function normalizeIdentifier(token: Token | undefined): string | null {
 		return image.slice(1, -1).replace(/""/g, '"').toLowerCase();
 	}
 	return image.toLowerCase();
-}
-
-function ensureDescriptorCacheTable(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
-	cacheTables: Set<string>;
-}): void {
-	const descriptorTable = schemaKeyToCacheTableName("lix_version_descriptor");
-	if (args.cacheTables.has(descriptorTable)) {
-		return;
-	}
-	const schemaDefinition = resolveCacheSchemaDefinition({
-		engine: args.engine,
-		schemaKey: "lix_version_descriptor",
-	});
-	if (!schemaDefinition) {
-		throw new Error("Missing schema definition for lix_version_descriptor");
-	}
-	const created = createSchemaCacheTable({
-		engine: args.engine,
-		schema: schemaDefinition,
-	});
-	args.cacheTables.add(created);
-	if (created !== descriptorTable) {
-		args.cacheTables.add(descriptorTable);
-	}
 }
 
 function collapseDerivedTableTarget(
