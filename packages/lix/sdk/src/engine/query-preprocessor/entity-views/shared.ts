@@ -7,7 +7,6 @@ import {
 } from "../../../schema-definition/json-pointer.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironmentState } from "./cel-environment.js";
-import { LixStoredSchemaSchema } from "../../../stored-schema/schema-definition.js";
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 
 /**
@@ -22,67 +21,6 @@ export type StoredSchemaDefinition = LixSchemaDefinition;
 export interface RewriteResult {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
-}
-
-const ENTITY_REWRITE_WHITELIST = new Set([
-	"key_value",
-	"lix_key_value",
-	"change_proposal",
-	"lix_change_proposal",
-	"change_set",
-	"lix_change_set",
-	"change_set_element",
-	"lix_change_set_element",
-	"change_set_label",
-	"lix_change_set_label",
-	"change_author",
-	"lix_change_author",
-	"mock_composite_schema",
-	"insertable_schema",
-	"mock_default_schema",
-	"mock_fn_schema",
-	"mock_cel_schema",
-	"mock_fn_override",
-	"multi_schema",
-	"expression_schema",
-	"delete_schema",
-	"update_schema",
-	"immutable_update_schema",
-	"json_update_schema",
-	"expression_update_schema",
-	"version_override_schema",
-	"pointer_entity_schema",
-	"active_version",
-	"lix_active_version",
-	"label",
-	"lix_label",
-	"entity_label",
-	"lix_entity_label",
-	"conversation",
-	"lix_conversation",
-	"conversation_message",
-	"lix_conversation_message",
-	"entity_conversation",
-	"lix_entity_conversation",
-	"commit",
-	"lix_commit",
-	"commit_edge",
-	"lix_commit_edge",
-	"log",
-	"lix_log",
-	"account",
-	"lix_account",
-	"active_account",
-	"lix_active_account",
-	"stored_schema",
-	"lix_stored_schema",
-]);
-
-/**
- * Determines whether entity view rewrites are enabled for the given schema key.
- */
-export function isEntityRewriteAllowed(schemaKey: string): boolean {
-	return ENTITY_REWRITE_WHITELIST.has(schemaKey.toLowerCase());
 }
 
 /**

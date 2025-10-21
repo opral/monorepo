@@ -25,7 +25,6 @@ import {
 	findKeyword,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
-	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
 	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
@@ -122,9 +121,6 @@ export function rewriteEntityUpdate(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
-	if (!isEntityRewriteAllowed(baseKey)) {
-		return null;
-	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
@@ -156,9 +152,6 @@ export function rewriteEntityUpdate(args: {
 	const getLixcolOverride = (key: string): unknown =>
 		lixcolOverrides.has(key) ? lixcolOverrides.get(key) : undefined;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
-	if (!isEntityRewriteAllowed(storedSchemaKey)) {
-		return null;
-	}
 	const isActiveVersionSchema = storedSchemaKey === "lix_active_version";
 
 	const propertiesObject = (schema as StoredSchemaDefinition).properties ?? {};

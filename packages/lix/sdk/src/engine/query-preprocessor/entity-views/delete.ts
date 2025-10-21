@@ -22,7 +22,6 @@ import {
 	findKeyword,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
-	isEntityRewriteAllowed,
 	collectPointerColumnDescriptors,
 	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
@@ -99,9 +98,6 @@ export function rewriteEntityDelete(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
-	if (!isEntityRewriteAllowed(baseKey)) {
-		return null;
-	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
@@ -147,9 +143,6 @@ export function rewriteEntityDelete(args: {
 	if (!primaryKeys) return null;
 
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
-	if (!isEntityRewriteAllowed(storedSchemaKey)) {
-		return null;
-	}
 
 	const whereIndex = findKeyword(tokens, index, "WHERE");
 	const returningIndex = findKeyword(tokens, index, "RETURNING");

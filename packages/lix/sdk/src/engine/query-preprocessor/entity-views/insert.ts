@@ -6,7 +6,6 @@ import {
 	LParen,
 	RParen,
 	Comma,
-	QIdent,
 	QMark,
 	QMarkNumber,
 	NULL as NULL_TOKEN,
@@ -23,7 +22,6 @@ import {
 	getColumnOrDefault,
 	loadStoredSchemaDefinition,
 	resolveStoredSchemaKey,
-	isEntityRewriteAllowed,
 	isEntityViewVariantEnabled,
 	resolveMetadataDefaults,
 	type RewriteResult,
@@ -76,9 +74,6 @@ export function rewriteEntityInsert(args: {
 
 	const baseKey = baseSchemaKey(viewNameRaw);
 	if (!baseKey) return null;
-	if (!isEntityRewriteAllowed(baseKey)) {
-		return null;
-	}
 
 	const schema = loadStoredSchemaDefinition(engine, baseKey);
 	if (!schema) return null;
@@ -116,9 +111,6 @@ export function rewriteEntityInsert(args: {
 			})
 		: null;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
-	if (!isEntityRewriteAllowed(storedSchemaKey)) {
-		return null;
-	}
 	const columnParse = parseColumnList(tokens, index);
 	if (!columnParse) return null;
 	const columns = columnParse.columns;

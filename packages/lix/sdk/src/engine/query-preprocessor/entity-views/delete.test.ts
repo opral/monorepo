@@ -23,7 +23,7 @@ test("rewrites deletes for stored schema views", async () => {
 	} satisfies LixSchemaDefinition;
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
 
 	const insertResult = preprocess({
