@@ -5,7 +5,15 @@ import { fromPlainText } from "@opral/zettel-ast";
 import { ebEntity } from "../entity/eb-entity.js";
 
 test("creates a conversation with sequential messages where only the first has null parent_id", async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	const comments = [
 		{ body: fromPlainText("First message") },

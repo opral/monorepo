@@ -53,9 +53,6 @@ ajv.addFormat("cel", {
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
-const decodePointerSegment = (segment: string): string =>
-	segment.replace(/~1/g, "/").replace(/~0/g, "~");
-
 const normalizeSchemaPath = (value: string): string => {
 	if (typeof value !== "string") {
 		return "";
@@ -587,11 +584,11 @@ function validateForeignKeyConstraints(args: {
 					.where(refPaths[0]!.segments[0] as any, "=", localValues[0]);
 			}
 		} else {
-			// Query JSON schema entities in the state table
 			query = internalQueryBuilder
-				.selectFrom("state_all")
-				.select("snapshot_content")
-				.where("schema_key", "=", foreignKey.references.schemaKey);
+				.selectFrom("lix_internal_state_vtable")
+				.select(["snapshot_content"])
+				.where("schema_key", "=", foreignKey.references.schemaKey)
+				.where("snapshot_content", "is not", null);
 
 			// Add WHERE conditions for each property
 			for (let i = 0; i < localPaths.length; i++) {
