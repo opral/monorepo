@@ -602,9 +602,8 @@ function buildCacheRouting(
 	}
 	const existing = [...uniqueCandidates].filter((name) => tableExists(name));
 	if (existing.length === 0) {
-		if (schemaKeys.length > 0) {
-			return buildCacheRouting([], existingCacheTables);
-		}
+		// If schema keys were provided but no cache tables exist,
+		// prune the cache entirely instead of falling back to all tables
 		return { sql: buildEmptyCacheSourceSql(), includeCache: false };
 	}
 

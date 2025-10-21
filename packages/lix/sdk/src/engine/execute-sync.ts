@@ -36,6 +36,7 @@ export function createExecuteSync(args: {
 				rewrittenSql: preprocessed.sql,
 				expandedSql: preprocessed.expandedSql,
 				originalSql: args2.sql,
+				parameters: preprocessed.parameters,
 			};
 			Object.assign(enriched, debugPayload);
 			throw enriched;

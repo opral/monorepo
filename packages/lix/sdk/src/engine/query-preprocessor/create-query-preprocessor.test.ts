@@ -145,7 +145,7 @@ describe("createQueryPreprocessorV2", () => {
 
 		expect(result.sql).toContain("INSERT INTO state_all");
 		expect(result.sql).not.toMatch(/\bactive_account\b/i);
-		expect(result.sql).toContain("json_object('account_id', ?)");
+		expect(result.sql).toMatch(/json_object\('account_id', \?\d*\)/);
 		expect(result.parameters).toEqual([
 			"user123",
 			"lix_active_account",
@@ -331,6 +331,44 @@ describe("createQueryPreprocessorV2", () => {
 
 		expect(Array.isArray(rows)).toBe(true);
 		expect((rows as unknown[]).length).toBe(0);
+
+		await lix.close();
+	});
+
+	test("prunes cache entirely when schema key does not exist", async () => {
+		const lix = await openLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const preprocess = createQueryPreprocessor(lix.engine!);
+		const sql = `
+			select "snapshot_content" from "lix_internal_state_vtable"
+			where "schema_key" = ?
+			and "version_id" = ?
+			and "snapshot_content" is not null
+			and _pk NOT LIKE 'T~%'
+			and json_extract(snapshot_content, '$.details.slug') = ?
+		`;
+		// Use a schema key that doesn't exist
+		const parameters = ["non_existent_schema", "global", "slug-new"] as const;
+
+		const preprocessed = preprocess({
+			sql,
+			parameters,
+		});
+
+		// Should not have the non_existent_schema cache table
+		expect(preprocessed.sql).not.toContain(
+			"lix_internal_state_cache_v1_non_existent_schema"
+		);
+		// Should still contain the untracked segments
+		expect(preprocessed.sql).toContain("lix_internal_state_all_untracked");
 
 		await lix.close();
 	});
