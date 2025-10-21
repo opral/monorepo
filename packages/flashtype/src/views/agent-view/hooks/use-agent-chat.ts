@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { createGatewayProvider } from "@ai-sdk/gateway";
 import { createConversation, type Lix } from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
 import {
 	createLixAgent,
@@ -55,17 +54,16 @@ const formatToolError = (value: unknown): string => {
 	}
 };
 
-
 const consumeAgentStream = async (
 	aiSdk: SendMessageResult["aiSdk"],
-	done: Promise<AgentConversationMessage>,
+	toPromise: SendMessageResult["toPromise"],
 	onToolEvent?: (event: ToolEvent) => void,
 ): Promise<AgentConversationMessage> => {
 	if (!onToolEvent) {
 		for await (const _ of aiSdk.fullStream) {
 			// consume events without emitting tool updates
 		}
-		return await done;
+		return await toPromise();
 	}
 
 	for await (const part of aiSdk.fullStream) {
@@ -96,7 +94,7 @@ const consumeAgentStream = async (
 			});
 		}
 	}
-	return await done;
+	return await toPromise();
 };
 
 export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
@@ -178,7 +176,9 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		[lix],
 	);
 
-	const refreshConversationId = useCallback(async (): Promise<string | null> => {
+	const refreshConversationId = useCallback(async (): Promise<
+		string | null
+	> => {
 		const ptr = await lix.db
 			.selectFrom("key_value_all")
 			.where("lixcol_version_id", "=", "global")
@@ -205,12 +205,7 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		await upsertConversationPointer(created.id);
 		setConversationId(created.id);
 		return created.id;
-	}, [
-		conversationId,
-		refreshConversationId,
-		lix,
-		upsertConversationPointer,
-	]);
+	}, [conversationId, refreshConversationId, lix, upsertConversationPointer]);
 
 	// Boot agent
 	useEffect(() => {
@@ -244,7 +239,14 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 			const query = lix.db
 				.selectFrom("conversation_message")
 				.where("conversation_id", "=", String(conversationId))
-				.select(["id", "body", "lixcol_metadata", "lixcol_created_at", "parent_id", "conversation_id"])
+				.select([
+					"id",
+					"body",
+					"lixcol_metadata",
+					"lixcol_created_at",
+					"parent_id",
+					"conversation_id",
+				])
 				.orderBy("lixcol_created_at", "asc")
 				.orderBy("id", "asc");
 			sub = lix.observe(query).subscribe({
@@ -297,7 +299,7 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 					signal: opts?.signal,
 				});
 				setConversationId(turn.conversationId);
-				await consumeAgentStream(turn.aiSdk, turn.done, opts?.onToolEvent);
+				await consumeAgentStream(turn.aiSdk, turn.toPromise, opts?.onToolEvent);
 				setPendingDecision({
 					id: `decision-${Date.now().toString(36)}`,
 				});

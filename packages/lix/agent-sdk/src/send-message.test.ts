@@ -28,6 +28,7 @@ type ToolHandler = (
 
 function createStreamingModel() {
 	let handler: ToolHandler | undefined;
+	let handlerConsumed = false;
 	const model = new MockLanguageModelV2({
 		doStream: async (options) => {
 			const events = await handler?.(options);
@@ -41,7 +42,18 @@ function createStreamingModel() {
 	});
 	return Object.assign(model, {
 		setToolHandler(next?: ToolHandler) {
-			handler = next;
+			handlerConsumed = false;
+			if (!next) {
+				handler = undefined;
+				return;
+			}
+			handler = (options) => {
+				if (handlerConsumed) {
+					return STREAM_FINISH_CHUNKS;
+				}
+				handlerConsumed = true;
+				return next(options);
+			};
 		},
 	});
 }
