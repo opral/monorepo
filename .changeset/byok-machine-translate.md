@@ -1,5 +1,5 @@
 ---
-"@inlang/cli": patch
+"@inlang/cli": minor
 ---
 
 Require the `INLANG_GOOGLE_TRANSLATE_API_KEY` environment variable for machine translations.
