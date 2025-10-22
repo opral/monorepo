@@ -121,6 +121,11 @@ test("emits fallback definitions after their dependencies", () => {
         const file = output["messages/admin_tasks.js"];
 
         expect(file).toBeDefined();
+
+        if (!file) {
+                throw new Error("messages/admin_tasks.js should have been generated");
+        }
+
         expect(file).toContain("const fr_admin_tasks = en_admin_tasks;");
         expect(file).toContain("const fr_ca_admin_tasks = fr_admin_tasks;");
 
