@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Command } from "commander";
-import { rpc } from "@inlang/rpc";
 import { getInlangProject } from "../../utilities/getInlangProject.js";
 import { log, logError } from "../../utilities/log.js";
 import {
@@ -12,6 +11,7 @@ import {
 import { projectOption } from "../../utilities/globalFlags.js";
 import progessBar from "cli-progress";
 import fs from "node:fs/promises";
+import { machineTranslateBundle } from "./machineTranslateBundle.js";
 
 export const translate = new Command()
   .command("translate")
@@ -20,7 +20,7 @@ export const translate = new Command()
   .option("--locale <source>", "Locales for translation.")
   .option(
     "--targetLocales <targets...>",
-    "Comma separated list of target locales for translation.",
+    "Comma separated list of target locales for translation."
   )
   .option("-n, --nobar", "disable progress bar", false)
   .description("Machine translate bundles.")
@@ -46,7 +46,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
           clearOnComplete: true,
           format: `🤖 Machine translating bundles | {bar} | {percentage}% | {value}/{total} Bundles`,
         },
-        progessBar.Presets.shades_grey,
+        progessBar.Presets.shades_grey
       );
   try {
     const settings = await args.project.settings.get();
@@ -66,25 +66,33 @@ export async function translateCommandAction(args: { project: InlangProject }) {
       return;
     }
 
+    const googleApiKey = process.env.INLANG_GOOGLE_TRANSLATE_API_KEY;
+
+    if (!googleApiKey) {
+      log.error(
+        "Set the INLANG_GOOGLE_TRANSLATE_API_KEY environment variable before running machine translate."
+      );
+      return;
+    }
+
     bar?.start(bundles.length, 0);
 
     const promises: Promise<
-      Awaited<ReturnType<typeof rpc.machineTranslateBundle>>
+      Awaited<ReturnType<typeof machineTranslateBundle>>
     >[] = [];
     const errors: string[] = [];
 
     for (const bundle of bundles) {
       promises.push(
-        rpc
-          .machineTranslateBundle({
-            bundle,
-            sourceLocale: settings.baseLocale,
-            targetLocales: targetLocales,
-          })
-          .then((result) => {
-            bar?.increment();
-            return result;
-          }),
+        machineTranslateBundle({
+          bundle,
+          sourceLocale: settings.baseLocale,
+          targetLocales: targetLocales,
+          googleApiKey,
+        }).then((result) => {
+          bar?.increment();
+          return result;
+        })
       );
     }
 

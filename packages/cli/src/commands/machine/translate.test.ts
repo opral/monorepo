@@ -7,7 +7,7 @@ import {
   selectBundleNested,
 } from "@inlang/sdk";
 
-test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
+test.runIf(process.env.INLANG_GOOGLE_TRANSLATE_API_KEY)(
   "should tanslate the missing languages",
   async () => {
     const project = await loadProjectInMemory({

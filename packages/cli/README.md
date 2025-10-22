@@ -121,6 +121,35 @@ The machine command is used to automate localization processes.
 
 The translate command machine translates all resources.
 
+Before running the command, export your Google Cloud translation token as
+`INLANG_GOOGLE_TRANSLATE_API_KEY`:
+
+```sh
+export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
+```
+
+Set it in your shell profile or CI secret store so every run can reuse it.
+
+To create the API key, follow the [Cloud Translation setup guide](https://cloud.google.com/translate/docs/setup)
+and choose the **Cloud Translation Basic** edition (the CLI uses the v2 REST API).
+High-level steps:
+
+1. Create or select a Google Cloud project.
+2. Enable the **Cloud Translation API (Basic)** for the project.
+3. Generate a credential of type **API key** under *APIs & Services → Credentials*.
+4. Copy the key and assign it to `INLANG_GOOGLE_TRANSLATE_API_KEY`.
+
+**Migration**
+
+```sh
+# Before
+npx @inlang/cli machine translate --project ./project.inlang
+
+# After
+export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
+npx @inlang/cli machine translate --project ./project.inlang
+```
+
 To initiate machine translation, run the following command:
 
 ```sh
