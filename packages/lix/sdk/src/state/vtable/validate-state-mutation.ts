@@ -359,9 +359,10 @@ function validatePrimaryKeyConstraints(args: {
 	query = query.where("version_id", "=", args.version_id);
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
-
 	// Exclude transaction-state rows: _pk starting with 'T~'
 	query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
+	// Only consider entities materialised in the current version context
+	query = query.where("inherited_from_version_id", "is", null);
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -440,6 +441,7 @@ function validateUniqueConstraints(args: {
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
 		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
+		query = query.where("inherited_from_version_id", "is", null);
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {

@@ -1023,7 +1023,7 @@ function collectResolvedSchemaKeys(
 	for (const shape of shapes) {
 		const resolved = resolveSchemaKeyValues(shape.schemaKeys, parameters);
 		if (resolved === null) {
-			return [];
+			return baseline ? [...baseline] : [];
 		}
 		if (resolved.size === 0) {
 			continue;
