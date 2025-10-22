@@ -428,8 +428,15 @@ test("validateStateMutation explain plans", async () => {
 					const [schemaParam] = parameters ?? [];
 					return (
 						normalised.includes(
-							'select "snapshot_content" from "state_all" where'
-						) && schemaParam === FK_TARGET_SCHEMA["x-lix-key"]
+							'select "snapshot_content" from "lix_internal_state_vtable" where'
+						) &&
+						normalised.includes(
+							'json_extract(snapshot_content, \'$.id\') = ?'
+						) &&
+						normalised.includes(
+							'"inherited_from_version_id" is null'
+						) &&
+						schemaParam === FK_TARGET_SCHEMA["x-lix-key"]
 					);
 				},
 				run: async () => {
