@@ -25,7 +25,6 @@ import type {
 } from "kysely";
 import { extractCteName } from "../utils.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
-import { buildInternalStateRewriteSql } from "./internal-state-rewrite-sql.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 export const REWRITTEN_STATE_VTABLE = "lix_internal_state_vtable_rewritten";
@@ -342,4 +341,257 @@ function determineProjectionKind(
 
 function extractIdentifier(node: OperationNode): string | null {
 	return IdentifierNode.is(node) ? node.name : null;
+}
+
+const BASE_COLUMNS = `
+    w._pk AS _pk,
+    w.entity_id AS entity_id,
+    w.schema_key AS schema_key,
+    w.file_id AS file_id,
+    w.plugin_key AS plugin_key,
+    w.snapshot_content AS snapshot_content,
+    w.schema_version AS schema_version,
+    w.version_id AS version_id,
+    w.created_at AS created_at,
+    w.updated_at AS updated_at,
+    w.inherited_from_version_id AS inherited_from_version_id,
+    w.change_id AS change_id,
+    w.untracked AS untracked,
+    w.commit_id AS commit_id,
+    w.metadata AS metadata,
+    w.writer_key AS writer_key
+`;
+
+const NEWLINE = "\n";
+
+const CACHE_COLUMNS = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
+	"version_id",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"commit_id",
+	"is_tombstone",
+] as const;
+
+function buildInternalStateRewriteSql(options: {
+	schemaKeys: readonly string[];
+	cacheTables: Map<string, unknown>;
+}): string {
+	const schemaFilterList = options.schemaKeys ?? [];
+	const schemaFilter = buildSchemaFilter(schemaFilterList);
+	const cacheSource = buildCacheSource(schemaFilterList, options.cacheTables);
+
+	const segments: string[] = [
+		buildTransactionSegment(schemaFilter),
+		buildUntrackedSegment(schemaFilter),
+	];
+	const cacheSegment = buildCacheSegment(cacheSource, schemaFilter);
+	if (cacheSegment) {
+		segments.push(cacheSegment);
+	}
+	const candidates = segments.join(`\n\n    UNION ALL\n\n`);
+
+	const body = `WITH
+  candidates AS (
+${indent(candidates, 4)}
+  ),
+  ranked AS (
+${indent(buildRankedSegment(), 4)}
+  )
+SELECT
+${indent(BASE_COLUMNS, 2)}
+FROM ranked w
+LEFT JOIN lix_internal_state_writer ws_dst ON
+  ws_dst.file_id = w.file_id AND
+  ws_dst.entity_id = w.entity_id AND
+  ws_dst.schema_key = w.schema_key AND
+  ws_dst.version_id = w.version_id
+LEFT JOIN lix_internal_state_writer ws_src ON
+  ws_src.file_id = w.file_id AND
+  ws_src.entity_id = w.entity_id AND
+  ws_src.schema_key = w.schema_key AND
+  ws_src.version_id = w.inherited_from_version_id
+LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
+LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id
+WHERE w.rn = 1`;
+
+	return `(-- hoisted_lix_internal_state_vtable_rewrite\n${body}\n)\n`;
+}
+
+function buildTransactionSegment(schemaFilter: string | null): string {
+	const filterClause = schemaFilter ? `WHERE ${schemaFilter}` : "";
+	return stripIndent(`
+		SELECT
+		  'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
+		  txn.entity_id AS entity_id,
+		  txn.schema_key AS schema_key,
+		  txn.file_id AS file_id,
+		  txn.plugin_key AS plugin_key,
+		  json(txn.snapshot_content) AS snapshot_content,
+		  txn.schema_version AS schema_version,
+		  txn.version_id AS version_id,
+		  txn.created_at AS created_at,
+		  txn.created_at AS updated_at,
+		  NULL AS inherited_from_version_id,
+		  txn.id AS change_id,
+		  txn.untracked AS untracked,
+		  'pending' AS commit_id,
+		  json(txn.metadata) AS metadata,
+		  txn.writer_key AS writer_key,
+		  1 AS priority
+		FROM lix_internal_transaction_state txn
+		${filterClause}
+	`).trimEnd();
+}
+
+function buildUntrackedSegment(schemaFilter: string | null): string {
+	const rewrittenFilter = schemaFilter
+		? schemaFilter.replace(/txn\./g, "unt.")
+		: null;
+	return stripIndent(`
+		SELECT
+		  'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk,
+		  unt.entity_id AS entity_id,
+		  unt.schema_key AS schema_key,
+		  unt.file_id AS file_id,
+		  unt.plugin_key AS plugin_key,
+		  json(unt.snapshot_content) AS snapshot_content,
+		  unt.schema_version AS schema_version,
+		  unt.version_id AS version_id,
+		  unt.created_at AS created_at,
+		  unt.updated_at AS updated_at,
+		  NULL AS inherited_from_version_id,
+		  'untracked' AS change_id,
+		  1 AS untracked,
+		  'untracked' AS commit_id,
+		  NULL AS metadata,
+		  NULL AS writer_key,
+		  2 AS priority
+		FROM lix_internal_state_all_untracked unt
+		WHERE unt.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
+	`).trimEnd();
+}
+
+function buildCacheSegment(
+	cacheSource: string | null,
+	schemaFilter: string | null
+): string | null {
+	if (!cacheSource) {
+		return null;
+	}
+	const rewrittenFilter = schemaFilter
+		? schemaFilter.replace(/txn\./g, "cache.")
+		: null;
+	const sourceKeyword = cacheSource.trim().toLowerCase();
+	const sourceSql = sourceKeyword.startsWith("select")
+		? `(${cacheSource})`
+		: cacheSource;
+	return stripIndent(`
+		SELECT
+		  'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk,
+		  cache.entity_id AS entity_id,
+		  cache.schema_key AS schema_key,
+		  cache.file_id AS file_id,
+		  cache.plugin_key AS plugin_key,
+		  json(cache.snapshot_content) AS snapshot_content,
+		  cache.schema_version AS schema_version,
+		  cache.version_id AS version_id,
+		  cache.created_at AS created_at,
+		  cache.updated_at AS updated_at,
+		  cache.inherited_from_version_id AS inherited_from_version_id,
+		  cache.change_id AS change_id,
+		  0 AS untracked,
+		  cache.commit_id AS commit_id,
+		  NULL AS metadata,
+		  NULL AS writer_key,
+		  3 AS priority
+		FROM ${sourceSql} cache
+		WHERE cache.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
+	`).trimEnd();
+}
+
+function buildRankedSegment(): string {
+	return stripIndent(`
+		SELECT
+		  c._pk AS _pk,
+		  c.entity_id AS entity_id,
+		  c.schema_key AS schema_key,
+		  c.file_id AS file_id,
+		  c.plugin_key AS plugin_key,
+		  c.snapshot_content AS snapshot_content,
+		  c.schema_version AS schema_version,
+		  c.version_id AS version_id,
+		  c.created_at AS created_at,
+		  c.updated_at AS updated_at,
+		  c.inherited_from_version_id AS inherited_from_version_id,
+		  c.change_id AS change_id,
+		  c.untracked AS untracked,
+		  c.commit_id AS commit_id,
+		  c.metadata AS metadata,
+		  c.writer_key AS writer_key,
+		  ROW_NUMBER() OVER (
+		    PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+		    ORDER BY c.priority, c.created_at DESC, c._pk
+		  ) AS rn
+		FROM candidates c
+	`).trimEnd();
+}
+
+function buildSchemaFilter(schemaKeys: readonly string[]): string | null {
+	if (!schemaKeys || schemaKeys.length === 0) {
+		return null;
+	}
+	const values = schemaKeys.map((key) => `'${key}'`).join(", ");
+	return `txn.schema_key IN (${values})`;
+}
+
+function buildCacheSource(
+	schemaKeys: readonly string[],
+	cacheTables: Map<string, unknown>
+): string | null {
+	if (schemaKeys && schemaKeys.length === 1) {
+		const candidate = cacheTables.get(schemaKeys[0]!);
+		if (typeof candidate === "string" && candidate.length > 0) {
+			return buildPhysicalCacheSelect(candidate);
+		}
+	}
+	return null;
+}
+
+function buildPhysicalCacheSelect(tableName: string): string {
+	const projection = CACHE_COLUMNS.map((column) =>
+		quoteIdentifier(column)
+	).join(",\n    ");
+	return `SELECT
+    ${projection}
+  FROM ${quoteIdentifier(tableName)}`;
+}
+
+function stripIndent(value: string): string {
+	const trimmed = value.replace(/^\n+/, "").replace(/\n+$/, "");
+	const lines = trimmed.split(NEWLINE);
+	const indents = lines
+		.filter((line) => line.trim().length > 0)
+		.map((line) => line.match(/^\s*/)?.[0]?.length ?? 0);
+	const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
+	return lines.map((line) => line.slice(minIndent)).join(NEWLINE);
+}
+
+function indent(value: string, spaces: number): string {
+	const pad = " ".repeat(spaces);
+	return value
+		.split(NEWLINE)
+		.map((line) => (line.length > 0 ? pad + line : line))
+		.join(NEWLINE);
+}
+
+function quoteIdentifier(identifier: string): string {
+	return `"${identifier.replace(/"/g, '""')}"`;
 }
