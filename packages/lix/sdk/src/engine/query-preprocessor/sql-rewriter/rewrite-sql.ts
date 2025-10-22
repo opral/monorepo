@@ -134,7 +134,6 @@ export function collectSchemaKeyHints(
 				placeholderOrdinals
 			);
 			if (value) {
-				console.error("hint", value);
 				hints.add(value);
 			}
 			continue;
@@ -153,7 +152,6 @@ export function collectSchemaKeyHints(
 					placeholderOrdinals
 				);
 				if (value) {
-					console.error("hint", value);
 					hints.add(value);
 				}
 				j += 1;
