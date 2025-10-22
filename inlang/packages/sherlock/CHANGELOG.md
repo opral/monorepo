@@ -1,5 +1,20 @@
 # inlang-vs-code-extension
 
+## 2.2.0
+
+### Minor Changes
+
+- 9a65cb4: Add centralized Sherlock logging so activation and project loading diagnostics are visible in the VS Code output tab, refine the direct message watcher to stop self-saving loops, make the editor webview always load bundled assets, and debounce editor writes while still saving projects to disk.
+
+### Patch Changes
+
+- b428890: Switch the Sherlock message sidebar from a polling loop to the new `lix.observe` API so bundle updates stream in immediately without hammering the database during activation.
+- Updated dependencies [7791be7]
+  - @inlang/sdk@3.0.0
+  - @inlang/rpc@0.3.52
+  - @inlang/editor-component@5.0.0
+  - @inlang/settings-component@6.0.0
+
 ## 2.1.0
 
 ### Minor Changes
@@ -15,6 +30,7 @@
   ### Writing directly to Lix state
 
   State is now written straight into Lix instead of the SDK’s private in-memory SQLite snapshot. Every bundle, message, and variant change becomes a first-class Lix commit, unlocking:
+
   - history and branching,
   - writer-key aware workflows,
   - change proposals and subscriptions, and
@@ -187,6 +203,7 @@
 - 8a9a8c9: # Sherlock v2 🎉
 
   🎸 Features:
+
   - improved editing experience overall
   - new variant editor to support variants
   - support for Cursor (AI editor)
@@ -203,6 +220,7 @@
   If you still want to use Sherlock v1, please use the previous major version of the plugin. For Sherlock itself, [please pin the version to `1.x.x`](https://github.com/microsoft/vscode-docs/blob/vnext/release-notes/v1_91.md#extension-install-options) in the VS Code extension settings.
 
   ### Breaking changes
+
   - Lint rules are now polyfilled (and therefore may work different), as we are currently reworking how lint rules are working with [Lix Validation Rules](https://lix.opral.com). If you experience different behavior with lint rules, please reach out to us.
   - The `messageId` parameter in the `extractMessages` function has been renamed to `bundleId`. This change is due to the new API in Sherlock v2. If you are using the `extractMessages` function, please update the parameter name to `bundleId`.
 
@@ -1173,6 +1191,7 @@
 ### Minor Changes
 
 - a1f3f064b: improve: tryAutoGenProjectSettings
+
   - Only prompts the user if the settings can actually be generated.
 
   refactor: remove unused code
