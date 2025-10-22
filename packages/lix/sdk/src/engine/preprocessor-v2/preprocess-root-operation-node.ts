@@ -1,4 +1,13 @@
 import type { RootOperationNode } from "kysely";
+import type { PreprocessorStep } from "./types.js";
+import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
+
+const pipeline: PreprocessorStep[] = [rewriteVtableSelects];
+
+type PreprocessContext = {
+	storedSchemas: Map<string, unknown>;
+	cacheTables: Map<string, unknown>;
+};
 
 /**
  * Applies pre-processing transformations to a Kysely operation tree.
@@ -14,7 +23,7 @@ import type { RootOperationNode } from "kysely";
  *   .selectFrom("lix_internal_state_vtable")
  *   .selectAll("lix_internal_state_vtable");
  *
- * const { query } = preprocessRootOperationNode({
+ * const node = preprocessRootOperationNode({
  *   query: builder.toOperationNode(),
  *   storedSchemas: new Map(),
  *   cacheTables: new Map(),
@@ -23,10 +32,17 @@ import type { RootOperationNode } from "kysely";
  */
 export function preprocessRootOperationNode(
 	input: RootOperationNode,
-	options?: {
-		storedSchemas: Map<string, unknown>;
-		cacheTables: Map<string, unknown>;
+	context: PreprocessContext = {
+		storedSchemas: new Map(),
+		cacheTables: new Map(),
 	}
 ): RootOperationNode {
-	return input;
+	return pipeline.reduce(
+		(node, step) =>
+			step({
+				node,
+				...context,
+			}),
+		input
+	);
 }
