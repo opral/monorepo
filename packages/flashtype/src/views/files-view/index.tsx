@@ -27,7 +27,7 @@ type DraftState = {
  * @example
  * <FilesView
  *   context={{
- *     onOpenFile: (fileId, options) =>
+ *     openFileView: (fileId, options) =>
  *       console.log(fileId, options?.filePath),
  *   }}
  * />
@@ -133,8 +133,8 @@ export function FilesView({ context }: FilesViewProps) {
 				setPendingPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
 				setSelectedKind("file");
-				if (context?.onOpenFile) {
-					await context.onOpenFile(id, { focus: false, filePath: path });
+				if (context?.openFileView) {
+					await context.openFileView(id, { focus: false, filePath: path });
 				}
 			} catch (error) {
 				console.error("Failed to create file", error);
@@ -181,8 +181,8 @@ export function FilesView({ context }: FilesViewProps) {
 		async (fileId: string, path: string) => {
 			setSelectedPath(path);
 			setSelectedKind("file");
-			if (context?.onOpenFile) {
-				await context.onOpenFile(fileId, {
+			if (context?.openFileView) {
+				await context.openFileView(fileId, {
 					focus: false,
 					filePath: path,
 				});
@@ -325,7 +325,7 @@ export function FilesView({ context }: FilesViewProps) {
 		<div className="flex min-h-0 flex-1 flex-col px-1 py-1">
 			<FileTree
 				nodes={nodes}
-				onOpenFile={handleOpenFile}
+				openFileView={handleOpenFile}
 				onSelectItem={handleSelectItem}
 				selectedPath={selectedPath ?? undefined}
 				isPanelFocused={isPanelFocused}

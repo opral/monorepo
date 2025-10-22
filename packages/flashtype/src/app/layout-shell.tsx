@@ -677,17 +677,19 @@ export function V2LayoutShell() {
 			filePath: string,
 			options?: {
 				readonly focus?: boolean;
+				readonly diffConfig?: DiffViewConfig;
 			},
 		) => {
+			console.log("[layout] opening diff", { fileId, filePath, options });
 			const shouldFocus = options?.focus ?? true;
+			const diffLabel =
+				options?.diffConfig?.title ?? diffLabelFromPath(filePath) ?? filePath;
+			const diffConfig =
+				options?.diffConfig ??
+				createWorkingVsCheckpointDiffConfig(fileId, diffLabel);
 			setPanelState(
 				"central",
 				(panel) => {
-					const diffLabel = diffLabelFromPath(filePath) ?? filePath;
-					const diffConfig = createWorkingVsCheckpointDiffConfig(
-						fileId,
-						diffLabel,
-					);
 					const existingDiffView = panel.views.find(
 						(view) =>
 							view.viewKey === "diff" && view.metadata?.fileId === fileId,
@@ -731,6 +733,60 @@ export function V2LayoutShell() {
 		[setPanelState],
 	);
 
+	const handleCloseDiff = useCallback(
+		(fileId: string) => {
+			// eslint-disable-next-line no-console
+			console.log("[layout] closing diff", fileId);
+			setPanelState(
+				"central",
+				(panel) => {
+					const targetIndex = panel.views.findIndex(
+						(view) =>
+							view.viewKey === "diff" && view.metadata?.fileId === fileId,
+					);
+					if (targetIndex === -1) {
+						return panel;
+					}
+					const targetView = panel.views[targetIndex];
+					const nextViews = panel.views.filter(
+						(view) =>
+							!(view.viewKey === "diff" && view.metadata?.fileId === fileId),
+					);
+					const filePath =
+						typeof targetView.metadata?.filePath === "string"
+							? targetView.metadata.filePath
+							: undefined;
+					if (nextViews.length === 0) {
+						const label = fileLabelFromPath(filePath, fileId);
+						const newView: ViewInstance = {
+							instanceKey: createViewInstanceKey("file-content"),
+							viewKey: "file-content",
+							isPending: true,
+							metadata: filePath
+								? { fileId, filePath, label }
+								: { fileId, label },
+						};
+						return {
+							views: [newView],
+							activeInstanceKey: newView.instanceKey,
+						};
+					}
+					const nextActive = nextViews.some(
+						(view) => view.instanceKey === panel.activeInstanceKey,
+					)
+						? panel.activeInstanceKey
+						: (nextViews[0]?.instanceKey ?? null);
+					return {
+						views: nextViews,
+						activeInstanceKey: nextActive,
+					};
+				},
+				{ focus: true },
+			);
+		},
+		[setPanelState],
+	);
+
 	const activeCentralEntry = useMemo(() => {
 		const activeKey =
 			centralPanel.activeInstanceKey ??
@@ -763,13 +819,14 @@ export function V2LayoutShell() {
 
 	const sharedViewContext = useMemo(
 		() => ({
-			onOpenFile: handleOpenFile,
-			onOpenCommit: handleOpenCommit,
-			onOpenDiff: handleOpenDiff,
+			openFileView: handleOpenFile,
+			openCommitView: handleOpenCommit,
+			openDiffView: handleOpenDiff,
+			closeDiffView: handleCloseDiff,
 			setTabBadgeCount: () => {},
 			lix,
 		}),
-		[handleOpenFile, handleOpenCommit, handleOpenDiff, lix],
+		[handleOpenFile, handleOpenCommit, handleOpenDiff, handleCloseDiff, lix],
 	);
 
 	const isLeftFocused = focusedPanel === "left";

@@ -78,11 +78,11 @@ export interface ViewDefinition {
  * Context passed to views for interacting with the layout.
  *
  * @example
- * context.onOpenFile?.("file-123", { focus: false, filePath: "/docs/guide.md" });
- * context.onOpenDiff?.("file-123", "/docs/guide.md");
+ * context.openFileView?.("file-123", { focus: false, filePath: "/docs/guide.md" });
+ * context.openDiffView?.("file-123", "/docs/guide.md");
  */
 export interface ViewContext {
-	readonly onOpenFile?: (
+	readonly openFileView?: (
 		fileId: string,
 		options?: {
 			/**
@@ -97,7 +97,7 @@ export interface ViewContext {
 			readonly filePath?: string;
 		},
 	) => Promise<void> | void;
-	readonly onOpenCommit?: (
+	readonly openCommitView?: (
 		checkpointId: string,
 		label: string,
 		options?: {
@@ -108,7 +108,7 @@ export interface ViewContext {
 			readonly focus?: boolean;
 		},
 	) => void;
-	readonly onOpenDiff?: (
+	readonly openDiffView?: (
 		fileId: string,
 		filePath: string,
 		options?: {
@@ -116,8 +116,13 @@ export interface ViewContext {
 			 * Whether the central panel should receive focus when the diff opens.
 			 */
 			readonly focus?: boolean;
+			/**
+			 * Optional override configuration for the diff view.
+			 */
+			readonly diffConfig?: DiffViewConfig;
 		},
 	) => void;
+	readonly closeDiffView?: (fileId: string) => void;
 	readonly isPanelFocused?: boolean;
 	readonly setTabBadgeCount: (count: number | null | undefined) => void;
 	readonly lix: Lix;

@@ -23,7 +23,7 @@ vi.mock("./view-registry", () => {
 				input.setAttribute("data-testid", "search-view-input");
 				input.setAttribute("placeholder", "Search project...");
 				input.addEventListener("pointerdown", () => {
-					context.onOpenFile?.("search", { focus: false });
+					context.openFileView?.("search", { focus: false });
 				});
 				target.replaceChildren(input);
 				return () => {

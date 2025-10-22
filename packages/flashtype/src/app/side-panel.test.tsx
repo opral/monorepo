@@ -78,7 +78,7 @@ vi.mock("./view-registry", async () => {
 				button.type = "button";
 				button.textContent = "writing-style.md";
 				button.addEventListener("click", () => {
-					context.onOpenFile?.("file-writing", {
+					context.openFileView?.("file-writing", {
 						focus: false,
 						filePath: "/docs/guides/writing-style.md",
 					});
@@ -143,7 +143,7 @@ describe("SidePanel", () => {
 		const handleRemove = vi.fn();
 		const handleOpenFile = vi.fn();
 		const viewContext = createViewContext({
-			onOpenFile: handleOpenFile,
+			openFileView: handleOpenFile,
 			isPanelFocused: true,
 		});
 

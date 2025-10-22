@@ -46,14 +46,14 @@ describe("FilesView", () => {
 
 	test("creates an inline draft when Cmd+. is pressed", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -87,7 +87,7 @@ describe("FilesView", () => {
 			expect(rows).toHaveLength(1);
 			expect(rows[0]?.path).toBe("/notes.md");
 			const createdId = rows[0]?.id as string;
-			expect(onOpenFile).toHaveBeenCalledWith(createdId, {
+			expect(openFileView).toHaveBeenCalledWith(createdId, {
 				focus: false,
 				filePath: "/notes.md",
 			});
@@ -192,14 +192,14 @@ describe("FilesView", () => {
 
 	test("replaces whitespace with dashes when creating files", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -236,14 +236,14 @@ describe("FilesView", () => {
 
 	test("creates an inline directory draft when Shift+Cmd+. is pressed", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -279,7 +279,7 @@ describe("FilesView", () => {
 			expect(rows.some((row) => row.path === "/docs/")).toBe(true);
 		});
 
-		expect(onOpenFile).not.toHaveBeenCalled();
+		expect(openFileView).not.toHaveBeenCalled();
 
 		utils!.unmount();
 		await lix.close();
@@ -287,14 +287,14 @@ describe("FilesView", () => {
 
 	test("ignores Ctrl+. on macOS", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -308,7 +308,7 @@ describe("FilesView", () => {
 
 		const rows = await lix.db.selectFrom("file").select(["path"]).execute();
 		expect(rows).toHaveLength(0);
-		expect(onOpenFile).not.toHaveBeenCalled();
+		expect(openFileView).not.toHaveBeenCalled();
 
 		utils!.unmount();
 		await lix.close();
@@ -316,14 +316,14 @@ describe("FilesView", () => {
 
 	test("ignores Ctrl+Shift+. on macOS", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -345,7 +345,7 @@ describe("FilesView", () => {
 			.select(["path"])
 			.execute();
 		expect(rows).toHaveLength(0);
-		expect(onOpenFile).not.toHaveBeenCalled();
+		expect(openFileView).not.toHaveBeenCalled();
 
 		utils!.unmount();
 		await lix.close();
@@ -353,14 +353,14 @@ describe("FilesView", () => {
 
 	test("cancels the draft when Escape is pressed", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const onOpenFile = vi.fn();
+		const openFileView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
 			utils = render(
 				<LixProvider lix={lix}>
 					<Suspense fallback={null}>
-						<FilesView context={createViewContext(lix, { onOpenFile })} />
+						<FilesView context={createViewContext(lix, { openFileView })} />
 					</Suspense>
 				</LixProvider>,
 			);
@@ -384,7 +384,7 @@ describe("FilesView", () => {
 
 		const rows = await lix.db.selectFrom("file").select(["path"]).execute();
 		expect(rows).toHaveLength(0);
-		expect(onOpenFile).not.toHaveBeenCalled();
+		expect(openFileView).not.toHaveBeenCalled();
 
 		utils!.unmount();
 		await lix.close();

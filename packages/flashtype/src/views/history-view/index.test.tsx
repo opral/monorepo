@@ -24,7 +24,7 @@ describe("HistoryView", () => {
 		render(
 			<HistoryView
 				context={{
-					onOpenCommit: handleOpenCommit,
+					openCommitView: handleOpenCommit,
 					isPanelFocused: true,
 					setTabBadgeCount: () => {},
 					lix: {} as any,
@@ -48,7 +48,7 @@ describe("HistoryView", () => {
 		render(
 			<HistoryView
 				context={{
-					onOpenCommit: handleOpenCommit,
+					openCommitView: handleOpenCommit,
 					isPanelFocused: false,
 					setTabBadgeCount: () => {},
 					lix: {} as any,

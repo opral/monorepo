@@ -7,8 +7,8 @@ const FILES = [
 ];
 
 describe("ChangedFilesList", () => {
-	test("calls onOpenDiff when clicking a file row", () => {
-		const handleOpenDiff = vi.fn();
+	test("calls openDiffView when clicking a file row", () => {
+		const openDiffView = vi.fn();
 
 		render(
 			<ChangedFilesList
@@ -16,13 +16,13 @@ describe("ChangedFilesList", () => {
 				selectedFiles={new Set()}
 				onToggleFile={() => {}}
 				onToggleAll={() => {}}
-				onOpenDiff={handleOpenDiff}
+				openDiffView={openDiffView}
 			/>,
 		);
 
 		const button = screen.getByRole("button", { name: "/docs/readme.md" });
 		fireEvent.click(button);
 
-		expect(handleOpenDiff).toHaveBeenCalledWith("file-1", "/docs/readme.md");
+		expect(openDiffView).toHaveBeenCalledWith("file-1", "/docs/readme.md");
 	});
 });

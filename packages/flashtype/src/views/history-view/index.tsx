@@ -88,7 +88,7 @@ export function HistoryView({ context }: HistoryViewProps) {
 									type="button"
 									onClick={() => {
 										setSelectedId(item.id);
-										context?.onOpenCommit?.(
+										context?.openCommitView?.(
 											item.id,
 											`${item.title} • ${item.timestampLabel}`,
 											context?.isPanelFocused ? { focus: false } : undefined,

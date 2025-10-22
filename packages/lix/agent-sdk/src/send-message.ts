@@ -16,19 +16,50 @@ import type {
 import { loadConversation } from "./conversation-storage.js";
 import { buildSystemPrompt } from "./system/build-system-prompt.js";
 import { getAgentState, type Agent } from "./create-lix-agent.js";
+import type {
+	ChangeProposalEvent,
+	ChangeProposalSummary,
+} from "./proposal-mode.js";
 
 export type SendMessageArgs = {
+	/**
+	 * Agent instance created via {@link createLixAgent}.
+	 */
 	agent: Agent;
+	/**
+	 * Prompt content for the turn (typically produced with `fromPlainText`).
+	 */
 	prompt: ZettelDoc;
+	/**
+	 * Optional conversation ID. When omitted the turn is stored only in memory.
+	 */
 	conversationId?: string;
+	/**
+	 * Persist the turn to the conversation store. Defaults to `true`.
+	 */
 	persist?: boolean;
+	/**
+	 * Optional abort signal for cancelling the request.
+	 */
 	signal?: AbortSignal;
+	/**
+	 * Enable proposal mode, staging mutating tool calls for explicit review. Defaults to `false`.
+	 */
+	proposalMode?: boolean;
+	/**
+	 * Callback invoked when proposal review state changes. Receives an event
+	 * for the proposal lifecycle (`open`, `accepted`, `rejected`, `cancelled`).
+	 */
+	onChangeProposal?: (event: ChangeProposalEvent) => void;
 };
 
 export type SendMessageResult = {
 	conversationId: string;
 	aiSdk: StreamTextResult<Agent["tools"], never>;
 	toPromise(): Promise<AgentConversationMessage>;
+	acceptChanges(proposalId?: string): Promise<void>;
+	rejectChanges(proposalId?: string): Promise<void>;
+	getPendingProposals(): ChangeProposalSummary[];
 };
 
 /**
@@ -36,6 +67,8 @@ export type SendMessageResult = {
  *
  * When `conversationId` is omitted the agent keeps the turn in memory.
  * Provide a `conversationId` to append the turn to a persisted conversation.
+ * Set `proposalMode: true` to stage mutating tool calls in a change proposal
+ * and require an explicit accept/reject before the turn continues.
  *
  * @example
  * const turn = await sendMessage({
@@ -60,6 +93,20 @@ export async function sendMessage(
 	} = args;
 	const shouldPersist = args.persist !== false;
 	const state = getAgentState(agent);
+	const proposalModeEnabled = args.proposalMode === true;
+	const proposalController = proposalModeEnabled
+		? (state.proposal ?? null)
+		: null;
+	if (proposalModeEnabled && !proposalController) {
+		throw new Error("ProposalModeController is unavailable on the agent state");
+	}
+	if (proposalController) {
+		if (proposalController.hasPending()) {
+			throw new Error(
+				"Cannot start a new turn while a change proposal is pending."
+			);
+		}
+	}
 
 	const previousConversationSnapshot: AgentConversation = {
 		id: state.conversation.id,
@@ -124,7 +171,7 @@ export async function sendMessage(
 			id: String(stored.id),
 			conversation_id: String(stored.conversation_id ?? conversationId),
 			lixcol_metadata: {
-				...(stored.lixcol_metadata ?? {}),
+				...stored.lixcol_metadata,
 				lix_agent_sdk_role: "user",
 			} as AgentConversationMessageMetadata | null,
 		};
@@ -166,10 +213,20 @@ export async function sendMessage(
 	);
 
 	const finalSystem = buildSystemPrompt({
-		basePrompt: state.systemInstruction,
+		basePrompt: state.systemPrompt,
 		mentionPaths: extractMentionPaths(promptText),
 		contextOverlay: state.contextStore.toOverlayBlock(),
 	});
+
+	const assistantMessageId = await uuidV7({ lix: agent.lix });
+
+	if (proposalController) {
+		proposalController.beginTurn({
+			conversationId,
+			messageId: assistantMessageId,
+			onChangeProposal: args.onChangeProposal,
+		});
+	}
 
 	const steps: AgentStep[] = [];
 	const upsertStep = (
@@ -225,11 +282,13 @@ export async function sendMessage(
 	const resolveTurn = (value: AgentConversationMessage) => {
 		if (doneSettled) return;
 		doneSettled = true;
+		proposalController?.endTurn();
 		resolveDone(value);
 	};
 	const rejectTurn = (reason: unknown) => {
 		if (doneSettled) return;
 		doneSettled = true;
+		proposalController?.endTurn();
 		if (!shouldPersist) {
 			state.conversation.id = previousConversationSnapshot.id;
 			state.conversation.messages = previousConversationSnapshot.messages.map(
@@ -276,6 +335,7 @@ export async function sendMessage(
 				if (shouldPersist) {
 					const stored = await createConversationMessage({
 						lix: agent.lix,
+						id: assistantMessageId,
 						conversation_id: conversationId,
 						body: assistantBody,
 						lixcol_metadata: metadata,
@@ -285,13 +345,13 @@ export async function sendMessage(
 						id: String(stored.id),
 						conversation_id: String(stored.conversation_id ?? conversationId),
 						lixcol_metadata: {
-							...(stored.lixcol_metadata ?? {}),
+							...stored.lixcol_metadata,
 							lix_agent_sdk_role: "assistant",
 						} as AgentConversationMessageMetadata | null,
 					};
 				} else {
 					assistantMessage = {
-						id: await uuidV7({ lix: agent.lix }),
+						id: assistantMessageId,
 						conversation_id: conversationId,
 						parent_id: null,
 						body: assistantBody,
@@ -338,10 +398,33 @@ export async function sendMessage(
 		return toPromiseResult;
 	};
 
+	const ensureProposalModeEnabled = () => {
+		if (!proposalController) {
+			throw new Error("proposalMode was not enabled for this turn");
+		}
+	};
+
+	const acceptChanges = async (proposalId?: string) => {
+		ensureProposalModeEnabled();
+		await proposalController?.accept(proposalId);
+	};
+
+	const rejectChanges = async (proposalId?: string) => {
+		ensureProposalModeEnabled();
+		await proposalController?.reject(proposalId);
+	};
+
+	const getPendingProposals = (): ChangeProposalSummary[] => {
+		return proposalController ? proposalController.getPendingSummaries() : [];
+	};
+
 	return {
 		conversationId,
 		aiSdk: aiSdkStream,
 		toPromise,
+		acceptChanges,
+		rejectChanges,
+		getPendingProposals,
 	};
 }
 

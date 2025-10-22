@@ -14,7 +14,10 @@ export type FileTreeDraft = {
 
 export type FileTreeProps = {
 	readonly nodes?: FilesystemTreeNode[];
-	readonly onOpenFile?: (fileId: string, path: string) => Promise<void> | void;
+	readonly openFileView?: (
+		fileId: string,
+		path: string,
+	) => Promise<void> | void;
 	readonly draft?: FileTreeDraft | null;
 	readonly selectedPath?: string;
 	readonly isPanelFocused?: boolean;
@@ -31,11 +34,11 @@ const sanitizeForTestId = (value: string): string =>
  * Minimal prototype file tree that mirrors the structure of the left sidebar.
  *
  * @example
- * <FileTree onOpenFile={(id) => console.log(id)} />
+ * <FileTree openFileView={(id) => console.log(id)} />
  */
 export function FileTree({
 	nodes = [],
-	onOpenFile,
+	openFileView,
 	draft,
 	selectedPath,
 	isPanelFocused = false,
@@ -119,7 +122,7 @@ export function FileTree({
 					node={node}
 					onToggleDirectory={toggleDirectory}
 					openDirectories={openDirectories}
-					onOpenFile={onOpenFile}
+					openFileView={openFileView}
 					draft={draft}
 					selectedPath={selectedPath}
 					onSelectItem={onSelectItem}
@@ -135,7 +138,7 @@ function FileTreeNode({
 	node,
 	onToggleDirectory,
 	openDirectories,
-	onOpenFile,
+	openFileView,
 	draft,
 	selectedPath,
 	onSelectItem,
@@ -145,7 +148,10 @@ function FileTreeNode({
 	readonly node: FilesystemTreeNode;
 	readonly onToggleDirectory: (path: string) => void;
 	readonly openDirectories: Set<string>;
-	readonly onOpenFile?: (fileId: string, path: string) => Promise<void> | void;
+	readonly openFileView?: (
+		fileId: string,
+		path: string,
+	) => Promise<void> | void;
 	readonly draft?: FileTreeDraft | null;
 	readonly selectedPath?: string;
 	readonly onSelectItem?: (path: string, kind: "file" | "directory") => void;
@@ -169,7 +175,7 @@ function FileTreeNode({
 					className={buttonClass}
 					onClick={() => {
 						onSelectItem?.(node.path, "file");
-						void onOpenFile?.(node.id, node.path);
+						void openFileView?.(node.id, node.path);
 					}}
 				>
 					<FileText className="h-3.5 w-3.5 text-neutral-500" />
@@ -226,7 +232,7 @@ function FileTreeNode({
 							node={child}
 							onToggleDirectory={onToggleDirectory}
 							openDirectories={openDirectories}
-							onOpenFile={onOpenFile}
+							openFileView={openFileView}
 							draft={draft}
 							selectedPath={selectedPath}
 							onSelectItem={onSelectItem}

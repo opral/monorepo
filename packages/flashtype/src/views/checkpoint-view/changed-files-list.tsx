@@ -7,7 +7,7 @@ type ChangedFilesListProps = {
 	selectedFiles: Set<string>;
 	onToggleFile: (fileId: string) => void;
 	onToggleAll: () => void;
-	onOpenDiff?: (fileId: string, filePath: string) => void;
+	openDiffView?: (fileId: string, filePath: string) => void;
 };
 
 /**
@@ -19,7 +19,7 @@ type ChangedFilesListProps = {
  *   selectedFiles={selected}
  *   onToggleFile={toggle}
  *   onToggleAll={toggleAll}
- *   onOpenDiff={(fileId, path) => console.log(fileId, path)}
+ *   openDiffView={(fileId, path) => console.log(fileId, path)}
  * />
  */
 export function ChangedFilesList({
@@ -27,7 +27,7 @@ export function ChangedFilesList({
 	selectedFiles,
 	onToggleFile,
 	onToggleAll,
-	onOpenDiff,
+	openDiffView,
 }: ChangedFilesListProps) {
 	const showHeader = files.length > 0;
 	const allSelected = showHeader && selectedFiles.size === files.length;
@@ -63,7 +63,7 @@ export function ChangedFilesList({
 						>
 							<button
 								type="button"
-								onClick={() => onOpenDiff?.(file.id, file.path)}
+								onClick={() => openDiffView?.(file.id, file.path)}
 								className="flex flex-1 items-center gap-2 rounded-sm bg-transparent px-0 text-left text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
 							>
 								<StatusIcon status={file.status} />

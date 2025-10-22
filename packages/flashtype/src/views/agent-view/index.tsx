@@ -8,15 +8,21 @@ import {
 } from "react";
 import { Bot } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
+import { selectVersionDiff } from "@lix-js/sdk";
 import type {
 	AgentConversationMessage,
 	AgentConversationMessageMetadata,
 	AgentStep,
+	ChangeProposalEvent,
 } from "@lix-js/agent-sdk";
 import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { ChatMessageList } from "./chat-message-list";
-import type { ViewContext } from "../../app/types";
+import type {
+	ViewContext,
+	DiffViewConfig,
+	RenderableDiff,
+} from "../../app/types";
 import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
 import { COMMANDS, type SlashCommand } from "./commands/index";
 import { MentionMenu, CommandMenu } from "./menu";
@@ -47,8 +53,38 @@ type ToolSession = {
  * @example
  * <AgentView />
  */
-export function AgentView({ context: _context }: AgentViewProps) {
+export function AgentView({ context }: AgentViewProps) {
 	const lix = useLix();
+
+	const handleProposalEvent = useCallback(
+		(event: ChangeProposalEvent) => {
+			if (!context) return;
+			// eslint-disable-next-line no-console
+			console.log("Proposal event", event);
+			if (event.status === "open") {
+				if (!event.fileId || !event.filePath) {
+					return;
+				}
+				const diffConfig = createProposalDiffConfig({
+					fileId: event.fileId,
+					filePath: event.filePath,
+					sourceVersionId:
+						event.sourceVersionId ?? event.proposal.source_version_id,
+					targetVersionId:
+						event.targetVersionId ?? event.proposal.target_version_id,
+				});
+				context.openDiffView?.(event.fileId, event.filePath, {
+					focus: true,
+					diffConfig,
+				});
+				return;
+			}
+			if (event.fileId) {
+				context.closeDiffView?.(event.fileId);
+			}
+		},
+		[context],
+	);
 	const {
 		messages: agentMessages,
 		send,
@@ -57,10 +93,14 @@ export function AgentView({ context: _context }: AgentViewProps) {
 		error,
 		ready,
 		hasKey,
-		pendingDecision,
-		acceptPendingDecision,
-		rejectPendingDecision,
-	} = useAgentChat({ lix, systemPrompt });
+		pendingProposal,
+		acceptPendingProposal,
+		rejectPendingProposal,
+	} = useAgentChat({
+		lix,
+		systemPrompt,
+		onProposalEvent: handleProposalEvent,
+	});
 
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -102,27 +142,27 @@ export function AgentView({ context: _context }: AgentViewProps) {
 	const [toolSessions, setToolSessions] = useState<ToolSession[]>([]);
 	const activeSessionRef = useRef<string | null>(null);
 
-const agentTranscript = useMemo<ChatMessage[]>(() => {
-	return agentMessages.flatMap((message) => {
-		const metadata = message.lixcol_metadata as
-			| AgentConversationMessageMetadata
-			| undefined;
-		const role =
-			(metadata?.lix_agent_sdk_role as "user" | "assistant" | undefined) ??
-			"assistant";
-		const rawSteps = metadata?.lix_agent_sdk_steps;
-		const steps: AgentStep[] = Array.isArray(rawSteps) ? rawSteps : [];
-	const base: ChatMessage = {
-		id: message.id,
-		role,
-		content: toPlainText(message.body as ZettelDoc),
-	};
-		if (role === "assistant" && steps.length > 0) {
-			return [{ ...base, toolRuns: stepsToToolRuns(steps) }];
-		}
-		return [base];
-	});
-}, [agentMessages]);
+	const agentTranscript = useMemo<ChatMessage[]>(() => {
+		return agentMessages.flatMap((message) => {
+			const metadata = message.lixcol_metadata as
+				| AgentConversationMessageMetadata
+				| undefined;
+			const role =
+				(metadata?.lix_agent_sdk_role as "user" | "assistant" | undefined) ??
+				"assistant";
+			const rawSteps = metadata?.lix_agent_sdk_steps;
+			const steps: AgentStep[] = Array.isArray(rawSteps) ? rawSteps : [];
+			const base: ChatMessage = {
+				id: message.id,
+				role,
+				content: toPlainText(message.body as ZettelDoc),
+			};
+			if (role === "assistant" && steps.length > 0) {
+				return [{ ...base, toolRuns: stepsToToolRuns(steps) }];
+			}
+			return [base];
+		});
+	}, [agentMessages]);
 
 	const transcript = useMemo<ChatMessage[]>(() => {
 		const out: ChatMessage[] = [...agentTranscript];
@@ -202,18 +242,18 @@ const agentTranscript = useMemo<ChatMessage[]>(() => {
 
 	const handleAcceptDecision = useCallback(
 		(id: string) => {
-			if (!pendingDecision || pendingDecision.id !== id) return;
-			acceptPendingDecision();
+			if (!pendingProposal || pendingProposal.proposalId !== id) return;
+			acceptPendingProposal();
 		},
-		[pendingDecision, acceptPendingDecision],
+		[pendingProposal, acceptPendingProposal],
 	);
 
 	const handleRejectDecision = useCallback(
 		(id: string) => {
-			if (!pendingDecision || pendingDecision.id !== id) return;
-			rejectPendingDecision();
+			if (!pendingProposal || pendingProposal.proposalId !== id) return;
+			rejectPendingProposal();
 		},
-		[pendingDecision, rejectPendingDecision],
+		[pendingProposal, rejectPendingProposal],
 	);
 
 	const beginToolSession = useCallback(() => {
@@ -584,9 +624,9 @@ const agentTranscript = useMemo<ChatMessage[]>(() => {
 			</div>
 
 			<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
-				{pendingDecision ? (
+				{pendingProposal ? (
 					<ChangeDecisionOverlay
-						id={pendingDecision.id}
+						id={pendingProposal.proposalId}
 						onAccept={handleAcceptDecision}
 						onReject={handleRejectDecision}
 					/>
@@ -702,5 +742,53 @@ function stringifyPayload(payload: unknown): string | undefined {
 		return JSON.stringify(payload, null, 2);
 	} catch {
 		return String(payload);
+	}
+}
+
+function createProposalDiffConfig(args: {
+	fileId: string;
+	filePath: string;
+	sourceVersionId: string;
+	targetVersionId: string;
+}): DiffViewConfig {
+	const title = proposalDiffTitle(args.filePath);
+	return {
+		title,
+		query: ({ lix }) =>
+			selectVersionDiff({
+				lix,
+				source: { id: args.sourceVersionId },
+				target: { id: args.targetVersionId },
+			})
+				.where("diff.file_id", "=", args.fileId)
+				.orderBy("diff.entity_id")
+				.leftJoin("change as after", "after.id", "diff.after_change_id")
+				.leftJoin("change as before", "before.id", "diff.before_change_id")
+				.select((eb) => [
+					eb.ref("diff.entity_id").as("entity_id"),
+					eb.ref("diff.schema_key").as("schema_key"),
+					eb.ref("diff.status").as("status"),
+					eb.ref("before.snapshot_content").as("before_snapshot_content"),
+					eb.ref("after.snapshot_content").as("after_snapshot_content"),
+					eb.fn
+						.coalesce(
+							eb.ref("after.plugin_key"),
+							eb.ref("before.plugin_key"),
+							eb.val("lix_own_entity"),
+						)
+						.as("plugin_key"),
+				])
+				.$castTo<RenderableDiff>(),
+	};
+}
+
+function proposalDiffTitle(filePath: string): string {
+	try {
+		const decoded = decodeURIComponent(filePath);
+		const trimmed = decoded.startsWith("/") ? decoded.slice(1) : decoded;
+		return trimmed.length > 0 ? `Proposal: ${trimmed}` : "Proposal Diff";
+	} catch {
+		const trimmed = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+		return trimmed.length > 0 ? `Proposal: ${trimmed}` : "Proposal Diff";
 	}
 }

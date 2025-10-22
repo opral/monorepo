@@ -8,16 +8,13 @@ import {
 	type Agent as LixAgent,
 	type AgentConversationMessage,
 	type AgentConversationMessageMetadata,
+	type ChangeProposalEvent,
 	type SendMessageResult,
 	sendMessage,
 } from "@lix-js/agent-sdk";
 import { clearConversation as runClearConversation } from "../commands/clear";
 
 type AgentChatMessage = AgentConversationMessage;
-
-type PendingDecision = {
-	id: string;
-};
 
 export type ToolEvent =
 	| {
@@ -97,16 +94,24 @@ const consumeAgentStream = async (
 	return await toPromise();
 };
 
-export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
-	const { lix, systemPrompt } = args;
+export function useAgentChat(args: {
+	lix: Lix;
+	systemPrompt?: string;
+	onProposalEvent?: (event: ChangeProposalEvent) => void;
+}) {
+	const { lix, systemPrompt, onProposalEvent } = args;
 
 	const [messages, setMessages] = useState<AgentChatMessage[]>([]);
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
 	const [conversationId, setConversationId] = useState<string | null>(null);
-	const [pendingDecision, setPendingDecision] =
-		useState<PendingDecision | null>(null);
+	const [pendingProposal, setPendingProposal] = useState<{
+		proposalId: string;
+		turn: SendMessageResult;
+		fileId?: string;
+		filePath?: string;
+	} | null>(null);
 
 	const modelName = "google/gemini-2.5-pro";
 	const [missingKey, setMissingKey] = useState(false);
@@ -288,20 +293,47 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 			const trimmed = text.trim();
 			if (!trimmed) return;
 			setError(null);
-			setPendingDecision(null);
+			setPendingProposal(null);
 			setPending(true);
 			try {
 				const convId = await ensureConversationId();
+				let turnResult: SendMessageResult | null = null;
+				const processEvent = (event: ChangeProposalEvent) => {
+					if (event.status === "open") {
+						if (!turnResult) {
+							return;
+						}
+						setPendingProposal({
+							proposalId: event.proposal.id,
+							turn: turnResult,
+							fileId: event.fileId,
+							filePath: event.filePath,
+						});
+					} else {
+						setPendingProposal(null);
+					}
+					onProposalEvent?.(event);
+				};
+				console.log("[agent] send", {
+					conversationId: convId,
+					proposalMode: true,
+				});
 				const turn = await sendMessage({
 					agent,
 					prompt: fromPlainText(trimmed),
 					conversationId: convId,
 					signal: opts?.signal,
+					proposalMode: true,
+					onChangeProposal: (event) => {
+						console.log("[agent] proposal event", event);
+						processEvent(event);
+					},
 				});
+				turnResult = turn;
 				setConversationId(turn.conversationId);
 				await consumeAgentStream(turn.aiSdk, turn.toPromise, opts?.onToolEvent);
-				setPendingDecision({
-					id: `decision-${Date.now().toString(36)}`,
+				console.log("[agent] turn completed", {
+					conversationId: turn.conversationId,
 				});
 			} catch (err) {
 				const message =
@@ -312,28 +344,38 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 				setPending(false);
 			}
 		},
-		[agent, ensureConversationId],
+		[agent, ensureConversationId, onProposalEvent],
 	);
 
-	const acceptPendingDecision = useCallback(() => {
-		if (!pendingDecision) return;
-		// eslint-disable-next-line no-console
-		console.log("Accepting agent changes", pendingDecision);
-		setPendingDecision(null);
-	}, [pendingDecision]);
+	const acceptPendingProposal = useCallback(async () => {
+		if (!pendingProposal) return;
+		try {
+			console.log("[agent] accepting proposal", pendingProposal.proposalId);
+			await pendingProposal.turn.acceptChanges(pendingProposal.proposalId);
+		} catch (error_) {
+			const message =
+				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
+			setError(message);
+		}
+	}, [pendingProposal]);
 
-	const rejectPendingDecision = useCallback(() => {
-		if (!pendingDecision) return;
-		// eslint-disable-next-line no-console
-		console.log("Rejecting agent changes", pendingDecision);
-		setPendingDecision(null);
-	}, [pendingDecision]);
+	const rejectPendingProposal = useCallback(async () => {
+		if (!pendingProposal) return;
+		try {
+			console.log("[agent] rejecting proposal", pendingProposal.proposalId);
+			await pendingProposal.turn.rejectChanges(pendingProposal.proposalId);
+		} catch (error_) {
+			const message =
+				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
+			setError(message);
+		}
+	}, [pendingProposal]);
 
 	const clear = useCallback(async () => {
 		const newId = await runClearConversation({ lix, agent });
 		setConversationId(newId);
 		setMessages([]);
-		setPendingDecision(null);
+		setPendingProposal(null);
 	}, [agent, lix]);
 
 	return {
@@ -345,8 +387,10 @@ export function useAgentChat(args: { lix: Lix; systemPrompt?: string }) {
 		ready: !!agent,
 		modelName,
 		hasKey,
-		pendingDecision,
-		acceptPendingDecision,
-		rejectPendingDecision,
+		pendingProposal,
+		acceptPendingProposal,
+		rejectPendingProposal,
 	} as const;
 }
+
+export type { ChangeProposalEvent };

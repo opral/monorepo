@@ -83,9 +83,9 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 		}
 	};
 
-	const handleOpenDiff = context?.onOpenDiff
+	const handleOpenDiff = context?.openDiffView
 		? (fileId: string, filePath: string) =>
-				context.onOpenDiff?.(fileId, decodeURIComponent(filePath))
+				context.openDiffView?.(fileId, decodeURIComponent(filePath))
 		: undefined;
 
 	return (
@@ -96,7 +96,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 					selectedFiles={visibleSelection}
 					onToggleFile={handleToggleFile}
 					onToggleAll={handleToggleAll}
-					onOpenDiff={handleOpenDiff}
+					openDiffView={handleOpenDiff}
 				/>
 			</div>
 

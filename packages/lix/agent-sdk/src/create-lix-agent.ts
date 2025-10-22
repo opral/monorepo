@@ -4,6 +4,7 @@ import { type AgentConversation } from "./types.js";
 import { ContextStore } from "./context/context-store.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./system-prompt.js";
 import { createAgentToolSet, type AgentToolSet } from "./tools/index.js";
+import { ProposalModeController } from "./proposal-mode.js";
 
 /**
  * Handle returned by {@link createLixAgent}.
@@ -23,8 +24,9 @@ export type Agent = {
 type AgentState = {
 	conversation: AgentConversation;
 	contextStore: ContextStore;
-	systemInstruction: string;
+	systemPrompt: string;
 	tools: AgentToolSet;
+	proposal: ProposalModeController;
 };
 
 const agentStates = new WeakMap<Agent, AgentState>();
@@ -73,8 +75,34 @@ export async function createLixAgent(args: {
 		conversation: { id: await uuidV7({ lix }), messages: [] },
 		contextStore: new ContextStore(),
 		tools: createAgentToolSet({ lix }),
-		systemInstruction: providedSystemPrompt ?? DEFAULT_SYSTEM_PROMPT,
+		systemPrompt: providedSystemPrompt ?? DEFAULT_SYSTEM_PROMPT,
+		proposal: new ProposalModeController(lix),
 	};
+
+	const wrapToolForReview = (toolName: keyof AgentToolSet) => {
+		const tool = state.tools[toolName] as any;
+		if (!tool || typeof tool.execute !== "function") return;
+		const originalExecute = tool.execute.bind(tool);
+		tool.execute = async (...args: any[]) => {
+			const [input, context, ...rest] = args;
+			if (!state.proposal.isActive()) {
+				return originalExecute(input, context, ...rest);
+			}
+			return state.proposal.interceptToolCall({
+				toolName: String(toolName),
+				toolCallId:
+					context && typeof context?.toolCallId === "string"
+						? context.toolCallId
+						: undefined,
+				toolInput: (input ?? {}) as Record<string, unknown>,
+				executeOriginal: (patchedInput) =>
+					originalExecute(patchedInput, context, ...rest),
+			});
+		};
+	};
+
+	wrapToolForReview("write_file");
+	wrapToolForReview("delete_file");
 
 	const agent: Agent = {
 		lix,
@@ -84,9 +112,9 @@ export async function createLixAgent(args: {
 			state.contextStore.set(key, value);
 		},
 		getContext: (key: string) => state.contextStore.get(key),
-		getSystemPrompt: () => state.systemInstruction,
+		getSystemPrompt: () => state.systemPrompt,
 		setSystemPrompt: (value: string) => {
-			state.systemInstruction = value;
+			state.systemPrompt = value;
 		},
 		getContextSnapshot: () => state.contextStore.toObject(),
 	};

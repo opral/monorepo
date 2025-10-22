@@ -17,6 +17,10 @@ export {
 	type SendMessageArgs,
 	type SendMessageResult,
 } from "./send-message.js";
+export type {
+	ChangeProposalEvent,
+	ChangeProposalSummary,
+} from "./proposal-mode.js";
 export {
 	appendUserMessage,
 	appendAssistantMessage,

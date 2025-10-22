@@ -53,7 +53,7 @@ describe("useViewContext", () => {
 	test("derives base context from parent", () => {
 		const parent: ViewContext = createParentContext({
 			isPanelFocused: false,
-			onOpenFile: vi.fn(),
+			openFileView: vi.fn(),
 		});
 		const panel: PanelState = {
 			views: [{ instanceKey: "beta", viewKey: "custom" }],

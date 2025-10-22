@@ -24,7 +24,7 @@ describe("FileTree", () => {
 		expect(screen.getByText("guides")).toBeInTheDocument();
 	});
 
-	test("invokes onOpenFile when a file is selected", () => {
+	test("invokes openFileView when a file is selected", () => {
 		const nodes: FilesystemTreeNode[] = [
 			{
 				type: "file",
@@ -36,7 +36,7 @@ describe("FileTree", () => {
 		];
 
 		const handleOpen = vi.fn();
-		render(<FileTree nodes={nodes} onOpenFile={handleOpen} />);
+		render(<FileTree nodes={nodes} openFileView={handleOpen} />);
 
 		fireEvent.click(screen.getByRole("button", { name: /README.md/i }));
 
