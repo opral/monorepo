@@ -107,12 +107,8 @@ export function collectSchemaKeyHints(
 	shapes: readonly Shape[],
 	parameters?: ReadonlyArray<unknown>
 ): string[] {
-	if (shapes.length !== 1) {
-		return [];
-	}
 	const hints = new Set<string>();
 	const allowedAliases = buildAllowedAliasSet(shapes);
-	const placeholderOrdinals = buildPlaceholderOrdinalMap(tokens);
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
 		if (!isSchemaKeyToken(token)) continue;
@@ -128,14 +124,8 @@ export function collectSchemaKeyHints(
 		const opToken = tokens[i + 1];
 		if (!opToken) continue;
 		if (opToken.tokenType === Equals) {
-			const value = resolveSchemaKeyHintValue(
-				tokens[i + 2],
-				parameters,
-				placeholderOrdinals
-			);
-			if (value) {
-				hints.add(value);
-			}
+			const value = resolveSchemaKeyHintValue(tokens[i + 2], parameters);
+			if (value) hints.add(value);
 			continue;
 		}
 		const opImage = opToken.image?.toLowerCase();
@@ -146,14 +136,8 @@ export function collectSchemaKeyHints(
 			}
 			j += 1;
 			while (j < tokens.length && tokens[j]?.tokenType !== RParen) {
-				const value = resolveSchemaKeyHintValue(
-					tokens[j],
-					parameters,
-					placeholderOrdinals
-				);
-				if (value) {
-					hints.add(value);
-				}
+				const value = resolveSchemaKeyHintValue(tokens[j], parameters);
+				if (value) hints.add(value);
 				j += 1;
 				if (tokens[j]?.tokenType === Comma) {
 					j += 1;
@@ -166,8 +150,7 @@ export function collectSchemaKeyHints(
 
 function resolveSchemaKeyHintValue(
 	token: Token | undefined,
-	parameters?: ReadonlyArray<unknown>,
-	placeholderOrdinals?: Map<Token, number>
+	parameters?: ReadonlyArray<unknown>
 ): string | undefined {
 	if (!token) return undefined;
 	if (token.tokenType === SQStr) {
@@ -180,11 +163,7 @@ function resolveSchemaKeyHintValue(
 		return token.image.slice(1, -1).replace(/""/g, '"');
 	}
 	if (token.tokenType === QMarkNumber || token.tokenType === QMark) {
-		const resolved = resolveParameterPlaceholder(
-			token,
-			parameters,
-			placeholderOrdinals
-		);
+		const resolved = resolveParameterPlaceholder(token.image, parameters);
 		if (typeof resolved === "string" && resolved.length > 0) {
 			return resolved;
 		}
@@ -193,21 +172,11 @@ function resolveSchemaKeyHintValue(
 }
 
 function resolveParameterPlaceholder(
-	token: Token | undefined,
-	parameters?: ReadonlyArray<unknown>,
-	placeholderOrdinals?: Map<Token, number>
+	image: string | undefined,
+	parameters?: ReadonlyArray<unknown>
 ): unknown {
-	if (!token || !parameters) return undefined;
-	const image = token.image;
-	if (!image) return undefined;
-	if (token.tokenType === QMark) {
-		const ordinal = placeholderOrdinals?.get(token);
-		if (ordinal && ordinal > 0 && ordinal <= parameters.length) {
-			return parameters[ordinal - 1];
-		}
-		return undefined;
-	}
-	if (token.tokenType === QMarkNumber || image.startsWith("?")) {
+	if (!image || !parameters) return undefined;
+	if (image.startsWith("?")) {
 		const index = Number.parseInt(image.slice(1), 10);
 		if (!Number.isNaN(index) && index > 0 && index <= parameters.length) {
 			return parameters[index - 1];
@@ -267,25 +236,4 @@ function extractAlias(tokens: Token[], index: number): string | null {
 	const aliasToken = tokens[index - 2];
 	if (!aliasToken) return null;
 	return normalizeIdentifierImage(aliasToken);
-}
-
-function buildPlaceholderOrdinalMap(tokens: Token[]): Map<Token, number> {
-	const ordinals = new Map<Token, number>();
-	let next = 1;
-	for (const token of tokens) {
-		if (!token?.image) continue;
-		if (token.tokenType === QMark) {
-			ordinals.set(token, next);
-			next += 1;
-			continue;
-		}
-		if (token.tokenType === QMarkNumber) {
-			const parsed = Number.parseInt(token.image.slice(1), 10);
-			if (!Number.isNaN(parsed)) {
-				ordinals.set(token, parsed);
-				next = Math.max(next, parsed + 1);
-			}
-		}
-	}
-	return ordinals;
 }
