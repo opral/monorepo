@@ -238,7 +238,8 @@ function deserializePattern(text: string): Variant["pattern"] {
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
     .replaceAll("<inlang-CarriageReturn>", "\r")
-    .replaceAll("<inlang-LineFeed> ", "\n");
+    .replaceAll("<inlang-LineFeed> ", "\n")
+    .replaceAll("<inlang-LineFeed>", "\n");
   let index = 0;
   while (index < unescapedText.length) {
     const start = unescapedText.indexOf(escapeStart, index);
