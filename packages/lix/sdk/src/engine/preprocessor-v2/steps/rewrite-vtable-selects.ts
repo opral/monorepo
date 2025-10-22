@@ -1,25 +1,34 @@
 import {
+	AliasNode,
+	AndNode,
+	BinaryOperationNode,
+	ColumnNode,
 	CommonTableExpressionNameNode,
 	CommonTableExpressionNode,
 	IdentifierNode,
 	OperationNodeTransformer,
+	OrNode,
 	RawNode,
+	ReferenceNode,
+	SelectAllNode,
 	SelectQueryNode,
+	SelectionNode,
+	TableNode,
+	ValueNode,
 	WithNode,
-	type QueryId,
-	type RootOperationNode,
-	type SchemableIdentifierNode,
-	type TableNode,
+} from "kysely";
+import type {
+	OperationNode,
+	QueryId,
+	RootOperationNode,
+	SchemableIdentifierNode,
 } from "kysely";
 import { extractCteName } from "../utils.js";
-import type { PreprocessorStep } from "../types.js";
+import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
+import { buildInternalStateRewriteSql } from "./internal-state-rewrite-sql.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 export const REWRITTEN_STATE_VTABLE = "lix_internal_state_vtable_rewritten";
-
-const HOISTED_REWRITE_SQL = `-- hoisted_lix_internal_state_vtable_rewrite
-SELECT 1 AS noop
-`;
 
 /**
  * Prototype transform that will eventually rewrite queries targeting the
@@ -38,7 +47,11 @@ SELECT 1 AS noop
  * });
  * ```
  */
-export const rewriteVtableSelects: PreprocessorStep = ({ node }) => {
+export const rewriteVtableSelects: PreprocessorStep = ({
+	node,
+	trace,
+	cacheTables,
+}) => {
 	const transformer = new RewriteInternalStateVtableTransformer();
 	const rewritten = transformer.transformNode(node) as RootOperationNode;
 	if (!transformer.touched) {
@@ -47,7 +60,16 @@ export const rewriteVtableSelects: PreprocessorStep = ({ node }) => {
 	if (!SelectQueryNode.is(rewritten)) {
 		return rewritten;
 	}
-	return ensureRewriteCte(rewritten);
+	const schemaSummary = collectSchemaKeyPredicates(
+		rewritten.where?.where,
+		new Set([REWRITTEN_STATE_VTABLE, ...collectTableAliases(rewritten)])
+	);
+	const ensured = ensureRewriteCte(rewritten, {
+		schemaKeys: schemaSummary.hasDynamic ? [] : schemaSummary.literals,
+		cacheTables,
+	});
+	trace?.push(buildTraceEntry(ensured, schemaSummary));
+	return ensured;
 };
 
 class RewriteInternalStateVtableTransformer extends OperationNodeTransformer {
@@ -85,7 +107,13 @@ function rewriteIdentifier(
 	};
 }
 
-function ensureRewriteCte(select: SelectQueryNode): SelectQueryNode {
+function ensureRewriteCte(
+	select: SelectQueryNode,
+	options: {
+		schemaKeys: readonly string[];
+		cacheTables: Map<string, unknown>;
+	}
+): SelectQueryNode {
 	const expressions = select.with?.expressions ?? [];
 	const alreadyPresent = expressions.some(
 		(cte) => extractCteName(cte) === REWRITTEN_STATE_VTABLE
@@ -95,8 +123,14 @@ function ensureRewriteCte(select: SelectQueryNode): SelectQueryNode {
 	}
 
 	const name = CommonTableExpressionNameNode.create(REWRITTEN_STATE_VTABLE);
-	const expression = RawNode.createWithSql(HOISTED_REWRITE_SQL);
-	const rewriteCte = CommonTableExpressionNode.create(name, expression);
+	const rewriteSql = buildInternalStateRewriteSql({
+		schemaKeys: options.schemaKeys,
+		cacheTables: options.cacheTables,
+	});
+	const rewriteCte = CommonTableExpressionNode.create(
+		name,
+		RawNode.createWithSql(rewriteSql)
+	);
 	const withNode = select.with
 		? WithNode.cloneWithExpression(select.with, rewriteCte)
 		: WithNode.create(rewriteCte);
@@ -105,4 +139,207 @@ function ensureRewriteCte(select: SelectQueryNode): SelectQueryNode {
 		...select,
 		with: withNode,
 	};
+}
+
+function buildTraceEntry(
+	select: SelectQueryNode,
+	schemaSummary: SchemaKeyPredicateSummary
+): PreprocessorTraceEntry {
+	const aliases = collectTableAliases(select);
+	const projection = determineProjectionKind(select.selections ?? []);
+
+	return {
+		step: "rewriteVtableSelects",
+		payload: {
+			reference_count: aliases.length === 0 ? 1 : aliases.length,
+			aliases,
+			projection,
+			schema_key_predicates: schemaSummary.count,
+			schema_key_literals: schemaSummary.literals,
+			schema_key_has_dynamic: schemaSummary.hasDynamic,
+		},
+	};
+}
+
+function collectTableAliases(select: SelectQueryNode): string[] {
+	const aliasSet = new Set<string>();
+	if (select.from?.froms) {
+		for (const from of select.from.froms) {
+			collectAliasFromOperation(from, aliasSet);
+		}
+	}
+	if (select.joins) {
+		for (const join of select.joins) {
+			collectAliasFromOperation(join.table, aliasSet);
+		}
+	}
+	return Array.from(aliasSet);
+}
+
+function collectAliasFromOperation(
+	node: OperationNode,
+	aliases: Set<string>
+): void {
+	if (AliasNode.is(node)) {
+		const aliasName = extractIdentifier(node.alias);
+		if (aliasName && TableNode.is(node.node) && isRewrittenTable(node.node)) {
+			aliases.add(aliasName);
+		}
+		return;
+	}
+	if (TableNode.is(node) && isRewrittenTable(node)) {
+		aliases.add(REWRITTEN_STATE_VTABLE);
+	}
+}
+
+function isRewrittenTable(node: TableNode): boolean {
+	const identifier = node.table.identifier;
+	return (
+		identifier.kind === "IdentifierNode" &&
+		identifier.name === REWRITTEN_STATE_VTABLE
+	);
+}
+
+type SchemaKeyPredicateSummary = {
+	count: number;
+	literals: string[];
+	hasDynamic: boolean;
+};
+
+function collectSchemaKeyPredicates(
+	node: OperationNode | undefined,
+	tableNames: Set<string>
+): SchemaKeyPredicateSummary {
+	const base: SchemaKeyPredicateSummary = {
+		count: 0,
+		literals: [],
+		hasDynamic: false,
+	};
+	if (!node) {
+		return base;
+	}
+	if (BinaryOperationNode.is(node)) {
+		return mergeSummaries(
+			evaluateBinaryPredicate(node, tableNames),
+			collectSchemaKeyPredicates(node.leftOperand, tableNames),
+			collectSchemaKeyPredicates(node.rightOperand, tableNames)
+		);
+	}
+	if (AndNode.is(node) || OrNode.is(node)) {
+		return mergeSummaries(
+			collectSchemaKeyPredicates(node.left, tableNames),
+			collectSchemaKeyPredicates(node.right, tableNames)
+		);
+	}
+	return base;
+}
+
+function evaluateBinaryPredicate(
+	node: BinaryOperationNode,
+	tableNames: Set<string>
+): SchemaKeyPredicateSummary {
+	const summary: SchemaKeyPredicateSummary = {
+		count: 0,
+		literals: [],
+		hasDynamic: false,
+	};
+	const leftRef =
+		ReferenceNode.is(node.leftOperand) &&
+		isSchemaKeyReference(node.leftOperand, tableNames);
+	const rightRef =
+		ReferenceNode.is(node.rightOperand) &&
+		isSchemaKeyReference(node.rightOperand, tableNames);
+
+	if (leftRef) {
+		summary.count += 1;
+		summaryHasValue(summary, node.rightOperand);
+	}
+	if (rightRef) {
+		summary.count += 1;
+		summaryHasValue(summary, node.leftOperand);
+	}
+	return summary;
+}
+
+function summaryHasValue(
+	summary: SchemaKeyPredicateSummary,
+	operand: OperationNode
+): void {
+	if (ValueNode.is(operand)) {
+		if (typeof operand.value === "string") {
+			summary.literals.push(operand.value);
+		} else {
+			summary.hasDynamic = true;
+		}
+		return;
+	}
+	if (RawNode.is(operand) || AliasNode.is(operand)) {
+		summary.hasDynamic = true;
+		return;
+	}
+	if (ReferenceNode.is(operand) || ColumnNode.is(operand)) {
+		summary.hasDynamic = true;
+	}
+}
+
+function mergeSummaries(
+	...summaries: SchemaKeyPredicateSummary[]
+): SchemaKeyPredicateSummary {
+	return summaries.reduce<SchemaKeyPredicateSummary>(
+		(acc, current) => {
+			acc.count += current.count;
+			acc.literals.push(...current.literals);
+			acc.hasDynamic = acc.hasDynamic || current.hasDynamic;
+			return acc;
+		},
+		{ count: 0, literals: [], hasDynamic: false }
+	);
+}
+
+function isSchemaKeyReference(
+	reference: ReferenceNode,
+	tableNames: Set<string>
+): boolean {
+	const tableIdentifier = extractTableIdentifier(reference.table);
+	if (!tableIdentifier || !tableNames.has(tableIdentifier)) {
+		return false;
+	}
+	if (!isSchemaKeyColumn(reference.column)) {
+		return false;
+	}
+	return true;
+}
+
+function extractTableIdentifier(table: TableNode | undefined): string | null {
+	if (!table) {
+		return null;
+	}
+	const identifier = table.table.identifier;
+	return identifier.kind === "IdentifierNode" ? identifier.name : null;
+}
+
+function isSchemaKeyColumn(column: OperationNode): boolean {
+	if (!ColumnNode.is(column)) {
+		return false;
+	}
+	return (
+		column.column.kind === "IdentifierNode" &&
+		column.column.name === "schema_key"
+	);
+}
+
+function determineProjectionKind(
+	selections: readonly SelectionNode[]
+): "selectAll" | "partial" {
+	for (const selection of selections) {
+		const node = selection.selection;
+		if (ReferenceNode.is(node) && SelectAllNode.is(node.column)) {
+			return "selectAll";
+		}
+	}
+	return "partial";
+}
+
+function extractIdentifier(node: OperationNode): string | null {
+	return IdentifierNode.is(node) ? node.name : null;
 }

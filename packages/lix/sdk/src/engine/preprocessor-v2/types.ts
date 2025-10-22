@@ -1,5 +1,12 @@
 import type { RootOperationNode } from "kysely";
 
+export type PreprocessorTraceEntry = {
+	step: string;
+	payload: unknown;
+};
+
+export type PreprocessorTrace = PreprocessorTraceEntry[];
+
 /**
  * A single transformation stage in the preprocessor pipeline.
  *
@@ -14,7 +21,8 @@ import type { RootOperationNode } from "kysely";
  * ```
  */
 export type PreprocessorStep = (context: {
-  node: RootOperationNode;
-  storedSchemas: Map<string, unknown>;
-  cacheTables: Map<string, unknown>;
+	node: RootOperationNode;
+	storedSchemas: Map<string, unknown>;
+	cacheTables: Map<string, unknown>;
+	trace?: PreprocessorTrace;
 }) => RootOperationNode;
