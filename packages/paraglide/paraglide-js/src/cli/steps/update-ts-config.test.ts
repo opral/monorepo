@@ -11,6 +11,7 @@ const setCwd = (cwd: string) => {
         };
 };
 
+// Regression coverage for https://github.com/opral/inlang-paraglide-js/issues/560
 test("skips prompting when allowJs is set in a referenced tsconfig", async () => {
         const fs = memfs({
                 "/tsconfig.json": JSON.stringify({
@@ -37,6 +38,7 @@ test("skips prompting when allowJs is set in a referenced tsconfig", async () =>
         }
 });
 
+// Regression coverage for https://github.com/opral/inlang-paraglide-js/issues/560
 test("skips prompting when allowJs is provided via extends", async () => {
         const fs = memfs({
                 "/tsconfig.json": JSON.stringify({
