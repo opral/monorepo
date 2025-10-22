@@ -16,9 +16,10 @@ import type {
 import { loadConversation } from "./conversation-storage.js";
 import { buildSystemPrompt } from "./system/build-system-prompt.js";
 import { getAgentState, type Agent } from "./create-lix-agent.js";
-import type {
-	ChangeProposalEvent,
-	ChangeProposalSummary,
+import {
+	ChangeProposalRejectedError,
+	type AgentChangeProposalEvent,
+	type ChangeProposalSummary,
 } from "./proposal-mode.js";
 
 export type SendMessageArgs = {
@@ -50,7 +51,7 @@ export type SendMessageArgs = {
 	 * Callback invoked when proposal review state changes. Receives an event
 	 * for the proposal lifecycle (`open`, `accepted`, `rejected`, `cancelled`).
 	 */
-	onChangeProposal?: (event: ChangeProposalEvent) => void;
+	onChangeProposal?: (event: AgentChangeProposalEvent) => void;
 };
 
 export type SendMessageResult = {
@@ -89,7 +90,7 @@ export async function sendMessage(
 		agent,
 		prompt,
 		conversationId: providedConversationId,
-		signal,
+		signal: externalAbortSignal,
 	} = args;
 	const shouldPersist = args.persist !== false;
 	const state = getAgentState(agent);
@@ -97,6 +98,51 @@ export async function sendMessage(
 	const proposalController = proposalModeEnabled
 		? (state.proposal ?? null)
 		: null;
+	const readAbortReason = (signal: AbortSignal | undefined): unknown =>
+		signal && "reason" in signal
+			? (signal as AbortSignal & { reason?: unknown }).reason
+			: undefined;
+	const coerceAbortError = (value?: unknown): Error => {
+		if (value instanceof Error) {
+			return value;
+		}
+		if (value === undefined || value === null) {
+			return new Error("sendMessage aborted");
+		}
+		if (typeof value === "string" && value.length > 0) {
+			return new Error(value);
+		}
+		return new Error(String(value));
+	};
+
+	if (externalAbortSignal?.aborted) {
+		throw coerceAbortError(readAbortReason(externalAbortSignal));
+	}
+
+	const turnAbortController = new AbortController();
+	let abortReason: Error | null = null;
+	let cleanupExternalAbort: (() => void) | null = null;
+
+	const abortTurn = (reason?: unknown) => {
+		if (reason !== undefined || !abortReason) {
+			abortReason = coerceAbortError(reason);
+		}
+		if (!turnAbortController.signal.aborted) {
+			turnAbortController.abort(abortReason);
+		}
+	};
+
+	if (externalAbortSignal) {
+		const handleExternalAbort = () => {
+			abortTurn(readAbortReason(externalAbortSignal));
+		};
+		externalAbortSignal.addEventListener("abort", handleExternalAbort, {
+			once: true,
+		});
+		cleanupExternalAbort = () => {
+			externalAbortSignal.removeEventListener("abort", handleExternalAbort);
+		};
+	}
 	if (proposalModeEnabled && !proposalController) {
 		throw new Error("ProposalModeController is unavailable on the agent state");
 	}
@@ -272,6 +318,13 @@ export async function sendMessage(
 		}));
 	};
 
+	const releaseAbortListener = () => {
+		if (cleanupExternalAbort) {
+			cleanupExternalAbort();
+			cleanupExternalAbort = null;
+		}
+	};
+
 	let doneSettled = false;
 	let resolveDone!: (value: AgentConversationMessage) => void;
 	let rejectDone!: (reason: unknown) => void;
@@ -282,12 +335,14 @@ export async function sendMessage(
 	const resolveTurn = (value: AgentConversationMessage) => {
 		if (doneSettled) return;
 		doneSettled = true;
+		releaseAbortListener();
 		proposalController?.endTurn();
 		resolveDone(value);
 	};
 	const rejectTurn = (reason: unknown) => {
 		if (doneSettled) return;
 		doneSettled = true;
+		releaseAbortListener();
 		proposalController?.endTurn();
 		if (!shouldPersist) {
 			state.conversation.id = previousConversationSnapshot.id;
@@ -305,6 +360,7 @@ export async function sendMessage(
 			system: finalSystem,
 			messages: toAiMessages(workingTurns),
 			tools: agent.tools as any,
+			abortSignal: turnAbortController.signal,
 			stopWhen: stepCountIs(30),
 			prepareStep: async ({ messages }) => {
 				if (messages.length > 20) {
@@ -379,9 +435,8 @@ export async function sendMessage(
 				rejectTurn(error ?? new Error("sendMessage stream error"));
 			},
 			onAbort: () => {
-				rejectTurn(new Error("sendMessage aborted"));
+				rejectTurn(abortReason ?? coerceAbortError());
 			},
-			abortSignal: signal,
 		}) as StreamTextResult<Agent["tools"], never>;
 	} catch (error) {
 		rejectTurn(error);
@@ -412,6 +467,7 @@ export async function sendMessage(
 	const rejectChanges = async (proposalId?: string) => {
 		ensureProposalModeEnabled();
 		await proposalController?.reject(proposalId);
+		abortTurn(new ChangeProposalRejectedError());
 	};
 
 	const getPendingProposals = (): ChangeProposalSummary[] => {

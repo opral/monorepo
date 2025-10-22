@@ -9,11 +9,12 @@ import {
 import { Bot } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { selectVersionDiff } from "@lix-js/sdk";
-import type {
-	AgentConversationMessage,
-	AgentConversationMessageMetadata,
-	AgentStep,
-	ChangeProposalEvent,
+import {
+	ChangeProposalRejectedError,
+	type AgentConversationMessage,
+	type AgentConversationMessageMetadata,
+	type AgentStep,
+	type AgentChangeProposalEvent,
 } from "@lix-js/agent-sdk";
 import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
@@ -56,8 +57,8 @@ type ToolSession = {
 export function AgentView({ context }: AgentViewProps) {
 	const lix = useLix();
 
-	const handleProposalEvent = useCallback(
-		(event: ChangeProposalEvent) => {
+const handleProposalEvent = useCallback(
+	(event: AgentChangeProposalEvent) => {
 			if (!context) return;
 			// eslint-disable-next-line no-console
 			console.log("Proposal event", event);
@@ -193,13 +194,13 @@ export function AgentView({ context }: AgentViewProps) {
 				content: notice,
 			});
 		}
-		if (error) {
-			out.push({
-				id: "agent-error",
-				role: "system",
-				content: `Error: ${error}`,
-			});
-		}
+	if (error) {
+		out.push({
+			id: "agent-error",
+			role: "system",
+			content: error,
+		});
+	}
 		if (!hasKey) {
 			out.push({
 				id: "agent-missing-key",
@@ -409,8 +410,12 @@ export function AgentView({ context }: AgentViewProps) {
 		} catch (err) {
 			const message =
 				err instanceof Error ? err.message : String(err ?? "unknown");
-			console.error("Failed to send agent message:", err);
-			setNotice(`Failed to send message: ${message}`);
+			if (err instanceof ChangeProposalRejectedError) {
+				setNotice(null);
+			} else {
+				console.error("Failed to send agent message:", err);
+				setNotice(`Failed to send message: ${message}`);
+			}
 		} finally {
 			finalizeToolSession(sessionId);
 			activeSessionRef.current = null;

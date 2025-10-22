@@ -7,7 +7,7 @@ import {
 import type { Lix } from "@lix-js/sdk";
 import type { LixChangeProposal } from "@lix-js/sdk";
 
-export type ChangeProposalEvent = {
+export type AgentChangeProposalEvent = {
 	status: "open" | "accepted" | "rejected" | "cancelled";
 	proposal: LixChangeProposal;
 	toolCallId: string;
@@ -26,6 +26,13 @@ export type ChangeProposalSummary = {
 	sourceVersionId: string;
 	targetVersionId: string;
 };
+
+export class ChangeProposalRejectedError extends Error {
+	constructor() {
+		super("Change proposal rejected");
+		this.name = "ChangeProposalRejectedError";
+	}
+}
 
 type PendingProposalState = {
 	proposal: LixChangeProposal;
@@ -50,7 +57,7 @@ function createDeferred<T>() {
 type ReviewContext = {
 	conversationId: string;
 	messageId: string;
-	onChangeProposal?: (event: ChangeProposalEvent) => void;
+	onChangeProposal?: (event: AgentChangeProposalEvent) => void;
 };
 
 type RecordedToolCall = {
@@ -195,11 +202,11 @@ export class ProposalModeController {
 		});
 		this.emitProposalEvent("rejected", state);
 		this.pending = null;
-		state.reject(new Error("Change proposal rejected"));
+		state.reject(new ChangeProposalRejectedError());
 	}
 
 	private emitProposalEvent(
-		status: ChangeProposalEvent["status"],
+		status: AgentChangeProposalEvent["status"],
 		state: PendingProposalState
 	): void {
 		const context = this.context;
@@ -208,7 +215,7 @@ export class ProposalModeController {
 		}
 		const { conversationId, messageId } = context;
 		const handler = context.onChangeProposal;
-		const event: ChangeProposalEvent = {
+		const event: AgentChangeProposalEvent = {
 			status,
 			proposal: state.proposal,
 			toolCallId: state.toolCall.id,

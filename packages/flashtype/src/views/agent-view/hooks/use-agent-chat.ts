@@ -4,11 +4,12 @@ import { createConversation, type Lix } from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
 import {
+	ChangeProposalRejectedError,
 	createLixAgent,
 	type Agent as LixAgent,
 	type AgentConversationMessage,
 	type AgentConversationMessageMetadata,
-	type ChangeProposalEvent,
+	type AgentChangeProposalEvent,
 	type SendMessageResult,
 	sendMessage,
 } from "@lix-js/agent-sdk";
@@ -97,7 +98,7 @@ const consumeAgentStream = async (
 export function useAgentChat(args: {
 	lix: Lix;
 	systemPrompt?: string;
-	onProposalEvent?: (event: ChangeProposalEvent) => void;
+	onProposalEvent?: (event: AgentChangeProposalEvent) => void;
 }) {
 	const { lix, systemPrompt, onProposalEvent } = args;
 
@@ -272,7 +273,6 @@ export function useAgentChat(args: {
 					);
 					setMessages(hist);
 				},
-				error: (e) => setError(e?.message || String(e)),
 			});
 		})();
 		return () => {
@@ -298,7 +298,7 @@ export function useAgentChat(args: {
 			try {
 				const convId = await ensureConversationId();
 				let turnResult: SendMessageResult | null = null;
-				const processEvent = (event: ChangeProposalEvent) => {
+				const processEvent = (event: AgentChangeProposalEvent) => {
 					if (event.status === "open") {
 						if (!turnResult) {
 							return;
@@ -338,7 +338,13 @@ export function useAgentChat(args: {
 			} catch (err) {
 				const message =
 					err instanceof Error ? err.message : String(err ?? "unknown");
-				setError(message);
+				if (err instanceof ChangeProposalRejectedError) {
+					setError(
+						"Change proposal rejected. Tell the agent what to do differently.",
+					);
+				} else {
+					setError(`Error: ${message}`);
+				}
 				throw err;
 			} finally {
 				setPending(false);
@@ -355,7 +361,7 @@ export function useAgentChat(args: {
 		} catch (error_) {
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
-			setError(message);
+			setError(`Error: ${message}`);
 		}
 	}, [pendingProposal]);
 
@@ -367,7 +373,7 @@ export function useAgentChat(args: {
 		} catch (error_) {
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
-			setError(message);
+			setError(`Error: ${message}`);
 		}
 	}, [pendingProposal]);
 
@@ -393,4 +399,4 @@ export function useAgentChat(args: {
 	} as const;
 }
 
-export type { ChangeProposalEvent };
+export type { AgentChangeProposalEvent as ChangeProposalEvent };

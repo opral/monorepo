@@ -18,9 +18,10 @@ export {
 	type SendMessageResult,
 } from "./send-message.js";
 export type {
-	ChangeProposalEvent,
+	AgentChangeProposalEvent,
 	ChangeProposalSummary,
 } from "./proposal-mode.js";
+export { ChangeProposalRejectedError } from "./proposal-mode.js";
 export {
 	appendUserMessage,
 	appendAssistantMessage,

@@ -5,7 +5,7 @@ import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { createLixAgent } from "./create-lix-agent.js";
 import { sendMessage } from "./send-message.js";
-import type { ChangeProposalEvent } from "./proposal-mode.js";
+import type { AgentChangeProposalEvent } from "./proposal-mode.js";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	{ type: "stream-start", warnings: [] },
@@ -113,17 +113,19 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const proposalEvents: ChangeProposalEvent[] = [];
-		let resolveProposal!: (event: ChangeProposalEvent) => void;
-		const proposalReceived = new Promise<ChangeProposalEvent>((resolve) => {
-			resolveProposal = resolve;
-		});
+		const proposalEvents: AgentChangeProposalEvent[] = [];
+		let resolveProposal!: (event: AgentChangeProposalEvent) => void;
+		const proposalReceived = new Promise<AgentChangeProposalEvent>(
+			(resolve) => {
+				resolveProposal = resolve;
+			}
+		);
 
 		const turn = await sendMessage({
 			agent,
 			prompt: fromPlainText("write to review"),
 			proposalMode: true,
-			onChangeProposal: (event: ChangeProposalEvent) => {
+			onChangeProposal: (event: AgentChangeProposalEvent) => {
 				proposalEvents.push(event);
 				resolveProposal(event);
 			},
@@ -166,6 +168,58 @@ describe("proposal review mode", () => {
 			mergedFile.data as unknown as Uint8Array
 		);
 		expect(text).toBe("review");
+	});
+
+	test("rejecting a proposal aborts the turn", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersionRow = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const activeVersionId = activeVersionRow.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "reject-write",
+				input: {
+					version_id: activeVersionId,
+					path: "/reject.txt",
+					content: "reject",
+				},
+				text: "should-not-complete",
+			})
+		);
+
+		const events: AgentChangeProposalEvent[] = [];
+		let resolveOpen!: (event: AgentChangeProposalEvent) => void;
+		const openEvent = new Promise<AgentChangeProposalEvent>((resolve) => {
+			resolveOpen = resolve;
+		});
+
+		const turn = await sendMessage({
+			agent,
+			prompt: fromPlainText("reject proposal"),
+			proposalMode: true,
+			onChangeProposal: (event) => {
+				events.push(event);
+				if (event.status === "open") {
+					resolveOpen(event);
+				}
+			},
+		});
+		const pendingAssistant = turn.toPromise();
+		const proposalEvent = await openEvent;
+
+		await turn.rejectChanges(proposalEvent.proposal.id);
+
+		await expect(pendingAssistant).rejects.toThrowError(
+			"Change proposal rejected"
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(events.map((event) => event.status)).toEqual(["open", "rejected"]);
 	});
 
 	test("proposal mode disabled writes directly to the active version", async () => {
@@ -248,17 +302,19 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const events: ChangeProposalEvent[] = [];
-		let resolveOpen!: (event: ChangeProposalEvent) => void;
-		const openEventPromise = new Promise<ChangeProposalEvent>((resolve) => {
-			resolveOpen = resolve;
-		});
+		const events: AgentChangeProposalEvent[] = [];
+		let resolveOpen!: (event: AgentChangeProposalEvent) => void;
+		const openEventPromise = new Promise<AgentChangeProposalEvent>(
+			(resolve) => {
+				resolveOpen = resolve;
+			}
+		);
 
 		const turn = await sendMessage({
 			agent,
 			prompt: fromPlainText("delete file"),
 			proposalMode: true,
-			onChangeProposal: (event: ChangeProposalEvent) => {
+			onChangeProposal: (event: AgentChangeProposalEvent) => {
 				events.push(event);
 				if (event.status === "open") {
 					resolveOpen(event);
