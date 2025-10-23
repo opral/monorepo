@@ -34,6 +34,15 @@ export type AgentConversationMessageMetadata = {
 } & Record<string, unknown>;
 
 /**
+ * Streaming notification for tool execution progress.
+ */
+export type AgentToolEvent = {
+	type: "tool";
+	phase: "start" | "finish" | "error";
+	call: AgentStep;
+};
+
+/**
  * Conversation message row compatible with {@link LixConversationMessage}
  * but with a typed metadata envelope.
  *
@@ -70,3 +79,67 @@ export type AgentTurnMessage = {
 	body?: ZettelDoc;
 	metadata?: AgentConversationMessageMetadata;
 };
+
+/**
+ * A compact summary of a change proposal produced during tool review.
+ */
+export type ChangeProposalSummary = {
+	id: string;
+	source_version_id: string;
+	target_version_id: string;
+	title?: string;
+	summary?: string;
+	filePath?: string;
+	fileId?: string;
+	diff?: string;
+};
+
+/**
+ * Streamed events emitted while handling an agent turn.
+ */
+export type AgentEvent =
+	| { type: "text"; delta: string }
+	| { type: "message"; message: AgentConversationMessage }
+	| AgentToolEvent
+	| { type: "step"; step: AgentStep }
+	| {
+			type: "proposal:open";
+			proposal: { id: string; summary?: string };
+			accept: () => Promise<void>;
+			reject: (reason?: string) => Promise<void>;
+	  }
+	| {
+			type: "proposal:closed";
+			proposalId: string;
+			status: "accepted" | "rejected" | "cancelled";
+	  }
+	| {
+			type: "usage";
+			inputTokens: number;
+			outputTokens: number;
+			totalTokens: number;
+	  }
+	| { type: "error"; error: unknown }
+	| { type: "done" };
+
+/**
+ * Stream handle returned by {@link sendMessage}.
+ *
+ * @example
+ * const turn = sendMessage({ agent, prompt: "Hello" });
+ * for await (const event of turn) {
+ * 	if (event.type === "text") console.log(event.delta);
+ * }
+ * const final = await turn.complete();
+ */
+export interface AgentTurn extends AsyncIterable<AgentEvent> {
+	/**
+	 * Await stream completion, optionally auto-accepting proposals.
+	 *
+	 * Rejects with the first stream error (including rejected proposals).
+	 */
+	complete(opts?: {
+		autoAcceptProposals?: boolean;
+		onError?: (err: unknown) => void;
+	}): Promise<AgentConversationMessage>;
+}

@@ -99,12 +99,12 @@ export async function loadConversation(
  * given version (defaults to `"global"`).
  *
  * @example
- * const turn = await sendMessage({
+ * const turn = sendMessage({
  * 	agent,
  * 	prompt: fromPlainText("Hello"),
  * 	persist: false,
  * });
- * await turn.toPromise();
+ * await turn.complete();
  * await persistConversation({ lix, conversation: getAgentState(agent).conversation });
  */
 export async function persistConversation(args: {

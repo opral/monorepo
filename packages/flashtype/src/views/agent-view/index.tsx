@@ -7,16 +7,22 @@ import {
 	useState,
 } from "react";
 import { Bot } from "lucide-react";
+import { createGatewayProvider } from "@ai-sdk/gateway";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
-import { selectVersionDiff } from "@lix-js/sdk";
+import { selectVersionDiff, createConversation } from "@lix-js/sdk";
 import {
 	ChangeProposalRejectedError,
+	createLixAgent,
+	getChangeProposalSummary,
 	type AgentConversationMessage,
 	type AgentConversationMessageMetadata,
+	type AgentEvent,
 	type AgentStep,
-	type AgentChangeProposalEvent,
+	type Agent as LixAgent,
+	type ChangeProposalSummary,
+	sendMessage,
 } from "@lix-js/agent-sdk";
-import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { ChatMessageList } from "./chat-message-list";
 import type {
@@ -29,11 +35,12 @@ import { COMMANDS, type SlashCommand } from "./commands/index";
 import { MentionMenu, CommandMenu } from "./menu";
 import { useComposerState } from "./composer-state";
 import { selectFilePaths } from "./select-file-paths";
-import { useAgentChat, type ToolEvent } from "./hooks/use-agent-chat";
+import { clearConversation as runClearConversation } from "./commands/clear";
 import { createReactViewDefinition } from "../../app/react-view";
 import { systemPrompt } from "./system-prompt";
 import { PromptComposer } from "./components/prompt-composer";
 import { ChangeDecisionOverlay } from "./components/change-decision";
+import { LLM_PROXY_PREFIX } from "@/env-variables";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -42,6 +49,19 @@ type AgentViewProps = {
 type ToolSession = {
 	id: string;
 	runs: ToolRun[];
+};
+
+const CONVERSATION_KEY = "flashtype_agent_conversation_id";
+const MODEL_NAME = "google/gemini-2.5-pro";
+
+const formatToolError = (value: unknown): string => {
+	if (value instanceof Error) return value.message;
+	if (typeof value === "string") return value;
+	try {
+		return JSON.stringify(value);
+	} catch {
+		return String(value);
+	}
 };
 
 /**
@@ -57,51 +77,350 @@ type ToolSession = {
 export function AgentView({ context }: AgentViewProps) {
 	const lix = useLix();
 
-const handleProposalEvent = useCallback(
-	(event: AgentChangeProposalEvent) => {
-			if (!context) return;
-			// eslint-disable-next-line no-console
-			console.log("Proposal event", event);
-			if (event.status === "open") {
-				if (!event.fileId || !event.filePath) {
-					return;
+	const [agentMessages, setAgentMessages] = useState<
+		AgentConversationMessage[]
+	>([]);
+	const [pending, setPending] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [agent, setAgent] = useState<LixAgent | null>(null);
+	const [conversationId, setConversationId] = useState<string | null>(null);
+	const [pendingProposal, setPendingProposal] = useState<{
+		proposalId: string;
+		summary?: string;
+		details?: ChangeProposalSummary | null;
+		accept: () => Promise<void>;
+		reject: (reason?: string) => Promise<void>;
+	} | null>(null);
+	const [missingKey, setMissingKey] = useState(false);
+
+	const provider = useMemo(() => {
+		return createGatewayProvider({
+			apiKey: "proxy",
+			baseURL: `${LLM_PROXY_PREFIX}/v1/ai`,
+			fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+				const request =
+					input instanceof Request ? input : new Request(input, init);
+				const headers = new Headers(request.headers);
+				headers.delete("authorization");
+				const response = await fetch(new Request(request, { headers }));
+				if (response.status === 500) {
+					try {
+						const clone = response.clone();
+						const text = await clone.text();
+						if (text.includes("Missing AI_GATEWAY_API_KEY")) {
+							setMissingKey(true);
+						}
+					} catch {
+						// ignore clone failures
+					}
+				} else {
+					setMissingKey((prev) => (prev ? false : prev));
 				}
-				const diffConfig = createProposalDiffConfig({
-					fileId: event.fileId,
-					filePath: event.filePath,
-					sourceVersionId:
-						event.sourceVersionId ?? event.proposal.source_version_id,
-					targetVersionId:
-						event.targetVersionId ?? event.proposal.target_version_id,
-				});
-				context.openDiffView?.(event.fileId, event.filePath, {
-					focus: true,
-					diffConfig,
-				});
+				return response;
+			},
+		});
+	}, []);
+
+	const model = useMemo(
+		() => (missingKey ? null : provider(MODEL_NAME)),
+		[missingKey, provider],
+	);
+	const hasKey = !missingKey;
+	const ready = !!agent;
+
+	const upsertConversationPointer = useCallback(
+		async (id: string) => {
+			await lix.db.transaction().execute(async (trx) => {
+				const existing = await trx
+					.selectFrom("key_value_all")
+					.where("lixcol_version_id", "=", "global")
+					.where("key", "=", CONVERSATION_KEY)
+					.select(["key"])
+					.executeTakeFirst();
+
+				if (existing) {
+					await trx
+						.updateTable("key_value_all")
+						.set({ value: id, lixcol_untracked: true })
+						.where("key", "=", CONVERSATION_KEY)
+						.where("lixcol_version_id", "=", "global")
+						.execute();
+				} else {
+					await trx
+						.insertInto("key_value_all")
+						.values({
+							key: CONVERSATION_KEY,
+							value: id,
+							lixcol_version_id: "global",
+							lixcol_untracked: true,
+						})
+						.execute();
+				}
+			});
+		},
+		[lix],
+	);
+
+	const refreshConversationId = useCallback(async (): Promise<string | null> => {
+		const ptr = await lix.db
+			.selectFrom("key_value_all")
+			.where("lixcol_version_id", "=", "global")
+			.where("key", "=", CONVERSATION_KEY)
+			.select(["value"])
+			.executeTakeFirst();
+		const id =
+			typeof ptr?.value === "string" && ptr.value.length > 0
+				? (ptr.value as string)
+				: null;
+		setConversationId(id);
+		return id;
+	}, [lix]);
+
+	const ensureConversationId = useCallback(async (): Promise<string> => {
+		if (conversationId) return conversationId;
+
+		const existing = await refreshConversationId();
+		if (existing) {
+			return existing;
+		}
+
+		const created = await createConversation({ lix, versionId: "global" });
+		await upsertConversationPointer(created.id);
+		setConversationId(created.id);
+		return created.id;
+	}, [conversationId, refreshConversationId, lix, upsertConversationPointer]);
+
+	// Boot agent
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			if (!hasKey || !model) {
+				setAgent(null);
+				setConversationId(null);
+				setAgentMessages([]);
 				return;
 			}
-			if (event.fileId) {
-				context.closeDiffView?.(event.fileId);
+			const nextAgent = await createLixAgent({ lix, model, systemPrompt });
+			if (cancelled) return;
+			setAgent(nextAgent);
+			await refreshConversationId();
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [lix, model, hasKey, refreshConversationId]);
+
+	// Subscribe to conversation messages when the ID changes
+	useEffect(() => {
+		let cancelled = false;
+		let sub: { unsubscribe(): void } | null = null;
+		(async () => {
+			if (!conversationId) {
+				setAgentMessages([]);
+				return;
+			}
+			const query = lix.db
+				.selectFrom("conversation_message")
+				.where("conversation_id", "=", String(conversationId))
+				.select([
+					"id",
+					"body",
+					"lixcol_metadata",
+					"lixcol_created_at",
+					"parent_id",
+					"conversation_id",
+				])
+				.orderBy("lixcol_created_at", "asc")
+				.orderBy("id", "asc");
+			sub = lix.observe(query).subscribe({
+				next: (rows) => {
+					if (cancelled) return;
+					type ConversationRow = (typeof rows)[number] & {
+						lixcol_metadata?: Record<string, unknown> | null;
+					};
+					const hist: AgentConversationMessage[] = (
+						rows as ConversationRow[]
+					).map((r) => ({
+						...r,
+						id: String(r.id),
+						conversation_id: String(r.conversation_id),
+						parent_id: (r.parent_id as string | null) ?? null,
+						lixcol_metadata: (r.lixcol_metadata ??
+							null) as AgentConversationMessageMetadata | null,
+					}));
+					setAgentMessages(hist);
+				},
+			});
+		})();
+		return () => {
+			cancelled = true;
+			sub?.unsubscribe();
+		};
+	}, [lix, conversationId]);
+
+	const acceptPendingProposal = useCallback(async () => {
+		if (!pendingProposal) return;
+		try {
+			await pendingProposal.accept();
+		} catch (error_) {
+			const message =
+				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
+			setError(`Error: ${message}`);
+		}
+	}, [pendingProposal]);
+
+	const rejectPendingProposal = useCallback(async () => {
+		if (!pendingProposal) return;
+		try {
+			await pendingProposal.reject();
+		} catch (error_) {
+			const message =
+				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
+			setError(`Error: ${message}`);
+		}
+	}, [pendingProposal]);
+
+	const clear = useCallback(async () => {
+		const newId = await runClearConversation({ lix, agent });
+		setConversationId(newId);
+		setAgentMessages([]);
+		setPendingProposal(null);
+	}, [agent, lix]);
+
+	const send = useCallback(
+		async (
+			text: string,
+				opts?: {
+					signal?: AbortSignal;
+					onToolEvent?: (event: Extract<AgentEvent, { type: "tool" }>) => void;
+				},
+		) => {
+			if (!agent) throw new Error("Agent not ready");
+			const trimmed = text.trim();
+			if (!trimmed) return;
+			setError(null);
+			setPendingProposal(null);
+			setPending(true);
+			try {
+				const convId = await ensureConversationId();
+				setConversationId(convId);
+				console.log("[agent] send", {
+					conversationId: convId,
+					proposalMode: true,
+				});
+				const stream = sendMessage({
+					agent,
+					prompt: fromPlainText(trimmed),
+					conversationId: convId,
+					signal: opts?.signal,
+					proposalMode: true,
+				});
+				let finalMessage: AgentConversationMessage | null = null;
+				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
+				let activeProposal: {
+					id: string;
+					summary?: string;
+					details?: ChangeProposalSummary | null;
+				} | null = null;
+				const handledToolPhases = new Map<
+					string,
+					Extract<AgentEvent, { type: "tool" }>["phase"]
+				>();
+				for await (const event of stream) {
+					switch (event.type) {
+						case "tool": {
+							const { call, phase } = event;
+							const name = call.tool_name;
+							if (name && handledToolPhases.get(call.id) !== phase) {
+								handledToolPhases.set(call.id, phase);
+								opts?.onToolEvent?.(event);
+							}
+							break;
+						}
+						case "proposal:open": {
+							const details = agent
+								? getChangeProposalSummary(agent, event.proposal.id)
+								: null;
+							activeProposal = {
+								id: event.proposal.id,
+								summary: event.proposal.summary,
+								details,
+							};
+							setPendingProposal({
+								proposalId: event.proposal.id,
+								summary: event.proposal.summary,
+								details,
+								accept: event.accept,
+								reject: event.reject,
+							});
+							if (context && details?.fileId && details.filePath) {
+								console.log("Proposal event", event);
+								const diffConfig = createProposalDiffConfig({
+									fileId: details.fileId,
+									filePath: details.filePath,
+									sourceVersionId: details.source_version_id,
+									targetVersionId: details.target_version_id,
+								});
+								context.openDiffView?.(details.fileId, details.filePath, {
+									focus: true,
+									diffConfig,
+								});
+							}
+							break;
+						}
+						case "proposal:closed": {
+							const details = activeProposal?.details;
+							if (context && details?.fileId) {
+								context.closeDiffView?.(details.fileId);
+							}
+							setPendingProposal(null);
+							activeProposal = null;
+							break;
+						}
+						case "message":
+							finalMessage = event.message;
+							setConversationId(String(event.message.conversation_id));
+							break;
+						case "error":
+							errorEvent = event;
+							break;
+						default:
+							break;
+					}
+				}
+
+				if (errorEvent) {
+					const err =
+						errorEvent.error instanceof Error
+							? errorEvent.error
+							: new Error(String(errorEvent.error ?? "Agent stream error"));
+					throw err;
+				}
+
+				if (!finalMessage) {
+					throw new Error("Agent did not produce a final message");
+				}
+
+				console.log("[agent] turn completed", {
+					conversationId: finalMessage.conversation_id,
+				});
+			} catch (err) {
+				const message =
+					err instanceof Error ? err.message : String(err ?? "unknown");
+				if (err instanceof ChangeProposalRejectedError) {
+					setError(
+						"Change proposal rejected. Tell the agent what to do differently.",
+					);
+				} else {
+					setError(`Error: ${message}`);
+				}
+				throw err;
+			} finally {
+				setPending(false);
 			}
 		},
-		[context],
+		[agent, ensureConversationId, context],
 	);
-	const {
-		messages: agentMessages,
-		send,
-		clear,
-		pending,
-		error,
-		ready,
-		hasKey,
-		pendingProposal,
-		acceptPendingProposal,
-		rejectPendingProposal,
-	} = useAgentChat({
-		lix,
-		systemPrompt,
-		onProposalEvent: handleProposalEvent,
-	});
 
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -273,63 +592,67 @@ const handleProposalEvent = useCallback(
 		setToolSessions([]);
 	}, []);
 
-	const handleToolEvent = useCallback((event: ToolEvent) => {
-		const sessionId = activeSessionRef.current;
-		if (!sessionId) return;
-		setToolSessions((prev) => {
-			const index = prev.findIndex((session) => session.id === sessionId);
-			if (index === -1) return prev;
-			const session = prev[index];
-			const runs = session.runs.slice();
-			const name = formatToolName(event.name);
-			if (event.type === "start") {
-				runs.push({
-					id: event.id,
-					title: name,
-					status: "running",
-					input: stringifyPayload(event.input),
-				});
-			} else if (event.type === "finish") {
-				const existingIdx = runs.findIndex((run) => run.id === event.id);
-				const output = stringifyPayload(event.output);
-				if (existingIdx === -1) {
+	const handleToolEvent = useCallback(
+		(event: Extract<AgentEvent, { type: "tool" }>) => {
+			const sessionId = activeSessionRef.current;
+			if (!sessionId) return;
+			setToolSessions((prev) => {
+				const index = prev.findIndex((session) => session.id === sessionId);
+				if (index === -1) return prev;
+				const session = prev[index];
+				const runs = session.runs.slice();
+				const name = formatToolName(event.call.tool_name);
+				if (event.phase === "start") {
 					runs.push({
-						id: event.id,
+						id: event.call.id,
 						title: name,
-						status: "success",
-						output,
+						status: "running",
+						input: stringifyPayload(event.call.tool_input),
 					});
-				} else {
-					runs[existingIdx] = {
-						...runs[existingIdx],
-						status: "success",
-						title: name,
-						output,
-					};
+				} else if (event.phase === "finish") {
+					const existingIdx = runs.findIndex((run) => run.id === event.call.id);
+					const output = stringifyPayload(event.call.tool_output);
+					if (existingIdx === -1) {
+						runs.push({
+							id: event.call.id,
+							title: name,
+							status: "success",
+							output,
+						});
+					} else {
+						runs[existingIdx] = {
+							...runs[existingIdx],
+							status: "success",
+							title: name,
+							output,
+						};
+					}
+				} else if (event.phase === "error") {
+					const existingIdx = runs.findIndex((run) => run.id === event.call.id);
+					const errorText = formatToolError(event.call.error_text);
+					if (existingIdx === -1) {
+						runs.push({
+							id: event.call.id,
+							title: name,
+							status: "error",
+							output: errorText,
+						});
+					} else {
+						runs[existingIdx] = {
+							...runs[existingIdx],
+							status: "error",
+							title: name,
+							output: errorText,
+						};
+					}
 				}
-			} else if (event.type === "error") {
-				const existingIdx = runs.findIndex((run) => run.id === event.id);
-				if (existingIdx === -1) {
-					runs.push({
-						id: event.id,
-						title: name,
-						status: "error",
-						output: event.errorText,
-					});
-				} else {
-					runs[existingIdx] = {
-						...runs[existingIdx],
-						status: "error",
-						title: name,
-						output: event.errorText,
-					};
-				}
-			}
-			const next = prev.slice();
-			next[index] = { ...session, runs };
-			return next;
-		});
-	}, []);
+				const next = prev.slice();
+				next[index] = { ...session, runs };
+				return next;
+			});
+		},
+		[]
+	);
 
 	useEffect(() => {
 		updateMention();

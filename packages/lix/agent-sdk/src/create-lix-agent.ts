@@ -1,6 +1,6 @@
 import { uuidV7, type Lix } from "@lix-js/sdk";
 import type { LanguageModelV2 } from "@ai-sdk/provider";
-import { type AgentConversation } from "./types.js";
+import { type AgentConversation, type ChangeProposalSummary } from "./types.js";
 import { ContextStore } from "./context/context-store.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./system-prompt.js";
 import { createAgentToolSet, type AgentToolSet } from "./tools/index.js";
@@ -122,6 +122,19 @@ export async function createLixAgent(args: {
 	agentStates.set(agent, state);
 
 	return agent;
+}
+
+/**
+ * Retrieve the currently staged change proposal summary for the given proposal id.
+ *
+ * Returns `null` when the proposal is not pending review.
+ */
+export function getChangeProposalSummary(
+	agent: Agent,
+	proposalId: string
+): ChangeProposalSummary | null {
+	const state = getAgentState(agent);
+	return state.proposal.getPendingSummary(proposalId);
 }
 
 // KV-based hydration removed; using threads instead

@@ -110,18 +110,20 @@ describe("sendMessage", () => {
 			})
 		);
 
-		const turnOne = await sendMessage({
+		const turnOne = sendMessage({
 			agent,
 			prompt: fromPlainText("turn one"),
 		});
-		const assistantOne = await turnOne.toPromise();
+		const assistantOne = await turnOne.complete({ autoAcceptProposals: true });
+		expect(assistantOne).toBeTruthy();
+		const conversationId = String(assistantOne.conversation_id ?? "");
+		expect(conversationId).toBeTruthy();
 
 		expect(assistantOne.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
 		expect(
 			assistantOne.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
 		).toBe("write_file");
 
-		const conversationId = turnOne.conversationId;
 		const rowsAfterOne = await lix.db
 			.selectFrom("conversation_message")
 			.where("conversation_id", "=", conversationId)
@@ -152,13 +154,14 @@ describe("sendMessage", () => {
 			})
 		);
 
-		const turnTwo = await sendMessage({
+		const turnTwo = sendMessage({
 			agent,
 			prompt: fromPlainText("turn two"),
 			conversationId,
 		});
 
-		const assistantTwo = await turnTwo.toPromise();
+		const assistantTwo = await turnTwo.complete({ autoAcceptProposals: true });
+		expect(assistantTwo).toBeTruthy();
 
 		expect(
 			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
@@ -178,24 +181,27 @@ describe("sendMessage", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const turn = await sendMessage({
+		const turn = sendMessage({
 			agent,
 			prompt: fromPlainText("draft message"),
 			persist: false,
 		});
 
-		await turn.toPromise();
+		const assistant = await turn.complete({ autoAcceptProposals: true });
+		expect(assistant).toBeTruthy();
+		const conversationId = String(assistant.conversation_id ?? "");
+		expect(conversationId).toBeTruthy();
 
 		const storedConversation = await lix.db
 			.selectFrom("conversation")
-			.where("id", "=", turn.conversationId)
+			.where("id", "=", conversationId)
 			.select(["id"])
 			.executeTakeFirst();
 		expect(storedConversation).toBeUndefined();
 
 		const storedMessages = await lix.db
 			.selectFrom("conversation_message")
-			.where("conversation_id", "=", turn.conversationId)
+			.where("conversation_id", "=", conversationId)
 			.select(["id"])
 			.execute();
 		expect(storedMessages).toHaveLength(0);
@@ -208,13 +214,14 @@ describe("sendMessage", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const result = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("hello there"),
 			persist: false,
 		});
 
-		await result.toPromise();
+		const finalMessage = await stream.complete({ autoAcceptProposals: true });
+		expect(finalMessage).toBeTruthy();
 
 		const inMemoryConversation = getAgentState(agent).conversation;
 		const persisted = await persistConversation({
@@ -255,12 +262,13 @@ describe("sendMessage", () => {
 			})
 		);
 
-		const result = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("write greeting"),
 		});
 
-		await result.toPromise();
+		const finalMessage = await stream.complete({ autoAcceptProposals: true });
+		expect(finalMessage).toBeTruthy();
 
 		const rows = await lix.db
 			.selectFrom("state_all")
@@ -274,7 +282,9 @@ describe("sendMessage", () => {
 			])
 			.execute();
 
-		const greetingRow = rows.find((row) => row.entity_id === "greeting");
+		const greetingRow = rows.find(
+			(row) => row.entity_id === "greeting" && row.version_id === versionId
+		);
 		expect(greetingRow).toBeTruthy();
 		expect(greetingRow?.schema_key).toBe("mock_json_property");
 		expect(greetingRow?.plugin_key).toBe("mock_json_plugin");

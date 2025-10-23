@@ -1,4 +1,7 @@
-export { createLixAgent } from "./create-lix-agent.js";
+export {
+	createLixAgent,
+	getChangeProposalSummary,
+} from "./create-lix-agent.js";
 export {
 	appendDefaultSystemPrompt,
 	DEFAULT_SYSTEM_PROMPT,
@@ -11,20 +14,11 @@ export type {
 	AgentConversationMessage,
 	AgentConversationMessageMetadata,
 	AgentStep,
-} from "./types.js";
-export {
-	sendMessage,
-	type SendMessageArgs,
-	type SendMessageResult,
-} from "./send-message.js";
-export type {
-	AgentChangeProposalEvent,
+	AgentToolEvent,
+	AgentEvent,
+	AgentTurn,
 	ChangeProposalSummary,
-} from "./proposal-mode.js";
+} from "./types.js";
+export { sendMessage, type SendMessageArgs } from "./send-message.js";
+export type { AgentChangeProposalEvent } from "./proposal-mode.js";
 export { ChangeProposalRejectedError } from "./proposal-mode.js";
-export {
-	appendUserMessage,
-	appendAssistantMessage,
-	loadConversation,
-	persistConversation,
-} from "./conversation-storage.js";

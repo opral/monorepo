@@ -37,12 +37,12 @@ describe("createLixAgent context", () => {
 		const agent = await createLixAgent({ lix, model });
 		agent.setContext("active_file", "/app.tsx");
 
-		const turn = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("hello"),
 		});
 
-		await turn.toPromise();
+		await stream.complete();
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();
@@ -69,11 +69,12 @@ describe("createLixAgent context", () => {
 		);
 		const agent = await createLixAgent({ lix, model, systemPrompt });
 
-		const turn = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("hello"),
 		});
-		await turn.toPromise();
+
+		await stream.complete();
 
 		const call = model.doStreamCalls.at(-1);
 		expect(call).toBeDefined();

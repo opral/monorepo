@@ -3,9 +3,12 @@ import { openLix } from "@lix-js/sdk";
 import type { LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import { createLixAgent } from "./create-lix-agent.js";
+import {
+	createLixAgent,
+	getChangeProposalSummary,
+} from "./create-lix-agent.js";
 import { sendMessage } from "./send-message.js";
-import type { AgentChangeProposalEvent } from "./proposal-mode.js";
+import type { AgentEvent } from "./types.js";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	{ type: "stream-start", warnings: [] },
@@ -94,12 +97,11 @@ describe("proposal review mode", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const activeVersionRow = await lix.db
+		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
-
-		const activeVersionId = activeVersionRow.version_id as string;
+		const activeVersionId = activeVersion.version_id as string;
 
 		model.setToolHandler(() =>
 			createToolCallStreamChunks({
@@ -113,49 +115,54 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const proposalEvents: AgentChangeProposalEvent[] = [];
-		let resolveProposal!: (event: AgentChangeProposalEvent) => void;
-		const proposalReceived = new Promise<AgentChangeProposalEvent>(
-			(resolve) => {
-				resolveProposal = resolve;
-			}
-		);
+		let openEvent: Extract<AgentEvent, { type: "proposal:open" }> | undefined;
+		let openSummary = null as ReturnType<
+			typeof getChangeProposalSummary
+		> | null;
+		let accepted = false;
 
-		const turn = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("write to review"),
 			proposalMode: true,
-			onChangeProposal: (event: AgentChangeProposalEvent) => {
-				proposalEvents.push(event);
-				resolveProposal(event);
-			},
 		});
-		const pendingAssistant = turn.toPromise();
 
-		await proposalReceived;
+		for await (const event of stream) {
+			if (event.type === "proposal:open") {
+				openEvent = event;
+				const summary = getChangeProposalSummary(agent, event.proposal.id);
+				openSummary = summary;
+				expect(summary?.target_version_id).toBe(activeVersionId);
+				expect(summary?.source_version_id).not.toBe(activeVersionId);
+				const proposalsOpen = await lix.db
+					.selectFrom("change_proposal")
+					.select(["id"])
+					.execute();
+				expect(proposalsOpen).toHaveLength(1);
+				const activeFile = await lix.db
+					.selectFrom("file_all")
+					.where("lixcol_version_id", "=", activeVersionId as any)
+					.where("path", "=", "/review.txt")
+					.select(["id"])
+					.executeTakeFirst();
+				expect(activeFile).toBeUndefined();
+				await event.accept();
+			} else if (
+				event.type === "proposal:closed" &&
+				event.status === "accepted"
+			) {
+				accepted = true;
+			} else if (event.type === "done") {
+				break;
+			}
+		}
 
-		expect(proposalEvents).toHaveLength(1);
-		const [proposalEvent] = proposalEvents;
-		expect(proposalEvent?.status).toBe("open");
-		expect(proposalEvent?.proposal.target_version_id).toBe(activeVersionId);
-		expect(proposalEvent?.proposal.source_version_id).not.toBe(activeVersionId);
-		expect(typeof proposalEvent?.proposal.id).toBe("string");
-		expect(proposalEvent?.toolName).toBe("write_file");
-
-		const activeFile = await lix.db
-			.selectFrom("file_all")
-			.where("lixcol_version_id", "=", activeVersionId as any)
-			.where("path", "=", "/review.txt")
-			.select(["id"])
-			.executeTakeFirst();
-		expect(activeFile).toBeUndefined();
-
-		await turn.acceptChanges();
-		await pendingAssistant;
-		expect(proposalEvents).toHaveLength(2);
-		const acceptedEvent = proposalEvents[1];
-		expect(acceptedEvent?.status).toBe("accepted");
-		expect(acceptedEvent?.proposal.id).toBe(proposalEvent?.proposal.id);
+		expect(openEvent).toBeTruthy();
+		expect(openEvent).toBeTruthy();
+		expect(openSummary?.target_version_id).toBe(activeVersionId);
+		expect(openSummary?.source_version_id).not.toBe(activeVersionId);
+		expect(openSummary?.filePath).toBe("/review.txt");
+		expect(accepted).toBe(true);
 
 		const mergedFile = await lix.db
 			.selectFrom("file_all")
@@ -163,11 +170,16 @@ describe("proposal review mode", () => {
 			.where("path", "=", "/review.txt")
 			.select(["data"])
 			.executeTakeFirstOrThrow();
-
 		const text = new TextDecoder("utf-8", { fatal: false }).decode(
 			mergedFile.data as unknown as Uint8Array
 		);
 		expect(text).toBe("review");
+
+		const proposalsAfter = await lix.db
+			.selectFrom("change_proposal")
+			.select(["id"])
+			.execute();
+		expect(proposalsAfter).toHaveLength(0);
 	});
 
 	test("rejecting a proposal aborts the turn", async () => {
@@ -175,11 +187,11 @@ describe("proposal review mode", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const activeVersionRow = await lix.db
+		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
-		const activeVersionId = activeVersionRow.version_id as string;
+		const activeVersionId = activeVersion.version_id as string;
 
 		model.setToolHandler(() =>
 			createToolCallStreamChunks({
@@ -193,33 +205,46 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const events: AgentChangeProposalEvent[] = [];
-		let resolveOpen!: (event: AgentChangeProposalEvent) => void;
-		const openEvent = new Promise<AgentChangeProposalEvent>((resolve) => {
-			resolveOpen = resolve;
-		});
+		let rejected = false;
+		let errorEvent: Extract<AgentEvent, { type: "error" }> | undefined;
 
-		const turn = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("reject proposal"),
 			proposalMode: true,
-			onChangeProposal: (event) => {
-				events.push(event);
-				if (event.status === "open") {
-					resolveOpen(event);
-				}
-			},
 		});
-		const pendingAssistant = turn.toPromise();
-		const proposalEvent = await openEvent;
 
-		await turn.rejectChanges(proposalEvent.proposal.id);
+		for await (const event of stream) {
+			if (event.type === "proposal:open") {
+				await event.reject("no thanks");
+			} else if (
+				event.type === "proposal:closed" &&
+				event.status === "rejected"
+			) {
+				rejected = true;
+			} else if (event.type === "error") {
+				errorEvent = event;
+			} else if (event.type === "done") {
+				break;
+			}
+		}
 
-		await expect(pendingAssistant).rejects.toThrowError(
-			"Change proposal rejected"
-		);
-		await new Promise((resolve) => setTimeout(resolve, 0));
-		expect(events.map((event) => event.status)).toEqual(["open", "rejected"]);
+		expect(rejected).toBe(true);
+		expect(errorEvent).toBeTruthy();
+
+		const mergedFile = await lix.db
+			.selectFrom("file_all")
+			.where("lixcol_version_id", "=", activeVersionId as any)
+			.where("path", "=", "/reject.txt")
+			.select(["id"])
+			.executeTakeFirst();
+		expect(mergedFile).toBeUndefined();
+
+		const proposalsAfterReject = await lix.db
+			.selectFrom("change_proposal")
+			.select(["id"])
+			.execute();
+		expect(proposalsAfterReject).toHaveLength(0);
 	});
 
 	test("proposal mode disabled writes directly to the active version", async () => {
@@ -227,11 +252,11 @@ describe("proposal review mode", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const activeVersionRow = await lix.db
+		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
-		const activeVersionId = activeVersionRow.version_id as string;
+		const activeVersionId = activeVersion.version_id as string;
 
 		model.setToolHandler(() =>
 			createToolCallStreamChunks({
@@ -245,11 +270,11 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const turn = await sendMessage({
+		await sendMessage({
 			agent,
 			prompt: fromPlainText("write directly"),
-		});
-		await turn.toPromise();
+			proposalMode: false,
+		}).complete({ autoAcceptProposals: true });
 
 		const file = await lix.db
 			.selectFrom("file_all")
@@ -268,11 +293,11 @@ describe("proposal review mode", () => {
 		const model = createStreamingModel();
 		const agent = await createLixAgent({ lix, model });
 
-		const activeVersionRow = await lix.db
+		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
-		const activeVersionId = activeVersionRow.version_id as string;
+		const activeVersionId = activeVersion.version_id as string;
 
 		await lix.db
 			.insertInto("file_all")
@@ -302,37 +327,31 @@ describe("proposal review mode", () => {
 			})
 		);
 
-		const events: AgentChangeProposalEvent[] = [];
-		let resolveOpen!: (event: AgentChangeProposalEvent) => void;
-		const openEventPromise = new Promise<AgentChangeProposalEvent>(
-			(resolve) => {
-				resolveOpen = resolve;
-			}
-		);
+		let openEvent: Extract<AgentEvent, { type: "proposal:open" }> | undefined;
+		let openSummary = null as ReturnType<
+			typeof getChangeProposalSummary
+		> | null;
 
-		const turn = await sendMessage({
+		const stream = sendMessage({
 			agent,
 			prompt: fromPlainText("delete file"),
 			proposalMode: true,
-			onChangeProposal: (event: AgentChangeProposalEvent) => {
-				events.push(event);
-				if (event.status === "open") {
-					resolveOpen(event);
-				}
-			},
 		});
-		const pendingAssistant = turn.toPromise();
 
-		const openEvent = await openEventPromise;
-		expect(openEvent.status).toBe("open");
-		expect(openEvent.fileId).toBe(String(existingFile.id));
-		expect(openEvent.filePath).toBe("/remove.md");
+		for await (const event of stream) {
+			if (event.type === "proposal:open") {
+				openEvent = event;
+				const summary = getChangeProposalSummary(agent, event.proposal.id);
+				openSummary = summary;
+				expect(summary?.fileId).toBe(String(existingFile.id));
+				expect(summary?.filePath).toBe("/remove.md");
+				await event.accept();
+			} else if (event.type === "done") {
+				break;
+			}
+		}
 
-		await turn.acceptChanges();
-		await pendingAssistant;
-
-		expect(events.some((event) => event.status === "accepted")).toBe(true);
-
+		expect(openEvent).toBeTruthy();
 		const remaining = await lix.db
 			.selectFrom("file_all")
 			.where("path", "=", "/remove.md")
@@ -340,5 +359,75 @@ describe("proposal review mode", () => {
 			.select(["id"])
 			.executeTakeFirst();
 		expect(remaining).toBeUndefined();
+		expect(openSummary?.fileId).toBe(String(existingFile.id));
+		expect(openSummary?.filePath).toBe("/remove.md");
+
+		const proposalsAfterDelete = await lix.db
+			.selectFrom("change_proposal")
+			.select(["id"])
+			.execute();
+		expect(proposalsAfterDelete).toHaveLength(0);
+	});
+
+	test("aborting a turn discards the pending proposal", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const activeVersionId = activeVersion.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "abort-write",
+				input: {
+					version_id: activeVersionId,
+					path: "/abort.txt",
+					content: "abort",
+				},
+				text: "should-not-complete",
+			})
+		);
+
+		const controller = new AbortController();
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("abort proposal"),
+			proposalMode: true,
+			signal: controller.signal,
+		});
+
+		const events: AgentEvent[] = [];
+		try {
+			for await (const event of stream) {
+				events.push(event);
+				if (event.type === "proposal:open") {
+					const proposalsOpen = await lix.db
+						.selectFrom("change_proposal")
+						.select(["id"])
+						.execute();
+					expect(proposalsOpen).toHaveLength(1);
+					controller.abort("abort-turn");
+				}
+			}
+		} catch (error) {
+			expect(error).toBeInstanceOf(Error);
+		}
+
+		const sawProposalOpen = events.some(
+			(event) => event.type === "proposal:open"
+		);
+		expect(sawProposalOpen).toBe(true);
+		const sawError = events.some((event) => event.type === "error");
+		expect(sawError).toBe(true);
+
+		const proposalsAfterAbort = await lix.db
+			.selectFrom("change_proposal")
+			.select(["id"])
+			.execute();
+		expect(proposalsAfterAbort).toHaveLength(0);
 	});
 });

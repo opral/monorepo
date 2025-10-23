@@ -6,6 +6,7 @@ import {
 } from "@lix-js/sdk";
 import type { Lix } from "@lix-js/sdk";
 import type { LixChangeProposal } from "@lix-js/sdk";
+import type { ChangeProposalSummary } from "./types.js";
 
 export type AgentChangeProposalEvent = {
 	status: "open" | "accepted" | "rejected" | "cancelled";
@@ -19,12 +20,6 @@ export type AgentChangeProposalEvent = {
 	filePath?: string;
 	sourceVersionId?: string;
 	targetVersionId?: string;
-};
-
-export type ChangeProposalSummary = {
-	proposalId: string;
-	sourceVersionId: string;
-	targetVersionId: string;
 };
 
 export class ChangeProposalRejectedError extends Error {
@@ -77,12 +72,20 @@ export class ProposalModeController {
 		this.pending = null;
 	}
 
-	endTurn(): void {
-		if (this.pending) {
-			this.emitProposalEvent("cancelled", this.pending);
+	async endTurn(args: { aborted?: boolean } = {}): Promise<void> {
+		const state = this.pending;
+		if (state) {
 			this.pending = null;
+			await this.discardPendingProposal(state);
+			try {
+				state.reject(new ChangeProposalRejectedError());
+			} catch {
+				// ignore double rejection
+			}
+			this.emitProposalEvent("cancelled", state);
 		}
 		this.context = null;
+		void args.aborted;
 	}
 
 	isActive(): boolean {
@@ -93,17 +96,22 @@ export class ProposalModeController {
 		if (!this.pending) {
 			return [];
 		}
-		return [
-			{
-				proposalId: this.pending.proposal.id,
-				sourceVersionId: this.pending.proposal.source_version_id,
-				targetVersionId: this.pending.proposal.target_version_id,
-			},
-		];
+		return [this.createSummary(this.pending)];
 	}
 
 	hasPending(): boolean {
 		return this.pending !== null;
+	}
+
+	getPendingSummary(proposalId: string): ChangeProposalSummary | null {
+		const state = this.pending;
+		if (!state) {
+			return null;
+		}
+		if (state.proposal.id !== proposalId) {
+			return null;
+		}
+		return this.createSummary(state);
 	}
 
 	async interceptToolCall<TResult>(args: {
@@ -231,6 +239,48 @@ export class ProposalModeController {
 		setTimeout(() => {
 			handler?.(event);
 		}, 0);
+	}
+
+	private async discardPendingProposal(
+		state: PendingProposalState
+	): Promise<void> {
+		const proposalId = String(state.proposal.id);
+		await this.lix.db.transaction().execute(async (trx) => {
+			await trx
+				.deleteFrom("change_proposal_all")
+				.where("id", "=", proposalId as any)
+				.where("lixcol_version_id", "=", "global")
+				.execute();
+
+			const sourceVersionId = state.proposal.source_version_id;
+			if (sourceVersionId) {
+				await trx
+					.deleteFrom("version")
+					.where("id", "=", sourceVersionId as any)
+					.execute();
+			}
+		});
+	}
+
+	private createSummary(state: PendingProposalState): ChangeProposalSummary {
+		const proposalRecord = state.proposal as Record<string, unknown>;
+		const title =
+			typeof proposalRecord["title"] === "string"
+				? (proposalRecord["title"] as string)
+				: undefined;
+		const summary =
+			typeof proposalRecord["summary"] === "string"
+				? (proposalRecord["summary"] as string)
+				: undefined;
+		return {
+			id: state.proposal.id,
+			source_version_id: state.proposal.source_version_id,
+			target_version_id: state.proposal.target_version_id,
+			title,
+			summary,
+			fileId: state.fileId,
+			filePath: state.filePath,
+		};
 	}
 
 	private async resolveFileInfo(args: {
