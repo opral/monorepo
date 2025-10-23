@@ -310,6 +310,32 @@ test("skips cache unions when no cache tables mapped", () => {
 	expect(sql).not.toContain("cache.is_tombstone");
 });
 
+test("prunes transaction segment when transaction closed", () => {
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.schema_key
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		storedSchemas: new Map(),
+		cacheTables: new Map(),
+		hasOpenTransaction: false,
+	});
+
+	const { sql } = compile(rewritten);
+
+	const upper = sql.toUpperCase();
+
+	expect(upper).not.toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
+	const unionCount = upper.match(/\bUNION ALL\b/g) ?? [];
+	expect(unionCount.length).toBe(0);
+});
+
 test("unions all available cache tables when no schema filter is provided", () => {
 	const node = toRootOperationNode(
 		parse(`

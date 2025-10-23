@@ -134,6 +134,57 @@ test("entity view rewrite flows through state and vtable pipeline", async () => 
 	await lix.close();
 });
 
+test("skips transaction rewrite when transaction closed", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		"x-lix-key": "pipeline_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		additionalProperties: false,
+	} as const;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const storedSchemas = await collectStoredSchemas(lix);
+
+	const node = toRootOperationNode(
+		parse(`
+			SELECT ps.*
+			FROM pipeline_schema AS ps
+			WHERE ps.id = 'row-1'
+		`)
+	);
+
+	const rewritten = preprocessRootOperationNode(node, {
+		storedSchemas,
+		cacheTables: new Map(),
+		hasOpenTransaction: false,
+	});
+
+	const compiled = compile(rewritten);
+
+	const upper = compiled.sql.toUpperCase();
+
+	expect(upper).not.toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
+
+	await lix.close();
+});
+
 test("rewrites join between two entity views", async () => {
 	const lix = await openLix({
 		keyValues: [
@@ -276,8 +327,7 @@ test("rewrites join mixing entity and raw state views", async () => {
 
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE"?(\s|$)/);
-	const candidateMatches =
-		upper.match(/ROW_NUMBER\(\) OVER \(/g) ?? [];
+	const candidateMatches = upper.match(/ROW_NUMBER\(\) OVER \(/g) ?? [];
 	expect(candidateMatches.length).toBeGreaterThanOrEqual(2);
 	expect(upper).not.toContain('"LIX_INTERNAL_STATE_VTABLE"');
 

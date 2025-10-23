@@ -50,6 +50,7 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	node,
 	trace,
 	cacheTables,
+	hasOpenTransaction = true,
 }) => {
 	const renameTransformer = new RewriteInternalStateVtableTransformer();
 	const renamed = renameTransformer.transformNode(node) as RootOperationNode;
@@ -82,7 +83,10 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		);
 	}
 
-	const inlineTransformer = new InlineInternalStateVtableTransformer(cacheTables);
+	const inlineTransformer = new InlineInternalStateVtableTransformer(
+		cacheTables,
+		hasOpenTransaction
+	);
 	const inlined = inlineTransformer.transformNode(renamed) as RootOperationNode;
 	if (traceEntry && trace) {
 		trace.push(traceEntry);
@@ -106,8 +110,12 @@ class RewriteInternalStateVtableTransformer extends OperationNodeTransformer {
 	}
 }
 
+
 class InlineInternalStateVtableTransformer extends OperationNodeTransformer {
-	constructor(private readonly cacheTables: Map<string, unknown>) {
+	constructor(
+		private readonly cacheTables: Map<string, unknown>,
+		private readonly hasOpenTransaction: boolean
+	) {
 		super();
 	}
 
@@ -122,7 +130,12 @@ class InlineInternalStateVtableTransformer extends OperationNodeTransformer {
 		}
 
 		const metadata = buildInlineMetadata(transformed, references);
-		return applyInlineRewrites(transformed, metadata, this.cacheTables);
+		return applyInlineRewrites(
+			transformed,
+			metadata,
+			this.cacheTables,
+			this.hasOpenTransaction
+		);
 	}
 }
 
@@ -220,18 +233,25 @@ function buildInlineMetadata(
 function applyInlineRewrites(
 	select: SelectQueryNode,
 	metadata: Map<string, InlineRewriteMetadata>,
-	cacheTables: Map<string, unknown>
+	cacheTables: Map<string, unknown>,
+	hasOpenTransaction: boolean
 ): SelectQueryNode {
 	const froms = select.from?.froms
 		? select.from.froms.map((from) =>
-				inlineTableReference(from, metadata, cacheTables, null)
+			inlineTableReference(from, metadata, cacheTables, null, hasOpenTransaction)
 			)
 		: undefined;
 	const joins = select.joins
 		? select.joins.map((join) =>
 				Object.freeze({
 					...join,
-					table: inlineTableReference(join.table, metadata, cacheTables, null),
+					table: inlineTableReference(
+						join.table,
+						metadata,
+						cacheTables,
+						null,
+						hasOpenTransaction
+					),
 				})
 			)
 		: undefined;
@@ -247,7 +267,8 @@ function inlineTableReference(
 	node: OperationNode,
 	metadata: Map<string, InlineRewriteMetadata>,
 	cacheTables: Map<string, unknown>,
-	aliasName: string | null
+	aliasName: string | null,
+	hasOpenTransaction: boolean
 ): OperationNode {
 	if (AliasNode.is(node)) {
 		const identifier = extractIdentifier(node.alias);
@@ -255,7 +276,8 @@ function inlineTableReference(
 			node.node as OperationNode,
 			metadata,
 			cacheTables,
-			identifier ?? null
+			identifier ?? null,
+			hasOpenTransaction
 		);
 		if (inner === node.node) {
 			return node;
@@ -267,7 +289,8 @@ function inlineTableReference(
 			node.node,
 			metadata,
 			cacheTables,
-			aliasName
+			aliasName,
+			hasOpenTransaction
 		);
 		if (inner === node.node) {
 			return node;
@@ -284,6 +307,7 @@ function inlineTableReference(
 			schemaKeys: info.schemaKeys,
 			cacheTables,
 			selectedColumns: info.selectedColumns,
+			hasOpenTransaction,
 		});
 	const subquery = ParensNode.create(RawNode.createWithSql(rewriteSql));
 		if (aliasName) {
@@ -573,13 +597,13 @@ const ALL_SEGMENT_COLUMNS = [
 ] as const;
 
 const BASE_SEGMENT_COLUMNS = new Set<string>([
-    "entity_id",
-    "schema_key",
-    "file_id",
-    "version_id",
-    "created_at",
-    "change_id",
-    "priority",
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"version_id",
+	"created_at",
+	"change_id",
+	"priority",
 ]);
 
 function collectSelectedColumns(
@@ -734,6 +758,7 @@ function buildInternalStateRewriteSql(options: {
 	schemaKeys: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
+	hasOpenTransaction: boolean;
 }): string {
 	const projectionSql = buildRewriteProjectionSql(options.selectedColumns);
 	const schemaFilterList = options.schemaKeys ?? [];
@@ -756,10 +781,11 @@ function buildInternalStateRewriteSql(options: {
 		"c.version_id",
 		"c.change_id",
 	];
-	const segments: string[] = [
-		buildTransactionSegment(schemaFilter, candidateColumns),
-		buildUntrackedSegment(schemaFilter, candidateColumns),
-	];
+	const segments: string[] = [];
+	if (options.hasOpenTransaction !== false) {
+		segments.push(buildTransactionSegment(schemaFilter, candidateColumns));
+	}
+	segments.push(buildUntrackedSegment(schemaFilter, candidateColumns));
 	const cacheSegment = buildCacheSegment(
 		cacheSource,
 		schemaFilter,
@@ -783,6 +809,10 @@ LEFT JOIN lix_internal_state_writer ws_src ON
   ws_src.schema_key = w.schema_key AND
   ws_src.version_id = w.inherited_from_version_id`
 		: "";
+	const transactionJoinSql = options.hasOpenTransaction !== false
+		? `
+LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
+		: "";
 
 	const body = `WITH
   candidates AS (
@@ -796,7 +826,7 @@ ${indent(projectionSql, 2)}
 FROM ranked w
 ${writerJoinSql}
 LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
-LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id
+${transactionJoinSql}
 WHERE w.rn = 1`;
 
 	return `(\n${body}\n)\n`;

@@ -16,6 +16,7 @@ type PreprocessContext = {
 	storedSchemas: Map<string, unknown>;
 	cacheTables: Map<string, unknown>;
 	trace?: PreprocessorTrace;
+	hasOpenTransaction?: boolean;
 };
 
 /**
@@ -45,6 +46,7 @@ export function preprocessRootOperationNode(
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
 		trace: undefined,
+		hasOpenTransaction: true,
 	}
 ): RootOperationNode {
 	return pipeline.reduce(
@@ -52,6 +54,7 @@ export function preprocessRootOperationNode(
 			step({
 				node,
 				...context,
+				hasOpenTransaction: context.hasOpenTransaction ?? true,
 			}),
 		input
 	);

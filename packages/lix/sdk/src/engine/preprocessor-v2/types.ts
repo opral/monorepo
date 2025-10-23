@@ -25,6 +25,7 @@ export type PreprocessorStep = (context: {
 	storedSchemas: Map<string, unknown>;
 	cacheTables: Map<string, unknown>;
 	trace?: PreprocessorTrace;
+	hasOpenTransaction?: boolean;
 }) => RootOperationNode;
 
 /**
