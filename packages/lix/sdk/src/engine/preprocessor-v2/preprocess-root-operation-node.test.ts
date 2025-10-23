@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { internalQueryBuilder } from "../internal-query-builder.js";
 import { preprocessRootOperationNode } from "./preprocess-root-operation-node.js";
 import { openLix } from "../../lix/index.js";
-import { type RootOperationNode } from "kysely";
 import { compile } from "./compile.js";
 import type { PreprocessorTrace } from "./types.js";
+import { parse } from "./sql-parser/parser.js";
+import { toRootOperationNode } from "./sql-parser/to-root-operation-node.js";
 
 async function collectStoredSchemas(lix: Awaited<ReturnType<typeof openLix>>) {
 	const rows = await lix.db
@@ -45,11 +45,12 @@ test("accepts internal state vtable queries", async () => {
 		],
 	});
 
-	const query = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable")
-		.selectAll("lix_internal_state_vtable");
-
-	const node = query.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+		SELECT *
+		FROM lix_internal_state_vtable
+	`)
+	);
 
 	const compiled = compile(preprocessRootOperationNode(node));
 
@@ -91,12 +92,13 @@ test("entity view rewrite flows through state and vtable pipeline", async () => 
 	const storedSchemas = await collectStoredSchemas(lix);
 	const trace: PreprocessorTrace = [];
 
-	const qb = internalQueryBuilder as any;
-	const node = qb
-		.selectFrom("pipeline_schema as ps")
-		.selectAll("ps")
-		.where("ps.id", "=", "row-1")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+		SELECT ps.*
+		FROM pipeline_schema AS ps
+		WHERE ps.id = 'row-1'
+	`)
+	);
 
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,
@@ -158,14 +160,14 @@ test("rewrites join between two entity views", async () => {
 	const storedSchemas = await collectStoredSchemas(lix);
 	const trace: PreprocessorTrace = [];
 
-	const qb = internalQueryBuilder as any;
-	const node = qb
-		.selectFrom("pipeline_schema as current")
-		.innerJoin("pipeline_schema_all as snapshot", (join: any) =>
-			join.onRef("current.lixcol_entity_id", "=", "snapshot.lixcol_entity_id")
-		)
-		.select(["current.id", "snapshot.lixcol_version_id"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+		SELECT current.id, snapshot.lixcol_version_id
+		FROM pipeline_schema AS current
+		INNER JOIN pipeline_schema_all AS snapshot
+			ON current.lixcol_entity_id = snapshot.lixcol_entity_id
+	`)
+	);
 
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,
@@ -250,16 +252,15 @@ test("rewrites join mixing entity and raw state views", async () => {
 	const storedSchemas = await collectStoredSchemas(lix);
 	const trace: PreprocessorTrace = [];
 
-	const qb = internalQueryBuilder as any;
-	const node = qb
-		.selectFrom("pipeline_schema as ps")
-		.innerJoin("lix_internal_state_vtable as v", (join: any) =>
-			join
-				.onRef("ps.lixcol_entity_id", "=", "v.entity_id")
-				.onRef("ps.lixcol_schema_key", "=", "v.schema_key")
-		)
-		.select(["ps.id", "ps.lixcol_schema_key", "v.snapshot_content"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+		SELECT ps.id, ps.lixcol_schema_key, v.snapshot_content
+		FROM pipeline_schema AS ps
+		INNER JOIN lix_internal_state_vtable AS v
+			ON ps.lixcol_entity_id = v.entity_id
+			AND ps.lixcol_schema_key = v.schema_key
+	`)
+	);
 
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,
@@ -332,17 +333,16 @@ test("rewrites nested subquery with entity view references", async () => {
 	const storedSchemas = await collectStoredSchemas(lix);
 	const trace: PreprocessorTrace = [];
 
-	const qb = internalQueryBuilder as any;
-	const source = qb
-		.selectFrom("pipeline_schema as inner_ps")
-		.select(["inner_ps.id", "inner_ps.lixcol_schema_key"])
-		.where("inner_ps.id", "=", "row-1")
-		.as("source");
-
-	const node = qb
-		.selectFrom(source)
-		.select(["source.id", "source.lixcol_schema_key"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+		SELECT source.id, source.lixcol_schema_key
+		FROM (
+			SELECT inner_ps.id, inner_ps.lixcol_schema_key
+			FROM pipeline_schema AS inner_ps
+			WHERE inner_ps.id = 'row-1'
+		) AS source
+	`)
+	);
 
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,

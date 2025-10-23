@@ -139,6 +139,12 @@ class SqlParser extends CstParser {
 		this.SUBRULE(this.columnReference, { LABEL: "left" });
 		this.CONSUME(Equals);
 		this.SUBRULE1(this.columnReference, { LABEL: "right" });
+		this.MANY(() => {
+			this.CONSUME1(And);
+			this.SUBRULE2(this.columnReference, { LABEL: "extraLeft" });
+			this.CONSUME2(Equals);
+			this.SUBRULE3(this.columnReference, { LABEL: "extraRight" });
+		});
 	});
 
 	private readonly whereClause: () => CstNode = this.RULE("whereClause", () => {

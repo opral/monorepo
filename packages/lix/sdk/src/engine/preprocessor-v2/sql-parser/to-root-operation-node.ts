@@ -153,6 +153,8 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		table?: CstNode[];
 		left?: CstNode[];
 		right?: CstNode[];
+		extraLeft?: CstNode[];
+		extraRight?: CstNode[];
 	}): JoinDefinition {
 		const tableNode = ctx.table?.[0];
 		if (!tableNode) {
@@ -166,11 +168,25 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		}
 		const left = this.visit(leftNode) as OperationNode;
 		const right = this.visit(rightNode) as OperationNode;
-		const on = BinaryOperationNode.create(
+		let on: OperationNode = BinaryOperationNode.create(
 			left,
 			OperatorNode.create("="),
 			right
 		);
+		const extraLeftNodes = ctx.extraLeft ?? [];
+		const extraRightNodes = ctx.extraRight ?? [];
+		for (let index = 0; index < extraLeftNodes.length; index += 1) {
+			const extraLeft = this.visit(extraLeftNodes[index]!) as OperationNode;
+			const extraRight = this.visit(extraRightNodes[index]!) as OperationNode;
+			on = AndNode.create(
+				on,
+				BinaryOperationNode.create(
+					extraLeft,
+					OperatorNode.create("="),
+					extraRight
+				)
+			);
+		}
 		const joinTypeToken = ctx.joinType?.[0];
 		const joinType = joinTypeToken
 			? normalizeJoinType(joinTypeToken.image)

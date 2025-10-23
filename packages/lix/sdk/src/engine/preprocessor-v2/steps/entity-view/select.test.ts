@@ -1,15 +1,13 @@
 import { describe, expect, test } from "vitest";
-import type { RootOperationNode } from "kysely";
 import { openLix } from "../../../../lix/open-lix.js";
-import { internalQueryBuilder } from "../../../internal-query-builder.js";
 import { compile } from "../../compile.js";
 import { rewriteEntityViewSelect } from "./select.js";
 import type { PreprocessorTrace } from "../../types.js";
-
-const qb = internalQueryBuilder as any;
+import { parse } from "../../sql-parser/parser.js";
+import { toRootOperationNode } from "../../sql-parser/to-root-operation-node.js";
 
 function applyRewrite(
-	node: RootOperationNode,
+	node: ReturnType<typeof toRootOperationNode>,
 	overrides?: Partial<{
 		storedSchemas: Map<string, unknown>;
 		cacheTables: Map<string, unknown>;
@@ -57,11 +55,13 @@ describe("rewriteEntityViewSelect", () => {
 		const lix = await openLix({});
 		const storedSchemas = await collectStoredSchemas(lix);
 
-		const node = qb
-			.selectFrom("lix_key_value as kv")
-			.select(["kv.id", "kv.value"])
-			.where("kv.id", "=", "counter")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT kv.id, kv.value
+		FROM lix_key_value AS kv
+		WHERE kv.id = 'counter'
+		`)
+		);
 
 		const trace: PreprocessorTrace = [];
 		const rewritten = applyRewrite(node, {
@@ -99,10 +99,12 @@ describe("rewriteEntityViewSelect", () => {
 
 		const storedSchemas = await collectStoredSchemas(lix);
 
-		const node = qb
-			.selectFrom("alias_test as a")
-			.select(["a.id", "a.label"])
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT a.id, a.label
+		FROM alias_test AS a
+		`)
+		);
 
 		const rewritten = applyRewrite(node, {
 			storedSchemas,
@@ -136,20 +138,26 @@ describe("rewriteEntityViewSelect", () => {
 
 		const storedSchemas = await collectStoredSchemas(lix);
 
-		const baseNode = qb
-			.selectFrom("unit_test_schema as u")
-			.selectAll("u")
-			.toOperationNode() as RootOperationNode;
+		const baseNode = toRootOperationNode(
+			parse(`
+		SELECT u.*
+		FROM unit_test_schema AS u
+		`)
+		);
 
-		const allNode = qb
-			.selectFrom("unit_test_schema_all")
-			.selectAll()
-			.toOperationNode() as RootOperationNode;
+		const allNode = toRootOperationNode(
+			parse(`
+		SELECT *
+		FROM unit_test_schema_all
+		`)
+		);
 
-		const historyNode = qb
-			.selectFrom("unit_test_schema_history")
-			.selectAll()
-			.toOperationNode() as RootOperationNode;
+		const historyNode = toRootOperationNode(
+			parse(`
+		SELECT *
+		FROM unit_test_schema_history
+		`)
+		);
 
 		const baseSql = compile(applyRewrite(baseNode, { storedSchemas })).sql;
 		const allSql = compile(applyRewrite(allNode, { storedSchemas })).sql;
@@ -190,10 +198,12 @@ describe("rewriteEntityViewSelect", () => {
 
 		const storedSchemas = await collectStoredSchemas(lix);
 
-		const node = qb
-			.selectFrom("limited_views_schema_all")
-			.selectAll()
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT *
+		FROM limited_views_schema_all
+		`)
+		);
 
 		expect(() => applyRewrite(node, { storedSchemas })).toThrow(
 			/entity view 'limited_views_schema_all'/i
@@ -244,11 +254,13 @@ describe("rewriteEntityViewSelect", () => {
 			})
 			.execute();
 
-		const node = qb
-			.selectFrom("e2e_schema as e")
-			.select("e.name")
-			.where("e.id", "=", "row-1")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT e.name
+		FROM e2e_schema AS e
+		WHERE e.id = 'row-1'
+		`)
+		);
 
 		const { sql, parameters } = compile(applyRewrite(node, { storedSchemas }));
 
@@ -305,11 +317,13 @@ describe("rewriteEntityViewSelect", () => {
 			})
 			.execute();
 
-		const node = qb
-			.selectFrom("inherited_version_schema as s")
-			.select("s.lixcol_inherited_from_version_id")
-			.where("s.id", "=", "entity-1")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT s.lixcol_inherited_from_version_id
+		FROM inherited_version_schema AS s
+		WHERE s.id = 'entity-1'
+		`)
+		);
 
 		const { sql, parameters } = compile(applyRewrite(node, { storedSchemas }));
 
@@ -330,11 +344,13 @@ describe("rewriteEntityViewSelect", () => {
 		const lix = await openLix({});
 		const storedSchemas = await collectStoredSchemas(lix);
 
-		const node = qb
-			.selectFrom("lix_key_value as kv")
-			.select(["kv.id", "kv.value"])
-			.where("kv.id", "=", "counter")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT kv.id, kv.value
+		FROM lix_key_value AS kv
+		WHERE kv.id = 'counter'
+		`)
+		);
 
 		const first = compile(applyRewrite(node, { storedSchemas }));
 		const second = compile(applyRewrite(node, { storedSchemas }));
@@ -348,11 +364,13 @@ describe("rewriteEntityViewSelect", () => {
 	test("rewrites only when stored schema exists", async () => {
 		const lix = await openLix({});
 
-		const node = qb
-			.selectFrom("transient_schema as t")
-			.select("t.name")
-			.where("t.id", "=", "row-1")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+		SELECT t.name
+		FROM transient_schema AS t
+		WHERE t.id = 'row-1'
+		`)
+		);
 
 		const unchanged = compile(
 			applyRewrite(node, { storedSchemas: new Map() })
@@ -400,8 +418,6 @@ describe("rewriteEntityViewSelect", () => {
 			.execute();
 
 		const { sql, parameters } = compile(applyRewrite(node, { storedSchemas }));
-
-		console.log(sql);
 
 		const rows = lix.engine!.sqlite.exec({
 			sql,

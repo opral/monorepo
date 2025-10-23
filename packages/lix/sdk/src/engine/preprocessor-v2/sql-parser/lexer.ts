@@ -8,82 +8,82 @@ export const Whitespace: TokenType = createToken({
 
 export const Select: TokenType = createToken({
 	name: "Select",
-	pattern: /select/i,
+	pattern: /select\b/i,
 });
 
 export const From: TokenType = createToken({
 	name: "From",
-	pattern: /from/i,
+	pattern: /from\b/i,
 });
 
 export const Where: TokenType = createToken({
 	name: "Where",
-	pattern: /where/i,
+	pattern: /where\b/i,
 });
 
 export const And: TokenType = createToken({
 	name: "And",
-	pattern: /and/i,
+	pattern: /and\b/i,
 });
 
 export const Or: TokenType = createToken({
 	name: "Or",
-	pattern: /or/i,
+	pattern: /or\b/i,
 });
 
 export const Order: TokenType = createToken({
 	name: "Order",
-	pattern: /order/i,
+	pattern: /order\b/i,
 });
 
 export const By: TokenType = createToken({
 	name: "By",
-	pattern: /by/i,
+	pattern: /by\b/i,
 });
 
 export const Asc: TokenType = createToken({
 	name: "Asc",
-	pattern: /asc/i,
+	pattern: /asc\b/i,
 });
 
 export const Desc: TokenType = createToken({
 	name: "Desc",
-	pattern: /desc/i,
+	pattern: /desc\b/i,
 });
 
 export const Inner: TokenType = createToken({
 	name: "Inner",
-	pattern: /inner/i,
+	pattern: /inner\b/i,
 });
 
 export const Left: TokenType = createToken({
 	name: "Left",
-	pattern: /left/i,
+	pattern: /left\b/i,
 });
 
 export const Right: TokenType = createToken({
 	name: "Right",
-	pattern: /right/i,
+	pattern: /right\b/i,
 });
 
 export const Full: TokenType = createToken({
 	name: "Full",
-	pattern: /full/i,
+	pattern: /full\b/i,
 });
 
 export const Join: TokenType = createToken({
 	name: "Join",
-	pattern: /join/i,
+	pattern: /join\b/i,
 });
 
 export const On: TokenType = createToken({
 	name: "On",
-	pattern: /on/i,
+	pattern: /on\b/i,
 });
 
 export const As: TokenType = createToken({
 	name: "As",
-	pattern: /as/i,
+	pattern: /as\b/i,
 });
 
 export const Identifier: TokenType = createToken({

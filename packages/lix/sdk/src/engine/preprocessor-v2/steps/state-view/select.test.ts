@@ -1,18 +1,19 @@
 import { describe, expect, test } from "vitest";
-import type { RootOperationNode } from "kysely";
-import { internalQueryBuilder } from "../../../internal-query-builder.js";
 import type { PreprocessorTrace } from "../../types.js";
 import { compile } from "../../compile.js";
 import { rewriteStateViewSelect } from "./select.js";
+import { parse } from "../../sql-parser/parser.js";
+import { toRootOperationNode } from "../../sql-parser/to-root-operation-node.js";
 
 describe("rewriteStateViewSelect", () => {
 	test("rewrites state view into a state_all-backed subquery", () => {
-		const qb = internalQueryBuilder as any;
-		const node = qb
-			.selectFrom("state as s")
-			.selectAll("s")
-			.where("s.schema_key", "=", "test_schema")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+			SELECT s.*
+			FROM state AS s
+			WHERE s.schema_key = 'test_schema'
+		`)
+		);
 
 		const trace: PreprocessorTrace = [];
 		const rewritten = rewriteStateViewSelect({
@@ -38,17 +39,16 @@ describe("rewriteStateViewSelect", () => {
 	});
 
 	test("rewrites nested state reference within an entity view alias", () => {
-		const qb = internalQueryBuilder as any;
-		const node = qb
-			.selectFrom((eb: any) =>
-				eb
-					.selectFrom("state as s")
-					.selectAll("s")
-					.where("s.schema_key", "=", "test_schema")
-					.as("wrapped")
-			)
-			.selectAll("wrapped")
-			.toOperationNode() as RootOperationNode;
+		const node = toRootOperationNode(
+			parse(`
+			SELECT wrapped.*
+			FROM (
+				SELECT s.*
+				FROM state AS s
+				WHERE s.schema_key = 'test_schema'
+			) AS wrapped
+		`)
+		);
 
 		const trace: PreprocessorTrace = [];
 		const rewritten = rewriteStateViewSelect({
