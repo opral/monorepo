@@ -11,9 +11,7 @@ import type { CommonTableExpressionNode } from "kysely";
  * const cteName = extractCteName(cte);
  * ```
  */
-export function extractCteName(
-	node: CommonTableExpressionNode
-): string | null {
+export function extractCteName(node: CommonTableExpressionNode): string | null {
 	const tableNode = node.name.table;
 	const identifier = tableNode.table.identifier;
 

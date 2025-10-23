@@ -26,3 +26,36 @@ export type PreprocessorStep = (context: {
 	cacheTables: Map<string, unknown>;
 	trace?: PreprocessorTrace;
 }) => RootOperationNode;
+
+/**
+ * Arguments accepted by the query preprocessor function.
+ */
+export interface PreprocessorArgs {
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	sideEffects?: boolean;
+}
+
+/**
+ * Signature of the query preprocessor function that transforms SQL before execution.
+ */
+export type PreprocessorFn = (args: PreprocessorArgs) => PreprocessorResult;
+
+/**
+ * Shared result shape produced by the query preprocessor.
+ *
+ * @example
+ * ```ts
+ * import type { PreprocessorResult } from "./types.js";
+ *
+ * const result: PreprocessorResult = {
+ *   sql: "SELECT 1",
+ *   parameters: [],
+ * };
+ * ```
+ */
+export interface PreprocessorResult {
+	sql: string;
+	parameters: ReadonlyArray<unknown>;
+	expandedSql?: string;
+}

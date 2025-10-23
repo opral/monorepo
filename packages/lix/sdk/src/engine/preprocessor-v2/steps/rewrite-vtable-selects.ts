@@ -81,7 +81,9 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		cacheTables,
 		selectedColumns,
 	});
-	trace?.push(buildTraceEntry(ensured, schemaSummary, selectedColumns, aliases));
+	trace?.push(
+		buildTraceEntry(ensured, schemaSummary, selectedColumns, aliases)
+	);
 	return ensured;
 };
 
@@ -477,9 +479,7 @@ function buildRewriteProjectionSql(
 	selectedColumns: SelectedProjection[] | null
 ): string {
 	const builder = internalQueryBuilder as unknown as {
-		selectFrom: (
-			table: string
-		) => {
+		selectFrom: (table: string) => {
 			selectAll: (table: string) => { compile: () => { sql: string } };
 			select: (
 				callback: (eb: {
@@ -491,9 +491,7 @@ function buildRewriteProjectionSql(
 		};
 	};
 
-	const baseQuery = builder.selectFrom(
-		`${REWRITTEN_STATE_VTABLE} as w`
-	);
+	const baseQuery = builder.selectFrom(`${REWRITTEN_STATE_VTABLE} as w`);
 	const query =
 		selectedColumns === null || selectedColumns.length === 0
 			? baseQuery.selectAll("w")
@@ -501,7 +499,7 @@ function buildRewriteProjectionSql(
 					selectedColumns.map((entry) =>
 						eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column)
 					)
-			  );
+				);
 
 	const { sql } = query.compile();
 	const match = sql.match(/^select\s+(?<projection>[\s\S]+?)\s+from\s+/i);
@@ -515,18 +513,18 @@ function buildProjectionColumnSet(
 	rankedColumns: Set<string>;
 } {
 	if (selectedColumns === null) {
-	return {
-		candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
-		rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
-	};
-}
-const candidateColumns = new Set<string>(REQUIRED_SEGMENT_COLUMNS);
-const rankedColumns = new Set<string>(candidateColumns);
-for (const entry of selectedColumns) {
-	candidateColumns.add(entry.column);
-	rankedColumns.add(entry.column);
-}
-return { candidateColumns, rankedColumns };
+		return {
+			candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
+			rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
+		};
+	}
+	const candidateColumns = new Set<string>(REQUIRED_SEGMENT_COLUMNS);
+	const rankedColumns = new Set<string>(candidateColumns);
+	for (const entry of selectedColumns) {
+		candidateColumns.add(entry.column);
+		rankedColumns.add(entry.column);
+	}
+	return { candidateColumns, rankedColumns };
 }
 
 const NEWLINE = "\n";
@@ -623,7 +621,10 @@ function buildTransactionSegment(
 ): string {
 	const filterClause = schemaFilter ? `WHERE ${schemaFilter}` : "";
 	const columns: Array<[string, string]> = [
-		["_pk", `'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk`],
+		[
+			"_pk",
+			`'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk`,
+		],
 		["entity_id", "txn.entity_id AS entity_id"],
 		["schema_key", "txn.schema_key AS schema_key"],
 		["file_id", "txn.file_id AS file_id"],
@@ -661,7 +662,10 @@ function buildUntrackedSegment(
 		? schemaFilter.replace(/txn\./g, "unt.")
 		: null;
 	const columns: Array<[string, string]> = [
-		["_pk", `'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk`],
+		[
+			"_pk",
+			`'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk`,
+		],
 		["entity_id", "unt.entity_id AS entity_id"],
 		["schema_key", "unt.schema_key AS schema_key"],
 		["file_id", "unt.file_id AS file_id"],
@@ -707,7 +711,10 @@ function buildCacheSegment(
 		? `(${cacheSource})`
 		: cacheSource;
 	const columns: Array<[string, string]> = [
-		["_pk", `'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk`],
+		[
+			"_pk",
+			`'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk`,
+		],
 		["entity_id", "cache.entity_id AS entity_id"],
 		["schema_key", "cache.schema_key AS schema_key"],
 		["file_id", "cache.file_id AS file_id"],
@@ -717,7 +724,10 @@ function buildCacheSegment(
 		["version_id", "cache.version_id AS version_id"],
 		["created_at", "cache.created_at AS created_at"],
 		["updated_at", "cache.updated_at AS updated_at"],
-		["inherited_from_version_id", "cache.inherited_from_version_id AS inherited_from_version_id"],
+		[
+			"inherited_from_version_id",
+			"cache.inherited_from_version_id AS inherited_from_version_id",
+		],
 		["change_id", "cache.change_id AS change_id"],
 		["untracked", "0 AS untracked"],
 		["commit_id", "cache.commit_id AS commit_id"],

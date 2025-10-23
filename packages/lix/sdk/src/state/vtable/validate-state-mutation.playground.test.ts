@@ -430,12 +430,8 @@ test("validateStateMutation explain plans", async () => {
 						normalised.includes(
 							'select "snapshot_content" from "lix_internal_state_vtable" where'
 						) &&
-						normalised.includes(
-							'json_extract(snapshot_content, \'$.id\') = ?'
-						) &&
-						normalised.includes(
-							'"inherited_from_version_id" is null'
-						) &&
+						normalised.includes("json_extract(snapshot_content, '$.id') = ?") &&
+						normalised.includes('"inherited_from_version_id" is null') &&
 						schemaParam === FK_TARGET_SCHEMA["x-lix-key"]
 					);
 				},
