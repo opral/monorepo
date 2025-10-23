@@ -2,10 +2,15 @@ import { CstParser, EOF, type CstNode } from "chevrotain";
 import {
 	Select,
 	From,
+	Where,
 	Identifier,
 	Star,
 	Semicolon,
 	As,
+	Dot,
+	Equals,
+	StringLiteral,
+	NumberLiteral,
 	QuotedIdentifier,
 	sqlTokens,
 	sqlLexer,
@@ -26,7 +31,11 @@ class SqlParser extends CstParser {
 			this.SUBRULE(this.selectList);
 			this.CONSUME(From);
 			this.SUBRULE(this.tableReference);
-			this.OPTION(() => this.CONSUME(Semicolon));
+			this.OPTION1(() => {
+				this.CONSUME(Where);
+				this.SUBRULE(this.whereClause);
+			});
+			this.OPTION2(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
 		}
 	);
@@ -38,30 +47,50 @@ class SqlParser extends CstParser {
 	private readonly tableReference: () => CstNode = this.RULE(
 		"tableReference",
 		() => {
-			this.SUBRULE(this.tableIdentifierRule);
+			this.SUBRULE(this.identifier);
 			this.OPTION(() => {
 				this.OPTION1(() => this.CONSUME(As));
-				this.SUBRULE(this.aliasIdentifierRule);
+				this.SUBRULE1(this.identifier);
 			});
 		}
 	);
 
-	private readonly tableIdentifierRule: () => CstNode = this.RULE(
-		"tableIdentifier",
+	private readonly whereClause: () => CstNode = this.RULE(
+		"whereClause",
+		() => {
+			this.SUBRULE(this.columnReference);
+			this.CONSUME(Equals);
+			this.SUBRULE(this.valueExpression);
+		}
+	);
+
+	private readonly columnReference: () => CstNode = this.RULE(
+		"columnReference",
+		() => {
+			this.SUBRULE(this.identifier);
+			this.OPTION(() => {
+				this.CONSUME(Dot);
+				this.SUBRULE1(this.identifier);
+			});
+		}
+	);
+
+	private readonly valueExpression: () => CstNode = this.RULE(
+		"valueExpression",
 		() => {
 			this.OR([
-				{ ALT: () => this.CONSUME(Identifier) },
-				{ ALT: () => this.CONSUME(QuotedIdentifier) },
+				{ ALT: () => this.CONSUME(StringLiteral) },
+				{ ALT: () => this.CONSUME(NumberLiteral) },
 			]);
 		}
 	);
 
-	private readonly aliasIdentifierRule: () => CstNode = this.RULE(
-		"aliasIdentifier",
+	private readonly identifier: () => CstNode = this.RULE(
+		"identifier",
 		() => {
 			this.OR([
-				{ ALT: () => this.CONSUME1(Identifier) },
-				{ ALT: () => this.CONSUME1(QuotedIdentifier) },
+				{ ALT: () => this.CONSUME(Identifier) },
+				{ ALT: () => this.CONSUME(QuotedIdentifier) },
 			]);
 		}
 	);

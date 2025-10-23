@@ -1,14 +1,13 @@
 import { test, expect } from "vitest";
 import { Kysely } from "kysely";
-import { createEngineDialect } from "../../../database/sqlite/engine-dialect.js";
-import { createInMemoryDatabase } from "../../../database/sqlite/create-in-memory-database.js";
+import { createLixDialect } from "../../../database/sqlite/lix-dialect.js";
 import { toKysely } from "./to-kysely.js";
 import { parse } from "./parser.js";
 import { compile } from "../compile.js";
 
 const kysely = new Kysely<any>({
-	dialect: createEngineDialect({
-		database: await createInMemoryDatabase({}),
+	dialect: createLixDialect({
+		sqlite: {} as any,
 	}),
 });
 
@@ -18,9 +17,10 @@ test("SELECT matches kysely", () => {
 	const expectedNode = kysely.selectFrom("table").selectAll().toOperationNode();
 	const node = toKysely(parse(sql));
 	const out = compile(node);
+	const expectedOut = compile(expectedNode);
 
-	expect(out.sql.toLowerCase()).toBe('select * from "table"');
-	expect(out.parameters).toEqual([]);
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
 	expect(node).toEqual(expectedNode);
 });
 
@@ -33,9 +33,59 @@ test("handles quoted table names", () => {
 		.toOperationNode();
 	const node = toKysely(parse(sql));
 	const out = compile(node);
+	const expectedOut = compile(expectedNode);
 
-	expect(out.sql.toLowerCase()).toBe('select * from "lix_internal_state_vtable"');
-	expect(out.parameters).toEqual([]);
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports table aliases with AS", () => {
+	const sql = `SELECT * FROM projects AS p`;
+
+	const expectedNode = kysely
+		.selectFrom("projects as p")
+		.selectAll()
+		.toOperationNode();
+	const node = toKysely(parse(sql));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports table aliases without AS", () => {
+	const sql = `SELECT * FROM state_all s`;
+
+	const expectedNode = kysely
+		.selectFrom("state_all as s")
+		.selectAll()
+		.toOperationNode();
+	const node = toKysely(parse(sql));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports where clauses with string literals", () => {
+	const sql = `SELECT * FROM state_all s WHERE s.schema_key = 'test_schema'`;
+
+	const expectedNode = kysely
+		.selectFrom("state_all as s")
+		.selectAll()
+		.where("s.schema_key", "=", "test_schema")
+		.toOperationNode();
+	const node = toKysely(parse(sql));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
 	expect(node).toEqual(expectedNode);
 });
 
