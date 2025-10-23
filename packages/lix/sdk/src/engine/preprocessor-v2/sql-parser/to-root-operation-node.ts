@@ -11,10 +11,12 @@ import {
 	ColumnNode,
 	BinaryOperationNode,
 	OperatorNode,
+	AndNode,
 	OrNode,
 	ParensNode,
 	ValueNode,
 	JoinNode,
+	OrderByItemNode,
 	type OperationNode,
 	type RootOperationNode,
 } from "kysely";
@@ -42,13 +44,20 @@ type SelectColumn = {
 
 type JoinDefinition = {
 	table: TableReference;
-	joinType: "InnerJoin";
+	joinType: JoinType;
 	on: OperationNode;
 };
+
+type JoinType = "InnerJoin" | "LeftJoin" | "RightJoin" | "FullJoin";
 
 type TableReference = {
 	table: string;
 	alias?: string;
+};
+
+type OrderBySegment = {
+	reference: ReferenceNode;
+	direction?: "asc" | "desc";
 };
 
 class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
@@ -62,6 +71,7 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		from: CstNode[];
 		joins?: CstNode[];
 		whereClause?: CstNode[];
+		orderBy?: CstNode[];
 	}): RootOperationNode {
 		const selectList = ctx.selectList?.[0];
 		if (!selectList) {
@@ -79,9 +89,14 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		const filter = whereNode
 			? (this.visit(whereNode) as OperationNode)
 			: undefined;
+		const orderByNode = ctx.orderBy?.[0];
+		const orderBy = orderByNode
+			? (this.visit(orderByNode) as OrderBySegment[])
+			: undefined;
 		return buildSelectQuery(projection, table, {
 			joins,
 			filter,
+			orderBy,
 		});
 	}
 
@@ -117,6 +132,7 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 	}
 
 	public joinClause(ctx: {
+		joinType?: IToken[];
 		table?: CstNode[];
 		left?: CstNode[];
 		right?: CstNode[];
@@ -138,9 +154,13 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 			OperatorNode.create("="),
 			right
 		);
+		const joinTypeToken = ctx.joinType?.[0];
+		const joinType = joinTypeToken
+			? normalizeJoinType(joinTypeToken.image)
+			: "InnerJoin";
 		return {
 			table,
-			joinType: "InnerJoin",
+			joinType,
 			on,
 		};
 	}
@@ -204,6 +224,20 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		return current;
 	}
 
+	public andExpression(ctx: { operands?: CstNode[] }): OperationNode {
+		const operands =
+			ctx.operands?.map((operand) => this.visit(operand) as OperationNode) ??
+			[];
+		if (operands.length === 0) {
+			throw new Error("logical expression missing operands");
+		}
+		let current = operands[0]!;
+		for (let index = 1; index < operands.length; index += 1) {
+			current = AndNode.create(current, operands[index]!);
+		}
+		return current;
+	}
+
 	public atomicPredicate(ctx: {
 		column?: CstNode[];
 		value?: CstNode[];
@@ -234,6 +268,31 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		}
 		const expression = this.visit(inner) as OperationNode;
 		return ParensNode.create(expression);
+	}
+
+	public orderByClause(ctx: { items?: CstNode[] }): OrderBySegment[] {
+		return (
+			ctx.items?.map((item) => this.visit(item) as OrderBySegment) ?? []
+		);
+	}
+
+	public orderByItem(ctx: {
+		expression?: CstNode[];
+		direction?: IToken[];
+	}): OrderBySegment {
+		const expressionNode = ctx.expression?.[0];
+		if (!expressionNode) {
+			throw new Error("order by item missing expression");
+		}
+		const referenceNode = this.visit(expressionNode) as OperationNode;
+		if (!ReferenceNode.is(referenceNode)) {
+			throw new Error("order by item must be a column reference");
+		}
+		const directionToken = ctx.direction?.[0];
+		const direction = directionToken
+			? normalizeOrderDirection(directionToken.image)
+			: undefined;
+		return { reference: referenceNode, direction };
 	}
 
 	public valueExpression(ctx: {
@@ -271,6 +330,7 @@ function buildSelectQuery(
 	options?: {
 		joins?: JoinDefinition[];
 		filter?: OperationNode;
+		orderBy?: OrderBySegment[];
 	}
 ): RootOperationNode {
 	const relation = createTableRelation(reference);
@@ -317,7 +377,45 @@ function buildSelectQuery(
 			where: WhereNode.create(options.filter),
 		}) as SelectQueryNode;
 	}
+	const orderBySegments = options?.orderBy ?? [];
+	if (orderBySegments.length > 0) {
+		const orderByItems = orderBySegments.map((segment) =>
+			OrderByItemNode.create(
+				segment.reference,
+				segment.direction
+					? RawNode.createWithSql(segment.direction)
+					: undefined
+			)
+		);
+		withSelections = SelectQueryNode.cloneWithOrderByItems(
+			withSelections,
+			orderByItems
+		);
+	}
 	return withSelections;
+}
+
+function normalizeJoinType(value: string): JoinType {
+	switch (value.toLowerCase()) {
+		case "inner":
+			return "InnerJoin";
+		case "left":
+			return "LeftJoin";
+		case "right":
+			return "RightJoin";
+		case "full":
+			return "FullJoin";
+		default:
+			return "InnerJoin";
+	}
+}
+
+function normalizeOrderDirection(value: string): "asc" | "desc" {
+	const normalized = value.toLowerCase();
+	if (normalized === "asc" || normalized === "desc") {
+		return normalized;
+	}
+	throw new Error(`unsupported order by direction '${value}'`);
 }
 
 function createTableRelation(reference: TableReference): OperationNode {

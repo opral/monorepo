@@ -151,6 +151,36 @@ test("supports OR conditions in where clauses", () => {
 	expect(node).toEqual(expectedNode);
 });
 
+test("supports AND conditions in where clauses", () => {
+	const query = `
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key' AND v.file_id = 'file_id'
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("lix_internal_state_vtable as v")
+		.selectAll("v")
+		.where((eb) =>
+			eb.and([
+				eb("v.schema_key", "=", "test_schema_key"),
+				eb("v.file_id", "=", "file_id"),
+			])
+		)
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	const normalize = (sql: string) => sql.replace(/[()]/g, "");
+	expect(normalize(out.sql)).toBe(normalize(expectedOut.sql));
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	const whereNode = (node as any).where?.where;
+	expect(whereNode?.kind).toBe("AndNode");
+	expect(whereNode?.left?.kind).toBe("BinaryOperationNode");
+	expect(whereNode?.right?.kind).toBe("BinaryOperationNode");
+});
+
 test("supports inner joins", () => {
 	const query = `
 		SELECT a.schema_key, a.file_id, b.writer_key
@@ -165,6 +195,52 @@ test("supports inner joins", () => {
 			join.onRef("a.schema_key", "=", "b.schema_key")
 		)
 		.select(["a.schema_key", "a.file_id", "b.writer_key"])
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports left joins", () => {
+	const query = `
+		SELECT a.schema_key, b.writer_key
+		FROM lix_internal_state_vtable AS a
+		LEFT JOIN lix_internal_state_vtable AS b
+			ON a.schema_key = b.schema_key
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("lix_internal_state_vtable as a")
+		.leftJoin("lix_internal_state_vtable as b", (join) =>
+			 join.onRef("a.schema_key", "=", "b.schema_key")
+		)
+		.select(["a.schema_key", "b.writer_key"])
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports order by clauses", () => {
+	const query = `
+		SELECT v.schema_key, v.file_id
+		FROM lix_internal_state_vtable AS v
+		ORDER BY v.schema_key ASC, v.file_id DESC
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("lix_internal_state_vtable as v")
+		.select(["v.schema_key", "v.file_id"])
+		.orderBy("v.schema_key", "asc")
+		.orderBy("v.file_id", "desc")
 		.toOperationNode();
 	const node = toRootOperationNode(parse(query));
 	const out = compile(node);

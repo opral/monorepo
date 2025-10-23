@@ -3,8 +3,16 @@ import {
 	Select,
 	From,
 	Where,
+	And,
 	Or,
+	Order,
+	By,
+	Asc,
+	Desc,
 	Inner,
+	Left,
+	Right,
+	Full,
 	Join,
 	On,
 	Identifier,
@@ -46,7 +54,12 @@ class SqlParser extends CstParser {
 				this.CONSUME(Where);
 				this.SUBRULE(this.whereClause);
 			});
-			this.OPTION2(() => this.CONSUME(Semicolon));
+			this.OPTION2(() => {
+				this.CONSUME(Order);
+				this.CONSUME(By);
+				this.SUBRULE(this.orderByClause, { LABEL: "orderBy" });
+			});
+			this.OPTION3(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
 		}
 	);
@@ -93,7 +106,14 @@ class SqlParser extends CstParser {
 	);
 
 	private readonly joinClause: () => CstNode = this.RULE("joinClause", () => {
-		this.OPTION(() => this.CONSUME(Inner));
+		this.OPTION(() => {
+			this.OR([
+				{ ALT: () => this.CONSUME(Inner, { LABEL: "joinType" }) },
+				{ ALT: () => this.CONSUME(Left, { LABEL: "joinType" }) },
+				{ ALT: () => this.CONSUME(Right, { LABEL: "joinType" }) },
+				{ ALT: () => this.CONSUME(Full, { LABEL: "joinType" }) },
+			]);
+		});
 		this.CONSUME(Join);
 		this.SUBRULE(this.tableReference, { LABEL: "table" });
 		this.CONSUME(On);
@@ -109,9 +129,20 @@ class SqlParser extends CstParser {
 	private readonly orExpression: () => CstNode = this.RULE(
 		"orExpression",
 		() => {
-			this.SUBRULE(this.atomicPredicate, { LABEL: "operands" });
+			this.SUBRULE(this.andExpression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.CONSUME(Or);
+				this.SUBRULE1(this.andExpression, { LABEL: "operands" });
+			});
+		}
+	);
+
+	private readonly andExpression: () => CstNode = this.RULE(
+		"andExpression",
+		() => {
+			this.SUBRULE(this.atomicPredicate, { LABEL: "operands" });
+			this.MANY(() => {
+				this.CONSUME(And);
 				this.SUBRULE1(this.atomicPredicate, { LABEL: "operands" });
 			});
 		}
@@ -136,6 +167,30 @@ class SqlParser extends CstParser {
 					},
 				},
 			]);
+		}
+	);
+
+	private readonly orderByClause: () => CstNode = this.RULE(
+		"orderByClause",
+		() => {
+			this.SUBRULE(this.orderByItem, { LABEL: "items" });
+			this.MANY(() => {
+				this.CONSUME(Comma);
+				this.SUBRULE1(this.orderByItem, { LABEL: "items" });
+			});
+		}
+	);
+
+	private readonly orderByItem: () => CstNode = this.RULE(
+		"orderByItem",
+		() => {
+			this.SUBRULE(this.columnReference, { LABEL: "expression" });
+			this.OPTION(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Asc, { LABEL: "direction" }) },
+					{ ALT: () => this.CONSUME(Desc, { LABEL: "direction" }) },
+				]);
+			});
 		}
 	);
 
