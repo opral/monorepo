@@ -6,6 +6,7 @@ import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import { createLixAgent, getAgentState } from "./create-lix-agent.js";
 import { sendMessage } from "./send-message.js";
 import { persistConversation } from "./conversation-storage.js";
+import type { AgentConversationMessage } from "./types.js";
 
 const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
 	{ type: "stream-start", warnings: [] },
@@ -120,9 +121,11 @@ describe("sendMessage", () => {
 		expect(conversationId).toBeTruthy();
 
 		expect(assistantOne.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
-		expect(
-			assistantOne.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
-		).toBe("write_file");
+		const firstStepOne =
+			assistantOne.lixcol_metadata?.lix_agent_sdk_steps?.find(
+				(step) => step.kind === "tool_call"
+			);
+		expect(firstStepOne && firstStepOne.tool_name).toBe("write_file");
 
 		const rowsAfterOne = await lix.db
 			.selectFrom("conversation_message")
@@ -163,9 +166,11 @@ describe("sendMessage", () => {
 		const assistantTwo = await turnTwo.complete({ autoAcceptProposals: true });
 		expect(assistantTwo).toBeTruthy();
 
-		expect(
-			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.[0]?.tool_name
-		).toBe("write_file");
+		const firstStepTwo =
+			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.find(
+				(step) => step.kind === "tool_call"
+			);
+		expect(firstStepTwo && firstStepTwo.tool_name).toBe("write_file");
 
 		const rowsAfterTwo = await lix.db
 			.selectFrom("conversation_message")
@@ -237,6 +242,58 @@ describe("sendMessage", () => {
 			.select(["id"])
 			.execute();
 		expect(rows).toHaveLength(inMemoryConversation.messages.length);
+	});
+
+	test("emits thinking events and records thinking steps", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		model.setToolHandler(() => [
+			{ type: "stream-start", warnings: [] },
+			{ type: "reasoning-start", id: "think-1" },
+			{ type: "reasoning-delta", id: "think-1", delta: "pondering files" },
+			{ type: "reasoning-end", id: "think-1" },
+			{ type: "text-start", id: "text-1" },
+			{ type: "text-delta", id: "text-1", delta: "done" },
+			{ type: "text-end", id: "text-1" },
+			{
+				type: "finish",
+				finishReason: "stop",
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			},
+		]);
+
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("think first"),
+			persist: false,
+		});
+
+		const thinkingChunks: string[] = [];
+		let finalMessage: AgentConversationMessage | null = null;
+		for await (const event of stream) {
+			if (event.type === "thinking") {
+				thinkingChunks.push(event.delta);
+			} else if (event.type === "message") {
+				finalMessage = event.message;
+			} else if (event.type === "error") {
+				throw event.error instanceof Error
+					? event.error
+					: new Error(String(event.error ?? "unknown"));
+			}
+		}
+
+		expect(thinkingChunks.join("")).toBe("pondering files");
+		expect(finalMessage).toBeTruthy();
+		const thinkingSteps =
+			finalMessage?.lixcol_metadata?.lix_agent_sdk_steps?.filter(
+				(step) => step.kind === "thinking"
+			) ?? [];
+		expect(thinkingSteps).toHaveLength(1);
+		expect(thinkingSteps[0]?.text).toBe("pondering files");
+
+		await lix.close();
 	});
 
 	test("write_file tool persists structured data changes", async () => {

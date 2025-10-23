@@ -15,6 +15,8 @@ export type {
 	AgentConversationMessageMetadata,
 	AgentStep,
 	AgentToolEvent,
+	AgentToolStep,
+	AgentThinkingStep,
 	AgentEvent,
 	AgentTurn,
 	ChangeProposalSummary,

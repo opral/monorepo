@@ -18,6 +18,8 @@ import {
 	type AgentConversationMessageMetadata,
 	type AgentEvent,
 	type AgentStep,
+	type AgentThinkingStep,
+	type AgentToolStep,
 	type Agent as LixAgent,
 	type ChangeProposalSummary,
 	sendMessage,
@@ -287,140 +289,6 @@ export function AgentView({ context }: AgentViewProps) {
 		setPendingProposal(null);
 	}, [agent, lix]);
 
-	const send = useCallback(
-		async (
-			text: string,
-				opts?: {
-					signal?: AbortSignal;
-					onToolEvent?: (event: Extract<AgentEvent, { type: "tool" }>) => void;
-				},
-		) => {
-			if (!agent) throw new Error("Agent not ready");
-			const trimmed = text.trim();
-			if (!trimmed) return;
-			setError(null);
-			setPendingProposal(null);
-			setPending(true);
-			try {
-				const convId = await ensureConversationId();
-				setConversationId(convId);
-				console.log("[agent] send", {
-					conversationId: convId,
-					proposalMode: true,
-				});
-				const stream = sendMessage({
-					agent,
-					prompt: fromPlainText(trimmed),
-					conversationId: convId,
-					signal: opts?.signal,
-					proposalMode: true,
-				});
-				let finalMessage: AgentConversationMessage | null = null;
-				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
-				let activeProposal: {
-					id: string;
-					summary?: string;
-					details?: ChangeProposalSummary | null;
-				} | null = null;
-				const handledToolPhases = new Map<
-					string,
-					Extract<AgentEvent, { type: "tool" }>["phase"]
-				>();
-				for await (const event of stream) {
-					switch (event.type) {
-						case "tool": {
-							const { call, phase } = event;
-							const name = call.tool_name;
-							if (name && handledToolPhases.get(call.id) !== phase) {
-								handledToolPhases.set(call.id, phase);
-								opts?.onToolEvent?.(event);
-							}
-							break;
-						}
-						case "proposal:open": {
-							const details = agent
-								? getChangeProposalSummary(agent, event.proposal.id)
-								: null;
-							activeProposal = {
-								id: event.proposal.id,
-								summary: event.proposal.summary,
-								details,
-							};
-							setPendingProposal({
-								proposalId: event.proposal.id,
-								summary: event.proposal.summary,
-								details,
-								accept: event.accept,
-								reject: event.reject,
-							});
-							if (context && details?.fileId && details.filePath) {
-								console.log("Proposal event", event);
-								const diffConfig = createProposalDiffConfig({
-									fileId: details.fileId,
-									filePath: details.filePath,
-									sourceVersionId: details.source_version_id,
-									targetVersionId: details.target_version_id,
-								});
-								context.openDiffView?.(details.fileId, details.filePath, {
-									focus: true,
-									diffConfig,
-								});
-							}
-							break;
-						}
-						case "proposal:closed": {
-							const details = activeProposal?.details;
-							if (context && details?.fileId) {
-								context.closeDiffView?.(details.fileId);
-							}
-							setPendingProposal(null);
-							activeProposal = null;
-							break;
-						}
-						case "message":
-							finalMessage = event.message;
-							setConversationId(String(event.message.conversation_id));
-							break;
-						case "error":
-							errorEvent = event;
-							break;
-						default:
-							break;
-					}
-				}
-
-				if (errorEvent) {
-					const err =
-						errorEvent.error instanceof Error
-							? errorEvent.error
-							: new Error(String(errorEvent.error ?? "Agent stream error"));
-					throw err;
-				}
-
-				if (!finalMessage) {
-					throw new Error("Agent did not produce a final message");
-				}
-
-				console.log("[agent] turn completed", {
-					conversationId: finalMessage.conversation_id,
-				});
-			} catch (err) {
-				const message =
-					err instanceof Error ? err.message : String(err ?? "unknown");
-				if (err instanceof ChangeProposalRejectedError) {
-					setError(
-						"Change proposal rejected. Tell the agent what to do differently.",
-					);
-				} else {
-					setError(`Error: ${message}`);
-				}
-				throw err;
-			} finally {
-				setPending(false);
-			}
-		},
-		[agent, ensureConversationId, context],
-	);
 
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -652,6 +520,218 @@ export function AgentView({ context }: AgentViewProps) {
 			});
 		},
 		[]
+	);
+	const handleThinkingEvent = useCallback(
+		(event: Extract<AgentEvent, { type: "thinking" }>) => {
+			const sessionId = activeSessionRef.current;
+			if (!sessionId) return;
+			setToolSessions((prev) => {
+				const index = prev.findIndex((session) => session.id === sessionId);
+				if (index === -1) return prev;
+				const session = prev[index];
+				const runs = session.runs.slice();
+				const existingIdx = runs.findIndex((run) => run.id === event.id);
+				const nextContent =
+					(existingIdx === -1 ? "" : runs[existingIdx]?.content ?? "") +
+					event.delta;
+				if (existingIdx === -1) {
+					runs.push({
+						id: event.id,
+						title: "Thinking",
+						status: "thinking",
+						content: nextContent,
+					});
+				} else {
+					const existing = runs[existingIdx];
+					runs[existingIdx] = {
+						...existing,
+						title: existing.title || "Thinking",
+						status: "thinking",
+						content: nextContent,
+					};
+				}
+				const next = prev.slice();
+				next[index] = { ...session, runs };
+				return next;
+			});
+		},
+		[]
+	);
+	const handleStepEvent = useCallback(
+		(event: Extract<AgentEvent, { type: "step" }>) => {
+			if (event.step.kind !== "thinking") return;
+			const thinkingStep = event.step as AgentThinkingStep;
+			const sessionId = activeSessionRef.current;
+			if (!sessionId) return;
+			setToolSessions((prev) => {
+				const index = prev.findIndex((session) => session.id === sessionId);
+				if (index === -1) return prev;
+				const session = prev[index];
+				const runs = session.runs.slice();
+				const existingIdx = runs.findIndex((run) => run.id === thinkingStep.id);
+				if (existingIdx === -1) {
+					runs.push({
+						id: thinkingStep.id,
+						title: "Thinking",
+						status: "thinking",
+						content: thinkingStep.text,
+					});
+				} else {
+					const existing = runs[existingIdx];
+					runs[existingIdx] = {
+						...existing,
+						title: existing.title || "Thinking",
+						status: "thinking",
+						content: thinkingStep.text,
+					};
+				}
+				const next = prev.slice();
+				next[index] = { ...session, runs };
+				return next;
+			});
+		},
+		[]
+	);
+
+	const send = useCallback(
+		async (
+			text: string,
+				opts?: {
+					signal?: AbortSignal;
+					onToolEvent?: (event: Extract<AgentEvent, { type: "tool" }>) => void;
+				},
+		) => {
+			if (!agent) throw new Error("Agent not ready");
+			const trimmed = text.trim();
+			if (!trimmed) return;
+			setError(null);
+			setPendingProposal(null);
+			setPending(true);
+			try {
+				const convId = await ensureConversationId();
+				setConversationId(convId);
+				console.log("[agent] send", {
+					conversationId: convId,
+					proposalMode: true,
+				});
+				const stream = sendMessage({
+					agent,
+					prompt: fromPlainText(trimmed),
+					conversationId: convId,
+					signal: opts?.signal,
+					proposalMode: true,
+				});
+				let finalMessage: AgentConversationMessage | null = null;
+				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
+				let activeProposal: {
+					id: string;
+					summary?: string;
+					details?: ChangeProposalSummary | null;
+				} | null = null;
+				const handledToolPhases = new Map<
+					string,
+					Extract<AgentEvent, { type: "tool" }>["phase"]
+				>();
+				for await (const event of stream) {
+					switch (event.type) {
+						case "thinking":
+							handleThinkingEvent(event);
+							break;
+						case "tool": {
+							const { call, phase } = event;
+							const name = call.tool_name;
+							if (name && handledToolPhases.get(call.id) !== phase) {
+								handledToolPhases.set(call.id, phase);
+								opts?.onToolEvent?.(event);
+							}
+							break;
+						}
+						case "step":
+							handleStepEvent(event);
+							break;
+						case "proposal:open": {
+							const details = agent
+								? getChangeProposalSummary(agent, event.proposal.id)
+								: null;
+							activeProposal = {
+								id: event.proposal.id,
+								summary: event.proposal.summary,
+								details,
+							};
+							setPendingProposal({
+								proposalId: event.proposal.id,
+								summary: event.proposal.summary,
+								details,
+								accept: event.accept,
+								reject: event.reject,
+							});
+							if (context && details?.fileId && details.filePath) {
+								console.log("Proposal event", event);
+								const diffConfig = createProposalDiffConfig({
+									fileId: details.fileId,
+									filePath: details.filePath,
+									sourceVersionId: details.source_version_id,
+									targetVersionId: details.target_version_id,
+								});
+								context.openDiffView?.(details.fileId, details.filePath, {
+									focus: true,
+									diffConfig,
+								});
+							}
+							break;
+						}
+						case "proposal:closed": {
+							const details = activeProposal?.details;
+							if (context && details?.fileId) {
+								context.closeDiffView?.(details.fileId);
+							}
+							setPendingProposal(null);
+							activeProposal = null;
+							break;
+						}
+						case "message":
+							finalMessage = event.message;
+							setConversationId(String(event.message.conversation_id));
+							break;
+						case "error":
+							errorEvent = event;
+							break;
+						default:
+							break;
+					}
+				}
+
+				if (errorEvent) {
+					const err =
+						errorEvent.error instanceof Error
+							? errorEvent.error
+							: new Error(String(errorEvent.error ?? "Agent stream error"));
+					throw err;
+				}
+
+				if (!finalMessage) {
+					throw new Error("Agent did not produce a final message");
+				}
+
+				console.log("[agent] turn completed", {
+					conversationId: finalMessage.conversation_id,
+				});
+			} catch (err) {
+				const message =
+					err instanceof Error ? err.message : String(err ?? "unknown");
+				if (err instanceof ChangeProposalRejectedError) {
+					setError(
+						"Change proposal rejected. Tell the agent what to do differently.",
+					);
+				} else {
+					setError(`Error: ${message}`);
+				}
+				throw err;
+			} finally {
+				setPending(false);
+			}
+		},
+		[agent, ensureConversationId, context, handleThinkingEvent, handleStepEvent],
 	);
 
 	useEffect(() => {
@@ -1005,29 +1085,41 @@ export const view = createReactViewDefinition({
 export default AgentView;
 
 function stepsToToolRuns(steps: AgentStep[]): ToolRun[] {
-	return steps
-		.filter((step) => (step.kind ?? "tool_call") === "tool_call")
-		.map((step) => {
-			const status = statusFromStep(step.status);
-			const formattedInput = stringifyPayload(step.tool_input);
-			const formattedOutput =
-				status === "error"
-					? (step.error_text ?? stringifyPayload(step.tool_output))
-					: stringifyPayload(step.tool_output);
-			const titleSource = step.tool_name
-				? formatToolName(step.tool_name)
-				: (step.label ?? "Tool");
-			return {
-				id: step.id,
-				title: titleSource,
-				detail: step.label,
-				status,
-				input: formattedInput,
-				output: formattedOutput,
-				content:
-					status === "error" ? (step.error_text ?? undefined) : undefined,
-			};
+	const runs: ToolRun[] = [];
+	for (const step of steps) {
+		if (step.kind === "thinking") {
+			const thinking = step as AgentThinkingStep;
+			runs.push({
+				id: thinking.id,
+				title: "Thinking",
+				status: "thinking",
+				content: thinking.text,
+			});
+			continue;
+		}
+		if (step.kind !== "tool_call") continue;
+		const toolStep = step as AgentToolStep;
+		const status = statusFromStep(toolStep.status);
+		const formattedInput = stringifyPayload(toolStep.tool_input);
+		const formattedOutput =
+			status === "error"
+				? (toolStep.error_text ?? stringifyPayload(toolStep.tool_output))
+				: stringifyPayload(toolStep.tool_output);
+		const titleSource = toolStep.tool_name
+			? formatToolName(toolStep.tool_name)
+			: (toolStep.label ?? "Tool");
+		runs.push({
+			id: toolStep.id,
+			title: titleSource,
+			detail: toolStep.label,
+			status,
+			input: formattedInput,
+			output: formattedOutput,
+			content:
+				status === "error" ? (toolStep.error_text ?? undefined) : undefined,
 		});
+	}
+	return runs;
 }
 
 function statusFromStep(status?: string): ToolRunStatus {

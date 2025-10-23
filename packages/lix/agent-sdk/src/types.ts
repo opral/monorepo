@@ -1,10 +1,12 @@
 import type { LixConversation, LixConversationMessage } from "@lix-js/sdk";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 
+type IsoDateTime = string;
+
 /**
  * A single tool call recorded for an agent turn.
  */
-export type AgentStep = {
+export type AgentToolStep = {
 	id: string;
 	kind: "tool_call";
 	label?: string;
@@ -13,9 +15,25 @@ export type AgentStep = {
 	tool_input?: unknown;
 	tool_output?: unknown;
 	error_text?: string;
-	started_at: string;
-	finished_at?: string;
+	started_at: IsoDateTime;
+	finished_at?: IsoDateTime;
 };
+
+/**
+ * Internal reasoning/thinking captured before a tool call or assistant reply.
+ */
+export type AgentThinkingStep = {
+	id: string;
+	kind: "thinking";
+	text: string;
+	started_at: IsoDateTime;
+	finished_at: IsoDateTime;
+};
+
+/**
+ * A recorded step for an agent turn.
+ */
+export type AgentStep = AgentToolStep | AgentThinkingStep;
 
 /**
  * Metadata we store alongside conversation messages persisted via the Lix SDK.
@@ -39,7 +57,7 @@ export type AgentConversationMessageMetadata = {
 export type AgentToolEvent = {
 	type: "tool";
 	phase: "start" | "finish" | "error";
-	call: AgentStep;
+	call: AgentToolStep;
 };
 
 /**
@@ -99,6 +117,7 @@ export type ChangeProposalSummary = {
  */
 export type AgentEvent =
 	| { type: "text"; delta: string }
+	| { type: "thinking"; id: string; delta: string }
 	| { type: "message"; message: AgentConversationMessage }
 	| AgentToolEvent
 	| { type: "step"; step: AgentStep }

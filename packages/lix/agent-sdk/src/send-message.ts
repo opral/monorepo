@@ -20,6 +20,8 @@ import type {
 	AgentConversationMessageMetadata,
 	AgentEvent,
 	AgentStep,
+	AgentToolStep,
+	AgentThinkingStep,
 	AgentTurnMessage,
 	AgentTurn,
 	ChangeProposalSummary,
@@ -336,21 +338,24 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 		}
 
 		const steps: AgentStep[] = [];
-		const toolPhases = new Map<string, AgentStep["status"]>();
+		const toolPhases = new Map<string, AgentToolStep["status"]>();
 		const emitStep = (step: AgentStep) => {
 			queue.push({ type: "step", step: { ...step } });
 		};
 		const emitToolEvent = (
 			phase: "start" | "finish" | "error",
-			call: AgentStep
+			call: AgentToolStep
 		) => {
 			queue.push({ type: "tool", phase, call: { ...call } });
 		};
 		const upsertStep = (
 			toolCallId: string,
-			updater: (step: AgentStep) => AgentStep
+			updater: (step: AgentToolStep) => AgentToolStep
 		) => {
-			const index = steps.findIndex((step) => step.id === toolCallId);
+			const index = steps.findIndex(
+				(step): step is AgentToolStep =>
+					step.id === toolCallId && step.kind === "tool_call"
+			);
 			if (index === -1) {
 				const next = updater({
 					id: toolCallId,
@@ -362,7 +367,19 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 				steps.push(next);
 				return next;
 			}
-			const next = updater(steps[index]!);
+			const existing = steps[index];
+			if (!existing || existing.kind !== "tool_call") {
+				const next = updater({
+					id: toolCallId,
+					kind: "tool_call",
+					status: "running",
+					tool_name: "",
+					started_at: new Date().toISOString(),
+				});
+				steps.splice(index, 0, next);
+				return next;
+			}
+			const next = updater(existing);
 			steps[index] = next;
 			return next;
 		};
@@ -437,6 +454,36 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 			markFailed(toolCallId, error, label);
 		};
 
+		const thinkingBuffers = new Map<
+			string,
+			{ text: string; started_at: string }
+		>();
+		const flushThinking = () => {
+			if (thinkingBuffers.size === 0) return;
+			const finished_at = new Date().toISOString();
+			for (const [id, data] of thinkingBuffers) {
+				const step: AgentThinkingStep = {
+					id,
+					kind: "thinking",
+					text: data.text,
+					started_at: data.started_at,
+					finished_at,
+				};
+				steps.push(step);
+				emitStep(step);
+			}
+			thinkingBuffers.clear();
+		};
+		const enqueueThinking = (id: string, delta: string) => {
+			let record = thinkingBuffers.get(id);
+			if (!record) {
+				record = { text: "", started_at: new Date().toISOString() };
+				thinkingBuffers.set(id, record);
+			}
+			record.text += delta;
+			queue.push({ type: "thinking", id, delta });
+		};
+
 		let assistantText = "";
 		try {
 			const aiSdkStream = streamText({
@@ -454,12 +501,27 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 				},
 				onChunk: ({ chunk }) => {
 					switch (chunk.type) {
+						case "reasoning-delta": {
+							const record = chunk as Record<string, unknown>;
+							const text =
+								typeof record.text === "string"
+									? (record.text as string)
+									: typeof record.delta === "string"
+										? (record.delta as string)
+										: "";
+							if (text.length > 0) {
+								enqueueThinking(chunk.id, text);
+							}
+							break;
+						}
 						case "text-delta": {
+							flushThinking();
 							assistantText += chunk.text;
 							queue.push({ type: "text", delta: chunk.text });
 							break;
 						}
 						case "tool-call": {
+							flushThinking();
 							const input = parseToolInput(chunk.input);
 							const label = extractToolLabel(chunk);
 							if (
@@ -472,6 +534,7 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 							break;
 						}
 						case "tool-result": {
+							flushThinking();
 							const label = extractToolLabel(chunk);
 							markFinished(chunk.toolCallId, chunk.output, label);
 							break;
@@ -509,6 +572,7 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 			if (abortReason) {
 				throw abortReason;
 			}
+			flushThinking();
 			const stepSnapshot =
 				steps.length > 0 ? steps.map((step) => ({ ...step })) : [];
 			const metadata: AgentConversationMessageMetadata = {
@@ -520,14 +584,14 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 			const assistantBody = fromPlainText(assistantText);
 
 			let assistantMessage: AgentConversationMessage;
-			if (shouldPersist) {
-				const stored = await createConversationMessage({
-					lix: agent.lix,
-					id: assistantMessageId,
-					conversation_id: conversationId,
-					body: assistantBody,
-					lixcol_metadata: metadata,
-				});
+				if (shouldPersist) {
+					const stored = await createConversationMessage({
+						lix: agent.lix,
+						id: assistantMessageId,
+						conversation_id: conversationId,
+						body: assistantBody,
+						lixcol_metadata: metadata,
+					});
 				assistantMessage = {
 					...stored,
 					id: String(stored.id),
