@@ -11,14 +11,14 @@ import type { SqliteWasmDatabase } from "./create-in-memory-database.js";
  *
  * @example
  *   const db = await createInMemoryDatabase({ readOnly: false });
- *   const dialect = createEngineDialect({ database: db });
+ *   const dialect = createLixDialect({ sqlite: db });
  */
-export const createEngineDialect = (args: { database: SqliteWasmDatabase }) => {
+export const createLixDialect = (args: { sqlite: SqliteWasmDatabase }) => {
 	return {
 		createAdapter: (): SqliteAdapter => new SqliteAdapter(),
 		createDriver: (): SqliteWasmDriver =>
 			new SqliteWasmDriver({
-				database: args.database,
+				database: args.sqlite,
 			}),
 		createIntrospector: (db: any): SqliteIntrospector =>
 			new SqliteIntrospector(db),

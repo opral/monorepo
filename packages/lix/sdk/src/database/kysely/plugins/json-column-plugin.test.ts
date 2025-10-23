@@ -110,7 +110,7 @@ test("object-only columns prevent double serialization", async () => {
 			any_json: any;
 		};
 	}>({
-		dialect: createEngineDialect({ database }),
+		dialect: createEngineDialect({ sqlite: database }),
 		plugins: [
 			JSONColumnPlugin({
 				mock_table: {
@@ -203,7 +203,7 @@ const mockDatabase = async () => {
 		};
 	}>({
 		dialect: createEngineDialect({
-			database,
+			sqlite: database,
 		}),
 		plugins: [
 			JSONColumnPlugin({
