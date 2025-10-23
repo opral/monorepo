@@ -32,4 +32,36 @@ describe("rewriteStateAllViewSelect", () => {
 			bindings: ["sa"],
 		});
 	});
+
+	test("rewrites nested state_all reference inside alias subquery", () => {
+		const qb = internalQueryBuilder as any;
+		const node = qb
+			.selectFrom((eb: any) =>
+				eb
+					.selectFrom("state_all")
+					.selectAll()
+					.where("schema_key", "=", "test_schema")
+					.as("wrapped")
+			)
+			.selectAll("wrapped")
+			.toOperationNode() as RootOperationNode;
+
+		const trace: PreprocessorTrace = [];
+		const rewritten = rewriteStateAllViewSelect({
+			node,
+			storedSchemas: new Map(),
+			cacheTables: new Map(),
+			trace,
+		});
+
+		const { sql } = compile(rewritten);
+		const upper = sql.toUpperCase();
+
+		expect(upper).not.toMatch(/\bFROM\s+"?STATE_ALL"?\b/);
+		expect(upper).toContain('FROM "LIX_INTERNAL_STATE_VTABLE"');
+		expect(trace[0]?.payload).toMatchObject({
+			reference_count: 1,
+			bindings: ["state_all"],
+		});
+	});
 });

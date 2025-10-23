@@ -90,6 +90,12 @@ function collectEntityViewReferences(
 	const references: EntityViewReference[] = [];
 	if (select.from?.froms) {
 		for (const candidate of select.from.froms) {
+			if (AliasNode.is(candidate) && SelectQueryNode.is(candidate.node)) {
+				references.push(
+					...collectEntityViewReferences(candidate.node, storedSchemas)
+				);
+				continue;
+			}
 			const reference = resolveEntityViewReference(candidate, storedSchemas);
 			if (reference) {
 				references.push(reference);
@@ -98,9 +104,30 @@ function collectEntityViewReferences(
 	}
 	if (select.joins) {
 		for (const join of select.joins) {
+			if (AliasNode.is(join.table) && SelectQueryNode.is(join.table.node)) {
+				references.push(
+					...collectEntityViewReferences(join.table.node, storedSchemas)
+				);
+				continue;
+			}
 			const reference = resolveEntityViewReference(join.table, storedSchemas);
 			if (reference) {
 				references.push(reference);
+			}
+		}
+	}
+	if (select.setOperations) {
+		for (const operation of select.setOperations) {
+			const expression = operation.expression;
+			if (SelectQueryNode.is(expression)) {
+				references.push(
+					...collectEntityViewReferences(expression, storedSchemas)
+				);
+			} else {
+				const nested = resolveEntityViewReference(expression, storedSchemas);
+				if (nested) {
+					references.push(nested);
+				}
 			}
 		}
 	}
@@ -137,7 +164,10 @@ function resolveEntityViewReference(
 	}
 
 	const viewName = tableId.identifier.name;
-	const schema = resolveStoredSchemaDefinition(viewName, storedSchemas);
+	const schema = storedSchemas.get(viewName) as LixSchemaDefinition | undefined;
+	if (!schema) {
+		return null;
+	}
 	const variant = classifyVariant(viewName);
 
 	if (!isVariantEnabled(schema, variant)) {
@@ -156,19 +186,6 @@ function resolveEntityViewReference(
 		binding: alias ?? viewName,
 		schema,
 	};
-}
-
-function resolveStoredSchemaDefinition(
-	viewName: string,
-	storedSchemas: Map<string, unknown>
-): LixSchemaDefinition {
-	const schema = storedSchemas.get(viewName) as LixSchemaDefinition | undefined;
-	if (!schema) {
-		throw new Error(
-			`Expected stored schema for entity view '${viewName}' but none was provided.`
-		);
-	}
-	return schema;
 }
 
 function classifyVariant(name: string): EntityViewVariant {
@@ -242,51 +259,97 @@ function rewriteSelectQuery(
 		}
 	}
 
-	let joins = select.joins;
-	if (joins && joins.length > 0) {
-		const rewrittenJoins = joins.map((join) => {
-			const rewrittenTable = rewriteRelation(join.table, references);
-			if (rewrittenTable !== join.table) {
-				mutated = true;
-				return Object.freeze({
-					...join,
-					table: rewrittenTable,
-				}) as JoinNode;
-			}
-			return join;
-		});
-		if (mutated) {
-			joins = Object.freeze(rewrittenJoins);
+let joins = select.joins;
+if (joins && joins.length > 0) {
+	const rewrittenJoins = joins.map((join) => {
+		const rewrittenTable = rewriteRelation(join.table, references);
+		if (rewrittenTable !== join.table) {
+			mutated = true;
+			return Object.freeze({
+				...join,
+				table: rewrittenTable,
+			}) as JoinNode;
 		}
-	}
-
-	if (!mutated) {
-		return select;
-	}
-
-	return Object.freeze({
-		...select,
-		from: fromNode,
-		joins,
+		return join;
 	});
+	if (mutated) {
+		joins = Object.freeze(rewrittenJoins);
+	}
+}
+
+let setOperations = select.setOperations;
+if (setOperations && setOperations.length > 0) {
+	const rewrittenOperations = setOperations.map((operation) => {
+		const rewrittenExpression = rewriteSetOperationExpression(
+			operation.expression,
+			references
+		);
+		if (rewrittenExpression !== operation.expression) {
+			mutated = true;
+			return Object.freeze({
+				...operation,
+				expression: rewrittenExpression,
+			}) as typeof operation;
+		}
+		return operation;
+	});
+	if (mutated) {
+		setOperations = Object.freeze(rewrittenOperations);
+	}
+}
+
+if (!mutated) {
+	return select;
+}
+
+return Object.freeze({
+	...select,
+	from: fromNode,
+	joins,
+	setOperations,
+});
+}
+
+function rewriteSetOperationExpression(
+	expression: OperationNode,
+	references: Map<string, EntityViewReference>
+): OperationNode {
+	if (AliasNode.is(expression)) {
+		const rewrittenInner = rewriteSetOperationExpression(expression.node, references);
+		if (rewrittenInner !== expression.node) {
+			return AliasNode.create(rewrittenInner, expression.alias);
+		}
+		return expression;
+	}
+	if (SelectQueryNode.is(expression)) {
+		return rewriteSelectQuery(expression, references);
+	}
+	return rewriteRelation(expression, references);
 }
 
 function rewriteRelation(
 	node: OperationNode,
 	references: Map<string, EntityViewReference>
 ): OperationNode {
-	if (AliasNode.is(node)) {
-		if (!TableNode.is(node.node) || !isPlainIdentifier(node.node.table)) {
-			return node;
+if (AliasNode.is(node)) {
+	if (SelectQueryNode.is(node.node)) {
+		const rewrittenSubquery = rewriteSelectQuery(node.node, references);
+		if (rewrittenSubquery !== node.node) {
+			return AliasNode.create(rewrittenSubquery, node.alias);
 		}
-		const aliasName = IdentifierNode.is(node.alias) ? node.alias.name : null;
-		const binding = aliasName ?? node.node.table.identifier.name;
-		const reference = references.get(binding);
-		if (!reference) {
-			return node;
-		}
-		return createEntityViewAlias(reference);
+		return node;
 	}
+	if (!TableNode.is(node.node) || !isPlainIdentifier(node.node.table)) {
+		return node;
+	}
+	const aliasName = IdentifierNode.is(node.alias) ? node.alias.name : null;
+	const binding = aliasName ?? node.node.table.identifier.name;
+	const reference = references.get(binding);
+	if (!reference) {
+		return node;
+	}
+	return createEntityViewAlias(reference);
+}
 
 	if (TableNode.is(node) && isPlainIdentifier(node.table)) {
 		const binding = node.table.identifier.name;
@@ -322,12 +385,12 @@ function buildEntityViewSubquery(
 }
 
 function buildBaseEntityView(reference: EntityViewReference): SelectQueryNode {
-	const alias = "sa";
+	const alias = "st";
 	const qb = internalQueryBuilder as any;
 	const properties = extractPropertyKeys(reference.schema);
 
 	const builder = qb
-		.selectFrom(`state_all as ${alias}`)
+		.selectFrom(`state as ${alias}`)
 		.select((eb: any) => {
 			const selections = buildPropertySelections(eb, alias, properties);
 			selections.push(eb.ref(`${alias}.entity_id`).as("lixcol_entity_id"));
@@ -335,24 +398,20 @@ function buildBaseEntityView(reference: EntityViewReference): SelectQueryNode {
 			selections.push(eb.ref(`${alias}.file_id`).as("lixcol_file_id"));
 			selections.push(eb.ref(`${alias}.plugin_key`).as("lixcol_plugin_key"));
 			selections.push(
-				sql`COALESCE(${eb.ref(`${alias}.inherited_from_version_id`)}, ${eb.ref(`${alias}.version_id`)})`.as(
-					"lixcol_inherited_from_version_id"
-				)
+				eb
+					.ref(`${alias}.inherited_from_version_id`)
+					.as("lixcol_inherited_from_version_id")
 			);
 			selections.push(eb.ref(`${alias}.created_at`).as("lixcol_created_at"));
 			selections.push(eb.ref(`${alias}.updated_at`).as("lixcol_updated_at"));
 			selections.push(eb.ref(`${alias}.change_id`).as("lixcol_change_id"));
 			selections.push(eb.ref(`${alias}.untracked`).as("lixcol_untracked"));
 			selections.push(eb.ref(`${alias}.commit_id`).as("lixcol_commit_id"));
+			selections.push(eb.ref(`${alias}.writer_key`).as("lixcol_writer_key"));
 			selections.push(eb.ref(`${alias}.metadata`).as("lixcol_metadata"));
 			return selections;
 		})
-		.where(literalEquals(alias, "schema_key", reference.schemaKey))
-		.where(
-			`${alias}.version_id`,
-			"=",
-			qb.selectFrom("active_version").select("version_id")
-		);
+		.where(literalEquals(alias, "schema_key", reference.schemaKey));
 
 	return builder.toOperationNode() as SelectQueryNode;
 }

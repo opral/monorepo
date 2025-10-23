@@ -13,13 +13,8 @@ import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 import { internalQueryBuilder } from "../../../internal-query-builder.js";
 
 /**
- * Rewrites references to the `state_all` view so they bypass the SQLite view
- * layer and target the underlying internal vtable directly.
- *
- * The transformation emits a sub-query that mirrors the legacy view definition,
- * preserving all exposed columns and filters (e.g. dropping tombstones), while
- * ensuring downstream steps (like the vtable rewrite) can operate on the native
- * table representation.
+ * Rewrites references to the `state_all` view so callers query the underlying
+ * vtable directly instead of going through the SQLite view layer.
  */
 export const rewriteStateAllViewSelect: PreprocessorStep = ({
 	node,
@@ -29,16 +24,14 @@ export const rewriteStateAllViewSelect: PreprocessorStep = ({
 		return node;
 	}
 
-	const references = collectStateAllReferences(node);
+	const references: StateAllReference[] = [];
+	const rewritten = rewriteSelectNode(node, references);
+
 	if (references.length === 0) {
-		return node;
+		return rewritten;
 	}
 
-	const rewritten = rewriteSelect(node, references);
-	if (trace) {
-		trace.push(buildTraceEntry(references));
-	}
-
+	trace?.push(buildTraceEntry(references));
 	return rewritten;
 };
 
@@ -46,76 +39,31 @@ interface StateAllReference {
 	readonly binding: string;
 }
 
-function collectStateAllReferences(select: SelectQueryNode): StateAllReference[] {
-	const refs: StateAllReference[] = [];
+type RewriteOutcome = {
+	operation: OperationNode;
+	changed: boolean;
+};
 
-	if (select.from?.froms) {
-		for (const candidate of select.from.froms) {
-			const ref = resolveReference(candidate);
-			if (ref) refs.push(ref);
-		}
-	}
-
-	if (select.joins) {
-		for (const join of select.joins) {
-			const ref = resolveReference(join.table);
-			if (ref) refs.push(ref);
-		}
-	}
-
-	return refs;
-}
-
-function resolveReference(node: OperationNode): StateAllReference | null {
-	if (AliasNode.is(node)) {
-		if (!TableNode.is(node.node)) return null;
-		const identifier = extractIdentifier(node.node.table);
-		if (!identifier || identifier !== "state_all") {
-			return null;
-		}
-		const binding = IdentifierNode.is(node.alias)
-			? node.alias.name
-			: "state_all";
-		return { binding };
-	}
-
-	if (TableNode.is(node)) {
-		const identifier = extractIdentifier(node.table);
-		if (!identifier || identifier !== "state_all") {
-			return null;
-		}
-		return { binding: "state_all" };
-	}
-
-	return null;
-}
-
-function extractIdentifier(
-	node: SchemableIdentifierNode
-): string | null {
-	if (
-		node.kind === "SchemableIdentifierNode" &&
-		node.schema === undefined &&
-		IdentifierNode.is(node.identifier)
-	) {
-		return node.identifier.name;
-	}
-	return null;
-}
-
-function rewriteSelect(
+function rewriteSelectNode(
 	select: SelectQueryNode,
 	references: StateAllReference[]
 ): SelectQueryNode {
 	let mutated = false;
-	let from = select.from;
 
+	const rewriteOperation = (operation: OperationNode): OperationNode => {
+		const { operation: rewritten, changed } = rewriteRelation(
+			operation,
+			references
+		);
+		if (changed) {
+			mutated = true;
+		}
+		return rewritten;
+	};
+
+	let from = select.from;
 	if (from?.froms) {
-		const rewrittenFroms = from.froms.map((candidate) => {
-			const rewritten = rewriteRelation(candidate, references);
-			if (rewritten !== candidate) mutated = true;
-			return rewritten;
-		});
+		const rewrittenFroms = from.froms.map(rewriteOperation);
 		if (mutated) {
 			from = FromNode.create(rewrittenFroms);
 		}
@@ -123,25 +71,27 @@ function rewriteSelect(
 
 	let joins = select.joins;
 	if (joins && joins.length > 0) {
+		let joinMutated = false;
 		const rewrittenJoins = joins.map((join) => {
-			const rewrittenTable = rewriteRelation(join.table, references);
-			if (rewrittenTable !== join.table) {
-				mutated = true;
-				return Object.freeze({
-					...join,
-					table: rewrittenTable,
-				});
+			const { operation, changed } = rewriteRelation(join.table, references);
+			if (!changed) {
+				return join;
 			}
-			return join;
+			joinMutated = true;
+			return Object.freeze({
+				...join,
+				table: operation,
+			});
 		});
-		if (mutated) {
+		if (joinMutated) {
+			mutated = true;
 			joins = Object.freeze(rewrittenJoins);
 		}
 	}
 
 	if (!mutated) {
 		return select;
-}
+	}
 
 	return Object.freeze({
 		...select,
@@ -153,27 +103,72 @@ function rewriteSelect(
 function rewriteRelation(
 	node: OperationNode,
 	references: StateAllReference[]
-): OperationNode {
-	if (AliasNode.is(node) && TableNode.is(node.node)) {
-		const identifier = extractIdentifier(node.node.table);
-		if (identifier !== "state_all") {
-			return node;
+): RewriteOutcome {
+	if (AliasNode.is(node)) {
+		let inner = node.node;
+		let changed = false;
+
+		if (SelectQueryNode.is(inner)) {
+			const rewrittenInner = rewriteSelectNode(inner, references);
+			if (rewrittenInner !== inner) {
+				inner = rewrittenInner;
+				changed = true;
+			}
 		}
-		const binding = IdentifierNode.is(node.alias)
-			? node.alias.name
-			: "state_all";
-		return createStateAllAlias(binding);
+
+		if (TableNode.is(inner)) {
+			const identifier = extractIdentifier(inner.table);
+			if (identifier === "state_all") {
+				const binding = IdentifierNode.is(node.alias)
+					? node.alias.name
+					: "state_all";
+				references.push({ binding });
+				return {
+					operation: createStateAllAlias(binding),
+					changed: true,
+				};
+			}
+		}
+
+		if (changed) {
+			return {
+				operation: AliasNode.create(inner as any, node.alias),
+				changed: true,
+			};
+		}
+
+		return {
+			operation: node,
+			changed: false,
+		};
 	}
 
 	if (TableNode.is(node)) {
 		const identifier = extractIdentifier(node.table);
-		if (identifier !== "state_all") {
-			return node;
+		if (identifier === "state_all") {
+			references.push({ binding: "state_all" });
+			return {
+				operation: createStateAllAlias("state_all"),
+				changed: true,
+			};
 		}
-		return createStateAllAlias("state_all");
 	}
 
-	return node;
+	return {
+		operation: node,
+		changed: false,
+	};
+}
+
+function extractIdentifier(node: SchemableIdentifierNode): string | null {
+	if (
+		node.kind === "SchemableIdentifierNode" &&
+		node.schema === undefined &&
+		IdentifierNode.is(node.identifier)
+	) {
+		return node.identifier.name;
+	}
+	return null;
 }
 
 function createStateAllAlias(binding: string): AliasNode {
@@ -197,9 +192,9 @@ function buildStateAllSubquery(): SelectQueryNode {
 			eb.ref(`${alias}.version_id`).as("version_id"),
 			eb.ref(`${alias}.created_at`).as("created_at"),
 			eb.ref(`${alias}.updated_at`).as("updated_at"),
-			eb.ref(`${alias}.inherited_from_version_id`).as(
-				"inherited_from_version_id"
-			),
+			eb
+				.ref(`${alias}.inherited_from_version_id`)
+				.as("inherited_from_version_id"),
 			eb.ref(`${alias}.change_id`).as("change_id"),
 			eb.ref(`${alias}.untracked`).as("untracked"),
 			eb.ref(`${alias}.commit_id`).as("commit_id"),

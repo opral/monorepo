@@ -158,7 +158,7 @@ describe("rewriteEntityViewSelect", () => {
 		).sql;
 
 		expect(baseSql).toContain("schema_key = 'unit_test_schema'");
-		expect(baseSql.toUpperCase()).toMatch(/FROM\s+"?STATE_ALL"?/);
+		expect(baseSql.toUpperCase()).toMatch(/FROM\s+"?STATE"?/);
 		expect(allSql.toUpperCase()).toMatch(/FROM\s+"?STATE_ALL"?/);
 		expect(allSql.toUpperCase()).toContain(
 			'"SA"."VERSION_ID" AS "LIXCOL_VERSION_ID"'
@@ -354,9 +354,10 @@ describe("rewriteEntityViewSelect", () => {
 			.where("t.id", "=", "row-1")
 			.toOperationNode() as RootOperationNode;
 
-		expect(() => applyRewrite(node, { storedSchemas: new Map() })).toThrow(
-			/transient_schema/i
-		);
+		const unchanged = compile(
+			applyRewrite(node, { storedSchemas: new Map() })
+		).sql;
+		expect(unchanged.toUpperCase()).toMatch(/FROM\s+"?TRANSIENT_SCHEMA"?/);
 
 		const schema = {
 			"x-lix-key": "transient_schema",

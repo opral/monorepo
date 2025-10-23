@@ -14,6 +14,7 @@ import {
 	SelectAllNode,
 	SelectQueryNode,
 	SelectionNode,
+	SetOperationNode,
 	TableNode,
 	ValueNode,
 	WithNode,
@@ -69,17 +70,18 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	);
 	if (schemaSummary.hasDynamic) {
 		throw new Error(
-			"rewriteVtableSelects requires literal schema_key predicates; received ambiguous filter."
+			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
 		);
 	}
 	const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
-		rewritten.selections ?? [],
+		rewritten,
 		tableSet
 	);
+	const normalizedColumns = normalizeSelectedColumns(selectedColumns);
 	const ensured = ensureRewriteCte(rewritten, {
 		schemaKeys: schemaSummary.literals,
 		cacheTables,
-		selectedColumns,
+		selectedColumns: normalizedColumns,
 	});
 	trace?.push(
 		buildTraceEntry(ensured, schemaSummary, selectedColumns, aliases)
@@ -167,7 +169,7 @@ function buildTraceEntry(
 	const projection = determineProjectionKind(select.selections ?? []);
 
 	return {
-		step: "rewriteVtableSelects",
+		step: "rewrite_vtable_selects",
 		payload: {
 			reference_count: aliases.length === 0 ? 1 : aliases.length,
 			aliases,
@@ -184,6 +186,14 @@ function buildTraceEntry(
 
 function collectTableAliases(select: SelectQueryNode): string[] {
 	const aliasSet = new Set<string>();
+	collectTableAliasesInto(select, aliasSet);
+	return Array.from(aliasSet);
+}
+
+function collectTableAliasesInto(
+	select: SelectQueryNode,
+	aliasSet: Set<string>
+): void {
 	if (select.from?.froms) {
 		for (const from of select.from.froms) {
 			collectAliasFromOperation(from, aliasSet);
@@ -194,7 +204,11 @@ function collectTableAliases(select: SelectQueryNode): string[] {
 			collectAliasFromOperation(join.table, aliasSet);
 		}
 	}
-	return Array.from(aliasSet);
+	if (select.setOperations) {
+		for (const operation of select.setOperations) {
+			collectAliasFromOperation(operation.expression, aliasSet);
+		}
+	}
 }
 
 function collectAliasFromOperation(
@@ -206,10 +220,19 @@ function collectAliasFromOperation(
 		if (aliasName && TableNode.is(node.node) && isRewrittenTable(node.node)) {
 			aliases.add(aliasName);
 		}
+		collectAliasFromOperation(node.node as OperationNode, aliases);
+		return;
+	}
+	if (SelectQueryNode.is(node)) {
+		collectTableAliasesInto(node, aliases);
+		return;
+	}
+	if (SetOperationNode.is(node)) {
+		collectAliasFromOperation(node.expression, aliases);
 		return;
 	}
 	if (TableNode.is(node) && isRewrittenTable(node)) {
-		aliases.add(REWRITTEN_STATE_VTABLE);
+		return;
 	}
 }
 
@@ -397,82 +420,110 @@ const REQUIRED_SEGMENT_COLUMNS = new Set<string>([
 	"entity_id",
 	"schema_key",
 	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
 	"version_id",
+	"created_at",
+	"updated_at",
 	"change_id",
 	"inherited_from_version_id",
-	"created_at",
+	"untracked",
+	"commit_id",
+	"metadata",
 	"priority",
 ]);
 
-function collectSelectedColumns(
-	selections: readonly SelectionNode[],
-	tableNames: Set<string>
+function normalizeSelectedColumns(
+	selectedColumns: SelectedProjection[] | null
 ): SelectedProjection[] | null {
-	if (selections.length === 0) {
-		return null;
+	if (!selectedColumns || selectedColumns.length === 0) {
+		return selectedColumns;
 	}
-	const selected: SelectedProjection[] = [];
-	const seen = new Set<string>();
-	for (const selection of selections) {
-		const result = collectColumnsFromNode(
-			selection.selection,
-			tableNames,
-			selected,
-			seen,
-			undefined
-		);
-		if (result === "all") {
-			return null;
+	const normalized = [...selectedColumns];
+	const seen = new Set(normalized.map((entry) => entry.column));
+	for (const required of REQUIRED_SEGMENT_COLUMNS) {
+		if (!seen.has(required)) {
+			normalized.push({ column: required });
 		}
 	}
-	return selected;
+	return normalized;
 }
 
-function collectColumnsFromNode(
-	node: OperationNode,
-	tableNames: Set<string>,
-	selected: SelectedProjection[],
-	seen: Set<string>,
-	alias: string | undefined
-): "all" | "partial" {
-	if (SelectAllNode.is(node)) {
-		return "all";
+function collectSelectedColumns(
+	select: SelectQueryNode,
+	tableNames: Set<string>
+): SelectedProjection[] | null {
+	const collector = new VtableProjectionCollector(tableNames);
+	const aliases = collectSelectionAliases(select, tableNames);
+	collector.transformNode(select);
+	if (collector.selectAll) {
+		return null;
 	}
-	if (AliasNode.is(node)) {
-		const aliasIdentifier = extractIdentifier(node.alias);
-		return collectColumnsFromNode(
-			node.node,
-			tableNames,
-			selected,
-			seen,
-			aliasIdentifier ?? alias
-		);
+	return Array.from(collector.columns, (column) => ({
+		column,
+		alias: aliases.get(column) ?? undefined,
+	}));
+}
+
+function collectSelectionAliases(
+	select: SelectQueryNode,
+	tableNames: Set<string>
+): Map<string, string> {
+	const aliasMap = new Map<string, string>();
+	if (!select.selections) {
+		return aliasMap;
 	}
-	if (ReferenceNode.is(node)) {
+	for (const selection of select.selections) {
+		const selectionNode = selection.selection;
+		if (!AliasNode.is(selectionNode)) {
+			continue;
+		}
+		const aliasIdentifier = selectionNode.alias;
+		if (!IdentifierNode.is(aliasIdentifier)) {
+			continue;
+		}
+		const node = selectionNode.node;
+		if (!ReferenceNode.is(node)) {
+			continue;
+		}
 		const tableIdentifier = extractTableIdentifier(node.table);
 		if (!tableIdentifier || !tableNames.has(tableIdentifier)) {
-			return "partial";
+			continue;
 		}
-		const column = node.column;
-		if (SelectAllNode.is(column)) {
-			return "all";
+		if (!ColumnNode.is(node.column) || !IdentifierNode.is(node.column.column)) {
+			continue;
 		}
-		if (ColumnNode.is(column)) {
-			const identifier = column.column;
-			if (IdentifierNode.is(identifier)) {
-				const aliasName = alias ?? identifier.name;
-				if (!seen.has(aliasName)) {
-					seen.add(aliasName);
-					selected.push({
-						column: identifier.name,
-						alias: aliasName === identifier.name ? undefined : aliasName,
-					});
-				}
+		aliasMap.set(node.column.column.name, aliasIdentifier.name);
+	}
+	return aliasMap;
+}
+
+class VtableProjectionCollector extends OperationNodeTransformer {
+	public readonly columns = new Set<string>();
+	public selectAll = false;
+
+	constructor(private readonly tableNames: Set<string>) {
+		super();
+	}
+
+	override transformReference(
+		node: ReferenceNode,
+		queryId?: QueryId
+	): ReferenceNode {
+		const tableIdentifier = extractTableIdentifier(node.table);
+		if (tableIdentifier && this.tableNames.has(tableIdentifier)) {
+			if (SelectAllNode.is(node.column)) {
+				this.selectAll = true;
+			} else if (
+				ColumnNode.is(node.column) &&
+				IdentifierNode.is(node.column.column)
+			) {
+				this.columns.add(node.column.column.name);
 			}
 		}
-		return "partial";
+		return super.transformReference(node, queryId);
 	}
-	return "partial";
 }
 
 function buildRewriteProjectionSql(
@@ -512,7 +563,7 @@ function buildProjectionColumnSet(
 	candidateColumns: Set<string>;
 	rankedColumns: Set<string>;
 } {
-	if (selectedColumns === null) {
+	if (!selectedColumns || selectedColumns.length === 0) {
 		return {
 			candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
 			rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),

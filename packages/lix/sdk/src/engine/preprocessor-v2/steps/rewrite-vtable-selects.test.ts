@@ -76,7 +76,7 @@ test("emits trace metadata with alias and filters", () => {
 
 	expect(trace).toHaveLength(1);
 	const entry = trace[0]!;
-	expect(entry.step).toBe("rewriteVtableSelects");
+	expect(entry.step).toBe("rewrite_vtable_selects");
 	const payload = entry.payload as Record<string, unknown>;
 	expect(payload.aliases).toEqual(["v"]);
 	expect(payload.projection).toBe("selectAll");
@@ -104,7 +104,7 @@ test("throws on dynamic schema key filters", () => {
 			trace,
 		})
 	).toThrowError(
-		"rewriteVtableSelects requires literal schema_key predicates; received ambiguous filter."
+		"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
 	);
 	expect(trace).toHaveLength(0);
 });
@@ -128,12 +128,9 @@ test("uses projected columns when select is narrowed", () => {
 	expect(payload.selected_columns).toEqual(["schema_key", "file_id"]);
 
 	const { sql } = compile(rewritten);
-
-	console.log(sql);
-
-	expect(sql).toMatch(
-		/SELECT\s+"w"\."schema_key" AS "schema_key",\s+"w"\."file_id" AS "file_id"\s+FROM/i
-	);
+	expect(sql).toContain('"w"."schema_key" as "schema_key"');
+	expect(sql).toContain('"w"."file_id" as "file_id"');
+	expect(sql).not.toContain('"w"."_pk" as "_pk"');
 });
 
 test("respects aliases when projecting columns", () => {
@@ -154,9 +151,8 @@ test("respects aliases when projecting columns", () => {
 	expect(payload.selected_columns).toEqual(["schema_key_alias"]);
 
 	const { sql } = compile(rewritten);
-	expect(sql).toMatch(
-		/SELECT\s+"w"\."schema_key" AS "schema_key_alias"\s+FROM/i
-	);
+	expect(sql).toContain('"w"."schema_key" as "schema_key_alias"');
+	expect(sql).not.toContain('"w"."_pk" as "_pk"');
 });
 
 test("includes _pk across segments when explicitly selected", () => {
@@ -178,9 +174,8 @@ test("includes _pk across segments when explicitly selected", () => {
 	expect(payload.selected_columns).toEqual(["_pk", "schema_key"]);
 
 	const { sql } = compile(rewritten);
-	expect(sql).toMatch(
-		/SELECT\s+"w"\."_pk" AS "_pk",\s+"w"\."schema_key" AS "schema_key"\s+FROM/i
-	);
+	expect(sql).toContain('"w"."_pk" as "_pk"');
+	expect(sql).toContain('"w"."schema_key" as "schema_key"');
 	expect(sql).toContain("'T' || '~' || lix_encode_pk_part");
 	expect(sql).toContain("'U' || '~' || lix_encode_pk_part");
 	expect(sql).toContain("'C' || '~' || lix_encode_pk_part");

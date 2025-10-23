@@ -1,12 +1,21 @@
 import type { RootOperationNode } from "kysely";
-import type { PreprocessorStep } from "./types.js";
+import type { PreprocessorStep, PreprocessorTrace } from "./types.js";
+import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
+import { rewriteStateViewSelect } from "./steps/state-view/select.js";
+import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
 
-const pipeline: PreprocessorStep[] = [rewriteVtableSelects];
+const pipeline: PreprocessorStep[] = [
+	rewriteEntityViewSelect,
+	rewriteStateViewSelect,
+	rewriteStateAllViewSelect,
+	rewriteVtableSelects,
+];
 
 type PreprocessContext = {
 	storedSchemas: Map<string, unknown>;
 	cacheTables: Map<string, unknown>;
+	trace?: PreprocessorTrace;
 };
 
 /**
@@ -35,6 +44,7 @@ export function preprocessRootOperationNode(
 	context: PreprocessContext = {
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		trace: undefined,
 	}
 ): RootOperationNode {
 	return pipeline.reduce(
