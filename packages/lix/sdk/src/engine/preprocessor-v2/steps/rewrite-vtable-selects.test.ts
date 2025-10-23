@@ -135,6 +135,7 @@ test("uses projected columns when select is narrowed", () => {
 	expect(sql).not.toContain('"w"."_pk" as "_pk"');
 	expect(sql).not.toContain("txn.metadata");
 	expect(sql).not.toContain("txn.plugin_key");
+	expect(sql).not.toContain("lix_internal_change");
 });
 
 test("respects aliases when projecting columns", () => {
@@ -204,8 +205,28 @@ test("retains writer joins when writer_key is selected", () => {
 	});
 
 	const { sql } = compile(rewritten);
+
 	expect(sql).toContain("LEFT JOIN lix_internal_state_writer ws_dst");
 	expect(sql).toContain("LEFT JOIN lix_internal_state_writer ws_src");
+	expect(sql.toUpperCase()).toContain("COALESCE(");
+});
+
+test("retains change join when metadata is selected", () => {
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.metadata
+			FROM lix_internal_state_vtable AS v
+		`)
+	);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		storedSchemas: new Map(),
+		cacheTables: new Map(),
+	});
+
+	const { sql } = compile(rewritten);
+	expect(sql).toContain("lix_internal_change");
 });
 
 test("routes cache queries to mapped physical tables", () => {

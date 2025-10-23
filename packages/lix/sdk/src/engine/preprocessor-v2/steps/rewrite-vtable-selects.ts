@@ -110,7 +110,6 @@ class RewriteInternalStateVtableTransformer extends OperationNodeTransformer {
 	}
 }
 
-
 class InlineInternalStateVtableTransformer extends OperationNodeTransformer {
 	constructor(
 		private readonly cacheTables: Map<string, unknown>,
@@ -123,7 +122,10 @@ class InlineInternalStateVtableTransformer extends OperationNodeTransformer {
 		node: SelectQueryNode,
 		queryId?: QueryId
 	): SelectQueryNode {
-		const transformed = super.transformSelectQuery(node, queryId) as SelectQueryNode;
+		const transformed = super.transformSelectQuery(
+			node,
+			queryId
+		) as SelectQueryNode;
 		const references = collectRewrittenTableReferences(transformed);
 		if (references.length === 0) {
 			return transformed;
@@ -212,10 +214,7 @@ function buildInlineMetadata(
 		const tableNames = new Set<string>([
 			reference.alias ?? REWRITTEN_STATE_VTABLE,
 		]);
-		const summary = collectSchemaKeyPredicates(
-			select.where?.where,
-			tableNames
-		);
+		const summary = collectSchemaKeyPredicates(select.where?.where, tableNames);
 		if (summary.hasDynamic) {
 			throw new Error(
 				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
@@ -238,7 +237,13 @@ function applyInlineRewrites(
 ): SelectQueryNode {
 	const froms = select.from?.froms
 		? select.from.froms.map((from) =>
-			inlineTableReference(from, metadata, cacheTables, null, hasOpenTransaction)
+				inlineTableReference(
+					from,
+					metadata,
+					cacheTables,
+					null,
+					hasOpenTransaction
+				)
 			)
 		: undefined;
 	const joins = select.joins
@@ -309,7 +314,7 @@ function inlineTableReference(
 			selectedColumns: info.selectedColumns,
 			hasOpenTransaction,
 		});
-	const subquery = ParensNode.create(RawNode.createWithSql(rewriteSql));
+		const subquery = ParensNode.create(RawNode.createWithSql(rewriteSql));
 		if (aliasName) {
 			return subquery;
 		}
@@ -683,7 +688,8 @@ class VtableProjectionCollector extends OperationNodeTransformer {
 }
 
 function buildRewriteProjectionSql(
-	selectedColumns: SelectedProjection[] | null
+	selectedColumns: SelectedProjection[] | null,
+	options: { needsWriterJoin: boolean }
 ): string {
 	const builder = internalQueryBuilder as unknown as {
 		selectFrom: (table: string) => {
@@ -693,6 +699,7 @@ function buildRewriteProjectionSql(
 					ref: (reference: string) => {
 						as: (alias: string) => unknown;
 					};
+					fn: any;
 				}) => unknown[]
 			) => { compile: () => { sql: string } };
 		};
@@ -703,9 +710,18 @@ function buildRewriteProjectionSql(
 		selectedColumns === null || selectedColumns.length === 0
 			? baseQuery.selectAll("w")
 			: baseQuery.select((eb) =>
-					selectedColumns.map((entry) =>
-						eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column)
-					)
+					selectedColumns.map((entry) => {
+						if (options.needsWriterJoin && entry.column === "writer_key") {
+							return eb.fn
+								.coalesce(
+									eb.ref("ws_dst.writer_key"),
+									eb.ref("ws_src.writer_key"),
+									eb.ref("w.writer_key")
+								)
+								.as(entry.alias ?? entry.column) as unknown as any;
+						}
+						return eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column);
+					})
 				);
 
 	const { sql } = query.compile();
@@ -760,7 +776,6 @@ function buildInternalStateRewriteSql(options: {
 	selectedColumns: SelectedProjection[] | null;
 	hasOpenTransaction: boolean;
 }): string {
-	const projectionSql = buildRewriteProjectionSql(options.selectedColumns);
 	const schemaFilterList = options.schemaKeys ?? [];
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(schemaFilterList, options.cacheTables);
@@ -772,6 +787,10 @@ function buildInternalStateRewriteSql(options: {
 		candidateColumns.add("inherited_from_version_id");
 		rankedColumns.add("inherited_from_version_id");
 	}
+	const needsChangeJoin = candidateColumns.has("metadata");
+	const projectionSql = buildRewriteProjectionSql(options.selectedColumns, {
+		needsWriterJoin,
+	});
 	const rankingOrder = [
 		"c.priority",
 		"c.created_at DESC",
@@ -809,10 +828,15 @@ LEFT JOIN lix_internal_state_writer ws_src ON
   ws_src.schema_key = w.schema_key AND
   ws_src.version_id = w.inherited_from_version_id`
 		: "";
-	const transactionJoinSql = options.hasOpenTransaction !== false
+	const changeJoinSql = needsChangeJoin
 		? `
-LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
+LEFT JOIN lix_internal_change chc ON chc.id = w.change_id`
 		: "";
+	const transactionJoinSql =
+		options.hasOpenTransaction !== false
+			? `
+LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
+			: "";
 
 	const body = `WITH
   candidates AS (
@@ -825,7 +849,7 @@ SELECT
 ${indent(projectionSql, 2)}
 FROM ranked w
 ${writerJoinSql}
-LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
+${changeJoinSql}
 ${transactionJoinSql}
 WHERE w.rn = 1`;
 
