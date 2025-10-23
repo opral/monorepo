@@ -47,16 +47,34 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		return { kind: "all" };
 	}
 
-	public tableReference(ctx: { Identifier: IToken[] }): TableReference {
-		const [identifier] = ctx.Identifier ?? [];
-		if (!identifier) {
-			throw new Error("table reference is missing an identifier");
-		}
-		return { name: identifier.image }; // Identifier token image preserves casing as written.
+	public tableReference(ctx: {
+		Identifier?: IToken[];
+		QuotedIdentifier?: IToken[];
+	}): TableReference {
+		const identifierToken = selectIdentifierToken(ctx);
+		return { name: identifierToken }; // token already normalized below.
 	}
 }
 
 const visitor = new ToKyselyVisitor();
+
+function selectIdentifierToken(ctx: {
+	Identifier?: IToken[];
+	QuotedIdentifier?: IToken[];
+}): string {
+	const raw = ctx.Identifier?.[0] ?? ctx.QuotedIdentifier?.[0];
+	if (!raw?.image) {
+		throw new Error("table reference is missing an identifier");
+	}
+	if (raw.tokenType === undefined) {
+		return raw.image;
+	}
+	const tokenName = raw.tokenType.name;
+	if (tokenName === "QuotedIdentifier") {
+		return raw.image.slice(1, -1).replace(/""/g, '"');
+	}
+	return raw.image;
+}
 
 function buildSelectQuery(
 	projection: SelectProjection,

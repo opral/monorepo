@@ -22,6 +22,11 @@ export const Identifier: TokenType = createToken({
 	longer_alt: [Select, From],
 });
 
+export const QuotedIdentifier: TokenType = createToken({
+	name: "QuotedIdentifier",
+	pattern: /"(?:[^"]|"")*"/,
+});
+
 export const Star: TokenType = createToken({
 	name: "Star",
 	pattern: /\*/,
@@ -50,6 +55,7 @@ const tokens: TokenType[] = [
 	Comma,
 	Dot,
 	Semicolon,
+	QuotedIdentifier,
 	Identifier,
 ];
 

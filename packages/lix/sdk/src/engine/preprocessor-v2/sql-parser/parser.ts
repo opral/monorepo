@@ -7,6 +7,7 @@ import {
 	Semicolon,
 	sqlTokens,
 	sqlLexer,
+ 	QuotedIdentifier,
 } from "./lexer.js";
 
 class SqlParser extends CstParser {
@@ -36,7 +37,10 @@ class SqlParser extends CstParser {
 	private readonly tableReference: () => CstNode = this.RULE(
 		"tableReference",
 		() => {
-			this.CONSUME(Identifier);
+			this.OR([
+				{ ALT: () => this.CONSUME(Identifier) },
+				{ ALT: () => this.CONSUME(QuotedIdentifier) },
+			]);
 		}
 	);
 }
