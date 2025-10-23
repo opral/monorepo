@@ -6,6 +6,7 @@ import {
 	CommonTableExpressionNameNode,
 	CommonTableExpressionNode,
 	IdentifierNode,
+	ParensNode,
 	OperationNodeTransformer,
 	OrNode,
 	RawNode,
@@ -25,6 +26,7 @@ import type {
 } from "kysely";
 import { extractCteName } from "../utils.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
+import { internalQueryBuilder } from "../../internal-query-builder.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 export const REWRITTEN_STATE_VTABLE = "lix_internal_state_vtable_rewritten";
@@ -59,15 +61,27 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	if (!SelectQueryNode.is(rewritten)) {
 		return rewritten;
 	}
+	const aliases = collectTableAliases(rewritten);
+	const tableSet = new Set([REWRITTEN_STATE_VTABLE, ...aliases]);
 	const schemaSummary = collectSchemaKeyPredicates(
 		rewritten.where?.where,
-		new Set([REWRITTEN_STATE_VTABLE, ...collectTableAliases(rewritten)])
+		tableSet
+	);
+	if (schemaSummary.hasDynamic) {
+		throw new Error(
+			"rewriteVtableSelects requires literal schema_key predicates; received ambiguous filter."
+		);
+	}
+	const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
+		rewritten.selections ?? [],
+		tableSet
 	);
 	const ensured = ensureRewriteCte(rewritten, {
-		schemaKeys: schemaSummary.hasDynamic ? [] : schemaSummary.literals,
+		schemaKeys: schemaSummary.literals,
 		cacheTables,
+		selectedColumns,
 	});
-	trace?.push(buildTraceEntry(ensured, schemaSummary));
+	trace?.push(buildTraceEntry(ensured, schemaSummary, selectedColumns, aliases));
 	return ensured;
 };
 
@@ -111,6 +125,7 @@ function ensureRewriteCte(
 	options: {
 		schemaKeys: readonly string[];
 		cacheTables: Map<string, unknown>;
+		selectedColumns: SelectedProjection[] | null;
 	}
 ): SelectQueryNode {
 	const expressions = select.with?.expressions ?? [];
@@ -125,6 +140,7 @@ function ensureRewriteCte(
 	const rewriteSql = buildInternalStateRewriteSql({
 		schemaKeys: options.schemaKeys,
 		cacheTables: options.cacheTables,
+		selectedColumns: options.selectedColumns,
 	});
 	const rewriteCte = CommonTableExpressionNode.create(
 		name,
@@ -142,9 +158,10 @@ function ensureRewriteCte(
 
 function buildTraceEntry(
 	select: SelectQueryNode,
-	schemaSummary: SchemaKeyPredicateSummary
+	schemaSummary: SchemaKeyPredicateSummary,
+	selectedColumns: SelectedProjection[] | null,
+	aliases: string[]
 ): PreprocessorTraceEntry {
-	const aliases = collectTableAliases(select);
 	const projection = determineProjectionKind(select.selections ?? []);
 
 	return {
@@ -156,6 +173,9 @@ function buildTraceEntry(
 			schema_key_predicates: schemaSummary.count,
 			schema_key_literals: schemaSummary.literals,
 			schema_key_has_dynamic: schemaSummary.hasDynamic,
+			selected_columns: selectedColumns
+				? selectedColumns.map((entry) => entry.alias ?? entry.column)
+				: null,
 		},
 	};
 }
@@ -216,6 +236,9 @@ function collectSchemaKeyPredicates(
 	};
 	if (!node) {
 		return base;
+	}
+	if (ParensNode.is(node)) {
+		return collectSchemaKeyPredicates(node.node, tableNames);
 	}
 	if (BinaryOperationNode.is(node)) {
 		return mergeSummaries(
@@ -343,24 +366,168 @@ function extractIdentifier(node: OperationNode): string | null {
 	return IdentifierNode.is(node) ? node.name : null;
 }
 
-const BASE_COLUMNS = `
-    w._pk AS _pk,
-    w.entity_id AS entity_id,
-    w.schema_key AS schema_key,
-    w.file_id AS file_id,
-    w.plugin_key AS plugin_key,
-    w.snapshot_content AS snapshot_content,
-    w.schema_version AS schema_version,
-    w.version_id AS version_id,
-    w.created_at AS created_at,
-    w.updated_at AS updated_at,
-    w.inherited_from_version_id AS inherited_from_version_id,
-    w.change_id AS change_id,
-    w.untracked AS untracked,
-    w.commit_id AS commit_id,
-    w.metadata AS metadata,
-    w.writer_key AS writer_key
-`;
+type SelectedProjection = {
+	column: string;
+	alias?: string;
+};
+
+const ALL_SEGMENT_COLUMNS = [
+	"_pk",
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"schema_version",
+	"version_id",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"metadata",
+	"writer_key",
+	"priority",
+] as const;
+
+const REQUIRED_SEGMENT_COLUMNS = new Set<string>([
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"version_id",
+	"change_id",
+	"inherited_from_version_id",
+	"created_at",
+	"priority",
+]);
+
+function collectSelectedColumns(
+	selections: readonly SelectionNode[],
+	tableNames: Set<string>
+): SelectedProjection[] | null {
+	if (selections.length === 0) {
+		return null;
+	}
+	const selected: SelectedProjection[] = [];
+	const seen = new Set<string>();
+	for (const selection of selections) {
+		const result = collectColumnsFromNode(
+			selection.selection,
+			tableNames,
+			selected,
+			seen,
+			undefined
+		);
+		if (result === "all") {
+			return null;
+		}
+	}
+	return selected;
+}
+
+function collectColumnsFromNode(
+	node: OperationNode,
+	tableNames: Set<string>,
+	selected: SelectedProjection[],
+	seen: Set<string>,
+	alias: string | undefined
+): "all" | "partial" {
+	if (SelectAllNode.is(node)) {
+		return "all";
+	}
+	if (AliasNode.is(node)) {
+		const aliasIdentifier = extractIdentifier(node.alias);
+		return collectColumnsFromNode(
+			node.node,
+			tableNames,
+			selected,
+			seen,
+			aliasIdentifier ?? alias
+		);
+	}
+	if (ReferenceNode.is(node)) {
+		const tableIdentifier = extractTableIdentifier(node.table);
+		if (!tableIdentifier || !tableNames.has(tableIdentifier)) {
+			return "partial";
+		}
+		const column = node.column;
+		if (SelectAllNode.is(column)) {
+			return "all";
+		}
+		if (ColumnNode.is(column)) {
+			const identifier = column.column;
+			if (IdentifierNode.is(identifier)) {
+				const aliasName = alias ?? identifier.name;
+				if (!seen.has(aliasName)) {
+					seen.add(aliasName);
+					selected.push({
+						column: identifier.name,
+						alias: aliasName === identifier.name ? undefined : aliasName,
+					});
+				}
+			}
+		}
+		return "partial";
+	}
+	return "partial";
+}
+
+function buildRewriteProjectionSql(
+	selectedColumns: SelectedProjection[] | null
+): string {
+	const builder = internalQueryBuilder as unknown as {
+		selectFrom: (
+			table: string
+		) => {
+			selectAll: (table: string) => { compile: () => { sql: string } };
+			select: (
+				callback: (eb: {
+					ref: (reference: string) => {
+						as: (alias: string) => unknown;
+					};
+				}) => unknown[]
+			) => { compile: () => { sql: string } };
+		};
+	};
+
+	const baseQuery = builder.selectFrom(
+		`${REWRITTEN_STATE_VTABLE} as w`
+	);
+	const query =
+		selectedColumns === null || selectedColumns.length === 0
+			? baseQuery.selectAll("w")
+			: baseQuery.select((eb) =>
+					selectedColumns.map((entry) =>
+						eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column)
+					)
+			  );
+
+	const { sql } = query.compile();
+	const match = sql.match(/^select\s+(?<projection>[\s\S]+?)\s+from\s+/i);
+	return match?.groups?.projection?.trim() ?? sql;
+}
+
+function buildProjectionColumnSet(
+	selectedColumns: SelectedProjection[] | null
+): {
+	candidateColumns: Set<string>;
+	rankedColumns: Set<string>;
+} {
+	if (selectedColumns === null) {
+	return {
+		candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
+		rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
+	};
+}
+const candidateColumns = new Set<string>(REQUIRED_SEGMENT_COLUMNS);
+const rankedColumns = new Set<string>(candidateColumns);
+for (const entry of selectedColumns) {
+	candidateColumns.add(entry.column);
+	rankedColumns.add(entry.column);
+}
+return { candidateColumns, rankedColumns };
+}
 
 const NEWLINE = "\n";
 
@@ -383,31 +550,43 @@ const CACHE_COLUMNS = [
 function buildInternalStateRewriteSql(options: {
 	schemaKeys: readonly string[];
 	cacheTables: Map<string, unknown>;
+	selectedColumns: SelectedProjection[] | null;
 }): string {
+	const projectionSql = buildRewriteProjectionSql(options.selectedColumns);
+	const projectionColumns = buildProjectionColumnSet(options.selectedColumns);
 	const schemaFilterList = options.schemaKeys ?? [];
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(schemaFilterList, options.cacheTables);
+	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
+		options.selectedColumns
+	);
+	const rankingOrder = [
+		"c.priority",
+		"c.created_at DESC",
+		"c.file_id",
+		"c.schema_key",
+		"c.entity_id",
+		"c.version_id",
+		"c.change_id",
+	];
+	const needsWriterJoin = candidateColumns.has("writer_key");
 
 	const segments: string[] = [
-		buildTransactionSegment(schemaFilter),
-		buildUntrackedSegment(schemaFilter),
+		buildTransactionSegment(schemaFilter, candidateColumns),
+		buildUntrackedSegment(schemaFilter, candidateColumns),
 	];
-	const cacheSegment = buildCacheSegment(cacheSource, schemaFilter);
+	const cacheSegment = buildCacheSegment(
+		cacheSource,
+		schemaFilter,
+		candidateColumns
+	);
 	if (cacheSegment) {
 		segments.push(cacheSegment);
 	}
 	const candidates = segments.join(`\n\n    UNION ALL\n\n`);
 
-	const body = `WITH
-  candidates AS (
-${indent(candidates, 4)}
-  ),
-  ranked AS (
-${indent(buildRankedSegment(), 4)}
-  )
-SELECT
-${indent(BASE_COLUMNS, 2)}
-FROM ranked w
+	const writerJoinSql = needsWriterJoin
+		? `
 LEFT JOIN lix_internal_state_writer ws_dst ON
   ws_dst.file_id = w.file_id AND
   ws_dst.entity_id = w.entity_id AND
@@ -417,7 +596,20 @@ LEFT JOIN lix_internal_state_writer ws_src ON
   ws_src.file_id = w.file_id AND
   ws_src.entity_id = w.entity_id AND
   ws_src.schema_key = w.schema_key AND
-  ws_src.version_id = w.inherited_from_version_id
+  ws_src.version_id = w.inherited_from_version_id`
+		: "";
+
+	const body = `WITH
+  candidates AS (
+${indent(candidates, 4)}
+  ),
+  ranked AS (
+${indent(buildRankedSegment(rankedColumns, rankingOrder), 4)}
+  )
+SELECT
+${indent(projectionSql, 2)}
+FROM ranked w
+${writerJoinSql}
 LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id
 WHERE w.rn = 1`;
@@ -425,55 +617,75 @@ WHERE w.rn = 1`;
 	return `(-- hoisted_lix_internal_state_vtable_rewrite\n${body}\n)\n`;
 }
 
-function buildTransactionSegment(schemaFilter: string | null): string {
+function buildTransactionSegment(
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
+): string {
 	const filterClause = schemaFilter ? `WHERE ${schemaFilter}` : "";
+	const columns: Array<[string, string]> = [
+		["_pk", `'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk`],
+		["entity_id", "txn.entity_id AS entity_id"],
+		["schema_key", "txn.schema_key AS schema_key"],
+		["file_id", "txn.file_id AS file_id"],
+		["plugin_key", "txn.plugin_key AS plugin_key"],
+		["snapshot_content", "json(txn.snapshot_content) AS snapshot_content"],
+		["schema_version", "txn.schema_version AS schema_version"],
+		["version_id", "txn.version_id AS version_id"],
+		["created_at", "txn.created_at AS created_at"],
+		["updated_at", "txn.created_at AS updated_at"],
+		["inherited_from_version_id", "NULL AS inherited_from_version_id"],
+		["change_id", "txn.id AS change_id"],
+		["untracked", "txn.untracked AS untracked"],
+		["commit_id", "'pending' AS commit_id"],
+		["metadata", "json(txn.metadata) AS metadata"],
+		["writer_key", "txn.writer_key AS writer_key"],
+		["priority", "1 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
 	return stripIndent(`
 		SELECT
-		  'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk,
-		  txn.entity_id AS entity_id,
-		  txn.schema_key AS schema_key,
-		  txn.file_id AS file_id,
-		  txn.plugin_key AS plugin_key,
-		  json(txn.snapshot_content) AS snapshot_content,
-		  txn.schema_version AS schema_version,
-		  txn.version_id AS version_id,
-		  txn.created_at AS created_at,
-		  txn.created_at AS updated_at,
-		  NULL AS inherited_from_version_id,
-		  txn.id AS change_id,
-		  txn.untracked AS untracked,
-		  'pending' AS commit_id,
-		  json(txn.metadata) AS metadata,
-		  txn.writer_key AS writer_key,
-		  1 AS priority
+${indent(columnSql, 4)}
 		FROM lix_internal_transaction_state txn
 		${filterClause}
 	`).trimEnd();
 }
 
-function buildUntrackedSegment(schemaFilter: string | null): string {
+function buildUntrackedSegment(
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
+): string {
 	const rewrittenFilter = schemaFilter
 		? schemaFilter.replace(/txn\./g, "unt.")
 		: null;
+	const columns: Array<[string, string]> = [
+		["_pk", `'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk`],
+		["entity_id", "unt.entity_id AS entity_id"],
+		["schema_key", "unt.schema_key AS schema_key"],
+		["file_id", "unt.file_id AS file_id"],
+		["plugin_key", "unt.plugin_key AS plugin_key"],
+		["snapshot_content", "json(unt.snapshot_content) AS snapshot_content"],
+		["schema_version", "unt.schema_version AS schema_version"],
+		["version_id", "unt.version_id AS version_id"],
+		["created_at", "unt.created_at AS created_at"],
+		["updated_at", "unt.updated_at AS updated_at"],
+		["inherited_from_version_id", "NULL AS inherited_from_version_id"],
+		["change_id", "'untracked' AS change_id"],
+		["untracked", "1 AS untracked"],
+		["commit_id", "'untracked' AS commit_id"],
+		["metadata", "NULL AS metadata"],
+		["writer_key", "NULL AS writer_key"],
+		["priority", "2 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
 	return stripIndent(`
 		SELECT
-		  'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk,
-		  unt.entity_id AS entity_id,
-		  unt.schema_key AS schema_key,
-		  unt.file_id AS file_id,
-		  unt.plugin_key AS plugin_key,
-		  json(unt.snapshot_content) AS snapshot_content,
-		  unt.schema_version AS schema_version,
-		  unt.version_id AS version_id,
-		  unt.created_at AS created_at,
-		  unt.updated_at AS updated_at,
-		  NULL AS inherited_from_version_id,
-		  'untracked' AS change_id,
-		  1 AS untracked,
-		  'untracked' AS commit_id,
-		  NULL AS metadata,
-		  NULL AS writer_key,
-		  2 AS priority
+${indent(columnSql, 4)}
 		FROM lix_internal_state_all_untracked unt
 		WHERE unt.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
 	`).trimEnd();
@@ -481,7 +693,8 @@ function buildUntrackedSegment(schemaFilter: string | null): string {
 
 function buildCacheSegment(
 	cacheSource: string | null,
-	schemaFilter: string | null
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
 ): string | null {
 	if (!cacheSource) {
 		return null;
@@ -493,52 +706,52 @@ function buildCacheSegment(
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
 		: cacheSource;
+	const columns: Array<[string, string]> = [
+		["_pk", `'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk`],
+		["entity_id", "cache.entity_id AS entity_id"],
+		["schema_key", "cache.schema_key AS schema_key"],
+		["file_id", "cache.file_id AS file_id"],
+		["plugin_key", "cache.plugin_key AS plugin_key"],
+		["snapshot_content", "json(cache.snapshot_content) AS snapshot_content"],
+		["schema_version", "cache.schema_version AS schema_version"],
+		["version_id", "cache.version_id AS version_id"],
+		["created_at", "cache.created_at AS created_at"],
+		["updated_at", "cache.updated_at AS updated_at"],
+		["inherited_from_version_id", "cache.inherited_from_version_id AS inherited_from_version_id"],
+		["change_id", "cache.change_id AS change_id"],
+		["untracked", "0 AS untracked"],
+		["commit_id", "cache.commit_id AS commit_id"],
+		["metadata", "NULL AS metadata"],
+		["writer_key", "NULL AS writer_key"],
+		["priority", "3 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
 	return stripIndent(`
 		SELECT
-		  'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk,
-		  cache.entity_id AS entity_id,
-		  cache.schema_key AS schema_key,
-		  cache.file_id AS file_id,
-		  cache.plugin_key AS plugin_key,
-		  json(cache.snapshot_content) AS snapshot_content,
-		  cache.schema_version AS schema_version,
-		  cache.version_id AS version_id,
-		  cache.created_at AS created_at,
-		  cache.updated_at AS updated_at,
-		  cache.inherited_from_version_id AS inherited_from_version_id,
-		  cache.change_id AS change_id,
-		  0 AS untracked,
-		  cache.commit_id AS commit_id,
-		  NULL AS metadata,
-		  NULL AS writer_key,
-		  3 AS priority
+${indent(columnSql, 4)}
 		FROM ${sourceSql} cache
 		WHERE cache.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
 	`).trimEnd();
 }
 
-function buildRankedSegment(): string {
+function buildRankedSegment(
+	projectionColumns: Set<string>,
+	rankingOrder: string[]
+): string {
+	const columns = ALL_SEGMENT_COLUMNS.filter((column) =>
+		projectionColumns.has(column)
+	).map((column) => `c.${column} AS ${column}`);
+	const orderClause = rankingOrder.join(", ");
 	return stripIndent(`
 		SELECT
-		  c._pk AS _pk,
-		  c.entity_id AS entity_id,
-		  c.schema_key AS schema_key,
-		  c.file_id AS file_id,
-		  c.plugin_key AS plugin_key,
-		  c.snapshot_content AS snapshot_content,
-		  c.schema_version AS schema_version,
-		  c.version_id AS version_id,
-		  c.created_at AS created_at,
-		  c.updated_at AS updated_at,
-		  c.inherited_from_version_id AS inherited_from_version_id,
-		  c.change_id AS change_id,
-		  c.untracked AS untracked,
-		  c.commit_id AS commit_id,
-		  c.metadata AS metadata,
-		  c.writer_key AS writer_key,
-		  ROW_NUMBER() OVER (
+${indent(columns.join(",\n"), 4)}${
+		columns.length > 0 ? ",\n" : ""
+	}  ROW_NUMBER() OVER (
 		    PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-		    ORDER BY c.priority, c.created_at DESC, c._pk
+		    ORDER BY ${orderClause}
 		  ) AS rn
 		FROM candidates c
 	`).trimEnd();
@@ -556,13 +769,27 @@ function buildCacheSource(
 	schemaKeys: readonly string[],
 	cacheTables: Map<string, unknown>
 ): string | null {
-	if (schemaKeys && schemaKeys.length === 1) {
-		const candidate = cacheTables.get(schemaKeys[0]!);
-		if (typeof candidate === "string" && candidate.length > 0) {
-			return buildPhysicalCacheSelect(candidate);
-		}
+	const uniqueKeys =
+		schemaKeys && schemaKeys.length > 0
+			? Array.from(new Set(schemaKeys))
+			: Array.from(cacheTables.keys());
+	const selects = uniqueKeys
+		.map((key) => {
+			const candidate = cacheTables.get(key);
+			if (typeof candidate === "string" && candidate.length > 0) {
+				return buildPhysicalCacheSelect(candidate);
+			}
+			return null;
+		})
+		.filter((value): value is string => value !== null);
+
+	if (selects.length === 0) {
+		return null;
 	}
-	return null;
+	if (selects.length === 1) {
+		return selects[0]!;
+	}
+	return selects.join(`\nUNION ALL\n`);
 }
 
 function buildPhysicalCacheSelect(tableName: string): string {
