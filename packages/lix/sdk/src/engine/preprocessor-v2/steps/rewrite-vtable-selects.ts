@@ -3,8 +3,7 @@ import {
 	AndNode,
 	BinaryOperationNode,
 	ColumnNode,
-	CommonTableExpressionNameNode,
-	CommonTableExpressionNode,
+	FromNode,
 	IdentifierNode,
 	ParensNode,
 	OperationNodeTransformer,
@@ -17,7 +16,6 @@ import {
 	SetOperationNode,
 	TableNode,
 	ValueNode,
-	WithNode,
 } from "kysely";
 import type {
 	OperationNode,
@@ -25,7 +23,6 @@ import type {
 	RootOperationNode,
 	SchemableIdentifierNode,
 } from "kysely";
-import { extractCteName } from "../utils.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 
@@ -54,39 +51,43 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	trace,
 	cacheTables,
 }) => {
-	const transformer = new RewriteInternalStateVtableTransformer();
-	const rewritten = transformer.transformNode(node) as RootOperationNode;
-	if (!transformer.touched) {
-		return rewritten;
+	const renameTransformer = new RewriteInternalStateVtableTransformer();
+	const renamed = renameTransformer.transformNode(node) as RootOperationNode;
+	if (!renameTransformer.touched) {
+		return renamed;
 	}
-	if (!SelectQueryNode.is(rewritten)) {
-		return rewritten;
-	}
-	const aliases = collectTableAliases(rewritten);
-	const tableSet = new Set([REWRITTEN_STATE_VTABLE, ...aliases]);
-	const schemaSummary = collectSchemaKeyPredicates(
-		rewritten.where?.where,
-		tableSet
-	);
-	if (schemaSummary.hasDynamic) {
-		throw new Error(
-			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
+
+	let traceEntry: PreprocessorTraceEntry | null = null;
+	if (SelectQueryNode.is(renamed)) {
+		const aliases = collectTableAliases(renamed);
+		const tableSet = new Set([REWRITTEN_STATE_VTABLE, ...aliases]);
+		const schemaSummary = collectSchemaKeyPredicates(
+			renamed.where?.where,
+			tableSet
+		);
+		if (schemaSummary.hasDynamic) {
+			throw new Error(
+				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
+			);
+		}
+		const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
+			renamed,
+			tableSet
+		);
+		traceEntry = buildTraceEntry(
+			renamed,
+			schemaSummary,
+			selectedColumns,
+			aliases
 		);
 	}
-	const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
-		rewritten,
-		tableSet
-	);
-	const normalizedColumns = normalizeSelectedColumns(selectedColumns);
-	const ensured = ensureRewriteCte(rewritten, {
-		schemaKeys: schemaSummary.literals,
-		cacheTables,
-		selectedColumns: normalizedColumns,
-	});
-	trace?.push(
-		buildTraceEntry(ensured, schemaSummary, selectedColumns, aliases)
-	);
-	return ensured;
+
+	const inlineTransformer = new InlineInternalStateVtableTransformer(cacheTables);
+	const inlined = inlineTransformer.transformNode(renamed) as RootOperationNode;
+	if (traceEntry && trace) {
+		trace.push(traceEntry);
+	}
+	return inlined;
 };
 
 class RewriteInternalStateVtableTransformer extends OperationNodeTransformer {
@@ -105,6 +106,197 @@ class RewriteInternalStateVtableTransformer extends OperationNodeTransformer {
 	}
 }
 
+class InlineInternalStateVtableTransformer extends OperationNodeTransformer {
+	constructor(private readonly cacheTables: Map<string, unknown>) {
+		super();
+	}
+
+	override transformSelectQuery(
+		node: SelectQueryNode,
+		queryId?: QueryId
+	): SelectQueryNode {
+		const transformed = super.transformSelectQuery(node, queryId) as SelectQueryNode;
+		const references = collectRewrittenTableReferences(transformed);
+		if (references.length === 0) {
+			return transformed;
+		}
+
+		const metadata = buildInlineMetadata(transformed, references);
+		return applyInlineRewrites(transformed, metadata, this.cacheTables);
+	}
+}
+
+type TableReference = {
+	alias: string | null;
+};
+
+type InlineRewriteMetadata = {
+	schemaKeys: readonly string[];
+	selectedColumns: SelectedProjection[] | null;
+};
+
+function collectRewrittenTableReferences(
+	select: SelectQueryNode
+): TableReference[] {
+	const references: TableReference[] = [];
+	if (select.from?.froms) {
+		for (const from of select.from.froms) {
+			collectRewrittenTableReferenceFromOperation(from, references, null);
+		}
+	}
+	if (select.joins) {
+		for (const join of select.joins) {
+			collectRewrittenTableReferenceFromOperation(join.table, references, null);
+		}
+	}
+	return references;
+}
+
+function collectRewrittenTableReferenceFromOperation(
+	node: OperationNode,
+	references: TableReference[],
+	aliasOverride: string | null
+): void {
+	if (AliasNode.is(node)) {
+		const aliasName = extractIdentifier(node.alias);
+		collectRewrittenTableReferenceFromOperation(
+			node.node as OperationNode,
+			references,
+			aliasName ?? null
+		);
+		return;
+	}
+	if (ParensNode.is(node)) {
+		collectRewrittenTableReferenceFromOperation(
+			node.node,
+			references,
+			aliasOverride
+		);
+		return;
+	}
+	if (TableNode.is(node) && isRewrittenTable(node)) {
+		references.push({ alias: aliasOverride });
+		return;
+	}
+	if (SelectQueryNode.is(node)) {
+		return;
+	}
+	if (SetOperationNode.is(node)) {
+		return;
+	}
+}
+
+function buildInlineMetadata(
+	select: SelectQueryNode,
+	references: readonly TableReference[]
+): Map<string, InlineRewriteMetadata> {
+	const metadata = new Map<string, InlineRewriteMetadata>();
+	for (const reference of references) {
+		const key = reference.alias ?? REWRITTEN_STATE_VTABLE;
+		if (metadata.has(key)) {
+			continue;
+		}
+		const tableNames = new Set<string>([
+			reference.alias ?? REWRITTEN_STATE_VTABLE,
+		]);
+		const summary = collectSchemaKeyPredicates(
+			select.where?.where,
+			tableNames
+		);
+		if (summary.hasDynamic) {
+			throw new Error(
+				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
+			);
+		}
+		const selectedColumns = collectSelectedColumns(select, tableNames);
+		metadata.set(key, {
+			schemaKeys: summary.literals,
+			selectedColumns,
+		});
+	}
+	return metadata;
+}
+
+function applyInlineRewrites(
+	select: SelectQueryNode,
+	metadata: Map<string, InlineRewriteMetadata>,
+	cacheTables: Map<string, unknown>
+): SelectQueryNode {
+	const froms = select.from?.froms
+		? select.from.froms.map((from) =>
+				inlineTableReference(from, metadata, cacheTables, null)
+			)
+		: undefined;
+	const joins = select.joins
+		? select.joins.map((join) =>
+				Object.freeze({
+					...join,
+					table: inlineTableReference(join.table, metadata, cacheTables, null),
+				})
+			)
+		: undefined;
+
+	return {
+		...select,
+		from: froms ? FromNode.create(froms) : select.from,
+		joins: joins ? Object.freeze(joins) : undefined,
+	};
+}
+
+function inlineTableReference(
+	node: OperationNode,
+	metadata: Map<string, InlineRewriteMetadata>,
+	cacheTables: Map<string, unknown>,
+	aliasName: string | null
+): OperationNode {
+	if (AliasNode.is(node)) {
+		const identifier = extractIdentifier(node.alias);
+		const inner = inlineTableReference(
+			node.node as OperationNode,
+			metadata,
+			cacheTables,
+			identifier ?? null
+		);
+		if (inner === node.node) {
+			return node;
+		}
+		return AliasNode.create(inner, node.alias);
+	}
+	if (ParensNode.is(node)) {
+		const inner = inlineTableReference(
+			node.node,
+			metadata,
+			cacheTables,
+			aliasName
+		);
+		if (inner === node.node) {
+			return node;
+		}
+		return ParensNode.create(inner);
+	}
+	if (TableNode.is(node) && isRewrittenTable(node)) {
+		const key = aliasName ?? REWRITTEN_STATE_VTABLE;
+		const info = metadata.get(key);
+		if (!info) {
+			return node;
+		}
+		const rewriteSql = buildInternalStateRewriteSql({
+			schemaKeys: info.schemaKeys,
+			cacheTables,
+			selectedColumns: info.selectedColumns,
+		});
+	const subquery = ParensNode.create(RawNode.createWithSql(rewriteSql));
+		if (aliasName) {
+			return subquery;
+		}
+		return AliasNode.create(
+			subquery,
+			IdentifierNode.create(REWRITTEN_STATE_VTABLE)
+		);
+	}
+	return node;
+}
+
 function isInternalStateTable(node: TableNode): boolean {
 	const table = node.table;
 	return (
@@ -121,42 +313,6 @@ function rewriteIdentifier(
 	return {
 		...node,
 		identifier: IdentifierNode.create(REWRITTEN_STATE_VTABLE),
-	};
-}
-
-function ensureRewriteCte(
-	select: SelectQueryNode,
-	options: {
-		schemaKeys: readonly string[];
-		cacheTables: Map<string, unknown>;
-		selectedColumns: SelectedProjection[] | null;
-	}
-): SelectQueryNode {
-	const expressions = select.with?.expressions ?? [];
-	const alreadyPresent = expressions.some(
-		(cte) => extractCteName(cte) === REWRITTEN_STATE_VTABLE
-	);
-	if (alreadyPresent) {
-		return select;
-	}
-
-	const name = CommonTableExpressionNameNode.create(REWRITTEN_STATE_VTABLE);
-	const rewriteSql = buildInternalStateRewriteSql({
-		schemaKeys: options.schemaKeys,
-		cacheTables: options.cacheTables,
-		selectedColumns: options.selectedColumns,
-	});
-	const rewriteCte = CommonTableExpressionNode.create(
-		name,
-		RawNode.createWithSql(rewriteSql)
-	);
-	const withNode = select.with
-		? WithNode.cloneWithExpression(select.with, rewriteCte)
-		: WithNode.create(rewriteCte);
-
-	return {
-		...select,
-		with: withNode,
 	};
 }
 
@@ -416,39 +572,15 @@ const ALL_SEGMENT_COLUMNS = [
 	"priority",
 ] as const;
 
-const REQUIRED_SEGMENT_COLUMNS = new Set<string>([
-	"entity_id",
-	"schema_key",
-	"file_id",
-	"plugin_key",
-	"snapshot_content",
-	"schema_version",
-	"version_id",
-	"created_at",
-	"updated_at",
-	"change_id",
-	"inherited_from_version_id",
-	"untracked",
-	"commit_id",
-	"metadata",
-	"priority",
+const BASE_SEGMENT_COLUMNS = new Set<string>([
+    "entity_id",
+    "schema_key",
+    "file_id",
+    "version_id",
+    "created_at",
+    "change_id",
+    "priority",
 ]);
-
-function normalizeSelectedColumns(
-	selectedColumns: SelectedProjection[] | null
-): SelectedProjection[] | null {
-	if (!selectedColumns || selectedColumns.length === 0) {
-		return selectedColumns;
-	}
-	const normalized = [...selectedColumns];
-	const seen = new Set(normalized.map((entry) => entry.column));
-	for (const required of REQUIRED_SEGMENT_COLUMNS) {
-		if (!seen.has(required)) {
-			normalized.push({ column: required });
-		}
-	}
-	return normalized;
-}
 
 function collectSelectedColumns(
 	select: SelectQueryNode,
@@ -563,17 +695,19 @@ function buildProjectionColumnSet(
 	candidateColumns: Set<string>;
 	rankedColumns: Set<string>;
 } {
-	if (!selectedColumns || selectedColumns.length === 0) {
+	if (selectedColumns === null) {
 		return {
 			candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
 			rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
 		};
 	}
-	const candidateColumns = new Set<string>(REQUIRED_SEGMENT_COLUMNS);
-	const rankedColumns = new Set<string>(candidateColumns);
-	for (const entry of selectedColumns) {
-		candidateColumns.add(entry.column);
-		rankedColumns.add(entry.column);
+	const candidateColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
+	const rankedColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
+	if (selectedColumns && selectedColumns.length > 0) {
+		for (const entry of selectedColumns) {
+			candidateColumns.add(entry.column);
+			rankedColumns.add(entry.column);
+		}
 	}
 	return { candidateColumns, rankedColumns };
 }
@@ -602,13 +736,17 @@ function buildInternalStateRewriteSql(options: {
 	selectedColumns: SelectedProjection[] | null;
 }): string {
 	const projectionSql = buildRewriteProjectionSql(options.selectedColumns);
-	const projectionColumns = buildProjectionColumnSet(options.selectedColumns);
 	const schemaFilterList = options.schemaKeys ?? [];
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(schemaFilterList, options.cacheTables);
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
 		options.selectedColumns
 	);
+	const needsWriterJoin = candidateColumns.has("writer_key");
+	if (needsWriterJoin) {
+		candidateColumns.add("inherited_from_version_id");
+		rankedColumns.add("inherited_from_version_id");
+	}
 	const rankingOrder = [
 		"c.priority",
 		"c.created_at DESC",
@@ -618,8 +756,6 @@ function buildInternalStateRewriteSql(options: {
 		"c.version_id",
 		"c.change_id",
 	];
-	const needsWriterJoin = candidateColumns.has("writer_key");
-
 	const segments: string[] = [
 		buildTransactionSegment(schemaFilter, candidateColumns),
 		buildUntrackedSegment(schemaFilter, candidateColumns),
@@ -663,7 +799,7 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id
 WHERE w.rn = 1`;
 
-	return `(-- hoisted_lix_internal_state_vtable_rewrite\n${body}\n)\n`;
+	return `(\n${body}\n)\n`;
 }
 
 function buildTransactionSegment(

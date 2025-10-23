@@ -5,15 +5,13 @@ import {
 	REWRITTEN_STATE_VTABLE,
 	rewriteVtableSelects,
 } from "./rewrite-vtable-selects.js";
-import type { SelectQueryNode } from "kysely";
 import { compile } from "../compile.js";
-import { extractCteName } from "../utils.js";
 import type { PreprocessorTraceEntry } from "../types.js";
 import { openLix } from "../../../lix/open-lix.js";
 import { insertTransactionState } from "../../../state/transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../functions/timestamp.js";
 
-test("hoists to lix_internal_state_vtable_rewritten", () => {
+test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 	const node = toRootOperationNode(
 		parse(`
 			SELECT * FROM lix_internal_state_vtable
@@ -29,10 +27,11 @@ test("hoists to lix_internal_state_vtable_rewritten", () => {
 	const { sql } = compile(rewritten);
 
 	expect(sql).toContain("lix_internal_state_vtable_rewritten");
+	expect(sql).toMatch(/FROM\s+\(/i);
 	expect(sql).not.toMatch(/\blix_internal_state_vtable\b/);
 });
 
-test("hoists a CTE for the rewritten vtable", () => {
+test("does not rely on hoisted CTEs", () => {
 	const node = toRootOperationNode(
 		parse(`
 			SELECT *
@@ -46,18 +45,12 @@ test("hoists a CTE for the rewritten vtable", () => {
 		cacheTables: new Map(),
 	});
 
-	const select = rewritten as SelectQueryNode;
-	const ctes = select.with?.expressions ?? [];
-
-	expect(ctes.length).toBeGreaterThan(0);
-	const cteNames = ctes.map(extractCteName);
-	expect(cteNames).toContain(REWRITTEN_STATE_VTABLE);
-
 	const { sql } = compile(rewritten);
 	const normalized = sql.trim().toUpperCase();
 
-	expect(normalized).toMatch(/^WITH\b/);
+	expect(normalized.startsWith("WITH")).toBe(false);
 	expect(sql).toContain(REWRITTEN_STATE_VTABLE);
+	expect(sql).toMatch(/FROM\s+\(/i);
 });
 
 test("emits trace metadata with alias and filters", () => {
@@ -136,9 +129,12 @@ test("uses projected columns when select is narrowed", () => {
 	expect(payload.selected_columns).toEqual(["schema_key", "file_id"]);
 
 	const { sql } = compile(rewritten);
+
 	expect(sql).toContain('"w"."schema_key" as "schema_key"');
 	expect(sql).toContain('"w"."file_id" as "file_id"');
 	expect(sql).not.toContain('"w"."_pk" as "_pk"');
+	expect(sql).not.toContain("txn.metadata");
+	expect(sql).not.toContain("txn.plugin_key");
 });
 
 test("respects aliases when projecting columns", () => {

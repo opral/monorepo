@@ -112,7 +112,9 @@ test("entity view rewrite flows through state and vtable pipeline", async () => 
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE_ALL"?/);
-	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE_REWRITTEN");
+	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
+	expect(upper).toContain("ROW_NUMBER() OVER (");
 	expect(trace.map((entry) => entry.step)).toEqual([
 		"rewrite_entity_view_select",
 		"rewrite_state_view_select",
@@ -181,7 +183,8 @@ test("rewrites join between two entity views", async () => {
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA_ALL"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE"?(\s|$)/);
-	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE_REWRITTEN");
+	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 
 	const entityTrace = trace.find(
 		(entry) => entry.step === "rewrite_entity_view_select"
@@ -273,9 +276,9 @@ test("rewrites join mixing entity and raw state views", async () => {
 
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE"?(\s|$)/);
-	const rewrittenMatches =
-		upper.match(/LIX_INTERNAL_STATE_VTABLE_REWRITTEN/g) ?? [];
-	expect(rewrittenMatches.length).toBeGreaterThanOrEqual(2);
+	const candidateMatches =
+		upper.match(/ROW_NUMBER\(\) OVER \(/g) ?? [];
+	expect(candidateMatches.length).toBeGreaterThanOrEqual(2);
 	expect(upper).not.toContain('"LIX_INTERNAL_STATE_VTABLE"');
 
 	const entityTrace = trace.find(
@@ -353,7 +356,8 @@ test("rewrites nested subquery with entity view references", async () => {
 	const compiled = compile(rewritten);
 	const upper = compiled.sql.toUpperCase();
 
-	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE_REWRITTEN");
+	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA_ALL"?/);
 	expect(upper).not.toContain('"LIX_INTERNAL_STATE_VTABLE"');
