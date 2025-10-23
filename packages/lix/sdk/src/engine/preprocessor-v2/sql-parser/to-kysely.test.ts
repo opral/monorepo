@@ -38,3 +38,33 @@ test("handles quoted table names", () => {
 	expect(out.parameters).toEqual([]);
 	expect(node).toEqual(expectedNode);
 });
+
+test("supports table aliases with AS", () => {
+	const sql = `SELECT * FROM projects AS p`;
+
+	const expectedNode = kysely
+		.selectFrom("projects as p")
+		.selectAll()
+		.toOperationNode();
+	const node = toKysely(parse(sql));
+	const out = compile(node);
+
+	expect(out.sql.toLowerCase()).toBe('select * from "projects" as "p"');
+	expect(out.parameters).toEqual([]);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports table aliases without AS", () => {
+	const sql = `SELECT * FROM state_all s`;
+
+	const expectedNode = kysely
+		.selectFrom("state_all as s")
+		.selectAll()
+		.toOperationNode();
+	const node = toKysely(parse(sql));
+	const out = compile(node);
+
+	expect(out.sql.toLowerCase()).toBe('select * from "state_all" as "s"');
+	expect(out.parameters).toEqual([]);
+	expect(node).toEqual(expectedNode);
+});

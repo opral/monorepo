@@ -5,9 +5,10 @@ import {
 	Identifier,
 	Star,
 	Semicolon,
+	As,
+	QuotedIdentifier,
 	sqlTokens,
 	sqlLexer,
- 	QuotedIdentifier,
 } from "./lexer.js";
 
 class SqlParser extends CstParser {
@@ -37,9 +38,30 @@ class SqlParser extends CstParser {
 	private readonly tableReference: () => CstNode = this.RULE(
 		"tableReference",
 		() => {
+			this.SUBRULE(this.tableIdentifierRule);
+			this.OPTION(() => {
+				this.OPTION1(() => this.CONSUME(As));
+				this.SUBRULE(this.aliasIdentifierRule);
+			});
+		}
+	);
+
+	private readonly tableIdentifierRule: () => CstNode = this.RULE(
+		"tableIdentifier",
+		() => {
 			this.OR([
 				{ ALT: () => this.CONSUME(Identifier) },
 				{ ALT: () => this.CONSUME(QuotedIdentifier) },
+			]);
+		}
+	);
+
+	private readonly aliasIdentifierRule: () => CstNode = this.RULE(
+		"aliasIdentifier",
+		() => {
+			this.OR([
+				{ ALT: () => this.CONSUME1(Identifier) },
+				{ ALT: () => this.CONSUME1(QuotedIdentifier) },
 			]);
 		}
 	);

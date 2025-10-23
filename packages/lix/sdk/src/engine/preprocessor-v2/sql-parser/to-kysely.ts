@@ -3,6 +3,8 @@ import {
 	SelectQueryNode,
 	SelectionNode,
 	TableNode,
+	AliasNode,
+	IdentifierNode,
 	type RootOperationNode,
 } from "kysely";
 import { parserInstance } from "./parser.js";
@@ -17,7 +19,8 @@ type SelectProjection = {
 };
 
 type TableReference = {
-	name: string;
+	table: string;
+	alias?: string;
 };
 
 class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
@@ -48,33 +51,35 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 	}
 
 	public tableReference(ctx: {
+		tableIdentifier: CstNode[];
+		aliasIdentifier?: CstNode[];
+	}): TableReference {
+		const tableIdentifier = ctx.tableIdentifier?.[0];
+		if (!tableIdentifier) {
+			throw new Error("table reference is missing");
+		}
+		const table = this.visit(tableIdentifier) as string;
+		const aliasNode = ctx.aliasIdentifier?.[0];
+		const alias = aliasNode ? (this.visit(aliasNode) as string) : undefined;
+		return { table, alias };
+	}
+
+	public tableIdentifier(ctx: {
 		Identifier?: IToken[];
 		QuotedIdentifier?: IToken[];
-	}): TableReference {
-		const identifierToken = selectIdentifierToken(ctx);
-		return { name: identifierToken }; // token already normalized below.
+	}): string {
+		return normalizeIdentifierToken(ctx);
+	}
+
+	public aliasIdentifier(ctx: {
+		Identifier?: IToken[];
+		QuotedIdentifier?: IToken[];
+	}): string {
+		return normalizeIdentifierToken(ctx);
 	}
 }
 
 const visitor = new ToKyselyVisitor();
-
-function selectIdentifierToken(ctx: {
-	Identifier?: IToken[];
-	QuotedIdentifier?: IToken[];
-}): string {
-	const raw = ctx.Identifier?.[0] ?? ctx.QuotedIdentifier?.[0];
-	if (!raw?.image) {
-		throw new Error("table reference is missing an identifier");
-	}
-	if (raw.tokenType === undefined) {
-		return raw.image;
-	}
-	const tokenName = raw.tokenType.name;
-	if (tokenName === "QuotedIdentifier") {
-		return raw.image.slice(1, -1).replace(/""/g, '"');
-	}
-	return raw.image;
-}
 
 function buildSelectQuery(
 	projection: SelectProjection,
@@ -83,8 +88,14 @@ function buildSelectQuery(
 	if (projection.kind !== "all") {
 		throw new Error(`Unsupported projection '${projection.kind}'`);
 	}
-	const tableNode = TableNode.create(reference.name);
-	const baseSelect = SelectQueryNode.createFrom([tableNode]);
+	const tableNode = TableNode.create(reference.table);
+	const relation = reference.alias
+		? AliasNode.create(
+			tableNode,
+			IdentifierNode.create(reference.alias)
+		)
+		: tableNode;
+	const baseSelect = SelectQueryNode.createFrom([relation]);
 	const selectAll = SelectionNode.createSelectAll();
 	return SelectQueryNode.cloneWithSelections(baseSelect, [selectAll]);
 }
@@ -99,4 +110,18 @@ function buildSelectQuery(
  */
 export function toKysely(root: CstNode): RootOperationNode {
 	return visitor.visit(root) as RootOperationNode;
+}
+
+function normalizeIdentifierToken(ctx: {
+	Identifier?: IToken[];
+	QuotedIdentifier?: IToken[];
+}): string {
+	const raw = ctx.Identifier?.[0] ?? ctx.QuotedIdentifier?.[0];
+	if (!raw?.image) {
+		throw new Error("identifier token missing");
+	}
+	if (raw.tokenType?.name === "QuotedIdentifier") {
+		return raw.image.slice(1, -1).replace(/""/g, '"');
+	}
+	return raw.image;
 }

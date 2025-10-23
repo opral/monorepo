@@ -16,10 +16,15 @@ export const From: TokenType = createToken({
 	pattern: /from/i,
 });
 
+export const As: TokenType = createToken({
+	name: "As",
+	pattern: /as/i,
+});
+
 export const Identifier: TokenType = createToken({
 	name: "Identifier",
 	pattern: /[A-Za-z_][A-Za-z0-9_]*/,
-	longer_alt: [Select, From],
+	longer_alt: [Select, From, As],
 });
 
 export const QuotedIdentifier: TokenType = createToken({
@@ -51,6 +56,7 @@ const tokens: TokenType[] = [
 	Whitespace,
 	Select,
 	From,
+	As,
 	Star,
 	Comma,
 	Dot,
