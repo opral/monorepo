@@ -259,55 +259,55 @@ function rewriteSelectQuery(
 		}
 	}
 
-let joins = select.joins;
-if (joins && joins.length > 0) {
-	const rewrittenJoins = joins.map((join) => {
-		const rewrittenTable = rewriteRelation(join.table, references);
-		if (rewrittenTable !== join.table) {
-			mutated = true;
-			return Object.freeze({
-				...join,
-				table: rewrittenTable,
-			}) as JoinNode;
+	let joins = select.joins;
+	if (joins && joins.length > 0) {
+		const rewrittenJoins = joins.map((join) => {
+			const rewrittenTable = rewriteRelation(join.table, references);
+			if (rewrittenTable !== join.table) {
+				mutated = true;
+				return Object.freeze({
+					...join,
+					table: rewrittenTable,
+				}) as JoinNode;
+			}
+			return join;
+		});
+		if (mutated) {
+			joins = Object.freeze(rewrittenJoins);
 		}
-		return join;
-	});
-	if (mutated) {
-		joins = Object.freeze(rewrittenJoins);
 	}
-}
 
-let setOperations = select.setOperations;
-if (setOperations && setOperations.length > 0) {
-	const rewrittenOperations = setOperations.map((operation) => {
-		const rewrittenExpression = rewriteSetOperationExpression(
-			operation.expression,
-			references
-		);
-		if (rewrittenExpression !== operation.expression) {
-			mutated = true;
-			return Object.freeze({
-				...operation,
-				expression: rewrittenExpression,
-			}) as typeof operation;
+	let setOperations = select.setOperations;
+	if (setOperations && setOperations.length > 0) {
+		const rewrittenOperations = setOperations.map((operation) => {
+			const rewrittenExpression = rewriteSetOperationExpression(
+				operation.expression,
+				references
+			);
+			if (rewrittenExpression !== operation.expression) {
+				mutated = true;
+				return Object.freeze({
+					...operation,
+					expression: rewrittenExpression,
+				}) as typeof operation;
+			}
+			return operation;
+		});
+		if (mutated) {
+			setOperations = Object.freeze(rewrittenOperations);
 		}
-		return operation;
-	});
-	if (mutated) {
-		setOperations = Object.freeze(rewrittenOperations);
 	}
-}
 
-if (!mutated) {
-	return select;
-}
+	if (!mutated) {
+		return select;
+	}
 
-return Object.freeze({
-	...select,
-	from: fromNode,
-	joins,
-	setOperations,
-});
+	return Object.freeze({
+		...select,
+		from: fromNode,
+		joins,
+		setOperations,
+	});
 }
 
 function rewriteSetOperationExpression(
@@ -315,7 +315,10 @@ function rewriteSetOperationExpression(
 	references: Map<string, EntityViewReference>
 ): OperationNode {
 	if (AliasNode.is(expression)) {
-		const rewrittenInner = rewriteSetOperationExpression(expression.node, references);
+		const rewrittenInner = rewriteSetOperationExpression(
+			expression.node,
+			references
+		);
 		if (rewrittenInner !== expression.node) {
 			return AliasNode.create(rewrittenInner, expression.alias);
 		}
@@ -331,25 +334,25 @@ function rewriteRelation(
 	node: OperationNode,
 	references: Map<string, EntityViewReference>
 ): OperationNode {
-if (AliasNode.is(node)) {
-	if (SelectQueryNode.is(node.node)) {
-		const rewrittenSubquery = rewriteSelectQuery(node.node, references);
-		if (rewrittenSubquery !== node.node) {
-			return AliasNode.create(rewrittenSubquery, node.alias);
+	if (AliasNode.is(node)) {
+		if (SelectQueryNode.is(node.node)) {
+			const rewrittenSubquery = rewriteSelectQuery(node.node, references);
+			if (rewrittenSubquery !== node.node) {
+				return AliasNode.create(rewrittenSubquery, node.alias);
+			}
+			return node;
 		}
-		return node;
+		if (!TableNode.is(node.node) || !isPlainIdentifier(node.node.table)) {
+			return node;
+		}
+		const aliasName = IdentifierNode.is(node.alias) ? node.alias.name : null;
+		const binding = aliasName ?? node.node.table.identifier.name;
+		const reference = references.get(binding);
+		if (!reference) {
+			return node;
+		}
+		return createEntityViewAlias(reference);
 	}
-	if (!TableNode.is(node.node) || !isPlainIdentifier(node.node.table)) {
-		return node;
-	}
-	const aliasName = IdentifierNode.is(node.alias) ? node.alias.name : null;
-	const binding = aliasName ?? node.node.table.identifier.name;
-	const reference = references.get(binding);
-	if (!reference) {
-		return node;
-	}
-	return createEntityViewAlias(reference);
-}
 
 	if (TableNode.is(node) && isPlainIdentifier(node.table)) {
 		const binding = node.table.identifier.name;

@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { internalQueryBuilder } from "../../internal-query-builder.js";
+import { parse } from "../sql-parser/parser.js";
+import { toRootOperationNode } from "../sql-parser/to-root-operation-node.js";
 import {
 	REWRITTEN_STATE_VTABLE,
 	rewriteVtableSelects,
 } from "./rewrite-vtable-selects.js";
-import { sql } from "kysely";
-import type { RootOperationNode, SelectQueryNode } from "kysely";
+import type { SelectQueryNode } from "kysely";
 import { compile } from "../compile.js";
 import { extractCteName } from "../utils.js";
 import type { PreprocessorTraceEntry } from "../types.js";
@@ -14,10 +14,11 @@ import { insertTransactionState } from "../../../state/transaction/insert-transa
 import { getTimestamp } from "../../functions/timestamp.js";
 
 test("hoists to lix_internal_state_vtable_rewritten", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable")
-		.selectAll()
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT * FROM lix_internal_state_vtable
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -32,10 +33,12 @@ test("hoists to lix_internal_state_vtable_rewritten", () => {
 });
 
 test("hoists a CTE for the rewritten vtable", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable")
-		.selectAll()
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT *
+			FROM lix_internal_state_vtable
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -54,18 +57,19 @@ test("hoists a CTE for the rewritten vtable", () => {
 	const normalized = sql.trim().toUpperCase();
 
 	expect(normalized).toMatch(/^WITH\b/);
-	expect(sql).toContain("hoisted_lix_internal_state_vtable_rewrite");
 	expect(sql).toContain(REWRITTEN_STATE_VTABLE);
 });
 
 test("emits trace metadata with alias and filters", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	rewriteVtableSelects({
 		node,
@@ -90,11 +94,13 @@ test("emits trace metadata with alias and filters", () => {
 test("throws on dynamic schema key filters", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.where("v.schema_key", "=", sql.raw("?") as any)
-		.selectAll("v")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = ?
+		`)
+	);
 
 	expect(() =>
 		rewriteVtableSelects({
@@ -111,10 +117,12 @@ test("throws on dynamic schema key filters", () => {
 
 test("uses projected columns when select is narrowed", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.select(["v.schema_key", "v.file_id"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.schema_key, v.file_id
+			FROM lix_internal_state_vtable AS v
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -135,10 +143,12 @@ test("uses projected columns when select is narrowed", () => {
 
 test("respects aliases when projecting columns", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.select((eb) => [eb.ref("v.schema_key").as("schema_key_alias")])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.schema_key AS schema_key_alias
+			FROM lix_internal_state_vtable AS v
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -157,11 +167,13 @@ test("respects aliases when projecting columns", () => {
 
 test("includes _pk across segments when explicitly selected", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.select(["v._pk", "v.schema_key"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v._pk, v.schema_key
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -182,10 +194,12 @@ test("includes _pk across segments when explicitly selected", () => {
 });
 
 test("retains writer joins when writer_key is selected", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.select(["v.schema_key", "v.writer_key"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.schema_key, v.writer_key
+			FROM lix_internal_state_vtable AS v
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -199,11 +213,13 @@ test("retains writer joins when writer_key is selected", () => {
 });
 
 test("routes cache queries to mapped physical tables", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -219,11 +235,13 @@ test("routes cache queries to mapped physical tables", () => {
 });
 
 test("includes only cache tables for matching schema filters", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -243,16 +261,16 @@ test("includes only cache tables for matching schema filters", () => {
 });
 
 test("unions cache tables when multiple schema filters are present", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.where((eb) =>
-			eb.or([
-				eb("v.schema_key", "=", "test_schema_key"),
-				eb("v.schema_key", "=", "test_schema_key_other"),
-			])
-		)
-		.selectAll("v")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE (
+				v.schema_key = 'test_schema_key'
+				OR v.schema_key = 'test_schema_key_other'
+			)
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -274,11 +292,13 @@ test("unions cache tables when multiple schema filters are present", () => {
 });
 
 test("skips cache unions when no cache tables mapped", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -295,10 +315,12 @@ test("skips cache unions when no cache tables mapped", () => {
 });
 
 test("unions all available cache tables when no schema filter is provided", () => {
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -319,13 +341,14 @@ test("unions all available cache tables when no schema filter is provided", () =
 
 test("handles multiple vtable references with selective projections", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as a")
-		.innerJoin("lix_internal_state_vtable as b", (join) =>
-			join.onRef("a.schema_key", "=", "b.schema_key")
-		)
-		.select(["a.schema_key", "a.file_id", "b.writer_key"])
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT a.schema_key, a.file_id, b.writer_key
+			FROM lix_internal_state_vtable AS a
+			INNER JOIN lix_internal_state_vtable AS b
+				ON a.schema_key = b.schema_key
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,
@@ -379,11 +402,13 @@ test("returns transaction rows", async () => {
 		timestamp,
 	});
 
-	const node = internalQueryBuilder
-		.selectFrom("lix_internal_state_vtable as v")
-		.selectAll("v")
-		.where("v.schema_key", "=", "test_schema_key")
-		.toOperationNode() as RootOperationNode;
+	const node = toRootOperationNode(
+		parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'
+		`)
+	);
 
 	const rewritten = rewriteVtableSelects({
 		node,

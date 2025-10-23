@@ -21,6 +21,26 @@ export const Where: TokenType = createToken({
 	pattern: /where/i,
 });
 
+export const Or: TokenType = createToken({
+	name: "Or",
+	pattern: /or/i,
+});
+
+export const Inner: TokenType = createToken({
+	name: "Inner",
+	pattern: /inner/i,
+});
+
+export const Join: TokenType = createToken({
+	name: "Join",
+	pattern: /join/i,
+});
+
+export const On: TokenType = createToken({
+	name: "On",
+	pattern: /on/i,
+});
+
 export const As: TokenType = createToken({
 	name: "As",
 	pattern: /as/i,
@@ -29,7 +49,7 @@ export const As: TokenType = createToken({
 export const Identifier: TokenType = createToken({
 	name: "Identifier",
 	pattern: /[A-Za-z_][A-Za-z0-9_]*/,
-	longer_alt: [Select, From, Where, As],
+	longer_alt: [Select, From, Where, Or, Inner, Join, On, As],
 });
 
 export const QuotedIdentifier: TokenType = createToken({
@@ -57,9 +77,24 @@ export const Comma: TokenType = createToken({
 	pattern: /,/,
 });
 
+export const LeftParen: TokenType = createToken({
+	name: "LeftParen",
+	pattern: /\(/,
+});
+
+export const RightParen: TokenType = createToken({
+	name: "RightParen",
+	pattern: /\)/,
+});
+
 export const Dot: TokenType = createToken({
 	name: "Dot",
 	pattern: /\./,
+});
+
+export const Parameter: TokenType = createToken({
+	name: "Parameter",
+	pattern: /\?/,
 });
 
 export const Semicolon: TokenType = createToken({
@@ -77,10 +112,17 @@ const tokens: TokenType[] = [
 	Select,
 	From,
 	Where,
+	Or,
+	Inner,
+	Join,
+	On,
 	As,
 	Star,
 	Comma,
+	LeftParen,
+	RightParen,
 	Dot,
+	Parameter,
 	Semicolon,
 	Equals,
 	StringLiteral,
