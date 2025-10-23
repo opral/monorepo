@@ -130,6 +130,32 @@ export default function App(props: Route.ComponentProps) {
 }
 ```
 
+### Meta generation
+
+React Router generates the `<meta>` tags in a separate context on the client. To
+make sure the `getLocale` helper returns the correct locale during the
+generation step, update your `meta` function like this:
+
+```ts
+export function meta({ matches }: Route.MetaArgs) {
+  if (!import.meta.env.SSR) {
+    const { locale } = getRequiredLoaderData<ServerContext>(matches, "root");
+    overwriteGetLocale(() => assertIsLocale(locale));
+  } else {
+    overwriteGetLocale(() =>
+      assertIsLocale(useContext<Locale>(LocaleContextSSR))
+    );
+  }
+
+  return [];
+}
+```
+
+This mirrors the server setup shown above while ensuring that the meta
+generation step runs with the correct locale, even when multiple requests are
+handled in parallel. Replace `ServerContext` with the type returned by your root
+loader if it differs.
+
 In `routes.ts`: 
 
 ```diff
