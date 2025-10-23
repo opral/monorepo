@@ -216,9 +216,38 @@ test("supports left joins", () => {
 	const expectedNode = kysely
 		.selectFrom("lix_internal_state_vtable as a")
 		.leftJoin("lix_internal_state_vtable as b", (join) =>
-			 join.onRef("a.schema_key", "=", "b.schema_key")
+			join.onRef("a.schema_key", "=", "b.schema_key")
 		)
 		.select(["a.schema_key", "b.writer_key"])
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("supports derived table subqueries", () => {
+	const query = `
+		SELECT wrapped.*
+		FROM (
+			SELECT *
+			FROM state_all
+			WHERE schema_key = 'test_schema'
+		) AS wrapped
+	`;
+
+	const expectedNode = kysely
+		.selectFrom((eb) =>
+			eb
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "test_schema")
+				.as("wrapped")
+		)
+		.selectAll("wrapped")
 		.toOperationNode();
 	const node = toRootOperationNode(parse(query));
 	const out = compile(node);
