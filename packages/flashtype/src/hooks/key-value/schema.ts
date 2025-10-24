@@ -13,6 +13,11 @@ export type KeyDef<V> = {
 
 // Flashtype keys + per-key defaults
 export const KEY_VALUE_DEFINITIONS = {
+	flashtype_agent_conversation_id: {
+		defaultVersionId: "global",
+		untracked: true,
+	} as KeyDef<string | null>,
+
 	// Cross-version UI state, not change-controlled
 	flashtype_active_file_id: {
 		defaultVersionId: "global",

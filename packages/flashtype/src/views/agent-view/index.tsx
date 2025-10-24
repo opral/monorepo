@@ -9,30 +9,24 @@ import {
 import { Bot } from "lucide-react";
 import { createGatewayProvider } from "@ai-sdk/gateway";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
-import { selectVersionDiff, createConversation } from "@lix-js/sdk";
+import { createConversation, selectVersionDiff } from "@lix-js/sdk";
 import {
 	ChangeProposalRejectedError,
 	createLixAgent,
 	getChangeProposalSummary,
 	type AgentConversationMessage,
-	type AgentConversationMessageMetadata,
 	type AgentEvent,
-	type AgentStep,
-	type AgentThinkingStep,
-	type AgentToolStep,
 	type Agent as LixAgent,
 	type ChangeProposalSummary,
 	sendMessage,
 } from "@lix-js/agent-sdk";
-import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
-import { ChatMessageList } from "./chat-message-list";
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
 	ViewContext,
 	DiffViewConfig,
 	RenderableDiff,
 } from "../../app/types";
-import type { ChatMessage, ToolRun, ToolRunStatus } from "./chat-types";
+import ConversationMessage from "./conversation-message";
 import { COMMANDS, type SlashCommand } from "./commands/index";
 import { MentionMenu, CommandMenu } from "./menu";
 import { useComposerState } from "./composer-state";
@@ -43,28 +37,14 @@ import { systemPrompt } from "./system-prompt";
 import { PromptComposer } from "./components/prompt-composer";
 import { ChangeDecisionOverlay } from "./components/change-decision";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
+import { useKeyValue } from "@/hooks/key-value/use-key-value";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
 };
 
-type ToolSession = {
-	id: string;
-	runs: ToolRun[];
-};
-
-const CONVERSATION_KEY = "flashtype_agent_conversation_id";
+export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 const MODEL_NAME = "google/gemini-2.5-pro";
-
-const formatToolError = (value: unknown): string => {
-	if (value instanceof Error) return value.message;
-	if (typeof value === "string") return value;
-	try {
-		return JSON.stringify(value);
-	} catch {
-		return String(value);
-	}
-};
 
 /**
  * Agent chat view backed by the real Lix agent.
@@ -79,13 +59,20 @@ const formatToolError = (value: unknown): string => {
 export function AgentView({ context }: AgentViewProps) {
 	const lix = useLix();
 
-	const [agentMessages, setAgentMessages] = useState<
-		AgentConversationMessage[]
-	>([]);
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [agent, setAgent] = useState<LixAgent | null>(null);
-	const [conversationId, setConversationId] = useState<string | null>(null);
+	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
+
+	useEffect(() => {
+		(async () => {
+			if (!conversationId) {
+				const conversation = await createConversation({ lix });
+				setConversationId(conversation.id);
+			}
+		})();
+	}, [conversationId, lix, setConversationId]);
+
 	const [pendingProposal, setPendingProposal] = useState<{
 		proposalId: string;
 		summary?: string;
@@ -93,7 +80,6 @@ export function AgentView({ context }: AgentViewProps) {
 		accept: () => Promise<void>;
 		reject: (reason?: string) => Promise<void>;
 	} | null>(null);
-	const [missingKey, setMissingKey] = useState(false);
 
 	const provider = useMemo(() => {
 		return createGatewayProvider({
@@ -105,92 +91,23 @@ export function AgentView({ context }: AgentViewProps) {
 				const headers = new Headers(request.headers);
 				headers.delete("authorization");
 				const response = await fetch(new Request(request, { headers }));
-				if (response.status === 500) {
-					try {
-						const clone = response.clone();
-						const text = await clone.text();
-						if (text.includes("Missing AI_GATEWAY_API_KEY")) {
-							setMissingKey(true);
-						}
-					} catch {
-						// ignore clone failures
-					}
-				} else {
-					setMissingKey((prev) => (prev ? false : prev));
-				}
 				return response;
 			},
 		});
 	}, []);
 
-	const model = useMemo(
-		() => (missingKey ? null : provider(MODEL_NAME)),
-		[missingKey, provider],
-	);
-	const hasKey = !missingKey;
+	const model = useMemo(() => provider(MODEL_NAME), [provider]);
+	const hasKey = true;
 	const ready = !!agent;
 
-	const upsertConversationPointer = useCallback(
-		async (id: string) => {
-			await lix.db.transaction().execute(async (trx) => {
-				const existing = await trx
-					.selectFrom("key_value_all")
-					.where("lixcol_version_id", "=", "global")
-					.where("key", "=", CONVERSATION_KEY)
-					.select(["key"])
-					.executeTakeFirst();
-
-				if (existing) {
-					await trx
-						.updateTable("key_value_all")
-						.set({ value: id, lixcol_untracked: true })
-						.where("key", "=", CONVERSATION_KEY)
-						.where("lixcol_version_id", "=", "global")
-						.execute();
-				} else {
-					await trx
-						.insertInto("key_value_all")
-						.values({
-							key: CONVERSATION_KEY,
-							value: id,
-							lixcol_version_id: "global",
-							lixcol_untracked: true,
-						})
-						.execute();
-				}
-			});
-		},
-		[lix],
+	const messages = useQuery(({ lix }) =>
+		lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.selectAll()
+			.orderBy("lixcol_created_at", "asc")
+			.orderBy("id", "asc"),
 	);
-
-	const refreshConversationId = useCallback(async (): Promise<string | null> => {
-		const ptr = await lix.db
-			.selectFrom("key_value_all")
-			.where("lixcol_version_id", "=", "global")
-			.where("key", "=", CONVERSATION_KEY)
-			.select(["value"])
-			.executeTakeFirst();
-		const id =
-			typeof ptr?.value === "string" && ptr.value.length > 0
-				? (ptr.value as string)
-				: null;
-		setConversationId(id);
-		return id;
-	}, [lix]);
-
-	const ensureConversationId = useCallback(async (): Promise<string> => {
-		if (conversationId) return conversationId;
-
-		const existing = await refreshConversationId();
-		if (existing) {
-			return existing;
-		}
-
-		const created = await createConversation({ lix, versionId: "global" });
-		await upsertConversationPointer(created.id);
-		setConversationId(created.id);
-		return created.id;
-	}, [conversationId, refreshConversationId, lix, upsertConversationPointer]);
 
 	// Boot agent
 	useEffect(() => {
@@ -198,67 +115,16 @@ export function AgentView({ context }: AgentViewProps) {
 		(async () => {
 			if (!hasKey || !model) {
 				setAgent(null);
-				setConversationId(null);
-				setAgentMessages([]);
 				return;
 			}
 			const nextAgent = await createLixAgent({ lix, model, systemPrompt });
 			if (cancelled) return;
 			setAgent(nextAgent);
-			await refreshConversationId();
 		})();
 		return () => {
 			cancelled = true;
 		};
-	}, [lix, model, hasKey, refreshConversationId]);
-
-	// Subscribe to conversation messages when the ID changes
-	useEffect(() => {
-		let cancelled = false;
-		let sub: { unsubscribe(): void } | null = null;
-		(async () => {
-			if (!conversationId) {
-				setAgentMessages([]);
-				return;
-			}
-			const query = lix.db
-				.selectFrom("conversation_message")
-				.where("conversation_id", "=", String(conversationId))
-				.select([
-					"id",
-					"body",
-					"lixcol_metadata",
-					"lixcol_created_at",
-					"parent_id",
-					"conversation_id",
-				])
-				.orderBy("lixcol_created_at", "asc")
-				.orderBy("id", "asc");
-			sub = lix.observe(query).subscribe({
-				next: (rows) => {
-					if (cancelled) return;
-					type ConversationRow = (typeof rows)[number] & {
-						lixcol_metadata?: Record<string, unknown> | null;
-					};
-					const hist: AgentConversationMessage[] = (
-						rows as ConversationRow[]
-					).map((r) => ({
-						...r,
-						id: String(r.id),
-						conversation_id: String(r.conversation_id),
-						parent_id: (r.parent_id as string | null) ?? null,
-						lixcol_metadata: (r.lixcol_metadata ??
-							null) as AgentConversationMessageMetadata | null,
-					}));
-					setAgentMessages(hist);
-				},
-			});
-		})();
-		return () => {
-			cancelled = true;
-			sub?.unsubscribe();
-		};
-	}, [lix, conversationId]);
+	}, [lix, model, hasKey]);
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
@@ -283,12 +149,10 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [pendingProposal]);
 
 	const clear = useCallback(async () => {
-		const newId = await runClearConversation({ lix, agent });
-		setConversationId(newId);
-		setAgentMessages([]);
+		await runClearConversation({ agent: agent!, conversationId });
 		setPendingProposal(null);
-	}, [agent, lix]);
-
+		setPendingMessage(null);
+	}, [agent, conversationId]);
 
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -327,77 +191,8 @@ export function AgentView({ context }: AgentViewProps) {
 	// 	: "New conversation";
 
 	const [notice, setNotice] = useState<string | null>(null);
-	const [toolSessions, setToolSessions] = useState<ToolSession[]>([]);
-	const activeSessionRef = useRef<string | null>(null);
-
-	const agentTranscript = useMemo<ChatMessage[]>(() => {
-		return agentMessages.flatMap((message) => {
-			const metadata = message.lixcol_metadata as
-				| AgentConversationMessageMetadata
-				| undefined;
-			const role =
-				(metadata?.lix_agent_sdk_role as "user" | "assistant" | undefined) ??
-				"assistant";
-			const rawSteps = metadata?.lix_agent_sdk_steps;
-			const steps: AgentStep[] = Array.isArray(rawSteps) ? rawSteps : [];
-			const base: ChatMessage = {
-				id: message.id,
-				role,
-				content: toPlainText(message.body as ZettelDoc),
-			};
-			if (role === "assistant" && steps.length > 0) {
-				return [{ ...base, toolRuns: stepsToToolRuns(steps) }];
-			}
-			return [base];
-		});
-	}, [agentMessages]);
-
-	const transcript = useMemo<ChatMessage[]>(() => {
-		const out: ChatMessage[] = [...agentTranscript];
-		if (toolSessions.length > 0) {
-			const pendingRuns = toolSessions.flatMap((session) => session.runs);
-			if (pendingRuns.length > 0) {
-				const lastSessionId =
-					toolSessions[toolSessions.length - 1]?.id ?? "pending";
-				out.push({
-					id: `tool-session-${lastSessionId}`,
-					role: "assistant",
-					content: "",
-					toolRuns: pendingRuns,
-				});
-			}
-		}
-		if (pending) {
-			out.push({
-				id: "agent-pending",
-				role: "assistant",
-				content: "Thinking…",
-			});
-		}
-		if (notice) {
-			out.push({
-				id: "agent-notice",
-				role: "system",
-				content: notice,
-			});
-		}
-	if (error) {
-		out.push({
-			id: "agent-error",
-			role: "system",
-			content: error,
-		});
-	}
-		if (!hasKey) {
-			out.push({
-				id: "agent-missing-key",
-				role: "system",
-				content:
-					"Missing AI_GATEWAY_API_KEY. Add one to enable the Lix Agent conversation.",
-			});
-		}
-		return out;
-	}, [agentTranscript, toolSessions, pending, notice, error, hasKey]);
+	const [pendingMessage, setPendingMessage] =
+		useState<AgentConversationMessage | null>(null);
 
 	const updateMention = useCallback(() => {
 		updateMentions(textAreaRef.current);
@@ -444,162 +239,13 @@ export function AgentView({ context }: AgentViewProps) {
 		[pendingProposal, rejectPendingProposal],
 	);
 
-	const beginToolSession = useCallback(() => {
-		const id = generateSessionId();
-		activeSessionRef.current = id;
-		setToolSessions((prev) => [...prev, { id, runs: [] }]);
-		return id;
-	}, []);
-
-	const finalizeToolSession = useCallback((id: string) => {
-		setToolSessions((prev) => prev.filter((session) => session.id !== id));
-	}, []);
-
-	const resetToolSessions = useCallback(() => {
-		activeSessionRef.current = null;
-		setToolSessions([]);
-	}, []);
-
-	const handleToolEvent = useCallback(
-		(event: Extract<AgentEvent, { type: "tool" }>) => {
-			const sessionId = activeSessionRef.current;
-			if (!sessionId) return;
-			setToolSessions((prev) => {
-				const index = prev.findIndex((session) => session.id === sessionId);
-				if (index === -1) return prev;
-				const session = prev[index];
-				const runs = session.runs.slice();
-				const name = formatToolName(event.call.tool_name);
-				if (event.phase === "start") {
-					runs.push({
-						id: event.call.id,
-						title: name,
-						status: "running",
-						input: stringifyPayload(event.call.tool_input),
-					});
-				} else if (event.phase === "finish") {
-					const existingIdx = runs.findIndex((run) => run.id === event.call.id);
-					const output = stringifyPayload(event.call.tool_output);
-					if (existingIdx === -1) {
-						runs.push({
-							id: event.call.id,
-							title: name,
-							status: "success",
-							output,
-						});
-					} else {
-						runs[existingIdx] = {
-							...runs[existingIdx],
-							status: "success",
-							title: name,
-							output,
-						};
-					}
-				} else if (event.phase === "error") {
-					const existingIdx = runs.findIndex((run) => run.id === event.call.id);
-					const errorText = formatToolError(event.call.error_text);
-					if (existingIdx === -1) {
-						runs.push({
-							id: event.call.id,
-							title: name,
-							status: "error",
-							output: errorText,
-						});
-					} else {
-						runs[existingIdx] = {
-							...runs[existingIdx],
-							status: "error",
-							title: name,
-							output: errorText,
-						};
-					}
-				}
-				const next = prev.slice();
-				next[index] = { ...session, runs };
-				return next;
-			});
-		},
-		[]
-	);
-	const handleThinkingEvent = useCallback(
-		(event: Extract<AgentEvent, { type: "thinking" }>) => {
-			const sessionId = activeSessionRef.current;
-			if (!sessionId) return;
-			setToolSessions((prev) => {
-				const index = prev.findIndex((session) => session.id === sessionId);
-				if (index === -1) return prev;
-				const session = prev[index];
-				const runs = session.runs.slice();
-				const existingIdx = runs.findIndex((run) => run.id === event.id);
-				const nextContent =
-					(existingIdx === -1 ? "" : runs[existingIdx]?.content ?? "") +
-					event.delta;
-				if (existingIdx === -1) {
-					runs.push({
-						id: event.id,
-						title: "Thinking",
-						status: "thinking",
-						content: nextContent,
-					});
-				} else {
-					const existing = runs[existingIdx];
-					runs[existingIdx] = {
-						...existing,
-						title: existing.title || "Thinking",
-						status: "thinking",
-						content: nextContent,
-					};
-				}
-				const next = prev.slice();
-				next[index] = { ...session, runs };
-				return next;
-			});
-		},
-		[]
-	);
-	const handleStepEvent = useCallback(
-		(event: Extract<AgentEvent, { type: "step" }>) => {
-			if (event.step.kind !== "thinking") return;
-			const thinkingStep = event.step as AgentThinkingStep;
-			const sessionId = activeSessionRef.current;
-			if (!sessionId) return;
-			setToolSessions((prev) => {
-				const index = prev.findIndex((session) => session.id === sessionId);
-				if (index === -1) return prev;
-				const session = prev[index];
-				const runs = session.runs.slice();
-				const existingIdx = runs.findIndex((run) => run.id === thinkingStep.id);
-				if (existingIdx === -1) {
-					runs.push({
-						id: thinkingStep.id,
-						title: "Thinking",
-						status: "thinking",
-						content: thinkingStep.text,
-					});
-				} else {
-					const existing = runs[existingIdx];
-					runs[existingIdx] = {
-						...existing,
-						title: existing.title || "Thinking",
-						status: "thinking",
-						content: thinkingStep.text,
-					};
-				}
-				const next = prev.slice();
-				next[index] = { ...session, runs };
-				return next;
-			});
-		},
-		[]
-	);
-
 	const send = useCallback(
 		async (
 			text: string,
-				opts?: {
-					signal?: AbortSignal;
-					onToolEvent?: (event: Extract<AgentEvent, { type: "tool" }>) => void;
-				},
+			opts?: {
+				signal?: AbortSignal;
+				onToolEvent?: (event: Extract<AgentEvent, { type: "tool" }>) => void;
+			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
 			const trimmed = text.trim();
@@ -608,19 +254,21 @@ export function AgentView({ context }: AgentViewProps) {
 			setPendingProposal(null);
 			setPending(true);
 			try {
-				const convId = await ensureConversationId();
-				setConversationId(convId);
 				console.log("[agent] send", {
-					conversationId: convId,
+					conversationId: conversationId!,
 					proposalMode: true,
 				});
-				const stream = sendMessage({
+				const turn = sendMessage({
 					agent,
 					prompt: fromPlainText(trimmed),
-					conversationId: convId,
+					conversationId: conversationId!,
 					signal: opts?.signal,
 					proposalMode: true,
 				});
+				const updatePending = () => {
+					setPendingMessage(structuredClone(turn.message));
+				};
+				updatePending();
 				let finalMessage: AgentConversationMessage | null = null;
 				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
 				let activeProposal: {
@@ -632,10 +280,13 @@ export function AgentView({ context }: AgentViewProps) {
 					string,
 					Extract<AgentEvent, { type: "tool" }>["phase"]
 				>();
-				for await (const event of stream) {
+				for await (const event of turn) {
 					switch (event.type) {
+						case "text":
+							updatePending();
+							break;
 						case "thinking":
-							handleThinkingEvent(event);
+							updatePending();
 							break;
 						case "tool": {
 							const { call, phase } = event;
@@ -644,10 +295,11 @@ export function AgentView({ context }: AgentViewProps) {
 								handledToolPhases.set(call.id, phase);
 								opts?.onToolEvent?.(event);
 							}
+							updatePending();
 							break;
 						}
 						case "step":
-							handleStepEvent(event);
+							updatePending();
 							break;
 						case "proposal:open": {
 							const details = agent
@@ -691,7 +343,7 @@ export function AgentView({ context }: AgentViewProps) {
 						}
 						case "message":
 							finalMessage = event.message;
-							setConversationId(String(event.message.conversation_id));
+							updatePending();
 							break;
 						case "error":
 							errorEvent = event;
@@ -716,7 +368,9 @@ export function AgentView({ context }: AgentViewProps) {
 				console.log("[agent] turn completed", {
 					conversationId: finalMessage.conversation_id,
 				});
+				setPendingMessage(null);
 			} catch (err) {
+				setPendingMessage(null);
 				const message =
 					err instanceof Error ? err.message : String(err ?? "unknown");
 				if (err instanceof ChangeProposalRejectedError) {
@@ -731,7 +385,7 @@ export function AgentView({ context }: AgentViewProps) {
 				setPending(false);
 			}
 		},
-		[agent, ensureConversationId, context, handleThinkingEvent, handleStepEvent],
+		[agent, conversationId, context],
 	);
 
 	useEffect(() => {
@@ -744,7 +398,6 @@ export function AgentView({ context }: AgentViewProps) {
 			if (normalized === "clear" || normalized === "reset") {
 				try {
 					await clear();
-					resetToolSessions();
 					setNotice("Conversation cleared.");
 				} catch (err) {
 					const message =
@@ -761,7 +414,7 @@ export function AgentView({ context }: AgentViewProps) {
 			}
 			setNotice(`Unknown command: /${normalized}`);
 		},
-		[clear, resetToolSessions],
+		[clear],
 	);
 
 	const commit = useCallback(async () => {
@@ -803,13 +456,12 @@ export function AgentView({ context }: AgentViewProps) {
 			return;
 		}
 
-		const sessionId = beginToolSession();
 		setNotice(null);
 		pushHistory(trimmedEnd);
 		resetComposer();
 
 		try {
-			await send(trimmedEnd, { onToolEvent: handleToolEvent });
+			await send(trimmedEnd);
 		} catch (err) {
 			const message =
 				err instanceof Error ? err.message : String(err ?? "unknown");
@@ -819,9 +471,6 @@ export function AgentView({ context }: AgentViewProps) {
 				console.error("Failed to send agent message:", err);
 				setNotice(`Failed to send message: ${message}`);
 			}
-		} finally {
-			finalizeToolSession(sessionId);
-			activeSessionRef.current = null;
 		}
 	}, [
 		value,
@@ -835,11 +484,8 @@ export function AgentView({ context }: AgentViewProps) {
 		setMentionIdx,
 		mentionCtx,
 		handleSlashCommand,
-		beginToolSession,
 		pushHistory,
 		send,
-		handleToolEvent,
-		finalizeToolSession,
 		filteredCommands,
 	]);
 
@@ -1022,13 +668,35 @@ export function AgentView({ context }: AgentViewProps) {
 			</header>
 			*/}
 
-			{/* Chat messages */}
+			{/* Conversation messages */}
 			<div className="flex-1 min-h-0 overflow-y-auto">
-				<ChatMessageList
-					messages={transcript}
-					onAcceptDecision={handleAcceptDecision}
-					onRejectDecision={handleRejectDecision}
-				/>
+				{messages.map((message) => (
+					<ConversationMessage key={message.id} message={message} />
+				))}
+				{pendingMessage ? (
+					<ConversationMessage
+						key={pendingMessage.id || "agent-pending"}
+						message={pendingMessage}
+					/>
+				) : pending ? (
+					<div className="px-3 py-1 text-xs text-muted-foreground">
+						Thinking…
+					</div>
+				) : null}
+				{notice ? (
+					<div className="px-3 py-1 text-xs text-muted-foreground">
+						{notice}
+					</div>
+				) : null}
+				{error ? (
+					<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+				) : null}
+				{!hasKey ? (
+					<div className="px-3 py-1 text-xs text-muted-foreground">
+						Missing AI_GATEWAY_API_KEY. Add one to enable the Lix Agent
+						conversation.
+					</div>
+				) : null}
 			</div>
 
 			<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
@@ -1084,50 +752,6 @@ export const view = createReactViewDefinition({
 
 export default AgentView;
 
-function stepsToToolRuns(steps: AgentStep[]): ToolRun[] {
-	const runs: ToolRun[] = [];
-	for (const step of steps) {
-		if (step.kind === "thinking") {
-			const thinking = step as AgentThinkingStep;
-			runs.push({
-				id: thinking.id,
-				title: "Thinking",
-				status: "thinking",
-				content: thinking.text,
-			});
-			continue;
-		}
-		if (step.kind !== "tool_call") continue;
-		const toolStep = step as AgentToolStep;
-		const status = statusFromStep(toolStep.status);
-		const formattedInput = stringifyPayload(toolStep.tool_input);
-		const formattedOutput =
-			status === "error"
-				? (toolStep.error_text ?? stringifyPayload(toolStep.tool_output))
-				: stringifyPayload(toolStep.tool_output);
-		const titleSource = toolStep.tool_name
-			? formatToolName(toolStep.tool_name)
-			: (toolStep.label ?? "Tool");
-		runs.push({
-			id: toolStep.id,
-			title: titleSource,
-			detail: toolStep.label,
-			status,
-			input: formattedInput,
-			output: formattedOutput,
-			content:
-				status === "error" ? (toolStep.error_text ?? undefined) : undefined,
-		});
-	}
-	return runs;
-}
-
-function statusFromStep(status?: string): ToolRunStatus {
-	if (status === "succeeded") return "success";
-	if (status === "failed") return "error";
-	return "running";
-}
-
 function lastActionFocus(el: HTMLTextAreaElement | null) {
 	if (!el) return;
 	el.focus();
@@ -1139,30 +763,6 @@ function moveCaretToEnd(el: HTMLTextAreaElement | null) {
 	const len = el.value.length;
 	el.setSelectionRange(len, len);
 	el.focus();
-}
-
-function generateSessionId(): string {
-	const rand = Math.random().toString(36).slice(2, 10);
-	return `session-${Date.now().toString(36)}-${rand}`;
-}
-
-function formatToolName(name: string): string {
-	if (!name) return "Tool";
-	return name
-		.split(/[_\s-]+/)
-		.filter(Boolean)
-		.map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-		.join(" ");
-}
-
-function stringifyPayload(payload: unknown): string | undefined {
-	if (payload === null || payload === undefined) return undefined;
-	if (typeof payload === "string") return payload;
-	try {
-		return JSON.stringify(payload, null, 2);
-	} catch {
-		return String(payload);
-	}
 }
 
 function createProposalDiffConfig(args: {

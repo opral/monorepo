@@ -153,6 +153,12 @@ export type AgentEvent =
  */
 export interface AgentTurn extends AsyncIterable<AgentEvent> {
 	/**
+	 * Live assistant message for the current turn.
+	 * Mutates as streaming events arrive and resolves to the final message when
+	 * {@link complete} finishes.
+	 */
+	message: AgentConversationMessage;
+	/**
 	 * Await stream completion, optionally auto-accepting proposals.
 	 *
 	 * Rejects with the first stream error (including rejected proposals).

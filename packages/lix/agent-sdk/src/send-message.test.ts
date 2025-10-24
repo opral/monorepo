@@ -2,7 +2,8 @@ import { describe, expect, test } from "vitest";
 import { openLix, mockJsonPlugin } from "@lix-js/sdk";
 import type { LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
-import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { createLixAgent, getAgentState } from "./create-lix-agent.js";
 import { sendMessage } from "./send-message.js";
 import { persistConversation } from "./conversation-storage.js";
@@ -292,6 +293,27 @@ describe("sendMessage", () => {
 			) ?? [];
 		expect(thinkingSteps).toHaveLength(1);
 		expect(thinkingSteps[0]?.text).toBe("pondering files");
+
+		await lix.close();
+	});
+
+	test("turn.message reflects the live assistant response", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const turn = sendMessage({
+			agent,
+			prompt: fromPlainText("hello"),
+		});
+		const live = turn.message;
+		expect(live).toBeDefined();
+		expect(live.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
+
+		const final = await turn.complete({ autoAcceptProposals: true });
+		expect(final).toBe(live);
+		expect(toPlainText(live.body)).toBe("response");
+		expect(live.conversation_id).toBe(final.conversation_id);
 
 		await lix.close();
 	});

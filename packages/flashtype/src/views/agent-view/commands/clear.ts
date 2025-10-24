@@ -1,52 +1,31 @@
-import type { Lix } from "@lix-js/sdk";
-import type { LixAgent } from "@lix-js/agent-sdk";
-
-const CONVERSATION_KEY = "lix_agent_conversation_id";
+import type { Agent } from "@lix-js/agent-sdk";
+import type { LixConversation } from "@lix-js/sdk";
 
 /**
  * Clears the current conversation by removing all messages in a safe order.
  */
 export async function clearConversation(args: {
-	lix: Lix;
-	agent: LixAgent | null;
-}): Promise<string | null> {
-	const { lix } = args;
-
-	const currentId = await getConversationId(lix);
-	if (!currentId) {
-		return null;
+	agent: Pick<Agent, "lix">;
+	conversationId: LixConversation["id"] | null;
+}): Promise<void> {
+	if (!args.conversationId) {
+		return;
 	}
 
-	await lix.db.transaction().execute(async (trx) => {
-		const messageIds = await trx
-			.selectFrom("conversation_message_all")
-			.where("conversation_id", "=", currentId)
-			.where("lixcol_version_id", "=", "global")
-			.orderBy("lixcol_created_at", "desc")
-			.orderBy("id", "desc")
+	// need to delete the messages in order to avoid conflicts on parent_id
+	return await args.agent.lix.db.transaction().execute(async (trx) => {
+		const messages = await trx
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", args.conversationId!)
 			.select("id")
+			.orderBy("lixcol_created_at", "desc")
 			.execute();
 
-		for (const row of messageIds) {
+		for (const message of messages) {
 			await trx
-				.deleteFrom("conversation_message_all")
-				.where("id", "=", row.id as string)
-				.where("lixcol_version_id", "=", "global")
+				.deleteFrom("conversation_message")
+				.where("id", "=", message.id)
 				.execute();
 		}
 	});
-
-	return currentId;
-}
-
-async function getConversationId(lix: Lix): Promise<string | null> {
-	const row = await lix.db
-		.selectFrom("key_value_all")
-		.where("lixcol_version_id", "=", "global")
-		.where("key", "=", CONVERSATION_KEY)
-		.select(["value"])
-		.executeTakeFirst();
-	return typeof row?.value === "string" && row.value.length > 0
-		? (row.value as string)
-		: null;
 }

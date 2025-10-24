@@ -88,8 +88,19 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 
 	const queue = createEventQueue<AgentEvent>();
 	const iterable = queue.iterable();
+	const liveMessageMetadata: AgentConversationMessageMetadata = {
+		lix_agent_sdk_role: "assistant",
+	};
+	const liveMessage: AgentConversationMessage = {
+		id: "",
+		conversation_id: "",
+		parent_id: null,
+		body: fromPlainText(""),
+		lixcol_metadata: liveMessageMetadata,
+	};
 
 	const turn: AgentTurn = {
+		message: liveMessage,
 		[Symbol.asyncIterator]() {
 			return iterable[Symbol.asyncIterator]();
 		},
@@ -231,6 +242,7 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 				})),
 			};
 		}
+		liveMessage.conversation_id = conversationId;
 
 		const workingMessages = baseConversation.messages.map((message) => ({
 			...message,
@@ -303,6 +315,11 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 		});
 
 		const assistantMessageId = await uuidV7({ lix: agent.lix });
+		liveMessage.id = assistantMessageId;
+		liveMessage.conversation_id = conversationId;
+		liveMessage.parent_id = workingMessages.at(-1)?.id ?? null;
+		liveMessage.body = fromPlainText("");
+		liveMessage.lixcol_metadata = liveMessageMetadata;
 
 		const queuedProposalEvents: AgentEvent[] = [];
 		const flushProposalEvents = () => {
@@ -339,8 +356,14 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 
 		const steps: AgentStep[] = [];
 		const toolPhases = new Map<string, AgentToolStep["status"]>();
+		const syncSteps = () => {
+			liveMessageMetadata.lix_agent_sdk_steps = steps.map((step) => ({
+				...step,
+			}));
+		};
 		const emitStep = (step: AgentStep) => {
 			queue.push({ type: "step", step: { ...step } });
+			syncSteps();
 		};
 		const emitToolEvent = (
 			phase: "start" | "finish" | "error",
@@ -514,12 +537,13 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 							}
 							break;
 						}
-						case "text-delta": {
-							flushThinking();
-							assistantText += chunk.text;
-							queue.push({ type: "text", delta: chunk.text });
-							break;
-						}
+				case "text-delta": {
+					flushThinking();
+					assistantText += chunk.text;
+					queue.push({ type: "text", delta: chunk.text });
+					liveMessage.body = fromPlainText(assistantText);
+					break;
+				}
 						case "tool-call": {
 							flushThinking();
 							const input = parseToolInput(chunk.input);
@@ -582,17 +606,19 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 					: {}),
 			};
 			const assistantBody = fromPlainText(assistantText);
+			liveMessageMetadata.lix_agent_sdk_steps = stepSnapshot;
+			liveMessage.body = assistantBody;
 
 			let assistantMessage: AgentConversationMessage;
-				if (shouldPersist) {
-					const stored = await createConversationMessage({
-						lix: agent.lix,
-						id: assistantMessageId,
-						conversation_id: conversationId,
-						body: assistantBody,
-						lixcol_metadata: metadata,
-					});
-				assistantMessage = {
+			if (shouldPersist) {
+				const stored = await createConversationMessage({
+					lix: agent.lix,
+					id: assistantMessageId,
+					conversation_id: conversationId,
+					body: assistantBody,
+					lixcol_metadata: metadata,
+				});
+				Object.assign(liveMessage, {
 					...stored,
 					id: String(stored.id),
 					conversation_id: String(stored.conversation_id ?? conversationId),
@@ -600,16 +626,17 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 						...stored.lixcol_metadata,
 						lix_agent_sdk_role: "assistant",
 					} as AgentConversationMessageMetadata | null,
-				};
+				});
 			} else {
-				assistantMessage = {
+				Object.assign(liveMessage, {
 					id: assistantMessageId,
 					conversation_id: conversationId,
-					parent_id: null,
+					parent_id: liveMessage.parent_id,
 					body: assistantBody,
 					lixcol_metadata: metadata,
-				};
+				});
 			}
+			assistantMessage = liveMessage;
 
 			workingMessages.push({ ...assistantMessage });
 			workingTurns.push({
