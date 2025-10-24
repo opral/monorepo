@@ -59,70 +59,70 @@ class SqlParser extends CstParser {
 		this.performSelfAnalysis();
 	}
 
-	public readonly selectStatement: () => CstNode = this.RULE(
-		"selectStatement",
+	public readonly select_statement: () => CstNode = this.RULE(
+		"select_statement",
 		() => {
 			this.OR([
-				{ ALT: () => this.SUBRULE(this.selectCore, { LABEL: "core" }) },
-				{ ALT: () => this.SUBRULE(this.updateStatement, { LABEL: "update" }) },
-				{ ALT: () => this.SUBRULE(this.deleteStatement, { LABEL: "delete" }) },
+				{ ALT: () => this.SUBRULE(this.select_core, { LABEL: "core" }) },
+				{ ALT: () => this.SUBRULE(this.update_statement, { LABEL: "update" }) },
+				{ ALT: () => this.SUBRULE(this.delete_statement, { LABEL: "delete" }) },
 			]);
 			this.OPTION(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
 		}
 	);
 
-	private readonly selectCore: () => CstNode = this.RULE("selectCore", () => {
+	private readonly select_core: () => CstNode = this.RULE("select_core", () => {
 		this.CONSUME(Select);
-		this.SUBRULE(this.selectList);
+		this.SUBRULE(this.select_list);
 		this.CONSUME(From);
-		this.SUBRULE(this.tableReference, { LABEL: "from" });
+		this.SUBRULE(this.table_reference, { LABEL: "from" });
 		this.MANY(() => {
-			this.SUBRULE1(this.joinClause, { LABEL: "joins" });
+			this.SUBRULE1(this.join_clause, { LABEL: "joins" });
 		});
 		this.OPTION1(() => {
 			this.CONSUME(Where);
-			this.SUBRULE(this.whereClause);
+			this.SUBRULE(this.where_clause);
 		});
 		this.OPTION2(() => {
 			this.CONSUME(Order);
 			this.CONSUME(By);
-			this.SUBRULE(this.orderByClause, { LABEL: "orderBy" });
+			this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
 		});
 	});
 
-	private readonly updateStatement: () => CstNode = this.RULE(
-		"updateStatement",
+	private readonly update_statement: () => CstNode = this.RULE(
+		"update_statement",
 		() => {
 			this.CONSUME(Update);
-			this.SUBRULE(this.tableReference, { LABEL: "table" });
+			this.SUBRULE(this.table_reference, { LABEL: "table" });
 			this.CONSUME(SetKeyword);
-			this.SUBRULE(this.assignmentItem, { LABEL: "assignments" });
+			this.SUBRULE(this.assignment_item, { LABEL: "assignments" });
 			this.MANY(() => {
 				this.CONSUME(Comma);
-				this.SUBRULE1(this.assignmentItem, { LABEL: "assignments" });
+				this.SUBRULE1(this.assignment_item, { LABEL: "assignments" });
 			});
 			this.OPTION(() => {
 				this.CONSUME(Where);
-				this.SUBRULE(this.whereClause, { LABEL: "whereClause" });
+				this.SUBRULE(this.where_clause, { LABEL: "where_clause" });
 			});
 		}
 	);
 
-	private readonly deleteStatement: () => CstNode = this.RULE(
-		"deleteStatement",
+	private readonly delete_statement: () => CstNode = this.RULE(
+		"delete_statement",
 		() => {
 			this.CONSUME(Delete);
 			this.CONSUME(From);
-			this.SUBRULE(this.tableReference, { LABEL: "table" });
+			this.SUBRULE(this.table_reference, { LABEL: "table" });
 			this.OPTION(() => {
 				this.CONSUME(Where);
-				this.SUBRULE(this.whereClause, { LABEL: "whereClause" });
+				this.SUBRULE(this.where_clause, { LABEL: "where_clause" });
 			});
 		}
 	);
 
-	private readonly selectList: () => CstNode = this.RULE("selectList", () => {
+	private readonly select_list: () => CstNode = this.RULE("select_list", () => {
 		this.OR([
 			{ ALT: () => this.CONSUME(Star) },
 			{
@@ -134,31 +134,31 @@ class SqlParser extends CstParser {
 			},
 			{
 				ALT: () => {
-					this.SUBRULE(this.selectItem, { LABEL: "items" });
+					this.SUBRULE(this.select_item, { LABEL: "items" });
 					this.MANY(() => {
 						this.CONSUME(Comma);
-						this.SUBRULE1(this.selectItem, { LABEL: "items" });
+						this.SUBRULE1(this.select_item, { LABEL: "items" });
 					});
 				},
 			},
 		]);
 	});
 
-	private readonly selectItem: () => CstNode = this.RULE("selectItem", () => {
-		this.SUBRULE(this.columnReference, { LABEL: "expression" });
+	private readonly select_item: () => CstNode = this.RULE("select_item", () => {
+		this.SUBRULE(this.column_reference, { LABEL: "expression" });
 		this.OPTION(() => {
 			this.OPTION1(() => this.CONSUME(As));
 			this.SUBRULE1(this.identifier, { LABEL: "alias" });
 		});
 	});
 
-	private readonly tableReference: () => CstNode = this.RULE(
-		"tableReference",
+	private readonly table_reference: () => CstNode = this.RULE(
+		"table_reference",
 		() => {
 			this.OR([
 				{
 					ALT: () => {
-						this.SUBRULE(this.tableName, { LABEL: "table" });
+						this.SUBRULE(this.table_name, { LABEL: "table" });
 						this.OPTION1(() => {
 							this.OPTION2(() => this.CONSUME1(As));
 							this.SUBRULE1(this.identifier, { LABEL: "alias" });
@@ -168,7 +168,7 @@ class SqlParser extends CstParser {
 				{
 					ALT: () => {
 						this.CONSUME(LeftParen);
-						this.SUBRULE(this.selectCore, { LABEL: "select" });
+						this.SUBRULE(this.select_core, { LABEL: "select" });
 						this.CONSUME(RightParen);
 						this.OPTION3(() => this.CONSUME2(As));
 						this.SUBRULE2(this.identifier, { LABEL: "alias" });
@@ -178,102 +178,111 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly joinClause: () => CstNode = this.RULE("joinClause", () => {
+	private readonly join_clause: () => CstNode = this.RULE("join_clause", () => {
 		this.OPTION(() => {
 			this.OR([
-				{ ALT: () => this.CONSUME(Inner, { LABEL: "joinType" }) },
-				{ ALT: () => this.CONSUME(Left, { LABEL: "joinType" }) },
-				{ ALT: () => this.CONSUME(Right, { LABEL: "joinType" }) },
-				{ ALT: () => this.CONSUME(Full, { LABEL: "joinType" }) },
+				{ ALT: () => this.CONSUME(Inner, { LABEL: "join_type" }) },
+				{ ALT: () => this.CONSUME(Left, { LABEL: "join_type" }) },
+				{ ALT: () => this.CONSUME(Right, { LABEL: "join_type" }) },
+				{ ALT: () => this.CONSUME(Full, { LABEL: "join_type" }) },
 			]);
 		});
 		this.CONSUME(Join);
-		this.SUBRULE(this.tableReference, { LABEL: "table" });
+		this.SUBRULE(this.table_reference, { LABEL: "table" });
 		this.CONSUME(On);
-		this.SUBRULE(this.columnReference, { LABEL: "left" });
+		this.SUBRULE(this.column_reference, { LABEL: "left" });
 		this.CONSUME(Equals);
-		this.SUBRULE1(this.columnReference, { LABEL: "right" });
+		this.SUBRULE1(this.column_reference, { LABEL: "right" });
 		this.MANY(() => {
 			this.CONSUME1(And);
-			this.SUBRULE2(this.columnReference, { LABEL: "extraLeft" });
+			this.SUBRULE2(this.column_reference, { LABEL: "extra_left" });
 			this.CONSUME2(Equals);
-			this.SUBRULE3(this.columnReference, { LABEL: "extraRight" });
+			this.SUBRULE3(this.column_reference, { LABEL: "extra_right" });
 		});
 	});
 
-	private readonly whereClause: () => CstNode = this.RULE("whereClause", () => {
-		this.SUBRULE(this.orExpression, { LABEL: "expression" });
-	});
-
-	private readonly orExpression: () => CstNode = this.RULE(
-		"orExpression",
+	private readonly where_clause: () => CstNode = this.RULE(
+		"where_clause",
 		() => {
-			this.SUBRULE(this.andExpression, { LABEL: "operands" });
+			this.SUBRULE(this.or_expression, { LABEL: "expression" });
+		}
+	);
+
+	private readonly or_expression: () => CstNode = this.RULE(
+		"or_expression",
+		() => {
+			this.SUBRULE(this.and_expression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.CONSUME(Or);
-				this.SUBRULE1(this.andExpression, { LABEL: "operands" });
+				this.SUBRULE1(this.and_expression, { LABEL: "operands" });
 			});
 		}
 	);
 
-	private readonly andExpression: () => CstNode = this.RULE(
-		"andExpression",
+	private readonly and_expression: () => CstNode = this.RULE(
+		"and_expression",
 		() => {
-			this.SUBRULE(this.atomicPredicate, { LABEL: "operands" });
+			this.SUBRULE(this.atomic_predicate, { LABEL: "operands" });
 			this.MANY(() => {
 				this.CONSUME(And);
-				this.SUBRULE1(this.atomicPredicate, { LABEL: "operands" });
+				this.SUBRULE1(this.atomic_predicate, { LABEL: "operands" });
 			});
 		}
 	);
 
-	private readonly atomicPredicate: () => CstNode = this.RULE(
-		"atomicPredicate",
+	private readonly atomic_predicate: () => CstNode = this.RULE(
+		"atomic_predicate",
 		() => {
 			this.OR([
 				{
 					ALT: () => {
-						this.SUBRULE(this.columnReference, { LABEL: "predicateColumn" });
+						this.CONSUME(Not, { LABEL: "unary_not" });
+						this.SUBRULE(this.atomic_predicate, { LABEL: "negated" });
+					},
+				},
+				{
+					ALT: () => {
+		this.SUBRULE(this.column_reference, { LABEL: "comparison_column" });
 						this.OR1([
 							{
 								ALT: () => {
-									this.SUBRULE(this.comparisonOperator, {
-										LABEL: "comparisonOperator",
+									this.SUBRULE(this.comparison_operator, {
+										LABEL: "comparison_operator",
 									});
 									this.SUBRULE(this.expression, {
-										LABEL: "comparisonValue",
+										LABEL: "comparison_value",
 									});
 								},
 							},
 							{
 								ALT: () => {
 									this.CONSUME(Is);
-									this.OPTION(() => this.CONSUME(Not, { LABEL: "isNot" }));
+									this.OPTION(() => this.CONSUME1(Not, { LABEL: "is_not" }));
 									this.CONSUME(NullKeyword);
 								},
 							},
 							{
 								ALT: () => {
 									this.CONSUME(Between);
-									this.SUBRULE1(this.expression, { LABEL: "betweenStart" });
+									this.SUBRULE1(this.expression, { LABEL: "between_start" });
 									this.CONSUME1(And);
-									this.SUBRULE2(this.expression, { LABEL: "betweenEnd" });
+									this.SUBRULE2(this.expression, { LABEL: "between_end" });
 								},
 							},
 							{
 								ALT: () => {
-									this.OPTION1(() => this.CONSUME1(Not, { LABEL: "inNot" }));
+									this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
 									this.CONSUME(InKeyword);
 									this.CONSUME1(LeftParen);
-									this.SUBRULE(this.expressionList, { LABEL: "inList" });
+									this.SUBRULE(this.expression_list, { LABEL: "in_list" });
 									this.CONSUME1(RightParen);
 								},
 							},
 							{
 								ALT: () => {
-									this.OPTION2(() => this.CONSUME2(Not, { LABEL: "likeNot" }));
+									this.OPTION2(() => this.CONSUME3(Not, { LABEL: "like_not" }));
 									this.CONSUME(Like);
-									this.SUBRULE3(this.expression, { LABEL: "likePattern" });
+									this.SUBRULE3(this.expression, { LABEL: "like_pattern" });
 								},
 							},
 						]);
@@ -282,7 +291,7 @@ class SqlParser extends CstParser {
 				{
 					ALT: () => {
 						this.CONSUME2(LeftParen);
-						this.SUBRULE(this.orExpression, { LABEL: "inner" });
+						this.SUBRULE(this.or_expression, { LABEL: "inner" });
 						this.CONSUME2(RightParen);
 					},
 				},
@@ -290,28 +299,31 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly orderByClause: () => CstNode = this.RULE(
-		"orderByClause",
+	private readonly order_by_clause: () => CstNode = this.RULE(
+		"order_by_clause",
 		() => {
-			this.SUBRULE(this.orderByItem, { LABEL: "items" });
+			this.SUBRULE(this.order_by_item, { LABEL: "items" });
 			this.MANY(() => {
 				this.CONSUME(Comma);
-				this.SUBRULE1(this.orderByItem, { LABEL: "items" });
+				this.SUBRULE1(this.order_by_item, { LABEL: "items" });
 			});
 		}
 	);
 
-	private readonly orderByItem: () => CstNode = this.RULE("orderByItem", () => {
-		this.SUBRULE(this.columnReference, { LABEL: "expression" });
-		this.OPTION(() => {
-			this.OR([
-				{ ALT: () => this.CONSUME(Asc, { LABEL: "direction" }) },
-				{ ALT: () => this.CONSUME(Desc, { LABEL: "direction" }) },
-			]);
-		});
-	});
+	private readonly order_by_item: () => CstNode = this.RULE(
+		"order_by_item",
+		() => {
+			this.SUBRULE(this.column_reference, { LABEL: "expression" });
+			this.OPTION(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Asc, { LABEL: "direction" }) },
+					{ ALT: () => this.CONSUME(Desc, { LABEL: "direction" }) },
+				]);
+			});
+		}
+	);
 
-	private readonly tableName: () => CstNode = this.RULE("tableName", () => {
+	private readonly table_name: () => CstNode = this.RULE("table_name", () => {
 		this.SUBRULE(this.identifier, { LABEL: "parts" });
 		this.OPTION(() => {
 			this.CONSUME(Dot);
@@ -319,17 +331,17 @@ class SqlParser extends CstParser {
 		});
 	});
 
-	private readonly assignmentItem: () => CstNode = this.RULE(
-		"assignmentItem",
+	private readonly assignment_item: () => CstNode = this.RULE(
+		"assignment_item",
 		() => {
-			this.SUBRULE(this.columnReference, { LABEL: "column" });
+			this.SUBRULE(this.column_reference, { LABEL: "column" });
 			this.CONSUME(Equals);
 			this.SUBRULE(this.expression, { LABEL: "value" });
 		}
 	);
 
-	private readonly columnReference: () => CstNode = this.RULE(
-		"columnReference",
+	private readonly column_reference: () => CstNode = this.RULE(
+		"column_reference",
 		() => {
 			this.SUBRULE(this.identifier, { LABEL: "parts" });
 			this.OPTION(() => {
@@ -339,8 +351,8 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly comparisonOperator: () => CstNode = this.RULE(
-		"comparisonOperator",
+	private readonly comparison_operator: () => CstNode = this.RULE(
+		"comparison_operator",
 		() => {
 			this.OR([
 				{ ALT: () => this.CONSUME(Equals, { LABEL: "operator" }) },
@@ -358,8 +370,8 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly expressionList: () => CstNode = this.RULE(
-		"expressionList",
+	private readonly expression_list: () => CstNode = this.RULE(
+		"expression_list",
 		() => {
 			this.SUBRULE(this.expression, { LABEL: "items" });
 			this.MANY(() => {
@@ -370,57 +382,63 @@ class SqlParser extends CstParser {
 	);
 
 	private readonly expression: () => CstNode = this.RULE("expression", () => {
-		this.SUBRULE(this.additiveExpression, { LABEL: "expression" });
+		this.SUBRULE(this.additive_expression, { LABEL: "expression" });
 	});
 
-	private readonly additiveExpression: () => CstNode = this.RULE(
-		"additiveExpression",
+	private readonly additive_expression: () => CstNode = this.RULE(
+		"additive_expression",
 		() => {
-			this.SUBRULE(this.multiplicativeExpression, { LABEL: "operands" });
+			this.SUBRULE(this.multiplicative_expression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.OR([
 					{ ALT: () => this.CONSUME(Plus, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Minus, { LABEL: "operators" }) },
 				]);
-				this.SUBRULE1(this.multiplicativeExpression, {
+				this.SUBRULE1(this.multiplicative_expression, {
 					LABEL: "operands",
 				});
 			});
 		}
 	);
 
-	private readonly multiplicativeExpression: () => CstNode = this.RULE(
-		"multiplicativeExpression",
+	private readonly multiplicative_expression: () => CstNode = this.RULE(
+		"multiplicative_expression",
 		() => {
-			this.SUBRULE(this.unaryExpression, { LABEL: "operands" });
+			this.SUBRULE(this.unary_expression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.OR([
 					{ ALT: () => this.CONSUME(Star, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Slash, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Percent, { LABEL: "operators" }) },
 				]);
-				this.SUBRULE1(this.unaryExpression, { LABEL: "operands" });
+				this.SUBRULE1(this.unary_expression, { LABEL: "operands" });
 			});
 		}
 	);
 
-	private readonly unaryExpression: () => CstNode = this.RULE(
-		"unaryExpression",
+	private readonly unary_expression: () => CstNode = this.RULE(
+		"unary_expression",
 		() => {
-			this.OPTION(() => this.CONSUME(Minus, { LABEL: "unaryOperator" }));
-			this.SUBRULE(this.primaryExpression, { LABEL: "operand" });
+			this.OPTION(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Minus, { LABEL: "unary_operator" }) },
+					{ ALT: () => this.CONSUME(Not, { LABEL: "unary_operator" }) },
+				]);
+			});
+			this.SUBRULE(this.primary_expression, { LABEL: "operand" });
 		}
 	);
 
-	private readonly primaryExpression: () => CstNode = this.RULE(
-		"primaryExpression",
+	private readonly primary_expression: () => CstNode = this.RULE(
+		"primary_expression",
 		() => {
 			this.OR([
 				{ ALT: () => this.CONSUME(Parameter, { LABEL: "parameter" }) },
 				{ ALT: () => this.CONSUME(StringLiteral, { LABEL: "string" }) },
 				{ ALT: () => this.CONSUME(NumberLiteral, { LABEL: "number" }) },
 				{
-					ALT: () => this.SUBRULE(this.columnReference, { LABEL: "reference" }),
+					ALT: () =>
+						this.SUBRULE(this.column_reference, { LABEL: "reference" }),
 				},
 				{
 					ALT: () => {
@@ -450,11 +468,11 @@ function throwIfErrors(label: string, errors: ReadonlyArray<unknown>): void {
 	}
 }
 
-export function parse(sql: string): CstNode {
+export function parseCst(sql: string): CstNode {
 	const lexResult = sqlLexer.tokenize(sql);
 	throwIfErrors("Lexing", lexResult.errors);
 	parserInstance.input = lexResult.tokens;
-	const cst = parserInstance.selectStatement();
+	const cst = parserInstance.select_statement();
 	const parseErrors = [...parserInstance.errors];
 	parserInstance.reset();
 	throwIfErrors("Parsing", parseErrors);

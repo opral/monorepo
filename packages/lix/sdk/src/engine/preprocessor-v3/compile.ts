@@ -1,4 +1,4 @@
-import type { SqlNode } from "./ast/types.js";
+import type { SqlNode } from "./sql-parser/nodes.js";
 
 /**
  * Placeholder SQL compiler for the v3 preprocessor AST.
@@ -9,9 +9,7 @@ import type { SqlNode } from "./ast/types.js";
  * const result = compile(statement);
  * ```
  */
-export function compile(
-	statement: SqlNode
-): {
+export function compile(statement: SqlNode): {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
 } {

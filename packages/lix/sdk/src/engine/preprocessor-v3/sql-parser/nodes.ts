@@ -37,6 +37,7 @@ export type SelectStatementNode = SqlNode & {
 	readonly projection: readonly SelectItemNode[];
 	readonly from_clauses: readonly FromClauseNode[];
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
+	readonly order_by: readonly OrderByItemNode[];
 };
 
 export type SelectItemNode =
@@ -50,7 +51,7 @@ export type SelectStarNode = SqlNode & {
 
 export type SelectQualifiedStarNode = SqlNode & {
 	readonly node_kind: "select_qualified_star";
-	readonly qualifier: IdentifierNode;
+	readonly qualifier: readonly IdentifierNode[];
 };
 
 export type SelectExpressionNode = SqlNode & {
@@ -65,10 +66,7 @@ export type FromClauseNode = SqlNode & {
 	readonly joins: readonly JoinClauseNode[];
 };
 
-export type RelationNode =
-	| TableReferenceNode
-	| SubqueryNode
-	| RawFragmentNode;
+export type RelationNode = TableReferenceNode | SubqueryNode | RawFragmentNode;
 
 export type TableReferenceNode = SqlNode & {
 	readonly node_kind: "table_reference";
@@ -89,11 +87,13 @@ export type JoinClauseNode = SqlNode & {
 	readonly on_expression: ExpressionNode | RawFragmentNode | null;
 };
 
-export type JoinType =
-	| "inner"
-	| "left"
-	| "right"
-	| "full";
+export type OrderByItemNode = SqlNode & {
+	readonly node_kind: "order_by_item";
+	readonly expression: ExpressionNode;
+	readonly direction: "asc" | "desc" | null;
+};
+
+export type JoinType = "inner" | "left" | "right" | "full";
 
 export type UpdateStatementNode = SqlNode & {
 	readonly node_kind: "update_statement";
@@ -120,12 +120,14 @@ export type ExpressionNode =
 	| BinaryExpressionNode
 	| UnaryExpressionNode
 	| ParameterExpressionNode
+	| GroupedExpressionNode
+	| InListExpressionNode
+	| BetweenExpressionNode
 	| RawFragmentNode;
 
 export type ColumnReferenceNode = SqlNode & {
 	readonly node_kind: "column_reference";
-	readonly table: IdentifierNode | null;
-	readonly column: IdentifierNode;
+	readonly path: readonly IdentifierNode[];
 };
 
 export type LiteralNode = SqlNode & {
@@ -136,6 +138,26 @@ export type LiteralNode = SqlNode & {
 export type ParameterExpressionNode = SqlNode & {
 	readonly node_kind: "parameter";
 	readonly placeholder: string;
+};
+
+export type GroupedExpressionNode = SqlNode & {
+	readonly node_kind: "grouped_expression";
+	readonly expression: ExpressionNode;
+};
+
+export type InListExpressionNode = SqlNode & {
+	readonly node_kind: "in_list_expression";
+	readonly operand: ExpressionNode;
+	readonly items: readonly ExpressionNode[];
+	readonly negated: boolean;
+};
+
+export type BetweenExpressionNode = SqlNode & {
+	readonly node_kind: "between_expression";
+	readonly operand: ExpressionNode;
+	readonly start: ExpressionNode;
+	readonly end: ExpressionNode;
+	readonly negated: boolean;
 };
 
 export type UnaryExpressionNode = SqlNode & {
@@ -165,12 +187,13 @@ export type BinaryOperator =
 	| "or"
 	| "like"
 	| "not_like"
-	| "in"
-	| "not_in"
+	| "is"
+	| "is_not"
 	| "+"
 	| "-"
 	| "*"
-	| "/";
+	| "/"
+	| "%";
 
 export type IdentifierNode = SqlNode & {
 	readonly node_kind: "identifier";
@@ -181,3 +204,23 @@ export type ObjectNameNode = SqlNode & {
 	readonly node_kind: "object_name";
 	readonly parts: readonly IdentifierNode[];
 };
+
+/**
+ * Creates an identifier node.
+ */
+export function identifier(value: string): IdentifierNode {
+	return {
+		node_kind: "identifier",
+		value,
+	};
+}
+
+export function columnReference(parts: readonly string[]): ColumnReferenceNode {
+	if (parts.length === 0) {
+		throw new Error("columnReference requires at least one part");
+	}
+	return {
+		node_kind: "column_reference",
+		path: parts.map((part) => identifier(part)),
+	};
+}

@@ -1,8 +1,5 @@
-import type {
-	PreprocessorContext,
-	PreprocessorStep,
-} from "./types.js";
-import type { SqlNode } from "./ast/types.js";
+import type { PreprocessorContext, PreprocessorStep } from "./types.js";
+import type { SqlNode } from "./sql-parser/nodes.js";
 
 const pipeline: PreprocessorStep[] = [];
 

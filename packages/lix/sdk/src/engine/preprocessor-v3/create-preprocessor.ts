@@ -26,7 +26,9 @@ type EngineShape = Pick<
  * const result = preprocess({ sql: "SELECT 1", parameters: [] });
  * ```
  */
-export function createPreprocessor(args: { engine: EngineShape }): PreprocessorFn {
+export function createPreprocessor(args: {
+	engine: EngineShape;
+}): PreprocessorFn {
 	const { engine } = args;
 	void engine;
 

@@ -1,4 +1,4 @@
-import type { SqlNode } from "./ast/types.js";
+import type { SqlNode } from "./sql-parser/nodes.js";
 
 /**
  * Shared trace entry type for documenting per-step behaviour.
