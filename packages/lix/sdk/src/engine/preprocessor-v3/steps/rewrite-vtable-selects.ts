@@ -7,7 +7,6 @@ import {
 	type InListExpressionNode,
 	type ParameterExpressionNode,
 	type RawFragmentNode,
-	type RelationNode,
 	type SelectItemNode,
 	type SelectStatementNode,
 	type StatementNode,
@@ -24,6 +23,10 @@ import {
 	normalizeIdentifierValue,
 	objectNameMatches,
 } from "../sql-parser/ast-helpers.js";
+import {
+	visitSelectStatement,
+	type AstVisitor,
+} from "../sql-parser/visitor.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 export const REWRITTEN_STATE_VTABLE = "lix_internal_state_vtable_rewritten";
@@ -100,13 +103,26 @@ function rewriteSelectStatement(
 	select: SelectStatementNode,
 	runtime: RewriteRuntime
 ): SelectStatementNode {
-	const references = collectInternalStateReferences(select);
-	if (references.length === 0) {
-		return select;
-	}
+	const withRewrittenSubqueries = visitSelectStatement(select, {
+		subquery(node) {
+			const rewrittenStatement = rewriteSelectStatement(
+				node.statement,
+				runtime
+			);
+			if (rewrittenStatement !== node.statement) {
+				return {
+					...node,
+					statement: rewrittenStatement,
+				};
+			}
+			return node;
+		},
+	});
 
-	const cacheTables = () => runtime.getCacheTables();
-	const hasTransaction = () => runtime.hasOpenTransaction();
+	const references = collectInternalStateReferences(withRewrittenSubqueries);
+	if (references.length === 0) {
+		return withRewrittenSubqueries;
+	}
 
 	const aliasList = references
 		.map((reference) => reference.alias)
@@ -121,7 +137,7 @@ function rewriteSelectStatement(
 	]);
 
 	const schemaSummary = collectSchemaKeyPredicates(
-		select.where_clause,
+		withRewrittenSubqueries.where_clause,
 		tableNamesForTrace
 	);
 	if (schemaSummary.hasDynamic) {
@@ -131,21 +147,20 @@ function rewriteSelectStatement(
 	}
 
 	const projectionKind = determineProjectionKind(
-		select.projection,
+		withRewrittenSubqueries.projection,
 		tableNamesForTrace
 	);
 	const selectedColumnsForTrace = collectSelectedColumns(
-		select,
+		withRewrittenSubqueries,
 		tableNamesForTrace
 	);
 
-	const metadata = buildInlineMetadata(select, references);
+	const metadata = buildInlineMetadata(withRewrittenSubqueries, references);
 
-	const rewritten = applyInlineRewrites(select, metadata, {
-		getCacheTables: cacheTables,
-		hasOpenTransaction: hasTransaction,
-		runtime,
-	});
+	const rewritten = visitSelectStatement(
+		withRewrittenSubqueries,
+		createInlineVisitor(metadata, runtime)
+	);
 
 	if (runtime.trace) {
 		const entry = buildTraceEntry({
@@ -231,117 +246,37 @@ function buildInlineMetadata(
 	return metadata;
 }
 
-function applyInlineRewrites(
-	select: SelectStatementNode,
+function createInlineVisitor(
 	metadata: Map<string, InlineRewriteMetadata>,
-	options: {
-		getCacheTables: () => Map<string, unknown>;
-		hasOpenTransaction: () => boolean;
-		runtime: RewriteRuntime;
-	}
-): SelectStatementNode {
-	let changed = false;
-
-	const rewrittenFromClauses = select.from_clauses.map((clause) => {
-		const { relation, relationChanged } = inlineRelation(
-			clause.relation,
-			metadata,
-			options
-		);
-
-		let joinsChanged = false;
-		const rewrittenJoins = clause.joins.map((join) => {
-			const { relation: joinRelation, relationChanged: joinChanged } =
-				inlineRelation(join.relation, metadata, options);
-			if (joinChanged || joinRelation !== join.relation) {
-				joinsChanged = true;
-				return {
-					...join,
-					relation: joinRelation,
-				};
-			}
-			return join;
-		});
-
-		if (relationChanged || joinsChanged) {
-			changed = true;
-			return {
-				...clause,
-				relation,
-				joins: rewrittenJoins,
-			};
-		}
-
-		return clause;
-	});
-
-	if (!changed) {
-		return select;
-	}
-
+	runtime: RewriteRuntime
+): AstVisitor {
 	return {
-		...select,
-		from_clauses: rewrittenFromClauses,
+		table_reference(node: TableReferenceNode) {
+			if (!isInternalStateTable(node)) {
+				return;
+			}
+			const aliasValue = getIdentifierValue(node.alias);
+			const aliasKey = aliasValue
+				? normalizeIdentifierValue(aliasValue)
+				: DEFAULT_ALIAS_KEY;
+			const metadataEntry = metadata.get(aliasKey);
+			if (!metadataEntry) {
+				return;
+			}
+			const aliasForSql = aliasValue ?? REWRITTEN_STATE_VTABLE;
+			const inlineSql = buildInternalStateRewriteSql({
+				schemaKeys: metadataEntry.schemaKeys,
+				cacheTables: runtime.getCacheTables(),
+				selectedColumns: metadataEntry.selectedColumns,
+				hasOpenTransaction: runtime.hasOpenTransaction(),
+			}).trimEnd();
+			const fragment: RawFragmentNode = {
+				node_kind: "raw_fragment",
+				sql_text: `${inlineSql} AS ${quoteIdentifier(aliasForSql)}`,
+			};
+			return fragment;
+		},
 	};
-}
-
-function inlineRelation(
-	relation: RelationNode,
-	metadata: Map<string, InlineRewriteMetadata>,
-	options: {
-		getCacheTables: () => Map<string, unknown>;
-		hasOpenTransaction: () => boolean;
-		runtime: RewriteRuntime;
-	}
-): { relation: RelationNode; relationChanged: boolean } {
-	if (relation.node_kind === "table_reference") {
-		if (!isInternalStateTable(relation)) {
-			return { relation, relationChanged: false };
-		}
-
-		const aliasValue = getIdentifierValue(relation.alias);
-		const aliasKey = aliasValue
-			? normalizeIdentifierValue(aliasValue)
-			: DEFAULT_ALIAS_KEY;
-		const metadataEntry = metadata.get(aliasKey);
-		if (!metadataEntry) {
-			return { relation, relationChanged: false };
-		}
-
-		const aliasForSql = aliasValue ?? REWRITTEN_STATE_VTABLE;
-		const inlineSql = buildInternalStateRewriteSql({
-			schemaKeys: metadataEntry.schemaKeys,
-			cacheTables: options.getCacheTables(),
-			selectedColumns: metadataEntry.selectedColumns,
-			hasOpenTransaction: options.hasOpenTransaction(),
-		}).trimEnd();
-
-		const fragment: RawFragmentNode = {
-			node_kind: "raw_fragment",
-			sql_text: `${inlineSql} AS ${quoteIdentifier(aliasForSql)}`,
-		};
-
-		return { relation: fragment, relationChanged: true };
-	}
-
-	if (relation.node_kind === "subquery") {
-		const rewritten = rewriteSelectStatement(
-			relation.statement,
-			options.runtime
-		);
-		if (rewritten === relation.statement) {
-			return { relation, relationChanged: false };
-		}
-		return {
-			relation: {
-				...relation,
-				statement: rewritten,
-			},
-			relationChanged: true,
-		};
-	}
-
-	return { relation, relationChanged: false };
 }
 
 function collectSchemaKeyPredicates(

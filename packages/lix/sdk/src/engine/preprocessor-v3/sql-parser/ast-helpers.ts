@@ -119,7 +119,9 @@ export function getColumnPath(
 	options?: { normalize?: boolean }
 ): string[] {
 	return column.path.map((identifier) =>
-		options?.normalize ? normalizeIdentifierValue(identifier.value) : identifier.value
+		options?.normalize
+			? normalizeIdentifierValue(identifier.value)
+			: identifier.value
 	);
 }
 

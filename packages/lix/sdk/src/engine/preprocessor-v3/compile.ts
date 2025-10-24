@@ -26,13 +26,13 @@ import type {
 	SubqueryNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
-    UnaryOperator,
-    UpdateStatementNode,
+	UnaryOperator,
+	UpdateStatementNode,
 } from "./sql-parser/nodes.js";
 import type { SqlNode } from "./sql-parser/nodes.js";
 import {
-    getBinaryOperatorPrecedence,
-    isNonAssociativeBinaryOperator,
+	getBinaryOperatorPrecedence,
+	isNonAssociativeBinaryOperator,
 } from "./sql-parser/ast-helpers.js";
 
 type CompileResult = {
@@ -343,8 +343,8 @@ function emitParameter(parameter: ParameterExpressionNode): string {
 }
 
 function shouldWrapExpression(
-    expression: ExpressionNode,
-    parent?: ParentContext
+	expression: ExpressionNode,
+	parent?: ParentContext
 ): boolean {
 	if (!parent) {
 		return false;
@@ -354,24 +354,24 @@ function shouldWrapExpression(
 		return false;
 	}
 
-    if (parent.kind === "binary") {
-        if (expression.node_kind !== "binary_expression") {
-            return false;
-        }
-        const parentPrecedence = getBinaryOperatorPrecedence(parent.operator);
-        const currentPrecedence = getBinaryOperatorPrecedence(expression.operator);
-        if (currentPrecedence < parentPrecedence) {
-            return true;
-        }
-        if (currentPrecedence === parentPrecedence) {
-            if (
-                parent.position === "right" &&
-                isNonAssociativeBinaryOperator(parent.operator)
-            ) {
-                return true;
-            }
-        }
-        return false;
+	if (parent.kind === "binary") {
+		if (expression.node_kind !== "binary_expression") {
+			return false;
+		}
+		const parentPrecedence = getBinaryOperatorPrecedence(parent.operator);
+		const currentPrecedence = getBinaryOperatorPrecedence(expression.operator);
+		if (currentPrecedence < parentPrecedence) {
+			return true;
+		}
+		if (currentPrecedence === parentPrecedence) {
+			if (
+				parent.position === "right" &&
+				isNonAssociativeBinaryOperator(parent.operator)
+			) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	if (parent.kind === "unary") {
@@ -387,7 +387,7 @@ function shouldWrapExpression(
 		}
 	}
 
-    return false;
+	return false;
 }
 
 function formatBinaryOperator(operator: BinaryOperator): string {
