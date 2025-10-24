@@ -7,6 +7,7 @@ import {
 	Where,
 	And,
 	Or,
+	Not,
 	Order,
 	By,
 	Asc,
@@ -18,6 +19,11 @@ import {
 	Join,
 	On,
 	SetKeyword,
+	Is,
+	InKeyword,
+	NullKeyword,
+	Between,
+	Like,
 	Identifier,
 	Star,
 	Semicolon,
@@ -28,6 +34,16 @@ import {
 	Parameter,
 	Comma,
 	Equals,
+	NotEquals,
+	NotEqualsAlt,
+	GreaterThanOrEqual,
+	LessThanOrEqual,
+	GreaterThan,
+	LessThan,
+	Plus,
+	Minus,
+	Slash,
+	Percent,
 	StringLiteral,
 	NumberLiteral,
 	QuotedIdentifier,
@@ -217,16 +233,57 @@ class SqlParser extends CstParser {
 			this.OR([
 				{
 					ALT: () => {
-						this.SUBRULE(this.columnReference, { LABEL: "column" });
-						this.CONSUME(Equals);
-						this.SUBRULE(this.valueExpression, { LABEL: "value" });
+						this.SUBRULE(this.columnReference, { LABEL: "predicateColumn" });
+						this.OR1([
+							{
+								ALT: () => {
+									this.SUBRULE(this.comparisonOperator, {
+										LABEL: "comparisonOperator",
+									});
+									this.SUBRULE(this.expression, {
+										LABEL: "comparisonValue",
+									});
+								},
+							},
+							{
+								ALT: () => {
+									this.CONSUME(Is);
+									this.OPTION(() => this.CONSUME(Not, { LABEL: "isNot" }));
+									this.CONSUME(NullKeyword);
+								},
+							},
+							{
+								ALT: () => {
+									this.CONSUME(Between);
+									this.SUBRULE1(this.expression, { LABEL: "betweenStart" });
+									this.CONSUME1(And);
+									this.SUBRULE2(this.expression, { LABEL: "betweenEnd" });
+								},
+							},
+							{
+								ALT: () => {
+									this.OPTION1(() => this.CONSUME1(Not, { LABEL: "inNot" }));
+									this.CONSUME(InKeyword);
+									this.CONSUME1(LeftParen);
+									this.SUBRULE(this.expressionList, { LABEL: "inList" });
+									this.CONSUME1(RightParen);
+								},
+							},
+							{
+								ALT: () => {
+									this.OPTION2(() => this.CONSUME2(Not, { LABEL: "likeNot" }));
+									this.CONSUME(Like);
+									this.SUBRULE3(this.expression, { LABEL: "likePattern" });
+								},
+							},
+						]);
 					},
 				},
 				{
 					ALT: () => {
-						this.CONSUME(LeftParen);
+						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.orExpression, { LABEL: "inner" });
-						this.CONSUME(RightParen);
+						this.CONSUME2(RightParen);
 					},
 				},
 			]);
@@ -267,7 +324,7 @@ class SqlParser extends CstParser {
 		() => {
 			this.SUBRULE(this.columnReference, { LABEL: "column" });
 			this.CONSUME(Equals);
-			this.SUBRULE(this.valueExpression, { LABEL: "value" });
+			this.SUBRULE(this.expression, { LABEL: "value" });
 		}
 	);
 
@@ -282,13 +339,96 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly valueExpression: () => CstNode = this.RULE(
-		"valueExpression",
+	private readonly comparisonOperator: () => CstNode = this.RULE(
+		"comparisonOperator",
 		() => {
 			this.OR([
-				{ ALT: () => this.CONSUME(Parameter) },
-				{ ALT: () => this.CONSUME(StringLiteral) },
-				{ ALT: () => this.CONSUME(NumberLiteral) },
+				{ ALT: () => this.CONSUME(Equals, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(NotEquals, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(NotEqualsAlt, { LABEL: "operator" }) },
+				{
+					ALT: () => this.CONSUME(GreaterThanOrEqual, { LABEL: "operator" }),
+				},
+				{
+					ALT: () => this.CONSUME(LessThanOrEqual, { LABEL: "operator" }),
+				},
+				{ ALT: () => this.CONSUME(GreaterThan, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(LessThan, { LABEL: "operator" }) },
+			]);
+		}
+	);
+
+	private readonly expressionList: () => CstNode = this.RULE(
+		"expressionList",
+		() => {
+			this.SUBRULE(this.expression, { LABEL: "items" });
+			this.MANY(() => {
+				this.CONSUME(Comma);
+				this.SUBRULE1(this.expression, { LABEL: "items" });
+			});
+		}
+	);
+
+	private readonly expression: () => CstNode = this.RULE("expression", () => {
+		this.SUBRULE(this.additiveExpression, { LABEL: "expression" });
+	});
+
+	private readonly additiveExpression: () => CstNode = this.RULE(
+		"additiveExpression",
+		() => {
+			this.SUBRULE(this.multiplicativeExpression, { LABEL: "operands" });
+			this.MANY(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Plus, { LABEL: "operators" }) },
+					{ ALT: () => this.CONSUME(Minus, { LABEL: "operators" }) },
+				]);
+				this.SUBRULE1(this.multiplicativeExpression, {
+					LABEL: "operands",
+				});
+			});
+		}
+	);
+
+	private readonly multiplicativeExpression: () => CstNode = this.RULE(
+		"multiplicativeExpression",
+		() => {
+			this.SUBRULE(this.unaryExpression, { LABEL: "operands" });
+			this.MANY(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Star, { LABEL: "operators" }) },
+					{ ALT: () => this.CONSUME(Slash, { LABEL: "operators" }) },
+					{ ALT: () => this.CONSUME(Percent, { LABEL: "operators" }) },
+				]);
+				this.SUBRULE1(this.unaryExpression, { LABEL: "operands" });
+			});
+		}
+	);
+
+	private readonly unaryExpression: () => CstNode = this.RULE(
+		"unaryExpression",
+		() => {
+			this.OPTION(() => this.CONSUME(Minus, { LABEL: "unaryOperator" }));
+			this.SUBRULE(this.primaryExpression, { LABEL: "operand" });
+		}
+	);
+
+	private readonly primaryExpression: () => CstNode = this.RULE(
+		"primaryExpression",
+		() => {
+			this.OR([
+				{ ALT: () => this.CONSUME(Parameter, { LABEL: "parameter" }) },
+				{ ALT: () => this.CONSUME(StringLiteral, { LABEL: "string" }) },
+				{ ALT: () => this.CONSUME(NumberLiteral, { LABEL: "number" }) },
+				{
+					ALT: () => this.SUBRULE(this.columnReference, { LABEL: "reference" }),
+				},
+				{
+					ALT: () => {
+						this.CONSUME(LeftParen);
+						this.SUBRULE(this.expression, { LABEL: "inner" });
+						this.CONSUME(RightParen);
+					},
+				},
 			]);
 		}
 	);

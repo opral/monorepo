@@ -41,6 +41,11 @@ export const Or: TokenType = createToken({
 	pattern: /or\b/i,
 });
 
+export const Not: TokenType = createToken({
+	name: "Not",
+	pattern: /not\b/i,
+});
+
 export const Order: TokenType = createToken({
 	name: "Order",
 	pattern: /order\b/i,
@@ -96,6 +101,31 @@ export const SetKeyword: TokenType = createToken({
 	pattern: /set\b/i,
 });
 
+export const Is: TokenType = createToken({
+	name: "Is",
+	pattern: /is\b/i,
+});
+
+export const InKeyword: TokenType = createToken({
+	name: "InKeyword",
+	pattern: /in\b/i,
+});
+
+export const NullKeyword: TokenType = createToken({
+	name: "NullKeyword",
+	pattern: /null\b/i,
+});
+
+export const Between: TokenType = createToken({
+	name: "Between",
+	pattern: /between\b/i,
+});
+
+export const Like: TokenType = createToken({
+	name: "Like",
+	pattern: /like\b/i,
+});
+
 export const As: TokenType = createToken({
 	name: "As",
 	pattern: /as\b/i,
@@ -113,6 +143,7 @@ export const Identifier: TokenType = createToken({
 		And,
 		Order,
 		Or,
+		Not,
 		By,
 		Asc,
 		Desc,
@@ -122,6 +153,11 @@ export const Identifier: TokenType = createToken({
 		Full,
 		Join,
 		On,
+		Is,
+		InKeyword,
+		NullKeyword,
+		Between,
+		Like,
 		SetKeyword,
 		As,
 	],
@@ -182,6 +218,56 @@ export const Equals: TokenType = createToken({
 	pattern: /=/,
 });
 
+export const NotEquals: TokenType = createToken({
+	name: "NotEquals",
+	pattern: /!=/,
+});
+
+export const NotEqualsAlt: TokenType = createToken({
+	name: "NotEqualsAlt",
+	pattern: /<>/,
+});
+
+export const GreaterThanOrEqual: TokenType = createToken({
+	name: "GreaterThanOrEqual",
+	pattern: />=/,
+});
+
+export const LessThanOrEqual: TokenType = createToken({
+	name: "LessThanOrEqual",
+	pattern: /<=/,
+});
+
+export const GreaterThan: TokenType = createToken({
+	name: "GreaterThan",
+	pattern: />/,
+});
+
+export const LessThan: TokenType = createToken({
+	name: "LessThan",
+	pattern: /</,
+});
+
+export const Plus: TokenType = createToken({
+	name: "Plus",
+	pattern: /\+/,
+});
+
+export const Minus: TokenType = createToken({
+	name: "Minus",
+	pattern: /-/,
+});
+
+export const Slash: TokenType = createToken({
+	name: "Slash",
+	pattern: /\//,
+});
+
+export const Percent: TokenType = createToken({
+	name: "Percent",
+	pattern: /%/,
+});
+
 const tokens: TokenType[] = [
 	Whitespace,
 	Select,
@@ -192,6 +278,7 @@ const tokens: TokenType[] = [
 	And,
 	Order,
 	Or,
+	Not,
 	By,
 	Asc,
 	Desc,
@@ -201,6 +288,11 @@ const tokens: TokenType[] = [
 	Full,
 	Join,
 	On,
+	Is,
+	InKeyword,
+	NullKeyword,
+	Between,
+	Like,
 	SetKeyword,
 	As,
 	Star,
@@ -210,7 +302,17 @@ const tokens: TokenType[] = [
 	Dot,
 	Parameter,
 	Semicolon,
+	NotEquals,
+	NotEqualsAlt,
+	GreaterThanOrEqual,
+	LessThanOrEqual,
+	GreaterThan,
+	LessThan,
 	Equals,
+	Plus,
+	Minus,
+	Slash,
+	Percent,
 	StringLiteral,
 	NumberLiteral,
 	QuotedIdentifier,

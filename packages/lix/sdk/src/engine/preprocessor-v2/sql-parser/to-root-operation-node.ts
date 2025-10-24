@@ -19,8 +19,11 @@ import {
 	OrNode,
 	ParensNode,
 	ValueNode,
+	ValueListNode,
+	PrimitiveValueListNode,
 	JoinNode,
 	OrderByItemNode,
+	UnaryOperationNode,
 	type OperationNode,
 	type RootOperationNode,
 } from "kysely";
@@ -339,7 +342,7 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		for (let index = 1; index < operands.length; index += 1) {
 			current = OrNode.create(current, operands[index]!);
 		}
-		return current;
+		return operands.length > 1 ? ParensNode.create(current) : current;
 	}
 
 	public andExpression(ctx: { operands?: CstNode[] }): OperationNode {
@@ -353,31 +356,81 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		for (let index = 1; index < operands.length; index += 1) {
 			current = AndNode.create(current, operands[index]!);
 		}
-		return current;
+		return operands.length > 1 ? ParensNode.create(current) : current;
 	}
 
 	public atomicPredicate(ctx: {
-		column?: CstNode[];
-		value?: CstNode[];
+		comparisonColumn?: CstNode[];
+		comparisonOperator?: CstNode[];
+		comparisonValue?: CstNode[];
+		isColumn?: CstNode[];
+		isNot?: IToken[];
+		betweenColumn?: CstNode[];
+		betweenStart?: CstNode[];
+		betweenEnd?: CstNode[];
+		inColumn?: CstNode[];
+		inNot?: IToken[];
+		inList?: CstNode[];
+		likeColumn?: CstNode[];
+		likeNot?: IToken[];
+		likePattern?: CstNode[];
 		inner?: CstNode[];
-		Equals?: IToken[];
 	}): OperationNode {
-		const column = ctx.column?.[0];
-		if (column) {
-			const value = ctx.value?.[0];
-			if (!value) {
-				throw new Error("comparison predicate missing right operand");
+		const predicateColumnNode = (ctx as any).predicateColumn?.[0] as
+			| CstNode
+			| undefined;
+		if (predicateColumnNode) {
+			const leftOperand = this.visit(predicateColumnNode) as OperationNode;
+			const comparisonOperatorNode = ctx.comparisonOperator?.[0];
+			if (comparisonOperatorNode) {
+				const comparisonValueNode = ctx.comparisonValue?.[0];
+				if (!comparisonValueNode) {
+					throw new Error("comparison predicate missing right operand");
+				}
+				const operator = this.visit(comparisonOperatorNode) as string;
+				const rightOperand = this.visit(comparisonValueNode) as OperationNode;
+				return BinaryOperationNode.create(
+					leftOperand,
+					OperatorNode.create(operator as any),
+					rightOperand
+				);
 			}
-			const leftOperand = this.visit(column) as OperationNode;
-			const rightOperand = this.visit(value) as OperationNode;
-			const operatorToken = ctx.Equals?.[0]?.image ?? "=";
-			if (operatorToken !== "=") {
-				throw new Error(`operator '${operatorToken}' is not supported yet`);
+			const betweenStartNode = ctx.betweenStart?.[0];
+			const betweenEndNode = ctx.betweenEnd?.[0];
+			if (betweenStartNode && betweenEndNode) {
+				const start = this.visit(betweenStartNode) as OperationNode;
+				const end = this.visit(betweenEndNode) as OperationNode;
+				return BinaryOperationNode.create(
+					leftOperand,
+					OperatorNode.create("between"),
+					createValueListNode([start, end])
+				);
 			}
+			const inListNode = ctx.inList?.[0];
+			if (inListNode) {
+				const list = (this.visit(inListNode) as OperationNode[]) ?? [];
+				const operator = ctx.inNot?.length ? "not in" : "in";
+				return BinaryOperationNode.create(
+					leftOperand,
+					OperatorNode.create(operator as any),
+					createValueListNode(list)
+				);
+			}
+			const likePatternNode = ctx.likePattern?.[0];
+			if (likePatternNode) {
+				const pattern = this.visit(likePatternNode) as OperationNode;
+				const operator = ctx.likeNot?.length ? "not like" : "like";
+				return BinaryOperationNode.create(
+					leftOperand,
+					OperatorNode.create(operator as any),
+					pattern
+				);
+			}
+			const operator = ctx.isNot?.length ? "is not" : "is";
 			return BinaryOperationNode.create(
 				leftOperand,
-				OperatorNode.create("="),
-				rightOperand
+				OperatorNode.create(operator as any),
+				ValueNode.createImmediate(null)
 			);
 		}
 		const inner = ctx.inner?.[0];
@@ -385,7 +438,9 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 			throw new Error("predicate is neither comparison nor grouped expression");
 		}
 		const expression = this.visit(inner) as OperationNode;
-		return ParensNode.create(expression);
+		return ParensNode.is(expression)
+			? expression
+			: ParensNode.create(expression);
 	}
 
 	public orderByClause(ctx: { items?: CstNode[] }): OrderBySegment[] {
@@ -411,23 +466,122 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		return { reference: referenceNode, direction };
 	}
 
-	public valueExpression(ctx: {
-		StringLiteral?: IToken[];
-		NumberLiteral?: IToken[];
-		Parameter?: IToken[];
+	public comparisonOperator(ctx: { operator?: IToken[] }): string {
+		const operatorToken = ctx.operator?.[0];
+		if (!operatorToken?.image) {
+			throw new Error("comparison operator missing");
+		}
+		return operatorToken.image.toLowerCase();
+	}
+
+	public expressionList(ctx: { items?: CstNode[] }): OperationNode[] {
+		return ctx.items?.map((item) => this.visit(item) as OperationNode) ?? [];
+	}
+
+	public expression(ctx: { expression?: CstNode[] }): OperationNode {
+		const expression = ctx.expression?.[0];
+		if (!expression) {
+			throw new Error("expression is missing");
+		}
+		return this.visit(expression) as OperationNode;
+	}
+
+	public additiveExpression(ctx: {
+		operands?: CstNode[];
+		operators?: IToken[];
 	}): OperationNode {
-		const parameter = ctx.Parameter?.[0];
+		const operands =
+			ctx.operands?.map((operand) => this.visit(operand) as OperationNode) ??
+			[];
+		if (operands.length === 0) {
+			throw new Error("additive expression missing operands");
+		}
+		const operators = ctx.operators ?? [];
+		let current = operands[0]!;
+		for (let index = 0; index < operators.length; index += 1) {
+			const operatorToken = operators[index]!;
+			const right = operands[index + 1]!;
+			current = BinaryOperationNode.create(
+				current,
+				OperatorNode.create(operatorToken.image as any),
+				right
+			);
+		}
+		return current;
+	}
+
+	public multiplicativeExpression(ctx: {
+		operands?: CstNode[];
+		operators?: IToken[];
+	}): OperationNode {
+		const operands =
+			ctx.operands?.map((operand) => this.visit(operand) as OperationNode) ??
+			[];
+		if (operands.length === 0) {
+			throw new Error("multiplicative expression missing operands");
+		}
+		const operators = ctx.operators ?? [];
+		let current = operands[0]!;
+		for (let index = 0; index < operators.length; index += 1) {
+			const operatorToken = operators[index]!;
+			const right = operands[index + 1]!;
+			current = BinaryOperationNode.create(
+				current,
+				OperatorNode.create(operatorToken.image as any),
+				right
+			);
+		}
+		return current;
+	}
+
+	public unaryExpression(ctx: {
+		unaryOperator?: IToken[];
+		operand?: CstNode[];
+	}): OperationNode {
+		const operandNode = ctx.operand?.[0];
+		if (!operandNode) {
+			throw new Error("unary expression missing operand");
+		}
+		const operand = this.visit(operandNode) as OperationNode;
+		const operator = ctx.unaryOperator?.[0];
+		if (!operator) {
+			return operand;
+		}
+		return UnaryOperationNode.create(
+			OperatorNode.create(operator.image as any),
+			operand
+		);
+	}
+
+	public primaryExpression(ctx: {
+		parameter?: IToken[];
+		string?: IToken[];
+		number?: IToken[];
+		reference?: CstNode[];
+		inner?: CstNode[];
+	}): OperationNode {
+		const parameter = ctx.parameter?.[0];
 		if (parameter) {
 			return RawNode.createWithSql(parameter.image);
 		}
-		const raw = ctx.StringLiteral?.[0] ?? ctx.NumberLiteral?.[0];
-		if (!raw?.image) {
-			throw new Error("value expression is empty");
+		const stringLiteral = ctx.string?.[0];
+		if (stringLiteral?.image) {
+			return ValueNode.create(normalizeStringLiteral(stringLiteral.image));
 		}
-		if (raw.tokenType?.name === "StringLiteral") {
-			return ValueNode.create(normalizeStringLiteral(raw.image));
+		const numberLiteral = ctx.number?.[0];
+		if (numberLiteral?.image) {
+			return ValueNode.create(Number(numberLiteral.image));
 		}
-		return ValueNode.create(Number(raw.image));
+		const reference = ctx.reference?.[0];
+		if (reference) {
+			return this.visit(reference) as OperationNode;
+		}
+		const inner = ctx.inner?.[0];
+		if (!inner) {
+			throw new Error("primary expression is empty");
+		}
+		const expression = this.visit(inner) as OperationNode;
+		return ParensNode.create(expression);
 	}
 
 	public assignmentItem(ctx: {
@@ -443,8 +597,17 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 			throw new Error("assignment missing value");
 		}
 		let column = this.visit(columnNode) as OperationNode;
-		if (ReferenceNode.is(column) && column.table === undefined) {
-			column = column.column;
+		if (ReferenceNode.is(column)) {
+			const referenced = column.column;
+			if (ColumnNode.is(referenced)) {
+				const identifier = referenced.column as IdentifierNode;
+				column = ColumnNode.create(identifier.name);
+			} else {
+				column = referenced as OperationNode;
+			}
+		} else if (ColumnNode.is(column)) {
+			const identifier = column.column as IdentifierNode;
+			column = ColumnNode.create(identifier.name);
 		}
 		const value = this.visit(valueNode) as OperationNode;
 		return ColumnUpdateNode.create(column, value);
@@ -570,6 +733,15 @@ function createSimpleRelation(
  */
 export function toRootOperationNode(root: CstNode): RootOperationNode {
 	return visitor.visit(root) as RootOperationNode;
+}
+
+function createValueListNode(values: OperationNode[]): OperationNode {
+	if (values.length > 0 && values.every((value) => ValueNode.is(value))) {
+		return PrimitiveValueListNode.create(
+			values.map((value) => (value as ValueNode & { value: unknown }).value)
+		);
+	}
+	return ValueListNode.create(values);
 }
 
 function normalizeIdentifierToken(ctx: {

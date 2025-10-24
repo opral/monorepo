@@ -172,13 +172,9 @@ test("supports AND conditions in where clauses", () => {
 	const out = compile(node);
 	const expectedOut = compile(expectedNode);
 
-	const normalize = (sql: string) => sql.replace(/[()]/g, "");
-	expect(normalize(out.sql)).toBe(normalize(expectedOut.sql));
+	expect(out.sql).toBe(expectedOut.sql);
 	expect(out.parameters).toEqual(expectedOut.parameters);
-	const whereNode = (node as any).where?.where;
-	expect(whereNode?.kind).toBe("AndNode");
-	expect(whereNode?.left?.kind).toBe("BinaryOperationNode");
-	expect(whereNode?.right?.kind).toBe("BinaryOperationNode");
+	expect(node).toEqual(expectedNode);
 });
 
 test("supports inner joins", () => {
@@ -264,12 +260,12 @@ test("parses UPDATE statements with schema-qualified tables and aliases", () => 
 	const column = updates?.[0]?.column;
 
 	expect(outSql).toContain('update "accounting"."projects" as "p"');
-	expect(outSql).toContain('set "p"."name" = ?');
+	expect(outSql).toContain('set "name" = ?');
 	expect(outSql).toContain('where "p"."id" = ?');
 	expect(parameters).toEqual(expectedParameters);
-	expect(node.where).toEqual(expectedNode.where);
-	expect(column?.table?.table?.identifier?.name).toBe("p");
-	expect(column?.column?.column?.name).toBe("name");
+	expect(column?.kind).toBe("ColumnNode");
+	expect(column?.column?.name ?? column?.column).toBe("name");
+	expect(node).toEqual(expectedNode);
 });
 
 test("parses UPDATE statements with multiple assignments and parameters", () => {
@@ -341,14 +337,110 @@ test("parses UPDATE statements with complex predicates", () => {
 	const expectedOut = compile(expectedNode);
 	const whereNode = (node as any).where?.where;
 
-	expect(out.sql).toContain('update "projects" as "p" set "p"."name" = ?');
+	expect(out.sql).toContain('update "projects" as "p" set "name" = ?');
 	expect(out.parameters).toEqual(expectedOut.parameters);
-	expect(whereNode?.kind).toBe("OrNode");
-	expect(whereNode?.left?.kind).toBe("BinaryOperationNode");
-	const right = whereNode?.right;
+	expect(whereNode?.kind).toBe("ParensNode");
+	const orNode = (whereNode as any).node;
+	expect(orNode?.kind).toBe("OrNode");
+	expect(orNode?.left?.kind).toBe("BinaryOperationNode");
+	const right = orNode?.right;
 	expect(right?.kind).toBe("ParensNode");
 	const inner = right?.node;
 	expect(inner?.kind).toBe("AndNode");
+	expect(node).toEqual(expectedNode);
+});
+
+test("parses WHERE clauses with comparison operators", () => {
+	const query = `
+		SELECT *
+		FROM projects
+		WHERE revision != 0 AND priority > 1
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("projects")
+		.selectAll()
+		.where((eb) => eb.and([eb("revision", "!=", 0), eb("priority", ">", 1)]))
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("parses WHERE clauses with IN and IS NULL", () => {
+	const query = `
+		SELECT *
+		FROM projects
+		WHERE id IN ('a', 'b') OR deleted_at IS NULL
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("projects")
+		.selectAll()
+		.where((eb) =>
+			eb.or([eb("id", "in", ["a", "b"]), eb("deleted_at", "is", null)])
+		)
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("parses WHERE clauses with BETWEEN and LIKE", () => {
+	const query = `
+		SELECT *
+		FROM projects
+		WHERE revision BETWEEN 1 AND 5 AND name LIKE 'foo%'
+	`;
+
+	const expectedNode = kysely
+		.selectFrom("projects")
+		.selectAll()
+		.where((eb) =>
+			eb.and([
+				eb("revision", "between" as any, [1, 5]),
+				eb("name", "like", "foo%"),
+			])
+		)
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
+});
+
+test("parses UPDATE statements with arithmetic expressions", () => {
+	const query = `
+		UPDATE projects
+		SET revision = revision + 1
+		WHERE id = 'project'
+	`;
+
+	const expectedNode = kysely
+		.updateTable("projects")
+		.set((eb) => ({
+			revision: eb("revision", "+", 1),
+		}))
+		.where("id", "=", "project")
+		.toOperationNode();
+	const node = toRootOperationNode(parse(query));
+	const out = compile(node);
+	const expectedOut = compile(expectedNode);
+
+	expect(out.sql).toBe(expectedOut.sql);
+	expect(out.parameters).toEqual(expectedOut.parameters);
+	expect(node).toEqual(expectedNode);
 });
 
 test("parses DELETE statements", () => {
