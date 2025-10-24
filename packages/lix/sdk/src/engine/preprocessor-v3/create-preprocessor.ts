@@ -108,15 +108,15 @@ function resolveCachedResources(engine: EngineShape): ContextCacheEntry {
 	let entry = contextCache.get(cacheKey);
 
 	if (!entry || entry.schemaHash !== schemaHash) {
-		const storedSchemas = new Map(
-			schemas
-				.map((item) => item.definition)
-				.filter((definition): definition is LixSchemaDefinition => {
-					const key = definition["x-lix-key"];
-					return typeof key === "string" && key.length > 0;
-				})
-				.map((definition) => [definition["x-lix-key"], definition] as const)
-		);
+		const storedSchemas = new Map<string, LixSchemaDefinition>();
+		for (const item of schemas) {
+			const definition = item.definition;
+			const key = definition["x-lix-key"];
+			if (typeof key !== "string" || key.length === 0) {
+				continue;
+			}
+			registerSchemaDefinition(storedSchemas, key, definition);
+		}
 
 		entry = {
 			schemaHash,
@@ -154,4 +154,23 @@ function buildCacheTableMap(
 
 function buildCacheSignature(tables: Set<string>): string {
 	return Array.from(tables).sort().join("|");
+}
+
+function registerSchemaDefinition(
+	map: Map<string, LixSchemaDefinition>,
+	key: string,
+	definition: LixSchemaDefinition
+): void {
+	const baseKeys = new Set<string>([key]);
+	if (key.startsWith("lix_")) {
+		const alias = key.slice(4);
+		if (alias.length > 0) {
+			baseKeys.add(alias);
+		}
+	}
+	for (const baseKey of baseKeys) {
+		map.set(baseKey, definition);
+		map.set(`${baseKey}_all`, definition);
+		map.set(`${baseKey}_history`, definition);
+	}
 }

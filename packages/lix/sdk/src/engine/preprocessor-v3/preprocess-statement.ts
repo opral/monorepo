@@ -1,8 +1,14 @@
 import type { StatementNode } from "./sql-parser/nodes.js";
-import type { PreprocessorContext, PreprocessorStep } from "./types.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
+import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
+import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
+import type { PreprocessorContext, PreprocessorStep } from "./types.js";
 
-const pipeline: PreprocessorStep[] = [rewriteVtableSelects];
+const pipeline: PreprocessorStep[] = [
+    rewriteEntityViewSelect,
+    rewriteStateAllViewSelect,
+    rewriteVtableSelects,
+];
 
 /**
  * Executes the v3 preprocessing pipeline on the provided statement AST node.
