@@ -1,6 +1,8 @@
 import { CstParser, EOF, type CstNode } from "chevrotain";
 import {
 	Select,
+	Update,
+	Delete,
 	From,
 	Where,
 	And,
@@ -15,6 +17,7 @@ import {
 	Full,
 	Join,
 	On,
+	SetKeyword,
 	Identifier,
 	Star,
 	Semicolon,
@@ -43,7 +46,11 @@ class SqlParser extends CstParser {
 	public readonly selectStatement: () => CstNode = this.RULE(
 		"selectStatement",
 		() => {
-			this.SUBRULE(this.selectCore, { LABEL: "core" });
+			this.OR([
+				{ ALT: () => this.SUBRULE(this.selectCore, { LABEL: "core" }) },
+				{ ALT: () => this.SUBRULE(this.updateStatement, { LABEL: "update" }) },
+				{ ALT: () => this.SUBRULE(this.deleteStatement, { LABEL: "delete" }) },
+			]);
 			this.OPTION(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
 		}
@@ -67,6 +74,37 @@ class SqlParser extends CstParser {
 			this.SUBRULE(this.orderByClause, { LABEL: "orderBy" });
 		});
 	});
+
+	private readonly updateStatement: () => CstNode = this.RULE(
+		"updateStatement",
+		() => {
+			this.CONSUME(Update);
+			this.SUBRULE(this.tableReference, { LABEL: "table" });
+			this.CONSUME(SetKeyword);
+			this.SUBRULE(this.assignmentItem, { LABEL: "assignments" });
+			this.MANY(() => {
+				this.CONSUME(Comma);
+				this.SUBRULE1(this.assignmentItem, { LABEL: "assignments" });
+			});
+			this.OPTION(() => {
+				this.CONSUME(Where);
+				this.SUBRULE(this.whereClause, { LABEL: "whereClause" });
+			});
+		}
+	);
+
+	private readonly deleteStatement: () => CstNode = this.RULE(
+		"deleteStatement",
+		() => {
+			this.CONSUME(Delete);
+			this.CONSUME(From);
+			this.SUBRULE(this.tableReference, { LABEL: "table" });
+			this.OPTION(() => {
+				this.CONSUME(Where);
+				this.SUBRULE(this.whereClause, { LABEL: "whereClause" });
+			});
+		}
+	);
 
 	private readonly selectList: () => CstNode = this.RULE("selectList", () => {
 		this.OR([
@@ -104,7 +142,7 @@ class SqlParser extends CstParser {
 			this.OR([
 				{
 					ALT: () => {
-						this.SUBRULE(this.identifier, { LABEL: "table" });
+						this.SUBRULE(this.tableName, { LABEL: "table" });
 						this.OPTION1(() => {
 							this.OPTION2(() => this.CONSUME1(As));
 							this.SUBRULE1(this.identifier, { LABEL: "alias" });
@@ -216,6 +254,23 @@ class SqlParser extends CstParser {
 		});
 	});
 
+	private readonly tableName: () => CstNode = this.RULE("tableName", () => {
+		this.SUBRULE(this.identifier, { LABEL: "parts" });
+		this.OPTION(() => {
+			this.CONSUME(Dot);
+			this.SUBRULE1(this.identifier, { LABEL: "parts" });
+		});
+	});
+
+	private readonly assignmentItem: () => CstNode = this.RULE(
+		"assignmentItem",
+		() => {
+			this.SUBRULE(this.columnReference, { LABEL: "column" });
+			this.CONSUME(Equals);
+			this.SUBRULE(this.valueExpression, { LABEL: "value" });
+		}
+	);
+
 	private readonly columnReference: () => CstNode = this.RULE(
 		"columnReference",
 		() => {
@@ -263,6 +318,9 @@ export function parse(sql: string): CstNode {
 	const parseErrors = [...parserInstance.errors];
 	parserInstance.reset();
 	throwIfErrors("Parsing", parseErrors);
-	const core = (cst as any)?.children?.core?.[0];
-	return core ?? cst;
+	const children = (cst as any)?.children ?? {};
+	const core = children.core?.[0];
+	const update = children.update?.[0];
+	const del = children.delete?.[0];
+	return core ?? update ?? del ?? cst;
 }

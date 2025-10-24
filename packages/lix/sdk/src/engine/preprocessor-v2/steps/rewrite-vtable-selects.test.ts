@@ -32,6 +32,28 @@ test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 	expect(sql).not.toMatch(/\blix_internal_state_vtable\b/);
 });
 
+test("does not rewrite non-SELECT statements", () => {
+	const node = toRootOperationNode(
+		parse(`
+			UPDATE lix_internal_state_vtable
+			SET schema_key = 'test'
+		`)
+	);
+
+	const original = compile(node);
+	const rewritten = rewriteVtableSelects({
+		node,
+		storedSchemas: new Map(),
+		cacheTables: new Map(),
+		hasOpenTransaction: true,
+	});
+
+	const { sql } = compile(rewritten);
+
+	expect(sql).toBe(original.sql);
+	expect(sql).not.toContain(REWRITTEN_STATE_VTABLE);
+});
+
 test("does not rely on hoisted CTEs", () => {
 	const node = toRootOperationNode(
 		parse(`

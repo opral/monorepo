@@ -3,6 +3,10 @@ import {
 	SelectQueryNode,
 	SelectionNode,
 	TableNode,
+	UpdateQueryNode,
+	ColumnUpdateNode,
+	QueryNode,
+	DeleteQueryNode,
 	AliasNode,
 	IdentifierNode,
 	WhereNode,
@@ -61,12 +65,24 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		this.validateVisitor();
 	}
 
-	public selectStatement(ctx: { core?: CstNode[] }): RootOperationNode {
+	public selectStatement(ctx: {
+		core?: CstNode[];
+		update?: CstNode[];
+		delete?: CstNode[];
+	}): RootOperationNode {
 		const core = ctx.core?.[0];
-		if (!core) {
-			throw new Error("select statement missing core");
+		if (core) {
+			return this.visit(core) as RootOperationNode;
 		}
-		return this.visit(core) as RootOperationNode;
+		const update = ctx.update?.[0];
+		if (update) {
+			return this.visit(update) as RootOperationNode;
+		}
+		const del = ctx.delete?.[0];
+		if (del) {
+			return this.visit(del) as RootOperationNode;
+		}
+		throw new Error("statement missing recognized root");
 	}
 
 	public selectCore(ctx: {
@@ -101,6 +117,57 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 			filter,
 			orderBy,
 		});
+	}
+
+	public updateStatement(ctx: {
+		table?: CstNode[];
+		assignments?: CstNode[];
+		whereClause?: CstNode[];
+	}): RootOperationNode {
+		const tableCst = ctx.table?.[0];
+		if (!tableCst) {
+			throw new Error("update statement missing table reference");
+		}
+		const relation = this.visit(tableCst) as OperationNode;
+		if (!TableNode.is(relation) && !AliasNode.is(relation)) {
+			throw new Error("update statement requires a base table reference");
+		}
+		const assignmentsCst = ctx.assignments ?? [];
+		if (assignmentsCst.length === 0) {
+			throw new Error("update statement missing assignments");
+		}
+		const assignments = assignmentsCst.map(
+			(node) => this.visit(node) as ColumnUpdateNode
+		);
+		let updateNode = UpdateQueryNode.create([relation]);
+		updateNode = UpdateQueryNode.cloneWithUpdates(updateNode, assignments);
+		const whereNode = ctx.whereClause?.[0];
+		if (whereNode) {
+			const predicate = this.visit(whereNode) as OperationNode;
+			updateNode = QueryNode.cloneWithWhere(updateNode, predicate);
+		}
+		return updateNode;
+	}
+
+	public deleteStatement(ctx: {
+		table?: CstNode[];
+		whereClause?: CstNode[];
+	}): RootOperationNode {
+		const tableCst = ctx.table?.[0];
+		if (!tableCst) {
+			throw new Error("delete statement missing table reference");
+		}
+		const relation = this.visit(tableCst) as OperationNode;
+		if (!TableNode.is(relation) && !AliasNode.is(relation)) {
+			throw new Error("delete statement requires a base table reference");
+		}
+		let deleteNode = DeleteQueryNode.create([relation]);
+		const whereNode = ctx.whereClause?.[0];
+		if (whereNode) {
+			const predicate = this.visit(whereNode) as OperationNode;
+			deleteNode = QueryNode.cloneWithWhere(deleteNode, predicate);
+		}
+		return deleteNode;
 	}
 
 	public selectList(ctx: {
@@ -142,10 +209,28 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		if (!tableNode) {
 			throw new Error("table reference is missing");
 		}
-		const table = this.visit(tableNode) as string;
+		const table = this.visit(tableNode) as
+			| string
+			| { schema: string; table: string };
 		const aliasNode = ctx.alias?.[0];
 		const alias = aliasNode ? (this.visit(aliasNode) as string) : undefined;
 		return createSimpleRelation(table, alias);
+	}
+
+	public tableName(ctx: {
+		parts?: CstNode[];
+	}): string | { schema: string; table: string } {
+		const parts = ctx.parts?.map((node) => this.visit(node) as string) ?? [];
+		if (parts.length === 0) {
+			throw new Error("table name is missing");
+		}
+		if (parts.length === 1) {
+			return parts[0]!;
+		}
+		if (parts.length === 2) {
+			return { schema: parts[0]!, table: parts[1]! };
+		}
+		throw new Error("table names with nested paths are not supported yet");
 	}
 
 	public joinClause(ctx: {
@@ -345,6 +430,26 @@ class ToKyselyVisitor extends BaseSqlCstVisitorWithDefaults {
 		return ValueNode.create(Number(raw.image));
 	}
 
+	public assignmentItem(ctx: {
+		column?: CstNode[];
+		value?: CstNode[];
+	}): ColumnUpdateNode {
+		const columnNode = ctx.column?.[0];
+		if (!columnNode) {
+			throw new Error("assignment missing column");
+		}
+		const valueNode = ctx.value?.[0];
+		if (!valueNode) {
+			throw new Error("assignment missing value");
+		}
+		let column = this.visit(columnNode) as OperationNode;
+		if (ReferenceNode.is(column) && column.table === undefined) {
+			column = column.column;
+		}
+		const value = this.visit(valueNode) as OperationNode;
+		return ColumnUpdateNode.create(column, value);
+	}
+
 	public identifier(ctx: {
 		Identifier?: IToken[];
 		QuotedIdentifier?: IToken[];
@@ -442,8 +547,14 @@ function normalizeOrderDirection(value: string): "asc" | "desc" {
 	throw new Error(`unsupported order by direction '${value}'`);
 }
 
-function createSimpleRelation(table: string, alias?: string): OperationNode {
-	const tableNode = TableNode.create(table);
+function createSimpleRelation(
+	table: string | { schema: string; table: string },
+	alias?: string
+): OperationNode {
+	const tableNode =
+		typeof table === "string"
+			? TableNode.create(table)
+			: TableNode.createWithSchema(table.schema, table.table);
 	return alias
 		? AliasNode.create(tableNode, IdentifierNode.create(alias))
 		: tableNode;

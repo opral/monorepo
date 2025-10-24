@@ -57,31 +57,32 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	if (!renameTransformer.touched) {
 		return renamed;
 	}
+	if (!SelectQueryNode.is(renamed)) {
+		return node;
+	}
 
 	let traceEntry: PreprocessorTraceEntry | null = null;
-	if (SelectQueryNode.is(renamed)) {
-		const aliases = collectTableAliases(renamed);
-		const tableSet = new Set([REWRITTEN_STATE_VTABLE, ...aliases]);
-		const schemaSummary = collectSchemaKeyPredicates(
-			renamed.where?.where,
-			tableSet
-		);
-		if (schemaSummary.hasDynamic) {
-			throw new Error(
-				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-			);
-		}
-		const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
-			renamed,
-			tableSet
-		);
-		traceEntry = buildTraceEntry(
-			renamed,
-			schemaSummary,
-			selectedColumns,
-			aliases
+	const aliases = collectTableAliases(renamed);
+	const tableSet = new Set([REWRITTEN_STATE_VTABLE, ...aliases]);
+	const schemaSummary = collectSchemaKeyPredicates(
+		renamed.where?.where,
+		tableSet
+	);
+	if (schemaSummary.hasDynamic) {
+		throw new Error(
+			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
 		);
 	}
+	const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
+		renamed,
+		tableSet
+	);
+	traceEntry = buildTraceEntry(
+		renamed,
+		schemaSummary,
+		selectedColumns,
+		aliases
+	);
 
 	const inlineTransformer = new InlineInternalStateVtableTransformer(
 		cacheTables,

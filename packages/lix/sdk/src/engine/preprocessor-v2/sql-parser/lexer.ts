@@ -11,6 +11,16 @@ export const Select: TokenType = createToken({
 	pattern: /select\b/i,
 });
 
+export const Update: TokenType = createToken({
+	name: "Update",
+	pattern: /update\b/i,
+});
+
+export const Delete: TokenType = createToken({
+	name: "Delete",
+	pattern: /delete\b/i,
+});
+
 export const From: TokenType = createToken({
 	name: "From",
 	pattern: /from\b/i,
@@ -81,6 +91,11 @@ export const On: TokenType = createToken({
 	pattern: /on\b/i,
 });
 
+export const SetKeyword: TokenType = createToken({
+	name: "SetKeyword",
+	pattern: /set\b/i,
+});
+
 export const As: TokenType = createToken({
 	name: "As",
 	pattern: /as\b/i,
@@ -91,6 +106,8 @@ export const Identifier: TokenType = createToken({
 	pattern: /[A-Za-z_][A-Za-z0-9_]*/,
 	longer_alt: [
 		Select,
+		Update,
+		Delete,
 		From,
 		Where,
 		And,
@@ -105,6 +122,7 @@ export const Identifier: TokenType = createToken({
 		Full,
 		Join,
 		On,
+		SetKeyword,
 		As,
 	],
 });
@@ -167,6 +185,8 @@ export const Equals: TokenType = createToken({
 const tokens: TokenType[] = [
 	Whitespace,
 	Select,
+	Update,
+	Delete,
 	From,
 	Where,
 	And,
@@ -181,6 +201,7 @@ const tokens: TokenType[] = [
 	Full,
 	Join,
 	On,
+	SetKeyword,
 	As,
 	Star,
 	Comma,
