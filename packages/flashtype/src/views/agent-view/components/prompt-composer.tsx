@@ -168,7 +168,7 @@ export function PromptComposer({
 		}
 
 		if (!hasKey) {
-			onNotice("Add a GOOGLE_API_KEY to enable the Lix Agent.");
+			onNotice("Add an OpenRouter API key to enable the Lix Agent.");
 			return;
 		}
 
@@ -365,7 +365,7 @@ export function PromptComposer({
 
 	const placeholder = hasKey
 		? "Ask Lix Agent…"
-		: "Add GOOGLE_API_KEY to enable the Lix Agent…";
+		: "Add an OpenRouter API key to enable the Lix Agent…";
 	const sendDisabled = pending || !hasKey;
 
 	return (
@@ -378,6 +378,7 @@ export function PromptComposer({
 				id={textAreaId}
 				data-testid="agent-composer-input"
 				placeholder={placeholder}
+				disabled={!hasKey}
 				value={value}
 				onChange={(event) => {
 					const next = event.target.value;
@@ -398,7 +399,7 @@ export function PromptComposer({
 				onSelect={() => {
 					updateMentions(textAreaRef.current);
 				}}
-				className="h-28 w-full resize-none border-0 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none"
+				className="h-28 w-full resize-none border-0 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
 			/>
 			{menuFragment ? (
 				<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">

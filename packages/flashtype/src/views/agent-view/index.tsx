@@ -25,10 +25,11 @@ import { selectFilePaths } from "./select-file-paths";
 import { clearConversation as runClearConversation } from "./commands/clear";
 import { createReactViewDefinition } from "../../app/react-view";
 import { systemPrompt } from "./system-prompt";
-import { PromptComposer } from "./components/prompt-composer";
 import { ChangeDecisionOverlay } from "./components/change-decision";
+import { PromptComposer } from "./components/prompt-composer";
 import { LLM_PROXY_PREFIX } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
+import { WelcomeScreen } from "./components/welcome-screen";
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
@@ -36,6 +37,7 @@ type AgentViewProps = {
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 const MODEL_NAME = "google/gemini-2.5-pro";
+const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
 
 /**
  * Agent chat view backed by the real Lix agent.
@@ -53,6 +55,9 @@ export function AgentView({ context }: AgentViewProps) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
+	const [storedApiKey, setStoredApiKey] = useState<string | null>(null);
+	const [apiKeyDraft, setApiKeyDraft] = useState("");
+	const [keyLoaded, setKeyLoaded] = useState(false);
 
 	useEffect(() => {
 		(async () => {
@@ -62,6 +67,19 @@ export function AgentView({ context }: AgentViewProps) {
 			}
 		})();
 	}, [conversationId, lix, setConversationId]);
+
+	useEffect(() => {
+		if (typeof window === "undefined") {
+			setKeyLoaded(true);
+			return;
+		}
+		const existing = window.localStorage.getItem(OPENROUTER_KEY_STORAGE_KEY);
+		if (existing) {
+			setStoredApiKey(existing);
+			setApiKeyDraft(existing);
+		}
+		setKeyLoaded(true);
+	}, []);
 
 	const [pendingProposal, setPendingProposal] = useState<{
 		proposalId: string;
@@ -87,7 +105,7 @@ export function AgentView({ context }: AgentViewProps) {
 	}, []);
 
 	const model = useMemo(() => provider(MODEL_NAME), [provider]);
-	const hasKey = true;
+	const hasKey = Boolean(storedApiKey);
 
 	const messages = useQuery(({ lix }) =>
 		lix.db
@@ -123,7 +141,7 @@ export function AgentView({ context }: AgentViewProps) {
 		return () => {
 			cancelled = true;
 		};
-	}, [hasKey, lix, model]);
+	}, [hasKey, lix, model, storedApiKey]);
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
@@ -168,6 +186,25 @@ export function AgentView({ context }: AgentViewProps) {
 	const [notice, setNotice] = useState<string | null>(null);
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
+
+	const handleApiKeyChange = useCallback((value: string) => {
+		setApiKeyDraft(value);
+	}, []);
+
+	const handleSaveApiKey = useCallback(() => {
+		const trimmed = apiKeyDraft.trim();
+		if (typeof window !== "undefined") {
+			if (trimmed) {
+				window.localStorage.setItem(OPENROUTER_KEY_STORAGE_KEY, trimmed);
+			} else {
+				window.localStorage.removeItem(OPENROUTER_KEY_STORAGE_KEY);
+			}
+		}
+		setStoredApiKey(trimmed || null);
+		setApiKeyDraft(trimmed);
+		setNotice(null);
+		setError(null);
+	}, [apiKeyDraft]);
 
 	const handleAcceptDecision = useCallback(
 		(id: string) => {
@@ -360,7 +397,7 @@ export function AgentView({ context }: AgentViewProps) {
 	);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
+		<>
 			{/* Header with conversation picker */}
 			{/*
 			<header className="flex items-center justify-between border-b border-border/80 py-1">
@@ -382,58 +419,64 @@ export function AgentView({ context }: AgentViewProps) {
 			*/}
 
 			{/* Conversation messages */}
-			<div className="flex-1 min-h-0 overflow-y-auto">
-				{messages.map((message) => (
-					<ConversationMessage key={message.id} message={message} />
-				))}
-				{pendingMessage ? (
-					<ConversationMessage
-						key={pendingMessage.id || "agent-pending"}
-						message={pendingMessage}
+			<div className="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+				{hasKey ? (
+					<>
+						{messages.map((message) => (
+							<ConversationMessage key={message.id} message={message} />
+						))}
+						{pendingMessage ? (
+							<ConversationMessage
+								key={pendingMessage.id || "agent-pending"}
+								message={pendingMessage}
+							/>
+						) : pending ? (
+							<div className="px-3 py-1 text-xs text-muted-foreground">
+								Thinking…
+							</div>
+						) : null}
+						{notice ? (
+							<div className="px-3 py-1 text-xs text-muted-foreground">
+								{notice}
+							</div>
+						) : null}
+						{error ? (
+							<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+						) : null}
+					</>
+				) : keyLoaded ? (
+					<WelcomeScreen
+						value={apiKeyDraft}
+						onValueChange={handleApiKeyChange}
+						onSave={handleSaveApiKey}
 					/>
-				) : pending ? (
-					<div className="px-3 py-1 text-xs text-muted-foreground">
-						Thinking…
-					</div>
-				) : null}
-				{notice ? (
-					<div className="px-3 py-1 text-xs text-muted-foreground">
-						{notice}
-					</div>
-				) : null}
-				{error ? (
-					<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
-				) : null}
-				{!hasKey ? (
-					<div className="px-3 py-1 text-xs text-muted-foreground">
-						Missing AI_GATEWAY_API_KEY. Add one to enable the Lix Agent
-						conversation.
-					</div>
 				) : null}
 			</div>
 
-			<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
-				{pendingProposal ? (
-					<ChangeDecisionOverlay
-						id={pendingProposal.proposalId}
-						onAccept={handleAcceptDecision}
-						onReject={handleRejectDecision}
-					/>
-				) : (
-					<PromptComposer
-						hasKey={hasKey}
-						commands={COMMANDS}
-						files={filePaths}
-						pending={pending}
-						onNotice={setNotice}
-						onSlashCommand={handleSlashCommand}
-						onSendMessage={async (message) => {
-							await send(message);
-						}}
-					/>
-				)}
-			</div>
-		</div>
+			{hasKey && (
+				<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
+					{pendingProposal ? (
+						<ChangeDecisionOverlay
+							id={pendingProposal.proposalId}
+							onAccept={handleAcceptDecision}
+							onReject={handleRejectDecision}
+						/>
+					) : (
+						<PromptComposer
+							hasKey={hasKey}
+							commands={COMMANDS}
+							files={filePaths}
+							pending={pending}
+							onNotice={setNotice}
+							onSlashCommand={handleSlashCommand}
+							onSendMessage={async (message) => {
+								await send(message);
+							}}
+						/>
+					)}
+				</div>
+			)}
+		</>
 	);
 }
 
