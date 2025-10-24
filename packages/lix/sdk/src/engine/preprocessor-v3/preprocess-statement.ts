@@ -1,21 +1,22 @@
 import type { PreprocessorContext, PreprocessorStep } from "./types.js";
-import type { SqlNode } from "./sql-parser/nodes.js";
+import type { StatementNode } from "./sql-parser/nodes.js";
 
 const pipeline: PreprocessorStep[] = [];
 
 /**
- * Executes the v3 preprocessing pipeline on the provided root AST node.
+ * Executes the v3 preprocessing pipeline on the provided statement AST node.
  *
  * @example
  * ```ts
- * const rewritten = preprocessRootNode(node, context);
+ * const statement: StatementNode = parse(sql);
+ * const rewritten = preprocessStatement(statement, context);
  * ```
  */
-export function preprocessRootNode(
-	node: SqlNode,
+export function preprocessStatement(
+	node: StatementNode,
 	context: PreprocessorContext
-): SqlNode {
-	return pipeline.reduce<SqlNode>(
+): StatementNode {
+	return pipeline.reduce<StatementNode>(
 		(current, step) =>
 			step({
 				node: current,
@@ -23,7 +24,7 @@ export function preprocessRootNode(
 				getCacheTables: context.getCacheTables,
 				hasOpenTransaction: context.hasOpenTransaction,
 				trace: context.trace,
-			}),
+			}) as StatementNode,
 		node
 	);
 }
