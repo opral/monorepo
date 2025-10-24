@@ -242,7 +242,7 @@ class SqlParser extends CstParser {
 				},
 				{
 					ALT: () => {
-		this.SUBRULE(this.column_reference, { LABEL: "comparison_column" });
+						this.SUBRULE(this.column_reference, { LABEL: "comparison_column" });
 						this.OR1([
 							{
 								ALT: () => {
