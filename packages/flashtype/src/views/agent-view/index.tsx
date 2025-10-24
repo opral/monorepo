@@ -1,4 +1,4 @@
-import { use, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bot } from "lucide-react";
 import { createGatewayProvider } from "@ai-sdk/gateway";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
@@ -36,7 +36,6 @@ type AgentViewProps = {
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 const MODEL_NAME = "google/gemini-2.5-pro";
-const NULL_AGENT_PROMISE: Promise<LixAgent | null> = Promise.resolve(null);
 
 /**
  * Agent chat view backed by the real Lix agent.
@@ -99,14 +98,32 @@ export function AgentView({ context }: AgentViewProps) {
 			.orderBy("id", "asc"),
 	);
 
-	const agentResource = useMemo<Promise<LixAgent | null>>(() => {
-		if (!hasKey || !model) {
-			return NULL_AGENT_PROMISE;
-		}
-		return createLixAgent({ lix, model, systemPrompt });
-	}, [hasKey, lix, model]);
+	const [agent, setAgent] = useState<LixAgent | null>(null);
 
-	const agent = use(agentResource);
+	useEffect(() => {
+		let cancelled = false;
+		if (!hasKey || !model) {
+			setAgent(null);
+			return;
+		}
+		createLixAgent({ lix, model, systemPrompt })
+			.then((createdAgent) => {
+				if (cancelled) return;
+				setAgent(createdAgent);
+			})
+			.catch((error_) => {
+				if (cancelled) return;
+				setAgent(null);
+				const message =
+					error_ instanceof Error
+						? error_.message
+						: String(error_ ?? "unknown");
+				setError(`Error: ${message}`);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [hasKey, lix, model]);
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
@@ -131,7 +148,8 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [pendingProposal]);
 
 	const clear = useCallback(async () => {
-		await runClearConversation({ agent: agent!, conversationId });
+		if (!agent) throw new Error("Agent not ready");
+		await runClearConversation({ agent, conversationId });
 		setPendingProposal(null);
 		setPendingMessage(null);
 	}, [agent, conversationId]);
