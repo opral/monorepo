@@ -130,6 +130,13 @@ export default function App(props: Route.ComponentProps) {
 }
 ```
 
+Derive the loader's return type once so you can share it with the meta
+function:
+
+```ts
+type RootLoaderData = Awaited<ReturnType<typeof loader>>;
+```
+
 ### Meta generation
 
 React Router generates the `<meta>` tags in a separate context on the client. To
@@ -137,10 +144,13 @@ make sure the `getLocale` helper returns the correct locale during the
 generation step, update your `meta` function like this:
 
 ```ts
-export function meta({ matches }: Route.MetaArgs) {
+export function meta({ data }: Route.MetaArgs) {
   if (!import.meta.env.SSR) {
-    const { locale } = getRequiredLoaderData<ServerContext>(matches, "root");
-    overwriteGetLocale(() => assertIsLocale(locale));
+    const locale = assertIsLocale(
+      (data as RootLoaderData | undefined)?.locale ?? baseLocale,
+    );
+
+    overwriteGetLocale(() => locale);
   } else {
     overwriteGetLocale(() =>
       assertIsLocale(useContext<Locale>(LocaleContextSSR))
@@ -153,8 +163,8 @@ export function meta({ matches }: Route.MetaArgs) {
 
 This mirrors the server setup shown above while ensuring that the meta
 generation step runs with the correct locale, even when multiple requests are
-handled in parallel. Replace `ServerContext` with the type returned by your root
-loader if it differs.
+handled in parallel. Access the locale returned by your root loader through the
+`data` (aka `loaderData`) argument instead of `matches`.
 
 In `routes.ts`: 
 
