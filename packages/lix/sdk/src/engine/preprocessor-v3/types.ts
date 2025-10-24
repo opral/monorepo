@@ -10,7 +10,7 @@ import type { SqlNode } from "./sql-parser/nodes.js";
  */
 export type PreprocessorTraceEntry = {
 	readonly step: string;
-	readonly payload: unknown;
+	readonly payload: any;
 };
 
 /**
@@ -33,6 +33,7 @@ export type PreprocessorTrace = PreprocessorTraceEntry[];
 export type PreprocessorContext = {
 	readonly getStoredSchemas: () => Map<string, unknown>;
 	readonly getCacheTables: () => Map<string, unknown>;
+	readonly getSqlViews: () => Map<string, string>;
 	readonly hasOpenTransaction: () => boolean;
 	readonly trace?: PreprocessorTrace;
 };

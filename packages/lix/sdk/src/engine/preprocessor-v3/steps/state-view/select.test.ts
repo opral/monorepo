@@ -11,6 +11,7 @@ function run(sql: string) {
 		node: statement,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 		trace,
 	});

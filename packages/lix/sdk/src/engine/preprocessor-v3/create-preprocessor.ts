@@ -1,11 +1,7 @@
 import { compile } from "./compile.js";
 import { preprocessStatement } from "./preprocess-statement.js";
 import { parse } from "./sql-parser/parse.js";
-import type {
-	PreprocessorArgs,
-	PreprocessorFn,
-	PreprocessorResult,
-} from "./types.js";
+import type { PreprocessorArgs, PreprocessorFn } from "./types.js";
 import type { PreprocessorContext, PreprocessorTrace } from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
@@ -13,6 +9,7 @@ import type { LixSchemaDefinition } from "../../schema-definition/definition.js"
 import { getStateCacheTables } from "../../state/cache/schema.js";
 import { schemaKeyToCacheTableName } from "../../state/cache/create-schema-cache-table.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
+import { getSchemaVersion } from "../query-preprocessor/shared/schema-version.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -63,6 +60,8 @@ type ContextCacheEntry = {
 	storedSchemas: Map<string, LixSchemaDefinition>;
 	cacheSignature: string;
 	cacheTables: Map<string, string>;
+	viewSignature: string;
+	sqlViews: Map<string, string>;
 };
 
 const contextCache = new WeakMap<object, ContextCacheEntry>();
@@ -75,6 +74,7 @@ function buildContext(
 
 	let storedSchemas: Map<string, unknown> | undefined;
 	let cacheTables: Map<string, unknown> | undefined;
+	let sqlViews: Map<string, string> | undefined;
 	let transactionState: boolean | undefined;
 
 	const context: PreprocessorContext = {
@@ -89,6 +89,12 @@ function buildContext(
 				cacheTables = base.cacheTables as Map<string, unknown>;
 			}
 			return cacheTables;
+		},
+		getSqlViews: () => {
+			if (!sqlViews) {
+				sqlViews = base.sqlViews;
+			}
+			return sqlViews;
 		},
 		hasOpenTransaction: () => {
 			if (transactionState === undefined) {
@@ -123,6 +129,8 @@ function resolveCachedResources(engine: EngineShape): ContextCacheEntry {
 			storedSchemas,
 			cacheSignature: "",
 			cacheTables: new Map(),
+			viewSignature: "",
+			sqlViews: new Map(),
 		};
 		contextCache.set(cacheKey, entry);
 	}
@@ -132,6 +140,13 @@ function resolveCachedResources(engine: EngineShape): ContextCacheEntry {
 	if (entry.cacheSignature !== cacheSignature) {
 		entry.cacheTables = buildCacheTableMap(entry.storedSchemas, cacheTablesSet);
 		entry.cacheSignature = cacheSignature;
+		contextCache.set(cacheKey, entry);
+	}
+
+	const currentViewSignature = getSqlViewSignature(engine);
+	if (entry.viewSignature !== currentViewSignature) {
+		entry.sqlViews = loadSqlViewMap(engine);
+		entry.viewSignature = currentViewSignature;
 		contextCache.set(cacheKey, entry);
 	}
 
@@ -173,4 +188,50 @@ function registerSchemaDefinition(
 		map.set(`${baseKey}_all`, definition);
 		map.set(`${baseKey}_history`, definition);
 	}
+}
+
+function getSqlViewSignature(engine: EngineShape): string {
+	const version = getSchemaVersion(engine.sqlite);
+	return String(version);
+}
+
+function loadSqlViewMap(engine: EngineShape): Map<string, string> {
+	const result = engine.sqlite.exec({
+		sql: "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND sql IS NOT NULL",
+		returnValue: "resultRows",
+		rowMode: "object",
+		columnNames: [],
+	});
+
+	const map = new Map<string, string>();
+	for (const row of result as Array<Record<string, unknown>>) {
+		const name = typeof row.name === "string" ? row.name : undefined;
+		const sqlText = typeof row.sql === "string" ? row.sql : undefined;
+		if (!name || !sqlText) {
+			continue;
+		}
+		const selectSql = extractSelectBody(sqlText);
+		if (!selectSql) {
+			continue;
+		}
+		map.set(name, selectSql);
+	}
+	return map;
+}
+
+function extractSelectBody(sql: string): string | undefined {
+	const trimmed = sql.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+	const withoutPrefix = trimmed.replace(/^[\s\S]*?\bAS\b\s*/i, "");
+	if (withoutPrefix === trimmed) {
+		return undefined;
+	}
+	let statement = withoutPrefix.trim();
+	const semicolon = statement.indexOf(";");
+	if (semicolon !== -1) {
+		statement = statement.slice(0, semicolon);
+	}
+	return statement.trim() || undefined;
 }

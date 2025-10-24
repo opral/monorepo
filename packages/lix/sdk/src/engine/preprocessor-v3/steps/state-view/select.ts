@@ -10,18 +10,12 @@ import {
 	visitSelectStatement,
 	type AstVisitor,
 } from "../../sql-parser/visitor.js";
-import {
-	getIdentifierValue,
-} from "../../sql-parser/ast-helpers.js";
-import {
-	columnReference,
-	identifier,
-} from "../../sql-parser/nodes.js";
+import { getIdentifierValue } from "../../sql-parser/ast-helpers.js";
+import { columnReference, identifier } from "../../sql-parser/nodes.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 
 const STATE_VIEW_NAME = "state";
 const STATE_ALL_TABLE = "state_all";
-const STATE_ALIAS = "st";
 
 type StateReference = {
 	readonly binding: string;

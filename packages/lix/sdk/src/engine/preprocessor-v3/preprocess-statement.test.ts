@@ -10,6 +10,7 @@ function createContext(trace: PreprocessorTraceEntry[]): PreprocessorContext {
 	return {
 		getStoredSchemas: () => new Map<string, unknown>(),
 		getCacheTables: () => new Map<string, unknown>(),
+		getSqlViews: () => new Map<string, string>(),
 		hasOpenTransaction: () => true,
 		trace,
 	};
@@ -54,12 +55,15 @@ function createSchemaContext(
 	return {
 		getStoredSchemas: () => new Map(storedSchemas),
 		getCacheTables: () => new Map<string, unknown>(),
+		getSqlViews: () => new Map<string, string>(),
 		hasOpenTransaction: () => true,
 		trace,
 	};
 }
 
-function buildStoredSchemaMap(schema: LixSchemaDefinition): Map<string, unknown> {
+function buildStoredSchemaMap(
+	schema: LixSchemaDefinition
+): Map<string, unknown> {
 	const key = schema["x-lix-key"]!;
 	const map = new Map<string, unknown>();
 	const keys = new Set<string>([key]);
@@ -104,15 +108,47 @@ test("entity view query rewrites to state-backed subquery", () => {
 	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
 	expect(upper).toContain('"VERSION_ID" FROM "ACTIVE_VERSION"');
 	expect(sql).toContain("= 'demo_entity'");
-	expect(sql).toContain(
-		`json_extract("st"."snapshot_content", '$.id')`
-	);
-	expect(sql).not.toContain(
-		`json_extract("st"."snapshot_content", '$.label')`
-	);
+	expect(sql).toContain(`json_extract("st"."snapshot_content", '$.id')`);
+	expect(sql).not.toContain(`json_extract("st"."snapshot_content", '$.label')`);
 	expect(trace.map((entry) => entry.step)).toEqual([
 		"rewrite_entity_view_select",
 		"rewrite_state_view_select",
+		"rewrite_state_all_view_select",
+		"rewrite_vtable_selects",
+	]);
+});
+
+test("sql view expansion feeds subsequent rewrites", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+	const statement = parse(`
+		SELECT fv.file_id
+		FROM foo_view AS fv
+	`);
+
+	const context: PreprocessorContext = {
+		getStoredSchemas: () => new Map<string, unknown>(),
+		getCacheTables: () => new Map<string, unknown>(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"foo_view",
+					`
+						SELECT sa.file_id
+						FROM state_all AS sa
+					`,
+				],
+			]),
+		hasOpenTransaction: () => true,
+		trace,
+	};
+
+	const rewritten = preprocessStatement(statement, context);
+	const { sql } = compile(rewritten);
+
+	const upper = sql.toUpperCase();
+	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(trace.map((entry) => entry.step)).toEqual([
+		"expand_sql_views",
 		"rewrite_state_all_view_select",
 		"rewrite_vtable_selects",
 	]);

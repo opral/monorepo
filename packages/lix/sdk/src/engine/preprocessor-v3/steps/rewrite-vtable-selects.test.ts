@@ -19,6 +19,7 @@ test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -40,6 +41,7 @@ test("does not rewrite non-SELECT statements", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -59,6 +61,7 @@ test("does not rely on hoisted CTEs", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -83,6 +86,7 @@ test("emits trace metadata with alias and filters", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		trace,
 		hasOpenTransaction: () => true,
 	});
@@ -114,6 +118,7 @@ test("throws on dynamic schema key filters", () => {
 			node,
 			getStoredSchemas: () => new Map(),
 			getCacheTables: () => new Map(),
+			getSqlViews: () => new Map(),
 			trace,
 			hasOpenTransaction: () => true,
 		})
@@ -134,6 +139,7 @@ test("uses projected columns when select is narrowed", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		trace,
 		hasOpenTransaction: () => true,
 	});
@@ -163,6 +169,7 @@ test("respects aliases when projecting columns", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		trace,
 		hasOpenTransaction: () => true,
 	});
@@ -188,6 +195,7 @@ test("includes _pk across segments when explicitly selected", () => {
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () =>
 			new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+		getSqlViews: () => new Map(),
 		trace,
 		hasOpenTransaction: () => true,
 	});
@@ -213,6 +221,7 @@ test("retains writer joins when writer_key is selected", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -237,6 +246,7 @@ test("retains change join when metadata is selected", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -256,6 +266,7 @@ test("routes cache queries to mapped physical tables", () => {
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () =>
 			new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -281,6 +292,7 @@ test("includes only cache tables for matching schema filters", () => {
 				["test_schema_key", "test_schema_key_cache_table"],
 				["test_schema_key_other", "test_schema_key_other_cache_table"],
 			]),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -313,6 +325,7 @@ test("unions cache tables when multiple schema filters are present", () => {
 				["test_schema_key_other", "test_schema_key_other_cache_table"],
 				["test_schema_key_unused", "test_schema_key_unused_cache_table"],
 			]),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -338,6 +351,7 @@ test("skips cache unions when no cache tables mapped", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -360,6 +374,7 @@ test("prunes transaction segment when transaction closed", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => false,
 	});
 
@@ -387,6 +402,7 @@ test("unions all available cache tables when no schema filter is provided", () =
 				["test_schema_key_one", "cache_table_one"],
 				["test_schema_key_two", "cache_table_two"],
 			]),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
@@ -411,6 +427,7 @@ test("handles multiple vtable references with selective projections", () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		trace,
 		hasOpenTransaction: () => true,
 	});
@@ -474,6 +491,7 @@ test("returns transaction rows", async () => {
 		node,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 

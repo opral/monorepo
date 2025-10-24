@@ -45,6 +45,7 @@ function run(sql: string) {
 		node: statement,
 		getStoredSchemas: () => new Map(storedSchemas),
 		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
 		hasOpenTransaction: () => true,
 		trace,
 	});
@@ -86,9 +87,7 @@ describe("rewriteEntityViewSelect", () => {
 		`);
 
 		const sql = compiled.sql;
-		expect(sql).toContain(
-			`json_extract("st"."snapshot_content", '$.id')`
-		);
+		expect(sql).toContain(`json_extract("st"."snapshot_content", '$.id')`);
 		expect(sql).not.toContain(
 			`json_extract("st"."snapshot_content", '$.label')`
 		);

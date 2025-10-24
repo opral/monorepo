@@ -5,10 +5,7 @@ import type {
 	ExpressionNode,
 	SelectItemNode,
 } from "../../sql-parser/nodes.js";
-import {
-	identifier,
-	columnReference,
-} from "../../sql-parser/nodes.js";
+import { identifier, columnReference } from "../../sql-parser/nodes.js";
 import {
 	visitSelectStatement,
 	type AstVisitor,
@@ -81,10 +78,7 @@ function rewriteSelectNode(
 	return visitSelectStatement(select, visitor);
 }
 
-function createStateAllSubquery(
-	binding: string,
-	columns: Set<string> | null
-) {
+function createStateAllSubquery(binding: string, columns: Set<string> | null) {
 	return {
 		node_kind: "subquery" as const,
 		statement: buildStateAllSelect(columns),
@@ -127,7 +121,10 @@ function buildStateAllSelect(columns: Set<string> | null): SelectStatementNode {
 	};
 }
 
-function columnSelect(path: readonly string[], alias: string): SelectExpressionNode {
+function columnSelect(
+	path: readonly string[],
+	alias: string
+): SelectExpressionNode {
 	return {
 		node_kind: "select_expression",
 		expression: columnReference(path),
@@ -166,7 +163,10 @@ const BASE_STATE_ALL_COLUMNS = [
 
 const METADATA_COLUMN = "metadata";
 
-const STATE_ALL_COLUMNS = new Set<string>([...BASE_STATE_ALL_COLUMNS, METADATA_COLUMN]);
+const STATE_ALL_COLUMNS = new Set<string>([
+	...BASE_STATE_ALL_COLUMNS,
+	METADATA_COLUMN,
+]);
 const MANDATORY_COLUMNS = new Set<string>(["schema_key", "snapshot_content"]);
 
 function buildProjection(columns: Set<string> | null): SelectExpressionNode[] {
@@ -203,12 +203,20 @@ function collectReferencedColumns(
 	}
 
 	if (!selectAll && select.where_clause) {
-		collectColumnsFromExpression(select.where_clause, normalizedBinding, columns);
+		collectColumnsFromExpression(
+			select.where_clause,
+			normalizedBinding,
+			columns
+		);
 	}
 
 	if (!selectAll && select.order_by.length > 0) {
 		for (const orderItem of select.order_by) {
-			collectColumnsFromExpression(orderItem.expression, normalizedBinding, columns);
+			collectColumnsFromExpression(
+				orderItem.expression,
+				normalizedBinding,
+				columns
+			);
 		}
 	}
 
