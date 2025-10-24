@@ -101,7 +101,8 @@ test("entity view query rewrites to state-backed subquery", () => {
 	const { sql } = compile(rewritten);
 
 	const upper = sql.toUpperCase();
-	expect(upper).toContain('FROM "STATE" AS "ST"');
+	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+	expect(upper).toContain('"VERSION_ID" FROM "ACTIVE_VERSION"');
 	expect(sql).toContain("= 'demo_entity'");
 	expect(sql).toContain(
 		`json_extract("st"."snapshot_content", '$.id')`
@@ -109,6 +110,10 @@ test("entity view query rewrites to state-backed subquery", () => {
 	expect(sql).not.toContain(
 		`json_extract("st"."snapshot_content", '$.label')`
 	);
-	expect(trace).toHaveLength(1);
-	expect(trace[0]?.step).toBe("rewrite_entity_view_select");
+	expect(trace.map((entry) => entry.step)).toEqual([
+		"rewrite_entity_view_select",
+		"rewrite_state_view_select",
+		"rewrite_state_all_view_select",
+		"rewrite_vtable_selects",
+	]);
 });

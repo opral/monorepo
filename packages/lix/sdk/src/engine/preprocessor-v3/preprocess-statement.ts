@@ -2,10 +2,12 @@ import type { StatementNode } from "./sql-parser/nodes.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
 import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
 import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
+import { rewriteStateViewSelect } from "./steps/state-view/select.js";
 import type { PreprocessorContext, PreprocessorStep } from "./types.js";
 
 const pipeline: PreprocessorStep[] = [
     rewriteEntityViewSelect,
+    rewriteStateViewSelect,
     rewriteStateAllViewSelect,
     rewriteVtableSelects,
 ];
