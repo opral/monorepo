@@ -1,5 +1,5 @@
 import type { RootOperationNode } from "kysely";
-import type { PreprocessorStep, PreprocessorTrace } from "./types.js";
+import type { PreprocessorStep, PreprocessorContext } from "./types.js";
 import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
 import { rewriteStateViewSelect } from "./steps/state-view/select.js";
 import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
@@ -12,49 +12,33 @@ const pipeline: PreprocessorStep[] = [
 	rewriteVtableSelects,
 ];
 
-type PreprocessContext = {
-	storedSchemas: Map<string, unknown>;
-	cacheTables: Map<string, unknown>;
-	trace?: PreprocessorTrace;
-	hasOpenTransaction?: boolean;
-};
-
 /**
- * Applies pre-processing transformations to a Kysely operation tree.
+ * Runs the v2 preprocessor pipeline on a parsed Kysely operation tree.
  *
- * The prototype currently behaves as a no-op, simply returning the provided
- * operation node so tests can exercise the integration surface. Subsequent
- * iterations will expand the implementation with AST visitors that rewrite the
- * internal state vtable query.
+ * Steps currently include entity-view rewrites, state view rewrites, and
+ * the vtable inlining transformer. Callers are expected to supply the
+ * memoised preprocessing context (stored schemas, cache tables, transaction
+ * flag, optional trace array).
  *
  * @example
  * ```ts
- * const builder = internalQueryBuilder
- *   .selectFrom("lix_internal_state_vtable")
- *   .selectAll("lix_internal_state_vtable");
- *
- * const node = preprocessRootOperationNode({
- *   query: builder.toOperationNode(),
- *   storedSchemas: new Map(),
- *   cacheTables: new Map(),
- * });
+ * const operation = toRootOperationNode(parse("SELECT * FROM pipeline_schema"));
+ * const context = getContext(engine); // see create-preprocessor.ts
+ * const rewritten = preprocessRootOperationNode(operation, context);
  * ```
  */
 export function preprocessRootOperationNode(
 	input: RootOperationNode,
-	context: PreprocessContext = {
-		storedSchemas: new Map(),
-		cacheTables: new Map(),
-		trace: undefined,
-		hasOpenTransaction: true,
-	}
+	context: PreprocessorContext
 ): RootOperationNode {
 	return pipeline.reduce(
 		(node, step) =>
 			step({
 				node,
-				...context,
-				hasOpenTransaction: context.hasOpenTransaction ?? true,
+				storedSchemas: context.storedSchemas,
+				cacheTables: context.cacheTables,
+				trace: context.trace,
+				hasOpenTransaction: context.hasOpenTransaction,
 			}),
 		input
 	);

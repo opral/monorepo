@@ -22,6 +22,7 @@ test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -43,6 +44,7 @@ test("does not rely on hoisted CTEs", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -69,6 +71,7 @@ test("emits trace metadata with alias and filters", () => {
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	expect(trace).toHaveLength(1);
@@ -101,6 +104,7 @@ test("throws on dynamic schema key filters", () => {
 			storedSchemas: new Map(),
 			cacheTables: new Map(),
 			trace,
+			hasOpenTransaction: true,
 		})
 	).toThrowError(
 		"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
@@ -122,6 +126,7 @@ test("uses projected columns when select is narrowed", () => {
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	expect(trace).toHaveLength(1);
@@ -152,6 +157,7 @@ test("respects aliases when projecting columns", () => {
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
@@ -177,6 +183,7 @@ test("includes _pk across segments when explicitly selected", () => {
 		storedSchemas: new Map(),
 		cacheTables: new Map([["test_schema_key", "test_schema_key_cache_table"]]),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
@@ -202,6 +209,7 @@ test("retains writer joins when writer_key is selected", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -223,6 +231,7 @@ test("retains change join when metadata is selected", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -242,6 +251,7 @@ test("routes cache queries to mapped physical tables", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -267,6 +277,7 @@ test("includes only cache tables for matching schema filters", () => {
 			["test_schema_key", "test_schema_key_cache_table"],
 			["test_schema_key_other", "test_schema_key_other_cache_table"],
 		]),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -297,6 +308,7 @@ test("unions cache tables when multiple schema filters are present", () => {
 			["test_schema_key_other", "test_schema_key_other_cache_table"],
 			["test_schema_key_unused", "test_schema_key_unused_cache_table"],
 		]),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -321,6 +333,7 @@ test("skips cache unions when no cache tables mapped", () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -372,6 +385,7 @@ test("unions all available cache tables when no schema filter is provided", () =
 			["test_schema_key_one", "cache_table_one"],
 			["test_schema_key_two", "cache_table_two"],
 		]),
+		hasOpenTransaction: true,
 	});
 
 	const { sql } = compile(rewritten);
@@ -398,6 +412,7 @@ test("handles multiple vtable references with selective projections", () => {
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	expect(trace[0]!.payload).toMatchObject({
@@ -457,6 +472,7 @@ test("returns transaction rows", async () => {
 		node,
 		storedSchemas: new Map(),
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 	});
 
 	const { sql: rewrittenSql, parameters } = compile(rewritten);

@@ -12,6 +12,7 @@ function applyRewrite(
 		storedSchemas: Map<string, unknown>;
 		cacheTables: Map<string, unknown>;
 		trace: PreprocessorTrace;
+		hasOpenTransaction: boolean;
 	}>
 ) {
 	return rewriteEntityViewSelect({
@@ -19,6 +20,7 @@ function applyRewrite(
 		storedSchemas: overrides?.storedSchemas ?? new Map(),
 		cacheTables: overrides?.cacheTables ?? new Map(),
 		trace: overrides?.trace,
+		hasOpenTransaction: overrides?.hasOpenTransaction ?? true,
 	});
 }
 

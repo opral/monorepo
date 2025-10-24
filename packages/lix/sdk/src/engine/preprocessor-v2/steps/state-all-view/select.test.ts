@@ -21,6 +21,7 @@ describe("rewriteStateAllViewSelect", () => {
 			storedSchemas: new Map(),
 			cacheTables: new Map(),
 			trace,
+			hasOpenTransaction: true,
 		});
 
 		const { sql } = compile(rewritten);
@@ -52,6 +53,7 @@ describe("rewriteStateAllViewSelect", () => {
 			storedSchemas: new Map(),
 			cacheTables: new Map(),
 			trace,
+			hasOpenTransaction: true,
 		});
 
 		const { sql } = compile(rewritten);

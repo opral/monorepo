@@ -52,7 +52,13 @@ test("accepts internal state vtable queries", async () => {
 	`)
 	);
 
-	const compiled = compile(preprocessRootOperationNode(node));
+	const compiled = compile(
+		preprocessRootOperationNode(node, {
+			storedSchemas: new Map(),
+			cacheTables: new Map(),
+			hasOpenTransaction: true,
+		})
+	);
 
 	const result = lix.engine?.sqlite.exec({
 		sql: compiled.sql,
@@ -103,6 +109,7 @@ test("entity view rewrite flows through state and vtable pipeline", async () => 
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 		trace,
 	});
 
@@ -225,6 +232,7 @@ test("rewrites join between two entity views", async () => {
 	const rewritten = preprocessRootOperationNode(node, {
 		storedSchemas,
 		cacheTables: new Map(),
+		hasOpenTransaction: true,
 		trace,
 	});
 
@@ -320,6 +328,7 @@ test("rewrites join mixing entity and raw state views", async () => {
 		storedSchemas,
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	const compiled = compile(rewritten);
@@ -401,6 +410,7 @@ test("rewrites nested subquery with entity view references", async () => {
 		storedSchemas,
 		cacheTables: new Map(),
 		trace,
+		hasOpenTransaction: true,
 	});
 
 	const compiled = compile(rewritten);

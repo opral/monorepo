@@ -8,6 +8,29 @@ export type PreprocessorTraceEntry = {
 export type PreprocessorTrace = PreprocessorTraceEntry[];
 
 /**
+ * Shared context passed along the preprocessing pipeline.
+ *
+ * @example
+ * ```ts
+ * const context: PreprocessorContext = {
+ *   storedSchemas: new Map(),
+ *   cacheTables: new Map(),
+ *   hasOpenTransaction: true,
+ * };
+ * ```
+ */
+export interface PreprocessorContext {
+	storedSchemas: Map<string, unknown>;
+	cacheTables: Map<string, unknown>;
+	hasOpenTransaction: boolean;
+	trace?: PreprocessorTrace;
+}
+
+export type PreprocessorStepContext = PreprocessorContext & {
+	node: RootOperationNode;
+};
+
+/**
  * A single transformation stage in the preprocessor pipeline.
  *
  * Each step receives the current operation node alongside shared caches and
@@ -20,13 +43,9 @@ export type PreprocessorTrace = PreprocessorTraceEntry[];
  * };
  * ```
  */
-export type PreprocessorStep = (context: {
-	node: RootOperationNode;
-	storedSchemas: Map<string, unknown>;
-	cacheTables: Map<string, unknown>;
-	trace?: PreprocessorTrace;
-	hasOpenTransaction?: boolean;
-}) => RootOperationNode;
+export type PreprocessorStep = (
+	context: PreprocessorStepContext
+) => RootOperationNode;
 
 /**
  * Arguments accepted by the query preprocessor function.
@@ -35,6 +54,7 @@ export interface PreprocessorArgs {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
 	sideEffects?: boolean;
+	trace?: boolean;
 }
 
 /**
@@ -59,4 +79,5 @@ export interface PreprocessorResult {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
 	expandedSql?: string;
+	context?: PreprocessorContext;
 }

@@ -26,7 +26,6 @@ export type InternalStateCacheRow = {
 // Using WeakMap ensures proper cleanup when Lix instances are garbage collected
 const stateCacheTablesMap = new WeakMap<object, Set<string>>();
 
-// Export a getter function to access the cache for a specific Lix instance
 export function getStateCacheTables(args: {
 	engine: Pick<LixEngine, "runtimeCacheRef">;
 }): Set<string> {
