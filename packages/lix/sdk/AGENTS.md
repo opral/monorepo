@@ -11,3 +11,7 @@
 - always start with implementing test cases that reproduce bugs before implementing a fix to validate if the test captures the bug
 
 - do not create getter functions. isntead query sql directly via kysely. otherwise, we end up with a huge pile of wrapper functions
+
+- use type instead of interface 
+  
+- do not rely on try/catch for crash avoidance. we want to fail fast to catch bugs early. this does not apply if we explicitly want to catch errors
