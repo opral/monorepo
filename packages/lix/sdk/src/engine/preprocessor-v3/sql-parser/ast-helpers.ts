@@ -1,9 +1,13 @@
 import type {
+	BinaryOperator,
 	ColumnReferenceNode,
+	ExpressionNode,
 	IdentifierNode,
+	LiteralNode,
 	ObjectNameNode,
+	RawFragmentNode,
 	SelectItemNode,
-} from "../sql-parser/nodes.js";
+} from "./nodes.js";
 
 /**
  * Retrieves the string value from an identifier node.
@@ -100,6 +104,101 @@ export function getColumnName(column: ColumnReferenceNode): string {
 		throw new Error("column reference is missing its terminal identifier");
 	}
 	return terminal.value;
+}
+
+/**
+ * Collects the path components of a column reference.
+ *
+ * @example
+ * ```ts
+ * const parts = getColumnPath(columnReference);
+ * ```
+ */
+export function getColumnPath(
+	column: ColumnReferenceNode,
+	options?: { normalize?: boolean }
+): string[] {
+	return column.path.map((identifier) =>
+		options?.normalize ? normalizeIdentifierValue(identifier.value) : identifier.value
+	);
+}
+
+/**
+ * Determines whether an expression is a literal node.
+ *
+ * @example
+ * ```ts
+ * if (isLiteralExpression(expression)) {
+ *   console.log(expression.value);
+ * }
+ * ```
+ */
+export function isLiteralExpression(
+	expression: ExpressionNode | RawFragmentNode
+): expression is LiteralNode {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	return expression.node_kind === "literal";
+}
+
+/**
+ * Provides the SQL precedence ranking for binary operators.
+ *
+ * @example
+ * ```ts
+ * const precedence = getBinaryOperatorPrecedence("and");
+ * ```
+ */
+export function getBinaryOperatorPrecedence(operator: BinaryOperator): number {
+	switch (operator) {
+		case "or":
+			return 1;
+		case "and":
+			return 2;
+		case "=":
+		case "!=":
+		case "<>":
+		case ">":
+		case ">=":
+		case "<":
+		case "<=":
+		case "like":
+		case "not_like":
+		case "is":
+		case "is_not":
+			return 3;
+		case "+":
+		case "-":
+			return 4;
+		case "*":
+		case "/":
+		case "%":
+			return 5;
+		default:
+			return 0;
+	}
+}
+
+/**
+ * Identifies operators that are not associative and must preserve ordering.
+ *
+ * @example
+ * ```ts
+ * if (isNonAssociativeBinaryOperator("-")) { ... }
+ * ```
+ */
+export function isNonAssociativeBinaryOperator(
+	operator: BinaryOperator
+): boolean {
+	switch (operator) {
+		case "-":
+		case "/":
+		case "%":
+			return true;
+		default:
+			return false;
+	}
 }
 
 /**
