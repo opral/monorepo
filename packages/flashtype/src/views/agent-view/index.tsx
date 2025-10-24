@@ -1,11 +1,4 @@
-import {
-	useCallback,
-	useEffect,
-	useId,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { Bot } from "lucide-react";
 import { createGatewayProvider } from "@ai-sdk/gateway";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
@@ -27,9 +20,7 @@ import type {
 	RenderableDiff,
 } from "../../app/types";
 import ConversationMessage from "./conversation-message";
-import { COMMANDS, type SlashCommand } from "./commands/index";
-import { MentionMenu, CommandMenu } from "./menu";
-import { useComposerState } from "./composer-state";
+import { COMMANDS } from "./commands/index";
 import { selectFilePaths } from "./select-file-paths";
 import { clearConversation as runClearConversation } from "./commands/clear";
 import { createReactViewDefinition } from "../../app/react-view";
@@ -45,6 +36,7 @@ type AgentViewProps = {
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 const MODEL_NAME = "google/gemini-2.5-pro";
+const NULL_AGENT_PROMISE: Promise<LixAgent | null> = Promise.resolve(null);
 
 /**
  * Agent chat view backed by the real Lix agent.
@@ -61,7 +53,6 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [agent, setAgent] = useState<LixAgent | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
 
 	useEffect(() => {
@@ -98,7 +89,6 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const model = useMemo(() => provider(MODEL_NAME), [provider]);
 	const hasKey = true;
-	const ready = !!agent;
 
 	const messages = useQuery(({ lix }) =>
 		lix.db
@@ -109,22 +99,14 @@ export function AgentView({ context }: AgentViewProps) {
 			.orderBy("id", "asc"),
 	);
 
-	// Boot agent
-	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			if (!hasKey || !model) {
-				setAgent(null);
-				return;
-			}
-			const nextAgent = await createLixAgent({ lix, model, systemPrompt });
-			if (cancelled) return;
-			setAgent(nextAgent);
-		})();
-		return () => {
-			cancelled = true;
-		};
-	}, [lix, model, hasKey]);
+	const agentResource = useMemo<Promise<LixAgent | null>>(() => {
+		if (!hasKey || !model) {
+			return NULL_AGENT_PROMISE;
+		}
+		return createLixAgent({ lix, model, systemPrompt });
+	}, [hasKey, lix, model]);
+
+	const agent = use(agentResource);
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
@@ -154,36 +136,11 @@ export function AgentView({ context }: AgentViewProps) {
 		setPendingMessage(null);
 	}, [agent, conversationId]);
 
-	const textAreaId = useId();
-	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-
 	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
 	const filePaths = useMemo(
 		() => (fileRows ?? []).map((row: any) => String(row.path)),
 		[fileRows],
 	);
-	const hasFiles = filePaths.length > 0;
-
-	const {
-		value,
-		setValue,
-		history,
-		historyIdx: _historyIdx,
-		setHistoryIdx,
-		slashOpen,
-		setSlashOpen,
-		slashIdx,
-		setSlashIdx,
-		mentionOpen,
-		setMentionOpen,
-		mentionIdx,
-		setMentionIdx,
-		mentionItems,
-		mentionCtx,
-		filteredCommands,
-		updateMentions,
-		pushHistory,
-	} = useComposerState({ commands: COMMANDS, files: filePaths });
 
 	// const hasConversations = agentMessages.length > 0;
 	// const conversationLabel = hasConversations
@@ -193,35 +150,6 @@ export function AgentView({ context }: AgentViewProps) {
 	const [notice, setNotice] = useState<string | null>(null);
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
-
-	const updateMention = useCallback(() => {
-		updateMentions(textAreaRef.current);
-	}, [updateMentions]);
-
-	const insertMention = useCallback(
-		(path: string) => {
-			const ctx = mentionCtx.current;
-			if (!ctx) return;
-			const before = value.slice(0, ctx.start);
-			const after = value.slice(ctx.end);
-			const needsSpace = after.startsWith(" ") ? "" : " ";
-			const next = `${before}${path}${needsSpace}${after}`;
-			setValue(next);
-			setMentionOpen(false);
-			setSlashOpen(false);
-			setSlashIdx(0);
-			mentionCtx.current = null;
-			queueMicrotask(() => {
-				const el = textAreaRef.current;
-				if (el) {
-					const pos = before.length + path.length + needsSpace.length;
-					el.setSelectionRange(pos, pos);
-					el.focus();
-				}
-			});
-		},
-		[value, setValue, setMentionOpen, setSlashOpen, setSlashIdx, mentionCtx],
-	);
 
 	const handleAcceptDecision = useCallback(
 		(id: string) => {
@@ -388,10 +316,6 @@ export function AgentView({ context }: AgentViewProps) {
 		[agent, conversationId, context],
 	);
 
-	useEffect(() => {
-		updateMention();
-	}, [value, updateMention]);
-
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
 			const normalized = raw.trim().toLowerCase();
@@ -416,235 +340,6 @@ export function AgentView({ context }: AgentViewProps) {
 		},
 		[clear],
 	);
-
-	const commit = useCallback(async () => {
-		const trimmedEnd = value.trimEnd();
-		if (!trimmedEnd) return;
-		const trimmedStart = trimmedEnd.trimStart();
-
-		const resetComposer = () => {
-			setHistoryIdx(-1);
-			setValue("");
-			setSlashOpen(false);
-			setSlashIdx(0);
-			setMentionOpen(false);
-			setMentionIdx(0);
-			mentionCtx.current = null;
-			lastActionFocus(textAreaRef.current);
-		};
-
-		if (trimmedStart.startsWith("/")) {
-			const token = trimmedStart.slice(1).split(/\s+/)[0] ?? "";
-			const lower = token.toLowerCase();
-			const matched =
-				filteredCommands.find((cmd: SlashCommand) =>
-					cmd.name.toLowerCase().startsWith(lower),
-				) ?? COMMANDS.find((cmd) => cmd.name.toLowerCase() === lower);
-			resetComposer();
-			await handleSlashCommand((matched?.name ?? token).toLowerCase());
-			return;
-		}
-
-		if (!hasKey) {
-			setNotice("Add a GOOGLE_API_KEY to enable the Lix Agent.");
-			return;
-		}
-		if (!ready) {
-			setNotice(
-				"The Lix Agent is still starting up. Please try again shortly.",
-			);
-			return;
-		}
-
-		setNotice(null);
-		pushHistory(trimmedEnd);
-		resetComposer();
-
-		try {
-			await send(trimmedEnd);
-		} catch (err) {
-			const message =
-				err instanceof Error ? err.message : String(err ?? "unknown");
-			if (err instanceof ChangeProposalRejectedError) {
-				setNotice(null);
-			} else {
-				console.error("Failed to send agent message:", err);
-				setNotice(`Failed to send message: ${message}`);
-			}
-		}
-	}, [
-		value,
-		hasKey,
-		ready,
-		setHistoryIdx,
-		setValue,
-		setSlashOpen,
-		setSlashIdx,
-		setMentionOpen,
-		setMentionIdx,
-		mentionCtx,
-		handleSlashCommand,
-		pushHistory,
-		send,
-		filteredCommands,
-	]);
-
-	const onKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-			// Enter sends unless shift pressed
-			if (e.key === "Enter" && !e.shiftKey) {
-				if (mentionOpen && mentionItems[mentionIdx]) {
-					e.preventDefault();
-					insertMention(mentionItems[mentionIdx]);
-					return;
-				}
-				e.preventDefault();
-				void commit();
-				return;
-			}
-
-			if (mentionOpen) {
-				if (e.key === "ArrowDown") {
-					e.preventDefault();
-					setMentionIdx((idx: number) =>
-						Math.min(idx + 1, Math.max(mentionItems.length - 1, 0)),
-					);
-					return;
-				}
-				if (e.key === "ArrowUp") {
-					e.preventDefault();
-					setMentionIdx((idx: number) => Math.max(idx - 1, 0));
-					return;
-				}
-				if (e.key === "Tab") {
-					e.preventDefault();
-					if (mentionItems[mentionIdx]) insertMention(mentionItems[mentionIdx]);
-					return;
-				}
-				if (e.key === "Escape") {
-					e.preventDefault();
-					setMentionOpen(false);
-					mentionCtx.current = null;
-					return;
-				}
-			}
-
-			if (slashOpen) {
-				if (e.key === "ArrowDown") {
-					e.preventDefault();
-					setSlashIdx((idx: number) =>
-						Math.min(idx + 1, Math.max(filteredCommands.length - 1, 0)),
-					);
-					return;
-				}
-				if (e.key === "ArrowUp") {
-					e.preventDefault();
-					setSlashIdx((idx: number) => Math.max(idx - 1, 0));
-					return;
-				}
-				if (e.key === "Tab") {
-					e.preventDefault();
-					const pick = filteredCommands[slashIdx];
-					if (pick) setValue(`/${pick.name} `);
-					return;
-				}
-				if (e.key === "Escape") {
-					e.preventDefault();
-					setSlashOpen(false);
-					return;
-				}
-			}
-
-			if (
-				(e.key === "ArrowUp" || e.key === "ArrowDown") &&
-				!e.shiftKey &&
-				!e.metaKey &&
-				!e.ctrlKey
-			) {
-				e.preventDefault();
-				setHistoryIdx((idx) => {
-					if (e.key === "ArrowUp") {
-						const nextIdx = Math.min(idx + 1, history.length - 1);
-						const entry = history[nextIdx];
-						if (entry !== undefined) setValue(entry);
-						queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
-						return nextIdx;
-					}
-					const nextIdx = Math.max(idx - 1, -1);
-					const entry = nextIdx === -1 ? "" : (history[nextIdx] ?? "");
-					setValue(entry);
-					queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
-					return nextIdx;
-				});
-				return;
-			}
-
-			if (e.key === "@" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-				queueMicrotask(() => updateMention());
-			}
-
-			if (e.key === "Escape") {
-				if (mentionOpen || slashOpen) {
-					e.preventDefault();
-					setMentionOpen(false);
-					setSlashOpen(false);
-					mentionCtx.current = null;
-					return;
-				}
-			}
-		},
-		[
-			mentionOpen,
-			mentionItems,
-			mentionIdx,
-			insertMention,
-			commit,
-			slashOpen,
-			filteredCommands,
-			slashIdx,
-			history,
-			setMentionIdx,
-			setSlashIdx,
-			setSlashOpen,
-			setValue,
-			setHistoryIdx,
-			setMentionOpen,
-			mentionCtx,
-			updateMention,
-		],
-	);
-
-	const menuFragment = useMemo(() => {
-		if (mentionOpen) {
-			if (mentionItems.length > 0) {
-				return <MentionMenu items={mentionItems} selectedIndex={mentionIdx} />;
-			}
-			return (
-				<div className="pointer-events-none rounded-md border border-border/50 bg-white px-3 py-2 text-sm text-zinc-500 shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
-					{hasFiles ? "Type to search files…" : "No files available"}
-				</div>
-			);
-		}
-		if (slashOpen) {
-			return (
-				<CommandMenu commands={filteredCommands} selectedIndex={slashIdx} />
-			);
-		}
-		return null;
-	}, [
-		mentionOpen,
-		mentionItems,
-		mentionIdx,
-		hasFiles,
-		slashOpen,
-		filteredCommands,
-		slashIdx,
-	]);
-
-	const composerPlaceholder = hasKey
-		? "Ask Lix Agent…"
-		: "Add GOOGLE_API_KEY to enable the Lix Agent…";
-	const sendDisabled = pending || !hasKey || !ready;
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col px-3 py-2">
@@ -708,22 +403,14 @@ export function AgentView({ context }: AgentViewProps) {
 					/>
 				) : (
 					<PromptComposer
-						textAreaId={textAreaId}
-						value={value}
-						setValue={setValue}
-						setNotice={setNotice}
-						setSlashOpen={setSlashOpen}
-						setSlashIdx={setSlashIdx}
-						setMentionOpen={setMentionOpen}
-						mentionCtx={mentionCtx}
-						textAreaRef={textAreaRef}
-						onKeyDown={onKeyDown}
-						updateMention={updateMention}
-						menuFragment={menuFragment}
-						placeholder={composerPlaceholder}
-						sendDisabled={sendDisabled}
-						onSend={() => {
-							void commit();
+						hasKey={hasKey}
+						commands={COMMANDS}
+						files={filePaths}
+						pending={pending}
+						onNotice={setNotice}
+						onSlashCommand={handleSlashCommand}
+						onSendMessage={async (message) => {
+							await send(message);
 						}}
 					/>
 				)}
@@ -751,19 +438,6 @@ export const view = createReactViewDefinition({
 });
 
 export default AgentView;
-
-function lastActionFocus(el: HTMLTextAreaElement | null) {
-	if (!el) return;
-	el.focus();
-	el.setSelectionRange(0, 0);
-}
-
-function moveCaretToEnd(el: HTMLTextAreaElement | null) {
-	if (!el) return;
-	const len = el.value.length;
-	el.setSelectionRange(len, len);
-	el.focus();
-}
 
 function createProposalDiffConfig(args: {
 	fileId: string;
