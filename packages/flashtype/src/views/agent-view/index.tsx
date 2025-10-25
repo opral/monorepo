@@ -408,7 +408,7 @@ export function AgentView({ context }: AgentViewProps) {
 	return (
 		<>
 			{usingDevApiKey ? (
-				<div className="mx-2 mt-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-900 shadow-sm">
+				<div className="mx-2 my-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-900 shadow-sm">
 					Using development OpenRouter API key.
 				</div>
 			) : null}
@@ -433,7 +433,7 @@ export function AgentView({ context }: AgentViewProps) {
 			*/}
 
 			{/* Conversation messages */}
-			<div className="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+			<div className="flex-1 min-h-0 overflow-y-auto gap-4 flex flex-col">
 				{hasKey ? (
 					<>
 						{messages.map((message) => (
@@ -468,7 +468,7 @@ export function AgentView({ context }: AgentViewProps) {
 			</div>
 
 			{hasKey && (
-				<div className="sticky bottom-0 flex justify-center px-0 pb-1 pt-6">
+				<div className="sticky bottom-0 flex justify-center px-2 pb-2 pt-0.5">
 					{pendingProposal ? (
 						<ChangeDecisionOverlay
 							id={pendingProposal.proposalId}

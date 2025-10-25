@@ -15,8 +15,11 @@ type ConversationMessageProps = {
 };
 
 /**
- * Presentational component that renders a single conversation message (user or assistant),
- * including any recorded tool or thinking steps stored in the message metadata.
+ * Presentational component that renders a single conversation message by delegating
+ * to either the agent or user specific renderer depending on the stored message role.
+ *
+ * @example
+ * <ConversationMessage message={message} />
  */
 export function ConversationMessage({ message }: ConversationMessageProps) {
 	const metadata = message.lixcol_metadata as
@@ -36,21 +39,56 @@ export function ConversationMessage({ message }: ConversationMessageProps) {
 		return toPlainText(message.body as ZettelDoc);
 	}, [message.body]);
 
+	if (role === "assistant") {
+		return <AgentMessage steps={steps} content={content} />;
+	}
+
+	return <UserMessage content={content} />;
+}
+
+type AgentMessageProps = {
+	steps: AgentStep[];
+	content: string;
+};
+
+/**
+ * Renders the assistant-facing message with optional tool call steps
+ * displayed above the message body when provided by the metadata.
+ *
+ * @example
+ * <AgentMessage steps={steps} content="Tool call output" />
+ */
+function AgentMessage({ steps, content }: AgentMessageProps) {
 	return (
-		<div className="w-full py-2">
+		<div className="w-full px-3.5">
 			{steps.length > 0 && <StepList steps={steps} />}
-			{content && (
-				<div
-					className={[
-						"max-w-full leading-relaxed break-words",
-						role === "user"
-							? "rounded-lg border border-border/60 bg-secondary/40 px-4 py-3"
-							: "text-foreground",
-					].join(" ")}
-				>
+			{content ? (
+				<div className="max-w-full break-words leading-relaxed text-foreground pl-7">
 					<MessageBody content={content} />
 				</div>
-			)}
+			) : null}
+		</div>
+	);
+}
+
+type UserMessageProps = {
+	content: string;
+};
+
+/**
+ * Renders the user-authored message in a bordered bubble to highlight the
+ * prompt content supplied to the agent.
+ *
+ * @example
+ * <UserMessage content="Summarize the plan." />
+ */
+function UserMessage({ content }: UserMessageProps) {
+	if (!content) return null;
+	return (
+		<div className="w-full px-2">
+			<div className="max-w-full break-words rounded-lg border border-border/60 bg-secondary/40 px-2 py-1.5 leading-relaxed">
+				<MessageBody content={content} />
+			</div>
 		</div>
 	);
 }
@@ -58,7 +96,7 @@ export function ConversationMessage({ message }: ConversationMessageProps) {
 function MessageBody({ content }: { content: string }) {
 	const parts = React.useMemo(() => splitFences(content), [content]);
 	return (
-		<div className="space-y-3">
+		<div className="space-y-2">
 			{parts.map((part, index) =>
 				part.type === "fence" ? (
 					<div
@@ -113,6 +151,12 @@ function StepRow({
 }) {
 	const [isExpanded, setExpanded] = React.useState(false);
 	const isThinking = step.kind === "thinking";
+	const thinkingText = isThinking
+		? (step as AgentThinkingStep).text
+		: undefined;
+	const thinkingHeader = isThinking
+		? extractFirstBold(thinkingText)
+		: undefined;
 	const hasStructuredIO =
 		step.kind === "tool_call" &&
 		(Boolean(step.tool_input) || Boolean(step.tool_output));
@@ -123,7 +167,7 @@ function StepRow({
 			: "Thinking";
 	const status = isThinking ? "thinking" : step.status;
 	const plainContent = isThinking
-		? (step as AgentThinkingStep).text
+		? (thinkingHeader ?? summarizeThinking(thinkingText))
 		: status === "failed"
 			? formatToolError(step.error_text)
 			: undefined;
@@ -159,8 +203,19 @@ function StepRow({
 			</div>
 
 			{isThinking ? (
-				<div className="flex-1 text-sm leading-relaxed text-foreground">
-					{plainContent}
+				<div
+					className="flex-1 text-sm leading-relaxed text-muted-foreground"
+					title={
+						thinkingText && plainContent && thinkingText !== plainContent
+							? thinkingText
+							: undefined
+					}
+				>
+					{thinkingHeader ? (
+						<span className="text-foreground">{thinkingHeader}</span>
+					) : (
+						(plainContent ?? "Thinking…")
+					)}
 				</div>
 			) : (
 				<div className="flex-1 pb-2">
@@ -173,9 +228,7 @@ function StepRow({
 						<div className="min-w-0 flex-1">
 							<div className="flex items-center gap-2">
 								{title ? (
-									<span className="text-sm font-medium text-foreground">
-										{title}
-									</span>
+									<span className="text-sm text-foreground">{title}</span>
 								) : null}
 								{hasStructuredIO ? (
 									<ChevronRight
@@ -334,6 +387,40 @@ function splitFences(input: string): Part[] {
 		out.push({ type: "text", body: input.slice(last) });
 	}
 	return out;
+}
+
+/**
+ * Converts verbose model thinking text into a concise single-line summary.
+ *
+ * @example
+ * summarizeThinking("Line one\nMore detail") // "Line one"
+ */
+function summarizeThinking(input: string | undefined): string | undefined {
+	if (!input) return undefined;
+	const firstLine =
+		input
+			.split(/\r?\n/)
+			.map((segment) => segment.trim())
+			.find(Boolean) ?? "";
+	if (!firstLine) return undefined;
+	return firstLine.length > 140 ? `${firstLine.slice(0, 137)}...` : firstLine;
+}
+
+/**
+ * Extracts the first Markdown bold segment (`**text**`) from the provided input.
+ *
+ * @example
+ * extractFirstBold("Intro **Header** details") // "Header"
+ */
+function extractFirstBold(input: string | undefined): string | undefined {
+	if (!input) return undefined;
+	const start = input.indexOf("**");
+	if (start === -1) return undefined;
+	const rest = input.slice(start + 2);
+	const end = rest.indexOf("**");
+	if (end === -1) return undefined;
+	const candidate = rest.slice(0, end).trim();
+	return candidate.length > 0 ? candidate : undefined;
 }
 
 export default ConversationMessage;
