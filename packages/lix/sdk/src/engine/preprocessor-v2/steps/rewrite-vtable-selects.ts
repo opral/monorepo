@@ -778,10 +778,14 @@ function buildInternalStateRewriteSql(options: {
 	hasOpenTransaction: boolean;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
-	const schemaFilter = buildSchemaFilter(schemaFilterList);
-	const cacheSource = buildCacheSource(schemaFilterList, options.cacheTables);
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
 		options.selectedColumns
+	);
+	const schemaFilter = buildSchemaFilter(schemaFilterList);
+	const cacheSource = buildCacheSource(
+		schemaFilterList,
+		options.cacheTables,
+		candidateColumns
 	);
 	const needsWriterJoin = candidateColumns.has("writer_key");
 	if (needsWriterJoin) {
@@ -1019,8 +1023,17 @@ function buildSchemaFilter(schemaKeys: readonly string[]): string | null {
 
 function buildCacheSource(
 	schemaKeys: readonly string[],
-	cacheTables: Map<string, unknown>
+	cacheTables: Map<string, unknown>,
+	projectionColumns: Set<string>
 ): string | null {
+	const requiredColumns = new Set(projectionColumns);
+	requiredColumns.add("is_tombstone");
+	requiredColumns.add("file_id");
+	requiredColumns.add("entity_id");
+	requiredColumns.add("schema_key");
+	requiredColumns.add("version_id");
+	requiredColumns.add("change_id");
+	requiredColumns.add("created_at");
 	const uniqueKeys =
 		schemaKeys && schemaKeys.length > 0
 			? Array.from(new Set(schemaKeys))
@@ -1029,7 +1042,7 @@ function buildCacheSource(
 		.map((key) => {
 			const candidate = cacheTables.get(key);
 			if (typeof candidate === "string" && candidate.length > 0) {
-				return buildPhysicalCacheSelect(candidate);
+				return buildPhysicalCacheSelect(candidate, requiredColumns);
 			}
 			return null;
 		})
@@ -1044,10 +1057,15 @@ function buildCacheSource(
 	return selects.join(`\nUNION ALL\n`);
 }
 
-function buildPhysicalCacheSelect(tableName: string): string {
-	const projection = CACHE_COLUMNS.map((column) =>
-		quoteIdentifier(column)
-	).join(",\n    ");
+function buildPhysicalCacheSelect(
+	tableName: string,
+	requiredColumns: Set<string>
+): string {
+	const projection = CACHE_COLUMNS.filter((column) =>
+		requiredColumns.has(column)
+	)
+		.map((column) => quoteIdentifier(column))
+		.join(",\n    ");
 	return `SELECT
     ${projection}
   FROM ${quoteIdentifier(tableName)}`;

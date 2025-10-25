@@ -167,7 +167,11 @@ const STATE_ALL_COLUMNS = new Set<string>([
 	...BASE_STATE_ALL_COLUMNS,
 	METADATA_COLUMN,
 ]);
-const MANDATORY_COLUMNS = new Set<string>(["schema_key", "snapshot_content"]);
+const MANDATORY_COLUMNS = new Set<string>([
+	"schema_key",
+	"snapshot_content",
+	"version_id",
+]);
 
 function buildProjection(columns: Set<string> | null): SelectExpressionNode[] {
 	const result: SelectExpressionNode[] = [];

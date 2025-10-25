@@ -5,20 +5,46 @@ import type {
 	SubqueryNode,
 	SelectExpressionNode,
 	RawFragmentNode,
+	SelectItemNode,
+	ExpressionNode,
+	JoinClauseNode,
 } from "../../sql-parser/nodes.js";
 import {
 	visitSelectStatement,
 	type AstVisitor,
 } from "../../sql-parser/visitor.js";
-import { getIdentifierValue } from "../../sql-parser/ast-helpers.js";
+import {
+	getColumnName,
+	getColumnQualifier,
+	getIdentifierValue,
+	normalizeIdentifierValue,
+} from "../../sql-parser/ast-helpers.js";
 import { columnReference, identifier } from "../../sql-parser/nodes.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 
 const STATE_VIEW_NAME = "state";
 const STATE_ALL_TABLE = "state_all";
+const STATE_COLUMNS = [
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"version_id",
+	"schema_version",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"writer_key",
+	"metadata",
+] as const;
 
 type StateReference = {
 	readonly binding: string;
+	readonly usedColumns: Set<string> | null;
 };
 
 /**
@@ -41,27 +67,60 @@ export const rewriteStateViewSelect: PreprocessorStep = (context) => {
 };
 
 function collectStateReferences(select: SelectStatementNode): StateReference[] {
-	const bindings = new Map<string, StateReference>();
+	const references = new Map<string, StateReference>();
+	collectFromSelect(select, references);
+	return Array.from(references.values());
+}
 
-	const visitor: AstVisitor = {
-		table_reference(node) {
-			if (!isStateView(node)) {
-				return;
-			}
-			const binding = getIdentifierValue(node.alias) ?? STATE_VIEW_NAME;
-			bindings.set(binding, { binding });
-		},
-		subquery(node) {
-			const nested = collectStateReferences(node.statement);
-			for (const reference of nested) {
-				bindings.set(reference.binding, reference);
-			}
-			return node;
-		},
-	};
+function collectFromSelect(
+	select: SelectStatementNode,
+	references: Map<string, StateReference>
+) {
+	for (const fromClause of select.from_clauses) {
+		collectFromRelation(fromClause.relation, select, references);
+		for (const join of fromClause.joins) {
+			collectJoinUsage(join, select, references);
+		}
+	}
+}
 
-	visitSelectStatement(select, visitor);
-	return Array.from(bindings.values());
+function collectFromRelation(
+	relation: SelectStatementNode["from_clauses"][number]["relation"],
+	parentSelect: SelectStatementNode,
+	references: Map<string, StateReference>
+) {
+	if (relation.node_kind === "table_reference") {
+		if (!isStateView(relation)) {
+			return;
+		}
+		const binding = getIdentifierValue(relation.alias) ?? STATE_VIEW_NAME;
+		const usage = collectStateColumnUsage(parentSelect, binding);
+		const existing = references.get(binding);
+		if (!existing) {
+			references.set(binding, {
+				binding,
+				usedColumns: usage,
+			});
+		} else {
+			references.set(binding, {
+				binding,
+				usedColumns: mergeColumnUsage(existing.usedColumns, usage),
+			});
+		}
+		return;
+	}
+
+	if (relation.node_kind === "subquery") {
+		collectFromSelect(relation.statement, references);
+	}
+}
+
+function collectJoinUsage(
+	join: JoinClauseNode,
+	parentSelect: SelectStatementNode,
+	references: Map<string, StateReference>
+) {
+	collectFromRelation(join.relation, parentSelect, references);
 }
 
 function rewriteSelectStatement(
@@ -112,28 +171,31 @@ function isStateView(node: TableReferenceNode): boolean {
 function buildStateSubquery(reference: StateReference): SubqueryNode {
 	return {
 		node_kind: "subquery",
-		statement: buildStateSelect(),
+		statement: buildStateSelect(reference),
 		alias: identifier(reference.binding),
 	};
 }
 
-function buildStateSelect(): SelectStatementNode {
-	const projection: SelectExpressionNode[] = [
-		columnSelect("entity_id"),
-		columnSelect("schema_key"),
-		columnSelect("file_id"),
-		columnSelect("plugin_key"),
-		columnSelect("snapshot_content"),
-		columnSelect("schema_version"),
-		columnSelect("created_at"),
-		columnSelect("updated_at"),
-		columnSelect("inherited_from_version_id"),
-		columnSelect("change_id"),
-		columnSelect("untracked"),
-		columnSelect("commit_id"),
-		columnSelect("writer_key"),
-		columnSelect("metadata"),
-	];
+function buildStateSelect(reference: StateReference): SelectStatementNode {
+	const usedColumns = reference.usedColumns;
+	const columnSet =
+		usedColumns === null || usedColumns.size === 0
+			? new Set(STATE_COLUMNS)
+			: new Set(usedColumns);
+
+	// Ensure snapshot_content is available for JSON projections generated via raw fragments.
+	columnSet.add("snapshot_content");
+
+	const projection: SelectExpressionNode[] = [];
+	for (const column of STATE_COLUMNS) {
+		if (columnSet.has(column)) {
+			projection.push(columnSelect(column));
+		}
+	}
+
+	if (projection.length === 0) {
+		projection.push(columnSelect("entity_id"));
+	}
 
 	const whereClause: RawFragmentNode = rawFragment(
 		'"sa"."version_id" IN (SELECT "version_id" FROM "active_version")'
@@ -174,6 +236,242 @@ function rawFragment(sql: string): RawFragmentNode {
 		node_kind: "raw_fragment",
 		sql_text: sql,
 	};
+}
+
+function collectStateColumnUsage(
+	select: SelectStatementNode,
+	binding: string
+): Set<string> | null {
+	const normalizedBinding = normalizeIdentifierValue(binding);
+	const columns = new Set<string>();
+	let selectAll = false;
+
+	for (const item of select.projection) {
+		selectAll = processStateSelectItem(
+			item,
+			binding,
+			normalizedBinding,
+			columns
+		);
+		if (selectAll) {
+			return null;
+		}
+	}
+
+	if (select.where_clause) {
+		collectColumnsFromExpressionLike(
+			select.where_clause,
+			binding,
+			normalizedBinding,
+			columns
+		);
+	}
+
+	for (const orderItem of select.order_by) {
+		collectColumnsFromExpressionLike(
+			orderItem.expression,
+			binding,
+			normalizedBinding,
+			columns
+		);
+	}
+
+	for (const fromClause of select.from_clauses) {
+		for (const join of fromClause.joins) {
+			if (join.on_expression) {
+				collectColumnsFromExpressionLike(
+					join.on_expression,
+					binding,
+					normalizedBinding,
+					columns
+				);
+			}
+		}
+	}
+
+	return columns;
+}
+
+function processStateSelectItem(
+	item: SelectItemNode,
+	binding: string,
+	normalizedBinding: string,
+	columns: Set<string>
+): boolean {
+	switch (item.node_kind) {
+		case "select_star":
+			return true;
+		case "select_qualified_star": {
+			const qualifier = item.qualifier.at(-1);
+			if (!qualifier) {
+				return true;
+			}
+			return normalizeIdentifierValue(qualifier.value) === normalizedBinding;
+		}
+		case "select_expression": {
+			const expression = item.expression;
+			if (expression.node_kind === "raw_fragment") {
+				if (
+					rawFragmentReferencesColumn(
+						expression.sql_text,
+						binding,
+						"snapshot_content"
+					)
+				) {
+					columns.add("snapshot_content");
+				}
+				return false;
+			}
+			collectColumnsFromExpressionLike(
+				expression,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			return false;
+		}
+		default:
+			return false;
+	}
+}
+
+function collectColumnsFromExpressionLike(
+	expression:
+		| ExpressionNode
+		| SelectStatementNode["where_clause"]
+		| JoinClauseNode["on_expression"],
+	binding: string,
+	normalizedBinding: string,
+	columns: Set<string>
+): void {
+	if (!expression) {
+		return;
+	}
+
+	if (expression.node_kind === "raw_fragment") {
+		if (
+			rawFragmentReferencesColumn(
+				expression.sql_text,
+				binding,
+				"snapshot_content"
+			)
+		) {
+			columns.add("snapshot_content");
+		}
+		return;
+	}
+
+	switch (expression.node_kind) {
+		case "column_reference": {
+			const qualifier = getColumnQualifier(expression);
+			if (
+				qualifier === null ||
+				normalizeIdentifierValue(qualifier) === normalizedBinding
+			) {
+				columns.add(getColumnName(expression));
+			}
+			break;
+		}
+		case "binary_expression":
+			collectColumnsFromExpressionLike(
+				expression.left,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			collectColumnsFromExpressionLike(
+				expression.right,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			break;
+		case "grouped_expression":
+			collectColumnsFromExpressionLike(
+				expression.expression,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			break;
+		case "unary_expression":
+			collectColumnsFromExpressionLike(
+				expression.operand,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			break;
+		case "between_expression":
+			collectColumnsFromExpressionLike(
+				expression.operand,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			collectColumnsFromExpressionLike(
+				expression.start,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			collectColumnsFromExpressionLike(
+				expression.end,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			break;
+		case "in_list_expression":
+			collectColumnsFromExpressionLike(
+				expression.operand,
+				binding,
+				normalizedBinding,
+				columns
+			);
+			for (const item of expression.items) {
+				collectColumnsFromExpressionLike(
+					item,
+					binding,
+					normalizedBinding,
+					columns
+				);
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+function rawFragmentReferencesColumn(
+	sql: string,
+	binding: string,
+	column: string
+): boolean {
+	const escapedBinding = escapeRegExp(binding);
+	const pattern = new RegExp(
+		`"${escapedBinding}"\\."${escapeRegExp(column)}"`,
+		"i"
+	);
+	return pattern.test(sql);
+}
+
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+}
+
+function mergeColumnUsage(
+	existing: Set<string> | null,
+	next: Set<string> | null
+): Set<string> | null {
+	if (existing === null || next === null) {
+		return null;
+	}
+	const merged = new Set(existing);
+	for (const column of next) {
+		merged.add(column);
+	}
+	return merged;
 }
 
 function pushTrace(

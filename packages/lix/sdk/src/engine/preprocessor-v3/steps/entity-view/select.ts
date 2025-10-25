@@ -32,6 +32,7 @@ type EntityViewReference = {
 	readonly binding: string;
 	readonly schema: LixSchemaDefinition;
 	readonly usedProperties: Set<string> | null;
+	readonly usedLixcols: Set<string> | null;
 };
 
 const VARIANT_TABLE: Record<EntityViewVariant, string> = {
@@ -195,7 +196,7 @@ function resolveEntityViewReference(
 	const schemaKey = resolveSchemaKey(schema);
 	const alias = getIdentifierValue(node.alias);
 	const binding = alias ?? viewName;
-	const usedProperties = collectPropertyUsage(select, binding);
+	const columnUsage = collectColumnUsage(select, binding);
 
 	return {
 		viewName,
@@ -204,7 +205,8 @@ function resolveEntityViewReference(
 		alias,
 		binding,
 		schema,
-		usedProperties,
+		usedProperties: columnUsage.properties,
+		usedLixcols: columnUsage.lixcols,
 	};
 }
 
@@ -264,6 +266,7 @@ function buildEntityViewSelect(
 				);
 
 	const projection: SelectExpressionNode[] = [];
+	const lixcolUsage = reference.usedLixcols;
 	for (const property of properties) {
 		if (!propertySet.has(property)) {
 			continue;
@@ -274,36 +277,49 @@ function buildEntityViewSelect(
 	switch (reference.variant) {
 		case "base":
 			projection.push(
-				...BASE_META_COLUMNS.map((column) =>
+				...filterLixcolColumns(BASE_META_COLUMNS, lixcolUsage).map((column) =>
 					columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
 			break;
 		case "all":
 			projection.push(
-				...BASE_META_COLUMNS.filter(
-					(column) => column.alias !== "lixcol_inherited_from_version_id"
+				...filterLixcolColumns(
+					BASE_META_COLUMNS.filter(
+						(column) => column.alias !== "lixcol_inherited_from_version_id"
+					),
+					lixcolUsage
 				).map((column) =>
 					columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
 			projection.push(
-				...ALL_META_EXTRA.map((column) =>
+				...filterLixcolColumns(ALL_META_EXTRA, lixcolUsage).map((column) =>
 					columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
-			projection.push(coalesceInheritedColumn(alias));
-			projection.push(
-				columnSelectWithAlias(alias, "metadata", "lixcol_metadata")
-			);
+			if (
+				shouldIncludeLixcolColumn(
+					lixcolUsage,
+					"lixcol_inherited_from_version_id"
+				)
+			) {
+				projection.push(coalesceInheritedColumn(alias));
+			}
 			break;
 		case "history":
 			projection.push(
-				...HISTORY_META_COLUMNS.map((column) =>
-					columnSelectWithAlias(alias, column.column, column.alias)
+				...filterLixcolColumns(HISTORY_META_COLUMNS, lixcolUsage).map(
+					(column) => columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
 			break;
+	}
+
+	if (projection.length === 0) {
+		projection.push(
+			columnSelectWithAlias(alias, "entity_id", "lixcol_entity_id")
+		);
 	}
 
 	const whereClause: ExpressionNode = {
@@ -361,6 +377,23 @@ function columnSelectWithAlias(
 	};
 }
 
+function filterLixcolColumns<T extends { alias: string }>(
+	columns: readonly T[],
+	usage: Set<string> | null
+): readonly T[] {
+	if (usage === null) {
+		return columns;
+	}
+	return columns.filter((column) => usage.has(column.alias));
+}
+
+function shouldIncludeLixcolColumn(
+	usage: Set<string> | null,
+	alias: string
+): boolean {
+	return usage === null || usage.has(alias);
+}
+
 function coalesceInheritedColumn(alias: string): SelectExpressionNode {
 	return {
 		node_kind: "select_expression",
@@ -371,18 +404,24 @@ function coalesceInheritedColumn(alias: string): SelectExpressionNode {
 	};
 }
 
-function collectPropertyUsage(
+type ColumnUsage = {
+	properties: Set<string> | null;
+	lixcols: Set<string> | null;
+};
+
+function collectColumnUsage(
 	select: SelectStatementNode,
 	binding: string
-): Set<string> | null {
+): ColumnUsage {
 	const normalizedBinding = normalizeIdentifierValue(binding);
 	const properties = new Set<string>();
+	const lixcols = new Set<string>();
 	let selectAll = false;
 
 	for (const item of select.projection) {
-		selectAll = processSelectItem(item, normalizedBinding, properties);
+		selectAll = processSelectItem(item, normalizedBinding, properties, lixcols);
 		if (selectAll) {
-			return null;
+			return { properties: null, lixcols: null };
 		}
 	}
 
@@ -390,7 +429,8 @@ function collectPropertyUsage(
 		collectColumnsFromExpression(
 			select.where_clause,
 			normalizedBinding,
-			properties
+			properties,
+			lixcols
 		);
 	}
 
@@ -398,17 +438,22 @@ function collectPropertyUsage(
 		collectColumnsFromExpression(
 			orderItem.expression,
 			normalizedBinding,
-			properties
+			properties,
+			lixcols
 		);
 	}
 
-	return properties;
+	return {
+		properties,
+		lixcols,
+	};
 }
 
 function processSelectItem(
 	item: SelectItemNode,
 	binding: string,
-	properties: Set<string>
+	properties: Set<string>,
+	lixcols: Set<string>
 ): boolean {
 	switch (item.node_kind) {
 		case "select_star":
@@ -421,7 +466,12 @@ function processSelectItem(
 			return normalizeIdentifierValue(qualifier.value) === binding;
 		}
 		case "select_expression":
-			collectColumnsFromExpression(item.expression, binding, properties);
+			collectColumnsFromExpression(
+				item.expression,
+				binding,
+				properties,
+				lixcols
+			);
 			return false;
 		default:
 			return false;
@@ -431,7 +481,8 @@ function processSelectItem(
 function collectColumnsFromExpression(
 	expression: ExpressionNode,
 	binding: string,
-	properties: Set<string>
+	properties: Set<string>,
+	lixcols: Set<string>
 ) {
 	switch (expression.node_kind) {
 		case "column_reference": {
@@ -441,32 +492,74 @@ function collectColumnsFromExpression(
 				normalizeIdentifierValue(qualifier) === binding
 			) {
 				const column = getColumnName(expression);
-				if (!column.startsWith("lixcol_")) {
+				if (column.startsWith("lixcol_")) {
+					lixcols.add(column);
+				} else {
 					properties.add(column);
 				}
 			}
 			break;
 		}
 		case "grouped_expression":
-			collectColumnsFromExpression(expression.expression, binding, properties);
+			collectColumnsFromExpression(
+				expression.expression,
+				binding,
+				properties,
+				lixcols
+			);
 			break;
 		case "binary_expression":
-			collectColumnsFromExpression(expression.left, binding, properties);
-			collectColumnsFromExpression(expression.right, binding, properties);
+			collectColumnsFromExpression(
+				expression.left,
+				binding,
+				properties,
+				lixcols
+			);
+			collectColumnsFromExpression(
+				expression.right,
+				binding,
+				properties,
+				lixcols
+			);
 			break;
 		case "unary_expression":
-			collectColumnsFromExpression(expression.operand, binding, properties);
+			collectColumnsFromExpression(
+				expression.operand,
+				binding,
+				properties,
+				lixcols
+			);
 			break;
 		case "in_list_expression":
-			collectColumnsFromExpression(expression.operand, binding, properties);
+			collectColumnsFromExpression(
+				expression.operand,
+				binding,
+				properties,
+				lixcols
+			);
 			for (const item of expression.items) {
-				collectColumnsFromExpression(item, binding, properties);
+				collectColumnsFromExpression(item, binding, properties, lixcols);
 			}
 			break;
 		case "between_expression":
-			collectColumnsFromExpression(expression.operand, binding, properties);
-			collectColumnsFromExpression(expression.start, binding, properties);
-			collectColumnsFromExpression(expression.end, binding, properties);
+			collectColumnsFromExpression(
+				expression.operand,
+				binding,
+				properties,
+				lixcols
+			);
+			collectColumnsFromExpression(
+				expression.start,
+				binding,
+				properties,
+				lixcols
+			);
+			collectColumnsFromExpression(
+				expression.end,
+				binding,
+				properties,
+				lixcols
+			);
 			break;
 		default:
 			break;

@@ -438,18 +438,16 @@ test("handles multiple vtable references with selective projections", () => {
 
 	const { sql } = compile(rewritten);
 
-	expect(sql.toLowerCase()).toContain(
+	const normalizedSql = sql.replace(/\s+/g, " ").toLowerCase();
+
+	expect(normalizedSql).toContain(
 		'select "a"."schema_key", "a"."file_id", "b"."writer_key"'
 	);
-	expect(sql.toLowerCase()).toContain("c.entity_id as entity_id");
-	expect(sql.toLowerCase()).toContain("c.version_id as version_id");
-	expect(sql.toLowerCase()).toContain("c.change_id as change_id");
-	expect(sql.toLowerCase()).toContain(
-		"left join lix_internal_state_writer ws_dst"
-	);
-	expect(sql.toLowerCase()).toContain(
-		"left join lix_internal_state_writer ws_src"
-	);
+	expect(normalizedSql).toContain("c.entity_id as entity_id");
+	expect(normalizedSql).toContain("c.version_id as version_id");
+	expect(normalizedSql).toContain("c.change_id as change_id");
+	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_dst");
+	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_src");
 });
 
 test("returns transaction rows", async () => {

@@ -93,9 +93,7 @@ function emitSelectStatement(statement: SelectStatementNode): string {
 	const parts = [selectClause];
 
 	if (statement.from_clauses.length) {
-		parts.push(
-			`FROM ${statement.from_clauses.map(emitFromClause).join(", ")}`
-		);
+		parts.push(`FROM ${statement.from_clauses.map(emitFromClause).join(", ")}`);
 	}
 
 	if (statement.where_clause) {
