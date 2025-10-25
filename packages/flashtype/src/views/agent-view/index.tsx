@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bot } from "lucide-react";
-import { createGatewayProvider } from "@ai-sdk/gateway";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { createConversation, selectVersionDiff } from "@lix-js/sdk";
 import {
@@ -27,7 +27,7 @@ import { createReactViewDefinition } from "../../app/react-view";
 import { systemPrompt } from "./system-prompt";
 import { ChangeDecisionOverlay } from "./components/change-decision";
 import { PromptComposer } from "./components/prompt-composer";
-import { LLM_PROXY_PREFIX } from "@/env-variables";
+import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { WelcomeScreen } from "./components/welcome-screen";
 
@@ -51,13 +51,18 @@ const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
  */
 export function AgentView({ context }: AgentViewProps) {
 	const lix = useLix();
+	const devApiKey =
+		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
+			? VITE_DEV_OPENROUTER_API_KEY.trim()
+			: null;
+	const usingDevApiKey = Boolean(devApiKey);
 
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
-	const [storedApiKey, setStoredApiKey] = useState<string | null>(null);
-	const [apiKeyDraft, setApiKeyDraft] = useState("");
-	const [keyLoaded, setKeyLoaded] = useState(false);
+	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
+	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
+	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
 
 	useEffect(() => {
 		(async () => {
@@ -69,6 +74,12 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [conversationId, lix, setConversationId]);
 
 	useEffect(() => {
+		if (devApiKey) {
+			setStoredApiKey(devApiKey);
+			setApiKeyDraft(devApiKey);
+			setKeyLoaded(true);
+			return;
+		}
 		if (typeof window === "undefined") {
 			setKeyLoaded(true);
 			return;
@@ -79,7 +90,7 @@ export function AgentView({ context }: AgentViewProps) {
 			setApiKeyDraft(existing);
 		}
 		setKeyLoaded(true);
-	}, []);
+	}, [devApiKey]);
 
 	const [pendingProposal, setPendingProposal] = useState<{
 		proposalId: string;
@@ -90,21 +101,16 @@ export function AgentView({ context }: AgentViewProps) {
 	} | null>(null);
 
 	const provider = useMemo(() => {
-		return createGatewayProvider({
-			apiKey: "proxy",
-			baseURL: `${LLM_PROXY_PREFIX}/v1/ai`,
-			fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-				const request =
-					input instanceof Request ? input : new Request(input, init);
-				const headers = new Headers(request.headers);
-				headers.delete("authorization");
-				const response = await fetch(new Request(request, { headers }));
-				return response;
-			},
+		if (!storedApiKey) return null;
+		return createOpenRouter({
+			apiKey: storedApiKey,
 		});
-	}, []);
+	}, [storedApiKey]);
 
-	const model = useMemo(() => provider(MODEL_NAME), [provider]);
+	const model = useMemo(
+		() => (provider ? provider(MODEL_NAME) : null),
+		[provider],
+	);
 	const hasKey = Boolean(storedApiKey);
 
 	const messages = useQuery(({ lix }) =>
@@ -192,6 +198,9 @@ export function AgentView({ context }: AgentViewProps) {
 	}, []);
 
 	const handleSaveApiKey = useCallback(() => {
+		if (devApiKey) {
+			return;
+		}
 		const trimmed = apiKeyDraft.trim();
 		if (typeof window !== "undefined") {
 			if (trimmed) {
@@ -204,7 +213,7 @@ export function AgentView({ context }: AgentViewProps) {
 		setApiKeyDraft(trimmed);
 		setNotice(null);
 		setError(null);
-	}, [apiKeyDraft]);
+	}, [apiKeyDraft, devApiKey]);
 
 	const handleAcceptDecision = useCallback(
 		(id: string) => {
@@ -398,6 +407,11 @@ export function AgentView({ context }: AgentViewProps) {
 
 	return (
 		<>
+			{usingDevApiKey ? (
+				<div className="mx-2 mt-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-900 shadow-sm">
+					Using development OpenRouter API key.
+				</div>
+			) : null}
 			{/* Header with conversation picker */}
 			{/*
 			<header className="flex items-center justify-between border-b border-border/80 py-1">
