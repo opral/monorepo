@@ -3,6 +3,8 @@ import type {
 	BinaryExpressionNode,
 	ColumnReferenceNode,
 	DeleteStatementNode,
+	InsertStatementNode,
+	InsertValuesNode,
 	ExpressionNode,
 	FromClauseNode,
 	GroupedExpressionNode,
@@ -37,6 +39,7 @@ export type VisitContext = {
 type NodeKindMap = {
 	readonly raw_fragment: RawFragmentNode;
 	readonly select_statement: SelectStatementNode;
+	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
 	readonly select_star: SelectStarNode;
@@ -58,6 +61,7 @@ type NodeKindMap = {
 	readonly between_expression: BetweenExpressionNode;
 	readonly identifier: IdentifierNode;
 	readonly object_name: ObjectNameNode;
+	readonly insert_values: InsertValuesNode;
 };
 
 type NodeKind = keyof NodeKindMap;
@@ -195,6 +199,8 @@ function traverseNode(
 	switch (node.node_kind) {
 		case "select_statement":
 			return traverseSelectStatement(node as SelectStatementNode, visitor);
+		case "insert_statement":
+			return traverseInsertStatement(node as InsertStatementNode, visitor);
 		case "update_statement":
 			return traverseUpdateStatement(node as UpdateStatementNode, visitor);
 		case "delete_statement":
@@ -230,6 +236,8 @@ function traverseNode(
 			return traverseInListExpression(node as InListExpressionNode, visitor);
 		case "between_expression":
 			return traverseBetweenExpression(node as BetweenExpressionNode, visitor);
+		case "insert_values":
+			return traverseInsertValues(node as InsertValuesNode, visitor);
 		case "object_name":
 			return traverseObjectName(node as ObjectNameNode, visitor);
 		case "select_star":
@@ -289,6 +297,39 @@ function traverseSelectStatement(
 		from_clauses: fromClauses as readonly FromClauseNode[],
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
 		order_by: orderBy as readonly OrderByItemNode[],
+	};
+}
+
+function traverseInsertStatement(
+	node: InsertStatementNode,
+	visitor: AstVisitor
+): InsertStatementNode {
+	let changed = false;
+
+	const target = visitNode(node.target, visitor, createContext(node, "target"));
+	if (target !== node.target) {
+		changed = true;
+	}
+
+	const columns = visitArray(node.columns, node, "columns", visitor);
+	if (columns !== node.columns) {
+		changed = true;
+	}
+
+	const source = visitNode(node.source, visitor, createContext(node, "source"));
+	if (source !== node.source) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		target: target as ObjectNameNode,
+		columns: columns as readonly IdentifierNode[],
+		source: source as InsertValuesNode,
 	};
 }
 
@@ -360,6 +401,49 @@ function traverseDeleteStatement(
 		...node,
 		target: target as TableReferenceNode,
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
+	};
+}
+
+function traverseInsertValues(
+	node: InsertValuesNode,
+	visitor: AstVisitor
+): InsertValuesNode {
+	let changed = false;
+	const rows: (readonly ExpressionNode[])[] = [];
+
+	for (let rowIndex = 0; rowIndex < node.rows.length; rowIndex += 1) {
+		const row = node.rows[rowIndex]!;
+		let rowChanged = false;
+		const nextRow: ExpressionNode[] = [];
+
+		for (let valueIndex = 0; valueIndex < row.length; valueIndex += 1) {
+			const value = row[valueIndex]!;
+			const nextValue = visitNode(
+				value,
+				visitor,
+				createContext(node, `rows.${rowIndex}`, valueIndex)
+			) as ExpressionNode;
+			if (nextValue !== value) {
+				rowChanged = true;
+			}
+			nextRow.push(nextValue);
+		}
+
+		if (rowChanged) {
+			changed = true;
+			rows.push(nextRow);
+		} else {
+			rows.push(row);
+		}
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		rows: rows as readonly (readonly ExpressionNode[])[],
 	};
 }
 

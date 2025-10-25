@@ -6,6 +6,8 @@ import type {
 	DeleteStatementNode,
 	ExpressionNode,
 	FromClauseNode,
+	InsertStatementNode,
+	InsertValuesNode,
 	GroupedExpressionNode,
 	IdentifierNode,
 	InListExpressionNode,
@@ -61,10 +63,24 @@ export function compile(statement: SqlNode): CompileResult {
 	return compileStatement(statement as StatementNode);
 }
 
+/**
+ * Serialises a single expression node to SQL text.
+ *
+ * @example
+ * ```ts
+ * const sql = expressionToSql({ node_kind: "parameter", placeholder: "?" });
+ * ```
+ */
+export function expressionToSql(expression: ExpressionNode): string {
+	return emitExpression(expression);
+}
+
 function compileStatement(statement: StatementNode): CompileResult {
 	switch (statement.node_kind) {
 		case "select_statement":
 			return buildResult(emitSelectStatement(statement));
+		case "insert_statement":
+			return buildResult(emitInsertStatement(statement));
 		case "update_statement":
 			return buildResult(emitUpdateStatement(statement));
 		case "delete_statement":
@@ -126,6 +142,26 @@ function emitDeleteStatement(statement: DeleteStatementNode): string {
 		? " WHERE " + emitExpressionOrRaw(statement.where_clause)
 		: "";
 	return `DELETE FROM ${target}${whereSql}`;
+}
+
+function emitInsertStatement(statement: InsertStatementNode): string {
+	const target = emitObjectName(statement.target);
+	const columnSql = statement.columns.length
+		? ` (${statement.columns.map((column) => emitIdentifier(column)).join(", ")})`
+		: "";
+	const valuesSql = emitInsertValues(statement.source);
+	return `INSERT INTO ${target}${columnSql} ${valuesSql}`;
+}
+
+function emitInsertValues(values: InsertValuesNode): string {
+	const rows = values.rows.map((row) => {
+		const expressions = row.map((expression) => emitExpression(expression));
+		return `(${expressions.join(", ")})`;
+	});
+	if (rows.length <= 1) {
+		return `VALUES ${rows[0] ?? "()"}`;
+	}
+	return `VALUES\n  ${rows.join(",\n  ")}`;
 }
 
 function emitSelectItem(item: SelectItemNode): string {

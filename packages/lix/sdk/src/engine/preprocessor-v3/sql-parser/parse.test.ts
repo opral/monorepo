@@ -250,4 +250,31 @@ describe("parse", () => {
 			},
 		});
 	});
+
+	test("parses insert with column list and multiple rows", () => {
+		const ast = parse(
+			"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"
+		);
+		expect(ast).toEqual({
+			node_kind: "insert_statement",
+			target: {
+				node_kind: "object_name",
+				parts: [id("projects")],
+			},
+			columns: [id("id"), id("name")],
+			source: {
+				node_kind: "insert_values",
+				rows: [
+					[
+						lit("a"),
+						lit("Project A"),
+					],
+					[
+						lit("b"),
+						{ node_kind: "parameter", placeholder: "?" },
+					],
+				],
+			},
+		});
+	});
 });

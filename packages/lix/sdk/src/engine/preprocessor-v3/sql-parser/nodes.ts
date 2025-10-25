@@ -28,6 +28,7 @@ export type RawFragmentNode = SqlNode & {
 
 export type StatementNode =
 	| SelectStatementNode
+	| InsertStatementNode
 	| UpdateStatementNode
 	| DeleteStatementNode
 	| RawFragmentNode;
@@ -112,6 +113,18 @@ export type DeleteStatementNode = SqlNode & {
 	readonly node_kind: "delete_statement";
 	readonly target: TableReferenceNode;
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
+};
+
+export type InsertStatementNode = SqlNode & {
+	readonly node_kind: "insert_statement";
+	readonly target: ObjectNameNode;
+	readonly columns: readonly IdentifierNode[];
+	readonly source: InsertValuesNode;
+};
+
+export type InsertValuesNode = SqlNode & {
+	readonly node_kind: "insert_values";
+	readonly rows: readonly (readonly ExpressionNode[])[];
 };
 
 export type ExpressionNode =

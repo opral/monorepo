@@ -11,6 +11,11 @@ export const Select: TokenType = createToken({
 	pattern: /select\b/i,
 });
 
+export const Insert: TokenType = createToken({
+	name: "Insert",
+	pattern: /insert\b/i,
+});
+
 export const Update: TokenType = createToken({
 	name: "Update",
 	pattern: /update\b/i,
@@ -24,6 +29,11 @@ export const Delete: TokenType = createToken({
 export const From: TokenType = createToken({
 	name: "From",
 	pattern: /from\b/i,
+});
+
+export const Into: TokenType = createToken({
+	name: "Into",
+	pattern: /into\b/i,
 });
 
 export const Where: TokenType = createToken({
@@ -131,14 +141,21 @@ export const As: TokenType = createToken({
 	pattern: /as\b/i,
 });
 
+export const Values: TokenType = createToken({
+	name: "Values",
+	pattern: /values\b/i,
+});
+
 export const Identifier: TokenType = createToken({
 	name: "Identifier",
 	pattern: /[A-Za-z_][A-Za-z0-9_]*/,
 	longer_alt: [
 		Select,
+		Insert,
 		Update,
 		Delete,
 		From,
+		Into,
 		Where,
 		And,
 		Order,
@@ -159,6 +176,7 @@ export const Identifier: TokenType = createToken({
 		Between,
 		Like,
 		SetKeyword,
+		Values,
 		As,
 	],
 });
@@ -271,9 +289,11 @@ export const Percent: TokenType = createToken({
 const tokens: TokenType[] = [
 	Whitespace,
 	Select,
+	Insert,
 	Update,
 	Delete,
 	From,
+	Into,
 	Where,
 	And,
 	Order,
@@ -294,6 +314,7 @@ const tokens: TokenType[] = [
 	Between,
 	Like,
 	SetKeyword,
+	Values,
 	As,
 	Star,
 	Comma,

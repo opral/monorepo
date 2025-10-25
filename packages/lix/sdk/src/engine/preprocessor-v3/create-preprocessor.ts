@@ -10,7 +10,6 @@ import { getStateCacheTables } from "../../state/cache/schema.js";
 import { schemaKeyToCacheTableName } from "../../state/cache/create-schema-cache-table.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getSchemaVersion } from "../query-preprocessor/shared/schema-version.js";
-
 type EngineShape = Pick<
 	LixEngine,
 	| "sqlite"

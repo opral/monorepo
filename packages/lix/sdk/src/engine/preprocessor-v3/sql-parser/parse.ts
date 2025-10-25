@@ -4,6 +4,8 @@ import type {
 	BinaryOperator,
 	ColumnReferenceNode,
 	DeleteStatementNode,
+	InsertStatementNode,
+	InsertValuesNode,
 	ExpressionNode,
 	FromClauseNode,
 	GroupedExpressionNode,
@@ -45,12 +47,17 @@ class ToAstVisitor extends BaseVisitor {
 
 	public select_statement(ctx: {
 		core?: CstNode[];
+		insert?: CstNode[];
 		update?: CstNode[];
 		delete?: CstNode[];
 	}): StatementNode {
 		const core = ctx.core?.[0];
 		if (core) {
 			return this.visit(core) as SelectStatementNode;
+		}
+		const insert = ctx.insert?.[0];
+		if (insert) {
+			return this.visit(insert) as InsertStatementNode;
 		}
 		const update = ctx.update?.[0];
 		if (update) {
@@ -101,6 +108,35 @@ class ToAstVisitor extends BaseVisitor {
 			from_clauses: [fromClause],
 			where_clause: whereClause,
 			order_by: orderByItems,
+		};
+	}
+
+	public insert_statement(ctx: {
+		table?: CstNode[];
+		columns?: CstNode[];
+		rows?: CstNode[];
+	}): InsertStatementNode {
+		const tableNode = ctx.table?.[0];
+		if (!tableNode) {
+			throw new Error("insert statement missing target table");
+		}
+		const target = this.visit(tableNode) as ObjectNameNode;
+		const columnNodes =
+			ctx.columns?.map((column) => this.visit(column) as IdentifierNode) ?? [];
+		const valuesListNode = ctx.rows?.[0];
+		if (!valuesListNode) {
+			throw new Error("insert statement missing values list");
+		}
+		const rowNodes = this.visit(valuesListNode) as ExpressionNode[][];
+		const valuesNode: InsertValuesNode = {
+			node_kind: "insert_values",
+			rows: rowNodes,
+		};
+		return {
+			node_kind: "insert_statement",
+			target,
+			columns: columnNodes,
+			source: valuesNode,
 		};
 	}
 
@@ -555,6 +591,22 @@ class ToAstVisitor extends BaseVisitor {
 
 	public expression_list(ctx: { items?: CstNode[] }): ExpressionNode[] {
 		return ctx.items?.map((item) => this.visit(item) as ExpressionNode) ?? [];
+	}
+
+	public values_list(ctx: { rows?: CstNode[] }): ExpressionNode[][] {
+		const rows = ctx.rows ?? [];
+		if (rows.length === 0) {
+			throw new Error("values list is empty");
+		}
+		return rows.map((row) => this.visit(row) as ExpressionNode[]);
+	}
+
+	public values_clause(ctx: { values?: CstNode[] }): ExpressionNode[] {
+		const valuesNode = ctx.values?.[0];
+		if (!valuesNode) {
+			throw new Error("values clause missing expressions");
+		}
+		return this.visit(valuesNode) as ExpressionNode[];
 	}
 
 	public order_by_clause(ctx: { items?: CstNode[] }): OrderByItemNode[] {

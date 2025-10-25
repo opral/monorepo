@@ -1,9 +1,11 @@
 import { CstParser, EOF, type CstNode } from "chevrotain";
 import {
 	Select,
+	Insert,
 	Update,
 	Delete,
 	From,
+	Into,
 	Where,
 	And,
 	Or,
@@ -44,6 +46,7 @@ import {
 	Minus,
 	Slash,
 	Percent,
+	Values,
 	StringLiteral,
 	NumberLiteral,
 	QuotedIdentifier,
@@ -64,6 +67,10 @@ class SqlParser extends CstParser {
 		() => {
 			this.OR([
 				{ ALT: () => this.SUBRULE(this.select_core, { LABEL: "core" }) },
+				{
+					ALT: () =>
+						this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
+				},
 				{ ALT: () => this.SUBRULE(this.update_statement, { LABEL: "update" }) },
 				{ ALT: () => this.SUBRULE(this.delete_statement, { LABEL: "delete" }) },
 			]);
@@ -90,6 +97,26 @@ class SqlParser extends CstParser {
 			this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
 		});
 	});
+
+	private readonly insert_statement: () => CstNode = this.RULE(
+		"insert_statement",
+		() => {
+			this.CONSUME(Insert);
+			this.CONSUME(Into);
+			this.SUBRULE(this.table_name, { LABEL: "table" });
+			this.OPTION(() => {
+				this.CONSUME(LeftParen);
+				this.SUBRULE(this.identifier, { LABEL: "columns" });
+				this.MANY(() => {
+					this.CONSUME(Comma);
+					this.SUBRULE1(this.identifier, { LABEL: "columns" });
+				});
+				this.CONSUME(RightParen);
+			});
+			this.CONSUME(Values);
+			this.SUBRULE(this.values_list, { LABEL: "rows" });
+		}
+	);
 
 	private readonly update_statement: () => CstNode = this.RULE(
 		"update_statement",
@@ -381,6 +408,23 @@ class SqlParser extends CstParser {
 		}
 	);
 
+	private readonly values_list: () => CstNode = this.RULE("values_list", () => {
+		this.SUBRULE(this.values_clause, { LABEL: "rows" });
+		this.MANY(() => {
+			this.CONSUME(Comma);
+			this.SUBRULE1(this.values_clause, { LABEL: "rows" });
+		});
+	});
+
+	private readonly values_clause: () => CstNode = this.RULE(
+		"values_clause",
+		() => {
+			this.CONSUME(LeftParen);
+			this.SUBRULE(this.expression_list, { LABEL: "values" });
+			this.CONSUME(RightParen);
+		}
+	);
+
 	private readonly expression: () => CstNode = this.RULE("expression", () => {
 		this.SUBRULE(this.additive_expression, { LABEL: "expression" });
 	});
@@ -478,7 +522,8 @@ export function parseCst(sql: string): CstNode {
 	throwIfErrors("Parsing", parseErrors);
 	const children = (cst as any)?.children ?? {};
 	const core = children.core?.[0];
+	const insert = children.insert?.[0];
 	const update = children.update?.[0];
 	const del = children.delete?.[0];
-	return core ?? update ?? del ?? cst;
+	return core ?? insert ?? update ?? del ?? cst;
 }
