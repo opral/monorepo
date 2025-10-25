@@ -1,17 +1,14 @@
 import {
 	type BetweenExpressionNode,
 	type BinaryExpressionNode,
-	type ColumnReferenceNode,
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
-	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SelectItemNode,
 	type SelectStatementNode,
 	type StatementNode,
 	type TableReferenceNode,
-	type UnaryExpressionNode,
 } from "../sql-parser/nodes.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
@@ -967,23 +964,28 @@ function buildCacheSource(
 		schemaKeys && schemaKeys.length > 0
 			? Array.from(new Set(schemaKeys))
 			: Array.from(cacheTables.keys());
-	const selects = uniqueKeys
+	const entries = uniqueKeys
 		.map((key) => {
 			const candidate = cacheTables.get(key);
 			if (typeof candidate === "string" && candidate.length > 0) {
-				return buildPhysicalCacheSelect(candidate, requiredColumns);
+				return {
+					tableName: candidate,
+					sql: buildPhysicalCacheSelect(candidate, requiredColumns),
+				};
 			}
 			return null;
 		})
-		.filter((value): value is string => value !== null);
+		.filter(
+			(value): value is { tableName: string; sql: string } => value !== null
+		);
 
-	if (selects.length === 0) {
+	if (entries.length === 0) {
 		return null;
 	}
-	if (selects.length === 1) {
-		return selects[0]!;
+	if (entries.length === 1) {
+		return quoteIdentifier(entries[0]!.tableName);
 	}
-	return selects.join(`\nUNION ALL\n`);
+	return entries.map((entry) => entry.sql).join(`\nUNION ALL\n`);
 }
 
 function buildPhysicalCacheSelect(
