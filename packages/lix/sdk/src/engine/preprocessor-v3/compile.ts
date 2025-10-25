@@ -84,23 +84,31 @@ function buildResult(sql: string): CompileResult {
 }
 
 function emitSelectStatement(statement: SelectStatementNode): string {
-	const projection = statement.projection
-		.map((item) => emitSelectItem(item))
-		.join(", ");
+	const projectionItems = statement.projection.map(emitSelectItem);
+	const selectClause =
+		projectionItems.length <= 1
+			? `SELECT ${projectionItems[0] ?? ""}`
+			: `SELECT\n  ${projectionItems.join(",\n  ")}`;
 
-	const fromSql = statement.from_clauses.length
-		? " FROM " + statement.from_clauses.map(emitFromClause).join(", ")
-		: "";
+	const parts = [selectClause];
 
-	const whereSql = statement.where_clause
-		? " WHERE " + emitExpressionOrRaw(statement.where_clause)
-		: "";
+	if (statement.from_clauses.length) {
+		parts.push(
+			`FROM ${statement.from_clauses.map(emitFromClause).join(", ")}`
+		);
+	}
 
-	const orderSql = statement.order_by.length
-		? " ORDER BY " + statement.order_by.map(emitOrderByItem).join(", ")
-		: "";
+	if (statement.where_clause) {
+		parts.push(`WHERE ${emitExpressionOrRaw(statement.where_clause)}`);
+	}
 
-	return `SELECT ${projection}${fromSql}${whereSql}${orderSql}`;
+	if (statement.order_by.length) {
+		parts.push(
+			`ORDER BY ${statement.order_by.map(emitOrderByItem).join(", ")}`
+		);
+	}
+
+	return parts.join("\n");
 }
 
 function emitUpdateStatement(statement: UpdateStatementNode): string {
