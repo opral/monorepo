@@ -45,6 +45,8 @@ describe("VersionSwitcher", () => {
 	});
 
 	afterEach(async () => {
+		vi.restoreAllMocks();
+
 		for (const fn of cleanupFns.splice(0)) {
 			await fn();
 		}
@@ -92,9 +94,8 @@ describe("VersionSwitcher", () => {
 
 	test("renames a version via actions menu", async () => {
 		const target = await createVersion({ lix, name: "docs" });
-		const promptSpy = vi
-			.spyOn(window, "prompt")
-			.mockReturnValue("docs-renamed");
+		const promptSpy = vi.fn().mockReturnValue("docs-renamed");
+		vi.stubGlobal("prompt", promptSpy);
 
 		await renderWithProviders();
 
@@ -130,13 +131,12 @@ describe("VersionSwitcher", () => {
 			.where("id", "=", target.id)
 			.executeTakeFirstOrThrow();
 		expect(row.name).toBe("docs-renamed");
-
-		promptSpy.mockRestore();
 	});
 
 	test("deletes a version via actions menu", async () => {
 		const target = await createVersion({ lix, name: "temp" });
-		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+		const confirmSpy = vi.fn().mockReturnValue(true);
+		vi.stubGlobal("confirm", confirmSpy);
 
 		await renderWithProviders();
 
