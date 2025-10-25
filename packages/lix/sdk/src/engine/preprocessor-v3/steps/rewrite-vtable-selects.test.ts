@@ -9,6 +9,9 @@ import type { PreprocessorTraceEntry } from "../types.js";
 import { openLix } from "../../../lix/open-lix.js";
 import { insertTransactionState } from "../../../state/transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../functions/timestamp.js";
+import { updateStateCache } from "../../../state/cache/update-state-cache.js";
+import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
+import type { LixChangeRaw } from "../../../change/schema-definition.js";
 
 test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 	const node = parse(`
@@ -28,6 +31,123 @@ test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 	expect(sql.toLowerCase()).toContain("lix_internal_state_vtable_rewritten");
 	expect(sql).toMatch(/FROM\s+\(/i);
 	expect(sql).not.toMatch(/\blix_internal_state_vtable\b/i);
+});
+
+test("resolves cache rows across recursive version inheritance chains", async () => {
+	const lix = await openLix({});
+	const schemaKey = "recursive_entity_schema";
+	const schemaDefinition = {
+		"x-lix-key": schemaKey,
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: schemaDefinition })
+		.execute();
+
+	const timestamp = await getTimestamp({ lix });
+	const makeDescriptorChange = (
+		versionId: string,
+		inherits: string | null
+	): LixChangeRaw => ({
+		id: `descriptor-${versionId}`,
+		entity_id: versionId,
+		schema_key: "lix_version_descriptor",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		created_at: timestamp,
+		snapshot_content: JSON.stringify({
+			id: versionId,
+			inherits_from_version_id: inherits,
+		}),
+	});
+
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [makeDescriptorChange("version-root", null)],
+		version_id: "version-root",
+		commit_id: "commit-root",
+	});
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [makeDescriptorChange("version-mid", "version-root")],
+		version_id: "version-mid",
+		commit_id: "commit-mid",
+	});
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [makeDescriptorChange("version-leaf", "version-mid")],
+		version_id: "version-leaf",
+		commit_id: "commit-leaf",
+	});
+
+	const dataChange: LixChangeRaw = {
+		id: "cache-row-root",
+		entity_id: "entity-recursive",
+		schema_key: schemaKey,
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		created_at: timestamp,
+		snapshot_content: JSON.stringify({
+			id: "entity-recursive",
+			name: "Root Version Value",
+		}),
+	};
+
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [dataChange],
+		version_id: "version-root",
+		commit_id: "commit-data",
+	});
+
+	const cacheTable = schemaKeyToCacheTableName(schemaKey);
+	const node = parse(`
+				SELECT v.schema_key, v.version_id, v.inherited_from_version_id, v.snapshot_content
+				FROM lix_internal_state_vtable AS v
+				WHERE v.schema_key = '${schemaKey}'
+				  AND v.version_id = 'version-leaf'
+			`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map([[schemaKey, cacheTable]]),
+		getSqlViews: () => new Map(),
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql: rewrittenSql, parameters } = compile(rewritten);
+	expect(rewrittenSql.toLowerCase()).toContain("version_inheritance");
+
+	const rows = lix.engine!.sqlite.exec({
+		sql: rewrittenSql,
+		bind: parameters as any[],
+		returnValue: "resultRows",
+		rowMode: "object",
+	}) as Array<Record<string, unknown>>;
+
+	expect(rows).toHaveLength(1);
+	const row = rows[0]!;
+	expect(row.schema_key).toBe(schemaKey);
+	expect(row.version_id).toBe("version-leaf");
+	expect(row.inherited_from_version_id).toBe("version-root");
+	expect(JSON.parse(String(row.snapshot_content))).toMatchObject({
+		id: "entity-recursive",
+		name: "Root Version Value",
+	});
+	await lix.close();
 });
 
 test("does not rewrite non-SELECT statements", () => {
@@ -274,7 +394,7 @@ test("routes cache queries to mapped physical tables", () => {
 
 	expect(sql.toLowerCase()).toContain('from "test_schema_key_cache_table"');
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
-	expect(unions.length).toBe(2);
+	expect(unions.length).toBe(6);
 });
 
 test("includes only cache tables for matching schema filters", () => {
@@ -303,7 +423,7 @@ test("includes only cache tables for matching schema filters", () => {
 		'from "test_schema_key_other_cache_table"'
 	);
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
-	expect(unions.length).toBe(2);
+	expect(unions.length).toBe(6);
 });
 
 test("unions cache tables when multiple schema filters are present", () => {
@@ -336,7 +456,7 @@ test("unions cache tables when multiple schema filters are present", () => {
 		'from "test_schema_key_other_cache_table"'
 	);
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
-	expect(unions.length).toBe(3);
+	expect(unions.length).toBe(8);
 	expect(sql).not.toContain("test_schema_key_unused_cache_table");
 });
 
@@ -359,7 +479,7 @@ test("skips cache unions when no cache tables mapped", () => {
 
 	expect(sql.toLowerCase()).not.toContain('from "test_schema_key_cache_table"');
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
-	expect(unions.length).toBe(1);
+	expect(unions.length).toBe(4);
 	expect(sql.toLowerCase()).not.toContain("cache.is_tombstone");
 });
 
@@ -385,7 +505,7 @@ test("prunes transaction segment when transaction closed", () => {
 	expect(upper).not.toContain("LIX_INTERNAL_TRANSACTION_STATE");
 	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 	const unionCount = upper.match(/\bUNION ALL\b/g) ?? [];
-	expect(unionCount.length).toBe(0);
+	expect(unionCount.length).toBe(2);
 });
 
 test("unions all available cache tables when no schema filter is provided", () => {
@@ -501,11 +621,14 @@ test("returns transaction rows", async () => {
 		rowMode: "object",
 	});
 
-	expect(rows).toEqual([
-		expect.objectContaining({
-			entity_id: "entity_txn",
-			schema_key: "test_schema_key",
-			file_id: "file_txn",
-		}),
-	]);
+	expect(rows.length).toBeGreaterThan(0);
+	expect(rows).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "entity_txn",
+				schema_key: "test_schema_key",
+				file_id: "file_txn",
+			}),
+		])
+	);
 });

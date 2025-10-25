@@ -613,9 +613,9 @@ function buildInternalStateRewriteSql(options: {
 		"c.created_at DESC",
 		"c.file_id",
 		"c.schema_key",
-		"c.entity_id",
-		"c.version_id",
-		"c.change_id",
+	"c.entity_id",
+	"c.version_id",
+	"c.change_id",
 	];
 	const segments: string[] = [];
 	if (options.hasOpenTransaction !== false) {
@@ -630,7 +630,27 @@ function buildInternalStateRewriteSql(options: {
 	if (cacheSegment) {
 		segments.push(cacheSegment);
 	}
-	const candidates = segments.join(`\n\n    UNION ALL\n\n`);
+	const inheritedSegments: string[] = [];
+	if (cacheSegment) {
+		const inheritedCache = buildInheritedCacheSegment(
+			cacheSource,
+			schemaFilter,
+			candidateColumns
+		);
+		if (inheritedCache) {
+			inheritedSegments.push(inheritedCache);
+		}
+	}
+	inheritedSegments.push(
+		buildInheritedUntrackedSegment(schemaFilter, candidateColumns)
+	);
+	if (options.hasOpenTransaction !== false) {
+		inheritedSegments.push(
+			buildInheritedTransactionSegment(schemaFilter, candidateColumns)
+		);
+	}
+	const allSegments = segments.concat(inheritedSegments);
+	const candidates = allSegments.join(`\n\n    UNION ALL\n\n`);
 
 	const writerJoinSql = needsWriterJoin
 		? `
@@ -654,14 +674,28 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id`
 			? `
 LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 			: "";
+	const rankedSql = buildRankedSegment(rankedColumns, rankingOrder);
+	const withClauses: string[] = [];
+	if (allSegments.length > 0) {
+		withClauses.push(buildVersionDescriptorCte());
+		withClauses.push(buildVersionInheritanceCte());
+		withClauses.push(buildVersionParentCte());
+	}
+	withClauses.push(
+		stripIndent(`
+	candidates AS (
+${indent(candidates, 4)}
+	)`).trim()
+	);
+	withClauses.push(
+		stripIndent(`
+	ranked AS (
+${indent(rankedSql, 4)}
+	)`).trim()
+	);
 
 	const body = `WITH
-  candidates AS (
-${indent(candidates, 4)}
-  ),
-  ranked AS (
-${indent(buildRankedSegment(rankedColumns, rankingOrder), 4)}
-  )
+${withClauses.map((clause) => indent(clause, 2)).join(",\n")}
 SELECT
 ${indent(projectionSql, 2)}
 FROM ranked w
@@ -915,6 +949,268 @@ function buildCacheSegment(
 ${indent(columnSql, 4)}
 		FROM ${sourceSql} cache
 		WHERE cache.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
+	`).trimEnd();
+}
+
+/**
+ * Builds the base CTE extracting version descriptors for inheritance lookups.
+ *
+ * @returns SQL fragment for the version descriptor base CTE.
+ *
+ * @example
+ * ```ts
+ * const sql = buildVersionDescriptorCte();
+ * ```
+ */
+function buildVersionDescriptorCte(): string {
+	return stripIndent(`
+	version_descriptor_base AS (
+	  SELECT
+	    json_extract(desc.snapshot_content, '$.id') AS version_id,
+	    json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+	  FROM "lix_internal_state_cache_v1_lix_version_descriptor" desc
+	  WHERE desc.is_tombstone = 0
+	    AND desc.snapshot_content IS NOT NULL
+	)`).trim();
+}
+
+/**
+ * Builds the recursive CTE that unfolds the full inheritance chain.
+ *
+ * @returns SQL fragment for the version inheritance CTE.
+ *
+ * @example
+ * ```ts
+ * const sql = buildVersionInheritanceCte();
+ * ```
+ */
+function buildVersionInheritanceCte(): string {
+	return stripIndent(`
+	version_inheritance(version_id, ancestor_version_id) AS (
+	  SELECT
+	    vdb.version_id,
+	    vdb.inherits_from_version_id
+	  FROM version_descriptor_base vdb
+	  WHERE vdb.inherits_from_version_id IS NOT NULL
+
+	  UNION ALL
+
+	  SELECT
+	    vi.version_id,
+	    vdb.inherits_from_version_id
+	  FROM version_inheritance vi
+	  JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
+	  WHERE vdb.inherits_from_version_id IS NOT NULL
+	)`).trim();
+}
+
+/**
+ * Builds the CTE mapping each version to its direct parent version.
+ *
+ * @returns SQL fragment for the version parent CTE.
+ *
+ * @example
+ * ```ts
+ * const sql = buildVersionParentCte();
+ * ```
+ */
+function buildVersionParentCte(): string {
+	return stripIndent(`
+	version_parent AS (
+	  SELECT
+	    vdb.version_id,
+	    vdb.inherits_from_version_id AS parent_version_id
+	  FROM version_descriptor_base vdb
+	  WHERE vdb.inherits_from_version_id IS NOT NULL
+	)`).trim();
+}
+
+/**
+ * Builds the inherited cache candidate segment that maps ancestor versions onto
+ * the target schema version.
+ *
+ * @param cacheSource - The SQL producing the cache rows.
+ * @param schemaFilter - Optional schema predicate scoped to the cache alias.
+ * @param projectionColumns - Columns required for the projection.
+ * @returns SQL fragment or null when no cache source exists.
+ *
+ * @example
+ * ```ts
+ * const sql = buildInheritedCacheSegment('"cache_table"', "txn.schema_key = 'demo'", new Set());
+ * ```
+ */
+function buildInheritedCacheSegment(
+	cacheSource: string | null,
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
+): string | null {
+	if (!cacheSource) {
+		return null;
+	}
+	const rewrittenFilter = schemaFilter
+		? schemaFilter.replace(/txn\./g, "cache.")
+		: null;
+	const sourceKeyword = cacheSource.trim().toLowerCase();
+	const sourceSql = sourceKeyword.startsWith("select")
+		? `(${cacheSource})`
+		: cacheSource;
+	const columns: Array<[string, string]> = [
+		[
+			"_pk",
+			`'CI' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
+		],
+		["entity_id", "cache.entity_id AS entity_id"],
+		["schema_key", "cache.schema_key AS schema_key"],
+		["file_id", "cache.file_id AS file_id"],
+		["plugin_key", "cache.plugin_key AS plugin_key"],
+		["snapshot_content", "json(cache.snapshot_content) AS snapshot_content"],
+		["schema_version", "cache.schema_version AS schema_version"],
+		["version_id", "vi.version_id AS version_id"],
+		["created_at", "cache.created_at AS created_at"],
+		["updated_at", "cache.updated_at AS updated_at"],
+		[
+			"inherited_from_version_id",
+			"cache.version_id AS inherited_from_version_id",
+		],
+		["change_id", "cache.change_id AS change_id"],
+		["untracked", "0 AS untracked"],
+		["commit_id", "cache.commit_id AS commit_id"],
+		["metadata", "NULL AS metadata"],
+		["writer_key", "NULL AS writer_key"],
+		["priority", "4 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
+	return stripIndent(`
+		SELECT
+${indent(columnSql, 4)}
+		FROM version_inheritance vi
+		JOIN ${sourceSql} cache ON cache.version_id = vi.ancestor_version_id
+		WHERE cache.is_tombstone = 0
+		  AND cache.snapshot_content IS NOT NULL${
+				rewrittenFilter ? ` AND ${rewrittenFilter}` : ""
+			}
+	`).trimEnd();
+}
+
+/**
+ * Builds the inherited segment sourcing data from `lix_internal_state_all_untracked`.
+ *
+ * @param schemaFilter - Optional schema predicate scoped to the untracked alias.
+ * @param projectionColumns - Columns required for the projection.
+ * @returns SQL fragment selecting inherited untracked rows.
+ *
+ * @example
+ * ```ts
+ * const sql = buildInheritedUntrackedSegment(null, new Set(["entity_id"]));
+ * ```
+ */
+function buildInheritedUntrackedSegment(
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
+): string {
+	const rewrittenFilter = schemaFilter
+		? schemaFilter.replace(/txn\./g, "unt.")
+		: null;
+	const columns: Array<[string, string]> = [
+		[
+			"_pk",
+			`'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
+		],
+		["entity_id", "unt.entity_id AS entity_id"],
+		["schema_key", "unt.schema_key AS schema_key"],
+		["file_id", "unt.file_id AS file_id"],
+		["plugin_key", "unt.plugin_key AS plugin_key"],
+		["snapshot_content", "json(unt.snapshot_content) AS snapshot_content"],
+		["schema_version", "unt.schema_version AS schema_version"],
+		["version_id", "vi.version_id AS version_id"],
+		["created_at", "unt.created_at AS created_at"],
+		["updated_at", "unt.updated_at AS updated_at"],
+		[
+			"inherited_from_version_id",
+			"unt.version_id AS inherited_from_version_id",
+		],
+		["change_id", "'untracked' AS change_id"],
+		["untracked", "1 AS untracked"],
+		["commit_id", "'untracked' AS commit_id"],
+		["metadata", "NULL AS metadata"],
+		["writer_key", "NULL AS writer_key"],
+		["priority", "5 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
+	return stripIndent(`
+		SELECT
+${indent(columnSql, 4)}
+		FROM version_inheritance vi
+		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+		WHERE unt.is_tombstone = 0
+		  AND unt.snapshot_content IS NOT NULL${
+				rewrittenFilter ? ` AND ${rewrittenFilter}` : ""
+			}
+	`).trimEnd();
+}
+
+/**
+ * Builds the inherited segment that projects transaction rows onto descendant
+ * versions.
+ *
+ * @param schemaFilter - Optional schema predicate scoped to the transaction alias.
+ * @param projectionColumns - Columns required for the projection.
+ * @returns SQL fragment selecting inherited transaction rows.
+ *
+ * @example
+ * ```ts
+ * const sql = buildInheritedTransactionSegment("txn.schema_key = 'demo'", new Set(["change_id"]));
+ * ```
+ */
+function buildInheritedTransactionSegment(
+	schemaFilter: string | null,
+	projectionColumns: Set<string>
+): string {
+	const columns: Array<[string, string]> = [
+		[
+			"_pk",
+			`'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
+		],
+		["entity_id", "txn.entity_id AS entity_id"],
+		["schema_key", "txn.schema_key AS schema_key"],
+		["file_id", "txn.file_id AS file_id"],
+		["plugin_key", "txn.plugin_key AS plugin_key"],
+		["snapshot_content", "json(txn.snapshot_content) AS snapshot_content"],
+		["schema_version", "txn.schema_version AS schema_version"],
+		["version_id", "vi.version_id AS version_id"],
+		["created_at", "txn.created_at AS created_at"],
+		["updated_at", "txn.created_at AS updated_at"],
+		[
+			"inherited_from_version_id",
+			"vi.parent_version_id AS inherited_from_version_id",
+		],
+		["change_id", "txn.id AS change_id"],
+		["untracked", "txn.untracked AS untracked"],
+		["commit_id", "'pending' AS commit_id"],
+		["metadata", "json(txn.metadata) AS metadata"],
+		["writer_key", "txn.writer_key AS writer_key"],
+		["priority", "6 AS priority"],
+	];
+	const columnSql = columns
+		.filter(([column]) => projectionColumns.has(column))
+		.map(([, sql]) => sql)
+		.join(",\n");
+	const rewrittenFilter = schemaFilter ?? null;
+	return stripIndent(`
+		SELECT
+${indent(columnSql, 4)}
+		FROM version_parent vi
+		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
+		WHERE vi.parent_version_id IS NOT NULL
+		  AND txn.snapshot_content IS NOT NULL${
+				rewrittenFilter ? ` AND ${rewrittenFilter}` : ""
+			}
 	`).trimEnd();
 }
 

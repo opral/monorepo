@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { writeFile } from "node:fs/promises";
 import { parse } from "../../sql-parser/parse.js";
 import { compile } from "../../compile.js";
 import { rewriteEntityViewSelect } from "./select.js";
@@ -204,8 +203,6 @@ describe("rewriteEntityViewSelect", () => {
 			parameters: ["entity-1"],
 		});
 
-		await writeFile(new URL("./x.sql", import.meta.url), rewritten.sql, "utf8");
-
 		const rows = lix.engine!.sqlite.exec({
 			sql: rewritten.sql,
 			bind: rewritten.parameters as any[],
@@ -214,13 +211,13 @@ describe("rewriteEntityViewSelect", () => {
 			columnNames: [],
 		});
 
-		// expect(rows).toEqual([
-		// 	{
-		// 		id: "entity-1",
-		// 		name: "Entity",
-		// 		lixcol_inherited_from_version_id: "global",
-		// 	},
-		// ]);
+		expect(rows).toEqual([
+			{
+				id: "entity-1",
+				name: "Entity",
+				lixcol_inherited_from_version_id: "global",
+			},
+		]);
 	});
 
 	test("rewrites only when stored schema exists", async () => {
