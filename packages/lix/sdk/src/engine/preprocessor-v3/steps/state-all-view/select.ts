@@ -4,6 +4,7 @@ import type {
 	SelectExpressionNode,
 	ExpressionNode,
 	SelectItemNode,
+	RawFragmentNode,
 } from "../../sql-parser/nodes.js";
 import { identifier, columnReference } from "../../sql-parser/nodes.js";
 import {
@@ -70,26 +71,34 @@ function rewriteSelectNode(
 			}
 			const binding = getIdentifierValue(node.alias) ?? DEFAULT_BINDING;
 			references.push(binding);
-			const columns = collectReferencedColumns(select, binding);
-			return createStateAllSubquery(binding, columns);
+	const columns = collectReferencedColumns(select, binding);
+	const schemaFilter = collectSchemaKeyFilters(select, binding);
+			return createStateAllSubquery(binding, columns, schemaFilter);
 		},
 	};
 
 	return visitSelectStatement(select, visitor);
 }
 
-function createStateAllSubquery(binding: string, columns: Set<string> | null) {
+function createStateAllSubquery(
+	binding: string,
+	columns: Set<string> | null,
+	schemaFilters: Set<string> | null
+) {
 	return {
 		node_kind: "subquery" as const,
-		statement: buildStateAllSelect(columns),
+		statement: buildStateAllSelect(columns, schemaFilters),
 		alias: identifier(binding),
 	};
 }
 
-function buildStateAllSelect(columns: Set<string> | null): SelectStatementNode {
+function buildStateAllSelect(
+	columns: Set<string> | null,
+	schemaFilters: Set<string> | null
+): SelectStatementNode {
 	const projection = buildProjection(columns);
 
-	const whereClause: ExpressionNode = {
+	let whereClause: ExpressionNode = {
 		node_kind: "binary_expression",
 		left: columnReference(["v", "snapshot_content"]),
 		operator: "is_not",
@@ -98,6 +107,15 @@ function buildStateAllSelect(columns: Set<string> | null): SelectStatementNode {
 			value: null,
 		},
 	};
+	if (schemaFilters && schemaFilters.size > 0) {
+		const schemaExpression = buildSchemaFilterExpression(schemaFilters);
+		whereClause = {
+			node_kind: "binary_expression",
+			left: schemaExpression,
+			operator: "and",
+			right: whereClause,
+		};
+	}
 
 	return {
 		node_kind: "select_statement",
@@ -191,6 +209,30 @@ function buildProjection(columns: Set<string> | null): SelectExpressionNode[] {
 	return result;
 }
 
+function buildSchemaFilterExpression(values: Set<string>): ExpressionNode {
+	const literals = Array.from(values);
+	if (literals.length === 1) {
+		return {
+			node_kind: "binary_expression",
+			left: columnReference(["v", "schema_key"]),
+			operator: "=",
+			right: {
+				node_kind: "literal",
+				value: literals[0]!,
+			},
+		};
+	}
+	return {
+		node_kind: "in_list_expression",
+		operand: columnReference(["v", "schema_key"]),
+		items: literals.map((value) => ({
+			node_kind: "literal",
+			value,
+		})),
+		negated: false,
+	};
+}
+
 function collectReferencedColumns(
 	select: SelectStatementNode,
 	binding: string
@@ -240,6 +282,218 @@ function collectReferencedColumns(
 	}
 
 	return filtered.size === 0 ? new Set<string>(MANDATORY_COLUMNS) : filtered;
+}
+
+function collectSchemaKeyFilters(
+	select: SelectStatementNode,
+	binding: string
+): Set<string> | null {
+	const normalizedBinding = normalizeIdentifierValue(binding);
+	const whereClause = select.where_clause;
+	if (!whereClause) {
+		return null;
+	}
+	const values = new Set<string>();
+	let dynamic = false;
+	scanSchemaFilters(whereClause, normalizedBinding, values, () => {
+		dynamic = true;
+	});
+	if (dynamic || values.size === 0) {
+		return null;
+	}
+	return values;
+}
+
+function scanSchemaFilters(
+	expression: ExpressionNode | RawFragmentNode,
+	binding: string,
+	values: Set<string>,
+	markDynamic: () => void
+): void {
+	if ("sql_text" in expression) {
+		if (expression.sql_text.toLowerCase().includes("schema_key")) {
+			markDynamic();
+		}
+		return;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			scanSchemaFilters(expression.expression, binding, values, markDynamic);
+			return;
+		case "binary_expression": {
+			const operator = expression.operator.toLowerCase();
+			if (operator === "and") {
+				scanSchemaFilters(expression.left, binding, values, markDynamic);
+				scanSchemaFilters(expression.right, binding, values, markDynamic);
+				return;
+			}
+			if (operator === "or") {
+				if (
+					expressionContainsSchemaReference(expression.left, binding) ||
+					expressionContainsSchemaReference(expression.right, binding)
+				) {
+					markDynamic();
+					return;
+				}
+				scanSchemaFilters(expression.left, binding, values, markDynamic);
+				scanSchemaFilters(expression.right, binding, values, markDynamic);
+				return;
+			}
+			if (operator === "=" || operator === "is") {
+				let matched = false;
+				if (isSchemaKeyReferenceExpr(expression.left, binding)) {
+					matched = true;
+					if (!tryAddLiteralValue(expression.right, values)) {
+						markDynamic();
+					}
+				}
+				if (isSchemaKeyReferenceExpr(expression.right, binding)) {
+					matched = true;
+					if (!tryAddLiteralValue(expression.left, values)) {
+						markDynamic();
+					}
+				}
+				if (!matched) {
+					scanSchemaFilters(expression.left, binding, values, markDynamic);
+					scanSchemaFilters(expression.right, binding, values, markDynamic);
+				}
+				return;
+			}
+			if (expressionContainsSchemaReference(expression, binding)) {
+				markDynamic();
+				return;
+			}
+			scanSchemaFilters(expression.left, binding, values, markDynamic);
+			scanSchemaFilters(expression.right, binding, values, markDynamic);
+			return;
+		}
+		case "in_list_expression": {
+			if (isSchemaKeyReferenceExpr(expression.operand, binding)) {
+				for (const item of expression.items) {
+					if (!tryAddLiteralValue(item, values)) {
+						markDynamic();
+						return;
+					}
+				}
+				return;
+			}
+			scanSchemaFilters(expression.operand, binding, values, markDynamic);
+			for (const item of expression.items) {
+				scanSchemaFilters(item, binding, values, markDynamic);
+			}
+			return;
+		}
+		case "between_expression":
+			if (isSchemaKeyReferenceExpr(expression.operand, binding)) {
+				markDynamic();
+				return;
+			}
+			scanSchemaFilters(expression.operand, binding, values, markDynamic);
+			scanSchemaFilters(expression.start, binding, values, markDynamic);
+			scanSchemaFilters(expression.end, binding, values, markDynamic);
+			return;
+		case "unary_expression":
+			if (expressionContainsSchemaReference(expression.operand, binding)) {
+				markDynamic();
+				return;
+			}
+			scanSchemaFilters(expression.operand, binding, values, markDynamic);
+			return;
+		case "column_reference":
+			if (isSchemaKeyReferenceExpr(expression, binding)) {
+				markDynamic();
+			}
+			return;
+		case "literal":
+		case "parameter":
+		default:
+			return;
+	}
+}
+
+function isSchemaKeyReferenceExpr(
+	expression: ExpressionNode,
+	binding: string
+): boolean {
+	if (expression.node_kind !== "column_reference") {
+		return false;
+	}
+	const qualifier = getColumnQualifier(expression);
+	if (
+		qualifier !== null &&
+		normalizeIdentifierValue(qualifier) !== binding
+	) {
+		return false;
+	}
+	return getColumnName(expression) === "schema_key";
+}
+
+function tryAddLiteralValue(
+	expression: ExpressionNode | RawFragmentNode,
+	values: Set<string>
+): boolean {
+	const unwrapped = unwrapExpressionNode(expression);
+	if (unwrapped.node_kind !== "literal") {
+		return false;
+	}
+	return typeof unwrapped.value === "string"
+		? (values.add(unwrapped.value), true)
+		: false;
+}
+
+function unwrapExpressionNode(
+	expression: ExpressionNode | RawFragmentNode
+): ExpressionNode | RawFragmentNode {
+	let current = expression;
+	while (
+		!("sql_text" in current) &&
+		current.node_kind === "grouped_expression"
+	) {
+		current = current.expression;
+	}
+	return current;
+}
+
+function expressionContainsSchemaReference(
+	expression: ExpressionNode | RawFragmentNode,
+	binding: string
+): boolean {
+	if ("sql_text" in expression) {
+		return true;
+	}
+	switch (expression.node_kind) {
+		case "column_reference":
+			return isSchemaKeyReferenceExpr(expression, binding);
+		case "grouped_expression":
+			return expressionContainsSchemaReference(
+				expression.expression,
+				binding
+			);
+		case "binary_expression":
+			return (
+				expressionContainsSchemaReference(expression.left, binding) ||
+				expressionContainsSchemaReference(expression.right, binding)
+			);
+		case "in_list_expression":
+			return (
+				isSchemaKeyReferenceExpr(expression.operand, binding) ||
+				expression.items.some((item) =>
+					expressionContainsSchemaReference(item, binding)
+				)
+			);
+		case "between_expression":
+			return (
+				expressionContainsSchemaReference(expression.operand, binding) ||
+				expressionContainsSchemaReference(expression.start, binding) ||
+				expressionContainsSchemaReference(expression.end, binding)
+			);
+		case "unary_expression":
+			return expressionContainsSchemaReference(expression.operand, binding);
+		case "literal":
+		case "parameter":
+		default:
+			return false;
+	}
 }
 
 function processProjectionItem(

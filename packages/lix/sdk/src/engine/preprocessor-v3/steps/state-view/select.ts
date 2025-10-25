@@ -45,6 +45,7 @@ const STATE_COLUMNS = [
 type StateReference = {
 	readonly binding: string;
 	readonly usedColumns: Set<string> | null;
+	readonly schemaFilters: Set<string> | null;
 };
 
 /**
@@ -95,16 +96,19 @@ function collectFromRelation(
 		}
 		const binding = getIdentifierValue(relation.alias) ?? STATE_VIEW_NAME;
 		const usage = collectStateColumnUsage(parentSelect, binding);
+		const schemaFilters = collectStateSchemaFilters(parentSelect, binding);
 		const existing = references.get(binding);
 		if (!existing) {
 			references.set(binding, {
 				binding,
 				usedColumns: usage,
+				schemaFilters,
 			});
 		} else {
 			references.set(binding, {
 				binding,
 				usedColumns: mergeColumnUsage(existing.usedColumns, usage),
+				schemaFilters: mergeSchemaFilters(existing.schemaFilters, schemaFilters),
 			});
 		}
 		return;
@@ -197,9 +201,21 @@ function buildStateSelect(reference: StateReference): SelectStatementNode {
 		projection.push(columnSelect("entity_id"));
 	}
 
-	const whereClause: RawFragmentNode = rawFragment(
+	const versionFilter: RawFragmentNode = rawFragment(
 		'"sa"."version_id" IN (SELECT "version_id" FROM "active_version")'
 	);
+	let whereClause: ExpressionNode | RawFragmentNode = versionFilter;
+	if (reference.schemaFilters && reference.schemaFilters.size > 0) {
+		const schemaExpression = buildStateSchemaFilterExpression(
+			reference.schemaFilters
+		);
+		whereClause = {
+			node_kind: "binary_expression",
+			left: schemaExpression,
+			operator: "and",
+			right: versionFilter,
+		};
+	}
 
 	return {
 		node_kind: "select_statement",
@@ -228,6 +244,30 @@ function columnSelect(column: string): SelectExpressionNode {
 		node_kind: "select_expression",
 		expression: columnReference(["sa", column]),
 		alias: identifier(column),
+	};
+}
+
+function buildStateSchemaFilterExpression(values: Set<string>): ExpressionNode {
+	const literals = Array.from(values);
+	if (literals.length === 1) {
+		return {
+			node_kind: "binary_expression",
+			left: columnReference(["sa", "schema_key"]),
+			operator: "=",
+			right: {
+				node_kind: "literal",
+				value: literals[0]!,
+			},
+		};
+	}
+	return {
+		node_kind: "in_list_expression",
+		operand: columnReference(["sa", "schema_key"]),
+		items: literals.map((value) => ({
+			node_kind: "literal",
+			value,
+		})),
+		negated: false,
 	};
 }
 
@@ -290,6 +330,80 @@ function collectStateColumnUsage(
 	}
 
 	return columns;
+}
+
+function collectStateSchemaFilters(
+	select: SelectStatementNode,
+	binding: string
+): Set<string> | null {
+	const whereClause = select.where_clause;
+	if (!whereClause || "sql_text" in whereClause) {
+		return null;
+	}
+	const normalizedBinding = normalizeIdentifierValue(binding);
+	const expression = unwrapGroupedExpression(whereClause);
+	if (expression.node_kind !== "binary_expression") {
+		return null;
+	}
+	const operator = expression.operator.toLowerCase();
+	if (operator !== "=" && operator !== "is") {
+		return null;
+	}
+	const values = new Set<string>();
+	if (isSchemaKeyReference(expression.left, normalizedBinding)) {
+		const literal = extractLiteralValue(expression.right);
+		if (literal) {
+			values.add(literal);
+		} else {
+			return null;
+		}
+	}
+	if (isSchemaKeyReference(expression.right, normalizedBinding)) {
+		const literal = extractLiteralValue(expression.left);
+		if (literal) {
+			values.add(literal);
+		} else {
+			return null;
+		}
+	}
+	return values.size > 0 ? values : null;
+}
+
+function unwrapGroupedExpression(
+	expression: ExpressionNode
+): ExpressionNode {
+	let current = expression;
+	while (current.node_kind === "grouped_expression") {
+		current = current.expression;
+	}
+	return current;
+}
+
+function isSchemaKeyReference(
+	expression: ExpressionNode,
+	binding: string
+): boolean {
+	if (expression.node_kind !== "column_reference") {
+		return false;
+	}
+	const qualifier = getColumnQualifier(expression);
+	if (
+		qualifier !== null &&
+		normalizeIdentifierValue(qualifier) !== binding
+	) {
+		return false;
+	}
+	return getColumnName(expression) === "schema_key";
+}
+
+function extractLiteralValue(
+	expression: ExpressionNode
+): string | null {
+	const unwrapped = unwrapGroupedExpression(expression);
+	if (unwrapped.node_kind !== "literal") {
+		return null;
+	}
+	return typeof unwrapped.value === "string" ? unwrapped.value : null;
 }
 
 function processStateSelectItem(
@@ -470,6 +584,23 @@ function mergeColumnUsage(
 	const merged = new Set(existing);
 	for (const column of next) {
 		merged.add(column);
+	}
+	return merged;
+}
+
+function mergeSchemaFilters(
+	existing: Set<string> | null,
+	next: Set<string> | null
+): Set<string> | null {
+	if (existing === null) {
+		return next === null ? null : new Set(next);
+	}
+	if (next === null) {
+		return existing;
+	}
+	const merged = new Set(existing);
+	for (const value of next) {
+		merged.add(value);
 	}
 	return merged;
 }
