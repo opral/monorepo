@@ -2,12 +2,14 @@ import {
 	useCallback,
 	useEffect,
 	useId,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
 	type KeyboardEvent,
 } from "react";
-import { ArrowUp } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowUp, Brain, Check, ChevronDown } from "lucide-react";
 import { ChangeProposalRejectedError } from "@lix-js/agent-sdk";
 import { MentionMenu, CommandMenu } from "../menu";
 import type { SlashCommand } from "../commands";
@@ -15,11 +17,28 @@ import { buildMentionList, calculateMentionRange } from "../mention-utils";
 
 const MAX_HISTORY = 20;
 
+type ModelOption = {
+	id: string;
+	label: string;
+};
+
 type PromptComposerProps = {
 	/**
 	 * Enablement flags for sending messages and slash commands.
 	 */
 	hasKey: boolean;
+	/**
+	 * Available model options rendered in the composer footer.
+	 */
+	models: readonly ModelOption[];
+	/**
+	 * Currently selected model identifier.
+	 */
+	modelId: string;
+	/**
+	 * Persist the selected model identifier.
+	 */
+	onModelChange(value: string): void;
 	/**
 	 * Available slash commands surfaced in the composer.
 	 */
@@ -57,6 +76,9 @@ type PromptComposerProps = {
  */
 export function PromptComposer({
 	hasKey,
+	models,
+	modelId,
+	onModelChange,
 	commands,
 	files,
 	pending,
@@ -369,55 +391,239 @@ export function PromptComposer({
 	const sendDisabled = pending || !hasKey;
 
 	return (
-		<div className="relative w-full max-w-3xl overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
-			<label htmlFor={textAreaId} className="sr-only">
-				Ask the assistant
-			</label>
-			<textarea
-				ref={textAreaRef}
-				id={textAreaId}
-				data-testid="agent-composer-input"
-				placeholder={placeholder}
-				disabled={!hasKey}
-				value={value}
-				onChange={(event) => {
-					const next = event.target.value;
-					const token = extractSlashToken(next);
-					setValue(next);
-					onNotice(null);
-					setSlashOpen(token !== null);
-					setSlashIdx(0);
-					if (token !== null) {
-						setMentionOpen(false);
-						mentionCtx.current = null;
-					}
-				}}
-				onKeyDown={onKeyDown}
-				onClick={() => {
-					updateMentions(textAreaRef.current);
-				}}
-				onSelect={() => {
-					updateMentions(textAreaRef.current);
-				}}
-				className="h-28 w-full resize-none border-0 bg-transparent px-3 py-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
-			/>
-			{menuFragment ? (
-				<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
-					{menuFragment}
-				</div>
-			) : null}
-			<div className="flex justify-end bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+		<div className="relative w-full max-w-3xl">
+			<div className="relative overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
+				<label htmlFor={textAreaId} className="sr-only">
+					Ask the assistant
+				</label>
+				<textarea
+					ref={textAreaRef}
+					id={textAreaId}
+					data-testid="agent-composer-input"
+					placeholder={placeholder}
+					disabled={!hasKey}
+					value={value}
+					onChange={(event) => {
+						const next = event.target.value;
+						const token = extractSlashToken(next);
+						setValue(next);
+						onNotice(null);
+						setSlashOpen(token !== null);
+						setSlashIdx(0);
+						if (token !== null) {
+							setMentionOpen(false);
+							mentionCtx.current = null;
+						}
+					}}
+					onKeyDown={onKeyDown}
+					onClick={() => {
+						updateMentions(textAreaRef.current);
+					}}
+					onSelect={() => {
+						updateMentions(textAreaRef.current);
+					}}
+					className="h-28 w-full resize-none border-0 bg-transparent px-3 pr-14 pb-12 pt-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
+				/>
+				{menuFragment ? (
+					<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">
+						{menuFragment}
+					</div>
+				) : null}
 				<button
 					type="button"
 					onClick={() => {
 						void commit();
 					}}
 					disabled={sendDisabled}
-					className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+					className="absolute bottom-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-100 text-neutral-900 shadow-sm transition hover:bg-neutral-200/80 disabled:cursor-not-allowed disabled:border-border/60 disabled:bg-muted/20 disabled:text-muted-foreground"
+					aria-label="Send message"
 				>
-					<ArrowUp className="h-3.5 w-3.5" />
+					<ArrowUp className="h-4 w-4" />
 				</button>
 			</div>
+			<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+				<ModelSelector
+					options={models}
+					value={modelId}
+					onChange={onModelChange}
+					disabled={pending}
+				/>
+			</div>
+		</div>
+	);
+}
+
+function ModelSelector({
+	options,
+	value,
+	onChange,
+	disabled,
+}: {
+	options: readonly ModelOption[];
+	value: string;
+	onChange(value: string): void;
+	disabled?: boolean;
+}) {
+	const [open, setOpen] = useState(false);
+	const [menuRect, setMenuRect] = useState<{
+		top: number;
+		left: number;
+		width: number;
+		anchorBottom: number;
+	} | null>(null);
+	const buttonRef = useRef<HTMLButtonElement | null>(null);
+	const menuRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		const handlePointer = (event: PointerEvent) => {
+			const target = event.target as Node | null;
+			if (
+				target &&
+				(buttonRef.current?.contains(target) ||
+					menuRef.current?.contains(target))
+			) {
+				return;
+			}
+			setOpen(false);
+		};
+		window.addEventListener("pointerdown", handlePointer);
+		return () => {
+			window.removeEventListener("pointerdown", handlePointer);
+		};
+	}, [open]);
+
+	const updateMenuRect = useCallback(() => {
+		if (!buttonRef.current) return;
+		const rect = buttonRef.current.getBoundingClientRect();
+		setMenuRect({
+			top: rect.bottom + window.scrollY + 6,
+			left: rect.left + window.scrollX,
+			width: Math.max(rect.width, 200),
+			anchorBottom: rect.bottom + window.scrollY,
+		});
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!open) {
+			setMenuRect(null);
+			return;
+		}
+		updateMenuRect();
+		window.addEventListener("resize", updateMenuRect);
+		window.addEventListener("scroll", updateMenuRect, true);
+		return () => {
+			window.removeEventListener("resize", updateMenuRect);
+			window.removeEventListener("scroll", updateMenuRect, true);
+		};
+	}, [open, updateMenuRect]);
+
+	useLayoutEffect(() => {
+		if (!open || !menuRect) return;
+		const menuEl = menuRef.current;
+		if (!menuEl) return;
+		const height = menuEl.offsetHeight;
+		const viewportBottom = window.scrollY + window.innerHeight;
+		const preferredBottom = menuRect.top + height;
+		if (preferredBottom <= viewportBottom - 12) {
+			return;
+		}
+		const desiredTop = Math.max(
+			window.scrollY + 12,
+			menuRect.anchorBottom - height - 6,
+		);
+		if (Math.abs(desiredTop - menuRect.top) > 1) {
+			setMenuRect((prev) => (prev ? { ...prev, top: desiredTop } : prev));
+		}
+	}, [open, menuRect]);
+
+	const toggle = useCallback(() => {
+		if (disabled) return;
+		setOpen((prev) => !prev);
+	}, [disabled]);
+
+	const handleSelect = useCallback(
+		(next: string) => {
+			onChange(next);
+			setOpen(false);
+		},
+		[onChange],
+	);
+
+	const activeOption = options.find((option) => option.id === value);
+
+	return (
+		<div className="relative inline-flex">
+			<button
+				ref={buttonRef}
+				type="button"
+				disabled={disabled}
+				onClick={toggle}
+				title={activeOption ? `Model: ${activeOption.label}` : "Select model"}
+				className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:text-muted-foreground"
+				aria-haspopup="menu"
+				aria-expanded={open}
+				aria-label={
+					activeOption
+						? `Change model (current: ${activeOption.label})`
+						: "Select model"
+				}
+			>
+				<Brain
+					className="h-3.5 w-3.5 text-muted-foreground/80"
+					aria-hidden="true"
+				/>
+				<span className="max-w-[12rem] truncate">
+					{activeOption ? activeOption.label : "Select model"}
+				</span>
+				<ChevronDown
+					className="h-3 w-3 text-muted-foreground/70"
+					aria-hidden="true"
+				/>
+			</button>
+			{open && menuRect
+				? createPortal(
+						<div
+							ref={menuRef}
+							role="menu"
+							className="fixed z-[999] overflow-hidden rounded-lg border border-border/70 bg-background shadow-xl"
+							style={{
+								top: menuRect.top,
+								left: menuRect.left,
+								width: menuRect.width,
+							}}
+						>
+							<ul className="divide-y divide-border/70 text-xs text-foreground">
+								{options.map((option) => {
+									const isActive = option.id === value;
+									return (
+										<li key={option.id}>
+											<button
+												type="button"
+												onClick={() => handleSelect(option.id)}
+												className={[
+													"flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition",
+													isActive
+														? "bg-muted/30 text-foreground"
+														: "hover:bg-muted/40",
+												].join(" ")}
+												role="menuitemradio"
+												aria-checked={isActive}
+											>
+												<span className="flex items-center gap-2">
+													<Brain className="h-3.5 w-3.5 text-muted-foreground/80" />
+													{option.label}
+												</span>
+												{isActive ? <Check className="h-3 w-3" /> : null}
+											</button>
+										</li>
+									);
+								})}
+							</ul>
+						</div>,
+						document.body,
+					)
+				: null}
 		</div>
 	);
 }

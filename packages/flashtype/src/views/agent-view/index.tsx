@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bot } from "lucide-react";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
@@ -36,7 +36,11 @@ type AgentViewProps = {
 };
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
-const MODEL_NAME = "google/gemini-2.5-pro";
+const DEFAULT_MODEL_ID = "anthropic/claude-4.5-sonnet";
+const AVAILABLE_MODELS = [
+	{ id: DEFAULT_MODEL_ID, label: "Claude 4.5 Sonnet" },
+	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+] as const;
 const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
 
 /**
@@ -63,6 +67,20 @@ export function AgentView({ context }: AgentViewProps) {
 	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
 	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
 	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
+	const [storedModel, setStoredModel] = useKeyValue("flashtype_agent_model");
+	const selectedModelId = useMemo(() => {
+		if (!storedModel) return DEFAULT_MODEL_ID;
+		const match = AVAILABLE_MODELS.find((option) => option.id === storedModel);
+		return match ? match.id : DEFAULT_MODEL_ID;
+	}, [storedModel]);
+
+	useEffect(() => {
+		if (!storedModel) return;
+		const match = AVAILABLE_MODELS.some((option) => option.id === storedModel);
+		if (!match) {
+			void setStoredModel(DEFAULT_MODEL_ID);
+		}
+	}, [storedModel, setStoredModel]);
 
 	useEffect(() => {
 		(async () => {
@@ -108,8 +126,8 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [storedApiKey]);
 
 	const model = useMemo(
-		() => (provider ? provider(MODEL_NAME) : null),
-		[provider],
+		() => (provider ? provider(selectedModelId) : null),
+		[provider, selectedModelId],
 	);
 	const hasKey = Boolean(storedApiKey);
 
@@ -130,6 +148,7 @@ export function AgentView({ context }: AgentViewProps) {
 			setAgent(null);
 			return;
 		}
+		setAgent(null);
 		createLixAgent({ lix, model, systemPrompt })
 			.then((createdAgent) => {
 				if (cancelled) return;
@@ -178,6 +197,13 @@ export function AgentView({ context }: AgentViewProps) {
 		setPendingMessage(null);
 	}, [agent, conversationId]);
 
+	const handleModelChange = useCallback(
+		(next: string) => {
+			void setStoredModel(next);
+		},
+		[setStoredModel],
+	);
+
 	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
 	const filePaths = useMemo(
 		() => (fileRows ?? []).map((row: any) => String(row.path)),
@@ -192,6 +218,27 @@ export function AgentView({ context }: AgentViewProps) {
 	const [notice, setNotice] = useState<string | null>(null);
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
+	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+	const messageCount = messages?.length ?? 0;
+
+	const scrollToBottom = useCallback(() => {
+		const node = scrollContainerRef.current;
+		if (!node) return;
+		node.scrollTop = node.scrollHeight;
+	}, []);
+
+	useEffect(() => {
+		const frame = requestAnimationFrame(scrollToBottom);
+		return () => cancelAnimationFrame(frame);
+	}, [
+		scrollToBottom,
+		messageCount,
+		pendingMessage,
+		pendingProposal?.proposalId,
+		pending,
+		notice,
+		error,
+	]);
 
 	const handleApiKeyChange = useCallback((value: string) => {
 		setApiKeyDraft(value);
@@ -433,7 +480,10 @@ export function AgentView({ context }: AgentViewProps) {
 			*/}
 
 			{/* Conversation messages */}
-			<div className="flex-1 min-h-0 overflow-y-auto gap-4 flex flex-col">
+			<div
+				ref={scrollContainerRef}
+				className="flex-1 min-h-0 overflow-y-auto gap-4 flex flex-col"
+			>
 				{hasKey ? (
 					<>
 						{messages.map((message) => (
@@ -478,6 +528,9 @@ export function AgentView({ context }: AgentViewProps) {
 					) : (
 						<PromptComposer
 							hasKey={hasKey}
+							models={AVAILABLE_MODELS}
+							modelId={selectedModelId}
+							onModelChange={handleModelChange}
 							commands={COMMANDS}
 							files={filePaths}
 							pending={pending}

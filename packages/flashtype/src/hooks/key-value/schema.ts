@@ -35,6 +35,15 @@ export const KEY_VALUE_DEFINITIONS = {
 	} as KeyDef<boolean>,
 
 	/**
+	 * Persist the preferred agent model across sessions.
+	 */
+	flashtype_agent_model: {
+		defaultVersionId: "global",
+		untracked: true,
+		defaultValue: "google/gemini-2.5-pro",
+	} as KeyDef<string>,
+
+	/**
 	 * When true, the agent auto-accepts all change proposals during this session.
 	 * Untracked global UI toggle controlled via the prompt bar (1–2–3 menu).
 	 */
