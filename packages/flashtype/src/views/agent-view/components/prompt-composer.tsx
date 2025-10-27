@@ -435,6 +435,7 @@ export function PromptComposer({
 						void commit();
 					}}
 					disabled={sendDisabled}
+					data-testid="agent-composer-send"
 					className="absolute bottom-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-100 text-neutral-900 shadow-sm transition hover:bg-neutral-200/80 disabled:cursor-not-allowed disabled:border-border/60 disabled:bg-muted/20 disabled:text-muted-foreground"
 					aria-label="Send message"
 				>

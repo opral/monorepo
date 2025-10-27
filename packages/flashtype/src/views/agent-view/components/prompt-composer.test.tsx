@@ -20,6 +20,9 @@ function renderComposer(
 		commands: COMMANDS,
 		files: TEST_FILES,
 		pending: false,
+		models: [{ id: "claude-3-opus", label: "Claude 3 Opus" }],
+		modelId: "claude-3-opus",
+		onModelChange: vi.fn(),
 		onNotice: vi.fn(),
 		onSlashCommand: vi.fn().mockResolvedValue(undefined),
 		onSendMessage: vi.fn().mockResolvedValue(undefined),
@@ -29,7 +32,7 @@ function renderComposer(
 	const textarea = screen.getByTestId(
 		"agent-composer-input",
 	) as HTMLTextAreaElement;
-	const sendButton = screen.getByRole("button");
+	const sendButton = screen.getByTestId("agent-composer-send");
 	return {
 		props,
 		textarea,
