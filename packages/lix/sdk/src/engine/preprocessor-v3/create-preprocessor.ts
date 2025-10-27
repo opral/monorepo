@@ -123,6 +123,7 @@ function buildContext(
 			}
 			return celEnvironment ?? null;
 		},
+		getEngine: () => engine,
 		...(trace ? { trace } : {}),
 	} as PreprocessorContext;
 

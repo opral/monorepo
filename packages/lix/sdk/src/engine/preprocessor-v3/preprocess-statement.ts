@@ -7,6 +7,7 @@ import { rewriteEntityViewUpdate } from "./steps/entity-view/update.js";
 import { rewriteStateViewSelect } from "./steps/state-view/select.js";
 import { rewriteEntityViewInsert } from "./steps/entity-view/insert.js";
 import { rewriteEntityViewDelete } from "./steps/entity-view/delete.js";
+import { cachePopulator } from "./steps/cache-populator.js";
 import type { PreprocessorContext, PreprocessorStep } from "./types.js";
 
 const pipeline: PreprocessorStep[] = [
@@ -17,6 +18,7 @@ const pipeline: PreprocessorStep[] = [
 	rewriteEntityViewSelect,
 	rewriteStateViewSelect,
 	rewriteStateAllViewSelect,
+	cachePopulator,
 	rewriteVtableSelects,
 ];
 
@@ -44,6 +46,7 @@ export function preprocessStatement(
 				getSqlViews: context.getSqlViews,
 				hasOpenTransaction: context.hasOpenTransaction,
 				getCelEnvironment: context.getCelEnvironment,
+				getEngine: context.getEngine,
 				trace: context.trace,
 			}) as StatementNode,
 		node
