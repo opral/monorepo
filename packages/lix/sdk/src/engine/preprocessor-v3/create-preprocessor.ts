@@ -41,17 +41,26 @@ export function createPreprocessor(args: {
 	return ({ sql, parameters, sideEffects, trace }: PreprocessorArgs) => {
 		void sideEffects;
 
-		const traceEntries = trace ? [] : undefined;
+		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 
 		const statement = parse(sql);
 		const rewritten = preprocessStatement(statement, context, parameters);
+
+		if (traceEntries) {
+			traceEntries.push({
+				step: "complete",
+				payload: { ast: structuredClone(rewritten) },
+			});
+		}
+
 		const compiled = compile(rewritten);
 
 		return {
 			sql: compiled.sql,
 			parameters,
-			expandedSql: undefined,
+			expandedSql:
+				rewritten.node_kind === "raw_fragment" ? compiled.sql : undefined,
 			context,
 		};
 	};

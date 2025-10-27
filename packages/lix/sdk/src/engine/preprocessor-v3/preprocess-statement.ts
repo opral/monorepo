@@ -4,10 +4,12 @@ import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
 import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
 import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
 import { rewriteStateViewSelect } from "./steps/state-view/select.js";
+import { rewriteEntityViewInsert } from "./steps/entity-view/insert.js";
 import type { PreprocessorContext, PreprocessorStep } from "./types.js";
 
 const pipeline: PreprocessorStep[] = [
 	expandSqlViews,
+	rewriteEntityViewInsert,
 	rewriteEntityViewSelect,
 	rewriteStateViewSelect,
 	rewriteStateAllViewSelect,

@@ -484,6 +484,7 @@ class SqlParser extends CstParser {
 						this.SUBRULE(this.column_reference, { LABEL: "reference" }),
 				},
 				{
+					GATE: () => this.LA(2).tokenType === Select,
 					ALT: () => {
 						this.CONSUME1(LeftParen);
 						this.SUBRULE(this.select_core, { LABEL: "subselect" });
@@ -491,6 +492,7 @@ class SqlParser extends CstParser {
 					},
 				},
 				{
+					GATE: () => this.LA(2).tokenType !== Select,
 					ALT: () => {
 						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.expression, { LABEL: "inner" });

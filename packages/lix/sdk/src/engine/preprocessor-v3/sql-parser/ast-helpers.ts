@@ -126,6 +126,18 @@ export function getColumnPath(
 }
 
 /**
+ * Escapes single quotes in a string so it can be safely used as an SQL literal.
+ *
+ * @example
+ * ```ts
+ * sqlStringLiteral("O'Reilly"); // returns 'O''Reilly'
+ * ```
+ */
+export function sqlStringLiteral(value: string): string {
+	return `'${value.replace(/'/g, "''")}'`;
+}
+
+/**
  * Determines whether an expression is a literal node.
  *
  * @example

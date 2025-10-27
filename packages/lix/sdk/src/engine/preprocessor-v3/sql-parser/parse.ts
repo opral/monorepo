@@ -459,6 +459,7 @@ class ToAstVisitor extends BaseVisitor {
 		string?: IToken[];
 		number?: IToken[];
 		reference?: CstNode[];
+		subselect?: CstNode[];
 		inner?: CstNode[];
 	}): ExpressionNode {
 		const parameter = ctx.parameter?.[0];
@@ -480,6 +481,14 @@ class ToAstVisitor extends BaseVisitor {
 		const reference = ctx.reference?.[0];
 		if (reference) {
 			return this.visit(reference) as ExpressionNode;
+		}
+		const subselect = ctx.subselect?.[0];
+		if (subselect) {
+			const statement = this.visit(subselect) as SelectStatementNode;
+			return {
+				node_kind: "subquery_expression",
+				statement,
+			};
 		}
 		const inner = ctx.inner?.[0];
 		if (!inner) {

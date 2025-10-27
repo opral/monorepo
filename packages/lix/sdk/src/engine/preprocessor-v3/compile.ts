@@ -25,6 +25,7 @@ import type {
 	UnaryExpressionNode,
 	UnaryOperator,
 	UpdateStatementNode,
+	SubqueryExpressionNode,
 } from "./sql-parser/nodes.js";
 import type { SqlNode } from "./sql-parser/nodes.js";
 import {
@@ -278,10 +279,12 @@ function emitExpressionWithoutParent(expression: ExpressionNode): string {
 			return emitUnaryExpression(expression);
 		case "in_list_expression":
 			return emitInListExpression(expression);
-		case "between_expression":
-			return emitBetweenExpression(expression);
-		case "raw_fragment":
-			return expression.sql_text;
+	case "between_expression":
+		return emitBetweenExpression(expression);
+	case "subquery_expression":
+		return emitSubqueryExpression(expression);
+	case "raw_fragment":
+		return expression.sql_text;
 		default:
 			return assertNever(expression);
 	}
@@ -327,6 +330,11 @@ function emitBetweenExpression(expression: BetweenExpressionNode): string {
 	return `${operand} ${keyword} ${start} AND ${end}`;
 }
 
+function emitSubqueryExpression(expression: SubqueryExpressionNode): string {
+	const inner = emitSelectStatement(expression.statement);
+	return `(${inner})`;
+}
+
 function emitOrderByItem(item: OrderByItemNode): string {
 	const expressionSql = emitExpression(item.expression);
 	if (!item.direction) {
@@ -354,7 +362,11 @@ function emitIdentifierPath(path: readonly IdentifierNode[]): string {
 }
 
 function emitIdentifier(identifier: IdentifierNode): string {
-	const escaped = identifier.value.replace(/"/g, '""');
+	const value = identifier.value;
+	if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+		return value;
+	}
+	const escaped = value.replace(/"/g, '""');
 	return `"${escaped}"`;
 }
 

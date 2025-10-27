@@ -4,6 +4,11 @@ import { compile } from "../../compile.js";
 import { rewriteEntityViewSelect } from "./select.js";
 import type { PreprocessorTraceEntry } from "../../types.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
+import type {
+	SelectStatementNode,
+	SubqueryNode,
+	TableReferenceNode,
+} from "../../sql-parser/nodes.js";
 import { openLix } from "../../../../lix/open-lix.js";
 import { createPreprocessor } from "../../create-preprocessor.js";
 
@@ -60,26 +65,38 @@ function run(sql: string) {
 
 describe("rewriteEntityViewSelect", () => {
 	test("rewrites base entity view into state-backed subquery", () => {
-		const { compiled, trace } = run(`
-			SELECT ev.id
-			FROM demo_entity AS ev
-		`);
+		const { rewritten, trace } = run(`
+		SELECT ev.id
+		FROM demo_entity AS ev
+	`);
 
-		const sql = compiled.sql;
-		expect(sql.toUpperCase()).toContain('FROM "STATE" AS "ST"');
-		expect(sql).toContain("= 'demo_entity'");
+		const select = rewritten as SelectStatementNode;
+		const fromClause = select.from_clauses[0]!;
+		const relation = fromClause.relation;
+		expect(relation.node_kind).toBe("subquery");
+		const subquery = relation as SubqueryNode;
+		expect(subquery.alias?.value).toBe("ev");
+		const innerFrom = subquery.statement.from_clauses[0]!;
+		expect(innerFrom.relation.node_kind).toBe("table_reference");
+		const table = innerFrom.relation as TableReferenceNode;
+		expect(table.name.parts.at(-1)?.value.toLowerCase()).toBe("state");
 		expect(trace[0]?.step).toBe("rewrite_entity_view_select");
 	});
 
 	test("rewrites _all variant", () => {
-		const { compiled } = run(`
-			SELECT *
-			FROM demo_entity_all
-		`);
+		const { rewritten } = run(`
+		SELECT *
+		FROM demo_entity_all
+	`);
 
-		const sql = compiled.sql.toUpperCase();
-		expect(sql).toContain('FROM "STATE_ALL" AS "SA"');
-		expect(sql).toContain('COALESCE("SA"."INHERITED_FROM_VERSION_ID"');
+		const select = rewritten as SelectStatementNode;
+		const relation = select.from_clauses[0]!.relation;
+		expect(relation.node_kind).toBe("subquery");
+		const subquery = relation as SubqueryNode;
+		const innerFrom = subquery.statement.from_clauses[0]!;
+		expect(innerFrom.relation.node_kind).toBe("table_reference");
+		const table = innerFrom.relation as TableReferenceNode;
+		expect(table.name.parts.at(-1)?.value.toLowerCase()).toBe("state_all");
 	});
 
 	test("prunes unused properties", () => {
@@ -140,7 +157,9 @@ describe("rewriteEntityViewSelect", () => {
 		});
 
 		expect(selectResult.sql).not.toMatch(/FROM\s+e2e_schema\b/i);
-		expect(selectResult.sql).toMatch(/"schema_key"\s*=\s*'e2e_schema'/i);
+		expect(selectResult.sql.toLowerCase()).toContain(
+			"schema_key = 'e2e_schema'"
+		);
 
 		const executed = lix.engine!.sqlite.exec({
 			sql: selectResult.sql,
@@ -225,7 +244,7 @@ describe("rewriteEntityViewSelect", () => {
 		const preprocess = createPreprocessor({ engine: lix.engine! });
 		const sql = "SELECT name FROM transient_schema WHERE id = ?";
 		const initial = preprocess({ sql, parameters: ["row-1"] });
-		expect(initial.sql.toLowerCase()).toContain('from "transient_schema"');
+		expect(initial.sql.toLowerCase()).toContain("from transient_schema");
 		expect(initial.sql.toLowerCase()).not.toContain(
 			"lix_internal_transaction_state"
 		);
