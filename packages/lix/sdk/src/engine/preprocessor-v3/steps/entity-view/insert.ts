@@ -7,9 +7,7 @@ import {
 	type RawFragmentNode,
 	type StatementNode,
 } from "../../sql-parser/nodes.js";
-import {
-	normalizeIdentifierValue,
-} from "../../sql-parser/ast-helpers.js";
+import { normalizeIdentifierValue } from "../../sql-parser/ast-helpers.js";
 import { expressionToSql, compile } from "../../compile.js";
 import type { PreprocessorStep } from "../../types.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
@@ -83,37 +81,37 @@ export const rewriteEntityViewInsert: PreprocessorStep = (context) => {
 	const parameters = context.parameters ?? [];
 	const celEnvironment = context.getCelEnvironment?.() ?? null;
 
-const rewritten = buildEntityViewInsert({
-	insert,
-	schema,
-	variant,
-	viewName,
-	parameters,
-	celEnvironment,
-	getSqlViews: context.getSqlViews,
-});
-
-if (!rewritten) {
-	return statement;
-}
-
-const finalNode = context.getSqlViews
-	? (expandSqlViewsStep({
-		...context,
-		node: rewritten,
-	}) as StatementNode)
-	: rewritten;
-
-context.trace?.push({
-	step: "rewrite_entity_view_insert",
-	payload: {
-		view: viewName,
-		schema: schema["x-lix-key"],
+	const rewritten = buildEntityViewInsert({
+		insert,
+		schema,
 		variant,
-	},
-});
+		viewName,
+		parameters,
+		celEnvironment,
+		getSqlViews: context.getSqlViews,
+	});
 
-return finalNode;
+	if (!rewritten) {
+		return statement;
+	}
+
+	const finalNode = context.getSqlViews
+		? (expandSqlViewsStep({
+				...context,
+				node: rewritten,
+			}) as StatementNode)
+		: rewritten;
+
+	context.trace?.push({
+		step: "rewrite_entity_view_insert",
+		payload: {
+			view: viewName,
+			schema: schema["x-lix-key"],
+			variant,
+		},
+	});
+
+	return finalNode;
 };
 
 type BuildInsertArgs = {
@@ -238,10 +236,13 @@ function buildEntityViewInsert(args: BuildInsertArgs): StatementNode | null {
 
 	const baseSql = compile(rewritten).sql;
 	const views = args.getSqlViews?.();
-	const viewSql = views?.get("active_version") ??
+	const viewSql =
+		views?.get("active_version") ??
 		views?.get("active_version".toLowerCase()) ??
 		null;
-	const normalizedViewSql = (viewSql ?? "SELECT version_id FROM active_version").trim();
+	const normalizedViewSql = (
+		viewSql ?? "SELECT version_id FROM active_version"
+	).trim();
 	const viewAlias = "__active_version_view";
 	const cteSelect = `SELECT version_id FROM (${normalizedViewSql})`;
 	const insertSql = baseSql.replace(
@@ -339,7 +340,11 @@ function evaluateParameterExpression(args: {
 
 	if (/^\?\d+$/.test(args.placeholder)) {
 		const numeric = Number(args.placeholder.slice(1)) - 1;
-		if (!Number.isInteger(numeric) || numeric < 0 || numeric >= args.parameters.length) {
+		if (
+			!Number.isInteger(numeric) ||
+			numeric < 0 ||
+			numeric >= args.parameters.length
+		) {
 			return null;
 		}
 		return {
@@ -421,7 +426,11 @@ function resolvePlaceholder(args: {
 
 	if (/^\?\d+$/.test(args.placeholder)) {
 		const numeric = Number(args.placeholder.slice(1)) - 1;
-		if (!Number.isInteger(numeric) || numeric < 0 || numeric >= args.parameters.length) {
+		if (
+			!Number.isInteger(numeric) ||
+			numeric < 0 ||
+			numeric >= args.parameters.length
+		) {
 			return null;
 		}
 		return {
@@ -550,7 +559,8 @@ function buildStateRowExpressions(args: {
 			`Schema ${args.schemaKey} requires lixcol_plugin_key via column or x-lix-override-lixcols`
 		);
 	}
-	const pluginKeyExpr = expressionFor("lixcol_plugin_key") ?? literal(pluginKeyValue);
+	const pluginKeyExpr =
+		expressionFor("lixcol_plugin_key") ?? literal(pluginKeyValue);
 
 	const overrideVersion = getLixcolOverride("lixcol_version_id");
 	const explicitVersionExpr =
@@ -589,7 +599,7 @@ function buildStateRowExpressions(args: {
 	const metadataValue =
 		overrideMetadata !== undefined
 			? normalizeOverrideValue(overrideMetadata)
-			: columnMap.get("lixcol_metadata") ?? null;
+			: (columnMap.get("lixcol_metadata") ?? null);
 	const metadataExpr =
 		expressionFor("lixcol_metadata") ?? literal(metadataValue);
 
@@ -597,7 +607,11 @@ function buildStateRowExpressions(args: {
 	const untrackedValue =
 		overrideUntracked !== undefined
 			? normalizeOverrideValue(overrideUntracked)
-			: getColumnOrDefault(columnMap, "lixcol_untracked", overrideUntracked ?? 0);
+			: getColumnOrDefault(
+					columnMap,
+					"lixcol_untracked",
+					overrideUntracked ?? 0
+				);
 	const untrackedExpr =
 		expressionFor("lixcol_untracked") ?? literal(untrackedValue);
 
@@ -649,14 +663,18 @@ function expressionStringToAst(sql: string): ExpressionNode {
 	return createRawExpression(sql);
 }
 
-function createParameterExpression(placeholder: string): ParameterExpressionNode {
+function createParameterExpression(
+	placeholder: string
+): ParameterExpressionNode {
 	return {
 		node_kind: "parameter",
 		placeholder,
 	};
 }
 
-function createLiteralNode(value: string | number | boolean | null): ExpressionNode {
+function createLiteralNode(
+	value: string | number | boolean | null
+): ExpressionNode {
 	return {
 		node_kind: "literal",
 		value,

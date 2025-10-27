@@ -1,6 +1,19 @@
-import { buildSqliteJsonPath, parseJsonPointer } from "../../../../schema-definition/json-pointer.js";
+import {
+	buildSqliteJsonPath,
+	parseJsonPointer,
+} from "../../../../schema-definition/json-pointer.js";
 import { isJsonType } from "../../../../schema-definition/json-type.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
+import {
+	columnReference,
+	identifier,
+	type ColumnReferenceNode,
+	type ExpressionNode,
+	type FunctionCallExpressionNode,
+	type LiteralNode,
+	type RawFragmentNode,
+} from "../../sql-parser/nodes.js";
+import { getColumnName } from "../../sql-parser/ast-helpers.js";
 import type { CelEnvironment } from "./cel-environment.js";
 
 export type ExpressionValue = { kind: "expression"; sql: string };
@@ -11,7 +24,8 @@ export const isExpressionValue = (value: unknown): value is ExpressionValue =>
 	(value as Partial<ExpressionValue>).kind === "expression" &&
 	typeof (value as Partial<ExpressionValue>).sql === "string";
 
-export const escapeSqlString = (input: string): string => input.replace(/'/g, "''");
+export const escapeSqlString = (input: string): string =>
+	input.replace(/'/g, "''");
 
 export const literal = (value: unknown): string => {
 	if (value === undefined || value === null) {
@@ -83,6 +97,26 @@ export function buildColumnExpressionMap(
 		const expr = expressions[i];
 		if (expr === undefined) return null;
 		map.set(columnName, expr);
+	}
+	return map;
+}
+
+/**
+ * Builds a map from lower-case property names to their original casing.
+ *
+ * @example
+ * ```ts
+ * const lookup = buildPropertyLookup(schema);
+ * lookup.get("name"); // => "name"
+ * ```
+ */
+export function buildPropertyLookup(
+	schema: LixSchemaDefinition
+): Map<string, string> {
+	const map = new Map<string, string>();
+	const properties = schema.properties ?? {};
+	for (const property of Object.keys(properties)) {
+		map.set(property.toLowerCase(), property);
 	}
 	return map;
 }
@@ -163,9 +197,19 @@ export function renderSnapshotValue(args: {
 }): string {
 	const { definition, value, expression } = args;
 	if (expression && expression !== "NULL") {
-		if (definition && typeof definition === "object" && isJsonType(definition)) {
+		if (
+			definition &&
+			typeof definition === "object" &&
+			isJsonType(definition)
+		) {
 			const trimmed = expression.trim().toLowerCase();
-			if (trimmed.startsWith("json(") || trimmed.startsWith("json_quote(") || trimmed.startsWith("json_extract(") || trimmed.startsWith("json_set(") || trimmed.startsWith("case")) {
+			if (
+				trimmed.startsWith("json(") ||
+				trimmed.startsWith("json_quote(") ||
+				trimmed.startsWith("json_extract(") ||
+				trimmed.startsWith("json_set(") ||
+				trimmed.startsWith("case")
+			) {
 				return expression;
 			}
 			return `CASE WHEN json_valid(${expression}) THEN json(${expression}) ELSE json_quote(${expression}) END`;
@@ -193,7 +237,14 @@ export function renderDefaultSnapshotValue(args: {
 	context: Record<string, unknown>;
 	resolvedDefaults: Map<string, unknown>;
 }): string {
-	const { propertyName, definition, literal: literalFn, cel, context, resolvedDefaults } = args;
+	const {
+		propertyName,
+		definition,
+		literal: literalFn,
+		cel,
+		context,
+		resolvedDefaults,
+	} = args;
 
 	if (resolvedDefaults.has(propertyName)) {
 		const cached = resolvedDefaults.get(propertyName);
@@ -341,7 +392,7 @@ export function normalizeOverrideValue(value: unknown): unknown {
 		return value;
 	}
 	const trimmed = value.trim();
-	if (trimmed.length >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+	if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
 		try {
 			return JSON.parse(trimmed);
 		} catch (error) {
@@ -396,4 +447,483 @@ export function resolveStoredSchemaKey(
 		return key;
 	}
 	return fallbackKey;
+}
+
+/**
+ * Metadata describing the resolved entity view.
+ */
+export type ResolvedEntityView = {
+	readonly schema: LixSchemaDefinition;
+	readonly variant: Exclude<EntityViewVariant, "history">;
+	readonly storedSchemaKey: string;
+	readonly propertyLowerToActual: Map<string, string>;
+};
+
+/**
+ * Resolves the schema definition and metadata for an entity view.
+ *
+ * @example
+ * ```ts
+ * const resolved = resolveEntityView({
+ *   storedSchemas,
+ *   viewName: "projects",
+ *   rejectImmutable: true,
+ * });
+ * ```
+ */
+export function resolveEntityView(args: {
+	storedSchemas?: Map<string, unknown>;
+	viewName: string | null;
+	rejectImmutable?: boolean;
+}): ResolvedEntityView | null {
+	const { storedSchemas, viewName } = args;
+	if (!storedSchemas || !viewName) {
+		return null;
+	}
+
+	const variant = classifyViewVariant(viewName);
+	if (variant === "history") {
+		return null;
+	}
+
+	const schema = resolveSchemaDefinition(storedSchemas, viewName);
+	if (!schema) {
+		return null;
+	}
+
+	if (!isEntityViewVariantEnabled(schema, variant)) {
+		return null;
+	}
+
+	if (args.rejectImmutable && schema["x-lix-immutable"]) {
+		throw new Error(`Schema ${schema["x-lix-key"] ?? viewName} is immutable`);
+	}
+
+	const storedSchemaKey = resolveStoredSchemaKey(
+		schema,
+		baseSchemaKey(viewName) ?? viewName
+	);
+
+	const narrowedVariant = variant as Exclude<EntityViewVariant, "history">;
+
+	return {
+		schema,
+		variant: narrowedVariant,
+		storedSchemaKey,
+		propertyLowerToActual: buildPropertyLookup(schema),
+	};
+}
+
+/**
+ * Retrieves a stored schema definition by view name, ignoring case.
+ *
+ * @example
+ * ```ts
+ * const schema = resolveSchemaDefinition(storedSchemas, "projects_all");
+ * ```
+ */
+export function resolveSchemaDefinition(
+	storedSchemas: Map<string, unknown>,
+	viewName: string
+): LixSchemaDefinition | null {
+	const direct = storedSchemas.get(viewName);
+	if (direct && isSchemaDefinition(direct)) {
+		return direct;
+	}
+	const normalized = viewName.toLowerCase();
+	for (const [key, value] of storedSchemas) {
+		if (!value) continue;
+		if (!isSchemaDefinition(value)) continue;
+		if (key.toLowerCase() === normalized) {
+			return value;
+		}
+	}
+	return null;
+}
+
+/**
+ * Describes a binary equality predicate found in a WHERE clause.
+ */
+export type EqualityCondition = {
+	readonly column: string;
+	readonly expression: ExpressionNode;
+};
+
+/**
+ * Collects equality predicates from a WHERE clause expression tree.
+ *
+ * @example
+ * ```ts
+ * const equality = collectEqualityConditions(statement.where_clause);
+ * ```
+ */
+export function collectEqualityConditions(
+	whereClause: ExpressionNode | RawFragmentNode | null
+): EqualityCondition[] {
+	if (!whereClause) {
+		return [];
+	}
+
+	if ("sql_text" in whereClause) {
+		return [];
+	}
+
+	const conditions: EqualityCondition[] = [];
+	const visit = (expression: ExpressionNode) => {
+		switch (expression.node_kind) {
+			case "binary_expression":
+				if (expression.operator === "and") {
+					visit(expression.left);
+					visit(expression.right);
+					return;
+				}
+				if (expression.operator === "=") {
+					if (expression.left.node_kind === "column_reference") {
+						const column = getColumnName(expression.left).toLowerCase();
+						conditions.push({ column, expression: expression.right });
+						return;
+					}
+					if (expression.right.node_kind === "column_reference") {
+						const column = getColumnName(expression.right).toLowerCase();
+						conditions.push({ column, expression: expression.left });
+						return;
+					}
+				}
+				break;
+			case "grouped_expression":
+				visit(expression.expression);
+				return;
+			default:
+				return;
+		}
+	};
+
+	visit(whereClause);
+	return conditions;
+}
+
+const VIEW_METADATA_COLUMN_MAP: Record<string, string> = {
+	entity_id: "entity_id",
+	lixcol_entity_id: "entity_id",
+	schema_key: "schema_key",
+	lixcol_schema_key: "schema_key",
+	file_id: "file_id",
+	lixcol_file_id: "file_id",
+	plugin_key: "plugin_key",
+	lixcol_plugin_key: "plugin_key",
+	version_id: "version_id",
+	lixcol_version_id: "version_id",
+	metadata: "metadata",
+	lixcol_metadata: "metadata",
+	untracked: "untracked",
+	lixcol_untracked: "untracked",
+};
+
+export type PredicateRewriteResult = {
+	expression: ExpressionNode | null;
+	hasVersionReference: boolean;
+};
+
+/**
+ * Rewrites a predicate tree so that view columns reference state_all columns.
+ *
+ * @example
+ * ```ts
+ * const { expression } = rewriteViewWhereClause(where, { propertyLowerToActual });
+ * ```
+ */
+export function rewriteViewWhereClause(
+	whereClause: ExpressionNode | RawFragmentNode | null,
+	options: { propertyLowerToActual: Map<string, string> }
+): PredicateRewriteResult | null {
+	if (!whereClause) {
+		return { expression: null, hasVersionReference: false };
+	}
+	if ("sql_text" in whereClause) {
+		return null;
+	}
+
+	const flags = { hasVersionReference: false };
+	const rewritten = rewritePredicateExpression(
+		whereClause,
+		options.propertyLowerToActual,
+		flags
+	);
+	if (!rewritten) {
+		return null;
+	}
+
+	return {
+		expression: rewritten,
+		hasVersionReference: flags.hasVersionReference,
+	};
+}
+
+type PredicateRewriteFlags = {
+	hasVersionReference: boolean;
+};
+
+function rewritePredicateExpression(
+	expression: ExpressionNode,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): ExpressionNode | null {
+	switch (expression.node_kind) {
+		case "binary_expression": {
+			const operator = expression.operator;
+			if (operator === "and" || operator === "or") {
+				const left = rewritePredicateExpression(
+					expression.left,
+					propertyLowerToActual,
+					flags
+				);
+				if (!left) return null;
+				const right = rewritePredicateExpression(
+					expression.right,
+					propertyLowerToActual,
+					flags
+				);
+				if (!right) return null;
+				return {
+					node_kind: "binary_expression",
+					left,
+					operator,
+					right,
+				};
+			}
+
+			const supportedOperators = new Set([
+				"=",
+				"!=",
+				"<>",
+				">",
+				">=",
+				"<",
+				"<=",
+				"like",
+				"not_like",
+				"is",
+				"is_not",
+			]);
+			if (!supportedOperators.has(operator)) {
+				return null;
+			}
+
+			const left = rewritePredicateExpression(
+				expression.left,
+				propertyLowerToActual,
+				flags
+			);
+			if (!left) return null;
+			const right = rewritePredicateExpression(
+				expression.right,
+				propertyLowerToActual,
+				flags
+			);
+			if (!right) return null;
+			return {
+				node_kind: "binary_expression",
+				left,
+				operator,
+				right,
+			};
+		}
+		case "unary_expression": {
+			if (expression.operator === "minus" || expression.operator === "not") {
+				const operand = rewritePredicateExpression(
+					expression.operand,
+					propertyLowerToActual,
+					flags
+				);
+				if (!operand) return null;
+				return {
+					node_kind: "unary_expression",
+					operator: expression.operator,
+					operand,
+				};
+			}
+			return null;
+		}
+		case "grouped_expression": {
+			const rewritten = rewritePredicateExpression(
+				expression.expression,
+				propertyLowerToActual,
+				flags
+			);
+			if (!rewritten) return null;
+			return {
+				node_kind: "grouped_expression",
+				expression: rewritten,
+			};
+		}
+		case "column_reference":
+			return rewriteColumnReference(expression, propertyLowerToActual, flags);
+		case "function_call": {
+			const args: ExpressionNode[] = [];
+			for (const arg of expression.arguments) {
+				const rewritten = rewritePredicateExpression(
+					arg,
+					propertyLowerToActual,
+					flags
+				);
+				if (!rewritten) return null;
+				args.push(rewritten);
+			}
+			const call: FunctionCallExpressionNode = {
+				node_kind: "function_call",
+				name: expression.name,
+				arguments: args,
+			};
+			return call;
+		}
+		case "in_list_expression": {
+			const operand = rewritePredicateExpression(
+				expression.operand,
+				propertyLowerToActual,
+				flags
+			);
+			if (!operand) return null;
+			const items: ExpressionNode[] = [];
+			for (const item of expression.items) {
+				const rewritten = rewritePredicateExpression(
+					item,
+					propertyLowerToActual,
+					flags
+				);
+				if (!rewritten) return null;
+				items.push(rewritten);
+			}
+			return {
+				node_kind: "in_list_expression",
+				operand,
+				items,
+				negated: expression.negated,
+			};
+		}
+		case "between_expression": {
+			const operand = rewritePredicateExpression(
+				expression.operand,
+				propertyLowerToActual,
+				flags
+			);
+			if (!operand) return null;
+			const start = rewritePredicateExpression(
+				expression.start,
+				propertyLowerToActual,
+				flags
+			);
+			if (!start) return null;
+			const end = rewritePredicateExpression(
+				expression.end,
+				propertyLowerToActual,
+				flags
+			);
+			if (!end) return null;
+			return {
+				node_kind: "between_expression",
+				operand,
+				start,
+				end,
+				negated: expression.negated,
+			};
+		}
+		case "literal":
+		case "parameter":
+		case "subquery_expression":
+			return expression;
+		default:
+			return null;
+	}
+}
+
+function rewriteColumnReference(
+	column: ColumnReferenceNode,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): ExpressionNode | null {
+	const terminal = column.path[column.path.length - 1];
+	if (!terminal) {
+		return null;
+	}
+	const columnName = terminal.value;
+	const lower = columnName.toLowerCase();
+
+	const property = propertyLowerToActual.get(lower);
+	if (property) {
+		return createJsonExtractExpression(property);
+	}
+
+	const metadata = VIEW_METADATA_COLUMN_MAP[lower];
+	if (metadata) {
+		if (metadata === "version_id") {
+			flags.hasVersionReference = true;
+		}
+		return columnReference(["state_all", metadata]);
+	}
+
+	if (
+		column.path.length === 2 &&
+		column.path[0]?.value.toLowerCase() === "state_all"
+	) {
+		const target = column.path[1]!.value;
+		if (target.toLowerCase() === "version_id") {
+			flags.hasVersionReference = true;
+		}
+		return columnReference(["state_all", target]);
+	}
+
+	return null;
+}
+
+function createJsonExtractExpression(property: string): ExpressionNode {
+	const path = buildSqliteJsonPath([property]);
+	return {
+		node_kind: "function_call",
+		name: identifier("json_extract"),
+		arguments: [
+			columnReference(["state_all", "snapshot_content"]),
+			createLiteralNode(path),
+		],
+	};
+}
+
+function createLiteralNode(
+	value: string | number | boolean | null
+): LiteralNode {
+	return {
+		node_kind: "literal",
+		value,
+	};
+}
+
+/**
+ * Combines two expressions with an AND operator while preserving OR precedence.
+ */
+export function combineWithAnd(
+	left: ExpressionNode,
+	right: ExpressionNode
+): ExpressionNode {
+	const normalizedLeft = requiresGrouping(left)
+		? { node_kind: "grouped_expression" as const, expression: left }
+		: left;
+	const normalizedRight = requiresGrouping(right)
+		? { node_kind: "grouped_expression" as const, expression: right }
+		: right;
+	return {
+		node_kind: "binary_expression",
+		left: normalizedLeft,
+		operator: "and",
+		right: normalizedRight,
+	};
+}
+
+function requiresGrouping(expression: ExpressionNode): boolean {
+	if (expression.node_kind !== "binary_expression") {
+		return false;
+	}
+	return expression.operator === "or";
+}
+
+function isSchemaDefinition(value: unknown): value is LixSchemaDefinition {
+	return typeof value === "object" && value !== null;
 }
