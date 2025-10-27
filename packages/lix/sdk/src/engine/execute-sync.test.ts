@@ -52,7 +52,7 @@ describe("createExecuteSync", () => {
 		const sql = "SELECT 1";
 		const parameters = [] as any;
 
-		executeSync({ sql, parameters, bypassPreprocessor: true });
+		executeSync({ sql, parameters, skipPreprocessing: true });
 
 		expect(preprocess).not.toHaveBeenCalled();
 		expect(exec).toHaveBeenCalledWith(

@@ -77,7 +77,16 @@ export type LixEngine = {
 	executeSync: (args: {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
-		bypassPreprocessor?: boolean;
+		/**
+		 * Executes the statement without running it through the preprocessing pipeline.
+		 * Primarily useful while debugging to compare rewritten versus raw queries.
+		 *
+		 * @example
+		 * ```ts
+		 * engine.executeSync({ sql: "SELECT 1", skipPreprocessing: true });
+		 * ```
+		 */
+		skipPreprocessing?: boolean;
 	}) => {
 		rows: any[];
 	};

@@ -7,7 +7,7 @@ export function createExecuteSync(args: {
 	>;
 }): LixEngine["executeSync"] {
 	const executeSyncFn: LixEngine["executeSync"] = (args2) => {
-		const preprocessed = args2.bypassPreprocessor
+		const preprocessed = args2.skipPreprocessing
 			? { sql: args2.sql, parameters: args2.parameters, expandedSql: undefined }
 			: args.engine.preprocessQuery({
 					sql: args2.sql,
