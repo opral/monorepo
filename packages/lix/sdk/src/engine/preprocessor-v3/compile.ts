@@ -25,6 +25,7 @@ import type {
 	UnaryExpressionNode,
 	UnaryOperator,
 	UpdateStatementNode,
+	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
 } from "./sql-parser/nodes.js";
 import type { SqlNode } from "./sql-parser/nodes.js";
@@ -279,12 +280,14 @@ function emitExpressionWithoutParent(expression: ExpressionNode): string {
 			return emitUnaryExpression(expression);
 		case "in_list_expression":
 			return emitInListExpression(expression);
-	case "between_expression":
-		return emitBetweenExpression(expression);
-	case "subquery_expression":
-		return emitSubqueryExpression(expression);
-	case "raw_fragment":
-		return expression.sql_text;
+		case "between_expression":
+			return emitBetweenExpression(expression);
+		case "function_call":
+			return emitFunctionCall(expression);
+		case "subquery_expression":
+			return emitSubqueryExpression(expression);
+		case "raw_fragment":
+			return expression.sql_text;
 		default:
 			return assertNever(expression);
 	}
@@ -328,6 +331,12 @@ function emitBetweenExpression(expression: BetweenExpressionNode): string {
 	const end = emitExpression(expression.end);
 	const keyword = expression.negated ? "NOT BETWEEN" : "BETWEEN";
 	return `${operand} ${keyword} ${start} AND ${end}`;
+}
+
+function emitFunctionCall(expression: FunctionCallExpressionNode): string {
+	const name = emitIdentifier(expression.name);
+	const args = expression.arguments.map((argument) => emitExpression(argument));
+	return `${name}(${args.join(", ")})`;
 }
 
 function emitSubqueryExpression(expression: SubqueryExpressionNode): string {

@@ -480,6 +480,23 @@ class SqlParser extends CstParser {
 				{ ALT: () => this.CONSUME(StringLiteral, { LABEL: "string" }) },
 				{ ALT: () => this.CONSUME(NumberLiteral, { LABEL: "number" }) },
 				{
+					GATE: () =>
+						this.LA(1).tokenType === Identifier &&
+						this.LA(2).tokenType === LeftParen,
+					ALT: () => {
+						this.CONSUME(Identifier, { LABEL: "callIdentifier" });
+						this.CONSUME(LeftParen, { LABEL: "callLParen" });
+						this.OPTION(() => {
+							this.SUBRULE1(this.expression, { LABEL: "callArguments" });
+							this.MANY(() => {
+								this.CONSUME(Comma);
+								this.SUBRULE2(this.expression, { LABEL: "callArguments" });
+							});
+						});
+						this.CONSUME(RightParen, { LABEL: "callRParen" });
+					},
+				},
+				{
 					ALT: () =>
 						this.SUBRULE(this.column_reference, { LABEL: "reference" }),
 				},

@@ -31,7 +31,9 @@ import type {
 	UpdateStatementNode,
 	InListExpressionNode,
 	BetweenExpressionNode,
+	FunctionCallExpressionNode,
 } from "./nodes.js";
+import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
 
 const BaseVisitor: new (...args: unknown[]) => {
@@ -459,6 +461,8 @@ class ToAstVisitor extends BaseVisitor {
 		string?: IToken[];
 		number?: IToken[];
 		reference?: CstNode[];
+		callIdentifier?: IToken[];
+		callArguments?: CstNode[];
 		subselect?: CstNode[];
 		inner?: CstNode[];
 	}): ExpressionNode {
@@ -477,6 +481,19 @@ class ToAstVisitor extends BaseVisitor {
 		const numberLiteral = ctx.number?.[0];
 		if (numberLiteral?.image) {
 			return createLiteralNode(Number(numberLiteral.image));
+		}
+		const callIdentifier = ctx.callIdentifier?.[0];
+		if (callIdentifier?.image) {
+			const args: ExpressionNode[] =
+				ctx.callArguments?.map(
+					(argument) => this.visit(argument) as ExpressionNode
+				) ?? [];
+			const functionCall: FunctionCallExpressionNode = {
+				node_kind: "function_call",
+				name: identifier(callIdentifier.image),
+				arguments: args,
+			};
+			return functionCall;
 		}
 		const reference = ctx.reference?.[0];
 		if (reference) {

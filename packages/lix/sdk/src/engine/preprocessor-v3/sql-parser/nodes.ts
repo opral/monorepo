@@ -136,6 +136,7 @@ export type ExpressionNode =
 	| GroupedExpressionNode
 	| InListExpressionNode
 	| BetweenExpressionNode
+	| FunctionCallExpressionNode
 	| SubqueryExpressionNode
 	| RawFragmentNode;
 
@@ -152,6 +153,12 @@ export type LiteralNode = SqlNode & {
 export type ParameterExpressionNode = SqlNode & {
 	readonly node_kind: "parameter";
 	readonly placeholder: string;
+};
+
+export type FunctionCallExpressionNode = SqlNode & {
+	readonly node_kind: "function_call";
+	readonly name: IdentifierNode;
+	readonly arguments: readonly ExpressionNode[];
 };
 
 export type SubqueryExpressionNode = SqlNode & {

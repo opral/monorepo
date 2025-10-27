@@ -271,4 +271,89 @@ describe("parse", () => {
 			},
 		});
 	});
+
+	test("parses function call expression inside update assignment", () => {
+		const ast = parse(
+			"UPDATE key_value SET value = json_set(value, '$.foo', ?) WHERE key = ?"
+		);
+		expect(ast).toEqual({
+			node_kind: "update_statement",
+			target: {
+				node_kind: "table_reference",
+				name: { node_kind: "object_name", parts: [id("key_value")] },
+				alias: null,
+			},
+			assignments: [
+				{
+					node_kind: "set_clause",
+					column: {
+						node_kind: "column_reference",
+						path: [id("value")],
+					},
+					value: {
+						node_kind: "function_call",
+						name: id("json_set"),
+						arguments: [
+							{
+								node_kind: "column_reference",
+								path: [id("value")],
+							},
+							{
+								node_kind: "literal",
+								value: "$.foo",
+							},
+							{
+								node_kind: "parameter",
+								placeholder: "?",
+							},
+						],
+					},
+				},
+			],
+			where_clause: {
+				node_kind: "binary_expression",
+				left: {
+					node_kind: "column_reference",
+					path: [id("key")],
+				},
+				operator: "=",
+				right: { node_kind: "parameter", placeholder: "?" },
+			},
+		});
+	});
+
+	test("parses function call without arguments inside update assignment", () => {
+		const ast = parse("UPDATE metrics SET touched_at = random() WHERE id = ?");
+		expect(ast).toEqual({
+			node_kind: "update_statement",
+			target: {
+				node_kind: "table_reference",
+				name: { node_kind: "object_name", parts: [id("metrics")] },
+				alias: null,
+			},
+			assignments: [
+				{
+					node_kind: "set_clause",
+					column: {
+						node_kind: "column_reference",
+						path: [id("touched_at")],
+					},
+					value: {
+						node_kind: "function_call",
+						name: id("random"),
+						arguments: [],
+					},
+				},
+			],
+			where_clause: {
+				node_kind: "binary_expression",
+				left: {
+					node_kind: "column_reference",
+					path: [id("id")],
+				},
+				operator: "=",
+				right: { node_kind: "parameter", placeholder: "?" },
+			},
+		});
+	});
 });
