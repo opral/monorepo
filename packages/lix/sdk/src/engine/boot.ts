@@ -74,7 +74,11 @@ export type LixEngine = {
 	 */
 	runtimeCacheRef: object;
 	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
-	executeSync: (args: { sql: string; parameters?: Readonly<unknown[]> }) => {
+	executeSync: (args: {
+		sql: string;
+		parameters?: Readonly<unknown[]>;
+		bypassPreprocessor?: boolean;
+	}) => {
 		rows: any[];
 	};
 	/** Invoke an engine function (router) */
