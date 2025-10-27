@@ -265,14 +265,8 @@ describe("parse", () => {
 			source: {
 				node_kind: "insert_values",
 				rows: [
-					[
-						lit("a"),
-						lit("Project A"),
-					],
-					[
-						lit("b"),
-						{ node_kind: "parameter", placeholder: "?" },
-					],
+					[lit("a"), lit("Project A")],
+					[lit("b"), { node_kind: "parameter", placeholder: "?" }],
 				],
 			},
 		});

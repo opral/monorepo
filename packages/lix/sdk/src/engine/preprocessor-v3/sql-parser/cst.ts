@@ -68,8 +68,7 @@ class SqlParser extends CstParser {
 			this.OR([
 				{ ALT: () => this.SUBRULE(this.select_core, { LABEL: "core" }) },
 				{
-					ALT: () =>
-						this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
+					ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
 				},
 				{ ALT: () => this.SUBRULE(this.update_statement, { LABEL: "update" }) },
 				{ ALT: () => this.SUBRULE(this.delete_statement, { LABEL: "delete" }) },
@@ -486,9 +485,16 @@ class SqlParser extends CstParser {
 				},
 				{
 					ALT: () => {
-						this.CONSUME(LeftParen);
+						this.CONSUME1(LeftParen);
+						this.SUBRULE(this.select_core, { LABEL: "subselect" });
+						this.CONSUME1(RightParen);
+					},
+				},
+				{
+					ALT: () => {
+						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.expression, { LABEL: "inner" });
-						this.CONSUME(RightParen);
+						this.CONSUME2(RightParen);
 					},
 				},
 			]);

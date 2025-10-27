@@ -108,7 +108,10 @@ function collectFromRelation(
 			references.set(binding, {
 				binding,
 				usedColumns: mergeColumnUsage(existing.usedColumns, usage),
-				schemaFilters: mergeSchemaFilters(existing.schemaFilters, schemaFilters),
+				schemaFilters: mergeSchemaFilters(
+					existing.schemaFilters,
+					schemaFilters
+				),
 			});
 		}
 		return;
@@ -369,9 +372,7 @@ function collectStateSchemaFilters(
 	return values.size > 0 ? values : null;
 }
 
-function unwrapGroupedExpression(
-	expression: ExpressionNode
-): ExpressionNode {
+function unwrapGroupedExpression(expression: ExpressionNode): ExpressionNode {
 	let current = expression;
 	while (current.node_kind === "grouped_expression") {
 		current = current.expression;
@@ -387,18 +388,13 @@ function isSchemaKeyReference(
 		return false;
 	}
 	const qualifier = getColumnQualifier(expression);
-	if (
-		qualifier !== null &&
-		normalizeIdentifierValue(qualifier) !== binding
-	) {
+	if (qualifier !== null && normalizeIdentifierValue(qualifier) !== binding) {
 		return false;
 	}
 	return getColumnName(expression) === "schema_key";
 }
 
-function extractLiteralValue(
-	expression: ExpressionNode
-): string | null {
+function extractLiteralValue(expression: ExpressionNode): string | null {
 	const unwrapped = unwrapGroupedExpression(expression);
 	if (unwrapped.node_kind !== "literal") {
 		return null;

@@ -71,8 +71,8 @@ function rewriteSelectNode(
 			}
 			const binding = getIdentifierValue(node.alias) ?? DEFAULT_BINDING;
 			references.push(binding);
-	const columns = collectReferencedColumns(select, binding);
-	const schemaFilter = collectSchemaKeyFilters(select, binding);
+			const columns = collectReferencedColumns(select, binding);
+			const schemaFilter = collectSchemaKeyFilters(select, binding);
 			return createStateAllSubquery(binding, columns, schemaFilter);
 		},
 	};
@@ -419,10 +419,7 @@ function isSchemaKeyReferenceExpr(
 		return false;
 	}
 	const qualifier = getColumnQualifier(expression);
-	if (
-		qualifier !== null &&
-		normalizeIdentifierValue(qualifier) !== binding
-	) {
+	if (qualifier !== null && normalizeIdentifierValue(qualifier) !== binding) {
 		return false;
 	}
 	return getColumnName(expression) === "schema_key";
@@ -465,10 +462,7 @@ function expressionContainsSchemaReference(
 		case "column_reference":
 			return isSchemaKeyReferenceExpr(expression, binding);
 		case "grouped_expression":
-			return expressionContainsSchemaReference(
-				expression.expression,
-				binding
-			);
+			return expressionContainsSchemaReference(expression.expression, binding);
 		case "binary_expression":
 			return (
 				expressionContainsSchemaReference(expression.left, binding) ||

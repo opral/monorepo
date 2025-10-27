@@ -10,6 +10,9 @@ import { getStateCacheTables } from "../../state/cache/schema.js";
 import { schemaKeyToCacheTableName } from "../../state/cache/create-schema-cache-table.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { getSchemaVersion } from "../query-preprocessor/shared/schema-version.js";
+import { createCelEnvironment } from "./steps/entity-view/cel-environment.js";
+import type { CelEnvironment } from "./steps/entity-view/cel-environment.js";
+
 type EngineShape = Pick<
 	LixEngine,
 	| "sqlite"
@@ -42,7 +45,7 @@ export function createPreprocessor(args: {
 		const context = buildContext(engine, traceEntries);
 
 		const statement = parse(sql);
-		const rewritten = preprocessStatement(statement, context);
+		const rewritten = preprocessStatement(statement, context, parameters);
 		const compiled = compile(rewritten);
 
 		return {
@@ -75,6 +78,7 @@ function buildContext(
 	let cacheTables: Map<string, unknown> | undefined;
 	let sqlViews: Map<string, string> | undefined;
 	let transactionState: boolean | undefined;
+	let celEnvironment: CelEnvironment | undefined;
 
 	const context: PreprocessorContext = {
 		getStoredSchemas: () => {
@@ -100,6 +104,15 @@ function buildContext(
 				transactionState = hasOpenTransaction(engine);
 			}
 			return transactionState;
+		},
+		getCelEnvironment: () => {
+			if (!celEnvironment && engine.listFunctions && engine.call) {
+				celEnvironment = createCelEnvironment({
+					listFunctions: engine.listFunctions,
+					callFunction: engine.call,
+				});
+			}
+			return celEnvironment ?? null;
 		},
 		...(trace ? { trace } : {}),
 	} as PreprocessorContext;

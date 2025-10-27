@@ -10,7 +10,11 @@ import {
 	type StatementNode,
 	type TableReferenceNode,
 } from "../sql-parser/nodes.js";
-import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
+import type {
+	PreprocessorStep,
+	PreprocessorStepContext,
+	PreprocessorTraceEntry,
+} from "../types.js";
 import { internalQueryBuilder } from "../../internal-query-builder.js";
 import {
 	getColumnName,
@@ -53,12 +57,6 @@ type InlineRewriteMetadata = {
 	selectedColumns: SelectedProjection[] | null;
 };
 
-type RewriteRuntime = {
-	getCacheTables: () => Map<string, unknown>;
-	hasOpenTransaction: () => boolean;
-	trace?: PreprocessorTraceEntry[];
-};
-
 /**
  * Rewrites internal state vtable references into inline union subqueries.
  *
@@ -73,38 +71,27 @@ type RewriteRuntime = {
  */
 export const rewriteVtableSelects: PreprocessorStep = (context) => {
 	const node = context.node as StatementNode;
-	const runtime: RewriteRuntime = {
-		getCacheTables: context.getCacheTables,
-		hasOpenTransaction: context.hasOpenTransaction,
-		trace: context.trace,
-	};
-	return rewriteStatement(node, runtime);
-};
 
-function rewriteStatement(
-	statement: StatementNode,
-	runtime: RewriteRuntime
-): StatementNode {
-	switch (statement.node_kind) {
+	switch (node.node_kind) {
 		case "select_statement":
-			return rewriteSelectStatement(statement, runtime);
+			return rewriteSelectStatement(node, context);
 		case "update_statement":
 		case "delete_statement":
-			return statement;
+			return node;
 		default:
-			return statement;
+			return node;
 	}
-}
+};
 
 function rewriteSelectStatement(
 	select: SelectStatementNode,
-	runtime: RewriteRuntime
+	context: PreprocessorStepContext
 ): SelectStatementNode {
 	const withRewrittenSubqueries = visitSelectStatement(select, {
 		subquery(node) {
 			const rewrittenStatement = rewriteSelectStatement(
 				node.statement,
-				runtime
+				context
 			);
 			if (rewrittenStatement !== node.statement) {
 				return {
@@ -156,17 +143,17 @@ function rewriteSelectStatement(
 
 	const rewritten = visitSelectStatement(
 		withRewrittenSubqueries,
-		createInlineVisitor(metadata, runtime)
+		createInlineVisitor(metadata, context)
 	);
 
-	if (runtime.trace) {
+	if (context.trace) {
 		const entry = buildTraceEntry({
 			aliasList,
 			projectionKind,
 			schemaSummary,
 			selectedColumns: selectedColumnsForTrace,
 		});
-		runtime.trace.push(entry);
+		context.trace.push(entry);
 	}
 
 	return rewritten;
@@ -245,7 +232,7 @@ function buildInlineMetadata(
 
 function createInlineVisitor(
 	metadata: Map<string, InlineRewriteMetadata>,
-	runtime: RewriteRuntime
+	context: PreprocessorStepContext
 ): AstVisitor {
 	return {
 		table_reference(node: TableReferenceNode) {
@@ -261,11 +248,11 @@ function createInlineVisitor(
 				return;
 			}
 			const aliasForSql = aliasValue ?? REWRITTEN_STATE_VTABLE;
-			const inlineSql = buildInternalStateRewriteSql({
+			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
-				cacheTables: runtime.getCacheTables(),
+				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
-				hasOpenTransaction: runtime.hasOpenTransaction(),
+				hasOpenTransaction: context.hasOpenTransaction!(),
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
 				node_kind: "raw_fragment",
@@ -583,7 +570,7 @@ function buildTraceEntry(args: {
 	};
 }
 
-function buildInternalStateRewriteSql(options: {
+function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
@@ -613,9 +600,9 @@ function buildInternalStateRewriteSql(options: {
 		"c.created_at DESC",
 		"c.file_id",
 		"c.schema_key",
-	"c.entity_id",
-	"c.version_id",
-	"c.change_id",
+		"c.entity_id",
+		"c.version_id",
+		"c.change_id",
 	];
 	const segments: string[] = [];
 	if (options.hasOpenTransaction !== false) {

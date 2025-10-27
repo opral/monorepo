@@ -32,8 +32,8 @@ type ExpandState = {
  * ```
  */
 export const expandSqlViews: PreprocessorStep = (context) => {
-	const sqlViews = context.getSqlViews();
-	if (sqlViews.size === 0) {
+	const sqlViews = context.getSqlViews?.();
+	if (!sqlViews || sqlViews.size === 0) {
 		return context.node;
 	}
 

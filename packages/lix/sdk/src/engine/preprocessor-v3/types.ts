@@ -1,4 +1,5 @@
 import type { SqlNode } from "./sql-parser/nodes.js";
+import type { CelEnvironment } from "./steps/entity-view/cel-environment.js";
 
 /**
  * Shared trace entry type for documenting per-step behaviour.
@@ -31,10 +32,11 @@ export type PreprocessorTrace = PreprocessorTraceEntry[];
  * ```
  */
 export type PreprocessorContext = {
-	readonly getStoredSchemas: () => Map<string, unknown>;
-	readonly getCacheTables: () => Map<string, unknown>;
-	readonly getSqlViews: () => Map<string, string>;
-	readonly hasOpenTransaction: () => boolean;
+	readonly getStoredSchemas?: () => Map<string, unknown>;
+	readonly getCacheTables?: () => Map<string, unknown>;
+	readonly getSqlViews?: () => Map<string, string>;
+	readonly hasOpenTransaction?: () => boolean;
+	readonly getCelEnvironment?: () => CelEnvironment;
 	readonly trace?: PreprocessorTrace;
 };
 
@@ -43,6 +45,7 @@ export type PreprocessorContext = {
  */
 export type PreprocessorStepContext = PreprocessorContext & {
 	readonly node: SqlNode;
+	readonly parameters?: ReadonlyArray<unknown>;
 };
 
 /**

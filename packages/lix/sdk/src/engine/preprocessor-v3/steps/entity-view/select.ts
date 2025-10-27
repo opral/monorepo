@@ -93,8 +93,8 @@ export const rewriteEntityViewSelect: PreprocessorStep = (context) => {
 		return node;
 	}
 
-	const storedSchemas = context.getStoredSchemas();
-	if (storedSchemas.size === 0) {
+	const storedSchemas = context.getStoredSchemas?.();
+	if (!storedSchemas || storedSchemas.size === 0) {
 		return node;
 	}
 
