@@ -34,4 +34,29 @@ describe("createExecuteSync", () => {
 			expect.objectContaining({ bind: parameters })
 		);
 	});
+
+	test("bypasses the preprocessor when specified", async () => {
+		const exec = vi.fn().mockReturnValue([]);
+		const sqlite = { exec } as unknown as SqliteWasmDatabase;
+		const preprocess = vi.fn();
+
+		const executeSync = createExecuteSync({
+			engine: {
+				sqlite,
+				hooks: {} as any,
+				runtimeCacheRef: {} as any,
+				preprocessQuery: preprocess as any,
+			},
+		});
+
+		const sql = "SELECT 1";
+		const parameters = [] as any;
+
+		executeSync({ sql, parameters, bypassPreprocessor: true });
+
+		expect(preprocess).not.toHaveBeenCalled();
+		expect(exec).toHaveBeenCalledWith(
+			expect.objectContaining({ sql, bind: parameters })
+		);
+	});
 });

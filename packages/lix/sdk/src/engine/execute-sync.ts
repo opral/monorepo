@@ -1,24 +1,19 @@
 import type { LixEngine } from "./boot.js";
 
-type ExecuteSyncFn = (args: {
-	sql: string;
-	parameters?: Readonly<unknown[]>;
-}) => { rows: any[] };
-
 export function createExecuteSync(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery"
 	>;
-}): ExecuteSyncFn {
-	const executeSyncFn: ExecuteSyncFn = (args2: {
-		sql: string;
-		parameters?: Readonly<unknown[]>;
-	}) => {
-		const preprocessed = args.engine.preprocessQuery({
-			sql: args2.sql,
-			parameters: (args2.parameters as ReadonlyArray<unknown>) ?? [],
-		});
+}): LixEngine["executeSync"] {
+	const executeSyncFn: LixEngine["executeSync"] = (args2) => {
+		const preprocessed = args2.bypassPreprocessor
+			? { sql: args2.sql, parameters: args2.parameters, expandedSql: undefined }
+			: args.engine.preprocessQuery({
+					sql: args2.sql,
+					parameters: (args2.parameters as ReadonlyArray<unknown>) ?? [],
+				});
+
 		const columnNames: string[] = [];
 		try {
 			const rows = args.engine.sqlite.exec({
