@@ -149,20 +149,14 @@ test("getAllStoredSchemas returns all definitions and caches the result", async 
 	const spy = vi.spyOn(lix.engine!, "executeSync");
 
 	const first = getAllStoredSchemas({ engine: lix.engine! });
-	const keys = new Set(
-		first.schemas.map((entry) => entry.definition["x-lix-key"])
-	);
-	expect(keys.has("schema_one")).toBe(true);
-	expect(keys.has("schema_two")).toBe(true);
+	expect(first.definitions.has("schema_one")).toBe(true);
+	expect(first.definitions.has("schema_two")).toBe(true);
 
 	const afterFirst = countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL);
 
 	const second = getAllStoredSchemas({ engine: lix.engine! });
-	const secondKeys = new Set(
-		second.schemas.map((entry) => entry.definition["x-lix-key"])
-	);
-	expect(secondKeys.has("schema_one")).toBe(true);
-	expect(secondKeys.has("schema_two")).toBe(true);
+	expect(second.definitions.has("schema_one")).toBe(true);
+	expect(second.definitions.has("schema_two")).toBe(true);
 	expect(countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL)).toBe(
 		afterFirst
 	);
@@ -190,10 +184,7 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	const spy = vi.spyOn(lix.engine!, "executeSync");
 
 	const initial = getAllStoredSchemas({ engine: lix.engine! });
-	const hasSchema = initial.schemas.some(
-		(entry) => entry.definition["x-lix-key"] === "invalidate_all_schema"
-	);
-	expect(hasSchema).toBe(true);
+	expect(initial.definitions.has("invalidate_all_schema")).toBe(true);
 
 	const expectedPerFetch = countCallsForSql(
 		spy.mock.calls,
@@ -207,10 +198,7 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	});
 
 	const afterInvalidate = getAllStoredSchemas({ engine: lix.engine! });
-	const stillHasSchema = afterInvalidate.schemas.some(
-		(entry) => entry.definition["x-lix-key"] === "invalidate_all_schema"
-	);
-	expect(stillHasSchema).toBe(true);
+	expect(afterInvalidate.definitions.has("invalidate_all_schema")).toBe(true);
 	expect(countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL)).toBe(
 		expectedPerFetch
 	);

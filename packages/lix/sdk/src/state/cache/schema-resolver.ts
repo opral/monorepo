@@ -45,12 +45,10 @@ export function listAvailableCacheSchemas(args: {
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 }): Map<string, LixSchemaDefinition> {
 	const schemas = new Map<string, LixSchemaDefinition>();
-	const allStored = getAllStoredSchemas({ engine: args.engine });
-	for (const { definition } of allStored.schemas) {
-		const key = definition["x-lix-key"];
-		if (typeof key === "string" && key.length > 0) {
-			schemas.set(key, definition);
-		}
+	const { definitions } = getAllStoredSchemas({ engine: args.engine });
+	for (const [schemaKey, definition] of definitions) {
+		if (typeof schemaKey !== "string" || schemaKey.length === 0) continue;
+		schemas.set(schemaKey, definition);
 	}
 	for (const [key, definition] of Object.entries(BUILTIN_CACHE_SCHEMAS)) {
 		if (!schemas.has(key)) {

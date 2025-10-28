@@ -92,19 +92,13 @@ function getContext(
 		| "listFunctions"
 	>
 ): PreprocessorContext {
-	const { schemas, signature: schemaHash } = getAllStoredSchemas({ engine });
+	const { definitions, signature: schemaHash } = getAllStoredSchemas({
+		engine,
+	});
 	let entry = contextCache.get(engine.runtimeCacheRef);
 
 	if (!entry || entry.schemaHash !== schemaHash) {
-		const storedSchemas = new Map(
-			schemas
-				.map((item) => item.definition)
-				.filter((definition) => {
-					const key = definition["x-lix-key"];
-					return typeof key === "string" && key.length > 0;
-				})
-				.map((definition) => [definition["x-lix-key"], definition] as const)
-		);
+		const storedSchemas = definitions;
 		entry = {
 			schemaHash,
 			storedSchemas,

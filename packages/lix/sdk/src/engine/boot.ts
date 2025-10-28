@@ -17,6 +17,7 @@ import {
 	type FunctionRegistry,
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
+import { createPreprocessor } from "./preprocessor-v3/create-preprocessor.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -150,6 +151,8 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	}
 
 	engine.preprocessQuery = createQueryPreprocessor(engine);
+
+	// engine.preprocessQuery = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 

@@ -79,8 +79,8 @@ function buildContext(
 
 	const loadStoredSchemas = (): Map<string, LixSchemaDefinition> => {
 		if (!storedSchemas) {
-			const { schemas } = getAllStoredSchemas({ engine });
-			storedSchemas = buildStoredSchemaMap(schemas);
+			const { definitions } = getAllStoredSchemas({ engine });
+			storedSchemas = definitions;
 		}
 		return storedSchemas;
 	};
@@ -123,29 +123,6 @@ function buildContext(
 	} as PreprocessorContext;
 
 	return context;
-}
-
-/**
- * Builds a schema lookup map keyed by the exact stored schema identifier.
- *
- * @example
- * ```ts
- * const map = buildStoredSchemaMap([{ definition: schema }]);
- * console.log(map.get("lix_user"));
- * ```
- */
-function buildStoredSchemaMap(
-	schemas: Array<{ definition: LixSchemaDefinition }>
-): Map<string, LixSchemaDefinition> {
-	const map = new Map<string, LixSchemaDefinition>();
-	for (const { definition } of schemas) {
-		const key = definition["x-lix-key"];
-		if (typeof key !== "string" || key.length === 0) {
-			continue;
-		}
-		map.set(key, definition);
-	}
-	return map;
 }
 
 function buildCacheTableMap(

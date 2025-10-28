@@ -42,10 +42,9 @@ export function getEntityViewSelects(args: {
 			cache.delete(engine.runtimeCacheRef);
 		}
 	});
-	const { schemas, signature } = getAllStoredSchemas({ engine });
+	const { definitions, signature } = getAllStoredSchemas({ engine });
 	const map = new Map<string, string>();
-	for (const entry of schemas) {
-		const schema = entry.definition;
+	for (const schema of definitions.values()) {
 		const baseName = schema["x-lix-key"];
 		if (!baseName || typeof baseName !== "string") continue;
 		if (!Array.isArray(schema["x-lix-primary-key"])) continue;
