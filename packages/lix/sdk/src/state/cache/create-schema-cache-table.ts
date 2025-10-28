@@ -140,3 +140,12 @@ export function schemaKeyToCacheTableName(schema_key: string): string {
 	const sanitized = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
 	return `lix_internal_state_cache_v1_${sanitized}`;
 }
+
+const CACHE_TABLE_PREFIX = "lix_internal_state_cache_v1_";
+
+export function cacheTableNameToSchemaKey(tableName: string): string {
+	if (tableName.startsWith(CACHE_TABLE_PREFIX)) {
+		return tableName.slice(CACHE_TABLE_PREFIX.length);
+	}
+	return tableName;
+}

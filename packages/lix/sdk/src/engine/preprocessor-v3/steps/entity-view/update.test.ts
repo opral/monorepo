@@ -208,6 +208,7 @@ test("updates to immutable schemas are rejected", async () => {
 		required: ["id"],
 		additionalProperties: false,
 	} satisfies LixSchemaDefinition;
+
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createPreprocessor({ engine: lix.engine! });

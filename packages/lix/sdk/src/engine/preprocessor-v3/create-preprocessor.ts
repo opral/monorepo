@@ -10,7 +10,7 @@ import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { getStateCacheTables } from "../../state/cache/schema.js";
-import { schemaKeyToCacheTableName } from "../../state/cache/create-schema-cache-table.js";
+import { cacheTableNameToSchemaKey } from "../../state/cache/create-schema-cache-table.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { createCelEnvironment } from "./steps/entity-view/cel-environment.js";
 import type { CelEnvironment } from "./steps/entity-view/cel-environment.js";
@@ -61,8 +61,6 @@ export function createPreprocessor(args: {
 	engine: EngineShape;
 }): PreprocessorFn {
 	const { engine } = args;
-
-	buildContext(engine, undefined); // prime the context cache
 
 	return ({ sql, parameters, sideEffects, trace }: PreprocessorArgs) => {
 		void sideEffects;
@@ -127,7 +125,7 @@ function buildContext(
 	const loadCacheTables = (): Map<string, string> => {
 		if (!cacheTables) {
 			const cacheTableSet = getStateCacheTables({ engine });
-			cacheTables = buildCacheTableMap(loadStoredSchemas(), cacheTableSet);
+			cacheTables = buildCacheTableMap(cacheTableSet);
 		}
 		return cacheTables;
 	};
@@ -165,16 +163,11 @@ function buildContext(
 	return context;
 }
 
-function buildCacheTableMap(
-	storedSchemas: Map<string, LixSchemaDefinition>,
-	tableSet: Set<string>
-): Map<string, string> {
+function buildCacheTableMap(tableSet: Set<string>): Map<string, string> {
 	const map = new Map<string, string>();
-	for (const [key] of storedSchemas) {
-		const tableName = schemaKeyToCacheTableName(key);
-		if (tableSet.has(tableName)) {
-			map.set(key, tableName);
-		}
+	for (const tableName of tableSet) {
+		const key = cacheTableNameToSchemaKey(tableName);
+		map.set(key, tableName);
 	}
 	return map;
 }
