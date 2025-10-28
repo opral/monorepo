@@ -94,6 +94,10 @@ export const rewriteEntityViewSelect: PreprocessorStep = (context) => {
 		return node;
 	}
 
+	if (!hasEntityViewCandidate(node)) {
+		return node;
+	}
+
 	const storedSchemas = context.getStoredSchemas?.();
 	if (!storedSchemas || storedSchemas.size === 0) {
 		return node;
@@ -178,6 +182,16 @@ function resolveEntityViewReference(
 ): EntityViewReference | null {
 	const viewName = extractObjectName(node.name);
 	if (!viewName) {
+		return null;
+	}
+
+	const normalizedViewName = viewName.toLowerCase();
+	if (
+		normalizedViewName.startsWith("lix_internal_") ||
+		normalizedViewName === "state" ||
+		normalizedViewName === "state_all" ||
+		normalizedViewName === "state_history"
+	) {
 		return null;
 	}
 
@@ -637,4 +651,45 @@ function pushTrace(
 		return;
 	}
 	trace.push(entry);
+}
+
+function hasEntityViewCandidate(select: SelectStatementNode): boolean {
+	for (const fromClause of select.from_clauses) {
+		if (relationHasEntityViewCandidate(fromClause.relation)) {
+			return true;
+		}
+		for (const join of fromClause.joins) {
+			if (relationHasEntityViewCandidate(join.relation)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function relationHasEntityViewCandidate(
+	relation: SelectStatementNode["from_clauses"][number]["relation"]
+): boolean {
+	if (relation.node_kind === "table_reference") {
+		const viewName = extractObjectName(relation.name);
+		if (!viewName) {
+			return false;
+		}
+		const normalized = viewName.toLowerCase();
+		if (
+			normalized.startsWith("lix_internal_") ||
+			normalized === "state" ||
+			normalized === "state_all" ||
+			normalized === "state_history"
+		) {
+			return false;
+		}
+		return true;
+	}
+
+	if (relation.node_kind === "subquery") {
+		return hasEntityViewCandidate(relation.statement);
+	}
+
+	return false;
 }
