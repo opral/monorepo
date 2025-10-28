@@ -63,6 +63,23 @@ test("state_all query flows through state_all and vtable rewrites", async () => 
 	await lix.close();
 });
 
+test("unsupported statements return a raw fragment", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const sql = "CREATE TABLE raw_escape(id TEXT)";
+	const result = preprocess({
+		sql,
+		parameters: [],
+	});
+
+	expect(result.sql).toBe(sql);
+	expect(result.expandedSql).toBe(sql);
+	expect(result.parameters).toEqual([]);
+
+	await lix.close();
+});
+
 test.skip("sql view expansion feeds subsequent rewrites", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });

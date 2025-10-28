@@ -234,6 +234,24 @@ describe("parse", () => {
 		});
 	});
 
+	test("returns raw fragment for unsupported statement types", () => {
+		const sql = "CREATE TABLE projects(id TEXT)";
+		const ast = parse(sql);
+		expect(ast).toEqual({
+			node_kind: "raw_fragment",
+			sql_text: sql,
+		});
+	});
+
+	test("returns raw fragment when lexing fails", () => {
+		const sql = "???";
+		const ast = parse(sql);
+		expect(ast).toEqual({
+			node_kind: "raw_fragment",
+			sql_text: sql,
+		});
+	});
+
 	test("parses BETWEEN predicate", () => {
 		const ast = parse("SELECT * FROM projects WHERE revision BETWEEN 1 AND 5");
 		if (ast.node_kind !== "select_statement") {

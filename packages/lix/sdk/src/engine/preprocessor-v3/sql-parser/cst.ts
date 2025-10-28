@@ -556,21 +556,35 @@ class SqlParser extends CstParser {
 
 export const parserInstance: SqlParser = new SqlParser();
 
-function throwIfErrors(label: string, errors: ReadonlyArray<unknown>): void {
-	if (errors.length > 0) {
-		const [first] = errors;
-		throw new Error(`${label} failed: ${String(first)}`);
+function extractFirstError(
+	label: string,
+	errors: ReadonlyArray<unknown>
+): Error | null {
+	if (errors.length === 0) {
+		return null;
 	}
+	const [first] = errors;
+	if (first instanceof Error) {
+		return first;
+	}
+	return new Error(`${label} failed: ${String(first)}`);
 }
 
-export function parseCst(sql: string): CstNode {
+export function parseCst(sql: string): CstNode | null {
 	const lexResult = sqlLexer.tokenize(sql);
-	throwIfErrors("Lexing", lexResult.errors);
+	const lexError = extractFirstError("Lexing", lexResult.errors);
+	if (lexError) {
+		parserInstance.reset();
+		return null;
+	}
 	parserInstance.input = lexResult.tokens;
 	const cst = parserInstance.select_statement();
 	const parseErrors = [...parserInstance.errors];
 	parserInstance.reset();
-	throwIfErrors("Parsing", parseErrors);
+	const parseError = extractFirstError("Parsing", parseErrors);
+	if (parseError) {
+		return null;
+	}
 	const children = (cst as any)?.children ?? {};
 	const core = children.core?.[0];
 	const insert = children.insert?.[0];

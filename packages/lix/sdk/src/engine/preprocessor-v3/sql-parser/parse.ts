@@ -17,7 +17,6 @@ import type {
 	ObjectNameNode,
 	ParameterExpressionNode,
 	RelationNode,
-	SelectExpressionNode,
 	SelectItemNode,
 	SelectQualifiedStarNode,
 	SelectStarNode,
@@ -32,6 +31,7 @@ import type {
 	InListExpressionNode,
 	BetweenExpressionNode,
 	FunctionCallExpressionNode,
+	RawFragmentNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -854,8 +854,26 @@ function toStatementNode(root: CstNode): StatementNode {
 	return visitor.visit(root) as StatementNode;
 }
 
+/**
+ * Parses SQL into the v3 AST and falls back to a raw fragment when the
+ * statement is not supported by the parser.
+ *
+ * @example
+ * ```ts
+ * const select = parse("SELECT 1");
+ * const raw = parse("CREATE TABLE example(id TEXT)");
+ * ```
+ */
 export function parse(sql: string): StatementNode {
-	return toStatementNode(parseCst(sql));
+	const root = parseCst(sql);
+	if (!root) {
+		const raw: RawFragmentNode = {
+			node_kind: "raw_fragment",
+			sql_text: sql,
+		};
+		return raw;
+	}
+	return toStatementNode(root);
 }
 
 export { parseCst } from "./cst.js";
