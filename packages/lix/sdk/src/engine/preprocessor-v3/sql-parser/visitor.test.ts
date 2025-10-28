@@ -8,7 +8,7 @@ import type {
 	SelectStatementNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
-import { compile } from "../compile.js";
+import { getIdentifierValue } from "./ast-helpers.js";
 
 test("returns the same instance when no handlers modify the tree", () => {
 	const statement = parse("SELECT * FROM projects") as SelectStatementNode;
@@ -36,8 +36,11 @@ test("allows transforming table references during visitation", () => {
 	});
 
 	expect(rewritten).not.toBe(statement);
-	const { sql } = compile(rewritten);
-	expect(sql).toContain('"people"');
+	const tableReference = rewritten.from_clauses[0]?.relation;
+	if (!tableReference || tableReference.node_kind !== "table_reference") {
+		throw new Error("expected table reference relation");
+	}
+	expect(getIdentifierValue(tableReference.name.parts.at(-1))).toBe("people");
 });
 
 test("invokes generic enter and exit hooks in depth-first order", () => {
@@ -131,9 +134,4 @@ test("visitStatement traverses insert targets and values", () => {
 	expect(
 		(originalInsert.source.rows[0]?.[1] as LiteralNode | undefined)?.value
 	).toBe("Project A");
-
-	const { sql } = compile(insert);
-	expect(sql).toContain('"projects_shadow"');
-	expect(sql).toContain("'Project A (rewritten)'");
-	expect(sql).toContain("'Project B (rewritten)'");
 });

@@ -235,7 +235,7 @@ export const Dot: TokenType = createToken({
 
 export const Parameter: TokenType = createToken({
 	name: "Parameter",
-	pattern: /\?/,
+	pattern: /\?[0-9]*/,
 });
 
 export const Semicolon: TokenType = createToken({

@@ -12,6 +12,12 @@ import { getTimestamp } from "../../functions/timestamp.js";
 import { updateStateCache } from "../../../state/cache/update-state-cache.js";
 import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
 import type { LixChangeRaw } from "../../../change/schema-definition.js";
+import { getColumnPath } from "../sql-parser/ast-helpers.js";
+import type {
+	SelectExpressionNode,
+	SelectStatementNode,
+	SqlNode,
+} from "../sql-parser/nodes.js";
 
 test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 	const node = parse(`
@@ -556,19 +562,42 @@ test("handles multiple vtable references with selective projections", () => {
 		aliases: ["a", "b"],
 	});
 
-	const { sql } = compile(rewritten);
+	const select = assertSelectStatement(rewritten);
+	const { sql } = compile(select);
 
 	const normalizedSql = sql.replace(/\s+/g, " ").toLowerCase();
 
-	expect(normalizedSql).toContain(
-		'select "a"."schema_key", "a"."file_id", "b"."writer_key"'
-	);
+	const projectionColumns = select.projection
+		.filter(
+			(item): item is SelectExpressionNode =>
+				item.node_kind === "select_expression"
+		)
+		.map((item) => {
+			const expression = item.expression;
+			if (expression.node_kind !== "column_reference") {
+				throw new Error("Unexpected projection expression type.");
+			}
+			return getColumnPath(expression).join(".");
+		});
+
+	expect(projectionColumns).toEqual([
+		"a.schema_key",
+		"a.file_id",
+		"b.writer_key",
+	]);
 	expect(normalizedSql).toContain("c.entity_id as entity_id");
 	expect(normalizedSql).toContain("c.version_id as version_id");
 	expect(normalizedSql).toContain("c.change_id as change_id");
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_dst");
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_src");
 });
+
+function assertSelectStatement(node: SqlNode): SelectStatementNode {
+	if (node.node_kind !== "select_statement") {
+		throw new Error("expected select statement");
+	}
+	return node as SelectStatementNode;
+}
 
 test("returns transaction rows", async () => {
 	const lix = await openLix({

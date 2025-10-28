@@ -87,17 +87,17 @@ class ToAstVisitor extends BaseVisitor {
 		}
 		const projection = this.visit(selectList) as SelectItemNode[];
 		const fromNode = ctx.from?.[0];
-		if (!fromNode) {
-			throw new Error("table reference is missing");
+		const fromClauses: FromClauseNode[] = [];
+		if (fromNode) {
+			const relation = this.visit(fromNode) as RelationNode;
+			const joins =
+				ctx.joins?.map((join) => this.visit(join) as JoinClauseNode) ?? [];
+			fromClauses.push({
+				node_kind: "from_clause",
+				relation,
+				joins,
+			});
 		}
-		const relation = this.visit(fromNode) as RelationNode;
-		const joins =
-			ctx.joins?.map((join) => this.visit(join) as JoinClauseNode) ?? [];
-		const fromClause: FromClauseNode = {
-			node_kind: "from_clause",
-			relation,
-			joins,
-		};
 		const whereNode = ctx.where_clause?.[0];
 		const whereClause = whereNode
 			? (this.visit(whereNode) as ExpressionNode)
@@ -112,7 +112,7 @@ class ToAstVisitor extends BaseVisitor {
 		return {
 			node_kind: "select_statement",
 			projection,
-			from_clauses: [fromClause],
+			from_clauses: fromClauses,
 			where_clause: whereClause,
 			order_by: orderByItems,
 			limit: limitNode ? (this.visit(limitNode) as ExpressionNode) : null,
@@ -165,31 +165,36 @@ class ToAstVisitor extends BaseVisitor {
 		return this.visit(expressionNode) as ExpressionNode;
 	}
 
-	public select_list(ctx: {
-		table?: CstNode[];
-		items?: CstNode[];
-	}): SelectItemNode[] {
-		if (ctx.table?.length) {
-			const qualifierIdent = this.visit(ctx.table[0]!) as IdentifierNode;
-			const qualifier: IdentifierNode[] = [qualifierIdent];
-			const qualified: SelectQualifiedStarNode = {
-				node_kind: "select_qualified_star",
-				qualifier,
-			};
-			return [qualified];
-		}
+	public select_list(ctx: { items?: CstNode[] }): SelectItemNode[] {
 		const items = ctx.items ?? [];
-		if (items.length > 0) {
-			return items.map((item) => this.visit(item) as SelectItemNode);
+		if (items.length === 0) {
+			throw new Error("select list is missing");
 		}
-		const star: SelectStarNode = { node_kind: "select_star" };
-		return [star];
+		return items.map((item) => this.visit(item) as SelectItemNode);
 	}
 
 	public select_item(ctx: {
-		expression: CstNode[];
+		expression?: CstNode[];
 		alias?: CstNode[];
-	}): SelectExpressionNode {
+		star?: IToken[];
+		qualifier?: CstNode[];
+		qualifiedStar?: IToken[];
+	}): SelectItemNode {
+		if (ctx.star?.[0]) {
+			const star: SelectStarNode = { node_kind: "select_star" };
+			return star;
+		}
+
+		if (ctx.qualifiedStar?.[0]) {
+			const qualifiers =
+				ctx.qualifier?.map((node) => this.visit(node) as IdentifierNode) ?? [];
+			const qualified: SelectQualifiedStarNode = {
+				node_kind: "select_qualified_star",
+				qualifier: qualifiers,
+			};
+			return qualified;
+		}
+
 		const expressionNode = ctx.expression?.[0];
 		if (!expressionNode) {
 			throw new Error("select item missing expression");

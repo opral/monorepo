@@ -124,11 +124,6 @@ function rewriteSelectStatement(
 		withRewrittenSubqueries.where_clause,
 		tableNamesForTrace
 	);
-	if (schemaSummary.hasDynamic) {
-		throw new Error(
-			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-		);
-	}
 
 	const projectionKind = determineProjectionKind(
 		withRewrittenSubqueries.projection,

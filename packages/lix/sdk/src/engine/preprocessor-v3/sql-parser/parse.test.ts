@@ -74,6 +74,25 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses select literal without from clause", () => {
+		const ast = parse("SELECT 1 AS value");
+		expect(ast).toEqual({
+			node_kind: "select_statement",
+			projection: [
+				{
+					node_kind: "select_expression",
+					expression: { node_kind: "literal", value: 1 },
+					alias: id("value"),
+				},
+			],
+			from_clauses: [],
+			where_clause: null,
+			order_by: [],
+			limit: null,
+			offset: null,
+		});
+	});
+
 	test("parses qualified column without alias", () => {
 		const ast = parse("SELECT projects.id FROM projects");
 		expect(ast).toEqual({

@@ -81,30 +81,36 @@ function buildContext(
 	engine: EngineShape,
 	trace: PreprocessorTrace | undefined
 ): PreprocessorContext {
-	const base = resolveCachedResources(engine);
-
+	let baseEntry: ContextCacheEntry | undefined;
 	let storedSchemas: Map<string, unknown> | undefined;
 	let cacheTables: Map<string, unknown> | undefined;
 	let sqlViews: Map<string, string> | undefined;
 	let transactionState: boolean | undefined;
 	let celEnvironment: CelEnvironment | undefined;
 
+	const resolveBase = (): ContextCacheEntry => {
+		if (!baseEntry) {
+			baseEntry = resolveCachedResources(engine);
+		}
+		return baseEntry;
+	};
+
 	const context: PreprocessorContext = {
 		getStoredSchemas: () => {
 			if (!storedSchemas) {
-				storedSchemas = base.storedSchemas as Map<string, unknown>;
+				storedSchemas = resolveBase().storedSchemas as Map<string, unknown>;
 			}
 			return storedSchemas;
 		},
 		getCacheTables: () => {
 			if (!cacheTables) {
-				cacheTables = base.cacheTables as Map<string, unknown>;
+				cacheTables = resolveBase().cacheTables as Map<string, unknown>;
 			}
 			return cacheTables;
 		},
 		getSqlViews: () => {
 			if (!sqlViews) {
-				sqlViews = base.sqlViews;
+				sqlViews = resolveBase().sqlViews;
 			}
 			return sqlViews;
 		},

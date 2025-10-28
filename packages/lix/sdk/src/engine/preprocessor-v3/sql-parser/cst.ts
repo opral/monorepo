@@ -83,10 +83,12 @@ class SqlParser extends CstParser {
 	private readonly select_core: () => CstNode = this.RULE("select_core", () => {
 		this.CONSUME(Select);
 		this.SUBRULE(this.select_list);
-		this.CONSUME(From);
-		this.SUBRULE(this.table_reference, { LABEL: "from" });
-		this.MANY(() => {
-			this.SUBRULE1(this.join_clause, { LABEL: "joins" });
+		this.OPTION(() => {
+			this.CONSUME(From);
+			this.SUBRULE(this.table_reference, { LABEL: "from" });
+			this.MANY(() => {
+				this.SUBRULE1(this.join_clause, { LABEL: "joins" });
+			});
 		});
 		this.OPTION1(() => {
 			this.CONSUME(Where);
@@ -173,33 +175,33 @@ class SqlParser extends CstParser {
 	);
 
 	private readonly select_list: () => CstNode = this.RULE("select_list", () => {
+		this.SUBRULE(this.select_item, { LABEL: "items" });
+		this.MANY(() => {
+			this.CONSUME(Comma);
+			this.SUBRULE1(this.select_item, { LABEL: "items" });
+		});
+	});
+
+	private readonly select_item: () => CstNode = this.RULE("select_item", () => {
 		this.OR([
-			{ ALT: () => this.CONSUME(Star) },
+			{ ALT: () => this.CONSUME(Star, { LABEL: "star" }) },
 			{
 				ALT: () => {
-					this.SUBRULE(this.identifier, { LABEL: "table" });
+					this.SUBRULE(this.identifier, { LABEL: "qualifier" });
 					this.CONSUME(Dot);
-					this.CONSUME1(Star);
+					this.CONSUME1(Star, { LABEL: "qualifiedStar" });
 				},
 			},
 			{
 				ALT: () => {
-					this.SUBRULE(this.select_item, { LABEL: "items" });
-					this.MANY(() => {
-						this.CONSUME(Comma);
-						this.SUBRULE1(this.select_item, { LABEL: "items" });
+					this.SUBRULE(this.expression, { LABEL: "expression" });
+					this.OPTION(() => {
+						this.OPTION1(() => this.CONSUME(As));
+						this.SUBRULE1(this.identifier, { LABEL: "alias" });
 					});
 				},
 			},
 		]);
-	});
-
-	private readonly select_item: () => CstNode = this.RULE("select_item", () => {
-		this.SUBRULE(this.column_reference, { LABEL: "expression" });
-		this.OPTION(() => {
-			this.OPTION1(() => this.CONSUME(As));
-			this.SUBRULE1(this.identifier, { LABEL: "alias" });
-		});
 	});
 
 	private readonly table_reference: () => CstNode = this.RULE(
