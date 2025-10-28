@@ -610,9 +610,25 @@ export function applyStateVTable(
 							? valueFor("metadata")
 							: null;
 
-					// assert required fields
-					if (!entity_id || !schema_key || !file_id || !plugin_key) {
-						throw new Error("Missing required fields for state mutation");
+					const requiredFieldValues: Array<[string, unknown]> = [
+						["entity_id", entity_id],
+						["schema_key", schema_key],
+						["file_id", file_id],
+						["plugin_key", plugin_key],
+					];
+					const missingFields = requiredFieldValues
+						.filter(
+							([, value]) =>
+								value === null || value === undefined || value === ""
+						)
+						.map(([name]) => name);
+
+					if (missingFields.length > 0) {
+						throw new Error(
+							`Missing required fields for state mutation: ${missingFields.join(
+								", "
+							)}`
+						);
 					}
 
 					// Persist writer for INSERT/UPDATE
