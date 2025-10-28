@@ -39,6 +39,8 @@ export type SelectStatementNode = SqlNode & {
 	readonly from_clauses: readonly FromClauseNode[];
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
 	readonly order_by: readonly OrderByItemNode[];
+	readonly limit: ExpressionNode | RawFragmentNode | null;
+	readonly offset: ExpressionNode | RawFragmentNode | null;
 };
 
 export type SelectItemNode =

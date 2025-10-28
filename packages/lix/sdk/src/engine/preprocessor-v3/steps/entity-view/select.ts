@@ -351,6 +351,8 @@ function buildEntityViewSelect(
 		],
 		where_clause: whereClause,
 		order_by: [],
+		limit: null,
+		offset: null,
 	};
 }
 

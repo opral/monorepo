@@ -33,6 +33,12 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT with limit and offset", () => {
+		expectRoundTrip(
+			"SELECT id FROM projects ORDER BY created_at DESC LIMIT 5 OFFSET 10"
+		);
+	});
+
 	test("UPDATE with assignments", () => {
 		expectRoundTrip(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"

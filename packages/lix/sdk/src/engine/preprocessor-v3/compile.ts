@@ -119,6 +119,14 @@ function emitSelectStatement(statement: SelectStatementNode): string {
 		);
 	}
 
+	if (statement.limit) {
+		parts.push(`LIMIT ${emitExpressionOrRaw(statement.limit)}`);
+	}
+
+	if (statement.offset) {
+		parts.push(`OFFSET ${emitExpressionOrRaw(statement.offset)}`);
+	}
+
 	return parts.join("\n");
 }
 

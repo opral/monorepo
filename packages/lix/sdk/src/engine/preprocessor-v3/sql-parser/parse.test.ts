@@ -27,6 +27,8 @@ describe("parse", () => {
 			],
 			where_clause: null,
 			order_by: [],
+			limit: null,
+			offset: null,
 		});
 	});
 
@@ -67,6 +69,8 @@ describe("parse", () => {
 				right: { node_kind: "literal", value: 1 },
 			},
 			order_by: [],
+			limit: null,
+			offset: null,
 		});
 	});
 
@@ -97,6 +101,8 @@ describe("parse", () => {
 			],
 			where_clause: null,
 			order_by: [],
+			limit: null,
+			offset: null,
 		});
 	});
 
@@ -162,6 +168,50 @@ describe("parse", () => {
 			},
 			items: [lit("a"), lit("b")],
 			negated: false,
+		});
+	});
+
+	test("parses limit and offset clauses", () => {
+		const ast = parse(
+			"SELECT id FROM projects ORDER BY created_at DESC LIMIT 5 OFFSET 10"
+		);
+		if (ast.node_kind !== "select_statement") {
+			throw new Error("expected select statement");
+		}
+		expect(ast.limit).toEqual({
+			node_kind: "literal",
+			value: 5,
+		});
+		expect(ast.offset).toEqual({
+			node_kind: "literal",
+			value: 10,
+		});
+	});
+
+	test("parses limit without offset", () => {
+		const ast = parse("SELECT * FROM files LIMIT 20");
+		if (ast.node_kind !== "select_statement") {
+			throw new Error("expected select statement");
+		}
+		expect(ast.limit).toEqual({
+			node_kind: "literal",
+			value: 20,
+		});
+		expect(ast.offset).toBeNull();
+	});
+
+	test("parses parameterised limit and offset", () => {
+		const ast = parse("SELECT * FROM logs LIMIT ? OFFSET ?2");
+		if (ast.node_kind !== "select_statement") {
+			throw new Error("expected select statement");
+		}
+		expect(ast.limit).toEqual({
+			node_kind: "parameter",
+			placeholder: "?",
+		});
+		expect(ast.offset).toEqual({
+			node_kind: "parameter",
+			placeholder: "?2",
 		});
 	});
 

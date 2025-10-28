@@ -237,6 +237,8 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 			],
 			where_clause: null,
 			order_by: [],
+			limit: null,
+			offset: null,
 		},
 	};
 }

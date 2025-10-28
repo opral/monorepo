@@ -287,6 +287,16 @@ function traverseSelectStatement(
 		changed = true;
 	}
 
+	const limit = visitOptional(node.limit, node, "limit", visitor);
+	if (limit !== node.limit) {
+		changed = true;
+	}
+
+	const offset = visitOptional(node.offset, node, "offset", visitor);
+	if (offset !== node.offset) {
+		changed = true;
+	}
+
 	if (!changed) {
 		return node;
 	}
@@ -297,6 +307,8 @@ function traverseSelectStatement(
 		from_clauses: fromClauses as readonly FromClauseNode[],
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
 		order_by: orderBy as readonly OrderByItemNode[],
+		limit: limit as ExpressionNode | RawFragmentNode | null,
+		offset: offset as ExpressionNode | RawFragmentNode | null,
 	};
 }
 

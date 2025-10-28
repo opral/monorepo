@@ -56,6 +56,16 @@ export const Not: TokenType = createToken({
 	pattern: /not\b/i,
 });
 
+export const Limit: TokenType = createToken({
+	name: "Limit",
+	pattern: /limit\b/i,
+});
+
+export const Offset: TokenType = createToken({
+	name: "Offset",
+	pattern: /offset\b/i,
+});
+
 export const Order: TokenType = createToken({
 	name: "Order",
 	pattern: /order\b/i,
@@ -159,6 +169,8 @@ export const Identifier: TokenType = createToken({
 		Where,
 		And,
 		Order,
+		Limit,
+		Offset,
 		Or,
 		Not,
 		By,
@@ -297,6 +309,8 @@ const tokens: TokenType[] = [
 	Where,
 	And,
 	Order,
+	Limit,
+	Offset,
 	Or,
 	Not,
 	By,

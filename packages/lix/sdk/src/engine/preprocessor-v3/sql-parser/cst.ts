@@ -11,6 +11,8 @@ import {
 	Or,
 	Not,
 	Order,
+	Limit,
+	Offset,
 	By,
 	Asc,
 	Desc,
@@ -95,7 +97,29 @@ class SqlParser extends CstParser {
 			this.CONSUME(By);
 			this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
 		});
+		this.OPTION3(() => {
+			this.CONSUME(Limit);
+			this.SUBRULE(this.limit_clause, { LABEL: "limit" });
+		});
+		this.OPTION4(() => {
+			this.CONSUME(Offset);
+			this.SUBRULE(this.offset_clause, { LABEL: "offset" });
+		});
 	});
+
+	private readonly limit_clause: () => CstNode = this.RULE(
+		"limit_clause",
+		() => {
+			this.SUBRULE(this.expression, { LABEL: "value" });
+		}
+	);
+
+	private readonly offset_clause: () => CstNode = this.RULE(
+		"offset_clause",
+		() => {
+			this.SUBRULE(this.expression, { LABEL: "value" });
+		}
+	);
 
 	private readonly insert_statement: () => CstNode = this.RULE(
 		"insert_statement",

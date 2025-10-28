@@ -78,6 +78,8 @@ class ToAstVisitor extends BaseVisitor {
 		joins?: CstNode[];
 		where_clause?: CstNode[];
 		order_by?: CstNode[];
+		limit?: CstNode[];
+		offset?: CstNode[];
 	}): SelectStatementNode {
 		const selectList = ctx.select_list?.[0];
 		if (!selectList) {
@@ -104,12 +106,17 @@ class ToAstVisitor extends BaseVisitor {
 		const orderByItems = rawOrderBy
 			? (this.visit(rawOrderBy) as OrderByItemNode[])
 			: [];
+		const limitNode = ctx.limit?.[0] ?? null;
+		const offsetNode = ctx.offset?.[0] ?? null;
+
 		return {
 			node_kind: "select_statement",
 			projection,
 			from_clauses: [fromClause],
 			where_clause: whereClause,
 			order_by: orderByItems,
+			limit: limitNode ? (this.visit(limitNode) as ExpressionNode) : null,
+			offset: offsetNode ? (this.visit(offsetNode) as ExpressionNode) : null,
 		};
 	}
 
@@ -140,6 +147,22 @@ class ToAstVisitor extends BaseVisitor {
 			columns: columnNodes,
 			source: valuesNode,
 		};
+	}
+
+	public limit_clause(ctx: { value: CstNode[] }): ExpressionNode {
+		const expressionNode = ctx.value?.[0];
+		if (!expressionNode) {
+			throw new Error("limit clause missing value");
+		}
+		return this.visit(expressionNode) as ExpressionNode;
+	}
+
+	public offset_clause(ctx: { value: CstNode[] }): ExpressionNode {
+		const expressionNode = ctx.value?.[0];
+		if (!expressionNode) {
+			throw new Error("offset clause missing value");
+		}
+		return this.visit(expressionNode) as ExpressionNode;
 	}
 
 	public select_list(ctx: {

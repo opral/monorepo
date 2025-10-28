@@ -239,6 +239,8 @@ function buildStateSelect(reference: StateReference): SelectStatementNode {
 		],
 		where_clause: whereClause,
 		order_by: [],
+		limit: null,
+		offset: null,
 	};
 }
 
