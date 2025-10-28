@@ -21,6 +21,7 @@ import {
 } from "../../sql-parser/visitor.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
+import { resolveSchemaDefinition } from "./shared.js";
 
 type EntityViewVariant = "base" | "all" | "history";
 
@@ -180,7 +181,7 @@ function resolveEntityViewReference(
 		return null;
 	}
 
-	const schema = lookupSchemaForView(viewName, storedSchemas);
+	const schema = resolveSchemaDefinition(storedSchemas, viewName);
 	if (!schema) {
 		return null;
 	}
@@ -577,21 +578,6 @@ function classifyVariant(viewName: string): EntityViewVariant {
 		return "all";
 	}
 	return "base";
-}
-
-function lookupSchemaForView(
-	viewName: string,
-	storedSchemas: Map<string, unknown>
-): LixSchemaDefinition | undefined {
-	const baseKey = stripVariantSuffix(viewName);
-	return (
-		(storedSchemas.get(viewName) as LixSchemaDefinition | undefined) ??
-		(storedSchemas.get(baseKey) as LixSchemaDefinition | undefined)
-	);
-}
-
-function stripVariantSuffix(viewName: string): string {
-	return viewName.replace(/_(all|history)$/i, "");
 }
 
 function resolveSchemaKey(schema: LixSchemaDefinition): string {

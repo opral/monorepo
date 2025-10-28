@@ -30,6 +30,7 @@ import {
 	renderPointerExpression,
 	resolveMetadataDefaults,
 	resolveStoredSchemaKey,
+	resolveSchemaDefinition,
 	type EntityViewVariant,
 	type PrimaryKeyDescriptor,
 } from "./shared.js";
@@ -69,7 +70,7 @@ export const rewriteEntityViewInsert: PreprocessorStep = (context) => {
 		return statement;
 	}
 
-	const schema = resolveSchema(storedSchemas, viewName);
+	const schema = resolveSchemaDefinition(storedSchemas, viewName);
 	if (!schema) {
 		return statement;
 	}
@@ -701,27 +702,4 @@ function extractTableName(name: ObjectNameNode): string | null {
 	}
 	const last = name.parts[name.parts.length - 1];
 	return last?.value ?? null;
-}
-
-function resolveSchema(
-	storedSchemas: Map<string, unknown>,
-	viewName: string
-): LixSchemaDefinition | null {
-	const direct = storedSchemas.get(viewName);
-	if (direct && isSchemaDefinition(direct)) {
-		return direct;
-	}
-	const target = normalizeIdentifierValue(viewName);
-	for (const [key, value] of storedSchemas) {
-		if (!value) continue;
-		if (!isSchemaDefinition(value)) continue;
-		if (normalizeIdentifierValue(key) === target) {
-			return value;
-		}
-	}
-	return null;
-}
-
-function isSchemaDefinition(value: unknown): value is LixSchemaDefinition {
-	return typeof value === "object" && value !== null;
 }

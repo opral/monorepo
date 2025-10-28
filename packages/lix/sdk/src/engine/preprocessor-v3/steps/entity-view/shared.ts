@@ -423,6 +423,30 @@ const VARIANT_TABLE: Record<EntityViewVariant, string> = {
 	history: "state_history",
 };
 
+function buildSchemaKeyCandidates(viewName: string): string[] {
+	const candidates = new Set<string>();
+	const addCandidate = (value: string | null | undefined) => {
+		if (typeof value === "string" && value.length > 0) {
+			candidates.add(value);
+		}
+	};
+
+	addCandidate(viewName);
+
+	const base = baseSchemaKey(viewName);
+	addCandidate(base);
+
+	const baseValue = base ?? viewName;
+	const lowerBase = baseValue.toLowerCase();
+	if (lowerBase.startsWith("lix_")) {
+		addCandidate(baseValue.slice(4));
+	} else {
+		addCandidate(`lix_${baseValue}`);
+	}
+
+	return Array.from(candidates);
+}
+
 export function isEntityViewVariantEnabled(
 	schema: LixSchemaDefinition,
 	variant: EntityViewVariant
@@ -526,18 +550,27 @@ export function resolveSchemaDefinition(
 	storedSchemas: Map<string, unknown>,
 	viewName: string
 ): LixSchemaDefinition | null {
-	const direct = storedSchemas.get(viewName);
-	if (direct && isSchemaDefinition(direct)) {
-		return direct;
+	const candidates = buildSchemaKeyCandidates(viewName);
+
+	for (const candidate of candidates) {
+		const direct = storedSchemas.get(candidate);
+		if (direct && isSchemaDefinition(direct)) {
+			return direct;
+		}
 	}
-	const normalized = viewName.toLowerCase();
+
+	const normalizedCandidates = new Set(
+		candidates.map((candidate) => candidate.toLowerCase())
+	);
+
 	for (const [key, value] of storedSchemas) {
 		if (!value) continue;
 		if (!isSchemaDefinition(value)) continue;
-		if (key.toLowerCase() === normalized) {
+		if (normalizedCandidates.has(key.toLowerCase())) {
 			return value;
 		}
 	}
+
 	return null;
 }
 
