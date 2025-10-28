@@ -1,4 +1,3 @@
-import { isLocale } from "./is-locale.js";
 import { locales } from "./variables.js";
 
 /**
@@ -9,10 +8,17 @@ import { locales } from "./variables.js";
  * @throws {Error} If the input is not a locale.
  */
 export function assertIsLocale(input) {
-	if (isLocale(input) === false) {
+	if (typeof input !== "string") {
+		throw new Error(`Invalid locale: ${input}. Expected a string.`);
+	}
+	const lowerInput = input.toLowerCase();
+	const matchedLocale = locales.find(
+		(item) => item.toLowerCase() === lowerInput
+	);
+	if (!matchedLocale) {
 		throw new Error(
 			`Invalid locale: ${input}. Expected one of: ${locales.join(", ")}`
 		);
 	}
-	return input;
+	return matchedLocale;
 }
