@@ -1,5 +1,5 @@
 import { Environment } from "@marcbachmann/cel-js";
-import type { Call } from "../../../functions/function-registry.js";
+import type { LixEngine } from "../../../boot.js";
 
 export type CelEnvironment = {
 	/**
@@ -14,8 +14,7 @@ export type CelEnvironment = {
 };
 
 export function createCelEnvironment(args: {
-	listFunctions: () => readonly { name: string }[];
-	callFunction: Call;
+	engine: Pick<LixEngine, "call" | "listFunctions">;
 }): CelEnvironment {
 	const env = new Environment({
 		unlistedVariablesAreDyn: true,
@@ -24,7 +23,7 @@ export function createCelEnvironment(args: {
 	const programCache = new Map<string, ReturnType<Environment["parse"]>>();
 
 	const callSync = (name: string, callArgs?: unknown): unknown => {
-		const result = args.callFunction(name, callArgs);
+		const result = args.engine.call(name, callArgs);
 		if (result instanceof Promise) {
 			throw new Error(
 				`CEL helper "${name}" returned a Promise; asynchronous helpers are not supported`
@@ -33,7 +32,7 @@ export function createCelEnvironment(args: {
 		return result;
 	};
 
-	for (const { name } of args.listFunctions()) {
+	for (const { name } of args.engine.listFunctions()) {
 		env.registerFunction(`${name}(): dyn`, () => {
 			const result = callSync(name);
 			return normalizeCelValue(result);

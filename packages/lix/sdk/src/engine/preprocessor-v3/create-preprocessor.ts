@@ -121,11 +121,8 @@ function buildContext(
 			return transactionState;
 		},
 		getCelEnvironment: () => {
-			if (!celEnvironment && engine.listFunctions && engine.call) {
-				celEnvironment = createCelEnvironment({
-					listFunctions: engine.listFunctions,
-					callFunction: engine.call,
-				});
+			if (!celEnvironment) {
+				celEnvironment = createCelEnvironment({ engine });
 			}
 			return celEnvironment ?? null;
 		},
