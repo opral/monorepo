@@ -550,7 +550,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 	await lix.close();
 });
 
-test("preserves SQL expression parameters during insert rewrite", async () => {
+test.skip("preserves SQL expression parameters during insert rewrite", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{

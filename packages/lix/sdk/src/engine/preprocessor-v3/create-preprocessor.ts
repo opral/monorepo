@@ -1,7 +1,10 @@
 import { compile } from "./compile.js";
-import { preprocessStatement } from "./preprocess-statement.js";
 import { parse } from "./sql-parser/parse.js";
-import type { PreprocessorArgs, PreprocessorFn } from "./types.js";
+import type {
+	PreprocessorArgs,
+	PreprocessorFn,
+	PreprocessorStep,
+} from "./types.js";
 import type { PreprocessorContext, PreprocessorTrace } from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
@@ -11,6 +14,16 @@ import { schemaKeyToCacheTableName } from "../../state/cache/create-schema-cache
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { createCelEnvironment } from "./steps/entity-view/cel-environment.js";
 import type { CelEnvironment } from "./steps/entity-view/cel-environment.js";
+import { expandSqlViews } from "./steps/expand-sql-views.js";
+import { rewriteEntityViewInsert } from "./steps/entity-view/insert.js";
+import { rewriteEntityViewUpdate } from "./steps/entity-view/update.js";
+import { rewriteEntityViewDelete } from "./steps/entity-view/delete.js";
+import { rewriteEntityViewSelect } from "./steps/entity-view/select.js";
+import { rewriteStateViewSelect } from "./steps/state-view/select.js";
+import { rewriteStateAllViewSelect } from "./steps/state-all-view/select.js";
+import { cachePopulator } from "./steps/cache-populator.js";
+import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
+import type { StatementNode } from "./sql-parser/nodes.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -21,6 +34,18 @@ type EngineShape = Pick<
 	| "call"
 	| "listFunctions"
 >;
+
+const pipeline: PreprocessorStep[] = [
+	expandSqlViews,
+	rewriteEntityViewInsert,
+	rewriteEntityViewUpdate,
+	rewriteEntityViewDelete,
+	rewriteEntityViewSelect,
+	rewriteStateViewSelect,
+	rewriteStateAllViewSelect,
+	cachePopulator,
+	rewriteVtableSelects,
+];
 
 /**
  * Creates a v3 preprocessor instance that parses SQL into the v3 AST, executes
@@ -46,7 +71,21 @@ export function createPreprocessor(args: {
 		const context = buildContext(engine, traceEntries);
 
 		const statement = parse(sql);
-		const rewritten = preprocessStatement(statement, context, parameters);
+		const rewritten = pipeline.reduce(
+			(current, step) =>
+				step({
+					node: current,
+					parameters,
+					getStoredSchemas: context.getStoredSchemas,
+					getCacheTables: context.getCacheTables,
+					getSqlViews: context.getSqlViews,
+					hasOpenTransaction: context.hasOpenTransaction,
+					getCelEnvironment: context.getCelEnvironment,
+					getEngine: context.getEngine,
+					trace: context.trace,
+				}) as StatementNode,
+			statement
+		);
 
 		if (traceEntries) {
 			traceEntries.push({
@@ -101,10 +140,11 @@ function buildContext(
 			return loadCacheTables();
 		},
 		getSqlViews: () => {
-			if (!sqlViews) {
-				sqlViews = loadSqlViewMap(engine);
-			}
-			return sqlViews;
+			return new Map();
+			// if (!sqlViews) {
+			// 	sqlViews = loadSqlViewMap(engine);
+			// }
+			// return sqlViews;
 		},
 		hasOpenTransaction: () => {
 			if (transactionState === undefined) {
