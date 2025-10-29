@@ -30,7 +30,7 @@ import {
 } from "./shared.js";
 import {
 	createCelEnvironment,
-	type CelEnvironmentState,
+	type CelEnvironment,
 } from "../../cel-environment/cel-environment.js";
 
 interface ParameterState {
@@ -110,17 +110,14 @@ export function rewriteEntityDelete(args: {
 		typeof schema["x-lix-override-lixcols"] === "object"
 			? (schema["x-lix-override-lixcols"] as Record<string, unknown>)
 			: undefined;
-	let metadataCel: CelEnvironmentState | null = null;
+	let metadataCel: CelEnvironment | null = null;
 	if (
 		rawMetadataDefaults &&
 		Object.values(rawMetadataDefaults).some(
 			(value) => typeof value === "string"
 		)
 	) {
-		metadataCel = createCelEnvironment({
-			listFunctions: engine.listFunctions,
-			callFunction: engine.call,
-		});
+		metadataCel = createCelEnvironment({ engine });
 	}
 	const lixcolOverrides = resolveMetadataDefaults({
 		defaults: rawMetadataDefaults,

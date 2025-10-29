@@ -2,14 +2,16 @@
 
 ## Todos
 
-- [ ] real entity views creation upon insert of schema defintion
-- [ ] make all tests pass without any preprocessor being active (vtable has to build query without relying on vtable itself again) 
-- [ ] implement with no preprocessor simulation to ensure preprocessor is just an optimization
+<!-- - [ ] real entity views creation upon insert of schema defintion -->
+<!-- - [ ] make all tests pass without any preprocessor being active (vtable has to build query without relying on vtable itself again) -->
+<!-- - [ ] implement with no preprocessor simulation to ensure preprocessor is just an optimization -->
+
 - [ ] implement pipeline stages
   - [ ] normalize placeholders
   - [ ] expand views
   - [ ] rewrite vtable selects
   - [ ] cache populator
+  - [ ] entity view updates/inserts/deletes (if useful)
 
 ## Pipeline
 

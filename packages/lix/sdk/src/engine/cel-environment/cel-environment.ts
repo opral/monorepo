@@ -1,20 +1,21 @@
 import { Environment } from "@marcbachmann/cel-js";
-import type { Call } from "../functions/function-registry.js";
+import type { LixEngine } from "../boot.js";
 
-export type CelEnvironmentState = {
+export type CelEnvironment = {
 	/**
 	 * Evaluate a CEL expression with the provided context.
 	 *
-	 * Returns the expression result converted into JSON-serialisable primitives
-	 * (bigints downgraded to numbers/strings, nested collections normalised).
+	 * @example
+	 * ```ts
+	 * const value = env.evaluate("1 + 1", {});
+	 * ```
 	 */
 	evaluate: (expression: string, context: Record<string, unknown>) => unknown;
 };
 
 export function createCelEnvironment(args: {
-	listFunctions: () => readonly { name: string }[];
-	callFunction: Call;
-}): CelEnvironmentState {
+	engine: Pick<LixEngine, "call" | "listFunctions">;
+}): CelEnvironment {
 	const env = new Environment({
 		unlistedVariablesAreDyn: true,
 	});
@@ -22,7 +23,7 @@ export function createCelEnvironment(args: {
 	const programCache = new Map<string, ReturnType<Environment["parse"]>>();
 
 	const callSync = (name: string, callArgs?: unknown): unknown => {
-		const result = args.callFunction(name, callArgs);
+		const result = args.engine.call(name, callArgs);
 		if (result instanceof Promise) {
 			throw new Error(
 				`CEL helper "${name}" returned a Promise; asynchronous helpers are not supported`
@@ -31,7 +32,7 @@ export function createCelEnvironment(args: {
 		return result;
 	};
 
-	for (const { name } of args.listFunctions()) {
+	for (const { name } of args.engine.listFunctions()) {
 		env.registerFunction(`${name}(): dyn`, () => {
 			const result = callSync(name);
 			return normalizeCelValue(result);

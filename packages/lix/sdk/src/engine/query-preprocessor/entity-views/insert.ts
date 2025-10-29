@@ -31,7 +31,7 @@ import {
 } from "./shared.js";
 import {
 	createCelEnvironment,
-	type CelEnvironmentState,
+	type CelEnvironment,
 } from "../../cel-environment/cel-environment.js";
 
 type ExpressionValue = { kind: "expression"; sql: string };
@@ -105,11 +105,8 @@ export function rewriteEntityInsert(args: {
 				typeof (definition as Record<string, unknown>)["x-lix-default"] ===
 					"string"
 		);
-	const celState: CelEnvironmentState | null = hasCelDefaults
-		? createCelEnvironment({
-				listFunctions: args.engine.listFunctions,
-				callFunction: args.engine.call,
-			})
+	const celState: CelEnvironment | null = hasCelDefaults
+		? createCelEnvironment({ engine })
 		: null;
 	const storedSchemaKey = resolveStoredSchemaKey(schema, baseKey);
 	const columnParse = parseColumnList(tokens, index);
@@ -697,7 +694,7 @@ function buildSnapshotObjectExpression(args: {
 	columnMap: Map<string, unknown>;
 	columnExpressions: Map<string, string>;
 	literal: (value: unknown) => string;
-	cel: CelEnvironmentState | null;
+	cel: CelEnvironment | null;
 	context: Record<string, unknown>;
 	resolvedDefaults: Map<string, unknown>;
 }): string {
@@ -806,7 +803,7 @@ function renderDefaultSnapshotValue(args: {
 	propertyName: string;
 	definition: unknown;
 	literal: (value: unknown) => string;
-	cel: CelEnvironmentState | null;
+	cel: CelEnvironment | null;
 	context: Record<string, unknown>;
 	resolvedDefaults: Map<string, unknown>;
 }): string {

@@ -6,7 +6,7 @@ import {
 	buildSqliteJsonPath,
 } from "../../../schema-definition/json-pointer.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
-import type { CelEnvironmentState } from "../../cel-environment/cel-environment.js";
+import type { CelEnvironment } from "../../cel-environment/cel-environment.js";
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 
 /**
@@ -295,7 +295,7 @@ export function getColumnOrDefault(
  */
 export function resolveMetadataDefaults(args: {
 	defaults: unknown;
-	cel: CelEnvironmentState | null;
+	cel: CelEnvironment | null;
 	context?: Record<string, unknown>;
 }): Map<string, unknown> {
 	const { defaults, cel } = args;

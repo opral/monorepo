@@ -1,4 +1,4 @@
-import type { CelEnvironment } from "./cel-environment.js";
+import type { CelEnvironment } from "../cel-environment/cel-environment.js";
 import type { LixEngine } from "../boot.js";
 
 /**

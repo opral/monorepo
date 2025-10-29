@@ -13,7 +13,7 @@ import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import {
 	createCelEnvironment,
 	type CelEnvironment,
-} from "./cel-environment.js";
+} from "../cel-environment/cel-environment.js";
 
 type EngineShape = Pick<
 	LixEngine,

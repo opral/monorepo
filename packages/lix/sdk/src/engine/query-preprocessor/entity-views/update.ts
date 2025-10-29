@@ -35,7 +35,7 @@ import {
 } from "./shared.js";
 import {
 	createCelEnvironment,
-	type CelEnvironmentState,
+	type CelEnvironment,
 } from "../../cel-environment/cel-environment.js";
 import { buildJsonObjectEntries } from "../../entity-views/build-json-object-entries.js";
 
@@ -130,17 +130,14 @@ export function rewriteEntityUpdate(args: {
 		typeof schema["x-lix-override-lixcols"] === "object"
 			? (schema["x-lix-override-lixcols"] as Record<string, unknown>)
 			: undefined;
-	let metadataCel: CelEnvironmentState | null = null;
+	let metadataCel: CelEnvironment | null = null;
 	if (
 		rawMetadataDefaults &&
 		Object.values(rawMetadataDefaults).some(
 			(value) => typeof value === "string"
 		)
 	) {
-		metadataCel = createCelEnvironment({
-			listFunctions: args.engine.listFunctions,
-			callFunction: args.engine.call,
-		});
+		metadataCel = createCelEnvironment({ engine });
 	}
 	const lixcolOverrides = resolveMetadataDefaults({
 		defaults: rawMetadataDefaults,
