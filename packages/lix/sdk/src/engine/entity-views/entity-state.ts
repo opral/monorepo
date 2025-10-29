@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { LixGenerated } from "../schema-definition/definition.js";
+import type { LixGenerated } from "../../schema-definition/definition.js";
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
  * These views do NOT expose lixcol_version_id to prevent accidental version-specific operations.

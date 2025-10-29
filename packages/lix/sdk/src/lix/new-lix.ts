@@ -24,7 +24,7 @@ import {
 import type { LixChange } from "../change/schema-definition.js";
 import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import type { NewStateAll } from "../entity-views/types.js";
+import type { NewStateAll } from "../engine/entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
 import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";

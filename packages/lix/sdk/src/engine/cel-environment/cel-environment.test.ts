@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { createCelEnvironment } from "./cel-environment.js";
-import { openLix } from "../../../lix/open-lix.js";
+import { openLix } from "../../lix/open-lix.js";
 
 describe("createCelEnvironment", () => {
 	test("evaluates literal expressions", async () => {

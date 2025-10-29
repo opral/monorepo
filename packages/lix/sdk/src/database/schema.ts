@@ -36,7 +36,7 @@ import type {
 	EntityStateAllView,
 	EntityStateHistoryView,
 	EntityStateView,
-} from "../entity-views/types.js";
+} from "../engine/entity-views/types.js";
 import { LixLogSchema } from "../log/schema-definition.js";
 import {
 	LixAccountSchema,
@@ -52,8 +52,8 @@ import {
 	type LixConversationMessage,
 } from "../conversation/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
-import type { EntityViews } from "../entity-views/entity-view-builder.js";
-import type { ToKysely } from "../entity-views/types.js";
+import type { EntityViews } from "../engine/entity-views/entity-view-builder.js";
+import type { ToKysely } from "../engine/entity-views/types.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";

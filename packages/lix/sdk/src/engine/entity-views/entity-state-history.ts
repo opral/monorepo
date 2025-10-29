@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { LixGenerated } from "../schema-definition/definition.js";
+import type { LixGenerated } from "../../schema-definition/definition.js";
 
 /**
  * Base type for entity history views that include historical data from the state_history table.

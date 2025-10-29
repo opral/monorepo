@@ -7,7 +7,7 @@ import type {
 	LixInsertable,
 	LixUpdateable,
 	LixSelectable,
-} from "../schema-definition/definition.js";
+} from "../../schema-definition/definition.js";
 
 /**
  * Check if a type has the LixGenerated brand

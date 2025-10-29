@@ -1,5 +1,5 @@
 import { Environment } from "@marcbachmann/cel-js";
-import type { Call } from "../../functions/function-registry.js";
+import type { Call } from "../functions/function-registry.js";
 
 export type CelEnvironmentState = {
 	/**

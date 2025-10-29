@@ -1,7 +1,7 @@
 import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
-} from "../schema-definition/definition.js";
+} from "../../schema-definition/definition.js";
 import { type StateEntityView } from "./entity-state.js";
 import { type StateEntityAllView } from "./entity-state-all.js";
 import { type StateEntityHistoryView } from "./entity-state-history.js";

@@ -32,7 +32,7 @@ import {
 import {
 	createCelEnvironment,
 	type CelEnvironmentState,
-} from "./cel-environment.js";
+} from "../../cel-environment/cel-environment.js";
 
 type ExpressionValue = { kind: "expression"; sql: string };
 

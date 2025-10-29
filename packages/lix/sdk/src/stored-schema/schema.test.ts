@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewState } from "../engine/entity-views/types.js";
 import type { LixStoredSchema } from "./schema-definition.js";
 import { sql } from "kysely";
 

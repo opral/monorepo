@@ -36,8 +36,8 @@ import {
 import {
 	createCelEnvironment,
 	type CelEnvironmentState,
-} from "./cel-environment.js";
-import { buildJsonObjectEntries } from "./build-json-object-entries.js";
+} from "../../cel-environment/cel-environment.js";
+import { buildJsonObjectEntries } from "../../entity-views/build-json-object-entries.js";
 
 interface ParameterState {
 	readonly parameters: ReadonlyArray<unknown>;

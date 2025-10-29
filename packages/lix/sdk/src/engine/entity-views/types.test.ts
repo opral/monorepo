@@ -8,7 +8,7 @@ import type {
 	LixInsertable,
 	LixSelectable,
 	LixUpdateable,
-} from "../schema-definition/definition.js";
+} from "../../schema-definition/definition.js";
 import type { Generated as KyselyGenerated } from "kysely";
 
 test("ToKysely converts LixGenerated to Kysely Generated", () => {

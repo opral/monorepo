@@ -6,7 +6,7 @@ import {
 	buildSqliteJsonPath,
 } from "../../../schema-definition/json-pointer.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
-import type { CelEnvironmentState } from "./cel-environment.js";
+import type { CelEnvironmentState } from "../../cel-environment/cel-environment.js";
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 
 /**

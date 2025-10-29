@@ -1,5 +1,5 @@
-import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
-import { isJsonType } from "../../../schema-definition/json-type.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { isJsonType } from "../../schema-definition/json-type.js";
 
 /**
  * Builds a json_object entries list for snapshot_content serialization that respects schema types.

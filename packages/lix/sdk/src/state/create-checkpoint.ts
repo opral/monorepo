@@ -3,7 +3,7 @@ import {
 	LixCommitSchema,
 } from "../commit/schema-definition.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { State } from "../entity-views/types.js";
+import type { State } from "../engine/entity-views/types.js";
 import type { LixChangeRaw } from "../change/schema-definition.js";
 import type { StateCommitChange } from "../hooks/create-hooks.js";
 import { getTimestamp } from "../engine/functions/timestamp.js";

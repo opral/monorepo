@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { LixGenerated } from "../schema-definition/definition.js";
+import type { LixGenerated } from "../../schema-definition/definition.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
