@@ -1445,6 +1445,7 @@ function buildCacheSource(
 	requiredColumns.add("version_id");
 	requiredColumns.add("change_id");
 	requiredColumns.add("created_at");
+	requiredColumns.add("snapshot_content");
 	const uniqueKeys =
 		schemaKeys && schemaKeys.length > 0
 			? Array.from(new Set(schemaKeys))

@@ -71,9 +71,6 @@ export function createPreprocessor(args: {
 
 		const statement = parse(sql);
 		if (statement.node_kind === "raw_fragment") {
-			if (sql.toLowerCase().includes("commit")) {
-				console.log("[createPreprocessor] raw fragment with commit", sql);
-			}
 			return {
 				sql,
 				parameters,
@@ -106,10 +103,6 @@ export function createPreprocessor(args: {
 		}
 
 		const compiled = compile(rewritten);
-		if (compiled.sql.toLowerCase().includes("commit")) {
-			console.log("[createPreprocessor] compiled with commit", compiled.sql);
-		}
-
 		return {
 			sql: compiled.sql,
 			parameters,

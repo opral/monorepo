@@ -42,6 +42,24 @@ const STATE_COLUMNS = [
 	"metadata",
 ] as const;
 
+const ESSENTIAL_STATE_COLUMNS = new Set<string>([
+	"entity_id",
+	"schema_key",
+	"file_id",
+	"plugin_key",
+	"snapshot_content",
+	"version_id",
+	"schema_version",
+	"created_at",
+	"updated_at",
+	"inherited_from_version_id",
+	"change_id",
+	"untracked",
+	"commit_id",
+	"writer_key",
+	"metadata",
+]);
+
 type StateReference = {
 	readonly binding: string;
 	readonly usedColumns: Set<string> | null;
@@ -192,6 +210,9 @@ function buildStateSelect(reference: StateReference): SelectStatementNode {
 
 	// Ensure snapshot_content is available for JSON projections generated via raw fragments.
 	columnSet.add("snapshot_content");
+	for (const column of ESSENTIAL_STATE_COLUMNS) {
+		columnSet.add(column);
+	}
 
 	const projection: SelectExpressionNode[] = [];
 	for (const column of STATE_COLUMNS) {

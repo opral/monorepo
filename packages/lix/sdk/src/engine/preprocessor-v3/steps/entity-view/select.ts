@@ -147,17 +147,8 @@ function resolveEntityViewReference(
 
 	const schema = resolveSchemaDefinition(storedSchemas, viewName);
 	if (!schema) {
-		if (viewName === "commit_edge") {
-			console.log("[resolveEntityViewReference] missing schema", {
-				view: viewName,
-			});
-		}
 		return null;
 	}
-	console.log("[resolveEntityViewReference] resolved", {
-		view: viewName,
-		schemaKey: schema["x-lix-key"],
-	});
 
 	const variant = classifyVariant(viewName);
 	if (!isVariantEnabled(schema, variant)) {
@@ -171,12 +162,6 @@ function resolveEntityViewReference(
 	const alias = getIdentifierValue(node.alias);
 	const binding = alias ?? viewName;
 	const columnUsage = collectColumnUsage(select, binding);
-	if (viewName === "commit_edge") {
-		console.log("[resolveEntityViewReference] usage", {
-			properties: Array.from(columnUsage.properties ?? []),
-			lixcols: Array.from(columnUsage.lixcols ?? []),
-		});
-	}
 
 	return {
 		viewName,
@@ -275,12 +260,27 @@ function buildEntityViewSelect(
 	const tableName = VARIANT_TABLE[reference.variant];
 	const alias = BASE_ALIAS[reference.variant];
 	const properties = extractPropertyKeys(reference.schema);
-	const propertySet = new Set(properties);
+	const usedPropertyNames =
+		reference.usedProperties === null
+			? null
+			: new Set(
+					Array.from(reference.usedProperties).map((property) =>
+						normalizeIdentifierValue(property)
+					)
+				);
+	const lixcolUsage =
+		reference.usedLixcols === null
+			? null
+			: new Set(
+					Array.from(reference.usedLixcols).map((column) =>
+						normalizeIdentifierValue(column)
+					)
+				);
 
 	const projection: SelectExpressionNode[] = [];
-	const lixcolUsage: Set<string> | null = null;
 	for (const property of properties) {
-		if (!propertySet.has(property)) {
+		const normalized = normalizeIdentifierValue(property);
+		if (usedPropertyNames !== null && !usedPropertyNames.has(normalized)) {
 			continue;
 		}
 		projection.push(propertySelect(alias, property));
@@ -311,9 +311,9 @@ function buildEntityViewSelect(
 				)
 			);
 			if (
-				shouldIncludeLixcolColumn(
-					lixcolUsage,
-					"lixcol_inherited_from_version_id"
+				lixcolUsage !== null &&
+				lixcolUsage.has(
+					normalizeIdentifierValue("lixcol_inherited_from_version_id")
 				)
 			) {
 				projection.push(coalesceInheritedColumn(alias));
@@ -400,14 +400,9 @@ function filterLixcolColumns<T extends { alias: string }>(
 	if (usage === null) {
 		return columns;
 	}
-	return columns.filter((column) => usage.has(column.alias));
-}
-
-function shouldIncludeLixcolColumn(
-	usage: Set<string> | null,
-	alias: string
-): boolean {
-	return usage === null || usage.has(alias);
+	return columns.filter((column) =>
+		usage.has(normalizeIdentifierValue(column.alias))
+	);
 }
 
 function coalesceInheritedColumn(alias: string): SelectExpressionNode {
@@ -464,6 +459,26 @@ function collectColumnUsage(
 		);
 	}
 
+	if (select.from_clauses.length > 0) {
+		const dummyProperties = new Set<string>();
+		const dummyLixcols = new Set<string>();
+		for (const fromClause of select.from_clauses) {
+			for (const join of fromClause.joins) {
+				if (!join.on_expression) {
+					continue;
+				}
+				const propertyTarget = properties ?? dummyProperties;
+				const lixcolTarget = lixcols ?? dummyLixcols;
+				collectColumnsFromExpression(
+					join.on_expression,
+					normalizedBinding,
+					propertyTarget,
+					lixcolTarget
+				);
+			}
+		}
+	}
+
 	for (const operation of select.set_operations) {
 		const usage = collectColumnUsage(operation.select, binding);
 		if (usage.properties === null) {
@@ -484,6 +499,13 @@ function collectColumnUsage(
 
 	if (select.set_operations.length > 0) {
 		return { properties: null, lixcols: null };
+	}
+
+	if (properties !== null && properties.size === 0) {
+		properties = null;
+	}
+	if (lixcols !== null && lixcols.size === 0) {
+		lixcols = null;
 	}
 
 	return {
@@ -536,9 +558,9 @@ function collectColumnsFromExpression(
 			) {
 				const column = getColumnName(expression);
 				if (column.startsWith("lixcol_")) {
-					lixcols.add(column);
+					lixcols.add(normalizeIdentifierValue(column));
 				} else {
-					properties.add(column);
+					properties.add(normalizeIdentifierValue(column));
 				}
 			}
 			break;
