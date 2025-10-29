@@ -20,7 +20,7 @@ export const CACHE_COLUMNS = [
 
 const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
-type StateCacheColumn = (typeof CACHE_COLUMNS)[number];
+export type StateCacheColumn = (typeof CACHE_COLUMNS)[number];
 
 export type StateCacheRow = Record<StateCacheColumn, unknown>;
 
