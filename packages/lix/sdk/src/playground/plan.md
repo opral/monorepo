@@ -7,8 +7,8 @@
 <!-- - [ ] implement with no preprocessor simulation to ensure preprocessor is just an optimization -->
 
 - [ ] implement pipeline stages
-  - [ ] split statements
-  - [ ] normalize placeholders
+  - [x] split statements
+  - [x] normalize placeholders
   - [ ] expand views
   - [ ] rewrite vtable selects
   - [ ] cache populator
