@@ -169,6 +169,7 @@ const buildInlineSql = (
 /**
  * Collects schema key filters for references to the internal vtable.
  */
+
 const collectSchemaKeyFilters = ({
 	tokens,
 	references,
@@ -434,64 +435,45 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 
 	const availableSchemaKeys = Array.from(cacheTables.keys());
 
-	const statementAnalyses = statements.map((statement) => {
+	let changed = false;
+	const rewritten = statements.map((statement) => {
 		const tokens = tokenize(statement.sql);
 		const references = findVtableTables(tokens);
-		return { statement, tokens, references };
-	});
-
-	let sawReference = false;
-	const filteredSchemaKeySet = new Set<string>();
-
-	for (const analysis of statementAnalyses) {
-		if (analysis.references.length === 0) {
-			continue;
+		if (references.length === 0) {
+			return statement;
 		}
-		sawReference = true;
 
 		const filters = collectSchemaKeyFilters({
-			tokens: analysis.tokens,
-			references: analysis.references,
-			parameters: analysis.statement.parameters,
+			tokens,
+			references,
+			parameters: statement.parameters,
 			cacheTables,
 		});
 
-		for (const key of filters) {
-			filteredSchemaKeySet.add(key);
+		const schemaKeys = filters.length > 0 ? filters : availableSchemaKeys;
+		const context = buildInlineSql(schemaKeys);
+		if (!context) {
+			if (trace) {
+				trace.push({
+					step: "rewrite_vtable_selects",
+					payload: { filtered_schema_keys: filters },
+				});
+			}
+			return statement;
 		}
-	}
 
-	if (!sawReference) {
-		return { statements };
-	}
-
-	const effectiveSchemaKeys =
-		filteredSchemaKeySet.size > 0
-			? Array.from(filteredSchemaKeySet)
-			: availableSchemaKeys;
-
-	const context = buildInlineSql(effectiveSchemaKeys);
-	if (!context) {
-		return { statements };
-	}
-
-	let changed = false;
-	const rewritten = statements.map((statement) => {
 		const next = rewriteSql(statement, context);
+		if (trace) {
+			trace.push({
+				step: "rewrite_vtable_selects",
+				payload: { filtered_schema_keys: schemaKeys },
+			});
+		}
 		if (next !== statement && next.sql !== statement.sql) {
 			changed = true;
 		}
 		return next;
 	});
-
-	if (changed && trace) {
-		trace.push({
-			step: "rewrite_vtable_selects",
-			payload: {
-				filtered_schema_keys: effectiveSchemaKeys,
-			},
-		});
-	}
 
 	return changed ? { statements: rewritten } : { statements };
 };

@@ -180,4 +180,45 @@ describe("rewriteVtableSelects", () => {
 			schemaKeyB,
 		]);
 	});
+
+	test("processes multiple statements targeting the vtable", () => {
+		const firstSchema = "schema_a";
+		const secondSchema = "schema_b";
+
+		const cacheTables = buildCacheTableMap([
+			firstSchema,
+			secondSchema,
+			"lix_version_descriptor",
+		]);
+
+		const trace: PreprocessorTrace = [];
+
+		const result = rewriteVtableSelects({
+			trace,
+			statements: [
+				{
+					sql: `
+						SELECT *
+						FROM lix_internal_state_vtable
+						WHERE schema_key = ?1
+					`,
+					parameters: [firstSchema],
+				},
+				{
+					sql: `
+						SELECT *
+						FROM lix_internal_state_vtable
+						WHERE schema_key = ?1
+					`,
+					parameters: [secondSchema],
+				},
+			],
+			getCacheTables: () => cacheTables,
+		});
+
+		expect(result.statements).toHaveLength(2);
+		expect(trace).toHaveLength(2);
+		expect(trace[0]!.payload?.filtered_schema_keys).toEqual([firstSchema]);
+		expect(trace[1]!.payload?.filtered_schema_keys).toEqual([secondSchema]);
+	});
 });
