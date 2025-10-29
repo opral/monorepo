@@ -335,9 +335,6 @@ const collectSelectedColumns = ({
 		if (!token) {
 			continue;
 		}
-		if (token.tokenType === FROM || token.tokenType === LIMIT) {
-			break;
-		}
 		if (token.tokenType === Star) {
 			requiresAll = true;
 			break;

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { expandViews } from "./expand-views.js";
+import type { PreprocessorTrace } from "../types.js";
 
 const normalize = (sql: string) => sql.replace(/\s+/g, " ").trim();
 
@@ -97,5 +98,39 @@ describe("expandViewsStep", () => {
 		expect(second).toContain(
 			'FROM ( SELECT entity_id FROM lix_internal_state_vtable ) AS "file"'
 		);
+	});
+
+	test("records trace entries when views are expanded", () => {
+		const views = new Map([
+			["state_reader_view", "SELECT entity_id FROM lix_internal_state_vtable"],
+		]);
+
+		const trace: PreprocessorTrace = [];
+		const result = expandViews({
+			statements: [{ sql: "SELECT * FROM state_reader_view", parameters: [] }],
+			getSqlViews: () => views,
+			trace,
+		});
+
+		expect(result.statements[0]?.sql).toContain("lix_internal_state_vtable");
+		expect(trace).toHaveLength(1);
+		expect(trace[0]?.step).toBe("expand_views");
+		expect(trace[0]?.payload).toEqual({
+			expanded: true,
+			views: ["state_reader_view"],
+		});
+	});
+
+	test("records trace entries when no expansion occurs", () => {
+		const trace: PreprocessorTrace = [];
+		const result = expandViews({
+			statements: [{ sql: "SELECT 1", parameters: [] }],
+			getSqlViews: () => new Map(),
+			trace,
+		});
+
+		expect(result.statements[0]?.sql).toBe("SELECT 1");
+		expect(trace).toHaveLength(1);
+		expect(trace[0]?.payload).toEqual({ expanded: false, views: [] });
 	});
 });

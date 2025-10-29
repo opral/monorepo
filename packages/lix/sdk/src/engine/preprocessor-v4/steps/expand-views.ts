@@ -21,6 +21,7 @@ type Token = IToken;
 type ExpandResult = {
 	readonly sql: string;
 	readonly changed: boolean;
+	readonly expandedViews: ReadonlyArray<string>;
 };
 
 type ExpandArgs = {
@@ -30,6 +31,10 @@ type ExpandArgs = {
 };
 
 type ExpandOnceArgs = ExpandArgs;
+type ExpandOnceResult = {
+	readonly sql: string;
+	readonly viewName: string;
+} | null;
 
 const WhiteSpace = createToken({
 	name: "WhiteSpace",
@@ -222,7 +227,7 @@ const expandSqlOnce = ({
 	sql,
 	context,
 	stack,
-}: ExpandOnceArgs): string | null => {
+}: ExpandOnceArgs): ExpandOnceResult => {
 	const tokens = tokenizeSql(sql);
 
 	for (let index = 0; index < tokens.length; index += 1) {
@@ -242,11 +247,13 @@ const expandSqlOnce = ({
 		}
 
 		const replacement = `( ${expanded} ) AS ${reference.aliasText}`;
-		return (
-			sql.slice(0, reference.startOffset) +
-			replacement +
-			sql.slice(reference.endOffset + 1)
-		);
+		return {
+			sql:
+				sql.slice(0, reference.startOffset) +
+				replacement +
+				sql.slice(reference.endOffset + 1),
+			viewName: reference.viewName,
+		};
 	}
 
 	return null;
@@ -255,17 +262,19 @@ const expandSqlOnce = ({
 const expandSql = ({ sql, context, stack }: ExpandArgs): ExpandResult => {
 	let current = sql;
 	let changed = false;
+	const expandedViews: string[] = [];
 
 	while (true) {
 		const next = expandSqlOnce({ sql: current, context, stack });
 		if (!next) {
 			break;
 		}
-		current = next;
+		current = next.sql;
 		changed = true;
+		expandedViews.push(next.viewName);
 	}
 
-	return { sql: current, changed };
+	return { sql: current, changed, expandedViews };
 };
 
 type ExpandDefinitionArgs = {
@@ -319,46 +328,94 @@ const expandViewDefinition = ({
 const expandStatement = (
 	statement: PreprocessorStatement,
 	context: ViewExpansionContext
-): PreprocessorStatement => {
-	const { sql: expandedSql, changed } = expandSql({
+): {
+	readonly statement: PreprocessorStatement;
+	readonly expandedViews: ReadonlyArray<string>;
+	readonly changed: boolean;
+} => {
+	const { sql: expandedSql, changed, expandedViews } = expandSql({
 		sql: statement.sql,
 		context,
 		stack: new Set(),
 	});
 
 	if (!changed) {
-		return statement;
+		return { statement, expandedViews, changed: false };
 	}
 
 	return {
-		...statement,
-		sql: expandedSql,
+		statement: {
+			...statement,
+			sql: expandedSql,
+		},
+		expandedViews,
+		changed: true,
 	};
 };
 
 const expandStatements = (
 	statements: ReadonlyArray<PreprocessorStatement>,
 	views: SqlViews
-): PreprocessorStatement[] => {
+): {
+	readonly statements: ReadonlyArray<PreprocessorStatement>;
+	readonly expandedViews: ReadonlyArray<string>;
+} => {
 	const context: ViewExpansionContext = {
 		views,
 		expanded: new Map(),
 		blocked: new Set(),
 	};
 
-	return statements.map((statement) => expandStatement(statement, context));
+	const expandedStatements: PreprocessorStatement[] = [];
+	const expandedViewSet = new Set<string>();
+	let changed = false;
+
+	for (const statement of statements) {
+		const result = expandStatement(statement, context);
+		expandedStatements.push(result.statement);
+		if (result.changed) {
+			changed = true;
+		}
+		for (const viewName of result.expandedViews) {
+			expandedViewSet.add(viewName);
+		}
+	}
+
+	return {
+		statements: changed ? expandedStatements : statements,
+		expandedViews: Array.from(expandedViewSet),
+	};
 };
 
 /**
  * Expands SQL view references into their stored definitions using the v4 Chevrotain parser.
  */
-export const expandViews: PreprocessorStep = ({ statements, getSqlViews }) => {
+export const expandViews: PreprocessorStep = ({
+	statements,
+	getSqlViews,
+	trace,
+}) => {
+	const recordTrace = (payload: {
+		readonly expanded: boolean;
+		readonly views: ReadonlyArray<string>;
+	}) => {
+		if (!trace) {
+			return;
+		}
+		trace.push({
+			step: "expand_views",
+			payload,
+		});
+	};
+
 	if (!getSqlViews) {
+		recordTrace({ expanded: false, views: [] });
 		return { statements };
 	}
 
 	const sourceViews = getSqlViews();
 	if (!sourceViews || sourceViews.size === 0) {
+		recordTrace({ expanded: false, views: [] });
 		return { statements };
 	}
 
@@ -369,6 +426,19 @@ export const expandViews: PreprocessorStep = ({ statements, getSqlViews }) => {
 		])
 	);
 
-	const nextStatements = expandStatements(statements, normalizedViews);
+	const { statements: nextStatements, expandedViews } = expandStatements(
+		statements,
+		normalizedViews
+	);
+
+	recordTrace({
+		expanded: expandedViews.length > 0,
+		views: expandedViews,
+	});
+
+	if (expandedViews.length === 0) {
+		return { statements };
+	}
+
 	return { statements: nextStatements };
 };

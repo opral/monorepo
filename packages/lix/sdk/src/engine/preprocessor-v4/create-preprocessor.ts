@@ -1,8 +1,4 @@
-import type {
-	PreprocessorArgs,
-	PreprocessorFn,
-	PreprocessorStep,
-} from "./types.js";
+import type { PreprocessorArgs, PreprocessorFn } from "./types.js";
 import type {
 	PreprocessorContext,
 	PreprocessorStatement,
@@ -18,6 +14,11 @@ import {
 	createCelEnvironment,
 	type CelEnvironment,
 } from "../cel-environment/cel-environment.js";
+import { splitStatements } from "./steps/split-statements.js";
+import { normalizePlaceholders } from "./steps/normalize-placeholders.js";
+import { expandViews } from "./steps/expand-views.js";
+import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
+import type { PreprocessorStep } from "./types.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -29,7 +30,12 @@ type EngineShape = Pick<
 	| "listFunctions"
 >;
 
-const pipeline: PreprocessorStep[] = [];
+const pipeline: PreprocessorStep[] = [
+	splitStatements,
+	normalizePlaceholders,
+	expandViews,
+	rewriteVtableSelects,
+];
 
 /**
  * Creates a preprocessor instance that parses SQL into the v3 AST, executes
@@ -94,6 +100,7 @@ export function createPreprocessor(args: {
 		return {
 			sql: resultSql,
 			parameters: primaryParameters,
+			expandedSql: resultSql,
 			context,
 			statements: finalStatements,
 		};
@@ -134,11 +141,10 @@ function buildContext(
 			return loadCacheTables();
 		},
 		getSqlViews: () => {
-			return new Map();
-			// if (!sqlViews) {
-			// 	sqlViews = loadSqlViewMap(engine);
-			// }
-			// return sqlViews;
+			if (!sqlViews) {
+				sqlViews = loadSqlViewMap(engine);
+			}
+			return sqlViews;
 		},
 		hasOpenTransaction: () => {
 			if (transactionState === undefined) {
