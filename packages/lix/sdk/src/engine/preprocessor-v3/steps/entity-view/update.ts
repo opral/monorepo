@@ -225,6 +225,7 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementNode | null {
 
 	const rewritten: UpdateStatementNode = {
 		node_kind: "update_statement",
+		with: update.with,
 		target: buildTableReference("state_all"),
 		assignments: assignmentsList,
 		where_clause: whereExpression,
@@ -445,6 +446,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 		node_kind: "subquery_expression",
 		statement: {
 			node_kind: "select_statement",
+			with: null,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -463,6 +465,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 					joins: [],
 				},
 			],
+			set_operations: [],
 			where_clause: null,
 			order_by: [],
 			limit: null,
@@ -522,6 +525,13 @@ function rewriteExpressionForSnapshot(
 				items: expression.items.map((item) =>
 					rewriteExpressionForSnapshot(item)
 				),
+				negated: expression.negated,
+			};
+		case "in_subquery_expression":
+			return {
+				node_kind: "in_subquery_expression",
+				operand: rewriteExpressionForSnapshot(expression.operand),
+				subquery: expression.subquery,
 				negated: expression.negated,
 			};
 		case "between_expression":

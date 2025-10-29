@@ -34,27 +34,27 @@ export function applyStateAllView(args: {
 	args.engine.sqlite.exec(`
     CREATE VIEW IF NOT EXISTS state_all AS
     SELECT 
-      entity_id,
-      schema_key,
-      file_id,
-      version_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      created_at,
-      updated_at,
-      inherited_from_version_id,
-      change_id,
-      untracked,
-      commit_id,
-      writer_key,
+      v.entity_id,
+      v.schema_key,
+      v.file_id,
+      v.version_id,
+      v.plugin_key,
+      v.snapshot_content,
+      v.schema_version,
+      v.created_at,
+      v.updated_at,
+      v.inherited_from_version_id,
+      v.change_id,
+      v.untracked,
+      v.commit_id,
+      v.writer_key,
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = lix_internal_state_vtable.change_id
+        WHERE change.id = v.change_id
       ) AS metadata
-    FROM lix_internal_state_vtable
-    WHERE snapshot_content IS NOT NULL;
+    FROM lix_internal_state_vtable AS v
+    WHERE v.snapshot_content IS NOT NULL;
 
     -- Forward writes on state_all to the internal vtable
     CREATE TRIGGER IF NOT EXISTS state_all_insert

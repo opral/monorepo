@@ -22,6 +22,9 @@ import type {
 	SelectStarNode,
 	SelectStatementNode,
 	SetClauseNode,
+	SetOperationNode,
+	SetOperator,
+	SetQuantifier,
 	StatementNode,
 	SubqueryNode,
 	TableReferenceNode,
@@ -29,9 +32,12 @@ import type {
 	UnaryOperator,
 	UpdateStatementNode,
 	InListExpressionNode,
+	InSubqueryExpressionNode,
 	BetweenExpressionNode,
 	FunctionCallExpressionNode,
 	RawFragmentNode,
+	WithClauseNode,
+	WithBindingNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -48,28 +54,99 @@ class ToAstVisitor extends BaseVisitor {
 	}
 
 	public select_statement(ctx: {
+		with_clause?: CstNode[];
 		core?: CstNode[];
 		insert?: CstNode[];
 		update?: CstNode[];
 		delete?: CstNode[];
 	}): StatementNode {
+		const withClauseCst = ctx.with_clause?.[0] ?? null;
+		const withClause = withClauseCst
+			? (this.visit(withClauseCst) as WithClauseNode)
+			: null;
 		const core = ctx.core?.[0];
 		if (core) {
-			return this.visit(core) as SelectStatementNode;
+			const statement = this.visit(core) as SelectStatementNode;
+			return this.applyWithClause(statement, withClause);
 		}
 		const insert = ctx.insert?.[0];
 		if (insert) {
-			return this.visit(insert) as InsertStatementNode;
+			const statement = this.visit(insert) as InsertStatementNode;
+			return this.applyWithClause(statement, withClause);
 		}
 		const update = ctx.update?.[0];
 		if (update) {
-			return this.visit(update) as UpdateStatementNode;
+			const statement = this.visit(update) as UpdateStatementNode;
+			return this.applyWithClause(statement, withClause);
 		}
 		const del = ctx.delete?.[0];
 		if (del) {
-			return this.visit(del) as DeleteStatementNode;
+			const statement = this.visit(del) as DeleteStatementNode;
+			return this.applyWithClause(statement, withClause);
 		}
 		throw new Error("statement missing recognized root");
+	}
+
+	public select_compound(ctx: {
+		head: CstNode[];
+		operations?: CstNode[];
+	}): SelectStatementNode {
+		const headNode = ctx.head?.[0];
+		if (!headNode) {
+			throw new Error("select compound missing initial select");
+		}
+		const head = this.visit(headNode) as SelectStatementNode;
+		const operations = ctx.operations
+			?.map((operation) => this.visit(operation) as SetOperationNode)
+			?? [];
+		if (operations.length === 0) {
+			return head;
+		}
+		return {
+			...head,
+			set_operations: operations,
+		};
+	}
+
+	public set_operation(ctx: {
+		operator: IToken[];
+		quantifier?: IToken[];
+		select: CstNode[];
+	}): SetOperationNode {
+		const operatorToken = ctx.operator?.[0];
+		if (!operatorToken) {
+			throw new Error("set operation missing operator");
+		}
+		const quantifierToken = ctx.quantifier?.[0] ?? null;
+		const selectNode = ctx.select?.[0];
+		if (!selectNode) {
+			throw new Error("set operation missing select");
+		}
+		const select = this.visit(selectNode) as SelectStatementNode;
+		return {
+			node_kind: "set_operation",
+			operator: mapSetOperator(operatorToken.image),
+			quantifier: quantifierToken
+				? mapSetQuantifier(quantifierToken.image)
+				: null,
+			select,
+		};
+	}
+
+	private applyWithClause<T extends { with: WithClauseNode | null }>(
+		statement: T,
+		withClause: WithClauseNode | null
+	): T {
+		if (!withClause) {
+			return statement;
+		}
+		if (statement.with === withClause) {
+			return statement;
+		}
+		return {
+			...statement,
+			with: withClause,
+		};
 	}
 
 	public select_core(ctx: {
@@ -111,8 +188,10 @@ class ToAstVisitor extends BaseVisitor {
 
 		return {
 			node_kind: "select_statement",
+			with: null,
 			projection,
 			from_clauses: fromClauses,
+			set_operations: [],
 			where_clause: whereClause,
 			order_by: orderByItems,
 			limit: limitNode ? (this.visit(limitNode) as ExpressionNode) : null,
@@ -143,6 +222,7 @@ class ToAstVisitor extends BaseVisitor {
 		};
 		return {
 			node_kind: "insert_statement",
+			with: null,
 			target,
 			columns: columnNodes,
 			source: valuesNode,
@@ -207,6 +287,20 @@ class ToAstVisitor extends BaseVisitor {
 			expression,
 			alias,
 		};
+	}
+
+	public parenthesized_select(ctx: {
+		statement?: CstNode[];
+	}): SelectStatementNode {
+		const statementNode = ctx.statement?.[0];
+		if (!statementNode) {
+			throw new Error("parenthesized select missing statement");
+		}
+		const statement = this.visit(statementNode) as StatementNode;
+		if (statement.node_kind !== "select_statement") {
+			throw new Error("parenthesized select must be a select statement");
+		}
+		return statement as SelectStatementNode;
 	}
 
 	public table_reference(ctx: {
@@ -341,6 +435,7 @@ class ToAstVisitor extends BaseVisitor {
 		between_start?: CstNode[];
 		between_end?: CstNode[];
 		in_list?: CstNode[];
+		in_select?: CstNode[];
 		in_not?: IToken[];
 		like_pattern?: CstNode[];
 		like_not?: IToken[];
@@ -381,6 +476,18 @@ class ToAstVisitor extends BaseVisitor {
 				return createInListExpression(
 					leftOperand,
 					listItems,
+					Boolean(ctx.in_not?.length)
+				);
+			}
+			const inSelectNode = ctx.in_select?.[0];
+			if (inSelectNode) {
+				const statement = this.visit(inSelectNode) as StatementNode;
+				if (statement.node_kind !== "select_statement") {
+					throw new Error("IN subquery must be a select statement");
+				}
+				return createInSubqueryExpression(
+					leftOperand,
+					statement as SelectStatementNode,
 					Boolean(ctx.in_not?.length)
 				);
 			}
@@ -527,14 +634,17 @@ class ToAstVisitor extends BaseVisitor {
 		if (reference) {
 			return this.visit(reference) as ExpressionNode;
 		}
-		const subselect = ctx.subselect?.[0];
-		if (subselect) {
-			const statement = this.visit(subselect) as SelectStatementNode;
-			return {
-				node_kind: "subquery_expression",
-				statement,
-			};
+	const subselect = ctx.subselect?.[0];
+	if (subselect) {
+		const statement = this.visit(subselect) as StatementNode;
+		if (statement.node_kind !== "select_statement") {
+			throw new Error("subselect must be a select statement");
 		}
+		return {
+			node_kind: "subquery_expression",
+			statement: statement as SelectStatementNode,
+		};
+	}
 		const inner = ctx.inner?.[0];
 		if (!inner) {
 			throw new Error("primary expression is empty");
@@ -614,6 +724,7 @@ class ToAstVisitor extends BaseVisitor {
 			: null;
 		return {
 			node_kind: "update_statement",
+			with: null,
 			target: targetRelation,
 			assignments,
 			where_clause: whereClause,
@@ -638,9 +749,86 @@ class ToAstVisitor extends BaseVisitor {
 			: null;
 		return {
 			node_kind: "delete_statement",
+			with: null,
 			target: targetRelation,
 			where_clause: whereClause,
 		};
+	}
+
+	public with_clause(ctx: {
+		Recursive?: IToken[];
+		bindings?: CstNode[];
+	}): WithClauseNode {
+		const recursive = Boolean(ctx.Recursive?.length);
+		const bindingNodes = ctx.bindings ?? [];
+		const bindings = bindingNodes.map(
+			(binding) => this.visit(binding) as WithBindingNode
+		);
+		return {
+			node_kind: "with_clause",
+			recursive,
+			bindings,
+		};
+	}
+
+	public with_binding(ctx: {
+		name: CstNode[];
+		columns?: CstNode[];
+		statement?: CstNode[];
+	}): WithBindingNode {
+		const nameNode = ctx.name?.[0];
+		if (!nameNode) {
+			throw new Error("with binding missing name");
+		}
+		const name = this.visit(nameNode) as IdentifierNode;
+		const columns = (ctx.columns ?? []).map(
+			(column) => this.visit(column) as IdentifierNode
+		);
+		const statementNode = ctx.statement?.[0];
+		if (!statementNode) {
+			throw new Error("with binding missing statement");
+		}
+		const statement = this.visit(statementNode) as StatementNode;
+		return {
+			node_kind: "with_binding",
+			name,
+			columns,
+			statement,
+		};
+	}
+
+	public cte_substatement(ctx: {
+		with_clause?: CstNode[];
+		core?: CstNode[];
+		insert?: CstNode[];
+		update?: CstNode[];
+		delete?: CstNode[];
+	}): StatementNode {
+		const withClauseCst = ctx.with_clause?.[0] ?? null;
+		const withClause = withClauseCst
+			? (this.visit(withClauseCst) as WithClauseNode)
+			: null;
+		const core = ctx.core?.[0];
+		if (core) {
+			const statement = this.visit(core) as SelectStatementNode;
+			return this.applyWithClause(statement, withClause);
+		}
+		const insert = ctx.insert?.[0];
+		if (insert) {
+			const statement = this.visit(insert) as InsertStatementNode;
+			return this.applyWithClause(statement, withClause);
+		}
+		const update = ctx.update?.[0];
+		if (update) {
+			const statement = this.visit(update) as UpdateStatementNode;
+			return this.applyWithClause(statement, withClause);
+		}
+		const del = ctx.delete?.[0];
+		if (del) {
+			const statement = this.visit(del) as DeleteStatementNode;
+			return this.applyWithClause(statement, withClause);
+		}
+		throw new Error("cte statement missing recognized root");
 	}
 
 	public expression_list(ctx: { items?: CstNode[] }): ExpressionNode[] {
@@ -754,6 +942,19 @@ function createInListExpression(
 	};
 }
 
+function createInSubqueryExpression(
+	operand: ExpressionNode,
+	subquery: SelectStatementNode,
+	negated: boolean
+): InSubqueryExpressionNode {
+	return {
+		node_kind: "in_subquery_expression",
+		operand,
+		subquery,
+		negated,
+	};
+}
+
 function createBetweenExpression(
 	operand: ExpressionNode,
 	start: ExpressionNode,
@@ -778,6 +979,26 @@ function createUnaryExpression(
 		operator,
 		operand,
 	};
+}
+
+function mapSetOperator(image: string): SetOperator {
+	switch (image.toLowerCase()) {
+		case "union":
+			return "union";
+		default:
+			throw new Error(`unsupported set operator '${image}'`);
+	}
+}
+
+function mapSetQuantifier(image: string): SetQuantifier {
+	switch (image.toLowerCase()) {
+		case "all":
+			return "all";
+		case "distinct":
+			return "distinct";
+		default:
+			throw new Error(`unsupported set quantifier '${image}'`);
+	}
 }
 
 function mapArithmeticOperator(image: string): BinaryOperator {

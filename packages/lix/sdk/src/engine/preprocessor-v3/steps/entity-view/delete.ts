@@ -157,6 +157,7 @@ function buildEntityViewDelete(
 
 	return {
 		node_kind: "delete_statement",
+		with: statement.with,
 		target: buildTableReference("state_all"),
 		where_clause: finalWhere ?? null,
 	};
@@ -217,6 +218,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 		node_kind: "subquery_expression",
 		statement: {
 			node_kind: "select_statement",
+			with: null,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -235,6 +237,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 					joins: [],
 				},
 			],
+			set_operations: [],
 			where_clause: null,
 			order_by: [],
 			limit: null,

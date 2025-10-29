@@ -8,10 +8,35 @@ const lit = (value: string | number | boolean | null) => ({
 	value,
 });
 
+const stripOptionalFields = (value: unknown): unknown => {
+	if (Array.isArray(value)) {
+		return value.map(stripOptionalFields);
+	}
+	if (value && typeof value === "object") {
+		const entries = Object.entries(value as Record<string, unknown>);
+		const result: Record<string, unknown> = {};
+		for (const [key, nested] of entries) {
+			if (key === "with" && nested === null) {
+				continue;
+			}
+			if (
+				key === "set_operations" &&
+				Array.isArray(nested) &&
+				nested.length === 0
+			) {
+				continue;
+			}
+			result[key] = stripOptionalFields(nested);
+		}
+		return result;
+	}
+	return value;
+};
+
 describe("parse", () => {
 	test("parses select star", () => {
 		const ast = parse("SELECT * FROM projects");
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "select_statement",
 			projection: [{ node_kind: "select_star" }],
 			from_clauses: [
@@ -36,7 +61,7 @@ describe("parse", () => {
 		const ast = parse(
 			"SELECT p.id AS project_id FROM projects AS p WHERE p.revision >= 1"
 		);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "select_statement",
 			projection: [
 				{
@@ -76,7 +101,7 @@ describe("parse", () => {
 
 	test("parses select literal without from clause", () => {
 		const ast = parse("SELECT 1 AS value");
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "select_statement",
 			projection: [
 				{
@@ -95,7 +120,7 @@ describe("parse", () => {
 
 	test("parses qualified column without alias", () => {
 		const ast = parse("SELECT projects.id FROM projects");
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "select_statement",
 			projection: [
 				{
@@ -129,7 +154,7 @@ describe("parse", () => {
 		const ast = parse(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"
 		);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -237,7 +262,7 @@ describe("parse", () => {
 	test("returns raw fragment for unsupported statement types", () => {
 		const sql = "CREATE TABLE projects(id TEXT)";
 		const ast = parse(sql);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "raw_fragment",
 			sql_text: sql,
 		});
@@ -246,7 +271,7 @@ describe("parse", () => {
 	test("returns raw fragment when lexing fails", () => {
 		const sql = "???";
 		const ast = parse(sql);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "raw_fragment",
 			sql_text: sql,
 		});
@@ -319,7 +344,7 @@ describe("parse", () => {
 
 	test("parses delete", () => {
 		const ast = parse("DELETE FROM projects WHERE projects.id = 'obsolete'");
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "delete_statement",
 			target: {
 				node_kind: "table_reference",
@@ -342,7 +367,7 @@ describe("parse", () => {
 		const ast = parse(
 			"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"
 		);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "insert_statement",
 			target: {
 				node_kind: "object_name",
@@ -363,7 +388,7 @@ describe("parse", () => {
 		const ast = parse(
 			"UPDATE key_value SET value = json_set(value, '$.foo', ?) WHERE key = ?"
 		);
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -411,7 +436,7 @@ describe("parse", () => {
 
 	test("parses function call without arguments inside update assignment", () => {
 		const ast = parse("UPDATE metrics SET touched_at = random() WHERE id = ?");
-		expect(ast).toEqual({
+		expect(stripOptionalFields(ast)).toEqual({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -441,6 +466,54 @@ describe("parse", () => {
 				operator: "=",
 				right: { node_kind: "parameter", placeholder: "?" },
 			},
+		});
+	});
+
+	test("parses select with recursive cte using union", () => {
+		const sql = `
+			WITH RECURSIVE chain(id, depth) AS (
+				SELECT id, 0 FROM commit
+				UNION ALL
+				SELECT commit_edge.parent_id, chain.depth + 1
+				FROM commit_edge
+				JOIN chain ON commit_edge.child_id = chain.id
+			)
+			SELECT id FROM chain
+		`;
+		const ast = parse(sql);
+		if (ast.node_kind !== "select_statement") {
+			throw new Error("expected select statement");
+		}
+		const withClause = ast.with;
+		expect(withClause).not.toBeNull();
+		expect(withClause?.recursive).toBe(true);
+		const binding = withClause?.bindings[0];
+		if (!binding) {
+			throw new Error("expected with binding");
+		}
+		expect(binding.name.value).toBe("chain");
+		expect(binding.statement.set_operations).toHaveLength(1);
+		const operation = binding.statement.set_operations[0];
+		expect(operation.operator).toBe("union");
+		expect(operation.quantifier).toBe("all");
+		const baseFrom = binding.statement.from_clauses[0]?.relation;
+		if (!baseFrom || baseFrom.node_kind !== "table_reference") {
+			throw new Error("expected base table reference");
+		}
+		expect(baseFrom.name.parts[0]?.value).toBe("commit");
+		const unionFrom = operation.select.from_clauses[0]?.relation;
+		if (!unionFrom || unionFrom.node_kind !== "table_reference") {
+			throw new Error("expected union table reference");
+		}
+		expect(unionFrom.name.parts[0]?.value).toBe("commit_edge");
+	});
+
+	test("returns raw fragment for unsupported statements", () => {
+		const sql = "CREATE TABLE example(id TEXT)";
+		const ast = parse(sql);
+		expect(stripOptionalFields(ast)).toEqual({
+			node_kind: "raw_fragment",
+			sql_text: sql,
 		});
 	});
 });

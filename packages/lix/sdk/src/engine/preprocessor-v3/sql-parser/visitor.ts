@@ -10,6 +10,7 @@ import type {
 	GroupedExpressionNode,
 	IdentifierNode,
 	InListExpressionNode,
+	InSubqueryExpressionNode,
 	JoinClauseNode,
 	LiteralNode,
 	ObjectNameNode,
@@ -22,12 +23,15 @@ import type {
 	SelectStarNode,
 	SelectStatementNode,
 	SetClauseNode,
+ SetOperationNode,
 	SqlNode,
 	StatementNode,
 	SubqueryNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
 	UpdateStatementNode,
+	WithClauseNode,
+	WithBindingNode,
 } from "./nodes.js";
 
 export type VisitContext = {
@@ -39,9 +43,12 @@ export type VisitContext = {
 type NodeKindMap = {
 	readonly raw_fragment: RawFragmentNode;
 	readonly select_statement: SelectStatementNode;
+	readonly set_operation: SetOperationNode;
 	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
+	readonly with_clause: WithClauseNode;
+	readonly with_binding: WithBindingNode;
 	readonly select_star: SelectStarNode;
 	readonly select_qualified_star: SelectQualifiedStarNode;
 	readonly select_expression: SelectExpressionNode;
@@ -58,6 +65,7 @@ type NodeKindMap = {
 	readonly binary_expression: BinaryExpressionNode;
 	readonly unary_expression: UnaryExpressionNode;
 	readonly in_list_expression: InListExpressionNode;
+	readonly in_subquery_expression: InSubqueryExpressionNode;
 	readonly between_expression: BetweenExpressionNode;
 	readonly identifier: IdentifierNode;
 	readonly object_name: ObjectNameNode;
@@ -199,12 +207,18 @@ function traverseNode(
 	switch (node.node_kind) {
 		case "select_statement":
 			return traverseSelectStatement(node as SelectStatementNode, visitor);
+		case "set_operation":
+			return traverseSetOperation(node as SetOperationNode, visitor);
 		case "insert_statement":
 			return traverseInsertStatement(node as InsertStatementNode, visitor);
 		case "update_statement":
 			return traverseUpdateStatement(node as UpdateStatementNode, visitor);
 		case "delete_statement":
 			return traverseDeleteStatement(node as DeleteStatementNode, visitor);
+		case "with_clause":
+			return traverseWithClause(node as WithClauseNode, visitor);
+		case "with_binding":
+			return traverseWithBinding(node as WithBindingNode, visitor);
 		case "from_clause":
 			return traverseFromClause(node as FromClauseNode, visitor);
 		case "join_clause":
@@ -234,6 +248,11 @@ function traverseNode(
 			return traverseUnaryExpression(node as UnaryExpressionNode, visitor);
 		case "in_list_expression":
 			return traverseInListExpression(node as InListExpressionNode, visitor);
+		case "in_subquery_expression":
+			return traverseInSubqueryExpression(
+				node as InSubqueryExpressionNode,
+				visitor
+			);
 		case "between_expression":
 			return traverseBetweenExpression(node as BetweenExpressionNode, visitor);
 		case "insert_values":
@@ -257,6 +276,11 @@ function traverseSelectStatement(
 ): SelectStatementNode {
 	let changed = false;
 
+	const withClause = visitOptional(node.with, node, "with", visitor);
+	if (withClause !== node.with) {
+		changed = true;
+	}
+
 	const projection = visitArray(node.projection, node, "projection", visitor);
 	if (projection !== node.projection) {
 		changed = true;
@@ -269,6 +293,16 @@ function traverseSelectStatement(
 		visitor
 	);
 	if (fromClauses !== node.from_clauses) {
+		changed = true;
+	}
+
+	const setOperations = visitArray(
+		node.set_operations,
+		node,
+		"set_operations",
+		visitor
+	);
+	if (setOperations !== node.set_operations) {
 		changed = true;
 	}
 
@@ -303,12 +337,32 @@ function traverseSelectStatement(
 
 	return {
 		...node,
+		with: withClause as WithClauseNode | null,
 		projection: projection as readonly SelectItemNode[],
 		from_clauses: fromClauses as readonly FromClauseNode[],
+		set_operations: setOperations as readonly SetOperationNode[],
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
 		order_by: orderBy as readonly OrderByItemNode[],
 		limit: limit as ExpressionNode | RawFragmentNode | null,
 		offset: offset as ExpressionNode | RawFragmentNode | null,
+	};
+}
+
+function traverseSetOperation(
+	node: SetOperationNode,
+	visitor: AstVisitor
+): SetOperationNode {
+	const select = visitNode(
+		node.select,
+		visitor,
+		createContext(node, "select")
+	) as SelectStatementNode;
+	if (select === node.select) {
+		return node;
+	}
+	return {
+		...node,
+		select,
 	};
 }
 
@@ -317,6 +371,11 @@ function traverseInsertStatement(
 	visitor: AstVisitor
 ): InsertStatementNode {
 	let changed = false;
+
+	const withClause = visitOptional(node.with, node, "with", visitor);
+	if (withClause !== node.with) {
+		changed = true;
+	}
 
 	const target = visitNode(node.target, visitor, createContext(node, "target"));
 	if (target !== node.target) {
@@ -339,6 +398,7 @@ function traverseInsertStatement(
 
 	return {
 		...node,
+		with: withClause as WithClauseNode | null,
 		target: target as ObjectNameNode,
 		columns: columns as readonly IdentifierNode[],
 		source: source as InsertValuesNode,
@@ -350,6 +410,11 @@ function traverseUpdateStatement(
 	visitor: AstVisitor
 ): UpdateStatementNode {
 	let changed = false;
+
+	const withClause = visitOptional(node.with, node, "with", visitor);
+	if (withClause !== node.with) {
+		changed = true;
+	}
 
 	const target = visitNode(node.target, visitor, createContext(node, "target"));
 	if (target !== node.target) {
@@ -382,6 +447,7 @@ function traverseUpdateStatement(
 
 	return {
 		...node,
+		with: withClause as WithClauseNode | null,
 		target: target as TableReferenceNode,
 		assignments: assignments as readonly SetClauseNode[],
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
@@ -393,6 +459,11 @@ function traverseDeleteStatement(
 	visitor: AstVisitor
 ): DeleteStatementNode {
 	let changed = false;
+
+	const withClause = visitOptional(node.with, node, "with", visitor);
+	if (withClause !== node.with) {
+		changed = true;
+	}
 	const target = visitNode(node.target, visitor, createContext(node, "target"));
 	if (target !== node.target) {
 		changed = true;
@@ -411,8 +482,67 @@ function traverseDeleteStatement(
 	}
 	return {
 		...node,
+		with: withClause as WithClauseNode | null,
 		target: target as TableReferenceNode,
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
+	};
+}
+
+function traverseWithClause(
+	node: WithClauseNode,
+	visitor: AstVisitor
+): WithClauseNode {
+	let changed = false;
+
+	const bindings = visitArray(node.bindings, node, "bindings", visitor);
+	if (bindings !== node.bindings) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		bindings: bindings as readonly WithBindingNode[],
+	};
+}
+
+function traverseWithBinding(
+	node: WithBindingNode,
+	visitor: AstVisitor
+): WithBindingNode {
+	let changed = false;
+
+	const name = visitNode(node.name, visitor, createContext(node, "name"));
+	if (name !== node.name) {
+		changed = true;
+	}
+
+	const columns = visitArray(node.columns, node, "columns", visitor);
+	if (columns !== node.columns) {
+		changed = true;
+	}
+
+	const statement = visitNode(
+		node.statement,
+		visitor,
+		createContext(node, "statement")
+	);
+	if (statement !== node.statement) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		name: name as IdentifierNode,
+		columns: columns as readonly IdentifierNode[],
+		statement: statement as StatementNode,
 	};
 }
 
@@ -747,6 +877,37 @@ function traverseInListExpression(
 		...node,
 		operand: operand as ExpressionNode,
 		items: items as readonly ExpressionNode[],
+	};
+}
+
+function traverseInSubqueryExpression(
+	node: InSubqueryExpressionNode,
+	visitor: AstVisitor
+): InSubqueryExpressionNode {
+	let changed = false;
+	const operand = visitNode(
+		node.operand,
+		visitor,
+		createContext(node, "operand")
+	) as ExpressionNode;
+	if (operand !== node.operand) {
+		changed = true;
+	}
+	const subquery = visitNode(
+		node.subquery,
+		visitor,
+		createContext(node, "subquery")
+	) as SelectStatementNode;
+	if (subquery !== node.subquery) {
+		changed = true;
+	}
+	if (!changed) {
+		return node;
+	}
+	return {
+		...node,
+		operand,
+		subquery,
 	};
 }
 

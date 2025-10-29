@@ -7,6 +7,7 @@ import type {
 	StatementNode,
 	SubqueryNode,
 	TableReferenceNode,
+	WithBindingNode,
 } from "../../sql-parser/nodes.js";
 import { columnReference, identifier } from "../../sql-parser/nodes.js";
 import {
@@ -103,14 +104,10 @@ export const rewriteEntityViewSelect: PreprocessorStep = (context) => {
 		return node;
 	}
 
-	const references = collectEntityViewReferences(node, storedSchemas);
+	const references: EntityViewReference[] = [];
+	const rewritten = rewriteSelectStatement(node, storedSchemas, references);
 	if (references.length === 0) {
 		return node;
-	}
-
-	const referenceMap = new Map<string, EntityViewReference>();
-	for (const reference of references) {
-		referenceMap.set(reference.binding, reference);
 	}
 
 	const tracePayload = references.map((reference) => ({
@@ -125,55 +122,8 @@ export const rewriteEntityViewSelect: PreprocessorStep = (context) => {
 		payload: tracePayload,
 	});
 
-	const rewritten = rewriteSelectStatement(node, referenceMap);
 	return rewritten;
 };
-
-function collectEntityViewReferences(
-	select: SelectStatementNode,
-	storedSchemas: Map<string, unknown>
-): EntityViewReference[] {
-	const references: EntityViewReference[] = [];
-
-	for (const fromClause of select.from_clauses) {
-		references.push(
-			...collectReferencesFromRelation(
-				fromClause.relation,
-				select,
-				storedSchemas
-			)
-		);
-
-		for (const join of fromClause.joins) {
-			references.push(
-				...collectReferencesFromRelation(join.relation, select, storedSchemas)
-			);
-		}
-	}
-
-	return references;
-}
-
-function collectReferencesFromRelation(
-	relation: SelectStatementNode["from_clauses"][number]["relation"],
-	parentSelect: SelectStatementNode,
-	storedSchemas: Map<string, unknown>
-): EntityViewReference[] {
-	if (relation.node_kind === "table_reference") {
-		const reference = resolveEntityViewReference(
-			relation,
-			parentSelect,
-			storedSchemas
-		);
-		return reference ? [reference] : [];
-	}
-
-	if (relation.node_kind === "subquery") {
-		return collectEntityViewReferences(relation.statement, storedSchemas);
-	}
-
-	return [];
-}
 
 function resolveEntityViewReference(
 	node: TableReferenceNode,
@@ -197,8 +147,17 @@ function resolveEntityViewReference(
 
 	const schema = resolveSchemaDefinition(storedSchemas, viewName);
 	if (!schema) {
+		if (viewName === "commit_edge") {
+			console.log("[resolveEntityViewReference] missing schema", {
+				view: viewName,
+			});
+		}
 		return null;
 	}
+	console.log("[resolveEntityViewReference] resolved", {
+		view: viewName,
+		schemaKey: schema["x-lix-key"],
+	});
 
 	const variant = classifyVariant(viewName);
 	if (!isVariantEnabled(schema, variant)) {
@@ -212,6 +171,12 @@ function resolveEntityViewReference(
 	const alias = getIdentifierValue(node.alias);
 	const binding = alias ?? viewName;
 	const columnUsage = collectColumnUsage(select, binding);
+	if (viewName === "commit_edge") {
+		console.log("[resolveEntityViewReference] usage", {
+			properties: Array.from(columnUsage.properties ?? []),
+			lixcols: Array.from(columnUsage.lixcols ?? []),
+		});
+	}
 
 	return {
 		viewName,
@@ -227,11 +192,46 @@ function resolveEntityViewReference(
 
 function rewriteSelectStatement(
 	select: SelectStatementNode,
-	references: Map<string, EntityViewReference>
+	storedSchemas: Map<string, unknown>,
+	references: EntityViewReference[]
 ): SelectStatementNode {
+	const initialCount = references.length;
+
 	const visitor: AstVisitor = {
+		with_clause(node) {
+			let changed = false;
+			const bindings = node.bindings.map((binding) => {
+				if (binding.statement.node_kind !== "select_statement") {
+					return binding;
+				}
+				const rewritten = rewriteSelectStatement(
+					binding.statement,
+					storedSchemas,
+					references
+				);
+				if (rewritten === binding.statement) {
+					return binding;
+				}
+				changed = true;
+				return {
+					...binding,
+					statement: rewritten,
+				};
+			});
+			if (!changed) {
+				return node;
+			}
+			return {
+				...node,
+				bindings,
+			};
+		},
 		subquery(node) {
-			const rewritten = rewriteSelectStatement(node.statement, references);
+			const rewritten = rewriteSelectStatement(
+				node.statement,
+				storedSchemas,
+				references
+			);
 			if (rewritten !== node.statement) {
 				return {
 					...node,
@@ -241,20 +241,24 @@ function rewriteSelectStatement(
 			return node;
 		},
 		table_reference(node) {
-			const viewName = extractObjectName(node.name);
-			if (!viewName) {
-				return;
-			}
-			const binding = getIdentifierValue(node.alias) ?? viewName;
-			const reference = references.get(binding);
+			const reference = resolveEntityViewReference(
+				node,
+				select,
+				storedSchemas
+			);
 			if (!reference) {
 				return;
 			}
+			references.push(reference);
 			return buildEntityViewSubquery(reference);
 		},
 	};
 
-	return visitSelectStatement(select, visitor);
+	const rewritten = visitSelectStatement(select, visitor) as SelectStatementNode;
+	if (references.length === initialCount && rewritten === select) {
+		return select;
+	}
+	return rewritten;
 }
 
 function buildEntityViewSubquery(reference: EntityViewReference): SubqueryNode {
@@ -271,17 +275,10 @@ function buildEntityViewSelect(
 	const tableName = VARIANT_TABLE[reference.variant];
 	const alias = BASE_ALIAS[reference.variant];
 	const properties = extractPropertyKeys(reference.schema);
-	const propertySet =
-		reference.usedProperties === null
-			? new Set(properties)
-			: new Set(
-					properties.filter((property) =>
-						reference.usedProperties!.has(property)
-					)
-				);
+	const propertySet = new Set(properties);
 
 	const projection: SelectExpressionNode[] = [];
-	const lixcolUsage = reference.usedLixcols;
+	const lixcolUsage: Set<string> | null = null;
 	for (const property of properties) {
 		if (!propertySet.has(property)) {
 			continue;
@@ -349,6 +346,7 @@ function buildEntityViewSelect(
 
 	return {
 		node_kind: "select_statement",
+		with: null,
 		projection,
 		from_clauses: [
 			{
@@ -364,6 +362,7 @@ function buildEntityViewSelect(
 				joins: [],
 			},
 		],
+		set_operations: [],
 		where_clause: whereClause,
 		order_by: [],
 		limit: null,
@@ -431,12 +430,17 @@ function collectColumnUsage(
 	binding: string
 ): ColumnUsage {
 	const normalizedBinding = normalizeIdentifierValue(binding);
-	const properties = new Set<string>();
-	const lixcols = new Set<string>();
+	let properties: Set<string> | null = new Set<string>();
+	let lixcols: Set<string> | null = new Set<string>();
 	let selectAll = false;
 
 	for (const item of select.projection) {
-		selectAll = processSelectItem(item, normalizedBinding, properties, lixcols);
+		selectAll = processSelectItem(
+			item,
+			normalizedBinding,
+			properties ?? new Set<string>(),
+			lixcols ?? new Set<string>()
+		);
 		if (selectAll) {
 			return { properties: null, lixcols: null };
 		}
@@ -446,8 +450,8 @@ function collectColumnUsage(
 		collectColumnsFromExpression(
 			select.where_clause,
 			normalizedBinding,
-			properties,
-			lixcols
+			properties ?? new Set<string>(),
+			lixcols ?? new Set<string>()
 		);
 	}
 
@@ -455,9 +459,31 @@ function collectColumnUsage(
 		collectColumnsFromExpression(
 			orderItem.expression,
 			normalizedBinding,
-			properties,
-			lixcols
+			properties ?? new Set<string>(),
+			lixcols ?? new Set<string>()
 		);
+	}
+
+	for (const operation of select.set_operations) {
+		const usage = collectColumnUsage(operation.select, binding);
+		if (usage.properties === null) {
+			properties = null;
+		} else if (properties !== null) {
+			for (const property of usage.properties) {
+				properties.add(property);
+			}
+		}
+		if (usage.lixcols === null) {
+			lixcols = null;
+		} else if (lixcols !== null) {
+			for (const column of usage.lixcols) {
+				lixcols.add(column);
+			}
+		}
+	}
+
+	if (select.set_operations.length > 0) {
+		return { properties: null, lixcols: null };
 	}
 
 	return {
@@ -547,17 +573,25 @@ function collectColumnsFromExpression(
 				lixcols
 			);
 			break;
-		case "in_list_expression":
-			collectColumnsFromExpression(
-				expression.operand,
-				binding,
-				properties,
-				lixcols
-			);
-			for (const item of expression.items) {
-				collectColumnsFromExpression(item, binding, properties, lixcols);
-			}
-			break;
+	case "in_list_expression":
+		collectColumnsFromExpression(
+			expression.operand,
+			binding,
+			properties,
+			lixcols
+		);
+		for (const item of expression.items) {
+			collectColumnsFromExpression(item, binding, properties, lixcols);
+		}
+		break;
+	case "in_subquery_expression":
+		collectColumnsFromExpression(
+			expression.operand,
+			binding,
+			properties,
+			lixcols
+		);
+		break;
 		case "between_expression":
 			collectColumnsFromExpression(
 				expression.operand,

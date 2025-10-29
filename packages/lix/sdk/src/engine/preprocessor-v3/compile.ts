@@ -10,6 +10,7 @@ import type {
 	InsertValuesNode,
 	IdentifierNode,
 	InListExpressionNode,
+	InSubqueryExpressionNode,
 	JoinClauseNode,
 	JoinType,
 	LiteralNode,
@@ -20,6 +21,7 @@ import type {
 	SelectItemNode,
 	SelectStatementNode,
 	SetClauseNode,
+	SetOperationNode,
 	StatementNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
@@ -27,12 +29,55 @@ import type {
 	UpdateStatementNode,
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
+	WithClauseNode,
+	WithBindingNode,
 } from "./sql-parser/nodes.js";
 import type { SqlNode } from "./sql-parser/nodes.js";
 import {
 	getBinaryOperatorPrecedence,
 	isNonAssociativeBinaryOperator,
 } from "./sql-parser/ast-helpers.js";
+
+const RESERVED_IDENTIFIERS = new Set(
+	[
+		"select",
+		"insert",
+		"update",
+		"delete",
+		"with",
+		"recursive",
+		"union",
+		"all",
+		"distinct",
+		"from",
+		"into",
+		"where",
+		"and",
+		"or",
+		"not",
+		"limit",
+		"offset",
+		"order",
+		"by",
+		"asc",
+		"desc",
+		"inner",
+		"left",
+		"right",
+		"full",
+		"join",
+		"on",
+		"set",
+		"is",
+		"in",
+		"null",
+		"between",
+		"like",
+		"as",
+		"values",
+		"commit",
+	].map((value) => value.toLowerCase())
+);
 
 type CompileResult = {
 	sql: string;
@@ -73,15 +118,21 @@ export function expressionToSql(expression: ExpressionNode): string {
 }
 
 function compileStatement(statement: StatementNode): CompileResult {
+	return buildResult(emitStatementSql(statement));
+}
+
+function emitStatementSql(statement: StatementNode): string {
 	switch (statement.node_kind) {
 		case "select_statement":
-			return buildResult(emitSelectStatement(statement));
+			return emitSelectStatement(statement as SelectStatementNode);
 		case "insert_statement":
-			return buildResult(emitInsertStatement(statement));
+			return emitInsertStatement(statement as InsertStatementNode);
 		case "update_statement":
-			return buildResult(emitUpdateStatement(statement));
+			return emitUpdateStatement(statement as UpdateStatementNode);
 		case "delete_statement":
-			return buildResult(emitDeleteStatement(statement));
+			return emitDeleteStatement(statement as DeleteStatementNode);
+		case "raw_fragment":
+			return (statement as RawFragmentNode).sql_text;
 		default:
 			throw new Error(
 				`Unsupported statement node kind '${statement.node_kind}'`
@@ -97,6 +148,16 @@ function buildResult(sql: string): CompileResult {
 }
 
 function emitSelectStatement(statement: SelectStatementNode): string {
+	let sql = emitSelectCore(statement);
+	for (const operation of statement.set_operations) {
+		const rightSql = emitSelectStatement(operation.select);
+		const keyword = formatSetOperation(operation);
+		sql = `${sql}\n${keyword}\n${rightSql}`;
+	}
+	return applyWithClause(statement.with, sql);
+}
+
+function emitSelectCore(statement: SelectStatementNode): string {
 	const projectionItems = statement.projection.map(emitSelectItem);
 	const selectClause =
 		projectionItems.length <= 1
@@ -130,6 +191,22 @@ function emitSelectStatement(statement: SelectStatementNode): string {
 	return parts.join("\n");
 }
 
+function formatSetOperation(operation: SetOperationNode): string {
+	switch (operation.operator) {
+		case "union": {
+			const modifier =
+				operation.quantifier === "all"
+					? " ALL"
+					: operation.quantifier === "distinct"
+						? " DISTINCT"
+						: "";
+			return `UNION${modifier}`;
+		}
+		default:
+			return "UNION";
+	}
+}
+
 function emitUpdateStatement(statement: UpdateStatementNode): string {
 	const target = emitTableReference(statement.target);
 	const assignments = statement.assignments
@@ -138,7 +215,8 @@ function emitUpdateStatement(statement: UpdateStatementNode): string {
 	const whereSql = statement.where_clause
 		? " WHERE " + emitExpressionOrRaw(statement.where_clause)
 		: "";
-	return `UPDATE ${target} SET ${assignments}${whereSql}`;
+	const baseSql = `UPDATE ${target} SET ${assignments}${whereSql}`;
+	return applyWithClause(statement.with, baseSql);
 }
 
 function emitDeleteStatement(statement: DeleteStatementNode): string {
@@ -146,7 +224,8 @@ function emitDeleteStatement(statement: DeleteStatementNode): string {
 	const whereSql = statement.where_clause
 		? " WHERE " + emitExpressionOrRaw(statement.where_clause)
 		: "";
-	return `DELETE FROM ${target}${whereSql}`;
+	const baseSql = `DELETE FROM ${target}${whereSql}`;
+	return applyWithClause(statement.with, baseSql);
 }
 
 function emitInsertStatement(statement: InsertStatementNode): string {
@@ -155,7 +234,41 @@ function emitInsertStatement(statement: InsertStatementNode): string {
 		? ` (${statement.columns.map((column) => emitIdentifier(column)).join(", ")})`
 		: "";
 	const valuesSql = emitInsertValues(statement.source);
-	return `INSERT INTO ${target}${columnSql} ${valuesSql}`;
+	const baseSql = `INSERT INTO ${target}${columnSql} ${valuesSql}`;
+	return applyWithClause(statement.with, baseSql);
+}
+
+function applyWithClause(withClause: WithClauseNode | null, sql: string): string {
+	if (!withClause) {
+		return sql;
+	}
+	const prefix = emitWithClause(withClause);
+	return `${prefix}\n${sql}`;
+}
+
+function emitWithClause(withClause: WithClauseNode): string {
+	const keyword = withClause.recursive ? "WITH RECURSIVE" : "WITH";
+	const bindings = withClause.bindings
+		.map((binding) => emitWithBinding(binding))
+		.join(",\n");
+	return `${keyword} ${bindings}`;
+}
+
+function emitWithBinding(binding: WithBindingNode): string {
+	const name = emitIdentifier(binding.name);
+	const columnSql = binding.columns.length
+		? `(${binding.columns.map((column) => emitIdentifier(column)).join(", ")})`
+		: "";
+	const statementSql = emitStatementSql(binding.statement);
+	return `${name}${columnSql} AS (\n${indent(statementSql, 2)}\n)`;
+}
+
+function indent(sql: string, spaces: number): string {
+	const padding = " ".repeat(spaces);
+	return sql
+		.split("\n")
+		.map((line) => (line.length === 0 ? line : padding + line))
+		.join("\n");
 }
 
 function emitInsertValues(values: InsertValuesNode): string {
@@ -288,6 +401,8 @@ function emitExpressionWithoutParent(expression: ExpressionNode): string {
 			return emitUnaryExpression(expression);
 		case "in_list_expression":
 			return emitInListExpression(expression);
+		case "in_subquery_expression":
+			return emitInSubqueryExpression(expression);
 		case "between_expression":
 			return emitBetweenExpression(expression);
 		case "function_call":
@@ -331,6 +446,15 @@ function emitInListExpression(expression: InListExpressionNode): string {
 	const items = expression.items.map((item) => emitExpression(item)).join(", ");
 	const keyword = expression.negated ? "NOT IN" : "IN";
 	return `${operand} ${keyword} (${items})`;
+}
+
+function emitInSubqueryExpression(
+	expression: InSubqueryExpressionNode
+): string {
+	const operand = emitExpression(expression.operand);
+	const keyword = expression.negated ? "NOT IN" : "IN";
+	const subquerySql = emitSelectStatement(expression.subquery);
+	return `${operand} ${keyword} (${subquerySql})`;
 }
 
 function emitBetweenExpression(expression: BetweenExpressionNode): string {
@@ -380,7 +504,10 @@ function emitIdentifierPath(path: readonly IdentifierNode[]): string {
 
 function emitIdentifier(identifier: IdentifierNode): string {
 	const value = identifier.value;
-	if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+	if (
+		/^[A-Za-z_][A-Za-z0-9_]*$/.test(value) &&
+		!RESERVED_IDENTIFIERS.has(value.toLowerCase())
+	) {
 		return value;
 	}
 	const escaped = value.replace(/"/g, '""');

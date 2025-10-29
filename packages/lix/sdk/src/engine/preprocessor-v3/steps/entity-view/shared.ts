@@ -833,6 +833,20 @@ function rewritePredicateExpression(
 				negated: expression.negated,
 			};
 		}
+		case "in_subquery_expression": {
+			const operand = rewritePredicateExpression(
+				expression.operand,
+				propertyLowerToActual,
+				flags
+			);
+			if (!operand) return null;
+			return {
+				node_kind: "in_subquery_expression",
+				operand,
+				subquery: expression.subquery,
+				negated: expression.negated,
+			};
+		}
 		case "between_expression": {
 			const operand = rewritePredicateExpression(
 				expression.operand,

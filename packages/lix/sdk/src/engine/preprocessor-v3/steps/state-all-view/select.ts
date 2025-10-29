@@ -22,6 +22,7 @@ import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 
 const STATE_ALL_VIEW = "state_all";
 const STATE_VTABLE = "lix_internal_state_vtable";
+const STATE_VTABLE_ALIAS = "v";
 const DEFAULT_BINDING = STATE_ALL_VIEW;
 
 /**
@@ -119,6 +120,7 @@ function buildStateAllSelect(
 
 	return {
 		node_kind: "select_statement",
+		with: null,
 		projection,
 		from_clauses: [
 			{
@@ -129,11 +131,12 @@ function buildStateAllSelect(
 						node_kind: "object_name",
 						parts: [identifier(STATE_VTABLE)],
 					},
-					alias: identifier("v"),
+					alias: identifier(STATE_VTABLE_ALIAS),
 				},
 				joins: [],
 			},
 		],
+		set_operations: [],
 		where_clause: whereClause,
 		order_by: [],
 		limit: null,
@@ -157,8 +160,7 @@ function metadataSelectExpression(): SelectExpressionNode {
 		node_kind: "select_expression",
 		expression: {
 			node_kind: "raw_fragment",
-			sql_text:
-				'(SELECT json(metadata) FROM "change" WHERE "change"."id" = "v"."change_id")',
+			sql_text: `(SELECT json(metadata) FROM "change" WHERE "change"."id" = "${STATE_VTABLE_ALIAS}"."change_id")`,
 		},
 		alias: identifier("metadata"),
 	};
@@ -385,6 +387,13 @@ function scanSchemaFilters(
 			}
 			return;
 		}
+		case "in_subquery_expression":
+			if (isSchemaKeyReferenceExpr(expression.operand, binding)) {
+				markDynamic();
+				return;
+			}
+			scanSchemaFilters(expression.operand, binding, values, markDynamic);
+			return;
 		case "between_expression":
 			if (isSchemaKeyReferenceExpr(expression.operand, binding)) {
 				markDynamic();
@@ -477,6 +486,8 @@ function expressionContainsSchemaReference(
 					expressionContainsSchemaReference(item, binding)
 				)
 			);
+		case "in_subquery_expression":
+			return true;
 		case "between_expression":
 			return (
 				expressionContainsSchemaReference(expression.operand, binding) ||
@@ -552,6 +563,9 @@ function collectColumnsFromExpression(
 			for (const item of expression.items) {
 				collectColumnsFromExpression(item, binding, columns);
 			}
+			break;
+		case "in_subquery_expression":
+			collectColumnsFromExpression(expression.operand, binding, columns);
 			break;
 		case "between_expression":
 			collectColumnsFromExpression(expression.operand, binding, columns);

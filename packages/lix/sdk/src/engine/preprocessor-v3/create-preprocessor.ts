@@ -61,6 +61,7 @@ export function createPreprocessor(args: {
 	engine: EngineShape;
 }): PreprocessorFn {
 	const { engine } = args;
+	const sqlViews = loadSqlViewMap(engine);
 
 	return ({ sql, parameters, sideEffects, trace }: PreprocessorArgs) => {
 		void sideEffects;
@@ -69,6 +70,18 @@ export function createPreprocessor(args: {
 		const context = buildContext(engine, traceEntries);
 
 		const statement = parse(sql);
+		if (statement.node_kind === "raw_fragment") {
+			if (sql.toLowerCase().includes("commit")) {
+				console.log("[createPreprocessor] raw fragment with commit", sql);
+			}
+			return {
+				sql,
+				parameters,
+				expandedSql: sql,
+				context,
+			};
+		}
+
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
@@ -76,7 +89,7 @@ export function createPreprocessor(args: {
 					parameters,
 					getStoredSchemas: context.getStoredSchemas,
 					getCacheTables: context.getCacheTables,
-					getSqlViews: context.getSqlViews,
+					getSqlViews: () => sqlViews,
 					hasOpenTransaction: context.hasOpenTransaction,
 					getCelEnvironment: context.getCelEnvironment,
 					getEngine: context.getEngine,
@@ -93,6 +106,9 @@ export function createPreprocessor(args: {
 		}
 
 		const compiled = compile(rewritten);
+		if (compiled.sql.toLowerCase().includes("commit")) {
+			console.log("[createPreprocessor] compiled with commit", compiled.sql);
+		}
 
 		return {
 			sql: compiled.sql,

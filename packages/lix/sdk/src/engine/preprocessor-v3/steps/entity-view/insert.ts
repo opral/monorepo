@@ -6,6 +6,7 @@ import {
 	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type StatementNode,
+	type FunctionCallExpressionNode,
 } from "../../sql-parser/nodes.js";
 import { normalizeIdentifierValue } from "../../sql-parser/ast-helpers.js";
 import { expressionToSql, compile } from "../../compile.js";
@@ -223,6 +224,7 @@ function buildEntityViewInsert(args: BuildInsertArgs): StatementNode | null {
 
 	const rewritten: InsertStatementNode = {
 		node_kind: "insert_statement",
+		with: args.insert.with,
 		target: buildObjectName("state_all"),
 		columns: STATE_ALL_COLUMNS.map((column) => identifier(column)),
 		source: {
@@ -298,6 +300,12 @@ function evaluateExpression(args: {
 		case "parameter":
 			return evaluateParameterExpression({
 				placeholder: expression.placeholder ?? "?",
+				parameters: args.parameters,
+				state: args.state,
+			});
+		case "function_call":
+			return evaluateFunctionCallExpression({
+				expression,
 				parameters: args.parameters,
 				state: args.state,
 			});
@@ -441,6 +449,46 @@ function resolvePlaceholder(args: {
 	}
 
 	return null;
+}
+
+function evaluateFunctionCallExpression(args: {
+	readonly expression: FunctionCallExpressionNode;
+	readonly parameters: ReadonlyArray<unknown>;
+	readonly state: { position: number };
+}): { value: unknown; expression: string } | null {
+	const functionName = args.expression.name.value.toLowerCase();
+	if (
+		(functionName === "json" || functionName === "json_quote") &&
+		args.expression.arguments.length === 1
+	) {
+		const [argument] = args.expression.arguments;
+		if (argument.node_kind === "parameter") {
+			const evaluated = evaluateParameterExpression({
+				placeholder: argument.placeholder ?? "?",
+				parameters: args.parameters,
+				state: args.state,
+			});
+			if (!evaluated) {
+				return null;
+			}
+			if (functionName === "json") {
+				return {
+					value: deserializeJsonParameter(evaluated.value),
+					expression: `json(${evaluated.expression})`,
+				};
+			}
+			return {
+				value: evaluated.value,
+				expression: `json_quote(${evaluated.expression})`,
+			};
+		}
+	}
+
+	const sql = expressionToSql(args.expression);
+	return {
+		value: { kind: "expression", sql },
+		expression: sql,
+	};
 }
 
 function buildStateRowExpressions(args: {

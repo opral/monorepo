@@ -66,6 +66,45 @@ test("invokes generic enter and exit hooks in depth-first order", () => {
 	expect(trace).toContain("exit:column_reference");
 });
 
+test("visits with clause bindings during traversal", () => {
+	const statement = parse(
+		`
+			WITH active AS (
+				SELECT id FROM projects
+			)
+			SELECT * FROM active
+		`
+	) as SelectStatementNode;
+
+	const visited: string[] = [];
+	visitSelectStatement(statement, {
+		with_binding(node) {
+			visited.push(node.name.value);
+		},
+	});
+
+	expect(visited).toEqual(["active"]);
+});
+
+test("visits set operations during traversal", () => {
+	const statement = parse(
+		`
+			SELECT id FROM commit
+			UNION ALL
+			SELECT parent_id FROM commit_edge
+		`
+	) as SelectStatementNode;
+
+	const visited: string[] = [];
+	visitSelectStatement(statement, {
+		set_operation(node) {
+			visited.push(node.operator);
+		},
+	});
+
+	expect(visited).toEqual(["union"]);
+});
+
 test("visitStatement traverses insert targets and values", () => {
 	const statement = parse(
 		"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"

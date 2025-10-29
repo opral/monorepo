@@ -39,6 +39,28 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT with common table expression", () => {
+		expectRoundTrip(`
+			WITH latest AS (
+				SELECT id
+				FROM projects
+			)
+			SELECT *
+			FROM latest
+		`);
+	});
+
+	test("SELECT with recursive union", () => {
+		expectRoundTrip(`
+			WITH RECURSIVE chain(id) AS (
+				SELECT id FROM commit
+				UNION ALL
+				SELECT parent_id FROM commit_edge
+			)
+			SELECT id FROM chain
+		`);
+	});
+
 	test("UPDATE with assignments", () => {
 		expectRoundTrip(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"

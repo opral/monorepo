@@ -4,6 +4,7 @@ import {
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
+	type InSubqueryExpressionNode,
 	type RawFragmentNode,
 	type SelectItemNode,
 	type SelectStatementNode,
@@ -46,6 +47,11 @@ type SchemaKeyPredicateSummary = {
 	hasDynamic: boolean;
 };
 
+type ParameterState = {
+	position: number;
+	readonly values: ReadonlyArray<unknown>;
+};
+
 type TableReferenceInfo = {
 	relation: TableReferenceNode;
 	alias: string | null;
@@ -55,6 +61,7 @@ type TableReferenceInfo = {
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
+	requiredColumns: Set<string>;
 };
 
 /**
@@ -122,7 +129,8 @@ function rewriteSelectStatement(
 
 	const schemaSummary = collectSchemaKeyPredicates(
 		withRewrittenSubqueries.where_clause,
-		tableNamesForTrace
+		tableNamesForTrace,
+		context.parameters ?? []
 	);
 
 	const projectionKind = determineProjectionKind(
@@ -134,7 +142,16 @@ function rewriteSelectStatement(
 		tableNamesForTrace
 	);
 
-	const metadata = buildInlineMetadata(withRewrittenSubqueries, references);
+	const columnRequirements = collectColumnRequirements(
+		withRewrittenSubqueries,
+		tableNamesForTrace
+	);
+	const metadata = buildInlineMetadata(
+		withRewrittenSubqueries,
+		references,
+		context.parameters ?? [],
+		columnRequirements
+	);
 
 	const rewritten = visitSelectStatement(
 		withRewrittenSubqueries,
@@ -197,7 +214,9 @@ function normalizeAlias(alias: IdentifierNode | null): string | null {
 
 function buildInlineMetadata(
 	select: SelectStatementNode,
-	references: readonly TableReferenceInfo[]
+	references: readonly TableReferenceInfo[],
+	parameters: ReadonlyArray<unknown>,
+	columnRequirements: Map<string, Set<string>>
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -210,16 +229,25 @@ function buildInlineMetadata(
 			DEFAULT_ALIAS_KEY,
 			ORIGINAL_TABLE_KEY,
 		]);
-		const summary = collectSchemaKeyPredicates(select.where_clause, tableNames);
+		const summary = collectSchemaKeyPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
 		if (summary.hasDynamic) {
 			throw new Error(
 				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
 			);
 		}
 		const selectedColumns = collectSelectedColumns(select, tableNames);
+		const baseRequired = columnRequirements.get(aliasKey);
+		const requiredColumns = baseRequired
+			? new Set<string>(baseRequired)
+			: new Set<string>();
 		metadata.set(aliasKey, {
 			schemaKeys: summary.literals,
 			selectedColumns,
+			requiredColumns,
 		});
 	}
 	return metadata;
@@ -247,6 +275,7 @@ function createInlineVisitor(
 				schemaKeys: metadataEntry.schemaKeys,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
+				requiredColumns: metadataEntry.requiredColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
@@ -260,37 +289,55 @@ function createInlineVisitor(
 
 function collectSchemaKeyPredicates(
 	whereClause: SelectStatementNode["where_clause"],
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
 ): SchemaKeyPredicateSummary {
 	if (!whereClause) {
 		return { count: 0, literals: [], hasDynamic: false };
 	}
 
-	return visitExpression(whereClause, tableNames);
+	const state: ParameterState = { position: 0, values: parameters };
+	return visitExpression(whereClause, tableNames, state);
 }
 
 function visitExpression(
 	expression: ExpressionNode | RawFragmentNode,
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	state: ParameterState
 ): SchemaKeyPredicateSummary {
 	if ("sql_text" in expression) {
-		return { count: 0, literals: [], hasDynamic: true };
+		return {
+			count: 0,
+			literals: [],
+			hasDynamic: rawFragmentMentionsSchemaKey(expression.sql_text),
+		};
 	}
 
 	switch (expression.node_kind) {
 		case "grouped_expression":
-			return visitExpression(expression.expression, tableNames);
+			return visitExpression(expression.expression, tableNames, state);
 		case "binary_expression":
-			return visitBinaryExpression(expression, tableNames);
+			return visitBinaryExpression(expression, tableNames, state);
 		case "unary_expression":
-			return visitExpression(expression.operand, tableNames);
+			return visitExpression(expression.operand, tableNames, state);
 		case "in_list_expression":
-			return visitInListExpression(expression, tableNames);
+			return visitInListExpression(expression, tableNames, state);
+		case "in_subquery_expression":
+			return visitInSubqueryExpression(expression, tableNames, state);
 		case "between_expression":
-			return visitBetweenExpression(expression, tableNames);
+			return visitBetweenExpression(expression, tableNames, state);
+		case "function_call":
+			return expression.arguments.reduce<SchemaKeyPredicateSummary>(
+				(acc, arg) => mergeSummaries(acc, visitExpression(arg, tableNames, state)),
+				{ count: 0, literals: [], hasDynamic: false }
+			);
+		case "subquery_expression":
+			return { count: 0, literals: [], hasDynamic: true };
+		case "parameter":
+			consumeParameter(state);
+			return { count: 0, literals: [], hasDynamic: false };
 		case "column_reference":
 		case "literal":
-		case "parameter":
 		default:
 			return { count: 0, literals: [], hasDynamic: false };
 	}
@@ -298,12 +345,13 @@ function visitExpression(
 
 function visitBinaryExpression(
 	expression: BinaryExpressionNode,
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	state: ParameterState
 ): SchemaKeyPredicateSummary {
 	if (isLogicalOperator(expression.operator)) {
 		return mergeSummaries(
-			visitExpression(expression.left, tableNames),
-			visitExpression(expression.right, tableNames)
+			visitExpression(expression.left, tableNames, state),
+			visitExpression(expression.right, tableNames, state)
 		);
 	}
 
@@ -321,10 +369,21 @@ function visitBinaryExpression(
 	const rightIsSchema = isSchemaKeyReference(expression.right, tableNames);
 
 	if (leftIsSchema) {
-		summary = incrementSummaryWithOperand(summary, expression.right);
+		summary = incrementSummaryWithOperand(summary, expression.right, state);
 	}
 	if (rightIsSchema) {
-		summary = incrementSummaryWithOperand(summary, expression.left);
+		summary = incrementSummaryWithOperand(summary, expression.left, state);
+	}
+
+	const additional: SchemaKeyPredicateSummary[] = [];
+	if (!leftIsSchema) {
+		additional.push(visitExpression(expression.left, tableNames, state));
+	}
+	if (!rightIsSchema) {
+		additional.push(visitExpression(expression.right, tableNames, state));
+	}
+	if (additional.length > 0) {
+		summary = mergeSummaries(summary, ...additional);
 	}
 
 	return summary;
@@ -332,7 +391,8 @@ function visitBinaryExpression(
 
 function visitInListExpression(
 	expression: InListExpressionNode,
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	state: ParameterState
 ): SchemaKeyPredicateSummary {
 	if (!isSchemaKeyReference(expression.operand, tableNames)) {
 		return { count: 0, literals: [], hasDynamic: false };
@@ -343,14 +403,44 @@ function visitInListExpression(
 		hasDynamic: false,
 	};
 	for (const item of expression.items) {
-		summary = incrementSummaryWithOperand(summary, item);
+		summary = incrementSummaryWithOperand(summary, item, state);
 	}
 	return summary;
 }
 
+function visitInSubqueryExpression(
+	expression: InSubqueryExpressionNode,
+	tableNames: Set<string>,
+	state: ParameterState
+): SchemaKeyPredicateSummary {
+	const operandSummary = visitExpression(
+		expression.operand,
+		tableNames,
+		state
+	);
+	return mergeSummaries(operandSummary, {
+		count: 0,
+		literals: [],
+		hasDynamic: true,
+	});
+}
+
+function rawFragmentMentionsSchemaKey(sql: string): boolean {
+	return sql.toLowerCase().includes("schema_key");
+}
+
+function consumeParameter(state: ParameterState): unknown {
+	const value = state.values[state.position] ?? null;
+	if (state.position < state.values.length) {
+		state.position += 1;
+	}
+	return value;
+}
+
 function visitBetweenExpression(
 	expression: BetweenExpressionNode,
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	state: ParameterState
 ): SchemaKeyPredicateSummary {
 	if (!isSchemaKeyReference(expression.operand, tableNames)) {
 		return { count: 0, literals: [], hasDynamic: false };
@@ -360,14 +450,15 @@ function visitBetweenExpression(
 		literals: [],
 		hasDynamic: false,
 	};
-	summary = incrementSummaryWithOperand(summary, expression.start);
-	summary = incrementSummaryWithOperand(summary, expression.end);
+	summary = incrementSummaryWithOperand(summary, expression.start, state);
+	summary = incrementSummaryWithOperand(summary, expression.end, state);
 	return summary;
 }
 
 function incrementSummaryWithOperand(
 	summary: SchemaKeyPredicateSummary,
-	operand: ExpressionNode | RawFragmentNode
+	operand: ExpressionNode | RawFragmentNode,
+	state: ParameterState
 ): SchemaKeyPredicateSummary {
 	const next = { ...summary };
 	const node = unwrapExpression(operand);
@@ -379,7 +470,15 @@ function incrementSummaryWithOperand(
 				next.hasDynamic = true;
 			}
 			break;
-		case "parameter":
+		case "parameter": {
+			const value = consumeParameter(state);
+			if (typeof value === "string") {
+				next.literals.push(value);
+			} else {
+				next.hasDynamic = true;
+			}
+			break;
+		}
 		case "raw_fragment":
 		case "column_reference":
 		case "in_list_expression":
@@ -507,6 +606,91 @@ function collectSelectedColumns(
 	return order.map((column) => entries.get(column)!);
 }
 
+function collectColumnRequirements(
+	select: SelectStatementNode,
+	tableNames: Set<string>
+): Map<string, Set<string>> {
+	const requirements = new Map<string, Set<string>>();
+	const ensureEntry = (alias: string) => {
+		let entry = requirements.get(alias);
+		if (!entry) {
+			entry = new Set<string>();
+			requirements.set(alias, entry);
+		}
+		return entry;
+	};
+	const recordColumn = (qualifier: string | null, column: string) => {
+		const normalizedAlias =
+			qualifier !== null ? normalizeIdentifierValue(qualifier) : DEFAULT_ALIAS_KEY;
+		if (!tableNames.has(normalizedAlias)) {
+			return;
+		}
+		ensureEntry(normalizedAlias).add(column);
+		if (
+			normalizedAlias === ORIGINAL_TABLE_KEY &&
+			tableNames.has(DEFAULT_ALIAS_KEY)
+		) {
+			ensureEntry(DEFAULT_ALIAS_KEY).add(column);
+		}
+	};
+
+	const visitExpression = (expression: ExpressionNode | RawFragmentNode): void => {
+		if ("sql_text" in expression) {
+			return;
+		}
+		switch (expression.node_kind) {
+			case "column_reference": {
+				const qualifier = getColumnQualifier(expression);
+				const column = getColumnName(expression);
+				recordColumn(qualifier, column);
+				break;
+			}
+			case "grouped_expression":
+				visitExpression(expression.expression);
+				break;
+			case "binary_expression":
+				visitExpression(expression.left);
+				visitExpression(expression.right);
+				break;
+			case "unary_expression":
+				visitExpression(expression.operand);
+				break;
+			case "in_list_expression":
+				visitExpression(expression.operand);
+				for (const item of expression.items) {
+					visitExpression(item);
+				}
+				break;
+			case "between_expression":
+				visitExpression(expression.operand);
+				visitExpression(expression.start);
+				visitExpression(expression.end);
+				break;
+			case "function_call":
+				for (const argument of expression.arguments) {
+					visitExpression(argument);
+				}
+				break;
+			case "subquery_expression":
+				// Columns inside subqueries don't flow to the outer select directly.
+				break;
+			case "parameter":
+			case "literal":
+				break;
+			default:
+				break;
+		}
+	};
+
+	if (select.where_clause) {
+		visitExpression(select.where_clause);
+	}
+	for (const orderItem of select.order_by) {
+		visitExpression(orderItem.expression);
+	}
+	return requirements;
+}
+
 function extractColumnFromExpression(
 	expression: ExpressionNode | RawFragmentNode,
 	tableNames: Set<string>
@@ -569,11 +753,13 @@ function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
+	requiredColumns: Set<string>;
 	hasOpenTransaction: boolean;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
-		options.selectedColumns
+		options.selectedColumns,
+		options.requiredColumns
 	);
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(
@@ -587,9 +773,11 @@ function buildVtableSelectRewrite(options: {
 		rankedColumns.add("inherited_from_version_id");
 	}
 	const needsChangeJoin = candidateColumns.has("metadata");
-	const projectionSql = buildRewriteProjectionSql(options.selectedColumns, {
-		needsWriterJoin,
-	});
+	const projectionSql = buildRewriteProjectionSql(
+		options.selectedColumns,
+		options.requiredColumns,
+		{ needsWriterJoin }
+	);
 	const rankingOrder = [
 		"c.priority",
 		"c.created_at DESC",
@@ -691,6 +879,7 @@ WHERE w.rn = 1`;
 
 function buildRewriteProjectionSql(
 	selectedColumns: SelectedProjection[] | null,
+	requiredColumns: Set<string>,
 	options: { needsWriterJoin: boolean }
 ): string {
 	const builder = internalQueryBuilder as unknown as {
@@ -708,17 +897,30 @@ function buildRewriteProjectionSql(
 	};
 
 	const baseQuery = builder.selectFrom(`${REWRITTEN_STATE_VTABLE} as w`);
+	let effectiveSelected = selectedColumns;
+	if (effectiveSelected && effectiveSelected.length > 0) {
+		const present = new Set(effectiveSelected.map((entry) => entry.column));
+		for (const column of requiredColumns) {
+			if (!present.has(column)) {
+				effectiveSelected = effectiveSelected.concat({
+					column,
+					alias: null,
+				});
+				present.add(column);
+			}
+		}
+	}
 	const query =
-		selectedColumns === null || selectedColumns.length === 0
+		effectiveSelected === null || effectiveSelected.length === 0
 			? baseQuery.selectAll("w")
 			: baseQuery.select((eb) =>
-					selectedColumns.map((entry) => {
-						if (options.needsWriterJoin && entry.column === "writer_key") {
-							return eb.fn
-								.coalesce(
-									eb.ref("ws_dst.writer_key"),
-									eb.ref("ws_src.writer_key"),
-									eb.ref("w.writer_key")
+					effectiveSelected!.map((entry) => {
+					if (options.needsWriterJoin && entry.column === "writer_key") {
+						return eb.fn
+							.coalesce(
+								eb.ref("ws_dst.writer_key"),
+								eb.ref("ws_src.writer_key"),
+								eb.ref("w.writer_key")
 								)
 								.as(entry.alias ?? entry.column) as unknown as any;
 						}
@@ -732,7 +934,8 @@ function buildRewriteProjectionSql(
 }
 
 function buildProjectionColumnSet(
-	selectedColumns: SelectedProjection[] | null
+	selectedColumns: SelectedProjection[] | null,
+	requiredColumns: Set<string>
 ): {
 	candidateColumns: Set<string>;
 	rankedColumns: Set<string>;
@@ -745,6 +948,10 @@ function buildProjectionColumnSet(
 	}
 	const candidateColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
 	const rankedColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
+	for (const column of requiredColumns) {
+		candidateColumns.add(column);
+		rankedColumns.add(column);
+	}
 	if (selectedColumns && selectedColumns.length > 0) {
 		for (const entry of selectedColumns) {
 			candidateColumns.add(entry.column);

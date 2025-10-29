@@ -6,6 +6,18 @@ export const Whitespace: TokenType = createToken({
 	group: Lexer.SKIPPED,
 });
 
+export const LineComment: TokenType = createToken({
+	name: "LineComment",
+	pattern: /--[^\n\r]*/,
+	group: Lexer.SKIPPED,
+});
+
+export const BlockComment: TokenType = createToken({
+	name: "BlockComment",
+	pattern: /\/\*[\s\S]*?\*\//,
+	group: Lexer.SKIPPED,
+});
+
 export const Select: TokenType = createToken({
 	name: "Select",
 	pattern: /select\b/i,
@@ -24,6 +36,31 @@ export const Update: TokenType = createToken({
 export const Delete: TokenType = createToken({
 	name: "Delete",
 	pattern: /delete\b/i,
+});
+
+export const With: TokenType = createToken({
+	name: "With",
+	pattern: /with\b/i,
+});
+
+export const Recursive: TokenType = createToken({
+	name: "Recursive",
+	pattern: /recursive\b/i,
+});
+
+export const Union: TokenType = createToken({
+	name: "Union",
+	pattern: /union\b/i,
+});
+
+export const All: TokenType = createToken({
+	name: "All",
+	pattern: /all\b/i,
+});
+
+export const Distinct: TokenType = createToken({
+	name: "Distinct",
+	pattern: /distinct\b/i,
 });
 
 export const From: TokenType = createToken({
@@ -190,6 +227,8 @@ export const Identifier: TokenType = createToken({
 		SetKeyword,
 		Values,
 		As,
+		With,
+		Recursive,
 	],
 });
 
@@ -299,11 +338,18 @@ export const Percent: TokenType = createToken({
 });
 
 const tokens: TokenType[] = [
+	LineComment,
+	BlockComment,
 	Whitespace,
 	Select,
 	Insert,
 	Update,
 	Delete,
+	With,
+	Recursive,
+	Union,
+	All,
+	Distinct,
 	From,
 	Into,
 	Where,

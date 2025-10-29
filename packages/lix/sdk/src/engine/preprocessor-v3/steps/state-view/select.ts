@@ -222,6 +222,7 @@ function buildStateSelect(reference: StateReference): SelectStatementNode {
 
 	return {
 		node_kind: "select_statement",
+		with: null,
 		projection,
 		from_clauses: [
 			{
@@ -237,6 +238,7 @@ function buildStateSelect(reference: StateReference): SelectStatementNode {
 				joins: [],
 			},
 		],
+		set_operations: [],
 		where_clause: whereClause,
 		order_by: [],
 		limit: null,
@@ -549,6 +551,14 @@ function collectColumnsFromExpressionLike(
 					columns
 				);
 			}
+			break;
+		case "in_subquery_expression":
+			collectColumnsFromExpressionLike(
+				expression.operand,
+				binding,
+				normalizedBinding,
+				columns
+			);
 			break;
 		default:
 			break;

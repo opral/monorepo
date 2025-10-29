@@ -4,6 +4,11 @@ import {
 	Insert,
 	Update,
 	Delete,
+	With,
+	Recursive,
+	Union,
+	All,
+	Distinct,
 	From,
 	Into,
 	Where,
@@ -67,16 +72,93 @@ class SqlParser extends CstParser {
 	public readonly select_statement: () => CstNode = this.RULE(
 		"select_statement",
 		() => {
-			this.OR([
-				{ ALT: () => this.SUBRULE(this.select_core, { LABEL: "core" }) },
-				{
-					ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
-				},
+		this.OPTION(() => this.SUBRULE(this.with_clause, { LABEL: "with_clause" }));
+		this.OR([
+			{ ALT: () => this.SUBRULE(this.select_compound, { LABEL: "core" }) },
+			{
+				ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
+			},
 				{ ALT: () => this.SUBRULE(this.update_statement, { LABEL: "update" }) },
 				{ ALT: () => this.SUBRULE(this.delete_statement, { LABEL: "delete" }) },
 			]);
-			this.OPTION(() => this.CONSUME(Semicolon));
+			this.OPTION1(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
+		}
+	);
+
+	private readonly select_compound: () => CstNode = this.RULE(
+		"select_compound",
+		() => {
+			this.SUBRULE(this.select_core, { LABEL: "head" });
+			this.MANY(() => {
+				this.SUBRULE(this.set_operation, { LABEL: "operations" });
+			});
+		}
+	);
+
+	private readonly set_operation: () => CstNode = this.RULE(
+		"set_operation",
+		() => {
+			this.CONSUME(Union, { LABEL: "operator" });
+			this.OPTION(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(All, { LABEL: "quantifier" }) },
+					{ ALT: () => this.CONSUME(Distinct, { LABEL: "quantifier" }) },
+				]);
+			});
+			this.SUBRULE(this.select_core, { LABEL: "select" });
+		}
+	);
+
+	private readonly with_clause: () => CstNode = this.RULE("with_clause", () => {
+		this.CONSUME(With);
+		this.OPTION(() => this.CONSUME(Recursive));
+		this.SUBRULE(this.with_binding, { LABEL: "bindings" });
+		this.MANY(() => {
+			this.CONSUME(Comma);
+			this.SUBRULE1(this.with_binding, { LABEL: "bindings" });
+		});
+	});
+
+	private readonly with_binding: () => CstNode = this.RULE(
+		"with_binding",
+		() => {
+			this.SUBRULE(this.identifier, { LABEL: "name" });
+			this.OPTION(() => {
+				this.CONSUME(LeftParen);
+				this.SUBRULE1(this.identifier, { LABEL: "columns" });
+				this.MANY(() => {
+					this.CONSUME(Comma);
+					this.SUBRULE2(this.identifier, { LABEL: "columns" });
+				});
+				this.CONSUME(RightParen);
+			});
+			this.CONSUME(As);
+			this.CONSUME1(LeftParen);
+			this.SUBRULE3(this.cte_substatement, { LABEL: "statement" });
+			this.CONSUME1(RightParen);
+		}
+	);
+
+	private readonly cte_substatement: () => CstNode = this.RULE(
+		"cte_substatement",
+		() => {
+			this.OPTION(() => this.SUBRULE(this.with_clause, { LABEL: "with_clause" }));
+			this.OR([
+				{ ALT: () => this.SUBRULE(this.select_compound, { LABEL: "core" }) },
+				{ ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }) },
+				{ ALT: () => this.SUBRULE(this.update_statement, { LABEL: "update" }) },
+				{ ALT: () => this.SUBRULE(this.delete_statement, { LABEL: "delete" }) },
+			]);
+		}
+	);
+
+	private readonly parenthesized_select: () => CstNode = this.RULE(
+		"parenthesized_select",
+		() => {
+			this.CONSUME(LeftParen);
+			this.SUBRULE(this.cte_substatement, { LABEL: "statement" });
+			this.CONSUME(RightParen);
 		}
 	);
 
@@ -219,9 +301,7 @@ class SqlParser extends CstParser {
 				},
 				{
 					ALT: () => {
-						this.CONSUME(LeftParen);
-						this.SUBRULE(this.select_core, { LABEL: "select" });
-						this.CONSUME(RightParen);
+						this.SUBRULE(this.parenthesized_select, { LABEL: "select" });
 						this.OPTION3(() => this.CONSUME2(As));
 						this.SUBRULE2(this.identifier, { LABEL: "alias" });
 					},
@@ -242,14 +322,14 @@ class SqlParser extends CstParser {
 		this.CONSUME(Join);
 		this.SUBRULE(this.table_reference, { LABEL: "table" });
 		this.CONSUME(On);
-		this.SUBRULE(this.column_reference, { LABEL: "left" });
+		this.SUBRULE(this.expression, { LABEL: "left" });
 		this.CONSUME(Equals);
-		this.SUBRULE1(this.column_reference, { LABEL: "right" });
+		this.SUBRULE1(this.expression, { LABEL: "right" });
 		this.MANY(() => {
 			this.CONSUME1(And);
-			this.SUBRULE2(this.column_reference, { LABEL: "extra_left" });
+			this.SUBRULE2(this.expression, { LABEL: "extra_left" });
 			this.CONSUME2(Equals);
-			this.SUBRULE3(this.column_reference, { LABEL: "extra_right" });
+			this.SUBRULE3(this.expression, { LABEL: "extra_right" });
 		});
 	});
 
@@ -326,7 +406,18 @@ class SqlParser extends CstParser {
 									this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
 									this.CONSUME(InKeyword);
 									this.CONSUME1(LeftParen);
-									this.SUBRULE(this.expression_list, { LABEL: "in_list" });
+									this.OR2([
+										{
+											ALT: () =>
+												this.SUBRULE(this.expression_list, { LABEL: "in_list" }),
+										},
+										{
+											ALT: () =>
+												this.SUBRULE(this.cte_substatement, {
+													LABEL: "in_select",
+												}),
+										},
+									]);
 									this.CONSUME1(RightParen);
 								},
 							},
@@ -522,26 +613,26 @@ class SqlParser extends CstParser {
 						this.CONSUME(RightParen, { LABEL: "callRParen" });
 					},
 				},
-				{
-					ALT: () =>
-						this.SUBRULE(this.column_reference, { LABEL: "reference" }),
+			{
+				GATE: () => {
+					const next = this.LA(1).tokenType;
+					return next === Identifier || next === QuotedIdentifier;
 				},
-				{
-					GATE: () => this.LA(2).tokenType === Select,
-					ALT: () => {
-						this.CONSUME1(LeftParen);
-						this.SUBRULE(this.select_core, { LABEL: "subselect" });
-						this.CONSUME1(RightParen);
-					},
+				ALT: () =>
+					this.SUBRULE(this.column_reference, { LABEL: "reference" }),
+			},
+			{
+				GATE: this.BACKTRACK(this.parenthesized_select),
+				ALT: () =>
+					this.SUBRULE(this.parenthesized_select, { LABEL: "subselect" }),
+			},
+			{
+				ALT: () => {
+					this.CONSUME1(LeftParen, { LABEL: "groupLParen" });
+					this.SUBRULE(this.expression, { LABEL: "inner" });
+					this.CONSUME1(RightParen, { LABEL: "groupRParen" });
 				},
-				{
-					GATE: () => this.LA(2).tokenType !== Select,
-					ALT: () => {
-						this.CONSUME2(LeftParen);
-						this.SUBRULE(this.expression, { LABEL: "inner" });
-						this.CONSUME2(RightParen);
-					},
-				},
+			},
 			]);
 		}
 	);
@@ -585,10 +676,5 @@ export function parseCst(sql: string): CstNode | null {
 	if (parseError) {
 		return null;
 	}
-	const children = (cst as any)?.children ?? {};
-	const core = children.core?.[0];
-	const insert = children.insert?.[0];
-	const update = children.update?.[0];
-	const del = children.delete?.[0];
-	return core ?? insert ?? update ?? del ?? cst;
+	return cst;
 }

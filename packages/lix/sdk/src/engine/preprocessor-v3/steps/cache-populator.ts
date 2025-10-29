@@ -33,8 +33,12 @@ import { getStateCacheTables } from "../../../state/cache/schema.js";
 import { resolveCacheSchemaDefinition } from "../../../state/cache/schema-resolver.js";
 import type { LixEngine } from "../../boot.js";
 
-const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(REWRITTEN_STATE_VTABLE);
-const ORIGINAL_TABLE_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
+const DEFAULT_ALIAS_KEYS = new Set<string>([
+	normalizeIdentifierValue(REWRITTEN_STATE_VTABLE),
+	normalizeIdentifierValue(INTERNAL_STATE_VTABLE),
+	normalizeIdentifierValue("v"),
+	normalizeIdentifierValue("state_all"),
+]);
 
 type CacheAggregation = {
 	foundReference: boolean;
@@ -90,9 +94,7 @@ export const cachePopulator: PreprocessorStep = (context) => {
 	}
 
 	if (aggregation.schemaDynamic) {
-		throw new Error(
-			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-		);
+		return node;
 	}
 
 	const schemaKeyHints = Array.from(aggregation.schemaKeys);
@@ -166,13 +168,12 @@ function collectFromSelect(
 	const references = collectInternalStateReferences(select);
 	if (references.length > 0) {
 		aggregation.foundReference = true;
-		const aliasKeys = new Set<string>([
-			DEFAULT_ALIAS_KEY,
-			ORIGINAL_TABLE_KEY,
-			...references
-				.map((reference) => reference.normalizedAlias)
-				.filter((alias): alias is string => alias !== null),
-		]);
+		const aliasKeys = new Set<string>(DEFAULT_ALIAS_KEYS);
+		for (const reference of references) {
+			if (reference.normalizedAlias) {
+				aliasKeys.add(reference.normalizedAlias);
+			}
+		}
 
 		const summary = analyzePredicate(select.where_clause, {
 			parameters: args.parameters,
@@ -196,6 +197,13 @@ function collectFromSelect(
 			for (const versionId of summary.versionIds) {
 				aggregation.versionIds.add(versionId);
 			}
+		}
+
+		if (aggregation.schemaKeys.size > 0) {
+			aggregation.schemaDynamic = false;
+		}
+		if (aggregation.versionIds.size > 0) {
+			aggregation.versionDynamic = false;
 		}
 	} else if (select.where_clause) {
 		consumeExpression(select.where_clause, args);
@@ -305,6 +313,10 @@ function consumeExpression(
 				consumeExpression(item, args);
 			}
 			return;
+		case "in_subquery_expression":
+			consumeExpression(expression.operand, args);
+			collectFromSelect(expression.subquery, args);
+			return;
 		case "between_expression":
 			consumeExpression(expression.operand, args);
 			consumeExpression(expression.start, args);
@@ -342,7 +354,12 @@ function analyzePredicate(
 		return initial;
 	}
 	if ("sql_text" in expression) {
-		return { ...initial, schemaDynamic: true, versionDynamic: true };
+		const lower = expression.sql_text.toLowerCase();
+		return {
+			...initial,
+			schemaDynamic: lower.includes("schema_key"),
+			versionDynamic: lower.includes("version_id"),
+		};
 	}
 
 	switch (expression.node_kind) {
@@ -499,7 +516,7 @@ function analyzeInListExpression(
 }
 
 function mergeAnalyses(...analyses: PredicateAnalysis[]): PredicateAnalysis {
-	return analyses.reduce<PredicateAnalysis>(
+	const result = analyses.reduce<PredicateAnalysis>(
 		(accumulator, current) => {
 			current.schemaKeys.forEach((key) => accumulator.schemaKeys.add(key));
 			current.versionIds.forEach((id) => accumulator.versionIds.add(id));
@@ -516,6 +533,13 @@ function mergeAnalyses(...analyses: PredicateAnalysis[]): PredicateAnalysis {
 			versionDynamic: false,
 		}
 	);
+	if (result.schemaKeys.size > 0) {
+		result.schemaDynamic = false;
+	}
+	if (result.versionIds.size > 0) {
+		result.versionDynamic = false;
+	}
+	return result;
 }
 
 function getColumnTarget(

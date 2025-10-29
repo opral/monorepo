@@ -33,15 +33,45 @@ export type StatementNode =
 	| DeleteStatementNode
 	| RawFragmentNode;
 
+export type WithClauseNode = SqlNode & {
+	readonly node_kind: "with_clause";
+	readonly recursive: boolean;
+	readonly bindings: readonly WithBindingNode[];
+};
+
+export type WithBindingNode = SqlNode & {
+	readonly node_kind: "with_binding";
+	readonly name: IdentifierNode;
+	readonly columns: readonly IdentifierNode[];
+	readonly statement:
+		| SelectStatementNode
+		| InsertStatementNode
+		| UpdateStatementNode
+		| DeleteStatementNode;
+};
+
 export type SelectStatementNode = SqlNode & {
 	readonly node_kind: "select_statement";
+	readonly with: WithClauseNode | null;
 	readonly projection: readonly SelectItemNode[];
 	readonly from_clauses: readonly FromClauseNode[];
+	readonly set_operations: readonly SetOperationNode[];
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
 	readonly order_by: readonly OrderByItemNode[];
 	readonly limit: ExpressionNode | RawFragmentNode | null;
 	readonly offset: ExpressionNode | RawFragmentNode | null;
 };
+
+export type SetOperationNode = SqlNode & {
+	readonly node_kind: "set_operation";
+	readonly operator: SetOperator;
+	readonly quantifier: SetQuantifier;
+	readonly select: SelectStatementNode;
+};
+
+export type SetOperator = "union";
+
+export type SetQuantifier = "all" | "distinct" | null;
 
 export type SelectItemNode =
 	| SelectStarNode
@@ -100,6 +130,7 @@ export type JoinType = "inner" | "left" | "right" | "full";
 
 export type UpdateStatementNode = SqlNode & {
 	readonly node_kind: "update_statement";
+	readonly with: WithClauseNode | null;
 	readonly target: TableReferenceNode;
 	readonly assignments: readonly SetClauseNode[];
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
@@ -113,12 +144,14 @@ export type SetClauseNode = SqlNode & {
 
 export type DeleteStatementNode = SqlNode & {
 	readonly node_kind: "delete_statement";
+	readonly with: WithClauseNode | null;
 	readonly target: TableReferenceNode;
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
 };
 
 export type InsertStatementNode = SqlNode & {
 	readonly node_kind: "insert_statement";
+	readonly with: WithClauseNode | null;
 	readonly target: ObjectNameNode;
 	readonly columns: readonly IdentifierNode[];
 	readonly source: InsertValuesNode;
@@ -137,6 +170,7 @@ export type ExpressionNode =
 	| ParameterExpressionNode
 	| GroupedExpressionNode
 	| InListExpressionNode
+	| InSubqueryExpressionNode
 	| BetweenExpressionNode
 	| FunctionCallExpressionNode
 	| SubqueryExpressionNode
@@ -177,6 +211,13 @@ export type InListExpressionNode = SqlNode & {
 	readonly node_kind: "in_list_expression";
 	readonly operand: ExpressionNode;
 	readonly items: readonly ExpressionNode[];
+	readonly negated: boolean;
+};
+
+export type InSubqueryExpressionNode = SqlNode & {
+	readonly node_kind: "in_subquery_expression";
+	readonly operand: ExpressionNode;
+	readonly subquery: SelectStatementNode;
 	readonly negated: boolean;
 };
 
