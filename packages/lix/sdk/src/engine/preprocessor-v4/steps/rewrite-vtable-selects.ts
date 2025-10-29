@@ -329,12 +329,31 @@ const collectSelectedColumns = ({
 
 	const columns = new Set<string>();
 	let requiresAll = false;
+	let encounteredSelect = false;
+	const firstReferenceStart = Math.min(
+		...references.map((reference) => reference.start)
+	);
 
 	for (let index = 0; index < tokens.length; index += 1) {
 		const token = tokens[index];
 		if (!token) {
 			continue;
 		}
+
+		if (token.tokenType === SELECT) {
+			encounteredSelect = true;
+			continue;
+		}
+
+		if (!encounteredSelect) {
+			continue;
+		}
+
+		const tokenStart = token.startOffset ?? Number.POSITIVE_INFINITY;
+		if (tokenStart >= firstReferenceStart) {
+			break;
+		}
+
 		if (token.tokenType === Star) {
 			requiresAll = true;
 			break;
@@ -370,7 +389,10 @@ const collectSelectedColumns = ({
 			break;
 		}
 
-		if (aliasSet.has(LOWER_INTERNAL_STATE_VTABLE)) {
+		if (
+			aliasSet.has(LOWER_INTERNAL_STATE_VTABLE) &&
+			!aliasSet.has(lowerIdentifier)
+		) {
 			columns.add(identifier);
 		}
 	}
