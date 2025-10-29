@@ -20,6 +20,20 @@ export type PreprocessorTraceEntry = {
 export type PreprocessorTrace = PreprocessorTraceEntry[];
 
 /**
+ * Aggregated cache preflight state shared between pipeline stages.
+ *
+ * @example
+ * const state: CachePreflight = {
+ *   schemaKeys: new Set(["test_schema"]),
+ *   versionIds: new Set(["v1"]),
+ * };
+ */
+export type CachePreflight = {
+	readonly schemaKeys: Set<string>;
+	readonly versionIds: Set<string>;
+};
+
+/**
  * Shared context passed to each preprocessor stage.
  * ```
  */
@@ -31,6 +45,7 @@ export type PreprocessorContext = {
 	readonly getCelEnvironment?: () => CelEnvironment;
 	readonly getEngine?: () => LixEngine;
 	readonly trace?: PreprocessorTrace;
+	readonly cachePreflight?: CachePreflight;
 };
 
 /**

@@ -23,6 +23,10 @@ describe("rewriteVtableSelects", () => {
 			schemaKey,
 			"lix_version_descriptor",
 		]);
+		const cachePreflight = {
+			schemaKeys: new Set<string>(),
+			versionIds: new Set<string>(),
+		};
 
 		const result = rewriteVtableSelects({
 			statements: [
@@ -32,11 +36,12 @@ describe("rewriteVtableSelects", () => {
 						FROM lix_internal_state_vtable AS v
 						WHERE v.schema_key = ?1
 						  AND v.version_id = ?2
-					`,
+				`,
 					parameters: [schemaKey, versionId],
 				},
 			],
 			getCacheTables: () => cacheTables,
+			cachePreflight,
 		});
 
 		expect(result.statements).toHaveLength(1);
@@ -51,6 +56,8 @@ describe("rewriteVtableSelects", () => {
 		expect(rewritten.sql).toMatch(/FROM\s+\(\s*WITH RECURSIVE/i);
 		expect(rewritten.sql).toMatch(/AS\s+"v"/);
 		expect(rewritten.sql).not.toMatch(/FROM\s+"lix_internal_state_vtable"/i);
+		expect(cachePreflight.schemaKeys.has(schemaKey)).toBe(true);
+		expect(cachePreflight.versionIds.has(versionId)).toBe(true);
 	});
 
 	test("pushes down schema_key filters into the inline SQL", () => {

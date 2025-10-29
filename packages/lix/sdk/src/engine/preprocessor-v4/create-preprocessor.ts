@@ -3,6 +3,7 @@ import type {
 	PreprocessorContext,
 	PreprocessorStatement,
 	PreprocessorTrace,
+	CachePreflight,
 } from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
@@ -76,6 +77,7 @@ export function createPreprocessor(args: {
 					getCelEnvironment: context.getCelEnvironment,
 					getEngine: context.getEngine,
 					trace: context.trace,
+					cachePreflight: context.cachePreflight,
 				}),
 			initial
 		);
@@ -116,6 +118,10 @@ function buildContext(
 	let sqlViews: Map<string, string> | undefined;
 	let transactionState: boolean | undefined;
 	let celEnvironment: CelEnvironment | undefined;
+	const cachePreflightState: CachePreflight = {
+		schemaKeys: new Set<string>(),
+		versionIds: new Set<string>(),
+	};
 
 	const loadStoredSchemas = (): Map<string, LixSchemaDefinition> => {
 		if (!storedSchemas) {
@@ -159,6 +165,7 @@ function buildContext(
 			return celEnvironment ?? null;
 		},
 		getEngine: () => engine,
+		cachePreflight: cachePreflightState,
 		...(trace ? { trace } : {}),
 	} as PreprocessorContext;
 

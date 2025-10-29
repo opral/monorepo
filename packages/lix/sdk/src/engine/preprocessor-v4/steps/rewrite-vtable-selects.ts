@@ -178,12 +178,12 @@ const buildInlineSql = (
 const collectSchemaKeyFilters = ({
 	tokens,
 	references,
-	parameters,
+	resolveParameter,
 	cacheTables,
 }: {
 	tokens: readonly Token[];
 	references: readonly TableReferenceCst[];
-	parameters: ReadonlyArray<unknown>;
+	resolveParameter: (tokenIndex: number) => unknown;
 	cacheTables: Map<string, unknown>;
 }): string[] => {
 	if (references.length === 0) {
@@ -194,7 +194,6 @@ const collectSchemaKeyFilters = ({
 		references.map((reference) => reference.alias.toLowerCase())
 	);
 	aliasSet.add(LOWER_INTERNAL_STATE_VTABLE);
-	const resolveParameter = buildParameterResolver(tokens, parameters);
 	const collected = new Set<string>();
 
 	for (let index = 0; index < tokens.length; index += 1) {
@@ -255,7 +254,7 @@ const collectSchemaKeyFilters = ({
 				continue;
 			}
 
-			const value = extractSchemaKeyValue({
+			const value = extractStringPredicateValue({
 				token: valueToken,
 				tokenIndex: cursor,
 				resolveParameter,
@@ -293,7 +292,7 @@ const collectSchemaKeyFilters = ({
 				continue;
 			}
 
-			const value = extractSchemaKeyValue({
+			const value = extractStringPredicateValue({
 				token: candidateToken,
 				tokenIndex: cursor,
 				resolveParameter,
@@ -302,6 +301,134 @@ const collectSchemaKeyFilters = ({
 				continue;
 			}
 			if (!cacheTables.has(value)) {
+				continue;
+			}
+			collected.add(value);
+		}
+	}
+
+	return Array.from(collected);
+};
+
+const collectVersionFilters = ({
+	tokens,
+	references,
+	resolveParameter,
+}: {
+	tokens: readonly Token[];
+	references: readonly TableReferenceCst[];
+	resolveParameter: (tokenIndex: number) => unknown;
+}): string[] => {
+	if (references.length === 0) {
+		return [];
+	}
+
+	const aliasSet = new Set(
+		references.map((reference) => reference.alias.toLowerCase())
+	);
+	aliasSet.add(LOWER_INTERNAL_STATE_VTABLE);
+
+	const collected = new Set<string>();
+
+	for (let index = 0; index < tokens.length; index += 1) {
+		const token = tokens[index];
+		if (!token) {
+			continue;
+		}
+		const tokenType = token.tokenType;
+		if (tokenType !== Ident && tokenType !== QIdent) {
+			continue;
+		}
+
+		const identifier = normalizeIdentifier(token);
+		if (!equalsIgnoreCase(identifier, "version_id")) {
+			continue;
+		}
+
+		let matchesAlias = false;
+		const dotToken = tokens[index - 1];
+		const aliasTokenRaw = tokens[index - 2];
+		let aliasCandidate: Token | null = null;
+		if (
+			aliasTokenRaw &&
+			(aliasTokenRaw.tokenType === Ident || aliasTokenRaw.tokenType === QIdent)
+		) {
+			aliasCandidate = aliasTokenRaw;
+		}
+
+		if (
+			dotToken &&
+			dotToken.tokenType === Dot &&
+			aliasCandidate &&
+			(aliasCandidate.tokenType === Ident ||
+				aliasCandidate.tokenType === QIdent)
+		) {
+			const alias = normalizeIdentifier(aliasCandidate).toLowerCase();
+			if (aliasSet.has(alias)) {
+				matchesAlias = true;
+			}
+		} else if (aliasSet.has(LOWER_INTERNAL_STATE_VTABLE)) {
+			matchesAlias = true;
+		}
+
+		if (!matchesAlias) {
+			continue;
+		}
+
+		let cursor = index + 1;
+		const operatorToken = tokens[cursor];
+		if (operatorToken == null) {
+			continue;
+		}
+
+		if (operatorToken.tokenType === Equals) {
+			cursor += 1;
+			const valueToken = tokens[cursor];
+			if (valueToken == null) {
+				continue;
+			}
+
+			const value = extractStringPredicateValue({
+				token: valueToken,
+				tokenIndex: cursor,
+				resolveParameter,
+			});
+			if (typeof value !== "string" || value.length === 0) {
+				continue;
+			}
+			collected.add(value);
+			continue;
+		}
+
+		if (!isInToken(operatorToken)) {
+			continue;
+		}
+
+		cursor += 1;
+		const lParen = tokens[cursor];
+		if (lParen == null || lParen.tokenType !== LParen) {
+			continue;
+		}
+
+		cursor += 1;
+		for (; cursor < tokens.length; cursor += 1) {
+			const candidateToken = tokens[cursor];
+			if (candidateToken == null) {
+				break;
+			}
+			if (candidateToken.tokenType === RParen) {
+				break;
+			}
+			if (candidateToken.tokenType === Comma) {
+				continue;
+			}
+
+			const value = extractStringPredicateValue({
+				token: candidateToken,
+				tokenIndex: cursor,
+				resolveParameter,
+			});
+			if (typeof value !== "string" || value.length === 0) {
 				continue;
 			}
 			collected.add(value);
@@ -459,7 +586,13 @@ const buildParameterResolver = (
 	};
 };
 
-const extractSchemaKeyValue = ({
+/**
+ * Resolves the literal string value associated with a comparison token.
+ *
+ * @example
+ * const value = extractStringPredicateValue({ token, tokenIndex, resolveParameter });
+ */
+const extractStringPredicateValue = ({
 	token,
 	tokenIndex,
 	resolveParameter,
@@ -521,6 +654,7 @@ const isInToken = (token: Token): boolean => {
 export const rewriteVtableSelects: PreprocessorStep = ({
 	statements,
 	getCacheTables,
+	cachePreflight,
 	trace,
 }) => {
 	if (!getCacheTables) {
@@ -542,12 +676,24 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 			return statement;
 		}
 
+		const resolveParameter = buildParameterResolver(
+			tokens,
+			statement.parameters
+		);
+
 		const filters = collectSchemaKeyFilters({
 			tokens,
 			references,
-			parameters: statement.parameters,
+			resolveParameter,
 			cacheTables,
 		});
+
+		const versionFilters = collectVersionFilters({
+			tokens,
+			references,
+			resolveParameter,
+		});
+		const versionIds = versionFilters.length > 0 ? versionFilters : null;
 
 		const selectedColumns = collectSelectedColumns({
 			tokens,
@@ -562,6 +708,7 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 					step: "rewrite_vtable_selects",
 					payload: {
 						filtered_schema_keys: filters,
+						filtered_version_ids: versionIds,
 						selected_columns: selectedColumns,
 					},
 				});
@@ -570,11 +717,26 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		}
 
 		const next = rewriteSql(statement, context);
+		if (cachePreflight) {
+			for (const key of schemaKeys) {
+				if (typeof key === "string" && key.length > 0) {
+					cachePreflight.schemaKeys.add(key);
+				}
+			}
+			if (versionIds) {
+				for (const versionId of versionIds) {
+					if (typeof versionId === "string" && versionId.length > 0) {
+						cachePreflight.versionIds.add(versionId);
+					}
+				}
+			}
+		}
 		if (trace) {
 			trace.push({
 				step: "rewrite_vtable_selects",
 				payload: {
 					filtered_schema_keys: schemaKeys,
+					filtered_version_ids: versionIds,
 					selected_columns: selectedColumns,
 				},
 			});
