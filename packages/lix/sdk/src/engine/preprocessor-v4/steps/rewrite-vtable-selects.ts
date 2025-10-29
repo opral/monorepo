@@ -11,12 +11,14 @@ import {
 	IN,
 	JOIN,
 	LParen,
+	LIMIT,
 	Ident,
 	QIdent,
 	QMark,
 	QMarkNumber,
 	RParen,
 	SELECT,
+	Star,
 	SQStr,
 	tokenize,
 	type Token,
@@ -38,6 +40,8 @@ type TableReferenceCst = {
 type RewriteContext = {
 	readonly inlineSql: string;
 };
+
+const LOWER_INTERNAL_STATE_VTABLE = INTERNAL_STATE_VTABLE.toLowerCase();
 
 const isIdentifierToken = (token: Token | undefined): token is Token => {
 	if (!token) {
@@ -131,7 +135,7 @@ const rewriteSql = (
 		return statement;
 	}
 
-	const replacementSql = `(${context.inlineSql})`;
+	const replacementSql = `(\n${context.inlineSql}\n)`;
 	let sql = statement.sql;
 
 	for (const reference of [...references].reverse()) {
@@ -150,7 +154,8 @@ const rewriteSql = (
 };
 
 const buildInlineSql = (
-	filteredSchemaKeys: readonly string[]
+	filteredSchemaKeys: readonly string[],
+	requiredColumns: readonly string[] | null
 ): RewriteContext | null => {
 	if (filteredSchemaKeys.length === 0) {
 		return null;
@@ -158,7 +163,7 @@ const buildInlineSql = (
 
 	const options: InlineVtableSqlOptions = {
 		filteredSchemaKeys,
-		requiredColumns: null,
+		requiredColumns,
 	};
 
 	return {
@@ -188,6 +193,7 @@ const collectSchemaKeyFilters = ({
 	const aliasSet = new Set(
 		references.map((reference) => reference.alias.toLowerCase())
 	);
+	aliasSet.add(LOWER_INTERNAL_STATE_VTABLE);
 	const resolveParameter = buildParameterResolver(tokens, parameters);
 	const collected = new Set<string>();
 
@@ -228,7 +234,7 @@ const collectSchemaKeyFilters = ({
 			if (aliasSet.has(alias)) {
 				matchesAlias = true;
 			}
-		} else if (aliasSet.has(INTERNAL_STATE_VTABLE.toLowerCase())) {
+		} else if (aliasSet.has(LOWER_INTERNAL_STATE_VTABLE)) {
 			matchesAlias = true;
 		}
 
@@ -303,6 +309,80 @@ const collectSchemaKeyFilters = ({
 	}
 
 	return Array.from(collected);
+};
+
+const collectSelectedColumns = ({
+	tokens,
+	references,
+}: {
+	tokens: readonly Token[];
+	references: readonly TableReferenceCst[];
+}): string[] | null => {
+	if (references.length === 0) {
+		return null;
+	}
+
+	const aliasSet = new Set<string>(
+		references.map((reference) => reference.alias.toLowerCase())
+	);
+	aliasSet.add(LOWER_INTERNAL_STATE_VTABLE);
+
+	const columns = new Set<string>();
+	let requiresAll = false;
+
+	for (let index = 0; index < tokens.length; index += 1) {
+		const token = tokens[index];
+		if (!token) {
+			continue;
+		}
+		if (token.tokenType === FROM || token.tokenType === LIMIT) {
+			break;
+		}
+		if (token.tokenType === Star) {
+			requiresAll = true;
+			break;
+		}
+
+		if (token.tokenType !== Ident && token.tokenType !== QIdent) {
+			continue;
+		}
+
+		const identifier = normalizeIdentifier(token);
+		const lowerIdentifier = identifier.toLowerCase();
+		const next = tokens[index + 1];
+		const following = tokens[index + 2];
+
+		if (next && next.tokenType === Dot) {
+			if (!aliasSet.has(lowerIdentifier)) {
+				continue;
+			}
+			if (!following) {
+				continue;
+			}
+			if (following.tokenType === Star) {
+				requiresAll = true;
+				break;
+			}
+			if (following.tokenType === Ident || following.tokenType === QIdent) {
+				const column = normalizeIdentifier(following);
+				columns.add(column);
+				index += 2;
+				continue;
+			}
+			requiresAll = true;
+			break;
+		}
+
+		if (aliasSet.has(LOWER_INTERNAL_STATE_VTABLE)) {
+			columns.add(identifier);
+		}
+	}
+
+	if (requiresAll || columns.size === 0) {
+		return null;
+	}
+
+	return Array.from(columns);
 };
 
 const buildParameterResolver = (
@@ -450,13 +530,21 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 			cacheTables,
 		});
 
+		const selectedColumns = collectSelectedColumns({
+			tokens,
+			references,
+		});
+
 		const schemaKeys = filters.length > 0 ? filters : availableSchemaKeys;
-		const context = buildInlineSql(schemaKeys);
+		const context = buildInlineSql(schemaKeys, selectedColumns);
 		if (!context) {
 			if (trace) {
 				trace.push({
 					step: "rewrite_vtable_selects",
-					payload: { filtered_schema_keys: filters },
+					payload: {
+						filtered_schema_keys: filters,
+						selected_columns: selectedColumns,
+					},
 				});
 			}
 			return statement;
@@ -466,7 +554,10 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		if (trace) {
 			trace.push({
 				step: "rewrite_vtable_selects",
-				payload: { filtered_schema_keys: schemaKeys },
+				payload: {
+					filtered_schema_keys: schemaKeys,
+					selected_columns: selectedColumns,
+				},
 			});
 		}
 		if (next !== statement && next.sql !== statement.sql) {
