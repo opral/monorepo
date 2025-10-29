@@ -353,7 +353,7 @@ The used URL patterns.
 
 > **assertIsLocale**(`input`): `any`
 
-Defined in: [runtime/assert-is-locale.js:11](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/assert-is-locale.js)
+Defined in: [runtime/assert-is-locale.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/assert-is-locale.js)
 
 Asserts that the input is a locale.
 

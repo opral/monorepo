@@ -14,5 +14,8 @@ import { locales } from "./variables.js";
  * @returns {locale is Locale}
  */
 export function isLocale(locale) {
-	return !locale ? false : locales.includes(locale);
+	if (typeof locale !== "string") return false;
+	return !locale
+		? false
+		: locales.some((item) => item.toLowerCase() === locale.toLowerCase());
 }
