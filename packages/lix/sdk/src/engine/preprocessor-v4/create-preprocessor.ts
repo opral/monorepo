@@ -19,6 +19,7 @@ import { splitStatements } from "./steps/split-statements.js";
 import { normalizePlaceholders } from "./steps/normalize-placeholders.js";
 import { expandViews } from "./steps/expand-views.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
+import { cachePopulator } from "./steps/cache-populator.js";
 import type { PreprocessorStep } from "./types.js";
 
 type EngineShape = Pick<
@@ -36,6 +37,7 @@ const pipeline: PreprocessorStep[] = [
 	normalizePlaceholders,
 	expandViews,
 	rewriteVtableSelects,
+	cachePopulator,
 ];
 
 /**
