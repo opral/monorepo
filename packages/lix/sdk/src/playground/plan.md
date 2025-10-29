@@ -9,7 +9,7 @@
 - [ ] implement pipeline stages
   - [x] split statements
   - [x] normalize placeholders
-  - [ ] expand views
+  - [x] expand views
   - [ ] rewrite vtable selects
   - [ ] cache populator
   - [ ] entity view updates/inserts/deletes (if useful)

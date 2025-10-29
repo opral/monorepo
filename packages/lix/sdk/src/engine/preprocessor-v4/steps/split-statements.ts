@@ -1,7 +1,4 @@
-import type {
-	PreprocessorStatement,
-	PreprocessorStep,
-} from "../types.js";
+import type { PreprocessorStatement, PreprocessorStep } from "../types.js";
 import {
 	ColonName,
 	DollarName,
@@ -116,8 +113,7 @@ const splitSql = (sql: string): SplitResult => {
 
 	for (const token of tokens) {
 		const startOffset = token.startOffset ?? 0;
-		const endOffset =
-			token.endOffset ?? startOffset + token.image.length - 1;
+		const endOffset = token.endOffset ?? startOffset + token.image.length - 1;
 
 		if (PLACEHOLDER_TOKENS.has(token.tokenType)) {
 			placeholders += 1;

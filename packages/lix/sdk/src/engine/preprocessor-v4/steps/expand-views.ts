@@ -155,11 +155,8 @@ const lexer = new Lexer(tokenTypes, { ensureOptimizations: true });
 const tokenizeSql = (sql: string): Token[] => lexer.tokenize(sql).tokens;
 
 const normalizeIdentifier = (value: string): string => {
-	if (value.startsWith("\"")) {
-		return value
-			.slice(1, -1)
-			.replace(/""/g, "\"")
-			.toLowerCase();
+	if (value.startsWith('"')) {
+		return value.slice(1, -1).replace(/""/g, '"').toLowerCase();
 	}
 	return value.toLowerCase();
 };
@@ -202,7 +199,10 @@ const locateViewReference = (
 	}
 
 	const candidate = tokens[lookahead];
-	if (candidate && (candidate.tokenType === Ident || candidate.tokenType === QIdent)) {
+	if (
+		candidate &&
+		(candidate.tokenType === Ident || candidate.tokenType === QIdent)
+	) {
 		aliasToken = candidate;
 	}
 
@@ -213,11 +213,16 @@ const locateViewReference = (
 		viewName,
 		aliasText,
 		startOffset: token.startOffset ?? 0,
-		endOffset: endToken.endOffset ?? endToken.startOffset ?? token.startOffset ?? 0,
+		endOffset:
+			endToken.endOffset ?? endToken.startOffset ?? token.startOffset ?? 0,
 	};
 };
 
-const expandSqlOnce = ({ sql, context, stack }: ExpandOnceArgs): string | null => {
+const expandSqlOnce = ({
+	sql,
+	context,
+	stack,
+}: ExpandOnceArgs): string | null => {
 	const tokens = tokenizeSql(sql);
 
 	for (let index = 0; index < tokens.length; index += 1) {

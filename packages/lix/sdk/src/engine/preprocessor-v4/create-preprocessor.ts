@@ -88,7 +88,7 @@ export function createPreprocessor(args: {
 			.join(";\n");
 		const primaryParameters =
 			finalStatements.length === 1
-				? finalStatements[0]?.parameters ?? parameters
+				? (finalStatements[0]?.parameters ?? parameters)
 				: parameters;
 
 		return {
