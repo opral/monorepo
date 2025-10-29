@@ -1,5 +1,11 @@
 # @lix-js/host
 
+## 0.0.17
+
+### Patch Changes
+
+- md-app@0.2.6
+
 ## 0.0.16
 
 ### Patch Changes
