@@ -3,7 +3,11 @@ import type {
 	PreprocessorFn,
 	PreprocessorStep,
 } from "./types.js";
-import type { PreprocessorContext, PreprocessorTrace } from "./types.js";
+import type {
+	PreprocessorContext,
+	PreprocessorStatement,
+	PreprocessorTrace,
+} from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
@@ -46,11 +50,19 @@ export function createPreprocessor(args: {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 
+		const initial: { statements: ReadonlyArray<PreprocessorStatement> } = {
+			statements: [
+				{
+					sql,
+					parameters,
+				},
+			],
+		};
+
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
-					sql: current.sql,
-					parameters,
+					statements: current.statements,
 					getStoredSchemas: context.getStoredSchemas,
 					getCacheTables: context.getCacheTables,
 					getSqlViews: context.getSqlViews,
@@ -59,20 +71,31 @@ export function createPreprocessor(args: {
 					getEngine: context.getEngine,
 					trace: context.trace,
 				}),
-			{ sql }
+			initial
 		);
+
+		const finalStatements = rewritten.statements;
 
 		if (traceEntries) {
 			traceEntries.push({
 				step: "complete",
-				payload: { ast: structuredClone(rewritten) },
+				payload: { statements: structuredClone(finalStatements) },
 			});
 		}
 
+		const resultSql = finalStatements
+			.map((statement) => statement.sql)
+			.join(";\n");
+		const primaryParameters =
+			finalStatements.length === 1
+				? finalStatements[0]?.parameters ?? parameters
+				: parameters;
+
 		return {
-			sql,
-			parameters,
+			sql: resultSql,
+			parameters: primaryParameters,
 			context,
+			statements: finalStatements,
 		};
 	};
 }

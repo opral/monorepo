@@ -34,11 +34,23 @@ export type PreprocessorContext = {
 };
 
 /**
+ * Normalized SQL statement flowing through the pipeline.
+ *
+ * @example
+ * ```ts
+ * const statement: PreprocessorStatement = { sql: "SELECT 1", parameters: [] };
+ * ```
+ */
+export type PreprocessorStatement = {
+	readonly sql: string;
+	readonly parameters: ReadonlyArray<unknown>;
+};
+
+/**
  * Context shape for individual preprocessing steps.
  */
 export type PreprocessorStepContext = PreprocessorContext & {
-	readonly sql: string;
-	readonly parameters?: ReadonlyArray<unknown>;
+	readonly statements: ReadonlyArray<PreprocessorStatement>;
 };
 
 /**
@@ -46,11 +58,13 @@ export type PreprocessorStepContext = PreprocessorContext & {
  *
  * @example
  * ```ts
- * const noop: PreprocessorStep = (context) => context.node;
+ * const noop: PreprocessorStep = (context) => ({
+ *   statements: context.statements,
+ * });
  * ```
  */
 export type PreprocessorStep = (context: PreprocessorStepContext) => {
-	sql: string;
+	readonly statements: ReadonlyArray<PreprocessorStatement>;
 };
 
 /**
@@ -84,4 +98,5 @@ export type PreprocessorResult = {
 	readonly parameters: ReadonlyArray<unknown>;
 	readonly expandedSql?: string;
 	readonly context?: PreprocessorContext;
+	readonly statements?: ReadonlyArray<PreprocessorStatement>;
 };

@@ -7,6 +7,7 @@
 <!-- - [ ] implement with no preprocessor simulation to ensure preprocessor is just an optimization -->
 
 - [ ] implement pipeline stages
+  - [ ] split statements
   - [ ] normalize placeholders
   - [ ] expand views
   - [ ] rewrite vtable selects
@@ -15,11 +16,17 @@
 
 ## Pipeline
 
-0. Normalize placeholders
+0. Split statements
+
+- accept the incoming SQL text and split it into discrete statements using the existing compiler.
+- produce an ordered array of statements so downstream stages can operate on one statement at a time.
+- ensure delimiters inside strings/comments do not split the SQL.
+
+1. Normalize placeholders
 
 - convert `?` or named parameters to numbered placeholders (`?1`, `?2`, …) as the very first step so downstream stages can reference parameter-bound predicates reliably.
 
-1. Expand views
+2. Expand views
 
 - do not rewrite. just expand views in place.
 - do not hoist. keep things inline to avoid dependencies between statements.
@@ -52,7 +59,7 @@ WHERE "column_a" = 'hello'
   AND "lixcol_version_id" = 'global';
 ```
 
-2. Rewrite vtable selects
+3. Rewrite vtable selects
 
 - parse and analyze expanded query for vtable rewrites
 - provide the step context with a cache preflight (version + schema_key) that are used in the rewrite
@@ -152,7 +159,7 @@ WHERE "column_a" = 'hello'
   AND "lixcol_version_id" = 'global';
 ```
 
-3. Cache populator
+4. Cache populator
 
 - consumes the cache preflight info from the vtable rewrite step
 - populates the cache as needed prior to executing the rewritten query
