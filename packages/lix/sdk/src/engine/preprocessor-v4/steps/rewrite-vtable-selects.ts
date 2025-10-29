@@ -1,9 +1,23 @@
 import {
 	AS,
+	AtName,
+	ColonName,
+	Comma,
+	DollarName,
+	DollarNumber,
+	Dot,
+	Equals,
 	FROM,
+	IN,
 	JOIN,
+	LParen,
+	Ident,
 	QIdent,
+	QMark,
+	QMarkNumber,
+	RParen,
 	SELECT,
+	SQStr,
 	tokenize,
 	type Token,
 } from "../sql-parser/tokenizer.js";
@@ -95,8 +109,8 @@ const findVtableTables = (tokens: readonly Token[]): TableReferenceCst[] => {
 
 		references.push({
 			alias,
-			start: tableToken.startOffset,
-			end: lastToken.endOffset,
+			start: tableToken.startOffset ?? 0,
+			end: lastToken.endOffset ?? lastToken.startOffset ?? 0,
 		});
 	}
 
@@ -153,6 +167,250 @@ const buildInlineSql = (
 };
 
 /**
+ * Collects schema key filters for references to the internal vtable.
+ */
+const collectSchemaKeyFilters = ({
+	tokens,
+	references,
+	parameters,
+	cacheTables,
+}: {
+	tokens: readonly Token[];
+	references: readonly TableReferenceCst[];
+	parameters: ReadonlyArray<unknown>;
+	cacheTables: Map<string, unknown>;
+}): string[] => {
+	if (references.length === 0) {
+		return [];
+	}
+
+	const aliasSet = new Set(
+		references.map((reference) => reference.alias.toLowerCase())
+	);
+	const resolveParameter = buildParameterResolver(tokens, parameters);
+	const collected = new Set<string>();
+
+	for (let index = 0; index < tokens.length; index += 1) {
+		const token = tokens[index];
+		if (!token) {
+			continue;
+		}
+		const tokenType = token.tokenType;
+		if (tokenType !== Ident && tokenType !== QIdent) {
+			continue;
+		}
+
+		const identifier = normalizeIdentifier(token);
+		if (!equalsIgnoreCase(identifier, "schema_key")) {
+			continue;
+		}
+
+		let matchesAlias = false;
+		const dotToken = tokens[index - 1];
+		const aliasTokenRaw = tokens[index - 2];
+		let aliasCandidate: Token | null = null;
+		if (
+			aliasTokenRaw &&
+			(aliasTokenRaw.tokenType === Ident || aliasTokenRaw.tokenType === QIdent)
+		) {
+			aliasCandidate = aliasTokenRaw;
+		}
+
+		if (
+			dotToken &&
+			dotToken.tokenType === Dot &&
+			aliasCandidate &&
+			(aliasCandidate.tokenType === Ident ||
+				aliasCandidate.tokenType === QIdent)
+		) {
+			const alias = normalizeIdentifier(aliasCandidate).toLowerCase();
+			if (aliasSet.has(alias)) {
+				matchesAlias = true;
+			}
+		} else if (aliasSet.has(INTERNAL_STATE_VTABLE.toLowerCase())) {
+			matchesAlias = true;
+		}
+
+		if (!matchesAlias) {
+			continue;
+		}
+
+		let cursor = index + 1;
+		const operatorToken = tokens[cursor];
+		if (operatorToken == null) {
+			continue;
+		}
+
+		if (operatorToken.tokenType === Equals) {
+			cursor += 1;
+			const valueToken = tokens[cursor];
+			if (valueToken == null) {
+				continue;
+			}
+
+			const value = extractSchemaKeyValue({
+				token: valueToken,
+				tokenIndex: cursor,
+				resolveParameter,
+			});
+			if (typeof value !== "string" || value.length === 0) {
+				continue;
+			}
+			if (!cacheTables.has(value)) {
+				continue;
+			}
+			collected.add(value);
+			continue;
+		}
+
+		if (!isInToken(operatorToken)) {
+			continue;
+		}
+
+		cursor += 1;
+		const lParen = tokens[cursor];
+		if (lParen == null || lParen.tokenType !== LParen) {
+			continue;
+		}
+
+		cursor += 1;
+		for (; cursor < tokens.length; cursor += 1) {
+			const candidateToken = tokens[cursor];
+			if (candidateToken == null) {
+				break;
+			}
+			if (candidateToken.tokenType === RParen) {
+				break;
+			}
+			if (candidateToken.tokenType === Comma) {
+				continue;
+			}
+
+			const value = extractSchemaKeyValue({
+				token: candidateToken,
+				tokenIndex: cursor,
+				resolveParameter,
+			});
+			if (typeof value !== "string" || value.length === 0) {
+				continue;
+			}
+			if (!cacheTables.has(value)) {
+				continue;
+			}
+			collected.add(value);
+		}
+	}
+
+	return Array.from(collected);
+};
+
+const buildParameterResolver = (
+	tokens: readonly Token[],
+	parameters: ReadonlyArray<unknown>
+): ((tokenIndex: number) => unknown) => {
+	if (!parameters || parameters.length === 0) {
+		return () => undefined;
+	}
+
+	const mapping = new Map<number, number>();
+	let positionalCursor = 0;
+
+	for (let index = 0; index < tokens.length; index += 1) {
+		const token = tokens[index];
+		if (!token) {
+			continue;
+		}
+		if (!isPlaceholderToken(token)) {
+			continue;
+		}
+
+		let parameterIndex: number | undefined;
+
+		if (token.tokenType === QMarkNumber) {
+			const numeric = Number.parseInt(token.image.slice(1), 10);
+			if (Number.isInteger(numeric) && numeric > 0) {
+				parameterIndex = numeric - 1;
+			}
+		} else if (token.tokenType === DollarNumber) {
+			const numeric = Number.parseInt(token.image.slice(1), 10);
+			if (Number.isInteger(numeric) && numeric > 0) {
+				parameterIndex = numeric - 1;
+			}
+		}
+
+		if (parameterIndex === undefined) {
+			parameterIndex = positionalCursor;
+			positionalCursor += 1;
+		} else if (parameterIndex >= positionalCursor) {
+			positionalCursor = parameterIndex + 1;
+		}
+
+		if (parameterIndex >= 0) {
+			mapping.set(index, parameterIndex);
+		}
+	}
+
+	return (tokenIndex: number) => {
+		const parameterIndex = mapping.get(tokenIndex);
+		if (parameterIndex === undefined) {
+			return undefined;
+		}
+		return parameters[parameterIndex];
+	};
+};
+
+const extractSchemaKeyValue = ({
+	token,
+	tokenIndex,
+	resolveParameter,
+}: {
+	token: Token;
+	tokenIndex: number;
+	resolveParameter: (tokenIndex: number) => unknown;
+}): string | null => {
+	if (token.tokenType === SQStr) {
+		return decodeSingleQuotedString(token.image);
+	}
+
+	if (token.tokenType === QIdent) {
+		return normalizeIdentifier(token);
+	}
+
+	if (isPlaceholderToken(token)) {
+		const value = resolveParameter(tokenIndex);
+		return typeof value === "string" ? value : null;
+	}
+
+	if (isIdentifierToken(token)) {
+		return normalizeIdentifier(token);
+	}
+
+	return null;
+};
+
+const decodeSingleQuotedString = (value: string): string => {
+	const inner = value.slice(1, value.length - 1);
+	return inner.replace(/''/g, "'");
+};
+
+const isPlaceholderToken = (token: Token): boolean => {
+	const name = token.tokenType.name;
+	return (
+		name === QMark.name ||
+		name === QMarkNumber.name ||
+		name === DollarNumber.name ||
+		name === DollarName.name ||
+		name === ColonName.name ||
+		name === AtName.name
+	);
+};
+
+const isInToken = (token: Token): boolean => {
+	const name = token.tokenType.name;
+	return name === IN.name || equalsIgnoreCase(token.image, "IN");
+};
+
+/**
  * Rewrites statements that select from the internal state vtable.
  *
  * @example
@@ -163,6 +421,7 @@ const buildInlineSql = (
 export const rewriteVtableSelects: PreprocessorStep = ({
 	statements,
 	getCacheTables,
+	trace,
 }) => {
 	if (!getCacheTables) {
 		return { statements };
@@ -173,8 +432,45 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		return { statements };
 	}
 
-	const schemaKeys = Array.from(cacheTables.keys());
-	const context = buildInlineSql(schemaKeys);
+	const availableSchemaKeys = Array.from(cacheTables.keys());
+
+	const statementAnalyses = statements.map((statement) => {
+		const tokens = tokenize(statement.sql);
+		const references = findVtableTables(tokens);
+		return { statement, tokens, references };
+	});
+
+	let sawReference = false;
+	const filteredSchemaKeySet = new Set<string>();
+
+	for (const analysis of statementAnalyses) {
+		if (analysis.references.length === 0) {
+			continue;
+		}
+		sawReference = true;
+
+		const filters = collectSchemaKeyFilters({
+			tokens: analysis.tokens,
+			references: analysis.references,
+			parameters: analysis.statement.parameters,
+			cacheTables,
+		});
+
+		for (const key of filters) {
+			filteredSchemaKeySet.add(key);
+		}
+	}
+
+	if (!sawReference) {
+		return { statements };
+	}
+
+	const effectiveSchemaKeys =
+		filteredSchemaKeySet.size > 0
+			? Array.from(filteredSchemaKeySet)
+			: availableSchemaKeys;
+
+	const context = buildInlineSql(effectiveSchemaKeys);
 	if (!context) {
 		return { statements };
 	}
@@ -187,6 +483,15 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		}
 		return next;
 	});
+
+	if (changed && trace) {
+		trace.push({
+			step: "rewrite_vtable_selects",
+			payload: {
+				filtered_schema_keys: effectiveSchemaKeys,
+			},
+		});
+	}
 
 	return changed ? { statements: rewritten } : { statements };
 };

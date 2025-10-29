@@ -10,7 +10,7 @@
   - [x] split statements
   - [x] normalize placeholders
   - [x] expand views
-  - [ ] rewrite vtable selects
+  - [x] rewrite vtable selects
   - [ ] cache populator
   - [ ] entity view updates/inserts/deletes (if useful)
 

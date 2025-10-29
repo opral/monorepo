@@ -129,6 +129,7 @@ export const WITH: TokenType = keyword("WITH");
 export const INSERT: TokenType = keyword("INSERT");
 export const UPDATE: TokenType = keyword("UPDATE");
 export const DELETE: TokenType = keyword("DELETE");
+export const IN: TokenType = keyword("IN");
 
 const allTokens: TokenType[] = [
 	WhiteSpace,
@@ -177,6 +178,7 @@ const allTokens: TokenType[] = [
 	INSERT,
 	UPDATE,
 	DELETE,
+	IN,
 	Ident,
 ];
 
