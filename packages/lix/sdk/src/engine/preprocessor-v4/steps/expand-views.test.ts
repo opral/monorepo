@@ -133,4 +133,32 @@ describe("expandViewsStep", () => {
 		expect(trace).toHaveLength(1);
 		expect(trace[0]?.payload).toEqual({ expanded: false, views: [] });
 	});
+
+	test("only expands on SELECT statements", () => {
+		const trace: PreprocessorTrace = [];
+		const views = new Map([
+			["state_all", "SELECT entity_id FROM lix_internal_state_vtable"],
+		]);
+
+		expandViews({
+			statements: [
+				{
+					sql: 'DELETE from "state_all" where "entity_id" = ?',
+					parameters: ["entity-1"],
+				},
+				{
+					sql: "INSERT INTO 'state_all' (entity_id) VALUES (?)",
+					parameters: ["entity-1"],
+				},
+				{
+					sql: "UPDATE 'state_all' SET entity_id = ? WHERE entity_id = ?",
+					parameters: ["entity-2", "entity-1"],
+				},
+			],
+			getSqlViews: () => views,
+			trace,
+		});
+
+		expect(trace).toHaveLength(0);
+	});
 });

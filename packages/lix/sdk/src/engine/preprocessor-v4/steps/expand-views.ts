@@ -1,4 +1,10 @@
-import { Lexer, createToken, type IToken, type TokenType } from "chevrotain";
+import {
+	Lexer,
+	createToken,
+	tokenMatcher,
+	type IToken,
+	type TokenType,
+} from "chevrotain";
 import type { PreprocessorStep, PreprocessorStatement } from "../types.js";
 
 type SqlViews = Map<string, string>;
@@ -97,6 +103,24 @@ const RECURSIVE = createToken({
 	longer_alt: Ident,
 });
 
+const INSERT = createToken({
+	name: "INSERT",
+	pattern: /INSERT/i,
+	longer_alt: Ident,
+});
+
+const UPDATE = createToken({
+	name: "UPDATE",
+	pattern: /UPDATE/i,
+	longer_alt: Ident,
+});
+
+const DELETE = createToken({
+	name: "DELETE",
+	pattern: /DELETE/i,
+	longer_alt: Ident,
+});
+
 const SELECT = createToken({
 	name: "SELECT",
 	pattern: /SELECT/i,
@@ -145,6 +169,9 @@ const tokenTypes: TokenType[] = [
 	WITH,
 	RECURSIVE,
 	AS,
+	INSERT,
+	UPDATE,
+	DELETE,
 	SELECT,
 	FROM,
 	UNION,
@@ -158,6 +185,9 @@ const tokenTypes: TokenType[] = [
 const lexer = new Lexer(tokenTypes, { ensureOptimizations: true });
 
 const tokenizeSql = (sql: string): Token[] => lexer.tokenize(sql).tokens;
+
+const matchesToken = (token: Token | undefined, type: TokenType): boolean =>
+	token ? tokenMatcher(token, type) : false;
 
 const normalizeIdentifier = (value: string): string => {
 	if (value.startsWith('"')) {
@@ -325,6 +355,155 @@ const expandViewDefinition = ({
 	return expandedSql;
 };
 
+const skipParentheses = (tokens: Token[], startIndex: number): number => {
+	if (!matchesToken(tokens[startIndex], LParen)) {
+		return startIndex;
+	}
+
+	let depth = 0;
+	let index = startIndex;
+
+	while (index < tokens.length) {
+		const token = tokens[index];
+		if (!token) {
+			break;
+		}
+
+		if (matchesToken(token, LParen)) {
+			depth++;
+		} else if (matchesToken(token, RParen)) {
+			depth--;
+			if (depth === 0) {
+				return index + 1;
+			}
+		}
+
+		index++;
+	}
+
+	return tokens.length;
+};
+
+const skipCteDefinitions = (tokens: Token[], startIndex: number): number => {
+	let index = startIndex;
+
+	if (matchesToken(tokens[index], RECURSIVE)) {
+		index++;
+	}
+
+	while (index < tokens.length) {
+		const nameToken = tokens[index];
+
+		if (
+			!nameToken ||
+			(!matchesToken(nameToken, Ident) && !matchesToken(nameToken, QIdent))
+		) {
+			return index;
+		}
+
+		index++;
+
+		if (matchesToken(tokens[index], LParen)) {
+			index = skipParentheses(tokens, index);
+		}
+
+		if (!matchesToken(tokens[index], AS)) {
+			return index;
+		}
+		index++;
+
+		if (!matchesToken(tokens[index], LParen)) {
+			return index;
+		}
+
+		index = skipParentheses(tokens, index);
+
+		if (index >= tokens.length) {
+			return index;
+		}
+
+		if (matchesToken(tokens[index], Comma)) {
+			index++;
+			continue;
+		}
+
+		break;
+	}
+
+	return index;
+};
+
+const mutationTokens: TokenType[] = [INSERT, UPDATE, DELETE];
+
+/**
+ * Returns true when the provided SQL statement represents a SELECT.
+ *
+ * @example
+ * ```ts
+ * isSelectStatement("SELECT 1"); // true
+ * ```
+ */
+const isSelectStatement = (sql: string): boolean => {
+	const tokens = tokenizeSql(sql);
+	let index = 0;
+
+	while (index < tokens.length) {
+		const token = tokens[index];
+
+		if (!token) {
+			return false;
+		}
+
+		if (matchesToken(token, LParen)) {
+			index = skipParentheses(tokens, index);
+			continue;
+		}
+
+		if (matchesToken(token, WITH)) {
+			index = skipCteDefinitions(tokens, index + 1);
+
+			if (index >= tokens.length) {
+				return false;
+			}
+
+			const nextToken = tokens[index];
+			if (!nextToken) {
+				return false;
+			}
+
+			if (matchesToken(nextToken, SELECT)) {
+				return true;
+			}
+
+			return (
+				matchesToken(nextToken, Ident) &&
+				nextToken.image.toUpperCase() === "SELECT"
+			);
+		}
+
+		if (
+			matchesToken(token, SELECT) ||
+			(matchesToken(token, Ident) && token.image.toUpperCase() === "SELECT")
+		) {
+			return true;
+		}
+
+		if (
+			mutationTokens.some((mutation) => matchesToken(token, mutation)) ||
+			(matchesToken(token, Ident) &&
+				mutationTokens.some(
+					(mutation) => mutation.name === token.image.toUpperCase()
+				))
+		) {
+			return false;
+		}
+
+		return false;
+	}
+
+	return false;
+};
+
 const expandStatement = (
 	statement: PreprocessorStatement,
 	context: ViewExpansionContext
@@ -333,7 +512,15 @@ const expandStatement = (
 	readonly expandedViews: ReadonlyArray<string>;
 	readonly changed: boolean;
 } => {
-	const { sql: expandedSql, changed, expandedViews } = expandSql({
+	if (!isSelectStatement(statement.sql)) {
+		return { statement, expandedViews: [], changed: false };
+	}
+
+	const {
+		sql: expandedSql,
+		changed,
+		expandedViews,
+	} = expandSql({
 		sql: statement.sql,
 		context,
 		stack: new Set(),
@@ -395,6 +582,14 @@ export const expandViews: PreprocessorStep = ({
 	getSqlViews,
 	trace,
 }) => {
+	const hasSelectableStatements = statements.some(({ sql }) =>
+		isSelectStatement(sql)
+	);
+
+	if (!hasSelectableStatements) {
+		return { statements };
+	}
+
 	const recordTrace = (payload: {
 		readonly expanded: boolean;
 		readonly views: ReadonlyArray<string>;
