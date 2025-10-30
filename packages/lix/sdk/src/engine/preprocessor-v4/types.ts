@@ -34,6 +34,22 @@ export type CachePreflight = {
 };
 
 /**
+ * Serializable snapshot of cache preflight hints returned from the preprocessor.
+ *
+ * @example
+ * ```ts
+ * const result: CachePreflightResult = {
+ *   schemaKeys: ["test_schema"],
+ *   versionIds: ["v1"],
+ * };
+ * ```
+ */
+export type CachePreflightResult = {
+	readonly schemaKeys: ReadonlyArray<string>;
+	readonly versionIds: ReadonlyArray<string>;
+};
+
+/**
  * Shared context passed to each preprocessor stage.
  * ```
  */
@@ -112,6 +128,7 @@ export type PreprocessorResult = {
 	readonly sql: string;
 	readonly parameters: ReadonlyArray<unknown>;
 	readonly expandedSql?: string;
-	readonly context?: PreprocessorContext;
 	readonly statements?: ReadonlyArray<PreprocessorStatement>;
+	readonly trace?: PreprocessorTrace;
+	readonly cachePreflight?: CachePreflightResult;
 };

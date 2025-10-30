@@ -16,7 +16,7 @@ test("executing preprocessed sql does not throw", async () => {
 		trace: true,
 	});
 
-	const steps = result.context?.trace?.map((entry) => entry.step) ?? [];
+	const steps = result.trace?.map((entry) => entry.step) ?? [];
 	expect(steps).toContain("expand_views");
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps.at(-1)).toBe("complete");
@@ -44,12 +44,13 @@ test("state_all query flows is expanded leads to rewritten vtable select", async
 		parameters: [],
 		trace: true,
 	});
-	const { sql, parameters, context } = result;
+	const { sql, parameters, trace, cachePreflight } = result;
 
-	const steps = context?.trace?.map((entry) => entry.step) ?? [];
+	const steps = trace?.map((entry) => entry.step) ?? [];
 	expect(steps).toContain("expand_views");
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps).toContain("complete");
+	expect(cachePreflight?.schemaKeys ?? []).not.toHaveLength(0);
 
 	expect(() =>
 		lix.engine!.sqlite.exec({

@@ -4,6 +4,7 @@ import type {
 	PreprocessorStatement,
 	PreprocessorTrace,
 	CachePreflight,
+	CachePreflightResult,
 } from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
@@ -101,12 +102,18 @@ export function createPreprocessor(args: {
 				? (finalStatements[0]?.parameters ?? parameters)
 				: parameters;
 
+		const cachePreflightState = context.cachePreflight;
+		const cachePreflight = cachePreflightState
+			? serializeCachePreflight(cachePreflightState)
+			: undefined;
+
 		return {
 			sql: resultSql,
 			parameters: primaryParameters,
 			expandedSql: resultSql,
-			context,
 			statements: finalStatements,
+			trace: traceEntries,
+			cachePreflight,
 		};
 	};
 }
@@ -206,6 +213,20 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 	}
 	return map;
 }
+
+const serializeCachePreflight = (
+	state: CachePreflight
+): CachePreflightResult | undefined => {
+	const schemaKeys = Array.from(state.schemaKeys);
+	const versionIds = Array.from(state.versionIds);
+	if (schemaKeys.length === 0 && versionIds.length === 0) {
+		return undefined;
+	}
+	return {
+		schemaKeys,
+		versionIds,
+	};
+};
 
 function extractSelectBody(sql: string): string | undefined {
 	const trimmed = sql.trim();
