@@ -138,11 +138,11 @@ function buildContext(
 			return loadCacheTables();
 		},
 		getSqlViews: () => {
-			return new Map();
-			// if (!sqlViews) {
-			// 	sqlViews = loadSqlViewMap(engine);
-			// }
-			// return sqlViews;
+			// return new Map();
+			if (!sqlViews) {
+				sqlViews = loadSqlViewMap(engine);
+			}
+			return sqlViews;
 		},
 		hasOpenTransaction: () => {
 			if (transactionState === undefined) {
