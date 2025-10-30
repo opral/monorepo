@@ -743,23 +743,22 @@ test("unions all cache tables if schema key is omitted", () => {
 	expect(payload.schema_key_literals).toEqual([]);
 });
 
-test("executing SELECT on vtable should not throw in sqlite", async () => {
+test.each([
+	`select json_extract(snapshot_content, '$.value') as "value" from "lix_internal_state_vtable" 
+		where "entity_id" = ? and "schema_key" = ? and "version_id" = ? and "snapshot_content" is not null`,
+	`SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = 'test_schema_key'`,
+])("select statements that are valid should not throw", async (query) => {
 	const lix = await openLix({});
 
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(`
-			select json_extract(snapshot_content, '$.value') as "value" 
-			from "lix_internal_state_vtable" 
-			where "entity_id" = ? 
-			and "schema_key" = ? 
-			and "version_id" = ? 
-			and "snapshot_content" is not null
-	`);
+	const node = parse(query);
 
 	const rewritten = rewriteVtableSelects({
 		node,
-		parameters: ["foo", "test_schema", "global"],
+		parameters: [],
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map([]),
 		getSqlViews: () => new Map(),
@@ -772,7 +771,39 @@ test("executing SELECT on vtable should not throw in sqlite", async () => {
 	expect(() =>
 		lix.engine!.sqlite.exec({
 			sql,
-			bind: ["foo", "test_schema", "global"],
+			bind: [],
+			returnValue: "resultRows",
+			rowMode: "object",
+		})
+	).not.toThrow();
+});
+
+test("regression: filtered columns remain accessible after rewrite", async () => {
+	const lix = await openLix({});
+
+	const trace: PreprocessorTraceEntry[] = [];
+
+	const node = parse(`
+			select "snapshot_content", "updated_at" from "lix_internal_state_vtable" 
+			where "schema_key" = ? and "snapshot_content" is not null and "version_id" = ?
+	`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		parameters: [],
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map([]),
+		getSqlViews: () => new Map(),
+		trace,
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+
+	expect(() =>
+		lix.engine!.sqlite.exec({
+			sql,
+			bind: [],
 			returnValue: "resultRows",
 			rowMode: "object",
 		})

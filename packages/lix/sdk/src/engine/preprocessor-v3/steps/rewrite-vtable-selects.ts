@@ -44,6 +44,7 @@ type SelectedProjection = {
 type ColumnSelectionSummary = {
 	selectedColumns: SelectedProjection[] | null;
 	requestedHiddenColumns: ReadonlySet<string>;
+	supportColumns: ReadonlySet<string>;
 };
 
 type SchemaKeyPredicateSummary = {
@@ -66,6 +67,7 @@ type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
+	supportColumns: ReadonlySet<string>;
 };
 
 /**
@@ -238,6 +240,7 @@ function buildInlineMetadata(
 			schemaKeys: summary.literals,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
+			supportColumns: new Set(columnSummary.supportColumns),
 		});
 	}
 	return metadata;
@@ -269,6 +272,7 @@ function createInlineVisitor(
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
 				hiddenColumns: metadataEntry.hiddenColumns,
+				supportColumns: metadataEntry.supportColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
@@ -501,11 +505,13 @@ function collectSelectedColumns(
 	tableNames: Set<string>
 ): ColumnSelectionSummary {
 	const hiddenSelections = new Set<string>();
+	const supportColumns = new Set<string>();
 
 	if (select.projection.length === 0) {
 		return {
 			selectedColumns: null,
 			requestedHiddenColumns: hiddenSelections,
+			supportColumns,
 		};
 	}
 
@@ -549,17 +555,116 @@ function collectSelectedColumns(
 		}
 	}
 
+	if (!hasUnresolvedProjection && !selectsAll) {
+		const referenced = collectReferencedColumnSummary(select, tableNames);
+		if (referenced.hasUnknownReferences) {
+			hasUnresolvedProjection = true;
+		} else {
+			for (const column of referenced.columns) {
+				if (entries.has(column)) {
+					continue;
+				}
+				if (HIDDEN_SEGMENT_COLUMN_SET.has(column)) {
+					hiddenSelections.add(column);
+				}
+				supportColumns.add(column);
+			}
+		}
+	}
+
 	if (hasUnresolvedProjection || selectsAll) {
 		return {
 			selectedColumns: null,
 			requestedHiddenColumns: hiddenSelections,
+			supportColumns: new Set(),
 		};
 	}
 
 	return {
 		selectedColumns: order.map((column) => entries.get(column)!),
 		requestedHiddenColumns: hiddenSelections,
+		supportColumns,
 	};
+}
+
+function collectReferencedColumnSummary(
+	select: SelectStatementNode,
+	tableNames: Set<string>
+): {
+	columns: Set<string>;
+	hasUnknownReferences: boolean;
+} {
+	const columns = new Set<string>();
+	let hasUnknownReferences = false;
+
+	const visit = (expression: ExpressionNode | RawFragmentNode | null) => {
+		if (hasUnknownReferences || !expression) {
+			return;
+		}
+		if ("sql_text" in expression) {
+			hasUnknownReferences = true;
+			return;
+		}
+		switch (expression.node_kind) {
+			case "column_reference": {
+				const qualifier = getColumnQualifier(expression);
+				if (qualifier && !tableNames.has(qualifier)) {
+					return;
+				}
+				const columnName = getColumnName(expression);
+				if (columnName) {
+					columns.add(columnName);
+				}
+				return;
+			}
+			case "binary_expression":
+				visit(expression.left);
+				visit(expression.right);
+				return;
+			case "unary_expression":
+				visit(expression.operand);
+				return;
+			case "grouped_expression":
+				visit(expression.expression);
+				return;
+			case "function_call":
+				for (const argument of expression.arguments) {
+					visit(argument);
+				}
+				return;
+			case "in_list_expression":
+				visit(expression.operand);
+				for (const item of expression.items) {
+					visit(item);
+				}
+				return;
+			case "between_expression":
+				visit(expression.operand);
+				visit(expression.start);
+				visit(expression.end);
+				return;
+			case "subquery_expression":
+				hasUnknownReferences = true;
+				return;
+			case "literal":
+			case "parameter":
+				return;
+			default:
+				return;
+		}
+	};
+
+	visit(select.where_clause);
+	for (const clause of select.from_clauses) {
+		for (const join of clause.joins) {
+			visit(join.on_expression);
+		}
+	}
+	for (const order of select.order_by) {
+		visit(order.expression);
+	}
+
+	return { columns, hasUnknownReferences };
 }
 
 function extractColumnFromExpression(
@@ -624,12 +729,14 @@ function buildVtableSelectRewrite(options: {
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
+	supportColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
 		options.selectedColumns,
-		options.hiddenColumns
+		options.hiddenColumns,
+		options.supportColumns
 	);
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(
@@ -644,6 +751,7 @@ function buildVtableSelectRewrite(options: {
 	}
 	const needsChangeJoin = candidateColumns.has("metadata");
 	const projectionSql = buildRewriteProjectionSql(options.selectedColumns, {
+		supportColumns: options.supportColumns,
 		needsWriterJoin,
 	});
 	const rankingOrder = [
@@ -747,7 +855,10 @@ WHERE w.rn = 1`;
 
 function buildRewriteProjectionSql(
 	selectedColumns: SelectedProjection[] | null,
-	options: { needsWriterJoin: boolean }
+	options: {
+		needsWriterJoin: boolean;
+		supportColumns: ReadonlySet<string>;
+	}
 ): string {
 	const builder = internalQueryBuilder as unknown as {
 		selectFrom: (table: string) => {
@@ -764,11 +875,25 @@ function buildRewriteProjectionSql(
 	};
 
 	const baseQuery = builder.selectFrom(`${INTERNAL_STATE_VTABLE} as w`);
+	const supportEntries =
+		selectedColumns === null
+			? []
+			: Array.from(options.supportColumns)
+					.filter(
+						(column) =>
+							!selectedColumns.some((entry) => entry.column === column)
+					)
+					.map<SelectedProjection>((column) => ({
+						column,
+						alias: null,
+					}));
+	const combinedEntries =
+		selectedColumns === null ? null : [...selectedColumns, ...supportEntries];
 	const query =
-		selectedColumns === null || selectedColumns.length === 0
+		combinedEntries === null || combinedEntries.length === 0
 			? baseQuery.selectAll("w")
 			: baseQuery.select((eb) =>
-					selectedColumns.map((entry) => {
+					combinedEntries.map((entry) => {
 						if (options.needsWriterJoin && entry.column === "writer_key") {
 							return eb.fn
 								.coalesce(
@@ -789,7 +914,8 @@ function buildRewriteProjectionSql(
 
 function buildProjectionColumnSet(
 	selectedColumns: SelectedProjection[] | null,
-	hiddenColumns: ReadonlySet<string>
+	hiddenColumns: ReadonlySet<string>,
+	supportColumns: ReadonlySet<string>
 ): {
 	candidateColumns: Set<string>;
 	rankedColumns: Set<string>;
@@ -818,6 +944,11 @@ function buildProjectionColumnSet(
 			candidateColumns.add(entry.column);
 			rankedColumns.add(entry.column);
 		}
+	}
+
+	for (const column of supportColumns) {
+		candidateColumns.add(column);
+		rankedColumns.add(column);
 	}
 
 	for (const hiddenColumn of requestedHiddenColumns) {

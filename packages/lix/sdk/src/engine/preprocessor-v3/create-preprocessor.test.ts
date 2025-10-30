@@ -2,42 +2,6 @@ import { expect, test } from "vitest";
 import { createPreprocessor } from "./create-preprocessor.js";
 import { openLix } from "../../lix/open-lix.js";
 
-test.each([
-	{
-		sql: `select json_extract(snapshot_content, '$.value') as "value" from "lix_internal_state_vtable" 
-		where "entity_id" = ? and "schema_key" = ? and "version_id" = ? and "snapshot_content" is not null`,
-		parameters: ["lix_state_cache_stale", "lix_key_value", "global"],
-	},
-	{
-		sql: `SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'`,
-		parameters: [],
-	},
-])(
-	"executing preprocessed select statements that are valid should not throw",
-	async (query) => {
-		const lix = await openLix({});
-		const preprocess = createPreprocessor({ engine: lix.engine! });
-
-		const result = preprocess({
-			...query,
-			trace: true,
-		});
-
-		expect(() =>
-			lix.engine!.sqlite.exec({
-				sql: result.sql,
-				bind: result.parameters as any[],
-				returnValue: "resultRows",
-				rowMode: "object",
-			})
-		).not.toThrow();
-
-		expect(result.context?.trace?.[0]?.step).toBe("rewrite_vtable_selects");
-	}
-);
-
 test("state_all query flows through state_all and vtable rewrites", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
