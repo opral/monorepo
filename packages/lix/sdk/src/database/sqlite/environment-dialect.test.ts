@@ -43,11 +43,11 @@ describe("EnvironmentConnection", () => {
 			() => {
 				throw new Error("expected failure");
 			},
-				(error) => {
-					const message = String(error);
-					expect(message).toMatch(/user query[\s\S]*status: failed/);
-					expect(message).not.toMatch(/internal query/);
-				}
+			(error) => {
+				const message = String(error);
+				expect(message).toMatch(/user query[\s\S]*status: failed/);
+				expect(message).not.toMatch(/internal query/);
+			}
 		);
 	});
 

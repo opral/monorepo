@@ -150,9 +150,9 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	// engine.preprocessQuery = createQueryPreprocessor(engine);
+	engine.preprocessQuery = createQueryPreprocessor(engine);
 
-	engine.preprocessQuery = createPreprocessor({ engine });
+	// engine.preprocessQuery = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 

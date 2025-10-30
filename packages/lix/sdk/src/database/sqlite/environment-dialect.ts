@@ -45,13 +45,13 @@ class EnvironmentConnection implements DatabaseConnection {
 					? err.originalSql
 					: undefined;
 			const displaySql = originalSql ?? submittedSql;
-				const rewrittenSql =
-					typeof err?.rewrittenSql === "string" && err.rewrittenSql
-						? err.rewrittenSql
-						: undefined;
-				const parameterValues = Array.isArray(err?.parameters)
-					? err.parameters
-					: parameters ?? [];
+			const rewrittenSql =
+				typeof err?.rewrittenSql === "string" && err.rewrittenSql
+					? err.rewrittenSql
+					: undefined;
+			const parameterValues = Array.isArray(err?.parameters)
+				? err.parameters
+				: (parameters ?? []);
 			// Example formatted error for quick reference:
 			//
 			// executeQuery Error

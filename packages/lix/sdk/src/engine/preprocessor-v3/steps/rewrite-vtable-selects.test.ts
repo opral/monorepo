@@ -1,9 +1,6 @@
 import { expect, test } from "vitest";
 import { parse } from "../sql-parser/parse.js";
-import {
-	REWRITTEN_STATE_VTABLE,
-	rewriteVtableSelects,
-} from "./rewrite-vtable-selects.js";
+import { rewriteVtableSelects } from "./rewrite-vtable-selects.js";
 import { compile } from "../compile.js";
 import type { PreprocessorTraceEntry } from "../types.js";
 import { openLix } from "../../../lix/open-lix.js";
@@ -19,7 +16,7 @@ import type {
 	SqlNode,
 } from "../sql-parser/nodes.js";
 
-test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
+test("rewrites to inline vtable subquery", () => {
 	const node = parse(`
 			SELECT * FROM lix_internal_state_vtable
 		`);
@@ -34,9 +31,11 @@ test("rewrites to inline lix_internal_state_vtable_rewritten subquery", () => {
 
 	const { sql } = compile(rewritten);
 
-	expect(sql.toLowerCase()).toContain("lix_internal_state_vtable_rewritten");
+	expect(sql.toLowerCase()).not.toContain(
+		"lix_internal_state_vtable_rewritten"
+	);
 	expect(sql).toMatch(/FROM\s+\(/i);
-	expect(sql).not.toMatch(/\blix_internal_state_vtable\b/i);
+	expect(sql).not.toMatch(/\bFROM\s+"lix_internal_state_vtable"\b/i);
 });
 
 test("resolves cache rows across recursive version inheritance chains", async () => {
@@ -174,7 +173,9 @@ test("does not rewrite non-SELECT statements", () => {
 	const { sql } = compile(rewritten);
 
 	expect(sql).toBe(original.sql);
-	expect(sql.toLowerCase()).not.toContain(REWRITTEN_STATE_VTABLE.toLowerCase());
+	expect(sql.toLowerCase()).not.toContain(
+		"lix_internal_state_vtable_rewritten"
+	);
 });
 
 test("does not rely on hoisted CTEs", () => {
@@ -195,7 +196,9 @@ test("does not rely on hoisted CTEs", () => {
 	const normalized = sql.trim().toUpperCase();
 
 	expect(normalized.startsWith("WITH")).toBe(false);
-	expect(sql.toLowerCase()).toContain(REWRITTEN_STATE_VTABLE.toLowerCase());
+	expect(sql.toLowerCase()).not.toContain(
+		"lix_internal_state_vtable_rewritten"
+	);
 	expect(sql).toMatch(/FROM\s+\(/i);
 });
 
@@ -310,6 +313,43 @@ test("includes _pk across segments when explicitly selected", () => {
 	expect(sql.toLowerCase()).toContain("'t' || '~' || lix_encode_pk_part");
 	expect(sql.toLowerCase()).toContain("'u' || '~' || lix_encode_pk_part");
 	expect(sql.toLowerCase()).toContain("'c' || '~' || lix_encode_pk_part");
+});
+
+test("includes hidden _pk only when explicitly projected", () => {
+	const node = parse(`
+			SELECT v.*, v._pk
+			FROM lix_internal_state_vtable AS v
+		`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+	expect(sql.toLowerCase()).toContain(" as _pk");
+});
+
+test("omits hidden _pk when not explicitly selected", () => {
+	const node = parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+		`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () => new Map(),
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+
+	expect(sql.toLowerCase()).not.toContain(" as _pk");
 });
 
 test("retains writer joins when writer_key is selected", () => {
@@ -701,4 +741,40 @@ test("unions all cache tables if schema key is omitted", () => {
 	expect(trace).toHaveLength(1);
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.schema_key_literals).toEqual([]);
+});
+
+test("executing SELECT on vtable should not throw in sqlite", async () => {
+	const lix = await openLix({});
+
+	const trace: PreprocessorTraceEntry[] = [];
+
+	const node = parse(`
+			select json_extract(snapshot_content, '$.value') as "value" 
+			from "lix_internal_state_vtable" 
+			where "entity_id" = ? 
+			and "schema_key" = ? 
+			and "version_id" = ? 
+			and "snapshot_content" is not null
+	`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		parameters: ["foo", "test_schema", "global"],
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map([]),
+		getSqlViews: () => new Map(),
+		trace,
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+
+	expect(() =>
+		lix.engine!.sqlite.exec({
+			sql,
+			bind: ["foo", "test_schema", "global"],
+			returnValue: "resultRows",
+			rowMode: "object",
+		})
+	).not.toThrow();
 });

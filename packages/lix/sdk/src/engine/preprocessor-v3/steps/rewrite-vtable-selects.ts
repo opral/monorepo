@@ -31,14 +31,19 @@ import {
 } from "../sql-parser/visitor.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
-export const REWRITTEN_STATE_VTABLE = "lix_internal_state_vtable_rewritten";
-
-const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(REWRITTEN_STATE_VTABLE);
-const ORIGINAL_TABLE_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
+const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
+const ORIGINAL_TABLE_KEY = DEFAULT_ALIAS_KEY;
+const HIDDEN_SEGMENT_COLUMNS = ["_pk"] as const;
+const HIDDEN_SEGMENT_COLUMN_SET = new Set<string>(HIDDEN_SEGMENT_COLUMNS);
 
 type SelectedProjection = {
 	column: string;
 	alias: string | null;
+};
+
+type ColumnSelectionSummary = {
+	selectedColumns: SelectedProjection[] | null;
+	requestedHiddenColumns: ReadonlySet<string>;
 };
 
 type SchemaKeyPredicateSummary = {
@@ -60,6 +65,7 @@ type TableReferenceInfo = {
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
+	hiddenColumns: ReadonlySet<string>;
 };
 
 /**
@@ -136,7 +142,7 @@ function rewriteSelectStatement(
 		withRewrittenSubqueries.projection,
 		tableNamesForTrace
 	);
-	const selectedColumnsForTrace = collectSelectedColumns(
+	const selectedColumnsSummaryForTrace = collectSelectedColumns(
 		withRewrittenSubqueries,
 		tableNamesForTrace
 	);
@@ -157,7 +163,7 @@ function rewriteSelectStatement(
 			aliasList,
 			projectionKind,
 			schemaSummary,
-			selectedColumns: selectedColumnsForTrace,
+			selectedColumns: selectedColumnsSummaryForTrace.selectedColumns,
 		});
 		context.trace.push(entry);
 	}
@@ -227,10 +233,11 @@ function buildInlineMetadata(
 			tableNames,
 			parameters
 		);
-		const selectedColumns = collectSelectedColumns(select, tableNames);
+		const columnSummary = collectSelectedColumns(select, tableNames);
 		metadata.set(aliasKey, {
 			schemaKeys: summary.literals,
-			selectedColumns,
+			selectedColumns: columnSummary.selectedColumns,
+			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 		});
 	}
 	return metadata;
@@ -253,11 +260,15 @@ function createInlineVisitor(
 			if (!metadataEntry) {
 				return;
 			}
-			const aliasForSql = aliasValue ?? REWRITTEN_STATE_VTABLE;
+			const aliasForSql =
+				aliasValue ??
+				getIdentifierValue(node.name.parts.at(-1) ?? null) ??
+				INTERNAL_STATE_VTABLE;
 			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
+				hiddenColumns: metadataEntry.hiddenColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
@@ -488,32 +499,39 @@ function mergeSummaries(
 function collectSelectedColumns(
 	select: SelectStatementNode,
 	tableNames: Set<string>
-): SelectedProjection[] | null {
-	if (select.projection.length === 0) {
-		return null;
-	}
+): ColumnSelectionSummary {
+	const hiddenSelections = new Set<string>();
 
-	for (const item of select.projection) {
-		if (isSelectAllForTable(item, tableNames)) {
-			return null;
-		}
+	if (select.projection.length === 0) {
+		return {
+			selectedColumns: null,
+			requestedHiddenColumns: hiddenSelections,
+		};
 	}
 
 	const order: string[] = [];
 	const entries = new Map<string, SelectedProjection>();
+	let hasUnresolvedProjection = false;
+	let selectsAll = false;
 
-	for (const projection of select.projection) {
-		if (projection.node_kind !== "select_expression") {
+	for (const item of select.projection) {
+		if (isSelectAllForTable(item, tableNames)) {
+			selectsAll = true;
 			continue;
 		}
-		const columnName = extractColumnFromExpression(
-			projection.expression,
-			tableNames
-		);
+		if (item.node_kind !== "select_expression") {
+			hasUnresolvedProjection = true;
+			continue;
+		}
+		const columnName = extractColumnFromExpression(item.expression, tableNames);
 		if (!columnName) {
+			hasUnresolvedProjection = true;
 			continue;
 		}
-		const alias = getIdentifierValue(projection.alias);
+		if (HIDDEN_SEGMENT_COLUMN_SET.has(columnName)) {
+			hiddenSelections.add(columnName);
+		}
+		const alias = getIdentifierValue(item.alias);
 		if (!entries.has(columnName)) {
 			order.push(columnName);
 			entries.set(columnName, {
@@ -531,7 +549,17 @@ function collectSelectedColumns(
 		}
 	}
 
-	return order.map((column) => entries.get(column)!);
+	if (hasUnresolvedProjection || selectsAll) {
+		return {
+			selectedColumns: null,
+			requestedHiddenColumns: hiddenSelections,
+		};
+	}
+
+	return {
+		selectedColumns: order.map((column) => entries.get(column)!),
+		requestedHiddenColumns: hiddenSelections,
+	};
 }
 
 function extractColumnFromExpression(
@@ -595,11 +623,13 @@ function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
+	hiddenColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
-		options.selectedColumns
+		options.selectedColumns,
+		options.hiddenColumns
 	);
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(
@@ -733,7 +763,7 @@ function buildRewriteProjectionSql(
 		};
 	};
 
-	const baseQuery = builder.selectFrom(`${REWRITTEN_STATE_VTABLE} as w`);
+	const baseQuery = builder.selectFrom(`${INTERNAL_STATE_VTABLE} as w`);
 	const query =
 		selectedColumns === null || selectedColumns.length === 0
 			? baseQuery.selectAll("w")
@@ -758,25 +788,50 @@ function buildRewriteProjectionSql(
 }
 
 function buildProjectionColumnSet(
-	selectedColumns: SelectedProjection[] | null
+	selectedColumns: SelectedProjection[] | null,
+	hiddenColumns: ReadonlySet<string>
 ): {
 	candidateColumns: Set<string>;
 	rankedColumns: Set<string>;
 } {
-	if (selectedColumns === null) {
-		return {
-			candidateColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
-			rankedColumns: new Set<string>(ALL_SEGMENT_COLUMNS),
-		};
+	const requestedHiddenColumns = new Set(hiddenColumns);
+	const seedColumns =
+		selectedColumns === null
+			? ALL_SEGMENT_COLUMNS
+			: Array.from(BASE_SEGMENT_COLUMNS);
+	const candidateColumns = new Set<string>();
+	const rankedColumns = new Set<string>();
+
+	for (const column of seedColumns) {
+		if (
+			HIDDEN_SEGMENT_COLUMN_SET.has(column) &&
+			!requestedHiddenColumns.has(column)
+		) {
+			continue;
+		}
+		candidateColumns.add(column);
+		rankedColumns.add(column);
 	}
-	const candidateColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
-	const rankedColumns = new Set<string>(BASE_SEGMENT_COLUMNS);
+
 	if (selectedColumns && selectedColumns.length > 0) {
 		for (const entry of selectedColumns) {
 			candidateColumns.add(entry.column);
 			rankedColumns.add(entry.column);
 		}
 	}
+
+	for (const hiddenColumn of requestedHiddenColumns) {
+		candidateColumns.add(hiddenColumn);
+		rankedColumns.add(hiddenColumn);
+	}
+
+	for (const hiddenColumn of HIDDEN_SEGMENT_COLUMN_SET) {
+		if (!requestedHiddenColumns.has(hiddenColumn)) {
+			candidateColumns.delete(hiddenColumn);
+			rankedColumns.delete(hiddenColumn);
+		}
+	}
+
 	return { candidateColumns, rankedColumns };
 }
 

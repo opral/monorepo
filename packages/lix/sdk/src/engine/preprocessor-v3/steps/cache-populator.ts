@@ -18,10 +18,7 @@ import {
 	normalizeIdentifierValue,
 	objectNameMatches,
 } from "../sql-parser/ast-helpers.js";
-import {
-	INTERNAL_STATE_VTABLE,
-	REWRITTEN_STATE_VTABLE,
-} from "./rewrite-vtable-selects.js";
+import { INTERNAL_STATE_VTABLE } from "./rewrite-vtable-selects.js";
 import { populateStateCache } from "../../../state/cache/populate-state-cache.js";
 import { isStaleStateCache } from "../../../state/cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "../../../state/cache/mark-state-cache-as-stale.js";
@@ -33,8 +30,7 @@ import { getStateCacheTables } from "../../../state/cache/schema.js";
 import { resolveCacheSchemaDefinition } from "../../../state/cache/schema-resolver.js";
 import type { LixEngine } from "../../boot.js";
 
-const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(REWRITTEN_STATE_VTABLE);
-const ORIGINAL_TABLE_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
+const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
 
 type CacheAggregation = {
 	foundReference: boolean;
@@ -166,13 +162,12 @@ function collectFromSelect(
 	const references = collectInternalStateReferences(select);
 	if (references.length > 0) {
 		aggregation.foundReference = true;
-		const aliasKeys = new Set<string>([
-			DEFAULT_ALIAS_KEY,
-			ORIGINAL_TABLE_KEY,
-			...references
-				.map((reference) => reference.normalizedAlias)
-				.filter((alias): alias is string => alias !== null),
-		]);
+		const aliasKeys = new Set<string>([DEFAULT_ALIAS_KEY]);
+		for (const reference of references) {
+			if (reference.normalizedAlias) {
+				aliasKeys.add(reference.normalizedAlias);
+			}
+		}
 
 		const summary = analyzePredicate(select.where_clause, {
 			parameters: args.parameters,
