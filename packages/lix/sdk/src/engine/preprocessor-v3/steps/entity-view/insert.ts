@@ -312,6 +312,42 @@ function evaluateExpression(args: {
 				parameters: args.parameters,
 				state: args.state,
 			});
+		case "function_call": {
+			const functionName = expression.name.value.toLowerCase();
+			if (
+				(functionName === "json" || functionName === "json_quote") &&
+				expression.arguments.length === 1
+			) {
+				const argument = expression.arguments[0];
+				if (argument?.node_kind === "parameter") {
+					const evaluated = evaluateParameterExpression({
+						node: argument,
+						parameters: args.parameters,
+						state: args.state,
+					});
+					if (!evaluated) {
+						return null;
+					}
+					const parameterExpression = createParameterExpression(
+						evaluated.expression
+					);
+					const normalizedCall = {
+						...expression,
+						arguments: [parameterExpression],
+					};
+					const expressionSql = expressionToSql(normalizedCall);
+					const value =
+						functionName === "json"
+							? deserializeJsonParameter(evaluated.value)
+							: evaluated.value;
+					return {
+						value,
+						expression: expressionSql,
+					};
+				}
+			}
+			break;
+		}
 		default: {
 			const sql = expressionToSql(expression);
 			return {

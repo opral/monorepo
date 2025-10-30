@@ -1012,3 +1012,67 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 
 	await lix.close();
 });
+
+test("regression: handles json function call parameters when deriving entity_id", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		"x-lix-key": "json_function_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const rewritten = preprocess({
+		sql: `INSERT INTO json_function_schema (id, name) VALUES (json(?), ?)`,
+		parameters: [JSON.stringify("row-1"), "Function Call"],
+	});
+
+	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.parameters).toEqual([
+		JSON.stringify("row-1"),
+		"Function Call",
+	]);
+
+	lix.engine!.executeSync({
+		sql: rewritten.sql,
+		parameters: rewritten.parameters,
+		skipPreprocessing: true,
+	});
+
+	const inserted = await lix.db
+		.selectFrom("state_all")
+		.select(["entity_id", "schema_key"] as const)
+		.where("schema_key", "=", "json_function_schema")
+		.executeTakeFirstOrThrow();
+
+	expect(inserted).toEqual({
+		entity_id: JSON.stringify("row-1"),
+		schema_key: "json_function_schema",
+	});
+	expect(JSON.parse(inserted.entity_id)).toBe("row-1");
+
+	await lix.close();
+});
