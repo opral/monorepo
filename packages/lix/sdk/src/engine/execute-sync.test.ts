@@ -20,6 +20,7 @@ describe("createExecuteSync", () => {
 				hooks: {} as any,
 				runtimeCacheRef: {} as any,
 				preprocessQuery: preprocess as any,
+				preprocessQueryV4: preprocess,
 			},
 		});
 
@@ -46,6 +47,7 @@ describe("createExecuteSync", () => {
 				hooks: {} as any,
 				runtimeCacheRef: {} as any,
 				preprocessQuery: preprocess as any,
+				preprocessQueryV4: preprocess,
 			},
 		});
 

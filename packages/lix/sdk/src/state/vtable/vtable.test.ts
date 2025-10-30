@@ -713,7 +713,7 @@ simulationTest(
 );
 
 simulationTest(
-	"delete via vtable with WHERE should delete only untracked entities in active version",
+	"delete via vtable with WHERE should delete only untracked entities in active version if subquery is provided",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -777,6 +777,7 @@ simulationTest(
 			.orderBy("entity_id")
 			.select(["entity_id"])
 			.execute();
+
 		expectDeterministic(beforeDelete).toHaveLength(2);
 
 		// Delete the untracked entity by id in active version

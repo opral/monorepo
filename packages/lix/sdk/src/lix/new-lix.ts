@@ -37,6 +37,7 @@ import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
 import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
+import { createPreprocessor } from "../engine/preprocessor-v4/create-preprocessor.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -138,6 +139,9 @@ export async function newLixFile(args?: {
 		preprocessQuery: () => {
 			throw new Error("preprocessQuery() is not yet initialised");
 		},
+		preprocessQueryV4: () => {
+			throw new Error("preprocessQueryV4() is not yet initialised");
+		},
 		executeSync: () => {
 			throw new Error("executeSync() is not yet initialised");
 		},
@@ -175,6 +179,8 @@ export async function newLixFile(args?: {
 	}
 
 	engine.preprocessQuery = createQueryPreprocessor(engine);
+
+	engine.preprocessQueryV4 = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 
@@ -318,6 +324,8 @@ export async function newLixFile(args?: {
 		timestamp: created_at,
 	});
 	populateStateCache({ engine });
+
+	engine.preprocessQueryV4 = createPreprocessor({ engine });
 
 	try {
 		const blob = new Blob([

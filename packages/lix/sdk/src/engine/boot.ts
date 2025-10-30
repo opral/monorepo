@@ -17,7 +17,8 @@ import {
 	type FunctionRegistry,
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
-import { createPreprocessor } from "./preprocessor-v3/create-preprocessor.js";
+import { createPreprocessor } from "./preprocessor-v4/create-preprocessor.js";
+import type { PreprocessorFn } from "./preprocessor-v4/types.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -52,6 +53,8 @@ export type LixEngine = {
 	getAllPluginsSync: () => LixPlugin[];
 	/** Query preprocessor shared across executeSync + explain flows */
 	preprocessQuery: QueryPreprocessorFn;
+	preprocessQueryV4: PreprocessorFn;
+
 	/**
 	 * Stable runtime-only cache token.
 	 *
@@ -124,6 +127,9 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		preprocessQuery: () => {
 			throw new Error("preprocessQuery() is not yet initialised");
 		},
+		preprocessQueryV4: () => {
+			throw new Error("preprocessQueryV4() is not yet initialised");
+		},
 		executeSync: () => {
 			throw new Error("executeSync() is not yet initialised");
 		},
@@ -152,7 +158,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 
 	engine.preprocessQuery = createQueryPreprocessor(engine);
 
-	// engine.preprocessQuery = createPreprocessor({ engine });
+	engine.preprocessQueryV4 = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 
