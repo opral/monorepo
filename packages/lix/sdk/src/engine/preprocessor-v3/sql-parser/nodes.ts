@@ -155,6 +155,7 @@ export type LiteralNode = SqlNode & {
 export type ParameterExpressionNode = SqlNode & {
 	readonly node_kind: "parameter";
 	readonly placeholder: string;
+	readonly position: number;
 };
 
 export type FunctionCallExpressionNode = SqlNode & {

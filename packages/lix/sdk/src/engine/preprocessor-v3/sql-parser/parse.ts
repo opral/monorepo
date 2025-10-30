@@ -499,6 +499,7 @@ class ToAstVisitor extends BaseVisitor {
 			const parameterNode: ParameterExpressionNode = {
 				node_kind: "parameter",
 				placeholder: parameter.image ?? "?",
+				position: -1,
 			};
 			return parameterNode;
 		}
@@ -854,6 +855,343 @@ function toStatementNode(root: CstNode): StatementNode {
 	return visitor.visit(root) as StatementNode;
 }
 
+function assignParameterPositions<T extends StatementNode>(statement: T): T {
+	const state = { nextSequential: 0 };
+	assignPositionsInStatement(statement, state);
+	return statement;
+}
+
+function resolveParameterPosition(
+	placeholder: string,
+	state: { nextSequential: number }
+): number {
+	if (isSequentialPlaceholder(placeholder)) {
+		const position = state.nextSequential;
+		state.nextSequential += 1;
+		return position;
+	}
+	const numericMatch = placeholder.match(/^\?(\d+)$/);
+	if (numericMatch) {
+		const numeric = Number(numericMatch[1]) - 1;
+		if (Number.isInteger(numeric) && numeric >= 0) {
+			if (numeric + 1 > state.nextSequential) {
+				state.nextSequential = numeric + 1;
+			}
+			return numeric;
+		}
+	}
+	// Fall back to sequential ordering for unsupported placeholder formats.
+	const position = state.nextSequential;
+	state.nextSequential += 1;
+	return position;
+}
+
+function isSequentialPlaceholder(placeholder: string): boolean {
+	if (placeholder === "" || placeholder === "?") {
+		return true;
+	}
+	if (placeholder.startsWith("?")) {
+		const rest = placeholder.slice(1);
+		return rest.length === 0 || /\D/.test(rest);
+	}
+	return true;
+}
+
+function countSequentialPlaceholders(sql: string): number {
+	let count = 0;
+	let index = 0;
+	let inSingle = false;
+	let inDouble = false;
+	let inBracket = false;
+	let inLineComment = false;
+	let inBlockComment = false;
+
+	const advance = (step = 1): void => {
+		index += step;
+	};
+
+	while (index < sql.length) {
+		const ch = sql[index]!;
+		const next = sql[index + 1];
+
+		if (inLineComment) {
+			if (ch === "\n") {
+				inLineComment = false;
+			}
+			advance();
+			continue;
+		}
+
+		if (inBlockComment) {
+			if (ch === "*" && next === "/") {
+				inBlockComment = false;
+				advance(2);
+				continue;
+			}
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inDouble && !inBracket) {
+			if (ch === "-" && next === "-") {
+				inLineComment = true;
+				advance(2);
+				continue;
+			}
+			if (ch === "/" && next === "*") {
+				inBlockComment = true;
+				advance(2);
+				continue;
+			}
+		}
+
+		if (!inDouble && !inBracket && ch === "'") {
+			if (inSingle && next === "'") {
+				advance(2);
+				continue;
+			}
+			inSingle = !inSingle;
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inBracket && ch === '"') {
+			if (inDouble && next === '"') {
+				advance(2);
+				continue;
+			}
+			inDouble = !inDouble;
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inDouble && ch === "[" && !inBracket) {
+			inBracket = true;
+			advance();
+			continue;
+		}
+
+		if (inBracket) {
+			if (ch === "]") {
+				inBracket = false;
+			}
+			advance();
+			continue;
+		}
+
+		if (!inSingle && !inDouble && !inBracket && ch === "?") {
+			let j = index + 1;
+			while (j < sql.length && /\d/.test(sql[j]!)) {
+				j += 1;
+			}
+			if (j === index + 1) {
+				count += 1;
+				advance();
+				continue;
+			}
+			index = j;
+			continue;
+		}
+
+		advance();
+	}
+
+	return count;
+}
+
+type ParameterTraversalState = {
+	nextSequential: number;
+};
+
+function assignPositionsInStatement(
+	statement: StatementNode,
+	state: ParameterTraversalState
+): void {
+	switch (statement.node_kind) {
+		case "select_statement":
+			assignPositionsInSelect(statement, state);
+			break;
+		case "insert_statement":
+			assignPositionsInInsert(statement, state);
+			break;
+		case "update_statement":
+			assignPositionsInUpdate(statement, state);
+			break;
+		case "delete_statement":
+			assignPositionsInDelete(statement, state);
+			break;
+		default:
+			break;
+	}
+}
+
+function assignPositionsInSelect(
+	select: SelectStatementNode,
+	state: ParameterTraversalState
+): void {
+	for (const item of select.projection) {
+		assignPositionsInSelectItem(item, state);
+	}
+	for (const clause of select.from_clauses) {
+		assignPositionsInFromClause(clause, state);
+	}
+	assignPositionsInExpressionOrFragment(select.where_clause, state);
+	for (const order of select.order_by) {
+		assignPositionsInExpression(order.expression, state);
+	}
+	assignPositionsInExpressionOrFragment(select.limit, state);
+	assignPositionsInExpressionOrFragment(select.offset, state);
+}
+
+function assignPositionsInSelectItem(
+	item: SelectItemNode,
+	state: ParameterTraversalState
+): void {
+	if (item.node_kind === "select_expression") {
+		assignPositionsInExpression(item.expression, state);
+	}
+}
+
+function assignPositionsInFromClause(
+	clause: FromClauseNode,
+	state: ParameterTraversalState
+): void {
+	assignPositionsInRelation(clause.relation, state);
+	for (const join of clause.joins) {
+		assignPositionsInJoin(join, state);
+	}
+}
+
+function assignPositionsInJoin(
+	join: JoinClauseNode,
+	state: ParameterTraversalState
+): void {
+	assignPositionsInRelation(join.relation, state);
+	assignPositionsInExpressionOrFragment(join.on_expression, state);
+}
+
+function assignPositionsInRelation(
+	relation: RelationNode,
+	state: ParameterTraversalState
+): void {
+	switch (relation.node_kind) {
+		case "subquery":
+			assignPositionsInStatement(relation.statement, state);
+			break;
+		case "raw_fragment":
+			state.nextSequential += countSequentialPlaceholders(relation.sql_text);
+			break;
+		default:
+			break;
+	}
+}
+
+function assignPositionsInInsert(
+	statement: InsertStatementNode,
+	state: ParameterTraversalState
+): void {
+	assignPositionsInInsertSource(statement.source, state);
+}
+
+function assignPositionsInInsertSource(
+	source: InsertValuesNode,
+	state: ParameterTraversalState
+): void {
+	for (const row of source.rows) {
+		for (const expression of row) {
+			assignPositionsInExpression(expression, state);
+		}
+	}
+}
+
+function assignPositionsInUpdate(
+	statement: UpdateStatementNode,
+	state: ParameterTraversalState
+): void {
+	for (const clause of statement.assignments) {
+		assignPositionsInExpression(clause.value, state);
+	}
+	assignPositionsInExpressionOrFragment(statement.where_clause, state);
+}
+
+function assignPositionsInDelete(
+	statement: DeleteStatementNode,
+	state: ParameterTraversalState
+): void {
+	assignPositionsInExpressionOrFragment(statement.where_clause, state);
+}
+
+function assignPositionsInExpressionOrFragment(
+	expression: ExpressionNode | RawFragmentNode | null,
+	state: ParameterTraversalState
+): void {
+	if (!expression) {
+		return;
+	}
+	if ("sql_text" in expression) {
+		state.nextSequential += countSequentialPlaceholders(expression.sql_text);
+		return;
+	}
+	assignPositionsInExpression(expression, state);
+}
+
+function assignPositionsInExpression(
+	expression: ExpressionNode,
+	state: ParameterTraversalState
+): void {
+	switch (expression.node_kind) {
+		case "parameter":
+			assignPositionToParameter(expression, state);
+			break;
+		case "grouped_expression":
+			assignPositionsInExpression(expression.expression, state);
+			break;
+		case "binary_expression":
+			assignPositionsInExpression(expression.left, state);
+			assignPositionsInExpression(expression.right, state);
+			break;
+		case "unary_expression":
+			assignPositionsInExpression(expression.operand, state);
+			break;
+		case "in_list_expression":
+			assignPositionsInExpression(expression.operand, state);
+			for (const item of expression.items) {
+				assignPositionsInExpression(item, state);
+			}
+			break;
+		case "between_expression":
+			assignPositionsInExpression(expression.operand, state);
+			assignPositionsInExpression(expression.start, state);
+			assignPositionsInExpression(expression.end, state);
+			break;
+		case "function_call":
+			for (const argument of expression.arguments) {
+				assignPositionsInExpression(argument, state);
+			}
+			break;
+		case "subquery_expression":
+			assignPositionsInStatement(expression.statement, state);
+			break;
+		case "raw_fragment":
+			state.nextSequential += countSequentialPlaceholders(expression.sql_text);
+			break;
+		default:
+			break;
+	}
+}
+
+function assignPositionToParameter(
+	parameter: ParameterExpressionNode,
+	state: ParameterTraversalState
+): void {
+	const position = resolveParameterPosition(
+		parameter.placeholder ?? "?",
+		state
+	);
+	(parameter as ParameterExpressionNode & { position: number }).position =
+		position;
+}
+
 /**
  * Parses SQL into the v3 AST and falls back to a raw fragment when the
  * statement is not supported by the parser.
@@ -873,7 +1211,7 @@ export function parse(sql: string): StatementNode {
 		};
 		return raw;
 	}
-	return toStatementNode(root);
+	return assignParameterPositions(toStatementNode(root));
 }
 
 export { parseCst } from "./cst.js";

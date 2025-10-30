@@ -65,7 +65,11 @@ export function compile(statement: SqlNode): CompileResult {
  *
  * @example
  * ```ts
- * const sql = expressionToSql({ node_kind: "parameter", placeholder: "?" });
+ * const sql = expressionToSql({
+ *   node_kind: "parameter",
+ *   placeholder: "?",
+ *   position: 0,
+ * });
  * ```
  */
 export function expressionToSql(expression: ExpressionNode): string {
@@ -405,7 +409,8 @@ function emitLiteral(literal: LiteralNode): string {
 }
 
 function emitParameter(parameter: ParameterExpressionNode): string {
-	return parameter.placeholder ?? "?";
+	const placeholder = parameter.placeholder ?? "?";
+	return placeholder === "" ? "?" : placeholder;
 }
 
 function shouldWrapExpression(

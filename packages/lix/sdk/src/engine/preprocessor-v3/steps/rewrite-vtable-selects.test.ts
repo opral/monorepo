@@ -230,30 +230,6 @@ test("emits trace metadata with alias and filters", () => {
 	expect(payload.selected_columns).toBeNull();
 });
 
-test("throws on dynamic schema key filters", () => {
-	const trace: PreprocessorTraceEntry[] = [];
-
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = ?
-		`);
-
-	expect(() =>
-		rewriteVtableSelects({
-			node,
-			getStoredSchemas: () => new Map(),
-			getCacheTables: () => new Map(),
-			getSqlViews: () => new Map(),
-			trace,
-			hasOpenTransaction: () => true,
-		})
-	).toThrowError(
-		"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-	);
-	expect(trace).toHaveLength(0);
-});
-
 test("uses projected columns when select is narrowed", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 	const node = parse(`
@@ -660,4 +636,71 @@ test("returns transaction rows", async () => {
 			}),
 		])
 	);
+});
+
+test("narrows cache tables on placeholders", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+
+	const node = parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+			WHERE v.schema_key = ?
+	`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		parameters: ["test_schema_key"],
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () =>
+			new Map([
+				["test_schema_key", "test_schema_key_cache_table"],
+				["other_schema_key", "other_schema_key_cache_table"],
+			]),
+		getSqlViews: () => new Map(),
+		trace,
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+	const lowered = sql.toLowerCase();
+	expect(lowered).toContain('from "test_schema_key_cache_table"');
+	expect(lowered).not.toContain('from "other_schema_key_cache_table"');
+
+	expect(trace).toHaveLength(1);
+	const payload = trace[0]!.payload as Record<string, unknown>;
+	expect(payload.schema_key_literals).toEqual(["test_schema_key"]);
+	expect(payload.schema_key_has_dynamic).toBe(false);
+});
+
+test("unions all cache tables if schema key is omitted", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+
+	const node = parse(`
+			SELECT v.*
+			FROM lix_internal_state_vtable AS v
+	`);
+
+	const rewritten = rewriteVtableSelects({
+		node,
+		parameters: [],
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () =>
+			new Map([
+				["test_schema_key", "test_schema_key_cache_table"],
+				["other_schema_key", "other_schema_key_cache_table"],
+			]),
+		getSqlViews: () => new Map(),
+		trace,
+		hasOpenTransaction: () => true,
+	});
+
+	const { sql } = compile(rewritten);
+	const lowered = sql.toLowerCase();
+	expect(lowered).toContain('from "test_schema_key_cache_table"');
+	expect(lowered).toContain('from "other_schema_key_cache_table"');
+
+	expect(trace).toHaveLength(1);
+	const payload = trace[0]!.payload as Record<string, unknown>;
+	expect(payload.schema_key_literals).toEqual([]);
+	expect(payload.schema_key_has_dynamic).toBe(false);
 });

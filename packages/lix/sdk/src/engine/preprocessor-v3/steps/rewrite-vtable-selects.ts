@@ -4,6 +4,7 @@ import {
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
+	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SelectItemNode,
 	type SelectStatementNode,
@@ -44,6 +45,11 @@ type SchemaKeyPredicateSummary = {
 	count: number;
 	literals: string[];
 	hasDynamic: boolean;
+};
+
+type PredicateVisitContext = {
+	tableNames: Set<string>;
+	parameters: ReadonlyArray<unknown>;
 };
 
 type TableReferenceInfo = {
@@ -120,9 +126,11 @@ function rewriteSelectStatement(
 			.filter((alias): alias is string => alias !== null),
 	]);
 
+	const parameters = context.parameters ?? [];
 	const schemaSummary = collectSchemaKeyPredicates(
 		withRewrittenSubqueries.where_clause,
-		tableNamesForTrace
+		tableNamesForTrace,
+		parameters
 	);
 
 	const projectionKind = determineProjectionKind(
@@ -134,7 +142,11 @@ function rewriteSelectStatement(
 		tableNamesForTrace
 	);
 
-	const metadata = buildInlineMetadata(withRewrittenSubqueries, references);
+	const metadata = buildInlineMetadata(
+		withRewrittenSubqueries,
+		references,
+		parameters
+	);
 
 	const rewritten = visitSelectStatement(
 		withRewrittenSubqueries,
@@ -197,7 +209,8 @@ function normalizeAlias(alias: IdentifierNode | null): string | null {
 
 function buildInlineMetadata(
 	select: SelectStatementNode,
-	references: readonly TableReferenceInfo[]
+	references: readonly TableReferenceInfo[],
+	parameters: ReadonlyArray<unknown>
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -210,7 +223,11 @@ function buildInlineMetadata(
 			DEFAULT_ALIAS_KEY,
 			ORIGINAL_TABLE_KEY,
 		]);
-		const summary = collectSchemaKeyPredicates(select.where_clause, tableNames);
+		const summary = collectSchemaKeyPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
 		if (summary.hasDynamic) {
 			throw new Error(
 				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
@@ -260,18 +277,24 @@ function createInlineVisitor(
 
 function collectSchemaKeyPredicates(
 	whereClause: SelectStatementNode["where_clause"],
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
 ): SchemaKeyPredicateSummary {
 	if (!whereClause) {
 		return { count: 0, literals: [], hasDynamic: false };
 	}
 
-	return visitExpression(whereClause, tableNames);
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+	};
+
+	return visitExpression(whereClause, context);
 }
 
 function visitExpression(
 	expression: ExpressionNode | RawFragmentNode,
-	tableNames: Set<string>
+	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	if ("sql_text" in expression) {
 		return { count: 0, literals: [], hasDynamic: true };
@@ -279,15 +302,15 @@ function visitExpression(
 
 	switch (expression.node_kind) {
 		case "grouped_expression":
-			return visitExpression(expression.expression, tableNames);
+			return visitExpression(expression.expression, context);
 		case "binary_expression":
-			return visitBinaryExpression(expression, tableNames);
+			return visitBinaryExpression(expression, context);
 		case "unary_expression":
-			return visitExpression(expression.operand, tableNames);
+			return visitExpression(expression.operand, context);
 		case "in_list_expression":
-			return visitInListExpression(expression, tableNames);
+			return visitInListExpression(expression, context);
 		case "between_expression":
-			return visitBetweenExpression(expression, tableNames);
+			return visitBetweenExpression(expression, context);
 		case "column_reference":
 		case "literal":
 		case "parameter":
@@ -298,12 +321,12 @@ function visitExpression(
 
 function visitBinaryExpression(
 	expression: BinaryExpressionNode,
-	tableNames: Set<string>
+	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	if (isLogicalOperator(expression.operator)) {
 		return mergeSummaries(
-			visitExpression(expression.left, tableNames),
-			visitExpression(expression.right, tableNames)
+			visitExpression(expression.left, context),
+			visitExpression(expression.right, context)
 		);
 	}
 
@@ -317,14 +340,20 @@ function visitBinaryExpression(
 		hasDynamic: false,
 	};
 
-	const leftIsSchema = isSchemaKeyReference(expression.left, tableNames);
-	const rightIsSchema = isSchemaKeyReference(expression.right, tableNames);
+	const leftIsSchema = isSchemaKeyReference(
+		expression.left,
+		context.tableNames
+	);
+	const rightIsSchema = isSchemaKeyReference(
+		expression.right,
+		context.tableNames
+	);
 
 	if (leftIsSchema) {
-		summary = incrementSummaryWithOperand(summary, expression.right);
+		summary = incrementSummaryWithOperand(summary, expression.right, context);
 	}
 	if (rightIsSchema) {
-		summary = incrementSummaryWithOperand(summary, expression.left);
+		summary = incrementSummaryWithOperand(summary, expression.left, context);
 	}
 
 	return summary;
@@ -332,9 +361,9 @@ function visitBinaryExpression(
 
 function visitInListExpression(
 	expression: InListExpressionNode,
-	tableNames: Set<string>
+	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, tableNames)) {
+	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
 		return { count: 0, literals: [], hasDynamic: false };
 	}
 	let summary: SchemaKeyPredicateSummary = {
@@ -343,16 +372,16 @@ function visitInListExpression(
 		hasDynamic: false,
 	};
 	for (const item of expression.items) {
-		summary = incrementSummaryWithOperand(summary, item);
+		summary = incrementSummaryWithOperand(summary, item, context);
 	}
 	return summary;
 }
 
 function visitBetweenExpression(
 	expression: BetweenExpressionNode,
-	tableNames: Set<string>
+	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, tableNames)) {
+	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
 		return { count: 0, literals: [], hasDynamic: false };
 	}
 	let summary: SchemaKeyPredicateSummary = {
@@ -360,14 +389,15 @@ function visitBetweenExpression(
 		literals: [],
 		hasDynamic: false,
 	};
-	summary = incrementSummaryWithOperand(summary, expression.start);
-	summary = incrementSummaryWithOperand(summary, expression.end);
+	summary = incrementSummaryWithOperand(summary, expression.start, context);
+	summary = incrementSummaryWithOperand(summary, expression.end, context);
 	return summary;
 }
 
 function incrementSummaryWithOperand(
 	summary: SchemaKeyPredicateSummary,
-	operand: ExpressionNode | RawFragmentNode
+	operand: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	const next = { ...summary };
 	const node = unwrapExpression(operand);
@@ -379,7 +409,15 @@ function incrementSummaryWithOperand(
 				next.hasDynamic = true;
 			}
 			break;
-		case "parameter":
+		case "parameter": {
+			const resolved = resolveParameterSchemaLiteral(node, context.parameters);
+			if (typeof resolved === "string") {
+				next.literals.push(resolved);
+			} else {
+				next.hasDynamic = true;
+			}
+			break;
+		}
 		case "raw_fragment":
 		case "column_reference":
 		case "in_list_expression":
@@ -394,6 +432,18 @@ function incrementSummaryWithOperand(
 	}
 	next.count += 1;
 	return next;
+}
+
+function resolveParameterSchemaLiteral(
+	parameter: ParameterExpressionNode,
+	parameters: ReadonlyArray<unknown>
+): string | null {
+	const index = parameter.position;
+	if (typeof index === "number" && index >= 0 && index < parameters.length) {
+		const value = parameters[index];
+		return typeof value === "string" ? value : null;
+	}
+	return null;
 }
 
 function unwrapExpression(

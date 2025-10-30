@@ -297,7 +297,7 @@ function evaluateExpression(args: {
 	switch (expression.node_kind) {
 		case "parameter":
 			return evaluateParameterExpression({
-				placeholder: expression.placeholder ?? "?",
+				node: expression,
 				parameters: args.parameters,
 				state: args.state,
 			});
@@ -323,24 +323,34 @@ function evaluateExpression(args: {
 }
 
 function evaluateParameterExpression(args: {
-	readonly placeholder: string;
+	readonly node: ParameterExpressionNode;
 	readonly parameters: ReadonlyArray<unknown>;
 	readonly state: { position: number };
 }): { value: unknown; expression: string } | null {
-	if (args.placeholder === "?" || args.placeholder === "") {
-		const index = args.state.position;
+	const placeholder = args.node.placeholder ?? "?";
+	const hasPosition =
+		typeof args.node.position === "number" && args.node.position >= 0;
+
+	if (placeholder === "?" || placeholder === "") {
+		const index = hasPosition ? args.node.position : args.state.position;
+		if (!hasPosition) {
+			args.state.position += 1;
+		} else {
+			args.state.position = Math.max(args.state.position, index + 1);
+		}
 		if (index >= args.parameters.length) {
 			return null;
 		}
-		args.state.position += 1;
 		return {
 			value: args.parameters[index],
 			expression: `?${index + 1}`,
 		};
 	}
 
-	if (/^\?\d+$/.test(args.placeholder)) {
-		const numeric = Number(args.placeholder.slice(1)) - 1;
+	if (/^\?\d+$/.test(placeholder)) {
+		const numeric = hasPosition
+			? args.node.position
+			: Number(placeholder.slice(1)) - 1;
 		if (
 			!Number.isInteger(numeric) ||
 			numeric < 0 ||
@@ -350,11 +360,24 @@ function evaluateParameterExpression(args: {
 		}
 		return {
 			value: args.parameters[numeric],
-			expression: args.placeholder,
+			expression: placeholder,
 		};
 	}
 
-	return null;
+	const index = hasPosition ? args.node.position : args.state.position;
+	if (!hasPosition) {
+		args.state.position += 1;
+	} else {
+		args.state.position = Math.max(args.state.position, index + 1);
+	}
+	if (index >= args.parameters.length) {
+		return null;
+	}
+	return {
+		value: args.parameters[index],
+		expression:
+			placeholder === "" || placeholder === "?" ? `?${index + 1}` : placeholder,
+	};
 }
 
 function evaluateRawFragment(args: {
@@ -667,9 +690,12 @@ function expressionStringToAst(sql: string): ExpressionNode {
 function createParameterExpression(
 	placeholder: string
 ): ParameterExpressionNode {
+	const numericMatch = placeholder.match(/^\?(\d+)$/);
+	const position = numericMatch ? Number(numericMatch[1]) - 1 : -1;
 	return {
 		node_kind: "parameter",
 		placeholder,
+		position,
 	};
 }
 

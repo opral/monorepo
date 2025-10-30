@@ -169,7 +169,11 @@ describe("parse", () => {
 					path: [id("id")],
 				},
 				operator: "=",
-				right: { node_kind: "parameter", placeholder: "?" },
+				right: {
+					node_kind: "parameter",
+					placeholder: "?",
+					position: 0,
+				},
 			},
 		});
 	});
@@ -227,10 +231,50 @@ describe("parse", () => {
 		expect(ast.limit).toEqual({
 			node_kind: "parameter",
 			placeholder: "?",
+			position: 0,
 		});
 		expect(ast.offset).toEqual({
 			node_kind: "parameter",
 			placeholder: "?2",
+			position: 1,
+		});
+	});
+
+	test("assigns sequential positions after numbered placeholders", () => {
+		const ast = parse(
+			"SELECT * FROM logs WHERE owner_id = ?1 AND schema_key = ?"
+		);
+		if (ast.node_kind !== "select_statement") {
+			throw new Error("expected select statement");
+		}
+		const where = ast.where_clause;
+		if (!where || where.node_kind !== "binary_expression") {
+			throw new Error("expected binary expression");
+		}
+		const { left, right } = where;
+		if (left.node_kind !== "binary_expression") {
+			throw new Error("expected binary expression on left");
+		}
+		if (right.node_kind !== "binary_expression") {
+			throw new Error("expected binary expression on right");
+		}
+		const leftParam = left.right;
+		const rightParam = right.right;
+		if (leftParam.node_kind !== "parameter") {
+			throw new Error("expected parameter on left");
+		}
+		if (rightParam.node_kind !== "parameter") {
+			throw new Error("expected parameter on right");
+		}
+		expect(leftParam).toEqual({
+			node_kind: "parameter",
+			placeholder: "?1",
+			position: 0,
+		});
+		expect(rightParam).toEqual({
+			node_kind: "parameter",
+			placeholder: "?",
+			position: 1,
 		});
 	});
 
@@ -353,7 +397,7 @@ describe("parse", () => {
 				node_kind: "insert_values",
 				rows: [
 					[lit("a"), lit("Project A")],
-					[lit("b"), { node_kind: "parameter", placeholder: "?" }],
+					[lit("b"), { node_kind: "parameter", placeholder: "?", position: 0 }],
 				],
 			},
 		});
@@ -392,6 +436,7 @@ describe("parse", () => {
 							{
 								node_kind: "parameter",
 								placeholder: "?",
+								position: 0,
 							},
 						],
 					},
@@ -404,7 +449,11 @@ describe("parse", () => {
 					path: [id("key")],
 				},
 				operator: "=",
-				right: { node_kind: "parameter", placeholder: "?" },
+				right: {
+					node_kind: "parameter",
+					placeholder: "?",
+					position: 1,
+				},
 			},
 		});
 	});
@@ -439,7 +488,11 @@ describe("parse", () => {
 					path: [id("id")],
 				},
 				operator: "=",
-				right: { node_kind: "parameter", placeholder: "?" },
+				right: {
+					node_kind: "parameter",
+					placeholder: "?",
+					position: 0,
+				},
 			},
 		});
 	});

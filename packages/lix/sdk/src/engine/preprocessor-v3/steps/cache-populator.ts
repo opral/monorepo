@@ -591,13 +591,21 @@ function resolveParameter(
 	parameters: ReadonlyArray<unknown>
 ): unknown {
 	const placeholder = parameter.placeholder ?? "?";
+	const hasPosition =
+		typeof parameter.position === "number" && parameter.position >= 0;
 	if (placeholder === "?" || placeholder === "") {
-		const index = state.position;
-		state.position += 1;
+		const index = hasPosition ? parameter.position : state.position;
+		if (!hasPosition) {
+			state.position += 1;
+		} else {
+			state.position = Math.max(state.position, index + 1);
+		}
 		return index < parameters.length ? parameters[index] : undefined;
 	}
 	if (/^\?\d+$/.test(placeholder)) {
-		const numeric = Number(placeholder.slice(1)) - 1;
+		const numeric = hasPosition
+			? parameter.position
+			: Number(placeholder.slice(1)) - 1;
 		if (
 			Number.isInteger(numeric) &&
 			numeric >= 0 &&
@@ -608,8 +616,12 @@ function resolveParameter(
 		return undefined;
 	}
 	// Named placeholders default to sequential behaviour.
-	const index = state.position;
-	state.position += 1;
+	const index = hasPosition ? parameter.position : state.position;
+	if (!hasPosition) {
+		state.position += 1;
+	} else {
+		state.position = Math.max(state.position, index + 1);
+	}
 	return index < parameters.length ? parameters[index] : undefined;
 }
 
