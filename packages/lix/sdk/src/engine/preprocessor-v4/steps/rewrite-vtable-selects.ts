@@ -480,11 +480,6 @@ const collectSelectedColumns = ({
 			continue;
 		}
 
-		const tokenStart = token.startOffset ?? Number.POSITIVE_INFINITY;
-		if (tokenStart >= firstReferenceStart) {
-			break;
-		}
-
 		if (token.tokenType === Star) {
 			requiresAll = true;
 			break;

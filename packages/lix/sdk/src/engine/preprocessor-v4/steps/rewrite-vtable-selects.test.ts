@@ -292,6 +292,45 @@ describe("rewriteVtableSelects", () => {
 		]);
 	});
 
+	test("includes filtered columns even when not selected", () => {
+		const cacheTables = buildCacheTableMap([
+			"lix_key_value",
+			"lix_version_descriptor",
+		]);
+
+		const trace: PreprocessorTrace = [];
+
+		const result = rewriteVtableSelects({
+			trace,
+			statements: [
+				{
+					sql: `
+						SELECT json_extract(snapshot_content, '$.value') AS "value"
+						FROM "lix_internal_state_vtable"
+						WHERE "entity_id" = ?1
+						  AND "schema_key" = ?2
+						  AND "version_id" = ?3
+						  AND "snapshot_content" IS NOT NULL
+					`,
+					parameters: ["entity", "lix_key_value", "global"],
+				},
+			],
+			getCacheTables: () => cacheTables,
+		});
+
+		expect(result.statements[0]?.sql).toMatch(/"entity_id"/i);
+		expect(result.statements[0]?.sql).toMatch(/"schema_key"/i);
+		expect(result.statements[0]?.sql).toMatch(/"version_id"/i);
+		expect(trace[0]?.payload?.selected_columns).toEqual(
+			expect.arrayContaining([
+				"snapshot_content",
+				"entity_id",
+				"schema_key",
+				"version_id",
+			])
+		);
+	});
+
 	test("only rewrites SELECT statements", () => {
 		const trace: PreprocessorTrace = [];
 		const views = new Map([
