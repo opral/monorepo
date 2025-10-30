@@ -19,6 +19,7 @@ import {
 import { splitStatements } from "./steps/split-statements.js";
 import { normalizePlaceholders } from "./steps/normalize-placeholders.js";
 import { expandViews } from "./steps/expand-views.js";
+import { rewriteEntityViewSelects } from "./steps/entity-views/select.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
 import { cachePopulator } from "./steps/cache-populator.js";
 import type { PreprocessorStep } from "./types.js";
@@ -37,6 +38,7 @@ const pipeline: PreprocessorStep[] = [
 	splitStatements,
 	normalizePlaceholders,
 	expandViews,
+	rewriteEntityViewSelects,
 	rewriteVtableSelects,
 	cachePopulator,
 ];
@@ -51,9 +53,7 @@ const pipeline: PreprocessorStep[] = [
  * const result = preprocess({ sql: "SELECT 1", parameters: [] });
  * ```
  */
-export function createPreprocessor(args: {
-	engine: EngineShape;
-}): PreprocessorFn {
+export function createPreprocessor(args: { engine: EngineShape }): PreprocessorFn {
 	const { engine } = args;
 
 	return ({ sql, parameters, trace }: PreprocessorArgs) => {
