@@ -50,7 +50,10 @@ const hasInternalStateVtable = (
 };
 
 const safeIsStaleStateCache = (
-	engine: Pick<Parameters<typeof isStaleStateCache>[0]["engine"], "executeSync" | "hooks">
+	engine: Pick<
+		Parameters<typeof isStaleStateCache>[0]["engine"],
+		"executeSync" | "hooks"
+	>
 ): boolean => {
 	try {
 		return isStaleStateCache({ engine });
@@ -81,7 +84,10 @@ const safePopulateStateCache = (
 };
 
 const ensureCacheTables = (
-	engine: Pick<Parameters<typeof populateStateCache>[0]["engine"], "executeSync" | "runtimeCacheRef" | "hooks"> & {
+	engine: Pick<
+		Parameters<typeof populateStateCache>[0]["engine"],
+		"executeSync" | "runtimeCacheRef" | "hooks"
+	> & {
 		sqlite: Parameters<typeof populateStateCache>[0]["engine"]["sqlite"];
 	},
 	schemaKeys: Iterable<string>
@@ -106,7 +112,10 @@ const ensureCacheTables = (
 		if (!schemaDefinition) {
 			continue;
 		}
-		const created = createSchemaCacheTable({ engine, schema: schemaDefinition });
+		const created = createSchemaCacheTable({
+			engine,
+			schema: schemaDefinition,
+		});
 		if (!tableCache.has(created)) {
 			tableCache.add(created);
 		}

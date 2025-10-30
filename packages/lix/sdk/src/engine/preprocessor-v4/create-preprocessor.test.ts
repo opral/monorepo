@@ -75,7 +75,6 @@ test("unsupported statements are returned as is", async () => {
 	});
 
 	expect(result.sql).toBe(sql);
-	expect(result.expandedSql).toBe(sql);
 	expect(result.parameters).toEqual([]);
 
 	await lix.close();

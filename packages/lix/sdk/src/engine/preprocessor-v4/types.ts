@@ -127,8 +127,6 @@ export type PreprocessorFn = (args: PreprocessorArgs) => PreprocessorResult;
 export type PreprocessorResult = {
 	readonly sql: string;
 	readonly parameters: ReadonlyArray<unknown>;
-	readonly expandedSql?: string;
-	readonly statements?: ReadonlyArray<PreprocessorStatement>;
 	readonly trace?: PreprocessorTrace;
 	readonly cachePreflight?: CachePreflightResult;
 };

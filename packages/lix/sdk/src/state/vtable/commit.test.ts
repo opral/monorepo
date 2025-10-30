@@ -1159,7 +1159,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", activeVersionId)
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	const latestGlobalVersionChange = await db
@@ -1167,7 +1167,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", "global")
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	// Cross-check commit_id via JSON extraction
