@@ -44,7 +44,6 @@ type SelectedProjection = {
 type SchemaKeyPredicateSummary = {
 	count: number;
 	literals: string[];
-	hasDynamic: boolean;
 };
 
 type PredicateVisitContext = {
@@ -228,11 +227,6 @@ function buildInlineMetadata(
 			tableNames,
 			parameters
 		);
-		if (summary.hasDynamic) {
-			throw new Error(
-				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-			);
-		}
 		const selectedColumns = collectSelectedColumns(select, tableNames);
 		metadata.set(aliasKey, {
 			schemaKeys: summary.literals,
@@ -281,7 +275,7 @@ function collectSchemaKeyPredicates(
 	parameters: ReadonlyArray<unknown>
 ): SchemaKeyPredicateSummary {
 	if (!whereClause) {
-		return { count: 0, literals: [], hasDynamic: false };
+		return { count: 0, literals: [] };
 	}
 
 	const context: PredicateVisitContext = {
@@ -297,7 +291,7 @@ function visitExpression(
 	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	if ("sql_text" in expression) {
-		return { count: 0, literals: [], hasDynamic: true };
+		return { count: 0, literals: [] };
 	}
 
 	switch (expression.node_kind) {
@@ -315,7 +309,7 @@ function visitExpression(
 		case "literal":
 		case "parameter":
 		default:
-			return { count: 0, literals: [], hasDynamic: false };
+			return { count: 0, literals: [] };
 	}
 }
 
@@ -331,13 +325,12 @@ function visitBinaryExpression(
 	}
 
 	if (!isEqualityOperator(expression.operator)) {
-		return { count: 0, literals: [], hasDynamic: false };
+		return { count: 0, literals: [] };
 	}
 
 	let summary: SchemaKeyPredicateSummary = {
 		count: 0,
 		literals: [],
-		hasDynamic: false,
 	};
 
 	const leftIsSchema = isSchemaKeyReference(
@@ -364,12 +357,11 @@ function visitInListExpression(
 	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
-		return { count: 0, literals: [], hasDynamic: false };
+		return { count: 0, literals: [] };
 	}
 	let summary: SchemaKeyPredicateSummary = {
 		count: 1,
 		literals: [],
-		hasDynamic: false,
 	};
 	for (const item of expression.items) {
 		summary = incrementSummaryWithOperand(summary, item, context);
@@ -382,12 +374,11 @@ function visitBetweenExpression(
 	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
 	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
-		return { count: 0, literals: [], hasDynamic: false };
+		return { count: 0, literals: [] };
 	}
 	let summary: SchemaKeyPredicateSummary = {
 		count: 1,
 		literals: [],
-		hasDynamic: false,
 	};
 	summary = incrementSummaryWithOperand(summary, expression.start, context);
 	summary = incrementSummaryWithOperand(summary, expression.end, context);
@@ -405,28 +396,15 @@ function incrementSummaryWithOperand(
 		case "literal":
 			if (typeof node.value === "string") {
 				next.literals.push(node.value);
-			} else {
-				next.hasDynamic = true;
 			}
 			break;
 		case "parameter": {
 			const resolved = resolveParameterSchemaLiteral(node, context.parameters);
 			if (typeof resolved === "string") {
 				next.literals.push(resolved);
-			} else {
-				next.hasDynamic = true;
 			}
 			break;
 		}
-		case "raw_fragment":
-		case "column_reference":
-		case "in_list_expression":
-		case "between_expression":
-		case "binary_expression":
-		case "unary_expression":
-		case "grouped_expression":
-			next.hasDynamic = true;
-			break;
 		default:
 			break;
 	}
@@ -501,10 +479,9 @@ function mergeSummaries(
 		(accumulator, current) => {
 			accumulator.count += current.count;
 			accumulator.literals.push(...current.literals);
-			accumulator.hasDynamic = accumulator.hasDynamic || current.hasDynamic;
 			return accumulator;
 		},
-		{ count: 0, literals: [], hasDynamic: false }
+		{ count: 0, literals: [] }
 	);
 }
 
@@ -607,7 +584,6 @@ function buildTraceEntry(args: {
 			projection: projectionKind,
 			schema_key_predicates: schemaSummary.count,
 			schema_key_literals: schemaSummary.literals,
-			schema_key_has_dynamic: schemaSummary.hasDynamic,
 			selected_columns: selectedColumns
 				? selectedColumns.map((entry) => entry.alias ?? entry.column)
 				: null,

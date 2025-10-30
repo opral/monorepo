@@ -105,11 +105,10 @@ test("emits trace metadata with alias and filters", () => {
 	expect(payload.schema_key_predicates).toBe(1);
 	expect(payload.reference_count).toBe(1);
 	expect(payload.schema_key_literals).toEqual(["test_schema_key"]);
-	expect(payload.schema_key_has_dynamic).toBe(false);
 	expect(payload.selected_columns).toBeNull();
 });
 
-test("throws on dynamic schema key filters", () => {
+test("does not narrow when schema key filter is dynamic (no parameters given)", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
 	const node = toRootOperationNode(
@@ -120,18 +119,17 @@ test("throws on dynamic schema key filters", () => {
 		`)
 	);
 
-	expect(() =>
-		rewriteVtableSelects({
-			node,
-			storedSchemas: new Map(),
-			cacheTables: new Map(),
-			trace,
-			hasOpenTransaction: true,
-		})
-	).toThrowError(
-		"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-	);
-	expect(trace).toHaveLength(0);
+	rewriteVtableSelects({
+		node,
+		storedSchemas: new Map(),
+		cacheTables: new Map(),
+		trace,
+		hasOpenTransaction: true,
+	});
+
+	expect(trace).toHaveLength(1);
+	const payload = trace[0]!.payload as Record<string, unknown>;
+	expect(payload.schema_key_literals).toEqual([]);
 });
 
 test("uses projected columns when select is narrowed", () => {

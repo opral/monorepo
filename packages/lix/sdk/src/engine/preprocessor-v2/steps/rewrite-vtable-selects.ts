@@ -68,11 +68,6 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 		renamed.where?.where,
 		tableSet
 	);
-	if (schemaSummary.hasDynamic) {
-		throw new Error(
-			"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-		);
-	}
 	const selectedColumns: SelectedProjection[] | null = collectSelectedColumns(
 		renamed,
 		tableSet
@@ -216,11 +211,6 @@ function buildInlineMetadata(
 			reference.alias ?? REWRITTEN_STATE_VTABLE,
 		]);
 		const summary = collectSchemaKeyPredicates(select.where?.where, tableNames);
-		if (summary.hasDynamic) {
-			throw new Error(
-				"rewrite_vtable_selects requires literal schema_key predicates; received ambiguous filter."
-			);
-		}
 		const selectedColumns = collectSelectedColumns(select, tableNames);
 		metadata.set(key, {
 			schemaKeys: summary.literals,
@@ -362,7 +352,6 @@ function buildTraceEntry(
 			projection,
 			schema_key_predicates: schemaSummary.count,
 			schema_key_literals: schemaSummary.literals,
-			schema_key_has_dynamic: schemaSummary.hasDynamic,
 			selected_columns: selectedColumns
 				? selectedColumns.map((entry) => entry.alias ?? entry.column)
 				: null,
@@ -433,7 +422,6 @@ function isRewrittenTable(node: TableNode): boolean {
 type SchemaKeyPredicateSummary = {
 	count: number;
 	literals: string[];
-	hasDynamic: boolean;
 };
 
 function collectSchemaKeyPredicates(
@@ -443,7 +431,6 @@ function collectSchemaKeyPredicates(
 	const base: SchemaKeyPredicateSummary = {
 		count: 0,
 		literals: [],
-		hasDynamic: false,
 	};
 	if (!node) {
 		return base;
@@ -474,7 +461,6 @@ function evaluateBinaryPredicate(
 	const summary: SchemaKeyPredicateSummary = {
 		count: 0,
 		literals: [],
-		hasDynamic: false,
 	};
 	const leftRef =
 		ReferenceNode.is(node.leftOperand) &&
@@ -501,17 +487,14 @@ function summaryHasValue(
 	if (ValueNode.is(operand)) {
 		if (typeof operand.value === "string") {
 			summary.literals.push(operand.value);
-		} else {
-			summary.hasDynamic = true;
 		}
 		return;
 	}
 	if (RawNode.is(operand) || AliasNode.is(operand)) {
-		summary.hasDynamic = true;
 		return;
 	}
 	if (ReferenceNode.is(operand) || ColumnNode.is(operand)) {
-		summary.hasDynamic = true;
+		return;
 	}
 }
 
@@ -522,10 +505,9 @@ function mergeSummaries(
 		(acc, current) => {
 			acc.count += current.count;
 			acc.literals.push(...current.literals);
-			acc.hasDynamic = acc.hasDynamic || current.hasDynamic;
 			return acc;
 		},
-		{ count: 0, literals: [], hasDynamic: false }
+		{ count: 0, literals: [] }
 	);
 }
 

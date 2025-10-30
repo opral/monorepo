@@ -226,7 +226,6 @@ test("emits trace metadata with alias and filters", () => {
 	expect(payload.schema_key_predicates).toBe(1);
 	expect(payload.reference_count).toBe(1);
 	expect(payload.schema_key_literals).toEqual(["test_schema_key"]);
-	expect(payload.schema_key_has_dynamic).toBe(false);
 	expect(payload.selected_columns).toBeNull();
 });
 
@@ -669,14 +668,13 @@ test("narrows cache tables on placeholders", () => {
 	expect(trace).toHaveLength(1);
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.schema_key_literals).toEqual(["test_schema_key"]);
-	expect(payload.schema_key_has_dynamic).toBe(false);
 });
 
 test("unions all cache tables if schema key is omitted", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
 	const node = parse(`
-			SELECT v.*
+			SELECT v.entity_id
 			FROM lix_internal_state_vtable AS v
 	`);
 
@@ -695,6 +693,7 @@ test("unions all cache tables if schema key is omitted", () => {
 	});
 
 	const { sql } = compile(rewritten);
+
 	const lowered = sql.toLowerCase();
 	expect(lowered).toContain('from "test_schema_key_cache_table"');
 	expect(lowered).toContain('from "other_schema_key_cache_table"');
@@ -702,5 +701,4 @@ test("unions all cache tables if schema key is omitted", () => {
 	expect(trace).toHaveLength(1);
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.schema_key_literals).toEqual([]);
-	expect(payload.schema_key_has_dynamic).toBe(false);
 });
