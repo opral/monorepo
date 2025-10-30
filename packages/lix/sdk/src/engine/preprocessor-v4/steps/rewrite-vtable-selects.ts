@@ -7,12 +7,14 @@ import {
 	DollarNumber,
 	Dot,
 	Equals,
+	DELETE,
 	FROM,
 	IN,
 	JOIN,
 	LParen,
 	LIMIT,
 	Ident,
+	INSERT,
 	QIdent,
 	QMark,
 	QMarkNumber,
@@ -20,6 +22,8 @@ import {
 	SELECT,
 	Star,
 	SQStr,
+	UPDATE,
+	WITH,
 	tokenize,
 	type Token,
 } from "../sql-parser/tokenizer.js";
@@ -531,6 +535,85 @@ const collectSelectedColumns = ({
 	return Array.from(columns);
 };
 
+/**
+ * Classifies a token, returning the statement keyword it represents when recognised.
+ */
+const classifyStatementKeyword = (
+	token: Token | undefined
+): "select" | "insert" | "update" | "delete" | "with" | null => {
+	if (!token) {
+		return null;
+	}
+	if (token.tokenType === SELECT) {
+		return "select";
+	}
+	if (token.tokenType === INSERT) {
+		return "insert";
+	}
+	if (token.tokenType === UPDATE) {
+		return "update";
+	}
+	if (token.tokenType === DELETE) {
+		return "delete";
+	}
+	if (token.tokenType === WITH) {
+		return "with";
+	}
+	return null;
+};
+
+/**
+ * Determines whether the provided token stream represents a SELECT statement.
+ *
+ * @example
+ * ```ts
+ * const tokens = tokenize("SELECT 1");
+ * isSelectStatement(tokens); // true
+ * ```
+ */
+const isSelectStatement = (tokens: readonly Token[]): boolean => {
+	let inCte = false;
+	let depth = 0;
+
+	for (const token of tokens) {
+		if (!token) {
+			continue;
+		}
+
+		if (inCte) {
+			if (token.tokenType === LParen) {
+				depth += 1;
+				continue;
+			}
+			if (token.tokenType === RParen) {
+				if (depth > 0) {
+					depth -= 1;
+					continue;
+				}
+			}
+
+			const kind = classifyStatementKeyword(token);
+			if (kind && kind !== "with" && depth === 0) {
+				return kind === "select";
+			}
+			continue;
+		}
+
+		const kind = classifyStatementKeyword(token);
+		if (!kind) {
+			continue;
+		}
+		if (kind === "with") {
+			inCte = true;
+			depth = 0;
+			continue;
+		}
+		return kind === "select";
+	}
+
+	return false;
+};
+
 const buildParameterResolver = (
 	tokens: readonly Token[],
 	parameters: ReadonlyArray<unknown>
@@ -671,6 +754,10 @@ export const rewriteVtableSelects: PreprocessorStep = ({
 	let changed = false;
 	const rewritten = statements.map((statement) => {
 		const tokens = tokenize(statement.sql);
+		if (!isSelectStatement(tokens)) {
+			return statement;
+		}
+
 		const references = findVtableTables(tokens);
 		if (references.length === 0) {
 			return statement;

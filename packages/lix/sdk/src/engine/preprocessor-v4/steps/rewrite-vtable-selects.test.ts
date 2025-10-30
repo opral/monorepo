@@ -291,4 +291,55 @@ describe("rewriteVtableSelects", () => {
 			"schema_key",
 		]);
 	});
+
+	test("only rewrites SELECT statements", () => {
+		const trace: PreprocessorTrace = [];
+		const views = new Map([
+			["state_all", "SELECT entity_id FROM lix_internal_state_vtable"],
+		]);
+
+		const result = rewriteVtableSelects({
+			statements: [
+				{
+					sql: 'DELETE from "lix_internal_state_vtable" where "entity_id" = ?',
+					parameters: ["entity-1"],
+				},
+				{
+					sql: 'delete from "lix_internal_state_vtable" where "entity_id" = ? and "version_id" = (select "version_id" from "active_version")',
+					parameters: ["entity-1"],
+				},
+				{
+					sql: "INSERT INTO 'lix_internal_state_vtable' (entity_id) VALUES (?)",
+					parameters: ["entity-1"],
+				},
+				{
+					sql: "UPDATE 'lix_internal_state_vtable' SET entity_id = ? WHERE entity_id = ?",
+					parameters: ["entity-2", "entity-1"],
+				},
+			],
+			getSqlViews: () => views,
+			getCacheTables: () => new Map([["test_schema", "cache_table"]]),
+			trace,
+		});
+
+		expect(trace).toHaveLength(0);
+		expect(result.statements).toEqual([
+			{
+				sql: 'DELETE from "lix_internal_state_vtable" where "entity_id" = ?',
+				parameters: ["entity-1"],
+			},
+			{
+				sql: 'delete from "lix_internal_state_vtable" where "entity_id" = ? and "version_id" = (select "version_id" from "active_version")',
+				parameters: ["entity-1"],
+			},
+			{
+				sql: "INSERT INTO 'lix_internal_state_vtable' (entity_id) VALUES (?)",
+				parameters: ["entity-1"],
+			},
+			{
+				sql: "UPDATE 'lix_internal_state_vtable' SET entity_id = ? WHERE entity_id = ?",
+				parameters: ["entity-2", "entity-1"],
+			},
+		]);
+	});
 });
