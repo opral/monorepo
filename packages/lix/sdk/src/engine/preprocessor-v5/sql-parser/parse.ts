@@ -1322,11 +1322,18 @@ function segmentSelectStatements(sql: string): StatementSegmentNode[] | null {
 			continue;
 		}
 
-		if (
-			depth > 0 &&
-			isKeywordAt(sql, index, "select") &&
-			isIdentifierBoundary(sql, index - 1)
-		) {
+		const isSelectKeyword = isKeywordAt(sql, index, "select");
+		if (!isSelectKeyword || !isIdentifierBoundary(sql, index - 1)) {
+			continue;
+		}
+
+		const interstitial = sql.slice(cursor, index).trim().toLowerCase();
+		const isAfterUnion = /(?:^|\s)union(?:\s+all)?$/.test(interstitial);
+		if (!(depth > 0 || segments.length === 0 || isAfterUnion)) {
+			continue;
+		}
+
+		{
 			const endIndex = findSelectBoundary(sql, index, depth);
 			if (endIndex === null || endIndex <= index) {
 				return null;

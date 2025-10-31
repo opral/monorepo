@@ -615,6 +615,73 @@ FROM "foo";
 			throw new Error("expected raw fragment suffix");
 		}
 		const rawSuffix = suffix as RawFragmentNode;
-		expect(rawSuffix.sql_text).toContain(')\nSELECT *\nFROM "foo";');
+	expect(rawSuffix.sql_text).toContain(')\nSELECT *\nFROM "foo";');
+	});
+
+	test("segments parenthesised select with trailing clause", () => {
+		const sql = `(SELECT 1) LIMIT 1;`;
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		expect(statement.segments).toHaveLength(3);
+
+		const [prefix, select, suffix] = statement.segments;
+		if (!prefix || prefix.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment prefix");
+		}
+		expect(prefix.sql_text).toBe("(");
+
+		if (!select || select.node_kind !== "select_statement") {
+			throw new Error("expected select statement segment");
+		}
+		expect(select.projection).toHaveLength(1);
+
+		if (!suffix || suffix.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment suffix");
+		}
+		expect(suffix.sql_text).toBe(") LIMIT 1;");
+	});
+
+	test("handles mixed casing around UNION keyword", () => {
+		const sql = `
+SELECT * FROM foo
+uNiOn
+select bar FROM baz
+		`.trim();
+
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		expect(statement.segments).toHaveLength(3);
+
+		const [firstSelect, unionFragment, secondSelect] = statement.segments;
+
+		if (!firstSelect || firstSelect.node_kind !== "select_statement") {
+			throw new Error("expected select statement segment");
+		}
+		expect(firstSelect.from_clauses[0]?.relation.node_kind).toBe(
+			"table_reference"
+		);
+
+		if (!unionFragment || unionFragment.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment separator");
+		}
+		expect(unionFragment.sql_text.trim().toLowerCase()).toBe("union");
+
+		if (!secondSelect || secondSelect.node_kind !== "select_statement") {
+			throw new Error("expected select statement segment");
+		}
+		expect(secondSelect.from_clauses[0]?.relation.node_kind).toBe(
+			"table_reference"
+		);
 	});
 });
