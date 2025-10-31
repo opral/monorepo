@@ -27,12 +27,12 @@ import type {
 	UpdateStatementNode,
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
-} from "./sql-parser/nodes.js";
-import type { SqlNode } from "./sql-parser/nodes.js";
+} from "./nodes.js";
+import type { SqlNode } from "./nodes.js";
 import {
 	getBinaryOperatorPrecedence,
 	isNonAssociativeBinaryOperator,
-} from "./sql-parser/ast-helpers.js";
+} from "./ast-helpers.js";
 
 type CompileResult = {
 	sql: string;

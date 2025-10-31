@@ -356,6 +356,8 @@ function evaluateExpression(args: {
 			};
 		}
 	}
+	// Ensure all code paths return a value
+	return null;
 }
 
 function evaluateParameterExpression(args: {

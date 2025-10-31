@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { compile } from "./compile.js";
-import { parse } from "./sql-parser/parse.js";
+import { parse } from "./parse.js";
 
 function expectRoundTrip(sql: string) {
 	const original = parse(sql);

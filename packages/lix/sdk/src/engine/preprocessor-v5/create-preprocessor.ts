@@ -1,4 +1,4 @@
-import { compile } from "./compile.js";
+import { compile } from "./sql-parser/compile.js";
 import { parse } from "./sql-parser/parse.js";
 import type {
 	PreprocessorArgs,

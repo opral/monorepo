@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { parse } from "../sql-parser/parse.js";
 import { rewriteVtableSelects } from "./rewrite-vtable-selects.js";
-import { compile } from "../compile.js";
+import { compile } from "../sql-parser/compile.js";
 import type { PreprocessorTraceEntry } from "../types.js";
 import { openLix } from "../../../lix/open-lix.js";
 import { insertTransactionState } from "../../../state/transaction/insert-transaction-state.js";
