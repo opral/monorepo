@@ -202,13 +202,13 @@ function traverseNode(
 	context: VisitContext
 ): SqlNode {
 	switch (node.node_kind) {
-	case "segmented_statement":
-		return traverseSegmentedStatement(
-			node as SegmentedStatementNode,
-			visitor
-		);
-	case "compound_select":
-		return traverseCompoundSelect(node as CompoundSelectNode, visitor);
+		case "segmented_statement":
+			return traverseSegmentedStatement(
+				node as SegmentedStatementNode,
+				visitor
+			);
+		case "compound_select":
+			return traverseCompoundSelect(node as CompoundSelectNode, visitor);
 		case "select_statement":
 			return traverseSelectStatement(node as SelectStatementNode, visitor);
 		case "insert_statement":

@@ -88,6 +88,61 @@ test("keeps view name as alias when none provided", () => {
 	expect(getIdentifierValue(relation.alias)).toBe("only_view");
 });
 
+test("expands compound select branches independently", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+	const statements = parseStatements(`
+		SELECT av.schema_key
+		FROM active_version AS av
+		UNION ALL
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"active_version",
+					`
+						SELECT st.schema_key
+						FROM state AS st
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+		trace,
+	});
+
+	expect(trace).toHaveLength(1);
+	const [statement] = rewritten;
+	if (!statement || statement.node_kind !== "segmented_statement") {
+		throw new Error("expected segmented statement");
+	}
+
+	const [segment] = statement.segments;
+	if (!segment || segment.node_kind !== "compound_select") {
+		throw new Error("expected compound select");
+	}
+
+	const firstFrom = segment.first.from_clauses[0];
+	if (!firstFrom || firstFrom.relation.node_kind !== "subquery") {
+		throw new Error("expected first branch to expand view");
+	}
+
+	const secondFrom = segment.compounds[0]?.select.from_clauses[0];
+	if (!secondFrom || secondFrom.relation.node_kind !== "table_reference") {
+		throw new Error("expected second branch to stay as table reference");
+	}
+	const lastPart = secondFrom.relation.name.parts.at(-1);
+	if (!lastPart) {
+		throw new Error("missing table name in second branch");
+	}
+	expect(lastPart.value.toLowerCase()).toBe("lix_internal_state_vtable");
+});
+
 function assertSingleSelect(
 	statements: readonly SegmentedStatementNode[]
 ): SelectStatementNode {

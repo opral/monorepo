@@ -134,15 +134,15 @@ function collectCacheTargets(
 	}
 ): void {
 	switch (node.node_kind) {
-	case "select_statement":
-		collectFromSelect(node, args);
-		return;
-	case "compound_select":
-		collectFromSelect(node.first, args);
-		for (const branch of node.compounds) {
-			collectFromSelect(branch.select, args);
-		}
-		return;
+		case "select_statement":
+			collectFromSelect(node, args);
+			return;
+		case "compound_select":
+			collectFromSelect(node.first, args);
+			for (const branch of node.compounds) {
+				collectFromSelect(branch.select, args);
+			}
+			return;
 		case "update_statement":
 			for (const assignment of node.assignments) {
 				consumeExpression(assignment.value, args);

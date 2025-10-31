@@ -619,7 +619,7 @@ FROM "foo";
 			throw new Error("expected raw fragment suffix");
 		}
 		const rawSuffix = suffix as RawFragmentNode;
-	expect(rawSuffix.sql_text).toContain(')\nSELECT *\nFROM "foo";');
+		expect(rawSuffix.sql_text).toContain(')\nSELECT *\nFROM "foo";');
 	});
 
 	test("segments parenthesised select with trailing clause", () => {
@@ -684,6 +684,111 @@ select bar FROM baz
 		const secondFrom = compound.compounds[0]?.select.from_clauses[0];
 		if (!secondFrom || secondFrom.relation.node_kind !== "table_reference") {
 			throw new Error("expected table reference");
+		}
+	});
+
+	test("parses compound selects with INTERSECT and EXCEPT", () => {
+		const sql = `
+SELECT id FROM t1
+INTERSECT
+SELECT id FROM t2
+EXCEPT
+SELECT id FROM t3
+		`.trim();
+
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		expect(statement.segments).toHaveLength(1);
+		const [segment] = statement.segments;
+		if (!segment || segment.node_kind !== "compound_select") {
+			throw new Error("expected compound select");
+		}
+
+		const compound = segment as CompoundSelectNode;
+		expect(compound.compounds).toHaveLength(2);
+		expect(compound.compounds[0]?.operator).toBe("intersect");
+		expect(compound.compounds[1]?.operator).toBe("except");
+	});
+
+	test("applies ORDER BY/LIMIT/OFFSET to compound", () => {
+		const sql = `
+SELECT id FROM t1
+UNION ALL
+SELECT id FROM t2
+ORDER BY id DESC
+LIMIT 5
+OFFSET 10
+		`.trim();
+
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		expect(statement.segments).toHaveLength(1);
+		const [segment] = statement.segments;
+		if (!segment || segment.node_kind !== "compound_select") {
+			throw new Error("expected compound select");
+		}
+
+		const compound = segment as CompoundSelectNode;
+		expect(compound.order_by).toHaveLength(1);
+		expect(compound.limit).not.toBeNull();
+		expect(compound.offset).not.toBeNull();
+		expect(compound.first.order_by).toEqual([]);
+		expect(compound.first.limit).toBeNull();
+		expect(compound.first.offset).toBeNull();
+	});
+
+	test("compound inside CTE falls back to segmented selects", () => {
+		const sql = `
+WITH expr AS (
+  SELECT id FROM t1
+  UNION ALL
+  SELECT id FROM t2
+)
+SELECT * FROM expr;
+		`.trim();
+
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		expect(statement.segments).toHaveLength(5);
+
+		const [prefix, firstSelect, unionFrag, secondSelect, suffix] =
+			statement.segments;
+
+		if (!prefix || prefix.node_kind !== "raw_fragment") {
+			throw new Error("expected raw prefix");
+		}
+		expect(prefix.sql_text.trimStart().startsWith("WITH expr AS")).toBe(true);
+
+		if (!firstSelect || firstSelect.node_kind !== "select_statement") {
+			throw new Error("expected select segment");
+		}
+
+		if (!unionFrag || unionFrag.node_kind !== "raw_fragment") {
+			throw new Error("expected union fragment");
+		}
+		expect(unionFrag.sql_text.trim().toLowerCase()).toBe("union all");
+
+		if (!secondSelect || secondSelect.node_kind !== "select_statement") {
+			throw new Error("expected second select");
+		}
+
+		if (!suffix || suffix.node_kind !== "raw_fragment") {
+			throw new Error("expected closing fragment");
 		}
 	});
 });

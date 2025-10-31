@@ -73,8 +73,7 @@ class SqlParser extends CstParser {
 		() => {
 			this.OR([
 				{
-					ALT: () =>
-						this.SUBRULE(this.select_compound, { LABEL: "select" }),
+					ALT: () => this.SUBRULE(this.select_compound, { LABEL: "select" }),
 				},
 				{
 					ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
