@@ -6,9 +6,9 @@ import {
 	type InListExpressionNode,
 	type ParameterExpressionNode,
 	type RawFragmentNode,
+	type SegmentedStatementNode,
 	type SelectItemNode,
 	type SelectStatementNode,
-	type StatementNode,
 	type TableReferenceNode,
 } from "../sql-parser/nodes.js";
 import type {
@@ -29,6 +29,7 @@ import {
 	visitSelectStatement,
 	type AstVisitor,
 } from "../sql-parser/visitor.js";
+import { normalizeSegmentedStatement } from "../sql-parser/parse.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
@@ -83,18 +84,43 @@ type InlineRewriteMetadata = {
  * ```
  */
 export const rewriteVtableSelects: PreprocessorStep = (context) => {
-	const node = context.node as StatementNode;
+	let anyChanges = false;
+	const rewrittenStatements = context.statements.map((statement) => {
+		const rewritten = rewriteSegmentedStatement(statement, context);
+		if (rewritten !== statement) {
+			anyChanges = true;
+		}
+		return rewritten;
+	});
 
-	switch (node.node_kind) {
-		case "select_statement":
-			return rewriteSelectStatement(node, context);
-		case "update_statement":
-		case "delete_statement":
-			return node;
-		default:
-			return node;
-	}
+	return anyChanges ? rewrittenStatements : context.statements;
 };
+
+function rewriteSegmentedStatement(
+	statement: SegmentedStatementNode,
+	context: PreprocessorStepContext
+): SegmentedStatementNode {
+	let changed = false;
+	const segments = statement.segments.map((segment) => {
+		if (segment.node_kind !== "select_statement") {
+			return segment;
+		}
+		const rewritten = rewriteSelectStatement(segment, context);
+		if (rewritten !== segment) {
+			changed = true;
+		}
+		return rewritten;
+	});
+
+	if (!changed) {
+		return statement;
+	}
+
+	return normalizeSegmentedStatement({
+		...statement,
+		segments,
+	});
+}
 
 function rewriteSelectStatement(
 	select: SelectStatementNode,

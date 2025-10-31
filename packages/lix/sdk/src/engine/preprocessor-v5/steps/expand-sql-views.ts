@@ -1,13 +1,15 @@
 import type {
+	SegmentedStatementNode,
 	SelectStatementNode,
 	StatementNode,
+	StatementSegmentNode,
 	TableReferenceNode,
 	SubqueryNode,
 } from "../sql-parser/nodes.js";
 import { identifier } from "../sql-parser/nodes.js";
 import { normalizeIdentifierValue } from "../sql-parser/ast-helpers.js";
 import { visitStatement, type AstVisitor } from "../sql-parser/visitor.js";
-import { parse } from "../sql-parser/parse.js";
+import { parse, normalizeSegmentedStatement } from "../sql-parser/parse.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
 
 type ViewDefinition = {
@@ -34,31 +36,70 @@ type ExpandState = {
 export const expandSqlViews: PreprocessorStep = (context) => {
 	const sqlViews = context.getSqlViews?.();
 	if (!sqlViews || sqlViews.size === 0) {
-		return context.node;
+		return context.statements;
 	}
 
 	const viewMap = buildViewMap(sqlViews);
 	if (viewMap.size === 0) {
-		return context.node;
+		return context.statements;
 	}
 
-	const state: ExpandState = {
-		stack: [],
-		expandedViews: [],
-	};
+	let anyChanges = false;
+	const rewrittenStatements = context.statements.map((statement) => {
+		const result = expandSegmentedStatement(statement, viewMap, context.trace);
+		if (result !== statement) {
+			anyChanges = true;
+		}
+		return result;
+	});
 
-	const rewritten = expandStatementNode(
-		context.node as StatementNode,
-		viewMap,
-		state
-	);
-	if (state.expandedViews.length === 0) {
-		return context.node;
-	}
-
-	pushTrace(context.trace, state.expandedViews);
-	return rewritten;
+	return anyChanges ? rewrittenStatements : context.statements;
 };
+
+function expandSegmentedStatement(
+	statement: SegmentedStatementNode,
+	views: Map<string, ViewDefinition>,
+	trace: PreprocessorTraceEntry[] | undefined
+): SegmentedStatementNode {
+	let expandedViewNames: string[] = [];
+	const updatedSegments: StatementSegmentNode[] = statement.segments.map(
+		(segment) => {
+			if (segment.node_kind !== "select_statement") {
+				return segment;
+			}
+
+			const state: ExpandState = {
+				stack: [],
+				expandedViews: [],
+			};
+
+			const expanded = expandStatementNode(
+				segment as StatementNode,
+				views,
+				state
+			);
+			if (state.expandedViews.length === 0) {
+				return segment;
+			}
+
+			expandedViewNames = expandedViewNames.concat(state.expandedViews);
+			return expanded;
+		}
+	);
+
+	if (expandedViewNames.length === 0) {
+		return statement;
+	}
+
+	if (trace) {
+		pushTrace(trace, expandedViewNames);
+	}
+
+	return normalizeSegmentedStatement({
+		...statement,
+		segments: updatedSegments,
+	});
+}
 
 function buildViewMap(
 	source: Map<string, string>
@@ -133,13 +174,23 @@ function expandView(
 	}
 
 	state.stack.push(view.normalized);
-	const parsed = parse(view.sql);
-	if (parsed.node_kind !== "select_statement") {
+	const statements = parse(view.sql);
+	if (statements.length !== 1) {
+		state.stack.pop();
+		return null;
+	}
+	const [segmented] = statements;
+	if (!segmented || segmented.node_kind !== "segmented_statement") {
+		state.stack.pop();
+		return null;
+	}
+	const [firstSegment] = segmented.segments;
+	if (!firstSegment || firstSegment.node_kind !== "select_statement") {
 		state.stack.pop();
 		return null;
 	}
 	const expanded = expandStatementNode(
-		parsed,
+		firstSegment,
 		views,
 		state
 	) as SelectStatementNode;

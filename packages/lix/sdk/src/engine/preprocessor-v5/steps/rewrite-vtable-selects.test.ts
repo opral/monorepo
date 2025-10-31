@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parse } from "../sql-parser/parse.js";
+import { parse as parseStatements } from "../sql-parser/parse.js";
 import { rewriteVtableSelects } from "./rewrite-vtable-selects.js";
 import { compile } from "../sql-parser/compile.js";
 import type { PreprocessorTraceEntry } from "../types.js";
@@ -11,25 +11,75 @@ import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-ca
 import type { LixChangeRaw } from "../../../change/schema-definition.js";
 import { getColumnPath } from "../sql-parser/ast-helpers.js";
 import type {
+	SegmentedStatementNode,
 	SelectExpressionNode,
 	SelectStatementNode,
-	SqlNode,
+	StatementSegmentNode,
 } from "../sql-parser/nodes.js";
 
-test("rewrites to inline vtable subquery", () => {
-	const node = parse(`
-			SELECT * FROM lix_internal_state_vtable
-		`);
+const always = {
+	getStoredSchemas: () => new Map(),
+	getCacheTables: () => new Map(),
+	getSqlViews: () => new Map(),
+	hasOpenTransaction: () => false,
+	trace: undefined as PreprocessorTraceEntry[] | undefined,
+	parameters: [] as ReadonlyArray<unknown>,
+} as const;
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
+const parseSql = (sql: string) => parseStatements(sql);
+
+function rewrite(
+	sql: string,
+	overrides: Partial<Parameters<typeof rewriteVtableSelects>[0]> = {}
+) {
+	const statements = parseSql(sql);
+	return rewriteVtableSelects({
+		statements,
+		...always,
+		...overrides,
 	});
+}
 
-	const { sql } = compile(rewritten);
+function firstSegment<T extends StatementSegmentNode>(
+	statements: readonly SegmentedStatementNode[]
+): T {
+	if (statements.length === 0) {
+		throw new Error("expected at least one statement");
+	}
+	const [statement] = statements;
+	if (!statement || statement.node_kind !== "segmented_statement") {
+		throw new Error("expected segmented statement");
+	}
+	if (statement.segments.length === 0) {
+		throw new Error("missing segments");
+	}
+	return statement.segments[0] as T;
+}
+
+function firstSelect(
+	statements: readonly SegmentedStatementNode[]
+): SelectStatementNode {
+	const segment = firstSegment<StatementSegmentNode>(statements);
+	if (segment.node_kind !== "select_statement") {
+		throw new Error("expected select statement");
+	}
+	return segment;
+}
+
+const compileSql = (statements: readonly SegmentedStatementNode[]) =>
+	compile(statements).sql;
+
+const compileOriginalSql = (sql: string) => compile(parseSql(sql)).sql;
+
+test("rewrites to inline vtable subquery", () => {
+	const rewritten = rewrite(
+		`
+		SELECT * FROM lix_internal_state_vtable
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).not.toContain(
 		"lix_internal_state_vtable_rewritten"
@@ -118,20 +168,18 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 	});
 
 	const cacheTable = schemaKeyToCacheTableName(schemaKey);
-	const node = parse(`
-				SELECT v.schema_key, v.version_id, v.inherited_from_version_id, v.snapshot_content
-				FROM lix_internal_state_vtable AS v
-				WHERE v.schema_key = '${schemaKey}'
-				  AND v.version_id = 'version-leaf'
-			`);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map([[schemaKey, cacheTable]]),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key, v.version_id, v.inherited_from_version_id, v.snapshot_content
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = '${schemaKey}'
+		  AND v.version_id = 'version-leaf'
+	`,
+		{
+			getCacheTables: () => new Map([[schemaKey, cacheTable]]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
 	const { sql: rewrittenSql, parameters } = compile(rewritten);
 	expect(rewrittenSql.toLowerCase()).toContain("version_inheritance");
@@ -156,43 +204,31 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 });
 
 test("does not rewrite non-SELECT statements", () => {
-	const node = parse(`
-			UPDATE lix_internal_state_vtable
-			SET schema_key = 'test'
-		`);
+	const sql = `
+		UPDATE lix_internal_state_vtable
+		SET schema_key = 'test'
+	`;
 
-	const original = compile(node);
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
+	const original = compileOriginalSql(sql);
+	const rewritten = rewrite(sql, { hasOpenTransaction: () => true });
+	const rewrittenSql = compileSql(rewritten);
 
-	const { sql } = compile(rewritten);
-
-	expect(sql).toBe(original.sql);
-	expect(sql.toLowerCase()).not.toContain(
+	expect(rewrittenSql).toBe(original);
+	expect(rewrittenSql.toLowerCase()).not.toContain(
 		"lix_internal_state_vtable_rewritten"
 	);
 });
 
 test("does not rely on hoisted CTEs", () => {
-	const node = parse(`
-			SELECT *
-			FROM lix_internal_state_vtable
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	const normalized = sql.trim().toUpperCase();
 
 	expect(normalized.startsWith("WITH")).toBe(false);
@@ -205,20 +241,14 @@ test("does not rely on hoisted CTEs", () => {
 test("emits trace metadata with alias and filters", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
-
-	rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
+	rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ trace, hasOpenTransaction: () => true }
+	);
 
 	expect(trace).toHaveLength(1);
 	const entry = trace[0]!;
@@ -234,25 +264,19 @@ test("emits trace metadata with alias and filters", () => {
 
 test("uses projected columns when select is narrowed", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = parse(`
-			SELECT v.schema_key, v.file_id
-			FROM lix_internal_state_vtable AS v
-		`);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key, v.file_id
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ trace, hasOpenTransaction: () => true }
+	);
 
 	expect(trace).toHaveLength(1);
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.selected_columns).toEqual(["schema_key", "file_id"]);
 
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');
 	expect(sql.toLowerCase()).toContain('"w"."file_id" as "file_id"');
@@ -264,50 +288,42 @@ test("uses projected columns when select is narrowed", () => {
 
 test("respects aliases when projecting columns", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = parse(`
-			SELECT v.schema_key AS schema_key_alias
-			FROM lix_internal_state_vtable AS v
-		`);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key AS schema_key_alias
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ trace, hasOpenTransaction: () => true }
+	);
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.selected_columns).toEqual(["schema_key_alias"]);
 
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key_alias"');
 	expect(sql.toLowerCase()).not.toContain('"w"."_pk" as "_pk"');
 });
 
 test("includes _pk across segments when explicitly selected", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = parse(`
-			SELECT v._pk, v.schema_key
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([["test_schema_key", "test_schema_key_cache_table"]]),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
+	const rewritten = rewrite(
+		`
+		SELECT v._pk, v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{
+			trace,
+			getCacheTables: () =>
+				new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
 	expect(payload.selected_columns).toEqual(["_pk", "schema_key"]);
 
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain('"w"."_pk" as "_pk"');
 	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');
 	expect(sql.toLowerCase()).toContain("'t' || '~' || lix_encode_pk_part");
@@ -316,57 +332,41 @@ test("includes _pk across segments when explicitly selected", () => {
 });
 
 test("includes hidden _pk only when explicitly projected", () => {
-	const node = parse(`
-			SELECT v.*, v._pk
-			FROM lix_internal_state_vtable AS v
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*, v._pk
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain(" as _pk");
 });
 
 test("omits hidden _pk when not explicitly selected", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
-
+	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).not.toContain(" as _pk");
 });
 
 test("retains writer joins when writer_key is selected", () => {
-	const node = parse(`
-			SELECT v.schema_key, v.writer_key
-			FROM lix_internal_state_vtable AS v
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key, v.writer_key
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain(
 		"left join lix_internal_state_writer ws_dst"
@@ -378,40 +378,33 @@ test("retains writer joins when writer_key is selected", () => {
 });
 
 test("retains change join when metadata is selected", () => {
-	const node = parse(`
-			SELECT v.metadata
-			FROM lix_internal_state_vtable AS v
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.metadata
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain("lix_internal_change");
 });
 
 test("routes cache queries to mapped physical tables", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{
+			getCacheTables: () =>
+				new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([["test_schema_key", "test_schema_key_cache_table"]]),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain('from "test_schema_key_cache_table"');
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
@@ -419,25 +412,23 @@ test("routes cache queries to mapped physical tables", () => {
 });
 
 test("includes only cache tables for matching schema filters", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{
+			getCacheTables: () =>
+				new Map([
+					["test_schema_key", "test_schema_key_cache_table"],
+					["test_schema_key_other", "test_schema_key_other_cache_table"],
+				]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([
-				["test_schema_key", "test_schema_key_cache_table"],
-				["test_schema_key_other", "test_schema_key_other_cache_table"],
-			]),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain('from "test_schema_key_cache_table"');
 	expect(sql.toLowerCase()).not.toContain(
@@ -448,29 +439,27 @@ test("includes only cache tables for matching schema filters", () => {
 });
 
 test("unions cache tables when multiple schema filters are present", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE (
-				v.schema_key = 'test_schema_key'
-				OR v.schema_key = 'test_schema_key_other'
-			)
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE (
+			v.schema_key = 'test_schema_key'
+			OR v.schema_key = 'test_schema_key_other'
+		)
+	`,
+		{
+			getCacheTables: () =>
+				new Map([
+					["test_schema_key", "test_schema_key_cache_table"],
+					["test_schema_key_other", "test_schema_key_other_cache_table"],
+					["test_schema_key_unused", "test_schema_key_unused_cache_table"],
+				]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([
-				["test_schema_key", "test_schema_key_cache_table"],
-				["test_schema_key_other", "test_schema_key_other_cache_table"],
-				["test_schema_key_unused", "test_schema_key_unused_cache_table"],
-			]),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain('from "test_schema_key_cache_table"');
 	expect(sql.toLowerCase()).toContain(
@@ -482,21 +471,16 @@ test("unions cache tables when multiple schema filters are present", () => {
 });
 
 test("skips cache unions when no cache tables mapped", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).not.toContain('from "test_schema_key_cache_table"');
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
@@ -505,21 +489,16 @@ test("skips cache unions when no cache tables mapped", () => {
 });
 
 test("prunes transaction segment when transaction closed", () => {
-	const node = parse(`
-			SELECT v.schema_key
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ hasOpenTransaction: () => false }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => false,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	const upper = sql.toUpperCase();
 
@@ -530,24 +509,22 @@ test("prunes transaction segment when transaction closed", () => {
 });
 
 test("unions all available cache tables when no schema filter is provided", () => {
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+	`,
+		{
+			getCacheTables: () =>
+				new Map([
+					["test_schema_key_one", "cache_table_one"],
+					["test_schema_key_two", "cache_table_two"],
+				]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([
-				["test_schema_key_one", "cache_table_one"],
-				["test_schema_key_two", "cache_table_two"],
-			]),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(sql.toLowerCase()).toContain('from "cache_table_one"');
 	expect(sql.toLowerCase()).toContain('from "cache_table_two"');
@@ -557,30 +534,22 @@ test("unions all available cache tables when no schema filter is provided", () =
 
 test("handles multiple vtable references with selective projections", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const node = parse(`
-			SELECT a.schema_key, a.file_id, b.writer_key
-			FROM lix_internal_state_vtable AS a
-			INNER JOIN lix_internal_state_vtable AS b
-				ON a.schema_key = b.schema_key
-		`);
+	const rewritten = rewrite(
+		`
+		SELECT a.schema_key, a.file_id, b.writer_key
+		FROM lix_internal_state_vtable AS a
+		INNER JOIN lix_internal_state_vtable AS b
+			ON a.schema_key = b.schema_key
+	`,
+		{ trace, hasOpenTransaction: () => true }
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
+	expect(trace[0]!.payload).toMatchObject({ aliases: ["a", "b"] });
 
-	expect(trace[0]!.payload).toMatchObject({
-		aliases: ["a", "b"],
-	});
-
-	const select = assertSelectStatement(rewritten);
-	const { sql } = compile(select);
-
-	const normalizedSql = sql.replace(/\s+/g, " ").toLowerCase();
+	const select = firstSelect(rewritten);
+	const normalizedSql = compileSql(rewritten)
+		.replace(/\s+/g, " ")
+		.toLowerCase();
 
 	const projectionColumns = select.projection
 		.filter(
@@ -606,13 +575,6 @@ test("handles multiple vtable references with selective projections", () => {
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_dst");
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_src");
 });
-
-function assertSelectStatement(node: SqlNode): SelectStatementNode {
-	if (node.node_kind !== "select_statement") {
-		throw new Error("expected select statement");
-	}
-	return node as SelectStatementNode;
-}
 
 test("returns transaction rows", async () => {
 	const lix = await openLix({
@@ -643,19 +605,14 @@ test("returns transaction rows", async () => {
 		timestamp,
 	});
 
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'
-		`);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map(),
-		getSqlViews: () => new Map(),
-		hasOpenTransaction: () => true,
-	});
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
 
 	const { sql: rewrittenSql, parameters } = compile(rewritten);
 	const rows = lix.engine!.sqlite.exec({
@@ -680,27 +637,25 @@ test("returns transaction rows", async () => {
 test("narrows cache tables on placeholders", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(`
-			SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = ?
-	`);
+	const rewritten = rewrite(
+		`
+	SELECT v.*
+	FROM lix_internal_state_vtable AS v
+	WHERE v.schema_key = ?
+`,
+		{
+			trace,
+			parameters: ["test_schema_key"],
+			getCacheTables: () =>
+				new Map([
+					["test_schema_key", "test_schema_key_cache_table"],
+					["other_schema_key", "other_schema_key_cache_table"],
+				]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		parameters: ["test_schema_key"],
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([
-				["test_schema_key", "test_schema_key_cache_table"],
-				["other_schema_key", "other_schema_key_cache_table"],
-			]),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 	const lowered = sql.toLowerCase();
 	expect(lowered).toContain('from "test_schema_key_cache_table"');
 	expect(lowered).not.toContain('from "other_schema_key_cache_table"');
@@ -713,26 +668,23 @@ test("narrows cache tables on placeholders", () => {
 test("unions all cache tables if schema key is omitted", () => {
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(`
-			SELECT v.entity_id
-			FROM lix_internal_state_vtable AS v
-	`);
+	const rewritten = rewrite(
+		`
+	SELECT v.entity_id
+	FROM lix_internal_state_vtable AS v
+`,
+		{
+			trace,
+			getCacheTables: () =>
+				new Map([
+					["test_schema_key", "test_schema_key_cache_table"],
+					["other_schema_key", "other_schema_key_cache_table"],
+				]),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		parameters: [],
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () =>
-			new Map([
-				["test_schema_key", "test_schema_key_cache_table"],
-				["other_schema_key", "other_schema_key_cache_table"],
-			]),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	const lowered = sql.toLowerCase();
 	expect(lowered).toContain('from "test_schema_key_cache_table"');
@@ -747,26 +699,20 @@ test.each([
 	`select json_extract(snapshot_content, '$.value') as "value" from "lix_internal_state_vtable" 
 		where "entity_id" = ? and "schema_key" = ? and "version_id" = ? and "snapshot_content" is not null`,
 	`SELECT v.*
-			FROM lix_internal_state_vtable AS v
-			WHERE v.schema_key = 'test_schema_key'`,
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'`,
 ])("select statements that are valid should not throw", async (query) => {
 	const lix = await openLix({});
 
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(query);
-
-	const rewritten = rewriteVtableSelects({
-		node,
-		parameters: [],
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map([]),
-		getSqlViews: () => new Map(),
+	const rewritten = rewrite(query, {
 		trace,
+		getCacheTables: () => new Map(),
 		hasOpenTransaction: () => true,
 	});
 
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(() =>
 		lix.engine!.sqlite.exec({
@@ -783,22 +729,19 @@ test("regression: filtered columns remain accessible after rewrite", async () =>
 
 	const trace: PreprocessorTraceEntry[] = [];
 
-	const node = parse(`
-			select "snapshot_content", "updated_at" from "lix_internal_state_vtable" 
-			where "schema_key" = ? and "snapshot_content" is not null and "version_id" = ?
-	`);
+	const rewritten = rewrite(
+		`
+		select "snapshot_content", "updated_at" from "lix_internal_state_vtable" 
+		where "schema_key" = ? and "snapshot_content" is not null and "version_id" = ?
+	`,
+		{
+			trace,
+			getCacheTables: () => new Map(),
+			hasOpenTransaction: () => true,
+		}
+	);
 
-	const rewritten = rewriteVtableSelects({
-		node,
-		parameters: [],
-		getStoredSchemas: () => new Map(),
-		getCacheTables: () => new Map([]),
-		getSqlViews: () => new Map(),
-		trace,
-		hasOpenTransaction: () => true,
-	});
-
-	const { sql } = compile(rewritten);
+	const sql = compileSql(rewritten);
 
 	expect(() =>
 		lix.engine!.sqlite.exec({

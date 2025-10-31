@@ -1,8 +1,11 @@
 import { expect, test } from "vitest";
-import { parse } from "../sql-parser/parse.js";
+import { parse as parseStatements } from "../sql-parser/parse.js";
 import { expandSqlViews } from "./expand-sql-views.js";
 import type { PreprocessorTraceEntry } from "../types.js";
-import type { SqlNode, SelectStatementNode } from "../sql-parser/nodes.js";
+import type {
+	SegmentedStatementNode,
+	SelectStatementNode,
+} from "../sql-parser/nodes.js";
 import {
 	getIdentifierValue,
 	objectNameMatches,
@@ -10,13 +13,13 @@ import {
 
 test("expands referenced view into a subquery", () => {
 	const trace: PreprocessorTraceEntry[] = [];
-	const statement = parse(`
+	const statements = parseStatements(`
 		SELECT av.schema_key
 		FROM active_version AS av
 	`);
 
 	const rewritten = expandSqlViews({
-		node: statement,
+		statements,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
 		getSqlViews: () =>
@@ -33,7 +36,7 @@ test("expands referenced view into a subquery", () => {
 		trace,
 	});
 
-	const select = assertSelectStatement(rewritten);
+	const select = assertSingleSelect(rewritten);
 	const fromClause = select.from_clauses[0];
 	if (!fromClause) {
 		throw new Error("expected FROM clause");
@@ -55,13 +58,13 @@ test("expands referenced view into a subquery", () => {
 });
 
 test("keeps view name as alias when none provided", () => {
-	const statement = parse(`
+	const statements = parseStatements(`
 		SELECT *
 		FROM only_view
 	`);
 
 	const rewritten = expandSqlViews({
-		node: statement,
+		statements,
 		getStoredSchemas: () => new Map(),
 		getCacheTables: () => new Map(),
 		getSqlViews: () =>
@@ -77,7 +80,7 @@ test("keeps view name as alias when none provided", () => {
 		hasOpenTransaction: () => false,
 	});
 
-	const select = assertSelectStatement(rewritten);
+	const select = assertSingleSelect(rewritten);
 	const relation = select.from_clauses[0]?.relation;
 	if (!relation || relation.node_kind !== "subquery") {
 		throw new Error("expected subquery relation");
@@ -85,9 +88,22 @@ test("keeps view name as alias when none provided", () => {
 	expect(getIdentifierValue(relation.alias)).toBe("only_view");
 });
 
-function assertSelectStatement(node: SqlNode): SelectStatementNode {
-	if (node.node_kind !== "select_statement") {
+function assertSingleSelect(
+	statements: readonly SegmentedStatementNode[]
+): SelectStatementNode {
+	if (statements.length !== 1) {
+		throw new Error("expected single statement");
+	}
+	const [statement] = statements;
+	if (!statement || statement.node_kind !== "segmented_statement") {
+		throw new Error("expected segmented statement");
+	}
+	if (statement.segments.length !== 1) {
+		throw new Error("expected single segment");
+	}
+	const [segment] = statement.segments;
+	if (!segment || segment.node_kind !== "select_statement") {
 		throw new Error("expected select statement");
 	}
-	return node as SelectStatementNode;
+	return segment;
 }

@@ -1,4 +1,4 @@
-import type { SqlNode } from "./sql-parser/nodes.js";
+import type { SegmentedStatementNode } from "./sql-parser/nodes.js";
 import type { LixEngine } from "../boot.js";
 import type { CelEnvironment } from "../cel-environment/cel-environment.js";
 
@@ -46,7 +46,7 @@ export type PreprocessorContext = {
  * Context shape for individual preprocessing steps.
  */
 export type PreprocessorStepContext = PreprocessorContext & {
-	readonly node: SqlNode;
+	readonly statements: readonly SegmentedStatementNode[];
 	readonly parameters?: ReadonlyArray<unknown>;
 };
 
@@ -55,10 +55,12 @@ export type PreprocessorStepContext = PreprocessorContext & {
  *
  * @example
  * ```ts
- * const noop: PreprocessorStep = (context) => context.node;
+ * const noop: PreprocessorStep = (context) => context.statements;
  * ```
  */
-export type PreprocessorStep = (context: PreprocessorStepContext) => SqlNode;
+export type PreprocessorStep = (
+	context: PreprocessorStepContext
+) => readonly SegmentedStatementNode[];
 
 /**
  * Arguments accepted by the v3 preprocessor entry point.

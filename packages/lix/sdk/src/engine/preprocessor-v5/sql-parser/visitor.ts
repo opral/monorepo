@@ -21,8 +21,10 @@ import type {
 	SelectQualifiedStarNode,
 	SelectStarNode,
 	SelectStatementNode,
+	SegmentedStatementNode,
 	SetClauseNode,
 	SqlNode,
+	StatementSegmentNode,
 	StatementNode,
 	SubqueryNode,
 	TableReferenceNode,
@@ -42,6 +44,7 @@ type NodeKindMap = {
 	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
+	readonly segmented_statement: SegmentedStatementNode;
 	readonly select_star: SelectStarNode;
 	readonly select_qualified_star: SelectQualifiedStarNode;
 	readonly select_expression: SelectExpressionNode;
@@ -197,6 +200,11 @@ function traverseNode(
 	context: VisitContext
 ): SqlNode {
 	switch (node.node_kind) {
+		case "segmented_statement":
+			return traverseSegmentedStatement(
+				node as SegmentedStatementNode,
+				visitor
+			);
 		case "select_statement":
 			return traverseSelectStatement(node as SelectStatementNode, visitor);
 		case "insert_statement":
@@ -249,6 +257,28 @@ function traverseNode(
 		default:
 			return node;
 	}
+}
+
+/**
+ * Visits each segment in a statement sequence.
+ *
+ * @example
+ * ```ts
+ * const rewritten = traverseStatementSequence(node, visitor);
+ * ```
+ */
+function traverseSegmentedStatement(
+	node: SegmentedStatementNode,
+	visitor: AstVisitor
+): SegmentedStatementNode {
+	const segments = visitArray(node.segments, node, "segments", visitor);
+	if (segments === node.segments) {
+		return node;
+	}
+	return {
+		...node,
+		segments: segments as readonly StatementSegmentNode[],
+	};
 }
 
 function traverseSelectStatement(

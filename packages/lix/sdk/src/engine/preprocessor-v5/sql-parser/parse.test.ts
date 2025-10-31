@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { parse } from "./parse.js";
-import { identifier } from "./nodes.js";
+import { identifier, type RawFragmentNode } from "./nodes.js";
 
 const id = identifier;
 const lit = (value: string | number | boolean | null) => ({
@@ -8,9 +8,62 @@ const lit = (value: string | number | boolean | null) => ({
 	value,
 });
 
+const parseStatements = (sql: string) => parse(sql);
+
+function parseSingleSegment(sql: string) {
+	const statements = parseStatements(sql);
+	if (statements.length !== 1) {
+		throw new Error("expected single statement");
+	}
+	const [statement] = statements;
+	if (!statement || statement.node_kind !== "segmented_statement") {
+		throw new Error("expected segmented statement");
+	}
+	if (statement.segments.length !== 1) {
+		throw new Error("expected single segment");
+	}
+	const [segment] = statement.segments;
+	if (!segment) {
+		throw new Error("missing segment");
+	}
+	return segment;
+}
+
+function parseSelectStatement(sql: string) {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind !== "select_statement") {
+		throw new Error("expected select statement");
+	}
+	return segment;
+}
+
+function parseUpdateStatement(sql: string) {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind !== "update_statement") {
+		throw new Error("expected update statement");
+	}
+	return segment;
+}
+
+function parseDeleteStatement(sql: string) {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind !== "delete_statement") {
+		throw new Error("expected delete statement");
+	}
+	return segment;
+}
+
+function parseInsertStatement(sql: string) {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind !== "insert_statement") {
+		throw new Error("expected insert statement");
+	}
+	return segment;
+}
+
 describe("parse", () => {
 	test("parses select star", () => {
-		const ast = parse("SELECT * FROM projects");
+		const ast = parseSelectStatement("SELECT * FROM projects");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
 			projection: [{ node_kind: "select_star" }],
@@ -33,7 +86,7 @@ describe("parse", () => {
 	});
 
 	test("parses select with where and alias", () => {
-		const ast = parse(
+		const ast = parseSelectStatement(
 			"SELECT p.id AS project_id FROM projects AS p WHERE p.revision >= 1"
 		);
 		expect(ast).toEqual({
@@ -75,7 +128,7 @@ describe("parse", () => {
 	});
 
 	test("parses select literal without from clause", () => {
-		const ast = parse("SELECT 1 AS value");
+		const ast = parseSelectStatement("SELECT 1 AS value");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
 			projection: [
@@ -94,7 +147,7 @@ describe("parse", () => {
 	});
 
 	test("parses qualified column without alias", () => {
-		const ast = parse("SELECT projects.id FROM projects");
+		const ast = parseSelectStatement("SELECT projects.id FROM projects");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
 			projection: [
@@ -126,7 +179,7 @@ describe("parse", () => {
 	});
 
 	test("parses update with assignments", () => {
-		const ast = parse(
+		const ast = parseUpdateStatement(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"
 		);
 		expect(ast).toEqual({
@@ -179,10 +232,9 @@ describe("parse", () => {
 	});
 
 	test("parses IN predicate", () => {
-		const ast = parse("SELECT * FROM projects WHERE id IN ('a', 'b')");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement(
+			"SELECT * FROM projects WHERE id IN ('a', 'b')"
+		);
 		expect(ast.where_clause).toEqual({
 			node_kind: "in_list_expression",
 			operand: {
@@ -195,12 +247,9 @@ describe("parse", () => {
 	});
 
 	test("parses limit and offset clauses", () => {
-		const ast = parse(
+		const ast = parseSelectStatement(
 			"SELECT id FROM projects ORDER BY created_at DESC LIMIT 5 OFFSET 10"
 		);
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
 		expect(ast.limit).toEqual({
 			node_kind: "literal",
 			value: 5,
@@ -212,10 +261,7 @@ describe("parse", () => {
 	});
 
 	test("parses limit without offset", () => {
-		const ast = parse("SELECT * FROM files LIMIT 20");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement("SELECT * FROM files LIMIT 20");
 		expect(ast.limit).toEqual({
 			node_kind: "literal",
 			value: 20,
@@ -224,10 +270,7 @@ describe("parse", () => {
 	});
 
 	test("parses parameterised limit and offset", () => {
-		const ast = parse("SELECT * FROM logs LIMIT ? OFFSET ?2");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement("SELECT * FROM logs LIMIT ? OFFSET ?2");
 		expect(ast.limit).toEqual({
 			node_kind: "parameter",
 			placeholder: "?",
@@ -241,12 +284,9 @@ describe("parse", () => {
 	});
 
 	test("assigns sequential positions after numbered placeholders", () => {
-		const ast = parse(
+		const ast = parseSelectStatement(
 			"SELECT * FROM logs WHERE owner_id = ?1 AND schema_key = ?"
 		);
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
 		const where = ast.where_clause;
 		if (!where || where.node_kind !== "binary_expression") {
 			throw new Error("expected binary expression");
@@ -280,27 +320,40 @@ describe("parse", () => {
 
 	test("returns raw fragment for unsupported statement types", () => {
 		const sql = "CREATE TABLE projects(id TEXT)";
-		const ast = parse(sql);
-		expect(ast).toEqual({
-			node_kind: "raw_fragment",
-			sql_text: sql,
-		});
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+		expect(statement.segments).toEqual<RawFragmentNode[]>([
+			{
+				node_kind: "raw_fragment",
+				sql_text: sql,
+			},
+		]);
 	});
 
 	test("returns raw fragment when lexing fails", () => {
 		const sql = "???";
-		const ast = parse(sql);
-		expect(ast).toEqual({
-			node_kind: "raw_fragment",
-			sql_text: sql,
-		});
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+		expect(statement.segments).toEqual<RawFragmentNode[]>([
+			{
+				node_kind: "raw_fragment",
+				sql_text: sql,
+			},
+		]);
 	});
 
 	test("parses BETWEEN predicate", () => {
-		const ast = parse("SELECT * FROM projects WHERE revision BETWEEN 1 AND 5");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement(
+			"SELECT * FROM projects WHERE revision BETWEEN 1 AND 5"
+		);
 		expect(ast.where_clause).toEqual({
 			node_kind: "between_expression",
 			operand: {
@@ -314,10 +367,9 @@ describe("parse", () => {
 	});
 
 	test("parses ORDER BY clause", () => {
-		const ast = parse("SELECT * FROM projects ORDER BY updated_at DESC, id");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement(
+			"SELECT * FROM projects ORDER BY updated_at DESC, id"
+		);
 		expect(ast.order_by).toEqual([
 			{
 				node_kind: "order_by_item",
@@ -339,10 +391,9 @@ describe("parse", () => {
 	});
 
 	test("parses NOT predicate", () => {
-		const ast = parse("SELECT * FROM projects WHERE NOT (archived = 1)");
-		if (ast.node_kind !== "select_statement") {
-			throw new Error("expected select statement");
-		}
+		const ast = parseSelectStatement(
+			"SELECT * FROM projects WHERE NOT (archived = 1)"
+		);
 		expect(ast.where_clause).toEqual({
 			node_kind: "unary_expression",
 			operator: "not",
@@ -362,7 +413,9 @@ describe("parse", () => {
 	});
 
 	test("parses delete", () => {
-		const ast = parse("DELETE FROM projects WHERE projects.id = 'obsolete'");
+		const ast = parseDeleteStatement(
+			"DELETE FROM projects WHERE projects.id = 'obsolete'"
+		);
 		expect(ast).toEqual({
 			node_kind: "delete_statement",
 			target: {
@@ -383,7 +436,7 @@ describe("parse", () => {
 	});
 
 	test("parses insert with column list and multiple rows", () => {
-		const ast = parse(
+		const ast = parseInsertStatement(
 			"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"
 		);
 		expect(ast).toEqual({
@@ -404,7 +457,7 @@ describe("parse", () => {
 	});
 
 	test("parses function call expression inside update assignment", () => {
-		const ast = parse(
+		const ast = parseUpdateStatement(
 			"UPDATE key_value SET value = json_set(value, '$.foo', ?) WHERE key = ?"
 		);
 		expect(ast).toEqual({
@@ -459,7 +512,9 @@ describe("parse", () => {
 	});
 
 	test("parses function call without arguments inside update assignment", () => {
-		const ast = parse("UPDATE metrics SET touched_at = random() WHERE id = ?");
+		const ast = parseUpdateStatement(
+			"UPDATE metrics SET touched_at = random() WHERE id = ?"
+		);
 		expect(ast).toEqual({
 			node_kind: "update_statement",
 			target: {
@@ -495,5 +550,71 @@ describe("parse", () => {
 				},
 			},
 		});
+	});
+
+	test("splits recursive CTE into raw fragments and select statements", () => {
+		const sql = `
+WITH RECURSIVE
+  "foo" AS (
+    SELECT
+      "id",
+      "name",
+      0 AS "depth"
+    FROM "items"
+    WHERE "id" = 'root'
+
+    UNION ALL
+
+    SELECT
+      "child"."id",
+      "child"."name",
+      "foo"."depth" + 1 AS "depth"
+    FROM "items" AS "child"
+    JOIN "foo" ON "child"."parent_id" = "foo"."id"
+  )
+SELECT *
+FROM "foo";
+			`.trim();
+
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
+
+		const segments = statement.segments;
+		expect(segments).toHaveLength(5);
+
+		const prefix = segments[0];
+		if (!prefix || prefix.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment prefix");
+		}
+		const rawPrefix = prefix as RawFragmentNode;
+		expect(rawPrefix.sql_text).toContain('WITH RECURSIVE\n  "foo" AS (');
+
+		const firstSelect = segments[1];
+		if (!firstSelect || firstSelect.node_kind !== "select_statement") {
+			throw new Error("expected select statement for first query");
+		}
+
+		const unionFragment = segments[2];
+		if (!unionFragment || unionFragment.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment for UNION ALL separator");
+		}
+		const rawUnion = unionFragment as RawFragmentNode;
+		expect(rawUnion.sql_text.trim()).toBe("UNION ALL");
+
+		const secondSelect = segments[3];
+		if (!secondSelect || secondSelect.node_kind !== "select_statement") {
+			throw new Error("expected select statement for recursive branch");
+		}
+
+		const suffix = segments[4];
+		if (!suffix || suffix.node_kind !== "raw_fragment") {
+			throw new Error("expected raw fragment suffix");
+		}
+		const rawSuffix = suffix as RawFragmentNode;
+		expect(rawSuffix.sql_text).toContain(')\nSELECT *\nFROM "foo";');
 	});
 });

@@ -26,12 +26,18 @@ export type RawFragmentNode = SqlNode & {
 	readonly sql_text: string;
 };
 
+export type SegmentedStatementNode = SqlNode & {
+	readonly node_kind: "segmented_statement";
+	readonly segments: readonly StatementSegmentNode[];
+};
+
 export type StatementNode =
 	| SelectStatementNode
 	| InsertStatementNode
 	| UpdateStatementNode
-	| DeleteStatementNode
-	| RawFragmentNode;
+	| DeleteStatementNode;
+
+export type StatementSegmentNode = RawFragmentNode | StatementNode;
 
 export type SelectStatementNode = SqlNode & {
 	readonly node_kind: "select_statement";

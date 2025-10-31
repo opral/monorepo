@@ -21,8 +21,10 @@ import type {
 	SelectQualifiedStarNode,
 	SelectStarNode,
 	SelectStatementNode,
+	SegmentedStatementNode,
 	SetClauseNode,
 	StatementNode,
+	StatementSegmentNode,
 	SubqueryNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
@@ -32,6 +34,7 @@ import type {
 	BetweenExpressionNode,
 	FunctionCallExpressionNode,
 	RawFragmentNode,
+	SqlNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -1024,7 +1027,6 @@ function assignPositionsInStatement(
 			break;
 	}
 }
-
 function assignPositionsInSelect(
 	select: SelectStatementNode,
 	state: ParameterTraversalState
@@ -1193,25 +1195,289 @@ function assignPositionToParameter(
 }
 
 /**
- * Parses SQL into the v3 AST and falls back to a raw fragment when the
- * statement is not supported by the parser.
+ * Parses SQL text into one or more segmented statements, falling back to raw
+ * fragments when the grammar cannot represent portions of the input.
  *
  * @example
  * ```ts
- * const select = parse("SELECT 1");
- * const raw = parse("CREATE TABLE example(id TEXT)");
+ * const [statement] = parse("SELECT 1");
  * ```
  */
-export function parse(sql: string): StatementNode {
-	const root = parseCst(sql);
-	if (!root) {
-		const raw: RawFragmentNode = {
-			node_kind: "raw_fragment",
-			sql_text: sql,
-		};
-		return raw;
+export function parse(sql: string): readonly SegmentedStatementNode[] {
+	const program = parseWithGrammar(sql);
+	if (program.length > 0) {
+		return program;
 	}
-	return assignParameterPositions(toStatementNode(root));
+
+	const segmentedFallback = parseWithSegmentation(sql);
+	if (segmentedFallback.length > 0) {
+		return segmentedFallback;
+	}
+
+	return [createSegmentedStatement([createRawFragment(sql)])];
 }
 
 export { parseCst } from "./cst.js";
+
+function parseWithGrammar(sql: string): SegmentedStatementNode[] {
+	const root = parseCst(sql);
+	if (!root) {
+		return [];
+	}
+
+	const statement = toStatementNode(root);
+	return [createSegmentedStatement([statement])];
+}
+
+function parseWithSegmentation(sql: string): SegmentedStatementNode[] {
+	const segments = segmentSelectStatements(sql);
+	if (!segments) {
+		return [];
+	}
+
+	return [createSegmentedStatement(segments)];
+}
+
+function createSegmentedStatement(
+	segments: StatementSegmentNode[]
+): SegmentedStatementNode {
+	const state: ParameterTraversalState = { nextSequential: 0 };
+	assignPositionsInSegments(segments, state);
+	return {
+		node_kind: "segmented_statement",
+		segments,
+	};
+}
+
+export function normalizeSegmentedStatement(
+	statement: SegmentedStatementNode
+): SegmentedStatementNode {
+	const segments = [...statement.segments] as StatementSegmentNode[];
+	const state: ParameterTraversalState = { nextSequential: 0 };
+	assignPositionsInSegments(segments, state);
+	return {
+		...statement,
+		segments,
+	};
+}
+
+export function normalizeSegmentedStatements(
+	statements: readonly SegmentedStatementNode[]
+): SegmentedStatementNode[] {
+	return statements.map((statement) => normalizeSegmentedStatement(statement));
+}
+
+function assignPositionsInSegments(
+	segments: StatementSegmentNode[],
+	state: ParameterTraversalState
+): void {
+	for (const segment of segments) {
+		if (segment.node_kind === "raw_fragment") {
+			state.nextSequential += countSequentialPlaceholders(segment.sql_text);
+			continue;
+		}
+		assignPositionsInStatement(segment, state);
+	}
+}
+
+/**
+ * Extracts SELECT statements that appear within parenthesised regions while
+ * preserving surrounding fragments as raw nodes.
+ */
+function segmentSelectStatements(sql: string): StatementSegmentNode[] | null {
+	const segments: StatementSegmentNode[] = [];
+	let cursor = 0;
+	let depth = 0;
+	let inSingleQuotedString = false;
+
+	for (let index = 0; index < sql.length; index += 1) {
+		const ch = sql[index]!;
+
+		if (inSingleQuotedString) {
+			if (ch === "'") {
+				const next = sql[index + 1];
+				if (next === "'") {
+					index += 1;
+					continue;
+				}
+				inSingleQuotedString = false;
+			}
+			continue;
+		}
+
+		if (ch === "'") {
+			inSingleQuotedString = true;
+			continue;
+		}
+
+		if (ch === "(") {
+			depth += 1;
+			continue;
+		}
+
+		if (ch === ")") {
+			if (depth > 0) {
+				depth -= 1;
+			}
+			continue;
+		}
+
+		if (
+			depth > 0 &&
+			isKeywordAt(sql, index, "select") &&
+			isIdentifierBoundary(sql, index - 1)
+		) {
+			const endIndex = findSelectBoundary(sql, index, depth);
+			if (endIndex === null || endIndex <= index) {
+				return null;
+			}
+
+			if (index > cursor) {
+				const fragmentSql = sql.slice(cursor, index);
+				if (fragmentSql.length > 0) {
+					segments.push(createRawFragment(fragmentSql));
+				}
+			}
+
+			const selectSql = sql.slice(index, endIndex);
+			const parsed = parseSimpleStatement(selectSql);
+			if (!parsed || parsed.node_kind !== "select_statement") {
+				return null;
+			}
+			segments.push(parsed);
+
+			cursor = endIndex;
+			index = endIndex - 1;
+		}
+	}
+
+	if (segments.length === 0) {
+		return null;
+	}
+
+	if (cursor < sql.length) {
+		const trailing = sql.slice(cursor);
+		if (trailing.length > 0) {
+			segments.push(createRawFragment(trailing));
+		}
+	}
+
+	return segments;
+}
+
+function parseSimpleStatement(sql: string): StatementNode | null {
+	const root = parseCst(sql);
+	if (!root) {
+		return null;
+	}
+	return toStatementNode(root);
+}
+
+/**
+ * Locates the end of a SELECT segment, stopping at UNION keywords or the
+ * closing parenthesis that owns the statement.
+ *
+ * @example
+ * ```ts
+ * const end = findSelectBoundary("SELECT 1 UNION SELECT 2", 0, 0);
+ * ```
+ */
+function findSelectBoundary(
+	sql: string,
+	startIndex: number,
+	startDepth: number
+): number | null {
+	let depth = startDepth;
+	let inSingleQuotedString = false;
+
+	for (let index = startIndex; index < sql.length; index += 1) {
+		const ch = sql[index]!;
+
+		if (inSingleQuotedString) {
+			if (ch === "'") {
+				const next = sql[index + 1];
+				if (next === "'") {
+					index += 1;
+					continue;
+				}
+				inSingleQuotedString = false;
+			}
+			continue;
+		}
+
+		if (ch === "'") {
+			inSingleQuotedString = true;
+			continue;
+		}
+
+		if (ch === "(") {
+			depth += 1;
+			continue;
+		}
+
+		if (ch === ")") {
+			depth -= 1;
+			if (depth < startDepth) {
+				return index;
+			}
+			continue;
+		}
+
+		if (depth === startDepth && isKeywordAt(sql, index, "union")) {
+			return index;
+		}
+	}
+
+	return sql.length;
+}
+
+/**
+ * Checks whether the given keyword appears at the specified index.
+ *
+ * @example
+ * ```ts
+ * isKeywordAt("UNION", 0, "union") === true;
+ * ```
+ */
+function isKeywordAt(sql: string, index: number, keyword: string): boolean {
+	if (index < 0) {
+		return false;
+	}
+	const remaining = sql.length - index;
+	if (remaining < keyword.length) {
+		return false;
+	}
+	const candidate = sql.slice(index, index + keyword.length).toLowerCase();
+	return candidate === keyword;
+}
+
+/**
+ * Determines whether the character at a position can precede an identifier.
+ *
+ * @example
+ * ```ts
+ * isIdentifierBoundary(" SELECT", 0) === true;
+ * ```
+ */
+function isIdentifierBoundary(sql: string, index: number): boolean {
+	if (index < 0) {
+		return true;
+	}
+	const ch = sql[index]!;
+	return !/[a-zA-Z0-9_]/.test(ch);
+}
+
+/**
+ * Wraps SQL text in a raw fragment node.
+ *
+ * @example
+ * ```ts
+ * const fragment = createRawFragment("UNSUPPORTED()");
+ * ```
+ */
+function createRawFragment(sql: string): RawFragmentNode {
+	return {
+		node_kind: "raw_fragment",
+		sql_text: sql,
+	};
+}

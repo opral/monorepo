@@ -5,19 +5,51 @@ import type {
 	InsertStatementNode,
 	LiteralNode,
 	StatementNode,
+	StatementSegmentNode,
 	SelectStatementNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { getIdentifierValue } from "./ast-helpers.js";
 
+function parseSingleSegment(sql: string): StatementSegmentNode {
+	const statements = parse(sql);
+	if (statements.length !== 1) {
+		throw new Error("expected single statement");
+	}
+	const [statement] = statements;
+	if (!statement || statement.node_kind !== "segmented_statement") {
+		throw new Error("expected segmented statement");
+	}
+	if (statement.segments.length !== 1) {
+		throw new Error("expected single segment");
+	}
+	return statement.segments[0]!;
+}
+
+function parseSelect(sql: string): SelectStatementNode {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind !== "select_statement") {
+		throw new Error("expected select statement");
+	}
+	return segment;
+}
+
+function parseStatementNode(sql: string): StatementNode {
+	const segment = parseSingleSegment(sql);
+	if (segment.node_kind === "raw_fragment") {
+		throw new Error("expected supported statement");
+	}
+	return segment;
+}
+
 test("returns the same instance when no handlers modify the tree", () => {
-	const statement = parse("SELECT * FROM projects") as SelectStatementNode;
+	const statement = parseSelect("SELECT * FROM projects");
 	const result = visitSelectStatement(statement, {});
 	expect(result).toBe(statement);
 });
 
 test("allows transforming table references during visitation", () => {
-	const statement = parse("SELECT * FROM projects") as SelectStatementNode;
+	const statement = parseSelect("SELECT * FROM projects");
 	const rewritten = visitSelectStatement(statement, {
 		table_reference(node) {
 			const lastPart = node.name.parts.at(-1);
@@ -44,9 +76,7 @@ test("allows transforming table references during visitation", () => {
 });
 
 test("invokes generic enter and exit hooks in depth-first order", () => {
-	const statement = parse(
-		"SELECT name FROM projects WHERE name = 'foo'"
-	) as SelectStatementNode;
+	const statement = parseSelect("SELECT name FROM projects WHERE name = 'foo'");
 
 	const trace: string[] = [];
 	visitSelectStatement(statement, {
@@ -67,9 +97,9 @@ test("invokes generic enter and exit hooks in depth-first order", () => {
 });
 
 test("visitStatement traverses insert targets and values", () => {
-	const statement = parse(
+	const statement = parseStatementNode(
 		"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"
-	) as StatementNode;
+	);
 	if (statement.node_kind !== "insert_statement") {
 		throw new Error("expected insert statement");
 	}

@@ -141,3 +141,53 @@ test("selecting from stored schema view returns rows via preprocessor", async ()
 
 	await lix.close();
 });
+
+test("rewrites inner joins on views", async () => {
+	const lix = await openLix({});
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	lix.engine!.sqlite.exec({
+		sql: `
+			CREATE VIEW view_a AS
+			SELECT sa.entity_id, sa.schema_key
+			FROM state_all AS sa
+		`,
+	});
+
+	lix.engine!.sqlite.exec({
+		sql: `
+			CREATE VIEW view_b AS
+			SELECT sa.entity_id, sa.file_id
+			FROM state_all AS sa
+		`,
+	});
+
+	const result = preprocess({
+		sql: `
+		SELECT va.schema_key, vb.file_id
+		FROM view_a AS va
+		INNER JOIN view_b AS vb ON va.entity_id = vb.entity_id
+		`,
+		parameters: [],
+		trace: true,
+	});
+	const { sql, trace } = result;
+
+	expect(() => {
+		lix.engine!.sqlite.exec({
+			sql,
+			returnValue: "resultRows",
+			rowMode: "object",
+		});
+	}).not.toThrow();
+
+	const upper = sql.toUpperCase();
+	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE");
+	const steps = trace?.map((entry) => entry.step) ?? [];
+	expect(steps).toContain("expand_sql_views");
+	expect(steps).toContain("rewrite_vtable_selects");
+	expect(steps).toContain("complete");
+
+	await lix.close();
+});

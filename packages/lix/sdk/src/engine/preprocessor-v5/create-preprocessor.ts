@@ -59,11 +59,11 @@ export function createPreprocessor(args: {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 
-		const statement = parse(sql);
+		const statements = parse(sql);
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
-					node: current,
+					statements: current,
 					parameters,
 					getStoredSchemas: context.getStoredSchemas,
 					getCacheTables: context.getCacheTables,
@@ -72,8 +72,8 @@ export function createPreprocessor(args: {
 					getCelEnvironment: context.getCelEnvironment,
 					getEngine: context.getEngine,
 					trace: context.trace,
-				}) as StatementNode,
-			statement
+				}),
+			statements
 		);
 
 		if (traceEntries) {

@@ -19,8 +19,10 @@ import type {
 	RawFragmentNode,
 	SelectItemNode,
 	SelectStatementNode,
+	SegmentedStatementNode,
 	SetClauseNode,
 	StatementNode,
+	StatementSegmentNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
 	UnaryOperator,
@@ -28,7 +30,6 @@ import type {
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
 } from "./nodes.js";
-import type { SqlNode } from "./nodes.js";
 import {
 	getBinaryOperatorPrecedence,
 	isNonAssociativeBinaryOperator,
@@ -40,7 +41,7 @@ type CompileResult = {
 };
 
 /**
- * Compiles a v3 SQL statement AST back into SQL text.
+ * Compiles segmented statements back into SQL text.
  *
  * @example
  * ```ts
@@ -48,16 +49,14 @@ type CompileResult = {
  * const { sql } = compile(ast);
  * ```
  */
-export function compile(statement: SqlNode): CompileResult {
-	if (statement.node_kind === "raw_fragment") {
-		const fragment = statement as RawFragmentNode;
-		return {
-			sql: fragment.sql_text,
-			parameters: [],
-		};
-	}
-
-	return compileStatement(statement as StatementNode);
+export function compile(
+	statements: readonly SegmentedStatementNode[]
+): CompileResult {
+	const sql = statements.map(emitSegmentedStatement).join("\n");
+	return {
+		sql,
+		parameters: [],
+	};
 }
 
 /**
@@ -77,7 +76,8 @@ export function expressionToSql(expression: ExpressionNode): string {
 }
 
 function compileStatement(statement: StatementNode): CompileResult {
-	switch (statement.node_kind) {
+	const kind = statement.node_kind;
+	switch (kind) {
 		case "select_statement":
 			return buildResult(emitSelectStatement(statement));
 		case "insert_statement":
@@ -87,9 +87,7 @@ function compileStatement(statement: StatementNode): CompileResult {
 		case "delete_statement":
 			return buildResult(emitDeleteStatement(statement));
 		default:
-			throw new Error(
-				`Unsupported statement node kind '${statement.node_kind}'`
-			);
+			throw new Error(`Unsupported statement node kind '${kind}'`);
 	}
 }
 
@@ -98,6 +96,73 @@ function buildResult(sql: string): CompileResult {
 		sql,
 		parameters: [],
 	};
+}
+
+/**
+ * Serialises a sequence of SQL segments back into a single SQL string.
+ *
+ * @example
+ * ```ts
+ * const sql = emitStatementSequence(node);
+ * ```
+ */
+function emitSegmentedStatement(statement: SegmentedStatementNode): string {
+	let sql = "";
+	for (const segment of statement.segments as readonly StatementSegmentNode[]) {
+		const segmentSql = isRawFragment(segment)
+			? segment.sql_text
+			: compileStatement(segment).sql;
+
+		if (!segmentSql) {
+			continue;
+		}
+
+		if (sql) {
+			const lastChar = getLastCharacter(sql);
+			const firstChar = getFirstCharacter(segmentSql);
+			if (
+				lastChar &&
+				firstChar &&
+				!isWhitespace(lastChar) &&
+				!isWhitespace(firstChar)
+			) {
+				sql += "\n";
+			}
+		}
+
+		sql += segmentSql;
+	}
+	return sql;
+}
+
+function getFirstCharacter(value: string): string | null {
+	for (let index = 0; index < value.length; index += 1) {
+		const char = value[index];
+		if (char !== undefined) {
+			return char;
+		}
+	}
+	return null;
+}
+
+function getLastCharacter(value: string): string | null {
+	for (let index = value.length - 1; index >= 0; index -= 1) {
+		const char = value[index];
+		if (char !== undefined) {
+			return char;
+		}
+	}
+	return null;
+}
+
+function isWhitespace(char: string): boolean {
+	return /\s/.test(char);
+}
+
+function isRawFragment(
+	segment: StatementSegmentNode
+): segment is RawFragmentNode {
+	return segment.node_kind === "raw_fragment";
 }
 
 function emitSelectStatement(statement: SelectStatementNode): string {

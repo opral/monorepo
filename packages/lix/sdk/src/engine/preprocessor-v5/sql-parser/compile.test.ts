@@ -48,4 +48,42 @@ describe("compile", () => {
 	test("DELETE statement", () => {
 		expectRoundTrip("DELETE FROM projects WHERE projects.id = 'obsolete'");
 	});
+
+	test("compiles segmented statement sequences", () => {
+		const sql = `
+WITH RECURSIVE
+  "foo" AS (
+    SELECT
+      "id",
+      "name",
+      0 AS "depth"
+    FROM "items"
+    WHERE "id" = 'root'
+
+    UNION ALL
+
+    SELECT
+      "child"."id",
+      "child"."name",
+      "foo"."depth" + 1 AS "depth"
+    FROM "items" AS "child"
+    JOIN "foo" ON "child"."parent_id" = "foo"."id"
+  )
+SELECT *
+FROM "foo";
+			`.trim();
+
+		const parsed = parse(sql);
+		expect(parsed).toHaveLength(1);
+
+		const { sql: compiled, parameters } = compile(parsed);
+
+		expect(compiled).toContain("WITH RECURSIVE");
+		expect(compiled).toContain("\nUNION ALL\n");
+		expect(compiled).toContain("\n)\nSELECT *");
+		expect(parameters).toEqual([]);
+
+		const reparsed = parse(compiled);
+		expect(reparsed).toEqual(parsed);
+	});
 });

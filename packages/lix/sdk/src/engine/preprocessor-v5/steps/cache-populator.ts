@@ -6,6 +6,7 @@ import {
 	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type RelationNode,
+	type SegmentedStatementNode,
 	type SelectStatementNode,
 	type StatementNode,
 	type TableReferenceNode,
@@ -61,7 +62,7 @@ type ParameterState = { position: number };
 export const cachePopulator: PreprocessorStep = (context) => {
 	const engine = context.getEngine?.();
 	if (!engine) {
-		return context.node;
+		return context.statements;
 	}
 
 	const parameters = context.parameters ?? [];
@@ -73,16 +74,17 @@ export const cachePopulator: PreprocessorStep = (context) => {
 		versionDynamic: false,
 	};
 
-	const state: ParameterState = { position: 0 };
-	const node = context.node as StatementNode;
-	collectCacheTargets(node, {
-		parameters,
-		state,
-		aggregation,
-	});
+	for (const statement of context.statements) {
+		const state: ParameterState = { position: 0 };
+		collectCacheTargetsInSegments(statement, {
+			parameters,
+			state,
+			aggregation,
+		});
+	}
 
 	if (!aggregation.foundReference) {
-		return node;
+		return context.statements;
 	}
 
 	if (aggregation.schemaDynamic) {
@@ -104,8 +106,24 @@ export const cachePopulator: PreprocessorStep = (context) => {
 		versionId,
 	});
 
-	return node;
+	return context.statements;
 };
+
+function collectCacheTargetsInSegments(
+	statement: SegmentedStatementNode,
+	args: {
+		parameters: ReadonlyArray<unknown>;
+		state: ParameterState;
+		aggregation: CacheAggregation;
+	}
+): void {
+	for (const segment of statement.segments) {
+		if (segment.node_kind === "raw_fragment") {
+			continue;
+		}
+		collectCacheTargets(segment, args);
+	}
+}
 
 function collectCacheTargets(
 	node: StatementNode,
@@ -129,7 +147,6 @@ function collectCacheTargets(
 			consumeExpression(node.where_clause, args);
 			return;
 		case "insert_statement":
-		case "raw_fragment":
 		default:
 			return;
 	}
