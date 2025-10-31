@@ -21,6 +21,8 @@ import {
 } from "../cel-environment/cel-environment.js";
 import { getEntityViewSqlDefinitions } from "./entity-views/select.js";
 import { rewriteEntityViewInsert } from "./entity-views/insert.js";
+import { rewriteEntityViewUpdate } from "./entity-views/update.js";
+import { rewriteEntityViewDelete } from "./entity-views/delete.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -35,6 +37,8 @@ type EngineShape = Pick<
 const pipeline: PreprocessorStep[] = [
 	expandSqlViews,
 	rewriteEntityViewInsert,
+	rewriteEntityViewUpdate,
+	rewriteEntityViewDelete,
 	cachePopulator,
 	rewriteVtableSelects,
 ];
