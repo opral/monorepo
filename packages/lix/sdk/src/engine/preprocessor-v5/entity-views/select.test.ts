@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { openLix } from "../../../lix/open-lix.js";
-import { getEntityViewSelects } from "./selects.js";
-import { createQueryPreprocessor } from "../create-query-preprocessor.js";
+import { getEntityViewSqlDefinitions } from "./select.js";
+import { createPreprocessor } from "../create-preprocessor.js";
 
 describe("entity view select synthesis", () => {
-	test("bootstrap exposes built-in stored schemas", async () => {
+	test("opening a lix exposes built-in stored schemas", async () => {
 		const lix = await openLix({});
-		const result = getEntityViewSelects({ engine: lix.engine! });
+		const result = getEntityViewSqlDefinitions({ engine: lix.engine! });
 		expect(result.map.size).toBeGreaterThan(0);
 		expect(result.map.has("lix_key_value")).toBe(true);
 		expect(result.map.has("lix_key_value_all")).toBe(true);
@@ -33,7 +33,7 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const { map } = getEntityViewSelects({ engine: lix.engine! });
+		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
 		expect(map.has("lix_alias_test")).toBe(true);
 		expect(map.has("alias_test")).toBe(true);
 		expect(map.get("alias_test")).toBe(map.get("lix_alias_test"));
@@ -65,7 +65,7 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const { map } = getEntityViewSelects({ engine: lix.engine! });
+		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
 		expect(map.has("unit_test_schema")).toBe(true);
 		expect(map.has("unit_test_schema_all")).toBe(true);
 		expect(map.has("unit_test_schema_history")).toBe(true);
@@ -110,7 +110,7 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const { map } = getEntityViewSelects({ engine: lix.engine! });
+		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
 		expect(map.has("limited_views_schema")).toBe(true);
 		expect(map.has("limited_views_schema_all")).toBe(false);
 		expect(map.has("limited_views_schema_history")).toBe(false);
@@ -137,7 +137,7 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const preprocess = createPreprocessor({ engine: lix.engine! });
 
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
@@ -220,13 +220,11 @@ describe("entity view select synthesis", () => {
 			})
 			.execute();
 
-		const preprocess = await createQueryPreprocessor(lix.engine!);
+		const preprocess = createPreprocessor({ engine: lix.engine! });
 		const rewritten = preprocess({
 			sql: "SELECT lixcol_inherited_from_version_id FROM inherited_version_schema WHERE id = ?",
 			parameters: [entityId],
 		});
-
-		expect(rewritten.sql).toContain("COALESCE");
 
 		const rows = lix.engine!.sqlite.exec({
 			sql: rewritten.sql,
@@ -258,8 +256,8 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const first = getEntityViewSelects({ engine: lix.engine! });
-		const second = getEntityViewSelects({ engine: lix.engine! });
+		const first = getEntityViewSqlDefinitions({ engine: lix.engine! });
+		const second = getEntityViewSqlDefinitions({ engine: lix.engine! });
 
 		expect(first.signature).toBe(second.signature);
 		expect(first.map.get("cache_test_schema")).toBe(

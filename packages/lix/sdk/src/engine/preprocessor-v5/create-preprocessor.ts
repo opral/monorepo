@@ -20,6 +20,7 @@ import {
 	createCelEnvironment,
 	type CelEnvironment,
 } from "../cel-environment/cel-environment.js";
+import { getEntityViewSqlDefinitions } from "./entity-views/select.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -170,6 +171,8 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 		columnNames: [],
 	});
 
+	const entityViews = getEntityViewSqlDefinitions({ engine });
+
 	const map = new Map<string, string>();
 	for (const row of result as Array<Record<string, unknown>>) {
 		const name = typeof row.name === "string" ? row.name : undefined;
@@ -183,6 +186,11 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 		}
 		map.set(name, selectSql);
 	}
+
+	for (const [name, sql] of entityViews.map) {
+		map.set(name, sql);
+	}
+
 	return map;
 }
 
