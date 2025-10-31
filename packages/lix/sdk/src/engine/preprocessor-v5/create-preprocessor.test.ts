@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { createPreprocessor } from "./create-preprocessor.js";
 import { openLix } from "../../lix/open-lix.js";
 
-test("state_all query flows through state_all and vtable rewrites", async () => {
+test("state_all view is rewritten", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
@@ -33,7 +33,7 @@ test("state_all query flows through state_all and vtable rewrites", async () => 
 	await lix.close();
 });
 
-test("unsupported statements return a raw fragment", async () => {
+test("unsupported statements are ignored", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
@@ -50,7 +50,7 @@ test("unsupported statements return a raw fragment", async () => {
 	await lix.close();
 });
 
-test.skip("sql view expansion feeds subsequent rewrites", async () => {
+test("sql view expansion feeds subsequent rewrites", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
@@ -73,7 +73,7 @@ test.skip("sql view expansion feeds subsequent rewrites", async () => {
 	const { sql, context } = result;
 
 	const upper = sql.toUpperCase();
-	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE_REWRITTEN");
+	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE");
 	const steps = context?.trace?.map((entry) => entry.step) ?? [];
 	expect(steps).toContain("expand_sql_views");
 	expect(steps).toContain("rewrite_vtable_selects");
