@@ -5,6 +5,7 @@ import { createSqlSelectTool } from "./sql-select.js";
 import { createSqlIntrospectSchemaTool } from "./sql-introspect-schema.js";
 import { createWriteFileTool } from "./write-file.js";
 import { createDeleteFileTool } from "./delete-file.js";
+import { createExecuteJavascriptTool } from "./execute-javascript.js";
 
 export function createAgentToolSet(args: { lix: Lix }) {
 	const { lix } = args;
@@ -15,6 +16,7 @@ export function createAgentToolSet(args: { lix: Lix }) {
 		sql_introspect_schema: createSqlIntrospectSchemaTool({ lix }),
 		write_file: createWriteFileTool({ lix }),
 		delete_file: createDeleteFileTool({ lix }),
+		execute_javascript: createExecuteJavascriptTool({ lix }),
 	} as const;
 }
 
