@@ -86,6 +86,26 @@ export const Desc: TokenType = createToken({
 	pattern: /desc\b/i,
 });
 
+export const Union: TokenType = createToken({
+	name: "Union",
+	pattern: /union\b/i,
+});
+
+export const All: TokenType = createToken({
+	name: "All",
+	pattern: /all\b/i,
+});
+
+export const Intersect: TokenType = createToken({
+	name: "Intersect",
+	pattern: /intersect\b/i,
+});
+
+export const Except: TokenType = createToken({
+	name: "Except",
+	pattern: /except\b/i,
+});
+
 export const Inner: TokenType = createToken({
 	name: "Inner",
 	pattern: /inner\b/i,
@@ -322,6 +342,10 @@ const tokens: TokenType[] = [
 	Full,
 	Join,
 	On,
+	Union,
+	All,
+	Intersect,
+	Except,
 	Is,
 	InKeyword,
 	NullKeyword,

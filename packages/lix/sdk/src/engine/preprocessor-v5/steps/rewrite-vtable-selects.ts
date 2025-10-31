@@ -1,6 +1,7 @@
 import {
 	type BetweenExpressionNode,
 	type BinaryExpressionNode,
+	type CompoundSelectNode,
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
@@ -102,14 +103,21 @@ function rewriteSegmentedStatement(
 ): SegmentedStatementNode {
 	let changed = false;
 	const segments = statement.segments.map((segment) => {
-		if (segment.node_kind !== "select_statement") {
-			return segment;
+		if (segment.node_kind === "select_statement") {
+			const rewritten = rewriteSelectStatement(segment, context);
+			if (rewritten !== segment) {
+				changed = true;
+			}
+			return rewritten;
 		}
-		const rewritten = rewriteSelectStatement(segment, context);
-		if (rewritten !== segment) {
-			changed = true;
+		if (segment.node_kind === "compound_select") {
+			const rewritten = rewriteCompoundSelect(segment, context);
+			if (rewritten !== segment) {
+				changed = true;
+			}
+			return rewritten;
 		}
-		return rewritten;
+		return segment;
 	});
 
 	if (!changed) {
@@ -197,6 +205,39 @@ function rewriteSelectStatement(
 	}
 
 	return rewritten;
+}
+
+function rewriteCompoundSelect(
+	compound: CompoundSelectNode,
+	context: PreprocessorStepContext
+): CompoundSelectNode {
+	let changed = false;
+	const first = rewriteSelectStatement(compound.first, context);
+	if (first !== compound.first) {
+		changed = true;
+	}
+
+	const branches = compound.compounds.map((branch) => {
+		const rewritten = rewriteSelectStatement(branch.select, context);
+		if (rewritten !== branch.select) {
+			changed = true;
+			return {
+				...branch,
+				select: rewritten,
+			};
+		}
+		return branch;
+	});
+
+	if (!changed) {
+		return compound;
+	}
+
+	return {
+		...compound,
+		first,
+		compounds: branches,
+	};
 }
 
 function collectInternalStateReferences(

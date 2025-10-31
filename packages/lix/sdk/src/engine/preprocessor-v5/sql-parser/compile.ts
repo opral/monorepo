@@ -19,6 +19,8 @@ import type {
 	RawFragmentNode,
 	SelectItemNode,
 	SelectStatementNode,
+	CompoundSelectNode,
+	CompoundOperator,
 	SegmentedStatementNode,
 	SetClauseNode,
 	StatementNode,
@@ -78,6 +80,8 @@ export function expressionToSql(expression: ExpressionNode): string {
 function compileStatement(statement: StatementNode): CompileResult {
 	const kind = statement.node_kind;
 	switch (kind) {
+		case "compound_select":
+			return buildResult(emitCompoundSelect(statement));
 		case "select_statement":
 			return buildResult(emitSelectStatement(statement));
 		case "insert_statement":
@@ -163,6 +167,51 @@ function isRawFragment(
 	segment: StatementSegmentNode
 ): segment is RawFragmentNode {
 	return segment.node_kind === "raw_fragment";
+}
+
+function emitCompoundSelect(statement: CompoundSelectNode): string {
+	const segments: string[] = [];
+	segments.push(emitSelectStatement(statement.first));
+	for (const branch of statement.compounds) {
+		segments.push(
+			`${emitCompoundOperator(branch.operator)}\n${emitSelectStatement(branch.select)}`
+		);
+	}
+
+	const parts: string[] = [segments.join("\n")];
+
+	if (statement.order_by.length) {
+		parts.push(
+			`ORDER BY ${statement.order_by
+				.map((item) => emitOrderByItem(item))
+				.join(", ")}`
+		);
+	}
+
+	if (statement.limit) {
+		parts.push(`LIMIT ${emitExpressionOrRaw(statement.limit)}`);
+	}
+
+	if (statement.offset) {
+		parts.push(`OFFSET ${emitExpressionOrRaw(statement.offset)}`);
+	}
+
+	return parts.join("\n");
+}
+
+function emitCompoundOperator(operator: CompoundOperator): string {
+	switch (operator) {
+		case "union":
+			return "UNION";
+		case "union_all":
+			return "UNION ALL";
+		case "intersect":
+			return "INTERSECT";
+		case "except":
+			return "EXCEPT";
+		default:
+			return assertNever(operator);
+	}
 }
 
 function emitSelectStatement(statement: SelectStatementNode): string {

@@ -31,11 +31,32 @@ export type SegmentedStatementNode = SqlNode & {
 	readonly segments: readonly StatementSegmentNode[];
 };
 
+export type CompoundOperator =
+	| "union"
+	| "union_all"
+	| "intersect"
+	| "except";
+
+export type CompoundSelectBranch = {
+	readonly operator: CompoundOperator;
+	readonly select: SelectStatementNode;
+};
+
+export type CompoundSelectNode = SqlNode & {
+	readonly node_kind: "compound_select";
+	readonly first: SelectStatementNode;
+	readonly compounds: readonly CompoundSelectBranch[];
+	readonly order_by: readonly OrderByItemNode[];
+	readonly limit: ExpressionNode | RawFragmentNode | null;
+	readonly offset: ExpressionNode | RawFragmentNode | null;
+};
+
 export type StatementNode =
 	| SelectStatementNode
 	| InsertStatementNode
 	| UpdateStatementNode
-	| DeleteStatementNode;
+	| DeleteStatementNode
+	| CompoundSelectNode;
 
 export type StatementSegmentNode = RawFragmentNode | StatementNode;
 

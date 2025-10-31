@@ -21,6 +21,7 @@ import type {
 	SelectQualifiedStarNode,
 	SelectStarNode,
 	SelectStatementNode,
+	CompoundSelectNode,
 	SegmentedStatementNode,
 	SetClauseNode,
 	SqlNode,
@@ -41,6 +42,7 @@ export type VisitContext = {
 type NodeKindMap = {
 	readonly raw_fragment: RawFragmentNode;
 	readonly select_statement: SelectStatementNode;
+	readonly compound_select: CompoundSelectNode;
 	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
@@ -200,11 +202,13 @@ function traverseNode(
 	context: VisitContext
 ): SqlNode {
 	switch (node.node_kind) {
-		case "segmented_statement":
-			return traverseSegmentedStatement(
-				node as SegmentedStatementNode,
-				visitor
-			);
+	case "segmented_statement":
+		return traverseSegmentedStatement(
+			node as SegmentedStatementNode,
+			visitor
+		);
+	case "compound_select":
+		return traverseCompoundSelect(node as CompoundSelectNode, visitor);
 		case "select_statement":
 			return traverseSelectStatement(node as SelectStatementNode, visitor);
 		case "insert_statement":
@@ -278,6 +282,46 @@ function traverseSegmentedStatement(
 	return {
 		...node,
 		segments: segments as readonly StatementSegmentNode[],
+	};
+}
+
+function traverseCompoundSelect(
+	node: CompoundSelectNode,
+	visitor: AstVisitor
+): CompoundSelectNode {
+	let changed = false;
+	const first = visitNode(node.first, visitor, {
+		parent: node,
+		property: "first",
+	}) as SelectStatementNode;
+	if (first !== node.first) {
+		changed = true;
+	}
+
+	const compounds = node.compounds.map((branch, index) => {
+		const visited = visitNode(branch.select, visitor, {
+			parent: node,
+			property: "compounds",
+			index,
+		}) as SelectStatementNode;
+		if (visited !== branch.select) {
+			changed = true;
+			return {
+				...branch,
+				select: visited,
+			};
+		}
+		return branch;
+	});
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		first,
+		compounds,
 	};
 }
 

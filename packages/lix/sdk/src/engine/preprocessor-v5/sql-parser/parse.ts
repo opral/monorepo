@@ -21,6 +21,8 @@ import type {
 	SelectQualifiedStarNode,
 	SelectStarNode,
 	SelectStatementNode,
+	CompoundSelectNode,
+	CompoundOperator,
 	SegmentedStatementNode,
 	SetClauseNode,
 	StatementNode,
@@ -51,14 +53,14 @@ class ToAstVisitor extends BaseVisitor {
 	}
 
 	public select_statement(ctx: {
-		core?: CstNode[];
+		select?: CstNode[];
 		insert?: CstNode[];
 		update?: CstNode[];
 		delete?: CstNode[];
 	}): StatementNode {
-		const core = ctx.core?.[0];
-		if (core) {
-			return this.visit(core) as SelectStatementNode;
+		const select = ctx.select?.[0];
+		if (select) {
+			return this.visit(select) as StatementNode;
 		}
 		const insert = ctx.insert?.[0];
 		if (insert) {
@@ -75,14 +77,76 @@ class ToAstVisitor extends BaseVisitor {
 		throw new Error("statement missing recognized root");
 	}
 
+	public select_compound(ctx: {
+		cores?: CstNode[];
+		operators?: CstNode[];
+		order_by?: CstNode[];
+		limit?: CstNode[];
+		offset?: CstNode[];
+	}): SelectStatementNode | CompoundSelectNode {
+		const coreNodes = ctx.cores ?? [];
+		if (coreNodes.length === 0) {
+			throw new Error("compound select requires at least one core");
+		}
+
+		const selectNodes = coreNodes.map(
+			(core) => this.visit(core) as SelectStatementNode
+		);
+
+		const orderByItems = ctx.order_by?.[0]
+			? (this.visit(ctx.order_by[0]!) as OrderByItemNode[])
+			: [];
+
+		const limitNode = ctx.limit?.[0]
+			? (this.visit(ctx.limit[0]!) as ExpressionNode)
+			: null;
+		const offsetNode = ctx.offset?.[0]
+			? (this.visit(ctx.offset[0]!) as ExpressionNode)
+			: null;
+
+		const operatorNodes = ctx.operators ?? [];
+		if (operatorNodes.length === 0) {
+			const single = { ...selectNodes[0]! };
+			return {
+				...single,
+				order_by: orderByItems,
+				limit: limitNode,
+				offset: offsetNode,
+			};
+		}
+
+		if (operatorNodes.length !== selectNodes.length - 1) {
+			throw new Error("compound select operator mismatch");
+		}
+
+		const compounds = selectNodes.slice(1).map((select, index) => {
+			const op = this.visit(operatorNodes[index]!) as CompoundOperator;
+			return {
+				operator: op,
+				select,
+			};
+		});
+
+		const first = { ...selectNodes[0]! };
+		first.order_by = [];
+		first.limit = null;
+		first.offset = null;
+
+		return {
+			node_kind: "compound_select",
+			first,
+			compounds,
+			order_by: orderByItems,
+			limit: limitNode,
+			offset: offsetNode,
+		};
+	}
+
 	public select_core(ctx: {
 		select_list: CstNode[];
 		from: CstNode[];
 		joins?: CstNode[];
 		where_clause?: CstNode[];
-		order_by?: CstNode[];
-		limit?: CstNode[];
-		offset?: CstNode[];
 	}): SelectStatementNode {
 		const selectList = ctx.select_list?.[0];
 		if (!selectList) {
@@ -105,22 +169,33 @@ class ToAstVisitor extends BaseVisitor {
 		const whereClause = whereNode
 			? (this.visit(whereNode) as ExpressionNode)
 			: null;
-		const rawOrderBy = ctx.order_by?.[0];
-		const orderByItems = rawOrderBy
-			? (this.visit(rawOrderBy) as OrderByItemNode[])
-			: [];
-		const limitNode = ctx.limit?.[0] ?? null;
-		const offsetNode = ctx.offset?.[0] ?? null;
-
 		return {
 			node_kind: "select_statement",
 			projection,
 			from_clauses: fromClauses,
 			where_clause: whereClause,
-			order_by: orderByItems,
-			limit: limitNode ? (this.visit(limitNode) as ExpressionNode) : null,
-			offset: offsetNode ? (this.visit(offsetNode) as ExpressionNode) : null,
+			order_by: [],
+			limit: null,
+			offset: null,
 		};
+	}
+
+	public compound_operator(ctx: {
+		Union?: IToken[];
+		All?: IToken[];
+		Intersect?: IToken[];
+		Except?: IToken[];
+	}): CompoundOperator {
+		if (ctx.Union?.length) {
+			return ctx.All?.length ? "union_all" : "union";
+		}
+		if (ctx.Intersect?.length) {
+			return "intersect";
+		}
+		if (ctx.Except?.length) {
+			return "except";
+		}
+		throw new Error("unrecognised compound operator");
 	}
 
 	public insert_statement(ctx: {
@@ -1014,6 +1089,9 @@ function assignPositionsInStatement(
 		case "select_statement":
 			assignPositionsInSelect(statement, state);
 			break;
+		case "compound_select":
+			assignPositionsInCompound(statement, state);
+			break;
 		case "insert_statement":
 			assignPositionsInInsert(statement, state);
 			break;
@@ -1043,6 +1121,21 @@ function assignPositionsInSelect(
 	}
 	assignPositionsInExpressionOrFragment(select.limit, state);
 	assignPositionsInExpressionOrFragment(select.offset, state);
+}
+
+function assignPositionsInCompound(
+	compound: CompoundSelectNode,
+	state: ParameterTraversalState
+): void {
+	assignPositionsInSelect(compound.first, state);
+	for (const branch of compound.compounds) {
+		assignPositionsInSelect(branch.select, state);
+	}
+	for (const item of compound.order_by) {
+		assignPositionsInExpression(item.expression, state);
+	}
+	assignPositionsInExpressionOrFragment(compound.limit, state);
+	assignPositionsInExpressionOrFragment(compound.offset, state);
 }
 
 function assignPositionsInSelectItem(

@@ -49,6 +49,12 @@ describe("compile", () => {
 		expectRoundTrip("DELETE FROM projects WHERE projects.id = 'obsolete'");
 	});
 
+	test("compiles compound select", () => {
+		expectRoundTrip(
+			`SELECT id FROM foo UNION ALL SELECT id FROM bar WHERE bar.active = 1`
+		);
+	});
+
 	test("compiles segmented statement sequences", () => {
 		const sql = `
 WITH RECURSIVE

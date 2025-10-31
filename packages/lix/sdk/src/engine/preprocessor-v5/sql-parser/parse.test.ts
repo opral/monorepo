@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { parse } from "./parse.js";
-import { identifier, type RawFragmentNode } from "./nodes.js";
+import {
+	identifier,
+	type RawFragmentNode,
+	type CompoundSelectNode,
+} from "./nodes.js";
 
 const id = identifier;
 const lit = (value: string | number | boolean | null) => ({
@@ -661,27 +665,25 @@ select bar FROM baz
 			throw new Error("expected segmented statement");
 		}
 
-		expect(statement.segments).toHaveLength(3);
+		expect(statement.segments).toHaveLength(1);
 
-		const [firstSelect, unionFragment, secondSelect] = statement.segments;
-
-		if (!firstSelect || firstSelect.node_kind !== "select_statement") {
-			throw new Error("expected select statement segment");
+		const [segment] = statement.segments;
+		if (!segment || segment.node_kind !== "compound_select") {
+			throw new Error("expected compound select segment");
 		}
-		expect(firstSelect.from_clauses[0]?.relation.node_kind).toBe(
-			"table_reference"
-		);
 
-		if (!unionFragment || unionFragment.node_kind !== "raw_fragment") {
-			throw new Error("expected raw fragment separator");
-		}
-		expect(unionFragment.sql_text.trim().toLowerCase()).toBe("union");
+		const compound = segment as CompoundSelectNode;
+		expect(compound.compounds).toHaveLength(1);
+		expect(compound.compounds[0]?.operator).toBe("union");
 
-		if (!secondSelect || secondSelect.node_kind !== "select_statement") {
-			throw new Error("expected select statement segment");
+		const firstFrom = compound.first.from_clauses[0];
+		if (!firstFrom || firstFrom.relation.node_kind !== "table_reference") {
+			throw new Error("expected table reference");
 		}
-		expect(secondSelect.from_clauses[0]?.relation.node_kind).toBe(
-			"table_reference"
-		);
+
+		const secondFrom = compound.compounds[0]?.select.from_clauses[0];
+		if (!secondFrom || secondFrom.relation.node_kind !== "table_reference") {
+			throw new Error("expected table reference");
+		}
 	});
 });

@@ -60,10 +60,13 @@ function firstSelect(
 	statements: readonly SegmentedStatementNode[]
 ): SelectStatementNode {
 	const segment = firstSegment<StatementSegmentNode>(statements);
-	if (segment.node_kind !== "select_statement") {
-		throw new Error("expected select statement");
+	if (segment.node_kind === "select_statement") {
+		return segment;
 	}
-	return segment;
+	if (segment.node_kind === "compound_select") {
+		return segment.first;
+	}
+	throw new Error("expected select statement");
 }
 
 const compileSql = (statements: readonly SegmentedStatementNode[]) =>
@@ -574,6 +577,27 @@ test("handles multiple vtable references with selective projections", () => {
 	expect(normalizedSql).toContain("c.change_id as change_id");
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_dst");
 	expect(normalizedSql).toContain("left join lix_internal_state_writer ws_src");
+});
+
+test("rewrites compound selects", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		UNION ALL
+		SELECT w.schema_key
+		FROM lix_internal_state_vtable AS w
+	`,
+		{ trace, hasOpenTransaction: () => true }
+	);
+
+	expect(trace.length).toBeGreaterThanOrEqual(2);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).toContain("union all");
+	expect(sql).not.toContain("lix_internal_state_vtable as v");
+	expect(sql).not.toContain("lix_internal_state_vtable as w");
 });
 
 test("returns transaction rows", async () => {

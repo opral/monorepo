@@ -1,5 +1,6 @@
 import type {
 	SegmentedStatementNode,
+	CompoundSelectNode,
 	SelectStatementNode,
 	StatementNode,
 	StatementSegmentNode,
@@ -64,26 +65,31 @@ function expandSegmentedStatement(
 	let expandedViewNames: string[] = [];
 	const updatedSegments: StatementSegmentNode[] = statement.segments.map(
 		(segment) => {
-			if (segment.node_kind !== "select_statement") {
-				return segment;
+			if (segment.node_kind === "select_statement") {
+				const state: ExpandState = {
+					stack: [],
+					expandedViews: [],
+				};
+
+				const expanded = expandStatementNode(segment, views, state);
+				if (state.expandedViews.length === 0) {
+					return segment;
+				}
+
+				expandedViewNames = expandedViewNames.concat(state.expandedViews);
+				return expanded;
 			}
 
-			const state: ExpandState = {
-				stack: [],
-				expandedViews: [],
-			};
-
-			const expanded = expandStatementNode(
-				segment as StatementNode,
-				views,
-				state
-			);
-			if (state.expandedViews.length === 0) {
-				return segment;
+			if (segment.node_kind === "compound_select") {
+				const expanded = expandCompoundSelect(segment, views);
+				if (expanded.viewNames.length === 0) {
+					return segment;
+				}
+				expandedViewNames = expandedViewNames.concat(expanded.viewNames);
+				return expanded.node;
 			}
 
-			expandedViewNames = expandedViewNames.concat(state.expandedViews);
-			return expanded;
+			return segment;
 		}
 	);
 
@@ -99,6 +105,51 @@ function expandSegmentedStatement(
 		...statement,
 		segments: updatedSegments,
 	});
+}
+
+function expandCompoundSelect(
+	statement: CompoundSelectNode,
+	views: Map<string, ViewDefinition>
+): { node: CompoundSelectNode; viewNames: string[] } {
+	let viewNames: string[] = [];
+
+	const firstState: ExpandState = { stack: [], expandedViews: [] };
+	const expandedFirst = expandStatementNode(
+		statement.first,
+		views,
+		firstState
+	) as SelectStatementNode;
+	viewNames = viewNames.concat(firstState.expandedViews);
+
+	const expandedBranches = statement.compounds.map((branch) => {
+		const branchState: ExpandState = { stack: [], expandedViews: [] };
+		const expandedSelect = expandStatementNode(
+			branch.select,
+			views,
+			branchState
+		) as SelectStatementNode;
+		if (branchState.expandedViews.length === 0) {
+			return branch;
+		}
+		viewNames = viewNames.concat(branchState.expandedViews);
+		return {
+			...branch,
+			select: expandedSelect,
+		};
+	});
+
+	if (viewNames.length === 0) {
+		return { node: statement, viewNames };
+	}
+
+	return {
+		node: {
+			...statement,
+			first: expandedFirst,
+			compounds: expandedBranches,
+		},
+		viewNames,
+	};
 }
 
 function buildViewMap(

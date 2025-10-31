@@ -16,6 +16,10 @@ import {
 	By,
 	Asc,
 	Desc,
+	Union,
+	All,
+	Intersect,
+	Except,
 	Inner,
 	Left,
 	Right,
@@ -68,7 +72,10 @@ class SqlParser extends CstParser {
 		"select_statement",
 		() => {
 			this.OR([
-				{ ALT: () => this.SUBRULE(this.select_core, { LABEL: "core" }) },
+				{
+					ALT: () =>
+						this.SUBRULE(this.select_compound, { LABEL: "select" }),
+				},
 				{
 					ALT: () => this.SUBRULE(this.insert_statement, { LABEL: "insert" }),
 				},
@@ -77,6 +84,46 @@ class SqlParser extends CstParser {
 			]);
 			this.OPTION(() => this.CONSUME(Semicolon));
 			this.CONSUME(EOF);
+		}
+	);
+
+	private readonly select_compound: () => CstNode = this.RULE(
+		"select_compound",
+		() => {
+			this.SUBRULE(this.select_core, { LABEL: "cores" });
+			this.MANY(() => {
+				this.SUBRULE(this.compound_operator, { LABEL: "operators" });
+				this.SUBRULE1(this.select_core, { LABEL: "cores" });
+			});
+			this.OPTION(() => {
+				this.CONSUME(Order);
+				this.CONSUME(By);
+				this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
+			});
+			this.OPTION1(() => {
+				this.CONSUME(Limit);
+				this.SUBRULE(this.limit_clause, { LABEL: "limit" });
+			});
+			this.OPTION2(() => {
+				this.CONSUME(Offset);
+				this.SUBRULE(this.offset_clause, { LABEL: "offset" });
+			});
+		}
+	);
+
+	private readonly compound_operator: () => CstNode = this.RULE(
+		"compound_operator",
+		() => {
+			this.OR([
+				{
+					ALT: () => {
+						this.CONSUME(Union);
+						this.OPTION(() => this.CONSUME(All));
+					},
+				},
+				{ ALT: () => this.CONSUME(Intersect) },
+				{ ALT: () => this.CONSUME(Except) },
+			]);
 		}
 	);
 
@@ -93,19 +140,6 @@ class SqlParser extends CstParser {
 		this.OPTION1(() => {
 			this.CONSUME(Where);
 			this.SUBRULE(this.where_clause);
-		});
-		this.OPTION2(() => {
-			this.CONSUME(Order);
-			this.CONSUME(By);
-			this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
-		});
-		this.OPTION3(() => {
-			this.CONSUME(Limit);
-			this.SUBRULE(this.limit_clause, { LABEL: "limit" });
-		});
-		this.OPTION4(() => {
-			this.CONSUME(Offset);
-			this.SUBRULE(this.offset_clause, { LABEL: "offset" });
 		});
 	});
 
