@@ -5,6 +5,7 @@ import {
 	parseJsonPointer,
 	buildSqliteJsonPath,
 } from "../../../schema-definition/json-pointer.js";
+import { isJsonType } from "../../../schema-definition/json-type.js";
 import type { CelEnvironment } from "../../cel-environment/cel-environment.js";
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
@@ -56,6 +57,72 @@ export type RewriteResult = {
 	sql: string;
 };
 
+export type ExpressionValue = { kind: "expression"; sql: string };
+
+export const isExpressionValue = (value: unknown): value is ExpressionValue =>
+	typeof value === "object" &&
+	value !== null &&
+	(value as Partial<ExpressionValue>).kind === "expression" &&
+	typeof (value as Partial<ExpressionValue>).sql === "string";
+
+export function deserializeJsonParameter(value: unknown): unknown {
+	if (value == null) return null;
+	if (typeof value !== "string") {
+		return value;
+	}
+	return JSON.parse(value);
+}
+
+export function buildColumnValueMap(
+	columns: readonly string[],
+	values: readonly unknown[]
+): Map<string, unknown> | null {
+	if (columns.length !== values.length) return null;
+	const map = new Map<string, unknown>();
+	for (let i = 0; i < columns.length; i++) {
+		const columnName = columns[i];
+		if (columnName === undefined) return null;
+		map.set(columnName, values[i]);
+	}
+	return map;
+}
+
+export function buildColumnExpressionMap(
+	columns: readonly string[],
+	expressions: readonly string[]
+): Map<string, string> | null {
+	if (columns.length !== expressions.length) return null;
+	const map = new Map<string, string>();
+	for (let i = 0; i < columns.length; i++) {
+		const columnName = columns[i];
+		if (columnName === undefined) return null;
+		const expr = expressions[i];
+		if (expr === undefined) return null;
+		map.set(columnName, expr);
+	}
+	return map;
+}
+
+/**
+ * Builds a map from lower-case property names to their canonical casing.
+ *
+ * @example
+ * ```ts
+ * const lookup = buildPropertyLookup(schema);
+ * lookup.get("name"); // => "name"
+ * ```
+ */
+export function buildPropertyLookup(
+	schema: LixSchemaDefinition
+): Map<string, string> {
+	const map = new Map<string, string>();
+	const properties = schema.properties ?? {};
+	for (const property of Object.keys(properties)) {
+		map.set(property.toLowerCase(), property);
+	}
+	return map;
+}
+
 /**
  * Finds the index of a keyword in a token stream, starting at a given offset.
  */
@@ -92,7 +159,9 @@ export function extractIdentifier(token: IToken | undefined): string | null {
 /**
  * Categorises an entity view by its suffix (base, _all, or _history).
  */
-export function classifyViewVariant(name: string): "base" | "all" | "history" {
+export type EntityViewVariant = "base" | "all" | "history";
+
+export function classifyViewVariant(name: string): EntityViewVariant {
 	const lower = name.toLowerCase();
 	if (lower.endsWith("_all")) return "all";
 	if (lower.endsWith("_history")) return "history";
@@ -277,9 +346,12 @@ export function getColumnOrDefault(
 	column: string,
 	defaultValue: unknown
 ): unknown {
-	const value = columnMap.get(column.toLowerCase());
-	if (value !== undefined) {
-		return value;
+	if (columnMap.has(column)) {
+		return columnMap.get(column);
+	}
+	const lowerColumn = column.toLowerCase();
+	if (columnMap.has(lowerColumn)) {
+		return columnMap.get(lowerColumn);
 	}
 	return defaultValue;
 }
@@ -317,12 +389,259 @@ export function resolveMetadataDefaults(args: {
 			continue;
 		}
 		if (raw !== undefined) {
-			resolved.set(key, raw);
-			context[key] = raw as unknown;
+			const normalized = normalizeOverrideValue(raw);
+			resolved.set(key, normalized);
+			context[key] = normalized as unknown;
 		}
 	}
 
 	return resolved;
+}
+
+export function normalizeOverrideValue(value: unknown): unknown {
+	if (typeof value !== "string") {
+		return value;
+	}
+	const trimmed = value.trim();
+	if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+		try {
+			return JSON.parse(trimmed);
+		} catch (error) {
+			void error;
+		}
+	}
+	return value;
+}
+
+export function buildSnapshotObjectExpression(args: {
+	schema: LixSchemaDefinition;
+	columnMap: Map<string, unknown>;
+	columnExpressions: Map<string, string>;
+	literal: (value: unknown) => string;
+	cel: CelEnvironment | null;
+	context: Record<string, unknown>;
+	resolvedDefaults: Map<string, unknown>;
+}): string {
+	const properties = Object.keys(args.schema.properties ?? {});
+	if (properties.length === 0) {
+		return "json_object()";
+	}
+	const entries: string[] = [];
+	for (const prop of properties) {
+		const def = (args.schema.properties ?? {})[prop];
+		const lower = prop.toLowerCase();
+		if (!args.columnMap.has(lower)) {
+			const defaultExpr = renderDefaultSnapshotValue({
+				propertyName: prop,
+				definition: def,
+				literal: args.literal,
+				cel: args.cel,
+				context: args.context,
+				resolvedDefaults: args.resolvedDefaults,
+			});
+			entries.push(`'${escapeSqlString(prop)}', ${defaultExpr}`);
+			continue;
+		}
+		const rawValue = args.columnMap.get(lower);
+		const expression = args.columnExpressions.get(lower) ?? null;
+		const snapshotExpr = renderSnapshotValue({
+			definition: def,
+			value: rawValue,
+			expression,
+		});
+		entries.push(`'${escapeSqlString(prop)}', ${snapshotExpr}`);
+	}
+	return `json_object(${entries.join(", ")})`;
+}
+
+export function buildCelContext(args: {
+	columnMap: Map<string, unknown>;
+	propertyLowerToActual: Map<string, string>;
+}): Record<string, unknown> {
+	const context: Record<string, unknown> = {};
+	for (const [lowerName, actualName] of args.propertyLowerToActual.entries()) {
+		if (!args.columnMap.has(lowerName)) continue;
+		const raw = args.columnMap.get(lowerName);
+		if (raw === undefined || isExpressionValue(raw)) continue;
+		context[actualName] = raw;
+	}
+	return context;
+}
+
+export function renderPointerExpression(args: {
+	descriptor: PrimaryKeyDescriptor;
+	columnMap: Map<string, unknown>;
+	columnExpressions: Map<string, string>;
+}): string | null {
+	const path = args.descriptor.path;
+	if (path.length === 0) {
+		return null;
+	}
+	const root = path[0]!.toLowerCase();
+	const baseValue = args.columnMap.get(root);
+	const baseExpr = (() => {
+		const expr = args.columnExpressions.get(root);
+		if (expr) return expr;
+		if (baseValue === undefined) return null;
+		if (isExpressionValue(baseValue)) {
+			return baseValue.sql;
+		}
+		return literal(baseValue);
+	})();
+	if (!baseExpr) {
+		return null;
+	}
+	if (path.length === 1) {
+		return baseExpr;
+	}
+	const jsonPath = buildSqliteJsonPath(path.slice(1));
+	return `json_extract(${baseExpr}, '${jsonPath}')`;
+}
+
+export function renderDefaultSnapshotValue(args: {
+	propertyName: string;
+	definition: unknown;
+	literal: (value: unknown) => string;
+	cel: CelEnvironment | null;
+	context: Record<string, unknown>;
+	resolvedDefaults: Map<string, unknown>;
+}): string {
+	const {
+		propertyName,
+		definition,
+		literal: literalFn,
+		cel,
+		context,
+		resolvedDefaults,
+	} = args;
+
+	if (resolvedDefaults.has(propertyName)) {
+		const cached = resolvedDefaults.get(propertyName);
+		return renderSnapshotValue({ definition, value: cached, expression: null });
+	}
+
+	if (!definition || typeof definition !== "object") {
+		return "NULL";
+	}
+
+	const record = definition as Record<string, unknown>;
+	const celExpression = record["x-lix-default"];
+	if (typeof celExpression === "string") {
+		if (!cel) {
+			throw new Error(
+				`Encountered x-lix-default on ${propertyName} but CEL evaluation is not initialised.`
+			);
+		}
+		const value = cel.evaluate(celExpression, { ...context });
+		resolvedDefaults.set(propertyName, value);
+		return renderSnapshotValue({
+			definition,
+			value,
+			expression: null,
+		});
+	}
+
+	if (record.default !== undefined) {
+		resolvedDefaults.set(propertyName, record.default);
+		return literalFn(record.default);
+	}
+
+	return "NULL";
+}
+
+export function renderSnapshotValue(args: {
+	definition: unknown;
+	value: unknown;
+	expression: string | null;
+}): string {
+	const { definition, value, expression } = args;
+	if (expression && expression !== "NULL") {
+		if (
+			definition &&
+			typeof definition === "object" &&
+			isJsonType(definition)
+		) {
+			const trimmed = expression.trim().toLowerCase();
+			if (
+				trimmed.startsWith("json(") ||
+				trimmed.startsWith("json_quote(") ||
+				trimmed.startsWith("json_extract(") ||
+				trimmed.startsWith("json_set(") ||
+				trimmed.startsWith("case")
+			) {
+				return expression;
+			}
+			return `CASE WHEN json_valid(${expression}) THEN json(${expression}) ELSE json_quote(${expression}) END`;
+		}
+		return expression;
+	}
+	if (value === undefined || value === null) {
+		return "NULL";
+	}
+	if (definition && typeof definition === "object" && isJsonType(definition)) {
+		const literalExpr = literal(value);
+		return `CASE WHEN json_valid(${literalExpr}) THEN json(${literalExpr}) ELSE json_quote(${literalExpr}) END`;
+	}
+	if (isExpressionValue(value)) {
+		return value.sql;
+	}
+	return literal(value);
+}
+
+export function resolveSchemaDefinition(
+	storedSchemas: Map<string, unknown>,
+	viewName: string
+): LixSchemaDefinition | null {
+	const candidates = buildSchemaKeyCandidates(viewName);
+
+	for (const candidate of candidates) {
+		const direct = storedSchemas.get(candidate);
+		if (direct && isSchemaDefinition(direct)) {
+			return direct;
+		}
+	}
+
+	const normalizedCandidates = new Set(
+		candidates.map((candidate) => candidate.toLowerCase())
+	);
+
+	for (const [key, value] of storedSchemas) {
+		if (!value) continue;
+		if (!isSchemaDefinition(value)) continue;
+		if (normalizedCandidates.has(key.toLowerCase())) {
+			return value;
+		}
+	}
+
+	return null;
+}
+
+function buildSchemaKeyCandidates(viewName: string): string[] {
+	const candidates = new Set<string>();
+	const addCandidate = (value: string | null | undefined) => {
+		if (typeof value === "string" && value.length > 0) {
+			candidates.add(value);
+		}
+	};
+
+	addCandidate(viewName);
+
+	const base = baseSchemaKey(viewName);
+	addCandidate(base);
+
+	const baseValue = base ?? viewName;
+	const lowerBase = baseValue.toLowerCase();
+	if (lowerBase.startsWith("lix_")) {
+		addCandidate(baseValue.slice(4));
+	} else {
+		addCandidate(`lix_${baseValue}`);
+	}
+
+	return Array.from(candidates);
+}
+
+function isSchemaDefinition(value: unknown): value is LixSchemaDefinition {
+	return typeof value === "object" && value !== null;
 }
 
 function buildPointerAliasInfo(

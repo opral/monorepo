@@ -15,12 +15,12 @@ import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { expandSqlViews } from "./steps/expand-sql-views.js";
 import { cachePopulator } from "./steps/cache-populator.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
-import type { StatementNode } from "./sql-parser/nodes.js";
 import {
 	createCelEnvironment,
 	type CelEnvironment,
 } from "../cel-environment/cel-environment.js";
 import { getEntityViewSqlDefinitions } from "./entity-views/select.js";
+import { rewriteEntityViewInsert } from "./entity-views/insert.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -34,6 +34,7 @@ type EngineShape = Pick<
 
 const pipeline: PreprocessorStep[] = [
 	expandSqlViews,
+	rewriteEntityViewInsert,
 	cachePopulator,
 	rewriteVtableSelects,
 ];
