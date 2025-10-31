@@ -88,9 +88,7 @@ export function createPreprocessor(args: {
 		return {
 			sql: compiled.sql,
 			parameters,
-			expandedSql:
-				rewritten.node_kind === "raw_fragment" ? compiled.sql : undefined,
-			context,
+			trace: traceEntries,
 		};
 	};
 }
