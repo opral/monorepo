@@ -15,9 +15,9 @@ test("state_all view is rewritten", async () => {
 		parameters: [],
 		trace: true,
 	});
-	const { sql, parameters, context } = result;
+	const { sql, parameters, trace } = result;
 
-	const steps = context?.trace?.map((entry) => entry.step) ?? [];
+	const steps = trace?.map((entry) => entry.step) ?? [];
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps).toContain("complete");
 
@@ -33,7 +33,7 @@ test("state_all view is rewritten", async () => {
 	await lix.close();
 });
 
-test("unsupported statements are ignored", async () => {
+test("unsupported statements are passed through", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
@@ -44,7 +44,6 @@ test("unsupported statements are ignored", async () => {
 	});
 
 	expect(result.sql).toBe(sql);
-	expect(result.expandedSql).toBe(sql);
 	expect(result.parameters).toEqual([]);
 
 	await lix.close();
@@ -70,11 +69,11 @@ test("sql view expansion feeds subsequent rewrites", async () => {
 		parameters: [],
 		trace: true,
 	});
-	const { sql, context } = result;
+	const { sql, trace } = result;
 
 	const upper = sql.toUpperCase();
 	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE");
-	const steps = context?.trace?.map((entry) => entry.step) ?? [];
+	const steps = trace?.map((entry) => entry.step) ?? [];
 	expect(steps).toContain("expand_sql_views");
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps).toContain("complete");
