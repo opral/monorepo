@@ -1,0 +1,12 @@
+{
+	"$schema": "https://schema.railpack.com",
+	"provider": "node",
+	"steps": {
+		"build": {
+			"commands": [
+				"pnpm install --frozen-lockfile",
+				"pnpm --filter @opral/flashtype... build"
+			]
+		}
+	}
+}
