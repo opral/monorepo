@@ -63,7 +63,7 @@ function AgentMessage({ steps, content }: AgentMessageProps) {
 		<div className="w-full px-3.5">
 			{steps.length > 0 && <StepList steps={steps} />}
 			{content ? (
-				<div className="max-w-full break-words leading-relaxed text-foreground pl-7">
+				<div className="max-w-full break-words leading-relaxed text-foreground">
 					<MessageBody content={content} />
 				</div>
 			) : null}
