@@ -16,6 +16,8 @@ import {
 	By,
 	Asc,
 	Desc,
+	Distinct,
+	Group,
 	Union,
 	All,
 	Intersect,
@@ -34,6 +36,11 @@ import {
 	NullKeyword,
 	Between,
 	Like,
+	CaseKeyword,
+	WhenKeyword,
+	ThenKeyword,
+	ElseKeyword,
+	EndKeyword,
 	Identifier,
 	Star,
 	Semicolon,
@@ -115,20 +122,17 @@ class SqlParser extends CstParser {
 		}
 	);
 
-	private readonly with_clause: () => CstNode = this.RULE(
-		"with_clause",
-		() => {
-			this.CONSUME(With);
-			this.OPTION(() => {
-				this.CONSUME(Recursive, { LABEL: "recursive" });
-			});
-			this.SUBRULE(this.common_table_expression, { LABEL: "ctes" });
-			this.MANY(() => {
-				this.CONSUME(Comma);
-				this.SUBRULE1(this.common_table_expression, { LABEL: "ctes" });
-			});
-		}
-	);
+	private readonly with_clause: () => CstNode = this.RULE("with_clause", () => {
+		this.CONSUME(With);
+		this.OPTION(() => {
+			this.CONSUME(Recursive, { LABEL: "recursive" });
+		});
+		this.SUBRULE(this.common_table_expression, { LABEL: "ctes" });
+		this.MANY(() => {
+			this.CONSUME(Comma);
+			this.SUBRULE1(this.common_table_expression, { LABEL: "ctes" });
+		});
+	});
 
 	private readonly common_table_expression: () => CstNode = this.RULE(
 		"common_table_expression",
@@ -168,17 +172,27 @@ class SqlParser extends CstParser {
 
 	private readonly select_core: () => CstNode = this.RULE("select_core", () => {
 		this.CONSUME(Select);
+		this.OPTION(() => this.CONSUME(Distinct, { LABEL: "distinct" }));
 		this.SUBRULE(this.select_list);
-		this.OPTION(() => {
+		this.OPTION1(() => {
 			this.CONSUME(From);
 			this.SUBRULE(this.table_reference, { LABEL: "from" });
 			this.MANY(() => {
 				this.SUBRULE1(this.join_clause, { LABEL: "joins" });
 			});
 		});
-		this.OPTION1(() => {
+		this.OPTION2(() => {
 			this.CONSUME(Where);
 			this.SUBRULE(this.where_clause);
+		});
+		this.OPTION3(() => {
+			this.CONSUME(Group);
+			this.CONSUME(By);
+			this.SUBRULE(this.expression, { LABEL: "group_by" });
+			this.MANY2(() => {
+				this.CONSUME(Comma);
+				this.SUBRULE1(this.expression, { LABEL: "group_by" });
+			});
 		});
 	});
 
@@ -293,7 +307,7 @@ class SqlParser extends CstParser {
 				{
 					ALT: () => {
 						this.CONSUME(LeftParen);
-						this.SUBRULE(this.select_core, { LABEL: "select" });
+						this.SUBRULE(this.select_compound, { LABEL: "select" });
 						this.CONSUME(RightParen);
 						this.OPTION3(() => this.CONSUME2(As));
 						this.SUBRULE2(this.identifier, { LABEL: "alias" });
@@ -361,8 +375,7 @@ class SqlParser extends CstParser {
 				},
 				{
 					GATE: () =>
-						this.LA(1).tokenType !== Not &&
-						this.LA(1).tokenType !== LeftParen,
+						this.LA(1).tokenType !== Not && this.LA(1).tokenType !== LeftParen,
 					ALT: () => {
 						this.SUBRULE(this.expression, { LABEL: "left_expression" });
 						this.OR1([
@@ -539,7 +552,19 @@ class SqlParser extends CstParser {
 	);
 
 	private readonly expression: () => CstNode = this.RULE("expression", () => {
-		this.SUBRULE(this.additive_expression, { LABEL: "expression" });
+		this.OR([
+			{
+				GATE: () => this.LA(1).tokenType === CaseKeyword,
+				ALT: () => {
+					this.SUBRULE(this.case_expression, { LABEL: "expression" });
+				},
+			},
+			{
+				ALT: () => {
+					this.SUBRULE(this.additive_expression, { LABEL: "expression" });
+				},
+			},
+		]);
 	});
 
 	private readonly additive_expression: () => CstNode = this.RULE(
@@ -593,6 +618,16 @@ class SqlParser extends CstParser {
 				{ ALT: () => this.CONSUME(Parameter, { LABEL: "parameter" }) },
 				{ ALT: () => this.CONSUME(StringLiteral, { LABEL: "string" }) },
 				{ ALT: () => this.CONSUME(NumberLiteral, { LABEL: "number" }) },
+				{ ALT: () => this.CONSUME(NullKeyword, { LABEL: "nullLiteral" }) },
+				{
+					GATE: () =>
+						this.LA(1).tokenType === CaseKeyword ||
+						(this.LA(1).tokenType === Identifier &&
+							this.LA(1).image?.toLowerCase() === "case"),
+					ALT: () => {
+						this.SUBRULE(this.case_expression, { LABEL: "caseExpression" });
+					},
+				},
 				{
 					GATE: () =>
 						this.LA(1).tokenType === Identifier &&
@@ -631,6 +666,33 @@ class SqlParser extends CstParser {
 					},
 				},
 			]);
+		}
+	);
+
+	private readonly case_expression: () => CstNode = this.RULE(
+		"case_expression",
+		() => {
+			this.CONSUME(CaseKeyword, { LABEL: "caseToken" });
+			let hasOperand = false;
+			this.OPTION(() => {
+				hasOperand = true;
+				this.SUBRULE(this.expression, { LABEL: "operand" });
+			});
+			this.AT_LEAST_ONE(() => {
+				this.CONSUME(WhenKeyword, { LABEL: "whenToken" });
+				if (hasOperand) {
+					this.SUBRULE1(this.expression, { LABEL: "when_value" });
+				} else {
+					this.SUBRULE1(this.or_expression, { LABEL: "when_condition" });
+				}
+				this.CONSUME(ThenKeyword, { LABEL: "thenToken" });
+				this.SUBRULE2(this.expression, { LABEL: "then_expression" });
+			});
+			this.OPTION1(() => {
+				this.CONSUME(ElseKeyword, { LABEL: "elseToken" });
+				this.SUBRULE3(this.expression, { LABEL: "else_expression" });
+			});
+			this.CONSUME(EndKeyword, { LABEL: "endToken" });
 		}
 	);
 

@@ -82,6 +82,11 @@ export const By: TokenType = createToken({
 	pattern: /by\b/i,
 });
 
+export const Distinct: TokenType = createToken({
+	name: "Distinct",
+	pattern: /distinct\b/i,
+});
+
 export const Asc: TokenType = createToken({
 	name: "Asc",
 	pattern: /asc\b/i,
@@ -90,6 +95,11 @@ export const Asc: TokenType = createToken({
 export const Desc: TokenType = createToken({
 	name: "Desc",
 	pattern: /desc\b/i,
+});
+
+export const Group: TokenType = createToken({
+	name: "Group",
+	pattern: /group\b/i,
 });
 
 export const Union: TokenType = createToken({
@@ -182,6 +192,31 @@ export const Like: TokenType = createToken({
 	pattern: /like\b/i,
 });
 
+export const CaseKeyword: TokenType = createToken({
+	name: "CaseKeyword",
+	pattern: /case\b/i,
+});
+
+export const WhenKeyword: TokenType = createToken({
+	name: "WhenKeyword",
+	pattern: /when\b/i,
+});
+
+export const ThenKeyword: TokenType = createToken({
+	name: "ThenKeyword",
+	pattern: /then\b/i,
+});
+
+export const ElseKeyword: TokenType = createToken({
+	name: "ElseKeyword",
+	pattern: /else\b/i,
+});
+
+export const EndKeyword: TokenType = createToken({
+	name: "EndKeyword",
+	pattern: /end\b/i,
+});
+
 export const As: TokenType = createToken({
 	name: "As",
 	pattern: /as\b/i,
@@ -210,8 +245,10 @@ export const Identifier: TokenType = createToken({
 		Or,
 		Not,
 		By,
+		Distinct,
 		Asc,
 		Desc,
+		Group,
 		Inner,
 		Left,
 		Right,
@@ -225,6 +262,11 @@ export const Identifier: TokenType = createToken({
 		NullKeyword,
 		Between,
 		Like,
+		CaseKeyword,
+		WhenKeyword,
+		ThenKeyword,
+		ElseKeyword,
+		EndKeyword,
 		SetKeyword,
 		Values,
 		As,
@@ -353,8 +395,10 @@ const tokens: TokenType[] = [
 	Or,
 	Not,
 	By,
+	Distinct,
 	Asc,
 	Desc,
+	Group,
 	Inner,
 	Left,
 	Right,
@@ -372,6 +416,11 @@ const tokens: TokenType[] = [
 	NullKeyword,
 	Between,
 	Like,
+	CaseKeyword,
+	WhenKeyword,
+	ThenKeyword,
+	ElseKeyword,
+	EndKeyword,
 	SetKeyword,
 	Values,
 	As,

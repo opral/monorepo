@@ -37,7 +37,9 @@ test("expands referenced view into a subquery", () => {
 		trace,
 	});
 
-	const select = assertSingleSelect(rewritten) as SelectStatementNode | CompoundSelectNode;
+	const select = assertSingleSelect(rewritten) as
+		| SelectStatementNode
+		| CompoundSelectNode;
 	if (!("from_clauses" in select)) {
 		throw new Error("expected select statement segment");
 	}
@@ -89,7 +91,9 @@ test("keeps view name as alias when none provided", () => {
 		hasOpenTransaction: () => false,
 	});
 
-	const select = assertSingleSelect(rewritten) as SelectStatementNode | CompoundSelectNode;
+	const select = assertSingleSelect(rewritten) as
+		| SelectStatementNode
+		| CompoundSelectNode;
 	if (!("from_clauses" in select)) {
 		throw new Error("expected select statement segment");
 	}
@@ -154,6 +158,87 @@ test("expands compound select branches independently", () => {
 		throw new Error("missing table name in second branch");
 	}
 	expect(lastPart.value.toLowerCase()).toBe("lix_internal_state_vtable");
+});
+
+test("expands views defined by compound selects with nested view references", () => {
+	const statements = parseStatements(`
+		SELECT *
+		FROM complex_history
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"complex_history",
+					`
+						WITH base AS (
+							SELECT aux.value
+							FROM aux_view AS aux
+						)
+						SELECT value FROM base
+						UNION ALL
+						SELECT value FROM base;
+					`,
+				],
+				[
+					"aux_view",
+					`
+						SELECT source.value
+						FROM source_table AS source
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const relation = select.from_clauses[0]?.relation;
+	if (!relation || relation.node_kind !== "subquery") {
+		throw new Error("expected complex_history to expand into subquery");
+	}
+	expect(getIdentifierValue(relation.alias)).toBe("complex_history");
+
+	const subqueryStatement = relation.statement;
+	if (subqueryStatement.node_kind !== "compound_select") {
+		throw new Error("expected compound select inside complex_history view");
+	}
+
+	const withClause = subqueryStatement.with_clause;
+	if (!withClause) {
+		throw new Error("expected WITH clause to be preserved");
+	}
+	const [cte] = withClause.ctes;
+	if (!cte) {
+		throw new Error("expected base CTE");
+	}
+	const cteFrom = cte.statement.from_clauses[0];
+	if (!cteFrom || cteFrom.relation.node_kind !== "subquery") {
+		throw new Error("expected aux_view to expand within CTE");
+	}
+	expect(getIdentifierValue(cteFrom.relation.alias)).toBe("aux");
+
+	const firstBranchFrom = subqueryStatement.first.from_clauses[0];
+	if (
+		!firstBranchFrom ||
+		firstBranchFrom.relation.node_kind !== "table_reference"
+	) {
+		throw new Error("expected base CTE reference in first branch");
+	}
+	expect(objectNameMatches(firstBranchFrom.relation.name, "base")).toBe(true);
+
+	const secondBranch = subqueryStatement.compounds[0];
+	if (!secondBranch) {
+		throw new Error("expected UNION ALL branch");
+	}
+	const secondFrom = secondBranch.select.from_clauses[0];
+	if (!secondFrom || secondFrom.relation.node_kind !== "table_reference") {
+		throw new Error("expected base CTE reference in second branch");
+	}
+	expect(objectNameMatches(secondFrom.relation.name, "base")).toBe(true);
 });
 
 function assertSingleSelect(

@@ -33,6 +33,7 @@ import type {
 	SubqueryExpressionNode,
 	WithClauseNode,
 	CommonTableExpressionNode,
+	CaseExpressionNode,
 } from "./nodes.js";
 import {
 	getBinaryOperatorPrecedence,
@@ -295,9 +296,7 @@ function emitWithClause(withClause: WithClauseNode | null): string | null {
 	return `${prefix} ${ctesSql}`;
 }
 
-function emitCommonTableExpression(
-	cte: CommonTableExpressionNode
-): string {
+function emitCommonTableExpression(cte: CommonTableExpressionNode): string {
 	const name = emitIdentifier(cte.name);
 	const columnsSql = cte.columns.length
 		? `(${cte.columns.map((column) => emitIdentifier(column)).join(", ")})`
@@ -322,10 +321,11 @@ function emitSelectStatement(statement: SelectStatementNode): string {
 		parts.push(withClauseSql);
 	}
 	const projectionItems = statement.projection.map(emitSelectItem);
+	const selectKeyword = statement.distinct ? "SELECT DISTINCT" : "SELECT";
 	const selectClause =
 		projectionItems.length <= 1
-			? `SELECT ${projectionItems[0] ?? ""}`
-			: `SELECT\n  ${projectionItems.join(",\n  ")}`;
+			? `${selectKeyword} ${projectionItems[0] ?? ""}`
+			: `${selectKeyword}\n  ${projectionItems.join(",\n  ")}`;
 
 	parts.push(selectClause);
 
@@ -335,6 +335,12 @@ function emitSelectStatement(statement: SelectStatementNode): string {
 
 	if (statement.where_clause) {
 		parts.push(`WHERE ${emitExpressionOrRaw(statement.where_clause)}`);
+	}
+
+	if (statement.group_by.length) {
+		parts.push(
+			`GROUP BY ${statement.group_by.map((expr) => emitExpression(expr)).join(", ")}`
+		);
 	}
 
 	if (statement.order_by.length) {
@@ -518,11 +524,30 @@ function emitExpressionWithoutParent(expression: ExpressionNode): string {
 			return emitFunctionCall(expression);
 		case "subquery_expression":
 			return emitSubqueryExpression(expression);
+		case "case_expression":
+			return emitCaseExpression(expression);
 		case "raw_fragment":
 			return expression.sql_text;
 		default:
 			return assertNever(expression);
 	}
+}
+
+function emitCaseExpression(expression: CaseExpressionNode): string {
+	const parts: string[] = ["CASE"];
+	if (expression.operand) {
+		parts.push(emitExpression(expression.operand));
+	}
+	for (const branch of expression.branches) {
+		parts.push(
+			`WHEN ${emitExpression(branch.condition)} THEN ${emitExpression(branch.result)}`
+		);
+	}
+	if (expression.else_result) {
+		parts.push(`ELSE ${emitExpression(expression.else_result)}`);
+	}
+	parts.push("END");
+	return parts.join(" ");
 }
 
 function emitBinaryExpression(expression: BinaryExpressionNode): string {

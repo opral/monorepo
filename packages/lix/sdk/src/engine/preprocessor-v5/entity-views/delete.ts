@@ -269,6 +269,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 		node_kind: "subquery_expression",
 		statement: {
 			node_kind: "select_statement",
+			distinct: false,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -288,6 +289,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 				},
 			],
 			where_clause: null,
+			group_by: [],
 			order_by: [],
 			limit: null,
 			offset: null,

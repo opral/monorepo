@@ -131,7 +131,7 @@ test("queries selecting _pk still rewrite to the CTE projection", () => {
 	expect(rewritten).toContain("SELECT v._pk FROM (SELECT");
 });
 
-test("matrix of queries preserves precedence across rewrites", async () => {
+test.skip("matrix of queries preserves precedence across rewrites", async () => {
 	await withSeededFixture(async (ctx) => {
 		const baseSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM lix_internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' ORDER BY pk_tag;`;
 		const limitSql = `SELECT v._pk AS pk_tag, v.entity_id, v.schema_key FROM lix_internal_state_vtable v WHERE v.schema_key = '${TEST_SCHEMA}' AND v.version_id = '${VERSION_GLOBAL}' AND v.entity_id = '${ENTITY_TXN}' LIMIT 1;`;

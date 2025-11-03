@@ -34,6 +34,8 @@ import type {
 	UpdateStatementNode,
 	WithClauseNode,
 	CommonTableExpressionNode,
+	CaseExpressionNode,
+	CaseWhenNode,
 } from "./nodes.js";
 
 export type VisitContext = {
@@ -69,6 +71,7 @@ type NodeKindMap = {
 	readonly unary_expression: UnaryExpressionNode;
 	readonly in_list_expression: InListExpressionNode;
 	readonly between_expression: BetweenExpressionNode;
+	readonly case_expression: CaseExpressionNode;
 	readonly identifier: IdentifierNode;
 	readonly object_name: ObjectNameNode;
 	readonly insert_values: InsertValuesNode;
@@ -212,17 +215,17 @@ function traverseNode(
 				node as SegmentedStatementNode,
 				visitor
 			);
-	case "compound_select":
-		return traverseCompoundSelect(node as CompoundSelectNode, visitor);
-	case "select_statement":
-		return traverseSelectStatement(node as SelectStatementNode, visitor);
-	case "with_clause":
-		return traverseWithClause(node as WithClauseNode, visitor);
-	case "common_table_expression":
-		return traverseCommonTableExpression(
-			node as CommonTableExpressionNode,
-			visitor
-		);
+		case "compound_select":
+			return traverseCompoundSelect(node as CompoundSelectNode, visitor);
+		case "select_statement":
+			return traverseSelectStatement(node as SelectStatementNode, visitor);
+		case "with_clause":
+			return traverseWithClause(node as WithClauseNode, visitor);
+		case "common_table_expression":
+			return traverseCommonTableExpression(
+				node as CommonTableExpressionNode,
+				visitor
+			);
 		case "insert_statement":
 			return traverseInsertStatement(node as InsertStatementNode, visitor);
 		case "update_statement":
@@ -235,13 +238,13 @@ function traverseNode(
 			return traverseJoinClause(node as JoinClauseNode, visitor);
 		case "table_reference":
 			return traverseTableReference(node as TableReferenceNode, visitor);
-	case "subquery":
-		return traverseSubquery(node as SubqueryNode, visitor);
-	case "subquery_expression":
-		return traverseSubqueryExpression(
-			node as SubqueryExpressionNode,
-			visitor
-		);
+		case "subquery":
+			return traverseSubquery(node as SubqueryNode, visitor);
+		case "subquery_expression":
+			return traverseSubqueryExpression(
+				node as SubqueryExpressionNode,
+				visitor
+			);
 		case "order_by_item":
 			return traverseOrderByItem(node as OrderByItemNode, visitor);
 		case "set_clause":
@@ -265,6 +268,8 @@ function traverseNode(
 			return traverseInListExpression(node as InListExpressionNode, visitor);
 		case "between_expression":
 			return traverseBetweenExpression(node as BetweenExpressionNode, visitor);
+		case "case_expression":
+			return traverseCaseExpression(node as CaseExpressionNode, visitor);
 		case "insert_values":
 			return traverseInsertValues(node as InsertValuesNode, visitor);
 		case "object_name":
@@ -395,6 +400,11 @@ function traverseSelectStatement(
 		changed = true;
 	}
 
+	const groupBy = visitArray(node.group_by, node, "group_by", visitor);
+	if (groupBy !== node.group_by) {
+		changed = true;
+	}
+
 	const orderBy = visitArray(node.order_by, node, "order_by", visitor);
 	if (orderBy !== node.order_by) {
 		changed = true;
@@ -419,6 +429,7 @@ function traverseSelectStatement(
 		projection: projection as readonly SelectItemNode[],
 		from_clauses: fromClauses as readonly FromClauseNode[],
 		where_clause: whereClause as ExpressionNode | RawFragmentNode | null,
+		group_by: groupBy as readonly ExpressionNode[],
 		order_by: orderBy as readonly OrderByItemNode[],
 		limit: limit as ExpressionNode | RawFragmentNode | null,
 		offset: offset as ExpressionNode | RawFragmentNode | null,
@@ -732,8 +743,11 @@ function traverseSubqueryExpression(
 	node: SubqueryExpressionNode,
 	visitor: AstVisitor
 ): SubqueryExpressionNode {
-	const statement = visitNode(node.statement, visitor, createContext(node, "statement")) as
-		SelectStatementNode | CompoundSelectNode;
+	const statement = visitNode(
+		node.statement,
+		visitor,
+		createContext(node, "statement")
+	) as SelectStatementNode | CompoundSelectNode;
 	if (statement === node.statement) {
 		return node;
 	}
@@ -954,6 +968,63 @@ function traverseBetweenExpression(
 		operand: operand as ExpressionNode,
 		start: start as ExpressionNode,
 		end: end as ExpressionNode,
+	};
+}
+
+function traverseCaseExpression(
+	node: CaseExpressionNode,
+	visitor: AstVisitor
+): CaseExpressionNode {
+	let changed = false;
+	const operand = node.operand
+		? visitNode(node.operand, visitor, createContext(node, "operand"))
+		: null;
+	if (operand !== node.operand) {
+		changed = true;
+	}
+
+	const branchResults: CaseWhenNode[] = [];
+	for (let index = 0; index < node.branches.length; index += 1) {
+		const branch = node.branches[index]!;
+		const condition = visitNode(
+			branch.condition,
+			visitor,
+			createContext(node, "branch_condition", index)
+		) as ExpressionNode;
+		const result = visitNode(
+			branch.result,
+			visitor,
+			createContext(node, "branch_result", index)
+		) as ExpressionNode;
+		if (condition !== branch.condition || result !== branch.result) {
+			changed = true;
+		}
+		branchResults.push({
+			condition,
+			result,
+		});
+	}
+
+	const elseResult = node.else_result
+		? (visitNode(
+				node.else_result,
+				visitor,
+				createContext(node, "else_result")
+			) as ExpressionNode)
+		: null;
+	if (elseResult !== node.else_result) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		operand: operand as ExpressionNode | null,
+		branches: branchResults,
+		else_result: elseResult as ExpressionNode | null,
 	};
 }
 

@@ -33,6 +33,16 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT with CASE expression", () => {
+		expectRoundTrip(
+			"SELECT CASE WHEN status = 'active' THEN 1 ELSE 0 END AS status_flag FROM foo"
+		);
+	});
+
+	test("SELECT DISTINCT with GROUP BY", () => {
+		expectRoundTrip("SELECT DISTINCT foo FROM bar GROUP BY foo");
+	});
+
 	test("SELECT with limit and offset", () => {
 		expectRoundTrip(
 			"SELECT id FROM projects ORDER BY created_at DESC LIMIT 5 OFFSET 10"

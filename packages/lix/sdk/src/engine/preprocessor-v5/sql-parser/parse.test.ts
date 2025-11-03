@@ -71,6 +71,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement("SELECT * FROM projects");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
+			distinct: false,
 			projection: [{ node_kind: "select_star" }],
 			from_clauses: [
 				{
@@ -84,6 +85,7 @@ describe("parse", () => {
 				},
 			],
 			where_clause: null,
+			group_by: [],
 			order_by: [],
 			limit: null,
 			offset: null,
@@ -97,6 +99,7 @@ describe("parse", () => {
 		);
 		expect(ast).toEqual({
 			node_kind: "select_statement",
+			distinct: false,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -128,6 +131,7 @@ describe("parse", () => {
 				right: { node_kind: "literal", value: 1 },
 			},
 			order_by: [],
+			group_by: [],
 			limit: null,
 			offset: null,
 			with_clause: null,
@@ -138,6 +142,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement("SELECT 1 AS value");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
+			distinct: false,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -147,6 +152,7 @@ describe("parse", () => {
 			],
 			from_clauses: [],
 			where_clause: null,
+			group_by: [],
 			order_by: [],
 			limit: null,
 			offset: null,
@@ -158,6 +164,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement("SELECT projects.id FROM projects");
 		expect(ast).toEqual({
 			node_kind: "select_statement",
+			distinct: false,
 			projection: [
 				{
 					node_kind: "select_expression",
@@ -180,6 +187,7 @@ describe("parse", () => {
 				},
 			],
 			where_clause: null,
+			group_by: [],
 			order_by: [],
 			limit: null,
 			offset: null,
@@ -617,6 +625,117 @@ FROM "foo";
 		expect(cteStatement.compounds[0]?.select.with_clause).toBeNull();
 	});
 
+	test("parses searched CASE expression", () => {
+		const sql = `
+	SELECT
+	  CASE
+	    WHEN foo.kind = 'alpha' THEN 'first'
+	    WHEN foo.kind = 'beta' THEN 'second'
+	    ELSE 'other'
+	  END AS kind_label
+	FROM foo
+		`.trim();
+
+		const statement = parseSelectStatement(sql);
+		const projection = statement.projection[0];
+		if (!projection || projection.node_kind !== "select_expression") {
+			throw new Error("expected select expression");
+		}
+		const expression = projection.expression;
+		expect(expression.node_kind).toBe("case_expression");
+		if (expression.node_kind !== "case_expression") {
+			throw new Error("expected case expression");
+		}
+		expect(expression.operand).toBeNull();
+		expect(expression.branches).toHaveLength(2);
+		expect(expression.branches[0]?.condition.node_kind).toBe(
+			"binary_expression"
+		);
+		expect(expression.branches[0]?.result.node_kind).toBe("literal");
+		expect(expression.branches[1]?.result.node_kind).toBe("literal");
+		expect(expression.else_result?.node_kind).toBe("literal");
+	});
+
+	test("parses simple CASE expression with operand", () => {
+		const sql = `
+SELECT
+  CASE foo.status
+    WHEN 'active' THEN 1
+    ELSE 0
+  END AS status_flag
+FROM foo
+		`.trim();
+
+		const statement = parseSelectStatement(sql);
+		const projection = statement.projection[0];
+		if (!projection || projection.node_kind !== "select_expression") {
+			throw new Error("expected select expression");
+		}
+		const expression = projection.expression;
+		expect(expression.node_kind).toBe("case_expression");
+		if (expression.node_kind !== "case_expression") {
+			throw new Error("expected case expression");
+		}
+		expect(expression.operand?.node_kind).toBe("column_reference");
+		expect(expression.branches).toHaveLength(1);
+		expect(expression.branches[0]?.condition.node_kind).toBe("literal");
+		expect(expression.branches[0]?.result.node_kind).toBe("literal");
+		expect(expression.else_result?.node_kind).toBe("literal");
+	});
+
+	test("parses select distinct with group by", () => {
+		const ast = parseSelectStatement(
+			"SELECT DISTINCT foo FROM bar GROUP BY foo"
+		);
+		expect(ast.distinct).toBe(true);
+		expect(ast.group_by).toHaveLength(1);
+		expect(ast.group_by[0]?.node_kind).toBe("column_reference");
+	});
+
+	test("parses union select", () => {
+		const segment = parseSingleSegment(
+			"SELECT id FROM foo UNION SELECT parent_id FROM bar"
+		);
+		expect(segment.node_kind).toBe("compound_select");
+		if (segment.node_kind !== "compound_select") {
+			throw new Error("expected compound select");
+		}
+		expect(segment.compounds).toHaveLength(1);
+	});
+
+	test("parses recursive union select", () => {
+		const sql = `
+SELECT commit_id, commit_id as root_commit_id, 0 as depth
+FROM requested_commits
+UNION
+SELECT ce.parent_id, r.root_commit_id, r.depth + 1
+FROM commit_edge_all ce
+JOIN reachable_commits_from_requested r ON ce.child_id = r.id
+WHERE ce.lixcol_version_id = 'global'
+`.trim();
+		const segment = parseSingleSegment(sql);
+		expect(segment.node_kind).toBe("compound_select");
+	});
+
+	test("parses multi-cte with union", () => {
+		const sql = `
+WITH head AS (
+  SELECT 1 AS value
+),
+chain AS (
+  SELECT value FROM head
+  UNION
+  SELECT value + 1 FROM head
+)
+SELECT * FROM chain
+`.trim();
+		const segment = parseSingleSegment(sql);
+		expect(
+			segment.node_kind === "select_statement" ||
+				segment.node_kind === "compound_select"
+		).toBe(true);
+	});
+
 	test("segments parenthesised select with trailing clause", () => {
 		const sql = `(SELECT 1) LIMIT 1;`;
 		const statements = parseStatements(sql);
@@ -781,8 +900,8 @@ SELECT * FROM expr;
 		expect(cte.statement.compounds).toHaveLength(1);
 	});
 
- test("parses recursive IN subquery with with clause", () => {
-    const sql = `
+	test("parses recursive IN subquery with with clause", () => {
+		const sql = `
 SELECT c.id FROM commit AS c
 WHERE c.id IN (
 	WITH RECURSIVE ap(id, depth) AS (
@@ -843,13 +962,13 @@ LIMIT 1;
 			cteStatement.first,
 			cteStatement.compounds[0]!.select,
 		];
-    expect(
-      collectedSelects.every((sel) => sel.node_kind === "select_statement")
-    ).toBe(true);
-  });
+		expect(
+			collectedSelects.every((sel) => sel.node_kind === "select_statement")
+		).toBe(true);
+	});
 
-  test("parses recursive IN subquery within join-heavy query", () => {
-    const sql = `
+	test("parses recursive IN subquery within join-heavy query", () => {
+		const sql = `
 select "commit"."id" from "commit"
 inner join "entity_label"
   on "entity_label"."entity_id" = "commit"."id"
@@ -873,59 +992,59 @@ where "label"."name" = ?
   )
 limit ?`;
 
-    const statements = parseStatements(sql);
-    expect(statements).toHaveLength(1);
-    const [statement] = statements;
-    if (!statement || statement.node_kind !== "segmented_statement") {
-      throw new Error("expected segmented statement");
-    }
+		const statements = parseStatements(sql);
+		expect(statements).toHaveLength(1);
+		const [statement] = statements;
+		if (!statement || statement.node_kind !== "segmented_statement") {
+			throw new Error("expected segmented statement");
+		}
 
-    const [segment] = statement.segments;
-    if (!segment || segment.node_kind !== "select_statement") {
-      throw new Error("expected root select statement");
-    }
+		const [segment] = statement.segments;
+		if (!segment || segment.node_kind !== "select_statement") {
+			throw new Error("expected root select statement");
+		}
 
-    expect(segment.with_clause).toBeNull();
-    const whereClause = segment.where_clause;
-    if (!whereClause || whereClause.node_kind !== "binary_expression") {
-      throw new Error("expected binary where clause");
-    }
+		expect(segment.with_clause).toBeNull();
+		const whereClause = segment.where_clause;
+		if (!whereClause || whereClause.node_kind !== "binary_expression") {
+			throw new Error("expected binary where clause");
+		}
 
-    const inExpression =
-      (whereClause.right.node_kind === "in_list_expression"
-        ? whereClause.right
-        : whereClause.left.node_kind === "in_list_expression"
-          ? whereClause.left
-          : null);
-    if (!inExpression) {
-      throw new Error("missing IN list expression in where clause");
-    }
-    expect(inExpression.items).toHaveLength(1);
-    const [subqueryItem] = inExpression.items;
-    if (!subqueryItem || subqueryItem.node_kind !== "subquery_expression") {
-      throw new Error("expected subquery expression within IN clause");
-    }
+		const inExpression =
+			whereClause.right.node_kind === "in_list_expression"
+				? whereClause.right
+				: whereClause.left.node_kind === "in_list_expression"
+					? whereClause.left
+					: null;
+		if (!inExpression) {
+			throw new Error("missing IN list expression in where clause");
+		}
+		expect(inExpression.items).toHaveLength(1);
+		const [subqueryItem] = inExpression.items;
+		if (!subqueryItem || subqueryItem.node_kind !== "subquery_expression") {
+			throw new Error("expected subquery expression within IN clause");
+		}
 
-    const subquerySelect = subqueryItem.statement;
-    if (!subquerySelect || subquerySelect.node_kind !== "select_statement") {
-      throw new Error("expected select statement inside IN clause");
-    }
-    const subqueryWith = subquerySelect.with_clause;
-    expect(subqueryWith).not.toBeNull();
-    if (!subqueryWith) {
-      throw new Error("missing with clause in IN subquery");
-    }
-    expect(subqueryWith.recursive).toBe(true);
-    expect(subqueryWith.ctes).toHaveLength(1);
+		const subquerySelect = subqueryItem.statement;
+		if (!subquerySelect || subquerySelect.node_kind !== "select_statement") {
+			throw new Error("expected select statement inside IN clause");
+		}
+		const subqueryWith = subquerySelect.with_clause;
+		expect(subqueryWith).not.toBeNull();
+		if (!subqueryWith) {
+			throw new Error("missing with clause in IN subquery");
+		}
+		expect(subqueryWith.recursive).toBe(true);
+		expect(subqueryWith.ctes).toHaveLength(1);
 
-    const cte = subqueryWith.ctes[0];
-    if (!cte) {
-      throw new Error("expected CTE definition");
-    }
-    const cteStatement = cte.statement;
-    if (!cteStatement || cteStatement.node_kind !== "compound_select") {
-      throw new Error("expected compound select in recursive CTE");
-    }
-    expect(cteStatement.compounds).toHaveLength(1);
-  });
+		const cte = subqueryWith.ctes[0];
+		if (!cte) {
+			throw new Error("expected CTE definition");
+		}
+		const cteStatement = cte.statement;
+		if (!cteStatement || cteStatement.node_kind !== "compound_select") {
+			throw new Error("expected compound select in recursive CTE");
+		}
+		expect(cteStatement.compounds).toHaveLength(1);
+	});
 });

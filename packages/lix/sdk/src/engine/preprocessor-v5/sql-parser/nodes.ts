@@ -72,9 +72,11 @@ export type StatementSegmentNode = RawFragmentNode | StatementNode;
 
 export type SelectStatementNode = SqlNode & {
 	readonly node_kind: "select_statement";
+	readonly distinct: boolean;
 	readonly projection: readonly SelectItemNode[];
 	readonly from_clauses: readonly FromClauseNode[];
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
+	readonly group_by: readonly ExpressionNode[];
 	readonly order_by: readonly OrderByItemNode[];
 	readonly limit: ExpressionNode | RawFragmentNode | null;
 	readonly offset: ExpressionNode | RawFragmentNode | null;
@@ -178,6 +180,7 @@ export type ExpressionNode =
 	| BetweenExpressionNode
 	| FunctionCallExpressionNode
 	| SubqueryExpressionNode
+	| CaseExpressionNode
 	| RawFragmentNode;
 
 export type ColumnReferenceNode = SqlNode & {
@@ -225,6 +228,18 @@ export type BetweenExpressionNode = SqlNode & {
 	readonly start: ExpressionNode;
 	readonly end: ExpressionNode;
 	readonly negated: boolean;
+};
+
+export type CaseWhenNode = {
+	readonly condition: ExpressionNode;
+	readonly result: ExpressionNode;
+};
+
+export type CaseExpressionNode = SqlNode & {
+	readonly node_kind: "case_expression";
+	readonly operand: ExpressionNode | null;
+	readonly branches: readonly CaseWhenNode[];
+	readonly else_result: ExpressionNode | null;
 };
 
 export type UnaryExpressionNode = SqlNode & {

@@ -40,6 +40,7 @@ import type {
 	WithClauseNode,
 	CommonTableExpressionNode,
 	SubqueryExpressionNode,
+	CaseExpressionNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -153,10 +154,12 @@ class ToAstVisitor extends BaseVisitor {
 	}
 
 	public select_core(ctx: {
+		distinct?: IToken[];
 		select_list: CstNode[];
 		from: CstNode[];
 		joins?: CstNode[];
 		where_clause?: CstNode[];
+		group_by?: CstNode[];
 	}): SelectStatementNode {
 		const selectList = ctx.select_list?.[0];
 		if (!selectList) {
@@ -179,11 +182,15 @@ class ToAstVisitor extends BaseVisitor {
 		const whereClause = whereNode
 			? (this.visit(whereNode) as ExpressionNode)
 			: null;
+		const groupBy =
+			ctx.group_by?.map((node) => this.visit(node) as ExpressionNode) ?? [];
 		return {
 			node_kind: "select_statement",
+			distinct: Boolean(ctx.distinct?.length),
 			projection,
 			from_clauses: fromClauses,
 			where_clause: whereClause,
+			group_by: groupBy,
 			order_by: [],
 			limit: null,
 			offset: null,
@@ -195,8 +202,8 @@ class ToAstVisitor extends BaseVisitor {
 		recursive?: IToken[];
 		ctes?: CstNode[];
 	}): WithClauseNode {
-		const expressions = ctx.ctes?.map((cte) =>
-			(this.visit(cte) as CommonTableExpressionNode)
+		const expressions = ctx.ctes?.map(
+			(cte) => this.visit(cte) as CommonTableExpressionNode
 		);
 		return {
 			node_kind: "with_clause",
@@ -211,8 +218,8 @@ class ToAstVisitor extends BaseVisitor {
 		statement: CstNode[];
 	}): CommonTableExpressionNode {
 		const name = this.visit(ctx.name[0]!) as IdentifierNode;
-		const columns = ctx.columns?.map((column) =>
-			(this.visit(column) as IdentifierNode)
+		const columns = ctx.columns?.map(
+			(column) => this.visit(column) as IdentifierNode
 		);
 		const statement = this.visit(ctx.statement[0]!) as
 			| SelectStatementNode
@@ -396,9 +403,7 @@ class ToAstVisitor extends BaseVisitor {
 			? normalizeJoinType(joinTypeToken.image)
 			: "inner";
 		const onNode = ctx.on_expression?.[0];
-		const onExpression = onNode
-			? (this.visit(onNode) as ExpressionNode)
-			: null;
+		const onExpression = onNode ? (this.visit(onNode) as ExpressionNode) : null;
 		return {
 			node_kind: "join_clause",
 			join_type: joinType,
@@ -631,6 +636,14 @@ class ToAstVisitor extends BaseVisitor {
 		if (numberLiteral?.image) {
 			return createLiteralNode(Number(numberLiteral.image));
 		}
+		const nullLiteral = ctx.nullLiteral?.[0];
+		if (nullLiteral) {
+			return createLiteralNode(null);
+		}
+		const caseExpression = ctx.caseExpression?.[0];
+		if (caseExpression) {
+			return this.visit(caseExpression) as ExpressionNode;
+		}
 		const callIdentifier = ctx.callIdentifier?.[0];
 		if (callIdentifier?.image) {
 			const args: ExpressionNode[] =
@@ -671,6 +684,45 @@ class ToAstVisitor extends BaseVisitor {
 			expression,
 		};
 		return grouped;
+	}
+
+	public case_expression(ctx: {
+		operand?: CstNode[];
+		when_condition?: CstNode[];
+		when_value?: CstNode[];
+		then_expression: CstNode[];
+		else_expression?: CstNode[];
+	}): CaseExpressionNode {
+		const operandNode = ctx.operand?.[0];
+		const operand = operandNode
+			? (this.visit(operandNode) as ExpressionNode)
+			: null;
+		const conditions =
+			ctx.when_condition?.map((node) => this.visit(node) as ExpressionNode) ??
+			ctx.when_value?.map((node) => this.visit(node) as ExpressionNode) ??
+			[];
+		const results =
+			ctx.then_expression?.map((node) => this.visit(node) as ExpressionNode) ??
+			[];
+		if (conditions.length !== results.length) {
+			throw new Error(
+				"CASE expression requires matching WHEN and THEN clauses"
+			);
+		}
+		const branches = conditions.map((condition, index) => ({
+			condition,
+			result: results[index]!,
+		}));
+		const elseNode = ctx.else_expression?.[0];
+		const elseExpression = elseNode
+			? (this.visit(elseNode) as ExpressionNode)
+			: null;
+		return {
+			node_kind: "case_expression",
+			operand,
+			branches,
+			else_result: elseExpression,
+		};
 	}
 
 	public column_reference(ctx: { parts?: CstNode[] }): ColumnReferenceNode {
