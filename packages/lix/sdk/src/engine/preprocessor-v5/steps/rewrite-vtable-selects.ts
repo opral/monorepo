@@ -11,6 +11,7 @@ import {
 	type SelectItemNode,
 	type SelectStatementNode,
 	type TableReferenceNode,
+	type RelationNode,
 } from "../sql-parser/nodes.js";
 import type {
 	PreprocessorStep,
@@ -61,6 +62,7 @@ type SchemaKeyPredicateSummary = {
 type PredicateVisitContext = {
 	tableNames: Set<string>;
 	parameters: ReadonlyArray<unknown>;
+	allowUnqualified: boolean;
 };
 
 type TableReferenceInfo = {
@@ -136,14 +138,30 @@ function rewriteSegmentedStatement(
 
 function rewriteSelectStatement(
 	select: SelectStatementNode,
-	context: PreprocessorStepContext
+	context: PreprocessorStepContext,
+	inheritedSchemaKeys: readonly string[] = []
 ): SelectStatementNode {
+	const parameters = context.parameters ?? [];
+	const subquerySchemaKeyMap = collectSubquerySchemaKeyMap(
+		select,
+		parameters,
+		inheritedSchemaKeys
+	);
 	const withRewrittenSubqueries = visitSelectStatement(select, {
-		subquery(node) {
+		subquery(node, visitContext) {
+			const parentKind = visitContext.parent?.node_kind;
+			const aliasValue = getIdentifierValue(node.alias);
+			const normalizedAlias = aliasValue
+				? normalizeIdentifierValue(aliasValue)
+				: DEFAULT_ALIAS_KEY;
+			const nextInherited =
+				parentKind === "from_clause" || parentKind === "join_clause"
+					? (subquerySchemaKeyMap.get(normalizedAlias) ?? inheritedSchemaKeys)
+					: inheritedSchemaKeys;
 			const rewrittenStatement =
 				node.statement.node_kind === "compound_select"
-					? rewriteCompoundSelect(node.statement, context)
-					: rewriteSelectStatement(node.statement, context);
+					? rewriteCompoundSelect(node.statement, context, nextInherited)
+					: rewriteSelectStatement(node.statement, context, nextInherited);
 			if (rewrittenStatement !== node.statement) {
 				return {
 					...node,
@@ -171,12 +189,19 @@ function rewriteSelectStatement(
 			.filter((alias): alias is string => alias !== null),
 	]);
 
-	const parameters = context.parameters ?? [];
 	const schemaSummary = collectSchemaKeyPredicates(
 		withRewrittenSubqueries.where_clause,
 		tableNamesForTrace,
 		parameters
 	);
+	const mergedSchemaKeys = mergeSchemaKeyLiterals(
+		inheritedSchemaKeys,
+		schemaSummary.literals
+	);
+	const schemaSummaryForTrace: SchemaKeyPredicateSummary = {
+		count: schemaSummary.count,
+		literals: mergedSchemaKeys,
+	};
 
 	const projectionKind = determineProjectionKind(
 		withRewrittenSubqueries.projection,
@@ -190,7 +215,8 @@ function rewriteSelectStatement(
 	const metadata = buildInlineMetadata(
 		withRewrittenSubqueries,
 		references,
-		parameters
+		parameters,
+		inheritedSchemaKeys
 	);
 
 	const rewritten = visitSelectStatement(
@@ -202,7 +228,7 @@ function rewriteSelectStatement(
 		const entry = buildTraceEntry({
 			aliasList,
 			projectionKind,
-			schemaSummary,
+			schemaSummary: schemaSummaryForTrace,
 			selectedColumns: selectedColumnsSummaryForTrace.selectedColumns,
 		});
 		context.trace.push(entry);
@@ -213,16 +239,25 @@ function rewriteSelectStatement(
 
 function rewriteCompoundSelect(
 	compound: CompoundSelectNode,
-	context: PreprocessorStepContext
+	context: PreprocessorStepContext,
+	inheritedSchemaKeys: readonly string[] = []
 ): CompoundSelectNode {
 	let changed = false;
-	const first = rewriteSelectStatement(compound.first, context);
+	const first = rewriteSelectStatement(
+		compound.first,
+		context,
+		inheritedSchemaKeys
+	);
 	if (first !== compound.first) {
 		changed = true;
 	}
 
 	const branches = compound.compounds.map((branch) => {
-		const rewritten = rewriteSelectStatement(branch.select, context);
+		const rewritten = rewriteSelectStatement(
+			branch.select,
+			context,
+			inheritedSchemaKeys
+		);
 		if (rewritten !== branch.select) {
 			changed = true;
 			return {
@@ -285,10 +320,70 @@ function normalizeAlias(alias: IdentifierNode | null): string | null {
 	return value ? normalizeIdentifierValue(value) : null;
 }
 
+function collectSubquerySchemaKeyMap(
+	select: SelectStatementNode,
+	parameters: ReadonlyArray<unknown>,
+	inheritedSchemaKeys: readonly string[]
+): Map<string, readonly string[]> {
+	const map = new Map<string, readonly string[]>();
+	const register = (
+		relation: RelationNode,
+		joinFilter: ExpressionNode | RawFragmentNode | null
+	) => {
+		if (relation.node_kind !== "subquery") {
+			return;
+		}
+		const aliasValue = getIdentifierValue(relation.alias);
+		if (!aliasValue) {
+			return;
+		}
+		const normalizedAlias = normalizeIdentifierValue(aliasValue);
+		const tableNames = new Set<string>([
+			normalizedAlias,
+			DEFAULT_ALIAS_KEY,
+			ORIGINAL_TABLE_KEY,
+		]);
+		const whereSummary = collectSchemaKeyPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const joinSummary = collectSchemaKeyPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localKeys = mergeSchemaKeyLiterals(
+			whereSummary.literals,
+			joinSummary.literals
+		);
+		const existing = map.get(normalizedAlias) ?? [];
+		const merged = mergeSchemaKeyLiterals(
+			existing,
+			inheritedSchemaKeys,
+			localKeys
+		);
+		if (merged.length > 0) {
+			map.set(normalizedAlias, merged);
+		}
+	};
+
+	for (const clause of select.from_clauses) {
+		register(clause.relation, null);
+		for (const join of clause.joins) {
+			register(join.relation, join.on_expression);
+		}
+	}
+
+	return map;
+}
+
 function buildInlineMetadata(
 	select: SelectStatementNode,
 	references: readonly TableReferenceInfo[],
-	parameters: ReadonlyArray<unknown>
+	parameters: ReadonlyArray<unknown>,
+	inheritedSchemaKeys: readonly string[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -306,9 +401,13 @@ function buildInlineMetadata(
 			tableNames,
 			parameters
 		);
+		const schemaKeys = mergeSchemaKeyLiterals(
+			inheritedSchemaKeys,
+			summary.literals
+		);
 		const columnSummary = collectSelectedColumns(select, tableNames);
 		metadata.set(aliasKey, {
-			schemaKeys: summary.literals,
+			schemaKeys,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
@@ -358,7 +457,8 @@ function createInlineVisitor(
 function collectSchemaKeyPredicates(
 	whereClause: SelectStatementNode["where_clause"],
 	tableNames: Set<string>,
-	parameters: ReadonlyArray<unknown>
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
 ): SchemaKeyPredicateSummary {
 	if (!whereClause) {
 		return { count: 0, literals: [] };
@@ -367,9 +467,27 @@ function collectSchemaKeyPredicates(
 	const context: PredicateVisitContext = {
 		tableNames,
 		parameters,
+		allowUnqualified,
 	};
 
 	return visitExpression(whereClause, context);
+}
+
+function collectSchemaKeyPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): SchemaKeyPredicateSummary {
+	if (!expression) {
+		return { count: 0, literals: [] };
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return visitExpression(expression, context);
 }
 
 function visitExpression(
@@ -419,14 +537,8 @@ function visitBinaryExpression(
 		literals: [],
 	};
 
-	const leftIsSchema = isSchemaKeyReference(
-		expression.left,
-		context.tableNames
-	);
-	const rightIsSchema = isSchemaKeyReference(
-		expression.right,
-		context.tableNames
-	);
+	const leftIsSchema = isSchemaKeyReference(expression.left, context);
+	const rightIsSchema = isSchemaKeyReference(expression.right, context);
 
 	if (leftIsSchema) {
 		summary = incrementSummaryWithOperand(summary, expression.right, context);
@@ -442,7 +554,7 @@ function visitInListExpression(
 	expression: InListExpressionNode,
 	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
+	if (!isSchemaKeyReference(expression.operand, context)) {
 		return { count: 0, literals: [] };
 	}
 	let summary: SchemaKeyPredicateSummary = {
@@ -459,7 +571,7 @@ function visitBetweenExpression(
 	expression: BetweenExpressionNode,
 	context: PredicateVisitContext
 ): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context.tableNames)) {
+	if (!isSchemaKeyReference(expression.operand, context)) {
 		return { count: 0, literals: [] };
 	}
 	let summary: SchemaKeyPredicateSummary = {
@@ -524,7 +636,7 @@ function unwrapExpression(
 
 function isSchemaKeyReference(
 	expression: ExpressionNode | RawFragmentNode,
-	tableNames: Set<string>
+	context: PredicateVisitContext
 ): boolean {
 	if ("sql_text" in expression) {
 		return false;
@@ -532,16 +644,16 @@ function isSchemaKeyReference(
 	if (expression.node_kind === "column_reference") {
 		const qualifier = getColumnQualifier(expression);
 		const columnName = getColumnName(expression);
-		if (qualifier && tableNames.has(qualifier)) {
+		if (qualifier && context.tableNames.has(qualifier)) {
 			return columnName === "schema_key";
 		}
-		if (!qualifier) {
+		if (!qualifier && context.allowUnqualified) {
 			return columnName === "schema_key";
 		}
 		return false;
 	}
 	if (expression.node_kind === "grouped_expression") {
-		return isSchemaKeyReference(expression.expression, tableNames);
+		return isSchemaKeyReference(expression.expression, context);
 	}
 	return false;
 }
@@ -569,6 +681,25 @@ function mergeSummaries(
 		},
 		{ count: 0, literals: [] }
 	);
+}
+
+function mergeSchemaKeyLiterals(
+	...lists: readonly (readonly string[])[]
+): string[] {
+	const seen = new Set<string>();
+	const merged: string[] = [];
+	for (const list of lists) {
+		for (const item of list) {
+			if (typeof item !== "string") {
+				continue;
+			}
+			if (!seen.has(item)) {
+				seen.add(item);
+				merged.push(item);
+			}
+		}
+	}
+	return merged;
 }
 
 function collectSelectedColumns(

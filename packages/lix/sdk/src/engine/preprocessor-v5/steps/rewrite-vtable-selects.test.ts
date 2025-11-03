@@ -131,6 +131,35 @@ test("resolves cache table when schema key requires sanitization", () => {
 	expect(sql).toContain(`"${cacheTable}"`);
 });
 
+test("propagates schema filters into derived vtable subqueries", () => {
+	const schemaKey = "derived-schema";
+	const sanitizedKey = schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
+	const cacheTable = `lix_internal_state_cache_v1_${sanitizedKey}`;
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM (
+			SELECT entity_id, schema_key
+			FROM lix_internal_state_vtable
+		) AS derived
+		WHERE schema_key = '${schemaKey}'
+	`,
+		{
+			getCacheTables: () => new Map([[sanitizedKey, cacheTable]]),
+			hasOpenTransaction: () => false,
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toMatch(
+		new RegExp(`unt\\.schema_key\\s+IN\\s+\\('${schemaKey}'\\)`, "i")
+	);
+	expect(sql).toMatch(
+		new RegExp(`cache\\.schema_key\\s+IN\\s+\\('${schemaKey}'\\)`, "i")
+	);
+	expect(sql).toContain(`"${cacheTable}"`);
+});
+
 test("resolves cache rows across recursive version inheritance chains", async () => {
 	const lix = await openLix({});
 	const schemaKey = "recursive_entity_schema";

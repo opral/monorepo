@@ -73,21 +73,17 @@ test("validateStateMutation state_all placeholder rewrite reproduction", async (
 			sql,
 			parameters,
 		})) as {
-			original: { sql: string };
-			expanded?: { sql: string };
-			rewritten?: { sql: string };
+			originalSql: string;
+			rewrittenSql?: string;
 			plan: unknown;
 		};
 
 		const output = [
 			"-- SQL (state_all placeholder reproduction)",
-			explain.original.sql,
-			"",
-			"-- expanded SQL",
-			explain.expanded?.sql ?? "<unchanged>",
+			explain.originalSql,
 			"",
 			"-- rewritten SQL",
-			explain.rewritten?.sql ?? "<unchanged>",
+			explain.rewrittenSql ?? "<unchanged>",
 			"",
 			"-- rewritten parameters",
 			JSON.stringify(parameters),
@@ -103,7 +99,7 @@ test("validateStateMutation state_all placeholder rewrite reproduction", async (
 			"utf8"
 		);
 
-		expect(explain.rewritten?.sql).toBeTruthy();
+		expect(explain.rewrittenSql).toBeTruthy();
 	} finally {
 		await lix.close();
 	}
@@ -144,28 +140,24 @@ test("state view rewrite reproduction", async () => {
 		});
 
 		const entityId = `${REPRO_SCHEMA["x-lix-key"]}-entity-0`;
-		const sql = `select "entity_id", "schema_key", "writer_key" from "state" where "entity_id" = ?1`;
-		const parameters = [entityId];
+		const sql = `select "entity_id", "schema_key", "writer_key" from "state" where "entity_id" = ?1 AND "schema_key" = ?2`;
+		const parameters = [entityId, REPRO_SCHEMA["x-lix-key"]];
 
 		const explain = (await lix.call("lix_explain_query", {
 			sql,
 			parameters,
 		})) as {
-			original: { sql: string };
-			expanded?: { sql: string };
-			rewritten?: { sql: string };
+			originalSql: string;
+			rewrittenSql?: string;
 			plan: unknown;
 		};
 
 		const output = [
 			"-- SQL (state view reproduction)",
-			explain.original.sql,
-			"",
-			"-- expanded SQL",
-			explain.expanded?.sql ?? "<unchanged>",
+			explain.originalSql,
 			"",
 			"-- rewritten SQL",
-			explain.rewritten?.sql ?? "<unchanged>",
+			explain.rewrittenSql ?? "<unchanged>",
 			"",
 			"-- rewritten parameters",
 			JSON.stringify(parameters),
@@ -193,7 +185,7 @@ async function registerSchemas(
 		await lix.db
 			.insertInto("stored_schema")
 			.values({ value: schema })
-			.onConflict((oc) => oc.doNothing())
+			// .onConflict((oc) => oc.doNothing())
 			.execute();
 	}
 }

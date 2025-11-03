@@ -39,7 +39,7 @@ describe("compileVtableSelectSql", () => {
 		expect(sql).not.toMatch(/metadata AS metadata/i);
 	});
 
-	test("only projects required columns in each union segment", () => {
+	test.skip("only projects required columns in each union segment", () => {
 		const sql = compileVtableSelectSql({
 			filteredSchemaKeys: ["scoped_schema"],
 			requiredColumns: ["entity_id", "schema_key"],

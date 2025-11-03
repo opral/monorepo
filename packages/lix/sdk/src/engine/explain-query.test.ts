@@ -19,4 +19,3 @@ test("createExplainQuery returns rewritten when query is mutated", async () => {
 	expect(report.rewrittenSql).not.toBe(report.originalSql);
 	await lix.close();
 });
-
