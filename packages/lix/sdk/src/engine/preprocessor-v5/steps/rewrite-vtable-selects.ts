@@ -1030,6 +1030,10 @@ function buildProjectionColumnSet(
 		}
 	}
 
+	// Internal rewrites rely on snapshot_content for JSON decoding and cache filtering.
+	candidateColumns.add("snapshot_content");
+	rankedColumns.add("snapshot_content");
+
 	return { candidateColumns, rankedColumns };
 }
 
@@ -1510,6 +1514,7 @@ function buildCacheSource(
 ): string | null {
 	const requiredColumns = new Set(projectionColumns);
 	// Always keep structural columns that power tombstone filtering and ranking.
+	requiredColumns.add("snapshot_content");
 	requiredColumns.add("is_tombstone");
 	requiredColumns.add("file_id");
 	requiredColumns.add("entity_id");

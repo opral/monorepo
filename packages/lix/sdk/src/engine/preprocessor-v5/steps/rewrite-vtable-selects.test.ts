@@ -91,6 +91,26 @@ test("rewrites to inline vtable subquery", () => {
 	expect(sql).not.toMatch(/\bFROM\s+"lix_internal_state_vtable"\b/i);
 });
 
+test("cache segment projects snapshot_content even when not selected explicitly", () => {
+	const schemaKey = "lix_stored_schema";
+	const cacheTable = schemaKeyToCacheTableName(schemaKey);
+	const rewritten = rewrite(
+		`
+		SELECT schema_key
+		FROM lix_internal_state_vtable
+		WHERE schema_key = '${schemaKey}'
+		  AND version_id = 'global'
+	`,
+		{
+			getCacheTables: () => new Map([[schemaKey, cacheTable]]),
+			hasOpenTransaction: () => false,
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toContain("json(cache.snapshot_content) AS snapshot_content");
+});
+
 test("resolves cache rows across recursive version inheritance chains", async () => {
 	const lix = await openLix({});
 	const schemaKey = "recursive_entity_schema";

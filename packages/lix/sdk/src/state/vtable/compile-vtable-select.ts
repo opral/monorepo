@@ -267,6 +267,9 @@ function buildProjectionConfig(columns: readonly VtableColumn[]): {
 
 	const needsChangeJoin = candidateColumns.has("metadata");
 
+	candidateColumns.add("snapshot_content");
+	rankedColumns.add("snapshot_content");
+
 	return {
 		candidateColumns,
 		rankedColumns,
