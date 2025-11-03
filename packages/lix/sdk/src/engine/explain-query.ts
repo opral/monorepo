@@ -8,18 +8,9 @@ import { listAvailableCacheSchemas } from "../state/cache/schema-resolver.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 type ExplainQueryStage = {
-	original: {
-		sql: string;
-		parameters: unknown[];
-	};
-	expanded?: {
-		sql: string;
-		parameters: unknown[];
-	};
-	rewritten?: {
-		sql: string;
-		parameters: unknown[];
-	};
+	originalSql: string;
+	parameters: unknown[];
+	rewrittenSql?: string;
 	plan: any[];
 };
 
@@ -51,16 +42,9 @@ export function createExplainQuery(args: {
 		const wasRewritten = result.sql !== sql;
 
 		return {
-			original: {
-				sql,
-				parameters,
-			},
-			rewritten: wasRewritten
-				? {
-						sql: result.sql,
-						parameters: [...result.parameters],
-					}
-				: undefined,
+			originalSql: sql,
+			parameters,
+			rewrittenSql: wasRewritten ? result.sql : undefined,
 			plan: explainRows,
 		};
 	};
