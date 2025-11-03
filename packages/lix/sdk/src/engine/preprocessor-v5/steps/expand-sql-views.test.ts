@@ -215,7 +215,11 @@ test("expands views defined by compound selects with nested view references", ()
 	if (!cte) {
 		throw new Error("expected base CTE");
 	}
-	const cteFrom = cte.statement.from_clauses[0];
+	const cteStatement = cte.statement;
+	if (cteStatement.node_kind !== "select_statement") {
+		throw new Error("expected base CTE to compile into select statement");
+	}
+	const cteFrom = cteStatement.from_clauses[0];
 	if (!cteFrom || cteFrom.relation.node_kind !== "subquery") {
 		throw new Error("expected aux_view to expand within CTE");
 	}

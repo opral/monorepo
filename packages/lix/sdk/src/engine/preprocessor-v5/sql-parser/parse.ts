@@ -613,11 +613,13 @@ class ToAstVisitor extends BaseVisitor {
 		parameter?: IToken[];
 		string?: IToken[];
 		number?: IToken[];
+		nullLiteral?: IToken[];
 		reference?: CstNode[];
 		callIdentifier?: IToken[];
 		callArguments?: CstNode[];
 		subselect?: CstNode[];
 		inner?: CstNode[];
+		caseExpression?: CstNode[];
 	}): ExpressionNode {
 		const parameter = ctx.parameter?.[0];
 		if (parameter) {

@@ -46,7 +46,6 @@ async function storeMaterializationTestSchemas(lix: {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: testEntitySchema })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 }
 

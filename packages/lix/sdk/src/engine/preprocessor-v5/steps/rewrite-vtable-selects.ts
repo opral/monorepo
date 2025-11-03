@@ -622,20 +622,17 @@ function collectSelectedColumns(
 		}
 	}
 
-	if (!hasUnresolvedProjection && !selectsAll) {
-		const referenced = collectReferencedColumnSummary(select, tableNames);
-		if (referenced.hasUnknownReferences) {
-			hasUnresolvedProjection = true;
-		} else {
-			for (const column of referenced.columns) {
-				if (entries.has(column)) {
-					continue;
-				}
-				if (HIDDEN_SEGMENT_COLUMN_SET.has(column)) {
-					hiddenSelections.add(column);
-				}
-				supportColumns.add(column);
-			}
+	const referenced = collectReferencedColumnSummary(select, tableNames);
+	if (referenced.hasUnknownReferences) {
+		hasUnresolvedProjection = true;
+	}
+
+	for (const column of referenced.columns) {
+		if (HIDDEN_SEGMENT_COLUMN_SET.has(column)) {
+			hiddenSelections.add(column);
+		}
+		if (!entries.has(column)) {
+			supportColumns.add(column);
 		}
 	}
 
@@ -643,7 +640,7 @@ function collectSelectedColumns(
 		return {
 			selectedColumns: null,
 			requestedHiddenColumns: hiddenSelections,
-			supportColumns: new Set(),
+			supportColumns,
 		};
 	}
 
@@ -805,6 +802,8 @@ function buildVtableSelectRewrite(options: {
 		options.hiddenColumns,
 		options.supportColumns
 	);
+	candidateColumns.add("priority");
+	rankedColumns.add("priority");
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const cacheSource = buildCacheSource(
 		schemaFilterList,
@@ -820,6 +819,7 @@ function buildVtableSelectRewrite(options: {
 	const projectionSql = buildRewriteProjectionSql(options.selectedColumns, {
 		supportColumns: options.supportColumns,
 		needsWriterJoin,
+		candidateColumns,
 	});
 	const rankingOrder = [
 		"c.priority",
@@ -925,6 +925,7 @@ function buildRewriteProjectionSql(
 	options: {
 		needsWriterJoin: boolean;
 		supportColumns: ReadonlySet<string>;
+		candidateColumns: ReadonlySet<string>;
 	}
 ): string {
 	const builder = internalQueryBuilder as unknown as {
@@ -948,7 +949,8 @@ function buildRewriteProjectionSql(
 			: Array.from(options.supportColumns)
 					.filter(
 						(column) =>
-							!selectedColumns.some((entry) => entry.column === column)
+							!selectedColumns.some((entry) => entry.column === column) &&
+							!INTERNAL_ONLY_COLUMN_SET.has(column)
 					)
 					.map<SelectedProjection>((column) => ({
 						column,
@@ -958,7 +960,7 @@ function buildRewriteProjectionSql(
 		selectedColumns === null ? null : [...selectedColumns, ...supportEntries];
 	const query =
 		combinedEntries === null || combinedEntries.length === 0
-			? baseQuery.selectAll("w")
+			? undefined
 			: baseQuery.select((eb) =>
 					combinedEntries.map((entry) => {
 						if (options.needsWriterJoin && entry.column === "writer_key") {
@@ -974,9 +976,34 @@ function buildRewriteProjectionSql(
 					})
 				);
 
+	if (!query) {
+		const defaultColumns = buildDefaultProjectionColumns(
+			options.candidateColumns
+		);
+		return defaultColumns
+			.map(
+				(column) => `w.${quoteIdentifier(column)} AS ${quoteIdentifier(column)}`
+			)
+			.join(",\n");
+	}
+
 	const { sql } = query.compile();
 	const match = sql.match(/^select\s+(?<projection>[\s\S]+?)\s+from\s+/i);
 	return match?.groups?.projection?.trim() ?? sql;
+}
+
+function buildDefaultProjectionColumns(
+	candidateColumns: ReadonlySet<string>
+): string[] {
+	const ordered = PROJECTION_COLUMN_ORDER.filter(
+		(column) =>
+			!INTERNAL_ONLY_COLUMN_SET.has(column) && candidateColumns.has(column)
+	) as string[];
+	const additional = Array.from(candidateColumns).filter(
+		(column) =>
+			!INTERNAL_ONLY_COLUMN_SET.has(column) && !ordered.includes(column)
+	);
+	return ordered.concat(additional.sort());
 }
 
 function buildProjectionColumnSet(
@@ -1084,6 +1111,12 @@ const CACHE_COLUMNS = [
 	"commit_id",
 	"is_tombstone",
 ] as const;
+
+const PROJECTION_COLUMN_ORDER = ALL_SEGMENT_COLUMNS.filter(
+	(column) => column !== "priority"
+);
+
+const INTERNAL_ONLY_COLUMN_SET = new Set<string>(["priority", "rn"]);
 
 function buildTransactionSegment(
 	schemaFilter: string | null,
@@ -1209,11 +1242,16 @@ function buildCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const conditions: string[] = [];
+	if (rewrittenFilter) {
+		conditions.push(rewrittenFilter);
+	}
+	const whereClause =
+		conditions.length > 0 ? `\n\t\tWHERE ${conditions.join(" AND ")}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${sourceSql} cache
-		WHERE cache.is_tombstone = 0${rewrittenFilter ? ` AND ${rewrittenFilter}` : ""}
+		FROM ${sourceSql} cache${whereClause}
 	`).trimEnd();
 }
 

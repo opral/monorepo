@@ -376,8 +376,39 @@ test("omits hidden _pk when not explicitly selected", () => {
 		{ hasOpenTransaction: () => true }
 	);
 
+	const select = firstSelect(rewritten);
+	const projected = select.projection
+		.filter(
+			(item): item is SelectExpressionNode =>
+				item.node_kind === "select_expression"
+		)
+		.map((item) => {
+			const expression = item.expression;
+			if (expression.node_kind !== "column_reference") {
+				return null;
+			}
+			const path = getColumnPath(expression);
+			return path?.[path.length - 1] ?? null;
+		})
+		.filter((value): value is string => value !== null);
+
+	expect(projected).not.toContain("_pk");
+	expect(projected).not.toContain("priority");
+	expect(projected).not.toContain("rn");
+});
+
+test("includes hidden _pk when referenced in predicates", () => {
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v._pk LIKE 'C%'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
 	const sql = compileSql(rewritten);
-	expect(sql.toLowerCase()).not.toContain(" as _pk");
+	expect(sql.toLowerCase()).toContain(" as _pk");
 });
 
 test("retains writer joins when writer_key is selected", () => {
@@ -491,6 +522,28 @@ test("unions cache tables when multiple schema filters are present", () => {
 	const unions = sql.match(/\bUNION ALL\b/g) ?? [];
 	expect(unions.length).toBe(8);
 	expect(sql).not.toContain("test_schema_key_unused_cache_table");
+});
+
+test("cache segment keeps tombstones for tracked deletions", () => {
+	const rewritten = rewrite(
+		`
+		SELECT v.*
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{
+			getCacheTables: () =>
+				new Map([["test_schema_key", "test_schema_key_cache_table"]]),
+			hasOpenTransaction: () => false,
+		}
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	const tombstoneFilters = sql.match(/cache\.is_tombstone\s*=\s*0/g) ?? [];
+
+	expect(tombstoneFilters).toHaveLength(1);
+	expect(sql).toContain("from \"test_schema_key_cache_table\" cache");
+	expect(sql).toContain("where cache.schema_key in ('test_schema_key')");
 });
 
 test("skips cache unions when no cache tables mapped", () => {
