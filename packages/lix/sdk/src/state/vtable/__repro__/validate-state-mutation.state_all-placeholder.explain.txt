@@ -2,28 +2,7 @@
 select "snapshot_content" from "state_all" where "schema_key" = ?1 and json_extract(snapshot_content, '$.id') = ?2 and "version_id" = ?3 and "inherited_from_version_id" is null
 
 -- expanded SQL
-select "snapshot_content" from ( SELECT 
-      entity_id,
-      schema_key,
-      file_id,
-      version_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      created_at,
-      updated_at,
-      inherited_from_version_id,
-      change_id,
-      untracked,
-      commit_id,
-      writer_key,
-      (
-        SELECT json(metadata)
-        FROM change
-        WHERE change.id = lix_internal_state_vtable.change_id
-      ) AS metadata
-    FROM lix_internal_state_vtable
-    WHERE snapshot_content IS NOT NULL ) AS "state_all" where "schema_key" = ?1 and json_extract(snapshot_content, '$.id') = ?2 and "version_id" = ?3 and "inherited_from_version_id" is null
+<unchanged>
 
 -- rewritten SQL
 WITH

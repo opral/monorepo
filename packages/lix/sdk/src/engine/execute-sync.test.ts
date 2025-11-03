@@ -28,10 +28,42 @@ describe("createExecuteSync", () => {
 		executeSync({ sql: "SELECT ?", parameters });
 
 		expect(preprocess).toHaveBeenCalledWith(
-			expect.objectContaining({ sql: "SELECT ?", parameters })
+			expect.objectContaining({ sql: "SELECT ?", parameters, mode: "full" })
 		);
 		expect(exec).toHaveBeenCalledWith(
 			expect.objectContaining({ bind: parameters })
+		);
+	});
+
+	test("passes preprocessing mode through when provided", async () => {
+		const exec = vi.fn().mockReturnValue([]);
+		const sqlite = { exec } as unknown as SqliteWasmDatabase;
+		const preprocess = vi.fn(
+			({ sql, parameters }: QueryPreprocessorResult) => ({
+				sql,
+				parameters,
+			})
+		);
+
+		const executeSync = createExecuteSync({
+			engine: {
+				sqlite,
+				hooks: {} as any,
+				runtimeCacheRef: {} as any,
+				preprocessQuery: preprocess as any,
+			},
+		});
+
+		const sql = "SELECT 1";
+		const parameters = [] as any;
+
+		executeSync({ sql, parameters, preprocessMode: "vtable-select-only" });
+
+		expect(preprocess).toHaveBeenCalledWith(
+			expect.objectContaining({ sql, parameters, mode: "vtable-select-only" })
+		);
+		expect(exec).toHaveBeenCalledWith(
+			expect.objectContaining({ sql, bind: parameters })
 		);
 	});
 
@@ -52,7 +84,7 @@ describe("createExecuteSync", () => {
 		const sql = "SELECT 1";
 		const parameters = [] as any;
 
-		executeSync({ sql, parameters, skipPreprocessing: true });
+		executeSync({ sql, parameters, preprocessMode: "none" });
 
 		expect(preprocess).not.toHaveBeenCalled();
 		expect(exec).toHaveBeenCalledWith(

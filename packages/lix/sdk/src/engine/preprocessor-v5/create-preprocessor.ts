@@ -1,6 +1,7 @@
 import { compile } from "./sql-parser/compile.js";
 import { parse } from "./sql-parser/parse.js";
 import type {
+	PreprocessMode,
 	PreprocessorArgs,
 	PreprocessorFn,
 	PreprocessorStep,
@@ -34,11 +35,16 @@ type EngineShape = Pick<
 	| "listFunctions"
 >;
 
-const pipeline: PreprocessorStep[] = [
+const fullPipeline: PreprocessorStep[] = [
 	expandSqlViews,
 	rewriteEntityViewInsert,
 	rewriteEntityViewUpdate,
 	rewriteEntityViewDelete,
+	cachePopulator,
+	rewriteVtableSelects,
+];
+
+const vtableOnlyPipeline: PreprocessorStep[] = [
 	cachePopulator,
 	rewriteVtableSelects,
 ];
@@ -58,13 +64,26 @@ export function createPreprocessor(args: {
 }): PreprocessorFn {
 	const { engine } = args;
 
-	return ({ sql, parameters, sideEffects, trace }: PreprocessorArgs) => {
-		void sideEffects;
-
+	return ({ sql, parameters, trace, mode = "full" }: PreprocessorArgs) => {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 
+		if (mode === "none") {
+			if (traceEntries) {
+				traceEntries.push({
+					step: "complete",
+					payload: null,
+				});
+			}
+			return {
+				sql,
+				parameters,
+				trace: traceEntries,
+			};
+		}
+
 		const statements = parse(sql);
+		const pipeline = selectPipeline(mode);
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
@@ -96,6 +115,13 @@ export function createPreprocessor(args: {
 			trace: traceEntries,
 		};
 	};
+}
+
+function selectPipeline(mode: PreprocessMode): readonly PreprocessorStep[] {
+	if (mode === "vtable-select-only") {
+		return vtableOnlyPipeline;
+	}
+	return fullPipeline;
 }
 
 function buildContext(

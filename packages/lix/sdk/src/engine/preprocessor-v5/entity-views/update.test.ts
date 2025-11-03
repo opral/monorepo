@@ -34,7 +34,7 @@ test("rewrites updates for stored schema views", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const updateResult = preprocess({
@@ -51,7 +51,7 @@ test("rewrites updates for stored schema views", async () => {
 	lix.engine!.executeSync({
 		sql: updateResult.sql,
 		parameters: updateResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -62,7 +62,7 @@ test("rewrites updates for stored schema views", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([
@@ -105,7 +105,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const updateResult = preprocess({
@@ -120,7 +120,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 	lix.engine!.executeSync({
 		sql,
 		parameters: updateResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const stored = await lix.db
@@ -148,7 +148,7 @@ test("prefixless alias updates target stored schema key", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const updateResult = preprocess({
@@ -163,7 +163,7 @@ test("prefixless alias updates target stored schema key", async () => {
 	lix.engine!.executeSync({
 		sql: updateResult.sql,
 		parameters: updateResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -174,7 +174,7 @@ test("prefixless alias updates target stored schema key", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toHaveLength(1);
@@ -221,7 +221,7 @@ test("updates to immutable schemas are rejected", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const attemptUpdate = () =>
@@ -267,7 +267,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const updateResult = preprocess({
@@ -281,7 +281,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 	lix.engine!.executeSync({
 		sql: updateResult.sql,
 		parameters: updateResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const stored = await lix.db

@@ -3,6 +3,11 @@ import type { LixEngine } from "../boot.js";
 import type { CelEnvironment } from "../cel-environment/cel-environment.js";
 
 /**
+ * Controls which subset of preprocessing stages to execute.
+ */
+export type PreprocessMode = "full" | "vtable-select-only" | "none";
+
+/**
  * Shared trace entry type for documenting per-step behaviour.
  *
  * @example
@@ -68,8 +73,8 @@ export type PreprocessorStep = (
 export type PreprocessorArgs = {
 	readonly sql: string;
 	readonly parameters: ReadonlyArray<unknown>;
-	readonly sideEffects?: boolean;
 	readonly trace?: boolean;
+	readonly mode?: PreprocessMode;
 };
 
 /**

@@ -50,7 +50,7 @@ describe("createQueryPreprocessorV2", () => {
 		await lix.close();
 	});
 
-	test("skips cache population when sideEffects=false", async () => {
+	test("always populates cache when accessing vtable", async () => {
 		const lix = await openLix({});
 		try {
 			const populateSpy = vi.spyOn(
@@ -65,10 +65,9 @@ describe("createQueryPreprocessorV2", () => {
 			preprocess({
 				sql: "SELECT * FROM lix_internal_state_vtable WHERE schema_key = 'lix_key_value'",
 				parameters: [],
-				sideEffects: false,
 			});
 
-			expect(populateSpy).not.toHaveBeenCalled();
+			expect(populateSpy).toHaveBeenCalled();
 		} finally {
 			await lix.close();
 		}

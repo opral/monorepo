@@ -111,7 +111,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		const postRewrite = lix.engine!.preprocessQuery({
 			sql: rewritten!.sql,
 			parameters: [],
-			sideEffects: false,
+			// sideEffects removed false,
 		});
 
 		expect(postRewrite.sql).toContain("lix_internal_state_vtable_rewritten");

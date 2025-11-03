@@ -162,7 +162,7 @@ test("rewrites deletes for stored schema views", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const deleteResult = preprocess({
@@ -204,7 +204,7 @@ test("rewrites deletes for stored schema views", async () => {
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
 		parameters: deleteResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -215,7 +215,7 @@ test("rewrites deletes for stored schema views", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([]);
@@ -234,7 +234,7 @@ test("prefixless alias deletes target stored schema key", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const deleteResult = preprocess({
@@ -267,7 +267,7 @@ test("prefixless alias deletes target stored schema key", async () => {
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
 		parameters: deleteResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -278,7 +278,7 @@ test("prefixless alias deletes target stored schema key", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([]);
@@ -322,7 +322,7 @@ test("rewrites deletes for _all views", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const deleteResult = preprocess({
@@ -364,7 +364,7 @@ test("rewrites deletes for _all views", async () => {
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
 		parameters: deleteResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -375,7 +375,7 @@ test("rewrites deletes for _all views", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([]);
@@ -448,7 +448,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const deleteResult = preprocess({
@@ -482,7 +482,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
 		parameters: deleteResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const rows = await lix.db
@@ -528,7 +528,7 @@ test("base view delete uses schema default version when omitted", async () => {
 	lix.engine!.executeSync({
 		sql: insertResult.sql,
 		parameters: insertResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const deleteResult = preprocess({
@@ -562,7 +562,7 @@ test("base view delete uses schema default version when omitted", async () => {
 	lix.engine!.executeSync({
 		sql: deleteResult.sql,
 		parameters: deleteResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const rows = await (lix.db as any)

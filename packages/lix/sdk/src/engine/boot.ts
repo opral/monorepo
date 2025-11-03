@@ -9,7 +9,6 @@ import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
 import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
-import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
 import { internalQueryBuilder } from "./internal-query-builder.js";
 import { setDeterministicBoot } from "./deterministic-mode/is-deterministic-mode.js";
 import {
@@ -17,7 +16,7 @@ import {
 	type FunctionRegistry,
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
-import { createPreprocessor } from "./preprocessor-v3/create-preprocessor.js";
+import type { PreprocessorFn } from "./preprocessor-v5/types.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -51,7 +50,7 @@ export type LixEngine = {
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
 	/** Query preprocessor shared across executeSync + explain flows */
-	preprocessQuery: QueryPreprocessorFn;
+	preprocessQuery: PreprocessorFn;
 	/**
 	 * Stable runtime-only cache token.
 	 *
@@ -79,15 +78,13 @@ export type LixEngine = {
 		sql: string;
 		parameters?: Readonly<unknown[]>;
 		/**
-		 * Executes the statement without running it through the preprocessing pipeline.
-		 * Primarily useful while debugging to compare rewritten versus raw queries.
+		 * Selects the preprocessing pipeline to run before executing the query.
 		 *
-		 * @example
-		 * ```ts
-		 * engine.executeSync({ sql: "SELECT 1", skipPreprocessing: true });
-		 * ```
+		 * - `full` (default): run the entire rewrite pipeline.
+		 * - `vtable-select-only`: keep cache population and vtable rewrites.
+		 * - `none`: bypass preprocessing entirely.
 		 */
-		skipPreprocessing?: boolean;
+		preprocessMode?: "full" | "vtable-select-only" | "none";
 	}) => {
 		rows: any[];
 	};

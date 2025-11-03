@@ -62,7 +62,10 @@ export function getAllStoredSchemas(args: {
 		.where("version_id", "=", "global")
 		.compile();
 
-	const { rows } = engine.executeSync(compiledQuery);
+	const { rows } = engine.executeSync({
+		...compiledQuery,
+		preprocessMode: "vtable-select-only",
+	});
 
 	const definitions = new Map<string, LixSchemaDefinition>();
 	let maxUpdated = "";
@@ -108,7 +111,10 @@ function loadSchema(
 		.limit(1)
 		.compile();
 
-	const { rows } = engine.executeSync(compiledQuery);
+	const { rows } = engine.executeSync({
+		...compiledQuery,
+		preprocessMode: "vtable-select-only",
+	});
 	const raw = rows[0]?.value;
 	if (typeof raw !== "string") return null;
 	const definition = JSON.parse(raw) as LixSchemaDefinition;

@@ -86,15 +86,13 @@ function maybeRewriteStateAccess(
 		hasSchemaKeyPlaceholderPredicate(tokens);
 	const existingCacheTables = getStateCacheTables({ engine });
 
-	if (context.sideEffects !== false) {
-		for (const shape of shapes) {
-			ensureFreshStateCache({
-				engine,
-				shape,
-				parameters: context.parameters,
-				schemaKeyHints: allowSchemaHints ? schemaKeyHints : undefined,
-			});
-		}
+	for (const shape of shapes) {
+		ensureFreshStateCache({
+			engine,
+			shape,
+			parameters: context.parameters,
+			schemaKeyHints: allowSchemaHints ? schemaKeyHints : undefined,
+		});
 	}
 
 	const includeTransaction = hasOpenTransaction(engine);

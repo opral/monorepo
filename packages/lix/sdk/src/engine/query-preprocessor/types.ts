@@ -28,7 +28,6 @@ export type StatementKind = "select" | "insert" | "update" | "delete" | "other";
 export interface QueryPreprocessorArgs {
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
-	sideEffects?: boolean;
 }
 
 /**

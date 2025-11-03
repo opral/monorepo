@@ -35,7 +35,7 @@ export function createExplainQuery(args: {
 		const result = preprocess({
 			sql,
 			parameters,
-			sideEffects: false,
+			// sideEffects removed false,
 		});
 
 		ensureCacheTablesForSql(args.engine, result.sql);
@@ -55,12 +55,6 @@ export function createExplainQuery(args: {
 				sql,
 				parameters,
 			},
-			expanded: result.expandedSql
-				? {
-						sql: result.expandedSql,
-						parameters,
-					}
-				: undefined,
 			rewritten: wasRewritten
 				? {
 						sql: result.sql,

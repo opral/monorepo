@@ -24,7 +24,6 @@ export type PreprocessContext = {
 	expandedSql?: string;
 	rewriteApplied: boolean;
 	viewMap?: Map<string, string>;
-	sideEffects?: boolean;
 	readonly engine: Pick<
 		LixEngine,
 		| "sqlite"
@@ -117,7 +116,6 @@ export function createPreprocessContext(args: {
 	>;
 	sql: string;
 	parameters: ReadonlyArray<unknown>;
-	sideEffects?: boolean;
 }): PreprocessContext {
 	const context: PreprocessContext = {
 		originalSql: args.sql,
@@ -127,7 +125,6 @@ export function createPreprocessContext(args: {
 		parameters: args.parameters,
 		rewriteApplied: false,
 		engine: args.engine,
-		sideEffects: args.sideEffects,
 	};
 	retokenizeContext(context);
 	return context;

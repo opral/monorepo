@@ -43,12 +43,11 @@ export function createQueryPreprocessor(
 		| "listFunctions"
 	>
 ): QueryPreprocessorFn {
-	return ({ sql, parameters, sideEffects }: QueryPreprocessorArgs) => {
+	return ({ sql, parameters }: QueryPreprocessorArgs) => {
 		const context = createPreprocessContext({
 			engine,
 			sql,
 			parameters,
-			sideEffects,
 		});
 		const result = runPreprocessorSteps(context);
 		if (result) {

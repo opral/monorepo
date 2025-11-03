@@ -43,7 +43,7 @@ test("rewrites inserts for stored schema views", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -54,7 +54,7 @@ test("rewrites inserts for stored schema views", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([
@@ -112,7 +112,7 @@ test("rewrites inserts for _all view", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -123,7 +123,7 @@ test("rewrites inserts for _all view", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([
@@ -260,7 +260,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const rows = await lix.db
@@ -319,7 +319,7 @@ test("base-only view applies lixcol version id override", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const row = await lix.db
@@ -389,7 +389,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const stateRows = await lix.db
@@ -418,7 +418,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	const viewRows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(viewRows).toEqual([{ payload: "example" }]);
@@ -459,7 +459,7 @@ test("stored_schema insert uses pointer primary key components", async () => {
 	lix.engine!.executeSync({
 		sql: rewrite!.sql,
 		parameters: rewrite!.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const inserted = await lix.db
@@ -533,7 +533,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten!.sql,
 		parameters: rewritten!.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const stateRow = await lix.db
@@ -588,7 +588,7 @@ test.skip("preserves SQL expression parameters during insert rewrite", async () 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const rows = await lix.db
@@ -631,7 +631,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const selectResult = preprocess({
@@ -642,7 +642,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toHaveLength(1);
@@ -742,7 +742,7 @@ test("applies JSON defaults when column is omitted", async () => {
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const select = await lix.db
@@ -860,7 +860,7 @@ test("applies CEL defaults when column is omitted", async () => {
 	lix.engine!.executeSync({
 		sql: insert.sql,
 		parameters: insert.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const select = preprocess({
@@ -871,7 +871,7 @@ test("applies CEL defaults when column is omitted", async () => {
 	const row = lix.engine!.executeSync({
 		sql: select.sql,
 		parameters: select.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows[0] as Record<string, unknown>;
 
 	expect(row.slug).toBe("Sample-slug");
@@ -988,7 +988,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 	const rows = lix.engine!.executeSync({
 		sql: selectResult.sql,
 		parameters: selectResult.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	}).rows;
 
 	expect(rows).toEqual([
@@ -1059,7 +1059,7 @@ test("regression: handles json function call parameters when deriving entity_id"
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
-		skipPreprocessing: true,
+		preprocessMode: "none",
 	});
 
 	const inserted = await lix.db
