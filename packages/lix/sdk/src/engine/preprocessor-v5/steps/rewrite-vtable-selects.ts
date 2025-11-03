@@ -985,8 +985,12 @@ function buildRewriteProjectionSql(
 			options.candidateColumns
 		);
 		return defaultColumns
-			.map(
-				(column) => `w.${quoteIdentifier(column)} AS ${quoteIdentifier(column)}`
+			.map((column) =>
+				options.needsWriterJoin && column === "writer_key"
+					? `COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS ${quoteIdentifier(
+							column
+						)}`
+					: `w.${quoteIdentifier(column)} AS ${quoteIdentifier(column)}`
 			)
 			.join(",\n");
 	}
