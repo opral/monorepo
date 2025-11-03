@@ -360,15 +360,18 @@ class SqlParser extends CstParser {
 					},
 				},
 				{
+					GATE: () =>
+						this.LA(1).tokenType !== Not &&
+						this.LA(1).tokenType !== LeftParen,
 					ALT: () => {
-						this.SUBRULE(this.column_reference, { LABEL: "comparison_column" });
+						this.SUBRULE(this.expression, { LABEL: "left_expression" });
 						this.OR1([
 							{
 								ALT: () => {
 									this.SUBRULE(this.comparison_operator, {
 										LABEL: "comparison_operator",
 									});
-									this.SUBRULE(this.expression, {
+									this.SUBRULE1(this.expression, {
 										LABEL: "comparison_value",
 									});
 								},
@@ -383,39 +386,43 @@ class SqlParser extends CstParser {
 							{
 								ALT: () => {
 									this.CONSUME(Between);
-									this.SUBRULE1(this.expression, { LABEL: "between_start" });
+									this.SUBRULE2(this.expression, { LABEL: "between_start" });
 									this.CONSUME1(And);
-									this.SUBRULE2(this.expression, { LABEL: "between_end" });
+									this.SUBRULE3(this.expression, { LABEL: "between_end" });
 								},
 							},
 							{
 								ALT: () => {
-				this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
-				this.CONSUME(InKeyword);
-				this.CONSUME1(LeftParen);
-				this.OR2([
-					{
-						GATE: () =>
-							this.LA(1).tokenType === Select ||
-							this.LA(1).tokenType === With,
-						ALT: () => {
-							this.SUBRULE(this.select_compound, { LABEL: "in_subquery" });
-						},
-					},
-					{
-						ALT: () => {
-							this.SUBRULE(this.expression_list, { LABEL: "in_list" });
-						},
-					},
-				]);
-				this.CONSUME1(RightParen);
-			},
-		},
-		{
+									this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
+									this.CONSUME(InKeyword);
+									this.CONSUME1(LeftParen);
+									this.OR2([
+										{
+											GATE: () =>
+												this.LA(1).tokenType === Select ||
+												this.LA(1).tokenType === With,
+											ALT: () => {
+												this.SUBRULE(this.select_compound, {
+													LABEL: "in_subquery",
+												});
+											},
+										},
+										{
+											ALT: () => {
+												this.SUBRULE(this.expression_list, {
+													LABEL: "in_list",
+												});
+											},
+										},
+									]);
+									this.CONSUME1(RightParen);
+								},
+							},
+							{
 								ALT: () => {
 									this.OPTION2(() => this.CONSUME3(Not, { LABEL: "like_not" }));
 									this.CONSUME(Like);
-									this.SUBRULE3(this.expression, { LABEL: "like_pattern" });
+									this.SUBRULE4(this.expression, { LABEL: "like_pattern" });
 								},
 							},
 						]);

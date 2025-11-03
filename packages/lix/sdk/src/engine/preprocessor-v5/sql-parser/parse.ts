@@ -438,19 +438,19 @@ class ToAstVisitor extends BaseVisitor {
 	public atomic_predicate(ctx: {
 		unary_not?: IToken[];
 		negated?: CstNode[];
-		comparison_column?: CstNode[];
+		left_expression?: CstNode[];
 		comparison_operator?: CstNode[];
 		comparison_value?: CstNode[];
 		is_not?: IToken[];
-	between_start?: CstNode[];
-	between_end?: CstNode[];
-	in_list?: CstNode[];
-	in_subquery?: CstNode[];
-	in_not?: IToken[];
-	like_pattern?: CstNode[];
-	like_not?: IToken[];
-	inner?: CstNode[];
-}): ExpressionNode {
+		between_start?: CstNode[];
+		between_end?: CstNode[];
+		in_list?: CstNode[];
+		in_subquery?: CstNode[];
+		in_not?: IToken[];
+		like_pattern?: CstNode[];
+		like_not?: IToken[];
+		inner?: CstNode[];
+	}): ExpressionNode {
 		if (ctx.unary_not?.[0]) {
 			const inner = ctx.negated?.[0];
 			if (!inner) {
@@ -460,9 +460,9 @@ class ToAstVisitor extends BaseVisitor {
 			return createUnaryExpression("not", expression);
 		}
 
-		const predicateColumnNode = ctx.comparison_column?.[0];
-		if (predicateColumnNode) {
-			const leftOperand = this.visit(predicateColumnNode) as ExpressionNode;
+		const leftExpressionNode = ctx.left_expression?.[0];
+		if (leftExpressionNode) {
+			const leftOperand = this.visit(leftExpressionNode) as ExpressionNode;
 			const comparisonOperatorNode = ctx.comparison_operator?.[0];
 			if (comparisonOperatorNode) {
 				const comparisonValueNode = ctx.comparison_value?.[0];
