@@ -9,7 +9,7 @@ import {
 	type StatementSegmentNode,
 } from "../sql-parser/nodes.js";
 import { normalizeIdentifierValue } from "../sql-parser/ast-helpers.js";
-import { expressionToSql, compile } from "../sql-parser/compile.js";
+import { expressionToSql } from "../sql-parser/compile.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironment } from "../../cel-environment/cel-environment.js";
@@ -211,7 +211,6 @@ type EvaluatedRow = {
 
 type StateRowResult = {
 	readonly expressions: readonly string[];
-	readonly usesActiveVersionCte: boolean;
 };
 
 function buildEntityViewInsert(
@@ -253,7 +252,6 @@ function buildEntityViewInsert(
 	}
 
 	const rewrittenRows: ExpressionNode[][] = [];
-	let requiresActiveVersionCte = false;
 
 	for (const row of evaluatedRows) {
 		const columnValueMap = buildColumnValueMap(
@@ -295,10 +293,6 @@ function buildEntityViewInsert(
 		if (!rowResult) {
 			return null;
 		}
-		if (rowResult.usesActiveVersionCte) {
-			requiresActiveVersionCte = true;
-		}
-
 		rewrittenRows.push(rowResult.expressions.map(expressionStringToAst));
 	}
 
@@ -312,36 +306,7 @@ function buildEntityViewInsert(
 		},
 	};
 
-	if (!requiresActiveVersionCte) {
-		return rewritten;
-	}
-
-	const baseSql = compile([
-		{
-			node_kind: "segmented_statement",
-			segments: [rewritten],
-		},
-	]).sql;
-	const views = args.getSqlViews?.();
-	const viewSql =
-		views?.get("active_version") ??
-		views?.get("active_version".toLowerCase()) ??
-		null;
-	const normalizedViewSql = (
-		viewSql ?? "SELECT version_id FROM active_version"
-	).trim();
-	const viewAlias = "__active_version_view";
-	const cteSelect = `SELECT version_id FROM (${normalizedViewSql})`;
-	const insertSql = baseSql.replace(
-		/(\(SELECT\s+version_id\s+FROM\s+)active_version\)/i,
-		(_match, prefix) => `${prefix}${viewAlias})`
-	);
-	const finalSql = `WITH ${viewAlias} AS (${cteSelect}) ${insertSql}`;
-
-	return {
-		node_kind: "raw_fragment",
-		sql_text: finalSql,
-	};
+	return rewritten;
 }
 
 function evaluateRows(args: {
@@ -714,16 +679,9 @@ function buildStateRowExpressions(args: {
 	const explicitVersionExpr =
 		expressionFor("lixcol_version_id") ?? expressionFor("version_id");
 	let versionExpr: string;
-	let usesDefaultActiveVersion = false;
-	const referencesActiveVersion = explicitVersionExpr
-		? /\bactive_version\b/i.test(explicitVersionExpr)
-		: false;
 	if (args.variant === "all") {
 		if (explicitVersionExpr) {
 			versionExpr = explicitVersionExpr;
-			if (referencesActiveVersion) {
-				usesDefaultActiveVersion = true;
-			}
 		} else if (overrideVersion !== undefined) {
 			versionExpr = literal(normalizeOverrideValue(overrideVersion));
 		} else {
@@ -735,12 +693,8 @@ function buildStateRowExpressions(args: {
 		versionExpr = literal(normalizeOverrideValue(overrideVersion));
 	} else if (explicitVersionExpr) {
 		versionExpr = explicitVersionExpr;
-		if (referencesActiveVersion) {
-			usesDefaultActiveVersion = true;
-		}
 	} else {
 		versionExpr = "(SELECT version_id FROM active_version)";
-		usesDefaultActiveVersion = true;
 	}
 
 	const overrideMetadata = getLixcolOverride("lixcol_metadata");
@@ -786,7 +740,6 @@ function buildStateRowExpressions(args: {
 			metadataExpr,
 			untrackedExpr,
 		],
-		usesActiveVersionCte: usesDefaultActiveVersion,
 	};
 }
 
