@@ -111,6 +111,26 @@ test("cache segment projects snapshot_content even when not selected explicitly"
 	expect(sql).toContain("json(cache.snapshot_content) AS snapshot_content");
 });
 
+test("resolves cache table when schema key requires sanitization", () => {
+	const schemaKey = "delete-cache-schema";
+	const sanitizedKey = schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
+	const cacheTable = `lix_internal_state_cache_v1_${sanitizedKey}`;
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+		WHERE schema_key = '${schemaKey}'
+	`,
+		{
+			getCacheTables: () => new Map([[sanitizedKey, cacheTable]]),
+			hasOpenTransaction: () => true,
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toContain(`"${cacheTable}"`);
+});
+
 test("resolves cache rows across recursive version inheritance chains", async () => {
 	const lix = await openLix({});
 	const schemaKey = "recursive_entity_schema";
@@ -542,7 +562,7 @@ test("cache segment keeps tombstones for tracked deletions", () => {
 	const tombstoneFilters = sql.match(/cache\.is_tombstone\s*=\s*0/g) ?? [];
 
 	expect(tombstoneFilters).toHaveLength(1);
-	expect(sql).toContain("from \"test_schema_key_cache_table\" cache");
+	expect(sql).toContain('from "test_schema_key_cache_table" cache');
 	expect(sql).toContain("where cache.schema_key in ('test_schema_key')");
 });
 

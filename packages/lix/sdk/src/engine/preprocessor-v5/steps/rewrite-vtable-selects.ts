@@ -31,6 +31,10 @@ import {
 	type AstVisitor,
 } from "../sql-parser/visitor.js";
 import { normalizeSegmentedStatement } from "../sql-parser/parse.js";
+import {
+	cacheTableNameToSchemaKey,
+	schemaKeyToCacheTableName,
+} from "../../../state/cache/create-schema-cache-table.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
@@ -1564,14 +1568,29 @@ function buildCacheSource(
 		schemaKeys && schemaKeys.length > 0
 			? Array.from(new Set(schemaKeys))
 			: Array.from(cacheTables.keys());
+	const seenTables = new Set<string>();
 	const entries = uniqueKeys
 		.map((key) => {
-			const candidate = cacheTables.get(key);
-			if (typeof candidate === "string" && candidate.length > 0) {
-				return {
-					tableName: candidate,
-					sql: buildPhysicalCacheSelect(candidate, requiredColumns),
-				};
+			const lookupKeys = new Set<string>([key]);
+			const sanitizedKey = cacheTableNameToSchemaKey(
+				schemaKeyToCacheTableName(key)
+			);
+			if (sanitizedKey !== key) {
+				lookupKeys.add(sanitizedKey);
+			}
+			for (const lookupKey of lookupKeys) {
+				const tableName = cacheTables.get(lookupKey);
+				if (
+					typeof tableName === "string" &&
+					tableName.length > 0 &&
+					!seenTables.has(tableName)
+				) {
+					seenTables.add(tableName);
+					return {
+						tableName,
+						sql: buildPhysicalCacheSelect(tableName, requiredColumns),
+					};
+				}
 			}
 			return null;
 		})
@@ -1602,6 +1621,15 @@ function buildPhysicalCacheSelect(
   FROM ${quoteIdentifier(tableName)}`;
 }
 
+/**
+ * Resolves the cache table name for the provided schema key, falling back to its sanitized form.
+ *
+ * @example
+ * ```ts
+ * resolveCacheTableName(new Map([["delete_cache_schema", "cache_table"]]), "delete-cache-schema");
+ * // "cache_table"
+ * ```
+ */
 function stripIndent(value: string): string {
 	const trimmed = value.replace(/^\n+/, "").replace(/\n+$/, "");
 	const lines = trimmed.split(NEWLINE);
