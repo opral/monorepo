@@ -8,7 +8,6 @@ import type { Call } from "./functions/function-registry.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
-import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
 import { internalQueryBuilder } from "./internal-query-builder.js";
 import { setDeterministicBoot } from "./deterministic-mode/is-deterministic-mode.js";
 import {
@@ -17,6 +16,7 @@ import {
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
 import type { PreprocessorFn } from "./preprocessor-v5/types.js";
+import { createPreprocessor } from "./preprocessor-v5/create-preprocessor.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -147,9 +147,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	engine.preprocessQuery = createQueryPreprocessor(engine);
-
-	// engine.preprocessQuery = createPreprocessor({ engine });
+	engine.preprocessQuery = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 

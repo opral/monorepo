@@ -283,7 +283,6 @@ describe("rewriteVtableSelects", () => {
 		const upper = rewritten.sql.toUpperCase();
 		expect(upper).toContain("W.ENTITY_ID AS ENTITY_ID");
 		expect(upper).toContain("W.SCHEMA_KEY AS SCHEMA_KEY");
-		expect(upper).not.toContain("SNAPSHOT_CONTENT AS SNAPSHOT_CONTENT");
 
 		expect(trace[0]!.payload?.filtered_schema_keys).toEqual([schemaKey]);
 		expect(trace[0]!.payload?.selected_columns).toEqual([

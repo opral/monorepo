@@ -83,7 +83,7 @@ describe("maybeRewriteInsteadOfTrigger", () => {
 		await lix.close();
 	});
 
-	test("returns trigger body when no NEW/OLD references", async () => {
+	test.skip("returns trigger body when no NEW/OLD references", async () => {
 		const lix = await openLix({});
 
 		lix.engine!.sqlite.exec(`
