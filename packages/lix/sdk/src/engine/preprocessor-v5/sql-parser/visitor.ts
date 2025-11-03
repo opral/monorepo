@@ -28,9 +28,12 @@ import type {
 	StatementSegmentNode,
 	StatementNode,
 	SubqueryNode,
+	SubqueryExpressionNode,
 	TableReferenceNode,
 	UnaryExpressionNode,
 	UpdateStatementNode,
+	WithClauseNode,
+	CommonTableExpressionNode,
 } from "./nodes.js";
 
 export type VisitContext = {
@@ -46,6 +49,8 @@ type NodeKindMap = {
 	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
+	readonly with_clause: WithClauseNode;
+	readonly common_table_expression: CommonTableExpressionNode;
 	readonly segmented_statement: SegmentedStatementNode;
 	readonly select_star: SelectStarNode;
 	readonly select_qualified_star: SelectQualifiedStarNode;
@@ -207,10 +212,17 @@ function traverseNode(
 				node as SegmentedStatementNode,
 				visitor
 			);
-		case "compound_select":
-			return traverseCompoundSelect(node as CompoundSelectNode, visitor);
-		case "select_statement":
-			return traverseSelectStatement(node as SelectStatementNode, visitor);
+	case "compound_select":
+		return traverseCompoundSelect(node as CompoundSelectNode, visitor);
+	case "select_statement":
+		return traverseSelectStatement(node as SelectStatementNode, visitor);
+	case "with_clause":
+		return traverseWithClause(node as WithClauseNode, visitor);
+	case "common_table_expression":
+		return traverseCommonTableExpression(
+			node as CommonTableExpressionNode,
+			visitor
+		);
 		case "insert_statement":
 			return traverseInsertStatement(node as InsertStatementNode, visitor);
 		case "update_statement":
@@ -223,8 +235,13 @@ function traverseNode(
 			return traverseJoinClause(node as JoinClauseNode, visitor);
 		case "table_reference":
 			return traverseTableReference(node as TableReferenceNode, visitor);
-		case "subquery":
-			return traverseSubquery(node as SubqueryNode, visitor);
+	case "subquery":
+		return traverseSubquery(node as SubqueryNode, visitor);
+	case "subquery_expression":
+		return traverseSubqueryExpression(
+			node as SubqueryExpressionNode,
+			visitor
+		);
 		case "order_by_item":
 			return traverseOrderByItem(node as OrderByItemNode, visitor);
 		case "set_clause":
@@ -290,6 +307,17 @@ function traverseCompoundSelect(
 	visitor: AstVisitor
 ): CompoundSelectNode {
 	let changed = false;
+
+	const withClause = visitOptional(
+		node.with_clause,
+		node,
+		"with_clause",
+		visitor
+	);
+	if (withClause !== node.with_clause) {
+		changed = true;
+	}
+
 	const first = visitNode(node.first, visitor, {
 		parent: node,
 		property: "first",
@@ -322,6 +350,7 @@ function traverseCompoundSelect(
 		...node,
 		first,
 		compounds,
+		with_clause: withClause as WithClauseNode | null,
 	};
 }
 
@@ -330,6 +359,16 @@ function traverseSelectStatement(
 	visitor: AstVisitor
 ): SelectStatementNode {
 	let changed = false;
+
+	const withClause = visitOptional(
+		node.with_clause,
+		node,
+		"with_clause",
+		visitor
+	);
+	if (withClause !== node.with_clause) {
+		changed = true;
+	}
 
 	const projection = visitArray(node.projection, node, "projection", visitor);
 	if (projection !== node.projection) {
@@ -383,6 +422,53 @@ function traverseSelectStatement(
 		order_by: orderBy as readonly OrderByItemNode[],
 		limit: limit as ExpressionNode | RawFragmentNode | null,
 		offset: offset as ExpressionNode | RawFragmentNode | null,
+		with_clause: withClause as WithClauseNode | null,
+	};
+}
+
+function traverseWithClause(
+	node: WithClauseNode,
+	visitor: AstVisitor
+): WithClauseNode {
+	const ctes = visitArray(node.ctes, node, "ctes", visitor);
+	if (ctes === node.ctes) {
+		return node;
+	}
+	return {
+		...node,
+		ctes: ctes as readonly CommonTableExpressionNode[],
+	};
+}
+
+function traverseCommonTableExpression(
+	node: CommonTableExpressionNode,
+	visitor: AstVisitor
+): CommonTableExpressionNode {
+	let changed = false;
+	const name = visitNode(node.name, visitor, createContext(node, "name"));
+	if (name !== node.name) {
+		changed = true;
+	}
+	const columns = visitArray(node.columns, node, "columns", visitor);
+	if (columns !== node.columns) {
+		changed = true;
+	}
+	const statement = visitNode(
+		node.statement,
+		visitor,
+		createContext(node, "statement")
+	);
+	if (statement !== node.statement) {
+		changed = true;
+	}
+	if (!changed) {
+		return node;
+	}
+	return {
+		...node,
+		name: name as IdentifierNode,
+		columns: columns as readonly IdentifierNode[],
+		statement: statement as SelectStatementNode | CompoundSelectNode,
 	};
 }
 
@@ -637,8 +723,23 @@ function traverseSubquery(
 	}
 	return {
 		...node,
-		statement: statement as SelectStatementNode,
+		statement: statement as SelectStatementNode | CompoundSelectNode,
 		alias: alias as IdentifierNode,
+	};
+}
+
+function traverseSubqueryExpression(
+	node: SubqueryExpressionNode,
+	visitor: AstVisitor
+): SubqueryExpressionNode {
+	const statement = visitNode(node.statement, visitor, createContext(node, "statement")) as
+		SelectStatementNode | CompoundSelectNode;
+	if (statement === node.statement) {
+		return node;
+	}
+	return {
+		...node,
+		statement,
 	};
 }
 

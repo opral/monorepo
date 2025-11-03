@@ -291,6 +291,7 @@ function createActiveVersionSubquery(): SubqueryExpressionNode {
 			order_by: [],
 			limit: null,
 			offset: null,
+			with_clause: null,
 		},
 	};
 }

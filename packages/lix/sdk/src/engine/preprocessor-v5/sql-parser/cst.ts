@@ -20,6 +20,8 @@ import {
 	All,
 	Intersect,
 	Except,
+	With,
+	Recursive,
 	Inner,
 	Left,
 	Right,
@@ -89,24 +91,62 @@ class SqlParser extends CstParser {
 	private readonly select_compound: () => CstNode = this.RULE(
 		"select_compound",
 		() => {
+			this.OPTION(() => {
+				this.SUBRULE(this.with_clause, { LABEL: "with_clause" });
+			});
 			this.SUBRULE(this.select_core, { LABEL: "cores" });
 			this.MANY(() => {
 				this.SUBRULE(this.compound_operator, { LABEL: "operators" });
 				this.SUBRULE1(this.select_core, { LABEL: "cores" });
 			});
-			this.OPTION(() => {
+			this.OPTION1(() => {
 				this.CONSUME(Order);
 				this.CONSUME(By);
 				this.SUBRULE(this.order_by_clause, { LABEL: "order_by" });
 			});
-			this.OPTION1(() => {
+			this.OPTION2(() => {
 				this.CONSUME(Limit);
 				this.SUBRULE(this.limit_clause, { LABEL: "limit" });
 			});
-			this.OPTION2(() => {
+			this.OPTION3(() => {
 				this.CONSUME(Offset);
 				this.SUBRULE(this.offset_clause, { LABEL: "offset" });
 			});
+		}
+	);
+
+	private readonly with_clause: () => CstNode = this.RULE(
+		"with_clause",
+		() => {
+			this.CONSUME(With);
+			this.OPTION(() => {
+				this.CONSUME(Recursive, { LABEL: "recursive" });
+			});
+			this.SUBRULE(this.common_table_expression, { LABEL: "ctes" });
+			this.MANY(() => {
+				this.CONSUME(Comma);
+				this.SUBRULE1(this.common_table_expression, { LABEL: "ctes" });
+			});
+		}
+	);
+
+	private readonly common_table_expression: () => CstNode = this.RULE(
+		"common_table_expression",
+		() => {
+			this.SUBRULE(this.identifier, { LABEL: "name" });
+			this.OPTION(() => {
+				this.CONSUME(LeftParen);
+				this.SUBRULE1(this.identifier, { LABEL: "columns" });
+				this.MANY(() => {
+					this.CONSUME(Comma);
+					this.SUBRULE2(this.identifier, { LABEL: "columns" });
+				});
+				this.CONSUME(RightParen);
+			});
+			this.CONSUME(As);
+			this.CONSUME1(LeftParen);
+			this.SUBRULE(this.select_compound, { LABEL: "statement" });
+			this.CONSUME1(RightParen);
 		}
 	);
 
@@ -274,15 +314,9 @@ class SqlParser extends CstParser {
 		});
 		this.CONSUME(Join);
 		this.SUBRULE(this.table_reference, { LABEL: "table" });
-		this.CONSUME(On);
-		this.SUBRULE(this.column_reference, { LABEL: "left" });
-		this.CONSUME(Equals);
-		this.SUBRULE1(this.column_reference, { LABEL: "right" });
-		this.MANY(() => {
-			this.CONSUME1(And);
-			this.SUBRULE2(this.column_reference, { LABEL: "extra_left" });
-			this.CONSUME2(Equals);
-			this.SUBRULE3(this.column_reference, { LABEL: "extra_right" });
+		this.OPTION1(() => {
+			this.CONSUME(On);
+			this.SUBRULE(this.or_expression, { LABEL: "on_expression" });
 		});
 	});
 
@@ -356,14 +390,28 @@ class SqlParser extends CstParser {
 							},
 							{
 								ALT: () => {
-									this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
-									this.CONSUME(InKeyword);
-									this.CONSUME1(LeftParen);
-									this.SUBRULE(this.expression_list, { LABEL: "in_list" });
-									this.CONSUME1(RightParen);
-								},
-							},
-							{
+				this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
+				this.CONSUME(InKeyword);
+				this.CONSUME1(LeftParen);
+				this.OR2([
+					{
+						GATE: () =>
+							this.LA(1).tokenType === Select ||
+							this.LA(1).tokenType === With,
+						ALT: () => {
+							this.SUBRULE(this.select_compound, { LABEL: "in_subquery" });
+						},
+					},
+					{
+						ALT: () => {
+							this.SUBRULE(this.expression_list, { LABEL: "in_list" });
+						},
+					},
+				]);
+				this.CONSUME1(RightParen);
+			},
+		},
+		{
 								ALT: () => {
 									this.OPTION2(() => this.CONSUME3(Not, { LABEL: "like_not" }));
 									this.CONSUME(Like);

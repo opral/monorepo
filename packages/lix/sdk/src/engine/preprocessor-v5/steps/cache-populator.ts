@@ -8,6 +8,7 @@ import {
 	type RelationNode,
 	type SegmentedStatementNode,
 	type SelectStatementNode,
+	type CompoundSelectNode,
 	type StatementNode,
 	type TableReferenceNode,
 } from "../sql-parser/nodes.js";
@@ -138,10 +139,7 @@ function collectCacheTargets(
 			collectFromSelect(node, args);
 			return;
 		case "compound_select":
-			collectFromSelect(node.first, args);
-			for (const branch of node.compounds) {
-				collectFromSelect(branch.select, args);
-			}
+			collectFromSelect(node, args);
 			return;
 		case "update_statement":
 			for (const assignment of node.assignments) {
@@ -159,13 +157,20 @@ function collectCacheTargets(
 }
 
 function collectFromSelect(
-	select: SelectStatementNode,
+	select: SelectStatementNode | CompoundSelectNode,
 	args: {
 		parameters: ReadonlyArray<unknown>;
 		state: ParameterState;
 		aggregation: CacheAggregation;
 	}
 ): void {
+	if (select.node_kind === "compound_select") {
+		collectFromSelect(select.first, args);
+		for (const branch of select.compounds) {
+			collectFromSelect(branch.select, args);
+		}
+		return;
+	}
 	const { aggregation } = args;
 
 	for (const item of select.projection) {

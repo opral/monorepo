@@ -5,6 +5,7 @@ import type { PreprocessorTraceEntry } from "../types.js";
 import type {
 	SegmentedStatementNode,
 	SelectStatementNode,
+	CompoundSelectNode,
 } from "../sql-parser/nodes.js";
 import {
 	getIdentifierValue,
@@ -36,8 +37,12 @@ test("expands referenced view into a subquery", () => {
 		trace,
 	});
 
-	const select = assertSingleSelect(rewritten);
-	const fromClause = select.from_clauses[0];
+	const select = assertSingleSelect(rewritten) as SelectStatementNode | CompoundSelectNode;
+	if (!("from_clauses" in select)) {
+		throw new Error("expected select statement segment");
+	}
+	const selectStatement = select as SelectStatementNode;
+	const fromClause = selectStatement.from_clauses[0];
 	if (!fromClause) {
 		throw new Error("expected FROM clause");
 	}
@@ -46,7 +51,11 @@ test("expands referenced view into a subquery", () => {
 		throw new Error("expected subquery relation");
 	}
 	expect(getIdentifierValue(relation.alias)).toBe("av");
-	const innerFrom = relation.statement.from_clauses[0];
+	const relationStatement = relation.statement;
+	if (relationStatement.node_kind !== "select_statement") {
+		throw new Error("expected select statement inside view");
+	}
+	const innerFrom = relationStatement.from_clauses[0];
 	if (!innerFrom || innerFrom.relation.node_kind !== "table_reference") {
 		throw new Error("expected table reference");
 	}
@@ -80,8 +89,12 @@ test("keeps view name as alias when none provided", () => {
 		hasOpenTransaction: () => false,
 	});
 
-	const select = assertSingleSelect(rewritten);
-	const relation = select.from_clauses[0]?.relation;
+	const select = assertSingleSelect(rewritten) as SelectStatementNode | CompoundSelectNode;
+	if (!("from_clauses" in select)) {
+		throw new Error("expected select statement segment");
+	}
+	const selectStatement = select as SelectStatementNode;
+	const relation = selectStatement.from_clauses[0]?.relation;
 	if (!relation || relation.node_kind !== "subquery") {
 		throw new Error("expected subquery relation");
 	}
@@ -160,5 +173,5 @@ function assertSingleSelect(
 	if (!segment || segment.node_kind !== "select_statement") {
 		throw new Error("expected select statement");
 	}
-	return segment;
+	return segment as SelectStatementNode;
 }

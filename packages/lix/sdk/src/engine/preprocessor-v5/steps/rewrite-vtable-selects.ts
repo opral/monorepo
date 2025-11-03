@@ -136,10 +136,10 @@ function rewriteSelectStatement(
 ): SelectStatementNode {
 	const withRewrittenSubqueries = visitSelectStatement(select, {
 		subquery(node) {
-			const rewrittenStatement = rewriteSelectStatement(
-				node.statement,
-				context
-			);
+			const rewrittenStatement =
+				node.statement.node_kind === "compound_select"
+					? rewriteCompoundSelect(node.statement, context)
+					: rewriteSelectStatement(node.statement, context);
 			if (rewrittenStatement !== node.statement) {
 				return {
 					...node,

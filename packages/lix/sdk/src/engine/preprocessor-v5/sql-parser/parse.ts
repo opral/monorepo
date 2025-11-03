@@ -37,6 +37,9 @@ import type {
 	FunctionCallExpressionNode,
 	RawFragmentNode,
 	SqlNode,
+	WithClauseNode,
+	CommonTableExpressionNode,
+	SubqueryExpressionNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -78,6 +81,7 @@ class ToAstVisitor extends BaseVisitor {
 	}
 
 	public select_compound(ctx: {
+		with_clause?: CstNode[];
 		cores?: CstNode[];
 		operators?: CstNode[];
 		order_by?: CstNode[];
@@ -92,6 +96,10 @@ class ToAstVisitor extends BaseVisitor {
 		const selectNodes = coreNodes.map(
 			(core) => this.visit(core) as SelectStatementNode
 		);
+
+		const withClause = ctx.with_clause?.[0]
+			? (this.visit(ctx.with_clause[0]!) as WithClauseNode)
+			: null;
 
 		const orderByItems = ctx.order_by?.[0]
 			? (this.visit(ctx.order_by[0]!) as OrderByItemNode[])
@@ -112,6 +120,7 @@ class ToAstVisitor extends BaseVisitor {
 				order_by: orderByItems,
 				limit: limitNode,
 				offset: offsetNode,
+				with_clause: withClause,
 			};
 		}
 
@@ -139,6 +148,7 @@ class ToAstVisitor extends BaseVisitor {
 			order_by: orderByItems,
 			limit: limitNode,
 			offset: offsetNode,
+			with_clause: withClause,
 		};
 	}
 
@@ -177,6 +187,41 @@ class ToAstVisitor extends BaseVisitor {
 			order_by: [],
 			limit: null,
 			offset: null,
+			with_clause: null,
+		};
+	}
+
+	public with_clause(ctx: {
+		recursive?: IToken[];
+		ctes?: CstNode[];
+	}): WithClauseNode {
+		const expressions = ctx.ctes?.map((cte) =>
+			(this.visit(cte) as CommonTableExpressionNode)
+		);
+		return {
+			node_kind: "with_clause",
+			recursive: Boolean(ctx.recursive?.length),
+			ctes: expressions ?? [],
+		};
+	}
+
+	public common_table_expression(ctx: {
+		name: CstNode[];
+		columns?: CstNode[];
+		statement: CstNode[];
+	}): CommonTableExpressionNode {
+		const name = this.visit(ctx.name[0]!) as IdentifierNode;
+		const columns = ctx.columns?.map((column) =>
+			(this.visit(column) as IdentifierNode)
+		);
+		const statement = this.visit(ctx.statement[0]!) as
+			| SelectStatementNode
+			| CompoundSelectNode;
+		return {
+			node_kind: "common_table_expression",
+			name,
+			columns: columns ?? [],
+			statement,
 		};
 	}
 
@@ -299,7 +344,9 @@ class ToAstVisitor extends BaseVisitor {
 				throw new Error("derived table requires an alias");
 			}
 			const alias = this.visit(aliasToken) as IdentifierNode;
-			const statement = this.visit(selectNode) as SelectStatementNode;
+			const statement = this.visit(selectNode) as
+				| SelectStatementNode
+				| CompoundSelectNode;
 			const subquery: SubqueryNode = {
 				node_kind: "subquery",
 				statement,
@@ -337,42 +384,21 @@ class ToAstVisitor extends BaseVisitor {
 	public join_clause(ctx: {
 		join_type?: IToken[];
 		table?: CstNode[];
-		left?: CstNode[];
-		right?: CstNode[];
-		extra_left?: CstNode[];
-		extra_right?: CstNode[];
+		on_expression?: CstNode[];
 	}): JoinClauseNode {
 		const tableNode = ctx.table?.[0];
 		if (!tableNode) {
 			throw new Error("join clause is missing table reference");
 		}
 		const relation = this.visit(tableNode) as RelationNode;
-		const leftNode = ctx.left?.[0];
-		const rightNode = ctx.right?.[0];
-		if (!leftNode || !rightNode) {
-			throw new Error("join clause is missing comparison operands");
-		}
-		const left = this.visit(leftNode) as ExpressionNode;
-		const right = this.visit(rightNode) as ExpressionNode;
-		let onExpression: ExpressionNode = createBinaryExpression(left, "=", right);
-		const extraLeft = ctx.extra_left ?? [];
-		const extraRight = ctx.extra_right ?? [];
-		for (let index = 0; index < extraLeft.length; index += 1) {
-			const extraLeftOperand = this.visit(extraLeft[index]!) as ExpressionNode;
-			const extraRightOperand = this.visit(
-				extraRight[index]!
-			) as ExpressionNode;
-			const comparison = createBinaryExpression(
-				extraLeftOperand,
-				"=",
-				extraRightOperand
-			);
-			onExpression = createBinaryExpression(onExpression, "and", comparison);
-		}
 		const joinTypeToken = ctx.join_type?.[0];
 		const joinType = joinTypeToken
 			? normalizeJoinType(joinTypeToken.image)
 			: "inner";
+		const onNode = ctx.on_expression?.[0];
+		const onExpression = onNode
+			? (this.visit(onNode) as ExpressionNode)
+			: null;
 		return {
 			node_kind: "join_clause",
 			join_type: joinType,
@@ -416,14 +442,15 @@ class ToAstVisitor extends BaseVisitor {
 		comparison_operator?: CstNode[];
 		comparison_value?: CstNode[];
 		is_not?: IToken[];
-		between_start?: CstNode[];
-		between_end?: CstNode[];
-		in_list?: CstNode[];
-		in_not?: IToken[];
-		like_pattern?: CstNode[];
-		like_not?: IToken[];
-		inner?: CstNode[];
-	}): ExpressionNode {
+	between_start?: CstNode[];
+	between_end?: CstNode[];
+	in_list?: CstNode[];
+	in_subquery?: CstNode[];
+	in_not?: IToken[];
+	like_pattern?: CstNode[];
+	like_not?: IToken[];
+	inner?: CstNode[];
+}): ExpressionNode {
 		if (ctx.unary_not?.[0]) {
 			const inner = ctx.negated?.[0];
 			if (!inner) {
@@ -459,6 +486,21 @@ class ToAstVisitor extends BaseVisitor {
 				return createInListExpression(
 					leftOperand,
 					listItems,
+					Boolean(ctx.in_not?.length)
+				);
+			}
+			const inSubqueryNode = ctx.in_subquery?.[0];
+			if (inSubqueryNode) {
+				const statement = this.visit(inSubqueryNode) as
+					| SelectStatementNode
+					| CompoundSelectNode;
+				const subqueryExpression: SubqueryExpressionNode = {
+					node_kind: "subquery_expression",
+					statement,
+				};
+				return createInListExpression(
+					leftOperand,
+					[subqueryExpression],
 					Boolean(ctx.in_not?.length)
 				);
 			}
@@ -608,7 +650,9 @@ class ToAstVisitor extends BaseVisitor {
 		}
 		const subselect = ctx.subselect?.[0];
 		if (subselect) {
-			const statement = this.visit(subselect) as SelectStatementNode;
+			const statement = this.visit(subselect) as
+				| SelectStatementNode
+				| CompoundSelectNode;
 			return {
 				node_kind: "subquery_expression",
 				statement,
@@ -778,9 +822,18 @@ class ToAstVisitor extends BaseVisitor {
 		Identifier?: IToken[];
 		QuotedIdentifier?: IToken[];
 	}): IdentifierNode {
+		const token = ctx.Identifier?.[0] ?? ctx.QuotedIdentifier?.[0];
+		if (!token?.image) {
+			throw new Error("identifier token missing");
+		}
+		const isQuoted = token.tokenType?.name === "QuotedIdentifier";
+		const value = isQuoted
+			? token.image.slice(1, -1).replace(/""/g, '"')
+			: token.image;
 		return {
 			node_kind: "identifier",
-			value: normalizeIdentifierToken(ctx),
+			value,
+			quoted: isQuoted,
 		};
 	}
 }
@@ -908,20 +961,6 @@ function normalizeOrderDirection(value: string): "asc" | "desc" {
 		return normalized;
 	}
 	throw new Error(`unsupported order by direction '${value}'`);
-}
-
-function normalizeIdentifierToken(ctx: {
-	Identifier?: IToken[];
-	QuotedIdentifier?: IToken[];
-}): string {
-	const raw = ctx.Identifier?.[0] ?? ctx.QuotedIdentifier?.[0];
-	if (!raw?.image) {
-		throw new Error("identifier token missing");
-	}
-	if (raw.tokenType?.name === "QuotedIdentifier") {
-		return raw.image.slice(1, -1).replace(/""/g, '"');
-	}
-	return raw.image;
 }
 
 function normalizeStringLiteral(image: string): string {
@@ -1109,6 +1148,9 @@ function assignPositionsInSelect(
 	select: SelectStatementNode,
 	state: ParameterTraversalState
 ): void {
+	if (select.with_clause) {
+		assignPositionsInWithClause(select.with_clause, state);
+	}
 	for (const item of select.projection) {
 		assignPositionsInSelectItem(item, state);
 	}
@@ -1127,6 +1169,9 @@ function assignPositionsInCompound(
 	compound: CompoundSelectNode,
 	state: ParameterTraversalState
 ): void {
+	if (compound.with_clause) {
+		assignPositionsInWithClause(compound.with_clause, state);
+	}
 	assignPositionsInSelect(compound.first, state);
 	for (const branch of compound.compounds) {
 		assignPositionsInSelect(branch.select, state);
@@ -1136,6 +1181,15 @@ function assignPositionsInCompound(
 	}
 	assignPositionsInExpressionOrFragment(compound.limit, state);
 	assignPositionsInExpressionOrFragment(compound.offset, state);
+}
+
+function assignPositionsInWithClause(
+	withClause: WithClauseNode,
+	state: ParameterTraversalState
+): void {
+	for (const cte of withClause.ctes) {
+		assignPositionsInStatement(cte.statement, state);
+	}
 }
 
 function assignPositionsInSelectItem(

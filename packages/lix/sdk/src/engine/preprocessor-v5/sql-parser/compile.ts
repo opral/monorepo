@@ -31,11 +31,76 @@ import type {
 	UpdateStatementNode,
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
+	WithClauseNode,
+	CommonTableExpressionNode,
 } from "./nodes.js";
 import {
 	getBinaryOperatorPrecedence,
 	isNonAssociativeBinaryOperator,
 } from "./ast-helpers.js";
+
+const RESERVED_KEYWORDS = new Set(
+	[
+		"add",
+		"all",
+		"alter",
+		"and",
+		"as",
+		"asc",
+		"between",
+		"by",
+		"case",
+		"check",
+		"commit",
+		"constraint",
+		"create",
+		"default",
+		"delete",
+		"desc",
+		"distinct",
+		"drop",
+		"else",
+		"end",
+		"except",
+		"exists",
+		"from",
+		"group",
+		"having",
+		"in",
+		"index",
+		"inner",
+		"insert",
+		"intersect",
+		"into",
+		"is",
+		"join",
+		"left",
+		"limit",
+		"not",
+		"null",
+		"offset",
+		"on",
+		"or",
+		"order",
+		"outer",
+		"primary",
+		"recursive",
+		"references",
+		"select",
+		"set",
+		"table",
+		"then",
+		"union",
+		"unique",
+		"update",
+		"using",
+		"values",
+		"view",
+		"when",
+		"where",
+		"with",
+	].map((keyword) => keyword.toLowerCase())
+);
 
 type CompileResult = {
 	sql: string;
@@ -178,7 +243,12 @@ function emitCompoundSelect(statement: CompoundSelectNode): string {
 		);
 	}
 
-	const parts: string[] = [segments.join("\n")];
+	const parts: string[] = [];
+	const withClauseSql = emitWithClause(statement.with_clause);
+	if (withClauseSql) {
+		parts.push(withClauseSql);
+	}
+	parts.push(segments.join("\n"));
 
 	if (statement.order_by.length) {
 		parts.push(
@@ -214,14 +284,50 @@ function emitCompoundOperator(operator: CompoundOperator): string {
 	}
 }
 
+function emitWithClause(withClause: WithClauseNode | null): string | null {
+	if (!withClause || withClause.ctes.length === 0) {
+		return null;
+	}
+	const prefix = withClause.recursive ? "WITH RECURSIVE" : "WITH";
+	const ctesSql = withClause.ctes
+		.map((cte) => emitCommonTableExpression(cte))
+		.join(",\n");
+	return `${prefix} ${ctesSql}`;
+}
+
+function emitCommonTableExpression(
+	cte: CommonTableExpressionNode
+): string {
+	const name = emitIdentifier(cte.name);
+	const columnsSql = cte.columns.length
+		? `(${cte.columns.map((column) => emitIdentifier(column)).join(", ")})`
+		: "";
+	const statementSql = compileStatement(cte.statement).sql;
+	const indentedStatement = indentSql(statementSql);
+	const nameWithColumns = `${name}${columnsSql}`;
+	return `${nameWithColumns} AS (\n${indentedStatement}\n)`;
+}
+
+function indentSql(sql: string): string {
+	return sql
+		.split("\n")
+		.map((line) => (line.length > 0 ? `  ${line}` : line))
+		.join("\n");
+}
+
 function emitSelectStatement(statement: SelectStatementNode): string {
+	const parts: string[] = [];
+	const withClauseSql = emitWithClause(statement.with_clause);
+	if (withClauseSql) {
+		parts.push(withClauseSql);
+	}
 	const projectionItems = statement.projection.map(emitSelectItem);
 	const selectClause =
 		projectionItems.length <= 1
 			? `SELECT ${projectionItems[0] ?? ""}`
 			: `SELECT\n  ${projectionItems.join(",\n  ")}`;
 
-	const parts = [selectClause];
+	parts.push(selectClause);
 
 	if (statement.from_clauses.length) {
 		parts.push(`FROM ${statement.from_clauses.map(emitFromClause).join(", ")}`);
@@ -348,7 +454,7 @@ function emitRelation(
 			return name;
 		}
 		case "subquery": {
-			const sql = emitSelectStatement(relation.statement);
+			const sql = compileStatement(relation.statement).sql;
 			return `(${sql}) AS ${emitIdentifier(relation.alias)}`;
 		}
 		case "raw_fragment":
@@ -446,8 +552,18 @@ function emitUnaryExpression(expression: UnaryExpressionNode): string {
 
 function emitInListExpression(expression: InListExpressionNode): string {
 	const operand = emitExpression(expression.operand);
-	const items = expression.items.map((item) => emitExpression(item)).join(", ");
 	const keyword = expression.negated ? "NOT IN" : "IN";
+
+	if (expression.items.length === 1) {
+		const single = expression.items[0]!;
+		const innerSql =
+			single.node_kind === "subquery_expression"
+				? compileStatement(single.statement).sql
+				: emitExpression(single);
+		return `${operand} ${keyword} (${innerSql})`;
+	}
+
+	const items = expression.items.map((item) => emitExpression(item)).join(", ");
 	return `${operand} ${keyword} (${items})`;
 }
 
@@ -466,7 +582,7 @@ function emitFunctionCall(expression: FunctionCallExpressionNode): string {
 }
 
 function emitSubqueryExpression(expression: SubqueryExpressionNode): string {
-	const inner = emitSelectStatement(expression.statement);
+	const inner = compileStatement(expression.statement).sql;
 	return `(${inner})`;
 }
 
@@ -498,11 +614,15 @@ function emitIdentifierPath(path: readonly IdentifierNode[]): string {
 
 function emitIdentifier(identifier: IdentifierNode): string {
 	const value = identifier.value;
-	if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
-		return value;
+	if (
+		identifier.quoted ||
+		!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value) ||
+		RESERVED_KEYWORDS.has(value.toLowerCase())
+	) {
+		const escaped = value.replace(/"/g, '""');
+		return `"${escaped}"`;
 	}
-	const escaped = value.replace(/"/g, '""');
-	return `"${escaped}"`;
+	return value;
 }
 
 function emitLiteral(literal: LiteralNode): string {

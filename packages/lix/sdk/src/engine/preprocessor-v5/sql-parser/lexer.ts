@@ -6,6 +6,12 @@ export const Whitespace: TokenType = createToken({
 	group: Lexer.SKIPPED,
 });
 
+export const LineComment: TokenType = createToken({
+	name: "LineComment",
+	pattern: /--[^\n\r]*/,
+	group: Lexer.SKIPPED,
+});
+
 export const Select: TokenType = createToken({
 	name: "Select",
 	pattern: /select\b/i,
@@ -106,6 +112,16 @@ export const Except: TokenType = createToken({
 	pattern: /except\b/i,
 });
 
+export const With: TokenType = createToken({
+	name: "With",
+	pattern: /with\b/i,
+});
+
+export const Recursive: TokenType = createToken({
+	name: "Recursive",
+	pattern: /recursive\b/i,
+});
+
 export const Inner: TokenType = createToken({
 	name: "Inner",
 	pattern: /inner\b/i,
@@ -202,6 +218,8 @@ export const Identifier: TokenType = createToken({
 		Full,
 		Join,
 		On,
+		With,
+		Recursive,
 		Is,
 		InKeyword,
 		NullKeyword,
@@ -319,6 +337,7 @@ export const Percent: TokenType = createToken({
 });
 
 const tokens: TokenType[] = [
+	LineComment,
 	Whitespace,
 	Select,
 	Insert,
@@ -346,6 +365,8 @@ const tokens: TokenType[] = [
 	All,
 	Intersect,
 	Except,
+	With,
+	Recursive,
 	Is,
 	InKeyword,
 	NullKeyword,

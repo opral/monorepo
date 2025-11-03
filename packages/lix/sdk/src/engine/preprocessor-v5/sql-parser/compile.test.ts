@@ -85,7 +85,7 @@ FROM "foo";
 		const { sql: compiled, parameters } = compile(parsed);
 
 		expect(compiled).toContain("WITH RECURSIVE");
-		expect(compiled).toContain("\nUNION ALL\n");
+		expect(compiled).toContain("\n  UNION ALL\n");
 		expect(compiled).toContain("\n)\nSELECT *");
 		expect(parameters).toEqual([]);
 

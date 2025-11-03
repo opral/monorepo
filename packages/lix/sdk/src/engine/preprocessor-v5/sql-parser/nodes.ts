@@ -38,6 +38,19 @@ export type CompoundSelectBranch = {
 	readonly select: SelectStatementNode;
 };
 
+export type CommonTableExpressionNode = SqlNode & {
+	readonly node_kind: "common_table_expression";
+	readonly name: IdentifierNode;
+	readonly columns: readonly IdentifierNode[];
+	readonly statement: SelectStatementNode | CompoundSelectNode;
+};
+
+export type WithClauseNode = SqlNode & {
+	readonly node_kind: "with_clause";
+	readonly recursive: boolean;
+	readonly ctes: readonly CommonTableExpressionNode[];
+};
+
 export type CompoundSelectNode = SqlNode & {
 	readonly node_kind: "compound_select";
 	readonly first: SelectStatementNode;
@@ -45,6 +58,7 @@ export type CompoundSelectNode = SqlNode & {
 	readonly order_by: readonly OrderByItemNode[];
 	readonly limit: ExpressionNode | RawFragmentNode | null;
 	readonly offset: ExpressionNode | RawFragmentNode | null;
+	readonly with_clause: WithClauseNode | null;
 };
 
 export type StatementNode =
@@ -64,6 +78,7 @@ export type SelectStatementNode = SqlNode & {
 	readonly order_by: readonly OrderByItemNode[];
 	readonly limit: ExpressionNode | RawFragmentNode | null;
 	readonly offset: ExpressionNode | RawFragmentNode | null;
+	readonly with_clause: WithClauseNode | null;
 };
 
 export type SelectItemNode =
@@ -102,7 +117,7 @@ export type TableReferenceNode = SqlNode & {
 
 export type SubqueryNode = SqlNode & {
 	readonly node_kind: "subquery";
-	readonly statement: SelectStatementNode;
+	readonly statement: SelectStatementNode | CompoundSelectNode;
 	readonly alias: IdentifierNode;
 };
 
@@ -189,7 +204,7 @@ export type FunctionCallExpressionNode = SqlNode & {
 
 export type SubqueryExpressionNode = SqlNode & {
 	readonly node_kind: "subquery_expression";
-	readonly statement: SelectStatementNode;
+	readonly statement: SelectStatementNode | CompoundSelectNode;
 };
 
 export type GroupedExpressionNode = SqlNode & {
@@ -250,6 +265,7 @@ export type BinaryOperator =
 export type IdentifierNode = SqlNode & {
 	readonly node_kind: "identifier";
 	readonly value: string;
+	readonly quoted: boolean;
 };
 
 export type ObjectNameNode = SqlNode & {
@@ -260,10 +276,11 @@ export type ObjectNameNode = SqlNode & {
 /**
  * Creates an identifier node.
  */
-export function identifier(value: string): IdentifierNode {
+export function identifier(value: string, quoted = false): IdentifierNode {
 	return {
 		node_kind: "identifier",
 		value,
+		quoted,
 	};
 }
 

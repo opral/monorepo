@@ -148,6 +148,7 @@ const getOriginalPredicate = (
 
 test("rewrites deletes for stored schema views", async () => {
 	const lix = await openLix({});
+
 	const schema = {
 		"x-lix-key": "delete_schema",
 		"x-lix-version": "1.0",
@@ -164,29 +165,30 @@ test("rewrites deletes for stored schema views", async () => {
 		required: ["id"],
 		additionalProperties: false,
 	} satisfies LixSchemaDefinition;
+
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 	const table = schema["x-lix-key"];
 
-	const insertResult = preprocess({
+	const preprocessedInsert = preprocess({
 		sql: `INSERT INTO ${table} (id, name) VALUES (?, ?)`,
 		parameters: ["row-1", "Original"],
 	});
 
 	lix.engine!.executeSync({
-		sql: insertResult.sql,
-		parameters: insertResult.parameters,
+		sql: preprocessedInsert.sql,
+		parameters: preprocessedInsert.parameters,
 		preprocessMode: "none",
 	});
 
-	const deleteResult = preprocess({
+	const preprocessedDelete = preprocess({
 		sql: `DELETE FROM ${table} WHERE id = ?`,
 		parameters: ["row-1"],
 		trace: true,
 	});
 
-	const ast = getDeleteAst(deleteResult);
+	const ast = getDeleteAst(preprocessedDelete);
 	expect(ast.target.name.parts[0]?.value).toBe("state_all");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
@@ -217,8 +219,8 @@ test("rewrites deletes for stored schema views", async () => {
 	).toBe(true);
 
 	lix.engine!.executeSync({
-		sql: deleteResult.sql,
-		parameters: deleteResult.parameters,
+		sql: preprocessedDelete.sql,
+		parameters: preprocessedDelete.parameters,
 		preprocessMode: "none",
 	});
 
@@ -252,13 +254,13 @@ test("prefixless alias deletes target stored schema key", async () => {
 		preprocessMode: "none",
 	});
 
-	const deleteResult = preprocess({
+	const preprocessedDelete = preprocess({
 		sql: "DELETE FROM key_value WHERE key = ?",
 		parameters: ["alias"],
 		trace: true,
 	});
 
-	const ast = getDeleteAst(deleteResult);
+	const ast = getDeleteAst(preprocessedDelete);
 	expect(ast.target.name.parts[0]?.value).toBe("state_all");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
@@ -280,19 +282,19 @@ test("prefixless alias deletes target stored schema key", async () => {
 	).toBe(true);
 
 	lix.engine!.executeSync({
-		sql: deleteResult.sql,
-		parameters: deleteResult.parameters,
+		sql: preprocessedDelete.sql,
+		parameters: preprocessedDelete.parameters,
 		preprocessMode: "none",
 	});
 
-	const selectResult = preprocess({
+	const preprocessedSelect = preprocess({
 		sql: "SELECT value FROM key_value WHERE key = ?",
 		parameters: ["alias"],
 	});
 
 	const rows = lix.engine!.executeSync({
-		sql: selectResult.sql,
-		parameters: selectResult.parameters,
+		sql: preprocessedSelect.sql,
+		parameters: preprocessedSelect.parameters,
 		preprocessMode: "none",
 	}).rows;
 
