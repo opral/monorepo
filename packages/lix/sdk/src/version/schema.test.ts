@@ -258,6 +258,58 @@ test("update active version view", async () => {
 			version_id: "version_id_1",
 		},
 	]);
+
+	await lix.close();
+});
+
+test("active_version update succeeds via raw SQLite trigger", async () => {
+	const lix = await openLix({});
+
+	// Prepare change sets and commits identical to the preprocessor-driven path.
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs2", lixcol_version_id: "global" },
+			{ id: "working_cs2", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("commit_all")
+		.values([
+			{ id: "commit_cs2", change_set_id: "cs2", lixcol_version_id: "global" },
+			{
+				id: "working_commit_2",
+				change_set_id: "working_cs2",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "version_id_2",
+			name: "raw_update_version",
+			working_commit_id: "working_commit_2",
+		})
+		.execute();
+
+	// Execute the update directly through SQLite so the INSTEAD OF trigger handles it.
+	lix.engine!.sqlite.exec({
+		sql: `UPDATE active_version SET version_id = ?`,
+		bind: ["version_id_2"],
+	});
+
+	const rawResult = lix.engine!.sqlite.exec({
+		sql: `SELECT version_id FROM active_version`,
+		returnValue: "resultRows",
+		rowMode: "object",
+	});
+
+	expect(rawResult).toEqual([{ version_id: "version_id_2" }]);
+
+	await lix.close();
 });
 
 test("applying the schema should create an initial 'main' version", async () => {

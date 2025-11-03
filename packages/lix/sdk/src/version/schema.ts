@@ -389,6 +389,68 @@ export function applyVersionDatabaseSchema(args: {
 			json_extract(snapshot_content, '$.version_id') AS version_id
 		FROM lix_internal_state_all_untracked
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
+
+		CREATE TRIGGER IF NOT EXISTS active_version_update
+		INSTEAD OF UPDATE ON active_version
+		BEGIN
+			SELECT
+				CASE
+					WHEN NOT EXISTS (
+						SELECT 1
+						FROM state_all
+						WHERE schema_key = 'lix_version_descriptor'
+						  AND version_id = 'global'
+						  AND json_extract(snapshot_content, '$.id') = NEW.version_id
+					)
+					THEN RAISE(ABORT, 'Foreign key constraint violation: active_version.version_id')
+				END;
+
+			UPDATE lix_internal_state_all_untracked
+			SET
+				snapshot_content = jsonb(json_object('id', entity_id, 'version_id', NEW.version_id)),
+				schema_version = '${LixActiveVersionSchema["x-lix-version"]}',
+				updated_at = lix_timestamp(),
+				inherited_from_version_id = NULL,
+				is_tombstone = 0,
+				file_id = 'lix',
+				plugin_key = 'lix_own_entity'
+			WHERE schema_key = 'lix_active_version'
+			  AND version_id = 'global';
+
+			INSERT INTO lix_internal_state_all_untracked (
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				is_tombstone
+			)
+			SELECT
+				generated.new_id,
+				'lix_active_version',
+				'lix',
+				'global',
+				'lix_own_entity',
+				jsonb(json_object('id', generated.new_id, 'version_id', NEW.version_id)),
+				'${LixActiveVersionSchema["x-lix-version"]}',
+				generated.new_created_at,
+				generated.new_created_at,
+				NULL,
+				0
+			FROM (
+				SELECT lix_nano_id() AS new_id, lix_timestamp() AS new_created_at
+			) AS generated
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM lix_internal_state_all_untracked
+				WHERE schema_key = 'lix_active_version' AND version_id = 'global'
+			);
+		END;
 	`);
 }
 
