@@ -59,6 +59,18 @@ describe("compile", () => {
 		expectRoundTrip("DELETE FROM projects WHERE projects.id = 'obsolete'");
 	});
 
+	test("INSERT with ON CONFLICT DO NOTHING", () => {
+		expectRoundTrip(
+			"INSERT INTO projects (id) VALUES ('a') ON CONFLICT DO NOTHING"
+		);
+	});
+
+	test("INSERT with ON CONFLICT DO UPDATE", () => {
+		expectRoundTrip(
+			"INSERT INTO projects (id, name) VALUES ('a', 'A') ON CONFLICT(id) DO UPDATE SET name = excluded.name"
+		);
+	});
+
 	test("compiles compound select", () => {
 		expectRoundTrip(
 			`SELECT id FROM foo UNION ALL SELECT id FROM bar WHERE bar.active = 1`

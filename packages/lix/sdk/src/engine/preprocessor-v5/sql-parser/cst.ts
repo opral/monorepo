@@ -30,6 +30,9 @@ import {
 	Full,
 	Join,
 	On,
+	Conflict,
+	DoKeyword,
+	NothingKeyword,
 	SetKeyword,
 	Is,
 	InKeyword,
@@ -227,6 +230,53 @@ class SqlParser extends CstParser {
 			});
 			this.CONSUME(Values);
 			this.SUBRULE(this.values_list, { LABEL: "rows" });
+			this.OPTION1(() => {
+				this.SUBRULE(this.on_conflict_clause, { LABEL: "conflict" });
+			});
+		}
+	);
+
+	private readonly on_conflict_clause: () => CstNode = this.RULE(
+		"on_conflict_clause",
+		() => {
+			this.CONSUME(On);
+			this.CONSUME(Conflict);
+			this.OPTION(() => {
+				this.CONSUME(LeftParen);
+				this.SUBRULE1(this.expression, { LABEL: "target_expressions" });
+				this.MANY1(() => {
+					this.CONSUME1(Comma);
+					this.SUBRULE2(this.expression, { LABEL: "target_expressions" });
+				});
+				this.CONSUME(RightParen);
+			});
+			this.OPTION1(() => {
+				this.CONSUME2(Where);
+				this.SUBRULE3(this.or_expression, { LABEL: "target_where" });
+			});
+			this.CONSUME(DoKeyword);
+			this.OR([
+				{
+					ALT: () => {
+						this.CONSUME(NothingKeyword, { LABEL: "do_nothing" });
+					},
+				},
+				{
+					ALT: () => {
+						this.CONSUME(Update, { LABEL: "do_update" });
+						this.CONSUME(SetKeyword);
+						this.SUBRULE4(this.assignment_item, { LABEL: "assignments" });
+						this.MANY2(() => {
+							this.CONSUME3(Comma);
+							this.SUBRULE5(this.assignment_item, { LABEL: "assignments" });
+						});
+						this.OPTION2(() => {
+							this.CONSUME4(Where);
+							this.SUBRULE6(this.or_expression, { LABEL: "action_where" });
+						});
+					},
+				},
+			]);
 		}
 	);
 

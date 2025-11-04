@@ -8,6 +8,9 @@ import type {
 	FromClauseNode,
 	InsertStatementNode,
 	InsertValuesNode,
+	OnConflictActionNode,
+	OnConflictClauseNode,
+	OnConflictTargetNode,
 	IdentifierNode,
 	InListExpressionNode,
 	JoinClauseNode,
@@ -385,7 +388,10 @@ function emitInsertStatement(statement: InsertStatementNode): string {
 		? ` (${statement.columns.map((column) => emitIdentifier(column)).join(", ")})`
 		: "";
 	const valuesSql = emitInsertValues(statement.source);
-	return `INSERT INTO ${target}${columnSql} ${valuesSql}`;
+	const conflictSql = statement.on_conflict
+		? ` ${emitOnConflictClause(statement.on_conflict)}`
+		: "";
+	return `INSERT INTO ${target}${columnSql} ${valuesSql}${conflictSql}`;
 }
 
 function emitInsertValues(values: InsertValuesNode): string {
@@ -397,6 +403,45 @@ function emitInsertValues(values: InsertValuesNode): string {
 		return `VALUES ${rows[0] ?? "()"}`;
 	}
 	return `VALUES\n  ${rows.join(",\n  ")}`;
+}
+
+function emitOnConflictClause(clause: OnConflictClauseNode): string {
+	const targetSql = clause.target ? emitOnConflictTarget(clause.target) : "";
+	const actionSql = emitOnConflictAction(clause.action);
+	return targetSql
+		? `ON CONFLICT ${targetSql} ${actionSql}`
+		: `ON CONFLICT ${actionSql}`;
+}
+
+function emitOnConflictTarget(target: OnConflictTargetNode): string {
+	const expressionsSql = target.expressions
+		.map((expression) => emitExpressionOrRaw(expression))
+		.join(", ");
+	const whereSql = target.where
+		? ` WHERE ${emitExpressionOrRaw(target.where)}`
+		: "";
+	if (expressionsSql) {
+		return `(${expressionsSql})${whereSql}`;
+	}
+	return whereSql ? whereSql.trimStart() : "";
+}
+
+function emitOnConflictAction(action: OnConflictActionNode): string {
+	switch (action.node_kind) {
+		case "on_conflict_do_nothing":
+			return "DO NOTHING";
+		case "on_conflict_do_update": {
+			const assignments = action.assignments
+				.map((assignment) => emitSetClause(assignment))
+				.join(", ");
+			const whereSql = action.where
+				? ` WHERE ${emitExpressionOrRaw(action.where)}`
+				: "";
+			return `DO UPDATE SET ${assignments}${whereSql}`;
+		}
+		default:
+			return assertNever(action);
+	}
 }
 
 function emitSelectItem(item: SelectItemNode): string {

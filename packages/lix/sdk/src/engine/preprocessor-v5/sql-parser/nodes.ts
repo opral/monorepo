@@ -157,11 +157,38 @@ export type DeleteStatementNode = SqlNode & {
 	readonly where_clause: ExpressionNode | RawFragmentNode | null;
 };
 
+export type OnConflictDoNothingNode = SqlNode & {
+	readonly node_kind: "on_conflict_do_nothing";
+};
+
+export type OnConflictDoUpdateNode = SqlNode & {
+	readonly node_kind: "on_conflict_do_update";
+	readonly assignments: readonly SetClauseNode[];
+	readonly where: ExpressionNode | RawFragmentNode | null;
+};
+
+export type OnConflictActionNode =
+	| OnConflictDoNothingNode
+	| OnConflictDoUpdateNode;
+
+export type OnConflictTargetNode = SqlNode & {
+	readonly node_kind: "on_conflict_target";
+	readonly expressions: readonly (ExpressionNode | RawFragmentNode)[];
+	readonly where: ExpressionNode | RawFragmentNode | null;
+};
+
+export type OnConflictClauseNode = SqlNode & {
+	readonly node_kind: "on_conflict_clause";
+	readonly target: OnConflictTargetNode | null;
+	readonly action: OnConflictActionNode;
+};
+
 export type InsertStatementNode = SqlNode & {
 	readonly node_kind: "insert_statement";
 	readonly target: ObjectNameNode;
 	readonly columns: readonly IdentifierNode[];
 	readonly source: InsertValuesNode;
+	readonly on_conflict: OnConflictClauseNode | null;
 };
 
 export type InsertValuesNode = SqlNode & {

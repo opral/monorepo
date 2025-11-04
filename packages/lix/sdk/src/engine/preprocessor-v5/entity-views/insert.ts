@@ -79,25 +79,25 @@ function rewriteSegmentedStatement(
 ): SegmentedStatementNode {
 	let changed = false;
 	const segments = statement.segments.map((segment) => {
-		if (segment.node_kind !== "insert_statement") {
-			return segment;
+		if (segment.node_kind === "insert_statement") {
+			const rewritten = rewriteInsertSegment({
+				insert: segment,
+				context,
+				storedSchemas,
+			});
+
+			if (!rewritten) {
+				return segment;
+			}
+
+			if (rewritten !== segment) {
+				changed = true;
+			}
+
+			return rewritten;
 		}
 
-		const rewritten = rewriteInsertSegment({
-			insert: segment,
-			context,
-			storedSchemas,
-		});
-
-		if (!rewritten) {
-			return segment;
-		}
-
-		if (rewritten !== segment) {
-			changed = true;
-		}
-
-		return rewritten;
+		return segment;
 	});
 
 	if (!changed) {
@@ -132,6 +132,10 @@ function rewriteInsertSegment(args: {
 
 	if (!isEntityViewVariantEnabled(schema, variant)) {
 		return null;
+	}
+
+	if (args.insert.on_conflict) {
+		throw new Error("on conflict clauses are not yet supported");
 	}
 
 	const parameters = args.context.parameters ?? [];
@@ -304,6 +308,7 @@ function buildEntityViewInsert(
 			node_kind: "insert_values",
 			rows: rewrittenRows,
 		},
+		on_conflict: null,
 	};
 
 	return rewritten;

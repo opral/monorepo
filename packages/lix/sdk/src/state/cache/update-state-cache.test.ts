@@ -29,10 +29,9 @@ async function ensureCacheSchemas(
 	schemaKeys: string[]
 ): Promise<void> {
 	for (const key of schemaKeys) {
-		await (lix.db as any)
+		await lix.db
 			.insertInto("stored_schema")
 			.values({ value: simpleCacheSchema(key) })
-			.onConflict((oc: any) => oc.doNothing())
 			.execute();
 	}
 }

@@ -162,6 +162,21 @@ export const On: TokenType = createToken({
 	pattern: /on\b/i,
 });
 
+export const Conflict: TokenType = createToken({
+	name: "Conflict",
+	pattern: /conflict\b/i,
+});
+
+export const DoKeyword: TokenType = createToken({
+	name: "DoKeyword",
+	pattern: /do\b/i,
+});
+
+export const NothingKeyword: TokenType = createToken({
+	name: "NothingKeyword",
+	pattern: /nothing\b/i,
+});
+
 export const SetKeyword: TokenType = createToken({
 	name: "SetKeyword",
 	pattern: /set\b/i,
@@ -255,6 +270,9 @@ export const Identifier: TokenType = createToken({
 		Full,
 		Join,
 		On,
+		Conflict,
+		DoKeyword,
+		NothingKeyword,
 		With,
 		Recursive,
 		Is,
@@ -405,6 +423,9 @@ const tokens: TokenType[] = [
 	Full,
 	Join,
 	On,
+	Conflict,
+	DoKeyword,
+	NothingKeyword,
 	Union,
 	All,
 	Intersect,

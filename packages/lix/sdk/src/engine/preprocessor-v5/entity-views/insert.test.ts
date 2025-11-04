@@ -1074,3 +1074,44 @@ test("regression: handles json function call parameters when deriving entity_id"
 
 	await lix.close();
 });
+
+test("throws on entity view inserts that include ON CONFLICT", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+	const schemaDefinition: LixSchemaDefinition = {
+		"x-lix-key": "conflict_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: schemaDefinition })
+		.execute();
+
+	try {
+		expect(() =>
+			preprocess({
+				sql: `INSERT INTO "conflict_schema" ("id") VALUES ('row-1') ON CONFLICT DO NOTHING`,
+				parameters: [],
+			})
+		).toThrowError("on conflict clauses are not yet supported");
+	} finally {
+		await lix.close();
+	}
+});

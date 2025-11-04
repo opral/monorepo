@@ -5,6 +5,11 @@ import type {
 	DeleteStatementNode,
 	InsertStatementNode,
 	InsertValuesNode,
+	OnConflictActionNode,
+	OnConflictClauseNode,
+	OnConflictDoNothingNode,
+	OnConflictDoUpdateNode,
+	OnConflictTargetNode,
 	ExpressionNode,
 	FromClauseNode,
 	GroupedExpressionNode,
@@ -51,6 +56,10 @@ type NodeKindMap = {
 	readonly insert_statement: InsertStatementNode;
 	readonly update_statement: UpdateStatementNode;
 	readonly delete_statement: DeleteStatementNode;
+	readonly on_conflict_clause: OnConflictClauseNode;
+	readonly on_conflict_target: OnConflictTargetNode;
+	readonly on_conflict_do_nothing: OnConflictDoNothingNode;
+	readonly on_conflict_do_update: OnConflictDoUpdateNode;
 	readonly with_clause: WithClauseNode;
 	readonly common_table_expression: CommonTableExpressionNode;
 	readonly segmented_statement: SegmentedStatementNode;
@@ -228,6 +237,17 @@ function traverseNode(
 			);
 		case "insert_statement":
 			return traverseInsertStatement(node as InsertStatementNode, visitor);
+		case "on_conflict_clause":
+			return traverseOnConflictClause(node as OnConflictClauseNode, visitor);
+		case "on_conflict_target":
+			return traverseOnConflictTarget(node as OnConflictTargetNode, visitor);
+		case "on_conflict_do_update":
+			return traverseOnConflictDoUpdate(
+				node as OnConflictDoUpdateNode,
+				visitor
+			);
+		case "on_conflict_do_nothing":
+			return node;
 		case "update_statement":
 			return traverseUpdateStatement(node as UpdateStatementNode, visitor);
 		case "delete_statement":
@@ -504,6 +524,16 @@ function traverseInsertStatement(
 		changed = true;
 	}
 
+	const onConflict = visitOptional(
+		node.on_conflict,
+		node,
+		"on_conflict",
+		visitor
+	);
+	if (onConflict !== node.on_conflict) {
+		changed = true;
+	}
+
 	if (!changed) {
 		return node;
 	}
@@ -513,6 +543,98 @@ function traverseInsertStatement(
 		target: target as ObjectNameNode,
 		columns: columns as readonly IdentifierNode[],
 		source: source as InsertValuesNode,
+		on_conflict: onConflict as OnConflictClauseNode | null,
+	};
+}
+
+function traverseOnConflictClause(
+	node: OnConflictClauseNode,
+	visitor: AstVisitor
+): OnConflictClauseNode {
+	let changed = false;
+
+	const target = visitOptional(node.target, node, "target", visitor);
+	if (target !== node.target) {
+		changed = true;
+	}
+
+	const action = visitNode(node.action, visitor, createContext(node, "action"));
+	if (action !== node.action) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		target: target as OnConflictTargetNode | null,
+		action: action as OnConflictActionNode,
+	};
+}
+
+function traverseOnConflictTarget(
+	node: OnConflictTargetNode,
+	visitor: AstVisitor
+): OnConflictTargetNode {
+	let changed = false;
+
+	const expressions = visitArray(
+		node.expressions,
+		node,
+		"expressions",
+		visitor
+	);
+	if (expressions !== node.expressions) {
+		changed = true;
+	}
+
+	const whereClause = visitOptional(node.where, node, "where", visitor);
+	if (whereClause !== node.where) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		expressions: expressions as readonly (ExpressionNode | RawFragmentNode)[],
+		where: whereClause as ExpressionNode | RawFragmentNode | null,
+	};
+}
+
+function traverseOnConflictDoUpdate(
+	node: OnConflictDoUpdateNode,
+	visitor: AstVisitor
+): OnConflictDoUpdateNode {
+	let changed = false;
+
+	const assignments = visitArray(
+		node.assignments,
+		node,
+		"assignments",
+		visitor
+	);
+	if (assignments !== node.assignments) {
+		changed = true;
+	}
+
+	const whereClause = visitOptional(node.where, node, "where", visitor);
+	if (whereClause !== node.where) {
+		changed = true;
+	}
+
+	if (!changed) {
+		return node;
+	}
+
+	return {
+		...node,
+		assignments: assignments as readonly SetClauseNode[],
+		where: whereClause as ExpressionNode | RawFragmentNode | null,
 	};
 }
 

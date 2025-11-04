@@ -93,6 +93,66 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses insert with on conflict do nothing", () => {
+		const ast = parseInsertStatement(
+			"INSERT INTO projects (id) VALUES ('a') ON CONFLICT DO NOTHING"
+		);
+		expect(ast.on_conflict).toEqual({
+			node_kind: "on_conflict_clause",
+			target: null,
+			action: { node_kind: "on_conflict_do_nothing" },
+		});
+	});
+
+	test("parses insert with on conflict do update", () => {
+		const ast = parseInsertStatement(
+			"INSERT INTO projects (id, name) VALUES ('a', 'A') ON CONFLICT(id) DO UPDATE SET name = excluded.name WHERE excluded.id = 'a'"
+		);
+		const clause = ast.on_conflict;
+		expect(clause).not.toBeNull();
+		expect(clause).toEqual({
+			node_kind: "on_conflict_clause",
+			target: {
+				node_kind: "on_conflict_target",
+				expressions: [
+					{
+						node_kind: "column_reference",
+						path: [id("id")],
+					},
+				],
+				where: null,
+			},
+			action: {
+				node_kind: "on_conflict_do_update",
+				assignments: [
+					{
+						node_kind: "set_clause",
+						column: {
+							node_kind: "column_reference",
+							path: [id("name")],
+						},
+						value: {
+							node_kind: "column_reference",
+							path: [id("excluded"), id("name")],
+						},
+					},
+				],
+				where: {
+					node_kind: "binary_expression",
+					left: {
+						node_kind: "column_reference",
+						path: [id("excluded"), id("id")],
+					},
+					operator: "=",
+					right: {
+						node_kind: "literal",
+						value: "a",
+					},
+				},
+			},
+		});
+	});
+
 	test("parses select with where and alias", () => {
 		const ast = parseSelectStatement(
 			"SELECT p.id AS project_id FROM projects AS p WHERE p.revision >= 1"
@@ -470,6 +530,7 @@ describe("parse", () => {
 					[lit("b"), { node_kind: "parameter", placeholder: "?", position: 0 }],
 				],
 			},
+			on_conflict: null,
 		});
 	});
 

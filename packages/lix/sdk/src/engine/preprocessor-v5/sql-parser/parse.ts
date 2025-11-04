@@ -6,6 +6,9 @@ import type {
 	DeleteStatementNode,
 	InsertStatementNode,
 	InsertValuesNode,
+	OnConflictActionNode,
+	OnConflictClauseNode,
+	OnConflictTargetNode,
 	ExpressionNode,
 	FromClauseNode,
 	GroupedExpressionNode,
@@ -254,6 +257,7 @@ class ToAstVisitor extends BaseVisitor {
 		table?: CstNode[];
 		columns?: CstNode[];
 		rows?: CstNode[];
+		conflict?: CstNode[];
 	}): InsertStatementNode {
 		const tableNode = ctx.table?.[0];
 		if (!tableNode) {
@@ -271,11 +275,70 @@ class ToAstVisitor extends BaseVisitor {
 			node_kind: "insert_values",
 			rows: rowNodes,
 		};
+		const conflictNode = ctx.conflict?.[0];
+		const onConflict = conflictNode
+			? (this.visit(conflictNode) as OnConflictClauseNode)
+			: null;
 		return {
 			node_kind: "insert_statement",
 			target,
 			columns: columnNodes,
 			source: valuesNode,
+			on_conflict: onConflict,
+		};
+	}
+
+	public on_conflict_clause(ctx: {
+		target_expressions?: CstNode[];
+		target_where?: CstNode[];
+		do_nothing?: IToken[];
+		do_update?: IToken[];
+		assignments?: CstNode[];
+		action_where?: CstNode[];
+	}): OnConflictClauseNode {
+		const expressionNodes = ctx.target_expressions ?? [];
+		const expressions = expressionNodes.map(
+			(node) => this.visit(node) as ExpressionNode
+		);
+		const targetWhereNode = ctx.target_where?.[0];
+		const targetWhere = targetWhereNode
+			? (this.visit(targetWhereNode) as ExpressionNode)
+			: null;
+		const target: OnConflictTargetNode | null =
+			expressions.length > 0 || targetWhere
+				? {
+						node_kind: "on_conflict_target",
+						expressions,
+						where: targetWhere,
+					}
+				: null;
+
+		let action: OnConflictActionNode;
+		if (ctx.do_nothing?.length) {
+			action = { node_kind: "on_conflict_do_nothing" };
+		} else {
+			const assignmentNodes = ctx.assignments ?? [];
+			const assignments = assignmentNodes.map(
+				(node) => this.visit(node) as SetClauseNode
+			);
+			if (assignments.length === 0) {
+				throw new Error("ON CONFLICT DO UPDATE requires assignments");
+			}
+			const actionWhereNode = ctx.action_where?.[0];
+			const actionWhere = actionWhereNode
+				? (this.visit(actionWhereNode) as ExpressionNode)
+				: null;
+			action = {
+				node_kind: "on_conflict_do_update",
+				assignments,
+				where: actionWhere,
+			};
+		}
+
+		return {
+			node_kind: "on_conflict_clause",
+			target,
+			action,
 		};
 	}
 
