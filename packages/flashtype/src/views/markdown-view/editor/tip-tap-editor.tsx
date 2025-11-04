@@ -151,15 +151,15 @@ export function TipTapEditor({
 	}
 
 	return (
-		<div className={className ?? undefined}>
+		<div className={`min-h-0 ${className ?? ""}`}>
 			<div
-				className="tiptap-container w-full h-full min-h-screen bg-background py-0 cursor-text"
+				className="tiptap-container w-full h-full bg-background py-0 cursor-text overflow-y-auto"
 				data-editor-focused={isEditorFocused ? "true" : "false"}
 				onMouseDown={handleSurfacePointerDown}
 			>
 				<EditorContent
 					editor={editor}
-					className="tiptap w-full h-full max-w-5xl mx-auto"
+					className="tiptap w-full max-w-5xl mx-auto"
 					data-testid="tiptap-editor"
 					key={activeFileId ?? "no-file"}
 				/>
