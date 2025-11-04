@@ -122,7 +122,6 @@ async function registerSchemas(
 		await lix.db
 			.insertInto("stored_schema")
 			.values({ value: schema })
-			.onConflict((oc) => oc.doNothing())
 			.execute();
 	}
 }
@@ -207,24 +206,20 @@ async function captureExplainPlan(options: CaptureOptions): Promise<void> {
 		sql: captured!.sql,
 		parameters: captured!.parameters ?? [],
 	})) as {
-		original: { sql: string };
-		expanded?: { sql: string };
-		rewritten?: { sql: string; parameters: unknown[] };
+		originalSql: string;
+		rewrittenSql?: string;
 		plan: unknown;
 	};
 
 	const payload = [
 		`-- SQL (${label})`,
-		explain.original.sql,
+		explain.originalSql,
 		"",
-		"-- expanded SQL",
-		explain.expanded?.sql ?? "<unchanged>",
+		"-- parameters",
+		JSON.stringify(captured!.parameters ?? [], null, 2),
 		"",
 		"-- rewritten SQL",
-		explain.rewritten?.sql ?? "<unchanged>",
-		"",
-		"-- rewritten parameters",
-		JSON.stringify(explain.rewritten?.parameters ?? []),
+		explain.rewrittenSql ?? "<unchanged>",
 		"",
 		"-- query plan",
 		JSON.stringify(explain.plan, null, 2),

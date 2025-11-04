@@ -19,6 +19,10 @@ import type {
 	LiteralNode,
 	ObjectNameNode,
 	ParameterExpressionNode,
+	WindowSpecificationNode,
+	WindowFrameNode,
+	WindowFrameBoundNode,
+	WindowReferenceNode,
 	RelationNode,
 	SelectItemNode,
 	SelectQualifiedStarNode,
@@ -409,11 +413,10 @@ class ToAstVisitor extends BaseVisitor {
 	}): RelationNode {
 		const selectNode = ctx.select?.[0];
 		if (selectNode) {
-			const aliasToken = ctx.alias?.[0];
-			if (!aliasToken) {
-				throw new Error("derived table requires an alias");
-			}
-			const alias = this.visit(aliasToken) as IdentifierNode;
+			const aliasToken = ctx.alias?.[0] ?? null;
+			const alias = aliasToken
+				? (this.visit(aliasToken) as IdentifierNode)
+				: null;
 			const statement = this.visit(selectNode) as
 				| SelectStatementNode
 				| CompoundSelectNode;
@@ -715,10 +718,17 @@ class ToAstVisitor extends BaseVisitor {
 				ctx.callArguments?.map(
 					(argument) => this.visit(argument) as ExpressionNode
 				) ?? [];
+			const overClause = (ctx as { overClause?: CstNode[] }).overClause?.[0];
+			const over = overClause
+				? (this.visit(overClause) as
+						| WindowSpecificationNode
+						| WindowReferenceNode)
+				: null;
 			const functionCall: FunctionCallExpressionNode = {
 				node_kind: "function_call",
 				name: identifier(callIdentifier.image),
 				arguments: args,
+				over,
 			};
 			return functionCall;
 		}
@@ -749,6 +759,124 @@ class ToAstVisitor extends BaseVisitor {
 			expression,
 		};
 		return grouped;
+	}
+
+	public over_clause(ctx: {
+		windowName?: IToken[];
+		windowSpec?: CstNode[];
+	}): WindowSpecificationNode | WindowReferenceNode {
+		const nameToken = ctx.windowName?.[0];
+		if (nameToken?.image) {
+			return {
+				node_kind: "window_reference",
+				name: identifier(nameToken.image),
+			};
+		}
+		const specNode = ctx.windowSpec?.[0];
+		if (specNode) {
+			return this.visit(specNode) as WindowSpecificationNode;
+		}
+		return {
+			node_kind: "window_specification",
+			name: null,
+			partition_by: [],
+			order_by: [],
+			frame: null,
+		};
+	}
+
+	public window_specification(ctx: {
+		name?: CstNode[];
+		partitionBy?: CstNode[];
+		orderBy?: CstNode[];
+		frame?: CstNode[];
+	}): WindowSpecificationNode {
+		const nameNode = ctx.name?.[0];
+		const name = nameNode ? (this.visit(nameNode) as IdentifierNode) : null;
+		const partitionExpressions =
+			ctx.partitionBy?.map((node) => this.visit(node) as ExpressionNode) ?? [];
+		const orderNodes = ctx.orderBy?.[0]
+			? (this.visit(ctx.orderBy[0]!) as OrderByItemNode[])
+			: [];
+		const frameNode = ctx.frame?.[0]
+			? (this.visit(ctx.frame[0]!) as WindowFrameNode)
+			: null;
+		return {
+			node_kind: "window_specification",
+			name,
+			partition_by: partitionExpressions,
+			order_by: orderNodes,
+			frame: frameNode,
+		};
+	}
+
+	public window_frame(ctx: {
+		units: IToken[];
+		start?: CstNode[];
+		end?: CstNode[];
+	}): WindowFrameNode {
+		const unitToken = ctx.units[0];
+		const unitImage = unitToken?.image?.toLowerCase() ?? "";
+		const units: WindowFrameNode["units"] =
+			unitImage === "range"
+				? "range"
+				: unitImage === "groups"
+					? "groups"
+					: "rows";
+		const startNode = ctx.start?.[0];
+		if (!startNode) {
+			throw new Error("window frame requires a starting bound");
+		}
+		const start = this.visit(startNode) as WindowFrameBoundNode;
+		const endNode = ctx.end?.[0];
+		const end = endNode ? (this.visit(endNode) as WindowFrameBoundNode) : null;
+		return {
+			node_kind: "window_frame",
+			units,
+			start,
+			end,
+		};
+	}
+
+	public window_frame_bound(ctx: {
+		unbounded?: IToken[];
+		direction?: IToken[];
+		current?: IToken[];
+		offset?: CstNode[];
+	}): WindowFrameBoundNode {
+		const directionToken = ctx.direction?.[0];
+		if (ctx.unbounded?.length) {
+			if (!directionToken?.image) {
+				throw new Error("UNBOUNDED bound requires direction");
+			}
+			const direction = directionToken.image.toLowerCase();
+			return {
+				node_kind: "window_frame_bound",
+				type:
+					direction === "following"
+						? "unbounded_following"
+						: "unbounded_preceding",
+				offset: null,
+			};
+		}
+		if (ctx.current?.length) {
+			return {
+				node_kind: "window_frame_bound",
+				type: "current_row",
+				offset: null,
+			};
+		}
+		const offsetNode = ctx.offset?.[0];
+		if (!offsetNode || !directionToken?.image) {
+			throw new Error("window frame bound requires offset and direction");
+		}
+		const direction = directionToken.image.toLowerCase();
+		const offset = this.visit(offsetNode) as ExpressionNode;
+		return {
+			node_kind: "window_frame_bound",
+			type: direction === "following" ? "following" : "preceding",
+			offset,
+		};
 	}
 
 	public case_expression(ctx: {

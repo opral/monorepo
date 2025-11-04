@@ -10,6 +10,11 @@ import {
 	type SetClauseNode,
 	type StatementSegmentNode,
 	type SubqueryExpressionNode,
+	type OrderByItemNode,
+	type WindowSpecificationNode,
+	type WindowReferenceNode,
+	type WindowFrameNode,
+	type WindowFrameBoundNode,
 } from "../sql-parser/nodes.js";
 import {
 	extractPrimaryKeys,
@@ -592,6 +597,7 @@ function rewriteExpressionForSnapshot(
 				arguments: expression.arguments.map((argument) =>
 					rewriteExpressionForSnapshot(argument)
 				),
+				over: rewriteWindowOver(expression.over),
 			};
 		case "raw_fragment":
 		case "parameter":
@@ -637,4 +643,61 @@ function extractTableName(
 
 function escapeSqlString(value: string): string {
 	return value.replace(/'/g, "''");
+}
+
+function rewriteWindowOver(
+	over: WindowSpecificationNode | WindowReferenceNode | null
+): WindowSpecificationNode | WindowReferenceNode | null {
+	if (!over) {
+		return null;
+	}
+	if (over.node_kind === "window_reference") {
+		return over;
+	}
+	return rewriteWindowSpecification(over);
+}
+
+function rewriteWindowSpecification(
+	spec: WindowSpecificationNode
+): WindowSpecificationNode {
+	return {
+		...spec,
+		partition_by: spec.partition_by.map((expression) =>
+			rewriteExpressionForSnapshot(expression)
+		),
+		order_by: spec.order_by.map((item) => rewriteOrderByItemNode(item)),
+		frame: rewriteWindowFrame(spec.frame),
+	};
+}
+
+function rewriteOrderByItemNode(item: OrderByItemNode): OrderByItemNode {
+	return {
+		...item,
+		expression: rewriteExpressionForSnapshot(item.expression),
+	};
+}
+
+function rewriteWindowFrame(
+	frame: WindowFrameNode | null
+): WindowFrameNode | null {
+	if (!frame) {
+		return null;
+	}
+	return {
+		...frame,
+		start: rewriteWindowFrameBound(frame.start),
+		end: frame.end ? rewriteWindowFrameBound(frame.end) : null,
+	};
+}
+
+function rewriteWindowFrameBound(
+	bound: WindowFrameBoundNode
+): WindowFrameBoundNode {
+	if (!bound.offset) {
+		return bound;
+	}
+	return {
+		...bound,
+		offset: rewriteExpressionForSnapshot(bound.offset),
+	};
 }

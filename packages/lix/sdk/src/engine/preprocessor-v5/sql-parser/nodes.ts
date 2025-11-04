@@ -120,7 +120,7 @@ export type TableReferenceNode = SqlNode & {
 export type SubqueryNode = SqlNode & {
 	readonly node_kind: "subquery";
 	readonly statement: SelectStatementNode | CompoundSelectNode;
-	readonly alias: IdentifierNode;
+	readonly alias: IdentifierNode | null;
 };
 
 export type JoinClauseNode = SqlNode & {
@@ -230,6 +230,7 @@ export type FunctionCallExpressionNode = SqlNode & {
 	readonly node_kind: "function_call";
 	readonly name: IdentifierNode;
 	readonly arguments: readonly ExpressionNode[];
+	readonly over: WindowSpecificationNode | WindowReferenceNode | null;
 };
 
 export type SubqueryExpressionNode = SqlNode & {
@@ -240,6 +241,37 @@ export type SubqueryExpressionNode = SqlNode & {
 export type GroupedExpressionNode = SqlNode & {
 	readonly node_kind: "grouped_expression";
 	readonly expression: ExpressionNode;
+};
+
+export type WindowReferenceNode = SqlNode & {
+	readonly node_kind: "window_reference";
+	readonly name: IdentifierNode;
+};
+
+export type WindowSpecificationNode = SqlNode & {
+	readonly node_kind: "window_specification";
+	readonly name: IdentifierNode | null;
+	readonly partition_by: readonly ExpressionNode[];
+	readonly order_by: readonly OrderByItemNode[];
+	readonly frame: WindowFrameNode | null;
+};
+
+export type WindowFrameNode = SqlNode & {
+	readonly node_kind: "window_frame";
+	readonly units: "rows" | "range" | "groups";
+	readonly start: WindowFrameBoundNode;
+	readonly end: WindowFrameBoundNode | null;
+};
+
+export type WindowFrameBoundNode = SqlNode & {
+	readonly node_kind: "window_frame_bound";
+	readonly type:
+		| "unbounded_preceding"
+		| "unbounded_following"
+		| "current_row"
+		| "preceding"
+		| "following";
+	readonly offset: ExpressionNode | null;
 };
 
 export type InListExpressionNode = SqlNode & {

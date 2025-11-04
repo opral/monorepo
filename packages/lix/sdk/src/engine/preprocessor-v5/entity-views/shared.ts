@@ -8,6 +8,11 @@ import {
 	type FunctionCallExpressionNode,
 	type LiteralNode,
 	type RawFragmentNode,
+	type OrderByItemNode,
+	type WindowSpecificationNode,
+	type WindowReferenceNode,
+	type WindowFrameNode,
+	type WindowFrameBoundNode,
 } from "../sql-parser/nodes.js";
 import { getColumnName } from "../sql-parser/ast-helpers.js";
 import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
@@ -946,10 +951,19 @@ function rewritePredicateExpression(
 				if (!rewritten) return null;
 				args.push(rewritten);
 			}
+			const over = rewriteWindowOverForPredicate(
+				expression.over,
+				propertyLowerToActual,
+				flags
+			);
+			if (expression.over && !over) {
+				return null;
+			}
 			const call: FunctionCallExpressionNode = {
 				node_kind: "function_call",
 				name: expression.name,
 				arguments: args,
+				over,
 			};
 			return call;
 		}
@@ -1052,6 +1066,132 @@ function rewriteColumnReference(
 	return null;
 }
 
+function rewriteWindowOverForPredicate(
+	over: WindowSpecificationNode | WindowReferenceNode | null,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): WindowSpecificationNode | WindowReferenceNode | null {
+	if (!over) {
+		return null;
+	}
+	if (over.node_kind === "window_reference") {
+		return over;
+	}
+	const specification = rewriteWindowSpecificationForPredicate(
+		over,
+		propertyLowerToActual,
+		flags
+	);
+	return specification;
+}
+
+function rewriteWindowSpecificationForPredicate(
+	spec: WindowSpecificationNode,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): WindowSpecificationNode | null {
+	const partitionBy: ExpressionNode[] = [];
+	for (const expression of spec.partition_by) {
+		const rewritten = rewritePredicateExpression(
+			expression,
+			propertyLowerToActual,
+			flags
+		);
+		if (!rewritten) {
+			return null;
+		}
+		partitionBy.push(rewritten);
+	}
+
+	const orderBy: OrderByItemNode[] = [];
+	for (const item of spec.order_by) {
+		const rewritten = rewritePredicateExpression(
+			item.expression,
+			propertyLowerToActual,
+			flags
+		);
+		if (!rewritten) {
+			return null;
+		}
+		orderBy.push({
+			...item,
+			expression: rewritten,
+		});
+	}
+
+	let frame: WindowFrameNode | null = null;
+	if (spec.frame) {
+		frame = rewriteWindowFrameForPredicate(
+			spec.frame,
+			propertyLowerToActual,
+			flags
+		);
+		if (!frame) {
+			return null;
+		}
+	}
+
+	return {
+		...spec,
+		partition_by: partitionBy,
+		order_by: orderBy,
+		frame,
+	};
+}
+
+function rewriteWindowFrameForPredicate(
+	frame: WindowFrameNode,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): WindowFrameNode | null {
+	const start = rewriteWindowFrameBoundForPredicate(
+		frame.start,
+		propertyLowerToActual,
+		flags
+	);
+	if (!start) {
+		return null;
+	}
+	let end: WindowFrameBoundNode | null = null;
+	if (frame.end) {
+		end = rewriteWindowFrameBoundForPredicate(
+			frame.end,
+			propertyLowerToActual,
+			flags
+		);
+		if (!end) {
+			return null;
+		}
+	}
+	return {
+		...frame,
+		start,
+		end,
+	};
+}
+
+function rewriteWindowFrameBoundForPredicate(
+	bound: WindowFrameBoundNode,
+	propertyLowerToActual: Map<string, string>,
+	flags: PredicateRewriteFlags
+): WindowFrameBoundNode | null {
+	if (!bound.offset) {
+		return bound;
+	}
+	const offset = rewritePredicateExpression(
+		bound.offset,
+		propertyLowerToActual,
+		flags
+	);
+	if (!offset) {
+		return null;
+	}
+	return {
+		...bound,
+		offset,
+	};
+}
+
 function createJsonExtractExpression(property: string): ExpressionNode {
 	const path = buildSqliteJsonPath([property]);
 	return {
@@ -1061,6 +1201,7 @@ function createJsonExtractExpression(property: string): ExpressionNode {
 			columnReference(["state_all", "snapshot_content"]),
 			createLiteralNode(path),
 		],
+		over: null,
 	};
 }
 

@@ -37,6 +37,10 @@ import type {
 	WithClauseNode,
 	CommonTableExpressionNode,
 	CaseExpressionNode,
+	WindowSpecificationNode,
+	WindowReferenceNode,
+	WindowFrameNode,
+	WindowFrameBoundNode,
 } from "./nodes.js";
 import {
 	getBinaryOperatorPrecedence,
@@ -506,7 +510,10 @@ function emitRelation(
 		}
 		case "subquery": {
 			const sql = compileStatement(relation.statement).sql;
-			return `(${sql}) AS ${emitIdentifier(relation.alias)}`;
+			const alias = relation.alias
+				? ` AS ${emitIdentifier(relation.alias)}`
+				: "";
+			return `(${sql})${alias}`;
 		}
 		case "raw_fragment":
 			return relation.sql_text;
@@ -648,7 +655,77 @@ function emitBetweenExpression(expression: BetweenExpressionNode): string {
 function emitFunctionCall(expression: FunctionCallExpressionNode): string {
 	const name = emitIdentifier(expression.name);
 	const args = expression.arguments.map((argument) => emitExpression(argument));
-	return `${name}(${args.join(", ")})`;
+	const call = `${name}(${args.join(", ")})`;
+	if (!expression.over) {
+		return call;
+	}
+	return `${call} OVER ${emitWindowOver(expression.over)}`;
+}
+
+function emitWindowOver(
+	over: WindowSpecificationNode | WindowReferenceNode
+): string {
+	if (over.node_kind === "window_reference") {
+		return emitIdentifier(over.name);
+	}
+	const spec = emitWindowSpecification(over);
+	return `(${spec})`;
+}
+
+function emitWindowSpecification(spec: WindowSpecificationNode): string {
+	const parts: string[] = [];
+	if (spec.name) {
+		parts.push(emitIdentifier(spec.name));
+	}
+	if (spec.partition_by.length > 0) {
+		const partitionSql = spec.partition_by
+			.map((expression) => emitExpression(expression))
+			.join(", ");
+		parts.push(`PARTITION BY ${partitionSql}`);
+	}
+	if (spec.order_by.length > 0) {
+		const orderSql = spec.order_by
+			.map((item) => emitOrderByItem(item))
+			.join(", ");
+		parts.push(`ORDER BY ${orderSql}`);
+	}
+	if (spec.frame) {
+		parts.push(emitWindowFrame(spec.frame));
+	}
+	return parts.join(" ");
+}
+
+function emitWindowFrame(frame: WindowFrameNode): string {
+	const units = frame.units.toUpperCase();
+	if (frame.end) {
+		return `${units} BETWEEN ${emitWindowFrameBound(frame.start)} AND ${emitWindowFrameBound(frame.end)}`;
+	}
+	return `${units} ${emitWindowFrameBound(frame.start)}`;
+}
+
+function emitWindowFrameBound(bound: WindowFrameBoundNode): string {
+	switch (bound.type) {
+		case "unbounded_preceding":
+			return "UNBOUNDED PRECEDING";
+		case "unbounded_following":
+			return "UNBOUNDED FOLLOWING";
+		case "current_row":
+			return "CURRENT ROW";
+		case "preceding": {
+			if (!bound.offset) {
+				throw new Error("window frame bound missing offset for PRECEDING");
+			}
+			return `${emitExpression(bound.offset)} PRECEDING`;
+		}
+		case "following": {
+			if (!bound.offset) {
+				throw new Error("window frame bound missing offset for FOLLOWING");
+			}
+			return `${emitExpression(bound.offset)} FOLLOWING`;
+		}
+		default:
+			return assertNever(bound as never);
+	}
 }
 
 function emitSubqueryExpression(expression: SubqueryExpressionNode): string {

@@ -570,6 +570,7 @@ describe("parse", () => {
 								position: 0,
 							},
 						],
+						over: null,
 					},
 				},
 			],
@@ -611,6 +612,7 @@ describe("parse", () => {
 						node_kind: "function_call",
 						name: id("random"),
 						arguments: [],
+						over: null,
 					},
 				},
 			],
@@ -628,6 +630,163 @@ describe("parse", () => {
 				},
 			},
 		});
+	});
+
+	test("parses window function with partition and order", () => {
+		const ast = parseSelectStatement(
+			"SELECT ROW_NUMBER() OVER (PARTITION BY entity_id ORDER BY created_at) AS rn FROM change"
+		);
+		expect(ast).toEqual({
+			node_kind: "select_statement",
+			distinct: false,
+			projection: [
+				{
+					node_kind: "select_expression",
+					expression: {
+						node_kind: "function_call",
+						name: id("ROW_NUMBER"),
+						arguments: [],
+						over: {
+							node_kind: "window_specification",
+							name: null,
+							partition_by: [
+								{
+									node_kind: "column_reference",
+									path: [id("entity_id")],
+								},
+							],
+							order_by: [
+								{
+									node_kind: "order_by_item",
+									expression: {
+										node_kind: "column_reference",
+										path: [id("created_at")],
+									},
+									direction: null,
+								},
+							],
+							frame: null,
+						},
+					},
+					alias: id("rn"),
+				},
+			],
+			from_clauses: [
+				{
+					node_kind: "from_clause",
+					relation: {
+						node_kind: "table_reference",
+						name: {
+							node_kind: "object_name",
+							parts: [id("change")],
+						},
+						alias: null,
+					},
+					joins: [],
+				},
+			],
+			where_clause: null,
+			group_by: [],
+			order_by: [],
+			limit: null,
+			offset: null,
+			with_clause: null,
+		});
+	});
+
+	test("parses window function with frame bounds", () => {
+		const ast = parseSelectStatement(
+			"SELECT SUM(amount) OVER (PARTITION BY account ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM ledger"
+		);
+		expect(ast).toEqual({
+			node_kind: "select_statement",
+			distinct: false,
+			projection: [
+				{
+					node_kind: "select_expression",
+					expression: {
+						node_kind: "function_call",
+						name: id("SUM"),
+						arguments: [
+							{
+								node_kind: "column_reference",
+								path: [id("amount")],
+							},
+						],
+						over: {
+							node_kind: "window_specification",
+							name: null,
+							partition_by: [
+								{
+									node_kind: "column_reference",
+									path: [id("account")],
+								},
+							],
+							order_by: [],
+							frame: {
+								node_kind: "window_frame",
+								units: "rows",
+								start: {
+									node_kind: "window_frame_bound",
+									type: "unbounded_preceding",
+									offset: null,
+								},
+								end: {
+									node_kind: "window_frame_bound",
+									type: "current_row",
+									offset: null,
+								},
+							},
+						},
+					},
+					alias: null,
+				},
+			],
+			from_clauses: [
+				{
+					node_kind: "from_clause",
+					relation: {
+						node_kind: "table_reference",
+						name: {
+							node_kind: "object_name",
+							parts: [id("ledger")],
+						},
+						alias: null,
+					},
+					joins: [],
+				},
+			],
+			where_clause: null,
+			group_by: [],
+			order_by: [],
+			limit: null,
+			offset: null,
+			with_clause: null,
+		});
+	});
+
+	test("parses subqueries with no alias", () => {
+		const sql = `
+		SELECT * FROM (SELECT 1)
+		`;
+		const statements = parseStatements(sql);
+		expect(statements).toMatchObject([
+			{
+				node_kind: "segmented_statement",
+				segments: [
+					{
+						node_kind: "select_statement",
+						from_clauses: [
+							{
+								relation: {
+									node_kind: "subquery",
+								},
+							},
+						],
+					},
+				],
+			},
+		]);
 	});
 
 	test("parses recursive CTE with compound body", () => {

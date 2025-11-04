@@ -167,6 +167,61 @@ export const Conflict: TokenType = createToken({
 	pattern: /conflict\b/i,
 });
 
+export const Over: TokenType = createToken({
+	name: "Over",
+	pattern: /over\b/i,
+});
+
+export const Partition: TokenType = createToken({
+	name: "Partition",
+	pattern: /partition\b/i,
+});
+
+export const RowsKeyword: TokenType = createToken({
+	name: "RowsKeyword",
+	pattern: /rows\b/i,
+});
+
+export const RangeKeyword: TokenType = createToken({
+	name: "RangeKeyword",
+	pattern: /range\b/i,
+});
+
+export const GroupsKeyword: TokenType = createToken({
+	name: "GroupsKeyword",
+	pattern: /groups\b/i,
+});
+
+export const UnboundedKeyword: TokenType = createToken({
+	name: "UnboundedKeyword",
+	pattern: /unbounded\b/i,
+});
+
+export const PrecedingKeyword: TokenType = createToken({
+	name: "PrecedingKeyword",
+	pattern: /preceding\b/i,
+});
+
+export const FollowingKeyword: TokenType = createToken({
+	name: "FollowingKeyword",
+	pattern: /following\b/i,
+});
+
+export const CurrentKeyword: TokenType = createToken({
+	name: "CurrentKeyword",
+	pattern: /current\b/i,
+});
+
+export const RowKeyword: TokenType = createToken({
+	name: "RowKeyword",
+	pattern: /row\b/i,
+});
+
+export const WindowKeyword: TokenType = createToken({
+	name: "WindowKeyword",
+	pattern: /window\b/i,
+});
+
 export const DoKeyword: TokenType = createToken({
 	name: "DoKeyword",
 	pattern: /do\b/i,
@@ -271,6 +326,17 @@ export const Identifier: TokenType = createToken({
 		Join,
 		On,
 		Conflict,
+		Over,
+		Partition,
+		RowsKeyword,
+		RangeKeyword,
+		GroupsKeyword,
+		UnboundedKeyword,
+		PrecedingKeyword,
+		FollowingKeyword,
+		CurrentKeyword,
+		RowKeyword,
+		WindowKeyword,
 		DoKeyword,
 		NothingKeyword,
 		With,
@@ -424,6 +490,17 @@ const tokens: TokenType[] = [
 	Join,
 	On,
 	Conflict,
+	Over,
+	Partition,
+	RowsKeyword,
+	RangeKeyword,
+	GroupsKeyword,
+	UnboundedKeyword,
+	PrecedingKeyword,
+	FollowingKeyword,
+	CurrentKeyword,
+	RowKeyword,
+	WindowKeyword,
 	DoKeyword,
 	NothingKeyword,
 	Union,

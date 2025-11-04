@@ -3,6 +3,7 @@ import type {
 	BinaryExpressionNode,
 	ColumnReferenceNode,
 	DeleteStatementNode,
+	FunctionCallExpressionNode,
 	InsertStatementNode,
 	InsertValuesNode,
 	OnConflictActionNode,
@@ -41,6 +42,10 @@ import type {
 	CommonTableExpressionNode,
 	CaseExpressionNode,
 	CaseWhenNode,
+	WindowSpecificationNode,
+	WindowReferenceNode,
+	WindowFrameNode,
+	WindowFrameBoundNode,
 } from "./nodes.js";
 
 export type VisitContext = {
@@ -60,6 +65,7 @@ type NodeKindMap = {
 	readonly on_conflict_target: OnConflictTargetNode;
 	readonly on_conflict_do_nothing: OnConflictDoNothingNode;
 	readonly on_conflict_do_update: OnConflictDoUpdateNode;
+	readonly function_call: FunctionCallExpressionNode;
 	readonly with_clause: WithClauseNode;
 	readonly common_table_expression: CommonTableExpressionNode;
 	readonly segmented_statement: SegmentedStatementNode;
@@ -84,6 +90,10 @@ type NodeKindMap = {
 	readonly identifier: IdentifierNode;
 	readonly object_name: ObjectNameNode;
 	readonly insert_values: InsertValuesNode;
+	readonly window_specification: WindowSpecificationNode;
+	readonly window_reference: WindowReferenceNode;
+	readonly window_frame: WindowFrameNode;
+	readonly window_frame_bound: WindowFrameBoundNode;
 };
 
 type NodeKind = keyof NodeKindMap;
@@ -290,10 +300,23 @@ function traverseNode(
 			return traverseBetweenExpression(node as BetweenExpressionNode, visitor);
 		case "case_expression":
 			return traverseCaseExpression(node as CaseExpressionNode, visitor);
+		case "function_call":
+			return traverseFunctionCall(node as FunctionCallExpressionNode, visitor);
 		case "insert_values":
 			return traverseInsertValues(node as InsertValuesNode, visitor);
 		case "object_name":
 			return traverseObjectName(node as ObjectNameNode, visitor);
+		case "window_specification":
+			return traverseWindowSpecification(
+				node as WindowSpecificationNode,
+				visitor
+			);
+		case "window_frame":
+			return traverseWindowFrame(node as WindowFrameNode, visitor);
+		case "window_frame_bound":
+			return traverseWindowFrameBound(node as WindowFrameBoundNode, visitor);
+		case "window_reference":
+			return traverseWindowReference(node as WindowReferenceNode, visitor);
 		case "select_star":
 		case "literal":
 		case "parameter":
@@ -847,7 +870,7 @@ function traverseSubquery(
 	if (statement !== node.statement) {
 		changed = true;
 	}
-	const alias = visitNode(node.alias, visitor, createContext(node, "alias"));
+	const alias = visitOptional(node.alias, node, "alias", visitor);
 	if (alias !== node.alias) {
 		changed = true;
 	}
@@ -857,7 +880,7 @@ function traverseSubquery(
 	return {
 		...node,
 		statement: statement as SelectStatementNode | CompoundSelectNode,
-		alias: alias as IdentifierNode,
+		alias: alias as IdentifierNode | null,
 	};
 }
 
@@ -894,6 +917,134 @@ function traverseOrderByItem(
 	return {
 		...node,
 		expression: expression as ExpressionNode,
+	};
+}
+
+function traverseFunctionCall(
+	node: FunctionCallExpressionNode,
+	visitor: AstVisitor
+): FunctionCallExpressionNode {
+	let changed = false;
+	const name = visitNode(node.name, visitor, createContext(node, "name"));
+	if (name !== node.name) {
+		changed = true;
+	}
+	const args = visitArray(node.arguments, node, "arguments", visitor);
+	if (args !== node.arguments) {
+		changed = true;
+	}
+	const over = visitOptional(node.over, node, "over", visitor);
+	if (over !== node.over) {
+		changed = true;
+	}
+	if (!changed) {
+		return node;
+	}
+	return {
+		...node,
+		name: name as IdentifierNode,
+		arguments: args as readonly ExpressionNode[],
+		over: over as WindowSpecificationNode | WindowReferenceNode | null,
+	};
+}
+
+function traverseWindowSpecification(
+	spec: WindowSpecificationNode,
+	visitor: AstVisitor
+): WindowSpecificationNode {
+	let changed = false;
+	const name = visitOptional(spec.name, spec, "name", visitor);
+	if (name !== spec.name) {
+		changed = true;
+	}
+	const partitionBy = visitArray(
+		spec.partition_by,
+		spec,
+		"partition_by",
+		visitor
+	);
+	if (partitionBy !== spec.partition_by) {
+		changed = true;
+	}
+	const orderBy = visitArray(spec.order_by, spec, "order_by", visitor);
+	if (orderBy !== spec.order_by) {
+		changed = true;
+	}
+	const frame = visitOptional(spec.frame, spec, "frame", visitor);
+	if (frame !== spec.frame) {
+		changed = true;
+	}
+	if (!changed) {
+		return spec;
+	}
+	return {
+		...spec,
+		name: name as IdentifierNode | null,
+		partition_by: partitionBy as readonly ExpressionNode[],
+		order_by: orderBy as readonly OrderByItemNode[],
+		frame: frame as WindowFrameNode | null,
+	};
+}
+
+function traverseWindowFrame(
+	frame: WindowFrameNode,
+	visitor: AstVisitor
+): WindowFrameNode {
+	let changed = false;
+	const start = visitNode(frame.start, visitor, createContext(frame, "start"));
+	if (start !== frame.start) {
+		changed = true;
+	}
+	const end = visitOptional(frame.end, frame, "end", visitor);
+	if (end !== frame.end) {
+		changed = true;
+	}
+	if (!changed) {
+		return frame;
+	}
+	return {
+		...frame,
+		start: start as WindowFrameBoundNode,
+		end: end as WindowFrameBoundNode | null,
+	};
+}
+
+function traverseWindowFrameBound(
+	bound: WindowFrameBoundNode,
+	visitor: AstVisitor
+): WindowFrameBoundNode {
+	if (!bound.offset) {
+		return bound;
+	}
+	const offset = visitNode(
+		bound.offset,
+		visitor,
+		createContext(bound, "offset")
+	) as ExpressionNode;
+	if (offset === bound.offset) {
+		return bound;
+	}
+	return {
+		...bound,
+		offset,
+	};
+}
+
+function traverseWindowReference(
+	reference: WindowReferenceNode,
+	visitor: AstVisitor
+): WindowReferenceNode {
+	const name = visitNode(
+		reference.name,
+		visitor,
+		createContext(reference, "name")
+	) as IdentifierNode;
+	if (name === reference.name) {
+		return reference;
+	}
+	return {
+		...reference,
+		name,
 	};
 }
 

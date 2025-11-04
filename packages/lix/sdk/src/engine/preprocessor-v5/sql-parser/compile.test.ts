@@ -71,6 +71,18 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT window function with partition", () => {
+		expectRoundTrip(
+			"SELECT ROW_NUMBER() OVER (PARTITION BY entity_id ORDER BY created_at) FROM change"
+		);
+	});
+
+	test("SELECT window function with frame", () => {
+		expectRoundTrip(
+			"SELECT SUM(amount) OVER (PARTITION BY account ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM ledger"
+		);
+	});
+
 	test("compiles compound select", () => {
 		expectRoundTrip(
 			`SELECT id FROM foo UNION ALL SELECT id FROM bar WHERE bar.active = 1`

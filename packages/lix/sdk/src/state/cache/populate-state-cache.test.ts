@@ -28,7 +28,7 @@ function createSimpleSchema(key: string): LixSchemaDefinition {
  * Ensures stored schema rows exist for the provided schema keys so cache helpers
  * can resolve definitions during tests.
  */
-async function ensureCacheSchemas(
+async function insertSchemas(
 	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
 	schemaKeys: string[]
 ): Promise<void> {
@@ -36,7 +36,6 @@ async function ensureCacheSchemas(
 		await (lix.db as any)
 			.insertInto("stored_schema")
 			.values({ value: createSimpleSchema(key) })
-			.onConflict((oc: any) => oc.doNothing())
 			.execute();
 	}
 }
@@ -54,14 +53,6 @@ const testEntitySchema = {
 	required: ["id", "value"],
 } as const satisfies LixSchemaDefinition;
 
-async function ensureTestEntitySchema(lix: { db: any }): Promise<void> {
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: testEntitySchema })
-		.onConflict((oc: any) => oc.doNothing())
-		.execute();
-}
-
 test("populates v2 cache from materializer", async () => {
 	const lix = await openLix({
 		keyValues: [
@@ -72,7 +63,7 @@ test("populates v2 cache from materializer", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["lix_test", "lix_other"]);
+	await insertSchemas(lix, ["lix_test", "lix_other"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -150,7 +141,7 @@ test("populates v2 cache with version filter", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["lix_test"]);
+	await insertSchemas(lix, ["lix_test"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -235,7 +226,7 @@ test("clears all v2 cache tables when no filters specified", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["schema_a", "schema_b", "schema_c"]);
+	await insertSchemas(lix, ["schema_a", "schema_b", "schema_c"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -333,7 +324,10 @@ test("inheritance is queryable from the resolved view after population", async (
 		],
 	});
 
-	await ensureTestEntitySchema(lix);
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.execute();
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -487,7 +481,10 @@ test("global version entities are populated when populating child versions", asy
 		],
 	});
 
-	await ensureTestEntitySchema(lix);
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.execute();
 
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 

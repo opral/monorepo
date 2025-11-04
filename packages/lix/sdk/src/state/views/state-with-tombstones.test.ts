@@ -30,13 +30,11 @@ async function storeTestSchemas(lix: { db: any }): Promise<void> {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: testSchemaForDeleted })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: testSchemaForDeletedWriter })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 }
 

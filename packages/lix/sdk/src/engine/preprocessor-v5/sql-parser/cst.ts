@@ -31,6 +31,17 @@ import {
 	Join,
 	On,
 	Conflict,
+	Over,
+	Partition,
+	RowsKeyword,
+	RangeKeyword,
+	GroupsKeyword,
+	UnboundedKeyword,
+	PrecedingKeyword,
+	FollowingKeyword,
+	CurrentKeyword,
+	RowKeyword,
+	WindowKeyword,
 	DoKeyword,
 	NothingKeyword,
 	SetKeyword,
@@ -359,8 +370,12 @@ class SqlParser extends CstParser {
 						this.CONSUME(LeftParen);
 						this.SUBRULE(this.select_compound, { LABEL: "select" });
 						this.CONSUME(RightParen);
-						this.OPTION3(() => this.CONSUME2(As));
-						this.SUBRULE2(this.identifier, { LABEL: "alias" });
+						this.OPTION3(() => {
+							this.CONSUME2(As);
+						});
+						this.OPTION4(() => {
+							this.SUBRULE2(this.identifier, { LABEL: "alias" });
+						});
 					},
 				},
 			]);
@@ -693,6 +708,9 @@ class SqlParser extends CstParser {
 							});
 						});
 						this.CONSUME(RightParen, { LABEL: "callRParen" });
+						this.OPTION1(() => {
+							this.SUBRULE(this.over_clause, { LABEL: "overClause" });
+						});
 					},
 				},
 				{
@@ -703,7 +721,7 @@ class SqlParser extends CstParser {
 					GATE: () => this.LA(2).tokenType === Select,
 					ALT: () => {
 						this.CONSUME1(LeftParen);
-						this.SUBRULE(this.select_core, { LABEL: "subselect" });
+						this.SUBRULE(this.select_compound, { LABEL: "subselect" });
 						this.CONSUME1(RightParen);
 					},
 				},
@@ -713,6 +731,123 @@ class SqlParser extends CstParser {
 						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.expression, { LABEL: "inner" });
 						this.CONSUME2(RightParen);
+					},
+				},
+			]);
+		}
+	);
+
+	private readonly over_clause: () => CstNode = this.RULE("over_clause", () => {
+		this.CONSUME(Over);
+		this.OR([
+			{
+				ALT: () => {
+					this.CONSUME(Identifier, { LABEL: "windowName" });
+				},
+			},
+			{
+				ALT: () => {
+					this.CONSUME(LeftParen, { LABEL: "windowLParen" });
+					this.OPTION(() => {
+						this.SUBRULE(this.window_specification, { LABEL: "windowSpec" });
+					});
+					this.CONSUME(RightParen, { LABEL: "windowRParen" });
+				},
+			},
+		]);
+	});
+
+	private readonly window_specification: () => CstNode = this.RULE(
+		"window_specification",
+		() => {
+			this.OPTION(() => {
+				this.SUBRULE(this.identifier, { LABEL: "name" });
+			});
+			this.OPTION1(() => {
+				this.CONSUME(Partition);
+				this.CONSUME(By);
+				this.SUBRULE(this.expression, { LABEL: "partitionBy" });
+				this.MANY(() => {
+					this.CONSUME(Comma);
+					this.SUBRULE1(this.expression, { LABEL: "partitionBy" });
+				});
+			});
+			this.OPTION2(() => {
+				this.CONSUME(Order);
+				this.CONSUME1(By);
+				this.SUBRULE(this.order_by_clause, { LABEL: "orderBy" });
+			});
+			this.OPTION3(() => {
+				this.SUBRULE(this.window_frame, { LABEL: "frame" });
+			});
+		}
+	);
+
+	private readonly window_frame: () => CstNode = this.RULE(
+		"window_frame",
+		() => {
+			this.OR([
+				{ ALT: () => this.CONSUME(RowsKeyword, { LABEL: "units" }) },
+				{ ALT: () => this.CONSUME(RangeKeyword, { LABEL: "units" }) },
+				{ ALT: () => this.CONSUME(GroupsKeyword, { LABEL: "units" }) },
+			]);
+			this.OR1([
+				{
+					GATE: () => this.LA(1).tokenType === Between,
+					ALT: () => {
+						this.CONSUME(Between);
+						this.SUBRULE(this.window_frame_bound, { LABEL: "start" });
+						this.CONSUME(And);
+						this.SUBRULE1(this.window_frame_bound, { LABEL: "end" });
+					},
+				},
+				{
+					ALT: () => {
+						this.SUBRULE2(this.window_frame_bound, { LABEL: "start" });
+					},
+				},
+			]);
+		}
+	);
+
+	private readonly window_frame_bound: () => CstNode = this.RULE(
+		"window_frame_bound",
+		() => {
+			this.OR([
+				{
+					ALT: () => {
+						this.CONSUME(UnboundedKeyword, { LABEL: "unbounded" });
+						this.OR1([
+							{
+								ALT: () =>
+									this.CONSUME(PrecedingKeyword, { LABEL: "direction" }),
+							},
+							{
+								ALT: () =>
+									this.CONSUME(FollowingKeyword, { LABEL: "direction" }),
+							},
+						]);
+					},
+				},
+				{
+					ALT: () => {
+						this.CONSUME(CurrentKeyword, { LABEL: "current" });
+						this.CONSUME(RowKeyword, { LABEL: "row" });
+					},
+				},
+				{
+					ALT: () => {
+						this.SUBRULE(this.expression, { LABEL: "offset" });
+						this.OR2([
+							{
+								ALT: () =>
+									this.CONSUME1(PrecedingKeyword, { LABEL: "direction" }),
+							},
+							{
+								ALT: () =>
+									this.CONSUME1(FollowingKeyword, { LABEL: "direction" }),
+							},
+						]);
 					},
 				},
 			]);

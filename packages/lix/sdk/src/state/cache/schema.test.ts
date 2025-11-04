@@ -18,7 +18,7 @@ function simpleSchema(key: string): LixSchemaDefinition {
 	};
 }
 
-async function ensureSchemas(
+async function insertTestSchemas(
 	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
 	keys: string[]
 ): Promise<void> {
@@ -26,7 +26,6 @@ async function ensureSchemas(
 		await (lix.db as any)
 			.insertInto("stored_schema")
 			.values({ value: simpleSchema(key) })
-			.onConflict((oc: any) => oc.doNothing())
 			.execute();
 	}
 }
@@ -35,7 +34,7 @@ test("selecting from vtable queries per-schema physical tables", async () => {
 	const lix = await openLix({});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-	await ensureSchemas(lix, ["schema_a", "schema_b"]);
+	await insertTestSchemas(lix, ["schema_a", "schema_b"]);
 
 	// Use the direct function to insert rows into different schemas
 	updateStateCache({
