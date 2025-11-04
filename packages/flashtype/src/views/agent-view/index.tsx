@@ -523,7 +523,7 @@ export function AgentView({ context }: AgentViewProps) {
 			</div>
 
 			{hasKey && (
-				<div className="sticky bottom-0 flex justify-center px-2 pb-2 pt-0.5">
+				<div className="sticky bottom-0 flex justify-center px-2 pb-4 pt-4">
 					{pendingProposal ? (
 						<ChangeDecisionOverlay
 							id={pendingProposal.proposalId}
