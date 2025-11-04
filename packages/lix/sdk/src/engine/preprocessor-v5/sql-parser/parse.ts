@@ -1198,6 +1198,8 @@ function mapArithmeticOperator(image: string): BinaryOperator {
 		case "*":
 		case "/":
 		case "%":
+		case "->":
+		case "->>":
 			return image as BinaryOperator;
 		default:
 			throw new Error(`unsupported arithmetic operator '${image}'`);

@@ -551,9 +551,16 @@ function rewriteExpressionForSnapshot(
 ): ExpressionNode {
 	switch (expression.node_kind) {
 		case "column_reference": {
-			const column = getColumnName(expression).toLowerCase();
+			const column = getColumnName(expression);
+			const lower = column.toLowerCase();
+			if (
+				expression.path.length === 1 &&
+				(lower === "true" || lower === "false")
+			) {
+				return createLiteralExpression(lower === "true");
+			}
 			return createRawExpression(
-				`json_extract(snapshot_content, '$.${column}')`
+				`json_extract(snapshot_content, '$.${lower}')`
 			);
 		}
 		case "binary_expression":

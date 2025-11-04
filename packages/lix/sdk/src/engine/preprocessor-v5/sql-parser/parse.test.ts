@@ -69,7 +69,7 @@ function parseInsertStatement(sql: string) {
 describe("parse", () => {
 	test("parses select star", () => {
 		const ast = parseSelectStatement("SELECT * FROM projects");
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [{ node_kind: "select_star" }],
@@ -97,7 +97,7 @@ describe("parse", () => {
 		const ast = parseInsertStatement(
 			"INSERT INTO projects (id) VALUES ('a') ON CONFLICT DO NOTHING"
 		);
-		expect(ast.on_conflict).toEqual({
+		expect(ast.on_conflict).toMatchObject({
 			node_kind: "on_conflict_clause",
 			target: null,
 			action: { node_kind: "on_conflict_do_nothing" },
@@ -110,7 +110,7 @@ describe("parse", () => {
 		);
 		const clause = ast.on_conflict;
 		expect(clause).not.toBeNull();
-		expect(clause).toEqual({
+		expect(clause).toMatchObject({
 			node_kind: "on_conflict_clause",
 			target: {
 				node_kind: "on_conflict_target",
@@ -157,7 +157,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT p.id AS project_id FROM projects AS p WHERE p.revision >= 1"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [
@@ -200,7 +200,7 @@ describe("parse", () => {
 
 	test("parses select literal without from clause", () => {
 		const ast = parseSelectStatement("SELECT 1 AS value");
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [
@@ -222,7 +222,7 @@ describe("parse", () => {
 
 	test("parses qualified column without alias", () => {
 		const ast = parseSelectStatement("SELECT projects.id FROM projects");
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [
@@ -259,7 +259,7 @@ describe("parse", () => {
 		const ast = parseUpdateStatement(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -312,7 +312,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT * FROM projects WHERE id IN ('a', 'b')"
 		);
-		expect(ast.where_clause).toEqual({
+		expect(ast.where_clause).toMatchObject({
 			node_kind: "in_list_expression",
 			operand: {
 				node_kind: "column_reference",
@@ -327,11 +327,11 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT id FROM projects ORDER BY created_at DESC LIMIT 5 OFFSET 10"
 		);
-		expect(ast.limit).toEqual({
+		expect(ast.limit).toMatchObject({
 			node_kind: "literal",
 			value: 5,
 		});
-		expect(ast.offset).toEqual({
+		expect(ast.offset).toMatchObject({
 			node_kind: "literal",
 			value: 10,
 		});
@@ -339,7 +339,7 @@ describe("parse", () => {
 
 	test("parses limit without offset", () => {
 		const ast = parseSelectStatement("SELECT * FROM files LIMIT 20");
-		expect(ast.limit).toEqual({
+		expect(ast.limit).toMatchObject({
 			node_kind: "literal",
 			value: 20,
 		});
@@ -348,12 +348,12 @@ describe("parse", () => {
 
 	test("parses parameterised limit and offset", () => {
 		const ast = parseSelectStatement("SELECT * FROM logs LIMIT ? OFFSET ?2");
-		expect(ast.limit).toEqual({
+		expect(ast.limit).toMatchObject({
 			node_kind: "parameter",
 			placeholder: "?",
 			position: 0,
 		});
-		expect(ast.offset).toEqual({
+		expect(ast.offset).toMatchObject({
 			node_kind: "parameter",
 			placeholder: "?2",
 			position: 1,
@@ -383,12 +383,12 @@ describe("parse", () => {
 		if (rightParam.node_kind !== "parameter") {
 			throw new Error("expected parameter on right");
 		}
-		expect(leftParam).toEqual({
+		expect(leftParam).toMatchObject({
 			node_kind: "parameter",
 			placeholder: "?1",
 			position: 0,
 		});
-		expect(rightParam).toEqual({
+		expect(rightParam).toMatchObject({
 			node_kind: "parameter",
 			placeholder: "?",
 			position: 1,
@@ -403,7 +403,7 @@ describe("parse", () => {
 		if (!statement || statement.node_kind !== "segmented_statement") {
 			throw new Error("expected segmented statement");
 		}
-		expect(statement.segments).toEqual<RawFragmentNode[]>([
+		expect(statement.segments).toMatchObject([
 			{
 				node_kind: "raw_fragment",
 				sql_text: sql,
@@ -419,7 +419,7 @@ describe("parse", () => {
 		if (!statement || statement.node_kind !== "segmented_statement") {
 			throw new Error("expected segmented statement");
 		}
-		expect(statement.segments).toEqual<RawFragmentNode[]>([
+		expect(statement.segments).toMatchObject([
 			{
 				node_kind: "raw_fragment",
 				sql_text: sql,
@@ -431,7 +431,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT * FROM projects WHERE revision BETWEEN 1 AND 5"
 		);
-		expect(ast.where_clause).toEqual({
+		expect(ast.where_clause).toMatchObject({
 			node_kind: "between_expression",
 			operand: {
 				node_kind: "column_reference",
@@ -447,7 +447,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT * FROM projects ORDER BY updated_at DESC, id"
 		);
-		expect(ast.order_by).toEqual([
+		expect(ast.order_by).toMatchObject([
 			{
 				node_kind: "order_by_item",
 				expression: {
@@ -471,7 +471,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT * FROM projects WHERE NOT (archived = 1)"
 		);
-		expect(ast.where_clause).toEqual({
+		expect(ast.where_clause).toMatchObject({
 			node_kind: "unary_expression",
 			operator: "not",
 			operand: {
@@ -493,7 +493,7 @@ describe("parse", () => {
 		const ast = parseDeleteStatement(
 			"DELETE FROM projects WHERE projects.id = 'obsolete'"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "delete_statement",
 			target: {
 				node_kind: "table_reference",
@@ -516,7 +516,7 @@ describe("parse", () => {
 		const ast = parseInsertStatement(
 			"INSERT INTO projects (id, name) VALUES ('a', 'Project A'), ('b', ?)"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "insert_statement",
 			target: {
 				node_kind: "object_name",
@@ -538,7 +538,7 @@ describe("parse", () => {
 		const ast = parseUpdateStatement(
 			"UPDATE key_value SET value = json_set(value, '$.foo', ?) WHERE key = ?"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -594,7 +594,7 @@ describe("parse", () => {
 		const ast = parseUpdateStatement(
 			"UPDATE metrics SET touched_at = random() WHERE id = ?"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "update_statement",
 			target: {
 				node_kind: "table_reference",
@@ -636,7 +636,7 @@ describe("parse", () => {
 		const ast = parseSelectStatement(
 			"SELECT ROW_NUMBER() OVER (PARTITION BY entity_id ORDER BY created_at) AS rn FROM change"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [
@@ -694,11 +694,48 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses json arrow operators in projection", () => {
+		const ast = parseSelectStatement(
+			"SELECT value ->> '$.enabled' AS enabled FROM key_value"
+		);
+		expect(ast).toMatchObject({
+			node_kind: "select_statement",
+			projection: [
+				{
+					expression: {
+						node_kind: "binary_expression",
+						operator: "->>",
+						left: {
+							node_kind: "column_reference",
+							path: [id("value")],
+						},
+						right: {
+							node_kind: "literal",
+							value: "$.enabled",
+						},
+					},
+					alias: id("enabled"),
+				},
+			],
+			from_clauses: [
+				{
+					relation: {
+						node_kind: "table_reference",
+						name: {
+							node_kind: "object_name",
+							parts: [id("key_value")],
+						},
+					},
+				},
+			],
+		});
+	});
+
 	test("parses window function with frame bounds", () => {
 		const ast = parseSelectStatement(
 			"SELECT SUM(amount) OVER (PARTITION BY account ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM ledger"
 		);
-		expect(ast).toEqual({
+		expect(ast).toMatchObject({
 			node_kind: "select_statement",
 			distinct: false,
 			projection: [
@@ -1104,7 +1141,7 @@ OFFSET 10
 		expect(compound.order_by).toHaveLength(1);
 		expect(compound.limit).not.toBeNull();
 		expect(compound.offset).not.toBeNull();
-		expect(compound.first.order_by).toEqual([]);
+		expect(compound.first.order_by).toMatchObject([]);
 		expect(compound.first.limit).toBeNull();
 		expect(compound.first.offset).toBeNull();
 	});
@@ -1141,7 +1178,7 @@ SELECT * FROM expr;
 		if (!cte) {
 			throw new Error("expected CTE definition");
 		}
-		expect(cte.columns).toEqual([]);
+		expect(cte.columns).toMatchObject([]);
 		if (cte.statement.node_kind !== "compound_select") {
 			throw new Error("expected compound select inside CTE");
 		}

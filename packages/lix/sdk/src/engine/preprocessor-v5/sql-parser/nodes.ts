@@ -340,7 +340,9 @@ export type BinaryOperator =
 	| "-"
 	| "*"
 	| "/"
-	| "%";
+	| "%"
+	| "->"
+	| "->>";
 
 export type IdentifierNode = SqlNode & {
 	readonly node_kind: "identifier";

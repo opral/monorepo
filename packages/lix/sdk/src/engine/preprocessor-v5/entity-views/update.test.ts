@@ -189,6 +189,21 @@ test("prefixless alias updates target stored schema key", async () => {
 	await lix.close();
 });
 
+test("json_set boolean literals remain booleans after rewrite", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const updateResult = preprocess({
+		sql: "UPDATE key_value SET value = json_set(value, '$.enabled', false, '$.settings.notifications', false) WHERE key = ?",
+		parameters: ["toggle"],
+	});
+
+	expect(updateResult.sql).not.toContain("$.false");
+	expect(updateResult.sql).toContain("FALSE");
+
+	await lix.close();
+});
+
 test("updates to immutable schemas are rejected", async () => {
 	const lix = await openLix({});
 	const schema = {

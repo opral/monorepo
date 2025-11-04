@@ -188,6 +188,8 @@ export function getBinaryOperatorPrecedence(operator: BinaryOperator): number {
 		case "*":
 		case "/":
 		case "%":
+		case "->":
+		case "->>":
 			return 5;
 		default:
 			return 0;

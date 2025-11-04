@@ -65,6 +65,8 @@ import {
 	Parameter,
 	Comma,
 	Equals,
+	JsonExtract,
+	JsonExtractText,
 	NotEquals,
 	NotEqualsAlt,
 	GreaterThanOrEqual,
@@ -670,6 +672,8 @@ class SqlParser extends CstParser {
 					{ ALT: () => this.CONSUME(Star, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Slash, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Percent, { LABEL: "operators" }) },
+					{ ALT: () => this.CONSUME(JsonExtract, { LABEL: "operators" }) },
+					{ ALT: () => this.CONSUME(JsonExtractText, { LABEL: "operators" }) },
 				]);
 				this.SUBRULE1(this.unary_expression, { LABEL: "operands" });
 			});

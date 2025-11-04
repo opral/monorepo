@@ -412,6 +412,17 @@ export const Equals: TokenType = createToken({
 	pattern: /=/,
 });
 
+export const JsonExtractText: TokenType = createToken({
+	name: "JsonExtractText",
+	pattern: /->>/,
+});
+
+export const JsonExtract: TokenType = createToken({
+	name: "JsonExtract",
+	pattern: /->/,
+	longer_alt: [JsonExtractText],
+});
+
 export const NotEquals: TokenType = createToken({
 	name: "NotEquals",
 	pattern: /!=/,
@@ -536,6 +547,8 @@ const tokens: TokenType[] = [
 	GreaterThan,
 	LessThan,
 	Equals,
+	JsonExtractText,
+	JsonExtract,
 	Plus,
 	Minus,
 	Slash,

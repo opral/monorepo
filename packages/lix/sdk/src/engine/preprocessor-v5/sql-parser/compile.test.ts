@@ -49,6 +49,12 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT with json arrow operators", () => {
+		expectRoundTrip(
+			"SELECT value ->> '$.enabled' FROM key_value WHERE value -> '$.settings' IS NOT NULL"
+		);
+	});
+
 	test("UPDATE with assignments", () => {
 		expectRoundTrip(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"
