@@ -1,4 +1,4 @@
-import { bench, describe } from "vitest";
+import { afterAll, bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import { updateStateCacheV2 } from "../cache-v2/update-state-cache.js";
@@ -39,8 +39,22 @@ async function insertStateAllRows(args: {
 const VERSION_ID = "global";
 const FILE_ID = "bench_file";
 const PLUGIN_KEY = "bench_plugin";
-const ROW_COUNT = 1000;
-const FK_ROW_COUNT = 1;
+const ROW_COUNT = 200;
+const FK_ROW_COUNT = 200;
+
+async function createDeterministicLix(): Promise<
+	Awaited<ReturnType<typeof openLix>>
+> {
+	return openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: VERSION_ID,
+			},
+		],
+	});
+}
 
 const PK_SCHEMA: LixSchemaDefinition = {
 	$schema: "http://json-schema.org/draft-07/schema#",
@@ -151,37 +165,33 @@ function createChanges(args: {
 }
 
 describe("validateStateMutation index benchmarks", () => {
-	bench("primary key constraint with 5k cached rows", async () => {
-		const lix = await openLix({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true },
-					lixcol_version_id: "global",
-				},
-			],
+	describe("primary key constraint with cached rows", async () => {
+		const lix = await createDeterministicLix();
+		await registerSchemas(lix, PK_SCHEMA);
+		const ts = await getTimestamp({ lix });
+
+		const seedChanges = createChanges({
+			count: ROW_COUNT,
+			schemaKey: PK_SCHEMA["x-lix-key"],
+			timestamp: ts,
+			snapshotFactory: (idx) => ({
+				id: `${PK_SCHEMA["x-lix-key"]}-entity-${idx}`,
+				code: `code-${idx}`,
+			}),
 		});
-		try {
-			await registerSchemas(lix, PK_SCHEMA);
-			const ts = await getTimestamp({ lix });
 
-			const seedChanges = createChanges({
-				count: ROW_COUNT,
-				schemaKey: PK_SCHEMA["x-lix-key"],
-				timestamp: ts,
-				snapshotFactory: (idx) => ({
-					id: `${PK_SCHEMA["x-lix-key"]}-entity-${idx}`,
-					code: `code-${idx}`,
-				}),
-			});
+		updateStateCacheV2({
+			engine: lix.engine!,
+			changes: seedChanges,
+			version_id: VERSION_ID,
+			commit_id: "seed-pk",
+		});
 
-			updateStateCacheV2({
-				engine: lix.engine!,
-				changes: seedChanges,
-				version_id: VERSION_ID,
-				commit_id: "seed-pk",
-			});
+		afterAll(async () => {
+			await lix.close();
+		});
 
+		bench("primary key constraint with cached rows", () => {
 			validateStateMutation({
 				engine: lix.engine!,
 				schema: PK_SCHEMA,
@@ -194,49 +204,37 @@ describe("validateStateMutation index benchmarks", () => {
 				version_id: VERSION_ID,
 				operation: "insert",
 			});
-		} catch (error) {
-			console.error(
-				"[validate-state-mutation.bench] primary key constraint with 5k cached rows failed",
-				error
-			);
-			throw error;
-		} finally {
-			await lix.close();
-		}
+		});
 	});
 
-	bench("unique constraint with nested JSON pointer (1k rows)", async () => {
-		const lix = await openLix({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true },
-					lixcol_version_id: "global",
-				},
-			],
+	describe("unique constraint with nested JSON pointer", async () => {
+		const lix = await createDeterministicLix();
+		await registerSchemas(lix, UNIQUE_SCHEMA);
+		const ts = await getTimestamp({ lix });
+
+		const seedChanges = createChanges({
+			count: ROW_COUNT,
+			schemaKey: UNIQUE_SCHEMA["x-lix-key"],
+			timestamp: ts,
+			snapshotFactory: (idx) => ({
+				id: `${UNIQUE_SCHEMA["x-lix-key"]}-entity-${idx}`,
+				name: `entity-${idx}`,
+				details: { slug: `slug-${idx}` },
+			}),
 		});
-		try {
-			await registerSchemas(lix, UNIQUE_SCHEMA);
-			const ts = await getTimestamp({ lix });
 
-			const seedChanges = createChanges({
-				count: ROW_COUNT,
-				schemaKey: UNIQUE_SCHEMA["x-lix-key"],
-				timestamp: ts,
-				snapshotFactory: (idx) => ({
-					id: `${UNIQUE_SCHEMA["x-lix-key"]}-entity-${idx}`,
-					name: `entity-${idx}`,
-					details: { slug: `slug-${idx}` },
-				}),
-			});
+		updateStateCacheV2({
+			engine: lix.engine!,
+			changes: seedChanges,
+			version_id: VERSION_ID,
+			commit_id: "seed-unique",
+		});
 
-			updateStateCacheV2({
-				engine: lix.engine!,
-				changes: seedChanges,
-				version_id: VERSION_ID,
-				commit_id: "seed-unique",
-			});
+		afterAll(async () => {
+			await lix.close();
+		});
 
+		bench("unique constraint with nested JSON pointer rows", () => {
 			validateStateMutation({
 				engine: lix.engine!,
 				schema: UNIQUE_SCHEMA,
@@ -250,78 +248,66 @@ describe("validateStateMutation index benchmarks", () => {
 				version_id: VERSION_ID,
 				operation: "insert",
 			});
-		} catch (error) {
-			console.error(
-				"[validate-state-mutation.bench] unique constraint with nested JSON pointer (1k rows) failed",
-				error
-			);
-			throw error;
-		} finally {
-			await lix.close();
-		}
+		});
 	});
 
-	bench("foreign key validation against 5k referenced rows", async () => {
-		const lix = await openLix({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: { enabled: true },
-					lixcol_version_id: "global",
-				},
-			],
+	describe("foreign key validation with cached references", async () => {
+		const lix = await createDeterministicLix();
+		await registerSchemas(lix, FK_TARGET_SCHEMA, FK_SOURCE_SCHEMA);
+		const ts = await getTimestamp({ lix });
+
+		const targetChanges = createChanges({
+			count: FK_ROW_COUNT,
+			schemaKey: FK_TARGET_SCHEMA["x-lix-key"],
+			timestamp: ts,
+			snapshotFactory: (idx) => ({
+				id: `target-${idx}`,
+				label: `Target ${idx}`,
+			}),
+			entityIdFactory: (idx) => `target-${idx}`,
 		});
-		try {
-			await registerSchemas(lix, FK_TARGET_SCHEMA, FK_SOURCE_SCHEMA);
-			const ts = await getTimestamp({ lix });
 
-			const targetChanges = createChanges({
-				count: FK_ROW_COUNT,
-				schemaKey: FK_TARGET_SCHEMA["x-lix-key"],
-				timestamp: ts,
-				snapshotFactory: (idx) => ({
-					id: `target-${idx}`,
-					label: `Target ${idx}`,
-				}),
-				entityIdFactory: (idx) => `target-${idx}`,
-			});
+		updateStateCacheV2({
+			engine: lix.engine!,
+			changes: targetChanges,
+			version_id: VERSION_ID,
+			commit_id: "seed-target",
+		});
+		await insertStateAllRows({
+			lix,
+			changes: targetChanges,
+			versionId: VERSION_ID,
+		});
 
-			updateStateCacheV2({
-				engine: lix.engine!,
-				changes: targetChanges,
-				version_id: VERSION_ID,
-				commit_id: "seed-target",
-			});
-			await insertStateAllRows({
-				lix,
-				changes: targetChanges,
-				versionId: VERSION_ID,
-			});
+		const sourceChanges = createChanges({
+			count: FK_ROW_COUNT,
+			schemaKey: FK_SOURCE_SCHEMA["x-lix-key"],
+			timestamp: ts,
+			snapshotFactory: (idx) => ({
+				id: `source-${idx}`,
+				target_id: `target-${idx}`,
+				payload: `payload-${idx}`,
+			}),
+			entityIdFactory: (idx) => `source-${idx}`,
+		});
 
-			const sourceChanges = createChanges({
-				count: FK_ROW_COUNT,
-				schemaKey: FK_SOURCE_SCHEMA["x-lix-key"],
-				timestamp: ts,
-				snapshotFactory: (idx) => ({
-					id: `source-${idx}`,
-					target_id: `target-${idx}`,
-					payload: `payload-${idx}`,
-				}),
-				entityIdFactory: (idx) => `source-${idx}`,
-			});
+		updateStateCacheV2({
+			engine: lix.engine!,
+			changes: sourceChanges,
+			version_id: VERSION_ID,
+			commit_id: "seed-source",
+		});
+		await insertStateAllRows({
+			lix,
+			changes: sourceChanges,
+			versionId: VERSION_ID,
+		});
 
-			updateStateCacheV2({
-				engine: lix.engine!,
-				changes: sourceChanges,
-				version_id: VERSION_ID,
-				commit_id: "seed-source",
-			});
-			await insertStateAllRows({
-				lix,
-				changes: sourceChanges,
-				versionId: VERSION_ID,
-			});
+		afterAll(async () => {
+			await lix.close();
+		});
 
+		bench("foreign key validation with cached references", () => {
 			validateStateMutation({
 				engine: lix.engine!,
 				schema: FK_SOURCE_SCHEMA,
@@ -335,14 +321,6 @@ describe("validateStateMutation index benchmarks", () => {
 				version_id: VERSION_ID,
 				operation: "insert",
 			});
-		} catch (error) {
-			console.error(
-				"[validate-state-mutation.bench] foreign key validation against 5k referenced rows failed",
-				error
-			);
-			throw error;
-		} finally {
-			await lix.close();
-		}
+		});
 	});
 });

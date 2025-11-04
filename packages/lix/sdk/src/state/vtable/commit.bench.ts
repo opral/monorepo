@@ -77,17 +77,21 @@ describe("commit transaction with 1 row", async () => {
 		});
 	};
 
-	bench("", () => {
-		commit({
-			engine: lix.engine!,
-		});
-	}, {
-		setup: (task) => {
-			task.opts.beforeEach = async () => {
-				await seedSingleRow();
-			};
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
 		},
-	});
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedSingleRow();
+				};
+			},
+		}
+	);
 });
 
 describe("commit transaction with 100 rows", async () => {
@@ -129,17 +133,21 @@ describe("commit transaction with 100 rows", async () => {
 		});
 	};
 
-	bench("", () => {
-		commit({
-			engine: lix.engine!,
-		});
-	}, {
-		setup: (task) => {
-			task.opts.beforeEach = async () => {
-				await seedHundredRows();
-			};
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
 		},
-	});
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedHundredRows();
+				};
+			},
+		}
+	);
 });
 
 describe("commit 10 transactions x 10 changes (sequential)", async () => {
@@ -190,24 +198,28 @@ describe("commit 10 transactions x 10 changes (sequential)", async () => {
 		}
 	};
 
-	bench("", () => {
-		for (const batch of preparedBatches) {
-			insertTransactionState({
-				engine: lix.engine!,
-				data: batch.data,
-				timestamp: batch.timestamp,
-			});
-			commit({
-				engine: lix.engine!,
-			});
-		}
-	}, {
-		setup: (task) => {
-			task.opts.beforeEach = async () => {
-				await prepareSequentialBatches();
-			};
+	bench(
+		"",
+		() => {
+			for (const batch of preparedBatches) {
+				insertTransactionState({
+					engine: lix.engine!,
+					data: batch.data,
+					timestamp: batch.timestamp,
+				});
+				commit({
+					engine: lix.engine!,
+				});
+			}
 		},
-	});
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await prepareSequentialBatches();
+				};
+			},
+		}
+	);
 });
 
 describe("commit with mixed operations (insert/update/delete)", async () => {
@@ -309,15 +321,19 @@ describe("commit with mixed operations (insert/update/delete)", async () => {
 		});
 	};
 
-	bench("", () => {
-		commit({
-			engine: lix.engine!,
-		});
-	}, {
-		setup: (task) => {
-			task.opts.beforeEach = async () => {
-				await seedMixedOperations();
-			};
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
 		},
-	});
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedMixedOperations();
+				};
+			},
+		}
+	);
 });
