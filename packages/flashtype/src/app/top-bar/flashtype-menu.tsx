@@ -1,5 +1,5 @@
 import {
-	Download,
+	FileDown,
 	FilePlus,
 	Hammer,
 	RotateCcw,
@@ -102,9 +102,18 @@ export function FlashtypeMenu() {
 				side="bottom"
 				sideOffset={6}
 			>
+				<DropdownMenuItem
+					className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700"
+					onSelect={() => {
+						void handleExportLix();
+					}}
+				>
+					<FileDown className="h-3.5 w-3.5 shrink-0" />
+					<span>Export lix file</span>
+				</DropdownMenuItem>
 				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700">
-						<Hammer className="h-3.5 w-3.5" />
+					<DropdownMenuSubTrigger className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700">
+						<Hammer className="h-3.5 w-3.5 shrink-0" />
 						<span>Developer tools</span>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="min-w-56 text-xs">
@@ -125,15 +134,6 @@ export function FlashtypeMenu() {
 						>
 							<FilePlus className="h-3.5 w-3.5" />
 							<span>Seed Markdown files</span>
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							className="gap-1.5 text-xs"
-							onSelect={() => {
-								void handleExportLix();
-							}}
-						>
-							<Download className="h-3.5 w-3.5" />
-							<span>Export Lix blob</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className="gap-1.5 text-xs"
