@@ -1,4 +1,4 @@
-import { bench } from "vitest";
+import { bench, describe } from "vitest";
 import { parse as parseStatements } from "../sql-parser/parse.js";
 import { rewriteVtableSelects } from "./rewrite-vtable-selects.js";
 import { compile } from "../sql-parser/compile.js";
@@ -56,11 +56,13 @@ const runRewrite = (sql: string) =>
 	});
 
 for (const scenario of scenarios) {
-	bench(`[rewrite_vtable_select.js] ${scenario.name}`, () => {
-		const statements = runRewrite(scenario.sql);
-		const rendered = compile(statements).sql.toLowerCase();
-		if (rendered.includes('from "lix_internal_state_vtable"')) {
-			throw new Error("vtable reference should be rewritten");
-		}
+	describe(`[rewrite_vtable_select.js] ${scenario.name}`, () => {
+		bench("rewrite", () => {
+			const statements = runRewrite(scenario.sql);
+			const rendered = compile(statements).sql.toLowerCase();
+			if (rendered.includes('from "lix_internal_state_vtable"')) {
+				throw new Error("vtable reference should be rewritten");
+			}
+		});
 	});
 }

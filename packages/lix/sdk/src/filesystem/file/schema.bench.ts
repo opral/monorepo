@@ -1,62 +1,75 @@
-import { bench } from "vitest";
+import { afterAll, beforeAll, beforeEach, bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
 
 const NUM_FILES = 1;
 const NUM_READS = 10;
 
-/**
- * Benchmarks for file operations to measure the impact of caching.
- *
- * These benchmarks test:
- * 1. Reading multiple files sequentially
- * 2. Reading the same file multiple times (cache hit scenario)
- * 3. Mixed read patterns (simulating real-world usage)
- * 4. File operations with varying sizes
- * 5. Concurrent file reads
- *
- * @example
- * pnpm exec vitest bench src/filesystem/file/schema.bench.ts
- */
+type FileBenchCtx = Awaited<ReturnType<typeof openLix>>;
 
-bench("sequential file reads - unique files", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
+async function createFileBenchCtx(): Promise<FileBenchCtx> {
+	return openLix({ providePlugins: [mockJsonPlugin] });
+}
+
+async function clearFiles(lix: FileBenchCtx): Promise<void> {
+	await lix.db.deleteFrom("file").execute();
+}
+
+describe("sequential file reads - unique files", () => {
+	let lix: FileBenchCtx;
+
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
 	});
 
-	// Insert test files
-	const files = Array.from({ length: NUM_FILES }, (_, i) => ({
-		id: `file_${i}`,
-		path: `/test/file_${i}.json`,
-		data: new TextEncoder().encode(
-			JSON.stringify({
-				id: `file_${i}`,
-				content: `Test content for file ${i}`,
-				metadata: { index: i, type: "benchmark" },
-				largeData: Array(100).fill(`data_${i}`),
-			})
-		),
-	}));
+	afterAll(async () => {
+		await lix.close();
+	});
 
-	await lix.db.insertInto("file").values(files).execute();
+	beforeEach(async () => {
+		await clearFiles(lix);
 
-	// Benchmark: Read all files sequentially
-	for (let i = 0; i < NUM_FILES; i++) {
-		await lix.db
-			.selectFrom("file")
-			.where("id", "=", `file_${i}`)
-			.selectAll()
-			.executeTakeFirst();
-	}
+		const files = Array.from({ length: NUM_FILES }, (_, i) => ({
+			id: `file_${i}`,
+			path: `/test/file_${i}.json`,
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					id: `file_${i}`,
+					content: `Test content for file ${i}`,
+					metadata: { index: i, type: "benchmark" },
+					largeData: Array(100).fill(`data_${i}`),
+				})
+			),
+		}));
+
+		await lix.db.insertInto("file").values(files).execute();
+	});
+
+	bench("sequential file reads - unique files", async () => {
+		for (let i = 0; i < NUM_FILES; i++) {
+			await lix.db
+				.selectFrom("file")
+				.where("id", "=", `file_${i}`)
+				.selectAll()
+				.executeTakeFirst();
+		}
+	});
 });
 
-bench("repeated file reads - same file (cache hit scenario)", async () => {
-	try {
-		const lix = await openLix({
-			providePlugins: [mockJsonPlugin],
-		});
+describe("repeated file reads - same file (cache hit scenario)", () => {
+	let lix: FileBenchCtx;
 
-		// Insert a single test file
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
+	});
+
+	afterAll(async () => {
+		await lix.close();
+	});
+
+	beforeEach(async () => {
+		await clearFiles(lix);
+
 		await lix.db
 			.insertInto("file")
 			.values({
@@ -72,8 +85,9 @@ bench("repeated file reads - same file (cache hit scenario)", async () => {
 				),
 			})
 			.execute();
+	});
 
-		// Benchmark: Read the same file multiple times
+	bench("repeated file reads - same file (cache hit scenario)", async () => {
 		for (let i = 0; i < NUM_READS; i++) {
 			await lix.db
 				.selectFrom("file")
@@ -81,144 +95,184 @@ bench("repeated file reads - same file (cache hit scenario)", async () => {
 				.selectAll()
 				.executeTakeFirst();
 		}
-	} catch (error) {
-		console.error("Error during repeated file reads benchmark:", error);
-		throw error;
-	}
+	});
 });
 
-bench("mixed file read pattern - 80/20 distribution", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
+describe("mixed file read pattern - 80/20 distribution", () => {
+	let lix: FileBenchCtx;
+	let hotFileIds: string[];
+	let coldFileIds: string[];
+
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
 	});
 
-	// Insert test files
-	const files = Array.from({ length: 20 }, (_, i) => ({
-		id: `mixed_file_${i}`,
-		path: `/test/mixed_file_${i}.json`,
-		data: new TextEncoder().encode(
-			JSON.stringify({
-				id: `mixed_file_${i}`,
-				content: `Mixed pattern file ${i}`,
-				metadata: { index: i },
-			})
-		),
-	}));
-
-	await lix.db.insertInto("file").values(files).execute();
-
-	// Benchmark: 80% of reads on 20% of files (hot files)
-	const hotFileIds = files.slice(0, 4).map((f) => f.id);
-	const coldFileIds = files.slice(4).map((f) => f.id);
-
-	for (let i = 0; i < NUM_READS; i++) {
-		const fileId =
-			Math.random() < 0.8
-				? hotFileIds[Math.floor(Math.random() * hotFileIds.length)]!
-				: coldFileIds[Math.floor(Math.random() * coldFileIds.length)]!;
-
-		await lix.db
-			.selectFrom("file")
-			.where("id", "=", fileId)
-			.selectAll()
-			.executeTakeFirst();
-	}
-});
-
-bench("batch file reads - select multiple files", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
+	afterAll(async () => {
+		await lix.close();
 	});
 
-	// Insert test files
-	const files = Array.from({ length: NUM_FILES }, (_, i) => ({
-		id: `batch_file_${i}`,
-		path: `/test/batch_file_${i}.json`,
-		data: new TextEncoder().encode(
-			JSON.stringify({
-				id: `batch_file_${i}`,
-				content: `Batch file ${i}`,
-			})
-		),
-	}));
+	beforeEach(async () => {
+		await clearFiles(lix);
 
-	await lix.db.insertInto("file").values(files).execute();
-
-	// Benchmark: Read files in batches of 10
-	for (let i = 0; i < NUM_FILES; i += 10) {
-		const fileIds = Array.from({ length: 10 }, (_, j) => `batch_file_${i + j}`);
-		await lix.db
-			.selectFrom("file")
-			.where("id", "in", fileIds)
-			.selectAll()
-			.execute();
-	}
-});
-
-bench("file reads with varying sizes", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
-	});
-
-	// Insert files with varying sizes
-	const files = Array.from({ length: 10 }, (_, i) => {
-		const size = Math.pow(2, i); // Exponentially increasing sizes
-		return {
-			id: `sized_file_${i}`,
-			path: `/test/sized_file_${i}.json`,
+		const files = Array.from({ length: 20 }, (_, i) => ({
+			id: `mixed_file_${i}`,
+			path: `/test/mixed_file_${i}.json`,
 			data: new TextEncoder().encode(
 				JSON.stringify({
-					id: `sized_file_${i}`,
-					content: `File with size factor ${size}`,
-					largeData: Array(size * 10).fill(`data_${i}`),
+					id: `mixed_file_${i}`,
+					content: `Mixed pattern file ${i}`,
+					metadata: { index: i },
 				})
 			),
-		};
+		}));
+
+		await lix.db.insertInto("file").values(files).execute();
+
+		hotFileIds = files.slice(0, 4).map((f) => f.id);
+		coldFileIds = files.slice(4).map((f) => f.id);
 	});
 
-	await lix.db.insertInto("file").values(files).execute();
-
-	// Benchmark: Read files of different sizes
-	for (const file of files) {
-		await lix.db
-			.selectFrom("file")
-			.where("id", "=", file.id)
-			.selectAll()
-			.executeTakeFirst();
-	}
+	bench("mixed file read pattern - 80/20 distribution", async () => {
+		let toggle = 0;
+		for (let i = 0; i < NUM_READS; i++) {
+			const fileId =
+				toggle % 5 !== 0
+					? hotFileIds[(toggle / 5) % hotFileIds.length]!
+					: coldFileIds[(toggle / 5) % coldFileIds.length]!;
+			await lix.db
+				.selectFrom("file")
+				.where("id", "=", fileId)
+				.selectAll()
+				.executeTakeFirst();
+			toggle++;
+		}
+	});
 });
 
-bench("file read with path-based queries", async () => {
-	const lix = await openLix({
-		providePlugins: [mockJsonPlugin],
+describe("batch file reads - select multiple files", () => {
+	let lix: FileBenchCtx;
+
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
 	});
 
-	// Insert test files with structured paths
-	const files = Array.from({ length: NUM_FILES }, (_, i) => ({
-		id: `path_file_${i}`,
-		path: `/project/src/module_${Math.floor(i / 10)}/file_${i}.json`,
-		data: new TextEncoder().encode(
-			JSON.stringify({
-				id: `path_file_${i}`,
-				content: `Path-based file ${i}`,
-			})
-		),
-	}));
+	afterAll(async () => {
+		await lix.close();
+	});
 
-	await lix.db.insertInto("file").values(files).execute();
+	beforeEach(async () => {
+		await clearFiles(lix);
 
-	// Benchmark: Query files by path pattern
-	for (let i = 0; i < 10; i++) {
-		await lix.db
-			.selectFrom("file")
-			.where("path", "like", `/project/src/module_${i}/%`)
-			.selectAll()
-			.execute();
-	}
+		const files = Array.from({ length: Math.max(NUM_FILES, 50) }, (_, i) => ({
+			id: `batch_file_${i}`,
+			path: `/test/batch_file_${i}.json`,
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					id: `batch_file_${i}`,
+					content: `Batch file ${i}`,
+				})
+			),
+		}));
+
+		await lix.db.insertInto("file").values(files).execute();
+	});
+
+	bench("batch file reads - select multiple files", async () => {
+		for (let i = 0; i < Math.max(NUM_FILES, 50); i += 10) {
+			const fileIds = Array.from(
+				{ length: 10 },
+				(_, j) => `batch_file_${i + j}`
+			);
+			await lix.db
+				.selectFrom("file")
+				.where("id", "in", fileIds)
+				.selectAll()
+				.execute();
+		}
+	});
+});
+
+describe("file reads with varying sizes", () => {
+	let lix: FileBenchCtx;
+	let files: { id: string }[];
+
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
+	});
+
+	afterAll(async () => {
+		await lix.close();
+	});
+
+	beforeEach(async () => {
+		await clearFiles(lix);
+
+		files = Array.from({ length: 10 }, (_, i) => {
+			const size = Math.pow(2, i);
+			return {
+				id: `sized_file_${i}`,
+				path: `/test/sized_file_${i}.json`,
+				data: new TextEncoder().encode(
+					JSON.stringify({
+						id: `sized_file_${i}`,
+						content: `File with size factor ${size}`,
+						largeData: Array(size * 10).fill(`data_${i}`),
+					})
+				),
+			};
+		});
+
+		await lix.db.insertInto("file").values(files).execute();
+	});
+
+	bench("file reads with varying sizes", async () => {
+		for (const file of files) {
+			await lix.db
+				.selectFrom("file")
+				.where("id", "=", file.id)
+				.selectAll()
+				.executeTakeFirst();
+		}
+	});
+});
+
+describe("file read with path-based queries", () => {
+	let lix: FileBenchCtx;
+
+	beforeAll(async () => {
+		lix = await createFileBenchCtx();
+	});
+
+	afterAll(async () => {
+		await lix.close();
+	});
+
+	beforeEach(async () => {
+		await clearFiles(lix);
+
+		const files = Array.from({ length: Math.max(NUM_FILES, 100) }, (_, i) => ({
+			id: `path_file_${i}`,
+			path: `/project/src/module_${Math.floor(i / 10)}/file_${i}.json`,
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					id: `path_file_${i}`,
+					content: `Path-based file ${i}`,
+				})
+			),
+		}));
+
+		await lix.db.insertInto("file").values(files).execute();
+	});
+
+	bench("file read with path-based queries", async () => {
+		for (let i = 0; i < 10; i++) {
+			await lix.db
+				.selectFrom("file")
+				.where("path", "like", `/project/src/module_${i}/%`)
+				.selectAll()
+				.execute();
+		}
+	});
 });
 
 bench.todo("concurrent file reads - parallel access");
-
-bench.todo("file reads with cache invalidation");
-
-bench.todo("memory usage during large file operations");
