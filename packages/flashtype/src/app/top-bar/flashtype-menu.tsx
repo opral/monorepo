@@ -1,6 +1,7 @@
 import {
 	FileDown,
 	FilePlus,
+	FileUp,
 	Hammer,
 	RotateCcw,
 	Search,
@@ -29,6 +30,41 @@ import { OpfsSahEnvironment } from "@lix-js/sdk";
  */
 export function FlashtypeMenu() {
 	const lix = useLix();
+
+	const handleOpenLix = async () => {
+		try {
+			const input = document.createElement("input");
+			input.type = "file";
+			input.accept = ".lix";
+			input.onchange = async (e) => {
+				const file = (e.target as HTMLInputElement).files?.[0];
+				if (!file) return;
+				try {
+					// Close current lix instance
+					if (lix) {
+						try {
+							await lix.close();
+						} catch {
+							// ignore close errors so we can still proceed
+						}
+					}
+					// Clear OPFS to remove old database
+					await OpfsSahEnvironment.clear();
+					// Store the new file in OPFS
+					const env = new OpfsSahEnvironment({ key: "flashtype" });
+					await env.create({ blob: await file.arrayBuffer() });
+					// Reload to open the new file
+					window.location.reload();
+				} catch (error) {
+					console.error("Failed to open Lix file", error);
+					alert("Failed to open Lix file. Please try again.");
+				}
+			};
+			input.click();
+		} catch (error) {
+			console.error("Failed to open file picker", error);
+		}
+	};
 
 	const handleExportLix = async () => {
 		if (!lix) return;
@@ -103,7 +139,16 @@ export function FlashtypeMenu() {
 				sideOffset={6}
 			>
 				<DropdownMenuItem
-					className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700"
+					className="flex items-center gap-1.5 text-xs"
+					onSelect={() => {
+						void handleOpenLix();
+					}}
+				>
+					<FileUp className="h-3.5 w-3.5 shrink-0" />
+					<span>Open lix file</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="flex items-center gap-1.5 text-xs"
 					onSelect={() => {
 						void handleExportLix();
 					}}
@@ -112,7 +157,7 @@ export function FlashtypeMenu() {
 					<span>Export lix file</span>
 				</DropdownMenuItem>
 				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-neutral-700">
+					<DropdownMenuSubTrigger className="flex items-center gap-1.5 text-xs">
 						<Hammer className="h-3.5 w-3.5 shrink-0" />
 						<span>Developer tools</span>
 					</DropdownMenuSubTrigger>
