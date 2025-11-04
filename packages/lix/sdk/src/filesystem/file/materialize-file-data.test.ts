@@ -35,7 +35,6 @@ test("materializeFileData with plugin that has changes", async () => {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: testFileSchema })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 
 	const activeVersion = await lix.db

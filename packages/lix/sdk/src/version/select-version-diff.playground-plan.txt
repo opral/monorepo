@@ -63,9 +63,6 @@ SELECT *
 FROM joined
     ) as "diff" where "diff"."status" != ?
 
--- expanded SQL --
-<unchanged>
-
 -- rewritten SQL --
 SELECT *
 FROM (WITH s AS (
@@ -365,7 +362,6 @@ FROM (WITH s AS (
            "commit_id",
            "is_tombstone"
          FROM "lix_internal_state_cache_v1_test_bench_diff_entity") cache
-       		WHERE cache.is_tombstone = 0
 
            UNION ALL
 
@@ -614,7 +610,21 @@ FROM (WITH s AS (
        FROM candidates c
     )
   SELECT
-    "w".*
+    w."entity_id" AS "entity_id",
+    w."schema_key" AS "schema_key",
+    w."file_id" AS "file_id",
+    w."plugin_key" AS "plugin_key",
+    w."snapshot_content" AS "snapshot_content",
+    w."schema_version" AS "schema_version",
+    w."version_id" AS "version_id",
+    w."created_at" AS "created_at",
+    w."updated_at" AS "updated_at",
+    w."inherited_from_version_id" AS "inherited_from_version_id",
+    w."change_id" AS "change_id",
+    w."untracked" AS "untracked",
+    w."commit_id" AS "commit_id",
+    w."metadata" AS "metadata",
+    COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
   FROM ranked w
 
   LEFT JOIN lix_internal_state_writer ws_dst ON
@@ -930,7 +940,6 @@ t AS (
            "commit_id",
            "is_tombstone"
          FROM "lix_internal_state_cache_v1_test_bench_diff_entity") cache
-       		WHERE cache.is_tombstone = 0
 
            UNION ALL
 
@@ -1179,7 +1188,21 @@ t AS (
        FROM candidates c
     )
   SELECT
-    "w".*
+    w."entity_id" AS "entity_id",
+    w."schema_key" AS "schema_key",
+    w."file_id" AS "file_id",
+    w."plugin_key" AS "plugin_key",
+    w."snapshot_content" AS "snapshot_content",
+    w."schema_version" AS "schema_version",
+    w."version_id" AS "version_id",
+    w."created_at" AS "created_at",
+    w."updated_at" AS "updated_at",
+    w."inherited_from_version_id" AS "inherited_from_version_id",
+    w."change_id" AS "change_id",
+    w."untracked" AS "untracked",
+    w."commit_id" AS "commit_id",
+    w."metadata" AS "metadata",
+    COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
   FROM ranked w
 
   LEFT JOIN lix_internal_state_writer ws_dst ON
@@ -1301,2126 +1324,2150 @@ WHERE "diff"."status" != ?
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 42,
+    "id": 43,
     "parent": 40,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 67,
+    "id": 70,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 69,
-    "parent": 67,
+    "id": 73,
+    "parent": 70,
     "notused": 59,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_pk_version_id_json_extract_snapsho_json_extract_snapsho_r7zrf9 (version_id=?)"
   },
   {
-    "id": 94,
+    "id": 100,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 96,
-    "parent": 94,
+    "id": 103,
+    "parent": 100,
     "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 121,
+    "id": 130,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 123,
-    "parent": 121,
+    "id": 133,
+    "parent": 130,
     "notused": 48,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 148,
+    "id": 160,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 150,
-    "parent": 148,
+    "id": 163,
+    "parent": 160,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_unique_version_id_json_extract_snapsho_c3jqlx (version_id=?)"
   },
   {
-    "id": 175,
+    "id": 190,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 177,
-    "parent": 175,
+    "id": 193,
+    "parent": 190,
     "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 202,
+    "id": 220,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 204,
-    "parent": 202,
+    "id": 223,
+    "parent": 220,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 229,
+    "id": 250,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 232,
-    "parent": 229,
+    "id": 253,
+    "parent": 250,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 261,
+    "id": 280,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 263,
-    "parent": 261,
+    "id": 283,
+    "parent": 280,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 288,
+    "id": 310,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 291,
-    "parent": 288,
+    "id": 313,
+    "parent": 310,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 320,
+    "id": 340,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 322,
-    "parent": 320,
+    "id": 343,
+    "parent": 340,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
+    "detail": "SEARCH lix_internal_state_cache_v1_test_bench_diff_entity USING INDEX idx_lix_internal_state_cache_v1_test_bench_diff_entity_vfe (version_id=?)"
   },
   {
-    "id": 347,
+    "id": 370,
     "parent": 39,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 348,
-    "parent": 347,
+    "id": 371,
+    "parent": 370,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 349,
-    "parent": 348,
+    "id": 372,
+    "parent": 371,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 352,
-    "parent": 349,
+    "id": 375,
+    "parent": 372,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 356,
-    "parent": 352,
+    "id": 379,
+    "parent": 375,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 358,
-    "parent": 356,
+    "id": 381,
+    "parent": 379,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 386,
-    "parent": 352,
+    "id": 409,
+    "parent": 375,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 388,
-    "parent": 386,
+    "id": 411,
+    "parent": 409,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 397,
-    "parent": 386,
+    "id": 420,
+    "parent": 409,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 413,
-    "parent": 349,
+    "id": 436,
+    "parent": 372,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
-    "id": 423,
-    "parent": 349,
+    "id": 446,
+    "parent": 372,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 435,
-    "parent": 349,
+    "id": 458,
+    "parent": 372,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 463,
-    "parent": 348,
+    "id": 486,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 467,
-    "parent": 463,
+    "id": 490,
+    "parent": 486,
     "notused": 59,
     "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
   },
   {
-    "id": 475,
-    "parent": 463,
+    "id": 498,
+    "parent": 486,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 487,
-    "parent": 463,
+    "id": 510,
+    "parent": 486,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 515,
-    "parent": 348,
+    "id": 538,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 519,
-    "parent": 515,
+    "id": 542,
+    "parent": 538,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
-    "id": 527,
-    "parent": 515,
+    "id": 550,
+    "parent": 538,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 539,
-    "parent": 515,
+    "id": 562,
+    "parent": 538,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 567,
-    "parent": 348,
+    "id": 590,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 571,
-    "parent": 567,
+    "id": 594,
+    "parent": 590,
     "notused": 48,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
-    "id": 579,
-    "parent": 567,
+    "id": 602,
+    "parent": 590,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 591,
-    "parent": 567,
+    "id": 614,
+    "parent": 590,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 619,
-    "parent": 348,
+    "id": 642,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 623,
-    "parent": 619,
+    "id": 646,
+    "parent": 642,
     "notused": 36,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
-    "id": 631,
-    "parent": 619,
+    "id": 654,
+    "parent": 642,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 643,
-    "parent": 619,
+    "id": 666,
+    "parent": 642,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 671,
-    "parent": 348,
+    "id": 694,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 675,
-    "parent": 671,
+    "id": 698,
+    "parent": 694,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
-    "id": 683,
-    "parent": 671,
+    "id": 706,
+    "parent": 694,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 695,
-    "parent": 671,
+    "id": 718,
+    "parent": 694,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 723,
-    "parent": 348,
+    "id": 746,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 727,
-    "parent": 723,
+    "id": 750,
+    "parent": 746,
     "notused": 72,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
-    "id": 735,
-    "parent": 723,
+    "id": 758,
+    "parent": 746,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 747,
-    "parent": 723,
+    "id": 770,
+    "parent": 746,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 775,
-    "parent": 348,
+    "id": 798,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 780,
-    "parent": 775,
+    "id": 803,
+    "parent": 798,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
-    "id": 788,
-    "parent": 775,
+    "id": 811,
+    "parent": 798,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 800,
-    "parent": 775,
+    "id": 823,
+    "parent": 798,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 828,
-    "parent": 348,
+    "id": 851,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 832,
-    "parent": 828,
+    "id": 855,
+    "parent": 851,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
-    "id": 840,
-    "parent": 828,
+    "id": 863,
+    "parent": 851,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 852,
-    "parent": 828,
+    "id": 875,
+    "parent": 851,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 880,
-    "parent": 348,
+    "id": 903,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 885,
-    "parent": 880,
+    "id": 908,
+    "parent": 903,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe"
   },
   {
-    "id": 893,
-    "parent": 880,
+    "id": 916,
+    "parent": 903,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 905,
-    "parent": 880,
+    "id": 928,
+    "parent": 903,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 933,
-    "parent": 348,
+    "id": 956,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 937,
-    "parent": 933,
+    "id": 960,
+    "parent": 956,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
   },
   {
-    "id": 945,
-    "parent": 933,
+    "id": 968,
+    "parent": 956,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 957,
-    "parent": 933,
+    "id": 980,
+    "parent": 956,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 985,
-    "parent": 348,
+    "id": 1008,
+    "parent": 371,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 990,
-    "parent": 985,
+    "id": 1013,
+    "parent": 1008,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 994,
-    "parent": 985,
+    "id": 1017,
+    "parent": 1008,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1027,
+    "id": 1050,
     "parent": 39,
     "notused": 227,
     "detail": "SCAN c"
   },
   {
-    "id": 1066,
+    "id": 1089,
     "parent": 39,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 1106,
+    "id": 1129,
     "parent": 38,
     "notused": 207,
     "detail": "SCAN (subquery-80)"
   },
   {
-    "id": 1190,
+    "id": 1213,
     "parent": 10,
     "notused": 0,
     "detail": "MATERIALIZE lix_internal_state_vtable"
   },
   {
-    "id": 1192,
-    "parent": 1190,
+    "id": 1215,
+    "parent": 1213,
     "notused": 0,
     "detail": "CO-ROUTINE ranked"
   },
   {
-    "id": 1195,
-    "parent": 1192,
+    "id": 1218,
+    "parent": 1215,
     "notused": 0,
     "detail": "CO-ROUTINE (subquery-101)"
   },
   {
-    "id": 1197,
-    "parent": 1195,
+    "id": 1220,
+    "parent": 1218,
     "notused": 0,
     "detail": "CO-ROUTINE candidates"
   },
   {
-    "id": 1198,
-    "parent": 1197,
+    "id": 1221,
+    "parent": 1220,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1199,
-    "parent": 1198,
+    "id": 1222,
+    "parent": 1221,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1202,
-    "parent": 1199,
+    "id": 1225,
+    "parent": 1222,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 1226,
-    "parent": 1198,
+    "id": 1249,
+    "parent": 1221,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1227,
-    "parent": 1226,
+    "id": 1250,
+    "parent": 1249,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1228,
-    "parent": 1227,
+    "id": 1251,
+    "parent": 1250,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1230,
-    "parent": 1228,
+    "id": 1254,
+    "parent": 1251,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 1255,
-    "parent": 1227,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1257,
-    "parent": 1255,
-    "notused": 59,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
-  },
-  {
-    "id": 1282,
-    "parent": 1227,
+    "id": 1281,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
     "id": 1284,
-    "parent": 1282,
-    "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
-  },
-  {
-    "id": 1309,
-    "parent": 1227,
-    "notused": 0,
-    "detail": "UNION ALL"
+    "parent": 1281,
+    "notused": 59,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_pk_version_id_json_extract_snapsho_json_extract_snapsho_r7zrf9 (version_id=?)"
   },
   {
     "id": 1311,
-    "parent": 1309,
-    "notused": 48,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
-  },
-  {
-    "id": 1336,
-    "parent": 1227,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1338,
-    "parent": 1336,
-    "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
-  },
-  {
-    "id": 1363,
-    "parent": 1227,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 1365,
-    "parent": 1363,
+    "id": 1314,
+    "parent": 1311,
     "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 1390,
-    "parent": 1227,
+    "id": 1341,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1392,
-    "parent": 1390,
+    "id": 1344,
+    "parent": 1341,
+    "notused": 48,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
+  },
+  {
+    "id": 1371,
+    "parent": 1250,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1374,
+    "parent": 1371,
+    "notused": 36,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_unique_version_id_json_extract_snapsho_c3jqlx (version_id=?)"
+  },
+  {
+    "id": 1401,
+    "parent": 1250,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1404,
+    "parent": 1401,
+    "notused": 53,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
+  },
+  {
+    "id": 1431,
+    "parent": 1250,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 1434,
+    "parent": 1431,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 1417,
-    "parent": 1227,
+    "id": 1461,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1420,
-    "parent": 1417,
+    "id": 1464,
+    "parent": 1461,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 1449,
-    "parent": 1227,
+    "id": 1491,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1451,
-    "parent": 1449,
+    "id": 1494,
+    "parent": 1491,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 1476,
-    "parent": 1227,
+    "id": 1521,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1479,
-    "parent": 1476,
+    "id": 1524,
+    "parent": 1521,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 1508,
-    "parent": 1227,
+    "id": 1551,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1510,
-    "parent": 1508,
+    "id": 1554,
+    "parent": 1551,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
+    "detail": "SEARCH lix_internal_state_cache_v1_test_bench_diff_entity USING INDEX idx_lix_internal_state_cache_v1_test_bench_diff_entity_vfe (version_id=?)"
   },
   {
-    "id": 1535,
-    "parent": 1227,
+    "id": 1581,
+    "parent": 1250,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1536,
-    "parent": 1535,
+    "id": 1582,
+    "parent": 1581,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1537,
-    "parent": 1536,
+    "id": 1583,
+    "parent": 1582,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1540,
-    "parent": 1537,
+    "id": 1586,
+    "parent": 1583,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 1544,
-    "parent": 1540,
+    "id": 1590,
+    "parent": 1586,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 1546,
-    "parent": 1544,
+    "id": 1592,
+    "parent": 1590,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 1574,
-    "parent": 1540,
+    "id": 1620,
+    "parent": 1586,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 1576,
-    "parent": 1574,
+    "id": 1622,
+    "parent": 1620,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 1585,
-    "parent": 1574,
+    "id": 1631,
+    "parent": 1620,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 1601,
-    "parent": 1537,
+    "id": 1647,
+    "parent": 1583,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
-    "id": 1611,
-    "parent": 1537,
+    "id": 1657,
+    "parent": 1583,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1623,
-    "parent": 1537,
+    "id": 1669,
+    "parent": 1583,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1651,
-    "parent": 1536,
+    "id": 1697,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1655,
-    "parent": 1651,
+    "id": 1701,
+    "parent": 1697,
     "notused": 59,
     "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
   },
   {
-    "id": 1663,
-    "parent": 1651,
+    "id": 1709,
+    "parent": 1697,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1675,
-    "parent": 1651,
+    "id": 1721,
+    "parent": 1697,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1703,
-    "parent": 1536,
+    "id": 1749,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1707,
-    "parent": 1703,
+    "id": 1753,
+    "parent": 1749,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
-    "id": 1715,
-    "parent": 1703,
+    "id": 1761,
+    "parent": 1749,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1727,
-    "parent": 1703,
+    "id": 1773,
+    "parent": 1749,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1755,
-    "parent": 1536,
+    "id": 1801,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1759,
-    "parent": 1755,
+    "id": 1805,
+    "parent": 1801,
     "notused": 48,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
-    "id": 1767,
-    "parent": 1755,
+    "id": 1813,
+    "parent": 1801,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1779,
-    "parent": 1755,
+    "id": 1825,
+    "parent": 1801,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1807,
-    "parent": 1536,
+    "id": 1853,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1811,
-    "parent": 1807,
+    "id": 1857,
+    "parent": 1853,
     "notused": 36,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
-    "id": 1819,
-    "parent": 1807,
+    "id": 1865,
+    "parent": 1853,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1831,
-    "parent": 1807,
+    "id": 1877,
+    "parent": 1853,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1859,
-    "parent": 1536,
+    "id": 1905,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1863,
-    "parent": 1859,
+    "id": 1909,
+    "parent": 1905,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
-    "id": 1871,
-    "parent": 1859,
+    "id": 1917,
+    "parent": 1905,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1883,
-    "parent": 1859,
+    "id": 1929,
+    "parent": 1905,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1911,
-    "parent": 1536,
+    "id": 1957,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1915,
-    "parent": 1911,
+    "id": 1961,
+    "parent": 1957,
     "notused": 72,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
-    "id": 1923,
-    "parent": 1911,
+    "id": 1969,
+    "parent": 1957,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1935,
-    "parent": 1911,
+    "id": 1981,
+    "parent": 1957,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 1963,
-    "parent": 1536,
+    "id": 2009,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1968,
-    "parent": 1963,
+    "id": 2014,
+    "parent": 2009,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
-    "id": 1976,
-    "parent": 1963,
+    "id": 2022,
+    "parent": 2009,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 1988,
-    "parent": 1963,
+    "id": 2034,
+    "parent": 2009,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2016,
-    "parent": 1536,
+    "id": 2062,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2020,
-    "parent": 2016,
+    "id": 2066,
+    "parent": 2062,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
-    "id": 2028,
-    "parent": 2016,
+    "id": 2074,
+    "parent": 2062,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 2040,
-    "parent": 2016,
+    "id": 2086,
+    "parent": 2062,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2068,
-    "parent": 1536,
+    "id": 2114,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2073,
-    "parent": 2068,
+    "id": 2119,
+    "parent": 2114,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe"
   },
   {
-    "id": 2081,
-    "parent": 2068,
+    "id": 2127,
+    "parent": 2114,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 2093,
-    "parent": 2068,
+    "id": 2139,
+    "parent": 2114,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2121,
-    "parent": 1536,
+    "id": 2167,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2125,
-    "parent": 2121,
+    "id": 2171,
+    "parent": 2167,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
   },
   {
-    "id": 2133,
-    "parent": 2121,
+    "id": 2179,
+    "parent": 2167,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 2145,
-    "parent": 2121,
+    "id": 2191,
+    "parent": 2167,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2173,
-    "parent": 1536,
+    "id": 2219,
+    "parent": 1582,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2178,
-    "parent": 2173,
+    "id": 2224,
+    "parent": 2219,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 2182,
-    "parent": 2173,
+    "id": 2228,
+    "parent": 2219,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 2215,
-    "parent": 1227,
+    "id": 2261,
+    "parent": 1250,
     "notused": 227,
     "detail": "SCAN c"
   },
   {
-    "id": 2254,
-    "parent": 1227,
+    "id": 2300,
+    "parent": 1250,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 2294,
-    "parent": 1226,
+    "id": 2340,
+    "parent": 1249,
     "notused": 207,
     "detail": "SCAN (subquery-101)"
   },
   {
-    "id": 2377,
-    "parent": 1198,
+    "id": 2425,
+    "parent": 1221,
     "notused": 207,
     "detail": "SCAN w"
   },
   {
-    "id": 2408,
-    "parent": 1197,
+    "id": 2434,
+    "parent": 1221,
+    "notused": 45,
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 2447,
+    "parent": 1221,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 2486,
+    "parent": 1220,
     "notused": 207,
     "detail": "SCAN w"
   },
   {
-    "id": 2419,
-    "parent": 1197,
+    "id": 2497,
+    "parent": 1220,
     "notused": 0,
     "detail": "BLOOM FILTER ON lix_internal_state_vtable (version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
   },
   {
-    "id": 2449,
-    "parent": 1197,
+    "id": 2525,
+    "parent": 1220,
     "notused": 52,
     "detail": "SEARCH lix_internal_state_vtable USING AUTOMATIC PARTIAL COVERING INDEX (version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
   },
   {
-    "id": 2530,
-    "parent": 1195,
+    "id": 2606,
+    "parent": 1218,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2532,
-    "parent": 2530,
+    "id": 2608,
+    "parent": 2606,
     "notused": 0,
     "detail": "CO-ROUTINE ranked"
   },
   {
-    "id": 2535,
-    "parent": 2532,
+    "id": 2611,
+    "parent": 2608,
     "notused": 0,
     "detail": "CO-ROUTINE (subquery-122)"
   },
   {
-    "id": 2537,
-    "parent": 2535,
+    "id": 2613,
+    "parent": 2611,
     "notused": 0,
     "detail": "CO-ROUTINE candidates"
   },
   {
-    "id": 2538,
-    "parent": 2537,
+    "id": 2614,
+    "parent": 2613,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 2539,
-    "parent": 2538,
+    "id": 2615,
+    "parent": 2614,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 2542,
-    "parent": 2539,
+    "id": 2618,
+    "parent": 2615,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 2566,
-    "parent": 2538,
+    "id": 2642,
+    "parent": 2614,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2567,
-    "parent": 2566,
+    "id": 2643,
+    "parent": 2642,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 2568,
-    "parent": 2567,
+    "id": 2644,
+    "parent": 2643,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 2570,
-    "parent": 2568,
+    "id": 2647,
+    "parent": 2644,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 2595,
-    "parent": 2567,
+    "id": 2674,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2597,
-    "parent": 2595,
+    "id": 2677,
+    "parent": 2674,
     "notused": 59,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_pk_version_id_json_extract_snapsho_json_extract_snapsho_r7zrf9 (version_id=?)"
   },
   {
-    "id": 2622,
-    "parent": 2567,
+    "id": 2704,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2624,
-    "parent": 2622,
+    "id": 2707,
+    "parent": 2704,
     "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 2649,
-    "parent": 2567,
+    "id": 2734,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2651,
-    "parent": 2649,
+    "id": 2737,
+    "parent": 2734,
     "notused": 48,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 2676,
-    "parent": 2567,
+    "id": 2764,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2678,
-    "parent": 2676,
+    "id": 2767,
+    "parent": 2764,
     "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_unique_version_id_json_extract_snapsho_c3jqlx (version_id=?)"
   },
   {
-    "id": 2703,
-    "parent": 2567,
+    "id": 2794,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2705,
-    "parent": 2703,
+    "id": 2797,
+    "parent": 2794,
     "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 2730,
-    "parent": 2567,
+    "id": 2824,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2732,
-    "parent": 2730,
+    "id": 2827,
+    "parent": 2824,
     "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 2757,
-    "parent": 2567,
+    "id": 2854,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2760,
-    "parent": 2757,
+    "id": 2857,
+    "parent": 2854,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 2789,
-    "parent": 2567,
+    "id": 2884,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2791,
-    "parent": 2789,
+    "id": 2887,
+    "parent": 2884,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 2816,
-    "parent": 2567,
+    "id": 2914,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2819,
-    "parent": 2816,
+    "id": 2917,
+    "parent": 2914,
     "notused": 62,
     "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 2848,
-    "parent": 2567,
+    "id": 2944,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2850,
-    "parent": 2848,
+    "id": 2947,
+    "parent": 2944,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
+    "detail": "SEARCH lix_internal_state_cache_v1_test_bench_diff_entity USING INDEX idx_lix_internal_state_cache_v1_test_bench_diff_entity_vfe (version_id=?)"
   },
   {
-    "id": 2875,
-    "parent": 2567,
+    "id": 2974,
+    "parent": 2643,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2876,
-    "parent": 2875,
+    "id": 2975,
+    "parent": 2974,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 2877,
-    "parent": 2876,
+    "id": 2976,
+    "parent": 2975,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 2880,
-    "parent": 2877,
+    "id": 2979,
+    "parent": 2976,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 2884,
-    "parent": 2880,
+    "id": 2983,
+    "parent": 2979,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 2886,
-    "parent": 2884,
+    "id": 2985,
+    "parent": 2983,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 2914,
-    "parent": 2880,
+    "id": 3013,
+    "parent": 2979,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 2916,
-    "parent": 2914,
+    "id": 3015,
+    "parent": 3013,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 2925,
-    "parent": 2914,
+    "id": 3024,
+    "parent": 3013,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 2941,
-    "parent": 2877,
+    "id": 3040,
+    "parent": 2976,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
-    "id": 2951,
-    "parent": 2877,
+    "id": 3050,
+    "parent": 2976,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 2963,
-    "parent": 2877,
+    "id": 3062,
+    "parent": 2976,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 2991,
-    "parent": 2876,
+    "id": 3090,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 2995,
-    "parent": 2991,
+    "id": 3094,
+    "parent": 3090,
     "notused": 59,
     "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
   },
   {
-    "id": 3003,
-    "parent": 2991,
+    "id": 3102,
+    "parent": 3090,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3015,
-    "parent": 2991,
+    "id": 3114,
+    "parent": 3090,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3043,
-    "parent": 2876,
+    "id": 3142,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3047,
-    "parent": 3043,
+    "id": 3146,
+    "parent": 3142,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
-    "id": 3055,
-    "parent": 3043,
+    "id": 3154,
+    "parent": 3142,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3067,
-    "parent": 3043,
+    "id": 3166,
+    "parent": 3142,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3095,
-    "parent": 2876,
+    "id": 3194,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3099,
-    "parent": 3095,
+    "id": 3198,
+    "parent": 3194,
     "notused": 48,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
-    "id": 3107,
-    "parent": 3095,
+    "id": 3206,
+    "parent": 3194,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3119,
-    "parent": 3095,
+    "id": 3218,
+    "parent": 3194,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3147,
-    "parent": 2876,
+    "id": 3246,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3151,
-    "parent": 3147,
+    "id": 3250,
+    "parent": 3246,
     "notused": 36,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
-    "id": 3159,
-    "parent": 3147,
+    "id": 3258,
+    "parent": 3246,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3171,
-    "parent": 3147,
+    "id": 3270,
+    "parent": 3246,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3199,
-    "parent": 2876,
+    "id": 3298,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3203,
-    "parent": 3199,
+    "id": 3302,
+    "parent": 3298,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
-    "id": 3211,
-    "parent": 3199,
+    "id": 3310,
+    "parent": 3298,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3223,
-    "parent": 3199,
+    "id": 3322,
+    "parent": 3298,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3251,
-    "parent": 2876,
+    "id": 3350,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3255,
-    "parent": 3251,
+    "id": 3354,
+    "parent": 3350,
     "notused": 72,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
-    "id": 3263,
-    "parent": 3251,
+    "id": 3362,
+    "parent": 3350,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3275,
-    "parent": 3251,
+    "id": 3374,
+    "parent": 3350,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3303,
-    "parent": 2876,
+    "id": 3402,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3308,
-    "parent": 3303,
+    "id": 3407,
+    "parent": 3402,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
-    "id": 3316,
-    "parent": 3303,
+    "id": 3415,
+    "parent": 3402,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3328,
-    "parent": 3303,
+    "id": 3427,
+    "parent": 3402,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3356,
-    "parent": 2876,
+    "id": 3455,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3360,
-    "parent": 3356,
+    "id": 3459,
+    "parent": 3455,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
-    "id": 3368,
-    "parent": 3356,
+    "id": 3467,
+    "parent": 3455,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3380,
-    "parent": 3356,
+    "id": 3479,
+    "parent": 3455,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3408,
-    "parent": 2876,
+    "id": 3507,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3413,
-    "parent": 3408,
+    "id": 3512,
+    "parent": 3507,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe"
   },
   {
-    "id": 3421,
-    "parent": 3408,
+    "id": 3520,
+    "parent": 3507,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3433,
-    "parent": 3408,
+    "id": 3532,
+    "parent": 3507,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3461,
-    "parent": 2876,
+    "id": 3560,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3465,
-    "parent": 3461,
+    "id": 3564,
+    "parent": 3560,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
   },
   {
-    "id": 3473,
-    "parent": 3461,
+    "id": 3572,
+    "parent": 3560,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 3485,
-    "parent": 3461,
+    "id": 3584,
+    "parent": 3560,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 3513,
-    "parent": 2876,
+    "id": 3612,
+    "parent": 2975,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3518,
-    "parent": 3513,
+    "id": 3617,
+    "parent": 3612,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 3522,
-    "parent": 3513,
+    "id": 3621,
+    "parent": 3612,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 3555,
-    "parent": 2567,
+    "id": 3654,
+    "parent": 2643,
     "notused": 227,
     "detail": "SCAN c"
   },
   {
-    "id": 3594,
-    "parent": 2567,
+    "id": 3693,
+    "parent": 2643,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 3634,
-    "parent": 2566,
+    "id": 3733,
+    "parent": 2642,
     "notused": 207,
     "detail": "SCAN (subquery-122)"
   },
   {
-    "id": 3718,
-    "parent": 2538,
+    "id": 3817,
+    "parent": 2614,
     "notused": 0,
     "detail": "MATERIALIZE lix_internal_state_vtable"
   },
   {
-    "id": 3720,
-    "parent": 3718,
+    "id": 3819,
+    "parent": 3817,
     "notused": 0,
     "detail": "CO-ROUTINE ranked"
   },
   {
-    "id": 3723,
-    "parent": 3720,
+    "id": 3822,
+    "parent": 3819,
     "notused": 0,
     "detail": "CO-ROUTINE (subquery-143)"
   },
   {
-    "id": 3725,
-    "parent": 3723,
+    "id": 3824,
+    "parent": 3822,
     "notused": 0,
     "detail": "CO-ROUTINE candidates"
   },
   {
-    "id": 3726,
-    "parent": 3725,
+    "id": 3825,
+    "parent": 3824,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 3727,
-    "parent": 3726,
+    "id": 3826,
+    "parent": 3825,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 3730,
-    "parent": 3727,
+    "id": 3829,
+    "parent": 3826,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 3754,
-    "parent": 3726,
+    "id": 3853,
+    "parent": 3825,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3755,
-    "parent": 3754,
+    "id": 3854,
+    "parent": 3853,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 3756,
-    "parent": 3755,
+    "id": 3855,
+    "parent": 3854,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 3758,
-    "parent": 3756,
+    "id": 3858,
+    "parent": 3855,
     "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_descriptor USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 3783,
-    "parent": 3755,
+    "id": 3885,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3785,
-    "parent": 3783,
+    "id": 3888,
+    "parent": 3885,
     "notused": 59,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_stored_schema USING INDEX idx_lix_internal_state_cache_v1_lix_stored_schema_pk_version_id_json_extract_snapsho_json_extract_snapsho_r7zrf9 (version_id=?)"
   },
   {
-    "id": 3810,
-    "parent": 3755,
+    "id": 3915,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
-  },
-  {
-    "id": 3812,
-    "parent": 3810,
-    "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
-  },
-  {
-    "id": 3837,
-    "parent": 3755,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 3839,
-    "parent": 3837,
-    "notused": 48,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
-  },
-  {
-    "id": 3864,
-    "parent": 3755,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 3866,
-    "parent": 3864,
-    "notused": 36,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
-  },
-  {
-    "id": 3891,
-    "parent": 3755,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 3893,
-    "parent": 3891,
-    "notused": 53,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
     "id": 3918,
-    "parent": 3755,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 3920,
-    "parent": 3918,
-    "notused": 72,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
+    "parent": 3915,
+    "notused": 53,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
     "id": 3945,
-    "parent": 3755,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
     "id": 3948,
     "parent": 3945,
-    "notused": 62,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
+    "notused": 48,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
-    "id": 3977,
-    "parent": 3755,
+    "id": 3975,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 3979,
-    "parent": 3977,
-    "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
+    "id": 3978,
+    "parent": 3975,
+    "notused": 36,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_unique_version_id_json_extract_snapsho_c3jqlx (version_id=?)"
   },
   {
-    "id": 4004,
-    "parent": 3755,
+    "id": 4005,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4007,
-    "parent": 4004,
-    "notused": 62,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
+    "id": 4008,
+    "parent": 4005,
+    "notused": 53,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 4036,
-    "parent": 3755,
+    "id": 4035,
+    "parent": 3854,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
     "id": 4038,
-    "parent": 4036,
-    "notused": 32,
-    "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
-  },
-  {
-    "id": 4063,
-    "parent": 3755,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 4064,
-    "parent": 4063,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
+    "parent": 4035,
+    "notused": 72,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
   },
   {
     "id": 4065,
-    "parent": 4064,
+    "parent": 3854,
     "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
+    "detail": "UNION ALL"
   },
   {
     "id": 4068,
     "parent": 4065,
+    "notused": 62,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
+  },
+  {
+    "id": 4095,
+    "parent": 3854,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 4098,
+    "parent": 4095,
+    "notused": 32,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
+  },
+  {
+    "id": 4125,
+    "parent": 3854,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 4128,
+    "parent": 4125,
+    "notused": 62,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_foreign_version_id_inherited_from_versi_json_extract_snapsho_79rox8 (version_id=?)"
+  },
+  {
+    "id": 4155,
+    "parent": 3854,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 4158,
+    "parent": 4155,
+    "notused": 32,
+    "detail": "SEARCH lix_internal_state_cache_v1_test_bench_diff_entity USING INDEX idx_lix_internal_state_cache_v1_test_bench_diff_entity_vfe (version_id=?)"
+  },
+  {
+    "id": 4185,
+    "parent": 3854,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 4186,
+    "parent": 4185,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 4187,
+    "parent": 4186,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 4190,
+    "parent": 4187,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 4072,
-    "parent": 4068,
+    "id": 4194,
+    "parent": 4190,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 4074,
-    "parent": 4072,
+    "id": 4196,
+    "parent": 4194,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 4102,
-    "parent": 4068,
+    "id": 4224,
+    "parent": 4190,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 4104,
-    "parent": 4102,
+    "id": 4226,
+    "parent": 4224,
     "notused": 32,
     "detail": "SCAN desc"
   },
   {
-    "id": 4113,
-    "parent": 4102,
+    "id": 4235,
+    "parent": 4224,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 4129,
-    "parent": 4065,
+    "id": 4251,
+    "parent": 4187,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_descriptor"
   },
   {
-    "id": 4139,
-    "parent": 4065,
+    "id": 4261,
+    "parent": 4187,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4151,
-    "parent": 4065,
+    "id": 4273,
+    "parent": 4187,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4179,
-    "parent": 4064,
+    "id": 4301,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4183,
-    "parent": 4179,
+    "id": 4305,
+    "parent": 4301,
     "notused": 59,
     "detail": "SCAN lix_internal_state_cache_v1_lix_stored_schema"
   },
   {
-    "id": 4191,
-    "parent": 4179,
+    "id": 4313,
+    "parent": 4301,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4203,
-    "parent": 4179,
+    "id": 4325,
+    "parent": 4301,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4231,
-    "parent": 4064,
+    "id": 4353,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4235,
-    "parent": 4231,
+    "id": 4357,
+    "parent": 4353,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit"
   },
   {
-    "id": 4243,
-    "parent": 4231,
+    "id": 4365,
+    "parent": 4353,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4255,
-    "parent": 4231,
+    "id": 4377,
+    "parent": 4353,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4283,
-    "parent": 4064,
+    "id": 4405,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4287,
-    "parent": 4283,
+    "id": 4409,
+    "parent": 4405,
     "notused": 48,
     "detail": "SCAN lix_internal_state_cache_v1_lix_commit_edge"
   },
   {
-    "id": 4295,
-    "parent": 4283,
+    "id": 4417,
+    "parent": 4405,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4307,
-    "parent": 4283,
+    "id": 4429,
+    "parent": 4405,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4335,
-    "parent": 4064,
+    "id": 4457,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4339,
-    "parent": 4335,
+    "id": 4461,
+    "parent": 4457,
     "notused": 36,
     "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
   },
   {
-    "id": 4347,
-    "parent": 4335,
+    "id": 4469,
+    "parent": 4457,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4359,
-    "parent": 4335,
+    "id": 4481,
+    "parent": 4457,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4387,
-    "parent": 4064,
+    "id": 4509,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4391,
-    "parent": 4387,
+    "id": 4513,
+    "parent": 4509,
     "notused": 53,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set"
   },
   {
-    "id": 4399,
-    "parent": 4387,
+    "id": 4521,
+    "parent": 4509,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4411,
-    "parent": 4387,
+    "id": 4533,
+    "parent": 4509,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4439,
-    "parent": 4064,
+    "id": 4561,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4443,
-    "parent": 4439,
+    "id": 4565,
+    "parent": 4561,
     "notused": 72,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
-    "id": 4451,
-    "parent": 4439,
+    "id": 4573,
+    "parent": 4561,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4463,
-    "parent": 4439,
+    "id": 4585,
+    "parent": 4561,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4491,
-    "parent": 4064,
+    "id": 4613,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4496,
-    "parent": 4491,
+    "id": 4618,
+    "parent": 4613,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe"
   },
   {
-    "id": 4504,
-    "parent": 4491,
+    "id": 4626,
+    "parent": 4613,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4516,
-    "parent": 4491,
+    "id": 4638,
+    "parent": 4613,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4544,
-    "parent": 4064,
+    "id": 4666,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4548,
-    "parent": 4544,
+    "id": 4670,
+    "parent": 4666,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_lix_key_value"
   },
   {
-    "id": 4556,
-    "parent": 4544,
+    "id": 4678,
+    "parent": 4666,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4568,
-    "parent": 4544,
+    "id": 4690,
+    "parent": 4666,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4596,
-    "parent": 4064,
+    "id": 4718,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4601,
-    "parent": 4596,
+    "id": 4723,
+    "parent": 4718,
     "notused": 62,
     "detail": "SCAN lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe"
   },
   {
-    "id": 4609,
-    "parent": 4596,
+    "id": 4731,
+    "parent": 4718,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4621,
-    "parent": 4596,
+    "id": 4743,
+    "parent": 4718,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4649,
-    "parent": 4064,
+    "id": 4771,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4653,
-    "parent": 4649,
+    "id": 4775,
+    "parent": 4771,
     "notused": 32,
     "detail": "SCAN lix_internal_state_cache_v1_test_bench_diff_entity"
   },
   {
-    "id": 4661,
-    "parent": 4649,
+    "id": 4783,
+    "parent": 4771,
     "notused": 0,
     "detail": "BLOOM FILTER ON vi (version_id=?)"
   },
   {
-    "id": 4673,
-    "parent": 4649,
+    "id": 4795,
+    "parent": 4771,
     "notused": 53,
     "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 4701,
-    "parent": 4064,
+    "id": 4823,
+    "parent": 4186,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 4706,
-    "parent": 4701,
+    "id": 4828,
+    "parent": 4823,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 4710,
-    "parent": 4701,
+    "id": 4832,
+    "parent": 4823,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 4743,
-    "parent": 3755,
+    "id": 4865,
+    "parent": 3854,
     "notused": 227,
     "detail": "SCAN c"
   },
   {
-    "id": 4782,
-    "parent": 3755,
+    "id": 4904,
+    "parent": 3854,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 4822,
-    "parent": 3754,
+    "id": 4944,
+    "parent": 3853,
     "notused": 207,
     "detail": "SCAN (subquery-143)"
   },
   {
-    "id": 4905,
-    "parent": 3726,
+    "id": 5029,
+    "parent": 3825,
     "notused": 207,
     "detail": "SCAN w"
   },
   {
-    "id": 4934,
-    "parent": 3725,
+    "id": 5036,
+    "parent": 3825,
+    "notused": 45,
+    "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 5049,
+    "parent": 3825,
+    "notused": 45,
+    "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
+  },
+  {
+    "id": 5088,
+    "parent": 3824,
     "notused": 207,
     "detail": "SCAN w"
   },
   {
-    "id": 4947,
-    "parent": 3725,
+    "id": 5101,
+    "parent": 3824,
     "notused": 0,
     "detail": "BLOOM FILTER ON lix_internal_state_vtable (version_id=? AND entity_id=? AND schema_key=? AND file_id=?)"
   },
   {
-    "id": 4975,
-    "parent": 3725,
+    "id": 5127,
+    "parent": 3824,
     "notused": 52,
     "detail": "SEARCH lix_internal_state_vtable USING AUTOMATIC PARTIAL COVERING INDEX (version_id=? AND entity_id=? AND schema_key=? AND file_id=?) LEFT-JOIN"
   }

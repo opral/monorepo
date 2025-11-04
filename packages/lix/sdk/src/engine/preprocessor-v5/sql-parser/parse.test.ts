@@ -1332,3 +1332,45 @@ limit ?`;
 		});
 	});
 });
+
+test("parses parameter predicate without operator", () => {
+	const ast = parseSelectStatement(`SELECT "key" FROM "key_value" WHERE ?`);
+
+	expect(ast).toMatchObject({
+		where_clause: {
+			node_kind: "parameter",
+			placeholder: "?",
+		},
+	});
+});
+
+test("parses nested derived tables", () => {
+	const ast = parseSelectStatement(
+		"SELECT * FROM ((SELECT 1 AS value) AS inner_table)"
+	);
+
+	expect(ast).toMatchObject({
+		node_kind: "select_statement",
+		from_clauses: [
+			{
+				relation: {
+					node_kind: "subquery",
+					alias: id("inner_table"),
+					statement: {
+						node_kind: "select_statement",
+						projection: [
+							{
+								node_kind: "select_expression",
+								expression: {
+									node_kind: "literal",
+									value: 1,
+								},
+								alias: id("value"),
+							},
+						],
+					},
+				},
+			},
+		],
+	});
+});

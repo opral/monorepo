@@ -22,7 +22,6 @@ async function storeMergeTestSchemas(lix: { db: any }): Promise<void> {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: mergeTestEntitySchema })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 }
 

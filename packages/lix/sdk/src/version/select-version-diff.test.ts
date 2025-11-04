@@ -44,17 +44,14 @@ async function storeDiffTestSchemas(lix: { db: any }): Promise<void> {
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: diffEntitySchema })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: diffSchemaA })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: diffSchemaB })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 }
 

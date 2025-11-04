@@ -359,21 +359,30 @@ class SqlParser extends CstParser {
 				{
 					ALT: () => {
 						this.SUBRULE(this.table_name, { LABEL: "table" });
-						this.OPTION1(() => {
-							this.OPTION2(() => this.CONSUME1(As));
+						this.OPTION(() => {
+							this.OPTION1(() => this.CONSUME(As));
+							this.SUBRULE(this.identifier, { LABEL: "alias" });
+						});
+					},
+				},
+				{
+					ALT: () => {
+						this.CONSUME1(LeftParen, { LABEL: "nestedLParen" });
+						this.SUBRULE(this.table_reference, { LABEL: "nested" });
+						this.CONSUME1(RightParen, { LABEL: "nestedRParen" });
+						this.OPTION2(() => {
+							this.OPTION3(() => this.CONSUME2(As));
 							this.SUBRULE1(this.identifier, { LABEL: "alias" });
 						});
 					},
 				},
 				{
 					ALT: () => {
-						this.CONSUME(LeftParen);
+						this.CONSUME2(LeftParen, { LABEL: "selectLParen" });
 						this.SUBRULE(this.select_compound, { LABEL: "select" });
-						this.CONSUME(RightParen);
-						this.OPTION3(() => {
-							this.CONSUME2(As);
-						});
+						this.CONSUME2(RightParen, { LABEL: "selectRParen" });
 						this.OPTION4(() => {
+							this.OPTION5(() => this.CONSUME3(As));
 							this.SUBRULE2(this.identifier, { LABEL: "alias" });
 						});
 					},
@@ -443,67 +452,71 @@ class SqlParser extends CstParser {
 						this.LA(1).tokenType !== Not && this.LA(1).tokenType !== LeftParen,
 					ALT: () => {
 						this.SUBRULE(this.expression, { LABEL: "left_expression" });
-						this.OR1([
-							{
-								ALT: () => {
-									this.SUBRULE(this.comparison_operator, {
-										LABEL: "comparison_operator",
-									});
-									this.SUBRULE1(this.expression, {
-										LABEL: "comparison_value",
-									});
+						this.OPTION4(() => {
+							this.OR1([
+								{
+									ALT: () => {
+										this.SUBRULE(this.comparison_operator, {
+											LABEL: "comparison_operator",
+										});
+										this.SUBRULE1(this.expression, {
+											LABEL: "comparison_value",
+										});
+									},
 								},
-							},
-							{
-								ALT: () => {
-									this.CONSUME(Is);
-									this.OPTION(() => this.CONSUME1(Not, { LABEL: "is_not" }));
-									this.CONSUME(NullKeyword);
+								{
+									ALT: () => {
+										this.CONSUME(Is, { LABEL: "is_operator" });
+										this.OPTION(() => this.CONSUME1(Not, { LABEL: "is_not" }));
+										this.CONSUME(NullKeyword);
+									},
 								},
-							},
-							{
-								ALT: () => {
-									this.CONSUME(Between);
-									this.SUBRULE2(this.expression, { LABEL: "between_start" });
-									this.CONSUME1(And);
-									this.SUBRULE3(this.expression, { LABEL: "between_end" });
+								{
+									ALT: () => {
+										this.CONSUME(Between);
+										this.SUBRULE2(this.expression, { LABEL: "between_start" });
+										this.CONSUME1(And);
+										this.SUBRULE3(this.expression, { LABEL: "between_end" });
+									},
 								},
-							},
-							{
-								ALT: () => {
-									this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
-									this.CONSUME(InKeyword);
-									this.CONSUME1(LeftParen);
-									this.OR2([
-										{
-											GATE: () =>
-												this.LA(1).tokenType === Select ||
-												this.LA(1).tokenType === With,
-											ALT: () => {
-												this.SUBRULE(this.select_compound, {
-													LABEL: "in_subquery",
-												});
+								{
+									ALT: () => {
+										this.OPTION1(() => this.CONSUME2(Not, { LABEL: "in_not" }));
+										this.CONSUME(InKeyword);
+										this.CONSUME1(LeftParen);
+										this.OR2([
+											{
+												GATE: () =>
+													this.LA(1).tokenType === Select ||
+													this.LA(1).tokenType === With,
+												ALT: () => {
+													this.SUBRULE(this.select_compound, {
+														LABEL: "in_subquery",
+													});
+												},
 											},
-										},
-										{
-											ALT: () => {
-												this.SUBRULE(this.expression_list, {
-													LABEL: "in_list",
-												});
+											{
+												ALT: () => {
+													this.SUBRULE(this.expression_list, {
+														LABEL: "in_list",
+													});
+												},
 											},
-										},
-									]);
-									this.CONSUME1(RightParen);
+										]);
+										this.CONSUME1(RightParen);
+									},
 								},
-							},
-							{
-								ALT: () => {
-									this.OPTION2(() => this.CONSUME3(Not, { LABEL: "like_not" }));
-									this.CONSUME(Like);
-									this.SUBRULE4(this.expression, { LABEL: "like_pattern" });
+								{
+									ALT: () => {
+										this.OPTION2(() =>
+											this.CONSUME3(Not, { LABEL: "like_not" })
+										);
+										this.CONSUME(Like);
+										this.SUBRULE4(this.expression, { LABEL: "like_pattern" });
+									},
 								},
-							},
-						]);
+							]);
+						});
 					},
 				},
 				{

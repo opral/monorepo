@@ -410,8 +410,31 @@ class ToAstVisitor extends BaseVisitor {
 	public table_reference(ctx: {
 		table?: CstNode[];
 		alias?: CstNode[];
+		nested?: CstNode[];
 		select?: CstNode[];
 	}): RelationNode {
+		const nestedNode = ctx.nested?.[0];
+		if (nestedNode) {
+			const relation = this.visit(nestedNode) as RelationNode;
+			const aliasToken = ctx.alias?.[0] ?? null;
+			if (!aliasToken) {
+				return relation;
+			}
+			const aliasIdentifier = this.visit(aliasToken) as IdentifierNode;
+			if (relation.node_kind === "table_reference") {
+				return {
+					...relation,
+					alias: aliasIdentifier,
+				};
+			}
+			if (relation.node_kind === "subquery") {
+				return {
+					...relation,
+					alias: aliasIdentifier,
+				};
+			}
+			return relation;
+		}
 		const selectNode = ctx.select?.[0];
 		if (selectNode) {
 			const aliasToken = ctx.alias?.[0] ?? null;
@@ -514,6 +537,7 @@ class ToAstVisitor extends BaseVisitor {
 		comparison_operator?: CstNode[];
 		comparison_value?: CstNode[];
 		is_not?: IToken[];
+		is_operator?: IToken[];
 		between_start?: CstNode[];
 		between_end?: CstNode[];
 		in_list?: CstNode[];
@@ -584,9 +608,12 @@ class ToAstVisitor extends BaseVisitor {
 					: "like";
 				return createBinaryExpression(leftOperand, operator, pattern);
 			}
-			const operator: BinaryOperator = ctx.is_not?.length ? "is_not" : "is";
-			const nullLiteral = createLiteralNode(null);
-			return createBinaryExpression(leftOperand, operator, nullLiteral);
+			if (ctx.is_operator?.length) {
+				const operator: BinaryOperator = ctx.is_not?.length ? "is_not" : "is";
+				const nullLiteral = createLiteralNode(null);
+				return createBinaryExpression(leftOperand, operator, nullLiteral);
+			}
+			return leftOperand;
 		}
 		const inner = ctx.inner?.[0];
 		if (!inner) {

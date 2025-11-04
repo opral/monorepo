@@ -153,7 +153,6 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 	await lix.db
 		.insertInto("stored_schema")
 		.values({ value: testHooksSchema })
-		.onConflict((oc: any) => oc.doNothing())
 		.execute();
 
 	const v = await createVersion({ lix, name: "hook-test" });

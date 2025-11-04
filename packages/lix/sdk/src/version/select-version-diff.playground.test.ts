@@ -106,19 +106,16 @@ describe("selectVersionDiff playground", () => {
 				sql: compiled.sql,
 				parameters: compiled.parameters ?? [],
 			})) as {
-				original: { sql: string };
-				expanded?: { sql: string };
-				rewritten?: { sql: string };
+				originalSql: string;
+				rewrittenSql?: string;
 				plan: unknown;
 			};
 
 			const payload = [
 				"-- original SQL --",
-				report.original.sql,
-				"\n-- expanded SQL --",
-				report.expanded?.sql ?? "<unchanged>",
+				report.originalSql,
 				"\n-- rewritten SQL --",
-				report.rewritten?.sql ?? "<unchanged>",
+				report.rewrittenSql ?? "<unchanged>",
 				"\n-- plan --",
 				JSON.stringify(report.plan, null, 2),
 			].join("\n");
