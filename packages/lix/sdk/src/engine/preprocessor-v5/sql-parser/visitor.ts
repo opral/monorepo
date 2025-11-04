@@ -4,6 +4,8 @@ import type {
 	ColumnReferenceNode,
 	DeleteStatementNode,
 	FunctionCallExpressionNode,
+	FunctionCallArgumentNode,
+	AllColumnsNode,
 	InsertStatementNode,
 	InsertValuesNode,
 	OnConflictActionNode,
@@ -94,6 +96,7 @@ type NodeKindMap = {
 	readonly window_reference: WindowReferenceNode;
 	readonly window_frame: WindowFrameNode;
 	readonly window_frame_bound: WindowFrameBoundNode;
+	readonly all_columns: AllColumnsNode;
 };
 
 type NodeKind = keyof NodeKindMap;
@@ -322,6 +325,7 @@ function traverseNode(
 		case "parameter":
 		case "identifier":
 		case "raw_fragment":
+		case "all_columns":
 			return node;
 		default:
 			return node;
@@ -929,8 +933,25 @@ function traverseFunctionCall(
 	if (name !== node.name) {
 		changed = true;
 	}
-	const args = visitArray(node.arguments, node, "arguments", visitor);
-	if (args !== node.arguments) {
+	const args: FunctionCallArgumentNode[] = [];
+	let argsChanged = false;
+	for (let index = 0; index < node.arguments.length; index += 1) {
+		const argument = node.arguments[index]!;
+		if (argument.node_kind === "all_columns") {
+			args.push(argument);
+			continue;
+		}
+		const nextArgument = visitNode(
+			argument,
+			visitor,
+			createContext(node, "arguments", index)
+		) as ExpressionNode;
+		if (nextArgument !== argument) {
+			argsChanged = true;
+		}
+		args.push(nextArgument as FunctionCallArgumentNode);
+	}
+	if (argsChanged) {
 		changed = true;
 	}
 	const over = visitOptional(node.over, node, "over", visitor);
@@ -943,7 +964,7 @@ function traverseFunctionCall(
 	return {
 		...node,
 		name: name as IdentifierNode,
-		arguments: args as readonly ExpressionNode[],
+		arguments: args as readonly FunctionCallArgumentNode[],
 		over: over as WindowSpecificationNode | WindowReferenceNode | null,
 	};
 }

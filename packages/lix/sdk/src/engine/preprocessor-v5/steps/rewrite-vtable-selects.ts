@@ -828,6 +828,9 @@ function collectReferencedColumnSummary(
 				return;
 			case "function_call":
 				for (const argument of expression.arguments) {
+					if (argument.node_kind === "all_columns") {
+						continue;
+					}
 					visit(argument);
 				}
 				return;

@@ -789,6 +789,34 @@ describe("parse", () => {
 		]);
 	});
 
+	test("handles count(*) in select projection", () => {
+		const ast = parseSelectStatement("SELECT COUNT(*) AS total FROM users");
+
+		expect(ast).toMatchObject({
+			node_kind: "select_statement",
+			projection: [
+				{
+					node_kind: "select_expression",
+					expression: {
+						node_kind: "function_call",
+						name: id("COUNT"),
+						arguments: [{ node_kind: "all_columns" }],
+						over: null,
+					},
+					alias: id("total"),
+				},
+			],
+			from_clauses: [
+				{
+					relation: {
+						node_kind: "table_reference",
+						name: { node_kind: "object_name", parts: [id("users")] },
+					},
+				},
+			],
+		});
+	});
+
 	test("parses recursive CTE with compound body", () => {
 		const sql = `
 WITH RECURSIVE
@@ -1266,5 +1294,41 @@ limit ?`;
 			throw new Error("expected compound select in recursive CTE");
 		}
 		expect(cteStatement.compounds).toHaveLength(1);
+	});
+
+	test("handles count(*) in select projection", () => {
+		const ast = parseSelectStatement("SELECT COUNT(*) AS total FROM users");
+
+		expect(ast).toMatchObject({
+			node_kind: "select_statement",
+			distinct: false,
+			projection: [
+				{
+					node_kind: "select_expression",
+					expression: {
+						node_kind: "function_call",
+						name: id("COUNT"),
+						arguments: [
+							{
+								node_kind: "all_columns",
+							},
+						],
+						over: null,
+					},
+					alias: id("total"),
+				},
+			],
+			from_clauses: [
+				{
+					node_kind: "from_clause",
+					relation: {
+						node_kind: "table_reference",
+						name: { node_kind: "object_name", parts: [id("users")] },
+						alias: null,
+					},
+					joins: [],
+				},
+			],
+		});
 	});
 });

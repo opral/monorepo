@@ -229,7 +229,7 @@ export type ParameterExpressionNode = SqlNode & {
 export type FunctionCallExpressionNode = SqlNode & {
 	readonly node_kind: "function_call";
 	readonly name: IdentifierNode;
-	readonly arguments: readonly ExpressionNode[];
+	readonly arguments: readonly FunctionCallArgumentNode[];
 	readonly over: WindowSpecificationNode | WindowReferenceNode | null;
 };
 
@@ -242,6 +242,12 @@ export type GroupedExpressionNode = SqlNode & {
 	readonly node_kind: "grouped_expression";
 	readonly expression: ExpressionNode;
 };
+
+export type AllColumnsNode = SqlNode & {
+	readonly node_kind: "all_columns";
+};
+
+export type FunctionCallArgumentNode = ExpressionNode | AllColumnsNode;
 
 export type WindowReferenceNode = SqlNode & {
 	readonly node_kind: "window_reference";

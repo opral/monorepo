@@ -6,6 +6,7 @@ import {
 	type ColumnReferenceNode,
 	type ExpressionNode,
 	type FunctionCallExpressionNode,
+	type FunctionCallArgumentNode,
 	type LiteralNode,
 	type RawFragmentNode,
 	type OrderByItemNode,
@@ -941,8 +942,12 @@ function rewritePredicateExpression(
 		case "column_reference":
 			return rewriteColumnReference(expression, propertyLowerToActual, flags);
 		case "function_call": {
-			const args: ExpressionNode[] = [];
+			const args: FunctionCallArgumentNode[] = [];
 			for (const arg of expression.arguments) {
+				if (arg.node_kind === "all_columns") {
+					args.push(arg);
+					continue;
+				}
 				const rewritten = rewritePredicateExpression(
 					arg,
 					propertyLowerToActual,

@@ -11,6 +11,7 @@ import {
 	type StatementSegmentNode,
 	type SubqueryExpressionNode,
 	type OrderByItemNode,
+	type FunctionCallArgumentNode,
 	type WindowSpecificationNode,
 	type WindowReferenceNode,
 	type WindowFrameNode,
@@ -590,15 +591,22 @@ function rewriteExpressionForSnapshot(
 				end: rewriteExpressionForSnapshot(expression.end),
 				negated: expression.negated,
 			};
-		case "function_call":
+		case "function_call": {
+			const rewrittenArgs: FunctionCallArgumentNode[] =
+				expression.arguments.map((argument) =>
+					argument.node_kind === "all_columns"
+						? argument
+						: (rewriteExpressionForSnapshot(
+								argument
+							) as FunctionCallArgumentNode)
+				);
 			return {
 				node_kind: "function_call",
 				name: expression.name,
-				arguments: expression.arguments.map((argument) =>
-					rewriteExpressionForSnapshot(argument)
-				),
+				arguments: rewrittenArgs,
 				over: rewriteWindowOver(expression.over),
 			};
+		}
 		case "raw_fragment":
 		case "parameter":
 		case "literal":

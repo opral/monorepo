@@ -4,6 +4,7 @@ import type {
 	BinaryOperator,
 	ColumnReferenceNode,
 	DeleteStatementNode,
+	FunctionCallArgumentNode,
 	InsertStatementNode,
 	InsertValuesNode,
 	OnConflictActionNode,
@@ -714,10 +715,16 @@ class ToAstVisitor extends BaseVisitor {
 		}
 		const callIdentifier = ctx.callIdentifier?.[0];
 		if (callIdentifier?.image) {
-			const args: ExpressionNode[] =
-				ctx.callArguments?.map(
-					(argument) => this.visit(argument) as ExpressionNode
-				) ?? [];
+			let args: FunctionCallArgumentNode[] = [];
+			const starToken = (ctx as { callStar?: IToken[] }).callStar?.[0];
+			if (starToken) {
+				args = [{ node_kind: "all_columns" }];
+			} else {
+				args =
+					ctx.callArguments?.map(
+						(argument) => this.visit(argument) as ExpressionNode
+					) ?? [];
+			}
 			const overClause = (ctx as { overClause?: CstNode[] }).overClause?.[0];
 			const over = overClause
 				? (this.visit(overClause) as
@@ -1560,6 +1567,9 @@ function assignPositionsInExpression(
 			break;
 		case "function_call":
 			for (const argument of expression.arguments) {
+				if (argument.node_kind === "all_columns") {
+					continue;
+				}
 				assignPositionsInExpression(argument, state);
 			}
 			break;

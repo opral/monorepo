@@ -32,6 +32,7 @@ import type {
 	UnaryExpressionNode,
 	UnaryOperator,
 	UpdateStatementNode,
+	FunctionCallArgumentNode,
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
 	WithClauseNode,
@@ -654,12 +655,21 @@ function emitBetweenExpression(expression: BetweenExpressionNode): string {
 
 function emitFunctionCall(expression: FunctionCallExpressionNode): string {
 	const name = emitIdentifier(expression.name);
-	const args = expression.arguments.map((argument) => emitExpression(argument));
+	const args = expression.arguments.map((argument) =>
+		emitFunctionArgument(argument)
+	);
 	const call = `${name}(${args.join(", ")})`;
 	if (!expression.over) {
 		return call;
 	}
 	return `${call} OVER ${emitWindowOver(expression.over)}`;
+}
+
+function emitFunctionArgument(argument: FunctionCallArgumentNode): string {
+	if (argument.node_kind === "all_columns") {
+		return "*";
+	}
+	return emitExpression(argument as ExpressionNode);
 }
 
 function emitWindowOver(
