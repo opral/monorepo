@@ -5,11 +5,8 @@ state delete • tracked row
 DELETE FROM state
       WHERE entity_id = ? AND schema_key = ? AND file_id = ?
 
--- expanded SQL --
-<unchanged>
-
 -- rewritten SQL --
-<unchanged>
+DELETE FROM state WHERE entity_id = ? AND schema_key = ? AND file_id = ?
 
 -- plan --
 [

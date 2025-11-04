@@ -63,22 +63,25 @@ export function createSchemaCacheTable(args: {
     ) STRICT, WITHOUT ROWID;
   `;
 
-	engine.executeSync({ sql: createTableSql });
+	engine.executeSync({ sql: createTableSql, preprocessMode: "none" });
 
 	// Core static indexes for common access patterns
 	// 1) Fast version-scoped lookups (frequent)
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_version_id ON ${tableName} (version_id)`,
+		preprocessMode: "none",
 	});
 
 	// 2) Fast lookups by (version_id, file_id, entity_id) – complements PK order
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_vfe ON ${tableName} (version_id, file_id, entity_id)`,
+		preprocessMode: "none",
 	});
 
 	// 3) Fast scans by file within a version
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
+		preprocessMode: "none",
 	});
 
 	// 4) Partial index for live rows only to skip tombstones when applying predicates
@@ -86,6 +89,7 @@ export function createSchemaCacheTable(args: {
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_live_vfe
 			ON ${tableName} (version_id, file_id, entity_id)
 			WHERE is_tombstone = 0 AND snapshot_content IS NOT NULL`,
+		preprocessMode: "none",
 	});
 
 	// 5) Partial index for tombstones when they are queried explicitly
@@ -93,6 +97,7 @@ export function createSchemaCacheTable(args: {
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_tomb_vfe
 			ON ${tableName} (version_id, file_id, entity_id)
 			WHERE is_tombstone = 1 AND snapshot_content IS NULL`,
+		preprocessMode: "none",
 	});
 
 	// Extra expression indexes for descriptor cache
@@ -102,16 +107,18 @@ export function createSchemaCacheTable(args: {
 			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_inherits_from
 		        ON ${tableName}(json_extract(snapshot_content, '$.inherits_from_version_id'))
 		        WHERE json_extract(snapshot_content, '$.inherits_from_version_id') IS NOT NULL`,
+			preprocessMode: "none",
 		});
 		// Pair child/parent ids to avoid temp b-trees when deduping inheritance edges
 		engine.executeSync({
 			sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_id_parent
 		        ON ${tableName}(json_extract(snapshot_content, '$.id'), json_extract(snapshot_content, '$.inherits_from_version_id'))`,
+			preprocessMode: "none",
 		});
 	}
 
 	// Update planner stats
-	engine.executeSync({ sql: `ANALYZE ${tableName}` });
+	engine.executeSync({ sql: `ANALYZE ${tableName}`, preprocessMode: "none" });
 
 	const indexStatements = buildSchemaIndexStatements({
 		schema,
@@ -129,7 +136,7 @@ export function createSchemaCacheTable(args: {
 				`createSchemaCacheTable index -> ${statement.name}: ${statement.sql}`
 			);
 		}
-		engine.executeSync({ sql: statement.sql });
+		engine.executeSync({ sql: statement.sql, preprocessMode: "none" });
 	}
 
 	return tableName;

@@ -355,10 +355,11 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND version_id = (SELECT version_id FROM active_version);
         
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state_all
+      DELETE FROM lix_internal_state_vtable
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version)
-        AND schema_key != 'lix_file_descriptor';
+        AND schema_key != 'lix_file_descriptor'
+        AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
       DELETE FROM state_all
@@ -409,10 +410,11 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND version_id = OLD.lixcol_version_id;
         
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state_all
+      DELETE FROM lix_internal_state_vtable
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id
-        AND schema_key != 'lix_file_descriptor';
+        AND schema_key != 'lix_file_descriptor'
+        AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
       DELETE FROM state_all

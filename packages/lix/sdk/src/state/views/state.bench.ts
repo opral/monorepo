@@ -351,9 +351,8 @@ async function exportExplainPlans(args: {
 			sql: query.sql,
 			parameters: [...query.parameters],
 		})) as {
-			original: { sql: string };
-			expanded?: { sql: string };
-			rewritten?: { sql: string };
+			originalSql: string;
+			rewrittenSql: string | null;
 			plan: unknown;
 		};
 
@@ -361,11 +360,9 @@ async function exportExplainPlans(args: {
 			"-- label --",
 			label,
 			"\n-- original SQL --",
-			report.original.sql,
-			"\n-- expanded SQL --",
-			report.expanded?.sql ?? "<unchanged>",
+			report.originalSql,
 			"\n-- rewritten SQL --",
-			report.rewritten?.sql ?? "<unchanged>",
+			report.rewrittenSql ?? "<unchanged>",
 			"\n-- plan --",
 			JSON.stringify(report.plan, null, 2),
 			"",

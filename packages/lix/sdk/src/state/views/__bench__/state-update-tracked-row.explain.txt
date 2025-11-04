@@ -6,11 +6,8 @@ UPDATE state
       SET snapshot_content = ?, metadata = ?
       WHERE entity_id = ? AND schema_key = ? AND file_id = ?
 
--- expanded SQL --
-<unchanged>
-
 -- rewritten SQL --
-<unchanged>
+UPDATE state SET snapshot_content = ?, metadata = ? WHERE entity_id = ? AND schema_key = ? AND file_id = ?
 
 -- plan --
 [

@@ -13,11 +13,8 @@ INSERT INTO state (
         untracked
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 
--- expanded SQL --
-<unchanged>
-
 -- rewritten SQL --
-<unchanged>
+INSERT INTO state (entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, metadata, untracked) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 
 -- plan --
 []

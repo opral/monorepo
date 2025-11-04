@@ -185,7 +185,6 @@ async function registerSchemas(
 		await lix.db
 			.insertInto("stored_schema")
 			.values({ value: schema })
-			// .onConflict((oc) => oc.doNothing())
 			.execute();
 	}
 }
