@@ -9,7 +9,7 @@ import {
 	type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUp, Brain, Check, ChevronDown } from "lucide-react";
+import { ArrowUp, Brain, Check, ChevronDown, Loader2 } from "lucide-react";
 import { ChangeProposalRejectedError } from "@lix-js/agent-sdk";
 import { MentionMenu, CommandMenu } from "../menu";
 import type { SlashCommand } from "../commands";
@@ -437,9 +437,13 @@ export function PromptComposer({
 					disabled={sendDisabled}
 					data-testid="agent-composer-send"
 					className="absolute bottom-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-100 text-neutral-900 shadow-sm transition hover:bg-neutral-200/80 disabled:cursor-not-allowed disabled:border-border/60 disabled:bg-muted/20 disabled:text-muted-foreground"
-					aria-label="Send message"
+					aria-label={pending ? "Working..." : "Send message"}
 				>
-					<ArrowUp className="h-4 w-4" />
+					{pending ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<ArrowUp className="h-4 w-4" />
+					)}
 				</button>
 			</div>
 			<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
