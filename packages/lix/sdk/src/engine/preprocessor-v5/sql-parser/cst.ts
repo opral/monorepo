@@ -452,10 +452,10 @@ class SqlParser extends CstParser {
 				},
 				{
 					ALT: () => {
-					this.CONSUME(Exists, { LABEL: "exists" });
-					this.CONSUME(LeftParen, { LABEL: "exists_lparen" });
-					this.SUBRULE1(this.select_compound, { LABEL: "exists_subquery" });
-					this.CONSUME(RightParen, { LABEL: "exists_rparen" });
+						this.CONSUME(Exists, { LABEL: "exists" });
+						this.CONSUME(LeftParen, { LABEL: "exists_lparen" });
+						this.SUBRULE1(this.select_compound, { LABEL: "exists_subquery" });
+						this.CONSUME(RightParen, { LABEL: "exists_rparen" });
 					},
 				},
 				{

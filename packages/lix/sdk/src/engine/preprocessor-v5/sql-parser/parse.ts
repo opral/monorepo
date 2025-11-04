@@ -560,7 +560,8 @@ class ToAstVisitor extends BaseVisitor {
 		}
 
 		if ((ctx as { exists?: IToken[] }).exists?.[0]) {
-			const subqueryNode = (ctx as { exists_subquery?: CstNode[] }).exists_subquery?.[0];
+			const subqueryNode = (ctx as { exists_subquery?: CstNode[] })
+				.exists_subquery?.[0];
 			if (!subqueryNode) {
 				throw new Error("exists predicate missing subquery");
 			}
