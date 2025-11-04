@@ -35,7 +35,7 @@ export function updateFileLixcolCache(args: {
 				SELECT
 					s.change_id AS latest_change_id,
 					s.writer_key AS writer_key
-				FROM state_all s
+				FROM state_by_version s
 				WHERE s.file_id = ?
 				  AND s.version_id = ?
 				ORDER BY s.updated_at DESC, s.change_id DESC

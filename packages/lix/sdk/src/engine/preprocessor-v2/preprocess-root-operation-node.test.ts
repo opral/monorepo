@@ -118,14 +118,14 @@ test("entity view rewrite flows through state and vtable pipeline", async () => 
 
 	expect(upper).not.toMatch(/FROM\s+"?PIPELINE_SCHEMA"?/);
 	expect(upper).not.toMatch(/FROM\s+"?STATE"?/);
-	expect(upper).not.toMatch(/FROM\s+"?STATE_ALL"?/);
+	expect(upper).not.toMatch(/FROM\s+"?STATE_BY_VERSION"?/);
 	expect(upper).toContain("LIX_INTERNAL_TRANSACTION_STATE");
 	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 	expect(upper).toContain("ROW_NUMBER() OVER (");
 	expect(trace.map((entry) => entry.step)).toEqual([
 		"rewrite_entity_view_select",
 		"rewrite_state_view_select",
-		"rewrite_state_all_view_select",
+		"rewrite_state_by_version_view_select",
 		"rewrite_vtable_selects",
 	]);
 
@@ -270,7 +270,7 @@ test("rewrites join between two entity views", async () => {
 	expect(trace.map((entry) => entry.step)).toEqual([
 		"rewrite_entity_view_select",
 		"rewrite_state_view_select",
-		"rewrite_state_all_view_select",
+		"rewrite_state_by_version_view_select",
 		"rewrite_vtable_selects",
 	]);
 
@@ -360,7 +360,7 @@ test("rewrites join mixing entity and raw state views", async () => {
 	expect(trace.map((entry) => entry.step)).toEqual([
 		"rewrite_entity_view_select",
 		"rewrite_state_view_select",
-		"rewrite_state_all_view_select",
+		"rewrite_state_by_version_view_select",
 		"rewrite_vtable_selects",
 	]);
 

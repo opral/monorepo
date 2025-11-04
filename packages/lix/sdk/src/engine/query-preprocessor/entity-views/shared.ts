@@ -116,7 +116,7 @@ export function baseSchemaKey(name: string): string | null {
 
 const VIEW_VARIANT_TO_KEY: Record<"base" | "all" | "history", string> = {
 	base: "state",
-	all: "state_all",
+	all: "state_by_version",
 	history: "state_history",
 };
 

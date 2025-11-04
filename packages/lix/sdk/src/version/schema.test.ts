@@ -623,7 +623,7 @@ test("mutation of a version's state should NOT lead to duplicate version entries
 		.execute();
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "test_entity",
 			version_id: versionA.id,

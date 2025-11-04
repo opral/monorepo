@@ -384,7 +384,7 @@ test("updates editor when switching to a version with different external state",
 	const paraKey = AstSchemas.schemasByType.paragraph["x-lix-key"];
 	const paraVer = AstSchemas.schemasByType.paragraph["x-lix-version"];
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "root",
 			schema_key: rootKey,
@@ -396,7 +396,7 @@ test("updates editor when switching to a version with different external state",
 		} as any)
 		.execute();
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "p1",
 			schema_key: paraKey,

@@ -283,7 +283,7 @@ async function seedStateView(args: {
 
 /**
  * Insert a row into the public state view with deterministic payloads so the
- * triggers exercise the state_all forwarding path.
+ * triggers exercise the state_by_version forwarding path.
  */
 function insertStateRow(
 	lix: Awaited<ReturnType<typeof openLix>>,

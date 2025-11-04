@@ -343,7 +343,7 @@ test("active_account view injects global version defaults", async () => {
 		.execute();
 
 	const row = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select([
 			"schema_key",
 			"file_id",

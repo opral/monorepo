@@ -85,7 +85,7 @@ test("rewrites every lix_internal_state_vtable reference", () => {
 	expect(projectionMatches?.length).toBe(2);
 });
 
-test("rewrites state_all view body", () => {
+test("rewrites state_by_version view body", () => {
 	const sql = `SELECT
 	  entity_id,
 	  schema_key,
@@ -117,7 +117,7 @@ WHERE snapshot_content IS NOT NULL;`;
 	expect(rewritten).toContain("FROM change");
 });
 
-test("rewrites active_version view body proxying through state_all", () => {
+test("rewrites active_version view body proxying through state_by_version", () => {
 	const sql = `SELECT
 	  json_extract(snapshot_content, '$.version_id') AS version_id,
 	  inherited_from_version_id AS lixcol_inherited_from_version_id,

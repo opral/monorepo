@@ -26,7 +26,7 @@ import {
 } from "../key-value/schema-definition.js";
 import type {
 	StateView,
-	StateAllView,
+	StateByVersionView,
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
@@ -114,7 +114,7 @@ export type LixDatabaseSchema = {
 	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;
-	state_all: StateAllView;
+	state_by_version: StateByVersionView;
 	state_with_tombstones: StateWithTombstonesView;
 	state_history: StateHistoryView;
 

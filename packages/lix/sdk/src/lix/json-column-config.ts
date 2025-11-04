@@ -12,7 +12,7 @@ export function buildJsonColumnConfig(args?: {
 			snapshot_content: { type: "object" },
 			metadata: { type: "object" },
 		},
-		state_all: {
+		state_by_version: {
 			snapshot_content: { type: "object" },
 			metadata: { type: "object" },
 		},

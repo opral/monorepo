@@ -17,7 +17,7 @@ Implement a query processor which takes SQL and routes it to the underlying tabl
 
 - [x] compile internal_state_cache to optimized routes
 - [x] compile internal_resolved_state_all to optimized routes
-- [x] compile state, state_all, state_with_tombstones into optimized route
+- [x] compile state, state_by_version, state_with_tombstones into optimized route
 - [ ] verify no more vtable's on read queries
 - [ ] implement materialized cache
 - [ ] write docs that queries run through the query preprocessor (why does the preprocessor exist etc.)

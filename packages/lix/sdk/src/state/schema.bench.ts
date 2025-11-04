@@ -59,7 +59,7 @@ describe("select entities from single version", async () => {
 	await registerSchemas(lix);
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values(
 			Array.from({ length: NUM_ROWS }, (_, i) => ({
 				entity_id: `entity_${i}`,
@@ -83,7 +83,7 @@ describe("select entities from single version", async () => {
 
 	bench("select entities from single version", async () => {
 		await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", "global")
 			.selectAll()
 			.execute();
@@ -102,7 +102,7 @@ bench("insert single state record", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: `mutation_entity`,
 			version_id: "global",

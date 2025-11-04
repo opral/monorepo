@@ -37,7 +37,7 @@ test("returns untracked entities", async () => {
 	// legacy view fixture that the resolved builder needs to reproduce.
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "mock_key",
@@ -92,7 +92,7 @@ test("returns tracked entities with change metadata", async () => {
 	// surface it with change metadata.
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "tracked_key",
@@ -156,7 +156,7 @@ test("resolves inherited rows from ancestor versions", async () => {
 	// Persist a tracked row on the global version so the child inherits it.
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "inherited_key",
@@ -218,7 +218,7 @@ test("resolves inherited untracked rows from ancestor versions", async () => {
 
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "inherited_untracked_key",
@@ -281,7 +281,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 	// Parent version row
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "override_key",
@@ -301,7 +301,7 @@ test.skip("skips inherited rows when child overrides", async () => {
 	// Child override row
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "override_key",
@@ -364,7 +364,7 @@ test("includes change metadata for inherited and live rows", async () => {
 	// Parent tracked row
 	lix.engine!.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "metadata_key",
@@ -502,7 +502,7 @@ test("exposes rows flagged as tombstones", async () => {
 
 	engine.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				entity_id: "tombstone_key",
@@ -521,7 +521,7 @@ test("exposes rows flagged as tombstones", async () => {
 
 	engine.executeSync(
 		internalQueryBuilder
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "tombstone_key")
 			.where("schema_key", "=", LixKeyValueSchema["x-lix-key"])
 			.where("version_id", "=", "global")

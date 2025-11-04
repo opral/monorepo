@@ -70,7 +70,7 @@ test("keeps view name as alias when none provided", () => {
 					"only_view",
 					`
 						SELECT sa.file_id
-						FROM state_all AS sa
+						FROM state_by_version AS sa
 					`,
 				],
 			]),

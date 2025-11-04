@@ -96,7 +96,9 @@ describe("rewriteEntityViewSelect", () => {
 		const innerFrom = subquery.statement.from_clauses[0]!;
 		expect(innerFrom.relation.node_kind).toBe("table_reference");
 		const table = innerFrom.relation as TableReferenceNode;
-		expect(table.name.parts.at(-1)?.value.toLowerCase()).toBe("state_all");
+		expect(table.name.parts.at(-1)?.value.toLowerCase()).toBe(
+			"state_by_version"
+		);
 	});
 
 	test("prunes unused properties", () => {
@@ -194,7 +196,7 @@ describe("rewriteEntityViewSelect", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "entity-1",
 				schema_key: schemaKey,
@@ -283,7 +285,7 @@ describe("rewriteEntityViewSelect", () => {
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "row-1",
 				schema_key: "transient_schema",

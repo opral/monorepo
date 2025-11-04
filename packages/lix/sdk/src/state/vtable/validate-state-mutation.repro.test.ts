@@ -28,7 +28,7 @@ const REPRO_SCHEMA: LixSchemaDefinition = {
 	"x-lix-primary-key": ["/id"],
 };
 
-test("validateStateMutation state_all placeholder rewrite reproduction", async () => {
+test("validateStateMutation state_by_version placeholder rewrite reproduction", async () => {
 	await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
 	const lix = await openLix({
@@ -62,7 +62,7 @@ test("validateStateMutation state_all placeholder rewrite reproduction", async (
 			commit_id: "repro-seed",
 		});
 
-		const sql = `select "snapshot_content" from "state_all" where "schema_key" = ?1 and json_extract(snapshot_content, '$.id') = ?2 and "version_id" = ?3 and "inherited_from_version_id" is null`;
+		const sql = `select "snapshot_content" from "state_by_version" where "schema_key" = ?1 and json_extract(snapshot_content, '$.id') = ?2 and "version_id" = ?3 and "inherited_from_version_id" is null`;
 		const parameters = [REPRO_SCHEMA["x-lix-key"], "entity-0", VERSION_ID];
 
 		// Prime the rewrite with a real execution so schema-specific cache tables
@@ -79,7 +79,7 @@ test("validateStateMutation state_all placeholder rewrite reproduction", async (
 		};
 
 		const output = [
-			"-- SQL (state_all placeholder reproduction)",
+			"-- SQL (state_by_version placeholder reproduction)",
 			explain.originalSql,
 			"",
 			"-- rewritten SQL",
@@ -94,7 +94,7 @@ test("validateStateMutation state_all placeholder rewrite reproduction", async (
 		].join("\n");
 
 		await fs.writeFile(
-			`${OUTPUT_DIR}/validate-state-mutation.state_all-placeholder.explain.txt`,
+			`${OUTPUT_DIR}/validate-state-mutation.state_by_version-placeholder.explain.txt`,
 			output,
 			"utf8"
 		);

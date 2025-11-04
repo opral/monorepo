@@ -163,7 +163,7 @@ test("x-lix-entity-views accepts known view names", () => {
 		type: "object",
 		"x-lix-key": "mock",
 		"x-lix-version": "1.0",
-		"x-lix-entity-views": ["state", "state_all"],
+		"x-lix-entity-views": ["state", "state_by_version"],
 		properties: {
 			name: { type: "string" },
 		},

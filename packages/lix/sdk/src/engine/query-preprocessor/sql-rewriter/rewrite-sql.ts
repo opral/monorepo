@@ -19,7 +19,7 @@ import {
 } from "../../sql-parser/tokenizer.js";
 
 const DERIVED_STATE_ALIASES = new Set([
-	"state_all",
+	"state_by_version",
 	"state",
 	"state_with_tombstones",
 ]);

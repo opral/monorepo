@@ -20,12 +20,12 @@ import {
 } from "../../sql-parser/ast-helpers.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 
-const STATE_ALL_VIEW = "state_all";
+const STATE_BY_VERSION_VIEW = "state_by_version";
 const STATE_VTABLE = "lix_internal_state_vtable";
-const DEFAULT_BINDING = STATE_ALL_VIEW;
+const DEFAULT_BINDING = STATE_BY_VERSION_VIEW;
 
 /**
- * Rewrites references to the `state_all` SQLite view so they target the
+ * Rewrites references to the `state_by_version` SQLite view so they target the
  * underlying vtable directly.
  *
  * @example
@@ -66,7 +66,7 @@ function rewriteSelectNode(
 			return node;
 		},
 		table_reference(node) {
-			if (!objectNameMatches(node.name, STATE_ALL_VIEW)) {
+			if (!objectNameMatches(node.name, STATE_BY_VERSION_VIEW)) {
 				return;
 			}
 			const binding = getIdentifierValue(node.alias) ?? DEFAULT_BINDING;
@@ -164,7 +164,7 @@ function metadataSelectExpression(): SelectExpressionNode {
 	};
 }
 
-const BASE_STATE_ALL_COLUMNS = [
+const BASE_STATE_BY_VERSION_COLUMNS = [
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -183,8 +183,8 @@ const BASE_STATE_ALL_COLUMNS = [
 
 const METADATA_COLUMN = "metadata";
 
-const STATE_ALL_COLUMNS = new Set<string>([
-	...BASE_STATE_ALL_COLUMNS,
+const STATE_BY_VERSION_COLUMNS = new Set<string>([
+	...BASE_STATE_BY_VERSION_COLUMNS,
 	METADATA_COLUMN,
 ]);
 const MANDATORY_COLUMNS = new Set<string>([
@@ -196,9 +196,9 @@ const MANDATORY_COLUMNS = new Set<string>([
 function buildProjection(columns: Set<string> | null): SelectExpressionNode[] {
 	const result: SelectExpressionNode[] = [];
 	const selectAll = columns === null || columns.size === 0;
-	const target = selectAll ? STATE_ALL_COLUMNS : columns;
+	const target = selectAll ? STATE_BY_VERSION_COLUMNS : columns;
 
-	for (const column of BASE_STATE_ALL_COLUMNS) {
+	for (const column of BASE_STATE_BY_VERSION_COLUMNS) {
 		if (selectAll || target.has(column)) {
 			result.push(columnSelect(["v", column], column));
 		}
@@ -274,7 +274,7 @@ function collectReferencedColumns(
 
 	const filtered = new Set<string>();
 	for (const column of columns) {
-		if (STATE_ALL_COLUMNS.has(column)) {
+		if (STATE_BY_VERSION_COLUMNS.has(column)) {
 			filtered.add(column);
 		}
 	}
@@ -566,7 +566,7 @@ function collectColumnsFromExpression(
 
 function buildTraceEntry(bindings: readonly string[]): PreprocessorTraceEntry {
 	return {
-		step: "rewrite_state_all_view_select",
+		step: "rewrite_state_by_version_view_select",
 		payload: {
 			reference_count: bindings.length,
 			bindings: bindings.slice(),

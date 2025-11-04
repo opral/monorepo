@@ -333,7 +333,7 @@ describe("rewriteVtableSelects", () => {
 	test("only rewrites SELECT statements", () => {
 		const trace: PreprocessorTrace = [];
 		const views = new Map([
-			["state_all", "SELECT entity_id FROM lix_internal_state_vtable"],
+			["state_by_version", "SELECT entity_id FROM lix_internal_state_vtable"],
 		]);
 
 		const result = rewriteVtableSelects({

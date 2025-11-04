@@ -8,7 +8,7 @@ import type { LixEntity, LixEntityCanonical } from "./types.js";
  */
 const CANONICAL_TABLES = [
 	"state",
-	"state_all",
+	"state_by_version",
 	"entity_label",
 	"entity_conversation",
 	"entity_conversation_all",

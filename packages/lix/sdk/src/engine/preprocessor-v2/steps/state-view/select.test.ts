@@ -6,7 +6,7 @@ import { parse } from "../../sql-parser/parser.js";
 import { toRootOperationNode } from "../../sql-parser/to-root-operation-node.js";
 
 describe("rewriteStateViewSelect", () => {
-	test("rewrites state view into a state_all-backed subquery", () => {
+	test("rewrites state view into a state_by_version-backed subquery", () => {
 		const node = toRootOperationNode(
 			parse(`
 			SELECT s.*
@@ -29,7 +29,7 @@ describe("rewriteStateViewSelect", () => {
 
 		expect(upper).not.toMatch(/\bFROM\s+"?STATE"?\b/);
 		expect(upper).toMatch(/\bFROM\s+\(SELECT\b/);
-		expect(upper).toContain('FROM "STATE_ALL" AS "SA"');
+		expect(upper).toContain('FROM "STATE_BY_VERSION" AS "SA"');
 		expect(upper).toMatch(
 			/"SA"\."VERSION_ID" IN\s*\(SELECT "VERSION_ID" FROM "ACTIVE_VERSION"\)/
 		);
@@ -64,7 +64,7 @@ describe("rewriteStateViewSelect", () => {
 		const upper = sql.toUpperCase();
 
 		expect(upper).not.toMatch(/\bFROM\s+"?STATE"?\b/);
-		expect(upper).toContain('FROM "STATE_ALL" AS "SA"');
+		expect(upper).toContain('FROM "STATE_BY_VERSION" AS "SA"');
 		expect(upper).toMatch(
 			/"SA"\."VERSION_ID" IN\s*\(SELECT "VERSION_ID" FROM "ACTIVE_VERSION"\)/
 		);

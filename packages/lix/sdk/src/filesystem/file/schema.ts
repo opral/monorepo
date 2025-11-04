@@ -236,7 +236,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                fd.untracked,
 	                fd.metadata AS change_metadata,
 	                select_file_lixcol(fd.entity_id, fd.version_id) AS lixcol_json
-	            FROM state_all fd
+	            FROM state_by_version fd
 	            WHERE fd.schema_key = 'lix_file_descriptor'
 	        ),
 	        directory_paths AS (
@@ -362,7 +362,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
-      DELETE FROM state_all
+      DELETE FROM state_by_version
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file_descriptor'
         AND version_id = (SELECT version_id FROM active_version);
@@ -417,7 +417,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
-      DELETE FROM state_all
+      DELETE FROM state_by_version
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file_descriptor'
         AND version_id = OLD.lixcol_version_id;

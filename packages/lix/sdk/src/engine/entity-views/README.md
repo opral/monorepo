@@ -37,10 +37,10 @@ Entity views are "merely a view over the state table" - they don't store any dat
 
 Entity views are essentially filters over the generic state table. Here's how it works:
 
-### What's in the state_all table
+### What's in the state_by_version table
 
 ```sql
-state_all:
+state_by_version:
 ┌─────────────┬─────────────────┬──────────┬───────────────────────────────────┐
 │ entity_id   │ schema_key      │ file_id  │ snapshot_content                  │
 ├─────────────┼─────────────────┼──────────┼───────────────────────────────────┤
@@ -88,7 +88,7 @@ For each entity schema, three views are created:
 ### 2. All-Versions View (e.g., `key_value_all`)
 
 - **Purpose**: Work with entities across all versions
-- **Based on**: `state_all` virtual table
+- **Based on**: `state_by_version` virtual table
 - **Features**:
   - Exposes `lixcol_version_id` for version-specific queries
   - Full CRUD support with explicit version control
@@ -139,7 +139,7 @@ Entity views use SQLite's INSTEAD OF triggers to intercept CRUD operations and r
 INSERT INTO key_value (key, value) VALUES ('greeting', 'hello')
 
 -- Trigger converts to state table operation
-INSERT INTO state_all (
+INSERT INTO state_by_version (
   entity_id: 'greeting',
   schema_key: 'lix:key_value',
   snapshot_content: '{"key": "greeting", "value": "hello"}'

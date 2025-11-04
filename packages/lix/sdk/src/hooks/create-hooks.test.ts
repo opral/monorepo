@@ -163,7 +163,7 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 	});
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "hook-entity",
 			schema_key: "test_entity",

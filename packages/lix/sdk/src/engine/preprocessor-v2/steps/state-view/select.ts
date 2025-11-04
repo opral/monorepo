@@ -13,7 +13,7 @@ import { internalQueryBuilder } from "../../../internal-query-builder.js";
 
 /**
  * Rewrites references to the public `state` view so callers read from the
- * rewritten `state_all` representation while preserving the active-version
+ * rewritten `state_by_version` representation while preserving the active-version
  * filter the legacy view enforced.
  */
 export const rewriteStateViewSelect: PreprocessorStep = ({ node, trace }) => {
@@ -178,7 +178,7 @@ function buildStateSubquery(): SelectQueryNode {
 	const alias = "sa";
 
 	const builder = qb
-		.selectFrom(`state_all as ${alias}`)
+		.selectFrom(`state_by_version as ${alias}`)
 		.select((eb: any) => [
 			eb.ref(`${alias}.entity_id`).as("entity_id"),
 			eb.ref(`${alias}.schema_key`).as("schema_key"),

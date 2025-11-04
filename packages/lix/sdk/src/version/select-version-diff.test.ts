@@ -78,7 +78,7 @@ simulationTest(
 
 		// Add an entity only in the source version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -126,9 +126,9 @@ simulationTest(
 			snapshot_content: { value: "A" },
 		});
 
-		// After commit id should be the commit_id from state_all for the source side
+		// After commit id should be the commit_id from state_by_version for the source side
 		const srcState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", sourceVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -161,7 +161,7 @@ simulationTest(
 
 		// Both sides change the same key independently (common ancestor had no e1)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -174,7 +174,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -205,7 +205,7 @@ simulationTest(
 
 		// Verify winner is source side by checking after_change_id equals source state change_id
 		const srcState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", sourceVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -214,7 +214,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const tgtState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", targetVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -250,7 +250,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -277,7 +277,7 @@ simulationTest(
 
 		// Both sides update e1 independently
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({ snapshot_content: { value: "target" } })
 			.where("version_id", "=", targetVersion.id)
 			.where("file_id", "=", "file1")
@@ -286,7 +286,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({ snapshot_content: { value: "source" } })
 			.where("version_id", "=", sourceVersion.id)
 			.where("file_id", "=", "file1")
@@ -312,7 +312,7 @@ simulationTest(
 		expectDeterministic(r.after_version_id).toBe(sourceVersion.id);
 
 		const srcState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", sourceVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -321,7 +321,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const tgtState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", targetVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -357,7 +357,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -383,7 +383,7 @@ simulationTest(
 
 		// Perform deletion in source version (remove e1); target keeps content
 		await lix.db
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("version_id", "=", sourceVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -392,7 +392,7 @@ simulationTest(
 
 		// Confirm target still has the entity
 		const tgtState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", targetVersion.id)
 			.where("file_id", "=", "file1")
 			.where("schema_key", "=", "test_diff_entity")
@@ -453,7 +453,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e1",
 				schema_key: "test_diff_entity",
@@ -517,7 +517,7 @@ simulationTest(
 
 		// Insert entity only in target; source never had it and did not delete it
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "only-in-target",
 				schema_key: "test_diff_entity",
@@ -572,7 +572,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_same",
 				schema_key: "test_schemaA",
@@ -594,7 +594,7 @@ simulationTest(
 		// file1/test_schemaA: deleted (source explicitly deletes, target has content later)
 		// Seed then delete in source before target exists (no common ancestor for this key)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
 				schema_key: "test_schemaA",
@@ -607,7 +607,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "e_del")
 			.where("schema_key", "=", "test_schemaA")
 			.where("file_id", "=", "file1")
@@ -623,7 +623,7 @@ simulationTest(
 
 		// file1/test_schemaA: created (only in source)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_add",
 				schema_key: "test_schemaA",
@@ -637,7 +637,7 @@ simulationTest(
 
 		// Ensure target has content for the deleted key
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
 				schema_key: "test_schemaA",
@@ -651,7 +651,7 @@ simulationTest(
 
 		// file1/test_schemaB: updated (both present but different)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
 				schema_key: "test_schemaB",
@@ -664,7 +664,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
 				schema_key: "test_schemaB",

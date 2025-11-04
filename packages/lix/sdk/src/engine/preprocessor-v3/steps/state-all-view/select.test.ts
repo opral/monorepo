@@ -26,12 +26,12 @@ function run(sql: string, trace?: PreprocessorTrace): SelectStatementNode {
 }
 
 describe("rewriteStateAllViewSelect", () => {
-	test("rewrites state_all reference into subquery", () => {
+	test("rewrites state_by_version reference into subquery", () => {
 		const trace: PreprocessorTrace = [];
 		const node = run(
 			`
 				SELECT sa.*
-				FROM state_all AS sa
+				FROM state_by_version AS sa
 				WHERE sa.schema_key = 'test'
 			`,
 			trace
@@ -55,12 +55,12 @@ describe("rewriteStateAllViewSelect", () => {
 		});
 	});
 
-	test("rewrites nested state_all reference inside subquery", () => {
+	test("rewrites nested state_by_version reference inside subquery", () => {
 		const node = run(`
 		SELECT outer_alias.*
 		FROM (
 			SELECT *
-			FROM state_all
+			FROM state_by_version
 			WHERE schema_key = 'nested'
 		) AS outer_alias
 	`);
@@ -77,7 +77,7 @@ describe("rewriteStateAllViewSelect", () => {
 	test("narrows projection to referenced columns", () => {
 		const node = run(`
 		SELECT sa.file_id
-		FROM state_all AS sa
+		FROM state_by_version AS sa
 		WHERE sa.schema_key = 'narrow'
 	`);
 
@@ -93,7 +93,7 @@ describe("rewriteStateAllViewSelect", () => {
 	test("projection includes metadata when explicitly selected", () => {
 		const node = run(`
 		SELECT sa.metadata, sa.file_id
-		FROM state_all AS sa
+		FROM state_by_version AS sa
 		WHERE sa.schema_key = 'with_metadata'
 	`);
 
@@ -114,7 +114,7 @@ describe("rewriteStateAllViewSelect", () => {
 	test("prunes unused columns", () => {
 		const node = run(`
 		SELECT sa.file_id
-		FROM state_all AS sa
+		FROM state_by_version AS sa
 	`);
 
 		const subquery = extractStateAllSubquery(node).select;
@@ -141,7 +141,7 @@ function extractStateAllSubquery(node: SqlNode): {
 	const select = assertSelect(node);
 	const fromClause = select.from_clauses[0];
 	if (!fromClause || fromClause.relation.node_kind !== "subquery") {
-		throw new Error("expected subquery relation for state_all rewrite");
+		throw new Error("expected subquery relation for state_by_version rewrite");
 	}
 	const alias = getIdentifierValue(fromClause.relation.alias);
 	const innerFrom = fromClause.relation.statement.from_clauses[0];

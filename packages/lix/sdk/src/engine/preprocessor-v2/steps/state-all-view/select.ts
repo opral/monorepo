@@ -13,7 +13,7 @@ import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 import { internalQueryBuilder } from "../../../internal-query-builder.js";
 
 /**
- * Rewrites references to the `state_all` view so callers query the underlying
+ * Rewrites references to the `state_by_version` view so callers query the underlying
  * vtable directly instead of going through the SQLite view layer.
  */
 export const rewriteStateAllViewSelect: PreprocessorStep = ({
@@ -118,10 +118,10 @@ function rewriteRelation(
 
 		if (TableNode.is(inner)) {
 			const identifier = extractIdentifier(inner.table);
-			if (identifier === "state_all") {
+			if (identifier === "state_by_version") {
 				const binding = IdentifierNode.is(node.alias)
 					? node.alias.name
-					: "state_all";
+					: "state_by_version";
 				references.push({ binding });
 				return {
 					operation: createStateAllAlias(binding),
@@ -145,10 +145,10 @@ function rewriteRelation(
 
 	if (TableNode.is(node)) {
 		const identifier = extractIdentifier(node.table);
-		if (identifier === "state_all") {
-			references.push({ binding: "state_all" });
+		if (identifier === "state_by_version") {
+			references.push({ binding: "state_by_version" });
 			return {
-				operation: createStateAllAlias("state_all"),
+				operation: createStateAllAlias("state_by_version"),
 				changed: true,
 			};
 		}
@@ -212,7 +212,7 @@ function buildTraceEntry(
 	references: StateAllReference[]
 ): PreprocessorTraceEntry {
 	return {
-		step: "rewrite_state_all_view_select",
+		step: "rewrite_state_by_version_view_select",
 		payload: {
 			reference_count: references.length,
 			bindings: references.map((ref) => ref.binding),

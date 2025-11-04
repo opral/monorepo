@@ -20,8 +20,8 @@ export interface CachePopulationArgs {
 	schemaKeyHints?: readonly string[];
 }
 
-// Prevent re-entrancy when the stale-flag probe performs its own state_all read.
-// Without this guard, ensureFreshStateCache → isStaleStateCache → SELECT state_all
+// Prevent re-entrancy when the stale-flag probe performs its own state_by_version read.
+// Without this guard, ensureFreshStateCache → isStaleStateCache → SELECT state_by_version
 // would recurse into ensureFreshStateCache again and loop forever.
 const guardDepth = new WeakMap<object, number>();
 

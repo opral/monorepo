@@ -40,7 +40,7 @@ describe("materializer: select all from single version", async () => {
 
 	// Seed a single commit containing many entities in the global version
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values(
 			Array.from({ length: ROWS_SIMPLE }, (_, i) => ({
 				entity_id: `bench_entity_${i}`,
@@ -69,7 +69,7 @@ describe("materializer: select all from single version", async () => {
 
 		for (let c = 0; c < COMMITS_LINEAR; c++) {
 			await lix.db
-				.insertInto("state_all")
+				.insertInto("state_by_version")
 				.values(
 					Array.from({ length: ENTITIES_LINEAR }, (_, i) => ({
 						entity_id: `lin_entity_${i}`,
@@ -118,7 +118,7 @@ describe("materializer: select all from single version", async () => {
 		});
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values(
 				Array.from({ length: INHERIT_BASE }, (_, i) => ({
 					entity_id: `inh_entity_${i}`,
@@ -133,7 +133,7 @@ describe("materializer: select all from single version", async () => {
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values(
 				Array.from({ length: 100 }, (_, i) => ({
 					entity_id: `inh_entity_${i}`,
@@ -148,7 +148,7 @@ describe("materializer: select all from single version", async () => {
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values([
 				...Array.from({ length: 50 }, (_, i) => ({
 					entity_id: `inh_entity_${100 + i}`,
@@ -194,7 +194,7 @@ describe("materializer: select all from single version", async () => {
 		const pointVersion = await createVersion({ lix, id: "bench_point" });
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values(
 				Array.from({ length: ROWS_SIMPLE }, (_, i) => ({
 					entity_id: `point_entity_${i}`,

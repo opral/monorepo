@@ -523,7 +523,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// The test entities should exist in their respective versions
 	const versionAEntity = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "version-a-entity")
 		.where("version_id", "=", versionAId)
 		.selectAll()
@@ -532,7 +532,7 @@ test("commit should handle multiple versions correctly", async () => {
 	expect(versionAEntity).toBeDefined();
 
 	const versionBEntity = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "version-b-entity")
 		.where("version_id", "=", versionBId)
 		.selectAll()

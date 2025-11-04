@@ -71,7 +71,7 @@ describe("entity view select synthesis", () => {
 		expect(map.has("unit_test_schema_history")).toBe(true);
 
 		const base = map.get("unit_test_schema")!;
-		expect(base).toContain("FROM state_all");
+		expect(base).toContain("FROM state_by_version");
 		expect(base).toContain("schema_key = 'unit_test_schema'");
 		expect(base).toContain(
 			"AND sa.version_id = (SELECT version_id FROM active_version)"
@@ -83,7 +83,7 @@ describe("entity view select synthesis", () => {
 		expect(base).toContain("sa.plugin_key AS lixcol_plugin_key");
 
 		const all = map.get("unit_test_schema_all")!;
-		expect(all).toContain("FROM state_all");
+		expect(all).toContain("FROM state_by_version");
 		expect(all).toContain("version_id AS lixcol_version_id");
 
 		const history = map.get("unit_test_schema_history")!;
@@ -145,7 +145,7 @@ describe("entity view select synthesis", () => {
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "row-1",
 				schema_key: "e2e_schema",
@@ -205,7 +205,7 @@ describe("entity view select synthesis", () => {
 		const entityId = "entity-1";
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: entityId,
 				schema_key: schemaKey,
@@ -297,7 +297,7 @@ describe("entity view select synthesis", () => {
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "row-1",
 				schema_key: "transient_schema",

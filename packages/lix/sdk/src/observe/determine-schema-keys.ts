@@ -57,7 +57,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 	const specialMappings = {
 		change: "change",
 		state: "state",
-		state_all: "state_all",
+		state_by_version: "state_by_version",
 		version: "lix_version",
 		active_version: "lix_active_version",
 	} as const;
@@ -82,7 +82,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 	}
 
 	// Try to detect literal schema_key filters from the compiled SQL and parameters.
-	// This allows more precise dependency tracking for state_all queries.
+	// This allows more precise dependency tracking for state_by_version queries.
 	const sqlText: string | undefined = (compiledQuery?.sql ??
 		compiledQuery?.query?.sql) as any;
 	const params: any[] = (compiledQuery?.parameters ??

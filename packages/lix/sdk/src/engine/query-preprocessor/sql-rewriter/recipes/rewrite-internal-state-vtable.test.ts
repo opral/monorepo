@@ -177,7 +177,7 @@ test.skip("matrix of queries preserves precedence across rewrites", async () => 
 	});
 });
 
-test("rewriteSql routes placeholder schema key through state_all expansion with cache tables", () => {
+test("rewriteSql routes placeholder schema key through state_by_version expansion with cache tables", () => {
 	const sqlText = `select "snapshot_content" from (
       SELECT
         entity_id,
@@ -201,7 +201,7 @@ test("rewriteSql routes placeholder schema key through state_all expansion with 
         ) AS metadata
       FROM lix_internal_state_vtable
       WHERE snapshot_content IS NOT NULL
-    ) AS "state_all"
+    ) AS "state_by_version"
     WHERE "schema_key" = ?1
       AND json_extract(snapshot_content, '$.id') = ?2
       AND "version_id" = ?3

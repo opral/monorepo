@@ -54,7 +54,7 @@ test("materializeFileData with plugin that has changes", async () => {
 
 	// Manually insert some state data to simulate plugin changes
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity1",
 			schema_key: "test_schema",

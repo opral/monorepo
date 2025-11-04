@@ -31,7 +31,7 @@ function run(sql: string) {
 }
 
 describe("rewriteStateViewSelect", () => {
-	test("rewrites state view into state_all subquery", () => {
+	test("rewrites state view into state_by_version subquery", () => {
 		const { node, trace } = run(`
 			SELECT s.entity_id
 			FROM state AS s
@@ -84,9 +84,11 @@ function extractStateSubquery(select: SelectStatementNode): {
 function expectStateAllRelation(select: SelectStatementNode): void {
 	const fromClause = select.from_clauses[0];
 	if (!fromClause || fromClause.relation.node_kind !== "table_reference") {
-		throw new Error("expected table reference to state_all");
+		throw new Error("expected table reference to state_by_version");
 	}
-	expect(objectNameMatches(fromClause.relation.name, "state_all")).toBe(true);
+	expect(objectNameMatches(fromClause.relation.name, "state_by_version")).toBe(
+		true
+	);
 	expect(getIdentifierValue(fromClause.relation.alias)).toBe("sa");
 }
 

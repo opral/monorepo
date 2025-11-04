@@ -93,7 +93,7 @@ test("populateStateCacheV2 materializes normalized rows for global version", asy
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	await db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity-1",
 			schema_key: "lix_example",

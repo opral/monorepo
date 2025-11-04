@@ -50,7 +50,7 @@ const formatPositionalParameter = (index: number): string => `?${index + 1}`;
 
 /**
  * Rewrites DELETE statements that target stored-schema entity views so that the
- * mutation applies directly to `state_all` instead of relying on SQLite
+ * mutation applies directly to `state_by_version` instead of relying on SQLite
  * triggers.
  *
  * @example
@@ -61,7 +61,7 @@ const formatPositionalParameter = (index: number): string => `?${index + 1}`;
  *   parameters: ["row-1"],
  *   engine,
  * });
- * // => DELETE FROM state_all ...
+ * // => DELETE FROM state_by_version ...
  * ```
  */
 export function rewriteEntityDelete(args: {
@@ -191,7 +191,9 @@ export function rewriteEntityDelete(args: {
 	const whereClauses: string[] = [];
 	let hasVersionCondition = false;
 
-	whereClauses.push(`state_all.schema_key = ${literal(storedSchemaKey)}`);
+	whereClauses.push(
+		`state_by_version.schema_key = ${literal(storedSchemaKey)}`
+	);
 
 	for (const condition of whereConditions ?? []) {
 		const column = condition.name;
@@ -215,26 +217,26 @@ export function rewriteEntityDelete(args: {
 
 		switch (column) {
 			case "lixcol_entity_id":
-				whereClauses.push(`state_all.entity_id = ${rendered}`);
+				whereClauses.push(`state_by_version.entity_id = ${rendered}`);
 				break;
 			case "lixcol_schema_key":
-				whereClauses.push(`state_all.schema_key = ${rendered}`);
+				whereClauses.push(`state_by_version.schema_key = ${rendered}`);
 				break;
 			case "lixcol_file_id":
-				whereClauses.push(`state_all.file_id = ${rendered}`);
+				whereClauses.push(`state_by_version.file_id = ${rendered}`);
 				break;
 			case "lixcol_plugin_key":
-				whereClauses.push(`state_all.plugin_key = ${rendered}`);
+				whereClauses.push(`state_by_version.plugin_key = ${rendered}`);
 				break;
 			case "lixcol_version_id":
 				hasVersionCondition = true;
-				whereClauses.push(`state_all.version_id = ${rendered}`);
+				whereClauses.push(`state_by_version.version_id = ${rendered}`);
 				break;
 			case "lixcol_metadata":
-				whereClauses.push(`state_all.metadata = ${rendered}`);
+				whereClauses.push(`state_by_version.metadata = ${rendered}`);
 				break;
 			case "lixcol_untracked":
-				whereClauses.push(`state_all.untracked = ${rendered}`);
+				whereClauses.push(`state_by_version.untracked = ${rendered}`);
 				break;
 			default:
 				return null;
@@ -245,15 +247,19 @@ export function rewriteEntityDelete(args: {
 	if (!hasVersionCondition) {
 		if (variant === "base") {
 			if (defaultVersion !== undefined) {
-				whereClauses.push(`state_all.version_id = ${literal(defaultVersion)}`);
+				whereClauses.push(
+					`state_by_version.version_id = ${literal(defaultVersion)}`
+				);
 			} else {
 				whereClauses.push(
-					`state_all.version_id = (SELECT version_id FROM active_version)`
+					`state_by_version.version_id = (SELECT version_id FROM active_version)`
 				);
 			}
 		} else if (variant === "all") {
 			if (defaultVersion !== undefined) {
-				whereClauses.push(`state_all.version_id = ${literal(defaultVersion)}`);
+				whereClauses.push(
+					`state_by_version.version_id = ${literal(defaultVersion)}`
+				);
 			} else {
 				throw new Error(
 					`DELETE from ${viewNameRaw} requires explicit lixcol_version_id or schema default`
@@ -262,7 +268,7 @@ export function rewriteEntityDelete(args: {
 		}
 	}
 
-	const rewrittenSql = `DELETE FROM state_all\nWHERE\n  ${whereClauses.join("\n  AND ")}`;
+	const rewrittenSql = `DELETE FROM state_by_version\nWHERE\n  ${whereClauses.join("\n  AND ")}`;
 
 	return {
 		sql: rewrittenSql,

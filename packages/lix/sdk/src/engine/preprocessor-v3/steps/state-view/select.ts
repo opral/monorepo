@@ -23,7 +23,7 @@ import { columnReference, identifier } from "../../sql-parser/nodes.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 
 const STATE_VIEW_NAME = "state";
-const STATE_ALL_TABLE = "state_all";
+const STATE_ALL_TABLE = "state_by_version";
 const STATE_COLUMNS = [
 	"entity_id",
 	"schema_key",
@@ -49,7 +49,7 @@ type StateReference = {
 };
 
 /**
- * Rewrites the public `state` view to reuse the `state_all` rewrite while
+ * Rewrites the public `state` view to reuse the `state_by_version` rewrite while
  * preserving the active-version filter that the view enforces.
  */
 export const rewriteStateViewSelect: PreprocessorStep = (context) => {

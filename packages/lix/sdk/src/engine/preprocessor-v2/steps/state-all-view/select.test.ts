@@ -6,11 +6,11 @@ import { parse } from "../../sql-parser/parser.js";
 import { toRootOperationNode } from "../../sql-parser/to-root-operation-node.js";
 
 describe("rewriteStateAllViewSelect", () => {
-	test("rewrites state_all reference into a vtable-backed subquery", () => {
+	test("rewrites state_by_version reference into a vtable-backed subquery", () => {
 		const node = toRootOperationNode(
 			parse(`
 				SELECT sa.*
-				FROM state_all AS sa
+				FROM state_by_version AS sa
 				WHERE sa.schema_key = 'test_schema'
 			`)
 		);
@@ -26,7 +26,7 @@ describe("rewriteStateAllViewSelect", () => {
 
 		const { sql } = compile(rewritten);
 
-		expect(sql.toUpperCase()).not.toMatch(/\bFROM\s+"?STATE_ALL"?\b/);
+		expect(sql.toUpperCase()).not.toMatch(/\bFROM\s+"?STATE_BY_VERSION"?\b/);
 		expect(sql.toUpperCase()).toContain('FROM "LIX_INTERNAL_STATE_VTABLE"');
 		expect(sql).toContain("json(metadata)");
 		expect(trace[0]?.payload).toMatchObject({
@@ -35,13 +35,13 @@ describe("rewriteStateAllViewSelect", () => {
 		});
 	});
 
-	test("rewrites nested state_all reference inside alias subquery", () => {
+	test("rewrites nested state_by_version reference inside alias subquery", () => {
 		const node = toRootOperationNode(
 			parse(`
 				SELECT wrapped.*
 				FROM (
 					SELECT *
-					FROM state_all
+					FROM state_by_version
 					WHERE schema_key = 'test_schema'
 				) AS wrapped
 			`)
@@ -59,11 +59,11 @@ describe("rewriteStateAllViewSelect", () => {
 		const { sql } = compile(rewritten);
 		const upper = sql.toUpperCase();
 
-		expect(upper).not.toMatch(/\bFROM\s+"?STATE_ALL"?\b/);
+		expect(upper).not.toMatch(/\bFROM\s+"?STATE_BY_VERSION"?\b/);
 		expect(upper).toContain('FROM "LIX_INTERNAL_STATE_VTABLE"');
 		expect(trace[0]?.payload).toMatchObject({
 			reference_count: 1,
-			bindings: ["state_all"],
+			bindings: ["state_by_version"],
 		});
 	});
 });

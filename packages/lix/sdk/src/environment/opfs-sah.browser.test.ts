@@ -279,7 +279,7 @@ export default plugin;
 
 			// Plugin should have inserted a state row with our mock schema key
 			const row = await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "mock_schema")
 				.executeTakeFirst();

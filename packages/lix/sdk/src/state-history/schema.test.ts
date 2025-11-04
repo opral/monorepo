@@ -29,7 +29,7 @@ test("query current state at head of version lineage", async () => {
 
 	// Insert initial state (defaults to active version)
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -85,7 +85,7 @@ test("query state at specific depth in history", async () => {
 
 	// Insert and modify entity multiple times
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -98,13 +98,13 @@ test("query state at specific depth in history", async () => {
 		.execute();
 
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "value1" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "value2" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -297,7 +297,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 
 	// Insert initial state
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -348,7 +348,7 @@ test("diff detection between current and checkpoint state", async () => {
 
 	// Insert entity
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -365,7 +365,7 @@ test("diff detection between current and checkpoint state", async () => {
 
 	// Modify the same entity after checkpoint
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "modified" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -425,7 +425,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 
 	// Insert entity
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -442,7 +442,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 
 	// Delete entity
 	await lix.db
-		.deleteFrom("state_all")
+		.deleteFrom("state_by_version")
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
@@ -501,7 +501,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 
 	// Insert entity after checkpoint
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -642,7 +642,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Insert initial entity
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -659,7 +659,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Modify and create second checkpoint
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "checkpoint 2 content" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -668,7 +668,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Modify for current working state
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "working content" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -734,7 +734,7 @@ test("query history between two commits using ancestor/descendant filters", asyn
 
 	// Create a series of checkpoints with entity changes
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "tracked-entity",
 			file_id: "f0",
@@ -750,7 +750,7 @@ test("query history between two commits using ancestor/descendant filters", asyn
 
 	// Modify and create checkpoint 2
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "checkpoint 2 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();
@@ -759,7 +759,7 @@ test("query history between two commits using ancestor/descendant filters", asyn
 
 	// Modify and create checkpoint 3
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "checkpoint 3 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();
@@ -768,7 +768,7 @@ test("query history between two commits using ancestor/descendant filters", asyn
 
 	// Modify and create checkpoint 4
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({ snapshot_content: { value: "checkpoint 4 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();

@@ -168,7 +168,7 @@ export function selectWorkingDiff(args: {
 
 	// Unchanged rows = non-inherited, tracked state rows without a working CSE entry
 	const unchanged = db
-		.selectFrom("state_all as sa")
+		.selectFrom("state_by_version as sa")
 		.whereRef(
 			"sa.version_id",
 			"=",

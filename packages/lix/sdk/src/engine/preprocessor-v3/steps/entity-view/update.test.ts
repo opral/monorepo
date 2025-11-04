@@ -42,9 +42,9 @@ test("rewrites updates for stored schema views", async () => {
 		parameters: ["Updated", "row-1"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain(
-		"json_extract(state_all.snapshot_content, '$.id') = ?"
+		"json_extract(state_by_version.snapshot_content, '$.id') = ?"
 	);
 	expect(updateResult.parameters).toEqual(["Updated", "row-1"]);
 
@@ -113,7 +113,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 		parameters: ["Updated", "v-1"],
 	});
 	const sql = updateResult.sql;
-	expect(sql).toContain("UPDATE state_all");
+	expect(sql).toContain("UPDATE state_by_version");
 	expect(sql).toContain("'global'");
 	expect(updateResult.parameters).toEqual(["Updated", "v-1"]);
 
@@ -124,7 +124,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 	});
 
 	const stored = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "version_override_schema")
 		.where("entity_id", "=", "v-1")
 		.where("version_id", "=", "global")
@@ -156,7 +156,7 @@ test("prefixless alias updates target stored schema key", async () => {
 		parameters: ["baz", "alias"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain("lix_key_value");
 	expect(updateResult.parameters).toEqual(["baz", "alias"]);
 
@@ -275,7 +275,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 		parameters: ["Changed", "meta-1"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain("'global'");
 
 	lix.engine!.executeSync({
@@ -285,7 +285,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 	});
 
 	const stored = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "base_metadata_update")
 		.where("entity_id", "=", "meta-1")
 		.where("version_id", "=", "global")

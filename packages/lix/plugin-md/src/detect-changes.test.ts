@@ -49,11 +49,11 @@ async function seedMarkdownState(args: {
 	const CHUNK = 200;
 	for (let i = 0; i < values.length; i += CHUNK) {
 		const slice = values.slice(i, i + CHUNK);
-		await lix.db.insertInto("state_all").values(slice).execute();
+		await lix.db.insertInto("state_by_version").values(slice).execute();
 	}
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "root",
 			schema_key: (AstSchemas.RootOrderSchema as any)["x-lix-key"],

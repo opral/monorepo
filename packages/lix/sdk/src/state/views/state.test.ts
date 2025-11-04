@@ -69,13 +69,13 @@ simulationTest(
 		});
 
 		// Verify the version_id was auto-filled with the active version
-		const entityInStateAll = await lix.db
-			.selectFrom("state_all")
+		const entityInStateByVersion = await lix.db
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "entity0")
 			.select("version_id")
 			.executeTakeFirstOrThrow();
 
-		expectDeterministic(entityInStateAll.version_id).toBe(
+		expectDeterministic(entityInStateByVersion.version_id).toBe(
 			activeVersion.version_id
 		);
 

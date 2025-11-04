@@ -88,7 +88,7 @@ describe("deterministic state validation", () => {
 			});
 
 			const allState = await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.execute();
 

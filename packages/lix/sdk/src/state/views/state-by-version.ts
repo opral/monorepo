@@ -1,7 +1,7 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
 
-export type StateAllView = {
+export type StateByVersionView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
@@ -20,19 +20,19 @@ export type StateAllView = {
 };
 
 // Kysely operation types
-export type StateAllRow = Selectable<StateAllView>;
-export type NewStateAllRow = Insertable<StateAllView>;
-export type StateAllRowUpdate = Updateable<StateAllView>;
+export type StateByVersionRow = Selectable<StateByVersionView>;
+export type NewStateByVersionRow = Insertable<StateByVersionView>;
+export type StateByVersionRowUpdate = Updateable<StateByVersionView>;
 
 /**
- * Creates the public state_all view (no tombstones) over the internal vtable,
+ * Creates the public state_by_version view (no tombstones) over the internal vtable,
  * plus INSTEAD OF triggers to forward writes to the internal vtable.
  */
-export function applyStateAllView(args: {
+export function applyStateByVersionView(args: {
 	engine: Pick<LixEngine, "sqlite">;
 }): void {
 	args.engine.sqlite.exec(`
-    CREATE VIEW IF NOT EXISTS state_all AS
+    CREATE VIEW IF NOT EXISTS state_by_version AS
     SELECT 
       entity_id,
       schema_key,
@@ -56,9 +56,9 @@ export function applyStateAllView(args: {
     FROM lix_internal_state_vtable
     WHERE snapshot_content IS NOT NULL;
 
-    -- Forward writes on state_all to the internal vtable
-    CREATE TRIGGER IF NOT EXISTS state_all_insert
-    INSTEAD OF INSERT ON state_all
+    -- Forward writes on state_by_version to the internal vtable
+    CREATE TRIGGER IF NOT EXISTS state_by_version_insert
+    INSTEAD OF INSERT ON state_by_version
     BEGIN
       INSERT INTO lix_internal_state_vtable (
         entity_id,
@@ -88,8 +88,8 @@ export function applyStateAllView(args: {
         AND version_id = NEW.version_id;
     END;
 
-    CREATE TRIGGER IF NOT EXISTS state_all_update
-    INSTEAD OF UPDATE ON state_all
+    CREATE TRIGGER IF NOT EXISTS state_by_version_update
+    INSTEAD OF UPDATE ON state_by_version
     BEGIN
       UPDATE lix_internal_state_vtable
       SET
@@ -114,8 +114,8 @@ export function applyStateAllView(args: {
         AND version_id = NEW.version_id;
     END;
 
-    CREATE TRIGGER IF NOT EXISTS state_all_delete
-    INSTEAD OF DELETE ON state_all
+    CREATE TRIGGER IF NOT EXISTS state_by_version_delete
+    INSTEAD OF DELETE ON state_by_version
     BEGIN
       DELETE FROM lix_internal_state_vtable
       WHERE

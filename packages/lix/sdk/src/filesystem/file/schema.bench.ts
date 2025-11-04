@@ -194,7 +194,12 @@ describe("batch file reads - select multiple files", () => {
 
 describe("file reads with varying sizes", () => {
 	let lix: FileBenchCtx;
-	let files: { id: string }[];
+	let files: Array<{
+		id: string;
+		path: string;
+		data: Uint8Array;
+		hidden?: boolean;
+	}>;
 
 	beforeAll(async () => {
 		lix = await createFileBenchCtx();

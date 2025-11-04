@@ -253,7 +253,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 		parameters: ["acc-1", "Defaulted"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["acc-1", "Defaulted"]);
 
@@ -264,7 +264,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	});
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["version_id", "schema_key", "entity_id"] as const)
 		.where("schema_key", "=", "insertable_schema")
 		.where("entity_id", "=", "acc-1")
@@ -312,7 +312,7 @@ test("base-only view applies lixcol version id override", async () => {
 		parameters: ["base-1", "Base Entity"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["base-1", "Base Entity"]);
 
@@ -323,7 +323,7 @@ test("base-only view applies lixcol version id override", async () => {
 	});
 
 	const row = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select([
 			"entity_id",
 			"version_id",
@@ -383,7 +383,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		parameters: ["catA", "idB", "example"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toMatch(/\(\?\d+\s*\|\|\s*'~'\s*\|\|\s*\?\d+\)/);
 
 	lix.engine!.executeSync({
@@ -393,7 +393,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	});
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "schema_key", "snapshot_content"])
 		.where("schema_key", "=", "mock_composite_schema")
 		.execute();
@@ -463,7 +463,7 @@ test("stored_schema insert uses pointer primary key components", async () => {
 	});
 
 	const inserted = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "schema_key", "snapshot_content"])
 		.where("schema_key", "=", "lix_stored_schema")
 		.where(
@@ -528,7 +528,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 		parameters: [JSON.stringify({ id: "nested-id", value: "payload-value" })],
 	});
 
-	expect(rewritten?.sql).toContain("INSERT INTO state_all");
+	expect(rewritten?.sql).toContain("INSERT INTO state_by_version");
 
 	lix.engine!.executeSync({
 		sql: rewritten!.sql,
@@ -537,7 +537,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 	});
 
 	const stateRow = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "snapshot_content"])
 		.where("schema_key", "=", "pointer_entity_schema")
 		.executeTakeFirstOrThrow();
@@ -622,7 +622,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 		parameters: ["alias", JSON.stringify({ foo: "bar" })],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("lix_key_value");
 	expect(rewritten.parameters).toEqual(["alias", '{"foo":"bar"}']);
 
@@ -736,7 +736,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		parameters: ["row-default"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
@@ -996,7 +996,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 	]);
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["snapshot_content"] as const)
 		.where("schema_key", "=", "multi_schema")
 		.orderBy("entity_id")
@@ -1048,7 +1048,7 @@ test("regression: handles json function call parameters when deriving entity_id"
 		parameters: [JSON.stringify("row-1"), "Function Call"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.parameters).toEqual([
 		JSON.stringify("row-1"),
 		"Function Call",
@@ -1061,7 +1061,7 @@ test("regression: handles json function call parameters when deriving entity_id"
 	});
 
 	const inserted = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "schema_key"] as const)
 		.where("schema_key", "=", "json_function_schema")
 		.executeTakeFirstOrThrow();

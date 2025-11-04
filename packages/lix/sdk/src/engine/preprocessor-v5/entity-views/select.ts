@@ -144,7 +144,7 @@ function createActiveSelect(args: {
 
 	const versionFilter = buildActiveVersionFilter(schema, alias);
 
-	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_all ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'\n  AND ${versionFilter}`;
+	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_by_version ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'\n  AND ${versionFilter}`;
 }
 
 function createAllSelect(args: {
@@ -174,7 +174,7 @@ function createAllSelect(args: {
 		`${alias}.metadata AS lixcol_metadata`,
 	];
 
-	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_all ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'`;
+	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_by_version ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'`;
 }
 
 function createHistorySelect(args: {

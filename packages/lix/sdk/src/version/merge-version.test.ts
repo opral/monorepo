@@ -50,7 +50,7 @@ simulationTest(
 
 		// Insert entities only in source
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_created_1",
 				schema_key: "test_entity",
@@ -63,7 +63,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_created_2",
 				schema_key: "test_entity",
@@ -80,7 +80,7 @@ simulationTest(
 
 		// Target should now contain the created entities with source content
 		const targetRows = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileA")
 			.where("schema_key", "=", "test_entity")
@@ -109,7 +109,7 @@ simulationTest(
 		// Ensure no new change rows were created for these entities
 		// 1) Target change_ids equal source change_ids
 		const sourceRows = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", source.id)
 			.where("file_id", "=", "fileA")
 			.where("schema_key", "=", "test_entity")
@@ -157,7 +157,7 @@ simulationTest(
 
 		// Seed different content on both
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
 				schema_key: "test_entity",
@@ -170,7 +170,7 @@ simulationTest(
 			.execute();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
 				schema_key: "test_entity",
@@ -184,7 +184,7 @@ simulationTest(
 
 		// Capture source change_id
 		const srcRow = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", source.id)
 			.where("file_id", "=", "fileU")
 			.where("schema_key", "=", "test_entity")
@@ -195,7 +195,7 @@ simulationTest(
 		await mergeVersion({ lix, source, target });
 
 		const tgtRow = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileU")
 			.where("schema_key", "=", "test_entity")
@@ -229,7 +229,7 @@ simulationTest(
 
 		// Seed live in target
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
 				schema_key: "test_entity",
@@ -243,7 +243,7 @@ simulationTest(
 
 		// Create live in source then delete to create tombstone
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
 				schema_key: "test_entity",
@@ -255,7 +255,7 @@ simulationTest(
 			})
 			.execute();
 		await lix.db
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "e_del")
 			.where("schema_key", "=", "test_entity")
 			.where("file_id", "=", "fileD")
@@ -266,7 +266,7 @@ simulationTest(
 
 		// Target should have no live entity now
 		const tgtRows = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileD")
 			.where("schema_key", "=", "test_entity")
@@ -350,7 +350,7 @@ simulationTest(
 
 		// Seed only in target
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "only-target",
 				schema_key: "test_entity",
@@ -372,7 +372,7 @@ simulationTest(
 
 		// Target row unchanged
 		const tgt = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileT")
 			.where("schema_key", "=", "test_entity")
@@ -445,7 +445,7 @@ simulationTest(
 		const target = await createVersion({ lix, name: "target" });
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "idem-1",
 				schema_key: "test_entity",
@@ -517,7 +517,7 @@ simulationTest(
 
 		// Verify snapshots after first merge
 		const firstStateAll = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileI")
 			.where("schema_key", "=", "test_entity")
@@ -550,7 +550,7 @@ simulationTest(
 
 		// State remains referenced once
 		const tgtRows = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileI")
 			.where("schema_key", "=", "test_entity")
@@ -561,7 +561,7 @@ simulationTest(
 
 		// Verify snapshots after second merge
 		const secondStateAll = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileI")
 			.where("schema_key", "=", "test_entity")
@@ -598,7 +598,7 @@ simulationTest(
 
 		// Seed some business data in the version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "noop-1",
 				schema_key: "test_entity",
@@ -642,7 +642,7 @@ simulationTest(
 
 		//  tate remains unchanged
 		const row = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("file_id", "=", "fileS")
 			.where("schema_key", "=", "test_entity")
 			.where("entity_id", "=", "noop-1")
@@ -689,7 +689,7 @@ simulationTest(
 
 		// Insert one entity only in source
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "merge-meta-1",
 				schema_key: "test_entity",
@@ -841,7 +841,7 @@ simulationTest(
 
 		// Business state lands in target version's state view
 		const targetState = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("version_id", "=", target.id)
 			.where("file_id", "=", "fileM")
 			.where("schema_key", "=", "test_entity")

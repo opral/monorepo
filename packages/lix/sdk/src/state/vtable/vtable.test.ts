@@ -468,7 +468,7 @@ simulationTest(
 );
 
 simulationTest(
-	"writer_key exposed on state/state_all/state_with_tombstones",
+	"writer_key exposed on state/state_by_version/state_with_tombstones",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -512,9 +512,9 @@ simulationTest(
 				.execute()
 		);
 
-		// state_all
+		// state_by_version
 		const sAll = await db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "vw1")
 			.select(["entity_id", sql`writer_key`.as("writer_key")])
 			.executeTakeFirstOrThrow();
@@ -959,7 +959,7 @@ simulationTest(
 
 		const selectStateMetadata = async () =>
 			await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.where("entity_id", "=", "meta-entity")
 				.where("schema_key", "=", "lix_key_value")
 				.select(["metadata"])
@@ -1865,7 +1865,7 @@ simulationTest(
 
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "global-entity-1",
 				file_id: "test-file",
@@ -1891,7 +1891,7 @@ simulationTest(
 
 		// The child version should inherit the entity from global
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "global-entity-1")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
@@ -1943,7 +1943,7 @@ simulationTest(
 
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -1968,7 +1968,7 @@ simulationTest(
 
 		// Verify the child initially sees the inherited entity
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
@@ -1987,7 +1987,7 @@ simulationTest(
 
 		// Now modify the entity in the child version (copy-on-write)
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({
 				snapshot_content: {
 					id: "shared-entity",
@@ -2001,7 +2001,7 @@ simulationTest(
 
 		// Verify the child now has its own version of the entity
 		const childEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
@@ -2018,7 +2018,7 @@ simulationTest(
 
 		// Verify the global version still has the original value
 		const globalEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "global")
 			.selectAll()
@@ -2035,7 +2035,7 @@ simulationTest(
 
 		// Verify we now have 2 separate entities (one in global, one in child)
 		const allEntities = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
 			.orderBy("version_id", "asc")
@@ -2102,7 +2102,7 @@ simulationTest(
 
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -2119,7 +2119,7 @@ simulationTest(
 
 		// Verify the child initially sees the inherited entity
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
@@ -2133,14 +2133,14 @@ simulationTest(
 
 		// Delete the inherited entity in child version (should create copy-on-write deletion)
 		await lix.db
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.execute();
 
 		// Verify the entity is deleted in child version
 		const childEntityAfterDelete = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
@@ -2151,7 +2151,7 @@ simulationTest(
 
 		// Verify the entity still exists in global version (not affected by child deletion)
 		const inheritedEntityAfterDelete = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "global")
 			.selectAll()
@@ -2167,7 +2167,7 @@ simulationTest(
 
 		// Verify we now only see the global entity through the state view (deletion marker is hidden)
 		const allEntities = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.selectAll()
 			.execute();
@@ -2238,7 +2238,7 @@ simulationTest(
 
 		// Insert parent entity
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "parent-1",
 				schema_key: "parent_entity",
@@ -2255,7 +2255,7 @@ simulationTest(
 
 		// Insert child entity that references the parent
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "child-1",
 				schema_key: "child_entity",
@@ -2273,14 +2273,14 @@ simulationTest(
 
 		// Verify both entities exist
 		const parentBefore = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
 			.selectAll()
 			.execute();
 
 		const childBefore = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "child-1")
 			.where("schema_key", "=", "child_entity")
 			.selectAll()
@@ -2293,7 +2293,7 @@ simulationTest(
 		// because there's a child entity that references it
 		await expect(
 			lix.db
-				.deleteFrom("state_all")
+				.deleteFrom("state_by_version")
 				.where("entity_id", "=", "parent-1")
 				.where("schema_key", "=", "parent_entity")
 				.execute()
@@ -2301,7 +2301,7 @@ simulationTest(
 
 		// Verify the parent still exists after failed deletion attempt
 		const parentAfter = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
 			.selectAll()
@@ -2744,7 +2744,7 @@ simulationTest(
 
 		// Insert state data
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "timestamp-test-entity",
 				schema_key: "mock_schema",
@@ -2954,7 +2954,7 @@ simulationTest(
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		// Query state_all view to verify commit_id is exposed
+		// Query state_by_version view to verify commit_id is exposed
 		const stateResult = await db
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "change-set-id-test-entity")

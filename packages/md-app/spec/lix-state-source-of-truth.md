@@ -763,7 +763,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
   }).execute();
 
   // Mutate heading entity using enhanced AST schema
-  await lix.db.updateTable("state_all")
+  await lix.db.updateTable("state_by_version")
     .set({
       snapshot_content: JSON.stringify({
         id: "V1StGXR8_Z",
@@ -777,7 +777,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
     .execute();
 
   // Mutate paragraph entity
-  await lix.db.updateTable("state_all")
+  await lix.db.updateTable("state_by_version")
     .set({
       snapshot_content: JSON.stringify({
         id: "3BqYGqeRws",
@@ -804,7 +804,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
   
   // Verify Plate editor would load with correct IDs
   const entities = await lix.db
-    .selectFrom("state_all")
+    .selectFrom("state_by_version")
     .where("file_id", "=", "file1")
     .where("schema_key", "=", "lix_plugin_md_block")
     .select(["entity_id", "snapshot_content"])

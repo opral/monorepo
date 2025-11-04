@@ -550,14 +550,14 @@ test("query with change table join should always re-execute", async () => {
 	await lix.close();
 });
 
-test("state_all observer re-executes when observed schema changes", async () => {
+test("state_by_version observer re-executes when observed schema changes", async () => {
 	const lix = await openLix({});
 	const emissions: any[] = [];
 
 	const sub = lix
 		.observe(
 			lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "lix_key_value")
 		)
@@ -579,14 +579,14 @@ test("state_all observer re-executes when observed schema changes", async () => 
 	await lix.close();
 });
 
-test("state_all observer does not re-execute for unrelated schema changes", async () => {
+test("state_by_version observer does not re-execute for unrelated schema changes", async () => {
 	const lix = await openLix({});
 	const emissions: any[] = [];
 
 	const sub = lix
 		.observe(
 			lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "lix_version")
 		)
@@ -609,7 +609,7 @@ test("state_all observer does not re-execute for unrelated schema changes", asyn
 	await lix.close();
 });
 
-test("state_all observer with version_id filter re-executes only for that version", async () => {
+test("state_by_version observer with version_id filter re-executes only for that version", async () => {
 	const lix = await openLix({});
 	const emissions: any[] = [];
 
@@ -624,7 +624,7 @@ test("state_all observer with version_id filter re-executes only for that versio
 	const sub = lix
 		.observe(
 			lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "lix_key_value")
 				.where("version_id", "=", vA.id)

@@ -40,7 +40,7 @@ export function readDirectoryByPath(args: {
 				SELECT
 					json_extract(snapshot_content, '$.id') AS id,
 					json_extract(snapshot_content, '$.parent_id') AS parent_id
-				FROM state_all
+				FROM state_by_version
 				WHERE schema_key = 'lix_directory_descriptor'
 					AND version_id = ?
 					AND json_extract(snapshot_content, '$.name') = ?
@@ -77,7 +77,7 @@ function readDirectoryDescriptorById(args: {
 }): { id: string; parent_id: string | null; name: string } | undefined {
 	const rows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "lix_directory_descriptor")
 			.where("version_id", "=", args.versionId)
 			.where("entity_id", "=", args.directoryId)

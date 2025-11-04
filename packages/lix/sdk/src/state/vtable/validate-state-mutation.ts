@@ -555,7 +555,7 @@ function validateForeignKeyConstraints(args: {
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
 				query = internalQueryBuilder
-					.selectFrom("state_all" as any)
+					.selectFrom("state_by_version" as any)
 					.select(refPaths.map((path) => path.segments[0]) as any);
 
 				// Add WHERE conditions for each property
@@ -697,7 +697,7 @@ function validateForeignKeyConstraints(args: {
 		if (!args.untracked && !isSpecialEntity) {
 			// Build query to check for untracked references
 			let untrackedQuery = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", foreignKey.references.schemaKey)
 				.where("version_id", "=", args.version_id)
@@ -749,7 +749,7 @@ function validateDeletionConstraints(args: {
 	// Check both direct entities and inherited entities
 	const currentEntity = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
@@ -775,7 +775,7 @@ function validateDeletionConstraints(args: {
 		// Check if entity exists in other versions
 		const entityInOtherVersions = args.engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
 				.where("schema_key", "=", args.schema["x-lix-key"])
@@ -872,7 +872,7 @@ function validateDeletionConstraints(args: {
 
 			// Build query to check if any entities reference these values
 			let query = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", schema["x-lix-key"])
 				.where("version_id", "=", args.version_id);

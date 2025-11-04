@@ -106,7 +106,7 @@ test("arbitrary json is allowed", async () => {
 	expect(viewAfterInsert).toEqual(expected);
 });
 
-test("key_value insert stores proper JSON in state_all (no double encoding)", async () => {
+test("key_value insert stores proper JSON in state_by_version (no double encoding)", async () => {
 	const lix = await openLix({});
 
 	const kvs = [
@@ -121,7 +121,7 @@ test("key_value insert stores proper JSON in state_all (no double encoding)", as
 	await lix.db.insertInto("key_value").values(kvs).execute();
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "lix_key_value")
 		.where(
 			"entity_id",

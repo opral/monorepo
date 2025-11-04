@@ -137,21 +137,21 @@ describe("expandViewsStep", () => {
 	test("only expands on SELECT statements", () => {
 		const trace: PreprocessorTrace = [];
 		const views = new Map([
-			["state_all", "SELECT entity_id FROM lix_internal_state_vtable"],
+			["state_by_version", "SELECT entity_id FROM lix_internal_state_vtable"],
 		]);
 
 		expandViews({
 			statements: [
 				{
-					sql: 'DELETE from "state_all" where "entity_id" = ?',
+					sql: 'DELETE from "state_by_version" where "entity_id" = ?',
 					parameters: ["entity-1"],
 				},
 				{
-					sql: "INSERT INTO 'state_all' (entity_id) VALUES (?)",
+					sql: "INSERT INTO 'state_by_version' (entity_id) VALUES (?)",
 					parameters: ["entity-1"],
 				},
 				{
-					sql: "UPDATE 'state_all' SET entity_id = ? WHERE entity_id = ?",
+					sql: "UPDATE 'state_by_version' SET entity_id = ? WHERE entity_id = ?",
 					parameters: ["entity-2", "entity-1"],
 				},
 			],

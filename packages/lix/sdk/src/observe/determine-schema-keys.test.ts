@@ -67,20 +67,20 @@ test("should extract schema keys from state table queries", async () => {
 	await lix.close();
 });
 
-test("should extract schema keys from state_all table queries", async () => {
+test("should extract schema keys from state_by_version table queries", async () => {
 	const lix = await openLix({});
 
-	// Test query using "state_all" table (includes all versions)
+	// Test query using "state_by_version" table (includes all versions)
 	const stateAllQuery = lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", "test_version_id")
 		.selectAll();
 
 	const schemaKeys = determineSchemaKeys(stateAllQuery.compile());
 
-	// "state_all" should be detected as a special schema key
-	expect(schemaKeys).toContain("state_all");
+	// "state_by_version" should be detected as a special schema key
+	expect(schemaKeys).toContain("state_by_version");
 
 	await lix.close();
 });

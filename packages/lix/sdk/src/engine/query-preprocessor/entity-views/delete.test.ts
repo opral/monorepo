@@ -170,7 +170,7 @@ test("rewrites deletes for _all views", async () => {
 	expect(rows).toEqual([]);
 });
 
-test("skips rewriting for disabled state_all view", async () => {
+test("skips rewriting for disabled state_by_version view", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "limited_delete_schema",
@@ -178,7 +178,7 @@ test("skips rewriting for disabled state_all view", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-entity-views": ["state"] as (
 			| "state"
-			| "state_all"
+			| "state_by_version"
 			| "state_history"
 		)[],
 		type: "object",
@@ -216,7 +216,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 		},
 		"x-lix-entity-views": ["state"] as (
 			| "state"
-			| "state_all"
+			| "state_by_version"
 			| "state_history"
 		)[],
 		type: "object",
@@ -257,7 +257,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	});
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", table)
 		.select(["entity_id"] as const)
 		.execute();

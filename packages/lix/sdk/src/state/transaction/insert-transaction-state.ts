@@ -1,12 +1,12 @@
 import { sql } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
-import type { NewStateAllRow, StateAllRow } from "../index.js";
+import type { NewStateByVersionRow, StateByVersionRow } from "../index.js";
 import { uuidV7Sync } from "../../engine/functions/uuid-v7.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { setHasOpenTransaction } from "../vtable/vtable.js";
 
 type NewTransactionStateRow = Omit<
-	NewStateAllRow,
+	NewStateByVersionRow,
 	"snapshot_content" | "metadata"
 > & {
 	snapshot_content: string | null;
@@ -14,7 +14,7 @@ type NewTransactionStateRow = Omit<
 };
 
 export type TransactionStateRow = Omit<
-	StateAllRow,
+	StateByVersionRow,
 	"snapshot_content" | "metadata"
 > & {
 	snapshot_content: string | null;

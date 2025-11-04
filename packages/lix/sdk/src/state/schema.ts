@@ -2,7 +2,7 @@ import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
-import { applyStateAllView } from "./views/state-all.js";
+import { applyStateByVersionView } from "./views/state-by-version.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
 import { applyStateVTable } from "./vtable/vtable.js";
@@ -39,6 +39,6 @@ export function applyStateDatabaseSchema(args: {
 
 	// Public views over the internal vtable
 	applyStateView({ engine });
-	applyStateAllView({ engine });
+	applyStateByVersionView({ engine });
 	applyStateWithTombstonesView({ engine });
 }

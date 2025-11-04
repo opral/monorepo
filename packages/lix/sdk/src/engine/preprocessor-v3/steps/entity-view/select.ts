@@ -38,7 +38,7 @@ type EntityViewReference = {
 
 const VARIANT_TABLE: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_all",
+	all: "state_by_version",
 	history: "state_history",
 };
 
@@ -189,7 +189,7 @@ function resolveEntityViewReference(
 	if (
 		normalizedViewName.startsWith("lix_internal_") ||
 		normalizedViewName === "state" ||
-		normalizedViewName === "state_all" ||
+		normalizedViewName === "state_by_version" ||
 		normalizedViewName === "state_history"
 	) {
 		return null;
@@ -679,7 +679,7 @@ function relationHasEntityViewCandidate(
 		if (
 			normalized.startsWith("lix_internal_") ||
 			normalized === "state" ||
-			normalized === "state_all" ||
+			normalized === "state_by_version" ||
 			normalized === "state_history"
 		) {
 			return false;

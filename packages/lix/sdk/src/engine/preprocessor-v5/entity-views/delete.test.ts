@@ -99,7 +99,7 @@ const isJsonExtractForProperty = (
 		return false;
 	}
 	if (
-		tableSegment.value.toLowerCase() !== "state_all" ||
+		tableSegment.value.toLowerCase() !== "state_by_version" ||
 		columnSegment.value.toLowerCase() !== "snapshot_content"
 	) {
 		return false;
@@ -189,14 +189,14 @@ test("rewrites deletes for stored schema views", async () => {
 	});
 
 	const ast = getDeleteAst(preprocessedDelete);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "schema_key"]) &&
+				isColumnReference(left, ["state_by_version", "schema_key"]) &&
 				isLiteral(right, "delete_schema")
 		)
 	).toBe(true);
@@ -213,7 +213,7 @@ test("rewrites deletes for stored schema views", async () => {
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "version_id"]) &&
+				isColumnReference(left, ["state_by_version", "version_id"]) &&
 				right.node_kind === "subquery_expression"
 		)
 	).toBe(true);
@@ -261,14 +261,14 @@ test("prefixless alias deletes target stored schema key", async () => {
 	});
 
 	const ast = getDeleteAst(preprocessedDelete);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "schema_key"]) &&
+				isColumnReference(left, ["state_by_version", "schema_key"]) &&
 				isLiteral(right, "lix_key_value")
 		)
 	).toBe(true);
@@ -349,14 +349,14 @@ test("rewrites deletes for _all views", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "schema_key"]) &&
+				isColumnReference(left, ["state_by_version", "schema_key"]) &&
 				isLiteral(right, "delete_schema")
 		)
 	).toBe(true);
@@ -373,7 +373,7 @@ test("rewrites deletes for _all views", async () => {
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "version_id"]) &&
+				isColumnReference(left, ["state_by_version", "version_id"]) &&
 				right.node_kind === "parameter"
 		)
 	).toBe(true);
@@ -399,7 +399,7 @@ test("rewrites deletes for _all views", async () => {
 	await lix.close();
 });
 
-test("skips rewriting for disabled state_all view", async () => {
+test("skips rewriting for disabled state_by_version view", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "limited_delete_schema",
@@ -407,7 +407,7 @@ test("skips rewriting for disabled state_all view", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-entity-views": ["state"] as (
 			| "state"
-			| "state_all"
+			| "state_by_version"
 			| "state_history"
 		)[],
 		type: "object",
@@ -475,14 +475,14 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "schema_key"]) &&
+				isColumnReference(left, ["state_by_version", "schema_key"]) &&
 				isLiteral(right, table)
 		)
 	).toBe(true);
@@ -491,7 +491,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "version_id"]) &&
+				isColumnReference(left, ["state_by_version", "version_id"]) &&
 				isLiteral(right, "global")
 		)
 	).toBe(true);
@@ -503,7 +503,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	});
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", table)
 		.select(["entity_id"] as const)
 		.execute();
@@ -555,14 +555,14 @@ test("base view delete uses schema default version when omitted", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "schema_key"]) &&
+				isColumnReference(left, ["state_by_version", "schema_key"]) &&
 				isLiteral(right, table)
 		)
 	).toBe(true);
@@ -571,7 +571,7 @@ test("base view delete uses schema default version when omitted", async () => {
 		equalityMatches(
 			equalities,
 			(left, right) =>
-				isColumnReference(left, ["state_all", "version_id"]) &&
+				isColumnReference(left, ["state_by_version", "version_id"]) &&
 				isLiteral(right, "global")
 		)
 	).toBe(true);
@@ -640,7 +640,7 @@ test("rewrites delete with OR predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -692,7 +692,7 @@ test("rewrites delete with NOT predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -743,7 +743,7 @@ test("rewrites delete with inequality predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -793,7 +793,7 @@ test("rewrites delete with IS NULL predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_all");
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
 
 	const trace = rewritten.trace ?? [];
 	expect(

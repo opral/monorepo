@@ -169,7 +169,7 @@ describe("rewriteEntityViewSelect", () => {
 
 		expect(baseSql).toContain("schema_key = 'unit_test_schema'");
 		expect(baseSql.toUpperCase()).toMatch(/FROM\s+"?STATE"?/);
-		expect(allSql.toUpperCase()).toMatch(/FROM\s+"?STATE_ALL"?/);
+		expect(allSql.toUpperCase()).toMatch(/FROM\s+"?STATE_BY_VERSION"?/);
 		expect(allSql.toUpperCase()).toContain(
 			'"SA"."VERSION_ID" AS "LIXCOL_VERSION_ID"'
 		);
@@ -242,7 +242,7 @@ describe("rewriteEntityViewSelect", () => {
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "row-1",
 				schema_key: "e2e_schema",
@@ -304,7 +304,7 @@ describe("rewriteEntityViewSelect", () => {
 		const storedSchemas = await collectStoredSchemas(lix);
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "entity-1",
 				schema_key: schemaKey,
@@ -405,7 +405,7 @@ describe("rewriteEntityViewSelect", () => {
 			.executeTakeFirstOrThrow();
 
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "row-1",
 				schema_key: "transient_schema",

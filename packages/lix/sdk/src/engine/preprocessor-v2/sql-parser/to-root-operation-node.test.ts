@@ -57,10 +57,10 @@ test("supports table aliases with AS", () => {
 });
 
 test("supports table aliases without AS", () => {
-	const sql = `SELECT * FROM state_all s`;
+	const sql = `SELECT * FROM state_by_version s`;
 
 	const expectedNode = kysely
-		.selectFrom("state_all as s")
+		.selectFrom("state_by_version as s")
 		.selectAll()
 		.toOperationNode();
 	const node = toRootOperationNode(parse(sql));
@@ -73,10 +73,10 @@ test("supports table aliases without AS", () => {
 });
 
 test("supports where clauses with string literals", () => {
-	const sql = `SELECT * FROM state_all s WHERE s.schema_key = 'test_schema'`;
+	const sql = `SELECT * FROM state_by_version s WHERE s.schema_key = 'test_schema'`;
 
 	const expectedNode = kysely
-		.selectFrom("state_all as s")
+		.selectFrom("state_by_version as s")
 		.selectAll()
 		.where("s.schema_key", "=", "test_schema")
 		.toOperationNode();
@@ -525,7 +525,7 @@ test("supports derived table subqueries", () => {
 		SELECT wrapped.*
 		FROM (
 			SELECT *
-			FROM state_all
+			FROM state_by_version
 			WHERE schema_key = 'test_schema'
 		) AS wrapped
 	`;
@@ -533,7 +533,7 @@ test("supports derived table subqueries", () => {
 	const expectedNode = kysely
 		.selectFrom((eb) =>
 			eb
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "test_schema")
 				.as("wrapped")
@@ -572,10 +572,10 @@ test("supports order by clauses", () => {
 });
 
 test("supports selecting tables via alias wildcards", () => {
-	const sql = `SELECT v.* FROM state_all AS v`;
+	const sql = `SELECT v.* FROM state_by_version AS v`;
 
 	const expectedNode = kysely
-		.selectFrom("state_all as v")
+		.selectFrom("state_by_version as v")
 		.selectAll("v")
 		.toOperationNode();
 	const node = toRootOperationNode(parse(sql));

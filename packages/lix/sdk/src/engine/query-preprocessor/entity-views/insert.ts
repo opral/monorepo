@@ -347,7 +347,7 @@ export function rewriteEntityInsert(args: {
 		);
 	}
 
-	const rewrittenSql = `INSERT INTO state_all (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
+	const rewrittenSql = `INSERT INTO state_by_version (${insertColumns.join(", ")}) VALUES ${rowsSql.join(", ")}`;
 	return {
 		sql: rewrittenSql,
 	};

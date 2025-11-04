@@ -44,7 +44,7 @@ describe("selectVersionDiff playground", () => {
 
 			await Promise.all([
 				lix.db
-					.insertInto("state_all")
+					.insertInto("state_by_version")
 					.values({
 						entity_id: "created_1",
 						schema_key: "test_bench_diff_entity",
@@ -56,7 +56,7 @@ describe("selectVersionDiff playground", () => {
 					})
 					.execute(),
 				lix.db
-					.insertInto("state_all")
+					.insertInto("state_by_version")
 					.values({
 						entity_id: "deleted_1",
 						schema_key: "test_bench_diff_entity",
@@ -69,7 +69,7 @@ describe("selectVersionDiff playground", () => {
 					.execute(),
 				(async () => {
 					await lix.db
-						.insertInto("state_all")
+						.insertInto("state_by_version")
 						.values({
 							entity_id: "updated_1",
 							schema_key: "test_bench_diff_entity",
@@ -81,7 +81,7 @@ describe("selectVersionDiff playground", () => {
 						})
 						.execute();
 					await lix.db
-						.insertInto("state_all")
+						.insertInto("state_by_version")
 						.values({
 							entity_id: "updated_1",
 							schema_key: "test_bench_diff_entity",

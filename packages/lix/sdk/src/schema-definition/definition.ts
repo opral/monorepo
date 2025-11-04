@@ -165,10 +165,10 @@ export const LixSchemaDefinition = {
 				"x-lix-entity-views": {
 					type: "array",
 					description:
-						"Restricts which SQL entity views (state/state_all/state_history) are generated. When omitted, all views are created.",
+						"Restricts which SQL entity views (state/state_by_version/state_history) are generated. When omitted, all views are created.",
 					items: {
 						type: "string",
-						enum: ["state", "state_all", "state_history"],
+						enum: ["state", "state_by_version", "state_history"],
 					},
 					uniqueItems: true,
 				},
@@ -260,7 +260,7 @@ export type LixSchemaDefinition = JSONSchema & {
 	"x-lix-override-lixcols"?: Record<string, string>;
 	/**
 	 * Restricts which entity views are generated. When omitted, all default
-	 * variants (state, state_all, state_history) are emitted.
+	 * variants (state, state_by_version, state_history) are emitted.
 	 *
 	 * @example
 	 *   {
@@ -268,8 +268,8 @@ export type LixSchemaDefinition = JSONSchema & {
 	 *   }
 	 */
 	"x-lix-entity-views"?:
-		| ("state" | "state_all" | "state_history")[]
-		| readonly ("state" | "state_all" | "state_history")[];
+		| ("state" | "state_by_version" | "state_history")[]
+		| readonly ("state" | "state_by_version" | "state_history")[];
 	"x-lix-primary-key"?: JsonPointer[] | readonly JsonPointer[];
 	/**
 	 * Properties that must be unique per version.

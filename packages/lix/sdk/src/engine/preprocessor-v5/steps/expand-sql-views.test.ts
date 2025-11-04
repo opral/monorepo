@@ -84,7 +84,7 @@ test("keeps view name as alias when none provided", () => {
 					"only_view",
 					`
 						SELECT sa.file_id
-						FROM state_all AS sa
+						FROM state_by_version AS sa
 					`,
 				],
 			]),
@@ -266,7 +266,7 @@ test("expands views referenced inside NOT EXISTS predicates", () => {
 					"conversation_message_all",
 					`
 						SELECT sa.id, sa.parent_id
-						FROM state_all AS sa
+						FROM state_by_version AS sa
 					`,
 				],
 			]),

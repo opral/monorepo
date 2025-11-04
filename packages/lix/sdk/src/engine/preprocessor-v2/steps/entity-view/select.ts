@@ -209,7 +209,7 @@ function resolveSchemaKey(schema: LixSchemaDefinition): string {
 
 const VARIANT_KEY: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_all",
+	all: "state_by_version",
 	history: "state_history",
 };
 
@@ -425,7 +425,7 @@ function buildAllEntityView(reference: EntityViewReference): SelectQueryNode {
 	const properties = extractPropertyKeys(reference.schema);
 
 	const builder = qb
-		.selectFrom(`state_all as ${alias}`)
+		.selectFrom(`state_by_version as ${alias}`)
 		.select((eb: any) => {
 			const selections = buildPropertySelections(eb, alias, properties);
 			selections.push(eb.ref(`${alias}.entity_id`).as("lixcol_entity_id"));

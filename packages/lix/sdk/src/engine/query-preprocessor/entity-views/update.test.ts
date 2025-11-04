@@ -41,7 +41,7 @@ test("rewrites updates for stored schema views", async () => {
 		parameters: ["Updated", "row-1"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain(
 		"json_extract(snapshot_content, '$.id') = ?"
 	);
@@ -107,7 +107,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 		sql: "UPDATE version_override_schema SET name = ? WHERE id = ?",
 		parameters: ["Updated", "v-1"],
 	});
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain("'global'");
 	expect(updateResult.parameters).toEqual(["Updated", "v-1"]);
 
@@ -117,7 +117,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 	});
 
 	const stored = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "version_override_schema")
 		.where("entity_id", "=", "v-1")
 		.where("version_id", "=", "global")
@@ -147,7 +147,7 @@ test("prefixless alias updates target stored schema key", async () => {
 		parameters: ["baz", "alias"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.sql).toContain("lix_key_value");
 	expect(updateResult.parameters).toEqual(["baz", "alias"]);
 
@@ -273,7 +273,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 		},
 		"x-lix-entity-views": ["state"] as (
 			| "state"
-			| "state_all"
+			| "state_by_version"
 			| "state_history"
 		)[],
 		type: "object",
@@ -302,7 +302,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 		parameters: ["Updated", "base-up-1"],
 	});
 
-	expect(update.sql).toContain("UPDATE state_all");
+	expect(update.sql).toContain("UPDATE state_by_version");
 
 	lix.engine!.executeSync({
 		sql: update.sql,
@@ -310,7 +310,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 	});
 
 	const row = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "version_id", "snapshot_content"] as const)
 		.where("schema_key", "=", table)
 		.where("entity_id", "=", "base-up-1")
@@ -366,7 +366,7 @@ test("rewrites updates for _all views", async () => {
 		parameters: ["Updated All", "row-2", activeVersion.version_id],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_all");
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
 	expect(updateResult.parameters).toEqual([
 		"Updated All",
 		"row-2",
@@ -453,7 +453,7 @@ test("rewrites updates with JSON payloads", async () => {
 	expect(rows).toEqual([{ payload: '{"items":["foo","bar"]}' }]);
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["snapshot_content"] as const)
 		.where("schema_key", "=", "json_update_schema")
 		.execute();
@@ -524,7 +524,7 @@ test("rewrites updates that use SQL expressions referencing entity properties", 
 	expect(parsed).toEqual({ counter: 2, theme: "dark" });
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["snapshot_content"] as const)
 		.where("schema_key", "=", "expression_update_schema")
 		.execute();
@@ -539,7 +539,7 @@ test("rewrites updates that use SQL expressions referencing entity properties", 
 	]);
 });
 
-test("skips rewriting for disabled state_all view", async () => {
+test("skips rewriting for disabled state_by_version view", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "limited_update_schema",

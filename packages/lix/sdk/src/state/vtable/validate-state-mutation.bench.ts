@@ -6,7 +6,7 @@ import type { LixSchemaDefinition } from "../../schema-definition/definition.js"
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 
-async function insertStateAllRows(args: {
+async function insertStateByVersionRows(args: {
 	lix: Awaited<ReturnType<typeof openLix>>;
 	changes: readonly LixChangeRaw[];
 	versionId: string;
@@ -31,7 +31,7 @@ async function insertStateAllRows(args: {
 		return;
 	}
 	await args.lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values(rows as any)
 		.execute();
 }
@@ -273,7 +273,7 @@ describe("validateStateMutation index benchmarks", () => {
 			version_id: VERSION_ID,
 			commit_id: "seed-target",
 		});
-		await insertStateAllRows({
+		await insertStateByVersionRows({
 			lix,
 			changes: targetChanges,
 			versionId: VERSION_ID,
@@ -297,7 +297,7 @@ describe("validateStateMutation index benchmarks", () => {
 			version_id: VERSION_ID,
 			commit_id: "seed-source",
 		});
-		await insertStateAllRows({
+		await insertStateByVersionRows({
 			lix,
 			changes: sourceChanges,
 			versionId: VERSION_ID,

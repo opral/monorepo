@@ -286,7 +286,7 @@ function buildEntityViewUpdate(
 
 	const rewritten: UpdateStatementNode = {
 		node_kind: "update_statement",
-		target: buildTableReference("state_all"),
+		target: buildTableReference("state_by_version"),
 		assignments: assignmentsList,
 		where_clause: whereExpression,
 	};
@@ -361,7 +361,7 @@ function resolveVersionExpression(args: {
 		return {
 			assignment: valueExpression,
 			condition: createBinaryExpression(
-				columnReference(["state_all", "version_id"]),
+				columnReference(["state_by_version", "version_id"]),
 				valueExpression
 			),
 		};
@@ -416,7 +416,7 @@ function buildWhereClause(args: {
 	}
 
 	const schemaCondition = createBinaryExpression(
-		columnReference(["state_all", "schema_key"]),
+		columnReference(["state_by_version", "schema_key"]),
 		createLiteralExpression(args.schemaKey)
 	);
 	finalPredicate = finalPredicate

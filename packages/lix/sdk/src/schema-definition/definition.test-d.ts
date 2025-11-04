@@ -61,9 +61,9 @@ test("x-lix-override-lixcols typing", () => {
 	assertType<Record<string, string> | undefined>(
 		schema["x-lix-override-lixcols"]
 	);
-	assertType<readonly ("state" | "state_all" | "state_history")[] | undefined>(
-		schema["x-lix-entity-views"]
-	);
+	assertType<
+		readonly ("state" | "state_by_version" | "state_history")[] | undefined
+	>(schema["x-lix-entity-views"]);
 });
 
 test("x-lix-default typing", () => {

@@ -31,14 +31,14 @@ test("executing preprocessed sql does not throw", async () => {
 	).not.toThrow();
 });
 
-test("state_all query flows is expanded leads to rewritten vtable select", async () => {
+test("state_by_version query flows is expanded leads to rewritten vtable select", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
 	const result = preprocess({
 		sql: `
 		SELECT sa.file_id
-		FROM state_all AS sa
+		FROM state_by_version AS sa
 		WHERE sa.schema_key = 'demo'
 		`,
 		parameters: [],

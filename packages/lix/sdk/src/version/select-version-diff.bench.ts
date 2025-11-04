@@ -49,7 +49,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 	// Seed created (only in source)
 	for (let i = 0; i < COUNTS.created; i++) {
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: `created_${i}`,
 				schema_key: "bench_diff_entity",
@@ -65,7 +65,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 	// Seed deleted (only in target)
 	for (let i = 0; i < COUNTS.deleted; i++) {
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: `deleted_${i}`,
 				schema_key: "bench_diff_entity",
@@ -83,7 +83,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 		const id = `updated_${i}`;
 		// target first (older)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: id,
 				schema_key: "bench_diff_entity",
@@ -96,7 +96,7 @@ const readyCtx: Promise<Ctx> = (async () => {
 			.execute();
 		// source later (newer)
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: id,
 				schema_key: "bench_diff_entity",

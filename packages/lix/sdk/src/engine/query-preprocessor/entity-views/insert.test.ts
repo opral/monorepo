@@ -31,7 +31,7 @@ test("rewrites inserts for stored schema views", async () => {
 		parameters: ["row-1", "Entity 1"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.parameters).toEqual(["row-1", "Entity 1"]);
 
 	lix.engine!.executeSync({
@@ -91,7 +91,7 @@ test("rewrites inserts for _all view", async () => {
 		parameters: ["row-2", "Entity 2", activeVersion.version_id],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.parameters).toEqual([
 		"row-2",
 		"Entity 2",
@@ -121,7 +121,7 @@ test("rewrites inserts for _all view", async () => {
 	await lix.close();
 });
 
-test("skips rewriting for disabled state_all view", async () => {
+test("skips rewriting for disabled state_by_version view", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "limited_insert_schema",
@@ -129,7 +129,7 @@ test("skips rewriting for disabled state_all view", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-entity-views": ["state"] as (
 			| "state"
-			| "state_all"
+			| "state_by_version"
 			| "state_history"
 		)[],
 		type: "object",
@@ -215,7 +215,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 		parameters: ["acc-1", "Defaulted"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["acc-1", "Defaulted"]);
 
@@ -225,7 +225,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	});
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["version_id", "schema_key", "entity_id"] as const)
 		.where("schema_key", "=", "insertable_schema")
 		.where("entity_id", "=", "acc-1")
@@ -264,7 +264,7 @@ test("base-only views apply metadata version defaults", async () => {
 		parameters: ["base-1", "Base Entity"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["base-1", "Base Entity"]);
 
@@ -274,7 +274,7 @@ test("base-only views apply metadata version defaults", async () => {
 	});
 
 	const row = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select([
 			"entity_id",
 			"version_id",
@@ -325,7 +325,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		parameters: ["catA", "idB", "example"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toMatch(/\(\?\d+\s*\|\|\s*'~'\s*\|\|\s*\?\d+\)/);
 
 	lix.engine!.executeSync({
@@ -334,7 +334,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 	});
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "schema_key", "snapshot_content"])
 		.where("schema_key", "=", "mock_composite_schema")
 		.execute();
@@ -388,7 +388,7 @@ test("stored_schema insert uses pointer primary key components", async () => {
 		parameters: [JSON.stringify(schema)],
 	});
 
-	expect(rewrite?.sql).toMatch(/INSERT INTO state_all/);
+	expect(rewrite?.sql).toMatch(/INSERT INTO state_by_version/);
 
 	lix.engine!.executeSync({
 		sql: rewrite!.sql,
@@ -396,7 +396,7 @@ test("stored_schema insert uses pointer primary key components", async () => {
 	});
 
 	const inserted = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "schema_key", "snapshot_content"])
 		.where("schema_key", "=", "lix_stored_schema")
 		.where(
@@ -453,7 +453,7 @@ test("pointer primary key schema uses pointer components for entity id", async (
 		parameters: [JSON.stringify({ id: "nested-id", value: "payload-value" })],
 	});
 
-	expect(rewritten?.sql).toContain("INSERT INTO state_all");
+	expect(rewritten?.sql).toContain("INSERT INTO state_by_version");
 
 	lix.engine!.executeSync({
 		sql: rewritten!.sql,
@@ -461,7 +461,7 @@ test("pointer primary key schema uses pointer components for entity id", async (
 	});
 
 	const stateRow = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["entity_id", "snapshot_content"])
 		.where("schema_key", "=", "pointer_entity_schema")
 		.executeTakeFirstOrThrow();
@@ -531,7 +531,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 		parameters: ["alias", JSON.stringify({ foo: "bar" })],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	expect(rewritten.sql).toContain("lix_key_value");
 	expect(rewritten.parameters).toEqual(["alias", '{"foo":"bar"}']);
 
@@ -627,7 +627,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		parameters: ["row-default"],
 	});
 
-	expect(rewritten.sql).toContain("INSERT INTO state_all");
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
 		parameters: rewritten.parameters,
@@ -860,7 +860,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 	]);
 
 	const stateRows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.select(["snapshot_content"] as const)
 		.where("schema_key", "=", "multi_schema")
 		.orderBy("entity_id")

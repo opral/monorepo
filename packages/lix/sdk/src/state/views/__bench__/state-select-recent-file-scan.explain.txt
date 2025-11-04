@@ -595,7 +595,7 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
-WHERE snapshot_content IS NOT NULL) AS state_all
+WHERE snapshot_content IS NOT NULL) AS state_by_version
 WHERE version_id IN (SELECT version_id
 FROM (SELECT
   json_extract(sa.snapshot_content, '$.id') AS id,

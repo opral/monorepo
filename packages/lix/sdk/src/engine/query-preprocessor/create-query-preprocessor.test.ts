@@ -142,7 +142,7 @@ describe("createQueryPreprocessorV2", () => {
 			parameters: ["user123"],
 		});
 
-		expect(result.sql).toContain("INSERT INTO state_all");
+		expect(result.sql).toContain("INSERT INTO state_by_version");
 		expect(result.sql).not.toMatch(/\bactive_account\b/i);
 		expect(result.sql).toMatch(/json_object\('account_id', \?\d*\)/);
 		expect(result.sql).toContain("lix_active_account");
@@ -274,7 +274,7 @@ describe("createQueryPreprocessorV2", () => {
 			});
 
 			expect(deleteResult.sql.trim().startsWith("WITH")).toBe(true);
-			expect(deleteResult.sql).toMatch(/\bDELETE\s+FROM\s+state_all\b/i);
+			expect(deleteResult.sql).toMatch(/\bDELETE\s+FROM\s+state_by_version\b/i);
 			expect(deleteResult.sql).toContain("lix_internal_state_vtable_rewritten");
 			expect(deleteResult.sql).not.toMatch(/\bFROM\s+active_version\b/i);
 			expect(deleteResult.expandedSql).toBeDefined();

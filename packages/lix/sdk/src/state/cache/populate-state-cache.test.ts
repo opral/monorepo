@@ -352,10 +352,10 @@ test("inheritance is queryable from the resolved view after population", async (
 		inheritsFrom: versionB,
 	});
 
-	// Insert test entities directly into state_all for each version using Kysely
+	// Insert test entities directly into state_by_version for each version using Kysely
 	// Entity in version A
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_a",
 			schema_key: "test_entity",
@@ -374,7 +374,7 @@ test("inheritance is queryable from the resolved view after population", async (
 
 	// Entity in version B
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_b",
 			schema_key: "test_entity",
@@ -393,7 +393,7 @@ test("inheritance is queryable from the resolved view after population", async (
 
 	// Entity in version C
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_c",
 			schema_key: "test_entity",
@@ -495,10 +495,10 @@ test("global version entities are populated when populating child versions", asy
 		id: "test_version_1",
 	});
 
-	// Insert a test entity into state_all for global version
+	// Insert a test entity into state_by_version for global version
 	// This simulates entities that exist in global and should be inherited by all versions
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "global_entity_1",
 			schema_key: "test_entity",
@@ -516,7 +516,7 @@ test("global version entities are populated when populating child versions", asy
 
 	// Verify the test version can see this entity through inheritance before cache miss
 	const beforeCacheMiss = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
@@ -544,7 +544,7 @@ test("global version entities are populated when populating child versions", asy
 
 	// ASSERT: After cache population, the test version should still see the global entity
 	const afterCachePopulation = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")

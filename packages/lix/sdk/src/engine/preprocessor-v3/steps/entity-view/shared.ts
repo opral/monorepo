@@ -419,7 +419,7 @@ export function baseSchemaKey(name: string): string | null {
 
 const VARIANT_TABLE: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_all",
+	all: "state_by_version",
 	history: "state_history",
 };
 
@@ -658,7 +658,7 @@ export type PredicateRewriteResult = {
 };
 
 /**
- * Rewrites a predicate tree so that view columns reference state_all columns.
+ * Rewrites a predicate tree so that view columns reference state_by_version columns.
  *
  * @example
  * ```ts
@@ -891,18 +891,18 @@ function rewriteColumnReference(
 		if (metadata === "version_id") {
 			flags.hasVersionReference = true;
 		}
-		return columnReference(["state_all", metadata]);
+		return columnReference(["state_by_version", metadata]);
 	}
 
 	if (
 		column.path.length === 2 &&
-		column.path[0]?.value.toLowerCase() === "state_all"
+		column.path[0]?.value.toLowerCase() === "state_by_version"
 	) {
 		const target = column.path[1]!.value;
 		if (target.toLowerCase() === "version_id") {
 			flags.hasVersionReference = true;
 		}
-		return columnReference(["state_all", target]);
+		return columnReference(["state_by_version", target]);
 	}
 
 	return null;
@@ -914,7 +914,7 @@ function createJsonExtractExpression(property: string): ExpressionNode {
 		node_kind: "function_call",
 		name: identifier("json_extract"),
 		arguments: [
-			columnReference(["state_all", "snapshot_content"]),
+			columnReference(["state_by_version", "snapshot_content"]),
 			createLiteralNode(path),
 		],
 	};

@@ -122,9 +122,9 @@ test("creates tracked entity with pending change", async () => {
 
 	expect(transactionAfterCommit).toHaveLength(0);
 
-	// Verify state_all and underlying state are consistent
+	// Verify state_by_version and underlying state are consistent
 	const resultingState = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.selectAll()
 		.execute();
 
@@ -570,7 +570,7 @@ test("should throw error when version_id is null", async () => {
 	// Try to insert state with null version_id - should throw
 	await expect(
 		lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "test_entity",
 				schema_key: "lix_key_value",
@@ -592,7 +592,7 @@ test("should throw error when version_id does not exist", async () => {
 	// Try to insert state with non-existent version_id - should throw
 	await expect(
 		lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "test_entity",
 				schema_key: "lix_key_value",

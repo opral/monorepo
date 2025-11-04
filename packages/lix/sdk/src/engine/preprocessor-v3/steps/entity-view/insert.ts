@@ -223,7 +223,7 @@ function buildEntityViewInsert(args: BuildInsertArgs): StatementNode | null {
 
 	const rewritten: InsertStatementNode = {
 		node_kind: "insert_statement",
-		target: buildObjectName("state_all"),
+		target: buildObjectName("state_by_version"),
 		columns: STATE_ALL_COLUMNS.map((column) => identifier(column)),
 		source: {
 			node_kind: "insert_values",

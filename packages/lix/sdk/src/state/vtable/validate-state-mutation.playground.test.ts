@@ -126,7 +126,7 @@ async function registerSchemas(
 	}
 }
 
-async function insertStateAllRows(args: {
+async function insertStateByVersionRows(args: {
 	lix: Awaited<ReturnType<typeof openLix>>;
 	changes: readonly LixChangeRaw[];
 	versionId: string;
@@ -150,7 +150,7 @@ async function insertStateAllRows(args: {
 	if (rows.length === 0) return;
 	for (const row of rows) {
 		await args.lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values(row as any)
 			.execute();
 	}
@@ -384,7 +384,7 @@ test("validateStateMutation explain plans", async () => {
 				version_id: VERSION_ID,
 				commit_id: "seed-fk-target",
 			});
-			await insertStateAllRows({
+			await insertStateByVersionRows({
 				lix,
 				changes: targetChanges,
 				versionId: VERSION_ID,
@@ -408,7 +408,7 @@ test("validateStateMutation explain plans", async () => {
 				version_id: VERSION_ID,
 				commit_id: "seed-fk-source",
 			});
-			await insertStateAllRows({
+			await insertStateByVersionRows({
 				lix,
 				changes: sourceChanges,
 				versionId: VERSION_ID,

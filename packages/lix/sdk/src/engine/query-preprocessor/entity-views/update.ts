@@ -65,7 +65,7 @@ const formatPositionalParameter = (index: number): string => `?${index + 1}`;
 
 /**
  * Rewrites UPDATE statements that target stored-schema entity views so the
- * underlying mutation is executed against `state_all` instead of relying on
+ * underlying mutation is executed against `state_by_version` instead of relying on
  * SQLite triggers.
  *
  * The transformation mirrors the historical `createEntityViewIfNotExists`
@@ -81,7 +81,7 @@ const formatPositionalParameter = (index: number): string => `?${index + 1}`;
  *   parameters: ["Updated", "row-1"],
  *   engine,
  * });
- * // => UPDATE state_all ...
+ * // => UPDATE state_by_version ...
  * ```
  */
 export function rewriteEntityUpdate(args: {
@@ -380,40 +380,42 @@ export function rewriteEntityUpdate(args: {
 		}
 		switch (column) {
 			case "lixcol_entity_id":
-				whereClauses.push(`state_all.entity_id = ${valueSql}`);
+				whereClauses.push(`state_by_version.entity_id = ${valueSql}`);
 				break;
 			case "lixcol_schema_key":
-				whereClauses.push(`state_all.schema_key = ${valueSql}`);
+				whereClauses.push(`state_by_version.schema_key = ${valueSql}`);
 				break;
 			case "lixcol_file_id":
-				whereClauses.push(`state_all.file_id = ${valueSql}`);
+				whereClauses.push(`state_by_version.file_id = ${valueSql}`);
 				break;
 			case "lixcol_plugin_key":
-				whereClauses.push(`state_all.plugin_key = ${valueSql}`);
+				whereClauses.push(`state_by_version.plugin_key = ${valueSql}`);
 				break;
 			case "lixcol_version_id":
 				hasVersionCondition = true;
-				whereClauses.push(`state_all.version_id = ${valueSql}`);
+				whereClauses.push(`state_by_version.version_id = ${valueSql}`);
 				break;
 			case "lixcol_metadata":
-				whereClauses.push(`state_all.metadata = ${valueSql}`);
+				whereClauses.push(`state_by_version.metadata = ${valueSql}`);
 				break;
 			case "lixcol_untracked":
-				whereClauses.push(`state_all.untracked = ${valueSql}`);
+				whereClauses.push(`state_by_version.untracked = ${valueSql}`);
 				break;
 			default:
 				return null;
 		}
 	}
 
-	whereClauses.push(`state_all.schema_key = ${literal(storedSchemaKey)}`);
+	whereClauses.push(
+		`state_by_version.schema_key = ${literal(storedSchemaKey)}`
+	);
 	if (variant === "base" && !hasVersionCondition) {
 		whereClauses.push(
-			`state_all.version_id = (SELECT version_id FROM active_version)`
+			`state_by_version.version_id = (SELECT version_id FROM active_version)`
 		);
 	}
 
-	const rewrittenSql = `UPDATE state_all\nSET\n  ${assignmentClauses.join(",\n  ")}\nWHERE\n  ${whereClauses.join("\n  AND ")}`;
+	const rewrittenSql = `UPDATE state_by_version\nSET\n  ${assignmentClauses.join(",\n  ")}\nWHERE\n  ${whereClauses.join("\n  AND ")}`;
 
 	return {
 		sql: rewrittenSql,
@@ -719,43 +721,43 @@ function renderExpressionTokens(args: {
 			}
 			switch (lower) {
 				case "lixcol_entity_id":
-					rendered.push("state_all.entity_id");
+					rendered.push("state_by_version.entity_id");
 					continue;
 				case "lixcol_schema_key":
-					rendered.push("state_all.schema_key");
+					rendered.push("state_by_version.schema_key");
 					continue;
 				case "lixcol_file_id":
-					rendered.push("state_all.file_id");
+					rendered.push("state_by_version.file_id");
 					continue;
 				case "lixcol_plugin_key":
-					rendered.push("state_all.plugin_key");
+					rendered.push("state_by_version.plugin_key");
 					continue;
 				case "lixcol_inherited_from_version_id":
-					rendered.push("state_all.inherited_from_version_id");
+					rendered.push("state_by_version.inherited_from_version_id");
 					continue;
 				case "lixcol_created_at":
-					rendered.push("state_all.created_at");
+					rendered.push("state_by_version.created_at");
 					continue;
 				case "lixcol_updated_at":
-					rendered.push("state_all.updated_at");
+					rendered.push("state_by_version.updated_at");
 					continue;
 				case "lixcol_change_id":
-					rendered.push("state_all.change_id");
+					rendered.push("state_by_version.change_id");
 					continue;
 				case "lixcol_untracked":
-					rendered.push("state_all.untracked");
+					rendered.push("state_by_version.untracked");
 					continue;
 				case "lixcol_commit_id":
-					rendered.push("state_all.commit_id");
+					rendered.push("state_by_version.commit_id");
 					continue;
 				case "lixcol_version_id":
-					rendered.push("state_all.version_id");
+					rendered.push("state_by_version.version_id");
 					continue;
 				case "lixcol_metadata":
-					rendered.push("state_all.metadata");
+					rendered.push("state_by_version.metadata");
 					continue;
 				case "lixcol_writer_key":
-					rendered.push("state_all.writer_key");
+					rendered.push("state_by_version.writer_key");
 					continue;
 			}
 			rendered.push(token.image);

@@ -2,14 +2,14 @@ import { expect, test } from "vitest";
 import { createPreprocessor } from "./create-preprocessor.js";
 import { openLix } from "../../lix/open-lix.js";
 
-test("state_all view is rewritten", async () => {
+test("state_by_version view is rewritten", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 
 	const result = preprocess({
 		sql: `
 		SELECT sa.file_id
-		FROM state_all AS sa
+		FROM state_by_version AS sa
 		WHERE sa.schema_key = 'demo'
 		`,
 		parameters: [],
@@ -57,7 +57,7 @@ test("sql view expansion feeds subsequent rewrites", async () => {
 		sql: `
 			CREATE VIEW foo_view AS
 			SELECT sa.file_id
-			FROM state_all AS sa
+			FROM state_by_version AS sa
 		`,
 	});
 
@@ -107,7 +107,7 @@ test("selecting from stored schema view returns rows via preprocessor", async ()
 		.executeTakeFirstOrThrow();
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "row-1",
 			schema_key: "e2e_schema",
@@ -151,7 +151,7 @@ test("rewrites inner joins on views", async () => {
 		sql: `
 			CREATE VIEW view_a AS
 			SELECT sa.entity_id, sa.schema_key
-			FROM state_all AS sa
+			FROM state_by_version AS sa
 		`,
 	});
 
@@ -159,7 +159,7 @@ test("rewrites inner joins on views", async () => {
 		sql: `
 			CREATE VIEW view_b AS
 			SELECT sa.entity_id, sa.file_id
-			FROM state_all AS sa
+			FROM state_by_version AS sa
 		`,
 	});
 

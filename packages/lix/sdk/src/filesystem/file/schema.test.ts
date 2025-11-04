@@ -1252,7 +1252,7 @@ simulationTest(
 );
 
 simulationTest(
-	"direct state_all updates invalidate file data cache",
+	"direct state_by_version updates invalidate file data cache",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			providePlugins: [mockJsonPlugin],
@@ -1278,15 +1278,15 @@ simulationTest(
 			content: "Start",
 		});
 
-		// Active version id for state_all write
+		// Active version id for state_by_version write
 		const active = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
 
-		// Update plugin entity directly in state_all for that version
+		// Update plugin entity directly in state_by_version for that version
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({ snapshot_content: { value: "New" } })
 			.where("file_id", "=", fileId)
 			.where("version_id", "=", active.version_id)
@@ -1295,7 +1295,7 @@ simulationTest(
 			.where("entity_id", "=", "content")
 			.execute();
 
-		// Next read must reflect updated state (cache invalidated by state_all trigger)
+		// Next read must reflect updated state (cache invalidated by state_by_version trigger)
 		const updated = await lix.db
 			.selectFrom("file")
 			.where("id", "=", fileId)

@@ -67,9 +67,9 @@ simulationTest(
 			])
 			.execute();
 
-		// Query state_all - results should be consistent within the out-of-order group
+		// Query state_by_version - results should be consistent within the out-of-order group
 		const stateAll = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "!=", "lix_state_cache_stale")
 			.orderBy("entity_id")

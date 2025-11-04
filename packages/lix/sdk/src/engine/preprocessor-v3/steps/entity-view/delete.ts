@@ -112,7 +112,7 @@ function buildEntityViewDelete(
 	});
 	const extraConditions: ExpressionNode[] = [
 		createBinaryExpression(
-			columnReference(["state_all", "schema_key"]),
+			columnReference(["state_by_version", "schema_key"]),
 			createLiteralExpression(storedSchemaKey)
 		),
 	];
@@ -129,7 +129,7 @@ function buildEntityViewDelete(
 					: createActiveVersionSubquery();
 			extraConditions.push(
 				createBinaryExpression(
-					columnReference(["state_all", "version_id"]),
+					columnReference(["state_by_version", "version_id"]),
 					versionExpression
 				)
 			);
@@ -143,7 +143,7 @@ function buildEntityViewDelete(
 			const versionExpression = createLiteralFromOverride(versionOverride);
 			extraConditions.push(
 				createBinaryExpression(
-					columnReference(["state_all", "version_id"]),
+					columnReference(["state_by_version", "version_id"]),
 					versionExpression
 				)
 			);
@@ -157,7 +157,7 @@ function buildEntityViewDelete(
 
 	return {
 		node_kind: "delete_statement",
-		target: buildTableReference("state_all"),
+		target: buildTableReference("state_by_version"),
 		where_clause: finalWhere ?? null,
 	};
 }
