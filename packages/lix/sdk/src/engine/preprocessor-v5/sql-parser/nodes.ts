@@ -31,7 +31,11 @@ export type SegmentedStatementNode = SqlNode & {
 	readonly segments: readonly StatementSegmentNode[];
 };
 
-export type CompoundOperator = "union" | "union_by_version" | "intersect" | "except";
+export type CompoundOperator =
+	| "union"
+	| "union_by_version"
+	| "intersect"
+	| "except";
 
 export type CompoundSelectBranch = {
 	readonly operator: CompoundOperator;

@@ -47,7 +47,11 @@ export async function applyChangeSet(args: {
 				"change_set_element_by_version.change_id",
 				"change.id"
 			)
-			.where("change_set_element_by_version.change_set_id", "=", args.changeSet.id)
+			.where(
+				"change_set_element_by_version.change_set_id",
+				"=",
+				args.changeSet.id
+			)
 			.where("change_set_element_by_version.lixcol_version_id", "=", "global")
 			.selectAll("change")
 			.execute();

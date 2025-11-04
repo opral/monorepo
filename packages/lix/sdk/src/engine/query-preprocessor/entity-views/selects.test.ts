@@ -39,7 +39,9 @@ describe("entity view select synthesis", () => {
 		expect(map.get("alias_test")).toBe(map.get("lix_alias_test"));
 		expect(map.has("lix_alias_test_by_version")).toBe(true);
 		expect(map.has("alias_test_by_version")).toBe(true);
-		expect(map.get("alias_test_by_version")).toBe(map.get("lix_alias_test_by_version"));
+		expect(map.get("alias_test_by_version")).toBe(
+			map.get("lix_alias_test_by_version")
+		);
 		expect(map.has("alias_test_history")).toBe(true);
 		expect(map.get("alias_test_history")).toBe(
 			map.get("lix_alias_test_history")

@@ -325,7 +325,11 @@ describe("commit", () => {
 
 		const row = await lix.db
 			.selectFrom("commit_edge_by_version")
-			.innerJoin("change", "change.id", "commit_edge_by_version.lixcol_change_id")
+			.innerJoin(
+				"change",
+				"change.id",
+				"commit_edge_by_version.lixcol_change_id"
+			)
 			.where("commit_edge_by_version.lixcol_version_id", "=", "global")
 			.where("commit_edge_by_version.parent_id", "=", "parentA")
 			.where("commit_edge_by_version.child_id", "=", "childB")

@@ -309,8 +309,8 @@ function buildEntityViewSelect(
 				)
 			);
 			projection.push(
-				...filterLixcolColumns(BY_VERSION_META_EXTRA, lixcolUsage).map((column) =>
-					columnSelectWithAlias(alias, column.column, column.alias)
+				...filterLixcolColumns(BY_VERSION_META_EXTRA, lixcolUsage).map(
+					(column) => columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
 			if (

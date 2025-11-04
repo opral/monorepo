@@ -325,4 +325,6 @@ export type NewStateByVersion<T> = LixInsertable<EntityStateByVersionView<T>>;
  * }
  * ```
  */
-export type StateByVersionUpdate<T> = LixUpdateable<EntityStateByVersionView<T>>;
+export type StateByVersionUpdate<T> = LixUpdateable<
+	EntityStateByVersionView<T>
+>;

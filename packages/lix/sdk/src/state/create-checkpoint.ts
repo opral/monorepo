@@ -64,7 +64,11 @@ export async function createCheckpoint(args: {
 		const workingElements = await trx
 			.selectFrom("change_set_element_by_version")
 			.where("change_set_id", "=", workingChangeSetId)
-			.innerJoin("change", "change.id", "change_set_element_by_version.change_id")
+			.innerJoin(
+				"change",
+				"change.id",
+				"change_set_element_by_version.change_id"
+			)
 			.where("lixcol_version_id", "=", "global")
 			.select(["change.id", "change.snapshot_content"])
 			.execute();

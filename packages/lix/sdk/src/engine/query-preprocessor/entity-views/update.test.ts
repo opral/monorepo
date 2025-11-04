@@ -558,7 +558,8 @@ test("skips rewriting for disabled state_by_version view", async () => {
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
-	const sql = "UPDATE limited_update_schema_by_version SET name = ? WHERE id = ?";
+	const sql =
+		"UPDATE limited_update_schema_by_version SET name = ? WHERE id = ?";
 	const parameters = ["Disabled", "row-1"];
 	const rewritten = preprocess({ sql, parameters });
 

@@ -51,12 +51,12 @@ export function getEntityViewSqlDefinitions(args: {
 		if ((schema as any).type !== "object") continue;
 
 		const props = extractPropertyKeys(schema);
-	const baseSql = isEntityViewVariantEnabled(schema, "base")
-		? createActiveSelect({ schema, properties: props })
-		: null;
-	const byVersionSql = isEntityViewVariantEnabled(schema, "by_version")
-		? createByVersionSelect({ schema, properties: props })
-		: null;
+		const baseSql = isEntityViewVariantEnabled(schema, "base")
+			? createActiveSelect({ schema, properties: props })
+			: null;
+		const byVersionSql = isEntityViewVariantEnabled(schema, "by_version")
+			? createByVersionSelect({ schema, properties: props })
+			: null;
 		const historySql = isEntityViewVariantEnabled(schema, "history")
 			? createHistorySelect({ schema, properties: props })
 			: null;
@@ -69,13 +69,13 @@ export function getEntityViewSqlDefinitions(args: {
 				sql: baseSql,
 			});
 		}
-	if (byVersionSql) {
-		registerView(map, {
-			primary: `${baseName}_by_version`,
-			alias: aliasBaseName ? `${aliasBaseName}_by_version` : null,
-			sql: byVersionSql,
-		});
-	}
+		if (byVersionSql) {
+			registerView(map, {
+				primary: `${baseName}_by_version`,
+				alias: aliasBaseName ? `${aliasBaseName}_by_version` : null,
+				sql: byVersionSql,
+			});
+		}
 		if (historySql) {
 			registerView(map, {
 				primary: `${baseName}_history`,
