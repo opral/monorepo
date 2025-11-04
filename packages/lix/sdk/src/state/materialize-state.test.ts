@@ -901,7 +901,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 
 			// Create the change set first
 			await lix.db
-				.insertInto("change_set_all")
+				.insertInto("change_set_by_version")
 				.values({
 					id: mergeChangeSetId,
 					lixcol_version_id: "global",
@@ -1237,7 +1237,7 @@ simulationTest(
 
 		// Ensure a changeset entity exists (not strictly required for edges but keeps commit snapshot coherent)
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values({ id: mergeChangeSetId, lixcol_version_id: "global" })
 			.execute();
 
@@ -2257,7 +2257,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Insert an entity directly to version-1
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "test-key",
 					value: "test-value",
@@ -2319,7 +2319,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add entity to parent version
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "inherited-key",
 					value: "parent-value",
@@ -2384,7 +2384,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add entity to parent version
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "shared-key",
 					value: "parent-value",
@@ -2394,7 +2394,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Update the inherited entity in child version
 			await lix.db
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({
 					value: "child-value",
 				})
@@ -2462,7 +2462,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add entity to version A
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "key-from-a",
 					value: "value-from-a",
@@ -2472,7 +2472,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add different entity to version B
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "b-only-key",
 					value: "value-from-b",
@@ -2542,7 +2542,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Insert an entity
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "entity-to-delete",
 					value: "initial-value",
@@ -2552,7 +2552,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Delete the entity (update to NULL snapshot)
 			await lix.db
-				.deleteFrom("key_value_all")
+				.deleteFrom("key_value_by_version")
 				.where("key", "=", "entity-to-delete")
 				.where("lixcol_version_id", "=", "version-1")
 				.execute();
@@ -2610,7 +2610,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add entity to parent version
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "entity-to-override",
 					value: "parent-value",
@@ -2620,7 +2620,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Delete the inherited entity in child version
 			await lix.db
-				.deleteFrom("key_value_all")
+				.deleteFrom("key_value_by_version")
 				.where("key", "=", "entity-to-override")
 				.where("lixcol_version_id", "=", "child-version")
 				.execute();
@@ -2722,7 +2722,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Add entity to root version A
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "shared-entity",
 					value: "value-from-a",
@@ -2732,7 +2732,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Override the entity in version B
 			await lix.db
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({
 					value: "value-from-b",
 				})
@@ -2742,7 +2742,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Also override the entity in version C
 			await lix.db
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({
 					value: "value-from-c",
 				})
@@ -2798,7 +2798,7 @@ describe("lix_internal_state_materializer", () => {
 
 			// Test inheritance ranking - add a different entity only in A
 			await lix.db
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: "root-only-entity",
 					value: "only-in-a",

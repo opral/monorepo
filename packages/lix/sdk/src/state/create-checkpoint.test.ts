@@ -598,7 +598,7 @@ simulationTest(
 
 		// Now delete the key-value pair
 		await lix.db
-			.deleteFrom("key_value_all")
+			.deleteFrom("key_value_by_version")
 			.where("key", "=", "test-key")
 			.where("lixcol_version_id", "=", activeVersion.id)
 			.execute();
@@ -621,16 +621,16 @@ simulationTest(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element_all",
-				"change_set_element_all.change_id",
+				"change_set_element_by_version",
+				"change_set_element_by_version.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element_all.change_set_id",
+				"change_set_element_by_version.change_set_id",
 				"=",
 				checkpointAfterDeletion.change_set_id
 			)
-			.where("change_set_element_all.lixcol_version_id", "=", "global")
+			.where("change_set_element_by_version.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
 			.where("change.snapshot_content", "is", null)
@@ -702,16 +702,16 @@ simulationTest(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element_all",
-				"change_set_element_all.change_id",
+				"change_set_element_by_version",
+				"change_set_element_by_version.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element_all.change_set_id",
+				"change_set_element_by_version.change_set_id",
 				"=",
 				checkpointAfterDeletion.change_set_id
 			)
-			.where("change_set_element_all.lixcol_version_id", "=", "global")
+			.where("change_set_element_by_version.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
 			.where("change.snapshot_content", "is", null)
 			.selectAll("change")

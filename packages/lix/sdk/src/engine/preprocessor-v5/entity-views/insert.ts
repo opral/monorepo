@@ -38,7 +38,7 @@ import {
 import { expandSqlViews as expandSqlViewsStep } from "../steps/expand-sql-views.js";
 import { normalizeSegmentedStatement } from "../sql-parser/parse.js";
 
-const STATE_ALL_COLUMNS: readonly string[] = [
+const STATE_BY_VERSION_COLUMNS: readonly string[] = [
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -303,7 +303,7 @@ function buildEntityViewInsert(
 	const rewritten: InsertStatementNode = {
 		node_kind: "insert_statement",
 		target: buildObjectName("state_by_version"),
-		columns: STATE_ALL_COLUMNS.map((column) => identifier(column)),
+		columns: STATE_BY_VERSION_COLUMNS.map((column) => identifier(column)),
 		source: {
 			node_kind: "insert_values",
 			rows: rewrittenRows,
@@ -684,7 +684,7 @@ function buildStateRowExpressions(args: {
 	const explicitVersionExpr =
 		expressionFor("lixcol_version_id") ?? expressionFor("version_id");
 	let versionExpr: string;
-	if (args.variant === "all") {
+	if (args.variant === "by_version") {
 		if (explicitVersionExpr) {
 			versionExpr = explicitVersionExpr;
 		} else if (overrideVersion !== undefined) {

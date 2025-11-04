@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import { LixActiveAccountSchema } from "./schema-definition.js";
 import { test, expect } from "vitest";
@@ -117,7 +118,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Insert account in version A
 	await lix.db
-		.insertInto("account_all")
+		.insertInto("account_by_version")
 		.values({
 			id: "accountA",
 			name: "User A",
@@ -127,7 +128,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Insert account in version B with same id but different name
 	await lix.db
-		.insertInto("account_all")
+		.insertInto("account_by_version")
 		.values({
 			id: "accountB",
 			name: "User B",
@@ -137,14 +138,14 @@ test("account operations are version specific and isolated", async () => {
 
 	// Verify both versions have their own accounts
 	const accountsInVersionA = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("lixcol_version_id", "=", versionA.id)
 		.where("id", "in", ["accountA", "accountB"])
 		.selectAll()
 		.execute();
 
 	const accountsInVersionB = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("lixcol_version_id", "=", versionB.id)
 		.where("id", "in", ["accountA", "accountB"])
 		.selectAll()
@@ -157,7 +158,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Update account in version A
 	await lix.db
-		.updateTable("account_all")
+		.updateTable("account_by_version")
 		.where("id", "=", "accountA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.set({
@@ -167,14 +168,14 @@ test("account operations are version specific and isolated", async () => {
 
 	// Verify update only affected version A
 	const updatedAccountsA = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("lixcol_version_id", "=", versionA.id)
 		.where("id", "=", "accountA")
 		.selectAll()
 		.execute();
 
 	const unchangedAccountsB = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("lixcol_version_id", "=", versionB.id)
 		.where("id", "=", "accountB")
 		.selectAll()
@@ -185,21 +186,21 @@ test("account operations are version specific and isolated", async () => {
 
 	// Delete account from version A
 	await lix.db
-		.deleteFrom("account_all")
+		.deleteFrom("account_by_version")
 		.where("id", "=", "accountA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingAccountsA = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("id", "in", ["accountA", "accountB"])
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingAccountsB = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("id", "in", ["accountA", "accountB"])
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
@@ -216,7 +217,7 @@ test("active_account temp table operations", async () => {
 	// No accounts should exist by default
 	const activeAccounts = await lix.db
 		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
 		.select(["aa.account_id", "a.id", "a.name"])
 		.execute();
@@ -225,7 +226,7 @@ test("active_account temp table operations", async () => {
 
 	// First create a real account in global version (where active accounts look)
 	await lix.db
-		.insertInto("account_all")
+		.insertInto("account_by_version")
 		.values({
 			id: "user123",
 			name: "Alice",
@@ -255,7 +256,7 @@ test("active_account temp table operations", async () => {
 
 	// Update the actual account (not the active account reference)
 	await lix.db
-		.updateTable("account_all")
+		.updateTable("account_by_version")
 		.where("id", "=", "user123")
 		.where("lixcol_version_id", "=", "global")
 		.set({ name: "Alice Updated" })
@@ -270,7 +271,7 @@ test("active_account temp table operations", async () => {
 	expect(afterUpdate).toHaveLength(1);
 	// Verify the account was updated by checking the actual account
 	const updatedAccount = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.where("id", "=", "user123")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -295,7 +296,7 @@ test("account tables start empty until an account is created", async () => {
 	const lix = await openLix({});
 
 	const allAccounts = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.selectAll()
 		.execute();
 
@@ -303,7 +304,7 @@ test("account tables start empty until an account is created", async () => {
 
 	const activeAccount = await lix.db
 		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
 		.select(["aa.account_id", "a.id", "a.name"])
 		.executeTakeFirst();
@@ -329,7 +330,7 @@ test("active_account view injects global version defaults", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("account_all")
+		.insertInto("account_by_version")
 		.values({
 			id: "acct-1",
 			name: "Global User",
@@ -387,27 +388,21 @@ test("active_account schema exposes only the base view", async () => {
 		.values({ value: storedSchema })
 		.execute();
 
-	const preprocess = await createQueryPreprocessor(lix.engine!);
+	const preprocess = createQueryPreprocessor(lix.engine!);
 	const rewritten = preprocess({
-		sql: "SELECT * FROM active_account_all",
+		sql: "SELECT * FROM active_account_by_version",
 		parameters: [],
 	});
 
-	expect(rewritten.sql).toContain("active_account_all");
+	expect(rewritten.sql).toContain("active_account_by_version");
 	expect(rewritten.sql).not.toContain("schema_key = 'lix_active_account'");
 
 	await expect(
-		lix.db
-			.selectFrom("active_account_all" as any)
-			.selectAll()
-			.execute()
+		sql`SELECT * FROM active_account_by_version`.execute(lix.db)
 	).rejects.toThrow(/no such table/i);
 
 	await expect(
-		lix.db
-			.selectFrom("active_account_history" as any)
-			.selectAll()
-			.execute()
+		sql`SELECT * FROM active_account_history`.execute(lix.db)
 	).rejects.toThrow(/no such table/i);
 
 	await lix.close();

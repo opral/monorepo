@@ -2,27 +2,27 @@ import type { Generated } from "kysely";
 import type { LixGenerated } from "../../schema-definition/definition.js";
 
 /**
- * Base type for _all entity views (cross-version) that include operational columns from the state table.
+ * Base type for cross-version entity views that include operational columns from the state table.
  * These views expose lixcol_version_id for version-specific operations and allow querying entities
  * across all versions in the database.
  *
  * @example
  * ```typescript
  * // Define an entity view type for cross-version operations
- * export type AccountAllView = {
+ * export type AccountByVersionView = {
  *   id: Generated<string>;
  *   name: string;
- * } & StateEntityAllView;
+ * } & StateEntityByVersionView;
  *
  * // Query entities across versions
  * const accounts = await lix.db
- *   .selectFrom("account_all")
+ *   .selectFrom("account_by_version")
  *   .where("lixcol_version_id", "=", "v1")
  *   .selectAll()
  *   .execute();
  * ```
  */
-export type StateEntityAllView = {
+export type StateEntityByVersionView = {
 	/**
 	 * The unique identifier for this entity within its schema and file.
 	 *
@@ -136,7 +136,7 @@ export type StateEntityAllView = {
 };
 
 /**
- * Base type for _all entity views using LixGenerated markers instead of Kysely's Generated type.
+ * Base type for cross-version cross-version entity views using LixGenerated markers instead of Kysely's Generated type.
  * This type is compatible with the Lix SDK's type transformation system and allows
  * cross-version entity operations.
  *
@@ -146,10 +146,10 @@ export type StateEntityAllView = {
  * export type Account = {
  *   id: LixGenerated<string>;
  *   name: string;
- * } & EntityStateAllColumns;
+ * } & EntityStateByVersionColumns;
  * ```
  */
-export type EntityStateAllColumns = {
+export type EntityStateByVersionColumns = {
 	/**
 	 * The unique identifier for this entity within its schema and file.
 	 *

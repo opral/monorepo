@@ -33,7 +33,7 @@ import type { StateHistoryView } from "../state-history/schema.js";
 import { LixDirectoryDescriptorSchema } from "../filesystem/directory/schema-definition.js";
 import { LixFileDescriptorSchema } from "../filesystem/file/schema-definition.js";
 import type {
-	EntityStateAllView,
+	EntityStateByVersionView,
 	EntityStateHistoryView,
 	EntityStateView,
 } from "../engine/entity-views/types.js";
@@ -91,8 +91,8 @@ type DirectoryDescriptorView = ToKysely<
 		}
 	>
 >;
-type DirectoryDescriptorAllView = ToKysely<
-	EntityStateAllView<
+type DirectoryDescriptorByVersionView = ToKysely<
+	EntityStateByVersionView<
 		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
 			path: LixGenerated<string>;
 		}
@@ -120,7 +120,7 @@ export type LixDatabaseSchema = {
 
 	change: ChangeView;
 	directory: DirectoryDescriptorView;
-	directory_all: DirectoryDescriptorAllView;
+	directory_by_version: DirectoryDescriptorByVersionView;
 	directory_history: DirectoryDescriptorHistoryView;
 } & EntityViews<
 	typeof LixKeyValueSchema,

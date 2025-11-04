@@ -669,7 +669,7 @@ test("entity_label works with change_set entities", async () => {
 
 	// Label the change set
 	await lix.db
-		.insertInto("entity_label_all")
+		.insertInto("entity_label_by_version")
 		.values({
 			entity_id: changeSet.id,
 			schema_key: "lix_change_set",

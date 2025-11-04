@@ -248,7 +248,7 @@ class ToAstVisitor extends BaseVisitor {
 		Except?: IToken[];
 	}): CompoundOperator {
 		if (ctx.Union?.length) {
-			return ctx.All?.length ? "union_all" : "union";
+			return ctx.All?.length ? "union_by_version" : "union";
 		}
 		if (ctx.Intersect?.length) {
 			return "intersect";

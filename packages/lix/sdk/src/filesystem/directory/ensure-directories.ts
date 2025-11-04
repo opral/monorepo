@@ -114,7 +114,7 @@ export function assertNoFileAtPath(args: {
 }): void {
 	const rows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", args.filePath)
 			.where("lixcol_version_id", "=", args.versionId)
 			.select(["id"])
@@ -135,7 +135,7 @@ export function assertNoDirectoryAtFilePath(args: {
 	const directoryPath = `${args.filePath}/`;
 	const rows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("directory_all")
+			.selectFrom("directory_by_version")
 			.where("path", "=", directoryPath)
 			.where("lixcol_version_id", "=", args.versionId)
 			.select(["id"])

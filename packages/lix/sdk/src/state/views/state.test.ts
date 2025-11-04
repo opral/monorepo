@@ -1,3 +1,4 @@
+import { expect } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { simulationTest } from "../../test-utilities/simulation-test/simulation-test.js";
 
@@ -58,8 +59,19 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expectDeterministic(insertedEntity).toHaveLength(1);
-		expectDeterministic(insertedEntity[0]).toMatchObject({
+		expect(insertedEntity).toHaveLength(1);
+
+		const sanitizedInsertedEntity = insertedEntity.map(
+			({
+				change_id: _ignoredChangeId,
+				commit_id: _ignoredCommitId,
+				created_at: _ignoredCreatedAt,
+				updated_at: _ignoredUpdatedAt,
+				...rest
+			}) => rest
+		);
+
+		expectDeterministic(sanitizedInsertedEntity[0]).toMatchObject({
 			entity_id: "entity0",
 			file_id: "f0",
 			schema_key: "mock_schema",
@@ -95,7 +107,17 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expectDeterministic(updatedEntity[0]?.snapshot_content).toEqual({
+		expectDeterministic(
+			updatedEntity.map(
+				({
+					change_id: _ignoredChangeId,
+					commit_id: _ignoredCommitId,
+					created_at: _ignoredCreatedAt,
+					updated_at: _ignoredUpdatedAt,
+					...rest
+				}) => rest
+			)[0]?.snapshot_content
+		).toEqual({
 			value: "updated content",
 		});
 
@@ -132,7 +154,7 @@ simulationTest(
 
 		// 1. Insert key_value in global version (tracked)
 		await lix.db
-			.insertInto("key_value_all")
+			.insertInto("key_value_by_version")
 			.values({
 				key: "test-key-global",
 				value: "global-tracked-value",
@@ -142,7 +164,7 @@ simulationTest(
 
 		// 2. Insert key_value in global version (untracked)
 		await lix.db
-			.insertInto("key_value_all")
+			.insertInto("key_value_by_version")
 			.values({
 				key: "test-key-global-untracked",
 				value: "global-untracked-value",
@@ -180,7 +202,54 @@ simulationTest(
 			.execute();
 
 		// state view shows active version entities + inherited from global
-		expectDeterministic(entitiesBeforeDelete).toHaveLength(4);
+		expect(entitiesBeforeDelete).toHaveLength(4);
+
+		const sanitizedEntitiesBeforeDelete = entitiesBeforeDelete.map(
+			({
+				change_id: _ignoredChangeId,
+				commit_id: _ignoredCommitId,
+				created_at: _ignoredCreatedAt,
+				updated_at: _ignoredUpdatedAt,
+				...rest
+			}) => rest
+		);
+
+		expectDeterministic(sanitizedEntitiesBeforeDelete).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					entity_id: "test-key-active",
+					snapshot_content: {
+						key: "test-key-active",
+						value: "active-tracked-value",
+					},
+					untracked: 0,
+				}),
+				expect.objectContaining({
+					entity_id: "test-key-active-untracked",
+					snapshot_content: {
+						key: "test-key-active-untracked",
+						value: "active-untracked-value",
+					},
+					untracked: 1,
+				}),
+				expect.objectContaining({
+					entity_id: "test-key-global",
+					snapshot_content: {
+						key: "test-key-global",
+						value: "global-tracked-value",
+					},
+					untracked: 0,
+				}),
+				expect.objectContaining({
+					entity_id: "test-key-global-untracked",
+					snapshot_content: {
+						key: "test-key-global-untracked",
+						value: "global-untracked-value",
+					},
+					untracked: 1,
+				}),
+			])
+		);
 
 		// Delete all key_value entities
 		// this is the reproduction of the infinite loop issue

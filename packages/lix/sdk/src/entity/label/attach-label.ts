@@ -52,7 +52,7 @@ export async function attachLabel(args: {
 	// Check if the mapping already exists in the relevant version scope
 	const existingMapping = await (versionId
 		? lix.db
-				.selectFrom("entity_label_all")
+				.selectFrom("entity_label_by_version")
 				.where("entity_id", "=", entity_id)
 				.where("schema_key", "=", schema_key)
 				.where("file_id", "=", file_id)
@@ -80,7 +80,7 @@ export async function attachLabel(args: {
 	// - The label exists
 	if (versionId) {
 		await lix.db
-			.insertInto("entity_label_all")
+			.insertInto("entity_label_by_version")
 			.values({
 				entity_id: entity_id,
 				schema_key: schema_key,
@@ -146,7 +146,7 @@ export async function detachLabel(args: {
 
 	if (versionId) {
 		await lix.db
-			.deleteFrom("entity_label_all")
+			.deleteFrom("entity_label_by_version")
 			.where("entity_id", "=", entity_id)
 			.where("schema_key", "=", schema_key)
 			.where("file_id", "=", file_id)

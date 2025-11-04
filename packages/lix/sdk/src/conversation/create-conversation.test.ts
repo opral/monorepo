@@ -45,7 +45,7 @@ test("creates a conversation with entity mapping when entity is provided", async
 
 	// Create a key-value entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-entity-config",
 			value: { setting: "entityvalue" },
@@ -108,7 +108,7 @@ test("can query conversations for a specific entity using ebEntity", async () =>
 
 	// Create a key-value entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "query-test-config",
 			value: { setting: "queryvalue" },
@@ -137,7 +137,7 @@ test("can query conversations for a specific entity using ebEntity", async () =>
 
 	// Create a conversation for a different entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "other-config",
 			value: { setting: "othervalue" },

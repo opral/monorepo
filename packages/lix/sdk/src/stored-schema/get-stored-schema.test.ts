@@ -56,12 +56,12 @@ test("returns the latest stored schema version for a key", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: base, lixcol_version_id: "global" })
 		.execute();
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: { ...base, "x-lix-version": "2.0" },
 			lixcol_version_id: "global",
@@ -96,12 +96,12 @@ test("ignores schemas outside the global version", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: base, lixcol_version_id: "global" })
 		.execute();
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: { ...base, "x-lix-version": "3.0" },
 			lixcol_version_id: featureVersion.id,
@@ -141,7 +141,7 @@ test("getAllStoredSchemas returns all definitions and caches the result", async 
 
 	for (const schema of schemas) {
 		await lix.db
-			.insertInto("stored_schema_all")
+			.insertInto("stored_schema_by_version")
 			.values({ value: schema, lixcol_version_id: "global" })
 			.execute();
 	}
@@ -177,7 +177,7 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
@@ -219,7 +219,7 @@ test("getAllStoredSchemas primes getStoredSchema cache", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
@@ -263,7 +263,7 @@ test("caches lookups for identical keys", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
@@ -302,7 +302,7 @@ test("invalidates the cache when stored schemas change", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 

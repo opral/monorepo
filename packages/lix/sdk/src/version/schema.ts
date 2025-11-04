@@ -104,7 +104,7 @@ export function applyVersionDatabaseSchema(args: {
         FROM descriptor d 
         LEFT JOIN tip t ON t.id = d.id;
 
-        CREATE VIEW IF NOT EXISTS version_all AS
+        CREATE VIEW IF NOT EXISTS version_by_version AS
         WITH descriptor AS (
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
@@ -208,14 +208,14 @@ export function applyVersionDatabaseSchema(args: {
         FROM state_history
         WHERE schema_key = 'lix_version';
 
-        -- Triggers to route writes on version view through version_all (global scope)
+        -- Triggers to route writes on version view through version_by_version (global scope)
         CREATE TRIGGER IF NOT EXISTS version_insert
         INSTEAD OF INSERT ON version
         BEGIN
 
-            -- Route creation via version_all (global scope). The version_all_insert trigger
+            -- Route creation via version_by_version (global scope). The version_by_version_insert trigger
             -- will take care of writing descriptor + tip rows.
-            INSERT INTO version_all (
+            INSERT INTO version_by_version (
                 id,
                 name,
                 working_commit_id,
@@ -238,9 +238,9 @@ export function applyVersionDatabaseSchema(args: {
         CREATE TRIGGER IF NOT EXISTS version_update
         INSTEAD OF UPDATE ON version
         BEGIN
-            -- Route updates via version_all (global scope). The version_all_update trigger
+            -- Route updates via version_by_version (global scope). The version_by_version_update trigger
             -- will update descriptor fields and move the tip when commit_id is provided.
-            UPDATE version_all
+            UPDATE version_by_version
             SET
                 name = NEW.name,
                 working_commit_id = NEW.working_commit_id,
@@ -255,15 +255,15 @@ export function applyVersionDatabaseSchema(args: {
         CREATE TRIGGER IF NOT EXISTS version_delete
         INSTEAD OF DELETE ON version
         BEGIN
-            -- Route deletes via version_all (global scope); version_all_delete handles state
-            DELETE FROM version_all
+            -- Route deletes via version_by_version (global scope); version_by_version_delete handles state
+            DELETE FROM version_by_version
             WHERE id = OLD.id
               AND lixcol_version_id = 'global';
         END;
 
-        -- Write-capable version_all triggers mirroring 'version' but honoring explicit lixcol_version_id
-        CREATE TRIGGER IF NOT EXISTS version_all_insert
-        INSTEAD OF INSERT ON version_all
+        -- Write-capable version_by_version triggers mirroring 'version' but honoring explicit lixcol_version_id
+        CREATE TRIGGER IF NOT EXISTS version_by_version_insert
+        INSTEAD OF INSERT ON version_by_version
         BEGIN
             -- Always write descriptor row
             INSERT INTO state_by_version (
@@ -316,8 +316,8 @@ export function applyVersionDatabaseSchema(args: {
 
         END;
 
-        CREATE TRIGGER IF NOT EXISTS version_all_update
-        INSTEAD OF UPDATE ON version_all
+        CREATE TRIGGER IF NOT EXISTS version_by_version_update
+        INSTEAD OF UPDATE ON version_by_version
         BEGIN
             -- Route descriptor updates via UPDATE (fields are coalesced from current values)
             UPDATE state_by_version
@@ -361,8 +361,8 @@ export function applyVersionDatabaseSchema(args: {
 
         END;
 
-        CREATE TRIGGER IF NOT EXISTS version_all_delete
-        INSTEAD OF DELETE ON version_all
+        CREATE TRIGGER IF NOT EXISTS version_by_version_delete
+        INSTEAD OF DELETE ON version_by_version
         BEGIN
             -- Route deletes via state_by_version (vtable handles tombstones)
             DELETE FROM state_by_version

@@ -255,7 +255,7 @@ export function rewriteEntityDelete(args: {
 					`state_by_version.version_id = (SELECT version_id FROM active_version)`
 				);
 			}
-		} else if (variant === "all") {
+		} else if (variant === "by_version") {
 			if (defaultVersion !== undefined) {
 				whereClauses.push(
 					`state_by_version.version_id = ${literal(defaultVersion)}`

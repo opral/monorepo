@@ -26,14 +26,14 @@ export async function acceptChangeProposal(args: {
 	// 3) Mark accepted, delete the proposal row (releasing FKs), then delete source version.
 	await lix.db.transaction().execute(async (trx) => {
 		await trx
-			.updateTable("change_proposal_all")
+			.updateTable("change_proposal_by_version")
 			.set({ status: "accepted" })
 			.where("id", "=", id)
 			.where("lixcol_version_id", "=", "global")
 			.execute();
 
 		await trx
-			.deleteFrom("change_proposal_all")
+			.deleteFrom("change_proposal_by_version")
 			.where("id", "=", id)
 			.where("lixcol_version_id", "=", "global")
 			.execute();

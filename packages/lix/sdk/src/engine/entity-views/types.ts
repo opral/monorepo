@@ -1,4 +1,4 @@
-import type { EntityStateAllColumns } from "./entity-state-all.js";
+import type { EntityStateByVersionColumns } from "./entity-state-by-version.js";
 import type { EntityStateColumns } from "./entity-state.js";
 import type { StateEntityHistoryColumns } from "./entity-state-history.js";
 import type { Generated as KyselyGenerated } from "kysely";
@@ -71,17 +71,17 @@ export type EntityStateView<T> = T & EntityStateColumns;
  * @example
  * ```typescript
  * // Define a view type for key-value entities across versions
- * type KeyValueAllView = EntityStateAllView<KeyValue>;
+ * type KeyValueByVersionView = EntityStateByVersionView<KeyValue>;
  *
  * // Query entities in a specific version
  * await lix.db
- *   .selectFrom("key_value_all")
+ *   .selectFrom("key_value_by_version")
  *   .where("lixcol_version_id", "=", "v2")
  *   .selectAll()
  *   .execute();
  * ```
  */
-export type EntityStateAllView<T> = T & EntityStateAllColumns;
+export type EntityStateByVersionView<T> = T & EntityStateByVersionColumns;
 
 /**
  * View type for entity history (read-only).
@@ -155,10 +155,10 @@ export type State<T> = LixSelectable<EntityStateView<T>>;
  *
  * @example
  * ```typescript
- * // Use StateAll for version comparison UI
+ * // Use StateByVersion for version comparison UI
  * interface VersionDiffProps {
- *   oldValue: StateAll<KeyValue>;
- *   newValue: StateAll<KeyValue>;
+ *   oldValue: StateByVersion<KeyValue>;
+ *   newValue: StateByVersion<KeyValue>;
  * }
  *
  * function VersionDiff({ oldValue, newValue }: VersionDiffProps) {
@@ -172,7 +172,7 @@ export type State<T> = LixSelectable<EntityStateView<T>>;
  * }
  * ```
  */
-export type StateAll<T> = LixSelectable<EntityStateAllView<T>>;
+export type StateByVersion<T> = LixSelectable<EntityStateByVersionView<T>>;
 
 /**
  * Type for querying entity history.
@@ -277,25 +277,25 @@ export type StateUpdate<T> = LixUpdateable<EntityStateView<T>>;
  *
  * @example
  * ```typescript
- * // Use NewStateAll for version-specific creation
+ * // Use NewStateByVersion for version-specific creation
  * async function createFeatureFlag(versionId: string, flag: {
  *   key: string;
  *   value: boolean;
  * }) {
- *   const newFlag: NewStateAll<KeyValue> = {
+ *   const newFlag: NewStateByVersion<KeyValue> = {
  *     key: flag.key,
  *     value: flag.value,
  *     lixcol_version_id: versionId  // Create in specific version
  *   };
  *
  *   await lix.db
- *     .insertInto("key_value_all")
+ *     .insertInto("key_value_by_version")
  *     .values(newFlag)
  *     .execute();
  * }
  * ```
  */
-export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
+export type NewStateByVersion<T> = LixInsertable<EntityStateByVersionView<T>>;
 
 /**
  * Type for updating entities in specific versions.
@@ -306,18 +306,18 @@ export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
  *
  * @example
  * ```typescript
- * // Use StateAllUpdate for version-specific updates
+ * // Use StateByVersionUpdate for version-specific updates
  * async function toggleFeatureFlag(
  *   key: string,
  *   versionId: string,
  *   enabled: boolean
  * ) {
- *   const updates: StateAllUpdate<KeyValue> = {
+ *   const updates: StateByVersionUpdate<KeyValue> = {
  *     value: enabled
  *   };
  *
  *   await lix.db
- *     .updateTable("key_value_all")
+ *     .updateTable("key_value_by_version")
  *     .set(updates)
  *     .where("key", "=", key)
  *     .where("lixcol_version_id", "=", versionId)
@@ -325,4 +325,4 @@ export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
  * }
  * ```
  */
-export type StateAllUpdate<T> = LixUpdateable<EntityStateAllView<T>>;
+export type StateByVersionUpdate<T> = LixUpdateable<EntityStateByVersionView<T>>;

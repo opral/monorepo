@@ -147,7 +147,7 @@ export function applyDirectoryDatabaseSchema(args: {
 	});
 
 	engine.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS directory_all AS
+		CREATE VIEW IF NOT EXISTS directory_by_version AS
 		SELECT
 			json_extract(snapshot_content, '$.id') AS id,
 			json_extract(snapshot_content, '$.parent_id') AS parent_id,
@@ -169,7 +169,7 @@ export function applyDirectoryDatabaseSchema(args: {
 		WHERE schema_key = '${schemaKey}';
 
 		CREATE VIEW IF NOT EXISTS directory AS
-		SELECT * FROM directory_all
+		SELECT * FROM directory_by_version
 		WHERE lixcol_version_id IN (SELECT version_id FROM active_version);
 
 		CREATE VIEW IF NOT EXISTS directory_history AS
@@ -253,8 +253,8 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_insert
-		INSTEAD OF INSERT ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_insert
+		INSTEAD OF INSERT ON directory_by_version
 		BEGIN
 			SELECT handle_directory_upsert(
 				COALESCE(NEW.id, lix_nano_id()),
@@ -268,8 +268,8 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_update
-		INSTEAD OF UPDATE ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_update
+		INSTEAD OF UPDATE ON directory_by_version
 		BEGIN
 			SELECT handle_directory_upsert(
 				NEW.id,
@@ -283,10 +283,10 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_delete
-		INSTEAD OF DELETE ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_delete
+		INSTEAD OF DELETE ON directory_by_version
 		BEGIN
-			DELETE FROM file_all
+			DELETE FROM file_by_version
 			WHERE (
 				path = substr(OLD.path, 1, length(OLD.path) - 1)
 				OR (

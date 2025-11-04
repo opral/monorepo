@@ -24,7 +24,7 @@ import {
 import type { LixChange } from "../change/schema-definition.js";
 import type { LixStoredSchema } from "../stored-schema/schema-definition.js";
 import { createHooks } from "../hooks/create-hooks.js";
-import type { NewStateAll } from "../engine/entity-views/types.js";
+import type { NewStateByVersion } from "../engine/entity-views/types.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { populateStateCache } from "../state/cache/populate-state-cache.js";
 import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
@@ -117,7 +117,7 @@ export async function newLixFile(args?: {
 	 *    { key: "my_custom_key", value: "my_custom_value", lixcol_version_id: "global" },
 	 *  ]
 	 */
-	keyValues?: NewStateAll<LixKeyValue>[];
+	keyValues?: NewStateByVersion<LixKeyValue>[];
 }): Promise<NewLixBlob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
@@ -350,7 +350,7 @@ type BootstrapChange = Omit<LixChange, "snapshot_id" | "metadata"> & {
  * All entities are created in a single change set to avoid dependency ordering issues.
  */
 function createBootstrapChanges(args: {
-	providedKeyValues?: NewStateAll<LixKeyValue>[];
+	providedKeyValues?: NewStateByVersion<LixKeyValue>[];
 	created_at: string;
 	generateUuid: () => string;
 	generateNanoid: () => string;

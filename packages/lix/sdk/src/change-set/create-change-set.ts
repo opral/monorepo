@@ -29,7 +29,7 @@ export async function createChangeSet(args: {
 		// Use _all view if version_id is specified, otherwise use regular view
 		if (args.lixcol_version_id) {
 			await trx
-				.insertInto("change_set_all")
+				.insertInto("change_set_by_version")
 				.values({
 					id: csId,
 					lixcol_version_id: args.lixcol_version_id,
@@ -48,7 +48,7 @@ export async function createChangeSet(args: {
 			// Insert elements linking change set to changes
 			if (args.lixcol_version_id) {
 				await trx
-					.insertInto("change_set_element_all")
+					.insertInto("change_set_element_by_version")
 					.values(
 						args.elements.map((element) => ({
 							change_set_id: csId,
@@ -71,7 +71,7 @@ export async function createChangeSet(args: {
 		}
 
 		const changeSet = await trx
-			.selectFrom("change_set_all")
+			.selectFrom("change_set_by_version")
 			.selectAll()
 			.where("id", "=", csId)
 			.where(

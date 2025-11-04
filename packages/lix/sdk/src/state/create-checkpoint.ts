@@ -62,9 +62,9 @@ export async function createCheckpoint(args: {
 
 		// Check if there are any working change set elements to checkpoint
 		const workingElements = await trx
-			.selectFrom("change_set_element_all")
+			.selectFrom("change_set_element_by_version")
 			.where("change_set_id", "=", workingChangeSetId)
-			.innerJoin("change", "change.id", "change_set_element_all.change_id")
+			.innerJoin("change", "change.id", "change_set_element_by_version.change_id")
 			.where("lixcol_version_id", "=", "global")
 			.select(["change.id", "change.snapshot_content"])
 			.execute();
@@ -72,7 +72,7 @@ export async function createCheckpoint(args: {
 		if (workingElements.length === 0) {
 			// Idempotent behavior: if working set is clean, return the current head commit
 			const headCommit = await trx
-				.selectFrom("commit_all")
+				.selectFrom("commit_by_version")
 				.selectAll()
 				.where("id", "=", activeVersion.commit_id)
 				.where("lixcol_version_id", "=", "global")
@@ -259,7 +259,7 @@ export async function createCheckpoint(args: {
 
 		// Return the checkpoint commit (old working)
 		const createdCommit = await trx
-			.selectFrom("commit_all")
+			.selectFrom("commit_by_version")
 			.selectAll()
 			.where("id", "=", checkpointCommitId)
 			.where("lixcol_version_id", "=", "global")

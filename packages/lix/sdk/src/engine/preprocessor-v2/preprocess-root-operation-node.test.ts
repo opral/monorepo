@@ -24,11 +24,11 @@ async function collectStoredSchemas(lix: Awaited<ReturnType<typeof openLix>>) {
 			const alias = schemaKey.slice(4);
 			if (alias.length > 0) {
 				map.set(alias, value);
-				map.set(`${alias}_all`, value);
+				map.set(`${alias}_by_version`, value);
 				map.set(`${alias}_history`, value);
 			}
 		}
-		map.set(`${schemaKey}_all`, value);
+		map.set(`${schemaKey}_by_version`, value);
 		map.set(`${schemaKey}_history`, value);
 	}
 	return map;
@@ -224,7 +224,7 @@ test("rewrites join between two entity views", async () => {
 		parse(`
 		SELECT current.id, snapshot.lixcol_version_id
 		FROM pipeline_schema AS current
-		INNER JOIN pipeline_schema_all AS snapshot
+		INNER JOIN pipeline_schema_by_version AS snapshot
 			ON current.lixcol_entity_id = snapshot.lixcol_entity_id
 	`)
 	);
@@ -260,7 +260,7 @@ test("rewrites join between two entity views", async () => {
 					alias: "current",
 				}),
 				expect.objectContaining({
-					view: "pipeline_schema_all",
+					view: "pipeline_schema_by_version",
 					alias: "snapshot",
 				}),
 			])

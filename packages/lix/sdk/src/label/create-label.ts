@@ -30,7 +30,7 @@ export async function createLabel(args: {
 
 		// Insert the label (views don't support returningAll)
 		await trx
-			.insertInto("label_all")
+			.insertInto("label_by_version")
 			.values({
 				id: labelId,
 				name: args.name,
@@ -42,7 +42,7 @@ export async function createLabel(args: {
 
 		// Query back the inserted label
 		const label = await trx
-			.selectFrom("label_all")
+			.selectFrom("label_by_version")
 			.selectAll()
 			.where("id", "=", labelId)
 			.where(

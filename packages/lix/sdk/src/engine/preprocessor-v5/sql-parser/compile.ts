@@ -283,7 +283,7 @@ function emitCompoundOperator(operator: CompoundOperator): string {
 	switch (operator) {
 		case "union":
 			return "UNION";
-		case "union_all":
+		case "union_by_version":
 			return "UNION ALL";
 		case "intersect":
 			return "INTERSECT";

@@ -172,7 +172,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		const accountExists =
 			engine.executeSync(
 				internalQueryBuilder
-					.selectFrom("account_all")
+					.selectFrom("account_by_version")
 					.select("id")
 					.where("id", "=", env.args.account.id)
 					.where("lixcol_version_id", "=", "global")
@@ -182,7 +182,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		if (!accountExists) {
 			engine.executeSync(
 				internalQueryBuilder
-					.insertInto("account_all")
+					.insertInto("account_by_version")
 					.values({
 						id: env.args.account.id,
 						name: env.args.account.name,
@@ -209,7 +209,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				const exists =
 					engine.executeSync(
 						internalQueryBuilder
-							.selectFrom("key_value_all")
+							.selectFrom("key_value_by_version")
 							.select("key")
 							.where("key", "=", kv.key)
 							.where("lixcol_version_id", "=", explicitVid)
@@ -219,8 +219,8 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				if (exists) {
 					engine.executeSync(
 						internalQueryBuilder
-							.updateTable("key_value_all")
-							.set({ value: kv.value as any })
+							.updateTable("key_value_by_version")
+							.set({ value: kv.value })
 							.where("key", "=", kv.key)
 							.where("lixcol_version_id", "=", explicitVid)
 							.compile()
@@ -228,10 +228,10 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				} else {
 					engine.executeSync(
 						internalQueryBuilder
-							.insertInto("key_value_all")
+							.insertInto("key_value_by_version")
 							.values({
 								key: kv.key,
-								value: kv.value as any,
+								value: kv.value,
 								lixcol_version_id: explicitVid,
 							})
 							.compile()

@@ -401,25 +401,25 @@ export function normalizeOverrideValue(value: unknown): unknown {
 	}
 	return value;
 }
-export type EntityViewVariant = "base" | "all" | "history";
+export type EntityViewVariant = "base" | "by_version" | "history";
 
 export function classifyViewVariant(name: string): EntityViewVariant {
 	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return "all";
+	if (lower.endsWith("_by_version")) return "by_version";
 	if (lower.endsWith("_history")) return "history";
 	return "base";
 }
 
 export function baseSchemaKey(name: string): string | null {
 	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return name.slice(0, -4);
+	if (lower.endsWith("_by_version")) return name.slice(0, -11);
 	if (lower.endsWith("_history")) return name.slice(0, -8);
 	return name;
 }
 
 const VARIANT_TABLE: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_by_version",
+	by_version: "state_by_version",
 	history: "state_history",
 };
 
@@ -543,7 +543,7 @@ export function resolveEntityView(args: {
  *
  * @example
  * ```ts
- * const schema = resolveSchemaDefinition(storedSchemas, "projects_all");
+ * const schema = resolveSchemaDefinition(storedSchemas, "projects_by_version");
  * ```
  */
 export function resolveSchemaDefinition(

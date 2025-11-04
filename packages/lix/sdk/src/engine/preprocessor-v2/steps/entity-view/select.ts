@@ -14,7 +14,7 @@ import type { PreprocessorStep } from "../../types.js";
 import { internalQueryBuilder } from "../../../internal-query-builder.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
 
-type EntityViewVariant = "base" | "all" | "history";
+type EntityViewVariant = "base" | "by_version" | "history";
 
 interface EntityViewReference {
 	readonly viewName: string;
@@ -193,8 +193,8 @@ function classifyVariant(name: string): EntityViewVariant {
 	if (lower.endsWith("_history")) {
 		return "history";
 	}
-	if (lower.endsWith("_all")) {
-		return "all";
+	if (lower.endsWith("_by_version")) {
+		return "by_version";
 	}
 	return "base";
 }
@@ -209,7 +209,7 @@ function resolveSchemaKey(schema: LixSchemaDefinition): string {
 
 const VARIANT_KEY: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_by_version",
+	by_version: "state_by_version",
 	history: "state_history",
 };
 
@@ -378,7 +378,7 @@ function buildEntityViewSubquery(
 	switch (reference.variant) {
 		case "base":
 			return buildBaseEntityView(reference);
-		case "all":
+		case "by_version":
 			return buildAllEntityView(reference);
 		case "history":
 			return buildHistoryEntityView(reference);

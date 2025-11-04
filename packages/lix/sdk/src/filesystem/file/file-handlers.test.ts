@@ -57,7 +57,7 @@ describe("file update", () => {
 
 		// Manually insert the file into the file table first
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				id: fileId,
 				path: "/test.unknown",

@@ -4,7 +4,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixChangeSet } from "../change-set/schema-definition.js";
 import type { LixCommit } from "../commit/schema-definition.js";
-import { uuidV7, uuidV7Sync } from "../engine/functions/uuid-v7.js";
+import { uuidV7 } from "../engine/functions/uuid-v7.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";
 import { createVersion } from "./create-version.js";
 
@@ -15,7 +15,7 @@ async function createCommit(args: {
 }): Promise<Pick<LixCommit, "id" | "change_set_id">> {
 	const commitId = await uuidV7({ lix: args.lix });
 	await args.lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: commitId,
 			change_set_id: args.changeSet.id,
@@ -23,7 +23,7 @@ async function createCommit(args: {
 		})
 		.execute();
 	const row = await args.lix.db
-		.selectFrom("commit_all")
+		.selectFrom("commit_by_version")
 		.where("id", "=", commitId)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -89,14 +89,14 @@ test("sets a fresh working_commit_id backed by an empty change set", async () =>
 
 	// working commit should point to an empty change set
 	const workingCommit = await lix.db
-		.selectFrom("commit_all")
+		.selectFrom("commit_by_version")
 		.where("id", "=", v.working_commit_id)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	const elements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()

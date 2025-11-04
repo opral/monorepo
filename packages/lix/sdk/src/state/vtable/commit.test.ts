@@ -919,7 +919,7 @@ test("does not update working change set elements for global version", async () 
 
 	// Stage a tracked change in the global version
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "global_key",
 			value: "global_value",
@@ -942,7 +942,7 @@ test("does not update working change set elements for global version", async () 
 
 	// There should be no working change set element for the global working change set
 	const workingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("entity_id", "=", "global_key")
@@ -1221,7 +1221,7 @@ test("creates a new commit and updates the version's commit id for mutations", a
 	);
 
 	await lix.db
-		.updateTable("key_value_all")
+		.updateTable("key_value_by_version")
 		.where("key", "=", "mock_key")
 		.where(
 			"lixcol_version_id",
@@ -1677,9 +1677,9 @@ describe("file lixcol cache updates", () => {
 		});
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert a file into global version using file_all
+		// Insert a file into global version using file_by_version
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/test.txt",
 				data: new TextEncoder().encode("initial"),
@@ -1693,16 +1693,16 @@ describe("file lixcol cache updates", () => {
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		// Update the file multiple times using file_all (in deterministic mode, timestamps auto-increment)
+		// Update the file multiple times using file_by_version (in deterministic mode, timestamps auto-increment)
 		await lix.db
-			.updateTable("file_all")
+			.updateTable("file_by_version")
 			.where("path", "=", "/test.txt")
 			.where("lixcol_version_id", "=", "global")
 			.set({ data: new TextEncoder().encode("update1") })
 			.execute();
 
 		await lix.db
-			.updateTable("file_all")
+			.updateTable("file_by_version")
 			.where("path", "=", "/test.txt")
 			.where("lixcol_version_id", "=", "global")
 			.set({ data: new TextEncoder().encode("update2") })

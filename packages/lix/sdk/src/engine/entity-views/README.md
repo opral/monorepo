@@ -85,7 +85,7 @@ For each entity schema, three views are created:
   - Full CRUD support via INSTEAD OF triggers
   - Most commonly used for application logic
 
-### 2. All-Versions View (e.g., `key_value_all`)
+### 2. All-Versions View (e.g., `key_value_by_version`)
 
 - **Purpose**: Work with entities across all versions
 - **Based on**: `state_by_version` virtual table
@@ -128,7 +128,7 @@ Entity views add metadata columns prefixed with `lixcol_`:
 - `lixcol_change_id` - Links to the change that created/modified the entity
 - `lixcol_untracked` - Bypasses change tracking (for UI state)
 - `lixcol_inherited_from_version_id` - Tracks entity lineage across branches
-- `lixcol_version_id` - Version ID (only in `_all` views)
+- `lixcol_version_id` - Version ID (only in `_by_version` views)
 
 ### INSTEAD OF Triggers
 
@@ -186,10 +186,10 @@ SELECT * FROM key_value WHERE value LIKE 'h%';
 
 ```sql
 -- Query specific version
-SELECT * FROM key_value_all WHERE lixcol_version_id = 'version-123';
+SELECT * FROM key_value_by_version WHERE lixcol_version_id = 'version-123';
 
 -- Insert into specific version
-INSERT INTO key_value_all (key, value, lixcol_version_id)
+INSERT INTO key_value_by_version (key, value, lixcol_version_id)
 VALUES ('greeting', 'hello', 'version-123');
 ```
 

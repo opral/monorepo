@@ -306,7 +306,7 @@ function resolveVersionExpression(args: {
 			),
 		};
 	};
-	if (args.variant === "all") {
+	if (args.variant === "by_version") {
 		if (assignment) {
 			const valueExpr = createRawExpression(assignment.sql);
 			return buildResult(valueExpr);

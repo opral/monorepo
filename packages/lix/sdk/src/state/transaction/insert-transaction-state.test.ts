@@ -162,7 +162,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 
 	// Insert a key_value in global version (parent)
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "inherited-key",
 			value: "parent-value",
@@ -268,7 +268,7 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 
 	// Insert an untracked key_value in global version (parent)
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "inherited-untracked-key",
 			value: "parent-untracked-value",
@@ -619,7 +619,7 @@ test("inserts working change set elements", async () => {
 
 	// Make a mutation
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -636,7 +636,7 @@ test("inserts working change set elements", async () => {
 
 	// Check that working change set element was created by mutation handler
 	const workingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test_key")
@@ -675,7 +675,7 @@ test("updates working change set elements on entity updates (latest change wins)
 
 	// Insert entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -697,7 +697,7 @@ test("updates working change set elements on entity updates (latest change wins)
 
 	// Get initial working element
 	const initialWorkingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test_key")
@@ -722,7 +722,7 @@ test("updates working change set elements on entity updates (latest change wins)
 
 	// Check that working change set still has only one element for this entity (latest change)
 	const workingElementsAfterUpdate = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test_key")
@@ -788,7 +788,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 
 	// Insert entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -810,7 +810,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 
 	// Verify element exists in working change set
 	const workingElementsAfterInsert = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test_key")
@@ -830,7 +830,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 
 	// Check that working change set no longer includes this entity
 	const workingElementsAfterDelete = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "test_key")
@@ -867,7 +867,7 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 
 	// AFTER checkpoint: Insert an entity
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "post_checkpoint_key",
 			value: "post_checkpoint_value",
@@ -889,7 +889,7 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 
 	// Verify entity appears in working change set after insert
 	const workingElementsAfterInsert = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "post_checkpoint_key")
@@ -912,7 +912,7 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 
 	// Verify entity is excluded from working change set (added after checkpoint then deleted)
 	const workingElementsAfterDelete = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.where("entity_id", "=", "post_checkpoint_key")
@@ -947,7 +947,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Make changes in the main version context
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "main_version_key",
 			value: "main_version_value",
@@ -957,7 +957,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Create a new change set, commit and version
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "new_cs", lixcol_version_id: "global" },
 			{ id: "new_working_cs", lixcol_version_id: "global" },
@@ -966,7 +966,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Create a commit that points to the change set
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: "new_commit",
 			change_set_id: "new_cs",
@@ -976,7 +976,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Create a working commit for the new version
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: "new_working_commit",
 			change_set_id: "new_working_cs",
@@ -1002,7 +1002,7 @@ test("working change set elements are separated per version", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "new_version_key",
 			value: "new_version_value",
@@ -1019,7 +1019,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Check main version's working change set elements
 	const mainWorkingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", mainWorkingCommit.change_set_id)
 		.where("lixcol_version_id", "=", mainVersion.id)
 		.where("entity_id", "=", "main_version_key")
@@ -1028,7 +1028,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Check new version's working change set elements
 	const newWorkingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", "new_working_cs")
 		.where("lixcol_version_id", "=", "new_version")
 		.where("entity_id", "=", "new_version_key")
@@ -1055,7 +1055,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Verify isolation - main working change set should not contain new version changes
 	const mainCrossCheck = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", mainWorkingCommit.change_set_id)
 		.where("lixcol_version_id", "=", mainVersion.id)
 		.where("entity_id", "=", "new_version_key")
@@ -1064,7 +1064,7 @@ test("working change set elements are separated per version", async () => {
 
 	// New working change set should not contain main version changes
 	const newCrossCheck = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("change_set_id", "=", "new_working_cs")
 		.where("lixcol_version_id", "=", "new_version")
 		.where("entity_id", "=", "main_version_key")

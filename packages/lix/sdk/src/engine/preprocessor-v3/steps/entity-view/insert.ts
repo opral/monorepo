@@ -632,7 +632,7 @@ function buildStateRowExpressions(args: {
 	const referencesActiveVersion = explicitVersionExpr
 		? /\bactive_version\b/i.test(explicitVersionExpr)
 		: false;
-	if (args.variant === "all") {
+	if (args.variant === "by_version") {
 		if (explicitVersionExpr) {
 			versionExpr = explicitVersionExpr;
 			if (referencesActiveVersion) {

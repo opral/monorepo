@@ -293,7 +293,7 @@ export function rewriteEntityInsert(args: {
 		const explicitVersionExpr =
 			expressionFor("lixcol_version_id") ?? expressionFor("version_id");
 		let versionExpr: string;
-		if (variant === "all") {
+		if (variant === "by_version") {
 			if (explicitVersionExpr) {
 				versionExpr = explicitVersionExpr;
 			} else if (overrideVersion !== undefined) {

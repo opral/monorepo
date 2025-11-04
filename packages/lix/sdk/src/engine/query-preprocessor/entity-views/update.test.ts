@@ -322,7 +322,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 	await lix.close();
 });
 
-test("rewrites updates for _all views", async () => {
+test("rewrites updates for _by_version views", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "update_schema",
@@ -344,7 +344,7 @@ test("rewrites updates for _all views", async () => {
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
-	const allView = `${table}_all`;
+	const byVersionView = `${table}_by_version`;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -352,7 +352,7 @@ test("rewrites updates for _all views", async () => {
 		.executeTakeFirstOrThrow();
 
 	const insertResult = preprocess({
-		sql: `INSERT INTO ${allView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
+		sql: `INSERT INTO ${byVersionView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
 		parameters: ["row-2", "Original All", activeVersion.version_id],
 	});
 
@@ -362,7 +362,7 @@ test("rewrites updates for _all views", async () => {
 	});
 
 	const updateResult = preprocess({
-		sql: `UPDATE ${allView} SET name = ? WHERE id = ? AND lixcol_version_id = ?`,
+		sql: `UPDATE ${byVersionView} SET name = ? WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["Updated All", "row-2", activeVersion.version_id],
 	});
 
@@ -379,7 +379,7 @@ test("rewrites updates for _all views", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: `SELECT name FROM ${allView} WHERE id = ? AND lixcol_version_id = ?`,
+		sql: `SELECT name FROM ${byVersionView} WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
@@ -441,7 +441,7 @@ test("rewrites updates with JSON payloads", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: "SELECT payload FROM json_update_schema_all WHERE id = ?",
+		sql: "SELECT payload FROM json_update_schema_by_version WHERE id = ?",
 		parameters: ["row-1"],
 	});
 
@@ -558,7 +558,7 @@ test("skips rewriting for disabled state_by_version view", async () => {
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
-	const sql = "UPDATE limited_update_schema_all SET name = ? WHERE id = ?";
+	const sql = "UPDATE limited_update_schema_by_version SET name = ? WHERE id = ?";
 	const parameters = ["Disabled", "row-1"];
 	const rewritten = preprocess({ sql, parameters });
 

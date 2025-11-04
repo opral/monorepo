@@ -134,7 +134,7 @@ function buildEntityViewDelete(
 				)
 			);
 			hasVersionReference = true;
-		} else if (variant === "all") {
+		} else if (variant === "by_version") {
 			if (versionOverride === undefined) {
 				throw new Error(
 					`DELETE from ${storedSchemaKey}_all requires explicit lixcol_version_id or schema default`

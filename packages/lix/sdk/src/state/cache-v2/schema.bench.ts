@@ -151,7 +151,7 @@ bench("query with json_extract from cache", async () => {
 	});
 });
 
-bench("query through resolved_state_all view", async () => {
+bench("query through resolved_state_by_version view", async () => {
 	const lix = await openLix({});
 	await registerBenchSchema(lix);
 	clearTable(lix);

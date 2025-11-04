@@ -81,7 +81,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 
 	// Switch to real time by deleting the key (cleaner approach)
 	await lix.db
-		.deleteFrom("key_value_all")
+		.deleteFrom("key_value_by_version")
 		.where("key", "=", "lix_deterministic_mode")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
@@ -91,7 +91,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 
 	// Switch back to deterministic
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "lix_deterministic_mode",
 			value: { enabled: true },

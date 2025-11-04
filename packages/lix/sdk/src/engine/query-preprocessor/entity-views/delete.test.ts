@@ -104,7 +104,7 @@ test("prefixless alias deletes target stored schema key", async () => {
 	expect(rows).toEqual([]);
 });
 
-test("rewrites deletes for _all views", async () => {
+test("rewrites deletes for _by_version views", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "delete_schema",
@@ -126,7 +126,7 @@ test("rewrites deletes for _all views", async () => {
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
-	const allView = `${table}_all`;
+	const byVersionView = `${table}_by_version`;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -134,7 +134,7 @@ test("rewrites deletes for _all views", async () => {
 		.executeTakeFirstOrThrow();
 
 	const insertResult = preprocess({
-		sql: `INSERT INTO ${allView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
+		sql: `INSERT INTO ${byVersionView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
 		parameters: ["row-2", "Original All", activeVersion.version_id],
 	});
 
@@ -145,7 +145,7 @@ test("rewrites deletes for _all views", async () => {
 	});
 
 	const deleteResult = preprocess({
-		sql: `DELETE FROM ${allView} WHERE id = ? AND lixcol_version_id = ?`,
+		sql: `DELETE FROM ${byVersionView} WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
@@ -158,7 +158,7 @@ test("rewrites deletes for _all views", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: `SELECT name FROM ${allView} WHERE id = ? AND lixcol_version_id = ?`,
+		sql: `SELECT name FROM ${byVersionView} WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
@@ -193,7 +193,7 @@ test("skips rewriting for disabled state_by_version view", async () => {
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
-	const sql = "DELETE FROM limited_delete_schema_all WHERE id = ?";
+	const sql = "DELETE FROM limited_delete_schema_by_version WHERE id = ?";
 	const parameters = ["row-1"];
 	const rewritten = preprocess({ sql, parameters });
 

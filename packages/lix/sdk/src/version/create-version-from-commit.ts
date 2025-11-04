@@ -54,7 +54,7 @@ export async function createVersionFromCommit(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Ensure the referenced commit exists (global scope)
 		const commitRow = await trx
-			.selectFrom("commit_all")
+			.selectFrom("commit_by_version")
 			.where("id", "=", args.commit.id)
 			.where("lixcol_version_id", "=", "global")
 			.select(["id"])
@@ -71,7 +71,7 @@ export async function createVersionFromCommit(args: {
 
 		const workingCommitId = await uuidV7({ lix: args.lix });
 		await trx
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: workingCommitId,
 				change_set_id: workingCs.id,

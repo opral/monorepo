@@ -283,7 +283,7 @@ export function rewriteEntityUpdate(args: {
 
 	let versionExpr: string | null = null;
 	let versionFallbackExpr: string | null = null;
-	if (variant === "all") {
+	if (variant === "by_version") {
 		if (explicitVersionAssignment) {
 			versionExpr = renderValueSource(explicitVersionAssignment.value);
 		} else {

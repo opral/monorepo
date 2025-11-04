@@ -57,7 +57,7 @@ test("rewrites inserts for stored schema views", async () => {
 	await lix.close();
 });
 
-test("rewrites inserts for _all view", async () => {
+test("rewrites inserts for _by_version view", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "insertable_schema",
@@ -79,7 +79,7 @@ test("rewrites inserts for _all view", async () => {
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
 	const table = schema["x-lix-key"];
-	const allView = `${table}_all`;
+	const byVersionView = `${table}_by_version`;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -87,7 +87,7 @@ test("rewrites inserts for _all view", async () => {
 		.executeTakeFirstOrThrow();
 
 	const rewritten = preprocess({
-		sql: `INSERT INTO ${allView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
+		sql: `INSERT INTO ${byVersionView} (id, name, lixcol_version_id) VALUES (?, ?, ?)`,
 		parameters: ["row-2", "Entity 2", activeVersion.version_id],
 	});
 
@@ -104,7 +104,7 @@ test("rewrites inserts for _all view", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: `SELECT name FROM ${allView} WHERE id = ? AND lixcol_version_id = ?`,
+		sql: `SELECT name FROM ${byVersionView} WHERE id = ? AND lixcol_version_id = ?`,
 		parameters: ["row-2", activeVersion.version_id],
 	});
 
@@ -145,7 +145,7 @@ test("skips rewriting for disabled state_by_version view", async () => {
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
 	const sql =
-		"INSERT INTO limited_insert_schema_all (id, name, lixcol_version_id) VALUES (?, ?, ?)";
+		"INSERT INTO limited_insert_schema_by_version (id, name, lixcol_version_id) VALUES (?, ?, ?)";
 	const parameters = ["row-limited", "Disabled", "v1"];
 	const rewritten = preprocess({ sql, parameters });
 
@@ -155,7 +155,7 @@ test("skips rewriting for disabled state_by_version view", async () => {
 	await lix.close();
 });
 
-test("missing lixcol_version_id for _all view throws", async () => {
+test("missing lixcol_version_id for _by_version view throws", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "insertable_schema",
@@ -176,11 +176,11 @@ test("missing lixcol_version_id for _all view throws", async () => {
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const preprocess = createQueryPreprocessor(lix.engine!);
-	const allView = `${schema["x-lix-key"]}_all`;
+	const byVersionView = `${schema["x-lix-key"]}_by_version`;
 
 	expect(() =>
 		preprocess({
-			sql: `INSERT INTO ${allView} (id, name) VALUES (?, ?)`,
+			sql: `INSERT INTO ${byVersionView} (id, name) VALUES (?, ?)`,
 			parameters: ["row-3", "Entity 3"],
 		})
 	).toThrow(/lixcol_version_id/);
@@ -188,7 +188,7 @@ test("missing lixcol_version_id for _all view throws", async () => {
 	await lix.close();
 });
 
-test("defaults version for _all view when schema defines lixcol_version_id", async () => {
+test("defaults version for _by_version view when schema defines lixcol_version_id", async () => {
 	const lix = await openLix({});
 	const schema = {
 		"x-lix-key": "insertable_schema",
@@ -211,7 +211,7 @@ test("defaults version for _all view when schema defines lixcol_version_id", asy
 	const preprocess = createQueryPreprocessor(lix.engine!);
 
 	const rewritten = preprocess({
-		sql: "INSERT INTO insertable_schema_all (id, name) VALUES (?, ?)",
+		sql: "INSERT INTO insertable_schema_by_version (id, name) VALUES (?, ?)",
 		parameters: ["acc-1", "Defaulted"],
 	});
 
@@ -844,7 +844,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 	});
 
 	const selectResult = preprocess({
-		sql: "SELECT id, payload FROM multi_schema_all WHERE id IN (?, ?, ?)",
+		sql: "SELECT id, payload FROM multi_schema_by_version WHERE id IN (?, ?, ?)",
 		parameters: ["row-1", "row-2", "row-3"],
 	});
 

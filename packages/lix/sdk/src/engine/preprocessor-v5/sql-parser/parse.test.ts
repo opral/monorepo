@@ -733,7 +733,7 @@ describe("parse", () => {
 
 	test("parses not exists predicate", () => {
 		const ast = parseSelectStatement(
-			"SELECT id FROM conversation_message_all AS m1 WHERE NOT EXISTS (SELECT 1 FROM conversation_message_all AS m2 WHERE m2.parent_id = m1.id)"
+			"SELECT id FROM conversation_message_by_version AS m1 WHERE NOT EXISTS (SELECT 1 FROM conversation_message_by_version AS m2 WHERE m2.parent_id = m1.id)"
 		);
 		expect(ast).toMatchObject({
 			where_clause: {
@@ -1012,7 +1012,7 @@ SELECT commit_id, commit_id as root_commit_id, 0 as depth
 FROM requested_commits
 UNION
 SELECT ce.parent_id, r.root_commit_id, r.depth + 1
-FROM commit_edge_all ce
+FROM commit_edge_by_version ce
 JOIN reachable_commits_from_requested r ON ce.child_id = r.id
 WHERE ce.lixcol_version_id = 'global'
 `.trim();

@@ -459,7 +459,7 @@ test("exposes writer key", async () => {
 
 	await withWriterKey(lix.db, writerKey, async (trx) => {
 		await trx
-			.insertInto("key_value_all")
+			.insertInto("key_value_by_version")
 			.values({
 				key: "writer_example",
 				value: "tracked",

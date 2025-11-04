@@ -26,7 +26,7 @@ export async function createAccount(args: {
 			args.id || (await nanoId({ lix: { ...args.lix, db: trx } }));
 		// Insert the account (views don't support returningAll)
 		await trx
-			.insertInto("account_all")
+			.insertInto("account_by_version")
 			.values({
 				id: accountId,
 				name: args.name,

@@ -9,9 +9,9 @@ describe("entity view select synthesis", () => {
 		const result = getEntityViewSelects({ engine: lix.engine! });
 		expect(result.map.size).toBeGreaterThan(0);
 		expect(result.map.has("lix_key_value")).toBe(true);
-		expect(result.map.has("lix_key_value_all")).toBe(true);
+		expect(result.map.has("lix_key_value_by_version")).toBe(true);
 		expect(result.map.has("key_value")).toBe(true);
-		expect(result.map.has("key_value_all")).toBe(true);
+		expect(result.map.has("key_value_by_version")).toBe(true);
 	});
 
 	test("registers prefixless aliases for lix_* stored schemas", async () => {
@@ -37,16 +37,16 @@ describe("entity view select synthesis", () => {
 		expect(map.has("lix_alias_test")).toBe(true);
 		expect(map.has("alias_test")).toBe(true);
 		expect(map.get("alias_test")).toBe(map.get("lix_alias_test"));
-		expect(map.has("lix_alias_test_all")).toBe(true);
-		expect(map.has("alias_test_all")).toBe(true);
-		expect(map.get("alias_test_all")).toBe(map.get("lix_alias_test_all"));
+		expect(map.has("lix_alias_test_by_version")).toBe(true);
+		expect(map.has("alias_test_by_version")).toBe(true);
+		expect(map.get("alias_test_by_version")).toBe(map.get("lix_alias_test_by_version"));
 		expect(map.has("alias_test_history")).toBe(true);
 		expect(map.get("alias_test_history")).toBe(
 			map.get("lix_alias_test_history")
 		);
 	});
 
-	test("generates base, _all, and _history selects for stored schema", async () => {
+	test("generates base, _by_version, and _history selects for stored schema", async () => {
 		const lix = await openLix({});
 		const schema = {
 			"x-lix-key": "unit_test_schema",
@@ -67,7 +67,7 @@ describe("entity view select synthesis", () => {
 
 		const { map } = getEntityViewSelects({ engine: lix.engine! });
 		expect(map.has("unit_test_schema")).toBe(true);
-		expect(map.has("unit_test_schema_all")).toBe(true);
+		expect(map.has("unit_test_schema_by_version")).toBe(true);
 		expect(map.has("unit_test_schema_history")).toBe(true);
 
 		const base = map.get("unit_test_schema")!;
@@ -82,7 +82,7 @@ describe("entity view select synthesis", () => {
 		);
 		expect(base).toContain("sa.plugin_key AS lixcol_plugin_key");
 
-		const all = map.get("unit_test_schema_all")!;
+		const all = map.get("unit_test_schema_by_version")!;
 		expect(all).toContain("FROM state_by_version");
 		expect(all).toContain("version_id AS lixcol_version_id");
 
@@ -112,7 +112,7 @@ describe("entity view select synthesis", () => {
 
 		const { map } = getEntityViewSelects({ engine: lix.engine! });
 		expect(map.has("limited_views_schema")).toBe(true);
-		expect(map.has("limited_views_schema_all")).toBe(false);
+		expect(map.has("limited_views_schema_by_version")).toBe(false);
 		expect(map.has("limited_views_schema_history")).toBe(false);
 	});
 

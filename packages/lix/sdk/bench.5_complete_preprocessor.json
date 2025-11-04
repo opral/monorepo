@@ -872,7 +872,7 @@
             },
             {
               "id": "-829802227_2",
-              "name": "query through resolved_state_all view",
+              "name": "query through resolved_state_by_version view",
               "rank": 3,
               "rme": 1.9208695112919572,
               "samples": [],

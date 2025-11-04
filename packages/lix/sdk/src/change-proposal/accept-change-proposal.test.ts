@@ -25,7 +25,7 @@ test("acceptChangeProposal merges source into target, deletes proposal, then del
 	});
 
 	await lix.db
-		.insertInto("file_all")
+		.insertInto("file_by_version")
 		.values({
 			path: "/accept-spec.md",
 			data: enc("hello"),
@@ -47,7 +47,7 @@ test("acceptChangeProposal merges source into target, deletes proposal, then del
 
 	// File should be present in main
 	const fileInMain = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("path", "=", "/accept-spec.md")
 		.where("lixcol_version_id", "=", main.id)
 		.selectAll()

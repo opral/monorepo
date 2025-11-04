@@ -51,12 +51,12 @@ export function getEntityViewSqlDefinitions(args: {
 		if ((schema as any).type !== "object") continue;
 
 		const props = extractPropertyKeys(schema);
-		const baseSql = isEntityViewVariantEnabled(schema, "base")
-			? createActiveSelect({ schema, properties: props })
-			: null;
-		const allSql = isEntityViewVariantEnabled(schema, "all")
-			? createAllSelect({ schema, properties: props })
-			: null;
+	const baseSql = isEntityViewVariantEnabled(schema, "base")
+		? createActiveSelect({ schema, properties: props })
+		: null;
+	const byVersionSql = isEntityViewVariantEnabled(schema, "by_version")
+		? createByVersionSelect({ schema, properties: props })
+		: null;
 		const historySql = isEntityViewVariantEnabled(schema, "history")
 			? createHistorySelect({ schema, properties: props })
 			: null;
@@ -69,13 +69,13 @@ export function getEntityViewSqlDefinitions(args: {
 				sql: baseSql,
 			});
 		}
-		if (allSql) {
-			registerView(map, {
-				primary: `${baseName}_all`,
-				alias: aliasBaseName ? `${aliasBaseName}_all` : null,
-				sql: allSql,
-			});
-		}
+	if (byVersionSql) {
+		registerView(map, {
+			primary: `${baseName}_by_version`,
+			alias: aliasBaseName ? `${aliasBaseName}_by_version` : null,
+			sql: byVersionSql,
+		});
+	}
 		if (historySql) {
 			registerView(map, {
 				primary: `${baseName}_history`,
@@ -147,7 +147,7 @@ function createActiveSelect(args: {
 	return `SELECT\n  ${expressions.join(",\n  ")}\nFROM state_by_version ${alias}\nWHERE ${alias}.schema_key = '${schema["x-lix-key"]}'\n  AND ${versionFilter}`;
 }
 
-function createAllSelect(args: {
+function createByVersionSelect(args: {
 	schema: LixSchemaDefinition;
 	properties: string[];
 }): string {

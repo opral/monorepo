@@ -248,10 +248,10 @@ test("expands views defined by compound selects with nested view references", ()
 test("expands views referenced inside NOT EXISTS predicates", () => {
 	const statements = parseStatements(`
 		SELECT m1.id
-		FROM conversation_message_all AS m1
+		FROM conversation_message_by_version AS m1
 		WHERE NOT EXISTS (
 			SELECT 1
-			FROM conversation_message_all AS m2
+			FROM conversation_message_by_version AS m2
 			WHERE m2.parent_id = m1.id
 		)
 	`);
@@ -263,7 +263,7 @@ test("expands views referenced inside NOT EXISTS predicates", () => {
 		getSqlViews: () =>
 			new Map([
 				[
-					"conversation_message_all",
+					"conversation_message_by_version",
 					`
 						SELECT sa.id, sa.parent_id
 						FROM state_by_version AS sa

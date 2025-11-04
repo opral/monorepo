@@ -86,7 +86,7 @@ describe("rewriteEntityViewSelect", () => {
 	test("rewrites _all variant", () => {
 		const { rewritten } = run(`
 		SELECT *
-		FROM demo_entity_all
+		FROM demo_entity_by_version
 	`);
 
 		const select = rewritten as SelectStatementNode;

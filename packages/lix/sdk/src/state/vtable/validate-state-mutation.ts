@@ -280,7 +280,7 @@ export function validateStateMutation(args: {
 		if (args.operation === "insert") {
 			const debugEnabled = args.engine.executeSync(
 				internalQueryBuilder
-					.selectFrom("key_value_all")
+					.selectFrom("key_value_by_version")
 					.select("value")
 					.where("key", "=", "lix_debug")
 					.where("value", "=", "true")
@@ -975,7 +975,7 @@ function validateAcyclicCommitGraph(args: {
 	// Get all existing edges
 	const existingEdges = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("commit_edge_all")
+			.selectFrom("commit_edge_by_version")
 			.select(["parent_id", "child_id"])
 			.where("lixcol_version_id", "=", args.version_id)
 			.compile()

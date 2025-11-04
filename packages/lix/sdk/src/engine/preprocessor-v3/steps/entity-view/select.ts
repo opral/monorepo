@@ -23,7 +23,7 @@ import type { PreprocessorStep, PreprocessorTraceEntry } from "../../types.js";
 import type { LixSchemaDefinition } from "../../../../schema-definition/definition.js";
 import { resolveSchemaDefinition } from "./shared.js";
 
-type EntityViewVariant = "base" | "all" | "history";
+type EntityViewVariant = "base" | "by_version" | "history";
 
 type EntityViewReference = {
 	readonly viewName: string;
@@ -38,13 +38,13 @@ type EntityViewReference = {
 
 const VARIANT_TABLE: Record<EntityViewVariant, string> = {
 	base: "state",
-	all: "state_by_version",
+	by_version: "state_by_version",
 	history: "state_history",
 };
 
 const BASE_ALIAS: Record<EntityViewVariant, string> = {
 	base: "st",
-	all: "sa",
+	by_version: "sa",
 	history: "sh",
 };
 
@@ -66,7 +66,7 @@ const BASE_META_COLUMNS = [
 	{ column: "metadata", alias: "lixcol_metadata" },
 ] as const;
 
-const ALL_META_EXTRA = [
+const BY_VERSION_META_EXTRA = [
 	{ column: "version_id", alias: "lixcol_version_id" },
 ] as const;
 
@@ -297,7 +297,7 @@ function buildEntityViewSelect(
 				)
 			);
 			break;
-		case "all":
+		case "by_version":
 			projection.push(
 				...filterLixcolColumns(
 					BASE_META_COLUMNS.filter(
@@ -309,7 +309,7 @@ function buildEntityViewSelect(
 				)
 			);
 			projection.push(
-				...filterLixcolColumns(ALL_META_EXTRA, lixcolUsage).map((column) =>
+				...filterLixcolColumns(BY_VERSION_META_EXTRA, lixcolUsage).map((column) =>
 					columnSelectWithAlias(alias, column.column, column.alias)
 				)
 			);
@@ -588,8 +588,8 @@ function classifyVariant(viewName: string): EntityViewVariant {
 	if (normalized.endsWith("_history")) {
 		return "history";
 	}
-	if (normalized.endsWith("_all")) {
-		return "all";
+	if (normalized.endsWith("_by_version")) {
+		return "by_version";
 	}
 	return "base";
 }

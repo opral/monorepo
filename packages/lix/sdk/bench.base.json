@@ -912,7 +912,7 @@
             },
             {
               "id": "1399465846_2",
-              "name": "query through resolved_state_all view",
+              "name": "query through resolved_state_by_version view",
               "rank": 3,
               "rme": 0,
               "samples": []

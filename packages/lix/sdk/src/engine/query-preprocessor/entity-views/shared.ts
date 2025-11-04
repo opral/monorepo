@@ -95,11 +95,13 @@ export function extractIdentifier(token: IToken | undefined): string | null {
 }
 
 /**
- * Categorises an entity view by its suffix (base, _all, or _history).
+ * Categorises an entity view by its suffix (base, _by_version, or _history).
  */
-export function classifyViewVariant(name: string): "base" | "all" | "history" {
+export function classifyViewVariant(
+	name: string
+): "base" | "by_version" | "history" {
 	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return "all";
+	if (lower.endsWith("_by_version")) return "by_version";
 	if (lower.endsWith("_history")) return "history";
 	return "base";
 }
@@ -109,14 +111,14 @@ export function classifyViewVariant(name: string): "base" | "all" | "history" {
  */
 export function baseSchemaKey(name: string): string | null {
 	const lower = name.toLowerCase();
-	if (lower.endsWith("_all")) return name.slice(0, -4);
+	if (lower.endsWith("_by_version")) return name.slice(0, -11);
 	if (lower.endsWith("_history")) return name.slice(0, -8);
 	return name;
 }
 
-const VIEW_VARIANT_TO_KEY: Record<"base" | "all" | "history", string> = {
+const VIEW_VARIANT_TO_KEY: Record<"base" | "by_version" | "history", string> = {
 	base: "state",
-	all: "state_by_version",
+	by_version: "state_by_version",
 	history: "state_history",
 };
 
@@ -125,7 +127,7 @@ const VIEW_VARIANT_TO_KEY: Record<"base" | "all" | "history", string> = {
  */
 export function isEntityViewVariantEnabled(
 	schema: StoredSchemaDefinition,
-	variant: "base" | "all" | "history"
+	variant: "base" | "by_version" | "history"
 ): boolean {
 	const selected = schema?.["x-lix-entity-views"];
 	if (!Array.isArray(selected)) {

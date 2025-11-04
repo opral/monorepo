@@ -11,7 +11,7 @@ const CANONICAL_TABLES = [
 	"state_by_version",
 	"entity_label",
 	"entity_conversation",
-	"entity_conversation_all",
+	"entity_conversation_by_version",
 ] as const;
 
 /**

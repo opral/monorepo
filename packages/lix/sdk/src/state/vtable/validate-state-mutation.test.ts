@@ -1879,7 +1879,7 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create change sets
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_referenced", lixcol_version_id: "global" },
 			{ id: "cs_working", lixcol_version_id: "global" },
@@ -1888,7 +1888,7 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create commits that reference the change sets
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_1",
@@ -2483,7 +2483,7 @@ test("should prevent foreign key references to inherited entities from different
 
 	// Create a conversation in global context
 	await lix.db
-		.insertInto("conversation_all")
+		.insertInto("conversation_by_version")
 		.values({
 			id: "global_thread",
 			lixcol_metadata: { title: "Global Conversation" },
@@ -2544,7 +2544,7 @@ test("should prevent change set elements from referencing change sets defined in
 
 	// Create a change set in global context
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values({
 			id: "global_change_set",
 			lixcol_version_id: "global",
@@ -2882,7 +2882,7 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 
 	// Create a few change sets and commits
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -2891,7 +2891,7 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
@@ -2901,15 +2901,19 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 
 	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit1"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit1"])})`,
+		})
 		.where("id", "=", "commit2")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit2"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit2"])})`,
+		})
 		.where("id", "=", "commit3")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
@@ -2963,7 +2967,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 
 	// Create a few change sets and commits
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -2972,7 +2976,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
@@ -2982,15 +2986,19 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 
 	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit1"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit1"])})`,
+		})
 		.where("id", "=", "commit2")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit2"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit2"])})`,
+		})
 		.where("id", "=", "commit3")
 		.where("lixcol_version_id", "=", "global")
 		.execute();

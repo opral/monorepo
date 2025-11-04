@@ -41,11 +41,17 @@ async function collectStoredSchemas(lix: Awaited<ReturnType<typeof openLix>>) {
 
 		map.set(schemaKey, value);
 
-		if (schemaKey.startsWith("lix_")) {
-			map.set(schemaKey.replace(/^lix_/, ""), value);
+		const alias = schemaKey.startsWith("lix_")
+			? schemaKey.replace(/^lix_/, "")
+			: undefined;
+
+		if (alias) {
+			map.set(alias, value);
+			map.set(`${alias}_by_version`, value);
+			map.set(`${alias}_history`, value);
 		}
 
-		map.set(`${schemaKey}_all`, value);
+		map.set(`${schemaKey}_by_version`, value);
 		map.set(`${schemaKey}_history`, value);
 	}
 
@@ -150,7 +156,7 @@ describe("rewriteEntityViewSelect", () => {
 		const allNode = toRootOperationNode(
 			parse(`
 		SELECT *
-		FROM unit_test_schema_all
+		FROM unit_test_schema_by_version
 		`)
 		);
 
@@ -203,12 +209,12 @@ describe("rewriteEntityViewSelect", () => {
 		const node = toRootOperationNode(
 			parse(`
 		SELECT *
-		FROM limited_views_schema_all
+		FROM limited_views_schema_by_version
 		`)
 		);
 
 		expect(() => applyRewrite(node, { storedSchemas })).toThrow(
-			/entity view 'limited_views_schema_all'/i
+			/entity view 'limited_views_schema_by_version'/i
 		);
 
 		await lix.close();

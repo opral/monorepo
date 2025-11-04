@@ -592,15 +592,15 @@ test("derived edge cache rows reference the commit change id", async () => {
 	});
 
 	const joined = await lix.db
-		.selectFrom("commit_edge_all")
-		.innerJoin("change", "change.id", "commit_edge_all.lixcol_change_id")
-		.where("commit_edge_all.lixcol_version_id", "=", "global")
-		.where("commit_edge_all.parent_id", "=", parentId)
-		.where("commit_edge_all.child_id", "=", childId)
+		.selectFrom("commit_edge_by_version")
+		.innerJoin("change", "change.id", "commit_edge_by_version.lixcol_change_id")
+		.where("commit_edge_by_version.lixcol_version_id", "=", "global")
+		.where("commit_edge_by_version.parent_id", "=", parentId)
+		.where("commit_edge_by_version.child_id", "=", childId)
 		.select([
-			"commit_edge_all.parent_id as parent_id",
-			"commit_edge_all.child_id as child_id",
-			"commit_edge_all.lixcol_change_id as change_id",
+			"commit_edge_by_version.parent_id as parent_id",
+			"commit_edge_by_version.child_id as child_id",
+			"commit_edge_by_version.lixcol_change_id as change_id",
 			"change.entity_id as change_entity_id",
 			"change.snapshot_content as snap",
 		])
@@ -675,9 +675,9 @@ test("commit caching materializes its change set in cache", async () => {
 		],
 	});
 
-	// Verify the change set appears via the cache in change_set_all
+	// Verify the change set appears via the cache in change_set_by_version
 	const cs = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set_by_version")
 		.where("id", "=", changeSetId)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -727,7 +727,7 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 	});
 
 	const edges = await lix.db
-		.selectFrom("commit_edge_all")
+		.selectFrom("commit_edge_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("parent_id", "=", parentId)
 		.where("child_id", "=", childId)
@@ -784,7 +784,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 
 	// Sanity check exists
 	const before = await lix.db
-		.selectFrom("commit_edge_all")
+		.selectFrom("commit_edge_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("child_id", "=", childId)
 		.selectAll()
@@ -815,7 +815,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 	});
 
 	const after = await lix.db
-		.selectFrom("commit_edge_all")
+		.selectFrom("commit_edge_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("child_id", "=", childId)
 		.selectAll()

@@ -4,7 +4,7 @@ import { type LixDatabaseSchema } from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema-definition.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import type { NewStateAll } from "../engine/entity-views/types.js";
+import type { NewStateByVersion } from "../engine/entity-views/types.js";
 import type { LixAccount } from "../account/schema-definition.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
@@ -185,7 +185,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewStateAll<LixKeyValue>[];
+	keyValues?: NewStateByVersion<LixKeyValue>[];
 }): Promise<Lix> {
 	const hooks = createHooks();
 	const blob = args.blob;

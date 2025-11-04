@@ -419,9 +419,9 @@ test("determineSchemaKeys: query on version yields descriptor and tip keys", asy
 	await lix.close();
 });
 
-test("determineSchemaKeys: query on version_all yields descriptor and tip keys", async () => {
+test("determineSchemaKeys: query on version_by_version yields descriptor and tip keys", async () => {
 	const lix = await openLix({});
-	const q = lix.db.selectFrom("version_all").selectAll();
+	const q = lix.db.selectFrom("version_by_version").selectAll();
 	const compiled = q.compile();
 	const keys = determineSchemaKeys(compiled);
 	expect(keys).toContain("lix_version_descriptor");

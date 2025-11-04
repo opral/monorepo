@@ -74,7 +74,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 
 	// Special case: the merged 'version' views are composed from descriptor + tip state
 	// Changes to those underlying schema keys should invalidate queries against 'version'.
-	if (tableNames.has("version") || tableNames.has("version_all")) {
+	if (tableNames.has("version") || tableNames.has("version_by_version")) {
 		if (!schemaKeys.includes("lix_version_descriptor"))
 			schemaKeys.push("lix_version_descriptor");
 		if (!schemaKeys.includes("lix_version_tip"))

@@ -778,7 +778,7 @@ simulationTest(
 
 		const changeSetId = (globalCommit as any).snapshot.change_set_id as string;
 		const cseRows = await lix.db
-			.selectFrom("change_set_element_all")
+			.selectFrom("change_set_element_by_version")
 			.where("lixcol_version_id", "=", "global")
 			.where("change_set_id", "=", changeSetId)
 			.select([
@@ -864,7 +864,7 @@ simulationTest(
 		const targetChangeSetId = (targetCommitChange as any).snapshot
 			.change_set_id as string;
 		const targetCseRows = await lix.db
-			.selectFrom("change_set_element_all")
+			.selectFrom("change_set_element_by_version")
 			.where("lixcol_version_id", "=", "global")
 			.where("change_set_id", "=", targetChangeSetId)
 			.select([

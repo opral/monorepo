@@ -282,7 +282,7 @@ test("attachLabel works with change_set entities", async () => {
 
 	// Verify the label was applied by checking entity_label table directly
 	const mapping = await lix.db
-		.selectFrom("entity_label_all")
+		.selectFrom("entity_label_by_version")
 		.where("entity_id", "=", "cs789")
 		.where("schema_key", "=", "lix_change_set")
 		.where("file_id", "=", "lix")

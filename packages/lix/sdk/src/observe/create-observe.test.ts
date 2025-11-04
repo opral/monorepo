@@ -636,7 +636,7 @@ test("state_by_version observer with version_id filter re-executes only for that
 
 	// Insert into different version (vB) - should NOT trigger
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({ key: "vk_b", value: "b", lixcol_version_id: vB.id })
 		.execute();
 
@@ -645,7 +645,7 @@ test("state_by_version observer with version_id filter re-executes only for that
 
 	// Insert into observed version (vA) - should trigger
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({ key: "vk_a", value: "a", lixcol_version_id: vA.id })
 		.execute();
 

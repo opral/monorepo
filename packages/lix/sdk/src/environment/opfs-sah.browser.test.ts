@@ -306,7 +306,7 @@ export default plugin;
 			// Verify current active account with details
 			const active1 = await lix1.db
 				.selectFrom("active_account as aa")
-				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 				.where("a.lixcol_version_id", "=", "global")
 				.select(["aa.account_id", "a.id", "a.name"])
 				.executeTakeFirstOrThrow();
@@ -325,7 +325,7 @@ export default plugin;
 		try {
 			const active2 = await lix2.db
 				.selectFrom("active_account as aa")
-				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 				.where("a.lixcol_version_id", "=", "global")
 				.select(["aa.account_id", "a.id", "a.name"])
 				.executeTakeFirstOrThrow();

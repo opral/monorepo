@@ -14,7 +14,7 @@ export async function createConversationMessage(
 		const messageId = args.id ?? (await nanoId({ lix: args.lix }));
 
 		const existingConversation = await trx
-			.selectFrom("conversation_all")
+			.selectFrom("conversation_by_version")
 			.where("id", "=", args.conversation_id)
 			.where("lixcol_inherited_from_version_id", "is", null)
 			.select("lixcol_version_id")
@@ -24,7 +24,7 @@ export async function createConversationMessage(
 		let parentId = args.parent_id as string | null | undefined;
 		if (parentId === undefined) {
 			const leaf = await trx
-				.selectFrom("conversation_message_all as m1")
+				.selectFrom("conversation_message_by_version as m1")
 				.where("m1.conversation_id", "=", args.conversation_id)
 				.where(
 					"m1.lixcol_version_id",
@@ -35,7 +35,7 @@ export async function createConversationMessage(
 					eb.not(
 						eb.exists(
 							eb
-								.selectFrom("conversation_message_all as m2")
+								.selectFrom("conversation_message_by_version as m2")
 								.where("m2.conversation_id", "=", args.conversation_id)
 								.where(
 									"m2.lixcol_version_id",
@@ -55,7 +55,7 @@ export async function createConversationMessage(
 		}
 
 		await trx
-			.insertInto("conversation_message_all")
+			.insertInto("conversation_message_by_version")
 			.values({
 				id: messageId,
 				conversation_id: args.conversation_id,
@@ -67,7 +67,7 @@ export async function createConversationMessage(
 			.execute();
 
 		return await trx
-			.selectFrom("conversation_message_all")
+			.selectFrom("conversation_message_by_version")
 			.selectAll()
 			.where("id", "=", messageId)
 			.where("lixcol_version_id", "=", existingConversation.lixcol_version_id)

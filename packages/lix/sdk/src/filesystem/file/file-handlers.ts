@@ -356,7 +356,7 @@ export function handleFileUpdate(args: {
 	// Get current file data for comparison
 	const currentFileRows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
 			.selectAll()
