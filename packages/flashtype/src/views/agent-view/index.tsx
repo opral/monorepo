@@ -36,11 +36,11 @@ type AgentViewProps = {
 };
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
-const DEFAULT_MODEL_ID = "anthropic/claude-4.5-sonnet";
+const DEFAULT_MODEL_ID = "google/gemini-2.5-flash";
 const AVAILABLE_MODELS = [
-	{ id: DEFAULT_MODEL_ID, label: "Claude 4.5 Sonnet" },
+	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
 	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-	{ id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+	{ id: DEFAULT_MODEL_ID, label: "Gemini 2.5 Flash" },
 	{ id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
 	{ id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
 	{ id: "openai/gpt-5", label: "GPT-5" },

@@ -40,7 +40,7 @@ export const KEY_VALUE_DEFINITIONS = {
 	flashtype_agent_model: {
 		defaultVersionId: "global",
 		untracked: true,
-		defaultValue: "google/gemini-2.5-pro",
+		defaultValue: "google/gemini-2.5-flash",
 	} as KeyDef<string>,
 
 	/**
