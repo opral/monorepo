@@ -1,5 +1,5 @@
 import { promises as fs } from "fs";
-import { afterAll, bench } from "vitest";
+import { afterAll, bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
@@ -16,7 +16,7 @@ const PLUGIN_KEY = "lix_own_entity";
 const ENTITY_TXN = "bench_priority_transaction";
 const ENTITY_UNTRACKED = "bench_priority_untracked";
 const ENTITY_CACHE = "bench_priority_cache";
-const EXTRA_ENTITIES_PER_TIER = 100;
+const EXTRA_ENTITIES_PER_TIER = 25;
 const BENCH_OUTPUT_DIR = decodeURIComponent(
 	new URL("./__bench__", import.meta.url).pathname
 );
@@ -111,7 +111,7 @@ const CASE_LABELS = SCENARIOS.flatMap((scenario) =>
 	FILTERS.map((filter) => labelFor(scenario, filter))
 );
 
-const readyCtx: Promise<BenchCtx> = (async () => {
+async function prepareBenchContext(): Promise<BenchCtx> {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -160,36 +160,38 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 
 	await exportExplainPlans({ lix, queries });
 
-	return { lix, queries } satisfies BenchCtx;
-})();
-
-afterAll(async () => {
-	const { lix } = await readyCtx;
-	await lix.close();
-});
-
-for (const label of CASE_LABELS) {
-	bench(label, async () => {
-		const { lix, queries } = await readyCtx;
-		const query = queries[label];
-		if (!query) {
-			throw new Error(`missing query for benchmark label: ${label}`);
-		}
-		try {
-			const result = lix.engine!.executeSync({
-				sql: query.sql,
-				parameters: [...query.parameters],
-			});
-			if (!result.rows || result.rows.length === 0) {
-				throw new Error(`expected rows for benchmark label: ${label}`);
-			}
-		} catch (error) {
-			console.error(`benchmark query failed for label: ${label}`);
-			console.error(error);
-			throw error;
-		}
-	});
+	return { lix, queries };
 }
+
+describe("vtable select benchmarks", async () => {
+	const ctx = await prepareBenchContext();
+
+	afterAll(async () => {
+		await ctx.lix.close();
+	});
+
+	for (const label of CASE_LABELS) {
+		bench(label, () => {
+			const query = ctx.queries[label];
+			if (!query) {
+				throw new Error(`missing query for benchmark label: ${label}`);
+			}
+			try {
+				const result = ctx.lix.engine!.executeSync({
+					sql: query.sql,
+					parameters: [...query.parameters],
+				});
+				if (!result.rows || result.rows.length === 0) {
+					throw new Error(`expected rows for benchmark label: ${label}`);
+				}
+			} catch (error) {
+				console.error(`benchmark query failed for label: ${label}`);
+				console.error(error);
+				throw error;
+			}
+		});
+	}
+});
 
 /**
  * Populate the internal state tables so each priority tier (transaction, untracked,

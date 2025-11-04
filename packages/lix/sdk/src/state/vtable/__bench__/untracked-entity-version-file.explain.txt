@@ -290,7 +290,7 @@ LIMIT 1
   {
     "id": 147,
     "parent": 80,
-    "notused": 38,
+    "notused": 37,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=? AND file_id=?)"
   },
   {
