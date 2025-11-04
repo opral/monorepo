@@ -234,7 +234,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_label"
+       FROM "lix_internal_state_cache_v1_lix_change_set_element"
      UNION ALL
      SELECT
          "entity_id",
@@ -266,7 +266,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_change_set_element"
+       FROM "lix_internal_state_cache_v1_lix_key_value"
      UNION ALL
      SELECT
          "entity_id",
@@ -282,7 +282,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_key_value"
+       FROM "lix_internal_state_cache_v1_lix_label"
      UNION ALL
      SELECT
          "entity_id",
@@ -430,7 +430,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_label"
+       FROM "lix_internal_state_cache_v1_lix_change_set_element"
      UNION ALL
      SELECT
          "entity_id",
@@ -462,7 +462,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_change_set_element"
+       FROM "lix_internal_state_cache_v1_lix_key_value"
      UNION ALL
      SELECT
          "entity_id",
@@ -478,7 +478,7 @@ WITH
          "change_id",
          "commit_id",
          "is_tombstone"
-       FROM "lix_internal_state_cache_v1_lix_key_value"
+       FROM "lix_internal_state_cache_v1_lix_label"
      UNION ALL
      SELECT
          "entity_id",
@@ -912,8 +912,8 @@ LIMIT 20
   {
     "id": 199,
     "parent": 196,
-    "notused": 62,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=?)"
+    "notused": 82,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_fv (file_id=?)"
   },
   {
     "id": 228,
@@ -936,8 +936,8 @@ LIMIT 20
   {
     "id": 263,
     "parent": 260,
-    "notused": 82,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_fv (file_id=?)"
+    "notused": 62,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_fv (file_id=?)"
   },
   {
     "id": 292,
@@ -949,7 +949,7 @@ LIMIT 20
     "id": 295,
     "parent": 292,
     "notused": 62,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_fv (file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=?)"
   },
   {
     "id": 324,
@@ -1120,52 +1120,52 @@ LIMIT 20
     "detail": "UNION ALL"
   },
   {
-    "id": 646,
+    "id": 645,
     "parent": 641,
-    "notused": 247,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 648,
-    "parent": 641,
-    "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=? AND file_id=?)"
-  },
-  {
-    "id": 680,
-    "parent": 389,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 684,
-    "parent": 680,
-    "notused": 26,
-    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
-  },
-  {
-    "id": 692,
-    "parent": 680,
-    "notused": 247,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 717,
-    "parent": 389,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 721,
-    "parent": 717,
     "notused": 82,
     "detail": "SCAN lix_internal_state_cache_v1_lix_change_set_element"
   },
   {
-    "id": 729,
-    "parent": 717,
+    "id": 653,
+    "parent": 641,
     "notused": 247,
     "detail": "SCAN vi"
+  },
+  {
+    "id": 678,
+    "parent": 389,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 682,
+    "parent": 678,
+    "notused": 26,
+    "detail": "SCAN lix_internal_state_cache_v1_lix_version_tip"
+  },
+  {
+    "id": 690,
+    "parent": 678,
+    "notused": 247,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 715,
+    "parent": 389,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 720,
+    "parent": 715,
+    "notused": 247,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 722,
+    "parent": 715,
+    "notused": 27,
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 754,
@@ -1183,7 +1183,7 @@ LIMIT 20
     "id": 761,
     "parent": 754,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 793,
