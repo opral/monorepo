@@ -245,6 +245,62 @@ test("expands views defined by compound selects with nested view references", ()
 	expect(objectNameMatches(secondFrom.relation.name, "base")).toBe(true);
 });
 
+test("expands views referenced inside NOT EXISTS predicates", () => {
+	const statements = parseStatements(`
+		SELECT m1.id
+		FROM conversation_message_all AS m1
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM conversation_message_all AS m2
+			WHERE m2.parent_id = m1.id
+		)
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"conversation_message_all",
+					`
+						SELECT sa.id, sa.parent_id
+						FROM state_all AS sa
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const outerRelation = select.from_clauses[0]?.relation;
+	if (!outerRelation || outerRelation.node_kind !== "subquery") {
+		throw new Error("expected outer view to expand to subquery");
+	}
+
+	const whereClause = select.where_clause;
+	if (!whereClause || whereClause.node_kind !== "unary_expression") {
+		throw new Error("expected unary expression where clause");
+	}
+	const exists = whereClause.operand;
+	if (!exists || exists.node_kind !== "exists_expression") {
+		throw new Error("expected exists expression operand");
+	}
+	if (exists.statement.node_kind !== "select_statement") {
+		throw new Error("expected exists statement to be select");
+	}
+	const innerFrom = exists.statement.from_clauses[0]?.relation;
+	if (!innerFrom || innerFrom.node_kind !== "subquery") {
+		throw new Error("expected inner view to expand to subquery");
+	}
+	const alias = innerFrom.alias;
+	if (!alias) {
+		throw new Error("expected inner subquery alias");
+	}
+	expect(getIdentifierValue(alias)).toBe("m2");
+});
+
 function assertSingleSelect(
 	statements: readonly SegmentedStatementNode[]
 ): SelectStatementNode {

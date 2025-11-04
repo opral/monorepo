@@ -48,6 +48,7 @@ import {
 	Is,
 	InKeyword,
 	NullKeyword,
+	Exists,
 	Between,
 	Like,
 	CaseKeyword,
@@ -447,6 +448,14 @@ class SqlParser extends CstParser {
 					ALT: () => {
 						this.CONSUME(Not, { LABEL: "unary_not" });
 						this.SUBRULE(this.atomic_predicate, { LABEL: "negated" });
+					},
+				},
+				{
+					ALT: () => {
+					this.CONSUME(Exists, { LABEL: "exists" });
+					this.CONSUME(LeftParen, { LABEL: "exists_lparen" });
+					this.SUBRULE1(this.select_compound, { LABEL: "exists_subquery" });
+					this.CONSUME(RightParen, { LABEL: "exists_rparen" });
 					},
 				},
 				{

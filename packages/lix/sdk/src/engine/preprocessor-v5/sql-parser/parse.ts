@@ -49,6 +49,7 @@ import type {
 	CommonTableExpressionNode,
 	SubqueryExpressionNode,
 	CaseExpressionNode,
+	ExistsExpressionNode,
 } from "./nodes.js";
 import { identifier } from "./nodes.js";
 import { parseCst, parserInstance } from "./cst.js";
@@ -546,6 +547,8 @@ class ToAstVisitor extends BaseVisitor {
 		like_pattern?: CstNode[];
 		like_not?: IToken[];
 		inner?: CstNode[];
+		exists?: IToken[];
+		exists_subquery?: CstNode[];
 	}): ExpressionNode {
 		if (ctx.unary_not?.[0]) {
 			const inner = ctx.negated?.[0];
@@ -554,6 +557,17 @@ class ToAstVisitor extends BaseVisitor {
 			}
 			const expression = this.visit(inner) as ExpressionNode;
 			return createUnaryExpression("not", expression);
+		}
+
+		if ((ctx as { exists?: IToken[] }).exists?.[0]) {
+			const subqueryNode = (ctx as { exists_subquery?: CstNode[] }).exists_subquery?.[0];
+			if (!subqueryNode) {
+				throw new Error("exists predicate missing subquery");
+			}
+			const statement = this.visit(subqueryNode) as
+				| SelectStatementNode
+				| CompoundSelectNode;
+			return createExistsExpression(statement);
 		}
 
 		const leftExpressionNode = ctx.left_expression?.[0];
@@ -1162,6 +1176,15 @@ function createInListExpression(
 		operand,
 		items,
 		negated,
+	};
+}
+
+function createExistsExpression(
+	statement: SelectStatementNode | CompoundSelectNode
+): ExistsExpressionNode {
+	return {
+		node_kind: "exists_expression",
+		statement,
 	};
 }
 

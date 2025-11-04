@@ -207,6 +207,7 @@ export type ExpressionNode =
 	| BetweenExpressionNode
 	| FunctionCallExpressionNode
 	| SubqueryExpressionNode
+	| ExistsExpressionNode
 	| CaseExpressionNode
 	| RawFragmentNode;
 
@@ -235,6 +236,11 @@ export type FunctionCallExpressionNode = SqlNode & {
 
 export type SubqueryExpressionNode = SqlNode & {
 	readonly node_kind: "subquery_expression";
+	readonly statement: SelectStatementNode | CompoundSelectNode;
+};
+
+export type ExistsExpressionNode = SqlNode & {
+	readonly node_kind: "exists_expression";
 	readonly statement: SelectStatementNode | CompoundSelectNode;
 };
 

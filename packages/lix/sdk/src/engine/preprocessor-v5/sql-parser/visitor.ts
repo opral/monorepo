@@ -48,6 +48,7 @@ import type {
 	WindowReferenceNode,
 	WindowFrameNode,
 	WindowFrameBoundNode,
+	ExistsExpressionNode,
 } from "./nodes.js";
 
 export type VisitContext = {
@@ -89,6 +90,7 @@ type NodeKindMap = {
 	readonly in_list_expression: InListExpressionNode;
 	readonly between_expression: BetweenExpressionNode;
 	readonly case_expression: CaseExpressionNode;
+	readonly exists_expression: ExistsExpressionNode;
 	readonly identifier: IdentifierNode;
 	readonly object_name: ObjectNameNode;
 	readonly insert_values: InsertValuesNode;
@@ -303,6 +305,8 @@ function traverseNode(
 			return traverseBetweenExpression(node as BetweenExpressionNode, visitor);
 		case "case_expression":
 			return traverseCaseExpression(node as CaseExpressionNode, visitor);
+		case "exists_expression":
+			return traverseExistsExpression(node as ExistsExpressionNode, visitor);
 		case "function_call":
 			return traverseFunctionCall(node as FunctionCallExpressionNode, visitor);
 		case "insert_values":
@@ -892,6 +896,24 @@ function traverseSubqueryExpression(
 	node: SubqueryExpressionNode,
 	visitor: AstVisitor
 ): SubqueryExpressionNode {
+	const statement = visitNode(
+		node.statement,
+		visitor,
+		createContext(node, "statement")
+	) as SelectStatementNode | CompoundSelectNode;
+	if (statement === node.statement) {
+		return node;
+	}
+	return {
+		...node,
+		statement,
+	};
+}
+
+function traverseExistsExpression(
+	node: ExistsExpressionNode,
+	visitor: AstVisitor
+): ExistsExpressionNode {
 	const statement = visitNode(
 		node.statement,
 		visitor,

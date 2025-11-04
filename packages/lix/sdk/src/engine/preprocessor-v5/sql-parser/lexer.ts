@@ -252,6 +252,11 @@ export const NullKeyword: TokenType = createToken({
 	pattern: /null\b/i,
 });
 
+export const Exists: TokenType = createToken({
+	name: "Exists",
+	pattern: /exists\b/i,
+});
+
 export const Between: TokenType = createToken({
 	name: "Between",
 	pattern: /between\b/i,
@@ -344,6 +349,7 @@ export const Identifier: TokenType = createToken({
 		Is,
 		InKeyword,
 		NullKeyword,
+		Exists,
 		Between,
 		Like,
 		CaseKeyword,
@@ -523,6 +529,7 @@ const tokens: TokenType[] = [
 	Is,
 	InKeyword,
 	NullKeyword,
+	Exists,
 	Between,
 	Like,
 	CaseKeyword,

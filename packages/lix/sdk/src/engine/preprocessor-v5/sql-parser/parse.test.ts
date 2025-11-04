@@ -731,6 +731,24 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses not exists predicate", () => {
+		const ast = parseSelectStatement(
+			"SELECT id FROM conversation_message_all AS m1 WHERE NOT EXISTS (SELECT 1 FROM conversation_message_all AS m2 WHERE m2.parent_id = m1.id)"
+		);
+		expect(ast).toMatchObject({
+			where_clause: {
+				node_kind: "unary_expression",
+				operator: "not",
+				operand: {
+					node_kind: "exists_expression",
+					statement: {
+						node_kind: "select_statement",
+					},
+				},
+			},
+		});
+	});
+
 	test("parses window function with frame bounds", () => {
 		const ast = parseSelectStatement(
 			"SELECT SUM(amount) OVER (PARTITION BY account ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM ledger"

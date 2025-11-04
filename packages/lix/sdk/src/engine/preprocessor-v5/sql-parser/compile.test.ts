@@ -55,6 +55,12 @@ describe("compile", () => {
 		);
 	});
 
+	test("SELECT with NOT EXISTS predicate", () => {
+		expectRoundTrip(
+			"SELECT id FROM conversation_message_all AS m1 WHERE NOT EXISTS (SELECT 1 FROM conversation_message_all AS m2 WHERE m2.parent_id = m1.id)"
+		);
+	});
+
 	test("UPDATE with assignments", () => {
 		expectRoundTrip(
 			"UPDATE projects SET name = 'new', revision = revision + 1 WHERE id = ?"

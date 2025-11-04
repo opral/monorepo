@@ -35,6 +35,7 @@ import type {
 	FunctionCallArgumentNode,
 	FunctionCallExpressionNode,
 	SubqueryExpressionNode,
+	ExistsExpressionNode,
 	WithClauseNode,
 	CommonTableExpressionNode,
 	CaseExpressionNode,
@@ -577,6 +578,8 @@ function emitExpressionWithoutParent(expression: ExpressionNode): string {
 			return emitFunctionCall(expression);
 		case "subquery_expression":
 			return emitSubqueryExpression(expression);
+		case "exists_expression":
+			return emitExistsExpression(expression);
 		case "case_expression":
 			return emitCaseExpression(expression);
 		case "raw_fragment":
@@ -741,6 +744,11 @@ function emitWindowFrameBound(bound: WindowFrameBoundNode): string {
 function emitSubqueryExpression(expression: SubqueryExpressionNode): string {
 	const inner = compileStatement(expression.statement).sql;
 	return `(${inner})`;
+}
+
+function emitExistsExpression(expression: ExistsExpressionNode): string {
+	const inner = compileStatement(expression.statement).sql;
+	return `EXISTS (${inner})`;
 }
 
 function emitOrderByItem(item: OrderByItemNode): string {
