@@ -1,4 +1,4 @@
-import { bench } from "vitest";
+import { afterAll, bench, describe } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -54,7 +54,7 @@ async function registerSchemas(
 		.execute();
 }
 
-bench("select entities from single version", async () => {
+describe("select entities from single version", async () => {
 	const lix = await openLix({});
 	await registerSchemas(lix);
 
@@ -77,12 +77,17 @@ bench("select entities from single version", async () => {
 		)
 		.execute();
 
-	// Benchmark: Select all entities from this version
-	await lix.db
-		.selectFrom("state_all")
-		.where("version_id", "=", "global")
-		.selectAll()
-		.execute();
+	afterAll(async () => {
+		await lix.close();
+	});
+
+	bench("select entities from single version", async () => {
+		await lix.db
+			.selectFrom("state_all")
+			.where("version_id", "=", "global")
+			.selectAll()
+			.execute();
+	});
 });
 
 bench.todo("select single entity by entity_id");
