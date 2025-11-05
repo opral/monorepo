@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type {
-  Bundle,
-  LiteralMatch,
-  Message,
-  Pattern,
-  Variant,
+	Bundle,
+	LiteralMatch,
+	Message,
+	Pattern,
+	Variant,
 } from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 import { unflatten } from "flat";
