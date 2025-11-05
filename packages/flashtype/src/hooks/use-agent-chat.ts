@@ -66,7 +66,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 			setAgent(a);
 			// Fetch pointer to default conversation
 			const ptr = await lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_agent_conversation_id")
 				.select(["value"])
@@ -140,7 +140,7 @@ export function useAgentChat(args: { lix: Lix; system?: string }) {
 		// After clearing, refetch pointer and let subscription update
 		try {
 			const ptr = await lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_agent_conversation_id")
 				.select(["value"])

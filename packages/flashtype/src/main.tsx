@@ -10,6 +10,7 @@ import { KeyValueProvider } from "./key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
+import { insertMarkdownSchemas } from "./lib/insert-markdown-schemas";
 
 const router = createRouter({
 	routeTree,
@@ -37,6 +38,7 @@ function AppRoot() {
 					providePluginsRaw: [mdPlugin],
 					environment: env,
 				});
+				await insertMarkdownSchemas({ lix: instance });
 				if (cancelled) {
 					await instance.close();
 					return;

@@ -90,8 +90,8 @@ export function createEditor(args: CreateEditorArgs): Editor {
 	}
 
 	async function upsertRootOrder(trx: any, fileId: string, order: string[]) {
-		const rootKey = (AstSchemas.RootOrderSchema as any)["x-lix-key"] as string;
-		const rootVersion = (AstSchemas.RootOrderSchema as any)[
+		const rootKey = (AstSchemas.DocumentSchema as any)["x-lix-key"] as string;
+		const rootVersion = (AstSchemas.DocumentSchema as any)[
 			"x-lix-version"
 		] as string;
 		const existingRoot = await trx
@@ -148,17 +148,18 @@ export function createEditor(args: CreateEditorArgs): Editor {
 		extensions: [
 			...MarkdownWc({}),
 			Placeholder.configure({
-				placeholder: ({ node }) =>
+				placeholder: ({ node }: { node: any }) =>
 					node.type.name === "paragraph" && node.childCount === 0
 						? "Start typing..."
 						: "",
 				showOnlyWhenEditable: true,
 				includeChildren: true,
-				shouldShow: ({ editor, node }) =>
+				// Cast to any to allow custom shouldShow handler until upstream types expose this hook
+				shouldShow: (({ editor, node }: { editor: Editor; node: any }) =>
 					editor.isFocused &&
 					node.type.name === "paragraph" &&
-					node.childCount === 0,
-			}),
+					node.childCount === 0) as any,
+			} as any),
 		],
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {

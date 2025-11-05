@@ -24,7 +24,7 @@ test("reads a global, untracked key (left sidebar tab)", async () => {
 
 	// Pre-insert expected value
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_left_sidebar_active_tab",
 			value: "files",
@@ -76,9 +76,9 @@ test("writes and reads a global, untracked key (left sidebar tab)", async () => 
 
 	await waitFor(() => expect((resultRef.current as any)?.[0]).toBe("history"));
 
-	// Verify DB row persisted to key_value_all with lixcol_version_id = 'global'
+	// Verify DB row persisted to key_value_by_version with lixcol_version_id = 'global'
 	const rows = (await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "flashtype_left_sidebar_active_tab")
 		.where("lixcol_version_id", "=", "global")
 		.select(["value"])
@@ -130,7 +130,7 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	const lix = await openLix({});
 	// Ensure the key exists so the initial load resolves deterministically
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_left_sidebar_active_tab",
 			value: "files",

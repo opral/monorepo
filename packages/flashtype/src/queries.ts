@@ -138,7 +138,7 @@ export function selectCheckpoints({ lix }: { lix: Lix }) {
 					.sum<number>(
 						sql`CASE 
                             WHEN change.plugin_key = ${sql.lit(mdPlugin.key)} 
-                             AND change.schema_key != ${sql.lit(AstSchemas.RootOrderSchema["x-lix-key"])} 
+                             AND change.schema_key != ${sql.lit(AstSchemas.DocumentSchema["x-lix-key"])} 
                              AND change.snapshot_content IS NOT NULL 
                         THEN 1 ELSE 0 END`,
 					)
@@ -147,7 +147,7 @@ export function selectCheckpoints({ lix }: { lix: Lix }) {
 					.sum<number>(
 						sql`CASE 
                             WHEN change.plugin_key = ${sql.lit(mdPlugin.key)} 
-                             AND change.schema_key != ${sql.lit(AstSchemas.RootOrderSchema["x-lix-key"])} 
+                             AND change.schema_key != ${sql.lit(AstSchemas.DocumentSchema["x-lix-key"])} 
                              AND change.snapshot_content IS NULL 
                         THEN 1 ELSE 0 END`,
 					)
@@ -186,7 +186,7 @@ export function selectDiffCount({
 		.leftJoin("change", "change.id", "change_set_element.change_id")
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.plugin_key", "=", mdPlugin.key)
-		.where("change.schema_key", "!=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.where("change.schema_key", "!=", AstSchemas.DocumentSchema["x-lix-key"])
 		.select((eb) => [
 			eb.fn.count<number>("change.id").as("total"),
 			eb.fn
