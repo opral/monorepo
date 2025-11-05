@@ -8,6 +8,7 @@ import type {
 	FromClauseNode,
 	InsertStatementNode,
 	InsertValuesNode,
+	InsertDefaultValuesNode,
 	OnConflictActionNode,
 	OnConflictClauseNode,
 	OnConflictTargetNode,
@@ -393,11 +394,20 @@ function emitInsertStatement(statement: InsertStatementNode): string {
 	const columnSql = statement.columns.length
 		? ` (${statement.columns.map((column) => emitIdentifier(column)).join(", ")})`
 		: "";
-	const valuesSql = emitInsertValues(statement.source);
+	const valuesSql = emitInsertSource(statement.source);
 	const conflictSql = statement.on_conflict
 		? ` ${emitOnConflictClause(statement.on_conflict)}`
 		: "";
 	return `INSERT INTO ${target}${columnSql} ${valuesSql}${conflictSql}`;
+}
+
+function emitInsertSource(
+	source: InsertValuesNode | InsertDefaultValuesNode
+): string {
+	if (source.node_kind === "insert_default_values") {
+		return "DEFAULT VALUES";
+	}
+	return emitInsertValues(source);
 }
 
 function emitInsertValues(values: InsertValuesNode): string {

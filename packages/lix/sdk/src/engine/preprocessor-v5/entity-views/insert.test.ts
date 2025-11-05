@@ -342,6 +342,64 @@ test("base-only view applies lixcol version id override", async () => {
 	await lix.close();
 });
 
+test("default values insert populates schema defaults", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		"x-lix-key": "default_values_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string", "x-lix-default": "'default-id-value'" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const rewritten = preprocess({
+		sql: "INSERT INTO default_values_schema DEFAULT VALUES",
+		parameters: [],
+	});
+
+	expect(rewritten.sql).toContain("INSERT INTO state_by_version");
+	expect(rewritten.sql).toContain("default-id-value");
+	expect(rewritten.parameters).toEqual([]);
+
+	lix.engine!.executeSync({
+		sql: rewritten.sql,
+		parameters: rewritten.parameters,
+		preprocessMode: "none",
+	});
+
+	const row = await lix.db
+		.selectFrom("state_by_version")
+		.select(["entity_id", "schema_key", "snapshot_content"] as const)
+		.where("schema_key", "=", "default_values_schema")
+		.executeTakeFirstOrThrow();
+
+	expect(row.entity_id).toBe("default-id-value");
+	expect((row.snapshot_content as any)?.id).toBe("default-id-value");
+	expect((row.snapshot_content as any)?.schema_key).toBeUndefined();
+
+	await lix.close();
+});
+
 test("rewrites inserts for composite primary key entity views", async () => {
 	const lix = await openLix({
 		keyValues: [

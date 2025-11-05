@@ -42,6 +42,11 @@ export const Into: TokenType = createToken({
 	pattern: /into\b/i,
 });
 
+export const DefaultKeyword: TokenType = createToken({
+	name: "DefaultKeyword",
+	pattern: /default\b/i,
+});
+
 export const Where: TokenType = createToken({
 	name: "Where",
 	pattern: /where\b/i,
@@ -312,6 +317,7 @@ export const Identifier: TokenType = createToken({
 		Delete,
 		From,
 		Into,
+		DefaultKeyword,
 		Where,
 		And,
 		Order,
@@ -358,6 +364,7 @@ export const Identifier: TokenType = createToken({
 		ElseKeyword,
 		EndKeyword,
 		SetKeyword,
+		DefaultKeyword,
 		Values,
 		As,
 	],
@@ -488,6 +495,7 @@ const tokens: TokenType[] = [
 	Delete,
 	From,
 	Into,
+	DefaultKeyword,
 	Where,
 	And,
 	Order,

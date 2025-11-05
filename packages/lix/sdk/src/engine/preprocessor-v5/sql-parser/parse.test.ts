@@ -153,6 +153,16 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses insert default values", () => {
+		const ast = parseInsertStatement("INSERT INTO projects DEFAULT VALUES");
+		expect(ast).toMatchObject({
+			node_kind: "insert_statement",
+			target: { parts: [id("projects")] },
+			columns: [],
+			source: { node_kind: "insert_default_values" },
+		});
+	});
+
 	test("parses select with where and alias", () => {
 		const ast = parseSelectStatement(
 			"SELECT p.id AS project_id FROM projects AS p WHERE p.revision >= 1"

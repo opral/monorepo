@@ -152,6 +152,9 @@ test("visitStatement traverses insert targets and values", () => {
 	expect(rewritten).not.toBe(statement);
 	const insert = rewritten as InsertStatementNode;
 	expect(insert.target.parts.at(-1)?.value).toBe("projects_shadow");
+	if (insert.source.node_kind !== "insert_values") {
+		throw new Error("expected insert values node");
+	}
 	expect((insert.source.rows[0]?.[1] as LiteralNode | undefined)?.value).toBe(
 		"Project A (rewritten)"
 	);
@@ -161,6 +164,9 @@ test("visitStatement traverses insert targets and values", () => {
 
 	// original AST remains unchanged
 	const originalInsert = statement as InsertStatementNode;
+	if (originalInsert.source.node_kind !== "insert_values") {
+		throw new Error("expected insert values node");
+	}
 	expect(
 		(originalInsert.source.rows[0]?.[1] as LiteralNode | undefined)?.value
 	).toBe("Project A");

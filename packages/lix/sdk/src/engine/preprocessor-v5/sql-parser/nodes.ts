@@ -191,13 +191,17 @@ export type InsertStatementNode = SqlNode & {
 	readonly node_kind: "insert_statement";
 	readonly target: ObjectNameNode;
 	readonly columns: readonly IdentifierNode[];
-	readonly source: InsertValuesNode;
+	readonly source: InsertValuesNode | InsertDefaultValuesNode;
 	readonly on_conflict: OnConflictClauseNode | null;
 };
 
 export type InsertValuesNode = SqlNode & {
 	readonly node_kind: "insert_values";
 	readonly rows: readonly (readonly ExpressionNode[])[];
+};
+
+export type InsertDefaultValuesNode = SqlNode & {
+	readonly node_kind: "insert_default_values";
 };
 
 export type ExpressionNode =

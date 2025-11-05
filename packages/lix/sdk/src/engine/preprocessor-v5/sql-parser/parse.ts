@@ -7,6 +7,7 @@ import type {
 	FunctionCallArgumentNode,
 	InsertStatementNode,
 	InsertValuesNode,
+	InsertDefaultValuesNode,
 	OnConflictActionNode,
 	OnConflictClauseNode,
 	OnConflictTargetNode,
@@ -264,6 +265,8 @@ class ToAstVisitor extends BaseVisitor {
 		columns?: CstNode[];
 		rows?: CstNode[];
 		conflict?: CstNode[];
+		default_keyword?: IToken[];
+		default_values?: IToken[];
 	}): InsertStatementNode {
 		const tableNode = ctx.table?.[0];
 		if (!tableNode) {
@@ -272,15 +275,21 @@ class ToAstVisitor extends BaseVisitor {
 		const target = this.visit(tableNode) as ObjectNameNode;
 		const columnNodes =
 			ctx.columns?.map((column) => this.visit(column) as IdentifierNode) ?? [];
-		const valuesListNode = ctx.rows?.[0];
-		if (!valuesListNode) {
-			throw new Error("insert statement missing values list");
+		const hasDefaultValues = (ctx.default_keyword?.length ?? 0) > 0;
+		let source: InsertValuesNode | InsertDefaultValuesNode;
+		if (hasDefaultValues) {
+			source = { node_kind: "insert_default_values" };
+		} else {
+			const valuesListNode = ctx.rows?.[0];
+			if (!valuesListNode) {
+				throw new Error("insert statement missing values list");
+			}
+			const rowNodes = this.visit(valuesListNode) as ExpressionNode[][];
+			source = {
+				node_kind: "insert_values",
+				rows: rowNodes,
+			};
 		}
-		const rowNodes = this.visit(valuesListNode) as ExpressionNode[][];
-		const valuesNode: InsertValuesNode = {
-			node_kind: "insert_values",
-			rows: rowNodes,
-		};
 		const conflictNode = ctx.conflict?.[0];
 		const onConflict = conflictNode
 			? (this.visit(conflictNode) as OnConflictClauseNode)
@@ -289,7 +298,7 @@ class ToAstVisitor extends BaseVisitor {
 			node_kind: "insert_statement",
 			target,
 			columns: columnNodes,
-			source: valuesNode,
+			source,
 			on_conflict: onConflict,
 		};
 	}
@@ -1548,9 +1557,12 @@ function assignPositionsInInsert(
 }
 
 function assignPositionsInInsertSource(
-	source: InsertValuesNode,
+	source: InsertValuesNode | InsertDefaultValuesNode,
 	state: ParameterTraversalState
 ): void {
+	if (source.node_kind === "insert_default_values") {
+		return;
+	}
 	for (const row of source.rows) {
 		for (const expression of row) {
 			assignPositionsInExpression(expression, state);

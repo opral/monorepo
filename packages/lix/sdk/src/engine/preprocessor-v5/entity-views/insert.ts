@@ -220,12 +220,16 @@ type StateRowResult = {
 function buildEntityViewInsert(
 	args: BuildInsertArgs
 ): StatementSegmentNode | null {
+	const isDefaultInsert =
+		args.insert.source.node_kind === "insert_default_values";
 	const columns = args.insert.columns;
-	if (columns.length === 0) {
+	if (columns.length === 0 && !isDefaultInsert) {
 		return null;
 	}
 
-	const rows = args.insert.source.rows;
+	const rows: readonly (readonly ExpressionNode[])[] = isDefaultInsert
+		? [[]]
+		: args.insert.source.rows;
 	if (rows.length === 0) {
 		return null;
 	}

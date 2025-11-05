@@ -6,6 +6,7 @@ import {
 	Delete,
 	From,
 	Into,
+	DefaultKeyword,
 	Where,
 	And,
 	Or,
@@ -242,8 +243,20 @@ class SqlParser extends CstParser {
 				});
 				this.CONSUME(RightParen);
 			});
-			this.CONSUME(Values);
-			this.SUBRULE(this.values_list, { LABEL: "rows" });
+			this.OR([
+				{
+					ALT: () => {
+						this.CONSUME(DefaultKeyword, { LABEL: "default_keyword" });
+						this.CONSUME1(Values, { LABEL: "default_values" });
+					},
+				},
+				{
+					ALT: () => {
+						this.CONSUME(Values);
+						this.SUBRULE(this.values_list, { LABEL: "rows" });
+					},
+				},
+			]);
 			this.OPTION1(() => {
 				this.SUBRULE(this.on_conflict_clause, { LABEL: "conflict" });
 			});
