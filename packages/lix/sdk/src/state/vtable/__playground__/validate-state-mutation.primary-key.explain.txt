@@ -1,0 +1,294 @@
+-- SQL (primary-key)
+select "snapshot_content" from "lix_internal_state_vtable" where "schema_key" = ? and "version_id" = ? and "snapshot_content" is not null and _pk NOT LIKE 'T~%' and json_extract(snapshot_content, '$.code') = ?
+
+-- parameters
+[
+  "text_play_pk",
+  "global",
+  "code-new"
+]
+
+-- rewritten SQL
+SELECT "snapshot_content"
+FROM (
+WITH
+  version_descriptor_base AS (
+    SELECT
+      json_extract(desc.snapshot_content, '$.id') AS version_id,
+      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
+    FROM "lix_internal_state_cache_v1_lix_version_descriptor" desc
+    WHERE desc.is_tombstone = 0
+      AND desc.snapshot_content IS NOT NULL
+  ),
+  version_inheritance(version_id, ancestor_version_id) AS (
+    SELECT
+      vdb.version_id,
+      vdb.inherits_from_version_id
+    FROM version_descriptor_base vdb
+    WHERE vdb.inherits_from_version_id IS NOT NULL
+
+    UNION ALL
+
+    SELECT
+      vi.version_id,
+      vdb.inherits_from_version_id
+    FROM version_inheritance vi
+    JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
+    WHERE vdb.inherits_from_version_id IS NOT NULL
+  ),
+  version_parent AS (
+    SELECT
+      vdb.version_id,
+      vdb.inherits_from_version_id AS parent_version_id
+    FROM version_descriptor_base vdb
+    WHERE vdb.inherits_from_version_id IS NOT NULL
+  ),
+  candidates AS (
+     SELECT
+       'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk,
+       unt.entity_id AS entity_id,
+       unt.schema_key AS schema_key,
+       unt.file_id AS file_id,
+       json(unt.snapshot_content) AS snapshot_content,
+       unt.version_id AS version_id,
+       unt.created_at AS created_at,
+       'untracked' AS change_id,
+       2 AS priority
+     FROM lix_internal_state_all_untracked unt
+     WHERE unt.schema_key IN ('text_play_pk')
+
+         UNION ALL
+
+     SELECT
+       'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk,
+       cache.entity_id AS entity_id,
+       cache.schema_key AS schema_key,
+       cache.file_id AS file_id,
+       json(cache.snapshot_content) AS snapshot_content,
+       cache.version_id AS version_id,
+       cache.created_at AS created_at,
+       cache.change_id AS change_id,
+       3 AS priority
+     FROM "lix_internal_state_cache_v1_text_play_pk" cache
+     WHERE cache.schema_key IN ('text_play_pk')
+
+         UNION ALL
+
+     SELECT
+       'CI' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+       cache.entity_id AS entity_id,
+       cache.schema_key AS schema_key,
+       cache.file_id AS file_id,
+       json(cache.snapshot_content) AS snapshot_content,
+       vi.version_id AS version_id,
+       cache.created_at AS created_at,
+       cache.change_id AS change_id,
+       4 AS priority
+     FROM version_inheritance vi
+     JOIN "lix_internal_state_cache_v1_text_play_pk" cache ON cache.version_id = vi.ancestor_version_id
+     WHERE cache.is_tombstone = 0
+       AND cache.snapshot_content IS NOT NULL AND cache.schema_key IN ('text_play_pk')
+
+         UNION ALL
+
+     SELECT
+       'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk,
+       unt.entity_id AS entity_id,
+       unt.schema_key AS schema_key,
+       unt.file_id AS file_id,
+       json(unt.snapshot_content) AS snapshot_content,
+       vi.version_id AS version_id,
+       unt.created_at AS created_at,
+       'untracked' AS change_id,
+       5 AS priority
+     FROM version_inheritance vi
+     JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+     WHERE unt.is_tombstone = 0
+       AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('text_play_pk')
+  ),
+  ranked AS (
+     SELECT
+       c._pk AS _pk,
+       c.entity_id AS entity_id,
+       c.schema_key AS schema_key,
+       c.file_id AS file_id,
+       c.snapshot_content AS snapshot_content,
+       c.version_id AS version_id,
+       c.created_at AS created_at,
+       c.change_id AS change_id,
+       c.priority AS priority,
+     ROW_NUMBER() OVER (
+         PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+         ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+       ) AS rn
+     FROM candidates c
+  )
+SELECT
+  "w"."snapshot_content" as "snapshot_content", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."_pk" as "_pk"
+FROM ranked w
+
+
+
+WHERE w.rn = 1
+) AS "lix_internal_state_vtable"
+WHERE "schema_key" = ? AND "version_id" = ? AND "snapshot_content" IS NOT NULL AND _pk NOT LIKE 'T~%' AND json_extract(snapshot_content, '$.code') = ?
+
+-- query plan
+[
+  {
+    "id": 2,
+    "parent": 0,
+    "notused": 0,
+    "detail": "CO-ROUTINE ranked"
+  },
+  {
+    "id": 5,
+    "parent": 2,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-12)"
+  },
+  {
+    "id": 7,
+    "parent": 5,
+    "notused": 0,
+    "detail": "CO-ROUTINE candidates"
+  },
+  {
+    "id": 8,
+    "parent": 7,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 9,
+    "parent": 8,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 15,
+    "parent": 9,
+    "notused": 61,
+    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+  },
+  {
+    "id": 46,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 52,
+    "parent": 46,
+    "notused": 62,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_pk_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
+  },
+  {
+    "id": 86,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 89,
+    "parent": 86,
+    "notused": 0,
+    "detail": "MATERIALIZE version_inheritance"
+  },
+  {
+    "id": 93,
+    "parent": 89,
+    "notused": 0,
+    "detail": "SETUP"
+  },
+  {
+    "id": 96,
+    "parent": 93,
+    "notused": 24,
+    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
+  },
+  {
+    "id": 124,
+    "parent": 89,
+    "notused": 0,
+    "detail": "RECURSIVE STEP"
+  },
+  {
+    "id": 127,
+    "parent": 124,
+    "notused": 62,
+    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
+  },
+  {
+    "id": 136,
+    "parent": 124,
+    "notused": 216,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 156,
+    "parent": 86,
+    "notused": 62,
+    "detail": "SCAN cache USING INDEX idx_lix_internal_state_cache_v1_text_play_pk_live_vfe"
+  },
+  {
+    "id": 168,
+    "parent": 86,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 183,
+    "parent": 86,
+    "notused": 54,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 215,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 222,
+    "parent": 215,
+    "notused": 216,
+    "detail": "SCAN unt"
+  },
+  {
+    "id": 232,
+    "parent": 215,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON vi (version_id=?)"
+  },
+  {
+    "id": 247,
+    "parent": 215,
+    "notused": 53,
+    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 281,
+    "parent": 5,
+    "notused": 239,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 315,
+    "parent": 5,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 348,
+    "parent": 2,
+    "notused": 219,
+    "detail": "SCAN (subquery-12)"
+  },
+  {
+    "id": 416,
+    "parent": 0,
+    "notused": 219,
+    "detail": "SCAN w"
+  }
+]
