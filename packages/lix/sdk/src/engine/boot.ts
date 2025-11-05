@@ -15,8 +15,8 @@ import {
 	type FunctionRegistry,
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
-import type { PreprocessorFn } from "./preprocessor-v5/types.js";
-import { createPreprocessor } from "./preprocessor-v5/create-preprocessor.js";
+import type { PreprocessorFn } from "./preprocessor/types.js";
+import { createPreprocessor } from "./preprocessor/create-preprocessor.js";
 
 export type EngineEvent = {
 	type: "state_commit";

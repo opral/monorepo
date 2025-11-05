@@ -1,9 +1,9 @@
 import { sql } from "kysely";
-import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import { LixActiveAccountSchema } from "./schema-definition.js";
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
+import { createPreprocessor } from "../engine/preprocessor/create-preprocessor.js";
 
 test("insert, update, delete on the account view", async () => {
 	const lix = await openLix({});
@@ -388,7 +388,7 @@ test("active_account schema exposes only the base view", async () => {
 		.values({ value: storedSchema })
 		.execute();
 
-	const preprocess = createQueryPreprocessor(lix.engine!);
+	const preprocess = createPreprocessor({ engine: lix.engine! });
 	const rewritten = preprocess({
 		sql: "SELECT * FROM active_account_by_version",
 		parameters: [],

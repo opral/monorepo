@@ -1,18 +1,16 @@
 import { describe, expect, test, vi } from "vitest";
 import type { SqliteWasmDatabase } from "../database/sqlite/create-in-memory-database.js";
 import { createExecuteSync } from "./execute-sync.js";
-import type { QueryPreprocessorResult } from "./query-preprocessor/create-query-preprocessor.js";
+import type { PreprocessorResult } from "./preprocessor/types.js";
 
 describe("createExecuteSync", () => {
 	test("passes through bound parameters unchanged", async () => {
 		const exec = vi.fn().mockReturnValue([]);
 		const sqlite = { exec } as unknown as SqliteWasmDatabase;
-		const preprocess = vi.fn(
-			({ sql, parameters }: QueryPreprocessorResult) => ({
-				sql,
-				parameters,
-			})
-		);
+		const preprocess = vi.fn(({ sql, parameters }: PreprocessorResult) => ({
+			sql,
+			parameters,
+		}));
 
 		const executeSync = createExecuteSync({
 			engine: {
@@ -38,12 +36,10 @@ describe("createExecuteSync", () => {
 	test("passes preprocessing mode through when provided", async () => {
 		const exec = vi.fn().mockReturnValue([]);
 		const sqlite = { exec } as unknown as SqliteWasmDatabase;
-		const preprocess = vi.fn(
-			({ sql, parameters }: QueryPreprocessorResult) => ({
-				sql,
-				parameters,
-			})
-		);
+		const preprocess = vi.fn(({ sql, parameters }: PreprocessorResult) => ({
+			sql,
+			parameters,
+		}));
 
 		const executeSync = createExecuteSync({
 			engine: {

@@ -32,11 +32,11 @@ import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
 import { createExecuteSync } from "../engine/execute-sync.js";
-import { createQueryPreprocessor } from "../engine/query-preprocessor/create-query-preprocessor.js";
 import type { LixEngine } from "../engine/boot.js";
 import { setDeterministicBoot } from "../engine/deterministic-mode/is-deterministic-mode.js";
 import { getTimestampSync } from "../engine/functions/timestamp.js";
 import { randomHumanIdWord } from "../engine/functions/generate-human-id.js";
+import { createPreprocessor } from "../engine/preprocessor/create-preprocessor.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -174,7 +174,7 @@ export async function newLixFile(args?: {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	engine.preprocessQuery = createQueryPreprocessor(engine);
+	engine.preprocessQuery = createPreprocessor({ engine });
 
 	engine.executeSync = createExecuteSync({ engine });
 
