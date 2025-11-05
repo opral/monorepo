@@ -37,7 +37,7 @@ export const activeFileAtom = atom(async (get) => {
 export const parsedCsvAtom = atom(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
-	const data = await new Blob([file.data]).text();
+	const data = await new Blob([file.data as any]).text();
 	const parsed = Papa.parse(data, { header: true });
 	return parsed as Papa.ParseResult<Record<string, string>>;
 });
@@ -118,18 +118,18 @@ export const activeCellChangesAtom = atom(async (get) => {
 	for (const change of changes) {
 		const labels = await lix.db
 			.selectFrom("label")
-			.innerJoin("change_set_label", "change_set_label.label_id", "label.id")
-			.innerJoin(
-				"change_set",
-				"change_set.id",
-				"change_set_label.change_set_id"
-			)
-			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_set_id",
-				"change_set.id"
-			)
-			.where("change_set_element.change_id", "=", change.id)
+			// .innerJoin("change_set_label", "change_set_label.label_id", "label.id")
+			// .innerJoin(
+			// "change_set",
+			// "change_set.id",
+			// "change_set_label.change_set_id"
+			// )
+			// .innerJoin(
+			// "change_set_element",
+			// "change_set_element.change_set_id",
+			// "change_set.id"
+			// )
+			// .where("change_set_element.change_id", "=", change.id)
 			.select("label.name")
 			.execute();
 
