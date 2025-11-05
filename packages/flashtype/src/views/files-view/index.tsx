@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Files } from "lucide-react";
+import { Files, FileUp } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { nanoId, normalizeDirectoryPath, normalizeFilePath } from "@lix-js/sdk";
 import { selectFilesystemEntries } from "@/queries";
@@ -46,6 +46,8 @@ export function FilesView({ context }: FilesViewProps) {
 	const [selectedKind, setSelectedKind] = useState<"file" | "directory" | null>(
 		null,
 	);
+	const [isDraggingOver, setIsDraggingOver] = useState(false);
+	const dragCounterRef = useRef(0);
 	const entryPathSet = useMemo(() => {
 		return new Set(
 			(entries ?? [])
@@ -321,8 +323,134 @@ export function FilesView({ context }: FilesViewProps) {
 		};
 	}, [handleDeleteSelection, isMacPlatform, resolveDraftDirectory]);
 
+	const handleDragEnter = useCallback((e: React.DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		dragCounterRef.current += 1;
+		if (e.dataTransfer.types.includes("Files")) {
+			setIsDraggingOver(true);
+		}
+	}, []);
+
+	const handleDragOver = useCallback((e: React.DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = "copy";
+		}
+	}, []);
+
+	const handleDragLeave = useCallback((e: React.DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		dragCounterRef.current -= 1;
+		if (dragCounterRef.current === 0) {
+			setIsDraggingOver(false);
+		}
+	}, []);
+
+	const handleDrop = useCallback(
+		async (e: React.DragEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			dragCounterRef.current = 0;
+			setIsDraggingOver(false);
+
+			const files = Array.from(e.dataTransfer.files);
+			if (files.length === 0) return;
+
+			// Filter for markdown files only
+			const markdownFiles = files.filter(
+				(file) => file.name.endsWith(".md") || file.name.endsWith(".markdown"),
+			);
+
+			if (markdownFiles.length === 0) {
+				alert(
+					"Only markdown files (.md) are supported at the moment.\n\nUpvote https://github.com/opral/flashtype/issues/81 for support for CSV, PDF, etc",
+				);
+				return;
+			}
+
+			// Process each markdown file
+			for (const file of markdownFiles) {
+				try {
+					const content = await file.text();
+					let filePath = `/${file.name}`;
+
+					// Handle name conflicts by appending a number
+					let counter = 1;
+					const baseName = file.name.replace(/\.(md|markdown)$/, "");
+					const extension = file.name.match(/\.(md|markdown)$/)?.[0] || ".md";
+
+					while (existingFilePaths.has(filePath)) {
+						filePath = `/${baseName}-${counter}${extension}`;
+						counter++;
+					}
+
+					// Add to pending paths immediately for UI feedback
+					setPendingPaths((prev) => [...prev, filePath]);
+
+					// Create the file in lix
+					await lix.db
+						.insertInto("file")
+						.values({
+							path: filePath,
+							data: new TextEncoder().encode(content),
+						})
+						.execute();
+
+					// Open the first dropped file
+					if (file === markdownFiles[0]) {
+						const newFile = await lix.db
+							.selectFrom("file")
+							.select("id")
+							.where("path", "=", filePath)
+							.executeTakeFirst();
+
+						if (newFile?.id) {
+							context?.openFileView?.(newFile.id as string, { filePath });
+						}
+					}
+				} catch (error) {
+					console.error(`Failed to add file ${file.name}:`, error);
+					alert(`Failed to add ${file.name}. Please try again.`);
+				}
+			}
+		},
+		[existingFilePaths, lix, context],
+	);
+
 	return (
-		<div className="flex min-h-0 flex-1 flex-col px-1 py-1">
+		<div
+			className="relative flex min-h-0 flex-1 flex-col px-1 py-1"
+			onDragEnter={handleDragEnter}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+		>
+			{isDraggingOver && (
+				<div className="absolute inset-1 z-50 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-400 bg-amber-50/50 backdrop-blur-sm pointer-events-none">
+					<FileUp className="h-12 w-12 text-foreground" />
+					<p className="mt-3 text-center text-sm font-medium text-foreground">
+						Drop markdown files here
+					</p>
+					<p className="mt-1 text-center text-xs text-muted-foreground">
+						Only .md and .markdown files supported
+					</p>
+					<p className="mt-1 text-center text-xs text-muted-foreground">
+						Upvote{" "}
+						<a
+							href="https://github.com/opral/flashtype/issues/81"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-foreground pointer-events-auto"
+						>
+							issue #81
+						</a>{" "}
+						for support for CSV, PDF, etc
+					</p>
+				</div>
+			)}
 			<FileTree
 				nodes={nodes}
 				openFileView={handleOpenFile}
