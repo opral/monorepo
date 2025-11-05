@@ -39,6 +39,19 @@ class EnvironmentConnection implements DatabaseConnection {
 					return String(v);
 				}
 			};
+			const submittedSql = sql;
+			const originalSql =
+				typeof err?.originalSql === "string" && err.originalSql
+					? err.originalSql
+					: undefined;
+			const displaySql = originalSql ?? submittedSql;
+			const rewrittenSql =
+				typeof err?.rewrittenSql === "string" && err.rewrittenSql
+					? err.rewrittenSql
+					: undefined;
+			const parameterValues = Array.isArray(err?.parameters)
+				? err.parameters
+				: (parameters ?? []);
 			// Example formatted error for quick reference:
 			//
 			// executeQuery Error
@@ -49,22 +62,43 @@ class EnvironmentConnection implements DatabaseConnection {
 			//       1: "WghuxhzbSR0XM7wdw5Pdd"
 			//       2: "/x.md"
 			//       3: Uint8Array(len=0)
+			const formatParams = (
+				target: string[],
+				values: readonly unknown[],
+				indent: string
+			) => {
+				if (values.length === 0) {
+					target.push(`${indent}(none)`);
+					return;
+				}
+				values.forEach((p, i) => {
+					target.push(`${indent}${i + 1}. ${previewParam(p)}`);
+				});
+			};
+
 			const lines: string[] = [];
-			lines.push("executeQuery Error\n");
-			lines.push(`  - cause: "${String(err?.message ?? err)}"`);
-			lines.push(`  - sql:   ${sql}`);
-			const rewrittenSql = err?.rewrittenSql;
-			if (
-				typeof rewrittenSql === "string" &&
-				rewrittenSql &&
-				rewrittenSql !== sql
-			) {
-				lines.push(`  - rewrittenSql: ${rewrittenSql}`);
+			lines.push("executeQuery Error");
+			lines.push(`- cause: "${String(err?.message ?? err)}"`);
+			lines.push("");
+			lines.push("user query");
+			lines.push(`  - sql: ${submittedSql}`);
+			lines.push("  - parameters:");
+			formatParams(lines, parameters ?? [], "      ");
+			if (displaySql === submittedSql) {
+				lines.push("  - status: failed");
+				if (rewrittenSql && rewrittenSql !== displaySql) {
+					lines.push(`  - rewrittenSql: ${rewrittenSql}`);
+				}
+			} else {
+				lines.push("");
+				lines.push("internal query (failed)");
+				lines.push(`  - sql: ${displaySql}`);
+				lines.push("  - parameters:");
+				formatParams(lines, parameterValues, "      ");
+				if (rewrittenSql) {
+					lines.push(`  - rewrittenSql: ${rewrittenSql}`);
+				}
 			}
-			lines.push("  - params:");
-			(parameters ?? []).forEach((p, i) => {
-				lines.push(`      ${i + 1}: ${previewParam(p)}`);
-			});
 			const wrapped = new Error(lines.join("\n"), { cause: err });
 			throw wrapped;
 		}

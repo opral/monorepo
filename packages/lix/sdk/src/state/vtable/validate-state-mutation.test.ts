@@ -51,12 +51,12 @@ test("inserts the version and active version schemas to enable validation", asyn
 
 	const result = await lix.db
 		.selectFrom("stored_schema")
-		.where("key", "in", [
+		.select("value")
+		.where(sql`json_extract("stored_schema"."value", '$."x-lix-key"')`, "in", [
 			"lix_version_tip",
 			"lix_active_version",
 			"lix_version_descriptor",
 		])
-		.selectAll()
 		.execute();
 
 	expect(result.length).toBe(3);
@@ -81,6 +81,8 @@ test("valid lix schema with a valid snapshot passes", async () => {
 			name: "John",
 		},
 	};
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -134,6 +136,36 @@ test("an invalid snapshot fails", async () => {
 	).toThrowError();
 });
 
+test("throws when stored schema is missing", async () => {
+	const lix = await openLix({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "missing_stored_schema_test",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/is not stored/i);
+});
+
 test("passes when primary key is unique", async () => {
 	const lix = await openLix({});
 
@@ -141,7 +173,7 @@ test("passes when primary key is unique", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -156,6 +188,8 @@ test("passes when primary key is unique", async () => {
 			name: "John",
 		},
 	};
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -180,7 +214,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -194,7 +228,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 
 	// Insert first user into state
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -230,7 +264,68 @@ test("throws when primary key violates uniqueness constraint", async () => {
 	).toThrowError("Primary key constraint violation");
 });
 
-test("state_all: inserting same PK twice in one transaction overwrites without PK error", async () => {
+test("immutable schemas reject repeated inserts", async () => {
+	const lix = await openLix({});
+
+	const schema: LixSchemaDefinition = {
+		"x-lix-key": "immutable_schema_test",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-immutable": true,
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1", name: "first" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrow();
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "1",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "1", name: "first" },
+			schema_version: schema["x-lix-version"],
+			untracked: false,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { id: "1", name: "second" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/Primary key constraint violation/);
+
+	await lix.close();
+});
+
+test("state_by_version: inserting same PK twice in one transaction overwrites without PK error", async () => {
 	const lix = await openLix({});
 
 	// Define a mock schema with PK on 'key'
@@ -238,7 +333,7 @@ test("state_all: inserting same PK twice in one transaction overwrites without P
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "kv_mock_vtab",
-		"x-lix-primary-key": ["key"],
+		"x-lix-primary-key": ["/key"],
 		properties: {
 			key: { type: "string" },
 			value: { type: "string" },
@@ -254,7 +349,7 @@ test("state_all: inserting same PK twice in one transaction overwrites without P
 	await lix.db.transaction().execute(async (trx) => {
 		// First insert
 		await trx
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "kv_vtab1",
 				file_id: "lix",
@@ -268,7 +363,7 @@ test("state_all: inserting same PK twice in one transaction overwrites without P
 
 		// Second insert with same PK in the same transaction → should overwrite, not error
 		await trx
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "kv_vtab1",
 				file_id: "lix",
@@ -283,7 +378,7 @@ test("state_all: inserting same PK twice in one transaction overwrites without P
 
 	// Verify the final materialized state reflects the second insert
 	const row = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "kv_mock_vtab")
 		.where("entity_id", "=", "kv_vtab1")
 		.selectAll()
@@ -299,7 +394,7 @@ test("handles composite primary keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user_role",
-		"x-lix-primary-key": ["user_id", "role_id"],
+		"x-lix-primary-key": ["/user_id", "/role_id"],
 		properties: {
 			user_id: { type: "string" },
 			role_id: { type: "string" },
@@ -314,7 +409,7 @@ test("handles composite primary keys", async () => {
 
 	// Insert first user-role into state
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user_role1",
 			file_id: "file1",
@@ -378,8 +473,8 @@ test("passes when unique constraint is satisfied", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["email"], ["username"]],
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/email"], ["/username"]],
 		properties: {
 			id: { type: "string" },
 			email: { type: "string" },
@@ -389,6 +484,8 @@ test("passes when unique constraint is satisfied", async () => {
 		required: ["id", "email", "username", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const snapshot = {
 		content: {
@@ -417,8 +514,8 @@ test("throws when single field unique constraint is violated", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["email"], ["username"]],
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/email"], ["/username"]],
 		properties: {
 			id: { type: "string" },
 			email: { type: "string" },
@@ -434,7 +531,7 @@ test("throws when single field unique constraint is violated", async () => {
 
 	// Insert first user into state
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -504,10 +601,10 @@ test("handles composite unique constraints", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "product",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-unique": [
-			["category", "name"], // Composite unique constraint
-			["sku"], // Single field unique constraint
+			["/category", "/name"], // Composite unique constraint
+			["/sku"], // Single field unique constraint
 		],
 		properties: {
 			id: { type: "string" },
@@ -525,7 +622,7 @@ test("handles composite unique constraints", async () => {
 
 	// Insert first product into state
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "product1",
 			file_id: "file1",
@@ -624,7 +721,7 @@ test("passes when foreign key references exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -637,13 +734,13 @@ test("passes when foreign key references exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -664,7 +761,7 @@ test("passes when foreign key references exist", async () => {
 
 	// Insert a user that will be referenced
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -707,7 +804,7 @@ test("throws when foreign key reference does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -720,13 +817,13 @@ test("throws when foreign key reference does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -773,7 +870,7 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -786,7 +883,7 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "category",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -799,20 +896,20 @@ test("handles multiple foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 			{
-				properties: ["category_id"],
+				properties: ["/category_id"],
 				references: {
 					schemaKey: "category",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -838,7 +935,7 @@ test("handles multiple foreign keys", async () => {
 
 	// Insert referenced entities
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values([
 			{
 				entity_id: "user1",
@@ -912,7 +1009,7 @@ test("allows null foreign key values", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -925,13 +1022,13 @@ test("allows null foreign key values", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -993,7 +1090,7 @@ test("handles composite foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "address",
-		"x-lix-primary-key": ["country", "postal_code", "street"],
+		"x-lix-primary-key": ["/country", "/postal_code", "/street"],
 		properties: {
 			country: { type: "string" },
 			postal_code: { type: "string" },
@@ -1009,13 +1106,13 @@ test("handles composite foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "delivery",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["address_country", "address_postal", "address_street"],
+				properties: ["/address_country", "/address_postal", "/address_street"],
 				references: {
 					schemaKey: "address",
-					properties: ["country", "postal_code", "street"],
+					properties: ["/country", "/postal_code", "/street"],
 				},
 			},
 		],
@@ -1044,7 +1141,7 @@ test("handles composite foreign keys", async () => {
 
 	// Insert an address that will be referenced
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "addr1",
 			file_id: "file1",
@@ -1099,7 +1196,7 @@ test("handles composite foreign keys", async () => {
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(
-		/Foreign key constraint violation.*address_country, address_postal, address_street.*referencing.*address.*country, postal_code, street/
+		/Foreign key constraint violation.*\/address_country, \/address_postal, \/address_street.*referencing.*address.*\/country, \/postal_code, \/street/
 	);
 });
 
@@ -1108,8 +1205,8 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 
 	// Insert a real change record into the change table
 	await lix.db
-		// @ts-expect-error - internal_snapshot is not a public table
-		.insertInto("internal_snapshot")
+		// @ts-expect-error - lix_internal_snapshot is not a public table
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: "snap1",
 			content: sql`jsonb(${JSON.stringify({ id: "entity1" })})`,
@@ -1117,8 +1214,8 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		.execute();
 
 	await lix.db
-		// @ts-expect-error - internal_change is not a public table
-		.insertInto("internal_change")
+		// @ts-expect-error - lix_internal_change is not a public table
+		.insertInto("lix_internal_change")
 		.values({
 			id: "change1",
 			entity_id: "entity1",
@@ -1136,10 +1233,10 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		"x-lix-key": "change_set_element_test",
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1150,6 +1247,11 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		required: ["id", "change_id"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: changeSetElementSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1197,7 +1299,7 @@ test("allows updates with same primary key", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1211,7 +1313,7 @@ test("allows updates with same primary key", async () => {
 
 	// Insert initial user
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1246,8 +1348,8 @@ test("unique constraints are validated per version, not globally", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "file",
-		"x-lix-primary-key": ["id"],
-		"x-lix-unique": [["path"]], // Unique path constraint
+		"x-lix-primary-key": ["/id"],
+		"x-lix-unique": [["/path"]], // Unique path constraint
 		properties: {
 			id: { type: "string" },
 			path: { type: "string" },
@@ -1272,7 +1374,7 @@ test("unique constraints are validated per version, not globally", async () => {
 	});
 	// Insert file with path "/app.js" in version1
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "file1",
 			file_id: "file1",
@@ -1326,7 +1428,7 @@ test("throws when version_id is not provided", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1354,7 +1456,7 @@ test("throws when referenced version does not exist", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1381,7 +1483,7 @@ test("passes when version_id is provided and version exists", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1389,6 +1491,8 @@ test("passes when version_id is provided and version exists", async () => {
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1413,7 +1517,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1426,13 +1530,13 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1458,7 +1562,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 
 	// Insert a user that will be referenced
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1475,7 +1579,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 
 	// Insert a post that references the user
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "post1",
 			file_id: "file1",
@@ -1513,7 +1617,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1535,7 +1639,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 
 	// Insert a user with no references
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1571,7 +1675,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mfk_parent",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1584,13 +1688,13 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mfk_child",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["parent_id"],
+				properties: ["/parent_id"],
 				references: {
 					schemaKey: "mfk_parent",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 				mode: "materialized",
 			},
@@ -1628,7 +1732,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 
 	// Materialize the child row so delete-time reverse FK check sees it
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "c1",
 			file_id: "file1",
@@ -1642,7 +1746,7 @@ test("materialized FK: insert allowed without referenced; delete restricts", asy
 
 	// Insert the parent rows
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values([
 			{
 				entity_id: "p1",
@@ -1699,7 +1803,7 @@ test("should throw when deleting non-existent entity", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1707,6 +1811,11 @@ test("should throw when deleting non-existent entity", async () => {
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: userSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1733,7 +1842,7 @@ test("should throw when entity_id is missing for delete operations", async () =>
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1741,6 +1850,11 @@ test("should throw when entity_id is missing for delete operations", async () =>
 		required: ["id", "name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: userSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1765,7 +1879,7 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create change sets
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_referenced", lixcol_version_id: "global" },
 			{ id: "cs_working", lixcol_version_id: "global" },
@@ -1774,7 +1888,7 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create commits that reference the change sets
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_1",
@@ -1809,7 +1923,11 @@ test("should handle deletion validation for change sets referenced by versions",
 	const changeSetSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_change_set"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should fail - cannot delete change set because version references it
@@ -1834,8 +1952,8 @@ test("should parse JSON object properties before validation", async () => {
 	const documentSchema = {
 		type: "object",
 		"x-lix-version": "1.0",
-		"x-lix-key": "document",
-		"x-lix-primary-key": ["id"],
+		"x-lix-key": "test_document",
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			title: { type: "string" },
@@ -1934,7 +2052,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 	const userSchema = {
 		"x-lix-key": "mock_user",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: { type: "string" },
@@ -1948,13 +2066,13 @@ test("foreign key validation should fail when referenced entity exists in differ
 	const postSchema = {
 		"x-lix-key": "mock_post",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "mock_user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -1992,7 +2110,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// Create a user in version A
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "user-1",
 			schema_key: "mock_user",
@@ -2026,7 +2144,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// Verify that user-1 indeed doesn't exist in version B's context
 	const userInVersionB = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "user-1")
 		.where("schema_key", "=", "mock_user")
 		.where("version_id", "=", versionB.id)
@@ -2037,7 +2155,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// But verify it does exist in version A
 	const userInVersionA = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "user-1")
 		.where("schema_key", "=", "mock_user")
 		.where("version_id", "=", versionA.id)
@@ -2055,13 +2173,13 @@ test("should allow self-referential foreign keys", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version", // Self-referential foreign key
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2087,7 +2205,7 @@ test("should allow self-referential foreign keys", async () => {
 
 	// Insert a parent version first (with null inheritance)
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "version0",
 			file_id: "file1",
@@ -2157,13 +2275,13 @@ test("should allow self-referential foreign keys for update operations", async (
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2189,7 +2307,7 @@ test("should allow self-referential foreign keys for update operations", async (
 
 	// Insert initial versions
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values([
 			{
 				entity_id: "version0",
@@ -2261,13 +2379,13 @@ test("should prevent deletion when self-referential foreign keys reference the e
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["inherits_from_version_id"],
+				properties: ["/inherits_from_version_id"],
 				references: {
 					schemaKey: "mock_version",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2293,7 +2411,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 
 	// Insert parent and child versions
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values([
 			{
 				entity_id: "version0",
@@ -2365,7 +2483,7 @@ test("should prevent foreign key references to inherited entities from different
 
 	// Create a conversation in global context
 	await lix.db
-		.insertInto("conversation_all")
+		.insertInto("conversation_by_version")
 		.values({
 			id: "global_thread",
 			lixcol_metadata: { title: "Global Conversation" },
@@ -2383,7 +2501,11 @@ test("should prevent foreign key references to inherited entities from different
 	const threadCommentSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_conversation_message")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_conversation_message"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should FAIL: attempting to create a conversation_message in the active version
@@ -2422,7 +2544,7 @@ test("should prevent change set elements from referencing change sets defined in
 
 	// Create a change set in global context
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values({
 			id: "global_change_set",
 			lixcol_version_id: "global",
@@ -2439,7 +2561,11 @@ test("should prevent change set elements from referencing change sets defined in
 	const changeSetElementSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set_element")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_change_set_element"
+		)
 		.executeTakeFirstOrThrow();
 
 	// This should FAIL: attempting to create a change_set_element in the active version
@@ -2477,7 +2603,7 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2490,13 +2616,13 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2522,7 +2648,7 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 
 	// Insert an untracked user
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "untracked_user",
 			file_id: "file1",
@@ -2568,7 +2694,7 @@ test("should allow untracked entities to reference tracked entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2581,13 +2707,13 @@ test("should allow untracked entities to reference tracked entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2613,7 +2739,7 @@ test("should allow untracked entities to reference tracked entities", async () =
 
 	// Insert a tracked user
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "tracked_user",
 			file_id: "file1",
@@ -2659,7 +2785,7 @@ test("should allow untracked entities to reference other untracked entities", as
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "user",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2672,13 +2798,13 @@ test("should allow untracked entities to reference other untracked entities", as
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["author_id"],
+				properties: ["/author_id"],
 				references: {
 					schemaKey: "user",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2704,7 +2830,7 @@ test("should allow untracked entities to reference other untracked entities", as
 
 	// Insert an untracked user
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "untracked_user",
 			file_id: "file1",
@@ -2747,12 +2873,16 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_commit_edge")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_commit_edge"
+		)
 		.executeTakeFirstOrThrow();
 
 	// Create a few change sets and commits
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -2761,7 +2891,7 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
@@ -2771,15 +2901,19 @@ test("should detect and prevent cycles in commit graph when lix_debug is enabled
 
 	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit1"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit1"])})`,
+		})
 		.where("id", "=", "commit2")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit2"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit2"])})`,
+		})
 		.where("id", "=", "commit3")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
@@ -2824,12 +2958,16 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_commit_edge")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"lix_commit_edge"
+		)
 		.executeTakeFirstOrThrow();
 
 	// Create a few change sets and commits
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -2838,7 +2976,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
@@ -2848,15 +2986,19 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 
 	// Create edges via parent_commit_ids: commit1 -> commit2 -> commit3
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit1"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit1"])})`,
+		})
 		.where("id", "=", "commit2")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
 
 	await lix.db
-		.updateTable("commit_all")
-		.set({ parent_commit_ids: ["commit2"] as any })
+		.updateTable("commit_by_version")
+		.set({
+			parent_commit_ids: sql<any>`json(${JSON.stringify(["commit2"])})`,
+		})
 		.where("id", "=", "commit3")
 		.where("lixcol_version_id", "=", "global")
 		.execute();
@@ -2877,7 +3019,7 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	).not.toThrowError();
 });
 
-test("should validate foreign keys that reference changes in internal_transaction_state during transaction", async () => {
+test("should validate foreign keys that reference changes in lix_internal_transaction_state during transaction", async () => {
 	const lix = await openLix({});
 
 	// Create a simple mock schema that references a change
@@ -2885,13 +3027,13 @@ test("should validate foreign keys that reference changes in internal_transactio
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_change_reference",
-		"x-lix-primary-key": ["change_id"],
+		"x-lix-primary-key": ["/change_id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -2915,7 +3057,7 @@ test("should validate foreign keys that reference changes in internal_transactio
 		.executeTakeFirstOrThrow();
 
 	await lix.db.transaction().execute(async (trx) => {
-		// Insert a key-value entity which creates a change in internal_transaction_state
+		// Insert a key-value entity which creates a change in lix_internal_transaction_state
 		await trx
 			.insertInto("key_value")
 			.values({
@@ -2924,9 +3066,9 @@ test("should validate foreign keys that reference changes in internal_transactio
 			})
 			.execute();
 
-		// Get the change ID that was just created in internal_transaction_state
+		// Get the change ID that was just created in lix_internal_transaction_state
 		const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-			.selectFrom("internal_transaction_state")
+			.selectFrom("lix_internal_transaction_state")
 			.select("id")
 			.where("entity_id", "=", "test_key_for_change_reference")
 			.where("schema_key", "=", "lix_key_value")
@@ -2935,9 +3077,9 @@ test("should validate foreign keys that reference changes in internal_transactio
 		expect(changes).toHaveLength(1);
 		const changeId = changes[0]!.id;
 
-		// This should NOT throw an error because the change exists in internal_transaction_state
-		// But currently it will throw because validation only checks the "change" table (internal_change)
-		// which doesn't include internal_transaction_state
+		// This should NOT throw an error because the change exists in lix_internal_transaction_state
+		// But currently it will throw because validation only checks the "change" table (lix_internal_change)
+		// which doesn't include lix_internal_transaction_state
 		expect(() =>
 			validateStateMutation({
 				engine: lix.engine!,
@@ -2988,13 +3130,13 @@ test("should allow foreign keys to changes from any version context", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_schema",
-		"x-lix-primary-key": ["change_id"],
+		"x-lix-primary-key": ["/change_id"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -3072,13 +3214,13 @@ test("should validate composite foreign keys referencing state table", async () 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3091,6 +3233,23 @@ test("should validate composite foreign keys referencing state table", async () 
 		required: ["entity_id", "schema_key", "file_id", "tag"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
 
 	// Store the schema
 	await lix.db
@@ -3105,7 +3264,7 @@ test("should validate composite foreign keys referencing state table", async () 
 
 	// First create a state entity that can be referenced
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "test_entity",
 			schema_key: "test_schema",
@@ -3148,7 +3307,7 @@ test("should validate composite foreign keys referencing state table", async () 
 			version_id: activeVersion.version_id,
 		})
 	).toThrow(
-		/Foreign key constraint violation.*mock_state_reference.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\).*no matching record exists/
+		/Foreign key constraint violation.*mock_state_reference.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\).*no matching record exists/
 	);
 });
 
@@ -3160,13 +3319,13 @@ test("state foreign key references should respect version context", async () => 
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3179,6 +3338,22 @@ test("state foreign key references should respect version context", async () => 
 		required: ["entity_id", "schema_key", "file_id", "tag"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
 
 	// Store the schema
 	await lix.db
@@ -3201,7 +3376,7 @@ test("state foreign key references should respect version context", async () => 
 
 	// Create state entity in main version only
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "main_only_entity",
 			schema_key: "test_schema",
@@ -3215,7 +3390,7 @@ test("state foreign key references should respect version context", async () => 
 
 	// Create state entity in version2 only
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "version2_only_entity",
 			schema_key: "test_schema",
@@ -3300,13 +3475,13 @@ test("state foreign key references should handle inherited entities", async () =
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_state_reference",
-		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/tag"],
 		"x-lix-foreign-keys": [
 			{
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 		],
@@ -3319,6 +3494,23 @@ test("state foreign key references should handle inherited entities", async () =
 		required: ["entity_id", "schema_key", "file_id", "tag"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
 
 	// Store the schema
 	await lix.db
@@ -3335,7 +3527,7 @@ test("state foreign key references should handle inherited entities", async () =
 
 	// Create a state entity in main version
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "shared_entity",
 			schema_key: "test_schema",
@@ -3382,22 +3574,22 @@ test("state foreign key with mixed single and composite properties", async () =>
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "complex_reference",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		"x-lix-foreign-keys": [
 			{
 				// Composite foreign key to state
-				properties: ["entity_id", "schema_key", "file_id"],
+				properties: ["/entity_id", "/schema_key", "/file_id"],
 				references: {
 					schemaKey: "state",
-					properties: ["entity_id", "schema_key", "file_id"],
+					properties: ["/entity_id", "/schema_key", "/file_id"],
 				},
 			},
 			{
 				// Single property foreign key to change
-				properties: ["change_id"],
+				properties: ["/change_id"],
 				references: {
 					schemaKey: "lix_change",
-					properties: ["id"],
+					properties: ["/id"],
 				},
 			},
 		],
@@ -3412,6 +3604,22 @@ test("state foreign key with mixed single and composite properties", async () =>
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	const referencedStateSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "test_schema",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: referencedStateSchema })
+		.execute();
+
 	// Store the schema
 	await lix.db
 		.insertInto("stored_schema")
@@ -3425,7 +3633,7 @@ test("state foreign key with mixed single and composite properties", async () =>
 
 	// Create a state entity
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "test_entity",
 			schema_key: "test_schema",

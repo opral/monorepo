@@ -52,7 +52,7 @@ test("defaults to the version of the conversation", async () => {
 	expect(m1).toBeDefined();
 
 	await lix.db
-		.insertInto("conversation_all")
+		.insertInto("conversation_by_version")
 		.values({ id: "global-conv", lixcol_version_id: "global" })
 		.execute();
 

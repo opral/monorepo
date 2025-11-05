@@ -8,7 +8,7 @@ test("insert with default id generation", async () => {
 
 	// Insert a snapshot without specifying an id
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			content: sql`jsonb(${JSON.stringify({ text: "Auto-generated ID test" })})`,
 		})
@@ -18,7 +18,7 @@ test("insert with default id generation", async () => {
 	const snapshots = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where(
 			"content",
 			"=",
@@ -52,7 +52,7 @@ test("handles complex JSON content", async () => {
 	};
 
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: "complex",
 			content: sql`jsonb(${JSON.stringify(complexContent)})`,
@@ -62,7 +62,7 @@ test("handles complex JSON content", async () => {
 	const snapshot = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", "complex")
 		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
 		.executeTakeFirstOrThrow();
@@ -77,7 +77,7 @@ test("no-content snapshot exists by default", async () => {
 	const internalNoContent = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", "no-content")
 		.selectAll()
 		.execute();
@@ -92,7 +92,7 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 
 	// Apply the schema again (this happens in real usage)
 	lix.engine!.sqlite.exec(`
-			INSERT OR IGNORE INTO internal_snapshot (id, content)
+			INSERT OR IGNORE INTO lix_internal_snapshot (id, content)
 			VALUES ('no-content', NULL);
 		`);
 
@@ -100,7 +100,7 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 	const noContentSnapshots = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", "no-content")
 		.selectAll()
 		.execute();
@@ -112,7 +112,7 @@ test("can insert null content explicitly", async () => {
 	const lix = await openLix({});
 
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: "explicit-null",
 			content: null,
@@ -122,7 +122,7 @@ test("can insert null content explicitly", async () => {
 	const snapshot = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", "explicit-null")
 		.selectAll()
 		.executeTakeFirstOrThrow();
@@ -135,7 +135,7 @@ test("snapshot content validation - accepts JSONB", async () => {
 
 	// This should succeed - content is properly formatted as JSONB
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: "valid-jsonb",
 			content: sql`jsonb(${JSON.stringify({ test: "data", value: 123 })})`,
@@ -145,7 +145,7 @@ test("snapshot content validation - accepts JSONB", async () => {
 	const snapshot = await (
 		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 	)
-		.selectFrom("internal_snapshot")
+		.selectFrom("lix_internal_snapshot")
 		.where("id", "=", "valid-jsonb")
 		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
 		.executeTakeFirstOrThrow();
@@ -160,7 +160,7 @@ test("snapshot content validation - rejects text JSON", async () => {
 	// SQLite's STRICT tables enforce that BLOB columns can't store TEXT
 	await expect(
 		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_snapshot")
+			.insertInto("lix_internal_snapshot")
 			.values({
 				id: "invalid-text-json",
 				content: sql`${JSON.stringify({ test: "data" })}`,
@@ -181,7 +181,7 @@ test("snapshot content validation - rejects arbitrary binary", async () => {
 
 	await expect(async () => {
 		lix.engine!.sqlite.exec({
-			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, ?)`,
+			sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, ?)`,
 			bind: ["invalid-binary", arbitraryBytes],
 		});
 	}).rejects.toThrow(/CHECK constraint failed.*json_valid/);
@@ -198,7 +198,7 @@ test("snapshot content validation - prevents double-stringified JSON storage", a
 	// First, verify that plain text JSON is rejected by STRICT table
 	await expect(
 		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_snapshot")
+			.insertInto("lix_internal_snapshot")
 			.values({
 				id: "double-stringified",
 				content: sql`${doubleStringified}`,
@@ -213,7 +213,7 @@ test("snapshot content validation - prevents double-stringified JSON storage", a
 	// this should now be rejected since it's storing a string, not an object
 	expect(() => {
 		lix.engine!.sqlite.exec({
-			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+			sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 			bind: ["double-stringified-jsonb", doubleStringified],
 		});
 	}).toThrow(/CHECK constraint failed/);
@@ -221,20 +221,20 @@ test("snapshot content validation - prevents double-stringified JSON storage", a
 	// Also verify that storing arrays is rejected (we only want objects)
 	expect(() => {
 		lix.engine!.sqlite.exec({
-			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+			sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 			bind: ["array-content", JSON.stringify([1, 2, 3])],
 		});
 	}).toThrow(/CHECK constraint failed/);
 
 	// Verify the correct way: jsonb() on properly stringified JSON
 	lix.engine!.sqlite.exec({
-		sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+		sql: `INSERT INTO lix_internal_snapshot (id, content) VALUES (?, jsonb(?))`,
 		bind: ["correct-jsonb", onceStringified],
 	});
 
 	// Verify it retrieves correctly
 	const correctResult: any = lix.engine!.sqlite.exec({
-		sql: `SELECT json(content) as json_content FROM internal_snapshot WHERE id = ?`,
+		sql: `SELECT json(content) as json_content FROM lix_internal_snapshot WHERE id = ?`,
 		bind: ["correct-jsonb"],
 		returnValue: "resultRows",
 	});
@@ -248,7 +248,7 @@ test("snapshot ids must be unique", async () => {
 
 	// Insert first snapshot
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-		.insertInto("internal_snapshot")
+		.insertInto("lix_internal_snapshot")
 		.values({
 			id: "duplicate",
 			content: sql`jsonb(${JSON.stringify({ first: true })})`,
@@ -258,7 +258,7 @@ test("snapshot ids must be unique", async () => {
 	// Try to insert another snapshot with the same id
 	await expect(
 		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_snapshot")
+			.insertInto("lix_internal_snapshot")
 			.values({
 				id: "duplicate",
 				content: sql`jsonb(${JSON.stringify({ second: true })})`,

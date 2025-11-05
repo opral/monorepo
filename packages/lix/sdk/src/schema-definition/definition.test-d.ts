@@ -41,6 +41,49 @@ test("a json change schema should be infer the properties", () => {
 	}>(snapshot);
 });
 
+test("x-lix-override-lixcols typing", () => {
+	const schema = {
+		"x-lix-key": "defaults",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+		"x-lix-entity-views": ["state"] as const,
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			attempts: "3",
+		},
+	} as const satisfies LixSchemaDefinition;
+
+	assertType<Record<string, string> | undefined>(
+		schema["x-lix-override-lixcols"]
+	);
+	assertType<
+		readonly ("state" | "state_by_version" | "state_history")[] | undefined
+	>(schema["x-lix-entity-views"]);
+});
+
+test("x-lix-default typing", () => {
+	const schema = {
+		"x-lix-key": "cel_default",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-default": "lix_uuid_v7()",
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	assertType<string | undefined>(schema.properties.id?.["x-lix-default"]);
+});
+
 test("LixInsertable combined with LixGenerated makes columns optional", () => {
 	type MockType = {
 		id: LixGenerated<string>;
@@ -184,17 +227,17 @@ test("LixUpdateable makes all fields optional and unwraps LixGenerated", () => {
 	};
 });
 
-test("FromLixSchemaDefinition transforms schema with x-lix-generated to LixGenerated types", () => {
-	// Define a test schema with x-lix-generated properties
+test("FromLixSchemaDefinition transforms schema with x-lix-default to LixGenerated types", () => {
+	// Define a test schema with x-lix-default properties
 	const TestSchema = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
 		type: "object",
 		properties: {
 			id: {
 				type: "string",
-				"x-lix-generated": true,
+				"x-lix-default": "lix_nano_id()",
 			},
 			name: {
 				type: "string",
@@ -223,7 +266,8 @@ test("FromLixSchemaDefinition transforms empty object types to Record<string, an
 	const TestSchema = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
+		"x-lix-primary-key": ["/id"],
+		"x-lix-immutable": true,
 		type: "object",
 		properties: {
 			id: { type: "string" },

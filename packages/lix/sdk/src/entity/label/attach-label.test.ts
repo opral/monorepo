@@ -3,6 +3,20 @@ import { openLix } from "../../lix/open-lix.js";
 import { createLabel } from "../../label/create-label.js";
 import { attachLabel, detachLabel } from "./attach-label.js";
 import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const documentSchema: LixSchemaDefinition = {
+	"x-lix-key": "test_document",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["/id"],
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		title: { type: "string" },
+	},
+	required: ["id"],
+} as const;
 
 test("attachLabel creates a mapping between entity and label", async () => {
 	const lix = await openLix({});
@@ -10,12 +24,17 @@ test("attachLabel creates a mapping between entity and label", async () => {
 	// Create a label
 	const label = await createLabel({ lix, name: "important" });
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create an entity in state
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "doc123",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -28,7 +47,7 @@ test("attachLabel creates a mapping between entity and label", async () => {
 		lix,
 		entity: {
 			entity_id: "doc123",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 		},
 		label: { id: label.id },
@@ -44,7 +63,7 @@ test("attachLabel creates a mapping between entity and label", async () => {
 
 	expect(mapping).toMatchObject({
 		entity_id: "doc123",
-		schema_key: "document",
+		schema_key: "test_document",
 		file_id: "docs.json",
 		label_id: label.id,
 	});
@@ -62,25 +81,30 @@ test("attachLabel throws error if entity doesn't exist", async () => {
 			lix,
 			entity: {
 				entity_id: "non-existent",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 			},
 			label: { id: label.id },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/entity_id, \/schema_key, \/file_id\).*state\.\(\/entity_id, \/schema_key, \/file_id\)/
 	);
 });
 
 test("attachLabel throws error if label doesn't exist", async () => {
 	const lix = await openLix({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create an entity in state
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "doc123",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -95,13 +119,13 @@ test("attachLabel throws error if label doesn't exist", async () => {
 			lix,
 			entity: {
 				entity_id: "doc123",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 			},
 			label: { id: "non-existent-label" },
 		})
 	).rejects.toThrow(
-		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+		/Foreign key constraint violation.*lix_entity_label.*\(\/label_id\).*lix_label\.\(\/id\)/
 	);
 });
 
@@ -110,12 +134,17 @@ test("attachLabel is idempotent - doesn't fail if mapping already exists", async
 
 	const label = await createLabel({ lix, name: "idempotent-test" });
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create entity
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "doc456",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -128,7 +157,7 @@ test("attachLabel is idempotent - doesn't fail if mapping already exists", async
 		lix,
 		entity: {
 			entity_id: "doc456",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 		},
 		label: { id: label.id },
@@ -140,7 +169,7 @@ test("attachLabel is idempotent - doesn't fail if mapping already exists", async
 			lix,
 			entity: {
 				entity_id: "doc456",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 			},
 			label: { id: label.id },
@@ -163,12 +192,17 @@ test("detachLabel removes the mapping", async () => {
 
 	const label = await createLabel({ lix, name: "removable" });
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create entity
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "doc789",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -181,7 +215,7 @@ test("detachLabel removes the mapping", async () => {
 		lix,
 		entity: {
 			entity_id: "doc789",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 		},
 		label: { id: label.id },
@@ -201,7 +235,7 @@ test("detachLabel removes the mapping", async () => {
 		lix,
 		entity: {
 			entity_id: "doc789",
-			schema_key: "document",
+			schema_key: "test_document",
 			file_id: "docs.json",
 		},
 		label: { id: label.id },
@@ -220,7 +254,11 @@ test("detachLabel removes the mapping", async () => {
 test("attachLabel works with change_set entities", async () => {
 	const lix = await openLix({});
 
-	const reviewedLabel = await createLabel({ lix, name: "reviewed" });
+	const reviewedLabel = await createLabel({
+		lix,
+		name: "reviewed",
+		lixcol_version_id: "global",
+	});
 
 	// Create a change set
 	await lix.db
@@ -239,14 +277,16 @@ test("attachLabel works with change_set entities", async () => {
 			file_id: "lix",
 		},
 		label: { id: reviewedLabel.id },
+		versionId: "global",
 	});
 
 	// Verify the label was applied by checking entity_label table directly
 	const mapping = await lix.db
-		.selectFrom("entity_label")
+		.selectFrom("entity_label_by_version")
 		.where("entity_id", "=", "cs789")
 		.where("schema_key", "=", "lix_change_set")
 		.where("file_id", "=", "lix")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirst();
 

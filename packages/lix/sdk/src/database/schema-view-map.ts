@@ -1,9 +1,11 @@
-import { LixAccountSchema } from "../account/schema-definition.js";
+import {
+	LixAccountSchema,
+	LixActiveAccountSchema,
+} from "../account/schema-definition.js";
 import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema-definition.js";
 import {
@@ -27,7 +29,6 @@ import { LixStoredSchemaSchema } from "../stored-schema/schema-definition.js";
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
-	change_set_label: LixChangeSetLabelSchema,
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
@@ -36,6 +37,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
 	account: LixAccountSchema,
+	active_account: LixActiveAccountSchema,
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,

@@ -26,12 +26,12 @@ export const RootSchema = {
 		data: { type: "object" },
 	},
 	required: ["type", "children"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
-// Root order document used for state snapshots in block-based persistence
-export const RootOrderSchema = {
-	"x-lix-key": "markdown_wc_root_order",
+// Document-level snapshot used for block-based persistence (not part of the AST)
+export const DocumentSchema = {
+	"x-lix-key": "markdown_wc_document",
 	"x-lix-version": "1.0",
 	description:
 		"Top-level block order for a Markdown document. Stores an array of block ids (node.data.id) to reconstruct the document order without reparsing.",
@@ -40,7 +40,7 @@ export const RootOrderSchema = {
 		order: { type: "array", items: { type: "string" } },
 	},
 	required: ["order"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type ParagraphNode = WithBase<FromSchema<typeof ParagraphSchema>>
@@ -53,9 +53,10 @@ export const ParagraphSchema = {
 		type: { const: "paragraph" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type HeadingNode = WithBase<FromSchema<typeof HeadingSchema>>
@@ -69,9 +70,10 @@ export const HeadingSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		depth: { type: "integer", minimum: 1, maximum: 6 },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type ListNode = WithBase<FromSchema<typeof ListSchema>>
@@ -87,9 +89,10 @@ export const ListSchema = {
 		ordered: { type: "boolean" },
 		start: { type: ["integer", "null"] },
 		spread: { type: ["boolean", "null"] },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type ListItemNode = WithBase<FromSchema<typeof ListItemSchema>>
@@ -104,9 +107,10 @@ export const ListItemSchema = {
 		position: { type: "object" },
 		checked: { type: ["boolean", "null"] },
 		spread: { type: ["boolean", "null"] },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type BlockquoteNode = WithBase<FromSchema<typeof BlockquoteSchema>>
@@ -119,9 +123,10 @@ export const BlockquoteSchema = {
 		type: { const: "blockquote" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type CodeNode = WithBase<FromSchema<typeof CodeSchema>>
@@ -137,9 +142,10 @@ export const CodeSchema = {
 		value: { type: "string" },
 		lang: { type: ["string", "null"] },
 		meta: { type: ["string", "null"] },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type InlineCodeNode = WithBase<FromSchema<typeof InlineCodeSchema>>
@@ -153,9 +159,10 @@ export const InlineCodeSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type ThematicBreakNode = WithBase<FromSchema<typeof ThematicBreakSchema>>
@@ -168,9 +175,10 @@ export const ThematicBreakSchema = {
 		type: { const: "thematicBreak" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type BreakNode = WithBase<FromSchema<typeof BreakSchema>>
@@ -183,9 +191,10 @@ export const BreakSchema = {
 		type: { const: "break" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type HtmlNode = WithBase<FromSchema<typeof HtmlSchema>>
@@ -199,9 +208,10 @@ export const HtmlSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type ImageNode = WithBase<FromSchema<typeof ImageSchema>>
@@ -217,9 +227,10 @@ export const ImageSchema = {
 		url: { type: "string" },
 		title: { type: ["string", "null"] },
 		alt: { type: ["string", "null"] },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type LinkNode = WithBase<FromSchema<typeof LinkSchema>>
@@ -234,9 +245,10 @@ export const LinkSchema = {
 		position: { type: "object" },
 		url: { type: "string" },
 		title: { type: ["string", "null"] },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type EmphasisNode = WithBase<FromSchema<typeof EmphasisSchema>>
@@ -249,9 +261,10 @@ export const EmphasisSchema = {
 		type: { const: "emphasis" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 export type StrongNode = WithBase<FromSchema<typeof StrongSchema>>
 export const StrongSchema = {
@@ -263,9 +276,10 @@ export const StrongSchema = {
 		type: { const: "strong" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 export type DeleteNode = WithBase<FromSchema<typeof DeleteSchema>>
 export const DeleteSchema = {
@@ -277,9 +291,10 @@ export const DeleteSchema = {
 		type: { const: "delete" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type TableNode = WithBase<FromSchema<typeof TableSchema>>
@@ -296,9 +311,10 @@ export const TableSchema = {
 			type: "array",
 			items: { type: ["string", "null"], enum: ["left", "right", "center", null] },
 		},
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 export type TableRowNode = WithBase<FromSchema<typeof TableRowSchema>>
 export const TableRowSchema = {
@@ -310,9 +326,10 @@ export const TableRowSchema = {
 		type: { const: "tableRow" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 export type TableCellNode = WithBase<FromSchema<typeof TableCellSchema>>
 export const TableCellSchema = {
@@ -324,9 +341,10 @@ export const TableCellSchema = {
 		type: { const: "tableCell" },
 		children: { type: "array" },
 		position: { type: "object" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type TextNode = WithBase<FromSchema<typeof TextSchema>>
@@ -340,9 +358,10 @@ export const TextSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 export type YamlNode = WithBase<FromSchema<typeof YamlSchema>>
@@ -356,13 +375,17 @@ export const YamlSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
+		data: { type: "object" },
 	},
 	required: ["type"],
-	additionalProperties: true,
+	additionalProperties: false,
 } as const
 
 /**
  * Runtime map from mdast `node.type` → JSON schema.
+ *
+ * !Mapping of Markdown AST node `type` to its schema.
+ * !Excludes persistence-only schemas such as `DocumentSchema`.
  *
  * Why this exists:
  *
@@ -418,7 +441,10 @@ export const schemasByType: Record<string, JsonSchema> = {
 	yaml: YamlSchema,
 }
 
-export const allSchemas: JsonSchema[] = Object.values(schemasByType)
+/**
+ * Collection of Markdown schemas including AST nodes and persistence metadata like `DocumentSchema`.
+ */
+export const allSchemas: JsonSchema[] = [...Object.values(schemasByType), DocumentSchema]
 
 // Type exports derived from JSON Schemas (no mdast import)
 export type AstRoot = FromSchema<typeof RootSchema>

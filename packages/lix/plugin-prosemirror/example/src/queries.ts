@@ -98,7 +98,7 @@ export function selectActiveVersion(lix: Lix) {
 export function selectActiveAccount(lix: Lix) {
 	return lix.db
 		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
 		.select(["aa.account_id", "a.id", "a.name"]);
 }

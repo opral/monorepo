@@ -1,0 +1,79 @@
+-- label --
+state delete • tracked row
+
+-- original SQL --
+DELETE FROM state
+      WHERE entity_id = ? AND schema_key = ? AND file_id = ?
+
+-- rewritten SQL --
+DELETE FROM state WHERE entity_id = ? AND schema_key = ? AND file_id = ?
+
+-- plan --
+[
+  {
+    "id": 3,
+    "parent": 0,
+    "notused": 176,
+    "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:version_id,entity_id,schema_key,file_id"
+  },
+  {
+    "id": 7,
+    "parent": 0,
+    "notused": 0,
+    "detail": "LIST SUBQUERY 7"
+  },
+  {
+    "id": 11,
+    "parent": 7,
+    "notused": 61,
+    "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+  },
+  {
+    "id": 24,
+    "parent": 7,
+    "notused": 0,
+    "detail": "CREATE BLOOM FILTER"
+  },
+  {
+    "id": 62,
+    "parent": 0,
+    "notused": 0,
+    "detail": "CORRELATED SCALAR SUBQUERY 4"
+  },
+  {
+    "id": 64,
+    "parent": 62,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 65,
+    "parent": 64,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 69,
+    "parent": 65,
+    "notused": 46,
+    "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
+  },
+  {
+    "id": 81,
+    "parent": 64,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 84,
+    "parent": 81,
+    "notused": 39,
+    "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
+  },
+  {
+    "id": 106,
+    "parent": 0,
+    "notused": 216,
+    "detail": "SCAN state"
+  }
+]

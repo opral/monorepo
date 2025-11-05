@@ -48,7 +48,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	for (const row of rows) {
 		const sk = row.schema_key as string;
 		const content = (row as any).snapshot_content;
-		if (sk === (AstSchemas.RootOrderSchema as any)["x-lix-key"]) {
+		if (sk === AstSchemas.DocumentSchema["x-lix-key"]) {
 			const order = (content as any)?.order;
 			if (Array.isArray(order)) beforeOrder = order as string[];
 			continue;
@@ -396,7 +396,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	// Order change
 	if (JSON.stringify(beforeOrder) !== JSON.stringify(afterOrder)) {
 		detectedChanges.push({
-			schema: AstSchemas.RootOrderSchema as unknown as LixSchemaDefinition,
+			schema: AstSchemas.DocumentSchema as unknown as LixSchemaDefinition,
 			entity_id: "root",
 			snapshot_content: { order: afterOrder },
 		});

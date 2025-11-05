@@ -9,7 +9,7 @@ export async function getOrCreateDefaultAgentConversationId(
 	lix: Lix
 ): Promise<string> {
 	const row = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("key", "=", POINTER_KEY)
 		.select(["value"])
@@ -32,7 +32,7 @@ export async function upsertConversationPointer(
 ): Promise<void> {
 	await lix.db.transaction().execute(async (trx) => {
 		const exists = await trx
-			.selectFrom("key_value_all")
+			.selectFrom("key_value_by_version")
 			.where("lixcol_version_id", "=", "global")
 			.where("key", "=", POINTER_KEY)
 			.select(["key"])
@@ -40,14 +40,14 @@ export async function upsertConversationPointer(
 
 		if (exists) {
 			await trx
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({ value: conversationId, lixcol_untracked: true })
 				.where("key", "=", POINTER_KEY)
 				.where("lixcol_version_id", "=", "global")
 				.execute();
 		} else {
 			await trx
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key: POINTER_KEY,
 					value: conversationId,

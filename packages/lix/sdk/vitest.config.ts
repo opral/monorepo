@@ -1,5 +1,5 @@
 import { defineConfig, defineProject } from "vitest/config";
-import { playwright } from "@vitest/browser/providers/playwright";
+import { playwright } from "@vitest/browser-playwright";
 import codspeedPlugin from "@codspeed/vitest-plugin";
 
 const COMMON_EXCLUDES = [
@@ -33,11 +33,13 @@ const browserProject = defineProject({
 		include: ["src/**/*.browser.test.ts"],
 		exclude: [...COMMON_EXCLUDES, "**/*.node.test.ts"],
 		browser: {
-			provider: playwright(),
 			enabled: true,
-			screenshotFailures: false,
 			headless: true,
+			provider: playwright({
+				launchOptions: { headless: true },
+			}),
 			instances: [{ browser: "chromium" }],
+			screenshotFailures: false,
 		},
 	},
 });

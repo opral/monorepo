@@ -5,6 +5,17 @@ import { createVersion } from "../version/create-version.js";
 import type { StateCommitChange } from "./create-hooks.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { withWriterKey } from "../state/writer.js";
+const testHooksSchema = {
+	"x-lix-key": "test_entity",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+	},
+	required: ["id"],
+} as const satisfies LixSchemaDefinition;
 
 test("should create hooks with onStateCommit method", () => {
 	const hooks = createHooks();
@@ -139,6 +150,10 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 			},
 		],
 	});
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testHooksSchema })
+		.execute();
 
 	const v = await createVersion({ lix, name: "hook-test" });
 
@@ -148,14 +163,14 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 	});
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "hook-entity",
-			schema_key: "mock_entity",
+			schema_key: "test_entity",
 			schema_version: "1.0",
 			file_id: "hook-file",
 			version_id: v.id,
-			plugin_key: "mock-plugin",
+			plugin_key: "test_plugin",
 			snapshot_content: { id: "hook-entity", name: "Hello" },
 		})
 		.execute();
@@ -165,7 +180,7 @@ test("onStateCommit emits state-shaped changes with version_id and commit_id", a
 	expect(events.length).toBeGreaterThan(0);
 	const flat = events.flat();
 	const domain = flat.find(
-		(c) => c.schema_key === "mock_entity" && c.entity_id === "hook-entity"
+		(c) => c.schema_key === "test_entity" && c.entity_id === "hook-entity"
 	);
 	expect(domain).toBeDefined();
 	expect(domain!.version_id).toBe(v.id);
@@ -189,7 +204,7 @@ test("onStateCommit exposes writer_key for state changes", async () => {
 	});
 
 	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema_writer_hook",
+		"x-lix-key": "test_schema_writer_hook",
 		"x-lix-version": "1.0",
 		type: "object",
 		additionalProperties: false,

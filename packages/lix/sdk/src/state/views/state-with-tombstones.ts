@@ -26,7 +26,7 @@ export type StateWithTombstonesRow = Selectable<StateWithTombstonesView>;
  *
  * This view reads from the materialized state which includes both live rows
  * and deletion tombstones (NULL snapshot_content). It intentionally does NOT
- * filter out tombstones, unlike the resolved-state or public state_all views.
+ * filter out tombstones, unlike the resolved-state or public state_by_version views.
  *
  * We restrict to non-inherited rows (inherited_from_version_id IS NULL) so that
  * each version only reports its own direct state or tombstones.
@@ -54,8 +54,8 @@ export function applyStateWithTombstonesView(args: {
       (
         SELECT json(metadata)
         FROM change
-        WHERE change.id = internal_state_vtable.change_id
+        WHERE change.id = lix_internal_state_vtable.change_id
       ) AS metadata
-    FROM internal_state_vtable;
+    FROM lix_internal_state_vtable;
   `);
 }

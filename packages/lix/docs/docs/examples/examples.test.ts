@@ -57,25 +57,27 @@ describe("Documentation Examples", () => {
     // Test each file in isolation by checking the file content
     for (const file of exampleFiles) {
       const filePath = join(__dirname, file);
-      const content = await readFile(filePath, 'utf-8');
-      
+      const content = await readFile(filePath, "utf-8");
+
       // Check if runExample is uncommented
-      const lines = content.split('\n');
+      const lines = content.split("\n");
       const hasUncommentedRunExample = lines.some((line, index) => {
         const trimmedLine = line.trim();
         // Skip if it's the function definition
-        if (trimmedLine.includes('function runExample')) {
+        if (trimmedLine.includes("function runExample")) {
           return false;
         }
         // Check if line contains runExample( and is not commented
-        if (line.includes('runExample(') && !trimmedLine.startsWith('//')) {
+        if (line.includes("runExample(") && !trimmedLine.startsWith("//")) {
           return true;
         }
         return false;
       });
-      
+
       if (hasUncommentedRunExample) {
-        throw new Error(`File ${file} has uncommented runExample() call - it should be commented out with // to prevent logging during import`);
+        throw new Error(
+          `File ${file} has uncommented runExample() call - it should be commented out with // to prevent logging during import`,
+        );
       }
     }
   });

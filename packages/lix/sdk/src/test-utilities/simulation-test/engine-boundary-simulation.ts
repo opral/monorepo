@@ -55,12 +55,8 @@ class EngineBoundaryEnvironment implements LixEnvironment {
 		return this.inner.exists();
 	}
 
-	async call(
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	): Promise<unknown> {
-		return this.inner.call(name, payload, opts);
+	async call(name: string, args?: unknown): Promise<unknown> {
+		return this.inner.call(name, args);
 	}
 
 	async close(): Promise<void> {

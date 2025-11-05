@@ -4,7 +4,7 @@ import exampleSrcCode from "../examples/diffs.ts?raw";
 
 # Entity-Level Diffs
 
-Unlike traditional version control that treats files as opaque blobs of text, Lix understands the *structure* of your data. Diffs are computed at the entity level, where an "entity" is a semantic unit defined by a plugin. For example:
+Unlike traditional version control that treats files as opaque blobs of text, Lix understands the _structure_ of your data. Diffs are computed at the entity level, where an "entity" is a semantic unit defined by a plugin. For example:
 
 - **JSON:** A property, array, or nested path.
 - **Tables/CSV:** A row or an individual cell.
@@ -18,12 +18,12 @@ This fine-grained, semantic approach makes changes easier to review, merge, and 
 
 By operating on entities instead of raw text lines, Lix provides several key advantages over traditional diffing methods.
 
-| Benefit | Description |
-| :--- | :--- |
-| **Semantic Meaning** | Diffs represent meaningful changes ("price changed from $10 to $12") not just arbitrary line edits. |
-| **Precise Attribution** | Pinpoint exactly who changed what and when, down to a single cell or property, avoiding whole-file noise. |
-| **Fewer Conflicts** | Merging changes to different entities (e.g., two different JSON properties) is trivial, even if they are on the same text line. |
-| **Pluggable Granularity**| Your domain model drives the diff. Plugins can define what constitutes a "change," tailoring diffs to your specific needs. |
+| Benefit                   | Description                                                                                                                     |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| **Semantic Meaning**      | Diffs represent meaningful changes ("price changed from $10 to $12") not just arbitrary line edits.                             |
+| **Precise Attribution**   | Pinpoint exactly who changed what and when, down to a single cell or property, avoiding whole-file noise.                       |
+| **Fewer Conflicts**       | Merging changes to different entities (e.g., two different JSON properties) is trivial, even if they are on the same text line. |
+| **Pluggable Granularity** | Your domain model drives the diff. Plugins can define what constitutes a "change," tailoring diffs to your specific needs.      |
 
 ## Quick Start: Diffing a JSON File
 
@@ -59,11 +59,11 @@ The same principle applies to any entity defined by a Lix plugin, such as a para
 
 Once you have the "before" and "after" data, you have complete control over how the changes are visualized. There are three common approaches.
 
-| Approach | Best For | Control Level |
-| :--- | :--- | :--- |
-| **Use a Plugin's UI** | Quick integration with standard, pre-built components. | Low |
-| **Use a Diff Library** | Custom integration with powerful, pre-built diffing logic. | Medium |
-| **Build Your Own UI** | Complete control for bespoke or complex visualizations. | High |
+| Approach               | Best For                                                   | Control Level |
+| :--------------------- | :--------------------------------------------------------- | :------------ |
+| **Use a Plugin's UI**  | Quick integration with standard, pre-built components.     | Low           |
+| **Use a Diff Library** | Custom integration with powerful, pre-built diffing logic. | Medium        |
+| **Build Your Own UI**  | Complete control for bespoke or complex visualizations.    | High          |
 
 ### Use a Plugin's UI
 

@@ -30,3 +30,6 @@ The usual structure is:
 
 If you develop in the @lix-js/sdk package, ensure that modifications are reflected in the docs. You can find the docs in the @lix-js/docs package. 
 
+### Ask before using try catch, default to no
+
+Bugs should emerge quickly. Silently ignoring errors is bad practice. Always ask before using try catch. The default is to not use try catch.

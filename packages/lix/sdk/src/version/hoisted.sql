@@ -1,7 +1,7 @@
 select * from (
 WITH
-  -- Hoisted internal_state_vtable definition (shared by downstream view rewrites)
-  internal_state_vtable AS (
+  -- Hoisted lix_internal_state_vtable definition (shared by downstream view rewrites)
+  lix_internal_state_vtable AS (
     SELECT
       entity_id,
       schema_key,
@@ -18,18 +18,18 @@ WITH
       commit_id,
       metadata,
       writer_key
-    FROM internal_state_vtable_rewritten
+    FROM lix_internal_state_vtable_rewritten
   ),
   -- Source side should expose explicit deletions (tombstones)
   -- Use state_with_tombstones to include rows with NULL snapshot_content
   s AS (
     SELECT entity_id, schema_key, file_id, change_id, commit_id, version_id, snapshot_content
-    FROM internal_state_vtable
+    FROM lix_internal_state_vtable
     WHERE version_id = 'test_0000000017'
   ),
   t AS (
     SELECT entity_id, schema_key, file_id, change_id, commit_id, version_id
-    FROM internal_state_vtable
+    FROM lix_internal_state_vtable
     WHERE snapshot_content IS NOT NULL
       AND version_id = 'test_0000000047'
   ),

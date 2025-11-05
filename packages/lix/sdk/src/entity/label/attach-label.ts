@@ -1,14 +1,16 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixEntity, LixEntityCanonical } from "../schema.js";
+import type { LixEntity, LixEntityCanonical } from "../types.js";
 
 /**
  * Attaches a label to an entity (creates mapping).
  *
  * This function allows any entity in the system to be labeled,
- * enabling universal labeling across all entity types.
+ * enabling universal labeling across all entity types. By default the label
+ * is attached in the active version, but a specific version can be provided
+ * when labeling global or historical entities.
  *
  * @example
- * // Label a bundle entity
+ * // Label a bundle entity in the active version
  * await attachLabel({
  *   lix,
  *   entity: {
@@ -20,7 +22,7 @@ import type { LixEntity, LixEntityCanonical } from "../schema.js";
  * });
  *
  * @example
- * // Label a change set
+ * // Label a change set that lives in the global version
  * await attachLabel({
  *   lix,
  *   entity: {
@@ -28,15 +30,17 @@ import type { LixEntity, LixEntityCanonical } from "../schema.js";
  *     schema_key: "lix_change_set",
  *     file_id: "lix"
  *   },
- *   label: { id: "reviewed-label-id" }
+ *   label: { id: "reviewed-label-id" },
+ *   versionId: "global"
  * });
  */
 export async function attachLabel(args: {
 	lix: Pick<Lix, "db">;
 	entity: LixEntity | LixEntityCanonical;
 	label: { id: string };
+	versionId?: string;
 }): Promise<void> {
-	const { lix, entity, label } = args;
+	const { lix, entity, label, versionId } = args;
 
 	// Extract entity fields - support both canonical and lixcol_ prefixed names
 	const entity_id =
@@ -45,15 +49,25 @@ export async function attachLabel(args: {
 		"schema_key" in entity ? entity.schema_key : entity.lixcol_schema_key;
 	const file_id = "file_id" in entity ? entity.file_id : entity.lixcol_file_id;
 
-	// Check if the mapping already exists
-	const existingMapping = await lix.db
-		.selectFrom("entity_label")
-		.where("entity_id", "=", entity_id)
-		.where("schema_key", "=", schema_key)
-		.where("file_id", "=", file_id)
-		.where("label_id", "=", label.id)
-		.select(["entity_id"])
-		.executeTakeFirst();
+	// Check if the mapping already exists in the relevant version scope
+	const existingMapping = await (versionId
+		? lix.db
+				.selectFrom("entity_label_by_version")
+				.where("entity_id", "=", entity_id)
+				.where("schema_key", "=", schema_key)
+				.where("file_id", "=", file_id)
+				.where("label_id", "=", label.id)
+				.where("lixcol_version_id", "=", versionId)
+				.select(["entity_id"])
+				.executeTakeFirst()
+		: lix.db
+				.selectFrom("entity_label")
+				.where("entity_id", "=", entity_id)
+				.where("schema_key", "=", schema_key)
+				.where("file_id", "=", file_id)
+				.where("label_id", "=", label.id)
+				.select(["entity_id"])
+				.executeTakeFirst());
 
 	if (existingMapping) {
 		// Mapping already exists, nothing to do
@@ -64,15 +78,28 @@ export async function attachLabel(args: {
 	// Foreign key constraints will automatically validate that:
 	// - The entity exists in state
 	// - The label exists
-	await lix.db
-		.insertInto("entity_label")
-		.values({
-			entity_id: entity_id,
-			schema_key: schema_key,
-			file_id: file_id,
-			label_id: label.id,
-		})
-		.execute();
+	if (versionId) {
+		await lix.db
+			.insertInto("entity_label_by_version")
+			.values({
+				entity_id: entity_id,
+				schema_key: schema_key,
+				file_id: file_id,
+				label_id: label.id,
+				lixcol_version_id: versionId,
+			})
+			.execute();
+	} else {
+		await lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: entity_id,
+				schema_key: schema_key,
+				file_id: file_id,
+				label_id: label.id,
+			})
+			.execute();
+	}
 }
 
 /**
@@ -88,13 +115,27 @@ export async function attachLabel(args: {
  *   },
  *   label: { id: "needs-translation-label-id" }
  * });
+ *
+ * @example
+ * // Remove a label from the global version
+ * await detachLabel({
+ *   lix,
+ *   entity: {
+ *     entity_id: "cs123",
+ *     schema_key: "lix_change_set",
+ *     file_id: "lix"
+ *   },
+ *   label: { id: "reviewed-label-id" },
+ *   versionId: "global"
+ * });
  */
 export async function detachLabel(args: {
 	lix: Pick<Lix, "db">;
 	entity: LixEntity | LixEntityCanonical;
 	label: { id: string };
+	versionId?: string;
 }): Promise<void> {
-	const { lix, entity, label } = args;
+	const { lix, entity, label, versionId } = args;
 
 	// Extract entity fields - support both canonical and lixcol_ prefixed names
 	const entity_id =
@@ -103,11 +144,22 @@ export async function detachLabel(args: {
 		"schema_key" in entity ? entity.schema_key : entity.lixcol_schema_key;
 	const file_id = "file_id" in entity ? entity.file_id : entity.lixcol_file_id;
 
-	await lix.db
-		.deleteFrom("entity_label")
-		.where("entity_id", "=", entity_id)
-		.where("schema_key", "=", schema_key)
-		.where("file_id", "=", file_id)
-		.where("label_id", "=", label.id)
-		.execute();
+	if (versionId) {
+		await lix.db
+			.deleteFrom("entity_label_by_version")
+			.where("entity_id", "=", entity_id)
+			.where("schema_key", "=", schema_key)
+			.where("file_id", "=", file_id)
+			.where("label_id", "=", label.id)
+			.where("lixcol_version_id", "=", versionId)
+			.execute();
+	} else {
+		await lix.db
+			.deleteFrom("entity_label")
+			.where("entity_id", "=", entity_id)
+			.where("schema_key", "=", schema_key)
+			.where("file_id", "=", file_id)
+			.where("label_id", "=", label.id)
+			.execute();
+	}
 }

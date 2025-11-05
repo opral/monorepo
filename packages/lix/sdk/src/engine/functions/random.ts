@@ -67,7 +67,7 @@ export function randomSync(args: {
 		// Check if we have persisted RNG state
 		const [stateRow] = engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("key", "=", "lix_deterministic_rng_state")
 				.where("lixcol_version_id", "=", "global")
 				.select("value")
@@ -76,7 +76,7 @@ export function randomSync(args: {
 
 		if (stateRow && stateRow.value) {
 			// Restore persisted state
-			// The value is stored as a JSON string in key_value_all view
+			// The value is stored as a JSON string in key_value_by_version view
 			const stateData =
 				typeof stateRow.value === "string"
 					? JSON.parse(stateRow.value)
@@ -113,7 +113,7 @@ function getRngSeed(args: {
 	const [configRow] = withRuntimeCache(
 		args.engine,
 		internalQueryBuilder
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)

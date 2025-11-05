@@ -69,7 +69,7 @@ export default async function runExample(console: any) {
 
   // 4. Query files across all versions to see the differences
   const allFiles = await lix.db
-    .selectFrom("file_all")
+    .selectFrom("file_by_version")
     .where("path", "=", "/products.json")
     .select(["lixcol_version_id", "data"])
     .execute();

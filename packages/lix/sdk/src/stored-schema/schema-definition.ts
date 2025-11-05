@@ -7,19 +7,24 @@ import { JSONTypeSchema } from "../schema-definition/json-type.js";
 export type LixStoredSchema = FromLixSchemaDefinition<
 	typeof LixStoredSchemaSchema
 > & {
-	value: any;
+	value: LixSchemaDefinition;
 };
 
 export const LixStoredSchemaSchema = {
 	"x-lix-key": "lix_stored_schema",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["key", "version"],
+	"x-lix-primary-key": ["/value/x-lix-key", "/value/x-lix-version"],
+	"x-lix-immutable": true,
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
+	},
 	type: "object",
 	properties: {
-		key: { type: "string", "x-lix-generated": true },
-		version: { type: "string", "x-lix-generated": true },
 		value: JSONTypeSchema as any,
 	},
+	required: ["value"],
 	additionalProperties: false,
 } as const;
 LixStoredSchemaSchema satisfies LixSchemaDefinition;

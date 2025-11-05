@@ -47,7 +47,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 
 	// Verify entity exists in untracked table
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "direct-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.select([
@@ -61,7 +61,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
@@ -74,7 +74,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 		value: "direct-value",
 	});
 	expect(result[0]!.inherited_from_version_id).toBe(null);
-	expect(result[0]!.inheritance_delete_marker).toBe(0);
+	expect(result[0]!.is_tombstone).toBe(0);
 });
 
 test("updateUntrackedState updates existing direct untracked entity", async () => {
@@ -140,7 +140,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 
 	// Verify entity was updated
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "update-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.select([
@@ -154,7 +154,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
@@ -210,7 +210,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 
 	// Verify entity exists
 	const beforeDelete = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "delete-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -238,7 +238,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 
 	// Verify entity is deleted
 	const afterDelete = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "delete-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -268,7 +268,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	// Create an untracked entity in global version (parent)
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "inherited-untracked-key",
 			schema_key: "lix_key_value",
@@ -283,13 +283,13 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 			created_at: currentTime,
 			updated_at: currentTime,
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 		})
 		.execute();
 
 	// Verify no direct entity exists in active version
 	const beforeDelete = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -317,7 +317,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	// Verify tombstone was created
 	const afterDelete = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -325,7 +325,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 
 	expect(afterDelete).toHaveLength(1);
 	expect(afterDelete[0]!.snapshot_content).toBe(null);
-	expect(afterDelete[0]!.inheritance_delete_marker).toBe(1);
+	expect(afterDelete[0]!.is_tombstone).toBe(1);
 	expect(afterDelete[0]!.inherited_from_version_id).toBe(null);
 });
 
@@ -371,7 +371,7 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 
 	// Verify timestamps are consistent
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "timestamp-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
@@ -421,14 +421,14 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 
 	// Verify tombstone exists
 	const tombstone = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "tombstone-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.selectAll()
 		.execute();
 
 	expect(tombstone).toHaveLength(1);
-	expect(tombstone[0]!.inheritance_delete_marker).toBe(1);
+	expect(tombstone[0]!.is_tombstone).toBe(1);
 	expect(tombstone[0]!.snapshot_content).toBe(null);
 
 	// Update the tombstone with actual content
@@ -454,7 +454,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 
 	// Verify tombstone flag is reset and content is restored
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "tombstone-test-key")
 		.where("version_id", "=", activeVersion.version_id)
 		.select([
@@ -468,12 +468,12 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
 	expect(result).toHaveLength(1);
-	expect(result[0]!.inheritance_delete_marker).toBe(0);
+	expect(result[0]!.is_tombstone).toBe(0);
 	const content = result[0]!.snapshot_content;
 	const parsedContent =
 		typeof content === "string" ? JSON.parse(content) : content;

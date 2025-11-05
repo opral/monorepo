@@ -1,8 +1,3 @@
-/* ------------------------------------------------------------------------- *
- *  lix-react/useSuspenseQuery.tsx
- *  React 19 Suspense-based hooks for live database queries
- * ------------------------------------------------------------------------- */
-
 import { useMemo, useContext, useEffect, useState, use } from "react";
 import type { Lix } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
@@ -178,7 +173,7 @@ export const useQueryTakeFirst = <TResult>(
  * @example
  * ```tsx
  * function ExampleDetail({ itemId }: { itemId: string }) {
- *   const item = useSuspenseQueryTakeFirstOrThrow(({ lix }) =>
+ *   const item = useQueryTakeFirstOrThrow(({ lix }) =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', '=', `example_${itemId}`)
  *       .selectAll()
@@ -204,21 +199,3 @@ export const useQueryTakeFirstOrThrow = <TResult>(
 	if (data === undefined) throw new Error("No result found");
 	return data;
 };
-
-/**
- * @deprecated Use `useQuery` instead.
- * This will be removed in a future version.
- */
-export const useSuspenseQuery = useQuery;
-
-/**
- * @deprecated Use `useQueryTakeFirst` instead.
- * This will be removed in a future version.
- */
-export const useSuspenseQueryTakeFirst = useQueryTakeFirst;
-
-/**
- * @deprecated Use `useQueryTakeFirstOrThrow` instead.
- * This will be removed in a future version.
- */
-export const useSuspenseQueryTakeFirstOrThrow = useQueryTakeFirstOrThrow;

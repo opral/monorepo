@@ -3,97 +3,97 @@ import { Value } from "@sinclair/typebox/value";
 import { PluginSettings } from "./settings.js";
 
 test("valid path patterns", async () => {
-  const validPathPatterns = [
-    "/folder/{locale}.json",
-    "./{locale}/file.json",
-    "../folder/{locale}/file.json",
-    "./{locale}.json",
-    "./{locale}/folder/file.json",
-  ];
+	const validPathPatterns = [
+		"/folder/{locale}.json",
+		"./{locale}/file.json",
+		"../folder/{locale}/file.json",
+		"./{locale}.json",
+		"./{locale}/folder/file.json",
+	];
 
-  for (const pathPattern of validPathPatterns) {
-    const isValid = Value.Check(PluginSettings, {
-      pathPattern,
-    });
-    expect(isValid).toBe(true);
-  }
+	for (const pathPattern of validPathPatterns) {
+		const isValid = Value.Check(PluginSettings, {
+			pathPattern,
+		});
+		expect(isValid).toBe(true);
+	}
 });
 
 test("it should fail if the path pattern does not start as a ralaitve path with a /,./ or ../", async () => {
-  const pathPattern = "{locale}.json";
+	const pathPattern = "{locale}.json";
 
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 test("if path patter does include the word `{locale}`", async () => {
-  const pathPattern = "./examplePath.json";
+	const pathPattern = "./examplePath.json";
 
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 
 test("should fail if the path does not end with .json", async () => {
-  const pathPattern = "./{locale}.";
+	const pathPattern = "./{locale}.";
 
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 
 test("if curly brackets {} does to cointain the word languageTag", async () => {
-  const pathPattern = "./{en}.json";
+	const pathPattern = "./{en}.json";
 
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 
 test("if pathPattern doesn't includes a '*' wildcard. This was deprecated in version 3.0.0.", async () => {
-  const pathPattern = "./{locale}/*.json";
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const pathPattern = "./{locale}/*.json";
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 
 test("if pathPattern with namespaces include the correct pathpattern schema", async () => {
-  const pathPattern = {
-    website: "./{locale}folder/file.json",
-    app: "../{locale}folder/file.json",
-    footer: "./{locale}folder/file.json",
-  };
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(true);
+	const pathPattern = {
+		website: "./{locale}folder/file.json",
+		app: "../{locale}folder/file.json",
+		footer: "./{locale}folder/file.json",
+	};
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(true);
 });
 
 test("if pathPattern with namespaces include a incorrect pathpattern", async () => {
-  const pathPattern = {
-    website: "./folder/file.json",
-    app: "../{locale}folder/file.json",
-    footer: "./{locale}folder/file.json",
-  };
-  const isValid = Value.Check(PluginSettings, {
-    pathPattern,
-  });
-  expect(isValid).toBe(false);
+	const pathPattern = {
+		website: "./folder/file.json",
+		app: "../{locale}folder/file.json",
+		footer: "./{locale}folder/file.json",
+	};
+	const isValid = Value.Check(PluginSettings, {
+		pathPattern,
+	});
+	expect(isValid).toBe(false);
 });
 
 test("if sourceLanguageFilePath with namespaces include the correct sourceLanguageFilePath schema", async () => {
-  const sourceLanguageFilePath = {
-    website: "./{locale}folder/file.json",
-    app: "../{locale}folder/file.json",
-    footer: "./{locale}folder/file.json",
-  };
-  const isValid = Value.Check(PluginSettings, {
-    sourceLanguageFilePath,
-  });
-  expect(isValid).toBe(false);
+	const sourceLanguageFilePath = {
+		website: "./{locale}folder/file.json",
+		app: "../{locale}folder/file.json",
+		footer: "./{locale}folder/file.json",
+	};
+	const isValid = Value.Check(PluginSettings, {
+		sourceLanguageFilePath,
+	});
+	expect(isValid).toBe(false);
 });

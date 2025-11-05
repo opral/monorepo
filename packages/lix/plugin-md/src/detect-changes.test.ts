@@ -4,26 +4,33 @@ import { plugin } from "./index.js";
 import { openLix, createQuerySync } from "../../sdk/dist/index.js";
 import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
 import type { Ast } from "@opral/markdown-wc";
-import type { LixPlugin } from "@lix-js/sdk";
+import type { Lix, LixPlugin } from "@lix-js/sdk";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
 type DetectChangesArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
 
 async function seedMarkdownState(args: {
-	lix: any;
+	lix: Lix;
 	fileId: string;
 	markdown: string;
 	ids?: string[];
 }) {
 	const { lix, fileId, markdown, ids } = args;
 	const ast = parseMarkdown(markdown) as Ast;
+
+	const schemas = AstSchemas.allSchemas.map((schema) => ({
+		value: schema,
+		lixcol_version_id: "global",
+	}));
+
+	await lix.db.insertInto("stored_schema_by_version").values(schemas).execute();
+
 	const order: string[] = [];
-	const vrow = (await lix.db
+	const { version_id: versionId } = await lix.db
 		.selectFrom("active_version")
 		.select("version_id")
-		.executeTakeFirst()) as any;
-	const versionId = vrow?.version_id as any;
+		.executeTakeFirstOrThrow();
 
 	// Build values array
 	const values: any[] = [];
@@ -49,18 +56,18 @@ async function seedMarkdownState(args: {
 	const CHUNK = 200;
 	for (let i = 0; i < values.length; i += CHUNK) {
 		const slice = values.slice(i, i + CHUNK);
-		await lix.db.insertInto("state_all").values(slice).execute();
+		await lix.db.insertInto("state_by_version").values(slice).execute();
 	}
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "root",
-			schema_key: (AstSchemas.RootOrderSchema as any)["x-lix-key"],
+			schema_key: AstSchemas.DocumentSchema["x-lix-key"],
 			file_id: fileId,
 			plugin_key: plugin.key,
 			snapshot_content: { order },
-			schema_version: (AstSchemas.RootOrderSchema as any)["x-lix-version"],
+			schema_version: AstSchemas.DocumentSchema["x-lix-version"],
 			version_id: versionId,
 		})
 		.execute();
@@ -238,7 +245,7 @@ test("it should detect node reordering", async () => {
 
 	const orderChange = detectedChanges.find((c) => c.entity_id === "root");
 	expect(orderChange).toBeTruthy();
-	expect(orderChange?.schema).toBe(AstSchemas.RootOrderSchema);
+	expect(orderChange?.schema).toBe(AstSchemas.DocumentSchema);
 	expect((orderChange?.snapshot_content as { order: string[] })?.order).toEqual(
 		["p2", "p1"],
 	);
@@ -295,7 +302,7 @@ test("preserves IDs on reorder", async () => {
 
 	const root = changes.find((c) => c.entity_id === "root");
 	expect(root).toBeTruthy();
-	expect(root?.schema).toBe(AstSchemas.RootOrderSchema);
+	expect(root?.schema).toBe(AstSchemas.DocumentSchema);
 	expect((root!.snapshot_content as { order: string[] }).order).toEqual([
 		"p2",
 		"p1",
@@ -406,7 +413,7 @@ test("move section (heading + paragraph) preserves ids and updates root order", 
 
 	const root = changes.find((c) => c.entity_id === "root");
 	expect(root).toBeTruthy();
-	expect(root?.schema).toBe(AstSchemas.RootOrderSchema);
+	expect(root?.schema).toBe(AstSchemas.DocumentSchema);
 	expect((root!.snapshot_content as { order: string[] }).order).toEqual([
 		"hB",
 		"pB",

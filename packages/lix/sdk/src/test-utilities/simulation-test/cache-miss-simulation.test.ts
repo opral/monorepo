@@ -75,9 +75,9 @@ simulationTest(
 			])
 			.execute();
 
-		// Query state_all
+		// Query state_by_version
 		const stateAll = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "!=", "lix_state_cache_stale")
 			.orderBy("entity_id")
@@ -156,7 +156,7 @@ simulationTest(
 );
 
 simulationTest(
-	"cache miss simulation clears even on internal_* tables",
+	"cache miss simulation clears even on lix_internal_* tables",
 	async ({ openSimulatedLix }) => {
 		// Spy on the actual clear export so we observe real calls
 		const clearModule = await import("../../state/cache/clear-state-cache.js");
@@ -183,7 +183,7 @@ simulationTest(
 
 		// Internal query SHOULD trigger clear
 		await (lix.db as any)
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.selectAll()
 			.limit(1)
 			.execute();

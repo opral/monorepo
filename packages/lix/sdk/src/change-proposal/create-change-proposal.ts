@@ -18,21 +18,22 @@ export async function createChangeProposal(args: {
 }): Promise<LixChangeProposal> {
 	const { lix } = args;
 	const exec = async (trx: Lix["db"]) => {
-		const row: Partial<LixChangeProposal> & { lixcol_version_id?: string } = {
-			id: args.id,
+		const values: Partial<LixChangeProposal> = {
 			source_version_id: args.source.id,
 			target_version_id: args.target.id,
-			status: args.status ?? "open",
-			lixcol_version_id: "global",
 		};
+		if (args.id) values.id = args.id;
+		if (args.status) values.status = args.status;
 
 		await trx
-			.insertInto("change_proposal_all")
-			.values(row as any)
+			.insertInto("change_proposal")
+			.values(values as any)
 			.execute();
 
 		const created = await trx
 			.selectFrom("change_proposal")
+			.where("source_version_id", "=", args.source.id)
+			.where("target_version_id", "=", args.target.id)
 			.selectAll()
 			.orderBy("lixcol_created_at", "desc")
 			.limit(1)

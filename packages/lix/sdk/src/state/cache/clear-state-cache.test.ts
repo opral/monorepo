@@ -3,13 +3,9 @@ import { clearStateCache } from "./clear-state-cache.js";
 import { isStaleStateCache } from "./is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./mark-state-cache-as-stale.js";
 import { openLix } from "../../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
-import type { Kysely } from "kysely";
 
 test("clearStateCache deletes all cache entries", async () => {
 	const lix = await openLix({});
-	const internalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
-
 	// Insert some data to populate cache
 	await lix.db
 		.insertInto("key_value")
@@ -19,13 +15,15 @@ test("clearStateCache deletes all cache entries", async () => {
 		})
 		.execute();
 
-	// Verify cache has entries
-	const cacheBeforeClear = await internalDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.execute();
+	const readPhysicalKeyValueCache = () => {
+		return lix.engine!.executeSync({
+			sql: `SELECT entity_id FROM lix_internal_state_cache_v1_lix_key_value`,
+		});
+	};
 
-	expect(cacheBeforeClear.length).toBeGreaterThan(0);
+	// Verify cache has entries in the physical schema table
+	const cacheBeforeClear = readPhysicalKeyValueCache();
+	expect(cacheBeforeClear.rows.length).toBeGreaterThan(0);
 
 	// Ensure the stale flag is false and cached before we clear it
 	markStateCacheAsFresh({ engine: lix.engine! });
@@ -35,12 +33,8 @@ test("clearStateCache deletes all cache entries", async () => {
 	clearStateCache({ engine: lix.engine! });
 
 	// Verify cache is empty
-	const cacheAfterClear = await internalDb
-		.selectFrom("internal_state_cache")
-		.selectAll()
-		.execute();
-
-	expect(cacheAfterClear.length).toBe(0);
+	const cacheAfterClear = readPhysicalKeyValueCache();
+	expect(cacheAfterClear.rows.length).toBe(0);
 
 	// Verify the cache is marked as stale
 	const isStale = isStaleStateCache({

@@ -17,14 +17,14 @@ export async function rejectChangeProposal(args: {
 
 		// Update status then remove proposal to release FK before deleting version
 		await trx
-			.updateTable("change_proposal_all")
+			.updateTable("change_proposal_by_version")
 			.set({ status: "rejected" })
 			.where("id", "=", id)
 			.where("lixcol_version_id", "=", "global")
 			.execute();
 
 		await trx
-			.deleteFrom("change_proposal_all")
+			.deleteFrom("change_proposal_by_version")
 			.where("id", "=", id)
 			.where("lixcol_version_id", "=", "global")
 			.execute();

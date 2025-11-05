@@ -11,7 +11,7 @@ export async function ensureAgentVersion(lix: Lix): Promise<LixVersion> {
 		// Proposal mode: if an active proposal id is set globally, resolve its source version
 		try {
 			const kv = await trx
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_agent_active_proposal_id")
 				.select(["value"])
@@ -34,7 +34,7 @@ export async function ensureAgentVersion(lix: Lix): Promise<LixVersion> {
 				// Clean up stale KV if proposal not found or not open
 				try {
 					await trx
-						.deleteFrom("key_value_all")
+						.deleteFrom("key_value_by_version")
 						.where("lixcol_version_id", "=", "global")
 						.where("key", "=", "lix_agent_active_proposal_id")
 						.execute();

@@ -2,6 +2,7 @@ import { openLix } from "../lix/open-lix.js";
 import { test, expect, describe } from "vitest";
 import { OpfsSahEnvironment } from "./opfs-sah.js";
 import { newLixFile } from "../lix/new-lix.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("inserting a file", async () => {
@@ -39,6 +40,18 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		});
 		// Worker environment cannot expose an in-process engine; engine must be undefined
 		expect(res.engine).toBeUndefined();
+		await env.close();
+	});
+
+	test("rejects providePlugins in worker environment", async () => {
+		const env = new OpfsSahEnvironment({ key: "vitest-opfs-reject-provide" });
+		const mockPlugin: LixPlugin = { key: "mock-plugin" };
+		await expect(
+			env.open({
+				boot: { args: { providePlugins: [mockPlugin] } },
+				emit: () => {},
+			})
+		).rejects.toThrow(/providePluginsRaw/);
 		await env.close();
 	});
 
@@ -279,7 +292,7 @@ export default plugin;
 
 			// Plugin should have inserted a state row with our mock schema key
 			const row = await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.where("schema_key", "=", "mock_schema")
 				.executeTakeFirst();
@@ -306,7 +319,7 @@ export default plugin;
 			// Verify current active account with details
 			const active1 = await lix1.db
 				.selectFrom("active_account as aa")
-				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 				.where("a.lixcol_version_id", "=", "global")
 				.select(["aa.account_id", "a.id", "a.name"])
 				.executeTakeFirstOrThrow();
@@ -325,7 +338,7 @@ export default plugin;
 		try {
 			const active2 = await lix2.db
 				.selectFrom("active_account as aa")
-				.innerJoin("account_all as a", "a.id", "aa.account_id")
+				.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 				.where("a.lixcol_version_id", "=", "global")
 				.select(["aa.account_id", "a.id", "a.name"])
 				.executeTakeFirstOrThrow();

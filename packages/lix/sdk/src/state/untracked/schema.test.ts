@@ -23,7 +23,7 @@ test("untracked schema validates JSONB content properly", async () => {
 
 	// Test 1: Valid JSONB object should work
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-valid-jsonb",
 			schema_key: "lix_key_value",
@@ -35,13 +35,13 @@ test("untracked schema validates JSONB content properly", async () => {
 			created_at: "2023-01-01T00:00:00.000Z",
 			updated_at: "2023-01-01T00:00:00.000Z",
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0,
+			is_tombstone: 0,
 		})
 		.execute();
 
 	// Verify it was inserted correctly
 	const validResult = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-valid-jsonb")
 		.select([
 			"entity_id",
@@ -54,7 +54,7 @@ test("untracked schema validates JSONB content properly", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker",
+			"is_tombstone",
 		])
 		.execute();
 
@@ -89,7 +89,7 @@ test("untracked schema rejects invalid JSONB", async () => {
 	// Test: Invalid JSON should be rejected by CHECK constraint
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-json",
 				schema_key: "lix_key_value",
@@ -101,7 +101,7 @@ test("untracked schema rejects invalid JSONB", async () => {
 				created_at: "2023-01-01T00:00:00.000Z",
 				updated_at: "2023-01-01T00:00:00.000Z",
 				inherited_from_version_id: null,
-				inheritance_delete_marker: 0,
+				is_tombstone: 0,
 			})
 			.execute();
 	}).rejects.toThrow();
@@ -127,7 +127,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 	// Test: JSONB array should be rejected (must be object)
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-jsonb-array",
 				schema_key: "lix_key_value",
@@ -139,7 +139,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 				created_at: "2023-01-01T00:00:00.000Z",
 				updated_at: "2023-01-01T00:00:00.000Z",
 				inherited_from_version_id: null,
-				inheritance_delete_marker: 0,
+				is_tombstone: 0,
 			})
 			.execute();
 	}).rejects.toThrow();
@@ -147,7 +147,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 	// Test: JSONB string should be rejected (must be object)
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-jsonb-string",
 				schema_key: "lix_key_value",
@@ -159,13 +159,13 @@ test("untracked schema rejects non-object JSONB types", async () => {
 				created_at: "2023-01-01T00:00:00.000Z",
 				updated_at: "2023-01-01T00:00:00.000Z",
 				inherited_from_version_id: null,
-				inheritance_delete_marker: 0,
+				is_tombstone: 0,
 			})
 			.execute();
 	}).rejects.toThrow();
 });
 
-test("untracked schema validates inheritance_delete_marker constraints", async () => {
+test("untracked schema validates is_tombstone constraints", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -182,9 +182,9 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Test 1: inheritance_delete_marker = 1 with NULL content should work (tombstone)
+	// Test 1: is_tombstone = 1 with NULL content should work (tombstone)
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-valid-tombstone",
 			schema_key: "lix_key_value",
@@ -196,25 +196,25 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 			created_at: "2023-01-01T00:00:00.000Z",
 			updated_at: "2023-01-01T00:00:00.000Z",
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 1, // Tombstone marker
+			is_tombstone: 1, // Tombstone marker
 		})
 		.execute();
 
 	// Verify tombstone was created correctly
 	const tombstoneResult = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-valid-tombstone")
 		.selectAll()
 		.execute();
 
 	expect(tombstoneResult).toHaveLength(1);
-	expect(tombstoneResult[0]!.inheritance_delete_marker).toBe(1);
+	expect(tombstoneResult[0]!.is_tombstone).toBe(1);
 	expect(tombstoneResult[0]!.snapshot_content).toBe(null);
 
-	// Test 2: inheritance_delete_marker = 1 with content should be rejected
+	// Test 2: is_tombstone = 1 with content should be rejected
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-tombstone",
 				schema_key: "lix_key_value",
@@ -226,15 +226,15 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 				created_at: "2023-01-01T00:00:00.000Z",
 				updated_at: "2023-01-01T00:00:00.000Z",
 				inherited_from_version_id: null,
-				inheritance_delete_marker: 1, // Tombstone marker but with content
+				is_tombstone: 1, // Tombstone marker but with content
 			})
 			.execute();
 	}).rejects.toThrow();
 
-	// Test 3: Invalid inheritance_delete_marker values should be rejected
+	// Test 3: Invalid is_tombstone values should be rejected
 	await expect(async () => {
 		await lixInternalDb
-			.insertInto("internal_state_all_untracked")
+			.insertInto("lix_internal_state_all_untracked")
 			.values({
 				entity_id: "test-invalid-marker",
 				schema_key: "lix_key_value",
@@ -246,13 +246,13 @@ test("untracked schema validates inheritance_delete_marker constraints", async (
 				created_at: "2023-01-01T00:00:00.000Z",
 				updated_at: "2023-01-01T00:00:00.000Z",
 				inherited_from_version_id: null,
-				inheritance_delete_marker: 2, // Invalid value (must be 0 or 1)
+				is_tombstone: 2, // Invalid value (must be 0 or 1)
 			})
 			.execute();
 	}).rejects.toThrow();
 });
 
-test("untracked schema allows NULL snapshot_content with inheritance_delete_marker = 0", async () => {
+test("untracked schema allows NULL snapshot_content with is_tombstone = 0", async () => {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -269,10 +269,10 @@ test("untracked schema allows NULL snapshot_content with inheritance_delete_mark
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Test: inheritance_delete_marker = 0 with NULL content should work
+	// Test: is_tombstone = 0 with NULL content should work
 	// (this could represent a normal deletion that's not a tombstone)
 	await lixInternalDb
-		.insertInto("internal_state_all_untracked")
+		.insertInto("lix_internal_state_all_untracked")
 		.values({
 			entity_id: "test-null-content-normal",
 			schema_key: "lix_key_value",
@@ -284,18 +284,18 @@ test("untracked schema allows NULL snapshot_content with inheritance_delete_mark
 			created_at: "2023-01-01T00:00:00.000Z",
 			updated_at: "2023-01-01T00:00:00.000Z",
 			inherited_from_version_id: null,
-			inheritance_delete_marker: 0, // Normal marker
+			is_tombstone: 0, // Normal marker
 		})
 		.execute();
 
 	// Verify it was inserted correctly
 	const result = await lixInternalDb
-		.selectFrom("internal_state_all_untracked")
+		.selectFrom("lix_internal_state_all_untracked")
 		.where("entity_id", "=", "test-null-content-normal")
 		.selectAll()
 		.execute();
 
 	expect(result).toHaveLength(1);
-	expect(result[0]!.inheritance_delete_marker).toBe(0);
+	expect(result[0]!.is_tombstone).toBe(0);
 	expect(result[0]!.snapshot_content).toBe(null);
 });

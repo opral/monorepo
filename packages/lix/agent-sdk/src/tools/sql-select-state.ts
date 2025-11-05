@@ -18,12 +18,12 @@ export type SqlSelectStateOutput = Array<Record<string, unknown>>;
  * Guardrails:
  * - Allows only a single SELECT/CTE (WITH ... SELECT) statement.
  * - Automatically limits results to `maxRows` by wrapping the query.
- * - Disallows selecting the file content columns: file.data or file_all.data.
+ * - Disallows selecting the file content columns: file.data or file_by_version.data.
  */
 export async function sqlSelectState(
 	args: SqlSelectStateInput & { lix: Lix }
 ): Promise<SqlSelectStateOutput> {
-	const { lix, sql: rawSql } = args;
+	const { sql: rawSql } = args;
 
 	const sqlRaw = rawSql.trim();
 

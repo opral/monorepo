@@ -99,7 +99,7 @@ test("directory views expose writer_key for descriptor rows", async () => {
 	expect(directoryRow.lixcol_writer_key).toBe(writerKey);
 
 	const directoryAllRow = await lix.db
-		.selectFrom("directory_all")
+		.selectFrom("directory_by_version")
 		.where("id", "=", directoryRow.id)
 		.select(["id", "lixcol_writer_key"])
 		.executeTakeFirstOrThrow();

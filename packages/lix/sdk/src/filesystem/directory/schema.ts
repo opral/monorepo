@@ -80,7 +80,7 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		engine.executeSync(
 			internalQueryBuilder
-				.deleteFrom("state_all")
+				.deleteFrom("state_by_version")
 				.where("entity_id", "=", id)
 				.where("schema_key", "=", schemaKey)
 				.where("version_id", "=", versionId)
@@ -89,7 +89,7 @@ export function applyDirectoryDatabaseSchema(args: {
 
 		engine.executeSync(
 			internalQueryBuilder
-				.insertInto("state_all")
+				.insertInto("state_by_version")
 				.values({
 					entity_id: id,
 					schema_key: schemaKey,
@@ -147,7 +147,7 @@ export function applyDirectoryDatabaseSchema(args: {
 	});
 
 	engine.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS directory_all AS
+		CREATE VIEW IF NOT EXISTS directory_by_version AS
 		SELECT
 			json_extract(snapshot_content, '$.id') AS id,
 			json_extract(snapshot_content, '$.parent_id') AS parent_id,
@@ -165,11 +165,11 @@ export function applyDirectoryDatabaseSchema(args: {
 			commit_id AS lixcol_commit_id,
 			writer_key AS lixcol_writer_key,
 			untracked AS lixcol_untracked
-		FROM state_all
+		FROM state_by_version
 		WHERE schema_key = '${schemaKey}';
 
 		CREATE VIEW IF NOT EXISTS directory AS
-		SELECT * FROM directory_all
+		SELECT * FROM directory_by_version
 		WHERE lixcol_version_id IN (SELECT version_id FROM active_version);
 
 		CREATE VIEW IF NOT EXISTS directory_history AS
@@ -233,7 +233,7 @@ export function applyDirectoryDatabaseSchema(args: {
 					AND path < substr(OLD.path, 1, length(OLD.path) - 1) || '0'
 				);
 
-			DELETE FROM state_all
+			DELETE FROM state_by_version
 			WHERE schema_key = '${schemaKey}'
 				AND version_id = (SELECT version_id FROM active_version)
 				AND entity_id IN (
@@ -241,7 +241,7 @@ export function applyDirectoryDatabaseSchema(args: {
 						SELECT OLD.id
 						UNION ALL
 						SELECT json_extract(child.snapshot_content, '$.id')
-						FROM state_all child
+						FROM state_by_version child
 						JOIN to_delete parent
 							ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
 						WHERE child.schema_key = '${schemaKey}'
@@ -253,8 +253,8 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_insert
-		INSTEAD OF INSERT ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_insert
+		INSTEAD OF INSERT ON directory_by_version
 		BEGIN
 			SELECT handle_directory_upsert(
 				COALESCE(NEW.id, lix_nano_id()),
@@ -268,8 +268,8 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_update
-		INSTEAD OF UPDATE ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_update
+		INSTEAD OF UPDATE ON directory_by_version
 		BEGIN
 			SELECT handle_directory_upsert(
 				NEW.id,
@@ -283,10 +283,10 @@ export function applyDirectoryDatabaseSchema(args: {
 	`);
 
 	engine.sqlite.exec(`
-		CREATE TRIGGER IF NOT EXISTS directory_all_delete
-		INSTEAD OF DELETE ON directory_all
+		CREATE TRIGGER IF NOT EXISTS directory_by_version_delete
+		INSTEAD OF DELETE ON directory_by_version
 		BEGIN
-			DELETE FROM file_all
+			DELETE FROM file_by_version
 			WHERE (
 				path = substr(OLD.path, 1, length(OLD.path) - 1)
 				OR (
@@ -296,7 +296,7 @@ export function applyDirectoryDatabaseSchema(args: {
 			)
 				AND lixcol_version_id = OLD.lixcol_version_id;
 
-			DELETE FROM state_all
+			DELETE FROM state_by_version
 			WHERE schema_key = '${schemaKey}'
 				AND version_id = OLD.lixcol_version_id
 				AND entity_id IN (
@@ -304,7 +304,7 @@ export function applyDirectoryDatabaseSchema(args: {
 						SELECT OLD.id
 						UNION ALL
 						SELECT json_extract(child.snapshot_content, '$.id')
-						FROM state_all child
+						FROM state_by_version child
 						JOIN to_delete parent
 							ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
 						WHERE child.schema_key = '${schemaKey}'
@@ -315,7 +315,7 @@ export function applyDirectoryDatabaseSchema(args: {
 		END;
 	`);
 
-	// internal_state_vtable is a virtual table; adding SQLite indexes would fail. Historical
+	// lix_internal_state_vtable is a virtual table; adding SQLite indexes would fail. Historical
 	// performance improvements for directories can be handled within the change/history tables
 	// if needed.
 }
@@ -451,7 +451,7 @@ function assertNoDirectoryCycle(args: {
 		}
 		const rows = args.engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.where("schema_key", "=", "lix_directory_descriptor")
 				.where("version_id", "=", args.versionId)
 				.where("entity_id", "=", current)

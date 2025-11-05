@@ -12,7 +12,7 @@ export function buildJsonColumnConfig(args?: {
 			snapshot_content: { type: "object" },
 			metadata: { type: "object" },
 		},
-		state_all: {
+		state_by_version: {
 			snapshot_content: { type: "object" },
 			metadata: { type: "object" },
 		},
@@ -46,7 +46,7 @@ export function buildJsonColumnConfig(args?: {
 		jsonColumns.lixcol_metadata = { type: "object" };
 		if (Object.keys(jsonColumns).length > 0) {
 			result[viewName] = jsonColumns;
-			result[viewName + "_all"] = jsonColumns;
+			result[viewName + "_by_version"] = jsonColumns;
 			result[viewName + "_history"] = jsonColumns;
 		}
 	}

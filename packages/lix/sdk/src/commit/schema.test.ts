@@ -7,7 +7,7 @@ describe("commit_edge (derived)", () => {
 
 		// Create change sets and commits
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values([
 				{ id: "cs0", lixcol_version_id: "global" },
 				{ id: "cs1", lixcol_version_id: "global" },
@@ -15,7 +15,7 @@ describe("commit_edge (derived)", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values([
 				{ id: "commit0", change_set_id: "cs0", lixcol_version_id: "global" },
 				{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
@@ -24,7 +24,7 @@ describe("commit_edge (derived)", () => {
 
 		// Link commit1 to commit0 via parent_commit_ids
 		await lix.db
-			.updateTable("commit_all")
+			.updateTable("commit_by_version")
 			.set({ parent_commit_ids: ["commit0"] as any })
 			.where("id", "=", "commit1")
 			.where("lixcol_version_id", "=", "global")
@@ -43,7 +43,7 @@ describe("commit_edge (derived)", () => {
 
 		// Remove parent linkage
 		await lix.db
-			.updateTable("commit_all")
+			.updateTable("commit_by_version")
 			.set({ parent_commit_ids: [] as any })
 			.where("id", "=", "commit1")
 			.where("lixcol_version_id", "=", "global")
@@ -59,12 +59,12 @@ describe("commit_edge (derived)", () => {
 		expect(viewAfterUnlink).toEqual([]);
 	});
 
-	test.skip("should enforce primary key constraint (parent_id, child_id)", async () => {
+	test("should enforce primary key constraint (parent_id, child_id)", async () => {
 		const lix = await openLix({});
 
 		// Create the referenced change sets and commits first
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values([
 				{ id: "cs0", lixcol_version_id: "global" },
 				{ id: "cs1", lixcol_version_id: "global" },
@@ -72,7 +72,7 @@ describe("commit_edge (derived)", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values([
 				{ id: "commit0", change_set_id: "cs0", lixcol_version_id: "global" },
 				{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
@@ -81,7 +81,7 @@ describe("commit_edge (derived)", () => {
 
 		// Insert first edge
 		await lix.db
-			.insertInto("commit_edge_all")
+			.insertInto("commit_edge_by_version")
 			.values({
 				parent_id: "commit0",
 				child_id: "commit1",
@@ -92,7 +92,7 @@ describe("commit_edge (derived)", () => {
 		// Attempt duplicate insert with same primary key
 		await expect(
 			lix.db
-				.insertInto("commit_edge_all")
+				.insertInto("commit_edge_by_version")
 				.values({
 					parent_id: "commit0",
 					child_id: "commit1",
@@ -102,17 +102,17 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Primary key constraint violation/i);
 	});
 
-	test.skip("should enforce foreign key constraint on parent_id", async () => {
+	test("should enforce foreign key constraint on parent_id", async () => {
 		const lix = await openLix({});
 
 		// Create only child commit (not parent)
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values({ id: "cs1", lixcol_version_id: "global" })
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "commit1",
 				change_set_id: "cs1",
@@ -123,7 +123,7 @@ describe("commit_edge (derived)", () => {
 		// Attempt to insert edge with non-existent parent_id
 		await expect(
 			lix.db
-				.insertInto("commit_edge_all")
+				.insertInto("commit_edge_by_version")
 				.values({
 					parent_id: "commit_nonexistent",
 					child_id: "commit1",
@@ -133,17 +133,17 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 
-	test.skip("should enforce foreign key constraint on child_id", async () => {
+	test("should enforce foreign key constraint on child_id", async () => {
 		const lix = await openLix({});
 
 		// Create only parent commit (not child)
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values({ id: "cs0", lixcol_version_id: "global" })
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "commit0",
 				change_set_id: "cs0",
@@ -154,7 +154,7 @@ describe("commit_edge (derived)", () => {
 		// Attempt to insert edge with non-existent child_id
 		await expect(
 			lix.db
-				.insertInto("commit_edge_all")
+				.insertInto("commit_edge_by_version")
 				.values({
 					parent_id: "commit0",
 					child_id: "commit_nonexistent",
@@ -164,17 +164,17 @@ describe("commit_edge (derived)", () => {
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 
-	test.skip("should prevent self-referencing edges", async () => {
+	test("should prevent self-referencing edges", async () => {
 		const lix = await openLix({});
 
 		// Create a commit
 		await lix.db
-			.insertInto("change_set_all")
+			.insertInto("change_set_by_version")
 			.values({ id: "cs1", lixcol_version_id: "global" })
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "commit1",
 				change_set_id: "cs1",
@@ -185,7 +185,7 @@ describe("commit_edge (derived)", () => {
 		// Attempt to create self-referencing edge
 		await expect(
 			lix.db
-				.insertInto("commit_edge_all")
+				.insertInto("commit_edge_by_version")
 				.values({
 					parent_id: "commit1",
 					child_id: "commit1", // Same as parent_id
@@ -253,12 +253,12 @@ describe("commit_edge (derived)", () => {
 });
 
 describe("commit", () => {
-	test("allows inserting commit_all without pre-creating change_set", async () => {
+	test("allows inserting commit_by_version without pre-creating change_set", async () => {
 		const lix = await openLix({});
 
 		// Insert commit directly with a new change_set_id that doesn't exist yet
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "commit_no_fk",
 				change_set_id: "cs_no_fk",
@@ -268,7 +268,7 @@ describe("commit", () => {
 
 		// Verify commit exists
 		const c = await lix.db
-			.selectFrom("commit_all")
+			.selectFrom("commit_by_version")
 			.selectAll()
 			.where("id", "=", "commit_no_fk")
 			.where("lixcol_version_id", "=", "global")
@@ -277,11 +277,11 @@ describe("commit", () => {
 		expect(c).toMatchObject({ id: "commit_no_fk", change_set_id: "cs_no_fk" });
 	});
 
-	test("commit_all insertion derives change_set in cache (global)", async () => {
+	test("commit_by_version insertion derives change_set in cache (global)", async () => {
 		const lix = await openLix({});
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "commit_cs_only",
 				change_set_id: "cs_only",
@@ -291,7 +291,7 @@ describe("commit", () => {
 
 		// change_set is materialized from commit snapshot into cache
 		const cs = await lix.db
-			.selectFrom("change_set_all")
+			.selectFrom("change_set_by_version")
 			.where("id", "=", "cs_only")
 			.where("lixcol_version_id", "=", "global")
 			.selectAll()
@@ -300,12 +300,12 @@ describe("commit", () => {
 		expect(cs).toMatchObject({ id: "cs_only", lixcol_version_id: "global" });
 	});
 
-	test("commit_all with parent_commit_ids produces edges joined to real commit change", async () => {
+	test("commit_by_version with parent_commit_ids produces edges joined to real commit change", async () => {
 		const lix = await openLix({});
 
 		// Insert parent and child commits directly (no pre-created change_set)
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "parentA",
 				change_set_id: "csA",
@@ -314,7 +314,7 @@ describe("commit", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("commit_all")
+			.insertInto("commit_by_version")
 			.values({
 				id: "childB",
 				change_set_id: "csB",
@@ -324,14 +324,18 @@ describe("commit", () => {
 			.execute();
 
 		const row = await lix.db
-			.selectFrom("commit_edge_all")
-			.innerJoin("change", "change.id", "commit_edge_all.lixcol_change_id")
-			.where("commit_edge_all.lixcol_version_id", "=", "global")
-			.where("commit_edge_all.parent_id", "=", "parentA")
-			.where("commit_edge_all.child_id", "=", "childB")
+			.selectFrom("commit_edge_by_version")
+			.innerJoin(
+				"change",
+				"change.id",
+				"commit_edge_by_version.lixcol_change_id"
+			)
+			.where("commit_edge_by_version.lixcol_version_id", "=", "global")
+			.where("commit_edge_by_version.parent_id", "=", "parentA")
+			.where("commit_edge_by_version.child_id", "=", "childB")
 			.select([
-				"commit_edge_all.parent_id as parent_id",
-				"commit_edge_all.child_id as child_id",
+				"commit_edge_by_version.parent_id as parent_id",
+				"commit_edge_by_version.child_id as child_id",
 				"change.entity_id as change_entity_id",
 				"change.snapshot_content as snap",
 			])

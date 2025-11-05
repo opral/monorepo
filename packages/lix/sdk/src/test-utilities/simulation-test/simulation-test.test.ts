@@ -88,7 +88,7 @@ describe("deterministic state validation", () => {
 			});
 
 			const allState = await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.selectAll()
 				.execute();
 
@@ -152,26 +152,26 @@ describe("database operations are deterministic", async () => {
 				.execute();
 
 			// Get all tables and views from the database
-			const tablesAndViews = lix
-				.engine!.sqlite.exec({
-					sql: `SELECT name FROM sqlite_master 
+			const { rows: tableRows } = lix.engine!.executeSync({
+				sql: `SELECT name FROM sqlite_master 
 				WHERE type IN ('table', 'view') 
 				AND name NOT LIKE 'sqlite_%'
 				ORDER BY name`,
-					returnValue: "resultRows",
-				})
-				.map((row) => row[0] as string);
+				parameters: [],
+			});
+			const tablesAndViews = tableRows.map((row: Record<string, unknown>) =>
+				String(row.name)
+			);
 
 			// Query each table/view and check determinism
 			for (const tableName of tablesAndViews) {
-				const data = lix.engine!.sqlite.exec({
+				const { rows } = lix.engine!.executeSync({
 					sql: `SELECT * FROM "${tableName}"`,
-					returnValue: "resultRows",
-					columnNames: [],
+					parameters: [],
 				});
 
 				try {
-					expectDeterministic(data).toBeDefined();
+					expectDeterministic(rows).toBeDefined();
 				} catch (error) {
 					throw new Error(
 						`Determinism check failed for table/view "${tableName}": ${error}`

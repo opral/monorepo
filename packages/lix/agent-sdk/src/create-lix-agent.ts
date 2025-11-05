@@ -115,10 +115,10 @@ export async function createLixAgent(args: {
 
     - A repository is called just "lix" e.g. a user might say "what is in my lix?". 
 
-		- State views: state (active version) and state_all (all versions).
+		- State views: state (active version) and state_by_version (all versions).
 		  Columns: entity_id, schema_key, file_id, plugin_key, snapshot_content
 		  (JSON), schema_version, created_at, updated_at, inherited_from_version_id,
-		  change_id, untracked, commit_id; plus version_id on state_all.
+		  change_id, untracked, commit_id; plus version_id on state_by_version.
 		
     - Dynamic schemas: entity shapes are stored by schema_key in
 		  snapshot_content; stored schemas live under lix_stored_schema.
@@ -180,7 +180,7 @@ export async function createLixAgent(args: {
 		let systemOverlay: string | undefined;
 		try {
 			const kv = await lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_agent_active_proposal_id")
 				.select(["value"])
@@ -209,7 +209,7 @@ export async function createLixAgent(args: {
 					// Clean stale KV if proposal is gone or closed
 					try {
 						await lix.db
-							.deleteFrom("key_value_all")
+							.deleteFrom("key_value_by_version")
 							.where("lixcol_version_id", "=", "global")
 							.where("key", "=", "lix_agent_active_proposal_id")
 							.execute();

@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
 import { importFiles } from "./importFiles.js";
 import {
-  type Bundle,
-  type LiteralMatch,
-  type Message,
-  type Pattern,
-  type Variant,
+	type Bundle,
+	type LiteralMatch,
+	type Message,
+	type Pattern,
+	type Variant,
 } from "@inlang/sdk";
 import { exportFiles } from "./exportFiles.js";
 import type { PluginSettings } from "../settings.js";

@@ -67,7 +67,7 @@ export function selectCommitDiff(args: {
         SELECT ${sql.lit(commitId)}, 0
         UNION ALL
         SELECT ce.parent_id, anc.depth + 1
-        FROM commit_edge_all ce
+        FROM commit_edge_by_version ce
         JOIN anc ON ce.child_id = anc.id
         WHERE ce.lixcol_version_id = 'global'
       ),
@@ -82,13 +82,13 @@ export function selectCommitDiff(args: {
           ic.created_at  AS created_at,
           ic.snapshot_id AS snapshot_id
         FROM anc
-        JOIN commit_all c
+        JOIN commit_by_version c
           ON c.id = anc.id AND c.lixcol_version_id = 'global'
-        JOIN change_set_element_all cse
+        JOIN change_set_element_by_version cse
           ON c.change_set_id = cse.change_set_id
          AND cse.lixcol_version_id = 'global'
         ${useChangedTriples ? sql`JOIN changed_triples ck ON ck.entity_id = cse.entity_id AND ck.schema_key = cse.schema_key AND ck.file_id = cse.file_id` : sql``}
-        JOIN internal_change ic
+        JOIN lix_internal_change ic
           ON ic.id = cse.change_id
         ${hints.fileId ? sql`AND cse.file_id = ${sql.lit(hints.fileId)}` : sql``}
         ${hints.pluginKey ? sql`AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
@@ -115,16 +115,16 @@ WITH RECURSIVE
     SELECT ${sql.lit(args.after)}, 0
     UNION ALL
     SELECT ce.parent_id, anc_after.depth + 1
-    FROM commit_edge_all ce
+    FROM commit_edge_by_version ce
     JOIN anc_after ON ce.child_id = anc_after.id
     WHERE ce.lixcol_version_id = 'global' AND anc_after.id != ${sql.lit(args.before)}
   ),
   changed_triples AS (
     SELECT DISTINCT cse.entity_id, cse.schema_key, cse.file_id
     FROM anc_after a
-    JOIN commit_all c ON c.id = a.id AND c.lixcol_version_id = 'global'
-    JOIN change_set_element_all cse ON cse.change_set_id = c.change_set_id AND cse.lixcol_version_id = 'global'
-    ${hints.pluginKey ? sql`JOIN internal_change ic ON ic.id = cse.change_id AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
+    JOIN commit_by_version c ON c.id = a.id AND c.lixcol_version_id = 'global'
+    JOIN change_set_element_by_version cse ON cse.change_set_id = c.change_set_id AND cse.lixcol_version_id = 'global'
+    ${hints.pluginKey ? sql`JOIN lix_internal_change ic ON ic.id = cse.change_id AND ic.plugin_key = ${sql.lit(hints.pluginKey)}` : sql``}
     ${hints.fileId ? sql`WHERE cse.file_id = ${sql.lit(hints.fileId)}` : sql``}
     ${hints.schemaKeys && hints.schemaKeys.length ? sql`${hints.fileId ? sql`AND` : sql`WHERE`} cse.schema_key IN (${sql.join(hints.schemaKeys.map((k) => sql.lit(k)))})` : sql``}
     ${hints.entityIds && hints.entityIds.length ? sql`${hints.fileId || (hints.schemaKeys && hints.schemaKeys.length) ? sql`AND` : sql`WHERE`} cse.entity_id IN (${sql.join(hints.entityIds.map((k) => sql.lit(k)))})` : sql``}

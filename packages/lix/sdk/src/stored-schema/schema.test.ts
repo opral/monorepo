@@ -1,8 +1,9 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewState } from "../engine/entity-views/types.js";
 import type { LixStoredSchema } from "./schema-definition.js";
+import { sql } from "kysely";
 
 test("insert and delete a stored schema", async () => {
 	const lix = await openLix({});
@@ -24,73 +25,42 @@ test("insert and delete a stored schema", async () => {
 
 	const afterInsert = await lix.db
 		.selectFrom("stored_schema")
-		.selectAll()
-		.where("key", "=", "mock")
-		.where("version", "=", "1.0")
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"mock"
+		)
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-version"')`,
+			"=",
+			"1.0"
+		)
 		.executeTakeFirst();
 
-	expect(afterInsert).toMatchObject({
-		key: "mock",
-		version: "1.0",
-		value: schema.value,
-	});
+	expect(afterInsert?.value).toEqual(schema.value);
 
-	await lix.db.deleteFrom("stored_schema").where("key", "=", "mock").execute();
+	await lix.db
+		.deleteFrom("stored_schema")
+		.where("lixcol_entity_id", "=", "mock~1.0")
+		.execute();
 
 	const afterDelete = await lix.db
 		.selectFrom("stored_schema")
-		.selectAll()
-		.where("key", "=", "mock")
-		.where("version", "=", "1.0")
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-key"')`,
+			"=",
+			"mock"
+		)
+		.where(
+			sql`json_extract("stored_schema"."value", '$."x-lix-version"')`,
+			"=",
+			"1.0"
+		)
 		.execute();
 
 	expect(afterDelete).toHaveLength(0);
-});
-
-test("throws if the stored schema version does not match the x-lix-version prop", async () => {
-	const lix = await openLix({});
-
-	const schema: NewState<LixStoredSchema> = {
-		version: "2.0",
-		key: "mock",
-		value: {
-			type: "object",
-			"x-lix-key": "mock",
-			"x-lix-version": "1.0",
-			properties: {
-				name: { type: "string" },
-			},
-			required: ["name"],
-			additionalProperties: false,
-		},
-	};
-
-	await expect(
-		lix.db.insertInto("stored_schema").values(schema).execute()
-	).rejects.toThrow(/Inserted version does not match value\.x-lix-version/);
-});
-
-test("throws if the stored schema key does not match the x-lix-key prop", async () => {
-	const lix = await openLix({});
-
-	const schema: NewState<LixStoredSchema> = {
-		key: "mock",
-		version: "1.0",
-		value: {
-			type: "object",
-			"x-lix-key": "mock2",
-			"x-lix-version": "1.0",
-			properties: {
-				name: { type: "string" },
-			},
-			required: ["name"],
-			additionalProperties: false,
-		},
-	};
-
-	await expect(
-		lix.db.insertInto("stored_schema").values(schema).execute()
-	).rejects.toThrow(/Inserted key does not match value\.x-lix-key/);
 });
 
 test("updating is not possible (schema is immutable, needs new version bumb)", async () => {
@@ -112,47 +82,26 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 	await lix.db.insertInto("stored_schema").values(schema).execute();
 
 	await expect(
-		lix.db.updateTable("stored_schema").set({ version: "2.0" }).execute()
-	).rejects.toThrow(
-		/Schemas are immutable and cannot be updated for backwards compatibility. Bump the version number instead./
-	);
-});
-
-test("default fills in key and version from the schema value", async () => {
-	const lix = await openLix({});
-
-	const schema: NewState<LixStoredSchema> = {
-		value: {
-			"x-lix-key": "mock",
-			"x-lix-version": "1.0",
-			type: "object",
-			properties: {
-				name: { type: "string" },
-			},
-			required: ["name"],
-			additionalProperties: false,
-		},
-	};
-
-	await lix.db.insertInto("stored_schema").values(schema).execute();
-
-	const result = await lix.db
-		.selectFrom("stored_schema")
-		.selectAll()
-		.where("key", "=", "mock")
-		.executeTakeFirstOrThrow();
-
-	expect(result.key).toBe("mock");
-	expect(result.version).toBe("1.0");
+		lix.db
+			.updateTable("stored_schema")
+			.set({
+				value: {
+					...(schema.value as Record<string, unknown>),
+					"x-lix-version": "2.0",
+				},
+			})
+			.execute()
+	).rejects.toThrow(/immutable/);
 });
 
 test("validates inserted schemas", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<LixStoredSchema> = {
+	const schema: any = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
+			// intentionally invalid version type
 			"x-lix-version": 1,
 			properties: {
 				name: { type: "string" },
@@ -164,15 +113,15 @@ test("validates inserted schemas", async () => {
 
 	await expect(
 		lix.db.insertInto("stored_schema").values(schema).execute()
-	).rejects.toThrow(/version must be string/);
+	).rejects.toThrow(/value\.x-lix-version must be string/);
 });
 
-test("can insert into stored_schema_all with explicit key and version", async () => {
+test("can insert into stored_schema_by_version ", async () => {
 	const lix = await openLix({});
 
 	const schema: LixSchemaDefinition = {
 		type: "object",
-		"x-lix-key": "mock_all",
+		"x-lix-key": "mock_by_version",
 		"x-lix-version": "1.0",
 		properties: {
 			name: { type: "string" },
@@ -181,30 +130,33 @@ test("can insert into stored_schema_all with explicit key and version", async ()
 		additionalProperties: false,
 	};
 
-	// Insert with explicit key and version
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
-			key: "mock_all",
-			version: "1.0",
 			value: schema,
 			lixcol_version_id: "global",
 		})
 		.execute();
 
 	const result = await lix.db
-		.selectFrom("stored_schema_all")
-		.selectAll()
-		.where("key", "=", "mock_all")
-		.where("version", "=", "1.0")
+		.selectFrom("stored_schema_by_version")
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-key"')`,
+			"=",
+			"mock_by_version"
+		)
+		.where(
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-version"')`,
+			"=",
+			"1.0"
+		)
 		.executeTakeFirstOrThrow();
 
-	expect(result.key).toBe("mock_all");
-	expect(result.version).toBe("1.0");
 	expect(result.value).toEqual(schema);
 });
 
-test("can insert into stored_schema_all with default key and version extraction", async () => {
+test("can insert into stored_schema_by_version with default key and version extraction", async () => {
 	const lix = await openLix({});
 
 	const schema: LixSchemaDefinition = {
@@ -220,7 +172,7 @@ test("can insert into stored_schema_all with default key and version extraction"
 
 	// Insert without key and version - should be extracted from value
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: schema,
 			lixcol_version_id: "global",
@@ -228,13 +180,19 @@ test("can insert into stored_schema_all with default key and version extraction"
 		.execute();
 
 	const result = await lix.db
-		.selectFrom("stored_schema_all")
-		.selectAll()
-		.where("key", "=", "mock_extract")
-		.where("version", "=", "2.0")
+		.selectFrom("stored_schema_by_version")
+		.select("value")
+		.where(
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-key"')`,
+			"=",
+			"mock_extract"
+		)
+		.where(
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-version"')`,
+			"=",
+			"2.0"
+		)
 		.executeTakeFirstOrThrow();
 
-	expect(result.key).toBe("mock_extract");
-	expect(result.version).toBe("2.0");
 	expect(result.value).toEqual(schema);
 });

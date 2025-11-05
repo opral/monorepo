@@ -10,11 +10,15 @@ export type LixFileDescriptor = FromLixSchemaDefinition<
 export const LixFileDescriptorSchema = {
 	"x-lix-key": "lix_file_descriptor",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["directory_id", "name", "extension"]],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-unique": [["/directory_id", "/name", "/extension"]],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	type: "object",
 	properties: {
-		id: { type: "string", "x-lix-generated": true },
+		id: { type: "string", "x-lix-default": "lix_uuid_v7()" },
 		directory_id: {
 			type: "string",
 			nullable: true,
@@ -37,7 +41,7 @@ export const LixFileDescriptorSchema = {
 			type: "object",
 			nullable: true,
 		},
-		hidden: { type: "boolean", "x-lix-generated": true },
+		hidden: { type: "boolean", "x-lix-default": "false" },
 	},
 	required: ["id", "directory_id", "name", "extension"],
 	additionalProperties: false,

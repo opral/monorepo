@@ -1,11 +1,35 @@
 import { Ajv } from "ajv";
+import { parse } from "@marcbachmann/cel-js";
 import { LixSchemaDefinition } from "./definition.js";
+import { parseJsonPointer } from "./json-pointer.js";
 
 const ajv = new Ajv({
 	strict: true,
 	// allow 'x-*' properties in alignment with new json schema spec
 	// https://json-schema.org/blog/posts/stable-json-schema
 	strictSchema: false,
+});
+ajv.addFormat("json-pointer", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
+ajv.addFormat("cel", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parse(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
 });
 
 const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);

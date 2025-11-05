@@ -523,7 +523,7 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// The test entities should exist in their respective versions
 	const versionAEntity = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "version-a-entity")
 		.where("version_id", "=", versionAId)
 		.selectAll()
@@ -532,7 +532,7 @@ test("commit should handle multiple versions correctly", async () => {
 	expect(versionAEntity).toBeDefined();
 
 	const versionBEntity = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "version-b-entity")
 		.where("version_id", "=", versionBId)
 		.selectAll()
@@ -919,7 +919,7 @@ test("does not update working change set elements for global version", async () 
 
 	// Stage a tracked change in the global version
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "global_key",
 			value: "global_value",
@@ -942,7 +942,7 @@ test("does not update working change set elements for global version", async () 
 
 	// There should be no working change set element for the global working change set
 	const workingElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("lixcol_version_id", "=", "global")
 		.where("change_set_id", "=", workingCommit.change_set_id)
 		.where("entity_id", "=", "global_key")
@@ -1159,7 +1159,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", activeVersionId)
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	const latestGlobalVersionChange = await db
@@ -1167,7 +1167,7 @@ test("active version should move forward when mutations occur", async () => {
 		.select(["id"])
 		.where("schema_key", "=", "lix_version_tip")
 		.where(sql`json_extract(snapshot_content,'$.id')`, "=", "global")
-		.orderBy("created_at desc")
+		.orderBy("created_at", "desc")
 		.executeTakeFirstOrThrow();
 
 	// Cross-check commit_id via JSON extraction
@@ -1221,7 +1221,7 @@ test("creates a new commit and updates the version's commit id for mutations", a
 	);
 
 	await lix.db
-		.updateTable("key_value_all")
+		.updateTable("key_value_by_version")
 		.where("key", "=", "mock_key")
 		.where(
 			"lixcol_version_id",
@@ -1456,18 +1456,35 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	expect(activeVersion.version_id).not.toBe("global");
 
-	// Insert a mock entity into global version via transaction
+	const testSchema = {
+		"x-lix-key": "test_global_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			data: { type: "string" },
+		},
+		required: ["id", "data"],
+	} as const;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testSchema })
+		.execute();
+
+	// Insert a test entity into global version via transaction
 	insertTransactionState({
 		engine: lix.engine!,
 		timestamp: await getTimestamp({ lix }),
 		data: [
 			{
-				entity_id: "mock-global-entity",
-				schema_key: "mock_schema",
-				file_id: "mock-file",
-				plugin_key: "mock_plugin",
+				entity_id: "test-global-entity",
+				schema_key: "test_global_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
 				snapshot_content: JSON.stringify({
-					id: "mock-global-entity",
+					id: "test-global-entity",
 					data: "test-data",
 				}),
 				schema_version: "1.0",
@@ -1484,19 +1501,22 @@ test("global cache entry should be inherited by child versions in resolved view"
 
 	// Verify cache has exactly one entry for this entity (in global version)
 	const cacheEntries = await db
-		.selectFrom("internal_state_cache")
+		.selectFrom("lix_internal_state_vtable")
 		.selectAll()
-		.where("entity_id", "=", "mock-global-entity")
+		.where("_pk", "like", "C%")
+		.where("entity_id", "=", "test-global-entity")
 		.execute();
 
-	expect(cacheEntries).toHaveLength(1);
-	expect(cacheEntries[0]?.version_id).toBe("global");
+	const globalCacheEntries = cacheEntries.filter(
+		(entry) => entry.version_id === "global"
+	);
+	expect(globalCacheEntries).toHaveLength(1);
 
 	// Verify resolved view returns the entity for both global and active version
 	const resolvedEntries = await db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["version_id", "entity_id", "schema_key"])
-		.where("entity_id", "=", "mock-global-entity")
+		.where("entity_id", "=", "test-global-entity")
 		.orderBy("version_id", "asc")
 		.execute();
 
@@ -1524,7 +1544,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check that the cache was populated
 		const cacheEntries = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 
@@ -1560,7 +1580,7 @@ describe("file lixcol cache updates", () => {
 
 		// Get initial cache entry
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -1575,7 +1595,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check that cache was updated
 		const updatedCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("file_id", "=", initialCache.file_id)
 			.selectAll()
 			.executeTakeFirstOrThrow();
@@ -1608,7 +1628,7 @@ describe("file lixcol cache updates", () => {
 
 		// Verify cache exists
 		const cacheBeforeDelete = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(cacheBeforeDelete.length).toBe(1);
@@ -1618,7 +1638,7 @@ describe("file lixcol cache updates", () => {
 
 		// Cache entry should be removed
 		const cacheAfterDelete = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(cacheAfterDelete.length).toBe(0);
@@ -1640,7 +1660,7 @@ describe("file lixcol cache updates", () => {
 
 		// All files should have cache entries
 		const cacheEntries = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 
@@ -1657,9 +1677,9 @@ describe("file lixcol cache updates", () => {
 		});
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-		// Insert a file into global version using file_all
+		// Insert a file into global version using file_by_version
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/test.txt",
 				data: new TextEncoder().encode("initial"),
@@ -1668,28 +1688,28 @@ describe("file lixcol cache updates", () => {
 			.execute();
 
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		// Update the file multiple times using file_all (in deterministic mode, timestamps auto-increment)
+		// Update the file multiple times using file_by_version (in deterministic mode, timestamps auto-increment)
 		await lix.db
-			.updateTable("file_all")
+			.updateTable("file_by_version")
 			.where("path", "=", "/test.txt")
 			.where("lixcol_version_id", "=", "global")
 			.set({ data: new TextEncoder().encode("update1") })
 			.execute();
 
 		await lix.db
-			.updateTable("file_all")
+			.updateTable("file_by_version")
 			.where("path", "=", "/test.txt")
 			.where("lixcol_version_id", "=", "global")
 			.set({ data: new TextEncoder().encode("update2") })
 			.execute();
 
 		const finalCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.where("file_id", "=", initialCache.file_id)
 			.where("version_id", "=", "global")
 			.selectAll()
@@ -1742,7 +1762,7 @@ describe("file lixcol cache updates", () => {
 
 		// Get initial state
 		const initialCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.execute();
 		expect(initialCache.length).toBe(3);
@@ -1810,7 +1830,7 @@ describe("file lixcol cache updates", () => {
 
 		// Check final cache state
 		const finalCache = await db
-			.selectFrom("internal_file_lixcol_cache")
+			.selectFrom("lix_internal_file_lixcol_cache")
 			.selectAll()
 			.orderBy("file_id")
 			.execute();

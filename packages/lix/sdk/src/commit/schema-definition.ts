@@ -8,20 +8,29 @@ export type LixCommit = FromLixSchemaDefinition<typeof LixCommitSchema>;
 export const LixCommitSchema = {
 	"x-lix-key": "lix_commit",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_version_id: '"global"',
+	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["/change_set_id"],
 			references: {
 				schemaKey: "lix_change_set",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 			mode: "materialized",
 		},
 	],
 	type: "object",
 	properties: {
-		id: { type: "string", description: "Commit identifier" },
+		id: {
+			type: "string",
+			description: "Commit identifier",
+			"x-lix-default": "lix_uuid_v7()",
+		},
 		change_set_id: {
 			type: "string",
 			description:
@@ -62,20 +71,24 @@ export type LixCommitEdge = FromLixSchemaDefinition<typeof LixCommitEdgeSchema>;
 export const LixCommitEdgeSchema = {
 	"x-lix-key": "lix_commit_edge",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["parent_id", "child_id"],
+	"x-lix-primary-key": ["/parent_id", "/child_id"],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"lix"',
+		lixcol_plugin_key: '"lix_own_entity"',
+	},
 	"x-lix-foreign-keys": [
 		{
-			properties: ["parent_id"],
+			properties: ["/parent_id"],
 			references: {
 				schemaKey: "lix_commit",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 		{
-			properties: ["child_id"],
+			properties: ["/child_id"],
 			references: {
 				schemaKey: "lix_commit",
-				properties: ["id"],
+				properties: ["/id"],
 			},
 		},
 	],

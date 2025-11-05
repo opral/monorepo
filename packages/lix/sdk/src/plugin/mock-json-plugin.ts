@@ -9,6 +9,7 @@ export const MockJsonPropertySchema: LixSchemaDefinition = {
 		value: JSONTypeSchema,
 	},
 	required: ["value"],
+	additionalProperties: false,
 	"x-lix-key": "mock_json_property",
 	"x-lix-version": "1.0",
 } as const;

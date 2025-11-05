@@ -12,7 +12,10 @@ test("newLixFile creates a valid lix that can be reopened", async () => {
 	const lix = await openLix({ blob });
 
 	// Try to query the state table to ensure it works
-	const result = await lix.db.selectFrom("state_all").selectAll().execute();
+	const result = await lix.db
+		.selectFrom("state_by_version")
+		.selectAll()
+		.execute();
 	expect(Array.isArray(result)).toBe(true);
 });
 
@@ -47,7 +50,7 @@ test("newLixFile creates required bootstrap change sets", async () => {
 
 	// Check that change sets exist (should be 4: 2 for global, 2 for main)
 	const changeSets = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set_by_version")
 		.where("lixcol_version_id", "in", ["global", "main"])
 		.orderBy("lixcol_version_id")
 		.selectAll()
@@ -78,8 +81,7 @@ test("newLixFile creates all schema definitions", async () => {
 	// Check that all schemas from LixSchemaViewMap are created
 	const storedSchemas = await lix.db
 		.selectFrom("stored_schema")
-		.orderBy("key")
-		.selectAll()
+		.select(["value", "lixcol_inherited_from_version_id"])
 		.execute();
 
 	const expectedSchemaCount = Object.keys(LixSchemaViewMap).length;
@@ -88,10 +90,10 @@ test("newLixFile creates all schema definitions", async () => {
 	// Check that each schema from LixSchemaViewMap exists
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		const storedSchema = storedSchemas.find(
-			(s) => s.key === schema["x-lix-key"]
+			(row) => row.value["x-lix-key"] === schema["x-lix-key"]
 		);
 		expect(storedSchema).toBeDefined();
-		expect(storedSchema?.version).toBe(schema["x-lix-version"]);
+		expect(storedSchema?.value["x-lix-version"]).toBe(schema["x-lix-version"]);
 		expect(storedSchema?.lixcol_inherited_from_version_id).toBe("global");
 
 		// Verify the stored value is valid JSON and matches the schema
@@ -106,7 +108,7 @@ test("newLixFile creates change set elements for all changes", async () => {
 
 	// Check that change set elements exist
 	const changeSetElements = await lix.db
-		.selectFrom("change_set_element_all")
+		.selectFrom("change_set_element_by_version")
 		.where("lixcol_version_id", "in", ["global", "main"])
 		.orderBy("lixcol_version_id")
 		.selectAll()
@@ -121,7 +123,7 @@ test("bootstrap changes include lix_id key-value in global version", async () =>
 	const lix = await openLix({ blob });
 
 	const kv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_id")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -137,7 +139,7 @@ test("bootstrap changes include lix_name key-value in the global version", async
 	const lix = await openLix({ blob });
 
 	const kv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_name")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -160,7 +162,7 @@ test("newLixFile returns blob with ._lix.id property", async () => {
 	// Verify the ._lix.id matches the one stored in the database
 	const lix = await openLix({ blob });
 	const kv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_id")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -182,7 +184,7 @@ test("newLixFile returns blob with ._lix.name property", async () => {
 	// Verify the ._lix.name matches the one stored in the database
 	const lix = await openLix({ blob });
 	const kv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_name")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -208,7 +210,7 @@ test("newLixFile can use provided key values", async () => {
 	// Check the values in the database
 	const lix = await openLix({ blob });
 	const nameKv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_name")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -216,7 +218,7 @@ test("newLixFile can use provided key values", async () => {
 	expect(nameKv?.value).toBe("Test Lix Name");
 
 	const idKv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_id")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -224,7 +226,7 @@ test("newLixFile can use provided key values", async () => {
 	expect(idKv?.value).toBe("test-lix-id");
 
 	const customKv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "custom_key")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -255,7 +257,7 @@ test("provided key values default to the active version if lixcol_version_id is 
 
 	// Check that the key values are associated with the active version
 	const kv1 = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "test_key_1")
 		.where("lixcol_version_id", "=", activeVersion!.version_id)
 		.selectAll()
@@ -265,7 +267,7 @@ test("provided key values default to the active version if lixcol_version_id is 
 	expect(kv1?.lixcol_version_id).toBe(activeVersion?.version_id);
 
 	const kv2 = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "test_key_2")
 		.where("lixcol_version_id", "=", activeVersion!.version_id)
 		.selectAll()
@@ -400,10 +402,10 @@ test("deterministic mode config is persisted correctly", async () => {
 	});
 	const lix = await openLix({ blob });
 
-	// Check that lix_deterministic_mode exists in key_value_all
+	// Check that lix_deterministic_mode exists in key_value_by_version
 	// Since no lixcol_version_id was specified, it should be in the main version
 	const result = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_deterministic_mode")
 		.select(["key", "value", "lixcol_version_id"])
 		.executeTakeFirst();
@@ -427,7 +429,7 @@ test("deterministic mode config with global version_id is persisted correctly", 
 
 	// Check that lix_deterministic_mode exists with global version_id
 	const result = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_deterministic_mode")
 		.where("lixcol_version_id", "=", "global")
 		.select(["key", "value"])
@@ -438,26 +440,23 @@ test("deterministic mode config with global version_id is persisted correctly", 
 	expect(result?.value).toEqual({ enabled: true, randomLixId: true }); // JSON values are preserved
 });
 
-test("newLixFile creates anonymous account and active account during bootstrap", async () => {
+test("newLixFile does not create accounts during bootstrap", async () => {
 	const blob = await newLixFile();
 	const lix = await openLix({ blob });
 
-	// Check that an anonymous account exists in account_all (untracked)
-	const allAccounts = await lix.db.selectFrom("account").selectAll().execute();
+	const allAccounts = await lix.db
+		.selectFrom("account_by_version")
+		.selectAll()
+		.execute();
 
-	expect(allAccounts.length).toBe(1);
-	const anonymousAccount = allAccounts[0]!;
-	expect(anonymousAccount.name).toMatch(/^Anonymous \w+$/);
-	expect(anonymousAccount.lixcol_untracked).toBe(1);
+	expect(allAccounts.length).toBe(0);
 
-	// Check that active_account references this account
-	const activeAccount = await lix.db
+	const activeAccounts = await lix.db
 		.selectFrom("active_account")
 		.selectAll()
-		.executeTakeFirst();
+		.execute();
 
-	expect(activeAccount).toBeDefined();
-	expect(activeAccount?.account_id).toBe(anonymousAccount.id);
+	expect(activeAccounts.length).toBe(0);
 
 	await lix.close();
 });

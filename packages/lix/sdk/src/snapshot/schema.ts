@@ -5,7 +5,7 @@ export function applySnapshotDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS internal_snapshot (
+  CREATE TABLE IF NOT EXISTS lix_internal_snapshot (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     content BLOB -- jsonb,
 
@@ -18,12 +18,12 @@ export function applySnapshotDatabaseSchema(
     CHECK (content IS NULL OR json_type(content) = 'object')
   ) STRICT;
 
-  INSERT OR IGNORE INTO internal_snapshot (id, content)
+  INSERT OR IGNORE INTO lix_internal_snapshot (id, content)
   VALUES ('no-content', NULL);
 
   -- Index on id (explicit, though PRIMARY KEY already provides one)
-  CREATE INDEX IF NOT EXISTS idx_internal_snapshot_id
-    ON internal_snapshot(id);
+  CREATE INDEX IF NOT EXISTS idx_lix_internal_snapshot_id
+    ON lix_internal_snapshot(id);
 `);
 }
 

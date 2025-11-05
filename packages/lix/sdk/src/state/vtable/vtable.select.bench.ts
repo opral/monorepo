@@ -1,9 +1,10 @@
 import { promises as fs } from "fs";
-import { afterAll, bench } from "vitest";
+import { afterAll, bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { createVersion } from "../../version/create-version.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const TEST_SCHEMA = "bench_vtable_schema";
 const FILE_ID = "bench-file";
@@ -15,7 +16,7 @@ const PLUGIN_KEY = "lix_own_entity";
 const ENTITY_TXN = "bench_priority_transaction";
 const ENTITY_UNTRACKED = "bench_priority_untracked";
 const ENTITY_CACHE = "bench_priority_cache";
-const EXTRA_ENTITIES_PER_TIER = 100;
+const EXTRA_ENTITIES_PER_TIER = 25;
 const BENCH_OUTPUT_DIR = decodeURIComponent(
 	new URL("./__bench__", import.meta.url).pathname
 );
@@ -110,7 +111,7 @@ const CASE_LABELS = SCENARIOS.flatMap((scenario) =>
 	FILTERS.map((filter) => labelFor(scenario, filter))
 );
 
-const readyCtx: Promise<BenchCtx> = (async () => {
+async function prepareBenchContext(): Promise<BenchCtx> {
 	const lix = await openLix({
 		keyValues: [
 			{
@@ -121,6 +122,24 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 			},
 		],
 	});
+
+	const BENCH_STORED_SCHEMA: LixSchemaDefinition = {
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			source: { type: "string" },
+			idx: { type: "integer" },
+		},
+		required: ["source"],
+		"x-lix-key": TEST_SCHEMA,
+		"x-lix-version": SCHEMA_VERSION,
+		"x-lix-primary-key": ["/source"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: BENCH_STORED_SCHEMA })
+		.execute();
 
 	await seedVtableFixture(lix);
 
@@ -141,36 +160,38 @@ const readyCtx: Promise<BenchCtx> = (async () => {
 
 	await exportExplainPlans({ lix, queries });
 
-	return { lix, queries } satisfies BenchCtx;
-})();
-
-afterAll(async () => {
-	const { lix } = await readyCtx;
-	await lix.close();
-});
-
-for (const label of CASE_LABELS) {
-	bench(label, async () => {
-		const { lix, queries } = await readyCtx;
-		const query = queries[label];
-		if (!query) {
-			throw new Error(`missing query for benchmark label: ${label}`);
-		}
-		try {
-			const result = lix.engine!.executeSync({
-				sql: query.sql,
-				parameters: [...query.parameters],
-			});
-			if (!result.rows || result.rows.length === 0) {
-				throw new Error(`expected rows for benchmark label: ${label}`);
-			}
-		} catch (error) {
-			console.error(`benchmark query failed for label: ${label}`);
-			console.error(error);
-			throw error;
-		}
-	});
+	return { lix, queries };
 }
+
+describe("vtable select benchmarks", async () => {
+	const ctx = await prepareBenchContext();
+
+	afterAll(async () => {
+		await ctx.lix.close();
+	});
+
+	for (const label of CASE_LABELS) {
+		bench(label, () => {
+			const query = ctx.queries[label];
+			if (!query) {
+				throw new Error(`missing query for benchmark label: ${label}`);
+			}
+			try {
+				const result = ctx.lix.engine!.executeSync({
+					sql: query.sql,
+					parameters: [...query.parameters],
+				});
+				if (!result.rows || result.rows.length === 0) {
+					throw new Error(`expected rows for benchmark label: ${label}`);
+				}
+			} catch (error) {
+				console.error(`benchmark query failed for label: ${label}`);
+				console.error(error);
+				throw error;
+			}
+		});
+	}
+});
 
 /**
  * Populate the internal state tables so each priority tier (transaction, untracked,
@@ -217,7 +238,7 @@ async function seedVtableFixture(lix: Awaited<ReturnType<typeof openLix>>) {
 	});
 
 	const childRows = lix.engine!.executeSync({
-		sql: `SELECT entity_id FROM internal_state_vtable WHERE schema_key = ? AND version_id = ?`,
+		sql: `SELECT entity_id FROM lix_internal_state_vtable WHERE schema_key = ? AND version_id = ?`,
 		parameters: [TEST_SCHEMA, ACTIVE_VERSION_ID],
 	});
 
@@ -250,7 +271,7 @@ function buildTransactionRows(args: { versionId: string; suffix: string }) {
 			file_id: FILE_ID,
 			plugin_key: PLUGIN_KEY,
 			snapshot_content: JSON.stringify({
-				source: `${baseLabel}-extra`,
+				source: `${baseLabel}-extra-${index}`,
 				idx: index,
 			}),
 			schema_version: SCHEMA_VERSION,
@@ -308,7 +329,7 @@ async function insertEntityRows(args: {
 			entityId: `${baseEntityId}_extra_${index}`,
 			versionId,
 			snapshot: {
-				source: `${sourcePrefix}-extra-${suffix}`,
+				source: `${sourcePrefix}-extra-${suffix}-${index}`,
 				idx: index,
 			},
 			untracked,
@@ -330,7 +351,7 @@ async function insertViaVtable(
 	}
 ) {
 	lix.engine!.executeSync({
-		sql: `INSERT INTO internal_state_vtable (
+		sql: `INSERT INTO lix_internal_state_vtable (
         entity_id,
         schema_key,
         file_id,
@@ -366,7 +387,7 @@ function buildQuery(
 	filter: FilterDefinition
 ): QueryShape {
 	const clauses = [`schema_key = '${TEST_SCHEMA}'`, ...filter.clauses];
-	const baseSql = `SELECT * FROM internal_state_vtable
+	const baseSql = `SELECT * FROM lix_internal_state_vtable
 	        WHERE ${clauses.join("\n          AND ")}`;
 	const sql =
 		params.includeLimit === false ? baseSql : `${baseSql}\n        LIMIT 1`;
@@ -396,9 +417,8 @@ async function exportExplainPlans(args: {
 			sql: query.sql,
 			parameters: [...query.parameters],
 		})) as {
-			original: { sql: string };
-			expanded?: { sql: string };
-			rewritten?: { sql: string };
+			originalSql: string;
+			rewrittenSql: string | null;
 			plan: unknown;
 		};
 
@@ -406,11 +426,9 @@ async function exportExplainPlans(args: {
 			"-- label --",
 			label,
 			"\n-- original SQL --",
-			report.original.sql,
-			"\n-- expanded SQL --",
-			report.expanded?.sql ?? "<unchanged>",
+			report.originalSql,
 			"\n-- rewritten SQL --",
-			report.rewritten?.sql ?? "<unchanged>",
+			report.rewrittenSql ?? "<unchanged>",
 			"\n-- plan --",
 			JSON.stringify(report.plan, null, 2),
 			"",

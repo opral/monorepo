@@ -235,7 +235,7 @@ export const activeAccountAtom = atom(async (get) => {
 
 	return await lix.db
 		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
 		.select(["aa.account_id as id", "a.name"])
 		// assuming only one account active at a time

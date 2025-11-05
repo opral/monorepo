@@ -1,39 +1,32 @@
 import type { LixEngine } from "./boot.js";
-import { createSchemaCacheTable } from "../state/cache/create-schema-cache-table.js";
-import { getStateCacheV2Tables } from "../state/cache/schema.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "../state/cache/create-schema-cache-table.js";
+import { getStateCacheTables } from "../state/cache/schema.js";
+import { listAvailableCacheSchemas } from "../state/cache/schema-resolver.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 type ExplainQueryStage = {
-	original: {
-		sql: string;
-		parameters: unknown[];
-	};
-	expanded?: {
-		sql: string;
-		parameters: unknown[];
-	};
-	rewritten?: {
-		sql: string;
-		parameters: unknown[];
-	};
+	originalSql: string;
+	parameters: unknown[];
+	rewrittenSql?: string;
 	plan: any[];
 };
 
-export async function createExplainQuery(args: {
+export function createExplainQuery(args: {
 	engine: Pick<
 		LixEngine,
 		"sqlite" | "hooks" | "runtimeCacheRef" | "preprocessQuery" | "executeSync"
 	>;
-}): Promise<
-	(args: { query: { sql: string; parameters: any[] } }) => ExplainQueryStage
-> {
+}): (args: { sql: string; parameters: any[] }) => ExplainQueryStage {
 	const preprocess = args.engine.preprocessQuery;
 
-	return ({ query }) => {
-		const parameters = [...(query.parameters ?? [])];
+	return ({ sql, parameters }) => {
 		const result = preprocess({
-			sql: query.sql,
+			sql,
 			parameters,
-			sideEffects: false,
+			// sideEffects removed false,
 		});
 
 		ensureCacheTablesForSql(args.engine, result.sql);
@@ -46,42 +39,44 @@ export async function createExplainQuery(args: {
 			columnNames: [],
 		}) as any[];
 
-		const wasRewritten = result.sql !== query.sql;
+		const wasRewritten = result.sql !== sql;
 
 		return {
-			original: {
-				sql: query.sql,
-				parameters,
-			},
-			expanded: result.expandedSql
-				? {
-						sql: result.expandedSql,
-						parameters,
-					}
-				: undefined,
-			rewritten: wasRewritten
-				? {
-						sql: result.sql,
-						parameters: [...result.parameters],
-					}
-				: undefined,
+			originalSql: sql,
+			parameters,
+			rewrittenSql: wasRewritten ? result.sql : undefined,
 			plan: explainRows,
 		};
 	};
 }
 
 function ensureCacheTablesForSql(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">,
 	sql: string
 ): void {
-	const matches = sql.matchAll(/internal_state_cache_([A-Za-z0-9_]+)/g);
-	const tableCache = getStateCacheV2Tables({ engine });
+	const matches = sql.matchAll(/lix_internal_state_cache_([A-Za-z0-9_]+)/g);
+	const tableCache = getStateCacheTables({ engine });
+	const availableSchemas = listAvailableCacheSchemas({ engine });
+	const tableToSchema = new Map<string, LixSchemaDefinition>();
+	for (const [schemaKey, definition] of availableSchemas.entries()) {
+		const tableName = schemaKeyToCacheTableName(schemaKey);
+		tableToSchema.set(tableName, definition);
+	}
 	for (const match of matches) {
-		const sanitizedSuffix = match[1];
-		if (!sanitizedSuffix) continue;
-		const tableName = `internal_state_cache_${sanitizedSuffix}`;
+		const tableName = match[0];
+		if (!tableName) continue;
 		if (tableCache.has(tableName)) continue;
-		createSchemaCacheTable({ engine, tableName });
-		tableCache.add(tableName);
+		const schemaDefinition = tableToSchema.get(tableName);
+		if (!schemaDefinition) {
+			continue;
+		}
+		const created = createSchemaCacheTable({
+			engine,
+			schema: schemaDefinition,
+		});
+		tableCache.add(created);
+		if (created !== tableName) {
+			tableCache.add(tableName);
+		}
 	}
 }

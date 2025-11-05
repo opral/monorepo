@@ -72,7 +72,7 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 	 * @example Watch latest change-set (first row)
 	 * ```ts
 	 * observe(
-	 *   lix.db.selectFrom('change_set_all')
+	 *   lix.db.selectFrom('change_set_by_version')
 	 *         .selectAll()
 	 *         .orderBy('created_at desc')
 	 * ).subscribeTakeFirst({ next: cs => console.log('head →', cs) })

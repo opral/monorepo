@@ -108,7 +108,7 @@ export async function mergeVersion(args: {
 
 			// Read pending rows from the transaction table
 			const pending = await intDbLocal
-				.selectFrom("internal_transaction_state")
+				.selectFrom("lix_internal_transaction_state")
 				.select([
 					"id",
 					"entity_id",
@@ -145,7 +145,7 @@ export async function mergeVersion(args: {
 
 				// Remove from transaction queue to prevent automatic commit logic for source
 				await intDbLocal
-					.deleteFrom("internal_transaction_state")
+					.deleteFrom("lix_internal_transaction_state")
 					.where("id", "in", refIds)
 					.execute();
 			}

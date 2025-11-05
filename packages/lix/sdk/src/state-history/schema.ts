@@ -127,8 +127,8 @@ WITH
 			     WHEN ic.metadata IS NULL THEN NULL
 			     ELSE json(ic.metadata)
 			   END AS metadata
-		FROM internal_change ic
-		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		FROM lix_internal_change ic
+		LEFT JOIN lix_internal_snapshot s ON ic.snapshot_id = s.id
 	),
 
 	-- Fast path for depth = 0 (no recursion, direct commit join)
@@ -145,8 +145,8 @@ WITH
 			c.id AS origin_commit_id,
 			c.id AS root_commit_id,
 			0 AS commit_depth
-		FROM change_set_element_all cse
-		JOIN commit_all c 
+		FROM change_set_element_by_version cse
+		JOIN commit_by_version c 
 			ON cse.change_set_id = c.change_set_id 
 			AND c.lixcol_version_id = 'global'
 		JOIN all_changes_with_snapshots chg 
@@ -157,14 +157,14 @@ WITH
 	-- General path for depth > 0 (recursive, ancestors of requested commits)
 	requested_commits AS (
 		SELECT DISTINCT c.id as commit_id
-		FROM commit_all c
+		FROM commit_by_version c
 	),
 	reachable_commits_from_requested(id, root_commit_id, depth) AS (
 		SELECT commit_id, commit_id as root_commit_id, 0 as depth 
 		FROM requested_commits
 		UNION
 		SELECT ce.parent_id, r.root_commit_id, r.depth + 1
-		FROM commit_edge_all ce 
+		FROM commit_edge_by_version ce 
 		JOIN reachable_commits_from_requested r ON ce.child_id = r.id
 		WHERE ce.lixcol_version_id = 'global'
 	),
@@ -174,7 +174,7 @@ WITH
 			c.change_set_id as change_set_id,
 			rc.root_commit_id,
 			rc.depth as commit_depth
-		FROM commit_all c
+		FROM commit_by_version c
 		JOIN reachable_commits_from_requested rc ON c.id = rc.id
 		WHERE c.lixcol_version_id = 'global'
 	),
@@ -188,7 +188,7 @@ WITH
 			   cc.root_commit_id,
 			   cc.commit_depth,
 			   cc.commit_id as depth_commit_id
-		FROM change_set_element_all cse
+		FROM change_set_element_by_version cse
 		JOIN commit_changesets cc ON cse.change_set_id = cc.change_set_id
 		WHERE cse.lixcol_version_id = 'global'
 	),

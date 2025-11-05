@@ -4,7 +4,6 @@ import type {
 } from "../change/schema-definition.js";
 import {
 	LixChangeSetElementSchema,
-	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema-definition.js";
 import {
@@ -27,21 +26,21 @@ import {
 } from "../key-value/schema-definition.js";
 import type {
 	StateView,
-	StateAllView,
+	StateByVersionView,
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixDirectoryDescriptorSchema } from "../filesystem/directory/schema-definition.js";
 import { LixFileDescriptorSchema } from "../filesystem/file/schema-definition.js";
 import type {
-	EntityStateAllView,
+	EntityStateByVersionView,
 	EntityStateHistoryView,
 	EntityStateView,
-} from "../entity-views/types.js";
+} from "../engine/entity-views/types.js";
 import { LixLogSchema } from "../log/schema-definition.js";
 import {
 	LixAccountSchema,
-	type LixActiveAccount,
+	LixActiveAccountSchema,
 } from "../account/schema-definition.js";
 import { LixChangeAuthorSchema } from "../change-author/schema-definition.js";
 import { LixLabelSchema } from "../label/schema-definition.js";
@@ -53,9 +52,8 @@ import {
 	type LixConversationMessage,
 } from "../conversation/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
-import type { EntityViews } from "../entity-views/entity-view-builder.js";
-import type { ToKysely } from "../entity-views/types.js";
-import type { InternalStateCacheTable } from "../state/cache/schema.js";
+import type { EntityViews } from "../engine/entity-views/entity-view-builder.js";
+import type { ToKysely } from "../engine/entity-views/types.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
@@ -68,16 +66,14 @@ export const LixDatabaseSchemaJsonColumns = {
 } as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
-	internal_transaction_state: InternalTransactionStateTable;
-	internal_change: InternalChangeTable;
-	internal_snapshot: InternalSnapshotTable;
-	internal_state_cache: InternalStateCacheTable;
-	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_state_vtable: InternalStateVTable;
-	internal_state_reader: InternalStateVTable;
-	internal_file_data_cache: InternalFileDataCacheTable;
-	internal_file_lixcol_cache: InternalFileLixcolCacheTable;
-	internal_state_writer: InternalStateWriterTable;
+	lix_internal_transaction_state: InternalTransactionStateTable;
+	lix_internal_change: InternalChangeTable;
+	lix_internal_snapshot: InternalSnapshotTable;
+	lix_internal_state_all_untracked: InternalStateAllUntrackedTable;
+	lix_internal_state_vtable: InternalStateVTable;
+	lix_internal_file_data_cache: InternalFileDataCacheTable;
+	lix_internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	lix_internal_state_writer: InternalStateWriterTable;
 };
 
 export type InternalStateWriterTable = {
@@ -95,8 +91,8 @@ type DirectoryDescriptorView = ToKysely<
 		}
 	>
 >;
-type DirectoryDescriptorAllView = ToKysely<
-	EntityStateAllView<
+type DirectoryDescriptorByVersionView = ToKysely<
+	EntityStateByVersionView<
 		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
 			path: LixGenerated<string>;
 		}
@@ -111,17 +107,20 @@ type DirectoryDescriptorHistoryView = ToKysely<
 >;
 
 export type LixDatabaseSchema = {
-	active_account: ToKysely<LixActiveAccount>;
+	active_account: EntityViews<
+		typeof LixActiveAccountSchema,
+		"active_account"
+	>["active_account"];
 	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;
-	state_all: StateAllView;
+	state_by_version: StateByVersionView;
 	state_with_tombstones: StateWithTombstonesView;
 	state_history: StateHistoryView;
 
 	change: ChangeView;
 	directory: DirectoryDescriptorView;
-	directory_all: DirectoryDescriptorAllView;
+	directory_by_version: DirectoryDescriptorByVersionView;
 	directory_history: DirectoryDescriptorHistoryView;
 } & EntityViews<
 	typeof LixKeyValueSchema,
@@ -131,7 +130,6 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
-	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<
 		typeof LixFileDescriptorSchema,

@@ -1,6 +1,6 @@
 import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { LixEntity, LixEntityCanonical } from "./schema.js";
+import type { LixEntity, LixEntityCanonical } from "./types.js";
 
 /**
  * List of tables that use canonical column names (entity_id, schema_key, file_id)
@@ -8,10 +8,10 @@ import type { LixEntity, LixEntityCanonical } from "./schema.js";
  */
 const CANONICAL_TABLES = [
 	"state",
-	"state_all",
+	"state_by_version",
 	"entity_label",
 	"entity_conversation",
-	"entity_conversation_all",
+	"entity_conversation_by_version",
 ] as const;
 
 /**

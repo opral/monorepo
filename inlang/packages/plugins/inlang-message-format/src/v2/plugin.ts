@@ -102,67 +102,67 @@ export const plugin: InlangPlugin<{
 };
 
 const createDirectoryIfNotExits = async (args: {
-  path: string;
-  nodeishFs: NodeishFilesystemSubset;
+	path: string;
+	nodeishFs: NodeishFilesystemSubset;
 }) => {
-  try {
-    await args.nodeishFs.mkdir(dirname(args.path), { recursive: true });
-  } catch {
-    // assume that the directory already exists
-  }
+	try {
+		await args.nodeishFs.mkdir(dirname(args.path), { recursive: true });
+	} catch {
+		// assume that the directory already exists
+	}
 };
 
 /**
  * Function extracted from https://www.npmjs.com/package/path-browserify
  */
 function dirname(path: string) {
-  if (path.length === 0) return ".";
-  let code = path.charCodeAt(0);
-  const hasRoot = code === 47; /*/*/
-  let end = -1;
-  let matchedSlash = true;
-  for (let i = path.length - 1; i >= 1; --i) {
-    code = path.charCodeAt(i);
-    if (code === 47 /*/*/) {
-      if (!matchedSlash) {
-        end = i;
-        break;
-      }
-    } else {
-      // We saw the first non-path separator
-      matchedSlash = false;
-    }
-  }
+	if (path.length === 0) return ".";
+	let code = path.charCodeAt(0);
+	const hasRoot = code === 47; /*/*/
+	let end = -1;
+	let matchedSlash = true;
+	for (let i = path.length - 1; i >= 1; --i) {
+		code = path.charCodeAt(i);
+		if (code === 47 /*/*/) {
+			if (!matchedSlash) {
+				end = i;
+				break;
+			}
+		} else {
+			// We saw the first non-path separator
+			matchedSlash = false;
+		}
+	}
 
-  if (end === -1) return hasRoot ? "/" : ".";
-  if (hasRoot && end === 1) return "//";
-  return path.slice(0, end);
+	if (end === -1) return hasRoot ? "/" : ".";
+	if (hasRoot && end === 1) return "//";
+	return path.slice(0, end);
 }
 
 const maybeMigrateToV2 = async (args: {
-  nodeishFs: NodeishFilesystemSubset;
-  settings: any;
+	nodeishFs: NodeishFilesystemSubset;
+	settings: any;
 }) => {
-  if (args.settings["plugin.inlang.messageFormat"].filePath == undefined) {
-    return;
-  }
-  try {
-    const file = await args.nodeishFs.readFile(
-      args.settings["plugin.inlang.messageFormat"].filePath,
-      {
-        encoding: "utf-8",
-      },
-    );
-    await plugin.saveMessages?.({
-      messages: JSON.parse(file)["data"],
-      nodeishFs: args.nodeishFs,
-      settings: args.settings,
-    });
-    // eslint-disable-next-line no-console
-    console.log(
-      "Migration to v2 of the inlang-message-format plugin was successful. Please delete the old messages.json file and the filePath property in the settings file of the project.",
-    );
-  } catch {
-    // we assume that the file does not exist any more
-  }
+	if (args.settings["plugin.inlang.messageFormat"].filePath == undefined) {
+		return;
+	}
+	try {
+		const file = await args.nodeishFs.readFile(
+			args.settings["plugin.inlang.messageFormat"].filePath,
+			{
+				encoding: "utf-8",
+			}
+		);
+		await plugin.saveMessages?.({
+			messages: JSON.parse(file)["data"],
+			nodeishFs: args.nodeishFs,
+			settings: args.settings,
+		});
+		// eslint-disable-next-line no-console
+		console.log(
+			"Migration to v2 of the inlang-message-format plugin was successful. Please delete the old messages.json file and the filePath property in the settings file of the project."
+		);
+	} catch {
+		// we assume that the file does not exist any more
+	}
 };

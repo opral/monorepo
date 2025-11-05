@@ -92,3 +92,46 @@ test("validateLixSchema throws when data doesn't match schema", () => {
 		"Data validation failed"
 	);
 });
+
+test("additional properties must be false", () => {
+	const schemaWithAdditionalProps = {
+		"x-lix-key": "user",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: true, // This should cause validation to fail
+	};
+
+	const data = {
+		id: "123",
+		name: "John Doe",
+		extraField: "not allowed", // Extra field not defined in schema
+	};
+
+	expect(() =>
+		validateLixSchemaDefinition(schemaWithAdditionalProps)
+	).toThrow();
+
+	const validSchema = {
+		"x-lix-key": "user",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false, // Correctly set to false
+	};
+
+	expect(() => validateLixSchemaDefinition(validSchema)).not.toThrow();
+	expect(validateLixSchemaDefinition(validSchema)).toBe(true);
+
+	expect(() => validateLixSchema(validSchema, data)).toThrow(
+		"Data validation failed"
+	);
+});

@@ -43,7 +43,7 @@ test("useQuery throws error when used outside LixProvider", () => {
 	}).toThrow("useQuery must be used inside <LixProvider>.");
 });
 
-test("useSuspenseQuery returns array with data using new API", async () => {
+test("returns array with data using new API", async () => {
 	const lix = await openLix({});
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -81,7 +81,7 @@ test("useSuspenseQuery returns array with data using new API", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQuery updates when data changes", async () => {
+test("updates when data changes", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -134,7 +134,7 @@ test("useSuspenseQuery updates when data changes", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst returns array with single item or undefined", async () => {
+test("akeFirst returns array with single item or undefined", async () => {
 	const lix = await openLix({});
 
 	// Insert test data
@@ -183,7 +183,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst returns undefined for empty results", async () => {
+test("akeFirst returns undefined for empty results", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -218,7 +218,7 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst updates reference when underlying row changes", async () => {
+test("akeFirst updates reference when underlying row changes", async () => {
 	const lix = await openLix({});
 	const rowKey = "react_first_ref";
 
@@ -270,7 +270,7 @@ test("useSuspenseQueryTakeFirst updates reference when underlying row changes", 
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the initial value", async () => {
+test("akeFirst re-emits when aggregate result returns to the initial value", async () => {
 	const lix = await openLix({});
 	const key = "agg_count_test";
 
@@ -321,7 +321,7 @@ test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the in
 	await lix.close();
 });
 
-test("useSuspenseQuery return type is properly typed", async () => {
+test("return type is properly typed", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -359,7 +359,7 @@ test("useSuspenseQuery return type is properly typed", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQuery error handling with ErrorBoundary", async () => {
+test("error handling with ErrorBoundary", async () => {
 	const lix = await openLix({});
 	let caught: Error | undefined;
 
@@ -399,7 +399,7 @@ test("useSuspenseQuery error handling with ErrorBoundary", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async () => {
+test("akeFirstOrThrow returns data when result exists", async () => {
 	const lix = await openLix({});
 
 	// Insert test data
@@ -444,7 +444,7 @@ test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async (
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () => {
+test("akeFirstOrThrow throws when no result found", async () => {
 	const lix = await openLix({});
 	let caught: Error | undefined;
 
@@ -487,7 +487,7 @@ test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () =>
 	await lix.close();
 });
 
-test("useSuspenseQuery re-executes when query function changes (dependency array fix)", async () => {
+test("re-executes when query function changes (dependency array fix)", async () => {
 	const lix = await openLix({});
 
 	// Insert test data with different prefixes

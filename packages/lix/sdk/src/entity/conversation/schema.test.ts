@@ -12,23 +12,23 @@ test("entity_conversation schema should be properly defined", () => {
 	);
 	expect(LixEntityConversationSchema["x-lix-version"]).toBe("1.0");
 	expect(LixEntityConversationSchema["x-lix-primary-key"]).toEqual([
-		"entity_id",
-		"schema_key",
-		"file_id",
-		"conversation_id",
+		"/entity_id",
+		"/schema_key",
+		"/file_id",
+		"/conversation_id",
 	]);
 
 	expect(LixEntityConversationSchema["x-lix-foreign-keys"]).toHaveLength(2);
 	expect(LixEntityConversationSchema["x-lix-foreign-keys"]![0]).toEqual({
-		properties: ["entity_id", "schema_key", "file_id"],
+		properties: ["/entity_id", "/schema_key", "/file_id"],
 		references: {
 			schemaKey: "state",
-			properties: ["entity_id", "schema_key", "file_id"],
+			properties: ["/entity_id", "/schema_key", "/file_id"],
 		},
 	});
 	expect(LixEntityConversationSchema["x-lix-foreign-keys"]![1]).toEqual({
-		properties: ["conversation_id"],
-		references: { schemaKey: "lix_conversation", properties: ["id"] },
+		properties: ["/conversation_id"],
+		references: { schemaKey: "lix_conversation", properties: ["/id"] },
 	});
 
 	expect(LixEntityConversationSchema.properties).toEqual({
@@ -81,7 +81,7 @@ test("entity_conversation foreign key to state table should be enforced", async 
 test("entity_conversation foreign key to conversation table should be enforced", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config",
 			value: { setting: "testvalue" },

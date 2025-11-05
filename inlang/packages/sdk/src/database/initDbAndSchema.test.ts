@@ -1,29 +1,29 @@
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
-import { isHumanId } from "../human-id/human-id.js";
-import { openLix } from "@lix-js/sdk";
+import { newProject } from "../project/newProject.js";
+import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 
 const uuidRegex =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 test("bundle default values", async () => {
-	const lix = await openLix({});
-	const db = initDb(lix);
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const db = initDb(project.lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
+
 	const bundle = await db
 		.selectFrom("bundle")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(isHumanId(bundle.id)).toBe(true);
+	expect(bundle.id).toBeDefined();
 	expect(bundle.declarations).toStrictEqual([]);
 });
 
 test("message default values", async () => {
-	const lix = await openLix({});
-
-	const db = initDb(lix);
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const db = initDb(project.lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
@@ -48,9 +48,8 @@ test("message default values", async () => {
 });
 
 test("variant default values", async () => {
-	const lix = await openLix({});
-
-	const db = initDb(lix);
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const db = initDb(project.lix);
 
 	await db.insertInto("bundle").defaultValues().execute();
 	const bundle = await db
@@ -87,9 +86,8 @@ test("variant default values", async () => {
 });
 
 test("it should handle json serialization and parsing for bundles", async () => {
-	const lix = await openLix({});
-
-	const db = initDb(lix);
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const db = initDb(project.lix);
 
 	await db
 		.insertInto("bundle")
@@ -115,13 +113,11 @@ test("it should handle json serialization and parsing for bundles", async () => 
 	]);
 });
 
-// https://github.com/opral/inlang-sdk/issues/209
-test.todo("it should enable foreign key constraints", async () => {
-	const lix = await openLix({});
+test("it should enable foreign key constraints", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const db = initDb(project.lix);
 
-	const db = initDb(lix);
-
-	expect(() =>
+	await expect(() =>
 		db
 			.insertInto("message")
 			.values({

@@ -67,20 +67,20 @@ test("should extract schema keys from state table queries", async () => {
 	await lix.close();
 });
 
-test("should extract schema keys from state_all table queries", async () => {
+test("should extract schema keys from state_by_version table queries", async () => {
 	const lix = await openLix({});
 
-	// Test query using "state_all" table (includes all versions)
+	// Test query using "state_by_version" table (includes all versions)
 	const stateAllQuery = lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", "test_version_id")
 		.selectAll();
 
 	const schemaKeys = determineSchemaKeys(stateAllQuery.compile());
 
-	// "state_all" should be detected as a special schema key
-	expect(schemaKeys).toContain("state_all");
+	// "state_by_version" should be detected as a special schema key
+	expect(schemaKeys).toContain("state_by_version");
 
 	await lix.close();
 });
@@ -96,12 +96,8 @@ test("should extract schema keys from complex join queries", async () => {
 			"change_set.id",
 			"change_set_element.change_set_id"
 		)
-		.leftJoin(
-			"change_set_label",
-			"change_set.id",
-			"change_set_label.change_set_id"
-		)
-		.leftJoin("label", "label.id", "change_set_label.label_id")
+		.leftJoin("entity_label", "change_set.id", "entity_label.entity_id")
+		.leftJoin("label", "label.id", "entity_label.label_id")
 		.where("label.name", "=", "checkpoint")
 		.selectAll("change_set");
 
@@ -110,7 +106,7 @@ test("should extract schema keys from complex join queries", async () => {
 	// Should include schema keys for all joined tables
 	expect(schemaKeys).toContain("lix_change_set");
 	expect(schemaKeys).toContain("lix_change_set_element");
-	expect(schemaKeys).toContain("lix_change_set_label");
+	expect(schemaKeys).toContain("lix_entity_label");
 	expect(schemaKeys).toContain("lix_label");
 
 	await lix.close();
@@ -226,7 +222,7 @@ test("should handle complex working changes query", async () => {
 
 test("extractLiteralFilters captures schema_key, entity_id, and version_id filters", () => {
 	const compiled = internalQueryBuilder
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.where("schema_key", "=", "lix_key_value")
 		.where("entity_id", "=", "lix_deterministic_mode")
 		.where("version_id", "=", "global")
@@ -241,7 +237,7 @@ test("extractLiteralFilters captures schema_key, entity_id, and version_id filte
 
 test("extractLiteralFilters handles IN lists", () => {
 	const compiled = internalQueryBuilder
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.where("entity_id", "in", ["lix_deterministic_mode", "other_entity"])
 		.compile();
 
@@ -423,9 +419,9 @@ test("determineSchemaKeys: query on version yields descriptor and tip keys", asy
 	await lix.close();
 });
 
-test("determineSchemaKeys: query on version_all yields descriptor and tip keys", async () => {
+test("determineSchemaKeys: query on version_by_version yields descriptor and tip keys", async () => {
 	const lix = await openLix({});
-	const q = lix.db.selectFrom("version_all").selectAll();
+	const q = lix.db.selectFrom("version_by_version").selectAll();
 	const compiled = q.compile();
 	const keys = determineSchemaKeys(compiled);
 	expect(keys).toContain("lix_version_descriptor");

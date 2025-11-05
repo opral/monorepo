@@ -15,8 +15,15 @@ import type { Lix } from "@lix-js/sdk";
 
 const textDecoder = new TextDecoder();
 
+const TABLE_NAME_MAP: Record<string, string> = {
+	bundle: "inlang_bundle",
+	message: "inlang_message",
+	variant: "inlang_variant",
+};
+
 export class JsonPlugin implements KyselyPlugin {
 	#serializeJsonTransformer = new SerializeJsonTransformer();
+	#renameTableTransformer = new RenameTableTransformer(TABLE_NAME_MAP);
 	#engine: NonNullable<Lix["engine"]>;
 
 	constructor(args: { engine: NonNullable<Lix["engine"]> }) {
@@ -24,13 +31,14 @@ export class JsonPlugin implements KyselyPlugin {
 	}
 
 	transformQuery(args: PluginTransformQueryArgs): RootOperationNode {
+		const renamed = this.#renameTableTransformer.transformNode(args.node);
 		if (
-			args.node.kind === "InsertQueryNode" ||
-			args.node.kind === "UpdateQueryNode"
+			renamed.kind === "InsertQueryNode" ||
+			renamed.kind === "UpdateQueryNode"
 		) {
-			return this.#serializeJsonTransformer.transformNode(args.node);
+			return this.#serializeJsonTransformer.transformNode(renamed);
 		}
-		return args.node;
+		return renamed;
 	}
 
 	async transformResult(
@@ -163,6 +171,42 @@ class SerializeJsonTransformer extends OperationNodeTransformer {
 				} satisfies ValueListNode;
 			}),
 		});
+	}
+}
+
+class RenameTableTransformer extends OperationNodeTransformer {
+	#map: Record<string, string>;
+
+	constructor(map: Record<string, string>) {
+		super();
+		this.#map = map;
+	}
+
+	override transformNode(node: any): any {
+		const transformed = super.transformNode(node);
+		if (transformed?.kind === "TableNode") {
+			const identifier = transformed.table?.identifier?.name;
+			const schema = transformed.table?.schema?.name;
+			const mapped = identifier ? this.#map[identifier] : undefined;
+			if (mapped) {
+				const tableNode =
+					schema !== undefined
+						? {
+								kind: "SchemableIdentifierNode",
+								schema: { kind: "IdentifierNode", name: schema },
+								identifier: { kind: "IdentifierNode", name: mapped },
+							}
+						: {
+								kind: "SchemableIdentifierNode",
+								identifier: { kind: "IdentifierNode", name: mapped },
+							};
+				return {
+					kind: "TableNode",
+					table: tableNode,
+				};
+			}
+		}
+		return transformed;
 	}
 }
 

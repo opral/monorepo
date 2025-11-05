@@ -1,13 +1,13 @@
 import type {
-  Match,
-  Variant,
-  MessageImport,
-  VariantImport,
-  Bundle,
-  Pattern,
-  Declaration,
-  VariableReference,
-  Message,
+	Match,
+	Variant,
+	MessageImport,
+	VariantImport,
+	Bundle,
+	Pattern,
+	Declaration,
+	VariableReference,
+	Message,
 } from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 import { flatten } from "flat";

@@ -40,7 +40,7 @@ if (process.env.NODE_ENV !== "production") {
 interface CorsOptions {
   origin: (
     origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
+    callback: (err: Error | null, allow?: boolean) => void,
   ) => void;
   credentials: boolean;
 }
@@ -114,7 +114,7 @@ function smoothStream<TOOLS extends ToolSet>({
 
       if (!buffer.startsWith(match)) {
         throw new Error(
-          `Chunking function must return a match that is a prefix of the buffer. Received: "${match}" expected to start with "${buffer}"`
+          `Chunking function must return a match that is a prefix of the buffer. Received: "${match}" expected to start with "${buffer}"`,
         );
       }
 
@@ -380,7 +380,7 @@ const lixApps = [
 for (const lixApp of lixApps) {
   app.use(
     `/app/${lixApp.route}`,
-    express.static(`${node_modules}/${lixApp.module}/dist`)
+    express.static(`${node_modules}/${lixApp.module}/dist`),
   );
   app.get(`/app/${lixApp.route}/*`, (req, res) => {
     const indexPath = join(node_modules, `${lixApp.module}/dist/index.html`);

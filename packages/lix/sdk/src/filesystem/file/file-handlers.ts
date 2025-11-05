@@ -89,7 +89,7 @@ export function handleFileInsert(args: {
 	// Insert the file metadata into state table
 	args.engine.executeSync(
 		internalQueryBuilder
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: args.file.id,
 				schema_key: LixFileDescriptorSchema["x-lix-key"],
@@ -169,7 +169,7 @@ export function handleFileInsert(args: {
 			for (const change of detectedChanges) {
 				args.engine.executeSync(
 					internalQueryBuilder
-						.insertInto("state_all")
+						.insertInto("state_by_version")
 						.values({
 							entity_id: change.entity_id,
 							schema_key: change.schema["x-lix-key"],
@@ -218,7 +218,7 @@ export function handleFileInsert(args: {
 				for (const change of detectedChanges) {
 					args.engine.executeSync(
 						internalQueryBuilder
-							.insertInto("state_all")
+							.insertInto("state_by_version")
 							.values({
 								entity_id: change.entity_id,
 								schema_key: change.schema["x-lix-key"],
@@ -334,7 +334,7 @@ export function handleFileUpdate(args: {
 	// Update the file metadata in state table FIRST
 	args.engine.executeSync(
 		internalQueryBuilder
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({
 				snapshot_content: {
 					id: args.file.id,
@@ -356,7 +356,7 @@ export function handleFileUpdate(args: {
 	// Get current file data for comparison
 	const currentFileRows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
 			.selectAll()
@@ -425,7 +425,7 @@ export function handleFileUpdate(args: {
 						// Handle deletion: remove the entity from state table
 						args.engine.executeSync(
 							internalQueryBuilder
-								.deleteFrom("state_all")
+								.deleteFrom("state_by_version")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
@@ -436,7 +436,7 @@ export function handleFileUpdate(args: {
 						// Handle update/insert: upsert the entity in state table
 						args.engine.executeSync(
 							internalQueryBuilder
-								.insertInto("state_all")
+								.insertInto("state_by_version")
 								.values({
 									entity_id: change.entity_id,
 									schema_key: change.schema["x-lix-key"],
@@ -490,7 +490,7 @@ export function handleFileUpdate(args: {
 							// Handle deletion: remove the entity from state table
 							args.engine.executeSync(
 								internalQueryBuilder
-									.deleteFrom("state_all")
+									.deleteFrom("state_by_version")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
@@ -501,7 +501,7 @@ export function handleFileUpdate(args: {
 							// Handle update/insert: upsert the entity in state table
 							args.engine.executeSync(
 								internalQueryBuilder
-									.insertInto("state_all")
+									.insertInto("state_by_version")
 									.values({
 										entity_id: change.entity_id,
 										schema_key: change.schema["x-lix-key"],

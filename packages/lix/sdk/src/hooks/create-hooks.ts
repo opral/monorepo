@@ -100,7 +100,26 @@ export type LixHooks = {
  *
  * @returns LixHooks instance with event subscription methods
  */
+function ensureCustomEventPolyfill(): void {
+	if (typeof globalThis.CustomEvent === "function") {
+		return;
+	}
+
+	class NodeCustomEvent<T = unknown> extends Event {
+		readonly detail: T;
+		constructor(type: string, params?: CustomEventInit<T>) {
+			super(type, params);
+			this.detail = (params?.detail ?? null) as T;
+		}
+	}
+
+	(globalThis as unknown as { CustomEvent: typeof CustomEvent }).CustomEvent =
+		NodeCustomEvent as unknown as typeof CustomEvent;
+}
+
 export function createHooks(): LixHooks {
+	ensureCustomEventPolyfill();
+
 	const eventTarget = new EventTarget();
 
 	return {

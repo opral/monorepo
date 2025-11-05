@@ -1,10 +1,21 @@
 import { Ajv } from "ajv";
 import type { LixEngine } from "../../engine/boot.js";
-import { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import {
+	LixSchemaDefinition,
+	type LixForeignKey,
+} from "../../schema-definition/definition.js";
+import {
+	parseJsonPointer,
+	parsePointerPaths,
+	extractValueAtPath,
+} from "../../schema-definition/json-pointer.js";
 import { sql, type Kysely } from "kysely";
 import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import { parse } from "@marcbachmann/cel-js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -18,24 +29,85 @@ const ajv = new Ajv({
 	// https://json-schema.org/blog/posts/stable-json-schema
 	strictSchema: false,
 });
+ajv.addFormat("json-pointer", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parseJsonPointer(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
+ajv.addFormat("cel", {
+	type: "string",
+	validate: (value: string) => {
+		try {
+			parse(value);
+			return true;
+		} catch {
+			return false;
+		}
+	},
+});
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
+const normalizeSchemaPath = (value: string): string => {
+	if (typeof value !== "string") {
+		return "";
+	}
+	return value;
+};
+
+const normalizeSchemaPathArray = (
+	values?: readonly string[] | string[]
+): string[] => {
+	if (!Array.isArray(values)) {
+		return [];
+	}
+	return values
+		.map((value) => normalizeSchemaPath(value))
+		.filter((value): value is string => value.length > 0);
+};
+
+type NormalizedForeignKey = {
+	properties: string[];
+	references: {
+		schemaKey: string;
+		properties: string[];
+		schemaVersion?: string;
+	};
+	mode?: "immediate" | "materialized";
+};
+
+const normalizeForeignKeys = (
+	foreignKeys?: readonly LixForeignKey[] | LixForeignKey[]
+): NormalizedForeignKey[] => {
+	if (!Array.isArray(foreignKeys)) {
+		return [];
+	}
+	return foreignKeys.map((foreignKey) => ({
+		properties: normalizeSchemaPathArray(foreignKey.properties),
+		references: {
+			schemaKey: foreignKey.references.schemaKey,
+			properties: normalizeSchemaPathArray(foreignKey.references.properties),
+			schemaVersion: foreignKey.references.schemaVersion,
+		},
+		mode: foreignKey.mode,
+	}));
+};
+
 export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "executeSync">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 	schema: LixSchemaDefinition | null;
+	schemaKey?: string;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
 	untracked?: boolean;
 }): void {
-	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
-	// Validate version_id is provided
-	// Skip validation if schema is null (during initialization when schemas aren't stored yet)
-	if (!args.schema) {
-		return;
-	}
-
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -52,7 +124,54 @@ export function validateStateMutation(args: {
 		throw new Error(`Version with id '${args.version_id}' does not exist`);
 	}
 
-	const isValidLixSchema = validateLixSchema(args.schema);
+	let schemaKey =
+		typeof args.schemaKey === "string" && args.schemaKey.length > 0
+			? args.schemaKey
+			: typeof args.schema?.["x-lix-key"] === "string" &&
+				  args.schema["x-lix-key"].length > 0
+				? (args.schema["x-lix-key"] as string)
+				: undefined;
+
+	let effectiveSchema = args.schema ?? null;
+
+	if (schemaKey === LixStoredSchemaSchema["x-lix-key"]) {
+		effectiveSchema ??= LixStoredSchemaSchema;
+	} else if (schemaKey) {
+		const storedSchema = getStoredSchema({
+			engine: args.engine,
+			key: schemaKey,
+		});
+
+		if (!storedSchema) {
+			throw new Error(
+				`Schema '${schemaKey}' is not stored. Store the schema before mutating state.`
+			);
+		}
+
+		if (!effectiveSchema) {
+			effectiveSchema = storedSchema;
+		}
+
+		const expectedVersion = storedSchema["x-lix-version"];
+		const receivedVersion = effectiveSchema?.["x-lix-version"];
+		if (
+			typeof expectedVersion === "string" &&
+			expectedVersion.length > 0 &&
+			typeof receivedVersion === "string" &&
+			receivedVersion.length > 0 &&
+			expectedVersion !== receivedVersion
+		) {
+			throw new Error(
+				`Stored schema '${schemaKey}' version mismatch. Expected '${expectedVersion}', received '${receivedVersion}'.`
+			);
+		}
+	}
+
+	if (!effectiveSchema) {
+		throw new Error("Schema definition is required for state validation");
+	}
+
+	const isValidLixSchema = validateLixSchema(effectiveSchema);
 
 	if (!isValidLixSchema) {
 		throw new Error(
@@ -60,16 +179,27 @@ export function validateStateMutation(args: {
 		);
 	}
 
+	const immutableFlag = effectiveSchema["x-lix-immutable"] === true;
+	const normalizedSchemaKey =
+		schemaKey ?? effectiveSchema["x-lix-key"] ?? "<unknown>";
+
+	if (immutableFlag) {
+		const immutableMessage = `Schema "${normalizedSchemaKey}" is immutable and cannot be updated.`;
+		if (args.operation === "update") {
+			throw new Error(immutableMessage);
+		}
+	}
+
 	// Skip snapshot content validation for delete operations
 	if (args.operation !== "delete") {
 		// Parse JSON strings back to objects for properties defined as objects in the schema
 		const parsedSnapshotContent = parseJsonPropertiesInSnapshotContent(
 			args.snapshot_content,
-			args.schema
+			effectiveSchema
 		);
 
 		const isValidSnapshotContent = ajv.validate(
-			args.schema,
+			effectiveSchema,
 			parsedSnapshotContent
 		);
 
@@ -84,7 +214,7 @@ export function validateStateMutation(args: {
 				.join("; ");
 
 			throw new Error(
-				`The provided snapshot content does not match the schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
+				`The provided snapshot content does not match the schema '${effectiveSchema["x-lix-key"]}' (${effectiveSchema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
 			);
 		}
 	}
@@ -93,16 +223,19 @@ export function validateStateMutation(args: {
 	if (args.operation === "delete") {
 		validateDeletionConstraints({
 			engine: args.engine,
-			schema: args.schema,
+			schema: effectiveSchema,
 			entity_id: args.entity_id,
 			version_id: args.version_id,
 		});
 	} else {
+		if (effectiveSchema["x-lix-key"] === "lix_stored_schema") {
+			validateStoredSchemaValue(args.snapshot_content);
+		}
 		// Validate primary key constraints (only for insert/update)
-		if (args.schema["x-lix-primary-key"]) {
+		if (effectiveSchema["x-lix-primary-key"]) {
 			validatePrimaryKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -111,10 +244,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate unique constraints (only for insert/update)
-		if (args.schema["x-lix-unique"]) {
+		if (effectiveSchema["x-lix-unique"]) {
 			validateUniqueConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -123,10 +256,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate foreign key constraints (only for insert/update)
-		if (args.schema["x-lix-foreign-keys"]) {
+		if (effectiveSchema["x-lix-foreign-keys"]) {
 			validateForeignKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
 				untracked: args.untracked,
@@ -135,7 +268,7 @@ export function validateStateMutation(args: {
 	}
 
 	// Hardcoded validation for commit_edge self-referencing
-	if (args.schema["x-lix-key"] === "lix_commit_edge") {
+	if (effectiveSchema["x-lix-key"] === "lix_commit_edge") {
 		const content = args.snapshot_content as any;
 		if (content.parent_id === content.child_id) {
 			throw new Error(
@@ -147,7 +280,7 @@ export function validateStateMutation(args: {
 		if (args.operation === "insert") {
 			const debugEnabled = args.engine.executeSync(
 				internalQueryBuilder
-					.selectFrom("key_value_all")
+					.selectFrom("key_value_by_version")
 					.select("value")
 					.where("key", "=", "lix_debug")
 					.where("value", "=", "true")
@@ -165,6 +298,28 @@ export function validateStateMutation(args: {
 	}
 }
 
+function validateStoredSchemaValue(
+	snapshot: LixChange["snapshot_content"]
+): void {
+	if (!snapshot || typeof snapshot !== "object") {
+		throw new Error("Stored schema mutation requires a JSON object payload");
+	}
+	const payload = (snapshot as Record<string, unknown>).value;
+	if (!payload || typeof payload !== "object") {
+		throw new Error(
+			"Stored schema mutation requires 'value' object in snapshot_content"
+		);
+	}
+	const key = (payload as Record<string, unknown>)["x-lix-key"];
+	if (typeof key !== "string" || key.length === 0) {
+		throw new Error("value.x-lix-key must be a non-empty string");
+	}
+	const version = (payload as Record<string, unknown>)["x-lix-version"];
+	if (typeof version !== "string" || version.length === 0) {
+		throw new Error("value.x-lix-version must be string");
+	}
+}
+
 function validatePrimaryKeyConstraints(args: {
 	engine: Pick<LixEngine, "executeSync">;
 	schema: LixSchemaDefinition;
@@ -173,18 +328,18 @@ function validatePrimaryKeyConstraints(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
-	const primaryKeyFields = args.schema["x-lix-primary-key"];
-	if (!primaryKeyFields || primaryKeyFields.length === 0) {
+	const primaryKeyPaths = parsePointerPaths(args.schema["x-lix-primary-key"]);
+	if (primaryKeyPaths.length === 0) {
 		return;
 	}
 
 	// Extract primary key values from the snapshot content
 	const primaryKeyValues: any[] = [];
-	for (const field of primaryKeyFields) {
-		const value = (args.snapshot_content as any)[field];
+	for (const path of primaryKeyPaths) {
+		const value = extractValueAtPath(args.snapshot_content, path.segments);
 		if (value === undefined || value === null) {
 			throw new Error(
-				`Primary key field '${field}' cannot be null or undefined`
+				`Primary key field '${path.label}' cannot be null or undefined`
 			);
 		}
 		primaryKeyValues.push(value);
@@ -196,11 +351,11 @@ function validatePrimaryKeyConstraints(args: {
 	const db =
 		internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 	let query = db
-		.selectFrom("internal_state_vtable")
+		.selectFrom("lix_internal_state_vtable")
 		.select(["snapshot_content"])
 		.where("schema_key", "=", args.schema["x-lix-key"]);
 
-	// Constrain by version – internal_state_vtable exposes child version_id directly
+	// Constrain by version – lix_internal_state_vtable exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
@@ -214,21 +369,19 @@ function validatePrimaryKeyConstraints(args: {
 	}
 
 	// Build WHERE conditions for each primary key field
-	for (let i = 0; i < primaryKeyFields.length; i++) {
-		const field = primaryKeyFields[i];
-		const value = primaryKeyValues[i];
-		// Use JSON extraction to check the field value in the content
-		query = query.where(
-			sql`json_extract(snapshot_content, '$.' || ${field})`,
-			"=",
-			value
+	for (let i = 0; i < primaryKeyPaths.length; i++) {
+		const path = primaryKeyPaths[i]!;
+		const value = primaryKeyValues[i]!;
+		const jsonPathExpr = sql.raw(
+			`json_extract(snapshot_content, '${path.jsonPath}')`
 		);
+		query = query.where(jsonPathExpr as any, "=", value);
 	}
 
 	const existingStates = args.engine.executeSync(query.compile()).rows;
 
 	if (existingStates.length > 0) {
-		const fieldNames = primaryKeyFields.join(", ");
+		const fieldNames = primaryKeyPaths.map((path) => path.label).join(", ");
 		const fieldValues = primaryKeyValues.map((v) => `'${v}'`).join(", ");
 
 		throw new Error(
@@ -245,21 +398,23 @@ function validateUniqueConstraints(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
-	const uniqueConstraints = args.schema["x-lix-unique"];
-	if (!uniqueConstraints || uniqueConstraints.length === 0) {
+	const uniqueConstraints = (args.schema["x-lix-unique"] ?? [])
+		.map((group) => parsePointerPaths(group))
+		.filter((group) => group.length > 0);
+	if (uniqueConstraints.length === 0) {
 		return;
 	}
 
 	// Validate each unique constraint
-	for (const uniqueFields of uniqueConstraints) {
-		if (!uniqueFields || uniqueFields.length === 0) {
+	for (const uniquePaths of uniqueConstraints) {
+		if (!uniquePaths || uniquePaths.length === 0) {
 			continue;
 		}
 
 		// Extract values for this unique constraint
 		const uniqueValues: any[] = [];
-		for (const field of uniqueFields) {
-			const value = (args.snapshot_content as any)[field];
+		for (const path of uniquePaths) {
+			const value = extractValueAtPath(args.snapshot_content, path.segments);
 			if (value === undefined || value === null) {
 				// Skip unique constraint validation if any field is null/undefined
 				// This allows nullable unique fields (like SQL UNIQUE constraints)
@@ -269,7 +424,7 @@ function validateUniqueConstraints(args: {
 		}
 
 		// If we didn't get all values (some were null), skip this constraint
-		if (uniqueValues.length !== uniqueFields.length) {
+		if (uniqueValues.length !== uniquePaths.length) {
 			continue;
 		}
 
@@ -277,7 +432,7 @@ function validateUniqueConstraints(args: {
 		const db =
 			internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 		let query = db
-			.selectFrom("internal_state_vtable")
+			.selectFrom("lix_internal_state_vtable")
 			.select(["snapshot_content"])
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 
@@ -292,21 +447,19 @@ function validateUniqueConstraints(args: {
 		}
 
 		// Build WHERE conditions for each field in the unique constraint
-		for (let i = 0; i < uniqueFields.length; i++) {
-			const field = uniqueFields[i];
-			const value = uniqueValues[i];
-			// Use JSON extraction to check the field value in the content
-			query = query.where(
-				sql`json_extract(snapshot_content, '$.' || ${field})`,
-				"=",
-				value
+		for (let i = 0; i < uniquePaths.length; i++) {
+			const path = uniquePaths[i]!;
+			const value = uniqueValues[i]!;
+			const jsonExpr = sql.raw(
+				`json_extract(snapshot_content, '${path.jsonPath}')`
 			);
+			query = query.where(jsonExpr as any, "=", value);
 		}
 
 		const existingStates = args.engine.executeSync(query.compile()).rows;
 
 		if (existingStates.length > 0) {
-			const fieldNames = uniqueFields.join(", ");
+			const fieldNames = uniquePaths.map((path) => path.label).join(", ");
 			const fieldValues = uniqueValues.map((v) => `'${v}'`).join(", ");
 
 			throw new Error(
@@ -335,22 +488,28 @@ function validateForeignKeyConstraints(args: {
 	version_id: string;
 	untracked?: boolean;
 }): void {
-	const foreignKeys = args.schema["x-lix-foreign-keys"];
-	if (!foreignKeys || !Array.isArray(foreignKeys)) {
+	const foreignKeys = normalizeForeignKeys(args.schema["x-lix-foreign-keys"]);
+	if (foreignKeys.length === 0) {
 		return;
 	}
 
 	// Validate each foreign key constraint
 	for (const foreignKey of foreignKeys) {
+		const localPaths = parsePointerPaths(foreignKey.properties);
+		const refPaths = parsePointerPaths(foreignKey.references.properties);
 		// Validation mode: default to immediate
 		const mode = foreignKey.mode ?? "immediate";
 		// Validate that properties arrays have same length
 		if (
-			foreignKey.properties.length !== foreignKey.references.properties.length
+			localPaths.length !== refPaths.length ||
+			localPaths.length !== foreignKey.properties.length
 		) {
 			throw new Error(
-				`Foreign key constraint error: Local properties (${foreignKey.properties.join(", ")}) and ` +
-					`referenced properties (${foreignKey.references.properties.join(", ")}) must have the same length`
+				`Foreign key constraint error: Local properties (${localPaths
+					.map((path) => path.label)
+					.join(", ")}) and referenced properties (${refPaths
+					.map((path) => path.label)
+					.join(", ")}) must have the same length`
 			);
 		}
 
@@ -364,8 +523,8 @@ function validateForeignKeyConstraints(args: {
 		const localValues: any[] = [];
 		let hasNullValue = false;
 
-		for (const localProperty of foreignKey.properties) {
-			const value = (args.snapshot_content as any)[localProperty];
+		for (const path of localPaths) {
+			const value = extractValueAtPath(args.snapshot_content, path.segments);
 			if (value === null || value === undefined) {
 				hasNullValue = true;
 				break;
@@ -396,49 +555,49 @@ function validateForeignKeyConstraints(args: {
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
 				query = internalQueryBuilder
-					.selectFrom("state_all" as any)
-					.select(foreignKey.references.properties as any);
+					.selectFrom("state_by_version" as any)
+					.select(refPaths.map((path) => path.segments[0]) as any);
 
 				// Add WHERE conditions for each property
-				for (let i = 0; i < foreignKey.properties.length; i++) {
-					const refProperty = foreignKey.references.properties[i];
-					const localValue = localValues[i];
-					query = query.where(refProperty as any, "=", localValue);
+				for (let i = 0; i < localPaths.length; i++) {
+					const refPath = refPaths[i]!;
+					if (refPath.segments.length !== 1) {
+						throw new Error(
+							`Foreign key constraint error: state references require direct column names, received '${refPath.label}'`
+						);
+					}
+					const localValue = localValues[i]!;
+					query = query.where(refPath.segments[0] as any, "=", localValue);
 				}
 			} else {
 				// For other special entities, we only support single property references
-				if (foreignKey.properties.length !== 1) {
+				if (localPaths.length !== 1 || refPaths.length !== 1) {
 					throw new Error(
 						`Foreign key constraint error: Special entity '${foreignKey.references.schemaKey}' references only support single property, ` +
-							`but got ${foreignKey.properties.length} properties`
+							`but got ${localPaths.length} properties`
 					);
 				}
 
 				query = internalQueryBuilder
 					.selectFrom(tableName as any)
-					.select(foreignKey.references.properties[0] as any)
-					.where(
-						foreignKey.references.properties[0] as any,
-						"=",
-						localValues[0]
-					);
+					.select(refPaths[0]!.segments[0] as any)
+					.where(refPaths[0]!.segments[0] as any, "=", localValues[0]);
 			}
 		} else {
-			// Query JSON schema entities in the state table
 			query = internalQueryBuilder
-				.selectFrom("state_all")
-				.select("snapshot_content")
-				.where("schema_key", "=", foreignKey.references.schemaKey);
+				.selectFrom("lix_internal_state_vtable")
+				.select(["snapshot_content"])
+				.where("schema_key", "=", foreignKey.references.schemaKey)
+				.where("snapshot_content", "is not", null);
 
 			// Add WHERE conditions for each property
-			for (let i = 0; i < foreignKey.properties.length; i++) {
-				const refProperty = foreignKey.references.properties[i];
-				const localValue = localValues[i];
-				query = query.where(
-					sql`json_extract(snapshot_content, '$.' || ${refProperty})`,
-					"=",
-					localValue
+			for (let i = 0; i < localPaths.length; i++) {
+				const refPath = refPaths[i]!;
+				const localValue = localValues[i]!;
+				const columnExpr = sql.raw(
+					`json_extract(snapshot_content, '${refPath.jsonPath}')`
 				);
+				query = query.where(columnExpr as any, "=", localValue);
 			}
 		}
 
@@ -495,8 +654,8 @@ function validateForeignKeyConstraints(args: {
 				versionInfo.length > 0 ? versionInfo[0].name : "unknown";
 
 			// Build the property/value pairs for error message
-			const localPropsStr = foreignKey.properties.join(", ");
-			const refPropsStr = foreignKey.references.properties.join(", ");
+			const localPropsStr = localPaths.map((path) => path.label).join(", ");
+			const refPropsStr = refPaths.map((path) => path.label).join(", ");
 			const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
 
 			// First line: compact string for regex matching (backwards compatibility)
@@ -538,21 +697,20 @@ function validateForeignKeyConstraints(args: {
 		if (!args.untracked && !isSpecialEntity) {
 			// Build query to check for untracked references
 			let untrackedQuery = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", foreignKey.references.schemaKey)
 				.where("version_id", "=", args.version_id)
 				.where("untracked", "=", true);
 
 			// Add WHERE conditions for each property
-			for (let i = 0; i < foreignKey.properties.length; i++) {
-				const refProperty = foreignKey.references.properties[i];
-				const localValue = localValues[i];
-				untrackedQuery = untrackedQuery.where(
-					sql`json_extract(snapshot_content, '$.' || ${refProperty})`,
-					"=",
-					localValue
+			for (let i = 0; i < localPaths.length; i++) {
+				const refPath = refPaths[i]!;
+				const localValue = localValues[i]!;
+				const expr = sql.raw(
+					`json_extract(snapshot_content, '${refPath.jsonPath}')`
 				);
+				untrackedQuery = untrackedQuery.where(expr as any, "=", localValue);
 			}
 
 			const untrackedReferences = args.engine.executeSync(
@@ -560,7 +718,7 @@ function validateForeignKeyConstraints(args: {
 			).rows;
 
 			if (untrackedReferences.length > 0) {
-				const refPropsStr = foreignKey.references.properties.join(", ");
+				const refPropsStr = refPaths.map((path) => path.label).join(", ");
 				const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
 
 				let errorMessage = `Foreign key constraint violation: tracked entities cannot reference untracked entities. This would create broken references during sync.\n`;
@@ -591,7 +749,7 @@ function validateDeletionConstraints(args: {
 	// Check both direct entities and inherited entities
 	const currentEntity = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
@@ -617,7 +775,7 @@ function validateDeletionConstraints(args: {
 		// Check if entity exists in other versions
 		const entityInOtherVersions = args.engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
 				.where("schema_key", "=", args.schema["x-lix-key"])
@@ -675,17 +833,14 @@ function validateDeletionConstraints(args: {
 				? (JSON.parse(storedSchema.value) as LixSchemaDefinition)
 				: (storedSchema.value as LixSchemaDefinition);
 
-		if (!schema["x-lix-foreign-keys"]) {
-			continue;
-		}
-
-		// Check each foreign key in this schema
-		const foreignKeys = schema["x-lix-foreign-keys"];
-		if (!foreignKeys || !Array.isArray(foreignKeys)) {
+		const foreignKeys = normalizeForeignKeys(schema["x-lix-foreign-keys"]);
+		if (foreignKeys.length === 0) {
 			continue;
 		}
 
 		for (const foreignKey of foreignKeys) {
+			const localPaths = parsePointerPaths(foreignKey.properties);
+			const refPaths = parsePointerPaths(foreignKey.references.properties);
 			// Skip if this foreign key doesn't reference our schema
 			if (foreignKey.references.schemaKey !== args.schema["x-lix-key"]) {
 				continue;
@@ -702,8 +857,8 @@ function validateDeletionConstraints(args: {
 			const referencedValues: any[] = [];
 			let hasNullValue = false;
 
-			for (const refProperty of foreignKey.references.properties) {
-				const value = entityContent[refProperty];
+			for (const refPath of refPaths) {
+				const value = extractValueAtPath(entityContent, refPath.segments);
 				if (value === null || value === undefined) {
 					hasNullValue = true;
 					break;
@@ -717,26 +872,25 @@ function validateDeletionConstraints(args: {
 
 			// Build query to check if any entities reference these values
 			let query = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", schema["x-lix-key"])
 				.where("version_id", "=", args.version_id);
 
 			// Add WHERE conditions for each property
-			for (let i = 0; i < foreignKey.properties.length; i++) {
-				const localProperty = foreignKey.properties[i];
-				const referencedValue = referencedValues[i];
-				query = query.where(
-					sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
-					"=",
-					referencedValue
+			for (let i = 0; i < localPaths.length; i++) {
+				const localPath = localPaths[i]!;
+				const referencedValue = referencedValues[i]!;
+				const expr = sql.raw(
+					`json_extract(snapshot_content, '${localPath.jsonPath}')`
 				);
+				query = query.where(expr as any, "=", referencedValue);
 			}
 
 			const referencingEntities = args.engine.executeSync(query.compile()).rows;
 
 			if (referencingEntities.length > 0) {
-				const localPropsStr = foreignKey.properties.join(", ");
+				const localPropsStr = localPaths.map((path) => path.label).join(", ");
 				throw new Error(
 					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key (${localPropsStr})`
 				);
@@ -821,7 +975,7 @@ function validateAcyclicCommitGraph(args: {
 	// Get all existing edges
 	const existingEdges = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("commit_edge_all")
+			.selectFrom("commit_edge_by_version")
 			.select(["parent_id", "child_id"])
 			.where("lixcol_version_id", "=", args.version_id)
 			.compile()

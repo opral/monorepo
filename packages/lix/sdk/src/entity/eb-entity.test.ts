@@ -3,6 +3,36 @@ import { openLix } from "../lix/open-lix.js";
 import { createLabel } from "../label/create-label.js";
 import { attachLabel } from "./label/attach-label.js";
 import { ebEntity } from "./eb-entity.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+
+const documentSchema: LixSchemaDefinition = {
+	"x-lix-key": "test_document",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["/id"],
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		title: { type: "string" },
+		author_id: { type: "string" },
+	},
+	required: ["id", "title"],
+} as const;
+
+const messageSchema: LixSchemaDefinition = {
+	"x-lix-key": "test_message",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["/id"],
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		thread_id: { type: "string" },
+		author_id: { type: "string" },
+		content: { type: "string" },
+	},
+	required: ["id", "thread_id", "author_id"],
+} as const;
 
 test("ebEntity.hasLabel filters entities by label name", async () => {
 	const lix = await openLix({});
@@ -275,17 +305,17 @@ test("ebEntity works with different entity types", async () => {
 
 	// Create various entities
 	await lix.db
-		.insertInto("account")
-		.values({ id: "acc1", name: "Test Account" })
+		.insertInto("key_value")
+		.values({ key: "acc1", value: "Test Account" })
 		.execute();
 
 	await lix.db.insertInto("conversation").values({ id: "thread1" }).execute();
 
 	// Get entity info from views
-	const account = await lix.db
-		.selectFrom("account")
+	const kv = await lix.db
+		.selectFrom("key_value")
 		.selectAll()
-		.where("id", "=", "acc1")
+		.where("key", "=", "acc1")
 		.executeTakeFirstOrThrow();
 
 	const thread = await lix.db
@@ -295,7 +325,7 @@ test("ebEntity works with different entity types", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Label all entities as reviewed
-	for (const entity of [account, thread]) {
+	for (const entity of [kv, thread]) {
 		await attachLabel({
 			lix,
 			entity: entity,
@@ -304,9 +334,9 @@ test("ebEntity works with different entity types", async () => {
 	}
 
 	// Query reviewed entities from different tables using new API
-	const reviewedAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity("account").hasLabel({ name: "reviewed" }))
+	const reviewedKeyValues = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity("key_value").hasLabel({ name: "reviewed" }))
 		.selectAll()
 		.execute();
 
@@ -316,7 +346,7 @@ test("ebEntity works with different entity types", async () => {
 		.selectAll()
 		.execute();
 
-	expect(reviewedAccounts).toHaveLength(1);
+	expect(reviewedKeyValues).toHaveLength(1);
 	expect(reviewedThreads).toHaveLength(1);
 });
 
@@ -405,6 +435,11 @@ test("ebEntity with multiple labels and complex conditions", async () => {
 test("ebEntity works with state table using canonical columns", async () => {
 	const lix = await openLix({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create key-value entries first
 	await lix.db
 		.insertInto("key_value")
@@ -429,7 +464,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 		.values([
 			{
 				entity_id: "doc1",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -441,7 +476,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 			},
 			{
 				entity_id: "doc2",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -453,7 +488,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 			},
 			{
 				entity_id: "doc3",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -474,7 +509,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 	// that reference a specific account entity
 	const documentsbyUser = await lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", "document")
+		.where("schema_key", "=", "test_document")
 		.where(
 			(eb) =>
 				eb.fn("json_extract", [
@@ -515,7 +550,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 	// Test ebEntity.in with state table
 	const firstTwoDocs = await lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", "document")
+		.where("schema_key", "=", "test_document")
 		.orderBy("entity_id")
 		.limit(2)
 		.selectAll()
@@ -534,13 +569,18 @@ test("ebEntity works with state table using canonical columns", async () => {
 test("ebEntity works without table parameter when context is unambiguous", async () => {
 	const lix = await openLix({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
+
 	// Create entities in state table
 	await lix.db
 		.insertInto("state")
 		.values([
 			{
 				entity_id: "doc1",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -548,7 +588,7 @@ test("ebEntity works without table parameter when context is unambiguous", async
 			},
 			{
 				entity_id: "doc2",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -556,7 +596,7 @@ test("ebEntity works without table parameter when context is unambiguous", async
 			},
 			{
 				entity_id: "doc3",
-				schema_key: "document",
+				schema_key: "test_document",
 				file_id: "docs.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -568,7 +608,7 @@ test("ebEntity works without table parameter when context is unambiguous", async
 	// Get some docs to test with
 	const firstTwoDocs = await lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", "document")
+		.where("schema_key", "=", "test_document")
 		.limit(2)
 		.selectAll()
 		.execute();
@@ -643,6 +683,11 @@ test("ebEntity works without table parameter when context is unambiguous", async
 test("ebEntity without table parameter fails when context is ambiguous (joins)", async () => {
 	const lix = await openLix({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: messageSchema })
+		.execute();
+
 	// Create some test data
 	await lix.db
 		.insertInto("key_value")
@@ -662,7 +707,7 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 		.insertInto("state")
 		.values({
 			entity_id: "msg1",
-			schema_key: "message",
+			schema_key: "test_message",
 			file_id: "messages.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",

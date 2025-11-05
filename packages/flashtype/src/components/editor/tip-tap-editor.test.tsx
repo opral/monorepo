@@ -17,6 +17,7 @@ import { AstSchemas } from "@opral/markdown-wc";
 import type { Editor } from "@tiptap/core";
 import { createVersion, switchVersion } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { insertMarkdownSchemas } from "../../lib/insert-markdown-schemas";
 
 function Providers({
 	lix,
@@ -49,6 +50,7 @@ test("renders initial document content", async () => {
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 	const fileId = "file_render_doc";
 
 	await lix.db
@@ -61,7 +63,7 @@ test("renders initial document content", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -104,6 +106,7 @@ test("persists state changes on edit (paragraph append)", async () => {
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	await lix.db
 		.insertInto("file")
@@ -168,6 +171,7 @@ test("renders content under React.StrictMode", async () => {
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	const fileId = "file_strict";
 	await lix.db
@@ -180,7 +184,7 @@ test("renders content under React.StrictMode", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -223,6 +227,7 @@ test("shows placeholder only while focused on an empty document", async () => {
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	await lix.db
 		.insertInto("file")
@@ -292,6 +297,7 @@ test("clicking the surface focuses the editor even when content exists", async (
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	await lix.db
 		.insertInto("file")
@@ -339,6 +345,7 @@ test("updates editor when switching to a version with different external state",
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	// Create a file and set it active
 	const fileId = "file_switch_version";
@@ -352,7 +359,7 @@ test("updates editor when switching to a version with different external state",
 		.execute();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -379,12 +386,13 @@ test("updates editor when switching to a version with different external state",
 	const vB = await createVersion({ lix });
 
 	// Pre-seed version B's STATE to differ from main (explicit, deterministic)
-	const rootKey = AstSchemas.RootOrderSchema["x-lix-key"];
-	const rootVer = AstSchemas.RootOrderSchema["x-lix-version"];
+	const rootKey = AstSchemas.DocumentSchema["x-lix-key"];
+	const rootVer = AstSchemas.DocumentSchema["x-lix-version"];
 	const paraKey = AstSchemas.schemasByType.paragraph["x-lix-key"];
 	const paraVer = AstSchemas.schemasByType.paragraph["x-lix-version"];
+	await insertMarkdownSchemas({ lix });
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "root",
 			schema_key: rootKey,
@@ -396,7 +404,7 @@ test("updates editor when switching to a version with different external state",
 		} as any)
 		.execute();
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "p1",
 			schema_key: paraKey,
@@ -417,10 +425,8 @@ test("updates editor when switching to a version with different external state",
 		await switchVersion({ lix, to: vB });
 	});
 
-	// Failing expectation under current implementation (editor does not update on switch)
-	await waitFor(async () => {
-		const editorB = await screen.findByTestId("tiptap-editor");
-		expect(editorB).toHaveTextContent("Hello B");
+	await waitFor(() => {
+		expect(screen.getByTestId("tiptap-editor")).toHaveTextContent("Hello B");
 	});
 });
 
@@ -435,6 +441,7 @@ test("updates editor when the file's state is changed externally in the same ver
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	const fileId = "file_external_state_update";
 	await lix.db
@@ -448,7 +455,7 @@ test("updates editor when the file's state is changed externally in the same ver
 
 	// Set active file id
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -512,6 +519,7 @@ test("updates editor when file.data is updated externally (simulate updateFile w
 			},
 		],
 	});
+	await insertMarkdownSchemas({ lix });
 
 	const fileId = "file_update_blob";
 	await lix.db
@@ -524,7 +532,7 @@ test("updates editor when file.data is updated externally (simulate updateFile w
 		.execute();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -581,7 +589,7 @@ test("preserves main content when switching to a new version and back", async ()
 
 	// Activate file globally
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "flashtype_active_file_id",
 			value: fileId,
@@ -598,10 +606,11 @@ test("preserves main content when switching to a new version and back", async ()
 	const mainId = (main as any).version_id as string;
 
 	// Seed state in main to "Hello world"
-	const rootKey = AstSchemas.RootOrderSchema["x-lix-key"];
-	const rootVer = AstSchemas.RootOrderSchema["x-lix-version"];
+	const rootKey = AstSchemas.DocumentSchema["x-lix-key"];
+	const rootVer = AstSchemas.DocumentSchema["x-lix-version"];
 	const paraKey = AstSchemas.schemasByType.paragraph["x-lix-key"];
 	const paraVer = AstSchemas.schemasByType.paragraph["x-lix-version"];
+	await insertMarkdownSchemas({ lix });
 	await lix.db
 		.insertInto("state")
 		.values({
@@ -653,8 +662,9 @@ test("preserves main content when switching to a new version and back", async ()
 		await switchVersion({ lix, to: { id: mainId } as any });
 	});
 
-	await waitFor(async () => {
-		const editorBack = await screen.findByTestId("tiptap-editor");
-		expect(editorBack).toHaveTextContent("Hello world");
+	await waitFor(() => {
+		expect(screen.getByTestId("tiptap-editor")).toHaveTextContent(
+			"Hello world",
+		);
 	});
 });

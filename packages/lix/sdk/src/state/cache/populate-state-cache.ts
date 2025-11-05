@@ -1,6 +1,12 @@
 import type { LixEngine } from "../../engine/boot.js";
-import { getStateCacheV2Tables } from "./schema.js";
-import { createSchemaCacheTable } from "./create-schema-cache-table.js";
+import { getStateCacheTables } from "./schema.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "./create-schema-cache-table.js";
+import { resolveCacheSchemaDefinition } from "./schema-resolver.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
 
 export interface PopulateStateCacheV2Options {
 	version_id?: string; // Optional - if not provided, all active versions are populated
@@ -17,7 +23,10 @@ export interface PopulateStateCacheV2Options {
  * @param options - Optional filters for selective population
  */
 export function populateStateCache(args: {
-	engine: Pick<LixEngine, "sqlite" | "executeSync" | "runtimeCacheRef">;
+	engine: Pick<
+		LixEngine,
+		"sqlite" | "executeSync" | "runtimeCacheRef" | "hooks"
+	>;
 	options?: PopulateStateCacheV2Options;
 }): void {
 	const { sqlite } = args.engine;
@@ -32,7 +41,7 @@ export function populateStateCache(args: {
 		const ancestorRows = sqlite.exec({
 			sql: `
 				SELECT DISTINCT ancestor_version_id as version_id
-				FROM internal_materialization_version_ancestry
+				FROM lix_internal_materialization_version_ancestry
 				WHERE version_id = ?
 			`,
 			bind: [options.version_id],
@@ -48,7 +57,7 @@ export function populateStateCache(args: {
 	} else {
 		// If no version_id specified, populate all active versions (with tips)
 		const tipRows = sqlite.exec({
-			sql: `SELECT version_id FROM internal_materialization_version_tips`,
+			sql: `SELECT version_id FROM lix_internal_materialization_version_tips`,
 			returnValue: "resultRows",
 			rowMode: "array",
 		}) as [string][];
@@ -59,10 +68,13 @@ export function populateStateCache(args: {
 		return;
 	}
 
+	// Prime the stored schema cache so lookups succeed while rebuilding tables.
+	getAllStoredSchemas({ engine: args.engine });
+
 	// Clear existing cache entries for the versions being populated
-	const tableCache = getStateCacheV2Tables({ engine: args.engine });
+	const tableCache = getStateCacheTables({ engine: args.engine });
 	for (const tableName of tableCache) {
-		if (tableName === "internal_state_cache") continue;
+		if (tableName === "lix_internal_state_cache") continue;
 
 		const tableExists = sqlite.exec({
 			sql: `SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?`,
@@ -95,7 +107,7 @@ export function populateStateCache(args: {
 			m.change_id,
 			m.commit_id,
 			m.inherited_from_version_id
-		FROM internal_state_materializer m
+		FROM lix_internal_state_materializer m
 		WHERE m.version_id IN (${placeholders})
 		  AND m.inherited_from_version_id IS NULL
 	`;
@@ -122,13 +134,38 @@ export function populateStateCache(args: {
 	}
 
 	// Process each schema's rows directly to its physical table
-	for (const [schema_key, schemaRows] of rowsBySchema) {
-		// Sanitize schema_key for use in table name - must match update-state-cache.ts
-		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+	const schemaEntries = Array.from(rowsBySchema.entries());
+	const storedSchemaKey = LixStoredSchemaSchema["x-lix-key"];
 
-		// Ensure table exists (creates if needed, updates cache)
-		ensureTableExists(args.engine, tableName);
+	schemaEntries.sort((a, b) => {
+		if (a[0] === storedSchemaKey) return -1;
+		if (b[0] === storedSchemaKey) return 1;
+		return 0;
+	});
+
+	for (const [schema_key, schemaRows] of schemaEntries) {
+		const schemaDefinition = resolveCacheSchemaDefinition({
+			engine: args.engine,
+			schemaKey: schema_key,
+		});
+		if (!schemaDefinition) {
+			throw new Error(
+				`populateStateCache: missing stored schema for ${schema_key}`
+			);
+		}
+
+		const tableName = createSchemaCacheTable({
+			engine: args.engine,
+			schema: schemaDefinition,
+		});
+		const tableCache = getStateCacheTables({ engine: args.engine });
+		if (!tableCache.has(tableName)) {
+			tableCache.add(tableName);
+		}
+		const sanitized = schemaKeyToCacheTableName(schema_key);
+		if (!tableCache.has(sanitized)) {
+			tableCache.add(sanitized);
+		}
 
 		// Batch insert with prepared statement
 		const stmt = sqlite.prepare(`
@@ -143,7 +180,7 @@ export function populateStateCache(args: {
 				created_at,
 				updated_at,
 				inherited_from_version_id,
-				inheritance_delete_marker,
+				is_tombstone,
 				change_id,
 				commit_id
 			) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
@@ -156,7 +193,7 @@ export function populateStateCache(args: {
 				created_at = excluded.created_at,
 				updated_at = excluded.updated_at,
 				inherited_from_version_id = excluded.inherited_from_version_id,
-				inheritance_delete_marker = excluded.inheritance_delete_marker,
+				is_tombstone = excluded.is_tombstone,
 				change_id = excluded.change_id,
 				commit_id = excluded.commit_id
 		`);
@@ -176,7 +213,7 @@ export function populateStateCache(args: {
 					row.created_at, // Preserve original created_at
 					row.updated_at, // Preserve original updated_at
 					row.inherited_from_version_id,
-					isDeletion ? 1 : 0, // inheritance_delete_marker
+					isDeletion ? 1 : 0, // is_tombstone
 					row.change_id,
 					row.commit_id,
 				]);
@@ -186,20 +223,5 @@ export function populateStateCache(args: {
 		} finally {
 			stmt.finalize();
 		}
-	}
-}
-
-/**
- * Ensures a table exists and updates the cache.
- * Duplicated from update-state-cache.ts to avoid circular dependency.
- */
-function ensureTableExists(
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
-	tableName: string
-): void {
-	createSchemaCacheTable({ engine, tableName });
-	const tableCache = getStateCacheV2Tables({ engine });
-	if (!tableCache.has(tableName)) {
-		tableCache.add(tableName);
 	}
 }

@@ -12,7 +12,8 @@ import { getTimestampSync } from "../../engine/functions/timestamp.js";
 import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
-import { buildResolvedStateQuery } from "./resolved-state.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { getStateCacheTables } from "../cache/schema.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -36,7 +37,7 @@ export function hasOpenTransaction(
 	}
 	// fall through on initial
 	const rows = engine.sqlite.exec({
-		sql: "SELECT 1 FROM internal_transaction_state LIMIT 1",
+		sql: "SELECT 1 FROM lix_internal_transaction_state LIMIT 1",
 		returnValue: "resultRows",
 	});
 	setHasOpenTransaction(engine, Array.isArray(rows) && rows.length > 0);
@@ -105,7 +106,7 @@ const STATE_VTAB_COLUMN_NAMES = [
 export function applyStateVTable(
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "preprocessQuery"
 	>
 ): void {
 	const { sqlite } = engine;
@@ -145,23 +146,6 @@ export function applyStateVTable(
 		arity: 0,
 		xFunc: () => {
 			return currentWriterKey ?? null;
-		},
-	});
-
-	sqlite.createFunction({
-		name: "validate_snapshot_content",
-		deterministic: true,
-		arity: 5,
-		// @ts-expect-error - type mismatch
-		xFunc: (_ctxPtr: number, ...args: any[]) => {
-			return validateStateMutation({
-				engine: engine,
-				schema: args[0] ? JSON.parse(args[0]) : null,
-				snapshot_content: JSON.parse(args[1]),
-				operation: args[2] || undefined,
-				entity_id: args[3] || undefined,
-				version_id: args[4],
-			});
 		},
 	});
 
@@ -223,10 +207,10 @@ export function applyStateVTable(
 			xBegin: () => {
 				setHasOpenTransaction(engine, true);
 				// TODO comment in after all internal v-table logic uses underlying state view
-				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
+				// // assert that we are not already in a transaction (the lix_internal_change_in_transaction table is empty)
 				// const existingChangesInTransaction = executeSync({
 				// 	lix: { sqlite },
-				// 	query: db.selectFrom("internal_change_in_transaction").selectAll(),
+				// 	query: db.selectFrom("lix_internal_change_in_transaction").selectAll(),
 				// });
 				// if (existingChangesInTransaction.length > 0) {
 				// 	const errorMessage = "Transaction already in progress";
@@ -251,7 +235,7 @@ export function applyStateVTable(
 
 			xRollback: () => {
 				sqlite.exec({
-					sql: "DELETE FROM internal_transaction_state",
+					sql: "DELETE FROM lix_internal_transaction_state",
 					returnValue: "resultRows",
 				});
 				currentWriterKey = null;
@@ -395,7 +379,10 @@ export function applyStateVTable(
 					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
 						// Query directly from resolved state (now includes tombstones)
-						let query = buildResolvedStateQuery().selectAll();
+						let query = internalQueryBuilder
+							.selectFrom("lix_internal_state_vtable")
+							.select("_pk")
+							.selectAll();
 
 						// Apply filters
 						for (const [column, value] of Object.entries(filters)) {
@@ -409,7 +396,10 @@ export function applyStateVTable(
 						return capi.SQLITE_OK;
 					}
 
-					let query = buildResolvedStateQuery().selectAll();
+					let query = internalQueryBuilder
+						.selectFrom("lix_internal_state_vtable")
+						.select("_pk")
+						.selectAll();
 
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
@@ -478,11 +468,11 @@ export function applyStateVTable(
 				} else {
 					const columnName = getColumnName(iCol);
 					if (columnName === "writer_key") {
-						// Compute writer on demand from internal_state_writer with inheritance fallback
+						// Compute writer on demand from lix_internal_state_writer with inheritance fallback
 						try {
 							const keyRows = engine.executeSync(
 								internalQueryBuilder
-									.selectFrom("internal_state_writer")
+									.selectFrom("lix_internal_state_writer")
 									.select(["writer_key"])
 									.where("file_id", "=", String(row.file_id))
 									.where("version_id", "=", String(row.version_id))
@@ -499,7 +489,7 @@ export function applyStateVTable(
 								if (parent) {
 									const parentRows = engine.executeSync(
 										internalQueryBuilder
-											.selectFrom("internal_state_writer")
+											.selectFrom("lix_internal_state_writer")
 											.select(["writer_key"])
 											.where("file_id", "=", String(row.file_id))
 											.where("version_id", "=", String(parent))
@@ -600,7 +590,7 @@ export function applyStateVTable(
 						const idx = STATE_VTAB_COLUMN_NAMES.indexOf(name);
 						if (idx === -1)
 							throw new Error(
-								`Unknown column '${name}' in internal_state_vtable`
+								`Unknown column '${name}' in lix_internal_state_vtable`
 							);
 						return idx;
 					};
@@ -620,9 +610,25 @@ export function applyStateVTable(
 							? valueFor("metadata")
 							: null;
 
-					// assert required fields
-					if (!entity_id || !schema_key || !file_id || !plugin_key) {
-						throw new Error("Missing required fields for state mutation");
+					const requiredFieldValues: Array<[string, unknown]> = [
+						["entity_id", entity_id],
+						["schema_key", schema_key],
+						["file_id", file_id],
+						["plugin_key", plugin_key],
+					];
+					const missingFields = requiredFieldValues
+						.filter(
+							([, value]) =>
+								value === null || value === undefined || value === ""
+						)
+						.map(([name]) => name);
+
+					if (missingFields.length > 0) {
+						throw new Error(
+							`Missing required fields for state mutation: ${missingFields.join(
+								", "
+							)}`
+						);
 					}
 
 					// Persist writer for INSERT/UPDATE
@@ -639,11 +645,14 @@ export function applyStateVTable(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(engine, schema_key);
-
+					const schemaKey = String(schema_key);
 					validateStateMutation({
 						engine: engine,
-						schema: storedSchema ? JSON.parse(storedSchema) : null,
+						schema:
+							schemaKey === LixStoredSchemaSchema["x-lix-key"]
+								? LixStoredSchemaSchema
+								: null,
+						schemaKey,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
@@ -699,7 +708,8 @@ export function applyStateVTable(
 						if (newVersionId && commitId) {
 							// Find other versions that point to the same commit
 							const existingVersionsWithSameCommit = engine.executeSync(
-								buildResolvedStateQuery()
+								internalQueryBuilder
+									.selectFrom("lix_internal_state_vtable")
 									.select(
 										sql`json_extract(snapshot_content, '$.id')`.as("version_id")
 									)
@@ -723,21 +733,14 @@ export function applyStateVTable(
 									existingVersionsWithSameCommit[0]!.version_id; // Take first existing version
 
 								// Get all unique schema keys from the source version
-								const schemaKeys = sqlite.exec({
-									sql: `SELECT DISTINCT schema_key FROM internal_state_cache WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor')`,
-									bind: [sourceVersionId],
-									returnValue: "resultRows",
-								}) as string[][];
-
-								// Copy cache entries for each schema key to the appropriate physical table
-								for (const row of schemaKeys || []) {
-									const sourceSchemaKey = row[0];
-									if (!sourceSchemaKey) continue;
-									const sanitizedSchemaKey = sourceSchemaKey.replace(
-										/[^a-zA-Z0-9]/g,
-										"_"
-									);
-									const tableName = `internal_state_cache_${sanitizedSchemaKey}`;
+								const tableCache = getStateCacheTables({ engine });
+								for (const tableName of tableCache) {
+									if (
+										tableName === "lix_internal_state_cache" ||
+										!tableName.startsWith("lix_internal_state_cache_v1_")
+									) {
+										continue;
+									}
 
 									// Check if table exists first
 									const tableExists = sqlite.exec({
@@ -746,25 +749,37 @@ export function applyStateVTable(
 										returnValue: "resultRows",
 									});
 
-									if (tableExists && tableExists.length > 0) {
-										// Copy entries from source version to new version using v2 cache structure
-										sqlite.exec({
-											sql: `
-												INSERT OR IGNORE INTO ${tableName} 
-												(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
-												SELECT 
-													entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
-													CASE 
+									if (!tableExists || tableExists.length === 0) {
+										continue;
+									}
+
+									const hasSourceRows = sqlite.exec({
+										sql: `SELECT 1 FROM ${tableName} WHERE version_id = ? AND schema_key NOT IN ('lix_version_tip','lix_version_descriptor') LIMIT 1`,
+										bind: [sourceVersionId],
+										returnValue: "resultRows",
+									});
+
+									if (!hasSourceRows || hasSourceRows.length === 0) {
+										continue;
+									}
+
+									// Copy entries from source version to new version using v2 cache structure
+									sqlite.exec({
+										sql: `
+									INSERT OR IGNORE INTO ${tableName} 
+									(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
+									SELECT 
+										entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+										CASE 
 														WHEN inherited_from_version_id IS NULL THEN ?
 														ELSE inherited_from_version_id
 													END as inherited_from_version_id,
-													inheritance_delete_marker, change_id, commit_id
-												FROM ${tableName}
-												WHERE version_id = ?
-											`,
-											bind: [newVersionId, sourceVersionId, sourceVersionId],
-										});
-									}
+													is_tombstone, change_id, commit_id
+									FROM ${tableName}
+									WHERE version_id = ?
+								`,
+										bind: [newVersionId, sourceVersionId, sourceVersionId],
+									});
 								}
 							}
 						}
@@ -804,7 +819,7 @@ export function applyStateVTable(
 			// UPSERT writer
 			engine.executeSync(
 				internalQueryBuilder
-					.insertInto("internal_state_writer")
+					.insertInto("lix_internal_state_writer")
 					.values({
 						file_id: args.fileId,
 						version_id: args.versionId,
@@ -823,7 +838,7 @@ export function applyStateVTable(
 			// DELETE writer row (no NULL storage)
 			engine.executeSync(
 				internalQueryBuilder
-					.deleteFrom("internal_state_writer")
+					.deleteFrom("lix_internal_state_writer")
 					.where("file_id", "=", args.fileId)
 					.where("version_id", "=", args.versionId)
 					.where("entity_id", "=", args.entityId)
@@ -838,7 +853,8 @@ export function applyStateVTable(
 		versionId: string;
 	}): string {
 		const [entity] = engine.executeSync(
-			buildResolvedStateQuery()
+			internalQueryBuilder
+				.selectFrom("lix_internal_state_vtable")
 				.select(["schema_key"])
 				.where("file_id", "=", args.fileId)
 				.where("entity_id", "=", args.entityId)
@@ -853,14 +869,14 @@ export function applyStateVTable(
 	// Register the vtable under a clearer internal name
 	capi.sqlite3_create_module(
 		sqlite.pointer!,
-		"internal_state_vtable",
+		"lix_internal_state_vtable",
 		module,
 		0
 	);
 
 	// Create the internal vtable (raw state surface)
 	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS internal_state_vtable USING internal_state_vtable();`
+		`CREATE VIRTUAL TABLE IF NOT EXISTS lix_internal_state_vtable USING lix_internal_state_vtable();`
 	);
 }
 
@@ -871,7 +887,8 @@ export function handleStateDelete(
 ): void {
 	// Look up the resolved row via the dynamic builder to avoid the legacy view
 	const [rowToDelete] = engine.executeSync(
-		buildResolvedStateQuery()
+		internalQueryBuilder
+			.selectFrom("lix_internal_state_vtable")
 			.select([
 				"entity_id",
 				"schema_key",
@@ -952,7 +969,7 @@ export function handleStateDelete(
 		// Direct untracked in this version (U tag) – delete from the untracked table immediately
 		engine.executeSync(
 			internalQueryBuilder
-				.deleteFrom("internal_state_all_untracked")
+				.deleteFrom("lix_internal_state_all_untracked")
 				.where("entity_id", "=", String(entity_id))
 				.where("schema_key", "=", String(schema_key))
 				.where("file_id", "=", String(file_id))
@@ -962,11 +979,13 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(engine, schema_key);
-
 	validateStateMutation({
 		engine: engine,
-		schema: storedSchema ? JSON.parse(storedSchema) : null,
+		schema:
+			String(schema_key) === LixStoredSchemaSchema["x-lix-key"]
+				? LixStoredSchemaSchema
+				: null,
+		schemaKey: String(schema_key),
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
 		entity_id: String(entity_id),
@@ -989,30 +1008,6 @@ export function handleStateDelete(
 			},
 		],
 	});
-}
-
-// Helper functions for the virtual table
-
-function getStoredSchema(
-	engine: Pick<LixEngine, "executeSync" | "hooks">,
-	schemaKey: any
-): string | null {
-	// Query the resolved-state builder directly to avoid vtable recursion
-	const result = engine.executeSync(
-		buildResolvedStateQuery()
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-			.where("schema_key", "=", "lix_stored_schema")
-			.where(
-				sql`json_extract(snapshot_content, '$.key')`,
-				"=",
-				String(schemaKey)
-			)
-			.where("snapshot_content", "is not", null)
-			.limit(1)
-			.compile()
-	).rows;
-
-	return result && result.length > 0 ? result[0]!.value : null;
 }
 
 function getColumnName(columnIndex: number): string {

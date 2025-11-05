@@ -64,7 +64,7 @@ export const cacheMissSimulation: SimulationTestDef = {
 			needsCacheClearance = true;
 		});
 
-		// 2) Repopulate lazily before the next SELECT (including internal_* for tests)
+		// 2) Repopulate lazily before the next SELECT (including lix_internal_* for tests)
 		const originalSelectFrom = lix.db.selectFrom.bind(lix.db);
 		// @ts-expect-error
 		lix.db.selectFrom = (table: any) => {

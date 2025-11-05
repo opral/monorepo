@@ -1,7 +1,7 @@
 import { v7 } from "uuid";
 import { nextSequenceNumberSync } from "./sequence.js";
 import { isDeterministicModeSync } from "../deterministic-mode/is-deterministic-mode.js";
-import type { Call } from "./router.js";
+import type { Call } from "./function-registry.js";
 import type { LixEngine } from "../boot.js";
 import { sql } from "kysely";
 import { internalQueryBuilder } from "../internal-query-builder.js";
@@ -26,7 +26,7 @@ export function uuidV7Sync(args: {
 		const [config] = withRuntimeCache(
 			engine,
 			internalQueryBuilder
-				.selectFrom("internal_state_vtable")
+				.selectFrom("lix_internal_state_vtable")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
 				.where("snapshot_content", "is not", null)

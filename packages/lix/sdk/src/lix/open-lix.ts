@@ -4,7 +4,7 @@ import { type LixDatabaseSchema } from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema-definition.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import type { NewStateAll } from "../entity-views/types.js";
+import type { NewStateByVersion } from "../engine/entity-views/types.js";
 import type { LixAccount } from "../account/schema-definition.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
@@ -38,11 +38,7 @@ export type Lix = {
 	 *
 	 * Preferred entrypoint for invoking engine functions.
 	 */
-	call: (
-		name: string,
-		payload?: unknown,
-		opts?: { signal?: AbortSignal }
-	) => Promise<unknown>;
+	call: (name: string, args?: unknown) => Promise<unknown>;
 
 	/**
 	 * Serialises the Lix into a {@link Blob}.
@@ -189,7 +185,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewStateAll<LixKeyValue>[];
+	keyValues?: NewStateByVersion<LixKeyValue>[];
 }): Promise<Lix> {
 	const hooks = createHooks();
 	const blob = args.blob;
@@ -265,11 +261,8 @@ export async function openLix(args: {
 		plugin: {
 			getAll: async () => hostPlugins,
 		},
-		call: async (
-			name: string,
-			payload?: unknown,
-			_opts?: { signal?: AbortSignal }
-		): Promise<unknown> => environment.call(name, payload),
+		call: async (name: string, args?: unknown): Promise<unknown> =>
+			environment.call(name, args),
 		close: async () => {
 			await environment.close();
 		},

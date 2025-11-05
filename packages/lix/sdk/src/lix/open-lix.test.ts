@@ -3,6 +3,7 @@ import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { openLix, usedFileExtensions } from "./open-lix.js";
 import type { LixAccount } from "../account/schema-definition.js";
+import { OpfsSahEnvironment } from "../environment/opfs-sah.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -82,7 +83,7 @@ test("provided key values in openLix should default to the active version if lix
 
 	// Check that test_key_1 without lixcol_version_id is associated with the active version
 	const kv1 = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "test_key_1")
 		.orderBy("key")
 		.selectAll()
@@ -93,7 +94,7 @@ test("provided key values in openLix should default to the active version if lix
 
 	// Check that test_key_2 with explicit lixcol_version_id is associated with the global version
 	const kv2 = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "test_key_2")
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -113,9 +114,6 @@ test("provided key values in openLix should default to the active version if lix
 	expect(mainVersion?.name).toBe("main");
 });
 
-// TODO occasional test failures due to timing issues
-// faulty state materialization might be the cause.
-// fix after https://github.com/opral/lix-sdk/issues/308
 test("providing an account should be possible", async () => {
 	const mockAccount: LixAccount = {
 		id: "mock-account",
@@ -139,7 +137,7 @@ test("providing an account should be possible", async () => {
 	// Join to verify the actual account was created with correct details
 	const activeAccountWithDetails = await lix.db
 		.selectFrom("active_account as aa")
-		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 		.where("a.lixcol_version_id", "=", "global")
 		.orderBy("aa.account_id")
 		.select(["a.id", "a.name"])
@@ -368,7 +366,7 @@ test("deterministic mode can be turned on and off", async () => {
 	await Promise.all(
 		[lix1, lix2].map(async (lix) => {
 			await lix.db
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_deterministic_mode")
 				.set({ value: { enabled: false } })
@@ -407,7 +405,7 @@ test("deterministic mode can be turned on and off", async () => {
 	await Promise.all(
 		[lix1, lix2].map(async (lix) => {
 			await lix.db
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_deterministic_mode")
 				.set({ value: { enabled: true } })
@@ -455,7 +453,7 @@ test("providing deterministic mode with kv false should still insert it", async 
 	});
 
 	const kvs = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "lix_deterministic_mode")
 		.where("lixcol_inherited_from_version_id", "is", null)
 		.orderBy("key")
@@ -500,7 +498,7 @@ test("provided key values respect lixcol_untracked setting", async () => {
 
 	// Check tracked key
 	const trackedKv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "tracked_key")
 		.where("lixcol_version_id", "=", "global")
 		.orderBy("key")
@@ -516,7 +514,7 @@ test("provided key values respect lixcol_untracked setting", async () => {
 
 	// Check untracked key
 	const untrackedKv = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "untracked_key")
 		.where("lixcol_version_id", "=", "global")
 		.orderBy("key")

@@ -57,7 +57,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 	const specialMappings = {
 		change: "change",
 		state: "state",
-		state_all: "state_all",
+		state_by_version: "state_by_version",
 		version: "lix_version",
 		active_version: "lix_active_version",
 	} as const;
@@ -74,7 +74,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 
 	// Special case: the merged 'version' views are composed from descriptor + tip state
 	// Changes to those underlying schema keys should invalidate queries against 'version'.
-	if (tableNames.has("version") || tableNames.has("version_all")) {
+	if (tableNames.has("version") || tableNames.has("version_by_version")) {
 		if (!schemaKeys.includes("lix_version_descriptor"))
 			schemaKeys.push("lix_version_descriptor");
 		if (!schemaKeys.includes("lix_version_tip"))
@@ -82,7 +82,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 	}
 
 	// Try to detect literal schema_key filters from the compiled SQL and parameters.
-	// This allows more precise dependency tracking for state_all queries.
+	// This allows more precise dependency tracking for state_by_version queries.
 	const sqlText: string | undefined = (compiledQuery?.sql ??
 		compiledQuery?.query?.sql) as any;
 	const params: any[] = (compiledQuery?.parameters ??

@@ -38,7 +38,7 @@ export async function writeFile(
 
 		// Look up existing file row in the agent version
 		const existing = await trx
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", path)
 			.where("lixcol_version_id", "=", agentVersion.id)
 			.select(["id", "data"])
@@ -53,14 +53,14 @@ export async function writeFile(
 
 		if (existing) {
 			await trx
-				.updateTable("file_all")
+				.updateTable("file_by_version")
 				.set({ data })
 				.where("id", "=", existing.id)
 				.where("lixcol_version_id", "=", agentVersion.id)
 				.execute();
 
 			const sel = await trx
-				.selectFrom("file_all")
+				.selectFrom("file_by_version")
 				.where("id", "=", existing.id)
 				.where("lixcol_version_id", "=", agentVersion.id)
 				.select(["id", "path", "data"])
@@ -75,7 +75,7 @@ export async function writeFile(
 			});
 		} else {
 			await trx
-				.insertInto("file_all")
+				.insertInto("file_by_version")
 				.values({
 					path,
 					data,
@@ -84,7 +84,7 @@ export async function writeFile(
 				.execute();
 
 			const sel = await trx
-				.selectFrom("file_all")
+				.selectFrom("file_by_version")
 				.where("path", "=", path)
 				.where("lixcol_version_id", "=", agentVersion.id)
 				.select(["id", "path", "data"])

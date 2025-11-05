@@ -19,31 +19,27 @@ export async function createAccount(args: {
 	lix: Lix;
 	id?: LixAccount["id"];
 	name: LixAccount["name"];
-	lixcol_version_id?: string;
 }): Promise<LixAccount> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
 		const accountId =
 			args.id || (await nanoId({ lix: { ...args.lix, db: trx } }));
-
 		// Insert the account (views don't support returningAll)
 		await trx
-			.insertInto("account_all")
+			.insertInto("account_by_version")
 			.values({
 				id: accountId,
 				name: args.name,
-				lixcol_version_id:
-					args.lixcol_version_id ??
-					trx.selectFrom("active_version").select("version_id"),
 			})
 			.execute();
 
 		// Query back the inserted account
-		const account = await trx
-			.selectFrom("account_all")
+		let selectQuery = trx
+			.selectFrom("account")
 			.selectAll()
-			.where("id", "=", accountId)
-			.executeTakeFirstOrThrow();
+			.where("id", "=", accountId);
+
+		const account = await selectQuery.executeTakeFirstOrThrow();
 
 		return account;
 	};

@@ -25,7 +25,7 @@ test("rejectChangeProposal deletes proposal first, then deletes source version (
 	});
 
 	await lix.db
-		.insertInto("file_all")
+		.insertInto("file_by_version")
 		.values({
 			path: "/reject-spec.md",
 			data: enc("hello"),
@@ -47,7 +47,7 @@ test("rejectChangeProposal deletes proposal first, then deletes source version (
 
 	// File should NOT be present in main after reject
 	const fileInMain = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("path", "=", "/reject-spec.md")
 		.where("lixcol_version_id", "=", main.id)
 		.selectAll()

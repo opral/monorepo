@@ -22,7 +22,7 @@ export type InternalFileLixcolCacheTable = {
  *
  * The view can query this table directly using SQL:
  * SELECT latest_change_id, latest_commit_id, created_at, updated_at, writer_key
- * FROM internal_file_lixcol_cache
+ * FROM lix_internal_file_lixcol_cache
  * WHERE file_id = ? AND version_id = ?
  */
 export function applyFileLixcolCacheSchema(args: {
@@ -30,7 +30,7 @@ export function applyFileLixcolCacheSchema(args: {
 }): void {
 	// Create the cache table for file lixcol metadata
 	args.engine.sqlite.exec(`
-		CREATE TABLE IF NOT EXISTS internal_file_lixcol_cache (
+		CREATE TABLE IF NOT EXISTS lix_internal_file_lixcol_cache (
 			file_id TEXT NOT NULL,
 			version_id TEXT NOT NULL,
 			latest_change_id TEXT,
@@ -43,6 +43,6 @@ export function applyFileLixcolCacheSchema(args: {
 
 		-- Index for fast lookups
 		CREATE INDEX IF NOT EXISTS idx_file_lixcol_cache_lookup 
-		ON internal_file_lixcol_cache(file_id, version_id);
+		ON lix_internal_file_lixcol_cache(file_id, version_id);
 	`);
 }

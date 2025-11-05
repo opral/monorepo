@@ -23,7 +23,7 @@ describe("write_file tool", () => {
 
 		const version = await ensureAgentVersion(lix);
 		const row = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/hello.txt")
 			.where("lixcol_version_id", "=", version.id)
 			.select(["data"])
@@ -44,7 +44,7 @@ describe("write_file tool", () => {
 		expect(res.updated).toBe(true);
 		const version = await ensureAgentVersion(lix);
 		const row = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/a.md")
 			.where("lixcol_version_id", "=", version.id)
 			.select(["data"])

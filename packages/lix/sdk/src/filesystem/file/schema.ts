@@ -223,10 +223,10 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
                 lixcol_writer_key,
                 lixcol_untracked,
                 lixcol_metadata
-        FROM file_all
+        FROM file_by_version
         WHERE lixcol_version_id IN (SELECT version_id FROM active_version);
 
-	  CREATE VIEW IF NOT EXISTS file_all AS
+	  CREATE VIEW IF NOT EXISTS file_by_version AS
 	        WITH file_lixcol AS (
 	            SELECT
 	                fd.entity_id,
@@ -236,7 +236,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                fd.untracked,
 	                fd.metadata AS change_metadata,
 	                select_file_lixcol(fd.entity_id, fd.version_id) AS lixcol_json
-	            FROM state_all fd
+	            FROM state_by_version fd
 	            WHERE fd.schema_key = 'lix_file_descriptor'
 	        ),
 	        directory_paths AS (
@@ -244,7 +244,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                id AS directory_id,
 	                lixcol_version_id AS version_id,
 	                path AS dir_path
-	            FROM directory_all
+	            FROM directory_by_version
 	        ),
 	        file_rows AS (
 	            SELECT
@@ -345,30 +345,31 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   INSTEAD OF DELETE ON file
   BEGIN
       -- Clear the file data cache
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
       -- Clear the file lixcol cache
-      DELETE FROM internal_file_lixcol_cache
+      DELETE FROM lix_internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state_all
+      DELETE FROM lix_internal_state_vtable
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version)
-        AND schema_key != 'lix_file_descriptor';
+        AND schema_key != 'lix_file_descriptor'
+        AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
-      DELETE FROM state_all
+      DELETE FROM state_by_version
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file_descriptor'
         AND version_id = (SELECT version_id FROM active_version);
   END;
 
-  CREATE TRIGGER IF NOT EXISTS file_all_insert
-  INSTEAD OF INSERT ON file_all
+  CREATE TRIGGER IF NOT EXISTS file_by_version_insert
+  INSTEAD OF INSERT ON file_by_version
   BEGIN
       SELECT handle_file_insert(
         COALESCE(NEW.id, lix_nano_id()),
@@ -381,8 +382,8 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
       );
   END;
 
-  CREATE TRIGGER IF NOT EXISTS file_all_update
-  INSTEAD OF UPDATE ON file_all
+  CREATE TRIGGER IF NOT EXISTS file_by_version_update
+  INSTEAD OF UPDATE ON file_by_version
   BEGIN
       SELECT handle_file_update(
         NEW.id,
@@ -395,27 +396,28 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
       );
   END;
 
-  CREATE TRIGGER IF NOT EXISTS file_all_delete
-  INSTEAD OF DELETE ON file_all
+  CREATE TRIGGER IF NOT EXISTS file_by_version_delete
+  INSTEAD OF DELETE ON file_by_version
   BEGIN
       -- Clear the file data cache
-      DELETE FROM internal_file_data_cache
+      DELETE FROM lix_internal_file_data_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         
       -- Clear the file lixcol cache
-      DELETE FROM internal_file_lixcol_cache
+      DELETE FROM lix_internal_file_lixcol_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state_all
+      DELETE FROM lix_internal_state_vtable
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id
-        AND schema_key != 'lix_file_descriptor';
+        AND schema_key != 'lix_file_descriptor'
+        AND snapshot_content IS NOT NULL;
         
       -- Delete the file entity itself
-      DELETE FROM state_all
+      DELETE FROM state_by_version
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file_descriptor'
         AND version_id = OLD.lixcol_version_id;
@@ -468,7 +470,7 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   WHERE schema_key = 'lix_file_descriptor';
 `);
 
-	// internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.
+	// lix_internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.
 	// History queries can be optimized later with dedicated cache tables if necessary.
 }
 

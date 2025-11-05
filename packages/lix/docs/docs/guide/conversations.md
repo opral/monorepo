@@ -13,7 +13,11 @@ Lix has a universal commenting system. You can attach conversations to any entit
 ## Examples
 
 ```ts
-import { openLix, createConversation, createConversationMessage } from "@lix-js/sdk";
+import {
+  openLix,
+  createConversation,
+  createConversationMessage,
+} from "@lix-js/sdk";
 import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 
 const lix = await openLix({});
@@ -55,7 +59,7 @@ Using Zettel makes messages highly interoperable. It allows different applicatio
 
 ## API Reference quick-links
 
-| Function / Type        | Purpose                                 | Docs                                           |
-| ---------------------- | --------------------------------------- | ---------------------------------------------- |
+| Function / Type        | Purpose                                      | Docs                              |
+| ---------------------- | -------------------------------------------- | --------------------------------- |
 | `attachConversation()` | Attach an existing conversation to an entity | /api/functions/attachConversation |
-| `detachConversation()` | Detach a conversation from an entity    | /api/functions/detachConversation |
+| `detachConversation()` | Detach a conversation from an entity         | /api/functions/detachConversation |

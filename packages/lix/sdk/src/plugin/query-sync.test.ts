@@ -85,9 +85,9 @@ describe("querySync", () => {
 			hidden: false,
 		} as any;
 
-		// Use engine helper: write state_all row for file descriptor via Kysely
+		// Use engine helper: write state_by_version row for file descriptor via Kysely
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: file.id,
 				schema_key: "lix_file_descriptor",

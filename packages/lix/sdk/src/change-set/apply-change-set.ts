@@ -23,7 +23,7 @@ export async function applyChangeSet(args: {
 		// This is necessary because we are applying a change set directly
 		// and we don't want to create a new change set for this operation
 		await trx
-			.insertInto("key_value_all")
+			.insertInto("key_value_by_version")
 			.values({
 				key: "lix_skip_file_handlers",
 				value: true,
@@ -43,16 +43,20 @@ export async function applyChangeSet(args: {
 		const changesResult = await trx
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element_all",
-				"change_set_element_all.change_id",
+				"change_set_element_by_version",
+				"change_set_element_by_version.change_id",
 				"change.id"
 			)
-			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
-			.where("change_set_element_all.lixcol_version_id", "=", "global")
+			.where(
+				"change_set_element_by_version.change_set_id",
+				"=",
+				args.changeSet.id
+			)
+			.where("change_set_element_by_version.lixcol_version_id", "=", "global")
 			.selectAll("change")
 			.execute();
 
-		// Write-through cache: populate internal_state_cache for all applied changes
+		// Write-through cache: populate lix_internal_state_cache for all applied changes
 		const changesForCache = changesResult.map((change) => ({
 			...change,
 			snapshot_content: change.snapshot_content
@@ -149,7 +153,7 @@ export async function applyChangeSet(args: {
 
 			// After processing all plugins, emit file change event
 			await trx
-				.deleteFrom("key_value_all")
+				.deleteFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", version.id)
 				.where("key", "=", "lix_skip_file_handlers")
 				.execute();
