@@ -26,17 +26,17 @@ import {
 } from "../key-value/schema-definition.js";
 import type {
 	StateView,
-	StateAllView,
+	StateByVersionView,
 	StateWithTombstonesView,
 } from "../state/index.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixDirectoryDescriptorSchema } from "../filesystem/directory/schema-definition.js";
 import { LixFileDescriptorSchema } from "../filesystem/file/schema-definition.js";
 import type {
-	EntityStateAllView,
+	EntityStateByVersionView,
 	EntityStateHistoryView,
 	EntityStateView,
-} from "../entity-views/types.js";
+} from "../engine/entity-views/types.js";
 import { LixLogSchema } from "../log/schema-definition.js";
 import {
 	LixAccountSchema,
@@ -52,9 +52,8 @@ import {
 	type LixConversationMessage,
 } from "../conversation/schema-definition.js";
 import { LixChangeProposalSchema } from "../change-proposal/schema-definition.js";
-import type { EntityViews } from "../entity-views/entity-view-builder.js";
-import type { ToKysely } from "../entity-views/types.js";
-import type { InternalStateCacheTable } from "../state/cache/schema.js";
+import type { EntityViews } from "../engine/entity-views/entity-view-builder.js";
+import type { ToKysely } from "../engine/entity-views/types.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
@@ -70,10 +69,8 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	lix_internal_transaction_state: InternalTransactionStateTable;
 	lix_internal_change: InternalChangeTable;
 	lix_internal_snapshot: InternalSnapshotTable;
-	lix_internal_state_cache: InternalStateCacheTable;
 	lix_internal_state_all_untracked: InternalStateAllUntrackedTable;
 	lix_internal_state_vtable: InternalStateVTable;
-	lix_internal_state_reader: InternalStateVTable;
 	lix_internal_file_data_cache: InternalFileDataCacheTable;
 	lix_internal_file_lixcol_cache: InternalFileLixcolCacheTable;
 	lix_internal_state_writer: InternalStateWriterTable;
@@ -94,8 +91,8 @@ type DirectoryDescriptorView = ToKysely<
 		}
 	>
 >;
-type DirectoryDescriptorAllView = ToKysely<
-	EntityStateAllView<
+type DirectoryDescriptorByVersionView = ToKysely<
+	EntityStateByVersionView<
 		FromLixSchemaDefinition<typeof LixDirectoryDescriptorSchema> & {
 			path: LixGenerated<string>;
 		}
@@ -117,13 +114,13 @@ export type LixDatabaseSchema = {
 	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;
-	state_all: StateAllView;
+	state_by_version: StateByVersionView;
 	state_with_tombstones: StateWithTombstonesView;
 	state_history: StateHistoryView;
 
 	change: ChangeView;
 	directory: DirectoryDescriptorView;
-	directory_all: DirectoryDescriptorAllView;
+	directory_by_version: DirectoryDescriptorByVersionView;
 	directory_history: DirectoryDescriptorHistoryView;
 } & EntityViews<
 	typeof LixKeyValueSchema,

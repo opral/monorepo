@@ -2,15 +2,18 @@ import { test, expect } from "vitest";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { assembleMdAst } from "./assemble-md-ast";
+import { insertMarkdownSchemas } from "../../../lib/insert-markdown-schemas";
 
 test("assembleMdAst returns empty root when no state root exists", async () => {
 	const lix = await openLix({ providePlugins: [mdPlugin] });
+	await insertMarkdownSchemas({ lix });
 	const ast = await assembleMdAst({ lix, fileId: "missing_file" });
 	expect(ast).toEqual({ type: "root", children: [] });
 });
 
 test("assembleMdAst returns ordered children from state (seeded by plugin)", async () => {
 	const lix = await openLix({ providePlugins: [mdPlugin] });
+	await insertMarkdownSchemas({ lix });
 
 	const fileId = "util_file_1";
 	const markdown = "Hello";

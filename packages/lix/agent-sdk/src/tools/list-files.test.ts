@@ -19,7 +19,7 @@ describe("listFiles tool", () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values([
 				{
 					path: "/docs/hello.md",
@@ -47,7 +47,7 @@ describe("listFiles tool", () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values([
 				{
 					path: "/notes/a.md",
@@ -100,7 +100,7 @@ describe("listFiles tool", () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values([
 				{
 					path: "/visible.md",

@@ -8,8 +8,6 @@ import type { Call } from "./functions/function-registry.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { openLix } from "../lix/open-lix.js";
 import { createExecuteSync } from "./execute-sync.js";
-import { createQueryPreprocessor } from "./query-preprocessor/create-query-preprocessor.js";
-import type { QueryPreprocessorFn } from "./query-preprocessor/create-query-preprocessor.js";
 import { internalQueryBuilder } from "./internal-query-builder.js";
 import { setDeterministicBoot } from "./deterministic-mode/is-deterministic-mode.js";
 import {
@@ -17,6 +15,8 @@ import {
 	type FunctionRegistry,
 } from "./functions/function-registry.js";
 import { registerBuiltinFunctions } from "./functions/register-builtins.js";
+import type { PreprocessorFn } from "./preprocessor/types.js";
+import { createPreprocessor } from "./preprocessor/create-preprocessor.js";
 
 export type EngineEvent = {
 	type: "state_commit";
@@ -50,7 +50,7 @@ export type LixEngine = {
 	/** Return all loaded plugins synchronously */
 	getAllPluginsSync: () => LixPlugin[];
 	/** Query preprocessor shared across executeSync + explain flows */
-	preprocessQuery: QueryPreprocessorFn;
+	preprocessQuery: PreprocessorFn;
 	/**
 	 * Stable runtime-only cache token.
 	 *
@@ -74,7 +74,18 @@ export type LixEngine = {
 	 */
 	runtimeCacheRef: object;
 	/** Execute raw SQL synchronously against the engine-controlled SQLite connection */
-	executeSync: (args: { sql: string; parameters?: Readonly<unknown[]> }) => {
+	executeSync: (args: {
+		sql: string;
+		parameters?: Readonly<unknown[]>;
+		/**
+		 * Selects the preprocessing pipeline to run before executing the query.
+		 *
+		 * - `full` (default): run the entire rewrite pipeline.
+		 * - `vtable-select-only`: keep cache population and vtable rewrites.
+		 * - `none`: bypass preprocessing entirely.
+		 */
+		preprocessMode?: "full" | "vtable-select-only" | "none";
+	}) => {
 		rows: any[];
 	};
 	/** Invoke an engine function (router) */
@@ -102,62 +113,45 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	const hooks = createHooks();
 	const runtimeCacheRef = {};
 
-	let engineRef: LixEngine | null = null;
+	const engine: LixEngine = {
+		sqlite: env.sqlite,
+		hooks,
+		getAllPluginsSync: () => plugins,
+		runtimeCacheRef,
+		preprocessQuery: () => {
+			throw new Error("preprocessQuery() is not yet initialised");
+		},
+		executeSync: () => {
+			throw new Error("executeSync() is not yet initialised");
+		},
+		call: async () => {
+			throw new Error("call() is not yet initialised");
+		},
+		registerFunction: () => {
+			throw new Error("registerFunction() is not yet initialised");
+		},
+		listFunctions: () => {
+			throw new Error("listFunctions() is not yet initialised");
+		},
+	};
 
 	const fnRegistry = createFunctionRegistry({
-		getEngine: () => {
-			if (!engineRef) {
-				throw new Error("Engine functions not initialised");
-			}
-			return engineRef;
-		},
+		engine,
 	});
 
-	let callImpl: LixEngine["call"] | null = null;
+	engine.registerFunction = fnRegistry.register;
+	engine.listFunctions = fnRegistry.list;
+	engine.call = fnRegistry.call;
 
 	if (deterministicBoot) {
 		setDeterministicBoot({ runtimeCacheRef, value: true });
 	}
 
-	let executeSyncImpl: LixEngine["executeSync"] | null = null;
+	engine.preprocessQuery = createPreprocessor({ engine });
 
-	const preprocessorEngine = {
-		sqlite: env.sqlite,
-		hooks,
-		runtimeCacheRef,
-		executeSync: ((args) => {
-			if (!executeSyncImpl) {
-				throw new Error("executeSync not initialised");
-			}
-			return executeSyncImpl(args);
-		}) as LixEngine["executeSync"],
-		call: ((name, callArgs) => {
-			if (!callImpl) {
-				throw new Error("Engine call not initialised");
-			}
-			return callImpl(name, callArgs);
-		}) as LixEngine["call"],
-		listFunctions: fnRegistry.list,
-	} as const;
+	engine.executeSync = createExecuteSync({ engine });
 
-	const preprocessQuery = await createQueryPreprocessor(preprocessorEngine);
-
-	const executeSync = await createExecuteSync({
-		engine: {
-			sqlite: env.sqlite,
-			hooks,
-			runtimeCacheRef,
-		},
-		preprocess: preprocessQuery,
-	});
-	executeSyncImpl = executeSync;
-
-	prepareEngineDatabase({
-		sqlite: env.sqlite,
-		hooks,
-		executeSync,
-		runtimeCacheRef,
-	});
+	prepareEngineDatabase({ engine });
 
 	const plugins: LixPlugin[] = [];
 	for (const code of env.args.providePluginsRaw ?? []) {
@@ -167,22 +161,6 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 	for (const input of env.args.providePlugins ?? []) {
 		plugins.push(input);
 	}
-
-	const engine: LixEngine = {
-		sqlite: env.sqlite,
-		hooks,
-		getAllPluginsSync: () => plugins,
-		runtimeCacheRef,
-		preprocessQuery,
-		executeSync,
-		call: async () => {
-			throw new Error("Engine router not initialised");
-		},
-		registerFunction: fnRegistry.register,
-		listFunctions: fnRegistry.list,
-	};
-
-	engineRef = engine;
 
 	applyFilesystemSchema({ engine });
 
@@ -194,7 +172,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		const accountExists =
 			engine.executeSync(
 				internalQueryBuilder
-					.selectFrom("account_all")
+					.selectFrom("account_by_version")
 					.select("id")
 					.where("id", "=", env.args.account.id)
 					.where("lixcol_version_id", "=", "global")
@@ -204,7 +182,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		if (!accountExists) {
 			engine.executeSync(
 				internalQueryBuilder
-					.insertInto("account_all")
+					.insertInto("account_by_version")
 					.values({
 						id: env.args.account.id,
 						name: env.args.account.name,
@@ -231,7 +209,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				const exists =
 					engine.executeSync(
 						internalQueryBuilder
-							.selectFrom("key_value_all")
+							.selectFrom("key_value_by_version")
 							.select("key")
 							.where("key", "=", kv.key)
 							.where("lixcol_version_id", "=", explicitVid)
@@ -241,8 +219,8 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				if (exists) {
 					engine.executeSync(
 						internalQueryBuilder
-							.updateTable("key_value_all")
-							.set({ value: kv.value as any })
+							.updateTable("key_value_by_version")
+							.set({ value: kv.value })
 							.where("key", "=", kv.key)
 							.where("lixcol_version_id", "=", explicitVid)
 							.compile()
@@ -250,10 +228,10 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 				} else {
 					engine.executeSync(
 						internalQueryBuilder
-							.insertInto("key_value_all")
+							.insertInto("key_value_by_version")
 							.values({
 								key: kv.key,
-								value: kv.value as any,
+								value: kv.value,
 								lixcol_version_id: explicitVid,
 							})
 							.compile()
@@ -292,25 +270,7 @@ export async function boot(env: BootEnv): Promise<LixEngine> {
 		}
 	}
 
-	const call = fnRegistry.call;
-	engine.call = call;
-	callImpl = call;
-
 	registerBuiltinFunctions({ register: fnRegistry.register, engine });
-
-	// Register synchronous UDFs now that we have the engine context
-	env.sqlite.createFunction({
-		name: "lix_call",
-		arity: 1,
-		// @ts-expect-error - not sure why this is not working
-		xFunc: (_ctx: number, descriptorJson: string) => {
-			const { name, args } = JSON.parse(descriptorJson) as {
-				name: string;
-				args?: Record<string, unknown>;
-			};
-			return call(name, args ?? {});
-		},
-	});
 
 	if (deterministicBoot) {
 		setDeterministicBoot({ runtimeCacheRef, value: false });

@@ -2,6 +2,18 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import type { LixPlugin } from "../../plugin/lix-plugin.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const testFileSchema = {
+	"x-lix-key": "test_schema",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		value: { type: "string" },
+	},
+	required: ["value"],
+} as const satisfies LixSchemaDefinition;
 
 test("materializeFileData with plugin that has changes", async () => {
 	const mockPlugin: LixPlugin = {
@@ -20,6 +32,10 @@ test("materializeFileData with plugin that has changes", async () => {
 	const lix = await openLix({
 		providePlugins: [mockPlugin],
 	});
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testFileSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -38,7 +54,7 @@ test("materializeFileData with plugin that has changes", async () => {
 
 	// Manually insert some state data to simulate plugin changes
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity1",
 			schema_key: "test_schema",

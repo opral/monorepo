@@ -1,22 +1,21 @@
 import type { LixEngine } from "../engine/boot.js";
 import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyUntrackedStateSchema } from "./untracked/schema.js";
-import { applyStateCacheV2Schema } from "./cache/schema.js";
-import { applyStateAllView } from "./views/state-all.js";
+import { applyStateCacheSchema } from "./cache/schema.js";
+import { applyStateByVersionView } from "./views/state-by-version.js";
 import { applyStateWithTombstonesView } from "./views/state-with-tombstones.js";
 import { applyStateView } from "./views/state.js";
 import { applyStateVTable } from "./vtable/vtable.js";
-import { applyInternalStateReaderSchema } from "./reader/schema.js";
 
 export function applyStateDatabaseSchema(args: {
 	engine: Pick<
 		LixEngine,
-		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef"
+		"sqlite" | "hooks" | "executeSync" | "runtimeCacheRef" | "preprocessQuery"
 	>;
 }): void {
 	const { engine } = args;
 	applyMaterializeStateSchema({ engine });
-	applyStateCacheV2Schema({ engine });
+	applyStateCacheSchema({ engine });
 	applyUntrackedStateSchema({ engine });
 
 	// Writer metadata table: stores last writer per (file, version, entity, schema).
@@ -35,15 +34,11 @@ export function applyStateDatabaseSchema(args: {
 	    ON lix_internal_state_writer(file_id, version_id, writer_key);
 	`);
 
-	// Views that route reads through the preprocessor must exist before the vtable registers
-	// triggers that may query them during initialization.
-	applyInternalStateReaderSchema({ engine });
-
 	// Apply the virtual table (binds to the in-process engine)
 	applyStateVTable(engine);
 
 	// Public views over the internal vtable
 	applyStateView({ engine });
-	applyStateAllView({ engine });
+	applyStateByVersionView({ engine });
 	applyStateWithTombstonesView({ engine });
 }

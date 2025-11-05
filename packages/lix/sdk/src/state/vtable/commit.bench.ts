@@ -1,107 +1,125 @@
-import { bench } from "vitest";
+import { bench, describe } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "../transaction/insert-transaction-state.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
-// NOTE: openLix includes database initialization overhead
-// This affects all benchmarks equally and represents real-world usage patterns
-// this test exists to act as baseline for commit performance
-bench("commit empty transaction (baseline)", async () => {
+const COMMIT_BENCHMARK_SCHEMA: LixSchemaDefinition = {
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		metadata: {
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				type: { type: "string" },
+				index: { type: "number" },
+				txn: { type: "number" },
+			},
+		},
+	},
+	required: ["id", "value"],
+	"x-lix-key": "commit_benchmark_entity",
+	"x-lix-version": "1.0",
+};
+
+async function registerCommitSchema(
+	lix: Awaited<ReturnType<typeof openLix>>
+): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: COMMIT_BENCHMARK_SCHEMA })
+		.execute();
+}
+
+describe("commit empty transaction (baseline)", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
-	commit({
-		engine: lix.engine!,
-	});
-});
-
-bench("commit transaction with 1 row", async () => {
-	const lix = await openLix({});
-
-	// Insert multiple transaction states in a single batch
-	const multipleData = [];
-	for (let i = 0; i < 1; i++) {
-		multipleData.push({
-			entity_id: `commit_test_entity_${i}`,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: `commit_file`,
-			plugin_key: "benchmark_plugin",
-			snapshot_content: JSON.stringify({
-				id: `commit_test_entity_${i}`,
-				value: `test_data_${i}`,
-				metadata: { type: "commit_benchmark", index: i },
-			}),
-			schema_version: "1.0",
-			untracked: false,
+	bench("", () => {
+		commit({
+			engine: lix.engine!,
 		});
-	}
-
-	insertTransactionState({
-		engine: lix.engine!,
-		data: multipleData,
-		timestamp: await getTimestamp({ lix }),
-	});
-
-	// Benchmark: Commit all transaction states
-	commit({
-		engine: lix.engine!,
 	});
 });
 
-bench("commit transaction with 100 rows", async () => {
+describe("commit transaction with 1 row", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
-	// Insert multiple transaction states in a single batch
-	const multipleData = [];
-	for (let i = 0; i < 100; i++) {
-		multipleData.push({
-			entity_id: `commit_test_entity_${i}`,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: `commit_file`,
-			plugin_key: "benchmark_plugin",
-			snapshot_content: JSON.stringify({
-				id: `commit_test_entity_${i}`,
-				value: `test_data_${i}`,
-				metadata: { type: "commit_benchmark", index: i },
-			}),
-			schema_version: "1.0",
-			untracked: false,
+	let seedIteration = 0;
+	const seedSingleRow = async (): Promise<void> => {
+		const iteration = seedIteration++;
+		const rowId = `commit_test_entity_${iteration}`;
+
+		insertTransactionState({
+			engine: lix.engine!,
+			data: [
+				{
+					entity_id: rowId,
+					version_id: "global",
+					schema_key: "commit_benchmark_entity",
+					file_id: "commit_file",
+					plugin_key: "benchmark_plugin",
+					snapshot_content: JSON.stringify({
+						id: rowId,
+						value: `test_data_${iteration}`,
+						metadata: { type: "commit_benchmark", index: iteration },
+					}),
+					schema_version: "1.0",
+					untracked: false,
+				},
+			],
+			timestamp: await getTimestamp({ lix }),
 		});
-	}
-	insertTransactionState({
-		engine: lix.engine!,
-		data: multipleData,
-		timestamp: await getTimestamp({ lix }),
-	});
+	};
 
-	// Benchmark: Commit all transaction states
-	commit({
-		engine: lix.engine!,
-	});
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
+		},
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedSingleRow();
+				};
+			},
+		}
+	);
 });
 
-bench("commit 10 transactions x 10 changes (sequential)", async () => {
+describe("commit transaction with 100 rows", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
-	const TXN_COUNT = 10;
-	const ROWS_PER_TXN = 10;
+	const ROW_COUNT = 100;
+	let seedIteration = 0;
+	const seedHundredRows = async (): Promise<void> => {
+		const iteration = seedIteration++;
+		const offset = iteration * ROW_COUNT;
+		const rows = [];
 
-	for (let t = 0; t < TXN_COUNT; t++) {
-		const batch = [];
-		for (let i = 0; i < ROWS_PER_TXN; i++) {
-			const globalIndex = t * ROWS_PER_TXN + i;
-			batch.push({
-				entity_id: `seq_commit_entity_${globalIndex}`,
+		for (let i = 0; i < ROW_COUNT; i++) {
+			const globalIndex = offset + i;
+			rows.push({
+				entity_id: `commit_test_entity_${globalIndex}`,
 				version_id: "global",
 				schema_key: "commit_benchmark_entity",
-				file_id: `commit_file`,
+				file_id: "commit_file",
 				plugin_key: "benchmark_plugin",
 				snapshot_content: JSON.stringify({
-					id: `seq_commit_entity_${globalIndex}`,
-					value: `seq_data_${globalIndex}`,
-					metadata: { type: "commit_benchmark_seq", txn: t, index: i },
+					id: `commit_test_entity_${globalIndex}`,
+					value: `test_data_${globalIndex}`,
+					metadata: {
+						type: "commit_benchmark",
+						index: globalIndex,
+					},
 				}),
 				schema_version: "1.0",
 				untracked: false,
@@ -110,104 +128,212 @@ bench("commit 10 transactions x 10 changes (sequential)", async () => {
 
 		insertTransactionState({
 			engine: lix.engine!,
-			data: batch,
+			data: rows,
 			timestamp: await getTimestamp({ lix }),
 		});
+	};
 
-		// Commit the current transaction batch
-		commit({
-			engine: lix.engine!,
-		});
-	}
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
+		},
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedHundredRows();
+				};
+			},
+		}
+	);
 });
 
-bench("commit with mixed operations (insert/update/delete)", async () => {
+describe("commit 10 transactions x 10 changes (sequential)", async () => {
 	const lix = await openLix({});
+	await registerCommitSchema(lix);
 
-	// Preload a baseline of entities to update/delete
-	const BASE_COUNT = 30; // baseline rows to enable realistic updates/deletes
-	const baseRows = [] as any[];
-	for (let i = 0; i < BASE_COUNT; i++) {
-		baseRows.push({
-			entity_id: `mixed_entity_${i}`,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: "commit_file",
-			plugin_key: "benchmark_plugin",
-			snapshot_content: JSON.stringify({
-				id: `mixed_entity_${i}`,
-				value: `base_${i}`,
-			}),
-			schema_version: "1.0",
-			untracked: false,
-		});
-	}
-	insertTransactionState({
-		engine: lix.engine!,
-		data: baseRows,
-		timestamp: await getTimestamp({ lix }),
-	});
-	commit({ engine: lix.engine! });
+	const TXN_COUNT = 10;
+	const ROWS_PER_TXN = 10;
+	let seedIteration = 0;
+	let preparedBatches: Array<{
+		data: Parameters<typeof insertTransactionState>[0]["data"];
+		timestamp: string;
+	}> = [];
 
-	// Prepare a mixed batch: 10 inserts, 10 updates, 10 deletes
+	const prepareSequentialBatches = async (): Promise<void> => {
+		const iteration = seedIteration++;
+		const baseOffset = iteration * TXN_COUNT * ROWS_PER_TXN;
+		preparedBatches = [];
+
+		for (let t = 0; t < TXN_COUNT; t++) {
+			const batch = [];
+			for (let i = 0; i < ROWS_PER_TXN; i++) {
+				const globalIndex = baseOffset + t * ROWS_PER_TXN + i;
+				batch.push({
+					entity_id: `seq_commit_entity_${globalIndex}`,
+					version_id: "global",
+					schema_key: "commit_benchmark_entity",
+					file_id: "commit_file",
+					plugin_key: "benchmark_plugin",
+					snapshot_content: JSON.stringify({
+						id: `seq_commit_entity_${globalIndex}`,
+						value: `seq_data_${globalIndex}`,
+						metadata: {
+							type: "commit_benchmark_seq",
+							txn: t,
+							index: i,
+						},
+					}),
+					schema_version: "1.0",
+					untracked: false,
+				});
+			}
+
+			preparedBatches.push({
+				data: batch,
+				timestamp: await getTimestamp({ lix }),
+			});
+		}
+	};
+
+	bench(
+		"",
+		() => {
+			for (const batch of preparedBatches) {
+				insertTransactionState({
+					engine: lix.engine!,
+					data: batch.data,
+					timestamp: batch.timestamp,
+				});
+				commit({
+					engine: lix.engine!,
+				});
+			}
+		},
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await prepareSequentialBatches();
+				};
+			},
+		}
+	);
+});
+
+describe("commit with mixed operations (insert/update/delete)", async () => {
+	const lix = await openLix({});
+	await registerCommitSchema(lix);
+
+	const BASE_COUNT = 30;
 	const INSERTS = 10;
 	const UPDATES = 10;
 	const DELETES = 10;
-	const ops: any[] = [];
+	let seedIteration = 0;
 
-	// Inserts: new entities
-	for (let i = 0; i < INSERTS; i++) {
-		const id = `mixed_new_${i}`;
-		ops.push({
-			entity_id: id,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: "commit_file",
-			plugin_key: "benchmark_plugin",
-			snapshot_content: JSON.stringify({ id, value: `insert_${i}` }),
-			schema_version: "1.0",
-			untracked: false,
+	const prepareBaseline = async (iteration: number): Promise<void> => {
+		const baseRows = [];
+		for (let i = 0; i < BASE_COUNT; i++) {
+			const id = `mixed_entity_${iteration}_${i}`;
+			baseRows.push({
+				entity_id: id,
+				version_id: "global",
+				schema_key: "commit_benchmark_entity",
+				file_id: "commit_file",
+				plugin_key: "benchmark_plugin",
+				snapshot_content: JSON.stringify({
+					id,
+					value: `base_${iteration}_${i}`,
+				}),
+				schema_version: "1.0",
+				untracked: false,
+			});
+		}
+
+		insertTransactionState({
+			engine: lix.engine!,
+			data: baseRows,
+			timestamp: await getTimestamp({ lix }),
 		});
-	}
 
-	// Updates: modify existing baseline entities
-	for (let i = 0; i < UPDATES; i++) {
-		const id = `mixed_entity_${i}`;
-		ops.push({
-			entity_id: id,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: "commit_file",
-			plugin_key: "benchmark_plugin",
-			snapshot_content: JSON.stringify({ id, value: `updated_${i}` }),
-			schema_version: "1.0",
-			untracked: false,
+		commit({ engine: lix.engine! });
+	};
+
+	const seedMixedOperations = async (): Promise<void> => {
+		const iteration = seedIteration++;
+		await prepareBaseline(iteration);
+
+		const ops = [];
+
+		for (let i = 0; i < INSERTS; i++) {
+			const id = `mixed_new_${iteration}_${i}`;
+			ops.push({
+				entity_id: id,
+				version_id: "global",
+				schema_key: "commit_benchmark_entity",
+				file_id: "commit_file",
+				plugin_key: "benchmark_plugin",
+				snapshot_content: JSON.stringify({
+					id,
+					value: `insert_${iteration}_${i}`,
+				}),
+				schema_version: "1.0",
+				untracked: false,
+			});
+		}
+
+		for (let i = 0; i < UPDATES; i++) {
+			const id = `mixed_entity_${iteration}_${i}`;
+			ops.push({
+				entity_id: id,
+				version_id: "global",
+				schema_key: "commit_benchmark_entity",
+				file_id: "commit_file",
+				plugin_key: "benchmark_plugin",
+				snapshot_content: JSON.stringify({
+					id,
+					value: `updated_${iteration}_${i}`,
+				}),
+				schema_version: "1.0",
+				untracked: false,
+			});
+		}
+
+		for (let i = 0; i < DELETES; i++) {
+			const id = `mixed_entity_${iteration}_${BASE_COUNT - 1 - i}`;
+			ops.push({
+				entity_id: id,
+				version_id: "global",
+				schema_key: "commit_benchmark_entity",
+				file_id: "commit_file",
+				plugin_key: "benchmark_plugin",
+				snapshot_content: null,
+				schema_version: "1.0",
+				untracked: false,
+			});
+		}
+
+		insertTransactionState({
+			engine: lix.engine!,
+			data: ops,
+			timestamp: await getTimestamp({ lix }),
 		});
-	}
+	};
 
-	// Deletes: remove other baseline entities
-	for (let i = 0; i < DELETES; i++) {
-		const id = `mixed_entity_${BASE_COUNT - 1 - i}`;
-		ops.push({
-			entity_id: id,
-			version_id: "global",
-			schema_key: "commit_benchmark_entity",
-			file_id: "commit_file",
-			plugin_key: "benchmark_plugin",
-			snapshot_content: null,
-			schema_version: "1.0",
-			untracked: false,
-		});
-	}
-
-	insertTransactionState({
-		engine: lix.engine!,
-		data: ops,
-		timestamp: await getTimestamp({ lix }),
-	});
-
-	// Benchmark: single commit with mixed operations
-	commit({
-		engine: lix.engine!,
-	});
+	bench(
+		"",
+		() => {
+			commit({
+				engine: lix.engine!,
+			});
+		},
+		{
+			setup: (task) => {
+				task.opts.beforeEach = async () => {
+					await seedMixedOperations();
+				};
+			},
+		}
+	);
 });

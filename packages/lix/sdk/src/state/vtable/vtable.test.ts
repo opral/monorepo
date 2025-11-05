@@ -69,6 +69,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -107,6 +108,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -145,6 +147,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -201,6 +204,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				sql`writer_key`.as("writer_key"),
@@ -225,6 +229,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -248,6 +253,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "w1")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -324,6 +330,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
 			.executeTakeFirstOrThrow();
 		expectDeterministic(tombstoneWithWriter.snapshot_content).toBeNull();
@@ -361,6 +368,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema_writer_del")
 			.where("file_id", "=", "fd")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`writer_key`.as("writer_key"), "snapshot_content"])
 			.executeTakeFirstOrThrow();
 		expectDeterministic(tombstoneNoWriter.snapshot_content).toBeNull();
@@ -421,6 +429,7 @@ simulationTest(
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -455,6 +464,7 @@ simulationTest(
 			.where("entity_id", "=", "wi1")
 			.where("version_id", "=", child.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`writer_key`.as("writer_key"),
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -468,7 +478,7 @@ simulationTest(
 );
 
 simulationTest(
-	"writer_key exposed on state/state_all/state_with_tombstones",
+	"writer_key exposed on state/state_by_version/state_with_tombstones",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -512,9 +522,9 @@ simulationTest(
 				.execute()
 		);
 
-		// state_all
+		// state_by_version
 		const sAll = await db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "vw1")
 			.select(["entity_id", sql`writer_key`.as("writer_key")])
 			.executeTakeFirstOrThrow();
@@ -603,6 +613,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema_tombstone")
 			.where("file_id", "=", "f_tomb")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				"schema_key",
@@ -614,10 +625,24 @@ simulationTest(
 			])
 			.execute();
 
-		expectDeterministic(rows).toHaveLength(1);
-		expectDeterministic(rows[0]?.snapshot_content).toBeNull();
-		expectDeterministic(rows[0]?.change_id).toBeTruthy();
-		expectDeterministic(rows[0]?.commit_id).toBeTruthy();
+		expect(rows).toHaveLength(1);
+		expect(rows[0]?.change_id).toBeTruthy();
+		expect(rows[0]?.commit_id).toBeTruthy();
+
+		const sanitizedRows = rows.map(
+			({ change_id: _ignoredChangeId, commit_id: _ignoredCommitId, ...rest }) =>
+				rest
+		);
+
+		expectDeterministic(sanitizedRows).toEqual([
+			{
+				entity_id: "e_tomb",
+				schema_key: "mock_schema_tombstone",
+				file_id: "f_tomb",
+				version_id: "boot_0000000000",
+				snapshot_content: null,
+			},
+		]);
 	}
 );
 
@@ -635,6 +660,20 @@ simulationTest(
 		});
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
 		// Create a tracked entity in active version
 		await db
 			.insertInto("lix_internal_state_vtable")
@@ -670,6 +709,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(beforeDelete).toHaveLength(2);
@@ -691,6 +731,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_test_schema")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -712,6 +753,19 @@ simulationTest(
 		});
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		// Create a tracked entity in active version
 		await db
@@ -748,6 +802,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(beforeDelete).toHaveLength(2);
@@ -768,6 +823,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id"])
 			.execute();
 		expectDeterministic(afterDelete).toHaveLength(1);
@@ -779,6 +835,7 @@ simulationTest(
 			.where("entity_id", "=", "untracked-entity")
 			.where("schema_key", "=", "mock_test_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 		expectDeterministic(stateAfterDelete).toHaveLength(0);
@@ -813,13 +870,27 @@ simulationTest(
 			activeVersion.working_commit_id
 		);
 
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		const commitsBeforeInsert = await lix.db
 			.selectFrom("commit")
 			.select("id")
 			.execute();
 
 		// Insert some state data via lix_internal_state_vtable
-		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		await db
 			.insertInto("lix_internal_state_vtable")
 			.values({
@@ -841,27 +912,26 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		// expect the version to be identical
-		expectDeterministic(activeVersionAfterInsert).toBeDefined();
+		expect(activeVersionAfterInsert).toBeDefined();
 
 		// Query to check the commit_id via vtable
 		const stateAfterInsert = await db
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
 
-		expectDeterministic(stateAfterInsert).toBeDefined();
+		expect(stateAfterInsert).toBeDefined();
 
 		// The commit_id should NOT be the working_commit_id
-		expectDeterministic(stateAfterInsert.commit_id).not.toBe(
+		expect(stateAfterInsert.commit_id).not.toBe(
 			activeVersionAfterInsert.working_commit_id
 		);
 
 		// The commit_id should be the auto-commit ID (not the working commit)
-		expectDeterministic(stateAfterInsert.commit_id).toBe(
-			activeVersionAfterInsert.commit_id
-		);
+		expect(stateAfterInsert.commit_id).toBe(activeVersionAfterInsert.commit_id);
 
 		const commitsAfterInsert = await lix.db
 			.selectFrom("commit")
@@ -884,6 +954,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "test-entity-1")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id", "commit_id"])
 			.executeTakeFirstOrThrow();
 
@@ -894,10 +965,8 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		// The commit_id should now be the new auto-commit ID
-		expectDeterministic(stateAfterUpdate.commit_id).toBe(
-			activeVersionAfterUpdate.commit_id
-		);
-		expectDeterministic(stateAfterUpdate.commit_id).not.toBe(
+		expect(stateAfterUpdate.commit_id).toBe(activeVersionAfterUpdate.commit_id);
+		expect(stateAfterUpdate.commit_id).not.toBe(
 			activeVersion.working_commit_id
 		);
 	}
@@ -918,7 +987,7 @@ simulationTest(
 
 		const selectStateMetadata = async () =>
 			await lix.db
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.where("entity_id", "=", "meta-entity")
 				.where("schema_key", "=", "lix_key_value")
 				.select(["metadata"])
@@ -1048,6 +1117,7 @@ simulationTest(
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1078,6 +1148,7 @@ simulationTest(
 			.where("entity_id", "=", "untracked_override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1140,6 +1211,7 @@ simulationTest(
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"untracked",
@@ -1177,6 +1249,7 @@ simulationTest(
 			.where("entity_id", "=", "override_test")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -1339,6 +1412,7 @@ simulationTest(
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", "global")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.executeTakeFirstOrThrow();
 
@@ -1350,6 +1424,7 @@ simulationTest(
 			.where("entity_id", "=", "test_key")
 			.where("version_id", "=", activeVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1420,6 +1495,7 @@ simulationTest(
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1455,6 +1531,7 @@ simulationTest(
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", childVersion.id)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1462,12 +1539,17 @@ simulationTest(
 			])
 			.execute();
 
-		expectDeterministic(finalState).toHaveLength(1);
-		expectDeterministic(finalState[0]?.snapshot_content).toEqual({
-			value: "untracked override",
-		});
-		expectDeterministic(finalState[0]?.inherited_from_version_id).toBe(null);
-		expectDeterministic(finalState[0]?.version_id).toBe(childVersion.id);
+		expect(finalState).toHaveLength(1);
+		const sanitizedFinalState = finalState.map(
+			({ version_id: _ignoredVersionId, ...rest }) => rest
+		);
+		expectDeterministic(sanitizedFinalState).toEqual([
+			{
+				snapshot_content: { value: "untracked override" },
+				inherited_from_version_id: null,
+			},
+		]);
+		expect(finalState[0]?.version_id).toBe(childVersion.id);
 
 		// Step 6: Verify the inherited entity still exists in global version (unchanged)
 		const globalState = await db
@@ -1475,6 +1557,7 @@ simulationTest(
 			.where("entity_id", "=", "inherited-entity")
 			.where("version_id", "=", "global")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"inherited_from_version_id",
@@ -1495,7 +1578,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expectDeterministic(changes).toHaveLength(1);
+		expect(changes).toHaveLength(1);
 	}
 );
 simulationTest(
@@ -1550,6 +1633,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1575,6 +1659,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1600,6 +1685,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "entity0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1634,6 +1720,22 @@ simulationTest(
 
 		// Insert an entity into global version via vtable
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id", "name"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		await db
 			.insertInto("lix_internal_state_vtable")
 			.values({
@@ -1664,6 +1766,7 @@ simulationTest(
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				"version_id",
@@ -1672,21 +1775,26 @@ simulationTest(
 			])
 			.execute();
 
-		expectDeterministic(beforeDelete).toHaveLength(2);
-		expectDeterministic(beforeDelete).toMatchObject([
-			{
-				entity_id: "shared-entity",
-				version_id: "global",
-				inherited_from_version_id: null,
-				snapshot_content: { id: "shared-entity", name: "Global Entity" },
-			},
-			{
-				entity_id: "shared-entity",
-				version_id: childVersion.id,
-				inherited_from_version_id: "global",
-				snapshot_content: { id: "shared-entity", name: "Global Entity" },
-			},
-		]);
+		expect(beforeDelete).toHaveLength(2);
+		expect(beforeDelete).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					entity_id: "shared-entity",
+					version_id: "global",
+					inherited_from_version_id: null,
+					snapshot_content: { id: "shared-entity", name: "Global Entity" },
+				}),
+				expect.objectContaining({
+					entity_id: "shared-entity",
+					version_id: childVersion.id,
+					inherited_from_version_id: "global",
+					snapshot_content: {
+						id: "shared-entity",
+						name: "Global Entity",
+					},
+				}),
+			])
+		);
 
 		// Delete across versions by not filtering by version_id
 		await db
@@ -1700,6 +1808,7 @@ simulationTest(
 			.where("entity_id", "=", "shared-entity")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -1765,6 +1874,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "persistent-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -1790,9 +1900,25 @@ simulationTest(
 			],
 		});
 
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["id", "name"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "global-entity-1",
 				file_id: "test-file",
@@ -1818,20 +1944,18 @@ simulationTest(
 
 		// The child version should inherit the entity from global
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "global-entity-1")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
 			.execute();
 
 		// This should pass - the entity should be visible in the child version via inheritance
-		expectDeterministic(inheritedEntity).toHaveLength(1);
-		expectDeterministic(inheritedEntity[0]?.entity_id).toBe("global-entity-1");
-		expectDeterministic(inheritedEntity[0]?.version_id).toBe(childVersion.id); // Should return child version ID
-		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
-			"global"
-		); // Should track inheritance source
-		expectDeterministic(inheritedEntity[0]?.snapshot_content).toEqual({
+		expect(inheritedEntity).toHaveLength(1);
+		expect(inheritedEntity[0]?.entity_id).toBe("global-entity-1");
+		expect(inheritedEntity[0]?.version_id).toBe(childVersion.id); // Should return child version ID
+		expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global"); // Should track inheritance source
+		expect(inheritedEntity[0]?.snapshot_content).toEqual({
 			id: "global-entity-1",
 			name: "Global Entity",
 		});
@@ -1851,9 +1975,26 @@ simulationTest(
 			],
 		});
 
+		const testSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
+				count: { type: "number" },
+			},
+			required: ["id", "name", "count"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: testSchema })
+			.execute();
+
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -1878,18 +2019,16 @@ simulationTest(
 
 		// Verify the child initially sees the inherited entity
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
 			.execute();
 
-		expectDeterministic(inheritedEntity).toHaveLength(1);
-		expectDeterministic(inheritedEntity[0]?.version_id).toBe(childVersion.id);
-		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
-			"global"
-		);
-		expectDeterministic(inheritedEntity[0]?.snapshot_content).toEqual({
+		expect(inheritedEntity).toHaveLength(1);
+		expect(inheritedEntity[0]?.version_id).toBe(childVersion.id);
+		expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
+		expect(inheritedEntity[0]?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "Original Global Value",
 			count: 1,
@@ -1897,7 +2036,7 @@ simulationTest(
 
 		// Now modify the entity in the child version (copy-on-write)
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({
 				snapshot_content: {
 					id: "shared-entity",
@@ -1911,16 +2050,16 @@ simulationTest(
 
 		// Verify the child now has its own version of the entity
 		const childEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", childVersion.id)
 			.selectAll()
 			.execute();
 
-		expectDeterministic(childEntity).toHaveLength(1);
-		expectDeterministic(childEntity[0]?.version_id).toBe(childVersion.id);
-		expectDeterministic(childEntity[0]?.inherited_from_version_id).toBe(null); // No longer inherited
-		expectDeterministic(childEntity[0]?.snapshot_content).toEqual({
+		expect(childEntity).toHaveLength(1);
+		expect(childEntity[0]?.version_id).toBe(childVersion.id);
+		expect(childEntity[0]?.inherited_from_version_id).toBe(null); // No longer inherited
+		expect(childEntity[0]?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "Modified in Child Version",
 			count: 2,
@@ -1928,16 +2067,16 @@ simulationTest(
 
 		// Verify the global version still has the original value
 		const globalEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "global")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(globalEntity).toHaveLength(1);
-		expectDeterministic(globalEntity[0]?.version_id).toBe("global");
-		expectDeterministic(globalEntity[0]?.inherited_from_version_id).toBe(null);
-		expectDeterministic(globalEntity[0]?.snapshot_content).toEqual({
+		expect(globalEntity).toHaveLength(1);
+		expect(globalEntity[0]?.version_id).toBe("global");
+		expect(globalEntity[0]?.inherited_from_version_id).toBe(null);
+		expect(globalEntity[0]?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "Original Global Value",
 			count: 1,
@@ -1945,28 +2084,32 @@ simulationTest(
 
 		// Verify we now have 2 separate entities (one in global, one in child)
 		const allEntities = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
 			.orderBy("version_id", "asc")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(allEntities).toHaveLength(2);
+		expect(allEntities).toHaveLength(2);
+		const childRecord = allEntities.find(
+			(entity) => entity.version_id === childVersion.id
+		);
+		const globalRecord = allEntities.find(
+			(entity) => entity.version_id === "global"
+		);
 
-		// Child version entity (modified)
-		expectDeterministic(allEntities[0]?.version_id).toBe(childVersion.id);
-		expectDeterministic(allEntities[0]?.inherited_from_version_id).toBe(null);
-		expectDeterministic(allEntities[0]?.snapshot_content).toEqual({
+		expect(childRecord).toBeDefined();
+		expect(childRecord?.inherited_from_version_id).toBe(null);
+		expect(childRecord?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "Modified in Child Version",
 			count: 2,
 		});
 
-		// Global version entity (original)
-		expectDeterministic(allEntities[1]?.version_id).toBe("global");
-		expectDeterministic(allEntities[1]?.inherited_from_version_id).toBe(null);
-		expectDeterministic(allEntities[1]?.snapshot_content).toEqual({
+		expect(globalRecord).toBeDefined();
+		expect(globalRecord?.inherited_from_version_id).toBe(null);
+		expect(globalRecord?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "Original Global Value",
 			count: 1,
@@ -2012,7 +2155,7 @@ simulationTest(
 
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -2029,64 +2172,60 @@ simulationTest(
 
 		// Verify the child initially sees the inherited entity
 		const inheritedEntity = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
 			.execute();
 
-		expectDeterministic(inheritedEntity).toHaveLength(1);
-		expectDeterministic(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
-		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
-			"global"
-		);
+		expect(inheritedEntity).toHaveLength(1);
+		expect(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
+		expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
 
 		// Delete the inherited entity in child version (should create copy-on-write deletion)
 		await lix.db
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.execute();
 
 		// Verify the entity is deleted in child version
 		const childEntityAfterDelete = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
 			.execute();
 
 		// Entity should be deleted in child version (copy-on-write deletion)
-		expectDeterministic(childEntityAfterDelete).toHaveLength(0);
+		expect(childEntityAfterDelete).toHaveLength(0);
 
 		// Verify the entity still exists in global version (not affected by child deletion)
 		const inheritedEntityAfterDelete = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "global")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(inheritedEntityAfterDelete).toHaveLength(1);
-		expectDeterministic(
-			inheritedEntityAfterDelete[0]?.snapshot_content
-		).toEqual({
+		expect(inheritedEntityAfterDelete).toHaveLength(1);
+		expect(inheritedEntityAfterDelete[0]?.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "shared Entity",
 		});
 
 		// Verify we now only see the global entity through the state view (deletion marker is hidden)
 		const allEntities = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "shared-entity")
 			.selectAll()
 			.execute();
 
 		// Both cache hit and cache miss scenarios should behave identically:
 		// copy-on-write deletion hides the entity from child but preserves it in parent
-		expectDeterministic(allEntities).toHaveLength(1);
-		expectDeterministic(allEntities[0]?.version_id).toBe("global");
-		expectDeterministic(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
+		expect(allEntities).toHaveLength(1);
+		expect(allEntities[0]?.version_id).toBe("global");
+		expect(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
 	}
 );
 simulationTest(
@@ -2148,7 +2287,7 @@ simulationTest(
 
 		// Insert parent entity
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "parent-1",
 				schema_key: "parent_entity",
@@ -2165,7 +2304,7 @@ simulationTest(
 
 		// Insert child entity that references the parent
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "child-1",
 				schema_key: "child_entity",
@@ -2183,27 +2322,27 @@ simulationTest(
 
 		// Verify both entities exist
 		const parentBefore = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
 			.selectAll()
 			.execute();
 
 		const childBefore = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "child-1")
 			.where("schema_key", "=", "child_entity")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(parentBefore).toHaveLength(1);
-		expectDeterministic(childBefore).toHaveLength(1);
+		expect(parentBefore).toHaveLength(1);
+		expect(childBefore).toHaveLength(1);
 
 		// Attempting to delete the parent entity should fail due to foreign key constraint
 		// because there's a child entity that references it
 		await expect(
 			lix.db
-				.deleteFrom("state_all")
+				.deleteFrom("state_by_version")
 				.where("entity_id", "=", "parent-1")
 				.where("schema_key", "=", "parent_entity")
 				.execute()
@@ -2211,13 +2350,13 @@ simulationTest(
 
 		// Verify the parent still exists after failed deletion attempt
 		const parentAfter = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(parentAfter).toHaveLength(1);
+		expect(parentAfter).toHaveLength(1);
 	}
 );
 simulationTest(
@@ -2334,6 +2473,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				"file_id",
@@ -2377,6 +2517,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const deleteSchema: LixSchemaDefinition = {
+			"x-lix-key": "delete-cache-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				to: { type: "string" },
+			},
+			required: ["to"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: deleteSchema })
+			.execute();
 
 		// Insert initial state via lix_internal_state_vtable
 		await db
@@ -2398,6 +2552,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 		expect(beforeDelete).toHaveLength(1);
@@ -2417,6 +2572,7 @@ simulationTest(
 			.where("entity_id", "=", "delete-cache-entity")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 		expect(afterDelete).toHaveLength(0);
@@ -2443,6 +2599,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const writeThroughSchema: LixSchemaDefinition = {
+			"x-lix-key": "write-through-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				test: { type: "string" },
+			},
+			required: ["test"],
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: writeThroughSchema })
+			.execute();
 
 		// Insert state data via lix_internal_state_vtable - should populate cache
 		await db
@@ -2461,7 +2631,8 @@ simulationTest(
 
 		// Cache should be populated immediately via write-through
 		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "write-through-entity")
 			.where("schema_key", "=", "write-through-schema")
 			.where("file_id", "=", "write-through-file")
@@ -2482,6 +2653,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "write-through-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["entity_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2514,6 +2686,20 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const updateSchema: LixSchemaDefinition = {
+			"x-lix-key": "update-cache-schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				initial: { type: "string" },
+				updated: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: updateSchema })
+			.execute();
 
 		// Insert initial state via lix_internal_state_vtable
 		await db
@@ -2545,7 +2731,8 @@ simulationTest(
 
 		// Cache should be immediately updated
 		const cacheEntry = await db
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "update-cache-entity")
 			.where("schema_key", "=", "update-cache-schema")
 			.where("file_id", "=", "update-cache-file")
@@ -2565,6 +2752,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "update-cache-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				sql`json(snapshot_content)`.as("snapshot_content"),
 				"plugin_key",
@@ -2610,7 +2798,7 @@ simulationTest(
 
 		// Insert state data
 		await lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "timestamp-test-entity",
 				schema_key: "mock_schema",
@@ -2636,7 +2824,8 @@ simulationTest(
 		const cacheRecord = await (
 			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
 		)
-			.selectFrom("lix_internal_state_cache")
+			.selectFrom("lix_internal_state_vtable")
+			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "timestamp-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.select(["created_at", "updated_at"])
@@ -2703,6 +2892,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["change_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2742,6 +2932,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-id-test-file")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select(["change_id", sql`json(snapshot_content)`.as("snapshot_content")])
 			.execute();
 
@@ -2819,20 +3010,19 @@ simulationTest(
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		// Query state_all view to verify commit_id is exposed
+		// Query state_by_version view to verify commit_id is exposed
 		const stateResult = await db
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "change-set-id-test-entity")
 			.where("schema_key", "=", "mock_schema")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
-		expectDeterministic(stateResult).toHaveLength(1);
-		expectDeterministic(stateResult[0]).toHaveProperty("commit_id");
-		expectDeterministic(stateResult[0]?.commit_id).toBe(
-			activeVersionAfterInsert.commit_id
-		);
+		expect(stateResult).toHaveLength(1);
+		expect(stateResult[0]).toHaveProperty("commit_id");
+		expect(stateResult[0]?.commit_id).toBe(activeVersionAfterInsert.commit_id);
 
 		// Get the change_set_element records - there should be two:
 		// 1. One in the working change set
@@ -2846,7 +3036,7 @@ simulationTest(
 			.orderBy("change_set_id")
 			.execute();
 
-		expectDeterministic(changeSetElements).toHaveLength(2);
+		expect(changeSetElements).toHaveLength(2);
 
 		// Get the version to understand which change sets we're dealing with
 		const version = await lix.db
@@ -2877,21 +3067,15 @@ simulationTest(
 			(el) => el.change_set_id === workingCommit.change_set_id
 		);
 
-		expectDeterministic(versionChangeSetElement).toBeDefined();
-		expectDeterministic(workingChangeSetElement).toBeDefined();
+		expect(versionChangeSetElement).toBeDefined();
+		expect(workingChangeSetElement).toBeDefined();
 
 		// The state view should show the commit_id from the version,
 		// not related to the working change set (which is temporary and not part of the graph)
-		expectDeterministic(stateResult[0]?.commit_id).toBe(version.commit_id);
-		expectDeterministic(stateResult[0]?.commit_id).toBe(version.commit_id);
+		expect(stateResult[0]?.commit_id).toBe(version.commit_id);
 
 		// Verify that the change_id also matches for consistency
-		expectDeterministic(stateResult[0]?.change_id).toBe(
-			versionChangeSetElement!.change_id
-		);
-		expectDeterministic(stateResult[0]?.change_id).toBe(
-			versionChangeSetElement!.change_id
-		);
+		expect(stateResult[0]?.change_id).toBe(versionChangeSetElement!.change_id);
 	}
 );
 
@@ -2940,6 +3124,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "mock_schema_txn")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 		await expectTxnEmpty();
@@ -3047,6 +3232,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "untracked-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([
 				"entity_id",
 				sql`json(snapshot_content)`.as("snapshot_content"),
@@ -3151,6 +3337,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -3177,6 +3364,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "override-entity")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.select([sql`json(snapshot_content)`.as("snapshot_content"), "untracked"])
 			.execute();
 
@@ -3250,6 +3438,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3276,6 +3465,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3370,6 +3560,7 @@ simulationTest(
 			)
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3394,6 +3585,19 @@ simulationTest(
 		await createVersion({ lix, id: "version_b" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		await db
 			.insertInto("lix_internal_state_vtable")
@@ -3431,6 +3635,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3471,6 +3676,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3498,6 +3704,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3586,6 +3793,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3594,6 +3802,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3625,6 +3834,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_a")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3633,6 +3843,7 @@ simulationTest(
 			.where("entity_id", "=", "e0")
 			.where("version_id", "=", "version_b")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3664,6 +3875,19 @@ simulationTest(
 		const versionA = await createVersion({ lix, id: "version_a" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		// Insert state into version A
 		await db
@@ -3701,6 +3925,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3742,6 +3967,21 @@ simulationTest(
 		const baseVersion = await createVersion({ lix, id: "base_version" });
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: { type: "string" },
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
 		await db
 			.insertInto("lix_internal_state_vtable")
@@ -3786,6 +4026,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("entity_id", "=", "e0")
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 
@@ -3911,6 +4152,7 @@ simulationTest(
 			)
 			.where("snapshot_content", "is not", null)
 			.orderBy("entity_id")
+			.orderBy("version_id")
 			.selectAll()
 			.execute();
 

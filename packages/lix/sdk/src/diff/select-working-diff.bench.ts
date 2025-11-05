@@ -1,15 +1,36 @@
-import { bench } from "vitest";
+import { afterAll, beforeAll, beforeEach, bench, describe } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "../state/create-checkpoint.js";
 import { selectWorkingDiff } from "./select-working-diff.js";
 import { LixKeyValueSchema } from "../key-value/schema-definition.js";
 
-const FILE_ID = "lix"; // key_value is stored under hardcoded file_id 'lix'
+const FILE_ID = "lix";
 const KV_SCHEMA = LixKeyValueSchema["x-lix-key"];
-const ROWS = 10; // created working rows (small)
-const BASE_UNCHANGED = 10; // baseline unchanged rows (moderate)
+const ROWS = 10;
+const BASE_UNCHANGED = 10;
 
-async function setKeyValue(lix: any, key: string, value: any) {
+type WorkingDiffCtx = Awaited<ReturnType<typeof openLix>>;
+
+async function createWorkingDiffCtx(): Promise<WorkingDiffCtx> {
+	return openLix({});
+}
+
+async function resetWorkingState(lix: WorkingDiffCtx): Promise<void> {
+	await lix.db.deleteFrom("key_value").execute();
+
+	await createCheckpoint({ lix });
+
+	for (let i = 0; i < BASE_UNCHANGED; i++) {
+		await setKeyValue(lix, `base_${i}`, `A${i}`);
+	}
+	await createCheckpoint({ lix });
+
+	for (let i = 0; i < ROWS; i++) {
+		await setKeyValue(lix, `work_${i}`, i);
+	}
+}
+
+async function setKeyValue(lix: WorkingDiffCtx, key: string, value: unknown) {
 	const existing = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", key)
@@ -26,51 +47,53 @@ async function setKeyValue(lix: any, key: string, value: any) {
 	}
 }
 
-bench("working diff: include unchanged", async () => {
-	const lix = await openLix({});
-	await createCheckpoint({ lix });
+describe("working diff: include unchanged", () => {
+	let lix: WorkingDiffCtx;
 
-	// Seed baseline tracked rows and checkpoint them (become unchanged)
-	for (let i = 0; i < BASE_UNCHANGED; i++) {
-		await setKeyValue(lix, `base_${i}`, `A${i}`);
-	}
-	await createCheckpoint({ lix });
+	beforeAll(async () => {
+		lix = await createWorkingDiffCtx();
+	});
 
-	// Add some working edits (created)
-	for (let i = 0; i < ROWS; i++) {
-		await setKeyValue(lix, `work_${i}`, i);
-	}
+	afterAll(async () => {
+		await lix.close();
+	});
 
-	// Include unchanged (no status filter). Select minimal column to avoid JSON overhead
-	await selectWorkingDiff({ lix })
-		.where("file_id", "=", FILE_ID)
-		.where("schema_key", "=", KV_SCHEMA)
-		.orderBy("entity_id")
-		.select(["status"])
-		.execute();
+	beforeEach(async () => {
+		await resetWorkingState(lix);
+	});
+
+	bench("working diff: include unchanged", async () => {
+		await selectWorkingDiff({ lix })
+			.where("file_id", "=", FILE_ID)
+			.where("schema_key", "=", KV_SCHEMA)
+			.orderBy("entity_id")
+			.select(["status"])
+			.execute();
+	});
 });
 
-bench("working diff: exclude unchanged", async () => {
-	const lix = await openLix({});
-	await createCheckpoint({ lix });
+describe("working diff: exclude unchanged", () => {
+	let lix: WorkingDiffCtx;
 
-	// Seed baseline tracked rows and checkpoint them (become unchanged)
-	for (let i = 0; i < BASE_UNCHANGED; i++) {
-		await setKeyValue(lix, `base_${i}`, `A${i}`);
-	}
-	await createCheckpoint({ lix });
+	beforeAll(async () => {
+		lix = await createWorkingDiffCtx();
+	});
 
-	// Add some working edits (created)
-	for (let i = 0; i < ROWS; i++) {
-		await setKeyValue(lix, `work_${i}`, i);
-	}
+	afterAll(async () => {
+		await lix.close();
+	});
 
-	// Exclude unchanged
-	await selectWorkingDiff({ lix })
-		.where("file_id", "=", FILE_ID)
-		.where("schema_key", "=", KV_SCHEMA)
-		.where("status", "!=", "unchanged")
-		.orderBy("entity_id")
-		.select(["status"])
-		.execute();
+	beforeEach(async () => {
+		await resetWorkingState(lix);
+	});
+
+	bench("working diff: exclude unchanged", async () => {
+		await selectWorkingDiff({ lix })
+			.where("file_id", "=", FILE_ID)
+			.where("schema_key", "=", KV_SCHEMA)
+			.where("status", "!=", "unchanged")
+			.orderBy("entity_id")
+			.select(["status"])
+			.execute();
+	});
 });

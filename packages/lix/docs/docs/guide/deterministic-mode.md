@@ -70,7 +70,7 @@ Or enable it after opening:
 
 ```ts
 await lix.db
-  .updateTable("key_value_all")
+  .updateTable("key_value_by_version")
   .set({ value: { enabled: true } })
   .where("key", "=", "lix_deterministic_mode")
   .where("lixcol_version_id", "=", "global")
@@ -161,7 +161,7 @@ const lix1 = await openLix({
 import { sql } from "@lix-js/sdk";
 
 await lix.db
-  .updateTable("key_value_all")
+  .updateTable("key_value_by_version")
   .set({
     value: sql`json_set(value, '$.random_seed', 'instance-2')`,
   })

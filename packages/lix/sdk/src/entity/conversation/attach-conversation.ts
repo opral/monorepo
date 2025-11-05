@@ -1,5 +1,5 @@
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixEntity, LixEntityCanonical } from "../schema.js";
+import type { LixEntity, LixEntityCanonical } from "../types.js";
 
 /**
  * Attaches a conversation to an entity (creates mapping).
@@ -38,7 +38,7 @@ export async function attachConversation(args: {
 	const versionId = args.versionId ?? "global";
 
 	const existingMapping = await lix.db
-		.selectFrom("entity_conversation_all")
+		.selectFrom("entity_conversation_by_version")
 		.where("entity_id", "=", entity_id)
 		.where("schema_key", "=", schema_key)
 		.where("file_id", "=", file_id)
@@ -50,7 +50,7 @@ export async function attachConversation(args: {
 	if (existingMapping) return;
 
 	await lix.db
-		.insertInto("entity_conversation_all")
+		.insertInto("entity_conversation_by_version")
 		.values({
 			entity_id,
 			schema_key,
@@ -88,7 +88,7 @@ export async function detachConversation(args: {
 	const versionId = args.versionId ?? "global";
 
 	await lix.db
-		.deleteFrom("entity_conversation_all")
+		.deleteFrom("entity_conversation_by_version")
 		.where("entity_id", "=", entity_id)
 		.where("schema_key", "=", schema_key)
 		.where("file_id", "=", file_id)

@@ -274,7 +274,7 @@ simulationTest(
 		expect(json2.shared).toBeUndefined();
 		expect(json2.keep).toBe(2);
 
-		// Additionally, check state_all shows only one leaf for entity_id 'shared' at this version
+		// Additionally, check state_by_version shows only one leaf for entity_id 'shared' at this version
 		const activeV = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "version.id", "active_version.version_id")
@@ -282,7 +282,7 @@ simulationTest(
 			.executeTakeFirstOrThrow();
 
 		const sharedLeaves = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "mock_json_property")
 			.where("entity_id", "=", "shared")
 			.where("version_id", "=", activeV.id)

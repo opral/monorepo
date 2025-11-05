@@ -19,7 +19,7 @@ describe("delete_file tool", () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/del.txt",
 				data: enc("x"),
@@ -36,7 +36,7 @@ describe("delete_file tool", () => {
 		expect(res.path).toBe("/del.txt");
 
 		const row = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/del.txt")
 			.where("lixcol_version_id", "=", versionId as unknown as any)
 			.select(["id"])
@@ -59,7 +59,7 @@ describe("delete_file tool", () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/id.txt",
 				data: enc("y"),
@@ -67,7 +67,7 @@ describe("delete_file tool", () => {
 			})
 			.execute();
 		const row = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/id.txt")
 			.where("lixcol_version_id", "=", versionId as unknown as any)
 			.select(["id"])

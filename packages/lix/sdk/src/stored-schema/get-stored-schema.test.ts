@@ -1,8 +1,40 @@
 import { test, expect, vi } from "vitest";
+import { sql } from "kysely";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { getStoredSchema, getAllStoredSchemas } from "./get-stored-schema.js";
 import { createVersion } from "../version/create-version.js";
+import { LixStoredSchemaSchema } from "./schema-definition.js";
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
+
+const ALL_STORED_SCHEMAS_SQL = internalQueryBuilder
+	.selectFrom("lix_internal_state_vtable")
+	.select(["snapshot_content", "updated_at"])
+	.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
+	.where("snapshot_content", "is not", null)
+	.compile().sql;
+
+const SINGLE_STORED_SCHEMA_SQL = internalQueryBuilder
+	.selectFrom("lix_internal_state_vtable")
+	.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+	.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
+	.where(sql`json_extract(snapshot_content, '$.value."x-lix-key"')`, "=", "")
+	.where("version_id", "=", "global")
+	.where("snapshot_content", "is not", null)
+	.orderBy(
+		sql`json_extract(snapshot_content, '$.value."x-lix-version"')`,
+		"desc"
+	)
+	.limit(1)
+	.compile().sql;
+
+const countCallsForSql = (
+	calls: ReadonlyArray<ReadonlyArray<unknown>>,
+	targetSql: string
+) =>
+	calls.filter(
+		([args]) => (args as { sql?: string } | undefined)?.sql === targetSql
+	).length;
 
 test("returns null when no stored schema is found", async () => {
 	const lix = await openLix({});
@@ -24,12 +56,12 @@ test("returns the latest stored schema version for a key", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: base, lixcol_version_id: "global" })
 		.execute();
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: { ...base, "x-lix-version": "2.0" },
 			lixcol_version_id: "global",
@@ -64,12 +96,12 @@ test("ignores schemas outside the global version", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: base, lixcol_version_id: "global" })
 		.execute();
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: { ...base, "x-lix-version": "3.0" },
 			lixcol_version_id: featureVersion.id,
@@ -109,7 +141,7 @@ test("getAllStoredSchemas returns all definitions and caches the result", async 
 
 	for (const schema of schemas) {
 		await lix.db
-			.insertInto("stored_schema_all")
+			.insertInto("stored_schema_by_version")
 			.values({ value: schema, lixcol_version_id: "global" })
 			.execute();
 	}
@@ -117,21 +149,17 @@ test("getAllStoredSchemas returns all definitions and caches the result", async 
 	const spy = vi.spyOn(lix.engine!, "executeSync");
 
 	const first = getAllStoredSchemas({ engine: lix.engine! });
-	const keys = new Set(
-		first.schemas.map((entry) => entry.definition["x-lix-key"])
-	);
-	expect(keys.has("schema_one")).toBe(true);
-	expect(keys.has("schema_two")).toBe(true);
+	expect(first.definitions.has("schema_one")).toBe(true);
+	expect(first.definitions.has("schema_two")).toBe(true);
 
-	const afterFirst = spy.mock.calls.length;
+	const afterFirst = countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL);
 
 	const second = getAllStoredSchemas({ engine: lix.engine! });
-	const secondKeys = new Set(
-		second.schemas.map((entry) => entry.definition["x-lix-key"])
+	expect(second.definitions.has("schema_one")).toBe(true);
+	expect(second.definitions.has("schema_two")).toBe(true);
+	expect(countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL)).toBe(
+		afterFirst
 	);
-	expect(secondKeys.has("schema_one")).toBe(true);
-	expect(secondKeys.has("schema_two")).toBe(true);
-	expect(spy.mock.calls.length).toBe(afterFirst);
 
 	spy.mockRestore();
 });
@@ -149,17 +177,19 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
 	const spy = vi.spyOn(lix.engine!, "executeSync");
 
 	const initial = getAllStoredSchemas({ engine: lix.engine! });
-	const hasSchema = initial.schemas.some(
-		(entry) => entry.definition["x-lix-key"] === "invalidate_all_schema"
+	expect(initial.definitions.has("invalidate_all_schema")).toBe(true);
+
+	const expectedPerFetch = countCallsForSql(
+		spy.mock.calls,
+		ALL_STORED_SCHEMAS_SQL
 	);
-	expect(hasSchema).toBe(true);
 
 	spy.mockClear();
 
@@ -168,11 +198,10 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	});
 
 	const afterInvalidate = getAllStoredSchemas({ engine: lix.engine! });
-	const stillHasSchema = afterInvalidate.schemas.some(
-		(entry) => entry.definition["x-lix-key"] === "invalidate_all_schema"
+	expect(afterInvalidate.definitions.has("invalidate_all_schema")).toBe(true);
+	expect(countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL)).toBe(
+		expectedPerFetch
 	);
-	expect(stillHasSchema).toBe(true);
-	expect(spy.mock.calls.length).toBe(1);
 
 	spy.mockRestore();
 });
@@ -190,21 +219,33 @@ test("getAllStoredSchemas primes getStoredSchema cache", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
 	const spy = vi.spyOn(lix.engine!, "executeSync");
 
 	getAllStoredSchemas({ engine: lix.engine! });
-	const callsAfterAll = spy.mock.calls.length;
+	const callsAfterAllAll = countCallsForSql(
+		spy.mock.calls,
+		ALL_STORED_SCHEMAS_SQL
+	);
+	const callsAfterAllSingle = countCallsForSql(
+		spy.mock.calls,
+		SINGLE_STORED_SCHEMA_SQL
+	);
 
 	const single = getStoredSchema({
 		engine: lix.engine!,
 		key: "primed_schema",
 	});
 	expect(single?.["x-lix-key"]).toBe("primed_schema");
-	expect(spy.mock.calls.length).toBe(callsAfterAll);
+	expect(countCallsForSql(spy.mock.calls, ALL_STORED_SCHEMAS_SQL)).toBe(
+		callsAfterAllAll
+	);
+	expect(countCallsForSql(spy.mock.calls, SINGLE_STORED_SCHEMA_SQL)).toBe(
+		callsAfterAllSingle
+	);
 
 	spy.mockRestore();
 });
@@ -222,7 +263,7 @@ test("caches lookups for identical keys", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
@@ -234,14 +275,16 @@ test("caches lookups for identical keys", async () => {
 	});
 	expect(first?.["x-lix-version"]).toBe("1.0");
 
-	const afterFirst = spy.mock.calls.length;
+	const afterFirst = countCallsForSql(spy.mock.calls, SINGLE_STORED_SCHEMA_SQL);
 
 	const second = getStoredSchema({
 		engine: lix.engine!,
 		key: "cached_schema",
 	});
 	expect(second?.["x-lix-version"]).toBe("1.0");
-	expect(spy.mock.calls.length).toBe(afterFirst);
+	expect(countCallsForSql(spy.mock.calls, SINGLE_STORED_SCHEMA_SQL)).toBe(
+		afterFirst
+	);
 
 	spy.mockRestore();
 });
@@ -259,7 +302,7 @@ test("invalidates the cache when stored schemas change", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({ value: schema, lixcol_version_id: "global" })
 		.execute();
 
@@ -270,6 +313,8 @@ test("invalidates the cache when stored schemas change", async () => {
 		key: "cache_invalidate_schema",
 	});
 	expect(initial?.["x-lix-version"]).toBe("1.0");
+
+	const perFetch = countCallsForSql(spy.mock.calls, SINGLE_STORED_SCHEMA_SQL);
 
 	spy.mockClear();
 
@@ -282,7 +327,9 @@ test("invalidates the cache when stored schemas change", async () => {
 		key: "cache_invalidate_schema",
 	});
 	expect(afterInvalidate?.["x-lix-version"]).toBe("1.0");
-	expect(spy.mock.calls.length).toBe(1);
+	expect(countCallsForSql(spy.mock.calls, SINGLE_STORED_SCHEMA_SQL)).toBe(
+		perFetch
+	);
 
 	spy.mockRestore();
 });

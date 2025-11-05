@@ -106,7 +106,7 @@ test("arbitrary json is allowed", async () => {
 	expect(viewAfterInsert).toEqual(expected);
 });
 
-test("key_value insert stores proper JSON in state_all (no double encoding)", async () => {
+test("key_value insert stores proper JSON in state_by_version (no double encoding)", async () => {
 	const lix = await openLix({});
 
 	const kvs = [
@@ -121,7 +121,7 @@ test("key_value insert stores proper JSON in state_all (no double encoding)", as
 	await lix.db.insertInto("key_value").values(kvs).execute();
 
 	const rows = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("schema_key", "=", "lix_key_value")
 		.where(
 			"entity_id",
@@ -140,7 +140,7 @@ test("key_value insert stores proper JSON in state_all (no double encoding)", as
 	expect(byKey.get("key3")?.snapshot_content.value).toBe(42);
 	// With json(snapshot_content), driver decodes JSON booleans to true/false
 	// SQLite JSON1 surfaces booleans as 1/0
-	expect(byKey.get("key4")?.snapshot_content.value).toBe(1);
+	expect(byKey.get("key4")?.snapshot_content.value).toBe(true);
 	expect(byKey.get("key5")?.snapshot_content.value).toBeNull();
 });
 
@@ -192,7 +192,7 @@ test("view should show changes across versions", async () => {
 
 	// inserting a key-value pair in version A
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "foo",
 			value: "bar",
@@ -201,7 +201,7 @@ test("view should show changes across versions", async () => {
 		.execute();
 
 	const kvAfterInsert = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
@@ -223,7 +223,7 @@ test("view should show changes across versions", async () => {
 	});
 
 	const kvAfterInsertInVersionB = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
@@ -242,14 +242,14 @@ test("view should show changes across versions", async () => {
 	]);
 
 	await lix.db
-		.updateTable("key_value_all")
+		.updateTable("key_value_by_version")
 		.where("key", "=", "foo")
 		.where("lixcol_version_id", "=", versionB.id)
 		.set({ value: "bar_updated" })
 		.execute();
 
 	const kvAfterUpdate = await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();

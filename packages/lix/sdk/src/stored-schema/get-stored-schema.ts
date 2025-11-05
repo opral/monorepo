@@ -1,17 +1,12 @@
 import { sql } from "kysely";
 import type { LixEngine } from "../engine/boot.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { buildResolvedStateQuery } from "../state/vtable/resolved-state.js";
 import { LixStoredSchemaSchema } from "./schema-definition.js";
-
-export type LoadedStoredSchema = {
-	definition: LixSchemaDefinition;
-	updatedAt: string;
-};
+import { internalQueryBuilder } from "../engine/internal-query-builder.js";
 
 type StoredSchemaCache = {
 	byKey: Map<string, LixSchemaDefinition | null>;
-	all?: { schemas: LoadedStoredSchema[]; signature: string };
+	all?: { definitions: Map<string, LixSchemaDefinition>; signature: string };
 };
 
 const cache = new WeakMap<object, StoredSchemaCache>();
@@ -51,7 +46,7 @@ export function getStoredSchema(args: {
 
 export function getAllStoredSchemas(args: {
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
-}): { schemas: LoadedStoredSchema[]; signature: string } {
+}): { definitions: Map<string, LixSchemaDefinition>; signature: string } {
 	const { engine } = args;
 	ensureSubscription(engine);
 	const cacheEntry = ensureCache(engine.runtimeCacheRef);
@@ -59,30 +54,42 @@ export function getAllStoredSchemas(args: {
 		return cacheEntry.all;
 	}
 
-	const compiledQuery = buildResolvedStateQuery()
+	const compiledQuery = internalQueryBuilder
+		.selectFrom("lix_internal_state_vtable")
 		.select(["snapshot_content", "updated_at"])
 		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 		.where("snapshot_content", "is not", null)
+		.where("version_id", "=", "global")
 		.compile();
 
-	const { rows } = engine.executeSync(compiledQuery);
+	const { rows } = engine.executeSync({
+		...compiledQuery,
+		preprocessMode: "vtable-select-only",
+	});
 
-	const schemas: LoadedStoredSchema[] = [];
+	const definitions = new Map<string, LixSchemaDefinition>();
 	let maxUpdated = "";
 
 	for (const row of rows as Array<Record<string, unknown>>) {
-		// if (typeof row.snapshot_content !== "string") continue;
 		const parsed = JSON.parse(String(row.snapshot_content));
 		const updatedAt = String(row.updated_at ?? "");
-		registerDefinition(cacheEntry, parsed.value);
-		schemas.push({ definition: parsed.value, updatedAt });
+		const definition = parsed.value as LixSchemaDefinition;
+		if (!definition || typeof definition !== "object") {
+			continue;
+		}
+		registerDefinition(cacheEntry, definition);
+		const key = definition["x-lix-key"];
+		if (typeof key !== "string" || key.length === 0) {
+			continue;
+		}
+		definitions.set(key, definition);
 		if (updatedAt > maxUpdated) {
 			maxUpdated = updatedAt;
 		}
 	}
 
-	const signature = `${schemas.length}:${maxUpdated}`;
-	cacheEntry.all = { schemas, signature };
+	const signature = `${definitions.size}:${maxUpdated}`;
+	cacheEntry.all = { definitions, signature };
 	return cacheEntry.all;
 }
 
@@ -90,7 +97,8 @@ function loadSchema(
 	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">,
 	key: string
 ): LixSchemaDefinition | null {
-	const compiledQuery = buildResolvedStateQuery()
+	const compiledQuery = internalQueryBuilder
+		.selectFrom("lix_internal_state_vtable")
 		.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 		.where("schema_key", "=", LixStoredSchemaSchema["x-lix-key"])
 		.where(sql`json_extract(snapshot_content, '$.value."x-lix-key"')`, "=", key)
@@ -103,7 +111,10 @@ function loadSchema(
 		.limit(1)
 		.compile();
 
-	const { rows } = engine.executeSync(compiledQuery);
+	const { rows } = engine.executeSync({
+		...compiledQuery,
+		preprocessMode: "vtable-select-only",
+	});
 	const raw = rows[0]?.value;
 	if (typeof raw !== "string") return null;
 	const definition = JSON.parse(raw) as LixSchemaDefinition;

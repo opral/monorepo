@@ -68,7 +68,7 @@ export function readFileDescriptorSnapshot(args: {
 	| undefined {
 	const rows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "lix_file_descriptor")
 			.where("version_id", "=", args.versionId)
 			.where("entity_id", "=", args.fileId)

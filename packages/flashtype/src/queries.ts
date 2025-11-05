@@ -69,7 +69,7 @@ export function selectFilesystemEntries(lix: Lix) {
  */
 export function selectWorkingDiffCount(lix: Lix) {
 	const activeFileIdQ = lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "flashtype_active_file_id")
 		.where("lixcol_version_id", "=", "global")
 		.select("value");
@@ -100,7 +100,7 @@ export function selectWorkingDiffCount(lix: Lix) {
  * - removed: count of changes with null snapshot_content (delete)
  *
  * Notes:
- * - Scoped to the currently active file via key_value_all("flashtype_active_file_id").
+ * - Scoped to the currently active file via key_value_by_version("flashtype_active_file_id").
  * - Counts include only Markdown plugin changes and exclude RootOrder schema (reorders).
  */
 export function selectCheckpoints({ lix }: { lix: Lix }) {
@@ -139,7 +139,7 @@ export function selectCheckpoints({ lix }: { lix: Lix }) {
 					.sum<number>(
 						sql`CASE 
                             WHEN change.plugin_key = ${sql.lit(mdPlugin.key)} 
-                             AND change.schema_key != ${sql.lit(AstSchemas.RootOrderSchema["x-lix-key"])} 
+                             AND change.schema_key != ${sql.lit(AstSchemas.DocumentSchema["x-lix-key"])} 
                              AND change.snapshot_content IS NOT NULL 
                         THEN 1 ELSE 0 END`,
 					)
@@ -148,7 +148,7 @@ export function selectCheckpoints({ lix }: { lix: Lix }) {
 					.sum<number>(
 						sql`CASE 
                             WHEN change.plugin_key = ${sql.lit(mdPlugin.key)} 
-                             AND change.schema_key != ${sql.lit(AstSchemas.RootOrderSchema["x-lix-key"])} 
+                             AND change.schema_key != ${sql.lit(AstSchemas.DocumentSchema["x-lix-key"])} 
                              AND change.snapshot_content IS NULL 
                         THEN 1 ELSE 0 END`,
 					)
@@ -187,7 +187,7 @@ export function selectDiffCount({
 		.leftJoin("change", "change.id", "change_set_element.change_id")
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.plugin_key", "=", mdPlugin.key)
-		.where("change.schema_key", "!=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.where("change.schema_key", "!=", AstSchemas.DocumentSchema["x-lix-key"])
 		.select((eb) => [
 			eb.fn.count<number>("change.id").as("total"),
 			eb.fn
@@ -221,7 +221,7 @@ export function selectCheckpointDiffCounts({
 	const fileIdQ = fileId
 		? sql.lit(fileId)
 		: lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("key", "=", "flashtype_active_file_id")
 				.where("lixcol_version_id", "=", "global")
 				.select("value");

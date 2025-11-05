@@ -1,7 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "./create-account.js";
-import { LixAccountSchema } from "./schema-definition.js";
 
 test("should create an account", async () => {
 	const lix = await openLix({});
@@ -45,7 +44,7 @@ test("should create an account using schema default version when lixcol_version_
 
 	// Verify the account exists in the database using the active version
 	const dbAccount = await lix.db
-		.selectFrom("account_all")
+		.selectFrom("account_by_version")
 		.selectAll()
 		.where("id", "=", account.id)
 		.where("lixcol_version_id", "=", "global")

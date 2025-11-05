@@ -38,8 +38,8 @@ function buildChangesFromAst(astMarkdown: string): Change[] {
 		{
 			id: "root-change",
 			entity_id: "root",
-			schema_key: AstSchemas.RootOrderSchema["x-lix-key"],
-			schema_version: AstSchemas.RootOrderSchema["x-lix-version"],
+			schema_key: AstSchemas.DocumentSchema["x-lix-key"],
+			schema_version: AstSchemas.DocumentSchema["x-lix-version"],
 			snapshot_content: { order: ids },
 			file_id: "mock",
 			plugin_key: "mock",

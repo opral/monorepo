@@ -136,7 +136,7 @@ describe("sendMessage", () => {
 		expect(rowsAfterOne).toHaveLength(2);
 
 		const fileOne = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/turn-one.txt")
 			.select(["data"])
 			.executeTakeFirstOrThrow();
@@ -350,7 +350,7 @@ describe("sendMessage", () => {
 		expect(finalMessage).toBeTruthy();
 
 		const rows = await lix.db
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("schema_key", "=", "mock_json_property" as any)
 			.select([
 				"entity_id",

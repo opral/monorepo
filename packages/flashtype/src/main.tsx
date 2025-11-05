@@ -8,6 +8,7 @@ import { KeyValueProvider } from "./hooks/key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "./hooks/key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
+import { insertMarkdownSchemas } from "./lib/insert-markdown-schemas";
 import { V2LayoutShell } from "./app/layout-shell";
 import { ensureAgentsFile, createSeededLixBlob } from "./seed";
 
@@ -32,6 +33,7 @@ export const AppRoot = () => {
 					providePluginsRaw: [mdPlugin],
 					environment: env,
 				});
+				await insertMarkdownSchemas({ lix: instance });
 				if (cancelled) {
 					await instance.close();
 					return;

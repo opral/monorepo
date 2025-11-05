@@ -537,13 +537,13 @@ export function sendMessage(args: SendMessageArgs): AgentTurn {
 							}
 							break;
 						}
-				case "text-delta": {
-					flushThinking();
-					assistantText += chunk.text;
-					queue.push({ type: "text", delta: chunk.text });
-					liveMessage.body = fromPlainText(assistantText);
-					break;
-				}
+						case "text-delta": {
+							flushThinking();
+							assistantText += chunk.text;
+							queue.push({ type: "text", delta: chunk.text });
+							liveMessage.body = fromPlainText(assistantText);
+							break;
+						}
 						case "tool-call": {
 							flushThinking();
 							const input = parseToolInput(chunk.input);

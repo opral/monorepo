@@ -16,7 +16,7 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 
 	// 1) Insert (omit status to exercise default 'open')
 	await lix.db
-		.insertInto("change_proposal_all")
+		.insertInto("change_proposal_by_version")
 		.values({
 			source_version_id: src.id,
 			target_version_id: tgt.id,
@@ -38,7 +38,7 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 
 	// 2) Verify tracked (not untracked) via _all view
 	const insertedAll = await lix.db
-		.selectFrom("change_proposal_all")
+		.selectFrom("change_proposal_by_version")
 		.where("id", "=", inserted.id)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -48,7 +48,7 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 
 	// 3) Update status
 	await lix.db
-		.updateTable("change_proposal_all")
+		.updateTable("change_proposal_by_version")
 		.set({ status: "accepted" })
 		.where("id", "=", inserted.id)
 		.where("lixcol_version_id", "=", "global")
@@ -63,7 +63,7 @@ test("insert/update/delete on change_proposal views (global, tracked)", async ()
 
 	// 4) Delete
 	await lix.db
-		.deleteFrom("change_proposal_all")
+		.deleteFrom("change_proposal_by_version")
 		.where("id", "=", inserted.id)
 		.where("lixcol_version_id", "=", "global")
 		.execute();
@@ -91,7 +91,7 @@ test("deleting a version referenced by a change proposal should fail (FK)", asyn
 
 	// Create a change proposal referencing src -> main
 	await lix.db
-		.insertInto("change_proposal_all")
+		.insertInto("change_proposal_by_version")
 		.values({
 			source_version_id: src.id,
 			target_version_id: main.id,
@@ -113,7 +113,7 @@ test("deleting a version referenced by a change proposal should fail (FK)", asyn
 		.executeTakeFirstOrThrow();
 
 	await lix.db
-		.deleteFrom("change_proposal_all")
+		.deleteFrom("change_proposal_by_version")
 		.where("id", "=", cp.id)
 		.where("lixcol_version_id", "=", "global")
 		.execute();

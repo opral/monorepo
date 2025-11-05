@@ -24,13 +24,13 @@ test("should execute a simple SELECT query", async () => {
 	expect(result[0]).toHaveProperty("version_id");
 });
 
-test("should query state_all view", async () => {
+test("should query state_by_version view", async () => {
 	const lix = await openLix({});
 	const versionId = await getActiveVersionId(lix);
 
 	// Insert a test entity
 	await lix.db
-		.insertInto("file_all")
+		.insertInto("file_by_version")
 		.values({
 			path: "/test.md",
 			data: new TextEncoder().encode("test content"),
@@ -40,7 +40,7 @@ test("should query state_all view", async () => {
 
 	const result = await sqlSelect({
 		lix,
-		sql: `SELECT entity_id, schema_key, file_id FROM state_all WHERE version_id = '${versionId}' LIMIT 10`,
+		sql: `SELECT entity_id, schema_key, file_id FROM state_by_version WHERE version_id = '${versionId}' LIMIT 10`,
 	});
 
 	expect(Array.isArray(result)).toBe(true);
@@ -91,7 +91,7 @@ test("should return empty array for no results", async () => {
 
 	const result = await sqlSelect({
 		lix,
-		sql: `SELECT * FROM state_all WHERE version_id = '${versionId}' AND schema_key = 'nonexistent_schema' LIMIT 10`,
+		sql: `SELECT * FROM state_by_version WHERE version_id = '${versionId}' AND schema_key = 'nonexistent_schema' LIMIT 10`,
 	});
 
 	expect(Array.isArray(result)).toBe(true);

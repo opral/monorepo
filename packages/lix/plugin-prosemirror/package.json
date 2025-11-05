@@ -10,12 +10,12 @@
 		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "tsc --build",
+		"build": "rolldown -c",
 		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",
 		"lint:fix": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --fix .",
-		"dev": "tsc --watch",
+		"dev": "rolldown --watch -c",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
@@ -33,7 +33,8 @@
 		"prosemirror-state": "^1.4.3",
 		"prosemirror-model": "^1.19.3",
 		"prosemirror-view": "^1.31.7",
-		"rolldown": "1.0.0-beta.1",
+		"rolldown": "1.0.0-beta.47",
+		"rolldown-plugin-dts": "^0.17.3",
 		"typescript": "^5.5.4",
 		"vitest": "^3.2.4"
 	},

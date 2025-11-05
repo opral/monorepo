@@ -6,6 +6,7 @@ import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
 import { parseMarkdown } from "@opral/markdown-wc";
 import { handlePaste } from "./handle-paste";
 import { AstSchemas } from "@opral/markdown-wc";
+import { insertMarkdownSchemas } from "../../../lib/insert-markdown-schemas";
 import { Editor } from "@tiptap/core";
 
 async function createEditorFromFile(args: {
@@ -13,6 +14,8 @@ async function createEditorFromFile(args: {
 	fileId: string;
 	persistDebounceMs?: number;
 }) {
+	await insertMarkdownSchemas({ lix: args.lix });
+
 	const row = await args.lix.db
 		.selectFrom("file")
 		.where("id", "=", args.fileId)
@@ -80,7 +83,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 	const rootOrderAfter = await lix.db
 		.selectFrom("state")
 		.where("file_id", "=", fileId)
-		.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.where("schema_key", "=", AstSchemas.DocumentSchema["x-lix-key"])
 		.select(["snapshot_content"])
 		.execute();
 
@@ -265,6 +268,7 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 		fileId,
 		persistDebounceMs: 0,
 	});
+
 	await handlePaste({
 		editor,
 		event: {
@@ -275,12 +279,15 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 			},
 		},
 	});
+
 	await new Promise((r) => setTimeout(r, 0));
+
 	const fileAfter = await lix.db
 		.selectFrom("file")
 		.where("id", "=", fileId)
 		.selectAll()
 		.executeTakeFirst();
+
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
 	expect(mdAfter).toBe("First line\n\nSecond line");
 	editor.destroy();
@@ -326,7 +333,7 @@ test("Enter splits paragraph → assigns unique ids and root order has no duplic
 	const root = await lix.db
 		.selectFrom("state")
 		.where("file_id", "=", fileId)
-		.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+		.where("schema_key", "=", AstSchemas.DocumentSchema["x-lix-key"])
 		.select(["snapshot_content"]) // small row
 		.executeTakeFirst();
 
@@ -384,7 +391,7 @@ test("two Enters create three paragraphs with unique ids and correct order", asy
 		const root = await lix.db
 			.selectFrom("state")
 			.where("file_id", "=", fileId)
-			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.where("schema_key", "=", AstSchemas.DocumentSchema["x-lix-key"])
 			.select(["snapshot_content"]) // small row
 			.executeTakeFirst();
 		order = ((root?.snapshot_content as { order?: string[] } | undefined)
@@ -608,7 +615,7 @@ test("rapid Enter/type coalescing persists 3 paragraphs with unique ids", async 
 		const root = await lix.db
 			.selectFrom("state")
 			.where("file_id", "=", fileId)
-			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.where("schema_key", "=", AstSchemas.DocumentSchema["x-lix-key"])
 			.select(["snapshot_content"]) // small row
 			.executeTakeFirst();
 		order = ((root?.snapshot_content as { order?: string[] } | undefined)
@@ -713,7 +720,7 @@ test("state cleanup on delete removes row and prunes root order", async () => {
 		const root = await lix.db
 			.selectFrom("state")
 			.where("file_id", "=", fileId)
-			.where("schema_key", "=", AstSchemas.RootOrderSchema["x-lix-key"])
+			.where("schema_key", "=", AstSchemas.DocumentSchema["x-lix-key"])
 			.select(["snapshot_content"]) // small row
 			.executeTakeFirst();
 		order = ((root?.snapshot_content as { order?: string[] } | undefined)

@@ -1,13 +1,25 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+
+const testStateSchema = {
+	"x-lix-key": "test_schema",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		foo: { type: "string" },
+	},
+	required: ["foo"],
+} as const satisfies LixSchemaDefinition;
 
 test("insert, update, delete on version descriptor", async () => {
 	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "change_set_id_0", lixcol_version_id: "global" },
 			{ id: "change_set_id_1", lixcol_version_id: "global" },
@@ -18,7 +30,7 @@ test("insert, update, delete on version descriptor", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_id_0",
@@ -44,7 +56,7 @@ test("insert, update, delete on version descriptor", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("version_all")
+		.insertInto("version_by_version")
 		.values([
 			{
 				id: "version0",
@@ -135,7 +147,7 @@ test("querying by id", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "change_set_id_0", lixcol_version_id: "global" },
 			{ id: "change_set_id_1", lixcol_version_id: "global" },
@@ -146,7 +158,7 @@ test("querying by id", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_id_0",
@@ -202,7 +214,7 @@ test("update active version view", async () => {
 
 	// Create required change sets and version first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "working_cs1", lixcol_version_id: "global" },
@@ -211,7 +223,7 @@ test("update active version view", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{
@@ -246,6 +258,58 @@ test("update active version view", async () => {
 			version_id: "version_id_1",
 		},
 	]);
+
+	await lix.close();
+});
+
+test("active_version update succeeds via raw SQLite trigger", async () => {
+	const lix = await openLix({});
+
+	// Prepare change sets and commits identical to the preprocessor-driven path.
+	await lix.db
+		.insertInto("change_set_by_version")
+		.values([
+			{ id: "cs2", lixcol_version_id: "global" },
+			{ id: "working_cs2", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("commit_by_version")
+		.values([
+			{ id: "commit_cs2", change_set_id: "cs2", lixcol_version_id: "global" },
+			{
+				id: "working_commit_2",
+				change_set_id: "working_cs2",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "version_id_2",
+			name: "raw_update_version",
+			working_commit_id: "working_commit_2",
+		})
+		.execute();
+
+	// Execute the update directly through SQLite so the INSTEAD OF trigger handles it.
+	lix.engine!.sqlite.exec({
+		sql: `UPDATE active_version SET version_id = ?`,
+		bind: ["version_id_2"],
+	});
+
+	const rawResult = lix.engine!.sqlite.exec({
+		sql: `SELECT version_id FROM active_version`,
+		returnValue: "resultRows",
+		rowMode: "object",
+	});
+
+	expect(rawResult).toEqual([{ version_id: "version_id_2" }]);
+
+	await lix.close();
 });
 
 test("applying the schema should create an initial 'main' version", async () => {
@@ -317,13 +381,13 @@ test.skip("should enforce foreign key constraint on working_commit_id", async ()
 
 	// Create valid change set for commit_id
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values({ id: "cs1", lixcol_version_id: "global" })
 		.execute();
 
 	// Create required commit
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 		])
@@ -347,7 +411,7 @@ test("should allow version insertion with valid working commit reference", async
 
 	// Create valid change sets
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -356,7 +420,7 @@ test("should allow version insertion with valid working commit reference", async
 
 	// Create valid commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{
@@ -398,13 +462,13 @@ test("should allow active_version update with valid version_id", async () => {
 
 	// Create valid change set and version
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values({ id: "cs1", lixcol_version_id: "global" })
 		.execute();
 
 	// Create required commit
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 		])
@@ -412,7 +476,7 @@ test("should allow active_version update with valid version_id", async () => {
 
 	// Create working commit
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "working_commit_cs1",
@@ -445,7 +509,7 @@ test("versions should be globally accessible regardless of version context", asy
 
 	// Create required change sets
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_a", lixcol_version_id: "global" },
 			{ id: "cs_b", lixcol_version_id: "global" },
@@ -455,7 +519,7 @@ test("versions should be globally accessible regardless of version context", asy
 
 	// Create working change sets
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "working_cs_a", lixcol_version_id: "global" },
 			{ id: "working_cs_b", lixcol_version_id: "global" },
@@ -465,7 +529,7 @@ test("versions should be globally accessible regardless of version context", asy
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_a", change_set_id: "cs_a", lixcol_version_id: "global" },
 			{ id: "commit_b", change_set_id: "cs_b", lixcol_version_id: "global" },
@@ -554,7 +618,12 @@ test("mutation of a version's state should NOT lead to duplicate version entries
 	});
 
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("stored_schema")
+		.values({ value: testStateSchema })
+		.execute();
+
+	await lix.db
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "test_entity",
 			version_id: versionA.id,
@@ -655,7 +724,7 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 
 	// Insert necessary change sets to satisfy foreign keys
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -666,7 +735,7 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit_cs2", change_set_id: "cs2", lixcol_version_id: "global" },
@@ -757,7 +826,7 @@ test("inherits_from_version_id should default to global", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "change_set_1", lixcol_version_id: "global" },
 			{ id: "working_change_set_1", lixcol_version_id: "global" },
@@ -766,7 +835,7 @@ test("inherits_from_version_id should default to global", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_1",
@@ -819,7 +888,7 @@ test("versions should have hidden property defaulting to false", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_test", lixcol_version_id: "global" },
 			{ id: "working_cs_test", lixcol_version_id: "global" },
@@ -828,7 +897,7 @@ test("versions should have hidden property defaulting to false", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_test",
@@ -894,7 +963,7 @@ test("can explicitly set hidden to true", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_hidden", lixcol_version_id: "global" },
 			{ id: "working_cs_hidden", lixcol_version_id: "global" },
@@ -903,7 +972,7 @@ test("can explicitly set hidden to true", async () => {
 
 	// Create required commits
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "commit_hidden",
@@ -944,7 +1013,7 @@ test("insert via version writes descriptor + tip when commit_id provided", async
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_unified_1", lixcol_version_id: "global" },
 			{ id: "wcs_unified_1", lixcol_version_id: "global" },
@@ -952,7 +1021,7 @@ test("insert via version writes descriptor + tip when commit_id provided", async
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "c_unified_1",
@@ -1017,11 +1086,11 @@ test("insert via version without commit_id auto-inserts a tip", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([{ id: "wcs_unified_2", lixcol_version_id: "global" }])
 		.execute();
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "wc_unified_2",
@@ -1058,18 +1127,18 @@ test("insert via version without commit_id auto-inserts a tip", async () => {
 	expect(tipRows.length).toBe(1);
 });
 
-test("insert via version_all writes descriptor + tip in scoped version", async () => {
+test("insert via version_by_version writes descriptor + tip in scoped version", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_unified_3", lixcol_version_id: "global" },
 			{ id: "wcs_unified_3", lixcol_version_id: "global" },
 		])
 		.execute();
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "c_unified_3",
@@ -1085,7 +1154,7 @@ test("insert via version_all writes descriptor + tip in scoped version", async (
 		.execute();
 
 	await lix.db
-		.insertInto("version_all")
+		.insertInto("version_by_version")
 		.values({
 			id: "v_unified_3",
 			name: "v_unified_3",
@@ -1107,12 +1176,12 @@ test("commit_id FK uses materialized mode (lenient on insert)", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([{ id: "wcs_unified_6", lixcol_version_id: "global" }])
 		.execute();
 
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "wc_unified_6",
@@ -1139,14 +1208,14 @@ test("delete via version writes descriptor + tip tombstones", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("change_set_all")
+		.insertInto("change_set_by_version")
 		.values([
 			{ id: "cs_unified_7", lixcol_version_id: "global" },
 			{ id: "wcs_unified_7", lixcol_version_id: "global" },
 		])
 		.execute();
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values([
 			{
 				id: "c_unified_7",

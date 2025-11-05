@@ -7,11 +7,11 @@ export type {
 } from "./views/state.js";
 
 export type {
-	StateAllView,
-	StateAllRow,
-	NewStateAllRow,
-	StateAllRowUpdate,
-} from "./views/state-all.js";
+	StateByVersionView,
+	StateByVersionRow,
+	NewStateByVersionRow,
+	StateByVersionRowUpdate,
+} from "./views/state-by-version.js";
 
 export type {
 	StateWithTombstonesView,

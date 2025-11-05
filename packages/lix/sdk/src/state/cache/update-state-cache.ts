@@ -1,8 +1,12 @@
 import type { LixEngine } from "../../engine/boot.js";
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
-import { getStateCacheV2Tables } from "./schema.js";
-import { createSchemaCacheTable } from "./create-schema-cache-table.js";
+import { getStateCacheTables } from "./schema.js";
+import {
+	createSchemaCacheTable,
+	schemaKeyToCacheTableName,
+} from "./create-schema-cache-table.js";
+import { resolveCacheSchemaDefinition } from "./schema-resolver.js";
 
 /**
  * Updates the state cache v2 directly to physical tables, bypassing the virtual table.
@@ -35,7 +39,7 @@ import { createSchemaCacheTable } from "./create-schema-cache-table.js";
  * });
  */
 export function updateStateCache(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 	// Accepts standard changes or materialized changes which include inline
 	// lixcol_version_id and lixcol_commit_id. When inline values are present,
 	// they take precedence over top-level commit/version arguments.
@@ -73,12 +77,10 @@ export function updateStateCache(args: {
 
 	// Process each schema's changes directly to its physical table
 	for (const [schema_key, schemaChanges] of changesBySchema) {
-		// Sanitize schema_key for use in table name - replace non-alphanumeric with underscore
-		const sanitizedSchemaKey = schema_key.replace(/[^a-zA-Z0-9]/g, "_");
-		const tableName = `lix_internal_state_cache_${sanitizedSchemaKey}`;
-
-		// Ensure table exists (creates if needed, updates cache)
-		ensureTableExists({ engine, tableName });
+		const tableName = ensureTableExists({
+			engine,
+			schemaKey: schema_key,
+		});
 
 		// Process inserts/updates for this schema
 		if (schemaChanges.inserts.length > 0) {
@@ -95,6 +97,8 @@ export function updateStateCache(args: {
 				// Build edge rows from each commit change
 				const edgeRows: Array<LixChangeRaw> = [];
 				const changeSetRows: Array<LixChangeRaw> = [];
+				let edgeTableName: string | null = null;
+				let changeSetTableName: string | null = null;
 				for (const change of schemaChanges.inserts) {
 					const snap = change.snapshot_content
 						? JSON.parse(change.snapshot_content as any)
@@ -109,10 +113,14 @@ export function updateStateCache(args: {
 						: undefined;
 
 					// Clear existing cached edges for this child in global scope
-					const edgeTable = "lix_internal_state_cache_lix_commit_edge";
-					ensureTableExists({ engine, tableName: edgeTable });
+					if (edgeTableName === null) {
+						edgeTableName = ensureTableExists({
+							engine,
+							schemaKey: "lix_commit_edge",
+						});
+					}
 					engine.executeSync({
-						sql: `DELETE FROM ${edgeTable} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = ?`,
+						sql: `DELETE FROM ${edgeTableName} WHERE version_id = 'global' AND json_extract(snapshot_content,'$.child_id') = ?`,
 						parameters: [childId],
 					});
 
@@ -139,6 +147,12 @@ export function updateStateCache(args: {
 
 					// Ensure the commit's change set exists in cache (global)
 					if (changeSetId) {
+						if (changeSetTableName === null) {
+							changeSetTableName = ensureTableExists({
+								engine,
+								schemaKey: "lix_change_set",
+							});
+						}
 						changeSetRows.push({
 							id: change.id, // tie to the real commit change id
 							entity_id: changeSetId,
@@ -159,9 +173,15 @@ export function updateStateCache(args: {
 				}
 
 				if (edgeRows.length > 0) {
+					if (edgeTableName === null) {
+						edgeTableName = ensureTableExists({
+							engine,
+							schemaKey: "lix_commit_edge",
+						});
+					}
 					batchInsertDirectToTable({
 						engine,
-						tableName: "lix_internal_state_cache_lix_commit_edge",
+						tableName: edgeTableName,
 						changes: edgeRows,
 						default_commit_id: args.commit_id,
 						default_version_id: "global",
@@ -169,14 +189,15 @@ export function updateStateCache(args: {
 				}
 
 				if (changeSetRows.length > 0) {
-					// Ensure the change_set cache table exists before inserting
-					ensureTableExists({
-						engine,
-						tableName: "lix_internal_state_cache_lix_change_set",
-					});
+					if (changeSetTableName === null) {
+						changeSetTableName = ensureTableExists({
+							engine,
+							schemaKey: "lix_change_set",
+						});
+					}
 					batchInsertDirectToTable({
 						engine,
-						tableName: "lix_internal_state_cache_lix_change_set",
+						tableName: changeSetTableName,
 						changes: changeSetRows,
 						default_commit_id: args.commit_id,
 						default_version_id: "global",
@@ -199,24 +220,33 @@ export function updateStateCache(args: {
 }
 
 /**
- * Ensures a table exists and updates the cache.
- * Single source of truth for table creation and cache management.
+ * Ensures a schema-backed cache table exists and tracks it in the engine cache.
  */
 function ensureTableExists(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">;
-	tableName: string;
-}): void {
-	const { engine, tableName } = args;
-	const tableCache = getStateCacheV2Tables({ engine });
-	createSchemaCacheTable({
-		engine: args.engine,
-		tableName,
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+	schemaKey: string;
+}): string {
+	const { engine, schemaKey } = args;
+	const schemaDefinition = resolveCacheSchemaDefinition({
+		engine,
+		schemaKey,
 	});
-
-	// Update cache set if newly seen
+	if (!schemaDefinition) {
+		throw new Error(`updateStateCache: missing stored schema for ${schemaKey}`);
+	}
+	const tableName = createSchemaCacheTable({
+		engine,
+		schema: schemaDefinition,
+	});
+	const tableCache = getStateCacheTables({ engine });
 	if (!tableCache.has(tableName)) {
 		tableCache.add(tableName);
 	}
+	const sanitized = schemaKeyToCacheTableName(schemaKey);
+	if (!tableCache.has(sanitized)) {
+		tableCache.add(sanitized);
+	}
+	return tableName;
 }
 
 function batchInsertDirectToTable(args: {
@@ -260,7 +290,7 @@ function batchInsertDirectToTable(args: {
 			created_at,
 			updated_at,
 			inherited_from_version_id,
-			inheritance_delete_marker,
+			is_tombstone,
 			change_id,
 			commit_id
 		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?, ?, ?)
@@ -271,7 +301,7 @@ function batchInsertDirectToTable(args: {
 			schema_version = excluded.schema_version,
 			updated_at = excluded.updated_at,
 			inherited_from_version_id = excluded.inherited_from_version_id,
-			inheritance_delete_marker = excluded.inheritance_delete_marker,
+			is_tombstone = excluded.is_tombstone,
 			change_id = excluded.change_id,
 			commit_id = excluded.commit_id`,
 			parameters: [
@@ -326,7 +356,7 @@ function batchDeleteDirectFromTable(args: {
 		const result = engine.executeSync({
 			sql: `SELECT * FROM ${tableName} 
 			      WHERE entity_id = ? AND file_id = ? AND version_id = ?
-			      AND inheritance_delete_marker = 0 AND snapshot_content IS NOT NULL`,
+			      AND is_tombstone = 0 AND snapshot_content IS NOT NULL`,
 			parameters: [change.entity_id, change.file_id, resolvedVersionId],
 		}).rows;
 
@@ -354,7 +384,7 @@ function batchDeleteDirectFromTable(args: {
 				created_at,
 				updated_at,
 				inherited_from_version_id,
-				inheritance_delete_marker,
+				is_tombstone,
 				change_id,
 				commit_id
 			) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, NULL, 1, ?, ?)
@@ -365,7 +395,7 @@ function batchDeleteDirectFromTable(args: {
 				schema_version = excluded.schema_version,
 				updated_at = excluded.updated_at,
 				inherited_from_version_id = NULL,
-				inheritance_delete_marker = 1,
+				is_tombstone = 1,
 				change_id = excluded.change_id,
 				commit_id = excluded.commit_id`,
 			parameters: [

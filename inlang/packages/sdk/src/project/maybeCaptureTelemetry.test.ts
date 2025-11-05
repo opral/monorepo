@@ -3,10 +3,10 @@ import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { newProject } from "./newProject.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { capture } from "../services/telemetry/capture.js";
-import { humanId } from "../human-id/human-id.js";
-import { uuidV7 } from "@lix-js/sdk";
+import { humanId, uuidV7 } from "@lix-js/sdk";
 
-test("it should capture as expected", async () => {
+// telemetry is disabled
+test.skip("it should capture as expected", async () => {
 	vi.mock("../services/telemetry/capture.js", async () => {
 		return {
 			capture: vi.fn(() => Promise.resolve()),
@@ -31,7 +31,7 @@ test("it should capture as expected", async () => {
 		.select("account_id")
 		.executeTakeFirstOrThrow();
 
-	const bundleId = humanId();
+	const bundleId = await humanId({ lix: project.lix });
 	await project.db
 		.insertInto("bundle")
 		.values({ id: bundleId, declarations: [] })

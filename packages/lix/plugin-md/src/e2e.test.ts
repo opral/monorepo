@@ -119,13 +119,13 @@ test("programatically mutating entities should be reflected in the file", async 
 
 	// Discover current entity ids for heading and paragraph
 	const headingRow = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("file_id", "=", "file1")
 		.where("schema_key", "=", AstSchemas["HeadingSchema"]["x-lix-key"])
 		.selectAll()
 		.executeTakeFirstOrThrow();
 	const paraRow = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("file_id", "=", "file1")
 		.where("schema_key", "=", AstSchemas.schemasByType.paragraph!["x-lix-key"])
 		.selectAll()
@@ -134,7 +134,7 @@ test("programatically mutating entities should be reflected in the file", async 
 	// 2. Mutate the paragraph via state using the discovered entity_id
 	// Create proper Markdown-WC node structure for paragraph
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({
 			snapshot_content: {
 				type: "paragraph",
@@ -155,7 +155,7 @@ test("programatically mutating entities should be reflected in the file", async 
 	// 3. Mutate the title via state using the known entity_id
 	// Create proper node structure for heading
 	await lix.db
-		.updateTable("state_all")
+		.updateTable("state_by_version")
 		.set({
 			snapshot_content: {
 				type: "heading",

@@ -1,8 +1,8 @@
 import type { Insertable, Selectable, Updateable } from "kysely";
 import type { LixEngine } from "../../engine/boot.js";
-import type { StateAllView } from "./state-all.js";
+import type { StateByVersionView } from "./state-by-version.js";
 
-export type StateView = Omit<StateAllView, "version_id">;
+export type StateView = Omit<StateByVersionView, "version_id">;
 
 // Kysely operation types
 export type StateRow = Selectable<StateView>;
@@ -11,7 +11,7 @@ export type StateRowUpdate = Updateable<StateView>;
 
 /**
  * Creates the public 'state' view filtered to the active version, and
- * INSTEAD OF triggers that forward writes to state_all (which proxies to the vtable).
+ * INSTEAD OF triggers that forward writes to state_by_version (which proxies to the vtable).
  */
 export function applyStateView(args: {
 	engine: Pick<LixEngine, "sqlite">;
@@ -33,14 +33,14 @@ export function applyStateView(args: {
       commit_id,
       writer_key,
       metadata
-    FROM state_all
+    FROM state_by_version
     WHERE version_id IN (SELECT version_id FROM active_version);
 
-    -- Forward writes to the active version via state_all
+    -- Forward writes to the active version via state_by_version
     CREATE TRIGGER IF NOT EXISTS state_insert
     INSTEAD OF INSERT ON state
     BEGIN
-      INSERT INTO state_all (
+      INSERT INTO state_by_version (
         entity_id,
         schema_key,
         file_id,
@@ -66,7 +66,7 @@ export function applyStateView(args: {
     CREATE TRIGGER IF NOT EXISTS state_update
     INSTEAD OF UPDATE ON state
     BEGIN
-      UPDATE state_all
+      UPDATE state_by_version
       SET
         entity_id = NEW.entity_id,
         schema_key = NEW.schema_key,
@@ -87,7 +87,7 @@ export function applyStateView(args: {
     CREATE TRIGGER IF NOT EXISTS state_delete
     INSTEAD OF DELETE ON state
     BEGIN
-      DELETE FROM state_all
+      DELETE FROM state_by_version
       WHERE 
         entity_id = OLD.entity_id
         AND schema_key = OLD.schema_key

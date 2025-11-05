@@ -1,3 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`matrix of queries preserves precedence across rewrites > matrix fast limit plan 1`] = `"3|0|179|SCAN v VIRTUAL TABLE INDEX 0:schema_key,version_id,entity_id"`;

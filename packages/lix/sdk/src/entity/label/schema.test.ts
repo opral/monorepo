@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { createLabel } from "../../label/create-label.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 test("entity_label mapping requires entity to exist in state", async () => {
 	const lix = await openLix({});
@@ -11,12 +12,31 @@ test("entity_label mapping requires entity to exist in state", async () => {
 		name: "needs translation",
 	});
 
+	const bundleSchema: LixSchemaDefinition = {
+		"x-lix-key": "test_inlang_bundle",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			key: { type: "string" },
+			messages: { type: "object" },
+		},
+		required: ["id", "key", "messages"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: bundleSchema })
+		.execute();
+
 	// Create an entity in state (simulate a bundle entity)
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "bundle123",
-			schema_key: "inlang_bundle",
+			schema_key: "test_inlang_bundle",
 			file_id: "messages.json",
 			schema_version: "1.0",
 			plugin_key: "test_plugin",
@@ -33,7 +53,7 @@ test("entity_label mapping requires entity to exist in state", async () => {
 		.insertInto("entity_label")
 		.values({
 			entity_id: "bundle123",
-			schema_key: "inlang_bundle",
+			schema_key: "test_inlang_bundle",
 			file_id: "messages.json",
 			label_id: needsTranslationLabel.id,
 		})
@@ -48,7 +68,7 @@ test("entity_label mapping requires entity to exist in state", async () => {
 
 	expect(mapping).toMatchObject({
 		entity_id: "bundle123",
-		schema_key: "inlang_bundle",
+		schema_key: "test_inlang_bundle",
 		file_id: "messages.json",
 		label_id: needsTranslationLabel.id,
 	});
@@ -63,12 +83,31 @@ test("entity can have multiple labels", async () => {
 		createLabel({ lix, name: "backend" }),
 	]);
 
+	const projectTaskSchema: LixSchemaDefinition = {
+		"x-lix-key": "test_project_task",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			title: { type: "string" },
+			status: { type: "string" },
+		},
+		required: ["id", "title", "status"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: projectTaskSchema })
+		.execute();
+
 	// Create an entity in state
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "task456",
-			schema_key: "project_task",
+			schema_key: "test_project_task",
 			file_id: "tasks.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -86,7 +125,7 @@ test("entity can have multiple labels", async () => {
 			.insertInto("entity_label")
 			.values({
 				entity_id: "task456",
-				schema_key: "project_task",
+				schema_key: "test_project_task",
 				file_id: "tasks.json",
 				label_id: label.id,
 			})
@@ -114,23 +153,72 @@ test("same label can be applied to multiple entities", async () => {
 
 	const urgentLabel = await createLabel({ lix, name: "urgent" });
 
+	const multiSchemas: LixSchemaDefinition[] = [
+		{
+			"x-lix-key": "test_bug_report",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				title: { type: "string" },
+				severity: { type: "string" },
+			},
+			required: ["id", "title"],
+		},
+		{
+			"x-lix-key": "test_feature_request",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				title: { type: "string" },
+				priority: { type: "string" },
+			},
+			required: ["id", "title"],
+		},
+		{
+			"x-lix-key": "test_task",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				title: { type: "string" },
+				assigned: { type: "string" },
+			},
+			required: ["id", "title"],
+		},
+	];
+
+	for (const schema of multiSchemas) {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+	}
+
 	// Create multiple entities in state
 	const entities = [
 		{
 			entity_id: "bug1",
-			schema_key: "bug_report",
+			schema_key: "test_bug_report",
 			file_id: "bugs.json",
 			content: { id: "bug1", title: "Login fails", severity: "high" },
 		},
 		{
 			entity_id: "feature1",
-			schema_key: "feature_request",
+			schema_key: "test_feature_request",
 			file_id: "features.json",
 			content: { id: "feature1", title: "Dark mode", priority: "high" },
 		},
 		{
 			entity_id: "task1",
-			schema_key: "task",
+			schema_key: "test_task",
 			file_id: "tasks.json",
 			content: { id: "task1", title: "Update docs", assigned: "john" },
 		},
@@ -184,6 +272,24 @@ test("entity_label respects composite primary key constraint", async () => {
 
 	const label = await createLabel({ lix, name: "duplicate-test" });
 
+	const testEntitySchema: LixSchemaDefinition = {
+		"x-lix-key": "test_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			data: { type: "string" },
+		},
+		required: ["id"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.execute();
+
 	// Create entity in state
 	await lix.db
 		.insertInto("state")
@@ -227,13 +333,59 @@ test("different entities with same ID but different schema_key or file_id can ha
 
 	const label = await createLabel({ lix, name: "shared" });
 
+	const typeSchemas: LixSchemaDefinition[] = [
+		{
+			"x-lix-key": "test_type_a",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				type: { type: "string" },
+			},
+			required: ["id"],
+		},
+		{
+			"x-lix-key": "test_type_b",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				type: { type: "string" },
+			},
+			required: ["id"],
+		},
+		{
+			"x-lix-key": "test_type_c",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id", "/file"],
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				file: { type: "number" },
+			},
+			required: ["id", "file"],
+		},
+	];
+
+	for (const schema of typeSchemas) {
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+	}
+
 	// Create entities in state with same ID but different schema_key
 	await lix.db
 		.insertInto("state")
 		.values([
 			{
 				entity_id: "shared123",
-				schema_key: "type_a",
+				schema_key: "test_type_a",
 				file_id: "file.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -241,7 +393,7 @@ test("different entities with same ID but different schema_key or file_id can ha
 			},
 			{
 				entity_id: "shared123",
-				schema_key: "type_b",
+				schema_key: "test_type_b",
 				file_id: "file.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -256,7 +408,7 @@ test("different entities with same ID but different schema_key or file_id can ha
 		.values([
 			{
 				entity_id: "shared456",
-				schema_key: "type_c",
+				schema_key: "test_type_c",
 				file_id: "file1.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -264,7 +416,7 @@ test("different entities with same ID but different schema_key or file_id can ha
 			},
 			{
 				entity_id: "shared456",
-				schema_key: "type_c",
+				schema_key: "test_type_c",
 				file_id: "file2.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -279,25 +431,25 @@ test("different entities with same ID but different schema_key or file_id can ha
 		.values([
 			{
 				entity_id: "shared123",
-				schema_key: "type_a",
+				schema_key: "test_type_a",
 				file_id: "file.json",
 				label_id: label.id,
 			},
 			{
 				entity_id: "shared123",
-				schema_key: "type_b",
+				schema_key: "test_type_b",
 				file_id: "file.json",
 				label_id: label.id,
 			},
 			{
 				entity_id: "shared456",
-				schema_key: "type_c",
+				schema_key: "test_type_c",
 				file_id: "file1.json",
 				label_id: label.id,
 			},
 			{
 				entity_id: "shared456",
-				schema_key: "type_c",
+				schema_key: "test_type_c",
 				file_id: "file2.json",
 				label_id: label.id,
 			},
@@ -317,6 +469,24 @@ test("removing entity_label mapping", async () => {
 	const lix = await openLix({});
 
 	const label = await createLabel({ lix, name: "removable" });
+
+	const removableSchema: LixSchemaDefinition = {
+		"x-lix-key": "test_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			removable: { type: "boolean" },
+		},
+		required: ["id"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: removableSchema })
+		.execute();
 
 	// Create entity in state
 	await lix.db
@@ -377,6 +547,24 @@ test("querying entities by label with proper state", async () => {
 	const todoLabel = await createLabel({ lix, name: "todo" });
 	const doneLabel = await createLabel({ lix, name: "done" });
 
+	const taskSchema: LixSchemaDefinition = {
+		"x-lix-key": "test_task",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			status: { type: "string" },
+		},
+		required: ["id", "status"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: taskSchema })
+		.execute();
+
 	// Create task entities in state
 	const tasks = [
 		{ id: "task1", status: "pending" },
@@ -391,7 +579,7 @@ test("querying entities by label with proper state", async () => {
 			.insertInto("state")
 			.values({
 				entity_id: task.id,
-				schema_key: "task",
+				schema_key: "test_task",
 				file_id: "tasks.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -406,7 +594,7 @@ test("querying entities by label with proper state", async () => {
 			.insertInto("entity_label")
 			.values({
 				entity_id: `task${i}`,
-				schema_key: "task",
+				schema_key: "test_task",
 				file_id: "tasks.json",
 				label_id: todoLabel.id,
 			})
@@ -419,7 +607,7 @@ test("querying entities by label with proper state", async () => {
 			.insertInto("entity_label")
 			.values({
 				entity_id: `task${i}`,
-				schema_key: "task",
+				schema_key: "test_task",
 				file_id: "tasks.json",
 				label_id: doneLabel.id,
 			})
@@ -431,7 +619,7 @@ test("querying entities by label with proper state", async () => {
 		.selectFrom("entity_label")
 		.innerJoin("label", "label.id", "entity_label.label_id")
 		.where("label.name", "=", "todo")
-		.where("entity_label.schema_key", "=", "task")
+		.where("entity_label.schema_key", "=", "test_task")
 		.select(["entity_label.entity_id"])
 		.execute();
 
@@ -447,7 +635,7 @@ test("querying entities by label with proper state", async () => {
 		.selectFrom("entity_label")
 		.innerJoin("label", "label.id", "entity_label.label_id")
 		.where("label.name", "=", "done")
-		.where("entity_label.schema_key", "=", "task")
+		.where("entity_label.schema_key", "=", "test_task")
 		.select(["entity_label.entity_id"])
 		.execute();
 
@@ -481,7 +669,7 @@ test("entity_label works with change_set entities", async () => {
 
 	// Label the change set
 	await lix.db
-		.insertInto("entity_label_all")
+		.insertInto("entity_label_by_version")
 		.values({
 			entity_id: changeSet.id,
 			schema_key: "lix_change_set",
@@ -512,6 +700,24 @@ test("query entities with specific label combinations", async () => {
 	const criticalLabel = await createLabel({ lix, name: "critical" });
 	const resolvedLabel = await createLabel({ lix, name: "resolved" });
 
+	const issueSchema: LixSchemaDefinition = {
+		"x-lix-key": "test_issue",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "title"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: issueSchema })
+		.execute();
+
 	// Create issues in state
 	const issues = [
 		{ id: "issue1", title: "Critical bug", labels: [bugLabel, criticalLabel] },
@@ -526,7 +732,7 @@ test("query entities with specific label combinations", async () => {
 			.insertInto("state")
 			.values({
 				entity_id: issue.id,
-				schema_key: "issue",
+				schema_key: "test_issue",
 				file_id: "issues.json",
 				plugin_key: "test_plugin",
 				schema_version: "1.0",
@@ -540,7 +746,7 @@ test("query entities with specific label combinations", async () => {
 				.insertInto("entity_label")
 				.values({
 					entity_id: issue.id,
-					schema_key: "issue",
+					schema_key: "test_issue",
 					file_id: "issues.json",
 					label_id: label.id,
 				})
@@ -559,7 +765,7 @@ test("query entities with specific label combinations", async () => {
 		)
 		.where("el1.label_id", "=", bugLabel.id)
 		.where("el2.label_id", "=", criticalLabel.id)
-		.where("el1.schema_key", "=", "issue")
+		.where("el1.schema_key", "=", "test_issue")
 		.select(["el1.entity_id"])
 		.distinct()
 		.execute();
@@ -594,6 +800,23 @@ test("entity_label foreign key constraint prevents referencing non-existent stat
 
 test("entity_label foreign key constraint prevents referencing non-existent labels", async () => {
 	const lix = await openLix({});
+
+	// Ensure schema is registered for validation
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "test_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					id: { type: "string" },
+				},
+				required: ["id"],
+			},
+		})
+		.execute();
 
 	// Create an entity in state
 	await lix.db
@@ -630,12 +853,29 @@ test("entity_label composite foreign key correctly validates all three state col
 
 	const label = await createLabel({ lix, name: "test-label" });
 
+	const schemaOne: LixSchemaDefinition = {
+		"x-lix-key": "test_schema1",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: schemaOne })
+		.execute();
+
 	// Create an entity in state
 	await lix.db
 		.insertInto("state")
 		.values({
 			entity_id: "entity1",
-			schema_key: "schema1",
+			schema_key: "test_schema1",
 			file_id: "file1.json",
 			plugin_key: "test_plugin",
 			schema_version: "1.0",
@@ -649,7 +889,7 @@ test("entity_label composite foreign key correctly validates all three state col
 			.insertInto("entity_label")
 			.values({
 				entity_id: "wrong_entity",
-				schema_key: "schema1",
+				schema_key: "test_schema1",
 				file_id: "file1.json",
 				label_id: label.id,
 			})
@@ -675,7 +915,7 @@ test("entity_label composite foreign key correctly validates all three state col
 			.insertInto("entity_label")
 			.values({
 				entity_id: "entity1",
-				schema_key: "schema1",
+				schema_key: "test_schema1",
 				file_id: "wrong_file.json",
 				label_id: label.id,
 			})
@@ -688,7 +928,7 @@ test("entity_label composite foreign key correctly validates all three state col
 			.insertInto("entity_label")
 			.values({
 				entity_id: "entity1",
-				schema_key: "schema1",
+				schema_key: "test_schema1",
 				file_id: "file1.json",
 				label_id: label.id,
 			})

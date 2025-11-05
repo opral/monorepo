@@ -1,5 +1,9 @@
 import { adjectives, animals, verbs } from "./words.js";
 
+/**
+ *
+ * @deprecated Use lix'es humanId implementation.
+ */
 export function humanId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${
 		adjectives[Math.floor(Math.random() * 256)]

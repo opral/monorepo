@@ -2,12 +2,56 @@ import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { populateStateCache } from "./populate-state-cache.js";
 import { updateStateCache } from "./update-state-cache.js";
+import { schemaKeyToCacheTableName } from "./create-schema-cache-table.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixChangeRaw } from "../../change/schema-definition.js";
 import { clearStateCache } from "./clear-state-cache.js";
 import { createVersion } from "../../version/create-version.js";
 import { Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+function createSimpleSchema(key: string): LixSchemaDefinition {
+	return {
+		"x-lix-key": key,
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+}
+
+/**
+ * Ensures stored schema rows exist for the provided schema keys so cache helpers
+ * can resolve definitions during tests.
+ */
+async function insertSchemas(
+	lix: { db: Kysely<LixInternalDatabaseSchema> } | { db: any },
+	schemaKeys: string[]
+): Promise<void> {
+	for (const key of schemaKeys) {
+		await (lix.db as any)
+			.insertInto("stored_schema")
+			.values({ value: createSimpleSchema(key) })
+			.execute();
+	}
+}
+
+const testEntitySchema = {
+	"x-lix-key": "test_entity",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		id: { type: "string" },
+		value: { type: "string" },
+		updated_after_merge: { type: "boolean" },
+	},
+	required: ["id", "value"],
+} as const satisfies LixSchemaDefinition;
 
 test("populates v2 cache from materializer", async () => {
 	const lix = await openLix({
@@ -18,6 +62,8 @@ test("populates v2 cache from materializer", async () => {
 			},
 		],
 	});
+
+	await insertSchemas(lix, ["lix_test", "lix_other"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -65,7 +111,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_test table
 	const lixTestTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -76,7 +122,7 @@ test("populates v2 cache from materializer", async () => {
 
 	// Check lix_other table
 	const lixOtherTable = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_other ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_other")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -94,6 +140,8 @@ test("populates v2 cache with version filter", async () => {
 			},
 		],
 	});
+
+	await insertSchemas(lix, ["lix_test"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -140,7 +188,7 @@ test("populates v2 cache with version filter", async () => {
 
 	// Verify both versions exist
 	const allData = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -158,7 +206,7 @@ test("populates v2 cache with version filter", async () => {
 	// Check that version-1 was cleared (no materializer data to re-populate)
 	// but version-2 remains
 	const afterPopulate = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_lix_test ORDER BY entity_id`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("lix_test")} ORDER BY entity_id`,
 		returnValue: "resultRows",
 		rowMode: "object",
 	}) as any[];
@@ -177,6 +225,8 @@ test("clears all v2 cache tables when no filters specified", async () => {
 			},
 		],
 	});
+
+	await insertSchemas(lix, ["schema_a", "schema_b", "schema_c"]);
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -223,15 +273,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// Verify data exists in all tables
 	const schemaA = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_a")}`,
 		returnValue: "resultRows",
 	});
 	const schemaB = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_b")}`,
 		returnValue: "resultRows",
 	});
 	const schemaC = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_c")}`,
 		returnValue: "resultRows",
 	});
 
@@ -244,15 +294,15 @@ test("clears all v2 cache tables when no filters specified", async () => {
 
 	// All tables should be empty now (no materializer data)
 	const schemaAAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_a`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_a")}`,
 		returnValue: "resultRows",
 	});
 	const schemaBAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_b`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_b")}`,
 		returnValue: "resultRows",
 	});
 	const schemaCAfter = lix.engine!.sqlite.exec({
-		sql: `SELECT * FROM lix_internal_state_cache_schema_c`,
+		sql: `SELECT * FROM ${schemaKeyToCacheTableName("schema_c")}`,
 		returnValue: "resultRows",
 	});
 
@@ -273,6 +323,11 @@ test("inheritance is queryable from the resolved view after population", async (
 			},
 		],
 	});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.execute();
 
 	const currentTimestamp = await getTimestamp({ lix });
 
@@ -297,10 +352,10 @@ test("inheritance is queryable from the resolved view after population", async (
 		inheritsFrom: versionB,
 	});
 
-	// Insert test entities directly into state_all for each version using Kysely
+	// Insert test entities directly into state_by_version for each version using Kysely
 	// Entity in version A
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_a",
 			schema_key: "test_entity",
@@ -319,7 +374,7 @@ test("inheritance is queryable from the resolved view after population", async (
 
 	// Entity in version B
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_b",
 			schema_key: "test_entity",
@@ -338,7 +393,7 @@ test("inheritance is queryable from the resolved view after population", async (
 
 	// Entity in version C
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "entity_c",
 			schema_key: "test_entity",
@@ -426,6 +481,11 @@ test("global version entities are populated when populating child versions", asy
 		],
 	});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testEntitySchema })
+		.execute();
+
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Create a test version that will inherit from global
@@ -435,10 +495,10 @@ test("global version entities are populated when populating child versions", asy
 		id: "test_version_1",
 	});
 
-	// Insert a test entity into state_all for global version
+	// Insert a test entity into state_by_version for global version
 	// This simulates entities that exist in global and should be inherited by all versions
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "global_entity_1",
 			schema_key: "test_entity",
@@ -456,7 +516,7 @@ test("global version entities are populated when populating child versions", asy
 
 	// Verify the test version can see this entity through inheritance before cache miss
 	const beforeCacheMiss = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
@@ -484,7 +544,7 @@ test("global version entities are populated when populating child versions", asy
 
 	// ASSERT: After cache population, the test version should still see the global entity
 	const afterCachePopulation = await db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("version_id", "=", testVersion.id)
 		.where("schema_key", "=", "test_entity")
 		.where("entity_id", "=", "global_entity_1")
@@ -505,7 +565,7 @@ test("global version entities are populated when populating child versions", asy
 	// Check the physical cache directly: the parent/global authored entry
 	// should be materialized in its own version's cache table.
 	const cacheEntries = await db
-		.selectFrom("lix_internal_state_cache_test_entity" as any)
+		.selectFrom(schemaKeyToCacheTableName("test_entity") as any)
 		.where("entity_id", "=", "global_entity_1")
 		.select([
 			"entity_id",

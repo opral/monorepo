@@ -247,7 +247,7 @@ export class ProposalModeController {
 		const proposalId = String(state.proposal.id);
 		await this.lix.db.transaction().execute(async (trx) => {
 			await trx
-				.deleteFrom("change_proposal_all")
+				.deleteFrom("change_proposal_by_version")
 				.where("id", "=", proposalId as any)
 				.where("lixcol_version_id", "=", "global")
 				.execute();
@@ -295,7 +295,7 @@ export class ProposalModeController {
 			return { fileId: null, filePath: null };
 		}
 		const existing = await this.lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", filePath)
 			.where("lixcol_version_id", "=", proposal.source_version_id as any)
 			.select(["id"])
@@ -304,7 +304,7 @@ export class ProposalModeController {
 			return { fileId: String(existing.id), filePath };
 		}
 		const reviewFile = await this.lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", filePath)
 			.where("lixcol_version_id", "=", reviewVersionId as any)
 			.select(["id"])
@@ -328,7 +328,7 @@ export class ProposalModeController {
 		}
 
 		const query = this.lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("lixcol_version_id", "=", versionId as any)
 			.select(["id", "path"]);
 

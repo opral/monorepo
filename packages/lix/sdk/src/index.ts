@@ -7,7 +7,7 @@ export * from "./commit/index.js";
 export * from "./database/index.js";
 export * from "./engine/functions/index.js";
 export * from "./entity/index.js";
-export * from "./entity-views/index.js";
+export * from "./engine/entity-views/index.js";
 export * from "./filesystem/index.js";
 export * from "./hooks/create-hooks.js";
 export * from "./key-value/index.js";

@@ -45,7 +45,7 @@ async function upsertKeyValue(
 	// Use a transaction to ensure atomicity and handle race conditions
 	return await lix.db.transaction().execute(async (trx) => {
 		const existing = await trx
-			.selectFrom("key_value_all")
+			.selectFrom("key_value_by_version")
 			.where("key", "=", key)
 			.where(
 				"lixcol_version_id",
@@ -58,7 +58,7 @@ async function upsertKeyValue(
 
 		if (existing) {
 			await trx
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({
 					value,
 					lixcol_untracked: options.untracked,
@@ -73,7 +73,7 @@ async function upsertKeyValue(
 				.execute();
 		} else {
 			await trx
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key,
 					value,

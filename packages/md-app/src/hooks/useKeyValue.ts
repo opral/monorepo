@@ -49,7 +49,7 @@ export async function upsertKeyValue(
 
 		if (existing) {
 			await trx
-				.updateTable("key_value_all")
+				.updateTable("key_value_by_version")
 				.set({
 					value,
 					// skip change control as this is only UI state that
@@ -67,7 +67,7 @@ export async function upsertKeyValue(
 				.execute();
 		} else {
 			await trx
-				.insertInto("key_value_all")
+				.insertInto("key_value_by_version")
 				.values({
 					key,
 					value,

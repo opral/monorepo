@@ -14,6 +14,8 @@ import type { LixChange } from "../../change/schema-definition.js";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { parse } from "@marcbachmann/cel-js";
+import { getStoredSchema } from "../../stored-schema/get-stored-schema.js";
+import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 
 /**
  * List of special entity types that are not stored as JSON in the state table,
@@ -50,9 +52,6 @@ ajv.addFormat("cel", {
 	},
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
-
-const decodePointerSegment = (segment: string): string =>
-	segment.replace(/~1/g, "/").replace(/~0/g, "~");
 
 const normalizeSchemaPath = (value: string): string => {
 	if (typeof value !== "string") {
@@ -100,21 +99,15 @@ const normalizeForeignKeys = (
 };
 
 export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "executeSync">;
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
 	schema: LixSchemaDefinition | null;
+	schemaKey?: string;
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
 	untracked?: boolean;
 }): void {
-	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
-	// Validate version_id is provided
-	// Skip validation if schema is null (during initialization when schemas aren't stored yet)
-	if (!args.schema) {
-		return;
-	}
-
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -131,7 +124,54 @@ export function validateStateMutation(args: {
 		throw new Error(`Version with id '${args.version_id}' does not exist`);
 	}
 
-	const isValidLixSchema = validateLixSchema(args.schema);
+	let schemaKey =
+		typeof args.schemaKey === "string" && args.schemaKey.length > 0
+			? args.schemaKey
+			: typeof args.schema?.["x-lix-key"] === "string" &&
+				  args.schema["x-lix-key"].length > 0
+				? (args.schema["x-lix-key"] as string)
+				: undefined;
+
+	let effectiveSchema = args.schema ?? null;
+
+	if (schemaKey === LixStoredSchemaSchema["x-lix-key"]) {
+		effectiveSchema ??= LixStoredSchemaSchema;
+	} else if (schemaKey) {
+		const storedSchema = getStoredSchema({
+			engine: args.engine,
+			key: schemaKey,
+		});
+
+		if (!storedSchema) {
+			throw new Error(
+				`Schema '${schemaKey}' is not stored. Store the schema before mutating state.`
+			);
+		}
+
+		if (!effectiveSchema) {
+			effectiveSchema = storedSchema;
+		}
+
+		const expectedVersion = storedSchema["x-lix-version"];
+		const receivedVersion = effectiveSchema?.["x-lix-version"];
+		if (
+			typeof expectedVersion === "string" &&
+			expectedVersion.length > 0 &&
+			typeof receivedVersion === "string" &&
+			receivedVersion.length > 0 &&
+			expectedVersion !== receivedVersion
+		) {
+			throw new Error(
+				`Stored schema '${schemaKey}' version mismatch. Expected '${expectedVersion}', received '${receivedVersion}'.`
+			);
+		}
+	}
+
+	if (!effectiveSchema) {
+		throw new Error("Schema definition is required for state validation");
+	}
+
+	const isValidLixSchema = validateLixSchema(effectiveSchema);
 
 	if (!isValidLixSchema) {
 		throw new Error(
@@ -139,11 +179,12 @@ export function validateStateMutation(args: {
 		);
 	}
 
-	const isImmutable = args.schema["x-lix-immutable"] === true;
-	const schemaKey = args.schema["x-lix-key"];
+	const immutableFlag = effectiveSchema["x-lix-immutable"] === true;
+	const normalizedSchemaKey =
+		schemaKey ?? effectiveSchema["x-lix-key"] ?? "<unknown>";
 
-	if (isImmutable) {
-		const immutableMessage = `Schema "${schemaKey}" is immutable and cannot be updated.`;
+	if (immutableFlag) {
+		const immutableMessage = `Schema "${normalizedSchemaKey}" is immutable and cannot be updated.`;
 		if (args.operation === "update") {
 			throw new Error(immutableMessage);
 		}
@@ -154,11 +195,11 @@ export function validateStateMutation(args: {
 		// Parse JSON strings back to objects for properties defined as objects in the schema
 		const parsedSnapshotContent = parseJsonPropertiesInSnapshotContent(
 			args.snapshot_content,
-			args.schema
+			effectiveSchema
 		);
 
 		const isValidSnapshotContent = ajv.validate(
-			args.schema,
+			effectiveSchema,
 			parsedSnapshotContent
 		);
 
@@ -173,7 +214,7 @@ export function validateStateMutation(args: {
 				.join("; ");
 
 			throw new Error(
-				`The provided snapshot content does not match the schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
+				`The provided snapshot content does not match the schema '${effectiveSchema["x-lix-key"]}' (${effectiveSchema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
 			);
 		}
 	}
@@ -182,19 +223,19 @@ export function validateStateMutation(args: {
 	if (args.operation === "delete") {
 		validateDeletionConstraints({
 			engine: args.engine,
-			schema: args.schema,
+			schema: effectiveSchema,
 			entity_id: args.entity_id,
 			version_id: args.version_id,
 		});
 	} else {
-		if (args.schema["x-lix-key"] === "lix_stored_schema") {
+		if (effectiveSchema["x-lix-key"] === "lix_stored_schema") {
 			validateStoredSchemaValue(args.snapshot_content);
 		}
 		// Validate primary key constraints (only for insert/update)
-		if (args.schema["x-lix-primary-key"]) {
+		if (effectiveSchema["x-lix-primary-key"]) {
 			validatePrimaryKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -203,10 +244,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate unique constraints (only for insert/update)
-		if (args.schema["x-lix-unique"]) {
+		if (effectiveSchema["x-lix-unique"]) {
 			validateUniqueConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
@@ -215,10 +256,10 @@ export function validateStateMutation(args: {
 		}
 
 		// Validate foreign key constraints (only for insert/update)
-		if (args.schema["x-lix-foreign-keys"]) {
+		if (effectiveSchema["x-lix-foreign-keys"]) {
 			validateForeignKeyConstraints({
 				engine: args.engine,
-				schema: args.schema,
+				schema: effectiveSchema,
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
 				untracked: args.untracked,
@@ -227,7 +268,7 @@ export function validateStateMutation(args: {
 	}
 
 	// Hardcoded validation for commit_edge self-referencing
-	if (args.schema["x-lix-key"] === "lix_commit_edge") {
+	if (effectiveSchema["x-lix-key"] === "lix_commit_edge") {
 		const content = args.snapshot_content as any;
 		if (content.parent_id === content.child_id) {
 			throw new Error(
@@ -239,7 +280,7 @@ export function validateStateMutation(args: {
 		if (args.operation === "insert") {
 			const debugEnabled = args.engine.executeSync(
 				internalQueryBuilder
-					.selectFrom("key_value_all")
+					.selectFrom("key_value_by_version")
 					.select("value")
 					.where("key", "=", "lix_debug")
 					.where("value", "=", "true")
@@ -514,7 +555,7 @@ function validateForeignKeyConstraints(args: {
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
 				query = internalQueryBuilder
-					.selectFrom("state_all" as any)
+					.selectFrom("state_by_version" as any)
 					.select(refPaths.map((path) => path.segments[0]) as any);
 
 				// Add WHERE conditions for each property
@@ -543,11 +584,11 @@ function validateForeignKeyConstraints(args: {
 					.where(refPaths[0]!.segments[0] as any, "=", localValues[0]);
 			}
 		} else {
-			// Query JSON schema entities in the state table
 			query = internalQueryBuilder
-				.selectFrom("state_all")
-				.select("snapshot_content")
-				.where("schema_key", "=", foreignKey.references.schemaKey);
+				.selectFrom("lix_internal_state_vtable")
+				.select(["snapshot_content"])
+				.where("schema_key", "=", foreignKey.references.schemaKey)
+				.where("snapshot_content", "is not", null);
 
 			// Add WHERE conditions for each property
 			for (let i = 0; i < localPaths.length; i++) {
@@ -656,7 +697,7 @@ function validateForeignKeyConstraints(args: {
 		if (!args.untracked && !isSpecialEntity) {
 			// Build query to check for untracked references
 			let untrackedQuery = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", foreignKey.references.schemaKey)
 				.where("version_id", "=", args.version_id)
@@ -708,7 +749,7 @@ function validateDeletionConstraints(args: {
 	// Check both direct entities and inherited entities
 	const currentEntity = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
@@ -734,7 +775,7 @@ function validateDeletionConstraints(args: {
 		// Check if entity exists in other versions
 		const entityInOtherVersions = args.engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
 				.where("schema_key", "=", args.schema["x-lix-key"])
@@ -831,7 +872,7 @@ function validateDeletionConstraints(args: {
 
 			// Build query to check if any entities reference these values
 			let query = internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", schema["x-lix-key"])
 				.where("version_id", "=", args.version_id);
@@ -934,7 +975,7 @@ function validateAcyclicCommitGraph(args: {
 	// Get all existing edges
 	const existingEdges = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("commit_edge_all")
+			.selectFrom("commit_edge_by_version")
 			.select(["parent_id", "child_id"])
 			.where("lixcol_version_id", "=", args.version_id)
 			.compile()

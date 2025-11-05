@@ -329,7 +329,7 @@ test("can explicitly set hidden to true", async () => {
 	expect(file.hidden).toBe(1);
 });
 
-test("file_all operations are version specific and isolated", async () => {
+test("file_by_version operations are version specific and isolated", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -346,7 +346,7 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Insert file in version A
 	await lix.db
-		.insertInto("file_all")
+		.insertInto("file_by_version")
 		.values({
 			id: "fileA",
 			path: "/shared/file.json",
@@ -357,7 +357,7 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Insert file in version B with same path but different content
 	await lix.db
-		.insertInto("file_all")
+		.insertInto("file_by_version")
 		.values({
 			id: "fileB",
 			path: "/shared/file.json",
@@ -368,13 +368,13 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Verify both versions have their own files
 	const filesInVersionA = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const filesInVersionB = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -390,7 +390,7 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Update file in version A
 	await lix.db
-		.updateTable("file_all")
+		.updateTable("file_by_version")
 		.where("id", "=", "fileA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.set({
@@ -402,13 +402,13 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Verify update only affected version A
 	const updatedFilesA = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const unchangedFilesB = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -422,20 +422,20 @@ test("file_all operations are version specific and isolated", async () => {
 
 	// Delete file from version A
 	await lix.db
-		.deleteFrom("file_all")
+		.deleteFrom("file_by_version")
 		.where("id", "=", "fileA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingFilesA = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingFilesB = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -777,7 +777,7 @@ test("file metadata is Record<string, any>", async () => {
 	>();
 });
 
-test("file and file_all views expose change_id for blame and diff functionality", async () => {
+test("file and file_by_version views expose change_id for blame and diff functionality", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 		keyValues: [
@@ -802,9 +802,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 		})
 		.execute();
 
-	// Query file_all view to verify change_id is exposed
+	// Query file_by_version view to verify change_id is exposed
 	const fileAllResult = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", "change-id-test-file")
 		.selectAll()
 		.execute();
@@ -824,7 +824,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	expect(fileResult[0]?.lixcol_change_id).toBeDefined();
 	expect(typeof fileResult[0]?.lixcol_change_id).toBe("string");
 
-	// Verify that change_id matches between file and file_all views
+	// Verify that change_id matches between file and file_by_version views
 	expect(fileResult[0]?.lixcol_change_id).toBe(
 		fileAllResult[0]?.lixcol_change_id
 	);
@@ -856,7 +856,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 
 	// Query again to verify change_id updated after modification
 	const updatedFileResult = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", "change-id-test-file")
 		.selectAll()
 		.execute();
@@ -916,7 +916,7 @@ test("file views expose writer_key for descriptor rows", async () => {
 	expect(fileRow.lixcol_writer_key).toBe(writerKey);
 
 	const fileAllRow = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", fileId)
 		.select(["id", "lixcol_writer_key"])
 		.executeTakeFirstOrThrow();
@@ -961,7 +961,7 @@ test("file writer_key inherits across versions", async () => {
 	expect(branchRow.lixcol_writer_key).toBe(writerKey);
 
 	const fileAllRows = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", fileId)
 		.select(["lixcol_version_id", "lixcol_writer_key"])
 		.execute();
@@ -1252,7 +1252,7 @@ simulationTest(
 );
 
 simulationTest(
-	"direct state_all updates invalidate file data cache",
+	"direct state_by_version updates invalidate file data cache",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			providePlugins: [mockJsonPlugin],
@@ -1278,15 +1278,15 @@ simulationTest(
 			content: "Start",
 		});
 
-		// Active version id for state_all write
+		// Active version id for state_by_version write
 		const active = await lix.db
 			.selectFrom("active_version")
 			.select(["version_id"])
 			.executeTakeFirstOrThrow();
 
-		// Update plugin entity directly in state_all for that version
+		// Update plugin entity directly in state_by_version for that version
 		await lix.db
-			.updateTable("state_all")
+			.updateTable("state_by_version")
 			.set({ snapshot_content: { value: "New" } })
 			.where("file_id", "=", fileId)
 			.where("version_id", "=", active.version_id)
@@ -1295,7 +1295,7 @@ simulationTest(
 			.where("entity_id", "=", "content")
 			.execute();
 
-		// Next read must reflect updated state (cache invalidated by state_all trigger)
+		// Next read must reflect updated state (cache invalidated by state_by_version trigger)
 		const updated = await lix.db
 			.selectFrom("file")
 			.where("id", "=", fileId)
@@ -1726,15 +1726,15 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 					.where("key", "=", "lixcol-test-kv"),
 		},
 		{
-			name: "file_all",
+			name: "file_by_version",
 			fileQuery: () =>
 				lix.db
-					.selectFrom("file_all")
+					.selectFrom("file_by_version")
 					.selectAll()
 					.where("id", "=", "lixcol-test-file"),
 			keyValueQuery: () =>
 				lix.db
-					.selectFrom("key_value_all")
+					.selectFrom("key_value_by_version")
 					.selectAll()
 					.where("key", "=", "lixcol-test-kv"),
 		},
@@ -1925,15 +1925,15 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	// The file's change_set_id should contain the latest content change
 	expect(changeIdsInSet).toContain(latestContentChange.id);
 
-	// Test file_all view shows the same aggregated behavior AT THIS POINT (before path update)
-	// Re-query file_all after content update to verify it shows latest change
+	// Test file_by_version view shows the same aggregated behavior AT THIS POINT (before path update)
+	// Re-query file_by_version after content update to verify it shows latest change
 	const fileAllAfterContentUpdate = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", "aggregate-info-test")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// file_all should show the same change_id as the file view at this point
+	// file_by_version should show the same change_id as the file view at this point
 	expect(fileAllAfterContentUpdate.lixcol_change_id).toBe(
 		fileAfterContentUpdate.lixcol_change_id
 	);
@@ -1941,7 +1941,7 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 		fileAfterContentUpdate.lixcol_updated_at
 	);
 
-	// Verify that file_all view also exposes lix_file_descriptor as schema key
+	// Verify that file_by_version view also exposes lix_file_descriptor as schema key
 	expect(fileAllAfterContentUpdate.lixcol_schema_key).toBe(
 		"lix_file_descriptor"
 	);
@@ -1966,9 +1966,9 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	// For string timestamps, use string comparison
 	expect(fileAfterPathUpdate.lixcol_updated_at > initialUpdatedAt).toBe(true);
 
-	// After path update, file_all should show the descriptor change
+	// After path update, file_by_version should show the descriptor change
 	const fileAllAfterPathUpdate = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("id", "=", "aggregate-info-test")
 		.selectAll()
 		.executeTakeFirstOrThrow();
@@ -2081,9 +2081,9 @@ test("files should be identical across versions when versions have the same comm
 	const updatedData = JSON.parse(new TextDecoder().decode(updatedFile.data));
 	expect(updatedData.items[0].price).toBe(34.99);
 
-	// Query file_all to see both versions
+	// Query file_by_version to see both versions
 	const filesAcrossVersions = await lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("path", "=", "/products.json")
 		.select(["lixcol_version_id", "data"])
 		.execute();

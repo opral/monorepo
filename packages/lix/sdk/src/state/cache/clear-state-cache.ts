@@ -31,8 +31,7 @@ export function clearStateCache(args: {
 	const existingTables = args.engine.sqlite.exec({
 		sql: `SELECT name FROM sqlite_schema 
 		      WHERE type='table' 
-		      AND name LIKE 'lix_internal_state_cache_%' 
-		      AND name != 'lix_internal_state_cache'
+		      AND name LIKE 'lix_internal_state_cache_v1_%' 
 		      AND name != 'lix_internal_state_cache'`,
 		returnValue: "resultRows",
 	}) as any[];

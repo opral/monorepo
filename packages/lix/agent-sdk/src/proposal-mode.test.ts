@@ -140,7 +140,7 @@ describe("proposal review mode", () => {
 					.execute();
 				expect(proposalsOpen).toHaveLength(1);
 				const activeFile = await lix.db
-					.selectFrom("file_all")
+					.selectFrom("file_by_version")
 					.where("lixcol_version_id", "=", activeVersionId as any)
 					.where("path", "=", "/review.txt")
 					.select(["id"])
@@ -165,7 +165,7 @@ describe("proposal review mode", () => {
 		expect(accepted).toBe(true);
 
 		const mergedFile = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("lixcol_version_id", "=", activeVersionId as any)
 			.where("path", "=", "/review.txt")
 			.select(["data"])
@@ -233,7 +233,7 @@ describe("proposal review mode", () => {
 		expect(errorEvent).toBeTruthy();
 
 		const mergedFile = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("lixcol_version_id", "=", activeVersionId as any)
 			.where("path", "=", "/reject.txt")
 			.select(["id"])
@@ -277,7 +277,7 @@ describe("proposal review mode", () => {
 		}).complete({ autoAcceptProposals: true });
 
 		const file = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("lixcol_version_id", "=", activeVersionId as any)
 			.where("path", "=", "/direct.txt")
 			.select(["data"])
@@ -300,7 +300,7 @@ describe("proposal review mode", () => {
 		const activeVersionId = activeVersion.version_id as string;
 
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/remove.md",
 				data: new TextEncoder().encode("obsolete"),
@@ -309,7 +309,7 @@ describe("proposal review mode", () => {
 			.execute();
 
 		const existingFile = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/remove.md")
 			.where("lixcol_version_id", "=", activeVersionId as unknown as any)
 			.select(["id"])
@@ -353,7 +353,7 @@ describe("proposal review mode", () => {
 
 		expect(openEvent).toBeTruthy();
 		const remaining = await lix.db
-			.selectFrom("file_all")
+			.selectFrom("file_by_version")
 			.where("path", "=", "/remove.md")
 			.where("lixcol_version_id", "=", activeVersionId as unknown as any)
 			.select(["id"])

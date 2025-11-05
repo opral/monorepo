@@ -113,7 +113,9 @@ export function createExecuteJavascriptTool(args: { lix: Lix }) {
 		description,
 		inputSchema: ExecuteJavascriptInputSchema,
 		execute: async (input) =>
-			executeJavascript({ lix: args.lix, ...(input as ExecuteJavascriptInput) }),
+			executeJavascript({
+				lix: args.lix,
+				...(input as ExecuteJavascriptInput),
+			}),
 	});
 }
-

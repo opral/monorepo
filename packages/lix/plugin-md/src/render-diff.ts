@@ -16,7 +16,7 @@ async function buildAstFromDiffs(
 	diffs: RenderDiffArgs["diffs"],
 	which: "before" | "after",
 ): Promise<Ast> {
-	const rootKey = AstSchemas.RootOrderSchema["x-lix-key"] as string;
+	const rootKey = AstSchemas.DocumentSchema["x-lix-key"];
 	const orderDiff = diffs.find((d) => d.schema_key === rootKey);
 	const order: string[] =
 		(orderDiff as any)?.[`${which}_snapshot_content`]?.order ?? [];

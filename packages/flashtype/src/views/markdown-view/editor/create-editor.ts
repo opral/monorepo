@@ -90,8 +90,8 @@ export function createEditor(args: CreateEditorArgs): Editor {
 	}
 
 	async function upsertRootOrder(trx: any, fileId: string, order: string[]) {
-		const rootKey = (AstSchemas.RootOrderSchema as any)["x-lix-key"] as string;
-		const rootVersion = (AstSchemas.RootOrderSchema as any)[
+		const rootKey = (AstSchemas.DocumentSchema as any)["x-lix-key"] as string;
+		const rootVersion = (AstSchemas.DocumentSchema as any)[
 			"x-lix-version"
 		] as string;
 		const existingRoot = await trx

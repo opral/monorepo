@@ -31,7 +31,7 @@ export async function newProject(args?: {
 
 	try {
 		await lix.db
-			.insertInto("stored_schema_all")
+			.insertInto("stored_schema_by_version")
 			.values([
 				{ value: InlangBundleSchema, lixcol_version_id: "global" },
 				{ value: InlangMessageSchema, lixcol_version_id: "global" },

@@ -2,7 +2,7 @@ import { sql, type SelectQueryBuilder } from "kysely";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { schemaKeyToCacheTableName } from "./create-schema-cache-table.js";
 
-const CACHE_COLUMNS = [
+export const CACHE_COLUMNS = [
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -13,14 +13,14 @@ const CACHE_COLUMNS = [
 	"created_at",
 	"updated_at",
 	"inherited_from_version_id",
-	"inheritance_delete_marker",
+	"is_tombstone",
 	"change_id",
 	"commit_id",
 ] as const;
 
 const ROUTED_ALIAS = "lix_internal_state_cache_routed";
 
-type StateCacheColumn = (typeof CACHE_COLUMNS)[number];
+export type StateCacheColumn = (typeof CACHE_COLUMNS)[number];
 
 export type StateCacheRow = Record<StateCacheColumn, unknown>;
 
@@ -30,11 +30,12 @@ export type StateCacheRow = Record<StateCacheColumn, unknown>;
  * the physical table might not exist yet).
  */
 export function selectFromStateCache(
-	schemaKey?: string
+	schemaKey?: string,
+	columns: readonly StateCacheColumn[] = CACHE_COLUMNS
 ): SelectQueryBuilder<any, string, StateCacheRow> {
 	const selectSql = schemaKey
-		? buildSelectStatement(schemaKeyToCacheTableName(schemaKey))
-		: buildEmptySelect();
+		? buildSelectStatement(schemaKeyToCacheTableName(schemaKey), columns)
+		: buildEmptySelect(columns);
 
 	const tableExpression = sql<StateCacheRow>`(${sql.raw(selectSql)})`.as(
 		ROUTED_ALIAS
@@ -45,18 +46,21 @@ export function selectFromStateCache(
 	) as unknown as SelectQueryBuilder<any, string, StateCacheRow>;
 }
 
-function buildSelectStatement(tableName: string): string {
+function buildSelectStatement(
+	tableName: string,
+	columns: readonly StateCacheColumn[]
+): string {
 	const quoted = quoteIdentifier(tableName);
-	const projection = CACHE_COLUMNS.map(quoteIdentifier).join(",\n\t");
+	const projection = columns.map(quoteIdentifier).join(",\n\t");
 	return `SELECT
 	${projection}
 FROM ${quoted}`;
 }
 
-function buildEmptySelect(): string {
-	const projection = CACHE_COLUMNS.map(
-		(column) => `CAST(NULL AS TEXT) AS ${quoteIdentifier(column)}`
-	).join(",\n\t");
+function buildEmptySelect(columns: readonly StateCacheColumn[]): string {
+	const projection = columns
+		.map((column) => `CAST(NULL AS TEXT) AS ${quoteIdentifier(column)}`)
+		.join(",\n\t");
 	return `SELECT
 	${projection}
 WHERE 0`;

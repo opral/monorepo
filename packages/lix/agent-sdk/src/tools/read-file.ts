@@ -78,13 +78,13 @@ export async function readFile(
 
 	const row = path
 		? await lix.db
-				.selectFrom("file_all")
+				.selectFrom("file_by_version")
 				.where("path", "=", path)
 				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])
 				.executeTakeFirst()
 		: await lix.db
-				.selectFrom("file_all")
+				.selectFrom("file_by_version")
 				.where("id", "=", fileId as string)
 				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])

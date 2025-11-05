@@ -29,9 +29,9 @@ export const RootSchema = {
 	additionalProperties: false,
 } as const
 
-// Root order document used for state snapshots in block-based persistence
-export const RootOrderSchema = {
-	"x-lix-key": "markdown_wc_root_order",
+// Document-level snapshot used for block-based persistence (not part of the AST)
+export const DocumentSchema = {
+	"x-lix-key": "markdown_wc_document",
 	"x-lix-version": "1.0",
 	description:
 		"Top-level block order for a Markdown document. Stores an array of block ids (node.data.id) to reconstruct the document order without reparsing.",
@@ -384,6 +384,9 @@ export const YamlSchema = {
 /**
  * Runtime map from mdast `node.type` → JSON schema.
  *
+ * !Mapping of Markdown AST node `type` to its schema.
+ * !Excludes persistence-only schemas such as `DocumentSchema`.
+ *
  * Why this exists:
  *
  * - Generic code only knows `node.type` at runtime (e.g., during AST walks, diffing, persistence).
@@ -438,7 +441,13 @@ export const schemasByType: Record<string, JsonSchema> = {
 	yaml: YamlSchema,
 }
 
-export const allSchemas: JsonSchema[] = Object.values(schemasByType)
+/**
+ * Collection of Markdown schemas including AST nodes and persistence metadata like `DocumentSchema`.
+ */
+export const allSchemas: JsonSchema[] = [
+	...Object.values(schemasByType),
+	DocumentSchema,
+]
 
 // Type exports derived from JSON Schemas (no mdast import)
 export type AstRoot = FromSchema<typeof RootSchema>

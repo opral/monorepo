@@ -1,8 +1,11 @@
-import { Plugin } from "prosemirror-state";
+import { Plugin, PluginKey } from "prosemirror-state";
+
+const idPluginKey = new PluginKey("lix-prosemirror-id");
 
 // A plugin that adds unique IDs to each node for change detection
 export const idPlugin = () =>
 	new Plugin({
+		key: idPluginKey,
 		appendTransaction: (_transactions, _oldState, newState) => {
 			// Start with the current state's transaction, in case other plugins modified it
 			let tr = newState.tr;

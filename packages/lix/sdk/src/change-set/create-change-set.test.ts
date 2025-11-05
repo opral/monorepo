@@ -109,7 +109,7 @@ test("creating a change set with version_id should store it in the specified ver
 
 	// Also verify by querying the database directly
 	const storedChangeSet = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set_by_version")
 		.selectAll()
 		.where("id", "=", changeSet.id)
 		.where("lixcol_version_id", "=", globalVersion)

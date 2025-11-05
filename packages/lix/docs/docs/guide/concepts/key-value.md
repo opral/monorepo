@@ -55,7 +55,7 @@ await lix.db
 ```ts
 // UI preferences that don't create commits
 await lix.db
-  .insertInto("key_value_all")
+  .insertInto("key_value_by_version")
   .values({
     key: "ui_sidebar_width",
     value: 240,
@@ -68,7 +68,7 @@ await lix.db
 ## Views
 
 - **`key_value`** - Active version only. Your default choice.
-- **`key_value_all`** - All versions. Use for untracked values or cross-version operations.
+- **`key_value_by_version`** - All versions. Use for untracked values or cross-version operations.
 - **`key_value_history`** - Read-only audit trail.
 
 ## Important: Booleans

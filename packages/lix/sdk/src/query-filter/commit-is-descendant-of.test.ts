@@ -4,7 +4,7 @@ import { commitIsDescendantOf } from "./commit-is-descendant-of.js";
 import { commitIsAncestorOf } from "./commit-is-ancestor-of.js";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
 
-// commits are authoritative: insert directly into commit_all (no pre-created change sets).
+// commits are authoritative: insert directly into commit_by_version (no pre-created change sets).
 
 test("selects all descendants excluding the current commit", async () => {
 	const lix = await openLix({});
@@ -12,7 +12,7 @@ test("selects all descendants excluding the current commit", async () => {
 	// Create a linear chain of commits: c0 <- c1 <- c2
 	const c0Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c0Id,
 			change_set_id: "cs-" + c0Id,
@@ -22,7 +22,7 @@ test("selects all descendants excluding the current commit", async () => {
 
 	const c1Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c1Id,
 			change_set_id: "cs-" + c1Id,
@@ -33,7 +33,7 @@ test("selects all descendants excluding the current commit", async () => {
 
 	const c2Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c2Id,
 			change_set_id: "cs-" + c2Id,
@@ -58,7 +58,7 @@ test("respects the optional depth limit", async () => {
 	// c0 <- c1 <- c2
 	const c0Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c0Id,
 			change_set_id: "cs-" + c0Id,
@@ -68,7 +68,7 @@ test("respects the optional depth limit", async () => {
 
 	const c1Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c1Id,
 			change_set_id: "cs-" + c1Id,
@@ -79,7 +79,7 @@ test("respects the optional depth limit", async () => {
 
 	const c2Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c2Id,
 			change_set_id: "cs-" + c2Id,
@@ -104,7 +104,7 @@ test("can be combined with ancestor filter to select commits between two points"
 	// Create a linear chain: c0 <- c1 <- c2 <- c3
 	const c0Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c0Id,
 			change_set_id: "cs-" + c0Id,
@@ -114,7 +114,7 @@ test("can be combined with ancestor filter to select commits between two points"
 
 	const c1Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c1Id,
 			change_set_id: "cs-" + c1Id,
@@ -125,7 +125,7 @@ test("can be combined with ancestor filter to select commits between two points"
 
 	const c2Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c2Id,
 			change_set_id: "cs-" + c2Id,
@@ -136,7 +136,7 @@ test("can be combined with ancestor filter to select commits between two points"
 
 	const c3Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c3Id,
 			change_set_id: "cs-" + c3Id,
@@ -162,7 +162,7 @@ test("selects descendants including the current commit when includeSelf is true"
 	// Setup: c0 <- c1 <- c2
 	const c0Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c0Id,
 			change_set_id: "cs-" + c0Id,
@@ -172,7 +172,7 @@ test("selects descendants including the current commit when includeSelf is true"
 
 	const c1Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c1Id,
 			change_set_id: "cs-" + c1Id,
@@ -183,7 +183,7 @@ test("selects descendants including the current commit when includeSelf is true"
 
 	const c2Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c2Id,
 			change_set_id: "cs-" + c2Id,
@@ -208,7 +208,7 @@ test("respects depth limit when includeSelf is true", async () => {
 	// Setup: c0 <- c1 <- c2
 	const c0Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c0Id,
 			change_set_id: "cs-" + c0Id,
@@ -218,7 +218,7 @@ test("respects depth limit when includeSelf is true", async () => {
 
 	const c1Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c1Id,
 			change_set_id: "cs-" + c1Id,
@@ -229,7 +229,7 @@ test("respects depth limit when includeSelf is true", async () => {
 
 	const c2Id = await uuidV7({ lix });
 	await lix.db
-		.insertInto("commit_all")
+		.insertInto("commit_by_version")
 		.values({
 			id: c2Id,
 			change_set_id: "cs-" + c2Id,

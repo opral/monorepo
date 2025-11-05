@@ -243,7 +243,7 @@ function selectValue(
 				? lix.db.selectFrom("active_version").select("version_id")
 				: opts.defaultVersionId;
 		return lix.db
-			.selectFrom("key_value_all")
+			.selectFrom("key_value_by_version")
 			.where("lixcol_version_id", "=", versionExpr)
 			.where("key", "=", key)
 			.select(["value"]);
@@ -275,7 +275,7 @@ async function upsertValue<T>(
 			}
 
 			const exists = await trx
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("key", "=", key)
 				.where("lixcol_version_id", "=", versionId)
 				.select("key")
@@ -283,14 +283,14 @@ async function upsertValue<T>(
 
 			if (exists) {
 				await trx
-					.updateTable("key_value_all")
+					.updateTable("key_value_by_version")
 					.set({ value, lixcol_untracked: true })
 					.where("key", "=", key)
 					.where("lixcol_version_id", "=", versionId)
 					.execute();
 			} else {
 				await trx
-					.insertInto("key_value_all")
+					.insertInto("key_value_by_version")
 					.values({
 						key,
 						value,

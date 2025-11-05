@@ -26,7 +26,7 @@ test("reads a global, untracked key (test fixture)", async () => {
 
 	// Pre-insert expected value
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: UNTRACKED_TEST_KEY,
 			value: "alpha",
@@ -76,9 +76,9 @@ test("writes and reads a global, untracked key (test fixture)", async () => {
 
 	await waitFor(() => expect((resultRef.current as any)?.[0]).toBe("beta"));
 
-	// Verify DB row persisted to key_value_all with lixcol_version_id = 'global'
+	// Verify DB row persisted to key_value_by_version with lixcol_version_id = 'global'
 	const rows = (await lix.db
-		.selectFrom("key_value_all")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", UNTRACKED_TEST_KEY)
 		.where("lixcol_version_id", "=", "global")
 		.select(["value"])
@@ -130,7 +130,7 @@ test("shows Suspense fallback first, then renders value on initial read", async 
 	const lix = await openLix({});
 	// Ensure the key exists so the initial load resolves deterministically
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: UNTRACKED_TEST_KEY,
 			value: "ready",
@@ -354,7 +354,7 @@ test("returns optimistic value immediately when setter is called", async () => {
 test("memoized children should not re-render when parent state changes", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: UNTRACKED_TEST_KEY,
 			value: "initial",

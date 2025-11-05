@@ -46,7 +46,7 @@ test("should allow returning on non-view tables", async () => {
 	// This should not throw since 'state' is a table, not a view
 	expect(() => {
 		lix.db
-			.insertInto("state_all")
+			.insertInto("state_by_version")
 			.values({
 				entity_id: "test",
 				schema_key: "test",

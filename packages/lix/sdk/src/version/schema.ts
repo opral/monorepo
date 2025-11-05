@@ -40,18 +40,18 @@ export function applyVersionDatabaseSchema(args: {
                 created_at AS d_created_at,
                 updated_at AS d_updated_at,
                 commit_id AS d_commit_id
-            FROM state_all s
+            FROM state_by_version s
             WHERE s.schema_key = 'lix_version_descriptor' AND s.version_id = 'global'
               AND s.updated_at = (
                 SELECT MAX(updated_at)
-                FROM state_all s2
+                FROM state_by_version s2
                 WHERE s2.schema_key = 'lix_version_descriptor'
                   AND s2.version_id = 'global'
                   AND s2.entity_id = s.entity_id
               )
               AND s.change_id = (
                 SELECT MAX(change_id)
-                FROM state_all s3
+                FROM state_by_version s3
                 WHERE s3.schema_key = 'lix_version_descriptor'
                   AND s3.version_id = 'global'
                   AND s3.entity_id = s.entity_id
@@ -67,18 +67,18 @@ export function applyVersionDatabaseSchema(args: {
                 created_at AS t_created_at,
                 updated_at AS t_updated_at,
                 commit_id AS t_commit_id
-            FROM state_all s
+            FROM state_by_version s
             WHERE s.schema_key = 'lix_version_tip' AND s.version_id = 'global'
               AND s.updated_at = (
                 SELECT MAX(updated_at)
-                FROM state_all s2
+                FROM state_by_version s2
                 WHERE s2.schema_key = 'lix_version_tip'
                   AND s2.version_id = 'global'
                   AND s2.entity_id = s.entity_id
               )
               AND s.change_id = (
                 SELECT MAX(change_id)
-                FROM state_all s3
+                FROM state_by_version s3
                 WHERE s3.schema_key = 'lix_version_tip'
                   AND s3.version_id = 'global'
                   AND s3.entity_id = s.entity_id
@@ -104,7 +104,7 @@ export function applyVersionDatabaseSchema(args: {
         FROM descriptor d 
         LEFT JOIN tip t ON t.id = d.id;
 
-        CREATE VIEW IF NOT EXISTS version_all AS
+        CREATE VIEW IF NOT EXISTS version_by_version AS
         WITH descriptor AS (
             SELECT 
                 json_extract(snapshot_content, '$.id') AS id,
@@ -121,18 +121,18 @@ export function applyVersionDatabaseSchema(args: {
                 created_at AS d_created_at,
                 updated_at AS d_updated_at,
                 commit_id AS d_commit_id
-            FROM state_all s
+            FROM state_by_version s
             WHERE s.schema_key = 'lix_version_descriptor'
               AND s.updated_at = (
                 SELECT MAX(updated_at)
-                FROM state_all s2
+                FROM state_by_version s2
                 WHERE s2.schema_key = 'lix_version_descriptor'
                   AND s2.entity_id = s.entity_id
                   AND s2.version_id = s.version_id
               )
               AND s.change_id = (
                 SELECT MAX(change_id)
-                FROM state_all s3
+                FROM state_by_version s3
                 WHERE s3.schema_key = 'lix_version_descriptor'
                   AND s3.entity_id = s.entity_id
                   AND s3.version_id = s.version_id
@@ -149,18 +149,18 @@ export function applyVersionDatabaseSchema(args: {
                 created_at AS t_created_at,
                 updated_at AS t_updated_at,
                 commit_id AS t_commit_id
-            FROM state_all s
+            FROM state_by_version s
             WHERE s.schema_key = 'lix_version_tip'
               AND s.updated_at = (
                 SELECT MAX(updated_at)
-                FROM state_all s2
+                FROM state_by_version s2
                 WHERE s2.schema_key = 'lix_version_tip'
                   AND s2.entity_id = s.entity_id
                   AND s2.version_id = s.version_id
               )
               AND s.change_id = (
                 SELECT MAX(change_id)
-                FROM state_all s3
+                FROM state_by_version s3
                 WHERE s3.schema_key = 'lix_version_tip'
                   AND s3.entity_id = s.entity_id
                   AND s3.version_id = s.version_id
@@ -208,14 +208,14 @@ export function applyVersionDatabaseSchema(args: {
         FROM state_history
         WHERE schema_key = 'lix_version';
 
-        -- Triggers to route writes on version view through version_all (global scope)
+        -- Triggers to route writes on version view through version_by_version (global scope)
         CREATE TRIGGER IF NOT EXISTS version_insert
         INSTEAD OF INSERT ON version
         BEGIN
 
-            -- Route creation via version_all (global scope). The version_all_insert trigger
+            -- Route creation via version_by_version (global scope). The version_by_version_insert trigger
             -- will take care of writing descriptor + tip rows.
-            INSERT INTO version_all (
+            INSERT INTO version_by_version (
                 id,
                 name,
                 working_commit_id,
@@ -238,9 +238,9 @@ export function applyVersionDatabaseSchema(args: {
         CREATE TRIGGER IF NOT EXISTS version_update
         INSTEAD OF UPDATE ON version
         BEGIN
-            -- Route updates via version_all (global scope). The version_all_update trigger
+            -- Route updates via version_by_version (global scope). The version_by_version_update trigger
             -- will update descriptor fields and move the tip when commit_id is provided.
-            UPDATE version_all
+            UPDATE version_by_version
             SET
                 name = NEW.name,
                 working_commit_id = NEW.working_commit_id,
@@ -255,18 +255,18 @@ export function applyVersionDatabaseSchema(args: {
         CREATE TRIGGER IF NOT EXISTS version_delete
         INSTEAD OF DELETE ON version
         BEGIN
-            -- Route deletes via version_all (global scope); version_all_delete handles state
-            DELETE FROM version_all
+            -- Route deletes via version_by_version (global scope); version_by_version_delete handles state
+            DELETE FROM version_by_version
             WHERE id = OLD.id
               AND lixcol_version_id = 'global';
         END;
 
-        -- Write-capable version_all triggers mirroring 'version' but honoring explicit lixcol_version_id
-        CREATE TRIGGER IF NOT EXISTS version_all_insert
-        INSTEAD OF INSERT ON version_all
+        -- Write-capable version_by_version triggers mirroring 'version' but honoring explicit lixcol_version_id
+        CREATE TRIGGER IF NOT EXISTS version_by_version_insert
+        INSTEAD OF INSERT ON version_by_version
         BEGIN
             -- Always write descriptor row
-            INSERT INTO state_all (
+            INSERT INTO state_by_version (
                 entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
             ) 
             SELECT 
@@ -285,7 +285,7 @@ export function applyVersionDatabaseSchema(args: {
             FROM (SELECT COALESCE(NEW.id, lix_nano_id()) AS gen_id);
 
             -- Also write tip row: use NEW.commit_id if provided, otherwise default to parent's current tip
-            INSERT INTO state_all (
+            INSERT INTO state_by_version (
                 entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id
             )
             SELECT
@@ -316,11 +316,11 @@ export function applyVersionDatabaseSchema(args: {
 
         END;
 
-        CREATE TRIGGER IF NOT EXISTS version_all_update
-        INSTEAD OF UPDATE ON version_all
+        CREATE TRIGGER IF NOT EXISTS version_by_version_update
+        INSTEAD OF UPDATE ON version_by_version
         BEGIN
             -- Route descriptor updates via UPDATE (fields are coalesced from current values)
-            UPDATE state_all
+            UPDATE state_by_version
             SET 
                 file_id = 'lix',
                 plugin_key = 'lix_own_entity',
@@ -338,7 +338,7 @@ export function applyVersionDatabaseSchema(args: {
               AND version_id = COALESCE(NEW.lixcol_version_id, 'global');
 
             -- If a new commit_id is provided, update the tip pointer for the scoped version id
-            UPDATE state_all
+            UPDATE state_by_version
             SET 
                 file_id = 'lix',
                 plugin_key = 'lix_own_entity',
@@ -361,17 +361,17 @@ export function applyVersionDatabaseSchema(args: {
 
         END;
 
-        CREATE TRIGGER IF NOT EXISTS version_all_delete
-        INSTEAD OF DELETE ON version_all
+        CREATE TRIGGER IF NOT EXISTS version_by_version_delete
+        INSTEAD OF DELETE ON version_by_version
         BEGIN
-            -- Route deletes via state_all (vtable handles tombstones)
-            DELETE FROM state_all
+            -- Route deletes via state_by_version (vtable handles tombstones)
+            DELETE FROM state_by_version
             WHERE entity_id = OLD.id
               AND schema_key = 'lix_version_descriptor'
               AND file_id = 'lix'
               AND version_id = COALESCE(OLD.lixcol_version_id, 'global');
 
-            DELETE FROM state_all
+            DELETE FROM state_by_version
             WHERE entity_id = OLD.id
               AND schema_key = 'lix_version_tip'
               AND file_id = 'lix'
@@ -389,6 +389,68 @@ export function applyVersionDatabaseSchema(args: {
 			json_extract(snapshot_content, '$.version_id') AS version_id
 		FROM lix_internal_state_all_untracked
 		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
+
+		CREATE TRIGGER IF NOT EXISTS active_version_update
+		INSTEAD OF UPDATE ON active_version
+		BEGIN
+			SELECT
+				CASE
+					WHEN NOT EXISTS (
+						SELECT 1
+						FROM state_by_version
+						WHERE schema_key = 'lix_version_descriptor'
+						  AND version_id = 'global'
+						  AND json_extract(snapshot_content, '$.id') = NEW.version_id
+					)
+					THEN RAISE(ABORT, 'Foreign key constraint violation: active_version.version_id')
+				END;
+
+			UPDATE lix_internal_state_all_untracked
+			SET
+				snapshot_content = jsonb(json_object('id', entity_id, 'version_id', NEW.version_id)),
+				schema_version = '${LixActiveVersionSchema["x-lix-version"]}',
+				updated_at = lix_timestamp(),
+				inherited_from_version_id = NULL,
+				is_tombstone = 0,
+				file_id = 'lix',
+				plugin_key = 'lix_own_entity'
+			WHERE schema_key = 'lix_active_version'
+			  AND version_id = 'global';
+
+			INSERT INTO lix_internal_state_all_untracked (
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				is_tombstone
+			)
+			SELECT
+				generated.new_id,
+				'lix_active_version',
+				'lix',
+				'global',
+				'lix_own_entity',
+				jsonb(json_object('id', generated.new_id, 'version_id', NEW.version_id)),
+				'${LixActiveVersionSchema["x-lix-version"]}',
+				generated.new_created_at,
+				generated.new_created_at,
+				NULL,
+				0
+			FROM (
+				SELECT lix_nano_id() AS new_id, lix_timestamp() AS new_created_at
+			) AS generated
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM lix_internal_state_all_untracked
+				WHERE schema_key = 'lix_active_version' AND version_id = 'global'
+			);
+		END;
 	`);
 }
 

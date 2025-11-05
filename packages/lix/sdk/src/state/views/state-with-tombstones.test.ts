@@ -2,6 +2,41 @@ import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { applyStateWithTombstonesView } from "./state-with-tombstones.js";
 import { withWriterKey } from "../writer.js";
+import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const testSchemaForDeleted = {
+	"x-lix-key": "test_schema_for_deleted",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		v: { type: "string" },
+	},
+	required: ["v"],
+} as const satisfies LixSchemaDefinition;
+
+const testSchemaForDeletedWriter = {
+	"x-lix-key": "test_schema_for_deleted_writer",
+	"x-lix-version": "1.0",
+	type: "object",
+	additionalProperties: false,
+	properties: {
+		v: { type: "string" },
+	},
+	required: ["v"],
+} as const satisfies LixSchemaDefinition;
+
+async function storeTestSchemas(lix: { db: any }): Promise<void> {
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testSchemaForDeleted })
+		.execute();
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: testSchemaForDeletedWriter })
+		.execute();
+}
 
 test("state_with_tombstones exposes tracked deletions as tombstones", async () => {
 	const lix = await openLix({
@@ -16,6 +51,7 @@ test("state_with_tombstones exposes tracked deletions as tombstones", async () =
 
 	// Create the view (temporary until wired into schema bootstrap)
 	applyStateWithTombstonesView({ engine: lix.engine! });
+	await storeTestSchemas(lix);
 
 	const active = await lix.db
 		.selectFrom("active_version")
@@ -24,10 +60,10 @@ test("state_with_tombstones exposes tracked deletions as tombstones", async () =
 
 	// Insert a tracked row into active version
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "e_del",
-			schema_key: "mock_schema_for_deleted",
+			schema_key: "test_schema_for_deleted",
 			file_id: "file_tombstone",
 			version_id: (active as any).version_id ?? (active as any).id,
 			plugin_key: "test_plugin",
@@ -38,18 +74,18 @@ test("state_with_tombstones exposes tracked deletions as tombstones", async () =
 
 	// Delete to create a tracked tombstone
 	await lix.db
-		.deleteFrom("state_all")
+		.deleteFrom("state_by_version")
 		.where("entity_id", "=", "e_del")
-		.where("schema_key", "=", "mock_schema_for_deleted")
+		.where("schema_key", "=", "test_schema_for_deleted")
 		.where("file_id", "=", "file_tombstone")
 		.where("version_id", "=", (active as any).version_id ?? (active as any).id)
 		.execute();
 
-	// Default state_all should hide the deletion
+	// Default state_by_version should hide the deletion
 	const hidden = await lix.db
-		.selectFrom("state_all")
+		.selectFrom("state_by_version")
 		.where("entity_id", "=", "e_del")
-		.where("schema_key", "=", "mock_schema_for_deleted")
+		.where("schema_key", "=", "test_schema_for_deleted")
 		.where("file_id", "=", "file_tombstone")
 		.selectAll()
 		.execute();
@@ -59,7 +95,7 @@ test("state_with_tombstones exposes tracked deletions as tombstones", async () =
 	const withDeleted = await lix.db
 		.selectFrom("state_with_tombstones" as any)
 		.where("entity_id", "=", "e_del")
-		.where("schema_key", "=", "mock_schema_for_deleted")
+		.where("schema_key", "=", "test_schema_for_deleted")
 		.where("file_id", "=", "file_tombstone")
 		.selectAll()
 		.execute();
@@ -81,6 +117,7 @@ test("state_with_tombstones keeps writer_key for tombstones (delete)", async () 
 			},
 		],
 	});
+	await storeTestSchemas(lix);
 
 	const active = await lix.db
 		.selectFrom("active_version")
@@ -90,10 +127,10 @@ test("state_with_tombstones keeps writer_key for tombstones (delete)", async () 
 
 	// Insert a tracked row into active version
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state_by_version")
 		.values({
 			entity_id: "e_del_writer",
-			schema_key: "mock_schema_for_deleted_writer",
+			schema_key: "test_schema_for_deleted_writer",
 			file_id: "file_tombstone_writer",
 			version_id: vId,
 			plugin_key: "test_plugin",
@@ -106,9 +143,9 @@ test("state_with_tombstones keeps writer_key for tombstones (delete)", async () 
 	const WRITER = "spec:writer#delete";
 	await withWriterKey(lix.db, WRITER, async (trx) => {
 		await trx
-			.deleteFrom("state_all")
+			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "e_del_writer")
-			.where("schema_key", "=", "mock_schema_for_deleted_writer")
+			.where("schema_key", "=", "test_schema_for_deleted_writer")
 			.where("file_id", "=", "file_tombstone_writer")
 			.where("version_id", "=", vId)
 			.execute();
@@ -117,7 +154,7 @@ test("state_with_tombstones keeps writer_key for tombstones (delete)", async () 
 	const rows = await lix.db
 		.selectFrom("state_with_tombstones" as any)
 		.where("entity_id", "=", "e_del_writer")
-		.where("schema_key", "=", "mock_schema_for_deleted_writer")
+		.where("schema_key", "=", "test_schema_for_deleted_writer")
 		.where("file_id", "=", "file_tombstone_writer")
 		.selectAll()
 		.execute();

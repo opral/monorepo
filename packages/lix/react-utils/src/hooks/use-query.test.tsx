@@ -43,7 +43,7 @@ test("useQuery throws error when used outside LixProvider", () => {
 	}).toThrow("useQuery must be used inside <LixProvider>.");
 });
 
-test("useSuspenseQuery returns array with data using new API", async () => {
+test("returns array with data using new API", async () => {
 	const lix = await openLix({});
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -81,7 +81,7 @@ test("useSuspenseQuery returns array with data using new API", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQuery updates when data changes", async () => {
+test("updates when data changes", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -134,7 +134,7 @@ test("useSuspenseQuery updates when data changes", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst returns array with single item or undefined", async () => {
+test("akeFirst returns array with single item or undefined", async () => {
 	const lix = await openLix({});
 
 	// Insert test data
@@ -183,7 +183,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst returns undefined for empty results", async () => {
+test("akeFirst returns undefined for empty results", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -329,7 +329,118 @@ test("useQueryTakeFirst (subscribe:false) returns fresh data on rerender", async
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirst updates reference when underlying row changes", async () => {
+test("useQueryTakeFirst (subscribe:false) does not reuse previous rows", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "no_subscribe_a", value: "value_a" },
+			{ key: "no_subscribe_b", value: "value_b" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	const emissions: Array<string | null | undefined> = [];
+	let rerender: (props?: { key: string }) => void;
+	await act(async () => {
+		const { rerender: rerenderFn } = renderHook(
+			({ key = "no_subscribe_a" }: { key?: string } = {}) => {
+				const row = useQueryTakeFirst(
+					({ lix }) =>
+						lix.db.selectFrom("key_value").selectAll().where("key", "=", key),
+					{ subscribe: false },
+				);
+				emissions.push(row?.key);
+				return row;
+			},
+			{ wrapper },
+		);
+		rerender = rerenderFn;
+	});
+
+	await waitFor(() => {
+		expect(emissions).toContain("no_subscribe_a");
+	});
+
+	emissions.length = 0;
+
+	await act(async () => {
+		rerender({ key: "no_subscribe_b" });
+	});
+
+	await waitFor(() => {
+		expect(emissions).toContain("no_subscribe_b");
+	});
+
+	// The first emission after switching should be the new key, not the previous one.
+	expect(emissions[0]).toBe("no_subscribe_b");
+
+	await lix.close();
+});
+
+test("useQueryTakeFirst (subscribe:false) returns fresh data on rerender", async () => {
+	const lix = await openLix({});
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "memo_a", value: "value_a" },
+			{ key: "memo_b", value: "value_b" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading…</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	const seenKeys: Array<string | undefined> = [];
+	const hook = await act(async () =>
+		renderHook(
+			({ lookup = "memo_a" }: { lookup?: string } = {}) => {
+				const row = useQueryTakeFirst(
+					({ lix }) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", lookup),
+					{ subscribe: false },
+				);
+				if (row?.key) seenKeys.push(row.key);
+				return row;
+			},
+			{ wrapper },
+		),
+	);
+	const { rerender, unmount } = hook;
+
+	await waitFor(() => {
+		expect(seenKeys.length).toBeGreaterThan(0);
+	});
+	seenKeys.length = 0;
+	await act(async () => {
+		rerender({ lookup: "memo_b" });
+	});
+
+	await waitFor(() => {
+		expect(seenKeys.length).toBeGreaterThan(0);
+	});
+	expect(seenKeys[0]).toBe("memo_b");
+
+	unmount();
+	await lix.close();
+});
+
+test("akeFirst updates reference when underlying row changes", async () => {
 	const lix = await openLix({});
 	const rowKey = "react_first_ref";
 
@@ -439,7 +550,65 @@ test("useQuery key includes lix instance (no cross-instance reuse)", async () =>
 	await lix2.close();
 });
 
-test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the initial value", async () => {
+test("useQuery key includes lix instance (no cross-instance reuse)", async () => {
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
+
+	await lix1.db
+		.insertInto("key_value")
+		.values({ key: "shared_key", value: "instance_one" })
+		.execute();
+	await lix2.db
+		.insertInto("key_value")
+		.values({ key: "shared_key", value: "instance_two" })
+		.execute();
+
+	let current = lix1;
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={current}>
+			<Suspense fallback={<div>Loading…</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<LixKeyValue>[] };
+	let rerender: () => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(
+			() =>
+				useQuery(({ lix }) =>
+					lix.db
+						.selectFrom("key_value")
+						.selectAll()
+						.where("key", "=", "shared_key"),
+				),
+			{ wrapper },
+		);
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	await waitFor(() => {
+		expect(hookResult.current[0]?.value).toBe("instance_one");
+	});
+
+	await act(async () => {
+		current = lix2;
+		rerender();
+	});
+
+	await waitFor(() => {
+		expect(hookResult.current[0]?.value).toBe("instance_two");
+	});
+
+	await lix1.close();
+	await lix2.close();
+});
+
+test("akeFirst re-emits when aggregate result returns to the initial value", async () => {
 	const lix = await openLix({});
 	const key = "agg_count_test";
 
@@ -490,7 +659,7 @@ test("useSuspenseQueryTakeFirst re-emits when aggregate result returns to the in
 	await lix.close();
 });
 
-test("useSuspenseQuery return type is properly typed", async () => {
+test("return type is properly typed", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>
@@ -528,7 +697,7 @@ test("useSuspenseQuery return type is properly typed", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQuery error handling with ErrorBoundary", async () => {
+test("error handling with ErrorBoundary", async () => {
 	const lix = await openLix({});
 	let caught: Error | undefined;
 
@@ -568,7 +737,7 @@ test("useSuspenseQuery error handling with ErrorBoundary", async () => {
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async () => {
+test("akeFirstOrThrow returns data when result exists", async () => {
 	const lix = await openLix({});
 
 	// Insert test data
@@ -613,7 +782,7 @@ test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async (
 	await lix.close();
 });
 
-test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () => {
+test("akeFirstOrThrow throws when no result found", async () => {
 	const lix = await openLix({});
 	let caught: Error | undefined;
 
@@ -656,7 +825,7 @@ test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () =>
 	await lix.close();
 });
 
-test("useSuspenseQuery re-executes when query function changes (dependency array fix)", async () => {
+test("re-executes when query function changes (dependency array fix)", async () => {
 	const lix = await openLix({});
 
 	// Insert test data with different prefixes

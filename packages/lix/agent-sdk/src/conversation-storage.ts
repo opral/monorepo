@@ -160,7 +160,7 @@ async function resolveConversationId(args: {
 
 	if (requestedId) {
 		const existing = await lix.db
-			.selectFrom("conversation_all")
+			.selectFrom("conversation_by_version")
 			.where("id", "=", requestedId)
 			.where("lixcol_inherited_from_version_id", "is", null)
 			.select(["id"])

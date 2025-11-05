@@ -115,7 +115,7 @@ test("entity_conversation foreign key to state table should be enforced", async 
 test("entity_conversation foreign key to conversation table should be enforced", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config",
 			value: { setting: "testvalue" },

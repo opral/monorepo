@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite",
     "test": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

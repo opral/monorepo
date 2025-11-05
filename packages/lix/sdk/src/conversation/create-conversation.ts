@@ -3,8 +3,8 @@ import type {
 	LixConversation,
 	LixConversationMessage,
 } from "./schema-definition.js";
-import type { NewState, StateAll } from "../entity-views/types.js";
-import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
+import type { NewState, StateByVersion } from "../engine/entity-views/types.js";
+import type { LixEntity, LixEntityCanonical } from "../entity/types.js";
 import { attachConversation } from "../entity/conversation/attach-conversation.js";
 import { nanoId } from "../engine/functions/nano-id.js";
 
@@ -41,8 +41,8 @@ export async function createConversation(args: {
 	/** Optional entity to attach the conversation to */
 	entity?: LixEntity | LixEntityCanonical;
 }): Promise<
-	StateAll<LixConversation> & {
-		comments: StateAll<LixConversationMessage>[];
+	StateByVersion<LixConversation> & {
+		comments: StateByVersion<LixConversationMessage>[];
 	}
 > {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -51,12 +51,12 @@ export async function createConversation(args: {
 		const versionId = args.versionId ?? "global";
 
 		await trx
-			.insertInto("conversation_all")
+			.insertInto("conversation_by_version")
 			.values({ id: conversationId, lixcol_version_id: versionId })
 			.execute();
 
 		const conversation = await trx
-			.selectFrom("conversation_all")
+			.selectFrom("conversation_by_version")
 			.selectAll()
 			.where("id", "=", conversationId)
 			.where("lixcol_version_id", "=", versionId)
@@ -68,7 +68,7 @@ export async function createConversation(args: {
 			const messageId = await nanoId({ lix: { ...args.lix, db: trx } });
 
 			await trx
-				.insertInto("conversation_message_all")
+				.insertInto("conversation_message_by_version")
 				.values({
 					id: messageId,
 					conversation_id: conversation.id,
@@ -80,7 +80,7 @@ export async function createConversation(args: {
 				.execute();
 
 			const insertedMessage = await trx
-				.selectFrom("conversation_message_all")
+				.selectFrom("conversation_message_by_version")
 				.selectAll()
 				.where("id", "=", messageId)
 				.where("lixcol_version_id", "=", versionId)

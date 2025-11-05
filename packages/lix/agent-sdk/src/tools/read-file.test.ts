@@ -20,7 +20,7 @@ describe("readFile / createReadFileTool", () => {
 		const versionId = await getActiveVersionId(lix);
 		// seed a file
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/notes.md",
 				data: enc("# Title\nHello world\n"),
@@ -51,7 +51,7 @@ describe("readFile / createReadFileTool", () => {
 		const versionId = await getActiveVersionId(lix);
 		const content = "ABCDEFGHIJ"; // 10 bytes ascii
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/a.txt",
 				data: enc(content),
@@ -76,7 +76,7 @@ describe("readFile / createReadFileTool", () => {
 		const versionId = await getActiveVersionId(lix);
 		const content = ["line1", "line2", "line3", "line4"].join("\n");
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/b.txt",
 				data: enc(content),
@@ -99,7 +99,7 @@ describe("readFile / createReadFileTool", () => {
 		const versionId = await getActiveVersionId(lix);
 		const content = "X".repeat(1000);
 		await lix.db
-			.insertInto("file_all")
+			.insertInto("file_by_version")
 			.values({
 				path: "/c.txt",
 				data: enc(content),

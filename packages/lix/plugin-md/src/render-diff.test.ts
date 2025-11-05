@@ -35,7 +35,7 @@ describe("renderPluginDiff", () => {
 		expect(html).toContain("brave new");
 		expect(html).toContain("world.");
 	});
-	
+
 	test("ignores diffs with non-markdown schema keys", async () => {
 		const args: RenderDiffArgs = {
 			diffs: [

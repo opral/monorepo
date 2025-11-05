@@ -46,7 +46,7 @@ describe("MarkdownView", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("key_value_all")
+			.insertInto("key_value_by_version")
 			.values({
 				key: "flashtype_active_file_id",
 				value: "file_1",
@@ -72,7 +72,7 @@ describe("MarkdownView", () => {
 
 		await waitFor(async () => {
 			const rows = await lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("key", "=", "flashtype_active_file_id")
 				.select(["value"])
 				.execute();

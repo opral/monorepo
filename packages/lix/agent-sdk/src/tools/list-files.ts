@@ -47,7 +47,7 @@ export async function listFiles(
 
 	// Build query
 	let q = lix.db
-		.selectFrom("file_all")
+		.selectFrom("file_by_version")
 		.where("lixcol_version_id", "=", version_id as any);
 
 	if (!include_hidden) {

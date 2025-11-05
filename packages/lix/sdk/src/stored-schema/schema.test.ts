@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewState } from "../engine/entity-views/types.js";
 import type { LixStoredSchema } from "./schema-definition.js";
 import { sql } from "kysely";
 
@@ -116,12 +116,12 @@ test("validates inserted schemas", async () => {
 	).rejects.toThrow(/value\.x-lix-version must be string/);
 });
 
-test("can insert into stored_schema_all ", async () => {
+test("can insert into stored_schema_by_version ", async () => {
 	const lix = await openLix({});
 
 	const schema: LixSchemaDefinition = {
 		type: "object",
-		"x-lix-key": "mock_all",
+		"x-lix-key": "mock_by_version",
 		"x-lix-version": "1.0",
 		properties: {
 			name: { type: "string" },
@@ -131,7 +131,7 @@ test("can insert into stored_schema_all ", async () => {
 	};
 
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: schema,
 			lixcol_version_id: "global",
@@ -139,15 +139,15 @@ test("can insert into stored_schema_all ", async () => {
 		.execute();
 
 	const result = await lix.db
-		.selectFrom("stored_schema_all")
+		.selectFrom("stored_schema_by_version")
 		.select("value")
 		.where(
-			sql`json_extract("stored_schema_all"."value", '$."x-lix-key"')`,
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-key"')`,
 			"=",
-			"mock_all"
+			"mock_by_version"
 		)
 		.where(
-			sql`json_extract("stored_schema_all"."value", '$."x-lix-version"')`,
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-version"')`,
 			"=",
 			"1.0"
 		)
@@ -156,7 +156,7 @@ test("can insert into stored_schema_all ", async () => {
 	expect(result.value).toEqual(schema);
 });
 
-test("can insert into stored_schema_all with default key and version extraction", async () => {
+test("can insert into stored_schema_by_version with default key and version extraction", async () => {
 	const lix = await openLix({});
 
 	const schema: LixSchemaDefinition = {
@@ -172,7 +172,7 @@ test("can insert into stored_schema_all with default key and version extraction"
 
 	// Insert without key and version - should be extracted from value
 	await lix.db
-		.insertInto("stored_schema_all")
+		.insertInto("stored_schema_by_version")
 		.values({
 			value: schema,
 			lixcol_version_id: "global",
@@ -180,15 +180,15 @@ test("can insert into stored_schema_all with default key and version extraction"
 		.execute();
 
 	const result = await lix.db
-		.selectFrom("stored_schema_all")
+		.selectFrom("stored_schema_by_version")
 		.select("value")
 		.where(
-			sql`json_extract("stored_schema_all"."value", '$."x-lix-key"')`,
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-key"')`,
 			"=",
 			"mock_extract"
 		)
 		.where(
-			sql`json_extract("stored_schema_all"."value", '$."x-lix-version"')`,
+			sql`json_extract("stored_schema_by_version"."value", '$."x-lix-version"')`,
 			"=",
 			"2.0"
 		)

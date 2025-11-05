@@ -78,6 +78,14 @@ export class OpfsSahEnvironment implements LixEnvironment {
 			throw err;
 		}
 		this.eventHandler = initOpts.emit;
+
+		const bootArgs = initOpts.boot.args;
+		if (bootArgs.providePlugins && bootArgs.providePlugins.length > 0) {
+			throw new Error(
+				"OpfsSahEnvironment runs in a Worker and cannot receive plugins via providePlugins. Import the plugin source (e.g. with ?raw) and pass it through providePluginsRaw instead."
+			);
+		}
+
 		const payload: any = { name: this.dbKey, bootArgs: initOpts.boot.args };
 		await this.send("open", payload);
 		this.isOpen = true;

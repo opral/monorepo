@@ -138,7 +138,7 @@ WITH
   ),
   t AS (
     SELECT entity_id, schema_key, file_id, change_id, commit_id, version_id
-    FROM state_all
+    FROM state_by_version
     WHERE version_id = ${targetVersionId}
   ),
   joined AS (

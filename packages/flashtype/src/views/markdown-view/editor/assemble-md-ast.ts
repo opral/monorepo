@@ -6,30 +6,29 @@ export async function assembleMdAst(args: {
 	fileId: string | null | undefined;
 }): Promise<any> {
 	const { lix, fileId } = args;
-	if (!fileId) return { type: "root", children: [] } as any;
+	if (!fileId) return { type: "root", children: [] };
 
-	const rootKey = (AstSchemas.RootOrderSchema as any)["x-lix-key"] as string;
+	const rootKey = AstSchemas.DocumentSchema["x-lix-key"] as string;
 	const root = await lix.db
 		.selectFrom("state")
-		.where("file_id", "=", fileId as any)
+		.where("file_id", "=", fileId)
 		.where("schema_key", "=", rootKey)
 		.select(["snapshot_content"]) // { order }
 		.executeTakeFirst();
 
-	const order: string[] = Array.isArray((root as any)?.snapshot_content?.order)
+	const order: string[] = Array.isArray(root?.snapshot_content?.order)
 		? ((root as any).snapshot_content.order as string[])
 		: [];
-	if (!order.length) return { type: "root", children: [] } as any;
+	if (!order.length) return { type: "root", children: [] };
 
 	const nodes = await lix.db
 		.selectFrom("state")
-		.where("file_id", "=", fileId as any)
+		.where("file_id", "=", fileId)
 		.select(["entity_id", "schema_key", "snapshot_content"]) // top-level blocks
 		.execute();
 
 	const byId = new Map<string, any>();
-	for (const r of nodes)
-		byId.set((r as any).entity_id, (r as any).snapshot_content);
+	for (const r of nodes) byId.set(r.entity_id, r.snapshot_content);
 
 	const children: any[] = [];
 	for (const id of order) {
@@ -37,5 +36,5 @@ export async function assembleMdAst(args: {
 		if (n) children.push(n);
 	}
 
-	return { type: "root", children } as any;
+	return { type: "root", children };
 }

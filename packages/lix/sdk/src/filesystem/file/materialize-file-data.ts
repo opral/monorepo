@@ -38,7 +38,7 @@ export function materializeFileData(args: {
 
 		const rows = args.engine.executeSync(
 			internalQueryBuilder
-				.selectFrom("state_all")
+				.selectFrom("state_by_version")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", descriptor.id)
 				.where("version_id", "=", args.versionId)
@@ -69,7 +69,7 @@ export function materializeFileData(args: {
 	// If no specific plugin matched, use the fallback plugin
 	const fallbackRows = args.engine.executeSync(
 		internalQueryBuilder
-			.selectFrom("state_all")
+			.selectFrom("state_by_version")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", descriptor.id)
 			.where("version_id", "=", args.versionId)

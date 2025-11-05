@@ -11,7 +11,7 @@ test("attachConversation should create a mapping between entity and conversation
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config",
 			value: { setting: "value1" },
@@ -52,7 +52,7 @@ test("attachConversation should create a mapping between entity and conversation
 test("attachConversation should handle lixcol_ prefixed entity fields", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config-2",
 			value: { setting: "value2" },
@@ -93,7 +93,7 @@ test("attachConversation should handle lixcol_ prefixed entity fields", async ()
 test("attachConversation should be idempotent for same entity-conversation pair", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config-3",
 			value: { setting: "value3" },
@@ -136,7 +136,7 @@ test("attachConversation should be idempotent for same entity-conversation pair"
 test("detachConversation should remove the mapping", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "test-config-4",
 			value: { setting: "value4" },
@@ -189,7 +189,7 @@ test("detachConversation should remove the mapping", async () => {
 test("entity can have multiple conversations", async () => {
 	const lix = await openLix({});
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value_by_version")
 		.values({
 			key: "multi-conv-config",
 			value: { setting: "multivalue" },
