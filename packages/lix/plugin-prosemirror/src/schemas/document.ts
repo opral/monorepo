@@ -34,7 +34,8 @@ export const ProsemirrorDocumentSchema: LixSchemaDefinition = {
 		type: {
 			type: "string",
 			const: "document",
-			description: "Discriminator indicating this entity represents the document.",
+			description:
+				"Discriminator indicating this entity represents the document.",
 		},
 		children_order: {
 			type: "array",

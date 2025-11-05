@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, Suspense } from "react";
-import { useLix, useSuspenseQuery } from "@lix-js/react-utils";
+import { useLix, useQuery } from "@lix-js/react-utils";
 import { openLix } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
@@ -80,14 +80,14 @@ interface WindowState {
   isExpanded: boolean;
 }
 
-// Component that uses useSuspenseQuery for log counts
+// Component that uses live queries for log counts
 function LogCountsProvider({
   children,
 }: {
   children: (logCounts: any) => React.ReactNode;
 }) {
   // Get error counts
-  const errorLogs = useSuspenseQuery(({ lix }) =>
+  const errorLogs = useQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -95,7 +95,7 @@ function LogCountsProvider({
   );
 
   // Get warning counts
-  const warningLogs = useSuspenseQuery(({ lix }) =>
+  const warningLogs = useQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -103,7 +103,7 @@ function LogCountsProvider({
   );
 
   // Get info counts
-  const infoLogs = useSuspenseQuery(({ lix }) =>
+  const infoLogs = useQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -111,7 +111,7 @@ function LogCountsProvider({
   );
 
   // Get debug counts
-  const debugLogs = useSuspenseQuery(({ lix }) =>
+  const debugLogs = useQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))
@@ -119,7 +119,7 @@ function LogCountsProvider({
   );
 
   // Get unknown level counts
-  const unknownLogs = useSuspenseQuery(({ lix }) =>
+  const unknownLogs = useQuery(({ lix }) =>
     lix.db
       .selectFrom("log")
       .select(({ fn }) => fn.countAll().as("count"))

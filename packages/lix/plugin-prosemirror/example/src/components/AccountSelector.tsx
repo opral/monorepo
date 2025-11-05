@@ -2,25 +2,21 @@ import React, { useState } from "react";
 import { createAccount, switchAccount, Account } from "@lix-js/sdk";
 import { getInitials } from "../utilities/nameUtils";
 import { ChevronDown } from "lucide-react";
-import {
-	useLix,
-	useSuspenseQuery,
-	useSuspenseQueryTakeFirst,
-} from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const AccountSelector: React.FC = () => {
 	const lix = useLix();
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [newAccountName, setNewAccountName] = useState("");
 
-	const allAccounts = useSuspenseQuery(() =>
+	const allAccounts = useQuery(() =>
 		lix.db
 			.selectFrom("account_by_version")
 			.where("lixcol_version_id", "=", "global")
 			.select(["id", "name"]),
 	);
 
-	const activeAccount = useSuspenseQueryTakeFirst(() =>
+	const activeAccount = useQueryTakeFirst(() =>
 		lix.db
 			.selectFrom("active_account as aa")
 			.innerJoin("account_by_version as a", "a.id", "aa.account_id")

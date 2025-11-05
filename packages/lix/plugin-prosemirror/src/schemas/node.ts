@@ -53,7 +53,8 @@ export const ProsemirrorNodeSchema: LixSchemaDefinition = {
 	properties: {
 		type: {
 			type: "string",
-			description: "ProseMirror node type identifier (e.g. paragraph, heading).",
+			description:
+				"ProseMirror node type identifier (e.g. paragraph, heading).",
 		},
 		_id: {
 			type: "string",
