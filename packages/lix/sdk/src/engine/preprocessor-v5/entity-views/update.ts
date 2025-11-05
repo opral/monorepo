@@ -20,14 +20,12 @@ import {
 import {
 	extractPrimaryKeys,
 	type EntityViewVariant,
-	type PrimaryKeyDescriptor,
 	buildCelContext,
 	buildColumnValueMap,
 	buildColumnExpressionMap,
 	resolveMetadataDefaults,
 	normalizeOverrideValue,
 	resolveEntityView,
-	collectEqualityConditions,
 	combineWithAnd,
 	rewriteViewWhereClause,
 } from "./shared.js";
@@ -126,10 +124,8 @@ function rewriteUpdateSegment(args: {
 		storedSchemaKey,
 		propertyLowerToActual,
 		celEnvironment: args.context.getCelEnvironment?.() ?? null,
+		viewName,
 	});
-	if (!rewritten) {
-		return null;
-	}
 
 	args.context.trace?.push({
 		step: "rewrite_entity_view_update",
@@ -150,15 +146,14 @@ type BuildUpdateArgs = {
 	readonly storedSchemaKey: string;
 	readonly propertyLowerToActual: Map<string, string>;
 	readonly celEnvironment: CelEnvironment | null;
+	readonly viewName: string;
 };
 
 type AssignmentInfo = {
 	readonly sql: string;
 };
 
-function buildEntityViewUpdate(
-	args: BuildUpdateArgs
-): StatementSegmentNode | null {
+function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 	const {
 		update,
 		schema,
@@ -166,28 +161,38 @@ function buildEntityViewUpdate(
 		storedSchemaKey,
 		propertyLowerToActual,
 		celEnvironment,
+		viewName,
 	} = args;
-	const assignments = extractAssignments(update);
-	if (!assignments) {
-		return null;
+	const schemaKey = String(schema["x-lix-key"] ?? storedSchemaKey);
+	const fail = (detail: string): never => {
+		throw new Error(
+			`Entity view update rewrite failed for ${viewName} (schema ${schemaKey}): ${detail}`
+		);
+	};
+	const assignmentsResult = extractAssignments(update);
+	const assignments = assignmentsResult ?? fail("failed to parse assignments");
+	if (assignments.normalizedColumns.length === 0) {
+		fail("statement has no assignments");
 	}
 
 	const primaryKeys = extractPrimaryKeys(schema);
 	if (!primaryKeys || primaryKeys.length === 0) {
-		return null;
+		fail("schema does not define a primary key");
 	}
 
-	const columnValueMap = buildColumnValueMap(
+	const columnValueMapResult = buildColumnValueMap(
 		assignments.normalizedColumns,
 		assignments.values
 	);
-	const columnExpressionMap = buildColumnExpressionMap(
+	const columnValueMap =
+		columnValueMapResult ?? fail("unable to map SET assignments to values");
+	const columnExpressionMapResult = buildColumnExpressionMap(
 		assignments.normalizedColumns,
 		assignments.expressions
 	);
-	if (!columnValueMap || !columnExpressionMap) {
-		return null;
-	}
+	const columnExpressionMap =
+		columnExpressionMapResult ??
+		fail("unable to map SET assignments to values");
 
 	const celContext = buildCelContext({
 		columnMap: columnValueMap,
@@ -264,25 +269,19 @@ function buildEntityViewUpdate(
 		createSetClause("untracked", untrackedExpr),
 	];
 
-	const rewrite = rewriteViewWhereClause(update.where_clause, {
+	const rewriteResult = rewriteViewWhereClause(update.where_clause, {
 		propertyLowerToActual,
 	});
-	if (!rewrite) {
-		return null;
-	}
+	const { expression: basePredicate, hasVersionReference } =
+		rewriteResult ?? fail("WHERE clause contains unsupported expressions");
 
 	const whereExpression = buildWhereClause({
 		update,
-		primaryKeys,
-		propertyLowerToActual,
 		schemaKey: storedSchemaKey,
-		basePredicate: rewrite.expression,
-		hasVersionReference: rewrite.hasVersionReference,
+		basePredicate,
+		hasVersionReference,
 		versionCondition: versionAssignment.condition,
 	});
-	if (!whereExpression) {
-		return null;
-	}
 
 	const rewritten: UpdateStatementNode = {
 		node_kind: "update_statement",
@@ -395,25 +394,12 @@ function resolveVersionExpression(args: {
 
 function buildWhereClause(args: {
 	update: UpdateStatementNode;
-	primaryKeys: readonly PrimaryKeyDescriptor[];
-	propertyLowerToActual: Map<string, string>;
 	schemaKey: string;
 	basePredicate: ExpressionNode | null;
 	hasVersionReference: boolean;
 	versionCondition: ExpressionNode;
-}): ExpressionNode | null {
+}): ExpressionNode {
 	let finalPredicate = args.basePredicate ?? null;
-	const whereConditions = collectEqualityConditions(args.update.where_clause);
-	for (const descriptor of args.primaryKeys) {
-		const key = descriptor.path[descriptor.path.length - 1]?.toLowerCase();
-		if (!key) {
-			return null;
-		}
-		const condition = whereConditions.find((entry) => entry.column === key);
-		if (!condition) {
-			return null;
-		}
-	}
 
 	const schemaCondition = createBinaryExpression(
 		columnReference(["state_by_version", "schema_key"]),

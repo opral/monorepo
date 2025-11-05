@@ -73,6 +73,83 @@ test("rewrites updates for stored schema views", async () => {
 	await lix.close();
 });
 
+test("rewrites quoted updates for stored schema views", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "inlang_variant",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/messageId"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_own_entity"',
+		},
+		type: "object",
+		properties: {
+			messageId: { type: "string" },
+			pattern: { type: "array" },
+		},
+		required: ["messageId", "pattern"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+	const messageId = "019a550d-37c7-728f-9e76-e8f5c08b4444";
+	const updatedPattern = JSON.stringify([{ type: "text", value: "Hi" }]);
+	const updateResult = preprocess({
+		sql: 'UPDATE "inlang_variant" SET "pattern" = ? WHERE "messageId" = ?',
+		parameters: [updatedPattern, messageId],
+	});
+
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain("'pattern', ?");
+	expect(updateResult.sql).toContain("$.messageId");
+	expect(updateResult.parameters).toEqual([updatedPattern, messageId]);
+	expect(updateResult.sql).not.toBe(
+		'UPDATE "inlang_variant" SET "pattern" = ? WHERE "messageId" = ?'
+	);
+	await lix.close();
+});
+
+test("rewrites updates even when predicate omits primary key", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "inlang_variant",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"inlang"',
+			lixcol_plugin_key: '"inlang_sdk"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			messageId: { type: "string" },
+			pattern: { anyOf: [{ type: "array" }, { type: "object" }], default: [] },
+		},
+		required: ["id", "messageId", "pattern"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+	const messageId = "019a550d-37c7-728f-9e76-e8f5c08b4444";
+	const updatePattern = JSON.stringify([{ type: "text", value: "Hi" }]);
+	const updateResult = preprocess({
+		sql: 'UPDATE "inlang_variant" SET "pattern" = ? WHERE "messageId" = ?',
+		parameters: [updatePattern, messageId],
+	});
+
+	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"json_extract(state_by_version.snapshot_content, '$.messageId') = ?"
+	);
+	expect(updateResult.parameters).toEqual([updatePattern, messageId]);
+	await lix.close();
+});
+
 test("base view updates honour lixcol_version_id overrides", async () => {
 	const lix = await openLix({});
 	const schema = {

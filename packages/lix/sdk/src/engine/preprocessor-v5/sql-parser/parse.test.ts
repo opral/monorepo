@@ -318,6 +318,50 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses update with quoted identifiers and parameters", () => {
+		const ast = parseUpdateStatement(
+			'UPDATE "inlang_variant" SET "pattern" = ? WHERE "messageId" = ?'
+		);
+		expect(ast).toMatchObject({
+			node_kind: "update_statement",
+			target: {
+				node_kind: "table_reference",
+				name: {
+					node_kind: "object_name",
+					parts: [id("inlang_variant", true)],
+				},
+				alias: null,
+			},
+			assignments: [
+				{
+					node_kind: "set_clause",
+					column: {
+						node_kind: "column_reference",
+						path: [id("pattern", true)],
+					},
+					value: {
+						node_kind: "parameter",
+						placeholder: "?",
+						position: 0,
+					},
+				},
+			],
+			where_clause: {
+				node_kind: "binary_expression",
+				left: {
+					node_kind: "column_reference",
+					path: [id("messageId", true)],
+				},
+				operator: "=",
+				right: {
+					node_kind: "parameter",
+					placeholder: "?",
+					position: 1,
+				},
+			},
+		});
+	});
+
 	test("parses IN predicate", () => {
 		const ast = parseSelectStatement(
 			"SELECT * FROM projects WHERE id IN ('a', 'b')"
