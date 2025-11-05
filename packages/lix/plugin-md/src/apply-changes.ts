@@ -7,7 +7,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 }) => {
 	// Extract order from root change (use the most recent one)
 	const rootChanges = changes.filter(
-		(c) => c.schema_key === (AstSchemas.RootOrderSchema as any)["x-lix-key"],
+		(c) => c.schema_key === AstSchemas.DocumentSchema["x-lix-key"],
 	);
 	const orderChange = rootChanges.sort((a, b) =>
 		b.created_at.localeCompare(a.created_at),
@@ -24,7 +24,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 			ch.schema_key &&
 			typeof ch.schema_key === "string" &&
 			ch.schema_key.startsWith("markdown_wc_") &&
-			ch.schema_key !== (AstSchemas.RootOrderSchema as any)["x-lix-key"]
+			ch.schema_key !== AstSchemas.DocumentSchema["x-lix-key"]
 		) {
 			const prev = latestById.get(ch.entity_id);
 			if (!prev || ch.created_at > prev.created_at)
