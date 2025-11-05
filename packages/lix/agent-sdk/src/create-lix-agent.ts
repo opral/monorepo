@@ -180,7 +180,7 @@ export async function createLixAgent(args: {
 		let systemOverlay: string | undefined;
 		try {
 			const kv = await lix.db
-				.selectFrom("key_value_all")
+				.selectFrom("key_value_by_version")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_agent_active_proposal_id")
 				.select(["value"])
@@ -209,7 +209,7 @@ export async function createLixAgent(args: {
 					// Clean stale KV if proposal is gone or closed
 					try {
 						await lix.db
-							.deleteFrom("key_value_all")
+							.deleteFrom("key_value_by_version")
 							.where("lixcol_version_id", "=", "global")
 							.where("key", "=", "lix_agent_active_proposal_id")
 							.execute();

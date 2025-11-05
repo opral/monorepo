@@ -42,13 +42,13 @@ export async function deleteFile(
 		// Resolve the target row by path or id within the agent version
 		const row = path
 			? await trx
-					.selectFrom("file_all")
+					.selectFrom("file_by_version")
 					.where("path", "=", path)
 					.where("lixcol_version_id", "=", agentVersion.id)
 					.select(["id", "path"])
 					.executeTakeFirst()
 			: await trx
-					.selectFrom("file_all")
+					.selectFrom("file_by_version")
 					.where("id", "=", fileId as string)
 					.where("lixcol_version_id", "=", agentVersion.id)
 					.select(["id", "path"])
@@ -59,7 +59,7 @@ export async function deleteFile(
 		}
 
 		await trx
-			.deleteFrom("file_all")
+			.deleteFrom("file_by_version")
 			.where("id", "=", row.id as string)
 			.where("lixcol_version_id", "=", agentVersion.id)
 			.execute();

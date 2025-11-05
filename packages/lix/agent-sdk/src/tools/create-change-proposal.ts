@@ -106,7 +106,7 @@ export function createCreateChangeProposalTool(args: {
 			// Persist active proposal id globally so future turns know proposal mode
 			try {
 				await args.lix.db
-					.insertInto("key_value_all")
+					.insertInto("key_value_by_version")
 					.values({
 						key: "lix_agent_active_proposal_id",
 						value: result.id,
@@ -116,7 +116,7 @@ export function createCreateChangeProposalTool(args: {
 			} catch {
 				try {
 					await args.lix.db
-						.updateTable("key_value_all")
+						.updateTable("key_value_by_version")
 						.set({ value: result.id })
 						.where("lixcol_version_id", "=", "global")
 						.where("key", "=", "lix_agent_active_proposal_id")
