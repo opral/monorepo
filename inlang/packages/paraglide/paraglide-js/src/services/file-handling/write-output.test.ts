@@ -21,25 +21,73 @@ test("should write the output to a non-existing directory", async () => {
 });
 
 test("should clear & overwrite output that's already there", async () => {
-	const { writeOutput } = await import("./write-output.js");
-	const fs = mockFs({
-		"/output/test.txt": "old",
-		"/output/other.txt": "other",
-	});
+        const { writeOutput } = await import("./write-output.js");
+        const fs = mockFs({});
 
-	await writeOutput({
-		directory: "/output",
-		output: { "test.txt": "new" },
-		cleanDirectory: true,
-		fs,
-	});
+        const hashes = await writeOutput({
+                directory: "/output",
+                output: { "test.txt": "old", "other.txt": "other" },
+                fs,
+        });
 
-	expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe(
-		"new"
-	);
-	await expect(
-		async () => await fs.readFile("/output/other.txt", { encoding: "utf-8" })
-	).rejects.toBeDefined();
+        await writeOutput({
+                directory: "/output",
+                output: { "test.txt": "new" },
+                cleanDirectory: true,
+                fs,
+                previousOutputHashes: hashes,
+        });
+
+        expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe(
+                "new"
+        );
+        await expect(
+                async () => await fs.readFile("/output/other.txt", { encoding: "utf-8" })
+        ).rejects.toBeDefined();
+});
+
+test("should refuse to clean directories with unknown files", async () => {
+        const { writeOutput } = await import("./write-output.js");
+        const fs = mockFs({
+                "/output/test.txt": "keep me",
+        });
+
+        await expect(
+                writeOutput({
+                        directory: "/output",
+                        output: { "messages/en.json": "{}" },
+                        cleanDirectory: true,
+                        fs,
+                })
+        ).rejects.toThrowError(/Refusing to clean/);
+});
+
+test("should cache directory safety checks", async () => {
+        const { writeOutput } = await import("./write-output.js");
+        const fs = mockFs({
+                "/output/messages/en.json": "{}",
+        });
+        const readdirSpy = vi.spyOn(fs as any, "readdir");
+
+        const hashes = await writeOutput({
+                directory: "/output",
+                output: { "messages/en.json": "{}" },
+                cleanDirectory: true,
+                fs,
+        });
+
+        expect(readdirSpy).toHaveBeenCalled();
+        const initialCalls = readdirSpy.mock.calls.length;
+
+        await writeOutput({
+                directory: "/output",
+                output: { "messages/en.json": "{\"hello\":\"world\"}" },
+                cleanDirectory: true,
+                fs,
+                previousOutputHashes: hashes,
+        });
+
+        expect(readdirSpy).toHaveBeenCalledTimes(initialCalls);
 });
 
 test("should create any missing directories", async () => {
