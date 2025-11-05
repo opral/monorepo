@@ -2,6 +2,7 @@ import { openLix } from "../lix/open-lix.js";
 import { test, expect, describe } from "vitest";
 import { OpfsSahEnvironment } from "./opfs-sah.js";
 import { newLixFile } from "../lix/new-lix.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 describe.sequential("OPFS SAH Environment (browser)", () => {
 	test("inserting a file", async () => {
@@ -39,6 +40,18 @@ describe.sequential("OPFS SAH Environment (browser)", () => {
 		});
 		// Worker environment cannot expose an in-process engine; engine must be undefined
 		expect(res.engine).toBeUndefined();
+		await env.close();
+	});
+
+	test("rejects providePlugins in worker environment", async () => {
+		const env = new OpfsSahEnvironment({ key: "vitest-opfs-reject-provide" });
+		const mockPlugin: LixPlugin = { key: "mock-plugin" };
+		await expect(
+			env.open({
+				boot: { args: { providePlugins: [mockPlugin] } },
+				emit: () => {},
+			})
+		).rejects.toThrow(/providePluginsRaw/);
 		await env.close();
 	});
 
