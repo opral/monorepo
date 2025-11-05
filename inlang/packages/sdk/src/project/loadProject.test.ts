@@ -187,12 +187,16 @@ test("schemas are stored in Lix stored_schema views", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
 	const storedSchemas = await project.lix.db
-		.selectFrom("stored_schema_all")
-		.select(["key", "version"])
-		.where("key", "in", ["inlang_bundle", "inlang_message", "inlang_variant"])
+		.selectFrom("stored_schema_by_version")
+		.select("value")
 		.execute();
 
-	expect(storedSchemas).toEqual(
+	const keyVersions = storedSchemas.map((row) => ({
+		key: (row.value as any)?.["x-lix-key"],
+		version: (row.value as any)?.["x-lix-version"],
+	}));
+
+	expect(keyVersions).toEqual(
 		expect.arrayContaining([
 			{ key: "inlang_bundle", version: "1.0" },
 			{ key: "inlang_message", version: "1.0" },
