@@ -10,7 +10,7 @@ imports:
 Paraglide JS supports nested keys through bracket notation syntax `m["something.nested"]()`, which simulates nesting without actually creating nested JavaScript objects. This approach leverages TypeScript's template literal types to provide type safety while maintaining the flat structure that enables tree-shaking.
 
 <doc-callout type="warning">
-  While nested keys are supported, we strongly recommend using flat keys instead. The flat structure is what databases, applications, and compilers naturally work with.
+  While nested keys are supported, we still recommend using flat keys. Flat keys align better with how databases, applications, and compilers naturally work — even though the bracket notation keeps the generated modules tree-shakeable.
 </doc-callout>
 
 ## Why we recommend flat keys
@@ -27,8 +27,8 @@ While nested keys might seem nice for developers initially, they create pain for
 
 - **Translators**: Have to understand hierarchical structures instead of simple key-value pairs
 - **Build tools**: Need to parse and transform nested structures into flat lists
-- **Runtime performance**: Simulated nesting through bracket notation prevents some optimizations
-- **Type safety**: While TypeScript template literals provide types, direct function names offer better IDE support
+- **Developer experience**: Flat keys compile to direct function names, which provide richer IDE support such as go-to-definition and auto-imports
+- **Consistency across tooling**: Flat keys mirror how translators, design tools, and message catalogs typically represent content
 
 ## How to use nested keys (if you must)
 
