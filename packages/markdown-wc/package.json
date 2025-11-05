@@ -21,6 +21,7 @@
 		"build": "tsc --build && rolldown -c",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
+		"typecheck": "tsc --noEmit",
 		"test:watch": "vitest",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

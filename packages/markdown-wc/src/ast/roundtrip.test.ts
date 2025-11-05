@@ -2,6 +2,26 @@ import { describe, expect, test } from "vitest"
 import { parseMarkdown } from "./parse-markdown.js"
 import { serializeAst } from "./serialize-ast.js"
 import { validateAst } from "./validate-ast.js"
+import type { MarkdownNode } from "./schemas.js"
+
+function expectNodeType<T extends MarkdownNode["type"]>(
+	node: MarkdownNode | undefined,
+	type: T,
+): Extract<MarkdownNode, { type: T }> {
+	expect(node?.type).toBe(type)
+	if (!node || node.type !== type) {
+		throw new Error(`Expected node of type '${type}', received '${node?.type ?? "undefined"}'.`)
+	}
+	return node as Extract<MarkdownNode, { type: T }>
+}
+
+function childAt<T extends MarkdownNode["type"]>(
+	parent: { children?: MarkdownNode[] },
+	index: number,
+	type: T,
+): Extract<MarkdownNode, { type: T }> {
+	return expectNodeType(parent.children?.[index], type)
+}
 
 describe("root & paragraph", () => {
 	test("paragraph text", () => {
@@ -9,8 +29,9 @@ describe("root & paragraph", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		expect(ast.children[0]?.type).toBe("paragraph")
-		expect(ast.children[0]?.children?.[0]?.value).toBe("Hello world.")
+		const paragraph = expectNodeType(ast.children[0], "paragraph")
+		const text = childAt(paragraph, 0, "text")
+		expect(text.value).toBe("Hello world.")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -24,9 +45,8 @@ describe("heading", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const heading = ast.children[0]
-		expect(heading?.type).toBe("heading")
-		expect(heading?.depth).toBe(level)
+		const heading = expectNodeType(ast.children[0], "heading")
+		expect(heading.depth).toBe(level)
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -39,10 +59,10 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("strong")
-		expect(para?.children?.[0]?.children?.[0]?.value).toBe("bold")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const strong = childAt(para, 0, "strong")
+		const text = childAt(strong, 0, "text")
+		expect(text.value).toBe("bold")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -54,10 +74,10 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("strong")
-		expect(para?.children?.[0]?.children?.[0]?.value).toBe("bold")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const strong = childAt(para, 0, "strong")
+		const text = childAt(strong, 0, "text")
+		expect(text.value).toBe("bold")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(canonicalOutput)
@@ -68,10 +88,10 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("emphasis")
-		expect(para?.children?.[0]?.children?.[0]?.value).toBe("italic")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const emphasis = childAt(para, 0, "emphasis")
+		const text = childAt(emphasis, 0, "text")
+		expect(text.value).toBe("italic")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -83,10 +103,10 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("emphasis")
-		expect(para?.children?.[0]?.children?.[0]?.value).toBe("italic")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const emphasis = childAt(para, 0, "emphasis")
+		const text = childAt(emphasis, 0, "text")
+		expect(text.value).toBe("italic")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(canonicalOutput)
@@ -97,10 +117,9 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("inlineCode")
-		expect(para?.children?.[0]?.value).toBe("code")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const inlineCode = childAt(para, 0, "inlineCode")
+		expect(inlineCode.value).toBe("code")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -111,10 +130,10 @@ describe("inline marks", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.type).toBe("delete")
-		expect(para?.children?.[0]?.children?.[0]?.value).toBe("strike")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const del = childAt(para, 0, "delete")
+		const text = childAt(del, 0, "text")
+		expect(text.value).toBe("strike")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -127,10 +146,9 @@ describe("code block", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const code = ast.children[0]
-		expect(code?.type).toBe("code")
-		expect(code?.lang).toBe("js")
-		expect(code?.value).toBe("const a = 1")
+		const code = expectNodeType(ast.children[0], "code")
+		expect(code.lang).toBe("js")
+		expect(code.value).toBe("const a = 1")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -141,10 +159,9 @@ describe("code block", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const code = ast.children[0]
-		expect(code?.type).toBe("code")
-		expect(code?.lang).toBe(null)
-		expect(code?.value).toBe("plain code")
+		const code = expectNodeType(ast.children[0], "code")
+		expect(code.lang).toBe(null)
+		expect(code.value).toBe("plain code")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -157,13 +174,13 @@ describe("lists", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const list = ast.children[0]
-		expect(list?.type).toBe("list")
-		expect(list?.ordered).toBe(false)
-		expect(list?.children?.length).toBe(2)
-		expect(list?.children?.[0]?.type).toBe("listItem")
-		expect(list?.children?.[0]?.children?.[0]?.type).toBe("paragraph")
-		expect(list?.children?.[0]?.children?.[0]?.children?.[0]?.value).toBe("one")
+		const list = expectNodeType(ast.children[0], "list")
+		expect(list.ordered).toBe(false)
+		expect(list.children?.length).toBe(2)
+		const firstItem = childAt(list, 0, "listItem")
+		const firstParagraph = childAt(firstItem, 0, "paragraph")
+		const text = childAt(firstParagraph, 0, "text")
+		expect(text.value).toBe("one")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -174,15 +191,17 @@ describe("lists", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const list = ast.children[0]
-		expect(list?.type).toBe("list")
-		expect(list?.ordered).toBe(false)
-		const items = list?.children ?? []
-		expect(items[0]?.type).toBe("listItem")
-		expect(items[0]?.checked).toBe(true)
-		expect(items[0]?.children?.[0]?.children?.[0]?.value).toBe("done")
-		expect(items[1]?.checked).toBe(false)
-		expect(items[1]?.children?.[0]?.children?.[0]?.value).toBe("todo")
+		const list = expectNodeType(ast.children[0], "list")
+		expect(list.ordered).toBe(false)
+		const first = childAt(list, 0, "listItem")
+		expect(first.checked).toBe(true)
+		const firstParagraph = childAt(first, 0, "paragraph")
+		expect(childAt(firstParagraph, 0, "text").value).toBe("done")
+
+		const second = childAt(list, 1, "listItem")
+		expect(second.checked).toBe(false)
+		const secondParagraph = childAt(second, 0, "paragraph")
+		expect(childAt(secondParagraph, 0, "text").value).toBe("todo")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -193,11 +212,12 @@ describe("lists", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const list = ast.children[0]
-		expect(list?.type).toBe("list")
-		expect(list?.ordered).toBe(true)
-		expect(list?.children?.length).toBe(2)
-		expect(list?.children?.[0]?.children?.[0]?.children?.[0]?.value).toBe("one")
+		const list = expectNodeType(ast.children[0], "list")
+		expect(list.ordered).toBe(true)
+		expect(list.children?.length).toBe(2)
+		const first = childAt(list, 0, "listItem")
+		const firstParagraph = childAt(first, 0, "paragraph")
+		expect(childAt(firstParagraph, 0, "text").value).toBe("one")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -208,12 +228,13 @@ describe("lists", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const list = ast.children[0]
-		expect(list?.type).toBe("list")
-		expect(list?.ordered).toBe(true)
-		expect(list?.start).toBe(3)
-		expect(list?.children?.length).toBe(2)
-		expect(list?.children?.[1]?.children?.[0]?.children?.[0]?.value).toBe("four")
+		const list = expectNodeType(ast.children[0], "list")
+		expect(list.ordered).toBe(true)
+		expect(list.start).toBe(3)
+		expect(list.children?.length).toBe(2)
+		const second = childAt(list, 1, "listItem")
+		const secondParagraph = childAt(second, 0, "paragraph")
+		expect(childAt(secondParagraph, 0, "text").value).toBe("four")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -226,11 +247,9 @@ describe("blockquote", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const bq = ast.children[0]
-		expect(bq?.type).toBe("blockquote")
-		const para = bq?.children?.[0]
-		expect(para?.type).toBe("paragraph")
-		expect(para?.children?.[0]?.value).toBe("quote")
+		const bq = expectNodeType(ast.children[0], "blockquote")
+		const para = childAt(bq, 0, "paragraph")
+		expect(childAt(para, 0, "text").value).toBe("quote")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -244,7 +263,7 @@ describe("thematic break & break", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		expect(ast.children[0]?.type).toBe("thematicBreak")
+		expectNodeType(ast.children[0], "thematicBreak")
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(canonicalOutput)
 	})
@@ -255,8 +274,8 @@ describe("thematic break & break", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const hasBreak = (para.children ?? []).some((c) => c.type === "break")
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
@@ -269,8 +288,8 @@ describe("thematic break & break", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		const hasBreak = (para?.children ?? []).some((c: { type?: string }) => c.type === "break")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const hasBreak = (para.children ?? []).some((c) => c.type === "break")
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
@@ -284,20 +303,18 @@ describe("html", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		const children = para?.children ?? []
-		const [t1, htmlOpen, tWorld, htmlClose, t2] = children
-		expect(t1?.type).toBe("text")
-		expect(t1?.value).toBe("Hello ")
-		expect(htmlOpen?.type).toBe("html")
-		expect(htmlOpen?.value).toBe('<span class="x">')
-		expect(tWorld?.type).toBe("text")
-		expect(tWorld?.value).toBe("world")
-		expect(htmlClose?.type).toBe("html")
-		expect(htmlClose?.value).toBe("</span>")
-		expect(t2?.type).toBe("text")
-		expect(t2?.value).toBe(".")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const children = para.children ?? []
+		const text1 = expectNodeType(children[0], "text")
+		expect(text1.value).toBe("Hello ")
+		const htmlOpen = expectNodeType(children[1], "html")
+		expect(htmlOpen.value).toBe('<span class="x">')
+		const textWorld = expectNodeType(children[2], "text")
+		expect(textWorld.value).toBe("world")
+		const htmlClose = expectNodeType(children[3], "html")
+		expect(htmlClose.value).toBe("</span>")
+		const textEnd = expectNodeType(children[4], "text")
+		expect(textEnd.value).toBe(".")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -308,9 +325,8 @@ describe("html", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const html = ast.children[0]
-		expect(html?.type).toBe("html")
-		expect(html?.value).toBe('<div class="wrap">\n<p>hello</p>\n</div>')
+		const html = expectNodeType(ast.children[0], "html")
+		expect(html.value).toBe('<div class="wrap">\n<p>hello</p>\n</div>')
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -322,11 +338,9 @@ describe("html", () => {
 		const out = serializeAst(ast)
 
 		// Unknown/custom tags are treated as inline HTML inside a paragraph by remark-parse
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		const first = para?.children?.[0]
-		expect(first?.type).toBe("html")
-		expect(first?.value).toContain("doc-figure")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const first = childAt(para, 0, "html")
+		expect(first.value).toContain("doc-figure")
 
 		expect(out).toBe(input)
 	})
@@ -343,13 +357,11 @@ describe("image & link", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		const img = para?.children?.[0]
-		expect(img?.type).toBe("image")
-		expect(img?.url).toBe("https://example.com/a.png")
-		expect(img?.alt).toBe("alt")
-		expect(img?.title).toBe("title")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const img = childAt(para, 0, "image")
+		expect(img.url).toBe("https://example.com/a.png")
+		expect(img.alt).toBe("alt")
+		expect(img.title).toBe("title")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -360,15 +372,12 @@ describe("image & link", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const para = ast.children[0]
-		expect(para?.type).toBe("paragraph")
-		const link = para?.children?.[0]
-		expect(link?.type).toBe("link")
-		expect(link?.url).toBe("https://example.com")
-		expect(link?.title).toBe("title")
-		const txt = link?.children?.[0]
-		expect(txt?.type).toBe("text")
-		expect(txt?.value).toBe("text")
+		const para = expectNodeType(ast.children[0], "paragraph")
+		const link = childAt(para, 0, "link")
+		expect(link.url).toBe("https://example.com")
+		expect(link.title).toBe("title")
+		const txt = childAt(link, 0, "text")
+		expect(txt.value).toBe("text")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -381,20 +390,17 @@ describe("table", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const table = ast.children[0]
-		expect(table?.type).toBe("table")
-		expect(Array.isArray(table?.align)).toBe(true)
-		const align = table?.align
-		expect(Array.isArray(align) ? align.length : 0).toBe(2)
+		const table = expectNodeType(ast.children[0], "table")
+		expect(Array.isArray(table.align)).toBe(true)
+		expect((table.align ?? []).length).toBe(2)
 
-		const rows = table?.children ?? []
-		const [row1, row2] = rows
-		expect(row1?.type).toBe("tableRow")
-		expect(row1?.children?.[0]?.type).toBe("tableCell")
-		expect(row1?.children?.[0]?.children?.[0]?.value).toBe("a")
-		expect(row1?.children?.[1]?.children?.[0]?.value).toBe("b")
-		expect(row2?.children?.[0]?.children?.[0]?.value).toBe("1")
-		expect(row2?.children?.[1]?.children?.[0]?.value).toBe("2")
+		const rows = table.children ?? []
+		const row1 = expectNodeType(rows[0], "tableRow")
+		const row2 = expectNodeType(rows[1], "tableRow")
+		expect(childAt(childAt(row1, 0, "tableCell"), 0, "text").value).toBe("a")
+		expect(childAt(childAt(row1, 1, "tableCell"), 0, "text").value).toBe("b")
+		expect(childAt(childAt(row2, 0, "tableCell"), 0, "text").value).toBe("1")
+		expect(childAt(childAt(row2, 1, "tableCell"), 0, "text").value).toBe("2")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -406,11 +412,11 @@ describe("table", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const table = ast.children[0]
-		expect(table?.type).toBe("table")
-		expect(table?.children?.length).toBe(2)
-		expect(table?.children?.[0]?.children?.[0]?.children?.[0]?.value).toBe("a")
-		expect(table?.children?.[0]?.children?.[1]?.children?.[0]?.value).toBe("b")
+		const table = expectNodeType(ast.children[0], "table")
+		expect(table.children?.length).toBe(2)
+		const headerRow = childAt(table, 0, "tableRow")
+		expect(childAt(childAt(headerRow, 0, "tableCell"), 0, "text").value).toBe("a")
+		expect(childAt(childAt(headerRow, 1, "tableCell"), 0, "text").value).toBe("b")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(canonicalOutput)
@@ -423,12 +429,10 @@ describe("frontmatter (yaml)", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const yaml = ast.children[0]
-		expect(yaml?.type).toBe("yaml")
-		expect(yaml?.value).toBe("title: test")
-		const heading = ast.children[1]
-		expect(heading?.type).toBe("heading")
-		expect(heading?.depth).toBe(1)
+		const yaml = expectNodeType(ast.children[0], "yaml")
+		expect(yaml.value).toBe("title: test")
+		const heading = expectNodeType(ast.children[1], "heading")
+		expect(heading.depth).toBe(1)
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(input)
@@ -440,9 +444,8 @@ describe("frontmatter (yaml)", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const yaml = ast.children[0]
-		expect(yaml?.type).toBe("yaml")
-		expect(yaml?.value).toBe("title: test")
+		const yaml = expectNodeType(ast.children[0], "yaml")
+		expect(yaml.value).toBe("title: test")
 
 		expect(validateAst(ast)).toBe(true)
 		expect(out).toBe(canonicalOutput)
