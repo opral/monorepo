@@ -14,13 +14,16 @@ const AccountSelector: React.FC = () => {
 	const [newAccountName, setNewAccountName] = useState("");
 
 	const allAccounts = useSuspenseQuery(() =>
-		lix.db.selectFrom("account").selectAll(),
+		lix.db
+			.selectFrom("account_by_version")
+			.where("lixcol_version_id", "=", "global")
+			.select(["id", "name"]),
 	);
 
 	const activeAccount = useSuspenseQueryTakeFirst(() =>
 		lix.db
 			.selectFrom("active_account as aa")
-			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.innerJoin("account_by_version as a", "a.id", "aa.account_id")
 			.where("a.lixcol_version_id", "=", "global")
 			.select(["aa.account_id", "a.id", "a.name"]),
 	);

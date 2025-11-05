@@ -6,7 +6,7 @@ import VersionToolbar from "./components/VersionToolbar";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { openLix, OpfsSahEnvironment } from "@lix-js/sdk";
-import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
+import prosemirrorPlugin from "@lix-js/plugin-prosemirror?raw";
 import { initLixInspector } from "@lix-js/inspector";
 import { LixProvider } from "@lix-js/react-utils";
 
@@ -16,7 +16,7 @@ const environment = new OpfsSahEnvironment({ key: "prosemirror-example" });
 let lix;
 try {
 	lix = await openLix({
-		providePlugins: [prosemirrorPlugin],
+		providePluginsRaw: [prosemirrorPlugin],
 		environment,
 	});
 } catch (error) {
@@ -27,7 +27,6 @@ try {
 		// ignore close errors during recovery
 	}
 	await OpfsSahEnvironment.clear();
-	window.location.reload();
 }
 
 // dev tool for debugging
