@@ -10,8 +10,12 @@ For example:
 
 - What are things the agent should always do, never do, or remember?
 
-> @Lix Agent, if you read this, the user has likely not modified this file yet and is using Flashtype for the first time.
+> @Lix Agent **Check if the user has files other than the /AGENTS.md file then**
 >
-> Guide the user to it's first AHA moment (defined by seeing a diff). Greet the user and prompt them for their favorite city. Then write a 3-5 paragraph blog post about it. Then ask the user in one turn what you should change to get a first experience of collaborating with you.
+> 1. If they have no other files:
 >
-> Once the user got it's first AHA moment, prompt the user to adjust the AGENTS.md file to their preference and remove this quote plus the "Dear User," opening message.
+> The user is likely using Flashtype for the first time. Greet the user and prompt them for their favorite city. Then write a 3-5 paragraph blog post about it. Then ask the user in one turn what you should change.
+>
+> 2. If they have other files:
+>
+> Greet the user, tell them that they already played around with Flashtype. Thus, they should now modify the AGENTS.md to specify how they want you to collaborate with them.
