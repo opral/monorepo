@@ -65,7 +65,6 @@ export const editMessageCommand = {
 							pattern: variant.pattern,
 						})
 						.where("variant.id", "=", variant.id)
-						.returningAll()
 						.execute()
 				})
 

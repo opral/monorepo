@@ -71,4 +71,3 @@ test("complex messages declarations and selectors are optional ", async () => {
 	};
 	expect(Value.Check(FileSchema, messages)).toBe(true);
 });
-

@@ -324,14 +324,14 @@ function parsePattern(
 	return { variableReferences, result };
 }
 const removeDuplicates = <T extends any[]>(arr: T) =>
-  [...new Set(arr.map((item) => JSON.stringify(item)))].map((item) =>
-    JSON.parse(item),
-  );
+	[...new Set(arr.map((item) => JSON.stringify(item)))].map((item) =>
+		JSON.parse(item)
+	);
 
 const testForPlurals = (key: string) =>
-  key.endsWith("_zero") ||
-  key.endsWith("_one") ||
-  key.endsWith("_two") ||
-  key.endsWith("_few") ||
-  key.endsWith("_many") ||
-  key.endsWith("_other");
+	key.endsWith("_zero") ||
+	key.endsWith("_one") ||
+	key.endsWith("_two") ||
+	key.endsWith("_few") ||
+	key.endsWith("_many") ||
+	key.endsWith("_other");

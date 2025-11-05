@@ -1,48 +1,26 @@
-import {
-	JSONTypeSchema,
-	createEntityViewsIfNotExists,
-	uuidV7Sync,
-	type Lix,
-	type LixSchemaDefinition,
-} from "@lix-js/sdk";
+import { JSONTypeSchema, type LixSchemaDefinition } from "@lix-js/sdk";
 
 export const InlangMessageSchema = {
 	"x-lix-key": "inlang_message",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["id"],
+	"x-lix-primary-key": ["/id"],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["bundleId"],
-			references: { schemaKey: "inlang_bundle", properties: ["id"] },
+			properties: ["/bundleId"],
+			references: { schemaKey: "inlang_bundle", properties: ["/id"] },
 		},
 	],
+	"x-lix-override-lixcols": {
+		lixcol_file_id: '"inlang"',
+		lixcol_plugin_key: '"inlang_sdk"',
+	},
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-default": "lix_uuid_v7()" },
 		bundleId: { type: "string" },
 		locale: { type: "string" },
-		selectors: JSONTypeSchema,
+		selectors: { ...JSONTypeSchema, default: [] },
 	},
 	required: ["id", "bundleId", "locale", "selectors"],
 	additionalProperties: false,
 } as const satisfies LixSchemaDefinition;
-
-type Engine = NonNullable<Lix["engine"]>;
-
-export function createMessageView(args: {
-	engine: Engine;
-	pluginKey: string;
-	hardcodedFileId: string;
-}) {
-	createEntityViewsIfNotExists({
-		engine: args.engine,
-		schema: InlangMessageSchema,
-		overrideName: "message",
-		pluginKey: args.pluginKey,
-		hardcodedFileId: args.hardcodedFileId,
-		defaultValues: {
-			id: () => uuidV7Sync({ engine: args.engine }),
-			selectors: () => JSON.stringify([]),
-		},
-	});
-}
