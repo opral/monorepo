@@ -6,7 +6,7 @@ import type { MarkdownNode } from "./schemas.js"
 
 function expectNodeType<T extends MarkdownNode["type"]>(
 	node: MarkdownNode | undefined,
-	type: T,
+	type: T
 ): Extract<MarkdownNode, { type: T }> {
 	expect(node?.type).toBe(type)
 	if (!node || node.type !== type) {
@@ -18,7 +18,7 @@ function expectNodeType<T extends MarkdownNode["type"]>(
 function childAt<T extends MarkdownNode["type"]>(
 	parent: { children?: MarkdownNode[] },
 	index: number,
-	type: T,
+	type: T
 ): Extract<MarkdownNode, { type: T }> {
 	return expectNodeType(parent.children?.[index], type)
 }

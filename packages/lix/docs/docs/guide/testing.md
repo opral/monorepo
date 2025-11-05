@@ -34,11 +34,11 @@ test("should store and retrieve a key-value pair", async () => {
 
 Adhering to a few principles ensures your tests are robust, fast, and easy to maintain.
 
-| Principle             | Why It Matters                                                                                                                                        |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Test the Real Thing** | By using a real Lix instance, you verify the entire stack, from your business logic to the persistence layer. No brittle mocks, no surprises in production. |
+| Principle               | Why It Matters                                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Test the Real Thing** | By using a real Lix instance, you verify the entire stack, from your business logic to the persistence layer. No brittle mocks, no surprises in production.                          |
 | **Isolate Tests**       | Each call to `openLix({})` creates a fresh, ephemeral database in memory. This guarantees that tests run in isolation and don't leak state, making them parallelizable and reliable. |
-| **Use Production APIs** | Write tests that call your application's functions and services. This ensures you're testing your app's behavior, not just the underlying Lix functionality. |
+| **Use Production APIs** | Write tests that call your application's functions and services. This ensures you're testing your app's behavior, not just the underlying Lix functionality.                         |
 
 ## Common Testing Scenarios
 

@@ -136,12 +136,12 @@ Environments that support isolated execution can additionally expose `spawnActor
 
 ```ts
 const actor = await environment.spawnActor?.({
-  entryModule: new URL('./diff-worker.js', import.meta.url).href,
-  name: 'diff-render'
+  entryModule: new URL("./diff-worker.js", import.meta.url).href,
+  name: "diff-render",
 });
 
-actor?.subscribe((message) => console.log('actor message', message));
-actor?.post({ type: 'render', payload: diffs });
+actor?.subscribe((message) => console.log("actor message", message));
+actor?.post({ type: "render", payload: diffs });
 ```
 
 The SDK uses this capability to offload work (for example, diff rendering) when available, but will fall back to running tasks inline when `spawnActor` is absent. When authoring a custom environment you only need to implement this hook if you can actually spawn workers in your target runtime; otherwise, you can omit it.

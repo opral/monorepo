@@ -178,7 +178,7 @@ test("adding custom mark defs", () => {
 	expect(result.errors).toBeUndefined();
 });
 
-// it seems like typebox doesn't support propertyNames validation 
+// it seems like typebox doesn't support propertyNames validation
 test.skip("custom blocks may not define keys with `zettel_` prefix to avoid conflicts", () => {
 	const doc: ZettelDoc = {
 		type: "zettel_doc",

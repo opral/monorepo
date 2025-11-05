@@ -8,9 +8,9 @@ The answer is simple: Use metadata when an [entity](./entity.md) is not owned by
 
 Here are some examples:
 
--   **Lix Conversation API:** Lix provides a schema for conversation messages (`lix_conversation_message`). Your application might want to store additional context for these messages, such as the `LLM_role` (e.g., "user", "assistant") or the `LLM_model` used to generate a response. Since you don't own the `lix_conversation_message` schema, you use metadata to attach this information.
--   **Third-Party Plugin Data:** If you're using a plugin that processes a specific file format (e.g., a Markdown plugin), you might want to add your own application-specific flags or annotations to the entities (e.g., a `review_status` on a Markdown heading) without modifying the plugin's schema.
--   **Standard Lix Entities:** For core Lix entities like `file` or `commit`, you can attach metadata to store application-specific details (e.g., `imported_from_source` for a file, or `jira_ticket_id` for a commit).
+- **Lix Conversation API:** Lix provides a schema for conversation messages (`lix_conversation_message`). Your application might want to store additional context for these messages, such as the `LLM_role` (e.g., "user", "assistant") or the `LLM_model` used to generate a response. Since you don't own the `lix_conversation_message` schema, you use metadata to attach this information.
+- **Third-Party Plugin Data:** If you're using a plugin that processes a specific file format (e.g., a Markdown plugin), you might want to add your own application-specific flags or annotations to the entities (e.g., a `review_status` on a Markdown heading) without modifying the plugin's schema.
+- **Standard Lix Entities:** For core Lix entities like `file` or `commit`, you can attach metadata to store application-specific details (e.g., `imported_from_source` for a file, or `jira_ticket_id` for a commit).
 
 ## How to Use Metadata
 
@@ -22,24 +22,25 @@ When inserting or updating records in Lix, you can include a `metadata` property
 
 ```typescript
 // Attaching metadata when inserting a new state record
-await lix.db.insertInto("state").values({
-  entity_id: "task-123", // The unique ID of this entity
-  schema_key: "my_app_entity", // The schema defining this entity
-  snapshot_content: { // The actual data of the entity
-    id: "task-123",
-    name: "Review PR",
-  },
-  metadata: { // The metadata for this state record
-    priority: "high",
-    assigned_to: "dev_team",
-    source: "jira_ticket_456"
-  }
-}).execute();
-
-
+await lix.db
+  .insertInto("state")
+  .values({
+    entity_id: "task-123", // The unique ID of this entity
+    schema_key: "my_app_entity", // The schema defining this entity
+    snapshot_content: {
+      // The actual data of the entity
+      id: "task-123",
+      name: "Review PR",
+    },
+    metadata: {
+      // The metadata for this state record
+      priority: "high",
+      assigned_to: "dev_team",
+      source: "jira_ticket_456",
+    },
+  })
+  .execute();
 ```
-
-
 
 ### Updating Metadata
 
@@ -50,7 +51,7 @@ To update specific properties within an existing metadata object, use SQL JSON f
 await lix.db
   .updateTable("my_app_entity")
   .set({
-    metadata: sql`json_set(metadata, '$.priority', 'urgent')`
+    metadata: sql`json_set(metadata, '$.priority', 'urgent')`,
   })
   .where("id", "=", "task-123")
   .execute();
@@ -93,6 +94,6 @@ Follow these guidelines for effective metadata usage:
 
 ### Don'ts
 
-- **Don't use metadata for data you own:** If you control the schema of an entity, add the property directly to the schema instead of using metadata. Metadata is for *additional* context, not core data.
+- **Don't use metadata for data you own:** If you control the schema of an entity, add the property directly to the schema instead of using metadata. Metadata is for _additional_ context, not core data.
 - **Don't duplicate `snapshot_content`:** Avoid storing data in metadata that is already present in the entity's `snapshot_content`.
 - **Don't store large objects:** Avoid storing large arrays, long strings, or binary data in metadata, as this can impact performance and repository size.

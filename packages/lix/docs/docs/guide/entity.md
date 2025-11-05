@@ -6,14 +6,14 @@ In Lix, an **entity** is a meaningful, addressable unit of data within a file. I
 
 The definition of an entity depends on the file type and the Lix plugin that handles it. Here are some common examples for both text-based and binary formats:
 
-| File Type | Potential Entities |
-| :--- | :--- |
-| **JSON** | A specific key-value pair, an item in an array, or a nested object. |
-| **Spreadsheets (Excel, CSV, ...)** | A complete row, or an individual cell at a specific coordinate. |
-| **Documents (docx, md, ...)** | A paragraph, a heading, a list item, or a code block. |
-| **Design Files (Figma, Sketch)** | A component, a frame, a layer, a text node, or a vector shape. |
-| **3D Models (glTF, FBX)** | A mesh, a material, a bone in a skeleton, or a node in the scene graph. |
-| **Image Files (PSD, Krita)** | A layer, a labeled object or region, or a path. |
+| File Type                          | Potential Entities                                                      |
+| :--------------------------------- | :---------------------------------------------------------------------- |
+| **JSON**                           | A specific key-value pair, an item in an array, or a nested object.     |
+| **Spreadsheets (Excel, CSV, ...)** | A complete row, or an individual cell at a specific coordinate.         |
+| **Documents (docx, md, ...)**      | A paragraph, a heading, a list item, or a code block.                   |
+| **Design Files (Figma, Sketch)**   | A component, a frame, a layer, a text node, or a vector shape.          |
+| **3D Models (glTF, FBX)**          | A mesh, a material, a bone in a skeleton, or a node in the scene graph. |
+| **Image Files (PSD, Krita)**       | A layer, a labeled object or region, or a path.                         |
 
 ## Why Entities Matter
 
@@ -24,7 +24,7 @@ Traditional version control systems like Git track changes to files on a line-by
 + {"name":"John","age":31,"city":"New York"}
 ```
 
-While this is hard for a human to read, the bigger problem for building applications is that this change is not *queryable*. An application cannot programmatically ask questions like, "What did the `age` property change from and to?" or "Show me the history of all changes to the `age` property." The diff shows *that* a change happened, but the meaning of the change is lost and cannot be used by the software itself.
+While this is hard for a human to read, the bigger problem for building applications is that this change is not _queryable_. An application cannot programmatically ask questions like, "What did the `age` property change from and to?" or "Show me the history of all changes to the `age` property." The diff shows _that_ a change happened, but the meaning of the change is lost and cannot be used by the software itself.
 
 Lix's entity-based model solves this by unlocking several powerful capabilities:
 
@@ -37,7 +37,7 @@ Lix's entity-based model solves this by unlocking several powerful capabilities:
 
 The concepts of Entities, Schemas, and Plugins work together:
 
-- A **[Lix Schema](./schema.md)** defines the *structure* of an entity's data.
+- A **[Lix Schema](./schema.md)** defines the _structure_ of an entity's data.
 - A **Lix Plugin** understands a file format (like JSON) and is responsible for detecting changes to entities within that file.
 - When a plugin detects a change, it reports it to Lix using the structure defined by the corresponding schema.
 

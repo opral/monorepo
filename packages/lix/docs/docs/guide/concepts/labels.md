@@ -79,7 +79,11 @@ const reviewedEntities = await lix.db
   .selectFrom("entity_label")
   .innerJoin("label", "label.id", "entity_label.label_id")
   .where("label.name", "=", "reviewed")
-  .select(["entity_label.entity_id", "entity_label.schema_key", "entity_label.file_id"])
+  .select([
+    "entity_label.entity_id",
+    "entity_label.schema_key",
+    "entity_label.file_id",
+  ])
   .execute();
 ```
 
@@ -117,13 +121,21 @@ const statusInProgress = await createLabel({ lix, name: "status:in-progress" });
 
 await attachLabel({
   lix,
-  entity: { entity_id: feature.id, schema_key: "lix_change_set", file_id: "lix" },
+  entity: {
+    entity_id: feature.id,
+    schema_key: "lix_change_set",
+    file_id: "lix",
+  },
   label: { id: typeFeature.id },
 });
 
 await attachLabel({
   lix,
-  entity: { entity_id: feature.id, schema_key: "lix_change_set", file_id: "lix" },
+  entity: {
+    entity_id: feature.id,
+    schema_key: "lix_change_set",
+    file_id: "lix",
+  },
   label: { id: statusInProgress.id },
 });
 
@@ -131,16 +143,20 @@ await attachLabel({
 const statusReview = await createLabel({ lix, name: "status:review" });
 await attachLabel({
   lix,
-  entity: { entity_id: feature.id, schema_key: "lix_change_set", file_id: "lix" },
+  entity: {
+    entity_id: feature.id,
+    schema_key: "lix_change_set",
+    file_id: "lix",
+  },
   label: { id: statusReview.id },
 });
 ```
 
 ## API Reference quick-links
 
-| Function / Type   | Purpose                             | Docs                          |
-| ----------------- | ----------------------------------- | ----------------------------- |
-| `attachLabel()`   | Attach a label to an entity         | /api/functions/attachLabel    |
-| `detachLabel()`   | Detach a label from an entity       | /api/functions/detachLabel    |
-| `createLabel()`   | Create a label                      | /api/functions/createLabel    |
-| `ebEntity()`      | Query helper with `hasLabel(...)`   | /api/functions/ebEntity       |
+| Function / Type | Purpose                           | Docs                       |
+| --------------- | --------------------------------- | -------------------------- |
+| `attachLabel()` | Attach a label to an entity       | /api/functions/attachLabel |
+| `detachLabel()` | Detach a label from an entity     | /api/functions/detachLabel |
+| `createLabel()` | Create a label                    | /api/functions/createLabel |
+| `ebEntity()`    | Query helper with `hasLabel(...)` | /api/functions/ebEntity    |

@@ -38,7 +38,7 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
   const unregisterCommandHandlers = mergeRegister();
 
   // Format text (bold, italic, etc)
-  editor.registerCommand<TextFormatType>(
+  (editor.registerCommand<TextFormatType>(
     FORMAT_TEXT_COMMAND,
     (payload) => {
       editor.update(() => {
@@ -94,10 +94,10 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
       },
       COMMAND_PRIORITY_LOW,
       // @prettier-ignore
-    );
+    ));
 
   // Copy (Zettel HTML)
-  editor.registerCommand(
+  (editor.registerCommand(
     COPY_COMMAND,
     (event: ClipboardEvent | null) => {
       // 1. Get the current selection as Zettel AST
@@ -201,7 +201,7 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
         return true;
       },
       COMMAND_PRIORITY_EDITOR,
-    );
+    ));
 
   // Delete Word
   editor.registerCommand<boolean>(

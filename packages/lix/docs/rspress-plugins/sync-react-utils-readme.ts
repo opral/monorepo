@@ -7,13 +7,7 @@ export function syncReactUtilsReadmePlugin(): RspressPlugin {
     name: "sync-react-utils-readme",
     async config(config) {
       const docsRoot = config.root!;
-      const src = path.join(
-        __dirname,
-        "..",
-        "..",
-        "react-utils",
-        "README.md",
-      );
+      const src = path.join(__dirname, "..", "..", "react-utils", "README.md");
       const dest = path.join(docsRoot, "guide", "react-utils.mdx");
 
       const readme = await fs.readFile(src, "utf8");
