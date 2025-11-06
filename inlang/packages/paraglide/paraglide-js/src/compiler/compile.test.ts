@@ -170,6 +170,29 @@ test("doesn't clean the output directory if option is set to false", async () =>
 	expect(outputSubDir).toBe(true);
 });
 
+test("throws if outdir resolves to the project root", async () => {
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({}),
+	});
+
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await expect(
+		compile({
+			project: "/project.inlang",
+			outdir: "./",
+			fs: fs,
+		})
+	).rejects.toThrowError("`outdir` cannot be set to './'");
+	// Regression test for https://github.com/opral/inlang-sdk/issues/245
+});
+
 test("multiple compile calls do not interfere with each other", async () => {
 	const fs = memfs().fs as unknown as typeof import("node:fs");
 

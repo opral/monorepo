@@ -54,11 +54,20 @@ export async function compile(
 
 	compilationInProgress = (async () => {
 		try {
-			const fs = withDefaultOptions.fs ?? (await import("node:fs"));
-			const absoluteOutdir = path.resolve(
-				process.cwd(),
-				withDefaultOptions.outdir
-			);
+	                const fs = withDefaultOptions.fs ?? (await import("node:fs"));
+	                const absoluteOutdir = path.resolve(
+	                        process.cwd(),
+	                        withDefaultOptions.outdir
+	                );
+	                const cwd = path.resolve(process.cwd());
+
+	                // Regression test: https://github.com/opral/inlang-sdk/issues/245
+	                // Cleaning the project root deletes user source files. Guard against it early.
+	                if (absoluteOutdir === cwd) {
+	                        throw new Error(
+	                                "`outdir` cannot be set to './'. Cleaning the project root would delete your source files. See https://github.com/opral/inlang-sdk/issues/245 for details."
+	                        );
+	                }
 
 			// const localAccount = getLocalAccount({ fs });
 
