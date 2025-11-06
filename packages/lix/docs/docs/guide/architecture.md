@@ -2,87 +2,101 @@
 
 ## Core Concepts
 
-Lix represents all data through four fundamental concepts that build upon each other.
+Lix represents all data through four fundamental concepts that build upon each other:
 
-Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./versions.mdx) (branching), merging, and time-travel queries.
-
-**Change** A single modification (e.g., `c1`).
-
-```mermaid
-graph LR
-    C1["c1"]
-```
-
-**Change Set** A collection of related changes (e.g., `{c1, c2}`).
-
-```mermaid
-graph LR
-    CS1["{c1, c2}"]
-```
-
-**Change Set Graph** Multiple change sets linked together showing evolution.
+1. **Change** – the atomic unit.
+2. **Change set** – groups related changes.
+3. **Commit** – forms a graph of change sets that define state.
+4. **Version** – points to a specific state by referencing a commit.
 
 ```mermaid
 graph RL
-    CSG2["{c3, c4}"] --> CSG1["{c1, c2}"]
+    subgraph Change
+        direction TB
+        C1["c1: name=Sam"]:::change
+        C2["c2: email=sam@lix.dev"]:::change
+    end
+
+    subgraph ChangeSet
+        CS["cs42"]:::changeset
+    end
+
+    subgraph Commit
+        CM["commit a1"]:::commit
+    end
+
+    subgraph Version
+        V["version main"]:::version
+    end
+
+    CS --> C1
+    CS --> C2
+    CM --> CS
+    V --> CM
+
+    classDef change fill:#f8bbd0,stroke:#c2185b,color:#000;
+    classDef changeset fill:#bbdefb,stroke:#1976d2,color:#000;
+    classDef commit fill:#c8e6c9,stroke:#388e3c,color:#000;
+    classDef version fill:#fff9c4,stroke:#fbc02d,color:#000;
 ```
 
-**Version** A pointer to a specific change set in the graph.
-
-```mermaid
-graph RL
-    CSG2["{c3, c4}"] --> CSG1["{c1, c2}"]
-    V["Version"] -.-> CSG2
-```
+In this example, two changes (`c1`, `c2`) serve as atomic units—enabling fine-grained diffing and cherry-picking—while the change set `cs42` groups them together, signaling they belong together while preserving their individual atomicity. The commit `a1` materializes this change set into state, forming a point in time that can be referenced, traversed, and compared. The version `main` acts as a named pointer to this commit, defining what state is currently visible.
 
 ## Advanced Concepts
 
 ### Divergent Versions
 
-Multiple versions can point to different change sets, creating divergent versions which can be merged later:
+Multiple versions can point at different commits, creating divergent histories that remain isolated until you merge them.
 
 ```mermaid
 graph RL
     CS3["{c5, c6}"] --> CS2["{c3, c4}"] --> CS1["{c1, c2}"]
     CS4["{c7, c8}"] --> CS2
-    V1["Version A"] -.-> CS3
-    V2["Version B"] -.-> CS4
+
+    C3["Commit m2"] --> C2["Commit m1"] --> C1["Commit m0"]
+    C4["Commit n2"] --> C2
+
+    V1["Version A"] -.-> C3
+    V2["Version B"] -.-> C4
 ```
 
-Here, Version A and Version B diverge after CS2, each with their own subsequent changes. This enables:
-
-- Parallel development workflows
-- Feature branches
-- Experimental changes without affecting other versions
+Here, Versions A and B share commit `m1` and then diverge. Each version maintains its own pointer until you review and merge the changes.
 
 ### Historical State
 
-History in Lix is simply pointing to a specific change set in the graph and materializing the state up to that change set. Any change set in the graph can be queried, not just those pointed to by versions.
+Inspecting history means selecting a commit (or its change set) and rehydrating the state that existed there. Any commit in the DAG can be materialised even if no version currently points at it.
 
 ```mermaid
 graph RL
-    CS3["{c5, c6}"] --> CS2["{c3, c4}"] --> CS1["{c1, c2}"]
-    V["Version"] -.-> CS3
-    H["Historical Query"] -.-> CS2
+    C3["Commit m2"] --> C2["Commit m1"] --> C1["Commit m0"]
+    V["Version"] -.-> C3
+    H["Historical Query"] -.-> C2
 ```
 
-In this example, the "Historical Query" points to change set `{c3, c4}`, allowing access to the exact state at that point in time, even though no version currently points there.
+## On Demand State Materialisation
 
-## On Demand State Materialization
+Lix does not persist full snapshots. Instead it stores:
 
-Rather than storing state for every version and historical point, which would require large amounts of storage, Lix stores only the changes. State is then materialized on-demand in a cache by traversing the change set graph and applying the relevant changes.
+- raw changes with their payload,
+- membership of each change in a change set,
+- commits that materialise change sets and point to parents,
+- and a lightweight pointer from each version to its tip commit (plus the working commit used for drafts).
 
-This approach provides significant storage efficiency: instead of storing multiple complete copies of data, Lix stores each change only once. When state is needed (whether current or historical), it's computed by traversing the graph backward from a change set and applying all leaf changes in the lineage.
+When you request state, the engine walks the commit graph, gathers the change sets that are reachable from the target commit, and applies the newest change for every entity. The traversal is cached internally so queries stay fast without materialising full snapshots.
 
 ```mermaid
 graph RL
-    CSG2["{c3, c4}"] --> CSG1["{c1, c2}"]
-    V["Version"] -.-> CSG2
+    C0["Commit m0"] --> C1["Commit m1"] --> C2["Commit m2"]
+    V["Version"] -.-> C2
 ```
 
-### Materializing Logic
+### Materialisation Logic
 
-State materialization can be simplified to the process of taking the union of all change sets in the lineage and filtering for leaf changes. Leaf changes are the latest change for each entity, ensuring that only the most recent modifications are applied.
+Conceptually, materialisation follows three steps:
+
+1. Collect every change set reachable from the target commit.
+2. Take the union of the underlying changes along that path.
+3. Select the leaf change per entity/schema/file so only the most recent edit survives.
 
 Consider this example with two entities (`e1`, `e2`). The lineage of change sets might look like this:
 
@@ -103,45 +117,34 @@ graph RL
 
    `State = { e1: "julia", e2: "gunther" }`
 
-### Transactions and commit path
+## Commit Graph
 
-During a transaction, Lix stages state mutations and then commits them in a single pass. The writer identity (`writer_key`) is carried through the pipeline — from the internal transaction staging table to the commit generator and into the materialized state — without per‑row lookups. This enables reliable attribution for echo suppression and external‑change detection. For usage patterns and pitfalls, see the Writer Key guide: [/guide/writer-key](/guide/writer-key).
-
-## Global Change Set Graph
-
-The change set graph in Lix is global and shared across all versions. By having a global graph, all versions share the same understanding of history—each version may have a different lineage, but they all agree on what that lineage contains. If the change set graph were version-scoped, versions couldn't agree on what the history of another version is.
+State is expressed by the commit graph. Each commit packages the change set that advanced the system and links it to earlier commits, so walking the graph tells you exactly how a piece of state came to be. Versions are simply named pointers into that graph, and moving a version pointer just selects which commit’s state is visible.
 
 ```mermaid
 graph RL
-    %% Change sets in the global graph
-    CS6["{c11, c12}"] --> CS4["{c7, c8}"]
-    CS5["{c9, c10}"] --> CS3["{c5, c6}"]
-    CS4 --> CS2["{c3, c4}"]
-    CS3 --> CS2
-    CS2 --> CS1["{c1, c2}"]
+    %% Commits
+    C4["Commit z2\n{c7,c8}"] --> C2["Commit x1\n{c3,c4}"]
+    C3["Commit y2\n{c5,c6}"] --> C2
+    C2 --> C1["Commit r0\n{c1,c2}"]
 
-    %% Version pointers
-    V1["Version: main"] -.-> CS5
-    V2["Version: feature-x"] -.-> CS6
-    V3["Version: experiment"] -.-> CS3
+    %% Versions
+    V1["Version: main"] -.-> C3
+    V2["Version: feature-x"] -.-> C4
+    V3["Version: experiment"] -.-> C2
 
-    %% Style the versions differently
     style V1 fill:#e1f5fe
     style V2 fill:#f3e5f5
     style V3 fill:#e8f5e9
 ```
 
-In the global change set graph above:
-
-- All versions can see and reference any change set
-- Version "main" can query the history of Version "feature-x" by traversing from CS6
-- Historical queries can point to any change set, even those not currently pointed to by a version (like CS4)
+The commit graph is global, so any version can walk parents, replay change sets, and understand how another version reached its state.
 
 ## Foreign Keys
 
 Lix supports foreign key constraints to maintain referential integrity between entities.
 
-For simplicity, Lix only allows foreign keys on entities in the same version scope, with the exception of references to changes themselves. This design choice avoids global cascading effects and acknowledges that changes are versionless - they exist outside the version system as the immutable source of truth.
+For simplicity, Lix only allows foreign keys on entities in the same version scope, with the exception of references to changes themselves. This avoids cascading effects across versions and acknowledges that changes are versionless—they live outside the version system as the immutable source of truth tracked by commits.
 
 | Rule                                                  | Rationale                                                                        | Engine behaviour                                                                   |
 | ----------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -149,4 +152,4 @@ For simplicity, Lix only allows foreign keys on entities in the same version sco
 | **2. Version‑scoped → version‑scoped (same version)** | Keeps each version self‑contained and makes deletes cheap.                       | Current logic stands: both rows must share the same `version_id`.                  |
 | **3. Change → version‑scoped**                        | Would immediately violate Rule 2.                                                | Disallowed at schema‑registration time.                                            |
 
-> **Result:** An example_entity, comment or change‑set element lives inside a specific version, but can freely point at any `lix_change.id` without special handling.
+> **Result:** An example_entity or comment lives inside a specific version, but can freely point at any `lix_change.id` without special handling. System metadata like commits and change-set elements stay in the global scope and follow the same rules when they reference `lix_change`.
