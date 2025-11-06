@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import { openLix } from "./open-lix.js";
 import { LixSchemaViewMap } from "../database/schema-view-map.js";
+import { LixVersionDescriptorSchema } from "../version/schema-definition.js";
 
 test("newLixFile creates a valid lix that can be reopened", async () => {
 	// Create a new lix file
@@ -20,13 +21,20 @@ test("newLixFile creates a valid lix that can be reopened", async () => {
 });
 
 test("newLixFile creates a global and main version", async () => {
-	const blob = await newLixFile();
+	const blob = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 	const lix = await openLix({ blob });
 
 	// Check that both global and main versions exist
 	const versions = await lix.db
 		.selectFrom("version")
-		.where("name", "in", ["global", "main"])
 		.orderBy("name")
 		.selectAll()
 		.execute();
@@ -42,6 +50,22 @@ test("newLixFile creates a global and main version", async () => {
 	const mainVersion = versions.find((v) => v.name === "main");
 	expect(mainVersion).toBeDefined();
 	expect(mainVersion?.inherits_from_version_id).toBe("global");
+
+	const descriptors = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", LixVersionDescriptorSchema["x-lix-key"])
+		.selectAll()
+		.execute();
+
+	const globalDescriptor = descriptors.find(
+		(d) => d.snapshot_content.name === "global"
+	);
+	expect(globalDescriptor).toBeDefined();
+
+	const mainDescriptor = descriptors.find(
+		(d) => d.snapshot_content.name === "main"
+	);
+	expect(mainDescriptor).toBeDefined();
 });
 
 test("newLixFile creates required bootstrap change sets", async () => {
