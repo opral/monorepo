@@ -42,7 +42,7 @@ test("should create a version with the specified id", async () => {
 
 	const newVersion = await createVersion({
 		lix,
-		from: { id: sourceVersion.id },
+		from: sourceVersion,
 		id: "hello world",
 	});
 
@@ -164,4 +164,52 @@ test("should allow explicit null for inheritsFrom", async () => {
 
 	// Should be null, not "global"
 	expect(version.inherits_from_version_id).toBeNull();
+});
+
+test("creating a version from a version with existing state, 'copies' the state", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
+
+	const newVersion = await createVersion({
+		lix,
+		from: activeVersion,
+	});
+
+	// Check that the state was copied
+	const state = await lix.db
+		.selectFrom("key_value_by_version")
+		.where("lixcol_version_id", "=", newVersion.id)
+		.where("key", "=", "test_key")
+		.selectAll()
+		.execute();
+
+	expect(state).toHaveLength(1);
+	expect(state[0]).toMatchObject({
+		key: "test_key",
+		value: "test_value",
+		// crucial, we are creating a new version that under the hood points to the same commit.
+		// thus, they have the same state with no inheritance difference.
+		lixcol_inherited_from_version_id: null,
+	});
 });

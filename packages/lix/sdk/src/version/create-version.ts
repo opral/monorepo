@@ -1,4 +1,3 @@
-import { nanoId } from "../engine/functions/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema-definition.js";
 import { createVersionFromCommit } from "./create-version-from-commit.js";
@@ -22,7 +21,7 @@ export async function createVersion(args: {
 			const base = await trx
 				.selectFrom("version")
 				.select(["commit_id"])
-				.where("id", "=", (args.from as Pick<LixVersion, "id">).id)
+				.where("id", "=", args.from.id)
 				.executeTakeFirstOrThrow();
 			baseCommitId = base.commit_id;
 		} else {
@@ -34,12 +33,10 @@ export async function createVersion(args: {
 			baseCommitId = active.commit_id;
 		}
 
-		// Delegate to the commit-based creator for a single code path
-		const genId = args.id ?? (await nanoId({ lix: { ...args.lix, db: trx } }));
 		return createVersionFromCommit({
 			lix: { ...args.lix, db: trx },
 			commit: { id: baseCommitId },
-			id: genId,
+			id: args.id,
 			name: args.name,
 			inheritsFrom: args.inheritsFrom,
 		});

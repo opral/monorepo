@@ -6,12 +6,12 @@ WITH
   s AS (
     SELECT entity_id, schema_key, file_id, change_id, commit_id, version_id, snapshot_content
     FROM state_with_tombstones
-    WHERE version_id = 'test_0000000032'
+    WHERE version_id = '01920000-0000-7000-8000-000000000026'
   ),
   t AS (
     SELECT entity_id, schema_key, file_id, change_id, commit_id, version_id
     FROM state_by_version
-    WHERE version_id = 'test_0000000062'
+    WHERE version_id = '01920000-0000-7000-8000-000000000044'
   ),
   joined AS (
     SELECT
@@ -642,7 +642,7 @@ FROM (WITH s AS (
 
   WHERE w.rn = 1
   ) AS "lix_internal_state_vtable") AS state_with_tombstones
-  WHERE version_id = 'test_0000000032'
+  WHERE version_id = '01920000-0000-7000-8000-000000000026'
 ),
 t AS (
   SELECT
@@ -1221,7 +1221,7 @@ t AS (
   WHERE w.rn = 1
   ) AS "lix_internal_state_vtable"
   WHERE snapshot_content IS NOT NULL) AS state_by_version
-  WHERE version_id = 'test_0000000062'
+  WHERE version_id = '01920000-0000-7000-8000-000000000044'
 ),
 joined AS (
   SELECT
