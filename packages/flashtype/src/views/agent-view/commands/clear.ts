@@ -15,16 +15,18 @@ export async function clearConversation(args: {
 	// need to delete the messages in order to avoid conflicts on parent_id
 	return await args.agent.lix.db.transaction().execute(async (trx) => {
 		const messages = await trx
-			.selectFrom("conversation_message")
+			.selectFrom("conversation_message_by_version")
 			.where("conversation_id", "=", args.conversationId!)
+			.where("lixcol_version_id", "=", "global")
 			.select("id")
 			.orderBy("lixcol_created_at", "desc")
 			.execute();
 
 		for (const message of messages) {
 			await trx
-				.deleteFrom("conversation_message")
+				.deleteFrom("conversation_message_by_version")
 				.where("id", "=", message.id)
+				.where("lixcol_version_id", "=", "global")
 				.execute();
 		}
 	});
