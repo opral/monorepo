@@ -774,7 +774,7 @@ export function applyStateVTable(
 									is_tombstone, change_id, commit_id
 								FROM ${tableName}
 								WHERE version_id = ?
-							`,
+						`,
 										bind: [newVersionId, sourceVersionId],
 									});
 								}
