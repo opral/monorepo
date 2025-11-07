@@ -471,6 +471,7 @@ function validateUniqueConstraints(args: {
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 
 		query = query.where("version_id", "=", args.version_id);
+		query = query.where("inherited_from_version_id", "is", null);
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
 		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);

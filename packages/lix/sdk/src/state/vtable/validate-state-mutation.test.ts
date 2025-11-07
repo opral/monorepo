@@ -328,6 +328,73 @@ test("primary key validation ignores inherited entities", async () => {
 	).not.toThrow();
 });
 
+test("unique validation ignores inherited entities", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "unique_local_only",
+		"x-lix-unique": [["/slug"]],
+		properties: {
+			id: { type: "string" },
+			slug: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id", "slug", "value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const parentVersion = await createVersion({ lix, id: "unique-parent" });
+	const childVersion = await createVersion({
+		lix,
+		id: "unique-child",
+		inheritsFrom: { id: parentVersion.id },
+	});
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "unique-parent-entity",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: parentVersion.id,
+			snapshot_content: {
+				id: "unique-parent-entity",
+				slug: "conflicting-slug",
+				value: "parent",
+			},
+			schema_version: schema["x-lix-version"],
+			untracked: false,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: {
+				id: "unique-child-entity",
+				slug: "conflicting-slug",
+				value: "child",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrow();
+});
+
 test("immutable schemas reject repeated inserts", async () => {
 	const lix = await openLix({});
 

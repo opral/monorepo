@@ -6,10 +6,7 @@ import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
-import {
-	getStateCacheTables,
-	type InternalStateCacheRow,
-} from "./schema.js";
+import { getStateCacheTables, type InternalStateCacheRow } from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const { schemaKeyToCacheTableName } = cacheTableModule;

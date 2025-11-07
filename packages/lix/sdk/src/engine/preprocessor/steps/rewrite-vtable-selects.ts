@@ -541,11 +541,7 @@ function expressionRequiresNullForColumn(
 						columnName,
 						context
 					) ||
-					expressionRequiresNullForColumn(
-						expression.right,
-						columnName,
-						context
-					)
+					expressionRequiresNullForColumn(expression.right, columnName, context)
 				);
 			}
 			if (expression.operator === "or") {
@@ -555,11 +551,7 @@ function expressionRequiresNullForColumn(
 						columnName,
 						context
 					) &&
-					expressionRequiresNullForColumn(
-						expression.right,
-						columnName,
-						context
-					)
+					expressionRequiresNullForColumn(expression.right, columnName, context)
 				);
 			}
 			if (expression.operator === "is") {
