@@ -107,7 +107,18 @@ export function validateStateMutation(args: {
 	entity_id?: string;
 	version_id: string;
 	untracked?: boolean;
+	inherited_from_version_id?: string | null;
 }): void {
+	const attemptedInheritedOverride = args.inherited_from_version_id;
+	if (
+		attemptedInheritedOverride !== undefined &&
+		attemptedInheritedOverride !== null
+	) {
+		throw new Error(
+			"`inherited_from_version_id` is read-only and cannot be mutated."
+		);
+	}
+
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -170,6 +181,11 @@ export function validateStateMutation(args: {
 	if (!effectiveSchema) {
 		throw new Error("Schema definition is required for state validation");
 	}
+	const resolvedSchemaKey =
+		typeof effectiveSchema["x-lix-key"] === "string" &&
+		effectiveSchema["x-lix-key"].length > 0
+			? (effectiveSchema["x-lix-key"] as string)
+			: schemaKey;
 
 	const isValidLixSchema = validateLixSchema(effectiveSchema);
 
@@ -182,6 +198,20 @@ export function validateStateMutation(args: {
 	const immutableFlag = effectiveSchema["x-lix-immutable"] === true;
 	const normalizedSchemaKey =
 		schemaKey ?? effectiveSchema["x-lix-key"] ?? "<unknown>";
+
+	if (
+		(args.operation === "update" || args.operation === "delete") &&
+		args.entity_id &&
+		resolvedSchemaKey
+	) {
+		assertEntityIsLocal({
+			engine: args.engine,
+			schemaKey: resolvedSchemaKey,
+			entity_id: args.entity_id,
+			version_id: args.version_id,
+			operation: args.operation,
+		});
+	}
 
 	if (immutableFlag) {
 		const immutableMessage = `Schema "${normalizedSchemaKey}" is immutable and cannot be updated.`;
@@ -357,6 +387,10 @@ function validatePrimaryKeyConstraints(args: {
 
 	// Constrain by version – lix_internal_state_vtable exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
+
+	// Ignore inherited entities so that primary key validation only considers
+	// rows that are local to the active version context.
+	query = query.where("inherited_from_version_id", "is", null);
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
 
@@ -732,6 +766,40 @@ function validateForeignKeyConstraints(args: {
 				throw new Error(errorMessage);
 			}
 		}
+	}
+}
+
+function assertEntityIsLocal(args: {
+	engine: Pick<LixEngine, "executeSync">;
+	schemaKey: string;
+	entity_id: string;
+	version_id: string;
+	operation: "update" | "delete";
+}): void {
+	const rows = args.engine.executeSync(
+		internalQueryBuilder
+			.selectFrom("state_by_version")
+			.select(["inherited_from_version_id"])
+			.where("entity_id", "=", args.entity_id)
+			.where("schema_key", "=", args.schemaKey)
+			.where("version_id", "=", args.version_id)
+			.limit(1)
+			.compile()
+	).rows as Array<{ inherited_from_version_id: string | null }>;
+
+	if (!rows || rows.length === 0) {
+		const verb = args.operation === "delete" ? "delete" : "update";
+		throw new Error(
+			`Cannot ${verb} entity '${args.entity_id}' in version '${args.version_id}' because it does not exist in this version.`
+		);
+	}
+
+	const inheritedFrom = rows[0]?.inherited_from_version_id;
+	if (typeof inheritedFrom === "string" && inheritedFrom.length > 0) {
+		const verb = args.operation === "delete" ? "delete" : "update";
+		throw new Error(
+			`Cannot ${verb} entity '${args.entity_id}' in version '${args.version_id}' because it is inherited from version '${inheritedFrom}'.`
+		);
 	}
 }
 

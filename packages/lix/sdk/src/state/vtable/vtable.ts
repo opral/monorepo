@@ -609,6 +609,10 @@ export function applyStateVTable(
 						baseIndex + columnOffset("metadata") < args.length
 							? valueFor("metadata")
 							: null;
+					const inheritedFromValue =
+						baseIndex + columnOffset("inherited_from_version_id") < args.length
+							? valueFor("inherited_from_version_id")
+							: null;
 
 					const requiredFieldValues: Array<[string, unknown]> = [
 						["entity_id", entity_id],
@@ -658,6 +662,9 @@ export function applyStateVTable(
 						entity_id: String(entity_id),
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
+						...(inheritedFromValue !== null && inheritedFromValue !== undefined
+							? { inherited_from_version_id: String(inheritedFromValue) }
+							: {}),
 					});
 
 					const metadataJson =
@@ -766,19 +773,16 @@ export function applyStateVTable(
 									// Copy entries from source version to new version using v2 cache structure
 									sqlite.exec({
 										sql: `
-									INSERT OR IGNORE INTO ${tableName} 
-									(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
-									SELECT 
-										entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
-										CASE 
-														WHEN inherited_from_version_id IS NULL THEN ?
-														ELSE inherited_from_version_id
-													END as inherited_from_version_id,
-													is_tombstone, change_id, commit_id
-									FROM ${tableName}
-									WHERE version_id = ?
-								`,
-										bind: [newVersionId, sourceVersionId, sourceVersionId],
+								INSERT OR IGNORE INTO ${tableName} 
+								(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, is_tombstone, change_id, commit_id)
+								SELECT 
+									entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+									inherited_from_version_id,
+									is_tombstone, change_id, commit_id
+								FROM ${tableName}
+								WHERE version_id = ?
+						`,
+										bind: [newVersionId, sourceVersionId],
 									});
 								}
 							}

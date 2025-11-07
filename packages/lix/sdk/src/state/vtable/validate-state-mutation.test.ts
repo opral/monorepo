@@ -264,6 +264,70 @@ test("throws when primary key violates uniqueness constraint", async () => {
 	).toThrowError("Primary key constraint violation");
 });
 
+test("primary key validation ignores inherited entities", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "pk_local_only",
+		"x-lix-primary-key": ["/key"],
+		properties: {
+			key: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["key", "value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const parentVersion = await createVersion({ lix, id: "parent-version" });
+	const childVersion = await createVersion({
+		lix,
+		id: "child-version",
+		inheritsFrom: { id: parentVersion.id },
+	});
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "entity-to-override",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: parentVersion.id,
+			snapshot_content: {
+				key: "entity-to-override",
+				value: "parent-value",
+			},
+			schema_version: schema["x-lix-version"],
+			untracked: false,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: {
+				key: "entity-to-override",
+				value: "child-value",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrow();
+});
+
 test("immutable schemas reject repeated inserts", async () => {
 	const lix = await openLix({});
 
@@ -1832,7 +1896,9 @@ test("should throw when deleting non-existent entity", async () => {
 			entity_id: "nonexistent_user",
 			version_id: activeVersion.version_id,
 		})
-	).toThrowError(/Entity deletion failed/);
+	).toThrowError(
+		/Cannot delete entity 'nonexistent_user' in version '.+' because it does not exist in this version\./
+	);
 });
 
 test("should throw when entity_id is missing for delete operations", async () => {
@@ -3468,7 +3534,15 @@ test("state foreign key references should respect version context", async () => 
 });
 
 test("state foreign key references should handle inherited entities", async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	// Create a schema that references state table
 	const mockStateReferenceSchema = {
@@ -3509,23 +3583,13 @@ test("state foreign key references should handle inherited entities", async () =
 
 	await lix.db
 		.insertInto("stored_schema")
-		.values({ value: referencedStateSchema })
+		.values([
+			{ value: referencedStateSchema },
+			{ value: mockStateReferenceSchema },
+		])
 		.execute();
 
-	// Store the schema
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockStateReferenceSchema })
-		.execute();
-
-	// Get the main version
-	const mainVersion = await lix.db
-		.selectFrom("version")
-		.select("id")
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
-
-	// Create a state entity in main version
+	// Seed state in the global version so it appears as inherited elsewhere
 	await lix.db
 		.insertInto("state_by_version")
 		.values({
@@ -3533,18 +3597,17 @@ test("state foreign key references should handle inherited entities", async () =
 			schema_key: "test_schema",
 			file_id: "test.json",
 			plugin_key: "test_plugin",
-			version_id: mainVersion.id,
+			version_id: "global",
 			snapshot_content: { id: "shared_entity", value: "original" },
 			schema_version: "1.0",
 		})
 		.execute();
 
-	// Create a child version that inherits from main
-	const childVersion = await createVersion({
-		lix,
-		name: "child_version",
-		inheritsFrom: mainVersion,
-	});
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
 	// The inherited entity should NOT be visible for foreign key validation
 	// because foreign keys only validate entities in the same version (not inherited)
@@ -3559,7 +3622,7 @@ test("state foreign key references should handle inherited entities", async () =
 				tag: "from_child",
 			},
 			operation: "insert",
-			version_id: childVersion.id,
+			version_id: activeVersion.id,
 		})
 	).toThrow(
 		/Foreign key constraint violation.*no matching record exists.*Note: Foreign key constraints only validate entities that exist in the version context/s
@@ -3714,4 +3777,158 @@ test("state foreign key with mixed single and composite properties", async () =>
 			version_id: activeVersion.version_id,
 		})
 	).toThrow(/Foreign key constraint violation.*lix_change/);
+});
+
+test("rejects mutating inherited state", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_inherited_entity",
+		properties: {
+			value: { type: "string" },
+		},
+		required: ["value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "inherited-entity",
+			file_id: "test-file",
+			schema_key: schema["x-lix-key"],
+			plugin_key: "test_plugin",
+			version_id: "global",
+			schema_version: schema["x-lix-version"],
+			snapshot_content: {
+				value: "global seed",
+			},
+		})
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	const resolved = await lix.db
+		.selectFrom("state_by_version")
+		.select(["inherited_from_version_id"])
+		.where("entity_id", "=", "inherited-entity")
+		.where("schema_key", "=", schema["x-lix-key"])
+		.where("version_id", "=", activeVersion.version_id)
+		.executeTakeFirstOrThrow();
+
+	expect(resolved.inherited_from_version_id).toBe("global");
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { value: "child update" },
+			operation: "update",
+			entity_id: "inherited-entity",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/inherited/i);
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { value: "global seed" },
+			operation: "delete",
+			entity_id: "inherited-entity",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/inherited/i);
+});
+
+test("rejects mutating inherited_from_version_id", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_local_entity",
+		properties: {
+			value: { type: "string" },
+		},
+		required: ["value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "local-entity",
+			file_id: "test-file",
+			schema_key: schema["x-lix-key"],
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			schema_version: schema["x-lix-version"],
+			snapshot_content: {
+				value: "local seed",
+			},
+		})
+		.execute();
+
+	const before = await lix.db
+		.selectFrom("state_by_version")
+		.select(["inherited_from_version_id"])
+		.where("entity_id", "=", "local-entity")
+		.where("schema_key", "=", schema["x-lix-key"])
+		.where("version_id", "=", activeVersion.version_id)
+		.executeTakeFirstOrThrow();
+
+	expect(before.inherited_from_version_id).toBeNull();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: { value: "local seed" },
+			operation: "update",
+			entity_id: "local-entity",
+			version_id: activeVersion.version_id,
+			inherited_from_version_id: "global",
+		})
+	).toThrow(/inherited_from_version_id/i);
+
+	const after = await lix.db
+		.selectFrom("state_by_version")
+		.select(["inherited_from_version_id"])
+		.where("entity_id", "=", "local-entity")
+		.where("schema_key", "=", schema["x-lix-key"])
+		.where("version_id", "=", activeVersion.version_id)
+		.executeTakeFirstOrThrow();
+
+	expect(after.inherited_from_version_id).toBeNull();
 });

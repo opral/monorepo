@@ -2394,12 +2394,12 @@ describe("lix_internal_state_materializer", () => {
 
 			// Update the inherited entity in child version
 			await lix.db
-				.updateTable("key_value_by_version")
-				.set({
+				.insertInto("key_value_by_version")
+				.values({
+					key: "shared-key",
 					value: "child-value",
+					lixcol_version_id: "child-version",
 				})
-				.where("key", "=", "shared-key")
-				.where("lixcol_version_id", "=", "child-version")
 				.execute();
 
 			// Query the materializer for child version
@@ -2620,6 +2620,15 @@ describe("lix_internal_state_materializer", () => {
 
 			// Delete the inherited entity in child version
 			await lix.db
+				.insertInto("key_value_by_version")
+				.values({
+					key: "entity-to-override",
+					value: "child-value",
+					lixcol_version_id: "child-version",
+				})
+				.execute();
+
+			await lix.db
 				.deleteFrom("key_value_by_version")
 				.where("key", "=", "entity-to-override")
 				.where("lixcol_version_id", "=", "child-version")
@@ -2730,24 +2739,24 @@ describe("lix_internal_state_materializer", () => {
 				})
 				.execute();
 
-			// Override the entity in version B
+			// Override the entity in version B by inserting a local copy
 			await lix.db
-				.updateTable("key_value_by_version")
-				.set({
+				.insertInto("key_value_by_version")
+				.values({
+					key: "shared-entity",
 					value: "value-from-b",
+					lixcol_version_id: "version-b",
 				})
-				.where("key", "=", "shared-entity")
-				.where("lixcol_version_id", "=", "version-b")
 				.execute();
 
-			// Also override the entity in version C
+			// Also override the entity in version C via direct insert
 			await lix.db
-				.updateTable("key_value_by_version")
-				.set({
+				.insertInto("key_value_by_version")
+				.values({
+					key: "shared-entity",
 					value: "value-from-c",
+					lixcol_version_id: "version-c",
 				})
-				.where("key", "=", "shared-entity")
-				.where("lixcol_version_id", "=", "version-c")
 				.execute();
 
 			// Query materializer for version D

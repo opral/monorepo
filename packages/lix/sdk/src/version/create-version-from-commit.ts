@@ -7,7 +7,6 @@ import type {
 } from "./schema-definition.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { uuidV7 } from "../engine/functions/uuid-v7.js";
-import { nanoId } from "../engine/functions/nano-id.js";
 import { humanId } from "../engine/functions/generate-human-id.js";
 // Use state_by_version to write descriptor + tip; vtable commit handles persistence + cache
 
@@ -87,8 +86,7 @@ export async function createVersionFromCommit(args: {
 					? null
 					: args.inheritsFrom.id;
 
-		const versionId =
-			args.id ?? (await nanoId({ lix: { ...args.lix, db: trx } }));
+		const versionId = args.id ?? (await uuidV7({ lix: { ...args.lix } }));
 		const versionName =
 			args.name ?? (await humanId({ lix: { ...args.lix, db: trx } }));
 
