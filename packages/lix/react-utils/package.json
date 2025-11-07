@@ -34,8 +34,8 @@
 		"jsdom": "^26.1.0",
 		"oxlint": "^1.14.0",
 		"prettier": "^3.3.3",
-		"react": "19.1.1",
-		"react-dom": "19.1.1",
+		"react": "19.2.0",
+		"react-dom": "19.2.0",
 		"typescript": "^5.5.4",
 		"vitest": "^3.2.4"
 	}
