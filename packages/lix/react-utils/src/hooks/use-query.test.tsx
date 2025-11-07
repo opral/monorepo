@@ -218,62 +218,6 @@ test("akeFirst returns undefined for empty results", async () => {
 	await lix.close();
 });
 
-test("useQueryTakeFirst (subscribe:false) does not reuse previous rows", async () => {
-	const lix = await openLix({});
-	await lix.db
-		.insertInto("key_value")
-		.values([
-			{ key: "no_subscribe_a", value: "value_a" },
-			{ key: "no_subscribe_b", value: "value_b" },
-		])
-		.execute();
-
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={lix}>
-			<Suspense fallback={<div>Loading...</div>}>
-				<MockErrorBoundary>{children}</MockErrorBoundary>
-			</Suspense>
-		</LixProvider>
-	);
-
-	const emissions: Array<string | null | undefined> = [];
-	let rerender: (props?: { key: string }) => void;
-	await act(async () => {
-		const { rerender: rerenderFn } = renderHook(
-			({ key = "no_subscribe_a" }: { key?: string } = {}) => {
-				const row = useQueryTakeFirst(
-					({ lix }) =>
-						lix.db.selectFrom("key_value").selectAll().where("key", "=", key),
-					{ subscribe: false },
-				);
-				emissions.push(row?.key);
-				return row;
-			},
-			{ wrapper },
-		);
-		rerender = rerenderFn;
-	});
-
-	await waitFor(() => {
-		expect(emissions).toContain("no_subscribe_a");
-	});
-
-	emissions.length = 0;
-
-	await act(async () => {
-		rerender({ key: "no_subscribe_b" });
-	});
-
-	await waitFor(() => {
-		expect(emissions).toContain("no_subscribe_b");
-	});
-
-	// The first emission after switching should be the new key, not the previous one.
-	expect(emissions[0]).toBe("no_subscribe_b");
-
-	await lix.close();
-});
-
 test("useQueryTakeFirst (subscribe:false) returns fresh data on rerender", async () => {
 	const lix = await openLix({});
 	await lix.db
@@ -490,64 +434,6 @@ test("akeFirst updates reference when underlying row changes", async () => {
 	});
 
 	await lix.close();
-});
-
-test("useQuery key includes lix instance (no cross-instance reuse)", async () => {
-	const lix1 = await openLix({});
-	const lix2 = await openLix({});
-
-	await lix1.db
-		.insertInto("key_value")
-		.values({ key: "shared_key", value: "instance_one" })
-		.execute();
-	await lix2.db
-		.insertInto("key_value")
-		.values({ key: "shared_key", value: "instance_two" })
-		.execute();
-
-	let current = lix1;
-
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={current}>
-			<Suspense fallback={<div>Loading…</div>}>
-				<MockErrorBoundary>{children}</MockErrorBoundary>
-			</Suspense>
-		</LixProvider>
-	);
-
-	let hookResult: { current: State<LixKeyValue>[] };
-	let rerender: () => void;
-
-	await act(async () => {
-		const { result, rerender: rerenderFn } = renderHook(
-			() =>
-				useQuery(({ lix }) =>
-					lix.db
-						.selectFrom("key_value")
-						.selectAll()
-						.where("key", "=", "shared_key"),
-				),
-			{ wrapper },
-		);
-		hookResult = result;
-		rerender = rerenderFn;
-	});
-
-	await waitFor(() => {
-		expect(hookResult.current[0]?.value).toBe("instance_one");
-	});
-
-	await act(async () => {
-		current = lix2;
-		rerender();
-	});
-
-	await waitFor(() => {
-		expect(hookResult.current[0]?.value).toBe("instance_two");
-	});
-
-	await lix1.close();
-	await lix2.close();
 });
 
 test("useQuery key includes lix instance (no cross-instance reuse)", async () => {
