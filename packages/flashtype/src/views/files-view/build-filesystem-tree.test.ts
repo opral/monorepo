@@ -117,4 +117,73 @@ describe("buildFilesystemTree", () => {
 			expect(visibleDir.children[0]?.hidden).toBe(false);
 		}
 	});
+
+	test("propagates hidden flag even if child directories appear before their hidden ancestors", () => {
+		const entries: FilesystemEntryRow[] = [
+			{
+				id: "dir_child",
+				parent_id: "dir_parent",
+				path: "/hidden/parent/child/",
+				display_name: "child",
+				kind: "directory",
+				hidden: 0,
+			},
+			{
+				id: "dir_parent",
+				parent_id: "dir_hidden",
+				path: "/hidden/parent/",
+				display_name: "parent",
+				kind: "directory",
+				hidden: 0,
+			},
+			{
+				id: "dir_hidden",
+				parent_id: null,
+				path: "/hidden/",
+				display_name: "hidden",
+				kind: "directory",
+				hidden: 1,
+			},
+			{
+				id: "file_grandchild",
+				parent_id: "dir_child",
+				path: "/hidden/parent/child/secret.md",
+				display_name: "secret.md",
+				kind: "file",
+				hidden: 0,
+			},
+		];
+
+		const tree = buildFilesystemTree(entries);
+
+		const hiddenRoot = tree.find(
+			(node) => node.type === "directory" && node.path === "/hidden/",
+		);
+		expect(hiddenRoot?.hidden).toBe(true);
+
+		const parentDir =
+			hiddenRoot?.type === "directory"
+				? hiddenRoot.children.find(
+						(node) =>
+							node.type === "directory" && node.path === "/hidden/parent/",
+					)
+				: undefined;
+		expect(parentDir?.hidden).toBe(true);
+
+		const childDir =
+			parentDir?.type === "directory"
+				? parentDir.children.find(
+						(node) =>
+							node.type === "directory" &&
+							node.path === "/hidden/parent/child/",
+					)
+				: undefined;
+		expect(childDir?.hidden).toBe(true);
+
+		const nestedFile =
+			childDir?.type === "directory"
+				? childDir.children.find((node) => node.type === "file")
+				: undefined;
+		expect(nestedFile?.hidden).toBe(true);
+	});
 });

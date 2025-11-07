@@ -33,6 +33,18 @@ function sortChildren(nodes: FilesystemTreeNode[]): void {
 	}
 }
 
+function propagateHiddenFlag(
+	node: FilesystemTreeNode,
+	inheritedHidden: boolean,
+): void {
+	node.hidden = node.hidden || inheritedHidden;
+	if (node.type === "directory") {
+		for (const child of node.children) {
+			propagateHiddenFlag(child, node.hidden);
+		}
+	}
+}
+
 /**
  * Builds a nested tree from flat filesystem entries.
  *
@@ -86,6 +98,10 @@ export function buildFilesystemTree(
 		} else {
 			roots.push(fileNode);
 		}
+	}
+
+	for (const root of roots) {
+		propagateHiddenFlag(root, false);
 	}
 
 	sortChildren(roots);
