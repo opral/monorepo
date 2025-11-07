@@ -1,0 +1,377 @@
+import { describe, expect, test } from "vitest";
+import { openLix, mockJsonPlugin } from "@lix-js/sdk";
+import type { LanguageModelV2StreamPart } from "@ai-sdk/provider";
+import { MockLanguageModelV2, simulateReadableStream } from "ai/test";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
+import { createLixAgent, getAgentState } from "./create-lix-agent.js";
+import { sendMessage } from "./send-message.js";
+import { persistConversation } from "./conversation-storage.js";
+import type { AgentConversationMessage } from "./types.js";
+
+const STREAM_FINISH_CHUNKS: LanguageModelV2StreamPart[] = [
+	{ type: "stream-start", warnings: [] },
+	{ type: "text-start", id: "text-1" },
+	{ type: "text-delta", id: "text-1", delta: "response" },
+	{ type: "text-end", id: "text-1" },
+	{
+		type: "finish",
+		finishReason: "stop",
+		usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+	},
+];
+
+type ToolHandler = (
+	options: Parameters<MockLanguageModelV2["doStream"]>[0]
+) =>
+	| Promise<LanguageModelV2StreamPart[] | void>
+	| LanguageModelV2StreamPart[]
+	| void;
+
+function createStreamingModel() {
+	let handler: ToolHandler | undefined;
+	let handlerConsumed = false;
+	const model = new MockLanguageModelV2({
+		doStream: async (options) => {
+			const events = await handler?.(options);
+			const chunks = Array.isArray(events) ? events : STREAM_FINISH_CHUNKS;
+			return {
+				stream: simulateReadableStream<LanguageModelV2StreamPart>({
+					chunks,
+				}),
+			};
+		},
+	});
+	return Object.assign(model, {
+		setToolHandler(next?: ToolHandler) {
+			handlerConsumed = false;
+			if (!next) {
+				handler = undefined;
+				return;
+			}
+			handler = (options) => {
+				if (handlerConsumed) {
+					return STREAM_FINISH_CHUNKS;
+				}
+				handlerConsumed = true;
+				return next(options);
+			};
+		},
+	});
+}
+
+function createToolCallStreamChunks({
+	toolCallId,
+	input,
+	text,
+}: {
+	toolCallId: string;
+	input: Record<string, unknown>;
+	text: string;
+}): LanguageModelV2StreamPart[] {
+	return [
+		{ type: "stream-start", warnings: [] },
+		{
+			type: "tool-call",
+			toolCallId,
+			toolName: "write_file",
+			input: JSON.stringify(input),
+		},
+		{ type: "text-start", id: "text-1" },
+		{ type: "text-delta", id: "text-1", delta: text },
+		{ type: "text-end", id: "text-1" },
+		{
+			type: "finish",
+			finishReason: "stop",
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+		},
+	];
+}
+
+describe("sendMessage", () => {
+	test("streams tool steps and updates the conversation", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const versionId = activeVersion.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "call-one",
+				input: {
+					version_id: versionId,
+					path: "/turn-one.txt",
+					content: "one",
+				},
+				text: "turn-one-complete",
+			})
+		);
+
+		const turnOne = sendMessage({
+			agent,
+			prompt: fromPlainText("turn one"),
+		});
+		const assistantOne = await turnOne.complete({ autoAcceptProposals: true });
+		expect(assistantOne).toBeTruthy();
+		const conversationId = String(assistantOne.conversation_id ?? "");
+		expect(conversationId).toBeTruthy();
+
+		expect(assistantOne.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
+		const firstStepOne =
+			assistantOne.lixcol_metadata?.lix_agent_sdk_steps?.find(
+				(step) => step.kind === "tool_call"
+			);
+		expect(firstStepOne && firstStepOne.tool_name).toBe("write_file");
+
+		const rowsAfterOne = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.select(["id"])
+			.execute();
+		expect(rowsAfterOne).toHaveLength(2);
+
+		const fileOne = await lix.db
+			.selectFrom("file_by_version")
+			.where("path", "=", "/turn-one.txt")
+			.select(["data"])
+			.executeTakeFirstOrThrow();
+		expect(
+			new TextDecoder("utf-8", { fatal: false }).decode(
+				fileOne.data as unknown as Uint8Array
+			)
+		).toBe("one");
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "call-two",
+				input: {
+					version_id: versionId,
+					path: "/turn-two.txt",
+					content: "two",
+				},
+				text: "turn-two-complete",
+			})
+		);
+
+		const turnTwo = sendMessage({
+			agent,
+			prompt: fromPlainText("turn two"),
+			conversationId,
+		});
+
+		const assistantTwo = await turnTwo.complete({ autoAcceptProposals: true });
+		expect(assistantTwo).toBeTruthy();
+
+		const firstStepTwo =
+			assistantTwo.lixcol_metadata?.lix_agent_sdk_steps?.find(
+				(step) => step.kind === "tool_call"
+			);
+		expect(firstStepTwo && firstStepTwo.tool_name).toBe("write_file");
+
+		const rowsAfterTwo = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.select(["id"])
+			.execute();
+		expect(rowsAfterTwo).toHaveLength(4);
+		expect(getAgentState(agent).conversation.messages).toHaveLength(4);
+	}, 20000);
+
+	test("does not persist messages when persist is false", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const turn = sendMessage({
+			agent,
+			prompt: fromPlainText("draft message"),
+			persist: false,
+		});
+
+		const assistant = await turn.complete({ autoAcceptProposals: true });
+		expect(assistant).toBeTruthy();
+		const conversationId = String(assistant.conversation_id ?? "");
+		expect(conversationId).toBeTruthy();
+
+		const storedConversation = await lix.db
+			.selectFrom("conversation")
+			.where("id", "=", conversationId)
+			.select(["id"])
+			.executeTakeFirst();
+		expect(storedConversation).toBeUndefined();
+
+		const storedMessages = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", conversationId)
+			.select(["id"])
+			.execute();
+		expect(storedMessages).toHaveLength(0);
+
+		await lix.close();
+	});
+
+	test("persistConversation writes the conversation to Lix", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("hello there"),
+			persist: false,
+		});
+
+		const finalMessage = await stream.complete({ autoAcceptProposals: true });
+		expect(finalMessage).toBeTruthy();
+
+		const inMemoryConversation = getAgentState(agent).conversation;
+		const persisted = await persistConversation({
+			lix,
+			conversation: inMemoryConversation,
+		});
+
+		expect(persisted.id).toBeTruthy();
+
+		const rows = await lix.db
+			.selectFrom("conversation_message")
+			.where("conversation_id", "=", persisted.id as string)
+			.select(["id"])
+			.execute();
+		expect(rows).toHaveLength(inMemoryConversation.messages.length);
+	});
+
+	test("emits thinking events and records thinking steps", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		model.setToolHandler(() => [
+			{ type: "stream-start", warnings: [] },
+			{ type: "reasoning-start", id: "think-1" },
+			{ type: "reasoning-delta", id: "think-1", delta: "pondering files" },
+			{ type: "reasoning-end", id: "think-1" },
+			{ type: "text-start", id: "text-1" },
+			{ type: "text-delta", id: "text-1", delta: "done" },
+			{ type: "text-end", id: "text-1" },
+			{
+				type: "finish",
+				finishReason: "stop",
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			},
+		]);
+
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("think first"),
+			persist: false,
+		});
+
+		const thinkingChunks: string[] = [];
+		let finalMessage: AgentConversationMessage | null = null;
+		for await (const event of stream) {
+			if (event.type === "thinking") {
+				thinkingChunks.push(event.delta);
+			} else if (event.type === "message") {
+				finalMessage = event.message;
+			} else if (event.type === "error") {
+				throw event.error instanceof Error
+					? event.error
+					: new Error(String(event.error ?? "unknown"));
+			}
+		}
+
+		expect(thinkingChunks.join("")).toBe("pondering files");
+		expect(finalMessage).toBeTruthy();
+		const thinkingSteps =
+			finalMessage?.lixcol_metadata?.lix_agent_sdk_steps?.filter(
+				(step) => step.kind === "thinking"
+			) ?? [];
+		expect(thinkingSteps).toHaveLength(1);
+		expect(thinkingSteps[0]?.text).toBe("pondering files");
+
+		await lix.close();
+	});
+
+	test("turn.message reflects the live assistant response", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const turn = sendMessage({
+			agent,
+			prompt: fromPlainText("hello"),
+		});
+		const live = turn.message;
+		expect(live).toBeDefined();
+		expect(live.lixcol_metadata?.lix_agent_sdk_role).toBe("assistant");
+
+		const final = await turn.complete({ autoAcceptProposals: true });
+		expect(final).toBe(live);
+		expect(toPlainText(live.body)).toBe("response");
+		expect(live.conversation_id).toBe(final.conversation_id);
+
+		await lix.close();
+	});
+
+	test("write_file tool persists structured data changes", async () => {
+		const lix = await openLix({ providePlugins: [mockJsonPlugin] });
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const versionId = activeVersion.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "call-json",
+				input: {
+					version_id: versionId,
+					path: "/data.json",
+					content: JSON.stringify({ greeting: "hello" }),
+				},
+				text: "json-write-complete",
+			})
+		);
+
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("write greeting"),
+		});
+
+		const finalMessage = await stream.complete({ autoAcceptProposals: true });
+		expect(finalMessage).toBeTruthy();
+
+		const rows = await lix.db
+			.selectFrom("state_by_version")
+			.where("schema_key", "=", "mock_json_property" as any)
+			.select([
+				"entity_id",
+				"schema_key",
+				"plugin_key",
+				"version_id",
+				"snapshot_content",
+			])
+			.execute();
+
+		const greetingRow = rows.find(
+			(row) => row.entity_id === "greeting" && row.version_id === versionId
+		);
+		expect(greetingRow).toBeTruthy();
+		expect(greetingRow?.schema_key).toBe("mock_json_property");
+		expect(greetingRow?.plugin_key).toBe("mock_json_plugin");
+		expect(greetingRow?.version_id).toBe(versionId);
+		const snapshot =
+			typeof greetingRow?.snapshot_content === "string"
+				? JSON.parse(greetingRow.snapshot_content as string)
+				: greetingRow?.snapshot_content;
+		expect(snapshot).toEqual({ value: "hello" });
+	}, 20000);
+});

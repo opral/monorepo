@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import type { LixAgent } from "./create-lix-agent.js";
+import type { Agent } from "./create-lix-agent.js";
 import { generateText } from "ai";
 import { selectWorkingDiff } from "@lix-js/sdk";
 
@@ -10,7 +10,7 @@ import { selectWorkingDiff } from "@lix-js/sdk";
  * If a model is provided, generates a concise natural-language summary; otherwise returns a deterministic fallback.
  */
 export async function summarizeWorkingChanges(args: {
-	agent: LixAgent;
+	agent: Agent;
 	limit?: number;
 }): Promise<{ text: string }> {
 	// Diff since checkpoint using SDK helper
@@ -29,7 +29,7 @@ export async function summarizeWorkingChanges(args: {
 		.execute();
 
 	const prompt = [
-		"You are writing a commit message describing the working changes since the last checkpoint in a Lix workspace.",
+		"You are writing a commit message describing the working changes since the last checkpoint in the lix.",
 		"IMPORTANT: Output ONLY 1–3 short paragraphs (plain text). No headings, no lists, no code fences, no preamble.",
 		"Use neutral, imperative voice (e.g., Add…, Update…, Remove…). Prefer human meaning over schema/IDs.",
 		"Algorithm:\n1) Classify each diff row as added / modified / removed.\n2) Merge similar changes.\n3) Keep paragraphs short.",

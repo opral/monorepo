@@ -1,115 +1,175 @@
 import type { Lix } from "@lix-js/sdk";
 import { createConversation, createConversationMessage } from "@lix-js/sdk";
-import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
-import type { ChatMessage } from "./send-message.js";
-
-const POINTER_KEY = "lix_agent_conversation_id";
-
-export async function getOrCreateDefaultAgentConversationId(
-	lix: Lix
-): Promise<string> {
-	const row = await lix.db
-		.selectFrom("key_value_by_version")
-		.where("lixcol_version_id", "=", "global")
-		.where("key", "=", POINTER_KEY)
-		.select(["value"])
-		.executeTakeFirst();
-
-	const id =
-		(row?.value as any)?.value ??
-		(row?.value as any)?.id ??
-		(row as any)?.value;
-	if (id && typeof id === "string") return id;
-
-	const conv = await createConversation({ lix, versionId: "global" });
-	await upsertConversationPointer(lix, conv.id);
-	return conv.id;
-}
-
-export async function upsertConversationPointer(
-	lix: Lix,
-	conversationId: string
-): Promise<void> {
-	await lix.db.transaction().execute(async (trx) => {
-		const exists = await trx
-			.selectFrom("key_value_by_version")
-			.where("lixcol_version_id", "=", "global")
-			.where("key", "=", POINTER_KEY)
-			.select(["key"])
-			.executeTakeFirst();
-
-		if (exists) {
-			await trx
-				.updateTable("key_value_by_version")
-				.set({ value: conversationId, lixcol_untracked: true })
-				.where("key", "=", POINTER_KEY)
-				.where("lixcol_version_id", "=", "global")
-				.execute();
-		} else {
-			await trx
-				.insertInto("key_value_by_version")
-				.values({
-					key: POINTER_KEY,
-					value: conversationId,
-					lixcol_version_id: "global",
-					lixcol_untracked: true,
-				})
-				.execute();
-		}
-	});
-}
+import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import type {
+	AgentConversation,
+	AgentConversationMessage,
+	AgentConversationMessageMetadata,
+} from "./types.js";
 
 export async function appendUserMessage(
 	lix: Lix,
 	conversationId: string,
-	text: string
+	text: string,
+	metadata?: AgentConversationMessageMetadata
 ): Promise<void> {
+	const baseMetadata: AgentConversationMessageMetadata = {
+		...metadata,
+		lix_agent_sdk_role: "user",
+	};
+
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: { lix_agent_role: "user" },
+		lixcol_metadata: baseMetadata,
 	});
 }
 
 export async function appendAssistantMessage(
 	lix: Lix,
 	conversationId: string,
-	text: string
+	text: string,
+	metadata?: AgentConversationMessageMetadata
 ): Promise<void> {
+	const baseMetadata: AgentConversationMessageMetadata = {
+		...(metadata ?? {}),
+		lix_agent_sdk_role: "assistant",
+	};
+
 	await createConversationMessage({
 		lix,
 		conversation_id: conversationId,
 		body: fromPlainText(text),
-		lixcol_metadata: { lix_agent_role: "assistant" },
+		lixcol_metadata: baseMetadata,
 	});
 }
 
-export async function loadConversationHistory(
+export async function loadConversation(
 	lix: Lix,
 	conversationId: string
-): Promise<ChatMessage[]> {
+): Promise<AgentConversation | null> {
+	const conversationRow = await lix.db
+		.selectFrom("conversation")
+		.where("conversation.id", "=", conversationId)
+		.select(["conversation.id"])
+		.executeTakeFirst();
+
+	if (!conversationRow) {
+		return null;
+	}
+
 	const rows = await lix.db
 		.selectFrom("conversation_message")
 		.where("conversation_id", "=", conversationId)
-		.select(["id", "body", "lixcol_metadata", "lixcol_created_at"]) // created_at for ordering
+		.select([
+			"id",
+			"conversation_id",
+			"parent_id",
+			"body",
+			"lixcol_metadata",
+			"lixcol_created_at",
+		])
 		.orderBy("lixcol_created_at", "asc")
 		.orderBy("id", "asc")
 		.execute();
 
-	type ConversationRow = (typeof rows)[number] & {
-		lixcol_metadata: Record<string, any> | null;
+	const messages = rows.map((row) => ({
+		...row,
+		id: String(row.id),
+		conversation_id: String(row.conversation_id),
+		parent_id:
+			row.parent_id === null || row.parent_id === undefined
+				? null
+				: String(row.parent_id),
+		lixcol_metadata: (row.lixcol_metadata ??
+			null) as AgentConversationMessageMetadata | null,
+	})) as AgentConversationMessage[];
+
+	return {
+		id: String(conversationRow.id),
+		messages,
 	};
-	const history: ChatMessage[] = [];
-	for (const r of rows as ConversationRow[]) {
-		const role = (r.lixcol_metadata?.lix_agent_role as string) ?? "assistant";
-		const content = toPlainText(r.body).replace(
-			/^\[(user|assistant)\]\s*/i,
-			""
-		);
-		if (role === "user" || role === "assistant") {
-			history.push({ id: String(r.id), role, content });
+}
+
+/**
+ * Persist the provided in-memory conversation to the Lix database.
+ *
+ * When `conversation.id` is omitted a new conversation is created under the
+ * given version (defaults to `"global"`).
+ *
+ * @example
+ * const turn = sendMessage({
+ * 	agent,
+ * 	prompt: fromPlainText("Hello"),
+ * 	persist: false,
+ * });
+ * await turn.complete();
+ * await persistConversation({ lix, conversation: getAgentState(agent).conversation });
+ */
+export async function persistConversation(args: {
+	lix: Lix;
+	conversation: AgentConversation;
+	versionId?: string;
+}): Promise<AgentConversation> {
+	const { lix, conversation, versionId = "global" } = args;
+	let conversationId = await resolveConversationId({
+		lix,
+		requestedId: conversation.id,
+		versionId,
+	});
+
+	for (const message of conversation.messages) {
+		const metadata = (message.lixcol_metadata ?? {}) as
+			| AgentConversationMessageMetadata
+			| undefined;
+		const role = metadata?.lix_agent_sdk_role;
+		if (role !== "user" && role !== "assistant") {
+			continue;
+		}
+		const enrichedMetadata: AgentConversationMessageMetadata = {
+			...(metadata ?? {}),
+			lix_agent_sdk_role: role,
+		};
+
+		const bodyDoc = message.body ?? fromPlainText("");
+
+		await createConversationMessage({
+			lix,
+			conversation_id: conversationId,
+			body: bodyDoc,
+			lixcol_metadata: enrichedMetadata,
+		});
+	}
+
+	return {
+		id: conversationId,
+		messages: conversation.messages.map((message) => ({
+			...message,
+			conversation_id: conversationId,
+		})),
+	};
+}
+
+async function resolveConversationId(args: {
+	lix: Lix;
+	requestedId?: string;
+	versionId: string;
+}): Promise<string> {
+	const { lix, requestedId, versionId } = args;
+
+	if (requestedId) {
+		const existing = await lix.db
+			.selectFrom("conversation_by_version")
+			.where("id", "=", requestedId)
+			.where("lixcol_inherited_from_version_id", "is", null)
+			.select(["id"])
+			.executeTakeFirst();
+		if (existing) {
+			return requestedId;
 		}
 	}
-	return history;
+
+	const created = await createConversation({ lix, versionId });
+	return created.id;
 }
