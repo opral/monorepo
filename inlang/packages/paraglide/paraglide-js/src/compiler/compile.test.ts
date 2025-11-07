@@ -183,14 +183,16 @@ test("throws if outdir resolves to the project root", async () => {
 		fs: fs.promises,
 	});
 
-	await expect(
-		compile({
-			project: "/project.inlang",
-			outdir: "./",
-			fs: fs,
-		})
-	).rejects.toThrowError("`outdir` cannot be set to './'");
-	// Regression test for https://github.com/opral/inlang-sdk/issues/245
+        await expect(
+                compile({
+                        project: "/project.inlang",
+                        outdir: "./",
+                        fs: fs,
+                })
+        ).rejects.toThrowError(
+                /`outdir` cannot resolve to the project root \(".*"\)/
+        );
+        // Regression test for https://github.com/opral/inlang-sdk/issues/245
 });
 
 test("multiple compile calls do not interfere with each other", async () => {

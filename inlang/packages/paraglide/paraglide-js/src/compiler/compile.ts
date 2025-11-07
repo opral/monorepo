@@ -63,11 +63,11 @@ export async function compile(
 
 	                // Regression test: https://github.com/opral/inlang-sdk/issues/245
 	                // Cleaning the project root deletes user source files. Guard against it early.
-	                if (absoluteOutdir === cwd) {
-	                        throw new Error(
-	                                "`outdir` cannot be set to './'. Cleaning the project root would delete your source files. See https://github.com/opral/inlang-sdk/issues/245 for details."
-	                        );
-	                }
+                        if (absoluteOutdir === cwd) {
+                                throw new Error(
+                                        `\`outdir\` cannot resolve to the project root (\"${absoluteOutdir}\"). Cleaning the project root would delete your source files. See https://github.com/opral/inlang-sdk/issues/245 for details.`
+                                );
+                        }
 
 			// const localAccount = getLocalAccount({ fs });
 
