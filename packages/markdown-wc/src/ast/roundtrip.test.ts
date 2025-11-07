@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest"
+import type { MarkdownNode } from "./schemas.js"
 import { parseMarkdown } from "./parse-markdown.js"
 import { serializeAst } from "./serialize-ast.js"
 import { validateAst } from "./validate-ast.js"
-import type { MarkdownNode } from "./schemas.js"
 
 function expectNodeType<T extends MarkdownNode["type"]>(
 	node: MarkdownNode | undefined,

@@ -154,8 +154,13 @@ describe("selectWorkingDiffCount", () => {
 
 		// Set active file to A and checkpoint initial inserts
 		await lix.db
-			.insertInto("key_value")
-			.values({ key: "flashtype_active_file_id", value: fileA })
+			.insertInto("key_value_by_version")
+			.values({
+				key: "flashtype_active_file_id",
+				value: fileA,
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			})
 			.execute();
 		await createCheckpoint({ lix });
 
@@ -183,9 +188,10 @@ describe("selectWorkingDiffCount", () => {
 
 		// Switch active file to B
 		await lix.db
-			.updateTable("key_value")
+			.updateTable("key_value_by_version")
 			.set({ value: fileB })
 			.where("key", "=", "flashtype_active_file_id")
+			.where("lixcol_version_id", "=", "global")
 			.execute();
 
 		const diffB = await selectWorkingDiffCount(lix).executeTakeFirst();
@@ -213,8 +219,13 @@ describe("selectWorkingDiffCount", () => {
 			.execute();
 
 		await lix.db
-			.insertInto("key_value")
-			.values({ key: "flashtype_active_file_id", value: fileId })
+			.insertInto("key_value_by_version")
+			.values({
+				key: "flashtype_active_file_id",
+				value: fileId,
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			})
 			.execute();
 
 		await createCheckpoint({ lix });

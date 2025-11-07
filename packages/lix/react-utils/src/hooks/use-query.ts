@@ -73,21 +73,29 @@ export function useQuery<TRow>(
 
 	const { subscribe = true } = options;
 
-	// Create stable cache key that includes the compiled SQL to capture closure variables
-	const cacheKey = useMemo(() => {
-		// Compile the query to get the actual SQL with parameters
+	// Compile the query to build a cache key and avoid re-creating builders.
+	const { cacheKey, execute } = useMemo(() => {
 		const builder = query({ lix });
 		const compiled = builder.compile();
-		return `${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+		const key =
+			`${subscribe ? "sub" : "once"}:` +
+			`${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+		return {
+			cacheKey: key,
+			execute: () => builder.execute() as Promise<TRow[]>,
+		};
 	}, [query, lix, subscribe]);
 
-	// Get or create promise
-	let promise = queryPromiseCache.get(cacheKey);
-	if (!promise) {
-		const builder = query({ lix });
-		promise = builder.execute() as Promise<TRow[]>;
-		queryPromiseCache.set(cacheKey, promise);
-	}
+	// Get or create promise. Cache key includes parameters so different queries
+	// resolve independently while reuse avoids duplicating in-flight requests.
+	const cached = queryPromiseCache.get(cacheKey) as Promise<TRow[]> | undefined;
+	const promise: Promise<TRow[]> =
+		cached ??
+		(() => {
+			const p = execute();
+			queryPromiseCache.set(cacheKey, p);
+			return p;
+		})();
 
 	// Use the promise (suspends on first render)
 	const initialRows = use(promise);
@@ -97,12 +105,7 @@ export function useQuery<TRow>(
 
 	// Subscribe for ongoing updates (only if subscribe is true)
 	useEffect(() => {
-		if (!subscribe) {
-			// For one-time queries, just use the initial data
-			setRows(initialRows);
-			return;
-		}
-
+		if (!subscribe) return;
 		const builder = query({ lix });
 		const sub = lix.observe(builder).subscribe({
 			next: (value) => setRows(value as TRow[]),
@@ -116,7 +119,11 @@ export function useQuery<TRow>(
 			},
 		});
 		return () => sub.unsubscribe();
-	}, [cacheKey, subscribe, initialRows, lix]); // Re-subscribe when query changes
+	}, [cacheKey, subscribe, lix]);
+
+	if (!subscribe) {
+		return initialRows;
+	}
 
 	return rows;
 }

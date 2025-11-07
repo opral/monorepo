@@ -22,8 +22,7 @@
     "csv-app": "workspace:*",
     "dotenv": "^16.4.7",
     "http-proxy-middleware": "^3.0.3",
-    "lix-file-manager": "workspace:*",
-    "md-app": "workspace:*"
+    "lix-file-manager": "workspace:*"
   },
   "devDependencies": {
     "@opral/tsconfig": "workspace:*",

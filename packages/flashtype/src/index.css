@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./app/theme.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -249,16 +250,6 @@
 	height: 0;
 }
 
-/* TipTap / ProseMirror editor tweaks */
-.ProseMirror:focus,
-.ProseMirror:focus-visible {
-	outline: none;
-}
-.tiptap:focus,
-.tiptap:focus-visible {
-	outline: none;
-}
-
 /* Fill available space */
 html,
 body,
@@ -267,80 +258,8 @@ body,
 	max-height: 100%;
 }
 
-.tiptap,
-.ProseMirror {
-	width: 100%;
-	min-height: 100vh;
-	cursor: text;
-}
-
-/* TipTap content typography */
+/* TipTap / ProseMirror base styles */
 @layer components {
-	/* Lists */
-	.ProseMirror ul,
-	.ProseMirror ol {
-		@apply pl-6 my-3;
-		list-style-position: outside;
-	}
-	.ProseMirror ul {
-		list-style-type: disc;
-	}
-	.ProseMirror ol {
-		list-style-type: decimal;
-	}
-	.ProseMirror li {
-		@apply my-1;
-	}
-
-	.ProseMirror h1 {
-		@apply text-2xl font-bold leading-tight mt-6 mb-3;
-	}
-	.ProseMirror h2 {
-		@apply text-xl font-semibold leading-tight mt-5 mb-2.5;
-	}
-	.ProseMirror h3 {
-		@apply text-lg font-semibold leading-snug mt-4 mb-2;
-	}
-	.ProseMirror p {
-		@apply my-3;
-	}
-
-	/* Blockquote */
-	.ProseMirror blockquote {
-		@apply border-l-2 pl-3 italic text-muted-foreground my-3;
-	}
-	.ProseMirror blockquote p {
-		@apply my-0;
-	}
-
-	/* Inline code (not inside code blocks) */
-	.ProseMirror :not(pre) > code {
-		@apply bg-muted text-foreground font-mono text-[0.9em] rounded px-1.5 py-0.5;
-	}
-
-	/* Code block */
-	.ProseMirror pre {
-		@apply bg-muted border border-border rounded-md p-3 overflow-x-auto my-3;
-	}
-	.ProseMirror pre code {
-		@apply bg-transparent p-0 font-mono text-sm leading-relaxed;
-	}
-
-	/* Task list (checklist) */
-	.ProseMirror li[data-task] {
-		display: flex;
-		align-items: flex-start;
-	}
-	.ProseMirror li[data-task] > input[type="checkbox"] {
-		margin-top: 0.2em;
-	}
-	.ProseMirror li[data-task] > div {
-		flex: 1 1 auto;
-	}
-	.ProseMirror li[data-task] p {
-		@apply my-0;
-	}
-
 	.tiptap-container[data-editor-focused="true"]
 		.ProseMirror
 		p.is-editor-empty:first-child::before {

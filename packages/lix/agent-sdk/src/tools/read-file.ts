@@ -5,6 +5,7 @@ import { z } from "zod";
 
 export const ReadFileInputSchema = z
 	.object({
+		version_id: z.string().min(1),
 		path: z.string().min(1).optional(),
 		fileId: z.string().min(1).optional(),
 		byteOffset: z.number().int().min(0).default(0).optional(),
@@ -59,6 +60,7 @@ export async function readFile(
 ): Promise<ReadFileOutput> {
 	const {
 		lix,
+		version_id,
 		path,
 		fileId,
 		byteOffset = 0,
@@ -76,13 +78,15 @@ export async function readFile(
 
 	const row = path
 		? await lix.db
-				.selectFrom("file")
+				.selectFrom("file_by_version")
 				.where("path", "=", path)
+				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])
 				.executeTakeFirst()
 		: await lix.db
-				.selectFrom("file")
+				.selectFrom("file_by_version")
 				.where("id", "=", fileId as string)
+				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])
 				.executeTakeFirst();
 
@@ -140,7 +144,7 @@ function clamp(n: number, min: number, max: number): number {
 
 export function createReadFileTool(args: { lix: Lix }) {
 	const description = dedent`
-    Read a file from the Lix workspace (UTF-8).
+	    Read a file from the lix (UTF-8) for a specific version.
 
     Paths
     - Paths are absolute and must start with '/'.
@@ -159,6 +163,7 @@ export function createReadFileTool(args: { lix: Lix }) {
 
     Output
     - Returns { text, path, fileId?, size, byteOffset, byteLength, encoding: 'utf-8', truncated }.
+	- Always pass the version_id field to read from the intended lix version.
   `;
 
 	return tool({

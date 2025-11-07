@@ -69,8 +69,9 @@ export function selectFilesystemEntries(lix: Lix) {
  */
 export function selectWorkingDiffCount(lix: Lix) {
 	const activeFileIdQ = lix.db
-		.selectFrom("key_value")
+		.selectFrom("key_value_by_version")
 		.where("key", "=", "flashtype_active_file_id")
+		.where("lixcol_version_id", "=", "global")
 		.select("value");
 
 	return selectDiffCount({
@@ -99,7 +100,7 @@ export function selectWorkingDiffCount(lix: Lix) {
  * - removed: count of changes with null snapshot_content (delete)
  *
  * Notes:
- * - Scoped to the currently active file via key_value("flashtype_active_file_id").
+ * - Scoped to the currently active file via key_value_by_version("flashtype_active_file_id").
  * - Counts include only Markdown plugin changes and exclude RootOrder schema (reorders).
  */
 export function selectCheckpoints({ lix }: { lix: Lix }) {
@@ -220,8 +221,9 @@ export function selectCheckpointDiffCounts({
 	const fileIdQ = fileId
 		? sql.lit(fileId)
 		: lix.db
-				.selectFrom("key_value")
+				.selectFrom("key_value_by_version")
 				.where("key", "=", "flashtype_active_file_id")
+				.where("lixcol_version_id", "=", "global")
 				.select("value");
 
 	return selectDiffCount({ lix, changeSetId })

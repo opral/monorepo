@@ -1,9 +1,9 @@
 import type { Lix } from "@lix-js/sdk";
 import { tool } from "ai";
 import { z } from "zod";
-import { ensureAgentVersion } from "../agent-version.js";
 
 export const WriteFileInputSchema = z.object({
+	version_id: z.string().min(1),
 	path: z
 		.string()
 		.min(1)
@@ -29,18 +29,25 @@ export type WriteFileOutput = z.infer<typeof WriteFileOutputSchema>;
 export async function writeFile(
 	args: WriteFileInput & { lix: Lix }
 ): Promise<WriteFileOutput> {
-	const { lix, path, content, mode = "replace" } = args;
+	const { lix, version_id, path, content, mode = "replace" } = args;
 	const enc = new TextEncoder();
 
 	const exec = async (trx: Lix["db"]) => {
-		// Ensure the agent source version exists (non-hidden)
-		const agentVersion = await ensureAgentVersion({ ...lix, db: trx });
+		// Ensure the target version exists
+		const version = await trx
+			.selectFrom("version")
+			.where("id", "=", version_id as any)
+			.select(["id"])
+			.executeTakeFirst();
+		if (!version) {
+			throw new Error(`write_file: version ${version_id} not found`);
+		}
 
 		// Look up existing file row in the agent version
 		const existing = await trx
 			.selectFrom("file_by_version")
 			.where("path", "=", path)
-			.where("lixcol_version_id", "=", agentVersion.id)
+			.where("lixcol_version_id", "=", version_id as any)
 			.select(["id", "data"])
 			.executeTakeFirst();
 
@@ -56,13 +63,13 @@ export async function writeFile(
 				.updateTable("file_by_version")
 				.set({ data })
 				.where("id", "=", existing.id)
-				.where("lixcol_version_id", "=", agentVersion.id)
+				.where("lixcol_version_id", "=", version_id as any)
 				.execute();
 
 			const sel = await trx
 				.selectFrom("file_by_version")
 				.where("id", "=", existing.id)
-				.where("lixcol_version_id", "=", agentVersion.id)
+				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])
 				.executeTakeFirstOrThrow();
 			const size = (sel.data as unknown as Uint8Array)?.byteLength ?? 0;
@@ -79,14 +86,14 @@ export async function writeFile(
 				.values({
 					path,
 					data,
-					lixcol_version_id: agentVersion.id as unknown as any,
+					lixcol_version_id: version_id as unknown as any,
 				})
 				.execute();
 
 			const sel = await trx
 				.selectFrom("file_by_version")
 				.where("path", "=", path)
-				.where("lixcol_version_id", "=", agentVersion.id)
+				.where("lixcol_version_id", "=", version_id as any)
 				.select(["id", "path", "data"])
 				.executeTakeFirstOrThrow();
 			const size = (sel.data as unknown as Uint8Array)?.byteLength ?? 0;
@@ -107,9 +114,12 @@ export async function writeFile(
 export function createWriteFileTool(args: { lix: Lix }) {
 	return tool({
 		description:
-			"Write a UTF-8 text file to the Lix workspace. Paths must be absolute ('/'). Supports 'replace' or 'append' modes. Group all file modifications for a single user task together and finalize them with one create_change_proposal call when the task is complete.",
+			"Write a UTF-8 text file to the lix for a specific version. Provide an absolute path ('/'), the version_id to modify, and optionally set mode to 'append'.",
 		inputSchema: WriteFileInputSchema,
 		execute: async (input) =>
-			writeFile({ lix: args.lix, ...(input as WriteFileInput) }),
+			writeFile({
+				lix: args.lix,
+				...(input as WriteFileInput),
+			}),
 	});
 }
