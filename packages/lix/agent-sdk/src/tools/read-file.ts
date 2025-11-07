@@ -162,14 +162,20 @@ export function createReadFileTool(args: { lix: Lix }) {
     - Prefer small windows for previews; the tool clamps very large outputs.
 
     Output
-    - Returns { text, path, fileId?, size, byteOffset, byteLength, encoding: 'utf-8', truncated }.
-	- Always pass the version_id field to read from the intended lix version.
+    - Returns the selected UTF-8 text window directly (string only).
+    - Always pass the version_id field to read from the intended lix version.
   `;
 
 	return tool({
 		description,
 		inputSchema: ReadFileInputSchema,
-		execute: async (input) =>
-			readFile({ lix: args.lix, ...(input as ReadFileInput) }),
+		outputSchema: z.string(),
+		execute: async (input) => {
+			const result = await readFile({
+				lix: args.lix,
+				...(input as ReadFileInput),
+			});
+			return result.text;
+		},
 	});
 }
