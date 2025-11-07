@@ -6,7 +6,10 @@ import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
-import type { InternalStateCacheRow } from "./schema.js";
+import {
+	getStateCacheTables,
+	type InternalStateCacheRow,
+} from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const { schemaKeyToCacheTableName } = cacheTableModule;
@@ -607,6 +610,68 @@ test("reuses known cache tables without recreating them", async () => {
 
 		expect(createSpy).not.toHaveBeenCalled();
 	} finally {
+		createSpy.mockRestore();
+	}
+});
+
+test("reuses cached tables for schema keys with special characters", async () => {
+	const schemaKey = "lix-test-cache";
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	await ensureCacheSchemas(lix, [schemaKey]);
+
+	const tableCache = getStateCacheTables({ engine: lix.engine! });
+	const originalSanitize = cacheTableModule.schemaKeyToCacheTableName;
+	const createSpy = vi.spyOn(cacheTableModule, "createSchemaCacheTable");
+
+	const existingTableName = cacheTableModule.createSchemaCacheTable({
+		engine: lix.engine!,
+		schema: simpleCacheSchema(schemaKey),
+	});
+	tableCache.add(existingTableName);
+
+	createSpy.mockClear();
+
+	const sanitizeSpy = vi
+		.spyOn(cacheTableModule, "schemaKeyToCacheTableName")
+		.mockImplementation((key: string) => `${originalSanitize(key)}__shadow`);
+
+	try {
+		const timestamp = await getTimestamp({ lix });
+		const change: MaterializedState = {
+			id: "cache-reuse-hyphen",
+			entity_id: "cache-entity",
+			schema_key: schemaKey,
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "cache-entity",
+			}),
+			created_at: timestamp,
+			lixcol_version_id: "global",
+			lixcol_commit_id: "commit-cache-reuse",
+		};
+
+		updateStateCache({
+			engine: lix.engine!,
+			changes: [change],
+		});
+
+		const schemaSpecificCalls = createSpy.mock.calls.filter(
+			([callArgs]) =>
+				callArgs?.schema && callArgs.schema["x-lix-key"] === schemaKey
+		);
+		expect(schemaSpecificCalls).toHaveLength(0);
+	} finally {
+		sanitizeSpy.mockRestore();
 		createSpy.mockRestore();
 	}
 });

@@ -7,6 +7,7 @@ import {
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "./create-schema-cache-table.js";
+import { sanitizeIdentifier } from "./schema-indexes.js";
 import { resolveCacheSchemaDefinition } from "./schema-resolver.js";
 
 /**
@@ -268,12 +269,14 @@ function findCachedTableName(args: {
 	schemaKey: string;
 	sanitizedName: string;
 }): string | null {
+	const normalizedSchemaKey = sanitizeIdentifier(args.schemaKey);
+
 	if (args.tableCache.has(args.sanitizedName)) {
 		return args.sanitizedName;
 	}
 
 	for (const tableName of args.tableCache) {
-		if (cacheTableNameToSchemaKey(tableName) === args.schemaKey) {
+		if (cacheTableNameToSchemaKey(tableName) === normalizedSchemaKey) {
 			return tableName;
 		}
 	}
